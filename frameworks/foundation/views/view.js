@@ -914,7 +914,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // Now, update using renderer if possible; render() otherwise
     if (!this._useRenderFirst && this.createRenderer) {
-      this.renderer.update();
+      if (renderer) renderer.update();
     } else {
       var context = this.renderContext(this.get('layer')) ;
       this.render(context, NO) ;
@@ -1107,25 +1107,32 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // because inheriting views will build on top of the renderer (even if they don't know it)
     if (this.createRenderer) {
       // create if needed
-      if (!this.renderer) {
-        this.renderer = this.createRenderer();
-        this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
-        if (mixins = this.createRendererMixin) {
-          len = mixins.length;
-          for (idx = 0; idx < len; idx++) mixins[idx].call(this);
+      var theme = this.get("theme"); // renderers need a theme
+      if (!this.renderer && theme) {
+        this.renderer = this.createRenderer(theme);
+        
+        // the renderer was not necessarily successfully created.
+        if (this.renderer) {
+          this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
+          if (mixins = this.createRendererMixin) {
+            len = mixins.length;
+            for (idx = 0; idx < len; idx++) mixins[idx].call(this, theme);
+          }
         }
       }
       
       // update!
-      this.updateRenderer(this.renderer);
-      if (mixins = this.updateRendererMixin) {
-        len = mixins.length;
-        for (idx = 0; idx < len; idx++) mixins[idx].call(this, this.renderer);
+      if (this.renderer){
+        this.updateRenderer(this.renderer);
+        if (mixins = this.updateRendererMixin) {
+          len = mixins.length;
+          for (idx = 0; idx < len; idx++) mixins[idx].call(this, this.renderer);
+        }
       }
     }
     
     if (!this._useRenderFirst && this.createRenderer) {
-      this.renderer.render(context);
+      if (this.renderer) this.renderer.render(context);
     } else {
       this.render(context, YES);
       if (mixins = this.renderMixin) {
@@ -1313,9 +1320,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (firstTime) this.renderChildViews(context, firstTime) ;
     if (this.createRenderer) {
       if (firstTime) { 
-        this.renderer.render(context);
+        if (this.renderer) this.renderer.render(context);
       } else {
-        this.renderer.update();
+        if (this.renderer) this.renderer.update();
       }
     }
   },
@@ -1388,7 +1395,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {Array}
     @readOnly
   */
-  displayProperties: ['isFirstResponder', 'isVisible'],
+  displayProperties: ['isFirstResponder', 'isVisible', 'theme'],
   
   /**
     You can set this to an SC.Cursor instance; its class name will 
@@ -1761,9 +1768,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // find render path (to be removed in SC 2.0?)
     var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
     while (c && c.prototype.render) {
-      if (renderAge === 0 && c.prototype.render !== this.render) renderAge = currentAge;
-      if (rendererAge === 0 && c.prototype.createRenderer !== this.createRenderer) rendererAge = currentAge;
-      if (rendererAge > 0 && renderAge > 0) break;
+      if (renderAge < 0 && c.prototype.render !== this.render) renderAge = currentAge;
+      if (rendererAge < 0 && c.prototype.createRenderer !== this.createRenderer) rendererAge = currentAge;
+      if (rendererAge >= 0 && renderAge >= 0) break;
       currentAge = currentAge + 1;
       c = c.superclass;
     }

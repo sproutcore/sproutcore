@@ -243,8 +243,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   /**
     Creates the button view's renderer.
   */
-  createRenderer: function() {
-    var theme = this.get("theme");
+  createRenderer: function(theme) {
     var ret = theme.button();
     this.updateRenderer(ret); // updating looks _exactly_ like normal stuff for us.
     return ret;
@@ -252,7 +251,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   updateRenderer: function(r) {
     var toolTip = this.get("toolTip");
-    if (this.get("localize")) toolTip = toolTip.loc();
+    if (toolTip && this.get("localize")) toolTip = toolTip.loc();
     
     r.attr({
       toolTip: toolTip,

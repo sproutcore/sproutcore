@@ -29,7 +29,6 @@ require('panes/pane');
   @since SproutCore 1.0
 */
 SC.MainPane = SC.Pane.extend({
-
   /** @private */
   layout: { left:0, right:0, top:0, bottom:0 },
   
