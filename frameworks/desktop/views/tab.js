@@ -46,7 +46,7 @@ SC.TabView = SC.View.extend(
   itemIconKey: null,
   itemWidthKey: null,
   itemToolTipKey: null,
-  tabHeight:null,
+  tabHeight: (SC.REGULAR_BUTTON_HEIGHT/2),
   
   tabLocation: SC.TOP_LOCATION,
   
@@ -104,11 +104,13 @@ SC.TabView = SC.View.extend(
   },
   
   createChildViews: function() {
-    var childViews = [], view, containerView, layout ;
+    var childViews  = [], view, containerView, layout,
+        tabLocation = this.get('tabLocation'),
+        tabHeight   = this.get('tabHeight') ;
     
     layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
-             { top: (SC.REGULAR_BUTTON_HEIGHT/2)+1, left: 0, right: 0, bottom: 0 } :
-             { top: 0, left: 0, right: 0, bottom: 12 } ;
+             { top: tabHeight+1, left: 0, right: 0, bottom: 0 } :
+             { top: 0, left: 0, right: 0, bottom: tabHeight-1 } ;
     
     containerView = this.containerView.extend(SC.Border, {
       layout: layout,
@@ -118,13 +120,15 @@ SC.TabView = SC.View.extend(
     view = this.containerView = this.createChildView(containerView) ;
     childViews.push(view);
     
-    
     //  The segmentedView managed by this tab view.  Note that this TabView uses
     //  a custom segmented view.  You can access this view but you cannot change
     // it.
-    
-    this.segmentedView = SC.SegmentedView.extend({
-      layout: { left: 0, right: 0, height: SC.REGULAR_BUTTON_HEIGHT },
+    layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
+             { height: tabHeight, left: 0, right: 0, top: 0 } :
+             { height: tabHeight, left: 0, right: 0, bottom: 0 } ;
+
+    this.segmentedView = this.get('segmentedView').extend({
+      layout: layout,
 
       /** @private
         When the value changes, update the parentView's value as well.
@@ -139,23 +143,6 @@ SC.TabView = SC.View.extend(
         this.set('layerNeedsUpdate', YES) ;
         this.invokeOnce(this.updateLayerIfNeeded) ;
       }.observes('value'),
-
-      /** @private
-        When we need to actually create a container, look for the tab loc from
-        the parent view and adjust the internal frame accordingly.  Also copy
-        the item key settings from the tab view.
-      */
-      render: function(context, firstTime) {
-        sc_super();
-        // copy some useful properties from the parent view first
-        var pv = this.get('parentView');
-        var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
-        if (tabLoc === SC.TOP_LOCATION) {
-          context.addStyle('top', '0px');
-        } else {
-          context.addStyle('bottom', '0px');
-        }
-      },
 
       init: function() {
         // before we setup the rest of the view, copy key config properties 
@@ -184,8 +171,9 @@ SC.TabView = SC.View.extend(
     custom container view.  You can access this view but you cannot change 
     it.
   */
-  containerView: SC.ContainerView
+  containerView: SC.ContainerView,
   
+  segmentedView: SC.SegmentedView
   
 }) ;
 
