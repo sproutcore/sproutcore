@@ -84,7 +84,7 @@ SC.Event = function(originalEvent) {
   // note that we multiple the delta on FF to make it's acceleration more 
   // natural.
   } else if (!SC.none(originalEvent.detail)) {
-    var detail = Math.floor(originalEvent.detail * 2);
+    var detail = Math.floor(originalEvent.detail * 40);
     if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
       this.wheelDeltaX = detail;
       this.wheelDeltaY = this.wheelDelta = 0;
