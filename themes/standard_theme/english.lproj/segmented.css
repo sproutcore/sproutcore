@@ -7,17 +7,17 @@
   display: block;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment {
+.sc-theme .sc-segmented-view .sc-segment {
 	text-decoration: none ;
 	color: black ;
 	text-align: center ;
 }
 
-.sc-theme a.sc-segment:active, a.sc-segment:focus {
+.sc-theme .sc-segment:active, .sc-segment:focus {
 	outline: none;
 }
 
-.sc-theme a.sc-segment img.icon {
+.sc-theme .sc-segment img.icon {
 	position: relative;
 	vertical-align: middle;
 	top: -2px;
@@ -28,7 +28,7 @@
 
 
 
-.sc-theme .sc-segmented-view.disabled a.sc-segment img.icon {
+.sc-theme .sc-segmented-view.disabled .sc-segment img.icon {
 	opacity: 0.5;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
@@ -37,7 +37,7 @@
 
 /* @group Layout */
 
-.sc-theme .sc-segmented-view a.sc-segment {
+.sc-theme .sc-segmented-view .sc-segment {
 	display: block;
 	top: 0;
 	height: 24px;
@@ -53,7 +53,7 @@
 	border: none;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment {
+.sc-theme .sc-segmented-view .sc-segment {
 	padding-left: 11px;
 	padding-right: 0;
 	border: none;
@@ -61,13 +61,13 @@
 }
 
 
-.sc-theme .sc-segmented-view a.sc-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment .sc-button-inner {
 	padding-left: 0;
 	padding-right: 11px;
 	background:  transparent;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment label {
+.sc-theme .sc-segmented-view .sc-segment label {
 	display:  block;
 	line-height: 24px;
 	height:  24px;
@@ -81,26 +81,26 @@
 
 /* @group Normal */
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sc-last-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -814px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment {
+.sc-theme .sc-segmented-view .sc-segment.sc-first-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -789px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment label {
+.sc-theme .sc-segmented-view .sc-segment label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
   text-shadow: #fff 0px 1px 0px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-middle-segment,
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment {
+.sc-theme .sc-segmented-view .sc-segment.sc-middle-segment,
+.sc-theme .sc-segmented-view .sc-segment.sc-last-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -839px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-middle-segment .sc-button-inner,
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sc-middle-segment .sc-button-inner,
+.sc-theme .sc-segmented-view .sc-segment.sc-first-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -864px;
 }
 
@@ -112,28 +112,28 @@
 
 /* @group Active */
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sc-last-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.active.sc-last-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -939px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sc-first-segment {
+.sc-theme .sc-segmented-view .sc-segment.active.sc-first-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -913px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active label {
+.sc-theme .sc-segmented-view .sc-segment.active label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -889px;
   text-shadow: #fff 0px 1px 0px;
   text-shadow:  black 0px -1px 0px;
   color: white;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sc-middle-segment,
-.sc-theme .sc-segmented-view a.sc-segment.active.sc-last-segment {
+.sc-theme .sc-segmented-view .sc-segment.active.sc-middle-segment,
+.sc-theme .sc-segmented-view .sc-segment.active.sc-last-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -964px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sc-middle-segment .sc-button-inner,
-.sc-theme .sc-segmented-view a.sc-segment.active.sc-first-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.active.sc-middle-segment .sc-button-inner,
+.sc-theme .sc-segmented-view .sc-segment.active.sc-first-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -989px;
 }
 
@@ -143,34 +143,34 @@
 
 /* @group Normal - Disabled */
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.disabled .sc-button-inner,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sc-last-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sc-last-segment.disabled .sc-button-inner,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sc-last-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1064px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.disabled,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sc-first-segment {
+.sc-theme .sc-segmented-view .sc-segment.sc-first-segment.disabled,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sc-first-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1038px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.disabled label,
-.sc-theme .sc-segmented-view.disabled a.sc-segment label {
+.sc-theme .sc-segmented-view .sc-segment.disabled label,
+.sc-theme .sc-segmented-view.disabled .sc-segment label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1014px;
   color: #999;
   text-shadow: none;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-middle-segment.disabled,
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.disabled,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sc-middle-segment,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sc-last-segment {
+.sc-theme .sc-segmented-view .sc-segment.sc-middle-segment.disabled,
+.sc-theme .sc-segmented-view .sc-segment.sc-last-segment.disabled,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sc-middle-segment,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sc-last-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1089px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-middle-segment.disabled .sc-button-inner,
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.disabled .sc-button-inner,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sc-middle-segment .sc-button-inner,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sc-first-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sc-middle-segment.disabled .sc-button-inner,
+.sc-theme .sc-segmented-view .sc-segment.sc-first-segment.disabled .sc-button-inner,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sc-middle-segment .sc-button-inner,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sc-first-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1114px;
 }
 
@@ -180,27 +180,27 @@
 
 /* @group Selected */
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sc-last-segment.sel .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1190px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.sel {
+.sc-theme .sc-segmented-view .sc-segment.sc-first-segment.sel {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1164px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sel label {
+.sc-theme .sc-segmented-view .sc-segment.sel label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1140px;
   text-shadow:  black 0px -1px 0px;
   color: white;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-middle-segment.sel,
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel {
+.sc-theme .sc-segmented-view .sc-segment.sc-middle-segment.sel,
+.sc-theme .sc-segmented-view .sc-segment.sc-last-segment.sel {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1215px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-middle-segment.sel .sc-button-inner,
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.sel .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sc-middle-segment.sel .sc-button-inner,
+.sc-theme .sc-segmented-view .sc-segment.sc-first-segment.sel .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1240px;
 }
 
@@ -208,34 +208,34 @@
 
 /* @group Selected - Disabled */
 
-.sc-theme .sc-segmented-view a.sc-segment.sel.sc-last-segment.disabled .sc-button-inner,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel.sc-last-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sel.sc-last-segment.disabled .sc-button-inner,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel.sc-last-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1442px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sel.sc-first-segment.disabled,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel.sc-first-segment {
+.sc-theme .sc-segmented-view .sc-segment.sel.sc-first-segment.disabled,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel.sc-first-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1416px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sel.disabled label,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel label {
+.sc-theme .sc-segmented-view .sc-segment.sel.disabled label,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1392px;
 	color: white;
 	text-shadow: none;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sel.sc-middle-segment.disabled,
-.sc-theme .sc-segmented-view a.sc-segment.sel.sc-last-segment.disabled,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel.sc-middle-segment,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel.sc-last-segment {
+.sc-theme .sc-segmented-view .sc-segment.sel.sc-middle-segment.disabled,
+.sc-theme .sc-segmented-view .sc-segment.sel.sc-last-segment.disabled,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel.sc-middle-segment,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel.sc-last-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1467px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sel.sc-middle-segment.disabled .sc-button-inner,
-.sc-theme .sc-segmented-view a.sc-segment.sel.sc-first-segment.disabled .sc-button-inner,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel.sc-middle-segment .sc-button-inner,
-.sc-theme .sc-segmented-view.disabled a.sc-segment.sel.sc-first-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.sel.sc-middle-segment.disabled .sc-button-inner,
+.sc-theme .sc-segmented-view .sc-segment.sel.sc-first-segment.disabled .sc-button-inner,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel.sc-middle-segment .sc-button-inner,
+.sc-theme .sc-segmented-view.disabled .sc-segment.sel.sc-first-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1492px;
 }
 
@@ -247,27 +247,27 @@
 
 /* @group Selected - Active */
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sel.sc-last-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.active.sel.sc-last-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1316px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sel.sc-first-segment {
+.sc-theme .sc-segmented-view .sc-segment.active.sel.sc-first-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1290px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sel label {
+.sc-theme .sc-segmented-view .sc-segment.active.sel label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1266px;
   text-shadow:  black 0px -1px 0px;
   color: white;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sel.sc-middle-segment,
-.sc-theme .sc-segmented-view a.sc-segment.active.sel.sc-last-segment {
+.sc-theme .sc-segmented-view .sc-segment.active.sel.sc-middle-segment,
+.sc-theme .sc-segmented-view .sc-segment.active.sel.sc-last-segment {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1341px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.active.sel.sc-middle-segment .sc-button-inner,
-.sc-theme .sc-segmented-view a.sc-segment.active.sel.sc-first-segment .sc-button-inner {
+.sc-theme .sc-segmented-view .sc-segment.active.sel.sc-middle-segment .sc-button-inner,
+.sc-theme .sc-segmented-view .sc-segment.active.sel.sc-first-segment .sc-button-inner {
   background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1366px;
 }
 

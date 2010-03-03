@@ -41,8 +41,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     
     @property {String}
   */
-  tagName: 'a',
-  
+  tagName: 'div',
+
   /**
     Class names that will be applied to this view
     
@@ -232,6 +232,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript:;";
       context.attr('href', href);
+    } else {
+      context.attr('role','button');
     }
 
     // If there is a toolTip set, grab it and localize if necessary.

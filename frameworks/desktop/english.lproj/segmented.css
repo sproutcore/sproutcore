@@ -1,24 +1,19 @@
-/* @override 
-	http://localhost:4020/static/sproutcore/en/desktop/_cache/sc.theme/1227701833/segmented.css
-	http://localhost:4020/static/sproutcore/en/desktop/_cache/sc.theme/1227702837/segmented.css
-*/
-
 .sc-segmented-view {
   display: block;
   text-align: center;
 }
 
-.sc-segmented-view a.sc-segment {
+.sc-segmented-view .sc-segment {
 	text-decoration: none ;
 	color: black ;
 	text-align: center;
 }
 
-a.sc-segment:active, a.sc-segment:focus {
+.sc-segment:active, .sc-segment:focus {
 	outline: none;
 }
 
-a.sc-segment img.icon {
+.sc-segment img.icon {
 	position: relative;
 	vertical-align: middle;
 	top: -2px;
@@ -29,7 +24,7 @@ a.sc-segment img.icon {
 
 /* @group Layout */
 
-.sc-segmented-view a.sc-segment {
+.sc-segmented-view .sc-segment {
 	display: block;
 	top: 0;
 	height: 22px;
@@ -44,24 +39,24 @@ a.sc-segment img.icon {
 	min-height: 22px;
 }
 
-.sc-segmented-view a.sc-segment.sc-first-segment {
+.sc-segmented-view .sc-segment.sc-first-segment {
 	padding-left: 10px;
 }
 
 
-.sc-segmented-view a.sc-segment.sc-first-segment .sc-button-inner {
+.sc-segmented-view .sc-segment.sc-first-segment .sc-button-inner {
 	padding-right: 10px;
 }
-.sc-segmented-view a.sc-segment.sc-middle-segment .sc-button-inner {
+.sc-segmented-view .sc-segment.sc-middle-segment .sc-button-inner {
 	padding-left: 10px;
 	padding-right: 10px;
   
 }
-.sc-segmented-view a.sc-segment.sc-last-segment .sc-button-inner {
+.sc-segmented-view .sc-segment.sc-last-segment .sc-button-inner {
 	padding-left: 10px;
 }
 
-.sc-segmented-view a.sc-segment.sc-last-segment {
+.sc-segmented-view .sc-segment.sc-last-segment {
 	padding-right: 10px;
 	border:none;
 }
@@ -72,71 +67,68 @@ a.sc-segment img.icon {
 
 /* NORMAL */
 
-.sc-segmented-view a.sc-segment .sc-button-inner {
+.sc-segmented-view .sc-segment .sc-button-inner {
  	background: #DDDDDD;
 }
 
-.sc-segmented-view a.sc-segment.sc-last-segment {
+.sc-segmented-view .sc-segment.sc-last-segment {
  	background: #DDDDDD;
 }
 
-.sc-segmented-view a.sc-segment.sc-first-segment {
+.sc-segmented-view .sc-segment.sc-first-segment {
 	background: #DDDDDD;
 }
 
 
 /* SELECTED */
-.sc-segmented-view a.sc-segment.active .sc-button-inner,
-.sc-segmented-view a.sc-segment.sel .sc-button-inner {
+.sc-segmented-view .sc-segment.active .sc-button-inner,
+.sc-segmented-view .sc-segment.sel .sc-button-inner {
 	background: #999999;
 	text-shadow: #909090 0px 1px 0px;
 }
 
-.sc-segmented-view a.sc-segment.sc-last-segment.sel,
-.sc-segmented-view a.sc-segment.sc-last-segment.active {
+.sc-segmented-view .sc-segment.sc-last-segment.sel,
+.sc-segmented-view .sc-segment.sc-last-segment.active {
 	background: #999999;
 }
 
-.sc-segmented-view a.sc-segment.sc-first-segment.sel,
-.sc-segmented-view a.sc-segment.sc-first-segment.active {
+.sc-segmented-view .sc-segment.sc-first-segment.sel,
+.sc-segmented-view .sc-segment.sc-first-segment.active {
 	background: #999999;
 }
 
 /* DISABLED */
 
-.sc-segmented-view a.sc-segment.disabled .sc-button-inner,
-.sc-segmented-view.disabled a.sc-segment .sc-button-inner {
+.sc-segmented-view .sc-segment.disabled .sc-button-inner,
+.sc-segmented-view.disabled .sc-segment .sc-button-inner {
 	background: #FFFFFF;
 	color: #999;
 }
 
-.sc-segmented-view a.sc-segment.sc-last-segment.disabled,
-.sc-segmented-view.disabled a.sc-segment.sc-last-segment {
+.sc-segmented-view .sc-segment.sc-last-segment.disabled,
+.sc-segmented-view.disabled .sc-segment.sc-last-segment {
 	background: #FFFFFF;
 }
 
-.sc-segmented-view a.sc-segment.sc-first-segment.disabled,
-.sc-segmented-view.disabled a.sc-segment.sc-first-segment {
+.sc-segmented-view .sc-segment.sc-first-segment.disabled,
+.sc-segmented-view.disabled .sc-segment.sc-first-segment {
 	background: #FFFFFF;
 }
 
-.sc-segmented-view a.sc-segment.sel .sc-button-inner.disabled,
-.sc-segmented-view.disabled a.sc-segment.sel .sc-button-inner {
+.sc-segmented-view .sc-segment.sel .sc-button-inner.disabled,
+.sc-segmented-view.disabled .sc-segment.sel .sc-button-inner {
 	background: #FFFFFF;
 }
 
-.sc-segmented-view a.sc-segment.sc-last-segment.sel.disabled,
-.sc-segmented-view.disabled a.sc-segment.sc-last-segment.sel {
+.sc-segmented-view .sc-segment.sc-last-segment.sel.disabled,
+.sc-segmented-view.disabled .sc-segment.sc-last-segment.sel {
 	background: #FFFFFF;
 }
 
-.sc-segmented-view a.sc-segment.sc-first-segment.sel.disabled,
-.sc-segmented-view.disabled a.sc-segment.sc-first-segment.sel {
+.sc-segmented-view .sc-segment.sc-first-segment.sel.disabled,
+.sc-segmented-view.disabled .sc-segment.sc-first-segment.sel {
 	background: #FFFFFF;
 }
-
-
-
 /* @end */
 
 

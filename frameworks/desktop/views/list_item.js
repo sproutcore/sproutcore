@@ -310,7 +310,7 @@ SC.ListItemView = SC.View.extend(
     html = cache[key];
     
     if (!html) {
-      tmp = SC.RenderContext('a').attr('href', 'javascript:;')
+      tmp = SC.RenderContext('div').attr('role', 'button')
         .classNames(SC.clone(SC.CheckboxView.prototype.classNames));
 
       // set state on html
