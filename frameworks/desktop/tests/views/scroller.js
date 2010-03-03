@@ -23,7 +23,8 @@ module("SC.ScrollerView",{
 		SC.ScrollerView.extend({
       layout:{ top: 0, bottom: 0, right: 0, width: 20 },
 		  minimum:0,
-		  maximum:100
+		  maximum:100,
+		  hasButtons: NO
 		})
 
 	  ]
@@ -73,19 +74,17 @@ test('isEnabled', function() {
   ok(view.get('value') < (scrollerHeight+100), 'scrollers should respond to mouse events if they are not disabled');
 });
 
-test('mouseDown', function() {
-  var layer = view.get('layer');
-  var ev = SC.Event.simulateEvent(layer, 'mousedown');
-});
-
-test('maximum', function() {
-  var scrollerHeight = view.get('frame').height;
-  view.set('maximum', scrollerHeight + 100);
-});
-
 test('layoutDirection', function() {
   equals(view.get('layoutDirection'), SC.LAYOUT_VERTICAL, 'scrollers should default to vertical direction');
   ok(view.$().hasClass('sc-vertical'), 'scroller with vertical layoutDirection has sc-vertical class name');
   equals(view1.get('layoutDirection'), SC.LAYOUT_HORIZONTAL, 'precond - view1 has horizontal direction');
   ok(view1.$().hasClass('sc-horizontal'), 'scroller with horizontal layoutDirection has sc-horizontal class name');
+});
+
+test('hasButtons', function() {
+  equals(view.get('hasButtons'), YES, 'scrollers should default to having buttons');
+  equals(view.$('.endcap').length, 0, 'scrollers with buttons should not have an endcap');
+  equals(view.$('.button-bottom, .button-top').length, 2, 'scrollers with buttons should have an up and a down button');
+  equals(view2.$('.endcap').length, 1, 'scrollers with buttons should have an endcap');
+  equals(view2.$('.button-bottom, .button-top').length, 0, 'scrollers with buttons should not have an up or a down button');  
 });
