@@ -57,7 +57,7 @@ SC.ScrollerView = SC.View.extend(
       this._scs_value = val;
     }
 
-    val = this._scs_value || minimum; // default value is at top/left
+    val = this._scs_value||minimum; // default value is at top/left
     return Math.max(Math.min(val, this.get('maximum')), minimum) ;
   }.property('maximum', 'minimum').cacheable(),
 
@@ -178,7 +178,7 @@ SC.ScrollerView = SC.View.extend(
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'thumbPosition thumbLength'.w(),
+  displayProperties: 'thumbPosition thumbLength isEnabled controlsHidden'.w(),
 
   /**
     Generates the HTML that gets displayed to the user.
@@ -378,6 +378,7 @@ SC.ScrollerView = SC.View.extend(
 
     @property {Number}
     @isReadOnly
+    @private
   */
   thumbPosition: function() {
     var value = this.get('value'),
