@@ -554,6 +554,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this.invokeLater(this._scroll_mouseWheel, 10) ;
     } else {
       this._scroll_wheelDeltaY = 0;
+      this._scroll_wheelDeltaX = 0;
     }
   },
   
