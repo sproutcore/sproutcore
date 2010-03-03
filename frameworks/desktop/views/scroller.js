@@ -370,7 +370,7 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   thumbLength: function() {
-    return Math.max(Math.floor(this.get('trackLength')) * this.get('proportion'),20);
+    return Math.max(Math.floor(this.get('trackLength') * this.get('proportion')),20);
   }.property('trackLength', 'proportion').cacheable(),
 
   /**
@@ -391,7 +391,7 @@ SC.ScrollerView = SC.View.extend(
     position = (value/max)*(trackLength-thumbLength);
     position += capLength - capOverlap; // account for the top/left cap
 
-    return position;
+    return Math.floor(position);
   }.property('value', 'maximum', 'trackLength', 'thumbLength').cacheable(),
 
   /**
