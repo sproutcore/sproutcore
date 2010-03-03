@@ -140,7 +140,7 @@ SC.ScrollerView = SC.View.extend(
 
     @property {Number}
   */
-  capOverlap: 15,
+  capOverlap: 14,
 
   /**
     The width or height of the up/down or left/right arrow buttons. If the
@@ -149,7 +149,7 @@ SC.ScrollerView = SC.View.extend(
 
     @property {Number}
   */
-  buttonLength: 40,
+  buttonLength: 41,
 
   /**
     The amount by which the thumb overlaps the arrow buttons. If the scroller
@@ -158,7 +158,7 @@ SC.ScrollerView = SC.View.extend(
 
     @property {Number}
   */
-  buttonOverlap: 8,
+  buttonOverlap: 11,
 
   /**
     The size of the top/left end of the thumb.
