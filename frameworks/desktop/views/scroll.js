@@ -243,6 +243,43 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   verticalScrollerBottom: 0,
   
+  /**
+    Use this to overlay the vertical scroller.
+    
+    This ensures that the container frame will not resize to accomodate the
+    vertical scroller, hence overlaying the scroller on top of 
+    the container
+  
+    @property {Boolean}
+  */
+  verticalOverlay: NO,
+  
+  /**
+    Use this to overlay the horizontal scroller.
+    
+    This ensures that the container frame will not resize to accomodate the
+    horizontal scroller, hence overlaying the scroller on top of 
+    the container
+    
+    @property {Boolean}
+  */
+  horizontalOverlay: NO,
+  
+  /**
+    If verticalOverlay is YES, set the offset here to determine how many pixels
+    from the right you want the vertical scroller to be overlayed
+  
+    @property {Number}
+  */
+  verticalOverlayOffset: 0,
+  
+  /**
+    If horizontalOverlay is YES, set the offset here to determine how many 
+    pixels from the bottom you want the horizontal scroller to be overlayed
+  
+    @property {Number}
+  */
+  horizontalOverlayoffset: 0,
   
   // ..........................................................
   // CUSTOM VIEWS
@@ -493,14 +530,15 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // get the containerView
     var clip = this.get('containerView') ;
     var clipLayout = { left: 0, top: 0 } ;
-    var t ;
+    var t, vo, ho ;
     
     var ht = ((hasHorizontal) ? hscroll.get('scrollbarThickness') : 0) ;
     var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0 ;
     
     if (hasHorizontal) {
-      hscroll.set('layout', { left: 0, bottom: 0, right: vt, height: ht }) ;
-      clipLayout.bottom = ht ;
+      ho = this.get('horizontalOverlay');
+      hscroll.set('layout', { left: 0, bottom: (ho ? this.get('horizontalOverlayOffset') : 0), right: vt-1, height: ht }) ;
+      clipLayout.bottom = ho ? 0 : ht ;
     } else {
       clipLayout.bottom = 0 ;
     }
@@ -508,8 +546,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     if (hasVertical) {
       ht = ht + this.get('verticalScrollerBottom') ;
-      vscroll.set('layout', { top: 0, bottom: ht, right: 0, width: vt }) ;
-      clipLayout.right = vt ;
+      vo = this.get('verticalOverlay');
+      vscroll.set('layout', { top: 0, bottom: ht, right: (vo ? this.get('verticalOverlayOffset') : 0), width: vt }) ;
+      clipLayout.right = vo ? 0 : vt ;
     } else {
       clipLayout.right = 0 ;
     }
