@@ -810,7 +810,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
 
     if (container) {
-       container = container.$();
+       container = container.$()[0];
        container.scrollTop = this.get('verticalScrollOffset');
        container.scrollLeft = this.get('horizontalScrollOffset');
     }
