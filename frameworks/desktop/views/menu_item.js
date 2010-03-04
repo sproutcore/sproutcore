@@ -53,21 +53,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   hasMouseExited: NO,
 
   /**
-    Because we don't know what keys to observe for display changes
-    until we're instantiated, we explicitly set contentDisplayProperties
-    on init.
-
-    @private
-  */
-  init: function() {
-    var menu = this.getPath('parentMenu.rootMenu'),
-    keyArray = menu.menuItemKeys.map(SC._menu_fetchKeys, menu);
-
-    this.set('contentDisplayProperties', keyArray);
-    return sc_super();
-  },
-
-  /**
     This menu item's submenu, if it exists.
 
     @type SC.MenuView
