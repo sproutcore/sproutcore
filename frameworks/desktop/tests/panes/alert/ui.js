@@ -43,9 +43,9 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   }
   
   // buttons
-  ok(pane.childViews[0].childViews[1].$('a'), 'pane.div.div.a existance should be YES');
-  equals(pane.childViews[0].childViews[1].$('a').length, 2, 'pane.div.div should have 2 Buttons');
-  ok(pane.childViews[0].$('a'), 'pane.div.a existance should be YES');
+  ok(pane.childViews[0].childViews[1].$('div'), 'pane.div.div.div existance should be YES');
+  equals(pane.childViews[0].childViews[1].$('div').length, 2, 'pane.div.div should have 2 Buttons');
+  ok(pane.childViews[0].$('div'), 'pane.div.div existance should be YES');
   
   var button1 = pane.childViews[0].childViews[1].childViews[1];
   var button2 = pane.childViews[0].childViews[1].childViews[0];

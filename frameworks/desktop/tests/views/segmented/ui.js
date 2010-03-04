@@ -138,7 +138,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   test("Check that all segments have the right classes set", function() {
     var viewElem=pane.view('3_empty').$();
-    var segments=pane.view('3_empty').$('a');
+    var segments=pane.view('3_empty').$('div');
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
     for (var i=0, ilen=segments.length; i<ilen; i++){
@@ -164,7 +164,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   test("Check that all segments have the right classes set", function() {
     var viewElem=pane.view('3_empty,icon').$();
-    var segments=pane.view('3_empty,icon').$('a');
+    var segments=pane.view('3_empty,icon').$('div');
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
     for (var i=0, ilen=segments.length; i<ilen; i++){
@@ -190,7 +190,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
   test("Check that the selected segments have the right classes assigned.", function() {
-    var segments=pane.view('3_empty').$('a');
+    var segments=pane.view('3_empty').$('div');
     for (var i=0, ilen=segments.length; i<ilen; i++){
       var seg=segments[i];
       ok((seg.className.indexOf('sel')==-1), 'this element should not be selected.');
@@ -200,7 +200,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
   test("Check that two items are selected.", function() {
-    var segments=pane.view('3_items,icon,2_sel').$('a');
+    var segments=pane.view('3_items,icon,2_sel').$('div');
     var count=0;
     for (var i=0, ilen=segments.length; i<ilen; i++){
       var seg=segments[i];
@@ -214,7 +214,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
   test("2_items,toolTip has toolTips assigned.", function() {
-    var segments=pane.view('2_items,toolTip').$('a');
+    var segments=pane.view('2_items,toolTip').$('div');
     ok((segments[0].title=="this is title1's tip"), 'first segment has expected tool tip assigned.');
     ok((segments[1].title=="this is title2's tip"), 'second segment has expected tool tip assigned.');
   });

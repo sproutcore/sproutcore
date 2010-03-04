@@ -156,7 +156,7 @@ test("Check that the title is set or not and if it is in the appropriate element
 });
 
 test("Check if title,toolTip has the tool tip set", function() {
-  var viewElem=pane.view('title,toolTip').$('a');
+  var viewElem=pane.view('title,toolTip').$('div');
   ok(viewElem.defaultClass[0].title == 'Hello World is my tool tip', 'title,toolTip has the expected tool tip set.');
 });
 
