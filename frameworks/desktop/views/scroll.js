@@ -797,21 +797,23 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   adjustElementScroll: function() {
     var container = this.get('containerView'),
-        containerElement = container.$(),
-        content = this.get('contentView'),
-        offset;
+        content = this.get('contentView');
 
     // We notify the content view that it's frame property has changed
     // before we actually update the scrollTop/scrollLeft properties.
     // This gives views that use incremental rendering a chance to render
     // newly-appearing elements before they come into view.
-    SC.RunLoop.begin();
-    content.notifyPropertyChange('frame');
-    SC.RunLoop.end();
-    offset = this.get('verticalScrollOffset');
-    containerElement[0].scrollTop = offset;
-    offset = this.get('horizontalScrollOffset');
-    containerElement[0].scrollLeft = offset;
+    if (content) {
+      SC.RunLoop.begin();
+      content.notifyPropertyChange('frame');
+      SC.RunLoop.end();
+    }
+
+    if (container) {
+       container = container.$();
+       container.scrollTop = this.get('verticalScrollOffset');
+       container.scrollLeft = this.get('horizontalScrollOffset');
+    }
   },
 
   forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
