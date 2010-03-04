@@ -100,11 +100,8 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   render: function(context, firstTime) {
     context.addClass('sc-vertical') ;
     if (firstTime) {
-      if(this.get('scrollDown')){
-        context.push('<span class="arrowDown">&nbsp;</span>') ;
-      }else{
-        context.push('<span class="arrowUp">&nbsp;</span>') ;
-      }
+      var direction = this.get('scrollDown') ? 'arrowDown' : 'arrowUp' ;
+      context.push('<span class="'+direction+'">&nbsp;</span>') ;
     } 
     context.setClass('disabled', !this.get('isEnabled')) ;
   },
@@ -244,8 +241,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     @property {Number}
   */
-  maximumHorizontalScrollOffset: function() {
-  }.property(),
+  maximumHorizontalScrollOffset: 0,
     
        
   // ..........................................................
@@ -286,9 +282,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     @property {Boolean}
   */
-  canScrollHorizontal: function() {
-    return false; 
-  }.property('isHorizontalScrollerVisible').cacheable(),
+  canScrollHorizontal: NO,
    
   /**
     If YES, the horizontal scroller will autohide if the contentView is
@@ -323,9 +317,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
   isVerticalScrollerVisible: YES,
 
   
-  canScrollVertical: function() {
-    return YES;
-  }.property('isVerticalScrollerVisible').cacheable(),
+  canScrollVertical: YES,
 
   /**
     If YES, the vertical scroller will autohide if the contentView is
@@ -515,7 +507,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
   contentViewFrameDidChange: function() {
     var view   = this.get('contentView'), view2, 
         f      = (view) ? view.get('frame') : null,
-        width  = (f) ? f.width : 0,  
+        width  = (f) ? f.width : 0,
         height = (f) ? f.height : 0,
         dim    = this.get('frame'),
         viewportHeight, elem ;
@@ -545,8 +537,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     Whenever the horizontal scroll offset changes, update the scrollers and 
     edit the location of the contentView.
   */
-  _scroll_horizontalScrollOffsetDidChange: function() {
-  }.observes('horizontalScrollOffset'),
+  _scroll_horizontalScrollOffsetDidChange: function() {},
    
   /** @private
     Whenever the vertical scroll offset changes, update the scrollers and 
