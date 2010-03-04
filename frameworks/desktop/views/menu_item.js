@@ -366,7 +366,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     menu.set('currentMenuItem', this);
 
     if(this.get('hasSubMenu')) {
-      this.invokeLater(this.showSubMenu(),100) ;
+      this.invokeLater(this.showSubMenu,100) ;
     }
 	  return YES ;
   },
