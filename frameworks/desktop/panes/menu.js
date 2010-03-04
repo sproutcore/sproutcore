@@ -7,6 +7,15 @@
 require('panes/picker');
 require('views/menu_item');
 
+
+/** 
+  Default height for menu items.
+  
+  @property {Number}
+*/
+SC.DEFAULT_MENU_ITEM_HEIGHT = 20;
+
+
 /**
   @class
 
@@ -84,9 +93,9 @@ SC.MenuPane = SC.PickerPane.extend(
     You can override this on a per-item basis by setting the (by default) @height@ property on your object.
 
     @type Number
-    @default 20
+    @default SC.DEFAULT_MENU_ITEM_HEIGHT
   */
-  itemHeight: 20,
+  itemHeight: SC.DEFAULT_MENU_ITEM_HEIGHT,
 
   /**
     The default height for separator menu items.
