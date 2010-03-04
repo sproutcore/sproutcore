@@ -660,15 +660,6 @@ SC.MenuPane = SC.PickerPane.extend(
     return ret;
   },
 
-  mouseEntered: function() {
-    this.set('mouseHasEntered', YES);
-  },
-
-  mouseExited: function() {
-    this.set('currentMenuItem', null);
-    this.set('mouseHasEntered', NO);
-  },
-
   currentMenuItem: function(key, value) {
     if (value !== undefined) {
       if (this._currentMenuItem !== null) {
