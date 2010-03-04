@@ -445,7 +445,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} the normalized record
   */
   
-  normalize: function(includeNull) {
+  normalize: function(includeNull) {    
     var primaryKey = this.primaryKey, 
         recordId   = this.get('id'), 
         store      = this.get('store'), 
@@ -472,13 +472,9 @@ SC.Record = SC.Object.extend(
               dataHash[key] = attrValue;
             }
           }
-          else if (isChild){
+          else if (isChild) {
             attrValue = this.get(key);
-            normChild = attrValue.normalize();
-
-            if(normChild!==undefined || (normChild===null && includeNull)) {
-              dataHash[key] = normChild;
-            }
+            attrValue.normalize();
           }
           else if (isRecord) {
             attrValue = recHash[key];
