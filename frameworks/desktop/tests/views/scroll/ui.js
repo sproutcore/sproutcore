@@ -86,7 +86,16 @@
     ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');    
 	  var maxVScroll = view.maximumVerticalScrollOffset();    
 	  ok((maxVScroll > 0), 'Max vertical scroll should be greater than zero');
+
+    view.scrollTo(0,100);
+    SC.RunLoop.begin().end();
+    var elem = view.get('containerView').$()[0];
+    equals(elem.scrollTop, 100, 'vertical scrolling should adjust scrollTop of container view');
     
+    view.scrollTo(50,0);
+    SC.RunLoop.begin().end();
+    elem = view.get('containerView').$()[0];
+    equals(elem.scrollLeft, 50, 'horizontal scrolling should adjust scrollLeft of container view');
   });
    
   test("basic3", function() {
@@ -116,10 +125,7 @@
      ok(view.$().hasClass('disabled'), 'should have disabled class');
      ok(!view.$().hasClass('sel'), 'should not have sel class');
    });
-   
 
-   
-   
    test("non-zero bottom in vertical scrollbar", function() {
       var view = pane.view('verticalScrollerBottom'); 
       equals(view.get('verticalScrollerBottom'),16, "should have verticalScrollerBottom as ");
