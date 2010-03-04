@@ -1255,9 +1255,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // otherwise, destroy in dirty state
     } else status = K.DESTROYED_DIRTY ;
     
-    // set the new status
+    // remove the data hash, set new status
     this.writeStatus(storeKey, status);
-    this.dataHashDidChange(storeKey, null, YES);
+    this.dataHashDidChange(storeKey);
 
     // add/remove change log
     changelog = this.changelog;
