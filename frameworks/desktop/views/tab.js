@@ -46,7 +46,7 @@ SC.TabView = SC.View.extend(
   itemIconKey: null,
   itemWidthKey: null,
   itemToolTipKey: null,
-  tabHeight: (SC.REGULAR_BUTTON_HEIGHT/2),
+  tabHeight: SC.REGULAR_BUTTON_HEIGHT,
   
   tabLocation: SC.TOP_LOCATION,
   
@@ -109,7 +109,7 @@ SC.TabView = SC.View.extend(
         tabHeight   = this.get('tabHeight') ;
     
     layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
-             { top: tabHeight+1, left: 0, right: 0, bottom: 0 } :
+             { top: tabHeight/2+1, left: 0, right: 0, bottom: 0 } :
              { top: 0, left: 0, right: 0, bottom: tabHeight-1 } ;
     
     containerView = this.containerView.extend(SC.Border, {
