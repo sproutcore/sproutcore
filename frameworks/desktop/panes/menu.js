@@ -204,6 +204,11 @@ SC.MenuPane = SC.PickerPane.extend(
     this.endPropertyChanges();
     this.adjust('height', this.get('menuHeight'));
     this.positionPane();
+
+    // Because panes themselves do not receive key events, we need to set the
+    // pane's defaultResponder to itself. This way key events can be
+    // interpreted in keyUp.
+    this.set('defaultResponder', this);
     this.append();
   },
 
@@ -400,21 +405,6 @@ SC.MenuPane = SC.PickerPane.extend(
   // ..........................................................
   // INTERNAL METHODS
   //
-
-  /**
-    Because panes themselves do not receive key events, we need to set the
-    pane's defaultResponder to itself. This way key events can be interpreted
-    in keyUp.
-
-    @private
-    @returns {SC.MenuPane} receiver
-  */
-  init: function() {
-    var ret = sc_super();
-    this.set('defaultResponder', this);
-
-    return ret;
-  },
 
   /**
     Creates the child scroll view, and sets its contentView to a new
