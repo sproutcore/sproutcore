@@ -61,7 +61,16 @@ SC.TableRowView = SC.View.extend({
     sc_super();
     context.setClass('sel', this.get('isSelected'));
   },
-
+  
+  render: function(context, firstTime) {
+    var classArray = [];
+    
+    classArray.push((this.get('contentIndex')%2 === 0) ? 'even' : 'odd');
+    context.addClass(classArray);
+    
+    sc_super();
+  },
+  
   renderChildViews: function(context, firstTime) {
     var cells = this.get('cells'), cell, idx;
     for (idx = 0; idx < cells.get('length'); idx++) {
