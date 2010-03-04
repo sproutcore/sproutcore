@@ -533,7 +533,7 @@ SC.MenuPane = SC.PickerPane.extend(
   }.property('isSubMenu').cacheable(),
 
   /**
-    If the window resizes, we need to make sure that the height of the pane expands to fill the viewport as much as possible.
+    Close the menu if the user resizes the window.
 
     @private
   */
