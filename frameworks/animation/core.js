@@ -353,6 +353,7 @@ SC.Animatable = {
     {
       // clone it to be a nice starting point next time.
       this._animatableCurrentStyle = {};
+      this._animatableSetCSS = "";
       for (i in newStyle)
       {
         if (i[0] != "_") this._animatableCurrentStyle[i] = newStyle[i];
