@@ -189,29 +189,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
 
       if (element) {
-        var setStart, setEnd ;
-
-        // In IE8, input elements don't have hasOwnProperty() defined.  Also,
-        // in Firefox 3.5, trying to get the selectionStart / selectionEnd
-        // properties at certain times can cause exceptions.
-        if ('selectionStart' in element) {
-         element.selectionStart = value.get('start') ;
-         setStart = YES ;
+        if (element.setSelectionRange) {
+          element.setSelectionRange(value.get('start'), value.get('end')) ;
         }
-        if ('selectionEnd' in element) {
-         element.selectionEnd = value.get('end') ;
-         setEnd = YES ;
-        }
-
-        // Support Internet Explorer.
-        if (!setStart  ||  !setEnd) {
-         range = element.createTextRange() ;
-         start = value.get('start') ;
-         range.move('character', start) ;
-         range.moveEnd('character', value.get('end') - start) ;
-         range.select() ;
+        else {
+          // Support Internet Explorer.
+          range = element.createTextRange() ;
+          start = value.get('start') ;
+          range.move('character', start) ;
+          range.moveEnd('character', value.get('end') - start) ;
+          range.select() ;
         }
       }
+      return value;
     }
 
     // Implementation note:
