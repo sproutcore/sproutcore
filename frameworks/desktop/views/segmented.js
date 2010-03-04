@@ -384,18 +384,18 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (!elem || elem===document) return -1; // nothing found
 
     // start at the target event and go upwards until we reach either the 
-    // root responder or find an anchor.sc-segment.
+    // root responder or find an element with an 'sc-segment' class.
     var root = this.$(), match = null ;
     while(!match && (elem.length>0) && (elem[0]!==root[0])) {
-      if (elem.hasClass('sc-segment') && elem.attr('tagName')==='A') {
+      if (elem.hasClass('sc-segment')) {
         match = elem;
       } else elem = elem.parent();
     }
     
     elem = root = null;
-    
+
     // if a match was found, return the index of the match in subtags
-    return (match) ? this.$('a.sc-segment').index(match) : -1;
+    return (match) ? this.$('.sc-segment').index(match) : -1;
   },
   
   keyDown: function(evt) {
