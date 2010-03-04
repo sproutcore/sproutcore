@@ -8,6 +8,7 @@
 sc_require('views/segmented');
 
 SC.TOP_LOCATION = 'top';
+SC.TOP_TOOLBAR_LOCATION = 'top-toolbar';
 SC.BOTTOM_LOCATION = 'bottom';
 
 /** 
@@ -106,10 +107,12 @@ SC.TabView = SC.View.extend(
   createChildViews: function() {
     var childViews  = [], view, containerView, layout,
         tabLocation = this.get('tabLocation'),
-        tabHeight   = this.get('tabHeight') ;
+        tabHeight   = this.get('tabHeight');
     
-    layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
+    layout = (tabLocation === SC.TOP_LOCATION) ?
              { top: tabHeight/2+1, left: 0, right: 0, bottom: 0 } :
+             (tabLocation === SC.TOP_TOOLBAR_LOCATION) ?
+             { top: tabHeight+1, left: 0, right: 0, bottom: 0 } :
              { top: 0, left: 0, right: 0, bottom: tabHeight-1 } ;
     
     containerView = this.containerView.extend(SC.Border, {
@@ -123,7 +126,8 @@ SC.TabView = SC.View.extend(
     //  The segmentedView managed by this tab view.  Note that this TabView uses
     //  a custom segmented view.  You can access this view but you cannot change
     // it.
-    layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
+    layout = (tabLocation === SC.TOP_LOCATION || 
+              tabLocation === SC.TOP_TOOLBAR_LOCATION) ?
              { height: tabHeight, left: 0, right: 0, top: 0 } :
              { height: tabHeight, left: 0, right: 0, bottom: 0 } ;
 
