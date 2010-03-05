@@ -870,6 +870,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     evt.allowDefault();
     return YES;
   },
+  
+  // some touch events (may be improvable, though)
+  touchStart: function(evt) {
+    if (!this.get('isEnabled')) {
+      evt.stop();
+    } else {
+      evt.allowDefault();
+    }
+    return YES;
+  },
+  
+  touchEnd: function(evt) {
+    this.notifyPropertyChange('selection');
+    if (!this.get('isEnabled')) {
+      evt.stop();
+    } else {
+      evt.allowDefault();
+    }
+    return YES;
+  },
 
   /*
     Allows text selection in IE. We block the IE only event selectStart to 
