@@ -123,10 +123,9 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
         context.addClass('has-icon');
       }
 
-      val = this.getContentProperty('itemTitleKey') || '';
+      val = this.get('title');
       if (SC.typeOf(val) !== SC.T_STRING) val = val.toString();
-      // TODO check localization setting
-      this.renderLabel(context, val.loc());
+      this.renderLabel(context, val);
 
       if (this.getContentProperty('itemCheckboxKey')) {
         context.push('<div class="checkbox"></div>');
@@ -238,12 +237,12 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   }.property('content.isEnabled').cacheable(),
 
   title: function() {
-    var ret = this.getContentProperty('itemTitleKey');
+    var ret = this.getContentProperty('itemTitleKey'),
+        localize = this.getPath('parentMenu.localize');
 
-    if (ret) {
-      ret = ret.loc();
-    }
-    return ret;
+    if (localize && ret) ret = ret.loc();
+
+    return ret||'';
   }.property('content.title').cacheable(),
 
   getContentProperty: function(property) {
