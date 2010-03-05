@@ -87,11 +87,10 @@ SC.CONTEXT_MENU_ENABLED = YES;
 SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
 
 /**
-  This will enabled touch events to be routed into mouse events. 
-  It is disabled by default you just have to change this value in your app to
-  enable routing.
+  This will enable touch events to be routed into mouse events. 
+  It is enabled by default.
 */
-SC.ROUTE_TOUCH = NO;
+SC.ROUTE_TOUCH = YES;
 
 
 /** @private - custom array used for child views */
