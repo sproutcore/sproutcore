@@ -13,6 +13,7 @@ require('views/menu_item');
 */
 if (!SC.DEFAULT_MENU_ITEM_HEIGHT)           SC.DEFAULT_MENU_ITEM_HEIGHT           = 20;
 if (!SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT) SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+if (!SC.DEFAULT_MENU_HEIGHT_PADDING)        SC.DEFAULT_MENU_HEIGHT_PADDING        = 0;
 
 
 /**
@@ -155,9 +156,9 @@ SC.MenuPane = SC.PickerPane.extend(
     controlSize.
 
     @type Number
-    @default null
+    @default SC.DEFAULT_MENU_HEIGHT_PADDING
   */
-  menuHeightPadding: null,
+  menuHeightPadding: SC.DEFAULT_MENU_HEIGHT_PADDING,
 
   /**
     The amount of offset x while positioning submenu.
