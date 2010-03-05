@@ -2048,7 +2048,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     dH = pdim.height;
     dW = pdim.width;
     
-    
     // handle left aligned and left/right 
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)){
@@ -2480,15 +2479,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         translateTop = 0,
         translateLeft = 0;
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
-      error= SC.Error.desc("%@.layout() you cannot use width:auto if "+
-              "staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+      error= SC.Error.desc("%@.layout() you cannot use width:auto if ".fmt(this) +
+              "staticLayout is disabled","%@".fmt(this),-1);
       console.error(error.toString()) ;
       throw error ;
     }
     
     if (lH !== undefined && lH === SC.LAYOUT_AUTO && !stLayout) {
-      error = SC.Error.desc("%@.layout() you cannot use height:auto if "+
-                "staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+      error = SC.Error.desc("%@.layout() you cannot use height:auto if ".fmt(this) +
+                "staticLayout is disabled","%@".fmt(this),-1);  
       console.error(error.toString()) ;
       throw error ;
     }

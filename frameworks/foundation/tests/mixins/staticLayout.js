@@ -140,3 +140,4 @@ test("Test SC.StaticLayout frame support", function() {
   
   ok(SC.typeOf(child.get('frame')) === SC.T_HASH, "View's frame property will be an object when useStaticLayout is YES and layer is attached to DOM.");
 });
+
