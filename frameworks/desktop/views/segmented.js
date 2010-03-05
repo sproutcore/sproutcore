@@ -288,7 +288,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         value = value.objectAt(0); isArray = NO ;
       }
       var names = {}; // reuse
-      var loc = items.length, cq = this.$('a.sc-segment'), item;
+      var loc = items.length, cq = this.$('.sc-segment'), item;
       while(--loc>=0) {
         item = items[loc];
         names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
