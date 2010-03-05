@@ -266,20 +266,22 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   horizontalOverlay: NO,
   
   /**
-    If verticalOverlay is YES, set the offset here to determine how many pixels
-    from the right you want the vertical scroller to be overlayed
-  
-    @property {Number}
+    Use to control the positioning of the vertical scroller. In combination
+    with verticalOverlay, this allows you to position the scroller anywhere 
+    inside the container view.
+    
+    Example: { top: 0, bottom: 0, right: 0 }
   */
-  verticalOverlayOffset: 0,
+  verticalScrollerLayout: null,
   
   /**
-    If horizontalOverlay is YES, set the offset here to determine how many 
-    pixels from the bottom you want the horizontal scroller to be overlayed
-  
-    @property {Number}
+    Use to control the positioning of the horizontal scroller. In combination
+    with horizontalOverlay, this allows you to position the scroller anywhere 
+    inside the container view.
+    
+    Example: { left: 0, bottom: 0, right: 0 }
   */
-  horizontalOverlayoffset: 0,
+  horizontalScrollerLayout: null,
   
   // ..........................................................
   // CUSTOM VIEWS
@@ -530,14 +532,20 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // get the containerView
     var clip = this.get('containerView') ;
     var clipLayout = { left: 0, top: 0 } ;
-    var t, vo, ho ;
+    var t, vo, ho, vl, hl;
     
     var ht = ((hasHorizontal) ? hscroll.get('scrollbarThickness') : 0) ;
     var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0 ;
     
     if (hasHorizontal) {
       ho = this.get('horizontalOverlay');
-      hscroll.set('layout', { left: 0, bottom: (ho ? this.get('horizontalOverlayOffset') : 0), right: vt-1, height: ht }) ;
+      if(ho) hl = this.get('horizontalScrollerLayout');
+      hscroll.set('layout', { 
+        left: (hl ? hl.left : 0), 
+        bottom: (hl ? hl.bottom : 0), 
+        right: (hl ? hl.right + vt-1 : vt-1), 
+        height: ht 
+      }) ;
       clipLayout.bottom = ho ? 0 : ht ;
     } else {
       clipLayout.bottom = 0 ;
@@ -547,7 +555,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (hasVertical) {
       ht = ht + this.get('verticalScrollerBottom') ;
       vo = this.get('verticalOverlay');
-      vscroll.set('layout', { top: 0, bottom: ht, right: (vo ? this.get('verticalOverlayOffset') : 0), width: vt }) ;
+      if(vo) vl = this.get('verticalScrollerLayout');
+      vscroll.set('layout', { 
+        top: (vl ? vl.top : 0), 
+        bottom: (vl ? vl.bottom + ht : ht), 
+        right: (vl ? vl.right : 0), 
+        width: vt 
+      }) ;
       clipLayout.right = vo ? 0 : vt ;
     } else {
       clipLayout.right = 0 ;

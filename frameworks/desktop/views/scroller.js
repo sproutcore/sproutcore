@@ -120,12 +120,13 @@ SC.ScrollerView = SC.View.extend(
   //
 
   /**
-    The width or height of the scrollbar.
+    The width (if vertical scroller) or height (if horizontal scroller) of the 
+    scrollbar.
 
     @property {Number}
   */
   scrollbarThickness: 14,
-
+  
   /**
     The width or height of the cap that encloses the track.
 
