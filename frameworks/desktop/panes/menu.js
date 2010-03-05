@@ -13,7 +13,7 @@ require('views/menu_item');
   
   @property {Number}
 */
-SC.DEFAULT_MENU_ITEM_HEIGHT = 20;
+if (!SC.DEFAULT_MENU_ITEM_HEIGHT) SC.DEFAULT_MENU_ITEM_HEIGHT = 20;
 
 
 /**
