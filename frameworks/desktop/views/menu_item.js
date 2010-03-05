@@ -107,7 +107,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     var key, val ;
     var menu = this.get('parentMenu');
     var itemWidth = this.get('itemWidth') || menu.layout.width ;
-    var itemHeight = this.get('itemHeight') || 20 ;
+    var itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT ;
     this.set('itemWidth',itemWidth);
     this.set('itemHeight',itemHeight);
 
