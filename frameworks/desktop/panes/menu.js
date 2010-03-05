@@ -13,6 +13,7 @@ require('views/menu_item');
 */
 if (!SC.DEFAULT_MENU_ITEM_HEIGHT)           SC.DEFAULT_MENU_ITEM_HEIGHT           = 20;
 if (!SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT) SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+if (!SC.DEFAULT_MENU_HEIGHT_PADDING)        SC.DEFAULT_MENU_HEIGHT_PADDING        = 0;
 
 
 /**
@@ -124,9 +125,9 @@ SC.MenuPane = SC.PickerPane.extend(
     bottom is created.
 
     @type Number
-    @default 0
+    @default SC.DEFAULT_MENU_HEIGHT_PADDING
   */
-  menuHeightPadding: 0,
+  menuHeightPadding: SC.DEFAULT_MENU_HEIGHT_PADDING,
 
   /**
     The last menu item to be selected by the user.
