@@ -7,6 +7,14 @@
 require('panes/picker');
 require('views/menu_item');
 
+
+/** 
+  Default heights for menu items.
+*/
+if (!SC.DEFAULT_MENU_ITEM_HEIGHT) SC.DEFAULT_MENU_ITEM_HEIGHT           = 20;
+if (!SC.DEFAULT_MENU_SEPARATOR_HEIGHT) SC.DEFAULT_MENU_SEPARATOR_HEIGHT = 9;
+
+
 /**
   @class
 
@@ -123,9 +131,9 @@ SC.MenuPane = SC.PickerPane.extend(
     be inferred from controlSize.
 
     @type Number
-    @default null
+    @default SC.DEFAULT_MENU_SEPARATOR_HEIGHT
   */
-  itemSeparatorHeight: null,
+  itemSeparatorHeight: SC.DEFAULT_MENU_SEPARATOR_HEIGHT,
 
   /**
     The height of the menu pane.  This is updated every time menuItemViews
