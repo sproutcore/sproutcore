@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
-//            portions copyright @2009 Apple Inc.
+//            portions copyright ©2010 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -24,27 +24,34 @@ var items = [
 
 var menu, anchor;
 
-module('SC.MenuPane#popup', {
+module('SC.MenuPane Methods', {
   setup: function() {
     menu = SC.MenuPane.create({
       layout: { width: 206 },
-      items: items
+      items: items,
+
+      displayItemsCount: 0,
+      displayItemsDidChange: function() {
+        this.displayItemsCount++;
+      }.observes('displayItems')
     });
-    
+
     anchor = SC.Pane.create({
       layout: { top: 15, left: 15, width: 100, height: 100 }
     });
   },
 
   teardown: function() {
+    menu.remove();
+    anchor.remove();
     menu.destroy();
     menu = null;
   }
 });
 
-test('SC.MenuPane - popup() without anchor', function(){
+test('popup() without anchor', function(){
   var layout;
-  
+
   menu.popup();
   layout = menu.get('layout');
   equals(layout.centerX, 0, 'menu should be horizontally centered');
@@ -54,9 +61,9 @@ test('SC.MenuPane - popup() without anchor', function(){
   menu.remove();
 });
 
-test('SC.MenuPane - popup() with anchor', function(){
+test('popup() with anchor', function(){
   var layout;
-  
+
   anchor.append();
   menu.popup(anchor);
   layout = menu.get('layout');
@@ -65,4 +72,51 @@ test('SC.MenuPane - popup() with anchor', function(){
   equals(layout.width, 206, 'menu should maintain the width specified');
   equals(layout.height, 178, 'menu height should resize based on item content');
   menu.remove();
+});
+
+test('displayItems', function() {
+  var strings = ['Alpha', 'Beta', 'Gaga'], output, count;
+
+  menu.menuHeight = 1;
+  menu.set('items', strings);
+  equals(1, menu.displayItemsCount, 'displayItems should change when items array changes');
+  ok(menu.get('menuHeight') > 1, 'menuHeight should be recalculated when displayItems changes');
+
+  output = menu.get('displayItems')[0];
+  equals(SC.typeOf(output), SC.T_OBJECT, 'strings should be transformed into objects');
+  equals(output.title, 'Alpha', 'title property of transformed object should match original string');
+
+  var hashes = [
+    { title: 'Yankee' },
+    { title: 'Hotel' },
+    { title: 'Foxtrot' } ];
+  menu.set('items', hashes);
+
+  output = menu.get('displayItems')[0];
+  equals(SC.typeOf(output), SC.T_OBJECT, 'displayItems should convert hashes to objects');
+  equals(output.get('title'), 'Yankee', 'object properties should correspond to hash properties');
+
+  var objects = [
+    SC.Object.create({ title: 'Whiskey' }),
+    SC.Object.create({ title: 'Mystics' }),
+    SC.Object.create({ title: 'Men' })
+  ];
+  menu.set('items', objects);
+
+  output = menu.get('displayItems')[0];
+  equals(SC.typeOf(output), SC.T_OBJECT, 'displayItems should not convert objects');
+  equals(SC.guidFor(output), SC.guidFor(objects[0]), 'objects should be identical to provided objects');
+});
+
+test('displayItems - Edge Cases', function() {
+  menu.set('items', [null, null, false, 0, 'Real Item']);
+
+  var output = menu.get('displayItems');
+  equals(output.get('length'), 1, 'displayItems should strip out invalid items');
+
+  menu.set('items', ['Yellow', { title: 'Country' }, SC.Object.create({ title: 'Teeth' })]);
+  output = menu.get('displayItems');
+
+  ok(output[0].title === 'Yellow' && output[1].title === 'Country' && output[2].title === 'Teeth',
+     'displayItems should accept a mix of supported item types');
 });
