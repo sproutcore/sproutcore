@@ -588,7 +588,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        item = SC.Object.create({ title: item.humanize().titleize(),
+        item = SC.Object.create({ title: item,
                                   value: item,
                                   isEnabled: YES
                                });
