@@ -85,6 +85,8 @@ test('displayItems', function() {
   output = menu.get('displayItems')[0];
   equals(SC.typeOf(output), SC.T_OBJECT, 'strings should be transformed into objects');
   equals(output.title, 'Alpha', 'title property of transformed object should match original string');
+  equals(output.value, 'Alpha', 'value property of transformed object should match original string');
+  equals(output.isEnabled, YES, 'isEnabled property of transformed object should be YES');
 
   var hashes = [
     { title: 'Yankee' },
@@ -119,4 +121,15 @@ test('displayItems - Edge Cases', function() {
 
   ok(output[0].title === 'Yellow' && output[1].title === 'Country' && output[2].title === 'Teeth',
      'displayItems should accept a mix of supported item types');
+
+  menu.set('items', []);
+  equals(menu.getPath('displayItems.length'), 0, 'displayItems should be empty if items is empty');
+  menu.set('items', null);
+  equals(menu.get('displayItems'), null, 'displayItems should be null if items is null');
+});
+
+test('menuItemViewForContentIndex', function() {
+  menu.popup();
+  var view = menu.menuItemViewForContentIndex(0);
+  equals(items[0].title, view.$('.value').text(), 'menu item views should match content items');
 });

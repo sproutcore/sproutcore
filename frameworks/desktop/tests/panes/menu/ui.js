@@ -173,3 +173,15 @@ test('Menu Item Localization', function() {
   equals('LOCALIZED TEXT', locMenu.$('.sc-menu-item .value').text(), 'Menu item titles should be localized if localize is YES');
   locMenu.remove();
 });
+
+test('Automatic Closing', function() {
+  menu.popup();
+  ok(menu.get('isVisibleInWindow'), 'precond - window should be visible');
+  menu.windowSizeDidChange();
+  ok(!menu.get('isVisibleInWindow'), 'menu should close if window resizes');
+
+  menu.popup();
+  clickOn(menu);
+  ok(!menu.get('isVisibleInWindow'), 'menu should close if anywhere other than a menu item is clicked');
+});
+
