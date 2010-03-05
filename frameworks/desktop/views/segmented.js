@@ -315,7 +315,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         classArray;
 
     for(i=0; i< len; i++){
-      ic = context.begin('div').attr('role', 'button');
+      ic = context.begin('a').attr('role', 'button');
       item=items[i];
       title = item[0]; 
       icon = item[3];
