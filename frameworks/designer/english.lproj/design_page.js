@@ -10,7 +10,7 @@ SC.designPage = SC.Page.create({
   designMainPane: SC.MainPane.design({
     childViews: 'container viewList'.w(),
     
-    container: SC.ContainerView.design({
+    container: SC.ContainerView.design( SC.DesignerDropTarget,{
       layout: {top: 10, left: 10, right: 10, bottom: 60},
       contentViewBinding:'SC.designController.view',
       backgroundColor: 'white'
