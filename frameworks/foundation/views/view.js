@@ -311,6 +311,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.observes('isEnabled'),
 
   // ..........................................................
+  // MULTITOUCH SUPPORT
+  //
+  /**
+    Set to YES if you want to receive touch events for each distinct touch (rather than only
+    the first touch start and last touch end).
+  */
+  acceptsMultitouch: NO,
+  
+  // ..........................................................
   // IS VISIBLE IN WINDOW SUPPORT
   // 
   

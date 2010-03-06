@@ -192,12 +192,27 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {Object} object that handled the event
   */
   sendEvent: function(action, evt, target) {
-    var handler ;
+    var handler;
     
     // walk up the responder chain looking for a method to handle the event
     if (!target) target = this.get('firstResponder') ;
-    while(target && !target.tryToPerform(action, evt)) {
-
+    while(target) {
+      if (action === 'touchStart') {
+        if (!target.get("acceptsMultitouch")) {
+          if (evt.isFirstTouch) {
+            if (target.tryToPerform("touchStart", evt)) break;
+          }
+        }
+      } else if (action === 'touchEnd') {
+        if (!target.get("acceptsMultitouch")) {
+          if (evt.isLastTouch) {
+            if (target.tryToPerform("touchEnd", evt)) break;
+          }
+        }
+      } else {
+        if (target.tryToPerform(action, evt)) break;
+      }
+      
       // even if someone tries to fill in the nextResponder on the pane, stop
       // searching when we hit the pane.
       target = (target === this) ? null : target.get('nextResponder') ;
