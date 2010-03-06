@@ -553,7 +553,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     edit the location of the contentView.
   */
   _scroll_verticalScrollOffsetDidChange: function() {
-    var offset = this.get('verticalScrollOffset')+1 ;
+    var offset = this.get('verticalScrollOffset') ;
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
