@@ -541,37 +541,39 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // get the containerView
     var clip = this.get('containerView') ;
     var clipLayout = { left: 0, top: 0 } ;
-    var t, vo, ho, vl, hl;
+    var t, layout, vo, ho, vl, hl;
     
     var ht = ((hasHorizontal) ? hscroll.get('scrollbarThickness') : 0) ;
     var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0 ;
     
     if (hasHorizontal) {
-      hl = this.get('horizontalScrollerLayout');
-      hscroll.set('layout', { 
+      hl     = this.get('horizontalScrollerLayout');
+      layout = { 
         left: (hl ? hl.left : 0), 
         bottom: (hl ? hl.bottom : 0), 
         right: (hl ? hl.right + vt-1 : vt-1), 
         height: ht 
-      }) ;
+      };
+      hscroll.set('layout', layout) ;
       ho = this.get('horizontalOverlay');
-      clipLayout.bottom = ho ? 0 : ht ;
+      clipLayout.bottom = ho ? 0 : (layout.bottom + ht) ;
     } else {
       clipLayout.bottom = 0 ;
     }
     if (hscroll) hscroll.set('isVisible', hasHorizontal) ;
     
     if (hasVertical) {
-      ht = ht + this.get('verticalScrollerBottom') ;
-      vl = this.get('verticalScrollerLayout');
-      vscroll.set('layout', { 
+      ht     = ht + this.get('verticalScrollerBottom') ;
+      vl     = this.get('verticalScrollerLayout');
+      layout = { 
         top: (vl ? vl.top : 0), 
         bottom: (vl ? vl.bottom + ht : ht), 
         right: (vl ? vl.right : 0), 
         width: vt 
-      }) ;
+      };
+      vscroll.set('layout', layout) ;
       vo = this.get('verticalOverlay');
-      clipLayout.right = vo ? 0 : vt ;
+      clipLayout.right = vo ? 0 : (layout.right + vt) ;
     } else {
       clipLayout.right = 0 ;
     }
