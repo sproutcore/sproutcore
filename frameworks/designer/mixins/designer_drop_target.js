@@ -11,11 +11,9 @@ SC.DesignerDropTarget = {
   targetIsInIFrame: YES,
   
   dragStarted: function(drag, evt) {
-    console.log('drag started');
   },
   
   dragEntered: function(drag, evt) {
-    console.log('drag entered');
   },
   
   dragUpdated: function(drag, evt) {},
@@ -26,13 +24,12 @@ SC.DesignerDropTarget = {
   
 
   computeDragOperations: function(drag, evt) { 
-    console.log('compute drag operations');
     return SC.DRAG_ANY; 
   },
   
 
   acceptDragOperation: function(drag, op) { 
-    return YES; 
+    return YES;
   },
   
   /**
@@ -52,10 +49,13 @@ SC.DesignerDropTarget = {
     @return {DragOp} Drag Operation actually performed
   */
   performDragOperation: function(drag, op) { 
-    console.log('performing drop operation!');
-    var data = drag.dataForType(SC.View);
-    var cv = this.get('contentView');
-    if(cv) cv.appendChild(data.get('scClass').design({}));
+    var data = drag.dataForType('SC.View'),
+        cv = this.get('contentView'),
+        loc = drag.get('location'),
+        frame = drag.iframeFrame;
+    loc.x = loc.x - frame.x;
+    loc.y = loc.y - frame.y;
+    if(cv) cv.appendChild(data.get('scClass').design({layout: {top: loc.y, left: loc.x, width: 100, height: 25}}).create());
     return SC.DRAG_ANY; 
   }
   
