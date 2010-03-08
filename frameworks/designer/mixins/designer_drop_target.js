@@ -3,6 +3,7 @@
 // Copyright: ©2009 Mike Ball
 // ==========================================================================
 /*globals SC */
+/*jslint evil: true*/
 
 SC.DesignerDropTarget = {
   
@@ -48,14 +49,20 @@ SC.DesignerDropTarget = {
     
     @return {DragOp} Drag Operation actually performed
   */
-  performDragOperation: function(drag, op) { 
+  performDragOperation: function(drag, op) {
     var data = drag.dataForType('SC.View'),
         cv = this.get('contentView'),
         loc = drag.get('location'),
-        frame = drag.iframeFrame;
+        frame = drag.iframeFrame,
+        design, size;
+    //size and location
+    size = data.get('size');
     loc.x = loc.x - frame.x;
     loc.y = loc.y - frame.y;
-    if(cv) cv.appendChild(data.get('scClass').design({layout: {top: loc.y, left: loc.x, width: 100, height: 25}}).create());
+    //setup design (use eval to make sure code comes from iframe)
+    design = eval(data.get('scClass'));
+    design = design.design({layout: {top: loc.y, left: loc.x, width: size.width, height: size.height}});
+    if(cv) cv.appendChild(design.create({page: cv.get('page')}));
     return SC.DRAG_ANY; 
   }
   
