@@ -197,17 +197,13 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // walk up the responder chain looking for a method to handle the event
     if (!target) target = this.get('firstResponder') ;
     while(target) {
-      if (action === 'touchStart') {
-        if (!target.get("acceptsMultitouch")) {
-          if (evt.isFirstTouch) {
-            if (target.tryToPerform("touchStart", evt)) break;
-          }
+      if (action === 'touchStart' && !target.get("acceptsMultitouch")) {
+        if (evt.isFirstTouch) {
+          if (target.tryToPerform("touchStart", evt)) break;
         }
-      } else if (action === 'touchEnd') {
-        if (!target.get("acceptsMultitouch")) {
-          if (evt.isLastTouch) {
-            if (target.tryToPerform("touchEnd", evt)) break;
-          }
+      } else if (action === 'touchEnd' && !target.get("acceptsMultitouch")) {
+        if (evt.isLastTouch) {
+          if (target.tryToPerform("touchEnd", evt)) break;
         }
       } else {
         if (target.tryToPerform(action, evt)) break;
