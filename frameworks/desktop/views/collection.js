@@ -1035,6 +1035,8 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
+    var ret;
+
     // Use the cached view for this index, if we have it.  We'll do this up-
     // front to avoid 
     var itemViews = this._sc_itemViews;
@@ -1051,7 +1053,7 @@ SC.CollectionView = SC.View.extend(
         del  = this.get('contentDelegate'),
         groupIndexes = this.get('_contentGroupIndexes'),
         isGroupView = NO,
-        key, ret, E, layout, layerId,
+        key, E, layout, layerId,
         viewPoolKey, viewPool, reuseFunc, parentView, isEnabled, isSelected,
         outlineLevel, disclosureState, isVisibleInWindow;
 
