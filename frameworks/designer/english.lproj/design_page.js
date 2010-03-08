@@ -22,7 +22,10 @@ SC.designPage = SC.Page.create({
       contentView: SC.GridView.design({
         //contentBinding: 'SC.designsController',
         selectionBinding: 'SC.designsController.selection',
-        contentValueKey: 'name'
+        contentValueKey: 'name',
+        actOnSelect: YES,
+        target: 'SC.designController',
+        action: 'viewSelected'
       })
     })
   })
