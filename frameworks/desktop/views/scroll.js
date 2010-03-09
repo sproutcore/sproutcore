@@ -625,10 +625,20 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   touchStart: function(evt) {
     // Initialize start state
     this.beginTouchTracking(evt);
+    this.invokeLater(this.beginTouchesInContent, 150);
 
     // Indicate that we want a non-exclusive subscription to future
     // touch events
     return SC.MIXED_STATE;
+  },
+
+  beginTouchesInContent: function() {
+    var touch = this.touch, itemView;
+    if (touch.tracking && !touch.dragging) {
+      var ev = touch.originalEvent;
+      ev.manufactured = YES;
+      this.contentView.mouseDown(ev);
+    }
   },
 
   /**
