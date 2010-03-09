@@ -133,7 +133,6 @@ SC.SheetPane = SC.PanelPane.extend({
     if (SC.SheetPane.ANIMATABLE_AVAILABLE) {
       var layout = this.get('layout');
       this.transitions.top.timing = SC.Animatable.TRANSITION_EASE_IN;
-      SC.Logger.log(-1 * layout.height);
       this.adjust('top', -1 * layout.height);
     } else {
       this._start   = Date.now();
