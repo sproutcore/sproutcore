@@ -900,7 +900,7 @@ SC.Binding = {
     'pathB' whenever either source changes.  Note that the transform acts strictly
     as a one-way binding, working only in the direction
     
-      'pathA' AND 'pathB' --> value  (value will be either YES or NO)
+      'pathA' AND 'pathB' --> value  (value returned is the result of ('pathA' && 'pathB'))
 
     Usage example where a delete button's 'isEnabled' value is determined by whether
     something is selected in a list and whether the current user is allowed to delete:
@@ -910,7 +910,7 @@ SC.Binding = {
       })
 
   */
-  logicalAnd: function(pathA, pathB) {
+  and: function(pathA, pathB) {
 
     // create an object to do the logical computation
     var gate = SC.Object.create({
@@ -918,12 +918,35 @@ SC.Binding = {
       valueBBinding: pathB,
 
       and: function() {
-        return (this.get('valueA') && this.get('valueB')) ? YES : NO;
+        return (this.get('valueA') && this.get('valueB'));
       }.property('valueA', 'valueB').cacheable()
     });
 
     // add a transform that depends on the result of that computation.
     return this.from('and', gate).oneWay();
+  },
+
+  /**
+    Adds a transform that forwards the 'OR' of values at 'pathA' and
+    'pathB' whenever either source changes.  Note that the transform acts strictly
+    as a one-way binding, working only in the direction
+
+      'pathA' AND 'pathB' --> value  (value returned is the result of ('pathA' || 'pathB'))
+
+  */
+  or: function(pathA, pathB) {
+    
+    // create an object to the logical computation
+    var gate = SC.Object.create({
+      valueABinding: pathA,
+      valueBBinding: pathB,
+      
+      or: function() {
+        return (this.get('valueA') || this.get('valueB'));
+      }.property('valueA', 'valueB').cacheable()
+    });
+    
+    return this.from('or', gate).oneWay();
   },
   
   /**
