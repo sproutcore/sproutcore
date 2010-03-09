@@ -228,7 +228,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
         
         // even if it does have one, if it doesn't handle the event, give
         // methodName-style key equivalent handling a try
-        if (!ret) {
+        if (!ret && defaultResponder.tryToPerform) {
           ret = defaultResponder.tryToPerform(keystring, evt) ;
         }
       }
