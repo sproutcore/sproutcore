@@ -22,7 +22,7 @@ WHERE TO ADD NEW UNIT TESTS
 If you find a bug and reduce the problem down to a particular API method that
 is not responding in the way you might expect, then the best place to add a 
 test for this is in the API unit tests.  This will effectively make your unit
-test part of the API "specification" that must be satisified for all future
+test part of the API "specification" that must be satisfied for all future
 releases.
 
 Often times, however, you will find bugs that are not due to a particular 
@@ -34,13 +34,13 @@ test file and add it there.
 
 HOW TO WRITE API UNIT TESTS VS INTEGRATION
 
-The purpose of an API unit test is to excercise individual methods in the API
+The purpose of an API unit test is to exercise individual methods in the API
 in isolation of the rest of the API.  You should swap out methods, mock objects, or make any other temporary modifications to the framework needed to
 make the method run as isolated as possible from other methods.
 
 Integration tests, on the other hand, are about testing API usage in place.
-Avoid mocking parts of the framework unless necessary.  Try to run the 
-framework code in its natural state to ensure the full stack is excercised 
-just as it would be in production code.
+Avoid mocking parts of the framework unless necessary. Try to run the
+framework code in its natural state to ensure the full stack is exercised just
+as it would be in production code.
 
 
