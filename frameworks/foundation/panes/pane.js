@@ -233,7 +233,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {Array} views an array of views that handled the event
   */
   sendTouchEvent: function(action, evt, target) {
-    var handler, response, ret = [] ;
+    var handler, response, exclusive = NO, ret = [] ;
 
     // walk up the responder chain looking for a method to handle the event
     if (!target) target = this.get('firstResponder') ;
@@ -250,6 +250,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
             // and give it exclusive control
             ret = [target];
             target = null;
+            exclusive = YES;
             continue;
         }
       }
@@ -260,17 +261,31 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
 
     // if no handler was found in the responder chain, try the default
-    if (!target && (target = this.get('defaultResponder'))) {
+    if (!exclusive && (target = this.get('defaultResponder'))) {
       if (typeof target === SC.T_STRING) {
         target = SC.objectForPropertyPath(target);
       }
 
-      if (!target) target = null;
-      else if (target.isResponderContext) {
-        target = target.sendTouchAction(action, this, evt);
-      } else target = target.tryToPerform(action, evt) ? target : null ;
+      if (target) {
+        // Make sure we merge the return arrays instead of clobbering
+        // our earlier results
+        if (target.isResponderContext) {
+          ret = ret.concat(target.sendTouchAction(action, this, evt));
+        } else {
+          if (target.respondsTo(action)) response = target[action](evt);
+
+          switch (response) {
+            case SC.MIXED_STATE:
+              ret.push(target);
+              break;
+            case YES:
+              ret = [target];
+          }
+        }
+      }
     }
 
+    target = null;
     return ret ;
   },
 
