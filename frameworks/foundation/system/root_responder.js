@@ -395,7 +395,33 @@ SC.RootResponder = SC.Object.extend({
     
     return ret ;
   },
-  
+
+  /**
+    Attempts to send a touch event down the responder chain.  This differs
+    from the standard sendEvent method by supporting event methods that
+    return SC.MIXED. In this case, it will continue to bubble up the chain
+    until the end is reached or a different view returns YES.
+
+    @param {String} action
+    @param {SC.Event} evt
+    @param {Object} target
+    @returns {Array} views the views that handled the event
+  */
+  sendTouchEvent: function(action, evt, target) {
+    var pane, ret ;
+    SC.RunLoop.begin() ;
+
+    // get the target pane
+    if (target) pane = target.get('pane') ;
+    else pane = this.get('keyPane') || this.get('mainPane') ;
+
+    // if we found a valid pane, send the event to it
+    ret = (pane) ? pane.sendTouchEvent(action, evt, target) : null ;
+
+    SC.RunLoop.end() ;
+    return ret ;
+  },
+
   // .......................................................
   // EVENT LISTENER SETUP
   // 

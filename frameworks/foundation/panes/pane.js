@@ -213,6 +213,64 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     return evt.mouseHandler || target ;
   },
 
+  /**
+    Attempts to send a touch event down the responder chain for this pane. If
+    you pass a target, this method will begin with the target and work up the
+    responder chain. Otherwise, it will begin with the current firstResponder
+    and walk up the chain looking for any responder that implements a handler
+    for the passed method and returns YES or SC.MIXED_STATE when executed.
+
+    This method differs from the sendEvent method by supporting views that
+    return SC.MIXED_STATE. In that case, the event will continue to bubble up
+    the chain until the end is reached or another view returns YES.
+
+    @param {String} action
+    @param {SC.Event} evt
+    @param {Object} target
+    @returns {Array} views an array of views that handled the event
+  */
+  sendTouchEvent: function(action, evt, target) {
+    var handler, response, ret = [] ;
+
+    // walk up the responder chain looking for a method to handle the event
+    if (!target) target = this.get('firstResponder') ;
+    while (target) {
+      if (target.respondsTo(action)) {
+        switch (target[action](evt)) {
+          case SC.MIXED_STATE:
+            // The view is interested in events but doesn't want exclusive
+            // control, so keep it in a list of interested views
+            ret.push(target);
+            break;
+          case YES:
+            // The view wants to respond to this event, so we'll stop looking
+            // and give it exclusive control
+            ret = [target];
+            target = null;
+            continue;
+        }
+      }
+
+      // even if someone tries to fill in the nextResponder on the pane, stop
+      // searching when we hit the pane.
+      target = (target === this) ? null : target.get('nextResponder') ;
+    }
+
+    // if no handler was found in the responder chain, try the default
+    if (!target && (target = this.get('defaultResponder'))) {
+      if (typeof target === SC.T_STRING) {
+        target = SC.objectForPropertyPath(target);
+      }
+
+      if (!target) target = null;
+      else if (target.isResponderContext) {
+        target = target.sendTouchAction(action, this, evt);
+      } else target = target.tryToPerform(action, evt) ? target : null ;
+    }
+
+    return ret ;
+  },
+
   performKeyEquivalent: function(keystring, evt) {
     var ret = sc_super() ; // try normal view behavior first
     if (!ret) {
