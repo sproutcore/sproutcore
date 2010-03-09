@@ -610,42 +610,122 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_wheelDeltaX = 0;
     }
   },
-  
+
   touchStart: function(evt) {
-    this._scroll_startOffset = this.get('verticalScrollOffset');
-    this._scroll_touchStartOffset = evt.touches[0].pageY;
-    this._scroll_offset = 0;
-    return YES;
+    // Initialize start state
+    this.beginTouchTracking(evt);
+
+    // Indicate that we want a non-exclusive subscription to future
+    // touch events
+    return SC.MIXED_STATE;
+  },
+
+  /**
+    Initializes the start state of the gesture.
+
+    We keep information about the initial location of the touch so we can
+    disambiguate between a tap and a drag.
+
+    @param {Event} evt
+  */
+  beginTouchTracking: function(evt) {
+    var verticalScrollOffset = this.get('verticalScrollOffset');
+
+    this.touch = {
+      startScrollOffset: { x: this.horizontalScrollOffset, y: verticalScrollOffset },
+      startTime: evt.timeStamp,
+      startTimePosition: verticalScrollOffset,
+      startTouchOffset: { x: evt.pageX, y: evt.pageY },
+      decelerationVelocity: { y: 0 },
+      originalTarget: SC.RootResponder.responder.targetViewForEvent(evt),
+      originalPane: this.get('pane'),
+      originalEvent: SC.copy(evt),
+
+      tracking: YES,
+      dragging: NO,
+      decelerating: NO
+    };
+
+    this.tracking = YES;
+    this.dragging = NO;
   },
 
   touchDragged: function(evt) {
-    var offset = evt.touches[0].pageY - this._scroll_touchStartOffset;
-    this._scroll_offset = offset;
-    offset = this._scroll_startOffset - offset;
-    this.set('verticalScrollOffset', offset);
+    var touch = this.touch,
+        touchY = evt.pageY,
+        offsetY = touch.startScrollOffset.y,
+        maxOffset = this.get('maximumVerticalScrollOffset');
 
-    this._scroll_timestamp = evt.timeStamp;
+    var deltaY = touchY - touch.startTouchOffset.y;
+
+    if (!touch.dragging) {
+      // give the user 5 pixels of wiggle room before we begin a drag
+      if (Math.abs(deltaY) > 5) {
+        touch.dragging = YES;
+        touch.firstDrag = YES;
+        // this.contentView.select(SC.IndexSet.create());
+      }
+    }
+
+    if (touch.dragging) {
+      offsetY = offsetY - deltaY;
+
+      if (touch.firstDrag) {
+        touch.firstDrag = NO;
+        // this._scroll_startTouchOffset.y = offsetY;
+        return;
+      }
+    }
+    this.set('verticalScrollOffset', Math.max(0,Math.min(offsetY, maxOffset)));
+
+    if (evt.timeStamp - touch.lastEventTime > 50) {
+      touch.startTime = evt.timeStamp;
+      touch.startTimePosition = this.get('verticalScrollOffset');
+    }
+    touch.lastEventTime = evt.timeStamp;
   },
 
   touchEnd: function(evt) {
-    if (evt.timeStamp - this._scroll_timestamp < 100) {
-      this._scroll_touchEndOffset = this.get('verticalScrollOffset')-20;
-      this.decelerateAnimation();
+    var touch = this.touch;
+
+    this.tracking = NO;
+    touch.tracking = NO;
+    this.dragging = NO;
+    if (touch.dragging) {
+      touch.dragging = NO;
+
+      if (evt.timeStamp - touch.lastEventTime <= 100) {
+        touch.offsetBeforeDeceleration = { y: this.get('verticalScrollOffset') };
+        this.startDecelerationAnimation(evt);
+      }
     }
   },
 
+  startDecelerationAnimation: function(evt) {
+    var touch = this.touch;
+
+    var scrollDistance = this.get('verticalScrollOffset') - touch.startTimePosition;
+    var scrollDuration = (evt.timeStamp - touch.startTime)/15;
+    touch.decelerationVelocity = { y: scrollDistance / scrollDuration };
+    this.decelerateAnimation();
+  },
+
   decelerateAnimation: function() {
-    if (this._scroll_offset > 0) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset')-this._scroll_offset);
-      this._scroll_offset = Math.floor(this._scroll_offset*0.950);
-      this._scroll_offset = Math.max(this._scroll_offset, 0);
-      this.invokeLater(this.decelerateAnimation, 16) ;
-    } else if (this._scroll_offset < 0) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset')-this._scroll_offset);
-      this._scroll_offset = Math.ceil(this._scroll_offset*0.950);
-      this._scroll_offset = Math.min(this._scroll_offset, 0);
-      this.invokeLater(this.decelerateAnimation, 16) ;
+    var touch = this.touch,
+        maxOffset = this.get('maximumVerticalScrollOffset'),
+        newY = this.get('verticalScrollOffset') + touch.decelerationVelocity.y;
+    this.set('verticalScrollOffset', Math.max(0,Math.min(Math.round(newY), maxOffset)));
+
+    touch.decelerationVelocity.y *= 0.950;
+
+    var absYVelocity = Math.abs(touch.decelerationVelocity.y);
+    if (absYVelocity < 1) {
+      touch.decelerationVelocity.y = 0;
+      touch.decelerating = NO;
+      return;
     }
+
+    this.invokeLater(this.decelerateAnimation, 16);
   },
 
   // ..........................................................
