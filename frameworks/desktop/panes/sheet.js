@@ -41,16 +41,27 @@ SC.SheetPane = SC.PanelPane.extend({
     @property {Number}
   */
   transitionDuration: 200,
-
-  // states for view animation
-  NO_VIEW: 'NO_VIEW',
-  ANIMATING: 'ANIMATING',
-  READY: 'READY',
-
-  SLIDE_DOWN: 'SLIDEDOWN',
-  SLIDE_UP: 'SLIDEUP',
-
+  
   _state: 'NO_VIEW', // no view
+  
+  init: function() {
+    sc_super();
+    
+    if (SC.Animatable) {
+      SC.SheetPane.ANIMATABLE_AVAILABLE = YES;
+      this.mixin(SC.Animatable);
+      
+      if (!this.transitions) this.transitions = {};
+      if (!this.transitions.top) {
+        // transitionDuration = 200 seems to be too fast when using Animatable
+        this.transitions.top = {
+          duration: this.transitionDuration === 200 ? 0.3 : this.transitionDuration/1000,
+          action: "_complete",
+          target: this
+        };
+      }
+    }
+  },
 
   /**
     Displays the pane.  SheetPane will calculate the height of your pane, draw it offscreen, then
@@ -66,7 +77,12 @@ SC.SheetPane = SC.PanelPane.extend({
 
     // Gently rest the pane atop the viewport
     layout.top = -1*layout.height;
+
+    if (this.disableAnimation) this.disableAnimation();
     this.adjust(layout);
+    this.updateLayout();
+    if (this.enableAnimation) this.enableAnimation();
+    
     return sc_super();
   },
 
@@ -98,22 +114,48 @@ SC.SheetPane = SC.PanelPane.extend({
 
   slideDown: function(){
     // setup other general state
-    this._start   = Date.now();
-    this._end     = this._start + this.get('transitionDuration');
-    this._state   = this.ANIMATING;
-    this._direction = this.SLIDE_DOWN;
-    this.tick();
+    this._state   = SC.SheetPane.ANIMATING;
+    this._direction = SC.SheetPane.SLIDE_DOWN;
+    if (SC.SheetPane.ANIMATABLE_AVAILABLE) {
+      this.transitions.top.timing = SC.Animatable.TRANSITION_EASE_OUT;
+      this.adjust('top', 0);
+    } else {
+      this._start   = Date.now();
+      this._end     = this._start + this.get('transitionDuration');
+      this.tick();
+    }
   },
 
   slideUp: function(){
     // setup other general state
-    this._start   = Date.now();
-    this._end     = this._start + this.get('transitionDuration');
-    this._state   = this.ANIMATING;
-    this._direction = this.SLIDE_UP;
-    this.tick();
+    this._state   = SC.SheetPane.ANIMATING;
+    this._direction = SC.SheetPane.SLIDE_UP;
+    if (SC.SheetPane.ANIMATABLE_AVAILABLE) {
+      var layout = this.get('layout');
+      this.transitions.top.timing = SC.Animatable.TRANSITION_EASE_IN;
+      SC.Logger.log(-1 * layout.height);
+      this.adjust('top', -1 * layout.height);
+    } else {
+      this._start   = Date.now();
+      this._end     = this._start + this.get('transitionDuration');
+      this.tick();
+    }
   },
-
+  
+  _complete: function() {
+    var dir = this._direction;
+    if (dir === SC.SheetPane.SLIDE_DOWN) {
+      if (!SC.SheetPane.ANIMATABLE_AVAILABLE) this.adjust('top', 0);
+      if(SC.browser.mozilla) this.parentViewDidChange();
+    } else {
+      var layout = this.get('layout');
+      if (!SC.SheetPane.ANIMATABLE_AVAILABLE) this.adjust('top', -1*layout.height);
+    }
+    
+    this._state = SC.SheetPane.READY;
+    this.updateLayout();
+  },
+  
   // Needed because of the runLoop and that it is animated...must lose focus because will break if selection is change on text fields that don't move.
   blurTo: function(pane) { this.setFirstResponder(''); },
 
@@ -130,19 +172,7 @@ SC.SheetPane = SC.PanelPane.extend({
     
     // If we are done...
     if (pct>=1) {
-      
-      if (dir === this.SLIDE_DOWN){
-        target.adjust('top', 0);
-        
-        //Hack to make sure textfields are at the right place at the end of
-        // the animation.
-        if(SC.browser.mozilla) this.parentViewDidChange();
-      } else {
-        target.adjust('top', -1*layout.height);
-      }
-      this._state = SC.SheetPane.READY;
-      this.updateLayout();
-      
+      this._complete();
       return this;
     }
 
@@ -150,9 +180,9 @@ SC.SheetPane = SC.PanelPane.extend({
     adjust = Math.floor(layout.height * pct);
 
     // set the layout for the views, depending on the direction
-    if (dir == this.SLIDE_DOWN) {
+    if (dir == SC.SheetPane.SLIDE_DOWN) {
       target.adjust('top', 0-(layout.height-adjust));
-    } else if (dir == this.SLIDE_UP) {
+    } else if (dir == SC.SheetPane.SLIDE_UP) {
       target.adjust('top', 0-adjust);
     }
 
@@ -160,4 +190,18 @@ SC.SheetPane = SC.PanelPane.extend({
     target.updateLayout();
     return this;
   }
+});
+
+SC.SheetPane.mixin( /** @scope SC.SheetPane */ {
+  
+  ANIMATABLE_AVAILABLE: NO,
+  
+  // states for view animation
+  NO_VIEW: 'NO_VIEW',
+  ANIMATING: 'ANIMATING',
+  READY: 'READY',
+
+  SLIDE_DOWN: 'SLIDEDOWN',
+  SLIDE_UP: 'SLIDEUP'
+  
 });
