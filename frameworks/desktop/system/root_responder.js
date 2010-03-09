@@ -527,8 +527,10 @@ SC.RootResponder = SC.RootResponder.extend(
       //
       // However, doing this causes all sorts of bogus activate/deactivate
       // events in Internet Explorer
-      if (SC.browser.mozilla) window.focus();
-      if (SC.browser.mozilla) this.focus();
+      if (SC.browser.mozilla) {
+        window.focus();
+        this.focus();
+      }
 
       // First, save the click count. The click count resets if the mouse down
       // event occurs more than 200 ms later than the mouse up event or more
