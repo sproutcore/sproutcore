@@ -456,94 +456,132 @@ SC.RootResponder = SC.Object.extend({
   setup: function() {
     this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
   },
-  
+
+  /**
+    Called when the user first touches a view.
+
+    When this happens, we send the event up the view chain to see who is
+    interested in subscribing to future related touch events. A view may
+    respond with YES to get exclusive control, or may respond with
+    SC.MIXED_STATE to get a non-exclusive subscription.
+
+    @param {Event} evt the event
+    @returns {Boolean}
+  */
   touchstart: function(evt) {
     try {
       var view = this.targetViewForEvent(evt) ;
-      evt = this.convertTouchEvToMouseEv(evt);
-      view = this._touchView = this.sendEvent('touchStart', evt, view) ;
-      if (view && view.respondsTo('touchDragged')) this._touchCanDrag = YES ;
+
+      // Ensure we only have one pair of coordinates
+      evt = this.convertTouchEventToMouseEvent(evt);
+
+      this._touchViews = this.sendTouchEvent('touchStart', evt, view) ;
     } catch (e) {
-      console.log('Exception during touchStart: %@'.fmt(e)) ;
-      this._touchView = null ;
-      this._touchCanDrag = NO ;
+      SC.Logger.warn('Exception during touchStart: %@'.fmt(e)) ;
+      this._touchViews = null ;
       return NO ;
     }
+
     return view ? evt.hasCustomEventHandling : YES;
   },
 
-  
   touchmove: function(evt) {
     SC.RunLoop.begin();
     try {
-      evt = this.convertTouchEvToMouseEv(evt);
-      // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
-      // drags send their own events, e.g. drag[Moved|Entered|Exited]
-      if (this._drag) {
-        this._drag.tryToPerform('touchDragged', evt);
-      } else {
-        var lh = this._lastHovered || [] , nh = [] , exited, loc, len, 
-            view = this.targetViewForEvent(evt) ;
-        
-        // work up the view chain.  Notify of mouse entered and
-        // mouseMoved if implemented.
-        while(view && (view !== this)) {
+      evt = this.convertTouchEventToMouseEvent(evt);
+
+      var lh = this._lastHovered || [],
+          nh = [],
+          view = this.targetViewForEvent(evt),
+          exited, loc, len, touchViews, response;
+
+      // Walk up the view chain.
+      while (view && (view !== this)) {
           if (lh.indexOf(view) !== -1) {
-            view.tryToPerform('touchMoved', evt);
-            nh.push(view) ;
+              // We already sent a touchEntered event, so just send touchMoved
+              view.tryToPerform('touchMoved', evt);
+              nh.push(view);
           } else {
-            view.tryToPerform('touchEntered', evt);
-            nh.push(view) ;
+              // This is the first time seeing this view, so send touchEntered
+              view.tryToPerform('touchEntered', evt);
+              nh.push(view);
           }
-          
           view = view.get('nextResponder');
-        }
-        // now find those views last hovered over that were no longer found 
-        // in this chain and notify of mouseExited.
-        for(loc=0, len=lh.length; loc < len; loc++) {
-          view = lh[loc] ;
-          exited = view.respondsTo('touchExited') ;
+      }
+
+      // Now find those views last moved over that were no longer found
+      // in this chain and notify of touchExited.
+      for (loc = 0, len = lh.length; loc < len; loc++) {
+          view = lh[loc];
+          exited = view.respondsTo('touchExited');
           if (exited && !(nh.indexOf(view) !== -1)) {
-            view.tryToPerform('touchExited',evt);
+              view.tryToPerform('touchExited', evt);
           }
-        }
-        this._lastHovered = nh; 
-        
-        // also, if a touchView exists, call the touchDragged action, if 
-        // it exists.
-        if (this._touchView) this._touchView.tryToPerform('touchDragged', evt);
+      }
+      this._lastHovered = nh;
+
+      // Iterate through all of the views that requested notification of
+      // touchDragged events in touchstart
+      touchViews = this._touchViews;
+      len = touchViews.length;
+
+      for (loc = 0; loc < len; loc++) {
+          view = touchViews[loc];
+          if (view.respondsTo('touchDragged')) {
+              switch (view['touchDragged'](evt)) {
+                  // View has indicated that it wants exclusive control of
+                  // future touch events
+              case YES:
+                  // Notify other views that they will no longer be receiving
+                  // updates.
+                  this.cancelTouch(touchViews, view);
+                  // Set the touchViews array to only have this view as a member
+                  touchViews = null;
+                  this._touchViews = [view];
+                  break;
+                  // View has indicated it is no longer interested in receiving
+                  // touch events.
+              case NO:
+                  touchViews.removeObject(view);
+                  break;
+              }
+          }
       }
     } catch (e) {
-      throw e;
+      SC.Logger.warn('Exception during touchMove: %@'.fmt(e)) ;
     }
     SC.RunLoop.end();
-    return YES;
+    return NO;
   },
-  
+
   touchend: function(evt) {
     try {
       evt.cancel = NO ;
-      var handler = null, view = this._touchView ;
-      evt = this.convertTouchEvToMouseEv(evt);
-      
+      var handler = null, views = this._touchViews, idx, len, view ;
+      evt = this.convertTouchEventToMouseEvent(evt);
+
       // attempt the call only if there's a target.
       // don't want a touch end going to anyone unless they handled the 
       // touch start...
-      if (view) handler = this.sendEvent('touchEnd', evt, view) ;
-      
-      // try whoever's under the mouse if we haven't handle the mouse up yet
-      if (!handler) view = this.targetViewForEvent(evt) ;
-      
+      if (views) {
+        len = views.get('length');
+        for (idx=0; idx<len; idx++) {
+          view = views[idx];
+          if (view.respondsTo('touchEnd')) {
+            view['touchEnd'](evt);
+          }
+        }
+      }
       // cleanup
-      this._touchCanDrag = NO; this._touchView = null ;
+      this._touchViews = null ;
     } catch (e) {
-      console.log('Exception during touchEnd: %@'.fmt(e)) ;
-      this._touchCanDrag = NO; this._touchView = null ;
+      SC.Logger.warn('Exception during touchEnd: %@'.fmt(e)) ;
+      this._touchViews = null ;
       return NO ;
     }
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
-  
+
   /** @private
     Handle touch cancel event.  Works just like touch end except evt.cancel
     is set to YES.
@@ -552,8 +590,43 @@ SC.RootResponder = SC.Object.extend({
     evt.cancel = YES ;
     return this.touchend(evt);
   },
-  
-  convertTouchEvToMouseEv: function(ev){
+
+  /**
+    If multiple views were subscribed to touch events, sends a touchCancelled
+    event to all but the new, exclusive view. This is usually called when
+    a view asks for exclusive control by returning YES from a touchDragged
+    event.
+
+    @param {Array} views the array of views subscribed to touch events
+    @param {SC.View} newView the new view that is asking for exclusive control
+    @param {Event} evt the touch event
+    @private
+  */
+  cancelTouch: function(views, newView, evt) {
+    var view, idx, len;
+
+    len = views.get('length');
+    for (idx = 0; idx < len; idx++) {
+      view = views.objectAt(idx);
+
+      if (view !== newView) {
+        view.tryToPerform('touchCancelled', evt);
+      }
+    }
+  },
+
+  /**
+    Converts a multitouch event (where coordinates are stored in the touches
+    array) into a standard mouse event, where coordinates are stored in
+    pageX/pageY.
+
+    TODO: We should consider moving this into SC.Event.
+
+    @param {Event} event
+    @returns {Event} event the normalized event
+    @private
+  */
+  convertTouchEventToMouseEvent: function(ev){
     var touches = ev.changedTouches;
     if (touches && touches.length > 0) {
       var firstTouch = touches[0];
