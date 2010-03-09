@@ -25,12 +25,6 @@ var parent, child;
 */
 function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   
-  
-  // var layout = { right: 0.1, bottom: 0.1 };
-  // var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
-  // var with_f = { x: 0, y: 0, width: 190, height: 190 } ;
-  // var s = { bottom: '10%', right: '10%', top: 0, left: 0 } ;
-  
   // make sure we add null properties and convert numbers to 'XXpx' to style layout.
   var keys = 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight'.w();
   keys.forEach(function(key) {
@@ -274,15 +268,26 @@ test("layout {height, width} - assume top/left=0", function() {
   
 }) ;
 
-test("layout {right, bottom} - assume top/left=undefined", function() {
+test("layout {right, bottom} - assume top/left=0", function() {
 
   var layout = { right: 0.1, bottom: 0.1 };
   var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 0, y: 0, width: 190, height: 190 } ;
-  var s = { bottom: '10%', right: '10%', top: null, left: null } ;
+  var s = { bottom: '10%', right: '10%', top: 0, left: 0 } ;
   
   performLayoutTest(layout, no_f, s, with_f, s) ;
   
+}) ;
+
+test("layout {right, bottom, maxWidth, maxHeight} - assume top/left=null", function() {
+
+  var layout = { right: 0.1, bottom: 0.1, maxWidth: 10, maxHeight: 10 };
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
+  var with_f = { x: 0, y: 0, width: 190, height: 190 } ;
+  var s = { bottom: '10%', right: '10%', top: null, left: null, maxWidth: 10, maxHeight: 10 } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+
 }) ;
 
 test("layout {centerX, centerY} - assume width/height=0", function() {

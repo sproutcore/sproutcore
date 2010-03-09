@@ -2247,7 +2247,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lT = layout.top, 
         lB = layout.bottom, 
         lW = layout.width, 
-        lH = layout.height, 
+        lH = layout.height,
+        lMW = layout.maxWidth,
+        lMH = layout.maxHeight,
         lcX = layout.centerX, 
         lcY = layout.centerY;
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
@@ -2296,6 +2298,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.marginLeft = 0 ;
       
       if (SC.none(lW)) {
+        if (SC.none(lMW)) ret.left = 0;
         ret.width = null;
       } else {
         ret.left = null ;
@@ -2366,6 +2369,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if(SC.isPercentage(lB)) ret.bottom = (lB*100)+"%";
       else ret.bottom = Math.floor(lB) ;
       if (SC.none(lH)) {
+        if (SC.none(lMH)) ret.top = 0;
         ret.height = null ;
       } else {
         ret.top = null ;
