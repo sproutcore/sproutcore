@@ -455,7 +455,6 @@ SC.RootResponder = SC.Object.extend({
   */
   setup: function() {
     this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
-    SC.Event.add(window, 'touchmove', this, function(e){return false;});
   },
   
   touchstart: function(evt) {
