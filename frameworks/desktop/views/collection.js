@@ -2245,6 +2245,42 @@ SC.CollectionView = SC.View.extend(
     return YES ;
   },
   
+  // ..........................................................
+  // TOUCH EVENTS
+  //
+  touchStart: function(ev) {
+
+    // When the user presses the mouse down, we don't do much just yet.
+    // Instead, we just need to save a bunch of state about the mouse down
+    // so we can choose the right thing to do later.
+
+    // Toggle selection only triggers on mouse up.  Do nothing.
+    if (this.get('useToggleSelection')) return true;
+
+    // find the actual view the mouse was pressed down on.  This will call
+    // hitTest() on item views so they can implement non-square detection
+    // modes. -- once we have an item view, get its content object as well.
+    var itemView      = this.itemViewForEvent(ev),
+        content       = this.get('content'),
+        contentIndex  = itemView ? itemView.get('contentIndex') : -1,
+        info, anchor ;
+
+    // become first responder if possible.
+    this.becomeFirstResponder() ;
+    this.select(contentIndex, NO);
+
+    return SC.MIXED_STATE;
+  },
+
+  touchDragged: function(evt) {
+    this.select(null, NO);
+    return SC.MIXED_STATE;
+  },
+
+  touchCancelled: function(evt) {
+    this.select(null, NO);
+  },
+
   /** @private */
   _findSelectionExtendedByShift: function(sel, contentIndex) {
     
