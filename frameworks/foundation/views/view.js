@@ -2296,7 +2296,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.marginLeft = 0 ;
       
       if (SC.none(lW)) {
-        ret.left = 0;
         ret.width = null;
       } else {
         ret.left = null ;
@@ -2345,7 +2344,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // Y DIRECTION
     
-    // handle left aligned and left/right
+    // handle top aligned and left/right
     if (!SC.none(lT)) {
       if(SC.isPercentage(lT)) ret.top = (lT*100)+"%";
       else ret.top = Math.floor(lT);
@@ -2361,13 +2360,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
       ret.marginTop = 0 ;
       
-    // handle right aligned
+    // handle bottom aligned
     } else if (!SC.none(lB)) {
       ret.marginTop = 0 ;
       if(SC.isPercentage(lB)) ret.bottom = (lB*100)+"%";
       else ret.bottom = Math.floor(lB) ;
       if (SC.none(lH)) {
-        ret.top = 0;
         ret.height = null ;
       } else {
         ret.top = null ;
