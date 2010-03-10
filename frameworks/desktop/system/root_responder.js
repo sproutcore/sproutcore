@@ -550,6 +550,7 @@ SC.RootResponder = SC.RootResponder.extend(
       this._lastMouseDownY = evt.clientY ;
 
       var fr, view = this.targetViewForEvent(evt) ;
+      console.log('got view '+view.toString()+' for mousedown');
       // InlineTextField needs to loose firstResponder whenever you click outside
       // the view. This is a special case as textfields are not supposed to loose 
       // focus unless you click on a list, another textfield or an special
@@ -582,14 +583,15 @@ SC.RootResponder = SC.RootResponder.extend(
     sent.
   */
   mouseup: function(evt) {
-
+    this.targetViewForEvent(evt);
     try {
       if (this._drag) {
         this._drag.tryToPerform('mouseUp', evt) ;
         this._drag = null ;
       }
       
-      var handler = null, view = this._mouseDownView ;
+      var handler = null, view = this._mouseDownView,
+          targetView = this.targetViewForEvent(evt);
       this._lastMouseUpAt = Date.now() ;
       
       // record click count.
@@ -613,16 +615,15 @@ SC.RootResponder = SC.RootResponder.extend(
       
       // try whoever's under the mouse if we haven't handle the mouse up yet
       if (!handler) {
-        view = this.targetViewForEvent(evt) ;
       
         // try doubleClick
         if (this._clickCount === 2) {
-          handler = this.sendEvent('doubleClick', evt, view);
+          handler = this.sendEvent('doubleClick', evt, targetView);
         }
       
         // try singleClick
         if (!handler) {
-          handler = this.sendEvent('click', evt, view) ;
+          handler = this.sendEvent('click', evt, targetView) ;
         }
       }
       
