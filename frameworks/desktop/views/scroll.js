@@ -964,9 +964,15 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       SC.RunLoop.begin();
       content.notifyPropertyChange('frame');
       SC.RunLoop.end();
+
+      // Use accelerated drawing if the browser supports it
+      if (SC.browser.touch) {
+        var transform = 'translate3d(-'+horizontalScrollOffset+'px, -'+verticalScrollOffset+'px, 0)';
+        content.get('layer').style.webkitTransform = transform;
+      }
     }
 
-    if (container) {
+    if (container && !SC.browser.touch) {
       container = container.$()[0];
       
       if (container) {
