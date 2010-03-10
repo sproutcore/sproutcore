@@ -17,13 +17,21 @@ SC.designPage = SC.Page.create({
     }),
     
     viewList: SC.ScrollView.design({
-      layout: {left:0, right: 0, bottom: 0, height: 50},
-      hasVerticalScroller: NO,
+      layout: {left:0, right: 0, bottom: 0, height: 48},
+      hasHorizontalScroller: NO,
       contentView: SC.GridView.design({
+        rowHeight: 48,
+        columnWidth: 48,
         //contentBinding: 'SC.designsController',
+        delegate: SC.designsController,
         selectionBinding: 'SC.designsController.selection',
         contentValueKey: 'name',
+        isDropTarget: YES,
+        canEditContent: YES,
+        canReorderContent: YES,
+        canDeleteContent: YES,
         actOnSelect: YES,
+        targetIsInIFrame: YES,
         target: 'SC.designController',
         action: 'viewSelected'
       })
