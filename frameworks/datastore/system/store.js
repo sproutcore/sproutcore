@@ -653,7 +653,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (records) {
       for(storeKey in records) {
         if (!records.hasOwnProperty(storeKey)) continue ;
-        this._notifyRecordPropertyChange(storeKey, NO);
+        this._notifyRecordPropertyChange(parseInt(storeKey, 10), NO);
       }
     }
     
@@ -2348,7 +2348,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (isEnum) isMatch = recordType.contains(recType);
       else isMatch = recType === recordType;
       
-      if(isMatch && this.statuses[storeKey]) ret.push(parseInt(storeKey, 0));
+      if(isMatch && this.statuses[storeKey]) ret.push(parseInt(storeKey, 10));
     }
     
     return ret;
@@ -2367,7 +2367,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for(storeKey in this.statuses) {
       // if status is not empty
       if(this.statuses[storeKey] != SC.Record.EMPTY) {
-        ret.push(parseInt(storeKey,0));
+        ret.push(parseInt(storeKey, 10));
       }
     }
     
