@@ -37,7 +37,10 @@ SC.browser = (function() {
     /** non-zero if we are on a mac */
     mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
     
-    language: (navigator.language || navigator.browserLanguage).split('-', 1)[0]
+    language: (navigator.language || navigator.browserLanguage).split('-', 1)[0],
+
+    /** YES if the browser supports touch events, NO otherwise */
+    touch: ('createTouch' in document)
   };
   
   // Add more SC-like descriptions...
