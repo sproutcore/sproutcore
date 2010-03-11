@@ -968,6 +968,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
     if (container) {
       container = container.$()[0];
+      
       if (container) {
         if (verticalScrollOffset !== this._verticalScrollOffset) {
           container.scrollTop = verticalScrollOffset;
