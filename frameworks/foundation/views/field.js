@@ -34,9 +34,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   isTextArea: NO,
 
-
   _field_isMouseDown: NO,
-  
+
   /**
     The raw value of the field itself.  This is computed from the 'value'
     property by passing it through any validator you might have set.  This is 
@@ -46,7 +45,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */  
   fieldValue: function() {
     var value = this.get('value');
-    if (SC.typeOf(value) === SC.T_ERROR) value = value.get('value');
+    if (SC.typeOf(value) === SC.T_ERROR) value = value.get('errorValue');
     return this.fieldValueForObject(value);
   }.property('value', 'validator').cacheable(),
 
@@ -127,7 +126,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     var fieldValue = this.getFieldValue();
     var value = this.objectForFieldValue(fieldValue, partialChange);
     this.setIfChanged('value', value);
-    
+
+
+    // ======= [Old code -- left here for concept reminders. Basic validation
+    // API works without it] =======
+
     // validate value if needed...
     
     // this.notifyPropertyChange('fieldValue');
@@ -165,7 +168,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   _field_valueDidChange: function() {
     this.setFieldValue(this.get('fieldValue'));
-  }.observes('value'),
+  }.observes('fieldValue'),
 
   /** @private
     after the layer is created, set the field value and observe events
@@ -174,13 +177,13 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     this.setFieldValue(this.get('fieldValue'));
     SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange) ;
   },
-  
+
   /** @private
     after the layer is append to the doc, set the field value and observe events
     only for textarea.
   */
   didAppendToDocument: function() {
-    if(this.get('isTextArea')){
+    if (this.get('isTextArea')) {
       this.setFieldValue(this.get('fieldValue'));
       SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange) ;
     }
@@ -189,27 +192,10 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   willDestroyLayer: function() {
     SC.Event.remove(this.$input(), 'change', this, this._field_fieldValueDidChange); 
   },
-
-  /** @private
-    when the layer is updated, go ahead and call render like normal.  this 
-    will allow normal CSS class + style updates.  by then also update field
-    value manually.
-    
-    Most subclasses should not regenerate their contents unless necessary.
-  */
-  updateLayer: function() {
-    sc_super();
-    
-    // only change field value if it has changed from the last time we 
-    // set it.  This allows the browser-native field value to change without
-    // this method interfering with it.
-    //var fieldValue = this.get('fieldValue');
-    //this.setFieldValue(fieldValue);
-  },
   
   // ACTIONS
   // You generally do not need to override these but they may be used.
-  
+
   /**
     Called to perform validation on the field just before the form 
     is submitted.  If you have a validator attached, this will get the
@@ -275,7 +261,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     // handle tab key
     if (evt.which === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      if(view) view.becomeFirstResponder();
+      if (view) view.becomeFirstResponder();
       else evt.allowDefault();
       return YES ; // handled
     }
@@ -311,18 +297,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   willLoseKeyResponderTo: function(responder) {
     if (this._isFocused) this._isFocused = NO ;
   },
-  
-  
-  // called whenever the value is set on the object.  Will set the value
-  // on the field if the value is changed.
-  // valueDidChange: function() {
-  //   var value = this.get('value') ;
-  //   var isError = SC.typeOf(value) === SC.T_ERROR ;
-  //   if (!isError && (value !== this._field_getFieldValue())) {
-  //     this._field_setFieldValue(value) ;
-  //   } 
-  // }.observes('value'),
-  
+    
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.
   _field_setFieldValue: function(newValue) {
@@ -337,10 +312,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   _field_getFieldValue: function() {
     var ret = this.getFieldValue() ;
-    if (this.objectForFieldValue) ret=this.objectForFieldValue(ret);
+    if (this.objectForFieldValue) ret = this.objectForFieldValue(ret);
     return ret ;
   }
   
-}) ;
-
+});
 

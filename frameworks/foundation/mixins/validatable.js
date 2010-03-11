@@ -167,12 +167,12 @@ SC.Validatable = {
   _validatable_displayObserver: function() {
     this.displayDidChange();
   }.observes('isValid'),
-  
+
   /** @private */
-  updateLayerMixin: function(context) {
+  renderMixin: function(context) {
     context.setClass('invalid', !this.get('isValid'));
   },
-  
+
   // invoked whenever the attached validator changes.
   _validatable_validatorDidChange: function() {
     var form = this.get('ownerForm') ;

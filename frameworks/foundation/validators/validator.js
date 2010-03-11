@@ -88,7 +88,10 @@ SC.Validator = SC.Object.extend(
   /**
     Validate the field value.  
     
-    You can implement standard behavior for your validator by using the validate() and validateError() methods.  validate() should return NO if the field is not valid, YES otherwise.  If you return NO from this method, then the validateError() method will be called so you can generate an error object describing the specific problem.
+    You can implement standard behavior for your validator by using the validate()
+    and validateError() methods.  validate() should return NO if the field is not
+    valid, YES otherwise.  If you return NO from this method, then the validateError()
+    method will be called so you can generate an error object describing the specific problem.
 
     @param {SC.FormView} form the form this view belongs to
     @param {SC.View} field the field to validate.  Responds to fieldValue.
@@ -99,9 +102,13 @@ SC.Validator = SC.Object.extend(
   /**
     Returns an error object if the field is invalid.
   
-    This is the other standard validator method that can be used to impement basic validation.  Return an error object explaining why the field is not valid.  It will only be called if validate() returned NO.
+    This is the other standard validator method that can be used to impement basic validation.
+    Return an error object explaining why the field is not valid.  It will only be called if
+    validate() returned NO.
     
-    The default implementation of htis method returns a generic error message with the loc string "Invalid.Generate({fieldValue})".  You can simply define this loc string in strings.js if you prefer or you can override this method to provide a more specific error message.
+    The default implementation of htis method returns a generic error message with the loc
+    string "Invalid.Generate({fieldValue})".  You can simply define this loc string in
+    strings.js if you prefer or you can override this method to provide a more specific error message.
   
     @param {SC.FormView} form the form this view belongs to
     @param {SC.View} field the field to validate.  Responds to fieldValue.
@@ -120,9 +127,12 @@ SC.Validator = SC.Object.extend(
   /**
     Invoked just before the user ends editing of the field.
 
-    This is a primitive validation method.  You can implement the two higher-level methods (validate() and validateError()) if you prefer.
+    This is a primitive validation method.  You can implement the two higher-level
+    methods (validate() and validateError()) if you prefer.
     
-    The default implementation calls your validate() method and then validateError() if valiate() returns NO.  This method should return SC.VALIDATE_OK if validation succeeded or an error object if it fails.
+    The default implementation calls your validate() method and then validateError()
+    if valiate() returns NO.  This method should return SC.VALIDATE_OK if validation
+    succeeded or an error object if it fails.
   
     @param {SC.FormView} form the form for the field
     @param {SC.View} field the field to validate
