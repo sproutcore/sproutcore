@@ -968,15 +968,16 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
     if (container) {
       container = container.$()[0];
+      if (container) {
+        if (verticalScrollOffset !== this._verticalScrollOffset) {
+          container.scrollTop = verticalScrollOffset;
+          this._verticalScrollOffset = verticalScrollOffset;
+        }
 
-      if (verticalScrollOffset !== this._verticalScrollOffset) {
-        container.scrollTop = verticalScrollOffset;
-        this._verticalScrollOffset = verticalScrollOffset;
-      }
-
-      if (horizontalScrollOffset !== this._horizontalScrollOffset) {
-        container.scrollLeft = horizontalScrollOffset;
-        this._horizontalScrollOffset = horizontalScrollOffset;
+        if (horizontalScrollOffset !== this._horizontalScrollOffset) {
+          container.scrollLeft = horizontalScrollOffset;
+          this._horizontalScrollOffset = horizontalScrollOffset;
+        }
       }
     }
   },
