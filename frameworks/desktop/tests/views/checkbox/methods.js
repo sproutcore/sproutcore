@@ -34,10 +34,9 @@ module("SC.Checkbox", {
 test("renders an input tag with appropriate attributes", function() {
   equals(view.get('value'), YES, 'precon - value should be YES');
 
-  var q = Q$('input', view.get('layer'));
-  equals(q.attr('type'), 'checkbox', 'should have type=checkbox');
-  equals(q.attr('name'), SC.guidFor(view), 'should have name=view_guid');
-  equals(q.attr('checked'), YES, 'should be checked');
+  var q = view.$();
+  equals(q.attr('role'), 'checkbox', 'should have type=checkbox');
+  equals(q.attr('aria-checked'), 'true', 'should be checked');
 });
 
 test("should have span with title inside", function() {
@@ -80,7 +79,7 @@ test("isSelected should alter sel classname and sync with value property", funct
   
   ok(!view.get('isSelected'), 'isSelected should now be NO');
   ok(!view.$().hasClass('sel'), 'should no longer have sel class');
-  ok(!view.$('input').attr('checked'), 'input should not be checked');
+  equals(view.$().attr('aria-checked'), 'false', 'input should not be checked');
   
   // update isSelected -- make sure it edits the value
   SC.RunLoop.begin();
@@ -89,13 +88,14 @@ test("isSelected should alter sel classname and sync with value property", funct
   
   ok(view.get('isSelected'), 'isSelected should match value');
   ok(view.$().hasClass('sel'), 'should have sel class');
-  ok(view.$('input').attr('checked'), 'input should be checked');
+  equals(view.$().attr('aria-checked'), 'true', 'input should be checked');
 });
 
 test("clicking on the checkbox will change toggle the value", function() {
 
   ok(view.get('value'), 'precond - value should be YES');
-  view.$('input').get(0).click();
+  view.mouseDown();
+  view.mouseUp();
   ok(!view.get('value'), 'value should now be NO');
 });
 
@@ -123,10 +123,9 @@ test("isEnabled=NO should add disabled attr to input", function() {
   view.set('isEnabled', NO);
   SC.RunLoop.end();
   
-  ok(view.$input().attr('disabled'), 'should have disabled attr');
-  
   ok(view.get('value'), 'precond - value should be true');
-  view.$input().get(0).click();
+  view.mouseDown();
+  view.mouseUp();
   ok(view.get('value'), 'value should not change when clicked');
 });
 

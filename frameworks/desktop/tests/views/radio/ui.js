@@ -70,19 +70,19 @@ test("basic", function() {
   
   ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   
-  var radioButtons = view.$('input');
+  var radioButtons = view.$('.sc-radio-button');
   equals(radioButtons.length, 3, 'number of radio buttons should be 3');
   
   var i = 0;
   radioButtons.forEach(function(radioInput) {
     var theInput = SC.$(radioInput),
-      idx = parseInt(theInput.val(),0),
+      idx = parseInt(theInput.attr('index'),0),
       buttonValue = theInput.attr('value');
     
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
     
-    ok(!theInput.attr('checked'), 'radio button #%@ should not be checked'.fmt(idx));
-    ok(!theInput.attr('disabled'), 'radio button #%@ should not be disabled'.fmt(idx));
+    equals(theInput.attr('aria-checked'), 'false', 'radio button #%@ should not be checked'.fmt(idx));
+    ok(!theInput.hasClass('disabled'), 'radio button #%@ should not be disabled'.fmt(idx));
     
     i++;
   });
@@ -104,23 +104,23 @@ test("checked", function() {
   
   ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   
-  var radioButtons = view.$('input');
+  var radioButtons = view.$('.sc-radio-button');
   equals(radioButtons.length, 3, 'number of radio buttons should be 3');
   
   var i = 0;
   radioButtons.forEach(function(radioInput) {
     var theInput = SC.$(radioInput),
-      idx = parseInt(theInput.val(),0),
-      buttonValue = theInput.attr('value');
+        idx = parseInt(theInput.attr('index'),0),
+        buttonValue = theInput.attr('value');
     
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
     if(idx===0) {
-      ok(theInput.attr('checked'), 'radio button #%@ should be checked'.fmt(idx));
+      equals(theInput.attr('aria-checked'), 'true', 'radio button #%@ should be checked'.fmt(idx));
     } else {
-      ok(!theInput.attr('checked'), 'radio button #%@ should not be checked'.fmt(idx));
+      equals(theInput.attr('aria-checked'), 'false', 'radio button #%@ should not be checked'.fmt(idx));
     }
     
-    ok(!theInput.attr('disabled'), 'radio button #%@ should not be disabled'.fmt(idx));
+    ok(!theInput.hasClass('disabled'), 'radio button #%@ should not be disabled'.fmt(idx));
     i++;
   });
   
@@ -140,18 +140,18 @@ test("disabled", function() {
   
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   
-  var radioButtons = view.$('input');
+  var radioButtons = view.$('.sc-radio-button');
   equals(radioButtons.length, 3, 'number of radio buttons should be 3');
   
   var i = 0;
   radioButtons.forEach(function(radioInput) {
     var theInput = SC.$(radioInput),
-      idx = parseInt(theInput.val(),0),
+      idx = parseInt(theInput.attr('index'),0),
       buttonValue = theInput.attr('value');
     
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
-    ok(!theInput.attr('checked'), 'radio button #%@ should not be checked'.fmt(idx));
-    ok(theInput.attr('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
+    equals(theInput.attr('aria-checked'), 'false', 'radio button #%@ should not be checked'.fmt(idx));
+    ok(!theInput.hasClass('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
     i++;
   });
   
@@ -171,7 +171,7 @@ test("enabled first", function() {
   
   ok(!view.$().hasClass('disabled'), 'should have disabled class');
   
-  var radioButtons = view.$('input');
+  var radioButtons = view.$('.sc-radio-button');
   equals(radioButtons.length, 3, 'number of radio buttons should be 3');
   SC.RunLoop.begin();
   view.set('isEnabled', NO);
@@ -179,11 +179,11 @@ test("enabled first", function() {
   var i = 0;
   radioButtons.forEach(function(radioInput) {
     var theInput = SC.$(radioInput),
-      idx = parseInt(theInput.val(),0),
+      idx = parseInt(theInput.attr('index'),0),
       buttonValue = theInput.attr('value');
       
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
-    ok(!theInput.attr('checked'), 'radio button #%@ should not be checked'.fmt(idx));
+    ok(theInput.attr('aria-checked'), 'false', 'radio button #%@ should not be checked'.fmt(idx));
       ok(theInput.attr('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
     i++;
   });

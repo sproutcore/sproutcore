@@ -18,7 +18,7 @@
   @extends SC.FieldView
   @since SproutCore 1.0
 */
-SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
+SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   /** @scope SC.CheckboxView.prototype */ {
 
   classNames: ['sc-checkbox-view'],
@@ -35,7 +35,11 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   
 
   render: function(context, firstTime) {
-    var dt, elem ;
+    var dt, elem,
+        value = this.get('value'),
+        ariaValue = value === SC.MIXED_MODE ? 
+                'mixed' : (value === this.get('toggleOnValue') ? 
+                    'true': 'false');
     
     // add checkbox -- set name to view guid to separate it from others
     if (firstTime) {
@@ -43,11 +47,11 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
           disabled = this.get('isEnabled') ? '' : 'disabled="disabled"',
           guid = SC.guidFor(this);
       
+      context.attr('role', 'checkbox');
       dt = this._field_currentDisplayTitle = this.get('displayTitle');
 
       if(SC.browser.msie) context.attr('for', guid);
-      context.push('<span class="button" ></span>'+
-                  '<input type="checkbox" id="'+guid+'" name="'+guid+'" '+disabled+' />');
+      context.push('<span class="button" ></span>');
       if(this.get('needsEllipsis')){
         context.push('<span class="label ellipsis">', dt, '</span>');
       }else{
@@ -59,80 +63,36 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     // actually search for and update the displayTitle.
     } else {
       
-      if (elem = this.$input()[0]) {
-        if (this.get('isEnabled')) elem.disabled=NO;
-        else elem.disabled=YES;
-        elem = null ; // avoid memory leaks
-      }
-      
       dt = this.get('displayTitle');
       if (dt !== this._field_currentDisplayTitle) {
         this._field_currentDisplayTitle = dt;
         this.$('span.label').text(dt);
       }
     }
+    context.attr('aria-checked', ariaValue);
   },
   
-  // ..........................................
-  // SC.FIELD SUPPORT
-  //
-
-  /** @private - return the input tag */
-  $input: function() { return this.$('input'); },
-
-  /** @private - get the checked value from the input tag.  If the value is
-    unchecked and the last value set was mixed, then return mixed.  This
-    allows mixed states to remain unchanged. */
-  getFieldValue: function() { 
-    var ret = this.$input().attr('checked'); 
-    if (ret) {
-      this._lastFieldValue = null; // clear last field value since it changed
-      
-    // possibly return mixed state if that was the last value set and the 
-    // current checked value is still empty.
-    } else {
-      if (this._lastFieldValue === SC.MIXED_STATE) ret = SC.MIXED_STATE ;
-    }
-    return ret ;
-  },
-
-  /** @private - set the checked value on the input tag.  If the value is 
-    mixed, treat that as unchecked and save the value.  This way the mixed 
-    state can be retained.
-  */
-  setFieldValue: function(v) { 
-    this._lastFieldValue = v; 
-    this.$input().attr('checked', (v === SC.MIXED_STATE) ? NO : !!v); 
-  },
-  
-  /** @private - Converts the field value to the toggleOnValue or mixed */
-  fieldValueForObject: function(obj) {
-    return this.computeIsSelectedForValue(obj) ;
-  },
-
-  /** @private - Converts the field value to the toggleOffValue.  If the
-    value is MIXED_STATE, always return the current value */
-  objectForFieldValue: function(v) {
-    var ret = (v === SC.MIXED_STATE) ? this.get('value') : 
-      (!!v) ? this.get('toggleOnValue') : this.get('toggleOffValue'); 
-      return ret ;
-  },
-  
-  
-  didCreateLayer: function() {
-    this.setFieldValue(this.get('fieldValue'));
-    SC.Event.add(this.$input()[0], 'click', this, this._field_fieldValueDidChange) ;
-    SC.Event.add(this.$('.label')[0], 'click', this, this._field_fieldValueDidChange) ;
-  },
-  
-  willDestroyLayer: function() {
-    SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
-    SC.Event.remove(this.$('.label')[0], 'click', this, this._field_fieldValueDidChange) ;
-  },
   
   mouseDown: function(evt) {
+    if(!this.get('isEnabled')) return YES;
     this.set('isActive', YES);
     this._field_isMouseDown = YES;
+    return YES;
+  },
+  
+  mouseUp: function(evt) {
+    if(!this.get('isEnabled')) return YES;
+    var val = this.get('value');
+    if (val === this.get('toggleOnValue')) {
+      this.$().attr('aria-checked', 'false');
+      this.set('value', this.get('toggleOffValue'));
+    }
+    else {
+      this.$().attr('aria-checked', 'true');
+      this.set('value', this.get('toggleOnValue'));
+    }
+    this.set('isActive', NO);
+    this._field_isMouseDown = NO;
     return YES;
   }
     

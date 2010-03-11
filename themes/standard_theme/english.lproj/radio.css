@@ -20,18 +20,6 @@
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -776px;
 }
 
-.sc-theme .sc-radio-view .sc-radio-button input {
-	width: 10px;
-	height: 10px;
-  position: absolute;
-	margin-left: -20px;
-	opacity: 0;
-	outline:0px;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
-  -moz-opacity:0;
-}
-
 .sc-theme .sc-radio-view.sc-layout-vertical .sc-radio-button {
 	padding-left: 18px;
 	position: relative ;
@@ -49,13 +37,6 @@
 	top: 0;
 }
 
-.sc-theme .sc-radio-view.sc-layout-vertical .sc-radio-button input {
-	position: absolute ;
-	margin: 0;
-	left: 2px;
-	top: 1px;
-}
-
 
 .sc-theme .sc-radio-view.sc-layout-horizontal .sc-radio-button span.button {
 	position: relative ;
@@ -63,16 +44,6 @@
 	left: 0;
 	top: 0;
 	display: inline-block;
-}
-
-.sc-theme .sc-radio-view.sc-layout-horizontal .sc-radio-button input {
-	position: relative ;
-	left: 2px;
-	top: 1px;
-	display: block;
-	width:0px;
-	height:0px;
-	padding:0px;
 }
 
 

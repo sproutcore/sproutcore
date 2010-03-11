@@ -50,10 +50,9 @@ test("basic", function() {
   ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   ok(!view.$().hasClass('sel'), 'should not have sel class');
 
-  var input = view.$('input');
-  ok(!input.attr('checked'), 'input should not be checked');
-  ok(!input.attr('disabled'), 'input should not be disabled');
-
+  var input = view.$();
+  equals(input.attr('aria-checked'), 'false',  'input should not be checked');
+  
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
@@ -63,10 +62,9 @@ test("selected", function() {
   ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   ok(view.$().hasClass('sel'), 'should have sel class');
 
-  var input = view.$('input');
-  ok(input.attr('checked'), 'input should be checked');
-  ok(!input.attr('disabled'), 'input should not be disabled');
-
+  var input = view.$();
+  equals(input.attr('aria-checked'), 'true','input should be checked');
+  
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
@@ -76,10 +74,9 @@ test("disabled", function() {
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   ok(!view.$().hasClass('sel'), 'should not have sel class');
 
-  var input = view.$('input');
-  ok(!input.attr('checked'), 'input should not be checked');
-  ok(input.attr('disabled'), 'input should be disabled');
-
+  var input = view.$();
+  equals(input.attr('aria-checked'), 'false','input should not be checked');
+  
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
@@ -89,10 +86,9 @@ test("disabled - selected", function() {
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$().hasClass('sel'), 'should have sel class');
 
-  var input = view.$('input');
-  ok(input.attr('checked'), 'input should be checked');
-  ok(input.attr('disabled'), 'input should be disabled');
-
+  var input = view.$();
+  equals(input.attr('aria-checked'), 'true','input should be checked');
+  
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });

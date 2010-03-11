@@ -31,22 +31,6 @@
 
 /* @group Checkbox Image */
 
-/* Set the opacity of the input to 0 so it will take hits but not appear. */
-.sc-theme .sc-checkbox-view input {
-	width: 1px;
-	height: 1px;
-	top:1px; 
-	left: 1px;
-	position: relative;
-	opacity:0;
-	vertical-align: top ;
-	margin: 0;
-	margin-right: 3px;
-	outline:0px;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
-	-moz-opacity:0;
-	}
 
 .sc-theme .sc-checkbox-view span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -468px;
