@@ -288,24 +288,10 @@ SC.Drag = SC.Object.extend(
     this.set('location', loc) ;
     
     var dv = this.dragView ;
-    var pane = dv.get('pane') ;
     var pv = dv.get('parentView') ;
-    var clippingFrame = dv.get('clippingFrame') ;
+
     // convert to global cooridinates
-    //var f = pv ? pv.convertFrameToView(clippingFrame, null) : clippingFrame ;
-    var f = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
-    var pf = pane ? pane.get('frame') : {x:0, y: 0};
-    
-    dv.adjust({
-      top: f.y + pf.y,
-      left: f.x + pf.x,
-      width: f.width,
-      height: f.height
-    });
-    //get frame in global cords after pane adjustment
-    var dvf = dv.get('frame');
-    
-    var origin = f;//pv.convertFrameToView(dv.get('frame'), null) ;
+    var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
     
     if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
     else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
@@ -461,7 +447,13 @@ SC.Drag = SC.Object.extend(
       didCreateLayer: function() {
         if (that.dragView) {
           var layer = that.dragView.get('layer') ;
-          if (layer) this.get('layer').appendChild(layer.cloneNode(true)) ;
+          if (layer) {
+            layer = layer.cloneNode(true) ;
+            // Make sure the layer we put in the ghostView wrapper is not displaced.
+            layer.style.top = "0px" ;
+            layer.style.left = "0px" ;
+            this.get('layer').appendChild(layer) ;
+          }
         }
       }
     });
