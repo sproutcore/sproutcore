@@ -251,7 +251,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
   
   /** @private deletes an entry from the image queue, descheduling also */
   _deleteEntry: function(entry) {
-    this._unscheduleEntry(entry) ;
+    this._unscheduleImageEntry(entry) ;
     delete this._images[entry.url];    
   },
   
@@ -302,16 +302,16 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
 
     // if image is already in background queue, but now needs to be
     // foreground, simply remove from background queue....
-    if ((entry.status===this.IMAGE_QUEUE) && !isBackgroundFlag && entry.isBackground) {
+    if ((entry.status===this.IMAGE_QUEUED) && !isBackgroundFlag && entry.isBackground) {
       background[background.indexOf(entry)] = null ;
       entry.status = this.IMAGE_WAITING ;
     }
     
     // if image is not in queue already, add to queue.
-    if (entry.status!==this.IMAGE_QUEUE) {
+    if (entry.status!==this.IMAGE_QUEUED) {
       var queue = (isBackgroundFlag) ? background : foreground ;
       queue.push(entry);
-      entry.status = this.IMAGE_QUEUE ;
+      entry.status = this.IMAGE_QUEUED ;
       entry.isBackground = isBackgroundFlag ;
     }
     
@@ -327,7 +327,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
   */
   _unscheduleImageEntry: function(entry) {
     // if entry is not queued, do nothing
-    if (entry.status !== this.IMAGE_QUEUE) return this ;
+    if (entry.status !== this.IMAGE_QUEUED) return this ;
     
     var queue = entry.isBackground ? this._backgroundQueue : this._foregroundQueue ;
     queue[queue.indexOf(entry)] = null; 
