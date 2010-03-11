@@ -501,6 +501,17 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   willLoseKeyResponderTo: function(responder) {
     if (this._isFocused) this._isFocused = NO ;
+  },
+  
+  didAppendToDocument: function() {
+    if(SC.browser.msie===7){
+      var elem = this.$();
+      if(elem && elem[0]){
+        var w = elem[0].clientWidth,
+        padding = parseInt(elem.css('paddingRight'),0);
+        this.$('.sc-button-label').css('minWidth', w-(padding*2)+'px');
+      }
+    }
   }
   
 }) ;
