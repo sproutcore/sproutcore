@@ -362,20 +362,9 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.View} view instance or null
   */
   targetViewForEvent: function(evt) {
-    var target, elem;
-    target = elem = evt.target;
-
-    if (target === this._touchInterceptElement) {
-      // elem.style.display = 'none';
-      elem.style.display = 'none';
-      target = document.elementFromPoint(evt.touches[0].pageX, evt.touches[0].pageY);
-      evt.target = target;
-      elem.style.display = 'block';
-    }
-
-    return target ? SC.$(target).view()[0] : null ;
+    return evt.target ? SC.$(evt.target).view()[0] : null ;
   },
-  
+
   /**
     Attempts to send an event down the responder chain.  This method will 
     invoke the sendEvent() method on either the keyPane or on the pane owning 
@@ -467,18 +456,20 @@ SC.RootResponder = SC.Object.extend({
   setup: function() {
     this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
     
-    var elem = document.createElement('div');
-    elem.id = 'sc-touch-intercept';
-    elem.style.position = 'absolute';
-    elem.style.top = '0px';
-    elem.style.left = '0px';
-    elem.style.bottom = '0px';
-    elem.style.right = '0px';
-    elem.style.zIndex = 999;
-    
-    document.body.appendChild(elem);
-    this._touchInterceptElement = elem;
-    elem = null;
+    if (SC.browser.touch) {
+      var elem = document.createElement('div');
+      elem.id = 'sc-touch-intercept';
+      elem.style.position = 'absolute';
+      elem.style.top = '0px';
+      elem.style.left = '0px';
+      elem.style.bottom = '0px';
+      elem.style.right = '0px';
+      elem.style.zIndex = 999;
+
+      document.body.appendChild(elem);
+      this._touchInterceptElement = elem;
+      elem = null;
+    }
   },
 
   /**
@@ -493,12 +484,8 @@ SC.RootResponder = SC.Object.extend({
     @returns {Boolean}
   */
   touchstart: function(evt) {
-    console.log('target classnames: '+evt.target.className);
     try {
       var view = this.targetViewForEvent(evt) ;
-      console.log('x,y classnames: '+evt.target.className);
-      // Ensure we only have one pair of coordinates
-      evt = this.convertTouchEventToMouseEvent(evt);
 
       this._touchViews = this.sendTouchEvent('touchStart', evt, view) ;
     } catch (e) {
@@ -513,8 +500,6 @@ SC.RootResponder = SC.Object.extend({
   touchmove: function(evt) {
     SC.RunLoop.begin();
     try {
-      evt = this.convertTouchEventToMouseEvent(evt);
-
       var lh = this._lastHovered || [],
           nh = [],
           view = this.targetViewForEvent(evt),
@@ -583,8 +568,6 @@ SC.RootResponder = SC.Object.extend({
     try {
       evt.cancel = NO ;
       var handler = null, views = this._touchViews, idx, len, view ;
-      this.targetViewForEvent(evt);
-      // evt = this.convertTouchEventToMouseEvent(evt);
 
       // attempt the call only if there's a target.
       // don't want a touch end going to anyone unless they handled the 
@@ -639,33 +622,7 @@ SC.RootResponder = SC.Object.extend({
         view.tryToPerform('touchCancelled', evt);
       }
     }
-  },
-
-  /**
-    Converts a multitouch event (where coordinates are stored in the touches
-    array) into a standard mouse event, where coordinates are stored in
-    pageX/pageY.
-
-    TODO: We should consider moving this into SC.Event.
-
-    @param {Event} event
-    @returns {Event} event the normalized event
-    @private
-  */
-  convertTouchEventToMouseEvent: function(ev){
-    var touches = ev.changedTouches;
-    if (touches && touches.length > 0) {
-      var firstTouch = touches[0];
-      ev.pageX = firstTouch.pageX;
-      ev.pageY = firstTouch.pageY;
-    }
-    else{
-      ev.pageX = 0;
-      ev.pageY = 0;
-    }
-  return ev;
   }
-
 });
 
 /* 
