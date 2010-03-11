@@ -5,6 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+// Constants
+SC.WELL_CONTAINER_PADDING=15;
+
 /** @class
 
   A WellView is a ContainerView with a border. It's useful when you want to
@@ -25,7 +28,9 @@ SC.WellView = SC.ContainerView.extend(
     Layout for the content of the container view.
     @property {Object}
   */
-  contentLayout: {top:10, bottom:10, left:10, right:10},
+  contentLayout: {
+    top:SC.WELL_CONTAINER_PADDING, bottom:SC.WELL_CONTAINER_PADDING,
+    left:SC.WELL_CONTAINER_PADDING, right:SC.WELL_CONTAINER_PADDING},
   
   
   /**
