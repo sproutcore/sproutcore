@@ -550,7 +550,7 @@ SC.RootResponder = SC.RootResponder.extend(
       this._lastMouseDownY = evt.clientY ;
 
       var fr, view = this.targetViewForEvent(evt) ;
-      console.log('got view '+view.toString()+' for mousedown');
+
       // InlineTextField needs to loose firstResponder whenever you click outside
       // the view. This is a special case as textfields are not supposed to loose 
       // focus unless you click on a list, another textfield or an special
