@@ -272,7 +272,13 @@ SC.Drag = SC.Object.extend(
   
   /** @private required by autoscroll */
   _dragInProgress: YES,
-  
+
+  /** @private
+    Stores the initial visibililty state of the dragView so it can be restored
+    after the drag
+  */
+  _dragViewWasVisible: null,
+
   /** @private
     This will actually start the drag process. Called by SC.Drag.start().
   */
@@ -292,7 +298,13 @@ SC.Drag = SC.Object.extend(
 
     // convert to global cooridinates
     var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
-    
+
+    if (this.ghost) {
+      // Hide the dragView
+      this._dragViewWasVisible = dv.get('isVisible') ;
+      dv.set('isVisible', NO) ;
+    }
+
     if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
     else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
     
@@ -423,7 +435,13 @@ SC.Drag = SC.Object.extend(
 
     // destroy the ghost view
     this._destroyGhostView() ;
-    
+
+    if (this.ghost) {
+      // Show the dragView if it was visible
+      if (this._dragViewWasVisible) this.dragView.set('isVisible', YES) ;
+      this._dragViewWasVisible = null;
+    }
+
     // notify the source that everything has completed
     var source = this.source ;
     if (source && source.dragDidEnd) source.dragDidEnd(this, loc, op) ;
