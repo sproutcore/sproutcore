@@ -256,6 +256,8 @@ SC.Response = SC.Object.extend(
       var req = this.get('request');
       var source = req ? req.get('source') : null;
     
+      SC.RunLoop.begin();
+    
       // invoke the source, giving a chance to fixup the reponse or (more 
       // likely) cancel the request.
       if (source && source.willReceive) source.willReceive(req, this);
@@ -272,6 +274,8 @@ SC.Response = SC.Object.extend(
 
       // notify listeners if we weren't cancelled.
       if (!this.get('isCancelled')) this.notify();
+
+      SC.RunLoop.end();
     }
     
     // no matter what, remove from inflight queue
@@ -353,11 +357,9 @@ SC.Response = SC.Object.extend(
         
     if (!listeners) return this ; // nothing to do
     
-    SC.RunLoop.begin();
     handled = this._notifyListener(listeners, status);
     if (!handled) handled = this._notifyListener(listeners, baseStat);
     if (!handled) handled = this._notifyListener(listeners, 0);
-    SC.RunLoop.end();
     
     return this ;
   },
