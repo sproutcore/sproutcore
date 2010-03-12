@@ -183,18 +183,16 @@ SC.RadioView = SC.View.extend(SC.Control,
           sel = NO;
         }
         selectionStateClassNames = this._getSelectionStateClassNames(item, sel, value, isArray, false);
-        disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="true" ' : '';
-        
           
         labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
         
-        context.push('<label class="sc-radio-button ', 
+        context.push('<div class="sc-radio-button ', 
                     selectionStateClassNames, '" ', 
                     'aria-checked="', sel ? 'true':'false','" ',
                     'role="radio"' , ' index="', idx,'">',
                     '<span class="button"></span>',
                     '<span class="sc-button-label">', 
-                    icon, labelText, '</span></label>');
+                    icon, labelText, '</span></div>');
       }
       
     }
@@ -207,7 +205,6 @@ SC.RadioView = SC.View.extend(SC.Control,
         idx = parseInt(button.attr('index'),0);
         item = (idx>=0) ? items[idx] : null;
 
-        button.attr('disabled', (!item[2]) || (!this.get('isEnabled')) ? 'true' : 'false');
         if (item) {
           sel = (isArray) ? (value.indexOf(item[1])>=0) : (value===item[1]);
         } else {
@@ -325,7 +322,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     if (!target) return NO;
 
     target = this.$(target);
-    if(target.attr('disabled')!='false') return YES;
+    if(target.hasClass('disabled')) return YES;
     target.addClass('active');
     this._activeRadioButton = target;
 
@@ -354,7 +351,7 @@ SC.RadioView = SC.View.extend(SC.Control,
       target = target.parentNode;
     }
     target = this.$(target);
-    if (target[0] !== active[0] && target.attr('disabled')!='false') return YES;
+    if (target[0] !== active[0] || target.hasClass('disabled')) return YES;
     
     index = parseInt(target.attr('index'),0);
     item = items[index];

@@ -72,6 +72,11 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     context.attr('aria-checked', ariaValue);
   },
   
+  acceptsFirstResponder: function() {
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+    else return NO;
+  }.property('isEnabled'),
+  
   
   mouseDown: function(evt) {
     if(!this.get('isEnabled')) return YES;
