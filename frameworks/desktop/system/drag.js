@@ -301,7 +301,7 @@ SC.Drag = SC.Object.extend(
     // convert to global cooridinates
     var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
 
-    if (this.ghost) {
+    if (this.get('ghost')) {
       // Hide the dragView
       this._dragViewWasVisible = dv.get('isVisible') ;
       dv.set('isVisible', NO) ;
@@ -438,7 +438,7 @@ SC.Drag = SC.Object.extend(
     // destroy the ghost view
     this._destroyGhostView() ;
 
-    if (this.ghost) {
+    if (this.get('ghost')) {
       // Show the dragView if it was visible
       if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES) ;
       this._dragViewWasVisible = null;
