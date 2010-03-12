@@ -512,7 +512,6 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
           var w = elem[0].clientWidth;
           if(w!==0){
             var padding = parseInt(elem.css('paddingRight'),0);
-            console.log(padding+", "+w);
             this.$('.sc-button-label').css('minWidth', w-(padding*2)+'px');
           }
         }
