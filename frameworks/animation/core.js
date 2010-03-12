@@ -70,8 +70,6 @@ SC.Animatable = {
   // and, said animation order
   _animationOrder: ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "display", "transform"],
 
-  _transitionCallbacks: {},
-
 
   initMixin: function()
   {
@@ -306,11 +304,12 @@ SC.Animatable = {
         else if (i == "centerX") { l[i] = f.x + (f.width / 2) - (p.width / 2); continue; }
         else if (i == "centerY") { l[i] = f.y + (f.height / 2) - (p.height / 2); continue; }
       }
-
-      if (!SC.none(start[i])) l[i] = start[i];
-      else l[i] = target[i];
+      
+      if (SC.none(l[i])) {
+        if (!SC.none(start[i])) l[i] = start[i];
+        else l[i] = target[i];
+      }
     }
-
     return l;
   },
 
@@ -374,7 +373,6 @@ SC.Animatable = {
       // clone it to be a nice starting point next time.
       this._animatableSetCSS = "";
       this._animatableCurrentStyle = {};
-      this._animatableSetCSS = "";
       for (i in newStyle)
       {
         if (i[0] != "_") this._animatableCurrentStyle[i] = newStyle[i];
@@ -403,7 +401,8 @@ SC.Animatable = {
 
     // get a normalized starting point based off of our style
     var startingPoint = this._getStartStyleHash(this._animatableCurrentStyle, newStyle);
-
+    var endingPoint = {};
+    
     // prepare stuff for timing function calc
     var timing;
     
@@ -486,7 +485,7 @@ SC.Animatable = {
       {
         // the transition is already set up.
         // we can just set it as part of the starting point
-        startingPoint[i] = newStyle[i];
+        endingPoint[i] = newStyle[i];
 
         if (this.transitions[i].action){
           this._transitionCallbacks[i] = {
@@ -577,7 +576,7 @@ SC.Animatable = {
     this._animatableSetCSS = css;
 
     // apply starting styles directly to layer
-    this._animatableApplyStyles(layer, startingPoint);
+    this._animatableApplyStyles(layer, startingPoint, endingPoint);
 
     // all our timers are scheduled, we should be good to go. YAY.
     return this;
@@ -593,8 +592,12 @@ SC.Animatable = {
 
   /**
   Adjusts display and queues a change for the other properties.
+  
+  layer: the layer to modify
+  styles: the styles to set
+  delayed: styles to set after a brief delay (if any)
   */
-  _animatableApplyStyles: function(layer, styles)
+  _animatableApplyStyles: function(layer, styles, delayed)
   {	
     if (!layer) return;
     
@@ -624,6 +627,7 @@ SC.Animatable = {
     timer.inLoopAction = this._animatableApplyNonDisplayStyles;
     timer.layer = layer;
     timer.styles = styles;
+    timer.delayed = delayed;
     this._animatableCurrentStyle = styles;
     
     // schedule.
@@ -704,6 +708,23 @@ SC.Animatable = {
 
       // go back to previous
       this.holder.layout = prev;
+    }
+    
+    // queue up any delayed styles
+    if (this.delayed) {
+      // set settings
+      SC.mixin(this.holder._animatableCurrentStyle, this.delayed);
+      this.styles = this.delayed;
+      this.delayed = undefined;
+
+      // schedule.
+      if (this._disableAnimation > 0) {
+        this.inLoopAction();
+      } else {
+        // after setting transition or display, we must wait a moment;
+        // otherwise, no animation will happen.
+        SC.Animatable.addTimer(this);
+      }
     }
   },
 
