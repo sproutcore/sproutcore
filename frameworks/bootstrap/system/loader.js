@@ -40,7 +40,7 @@ SC.setupBodyClassNames = function() {
   if(borderRad) classNames.push('border-rad');
   classNames.push(browser) ;
   classNames.push(platform) ;
-  if (SC.browser.msie==7) classNames.push('ie7') ;
+  if (parseInt(SC.browser.msie,0)==7) classNames.push('ie7') ;
   if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
   el.className = classNames.join(' ') ;
 } ;

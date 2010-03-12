@@ -504,12 +504,18 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   },
   
   didAppendToDocument: function() {
-    if(SC.browser.msie===7){
-      var elem = this.$();
-      if(elem && elem[0]){
-        var w = elem[0].clientWidth,
-        padding = parseInt(elem.css('paddingRight'),0);
-        this.$('.sc-button-label').css('minWidth', w-(padding*2)+'px');
+   if(parseInt(SC.browser.msie, 0)===7){
+      var layout = this.get('layout');
+      if(this.get('useStaticLayout') && layout.width && layout.width.indexOf('auto')!=-1){
+        var elem = this.$();
+        if(elem && elem[0]){
+          var w = elem[0].clientWidth;
+          if(w!==0){
+            var padding = parseInt(elem.css('paddingRight'),0);
+            console.log(padding+", "+w);
+            this.$('.sc-button-label').css('minWidth', w-(padding*2)+'px');
+          }
+        }
       }
     }
   }
