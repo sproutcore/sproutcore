@@ -771,6 +771,96 @@ SC.RootResponder = SC.Object.extend({
       }
     }
   },
+  
+  // ................................................................................
+  // TOUCH SUPPORT
+  //
+  /*
+    This touch support is written to meet the following specifications. They are actually
+    simple, but I decided to write out in great detail all of the rules so there would
+    be no confusion.
+    - Views receive touchStart and touchEnd events
+    - Each touchStart and touchEnd event has a set of touches that were started or ended.
+    - Each view receiving the touchStart and touchEnd events has its own list of touches
+      started or ended (viewChangedTouches).
+    - When receiving a touchStart and touchEnd event, views can subscribe, subscribe
+      exclusively, or ignore the event.
+    - If views subscribe, they will receive touchDragged events for the touches they
+    - Each view receiving ANY touch event has a list of touches the view subscribes to,
+      barring the ones being started or ended (if in a touchStart/End event), as these will
+      not have been subscribed to yet.
+    - Any view the touches move over will receive touchEntered, Exited, and Moved events.
+      Any view at all.
+    - If a touch starts on a view and then moves, the view will receive, in order,
+      touchStart, touchEntered, touchDragged. 
+    - As a touch moves over a view, touchMoved will be called. Both tuchMoved and touchDragged
+      will be called if the view is subscribed to the touch.
+    - If a touch exits a view, touchExited will be called. 
+    - If a view subscribes to a touch, touchDragged will keep being called as the touch moves,
+      even if it has exited the view.
+    - Views subscribe by returning YES for exclusive subscription, NO for ignore, and
+      SC.MIXED_STATE for nonexclusive subscription.
+    - A touchDragged event can change the subscription by returning NO or YES. To leave things
+      the way they are, the view should not return either YES or NO.
+    - If subscription status is changed during a touchDragged, all other views subscribed to those
+      touches should be notified that the touch was cancelled.
+    - Views may stop propagation of touchDragged to other views by returning SC.STOP_DRAG_PROPAGATION;
+      this will allow the other subscribed views to stay subscribed, but not inform them of the drag.
+      Use case: view that can be swiped right for deletion that is a child of a ScrollView. It can
+      stop the event from going to the scroll view until the child is sure it does not want it.
+  */
+  
+  /**
+    @private
+    A map from views to internal touch entries.
+    
+    Note: the touch entries themselves also reference the views.
+  */
+  _touchedViews: {},
+  
+  /**
+    @private
+    A map from internal touch ids to the touch entries themselves.
+    
+    The touch entry ids currently come from the touch event's identifier.
+  */
+  _touches: {},
+  
+  /**
+    Returns the touches that are registered to the specified view; undefined if none.
+    
+    When views receive a touch event, they have the option to subscribe to it.
+    They are then mapped to touch events and vice-versa. This returns touches mapped to the view.
+  */
+  touchesForView: function(view) {
+    return this._touchedViews[SC.guidFor(view)];
+  },
+  
+  /**
+    @private
+    Returns the actual touch events for a view, given a view and a map of touch ids to touch objects.
+  */
+  eventTouchesForView: function(view, touchMap) {
+    var viewTouches = this._touchedViews[SC.guidFor(view)].touches, 
+        ret = [], idx, len = viewTouches.length, id;
+    for (idx = 0; idx < length; idx++) {
+      id = viewTouches[idx].identifier;
+      if (touchMap[id]) ret.push(touchMap[id]);
+    }
+    return ret;
+  },
+  
+  /**
+    @private
+    Creates a touch map (map of touch ids in an event to the touches themselves).
+  */
+  makeTouchMap: function(evt) {
+    var idx, len = evt.touches.length, ret = {};
+    for (idx = 0; idx < len; idx++) {
+      ret[evt.touches[idx].identifier] = evt.touches[idx];
+    }
+    return ret;
+  },
 
   // ................................................................................
   // TOUCH SUPPORT
