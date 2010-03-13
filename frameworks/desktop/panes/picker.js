@@ -392,12 +392,12 @@ SC.PickerPane = SC.PalettePane.extend({
         f.y = prefP1[cM][1] - cutoffPrefP[cM][2];
         this.set('pointerPosY', cutoffPrefP[cM][2]);
         i = SC.POINTER_LAYOUT.length;
-      } else if ((cM === 0 || cM === 1) && cutoffPrefP[cM][0]===0 && cutoffPrefP[cM][1]===0 && cutoffPrefP[cM][2] <= f.height-57 && cutoffPrefP[cM][3]===0) {
+      } else if ((cM === 0 || cM === 1) && cutoffPrefP[cM][0]===0 && cutoffPrefP[cM][1]===0 && cutoffPrefP[cM][2] <= f.height-51 && cutoffPrefP[cM][3]===0) {
         if (m[4] !== cM) {
           f.x = prefP1[cM][0] ;
         }
-        f.y = prefP1[cM][1] - (f.height-57) ;
-        this.set('pointerPosY', (f.height-59));
+        f.y = prefP1[cM][1] - (f.height-51) ;
+        this.set('pointerPosY', (f.height-53));
         this.set('pointerPos', SC.POINTER_LAYOUT[cM]+' extra-low');
         i = SC.POINTER_LAYOUT.length;
       }
@@ -412,16 +412,17 @@ SC.PickerPane = SC.PalettePane.extend({
     if (context.needsContent) {
       if (this.get('preferType') == SC.PICKER_POINTER) {
         context.push('<div class="sc-pointer '+this.get('pointerPos')+'" style="margin-top: '+this.get('pointerPosY')+'px"></div>');
+        context.addClass(this.get('pointerPos'));
       }
     } else {
       var el = this.$('.sc-pointer');
       el.attr('class', "sc-pointer "+this.get('pointerPos'));
       el.attr('style', "margin-top: "+this.get('pointerPosY')+"px");
+      context.addClass(this.get('pointerPos'));
     }
     return ret ;
   },
   
-
   /** @private - click away picker. */
   modalPaneDidClick: function(evt) {
     var f = this.get("frame");
