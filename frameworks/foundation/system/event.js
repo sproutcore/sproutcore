@@ -28,11 +28,13 @@ sc_require('system/core_query') ;
   @since SproutCore 1.0
 */
 SC.Event = function(originalEvent) { 
-
+  var idx, len;
   // copy properties from original event, if passed in.
   if (originalEvent) {
     this.originalEvent = originalEvent ;
-    var props = SC.Event._props, len = props.length, idx = len , key;
+    var props = SC.Event._props, key;
+    len = props.length;
+    idx = len;
     while(--idx >= 0) {
       key = props[idx] ;
       this[key] = originalEvent[key] ;

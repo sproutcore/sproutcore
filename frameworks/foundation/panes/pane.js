@@ -198,7 +198,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (!target) target = this.get('firstResponder') ;
     while(target) {
       if (action === 'touchStart' && !target.get("acceptsMultitouch")) {
-        if (!target.hasTouch) {
+        if (!target.get("hasTouch")) {
           if (target.tryToPerform("touchStart", evt)) break;
         }
       } else if (action === 'touchEnd' && !target.get("acceptsMultitouch")) {
