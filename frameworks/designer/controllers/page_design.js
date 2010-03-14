@@ -57,7 +57,6 @@ SC.PageDesignController = SC.Object.extend({
     }
     return this;
   },
-  
   /**
     Invoked whenever the selection changes.  Updates the selection states 
     on the old and new views.

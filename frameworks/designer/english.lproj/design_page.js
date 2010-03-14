@@ -3,6 +3,8 @@
 // Copyright: ©2009 Mike Ball
 // ==========================================================================
 /*globals SC */
+require('views/designer_drop_target');
+
 SC.designPage = SC.Page.create({
   // ..........................................................
   // Views used inside iframe...
@@ -10,10 +12,9 @@ SC.designPage = SC.Page.create({
   designMainPane: SC.MainPane.design({
     childViews: 'container viewList'.w(),
     
-    container: SC.ContainerView.design( SC.DesignerDropTarget,{
+    container: SC.DesignerDropTarget.design({
       layout: {top: 10, left: 10, right: 10, bottom: 60},
-      contentViewBinding:'SC.designController.view',
-      backgroundColor: 'white'
+      contentViewBinding:'SC.designController.view'
     }),
     
     viewList: SC.ScrollView.design({

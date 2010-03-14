@@ -4,9 +4,55 @@
 // ==========================================================================
 /*globals SC */
 /*jslint evil: true*/
-
-SC.DesignerDropTarget = {
+/** 
+  @class
   
+  @extends SC.ContainerView
+*/
+SC.DesignerDropTarget = SC.ContainerView.extend(
+  /** @scope SC.DesignerDropTarget.prototype */ {
+  
+  backgroundColor: 'white',
+  // ..........................................................
+  // Key Events
+  // 
+  keyDown: function(evt) {
+    return this.interpretKeyEvents(evt);
+  },
+  
+  keyUp: function(evt) {
+    return YES; 
+  },
+  
+  deleteForward: function(evt){
+    if(SC.designController) SC.designController.deleteSelection();
+    return YES;
+  },
+  
+  deleteBackward: function(evt){
+    if(SC.designController) SC.designController.deleteSelection();
+    return YES;
+  },
+
+  moveLeft: function(sender, evt) {
+    return YES;
+  },
+  
+  moveRight: function(sender, evt) {   
+    return YES;
+  },
+  
+  moveUp: function(sender, evt) {
+    return YES;
+  },
+  
+  moveDown: function(sender, evt) {
+    return YES;
+  },
+
+  // ..........................................................
+  // Drag and drop code
+  // 
   isDropTarget: YES,
   
   targetIsInIFrame: YES,
@@ -54,7 +100,7 @@ SC.DesignerDropTarget = {
         cv = this.get('contentView'),
         loc = drag.get('location'),
         frame = drag.iframeFrame,
-        design, size;
+        design, size, newView;
     //size and location
     size = data.get('size');
     loc.x = loc.x - frame.x;
@@ -62,9 +108,11 @@ SC.DesignerDropTarget = {
     //setup design (use eval to make sure code comes from iframe)
     design = eval(data.get('scClass'));
     design = design.design({layout: {top: loc.y, left: loc.x, width: size.width, height: size.height}});
-    if(cv) cv.appendChild(design.create({page: cv.get('page')}));
+    newView = design.create({page: cv.get('page')});
+    if(cv && newView) cv.appendChild(newView);
+    
     return SC.DRAG_ANY; 
   }
   
   
-};
+});
