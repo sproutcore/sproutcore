@@ -570,7 +570,57 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     property changes.
   */
   contentPropertyDidChange: function(target, key) {
-    this.notifyPropertyChange(key);
+    // If the key that changed in the content is one of the fields for which
+    // we (potentially) cache a value, update our cache.
+    var menu = this.get('parentMenu') ;
+    if (!menu) return ;
+    
+    var mapping           = SC.MenuItemView._contentPropertyToMenuItemPropertyMapping,
+        contentProperties = SC.keys(mapping),
+        i, len, contentProperty, menuItemProperty ;
+    
+    
+    // Are we invalidating all keys?
+    if (key === '*') {
+      for (i = 0, len = contentProperties.length;  i < len;  ++i) {
+        contentProperty  = contentProperties[i] ;
+        menuItemProperty = mapping[contentProperty] ;
+        this.notifyPropertyChange(menuItemProperty) ;
+      }
+    }
+    else {
+      for (i = 0, len = contentProperties.length;  i < len;  ++i) {
+        contentProperty  = contentProperties[i] ;
+        if (menu.get(contentProperty) === key) {
+          menuItemProperty = mapping[contentProperty] ;
+          this.notifyPropertyChange(menuItemProperty) ;
+          
+          // Note:  We won't break here in case the menu is set up to map
+          //        multiple properties to the same content key.
+        }
+      }
+    }
   }
 
 }) ;
+
+
+// ..........................................................
+// CLASS PROPERTIES
+//
+
+/** @private
+  A mapping of the "content property key" keys to the properties we use to
+  wrap them.  This hash is used in 'contentPropertyDidChange' to ensure that
+  when the content changes a property that is locally cached inside the menu
+  item, the cache is properly invalidated.
+  
+  Implementor note:  If you add such a cached property, you must add it to
+                     this mapping.
+*/
+SC.MenuItemView._contentPropertyToMenuItemPropertyMapping = {
+  itemTitleKey:     'title',
+  itemIsEnabledKey: 'isEnabled',
+  itemSeparatorKey: 'isSeparator',
+  itemSubMenuKey:   'subMenu'
+};
