@@ -73,9 +73,9 @@ SC.routes = SC.Object.create(
       if (typeof(value) == "object") {
         
         // get the original route and any params
-        var parts = value.route ? value.route.split('&') : [''] ;
-        var route = parts.shift() ;
-        var params = {} ;
+        var parts = value.route ? value.route.split('&') : [''] ,
+            route = parts.shift() ,
+            params = {} ;
         parts.forEach(function(p) {
           var bits = p.split('=') ;
           params[bits[0]] = bits[1] ;
@@ -245,8 +245,9 @@ SC.routes = SC.Object.create(
         // takes a little while for Safari to catch up.  So what we do instead 
         // is first check to see if Safari's length has changed from its last 
         // known length and only then check for a delta.
-        var historyDidChange = (history.length - this._lastLength) !== 0;
-        var delta = (historyDidChange) ? (history.length - this._backStack.length) : 0 ;
+        var historyDidChange = (history.length - this._lastLength) !== 0,
+            delta = (historyDidChange) ? (history.length - this._backStack.length) : 0 ,
+            i, iLen;
         this._lastLength = history.length ;
         
         if (historyDidChange) console.log('historyDidChange') ;
@@ -260,7 +261,7 @@ SC.routes = SC.Object.create(
             this._forwardStack.push(this._cloc) ; 
             
             // shift out other items.
-            for(var i=0; i < Math.abs(delta+1);i++) {
+            for(i=0, iLen = Math.abs(delta+1); i < iLen;i++) {
               this._forwardStack.push(this._backStack.pop()) ;
             }
             
@@ -273,7 +274,7 @@ SC.routes = SC.Object.create(
             // shift out the current loc.
             this._backStack.push(this._cloc) ;
             
-            for(i=0; i < (delta-1); i++) {
+            for(i=0, iLen = Math.abs(delta-1); i < iLen; i++) {
               this._backStack.push(this._forwardStack.pop()) ;
             }
             
@@ -290,14 +291,14 @@ SC.routes = SC.Object.create(
           this._locationDidChange = false ;
         }
         
-        var cloc = this._cloc ;
-        var loc = this.get('location') ;
+        var cloc = this._cloc,
+            loc = this.get('location') ;
         if (cloc != loc) {
           this.set('location',(cloc) ? cloc : '') ;
           this.gotoRoute(cloc) ;
         }
         
-        this.invokeCheckWindowLocation(50) ;
+        this.invokeCheckWindowLocation(150) ;
       },
       
       _setWindowLocation: function(loc) {
@@ -320,11 +321,11 @@ SC.routes = SC.Object.create(
       },
       
       _checkWindowLocation: function() {
-        var loc = this.get('location') ;
-        var cloc = location.hash ;
+        var loc = this.get('location'),
+            cloc = location.hash ;
         cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
         if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
-        this.invokeCheckWindowLocation(100) ;
+        this.invokeCheckWindowLocation(150) ;
       },
       
       _setWindowLocation: function(loc) {
@@ -345,8 +346,8 @@ SC.routes = SC.Object.create(
     firefox: {
       
       _checkWindowLocation: function() {
-        var loc = this.get('location') ;
-        var cloc = location.hash ;
+        var loc = this.get('location'),
+            cloc = location.hash ;
         cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
         if (cloc != loc) {
           SC.RunLoop.begin();
@@ -378,8 +379,14 @@ SC.routes = SC.Object.create(
   
   /** @private */
   _checkWindowLocation: function() {
-    var loc = this.get('location') ;
-    var cloc = decodeURI(location.hash) ;
+    var loc = this.get('location'), cloc;
+    if(location.hash !== this._locationCache){
+      cloc = decodeURI(location.hash) ;
+      this._locationCacheDecoded = cloc;
+      this._locationCache = location.hash;
+    }
+    else cloc = this._locationCacheDecoded ;
+    
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
     if (cloc !== loc) {
       SC.RunLoop.begin();
