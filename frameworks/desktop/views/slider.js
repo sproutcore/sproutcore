@@ -149,7 +149,6 @@ SC.SliderView = SC.View.extend(SC.Control,
     return YES ;  
   },
   
-  
   touchStart: function(evt){
     return this.mouseDown(evt);
   },
