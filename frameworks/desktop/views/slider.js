@@ -139,6 +139,16 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret ;
   },
   
+  mouseWheel: function(evt) {
+    var min = this.get('minimum'),
+        max = this.get('maximum'),
+        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*0.01);
+    if (newVal< min) this.set('value', min);
+    else if (newVal> max) this.set('value', max);
+    else this.set('value', newVal);
+    return YES ;  
+  },
+  
   
   touchStart: function(evt){
     return this.mouseDown(evt);
