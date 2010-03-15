@@ -16,6 +16,8 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
   // ..........................................................
   // Key Events
   // 
+  acceptsFirstResponder: YES,
+  
   keyDown: function(evt) {
     return this.interpretKeyEvents(evt);
   },
@@ -25,12 +27,14 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
   },
   
   deleteForward: function(evt){
-    if(SC.designController) SC.designController.deleteSelection();
+    var c = SC.designsController.getPath('page.designController');
+    if(c) c.deleteSelection();
     return YES;
   },
   
   deleteBackward: function(evt){
-    if(SC.designController) SC.designController.deleteSelection();
+    var c = SC.designsController.getPath('page.designController');
+    if(c) c.deleteSelection();
     return YES;
   },
 

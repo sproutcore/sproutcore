@@ -38,6 +38,8 @@ SC.PageDesignController = SC.Object.extend({
       base = (!extend || !base) ? SC.CoreSet.create() : base.copy();
       base.add(sel);
       this.set('selection', base.freeze()) ;
+      //make the designPane the firstResponder
+      SC.designPage.getPath('designMainPane.container').becomeFirstResponder();
     }
     return this ;
   },
@@ -97,6 +99,28 @@ SC.PageDesignController = SC.Object.extend({
     var sel = this.get('selection');
     if (sel) sel.invoke('prepareReposition', info);
   },
+  /**
+    removes all views in the selection from their parent view
+  */
+  deleteSelection: function(){
+    var sel = this.get('selection'), first, parentView;
+    
+    if(sel && sel.get('length') > 0){
+      //TODO: delete multi selection
+      //this.beginPropertyChanges();
+      //while(sel.get('length') > 0){
+        first = sel.firstObject();
+        this.deselect(first);
+        first = first.get('view');
+        parentView = first.get('parentView');
+        first.removeFromParent();
+        parent.displayDidChange();
+        first = null;
+      //}
+      //this.endPropertyChanges();
+    }
+  },
+  
   
   // ..........................................................
   // DESIGNERS

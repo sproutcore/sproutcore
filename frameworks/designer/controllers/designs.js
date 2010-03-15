@@ -35,6 +35,7 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
       }
     }
     this.set('content', designs);
+    this.set('page', page);
   },
   
   // ..........................................................
