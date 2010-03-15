@@ -345,7 +345,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     Remove the active class on mouseOut if mouse is down.
   */  
   mouseExited: function(evt) {
-    if (this._isMouseDown) this.set('isActive', NO);
+    if (this._isMouseDown) {
+      this.set('isActive', NO);
+    }
     return YES;
   },
 
@@ -353,7 +355,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     If mouse was down and we renter the button area, set the active state again.
   */  
   mouseEntered: function(evt) {
-    this.set('isActive', this._isMouseDown);
+    if (this._isMouseDown) {
+      this.set('isActive', YES);
+    }
     return YES;
   },
 
