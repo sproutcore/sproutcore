@@ -32,6 +32,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @private
   */
   init: function() {
+    sc_super();
     this.contentDidChange();
   },
 
@@ -543,10 +544,10 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     Add an observer to ensure that we invalidate our cached properties
     whenever the content object’s associated property changes.
   */
-  contentDidChange: function() {
+  contentDidChange: function() {  
     var content    = this.get('content'),
         oldContent = this._content;
-
+  
     if (content === oldContent) return ;
     
     var f = this.contentPropertyDidChange;
@@ -560,8 +561,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     // notify that value did change.
     this.contentPropertyDidChange(content, '*') ;
   }.observes('content'),
-  
-  
+
+
   /**
     @private
     
