@@ -26,6 +26,15 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @type {Boolean}
   */
   acceptsFirstResponder: YES,
+  
+  
+  /**
+    @private
+  */
+  init: function() {
+    this.contentDidChange();
+  },
+
 
   // ..........................................................
   // KEY PROPERTIES
@@ -521,6 +530,46 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   /** @private*/
   clickInside: function(frame, evt) {
     return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame) ;
+  },
+  
+  
+  // ..........................................................
+  // CONTENT OBSERVING
+  //
+  
+  /**
+    @private
+    
+    Add an observer to ensure that we invalidate our cached properties
+    whenever the content object’s associated property changes.
+  */
+  contentDidChange: function() {
+    var content    = this.get('content'),
+        oldContent = this._content;
+
+    if (content === oldContent) return ;
+    
+    var f = this.contentPropertyDidChange;
+    // remove an observer from the old content if necessary
+    if (oldContent  &&  oldContent.removeObserver) oldContent.removeObserver('*', this, f) ;
+    
+    // add observer to new content if necessary.
+    this._content = content ;
+    if (content  &&  content.addObserver) content.addObserver('*', this, f) ;
+    
+    // notify that value did change.
+    this.contentPropertyDidChange(content, '*') ;
+  }.observes('content'),
+  
+  
+  /**
+    @private
+    
+    Invalidate our cached property whenever the content object’s associated
+    property changes.
+  */
+  contentPropertyDidChange: function(target, key) {
+    this.notifyPropertyChange(key);
   }
 
 }) ;
