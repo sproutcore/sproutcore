@@ -74,12 +74,12 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   mouseDown: function(evt) {
     if(!this.get('isEnabled')) return YES;
     this.set('isActive', YES);
-    this._field_isMouseDown = YES;
+    this._isMouseDown = YES;
     return YES;
   },
   
   mouseUp: function(evt) {
-    if(!this.get('isEnabled')) return YES;
+    if(!this.get('isEnabled') || !this.$().within(evt.target)) return YES;
     var val = this.get('value');
     if (val === this.get('toggleOnValue')) {
       this.$().attr('aria-checked', 'false');
@@ -90,7 +90,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
       this.set('value', this.get('toggleOnValue'));
     }
     this.set('isActive', NO);
-    this._field_isMouseDown = NO;
+    this._isMouseDown = NO;
     return YES;
   },
   
