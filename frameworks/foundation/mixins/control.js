@@ -344,15 +344,6 @@ SC.Control = {
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
     names.active = this.get('isActive') ;
     context.setClass(names).addClass(this.get('controlSize'));
-    
-    // if the control implements the $input() helper, then fixup the input
-    // tags
-    if (!firstTime && this.$input) {
-      var inps = this.$input();
-      if(inps.attr('type')!=="radio"){
-        this.$input().attr('disabled', disabled);
-      }
-    }
   },
   
   /** @private
