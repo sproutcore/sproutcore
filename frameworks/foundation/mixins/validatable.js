@@ -43,6 +43,13 @@ SC.Validatable = {
   errorLabel: null,
 
   /**
+    Value being edited can be cached here when it is not committed during
+    partial edits.  If this is an SC.Error object, isValid() returns NO as
+    an indication that the current edited state of the value is invalid.
+  */
+  editingValue: null,
+
+  /**
     YES if the receiver is currently valid.
     
     This property watches the value property by default.  You can override
@@ -52,58 +59,8 @@ SC.Validatable = {
     @property {Boolean}
   */
   isValid: function() { 
-    return SC.typeOf(this.get('value')) !== SC.T_ERROR; 
-  }.property('value'),
-  
-  /**
-    The form that the view belongs to.  May be null if the view does not 
-    belong to a form.  This property is usually set automatically by an 
-    owner form view.
-    
-    @property {SC.View}
-  */
-  ownerForm: null,
-  
-  /**
-    Attempts to validate the receiver. 
-    
-    Runs the validator and returns SC.VALIDATE_OK, SC.VALIDATE_NO_CHANGE,
-    or an error object.  If no validator is installed, this method will
-    always return SC.VALIDATE_OK.
-
-    @param {Boolean} partialChange YES if this is a partial edit.
-    @returns {String} SC.VALIDATE_OK, error, or SC.VALIDATE_NO_CHANGE
-  */
-  performValidate: function(partialChange) {
-    var ret = SC.VALIDATE_OK ;
-
-    if (this._validator) {
-      var form = this.get('ownerForm') ;
-      if (partialChange) {
-        ret = this._validator.validatePartial(form,this) ;
-
-        // if the partial returned NO_CHANGE, then check to see if the 
-        // field is valid anyway.  If it is not valid, then don't update the
-        // value.  This way the user can have partially constructed values 
-        // without the validator trying to convert it to an object.
-        if ((ret == SC.VALIDATE_NO_CHANGE) && (this._validator.validateChange(form, this) == SC.VALIDATE_OK)) {
-          ret = SC.VALIDATE_OK; 
-        }
-      } else ret = this._validator.validateChange(form, this) ;
-    }
-    return ret ;
-  },
-
-  /**
-    Runs validateSubmit.  You should use this in your implementation of 
-    validateSubmit.  If no validator is installed, this always returns
-    SC.VALIDATE_OK
-    
-    @returns {String}
-  */
-  performValidateSubmit: function() {
-    return this._validator ? this._validator.validateSubmit(this.get('ownerForm'), this) : SC.VALIDATE_OK;
-  },
+    return (SC.typeOf(this.get('value')) !== SC.T_ERROR) && (SC.typeOf(this.get('editingValue')) !== SC.T_ERROR); 
+  }.property('value', 'editingValue'),
   
   /**
     Runs a keypress validation.  Returns YES if the keypress should be 
@@ -116,7 +73,23 @@ SC.Validatable = {
     // ignore anything with ctrl or meta key press
     var charStr = evt.getCharString();
     if (!charStr) return YES ;
-    return this._validator ? this._validator.validateKeyDown(this.get('ownerForm'), this, charStr) : YES;
+    return this._validator ? this._validator.validateKeyDown(charStr, this) : YES;
+  },
+  
+  /**
+    Asks the validator to perform either partial or commit validation on 'object',
+    depending on the 'isPartial' flag.
+  */
+  performValidate: function(object, isPartial) {
+    if (SC.typeOf(object) !== SC.T_ERROR) {
+      if (isPartial) {
+        object = this._validator ? this._validator.validatePartial(object, this) : object;
+      }
+      else {
+        object = this._validator ? this._validator.validateCommit(object, this) : object;
+      }
+    }
+    return object;
   },
   
   /**
@@ -127,18 +100,7 @@ SC.Validatable = {
   validatorObject: function() {
     return this._validator;
   }.property(),
-  
-  /**
-    Invoked by the owner form just before submission.  Override with your 
-    own method to commit any final changes after you perform validation. 
-    
-    The default implementation simply calls performValidateSubmit() and 
-    returns that value.
-    
-    @property {Boolean}
-  */
-  validateSubmit: function() { return this.performValidateSubmit(); },
-  
+
   /**
     Convert the field value string into an object.
     
@@ -148,8 +110,8 @@ SC.Validatable = {
     @param {Boolean} partialChange
     @returns {Object}
   */
-  objectForFieldValue: function(fieldValue, partialChange) {
-    return this._validator ? this._validator.objectForFieldValue(fieldValue, this.get('ownerForm'), this) : fieldValue ;
+  objectForFieldValue: function(fieldValue) {
+    return this._validator ? this._validator.objectForFieldValue(fieldValue, this) : fieldValue ;
   },
   
   /**
@@ -161,12 +123,12 @@ SC.Validatable = {
     @returns {Object}
   */
   fieldValueForObject: function(object) {
-    return this._validator ? this._validator.fieldValueForObject(object, this.get('ownerForm'), this) : object ;
+    return this._validator ? this._validator.fieldValueForObject(object, this) : object ;
   },
   
   _validatable_displayObserver: function() {
     this.displayDidChange();
-  }.observes('isValid'),
+  }.observes('isValid', 'editingValue'),
 
   /** @private */
   renderMixin: function(context) {
@@ -175,15 +137,14 @@ SC.Validatable = {
 
   // invoked whenever the attached validator changes.
   _validatable_validatorDidChange: function() {
-    var form = this.get('ownerForm') ;
-    var val = SC.Validator.findFor(form, this, this.get('validator')) ;
+    var val = SC.Validator.findFor(this, this.get('validator')) ;
     if (val != this._validator) {
       this.propertyWillChange('validatorObject');
-      if (this._validator) this._validator.detachFrom(form, this) ;
+      if (this._validator) this._validator.detachFrom(this) ;
       this._validator = val;
-      if (this._validator) this._validator.attachTo(form, this) ;
+      if (this._validator) this._validator.attachTo(this) ;
       this.propertyDidChange('validatorObject');
     }  
-  }.observes('validator', 'ownerForm')
-      
+  }.observes('validator')
+
 };
