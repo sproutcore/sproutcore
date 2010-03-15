@@ -372,6 +372,23 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     return YES ;
   },
   
+  touchStart: function(evt){
+    return this.mouseDown(evt);
+  },
+  
+  touchEnd: function(evt){
+    return this.mouseUp(evt);
+  },
+  
+  touchEntered: function(evt){
+    return this.mouseEntered(evt);
+  },
+
+  touchExited: function(evt){
+    return this.mouseExited(evt);
+  },
+  
+  
   /** @private */
   keyDown: function(evt) {
     // handle tab key

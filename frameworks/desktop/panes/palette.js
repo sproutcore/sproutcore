@@ -59,6 +59,14 @@ SC.PalettePane = SC.PanelPane.extend({
       this.updateLayout();
     }
     return YES;
+  },
+  
+  touchStart: function(evt){
+    return this.mouseDown(evt);
+  },
+  
+  touchDragged: function(evt){
+    return this.mouseDragged(evt);
   }
   
  

@@ -242,6 +242,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this._items) {
       this._items.addObserver('[]', this, this.itemContentDidChange) ;
     }
+    
     this.itemContentDidChange();
   }.observes('items'),
   
@@ -249,6 +250,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Invoked whenever the item array or an item in the array is changed.  This method will reginerate the list of items.
   */
   itemContentDidChange: function() {
+    this.set('renderLikeFirstTime', YES);
     this.notifyPropertyChange('displayItems');
   },
   
@@ -270,25 +272,23 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // collect some data 
     var items = this.get('displayItems');
     
-    // regenerate the buttons only if the new display items differs from the
-    // last cached version of it needsFirstDisplay is YES.
-    var last = this._seg_displayItems,
-      theme = this.get('theme');
+    var theme = this.get('theme');
     if (theme) context.addClass(theme);
-    if (firstTime || (items !== last)) {
+    if (firstTime || this.get('renderLikeFirstTime')) {
       this._seg_displayItems = items; // save for future
       this.renderDisplayItems(context, items) ;
       context.addStyle('text-align', this.get('align'));
+      this.set('renderLikeFirstTime',NO);
     }else{
     // update selection and active state
-      var activeIndex = this.get('activeIndex');
-      var value = this.get('value');
-      var isArray = SC.isArray(value);
+      var activeIndex = this.get('activeIndex'),
+          value = this.get('value'),
+          isArray = SC.isArray(value);
       if (isArray && value.get('length')===1) {
         value = value.objectAt(0); isArray = NO ;
       }
-      var names = {}; // reuse
-      var loc = items.length, cq = this.$('.sc-segment'), item;
+      var names = {}, // reuse  
+          loc = items.length, cq = this.$('.sc-segment'), item;
       while(--loc>=0) {
         item = items[loc];
         names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
@@ -477,6 +477,18 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // if mouse was down, hide active index
     if (this._isMouseDown) this.set('activeIndex', -1);
     return YES ;
+  },
+  
+  touchStart: function(evt){
+    return this.mouseDown(evt);
+  },
+  
+  touchEnd: function(evt){
+    return this.mouseUp(evt);
+  },
+  
+  touchMoved: function(evt){
+    return this.mouseMoved(evt);
   },
   
   /** 

@@ -523,6 +523,19 @@ SC.ScrollerView = SC.View.extend(
     this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
     return YES;
   },
+  
+  
+  touchStart: function(evt){
+    return this.mouseDown(evt);
+  },
+  
+  touchEnd: function(evt){
+    return this.mouseUp(evt);
+  },
+  
+  touchDragged: function(evt){
+    return this.mouseDragged(evt);
+  },
 
   /**
     Starts a timer that fires after 300ms.  This is called when the user

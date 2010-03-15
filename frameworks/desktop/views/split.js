@@ -485,6 +485,15 @@ SC.SplitView = SC.View.extend(
 		return NO ;
   },
   
+  touchDragged: function(evt){
+    return this.mouseDragged(evt);
+  },
+  
+  touchEnd: function(evt){
+    return this.mouseUp(evt);
+  },
+  
+  
   doubleClickInThumbView: function(evt, thumbView) {
     var view = this._topLeftView,
         isCollapsed = view.get('isCollapsed') || NO ;

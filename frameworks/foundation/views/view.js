@@ -90,7 +90,7 @@ SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
   This will enable touch events to be routed into mouse events. 
   It is enabled by default.
 */
-SC.ROUTE_TOUCH = YES;
+SC.ROUTE_TOUCH = NO;
 
 
 /** @private - custom array used for child views */
@@ -1460,7 +1460,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       this.touchEnd=this.mouseUp;
     }
     if(!this.respondsTo('touchMoved') && this.respondsTo('mouseMove')) {
-      this.touchMoved=this.mouseMove;
+      this.touchMoved=this.mouseMoved;
     }
     if(!this.respondsTo('touchEntered') && this.respondsTo('mouseEntered')) {
       this.touchEntered=this.mouseEntered;

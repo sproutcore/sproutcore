@@ -26,13 +26,6 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
   /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,
-  
-  /** 
-    This is temporary , while we reimplement radio buttons without input 
-    tags.
-  */
-  routeTouch: NO,
-  
 
   render: function(context, firstTime) {
     var dt, elem,
@@ -99,6 +92,15 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     this.set('isActive', NO);
     this._field_isMouseDown = NO;
     return YES;
+  },
+  
+  
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+  
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
   }
     
 }) ;

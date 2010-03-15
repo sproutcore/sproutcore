@@ -108,12 +108,6 @@ SC.RadioView = SC.View.extend(SC.Control,
   */
   itemIconKey: null,
   
-  /** 
-    This is temporary , while we reimplement radio buttons without input 
-    tags.
-  */
-  routeTouch: YES,
-  
 
   /** 
     If the items array itself changes, add/remove observer on item... 
@@ -356,5 +350,13 @@ SC.RadioView = SC.View.extend(SC.Control,
     index = parseInt(target.attr('index'),0);
     item = items[index];
     this.set('value', item[1]);    
+  },
+  
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+  
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
   }
 });
