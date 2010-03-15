@@ -135,5 +135,18 @@
       equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
     });
    
+   test('ScrollView should readjust scrollTop/scrollLeft if layer changes', function() {
+     var view = pane.view('basic2'), cv = view.get('contentView'), container = view.get('containerView') ;
+     view.scrollTo(10, 10);
+     SC.RunLoop.begin().end();
+     equals(container.get('layer').scrollLeft, 10, 'precond - scrollLeft is set to 10');
+     equals(container.get('layer').scrollTop, 10, 'precond- scrollTop is set to 10');
+     cv.replaceLayer();
+     equals(container.get('layer').scrollLeft, 0, 'scrollLeft should be 0 before runloop');
+     equals(container.get('layer').scrollTop, 0, 'scrollTop should be 0 before runloop');
+     SC.RunLoop.begin().end();
+     equals(container.get('layer').scrollLeft, 10, 'scrollLeft should be readjusted to 10');
+     equals(container.get('layer').scrollTop, 10, 'scrollTop should be readjust to 10');
+   });
    
 })();
