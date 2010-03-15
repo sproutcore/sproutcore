@@ -36,7 +36,7 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
     // implementation is intentionally lazy.
     if (context !== undefined) {
       var contexts = methods.contexts ;
-      if (!context) contexts = {};
+      if (!contexts) contexts = {};
       contexts[SC.guidFor(method)] = context ;
     }
     
