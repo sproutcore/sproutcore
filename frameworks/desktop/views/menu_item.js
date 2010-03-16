@@ -26,20 +26,11 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @type {Boolean}
   */
   acceptsFirstResponder: YES,
-  
-  
-  /**
-    @private
-  */
-  init: function() {
-    sc_super();
-    this.contentDidChange();
-  },
-
 
   // ..........................................................
   // KEY PROPERTIES
   //
+
   /**
     The content object the menu view will display.
 
@@ -48,24 +39,28 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   content: null,
 
   /**
-    This returns true if the child view is a menu list view.
-    This property can be over written to have other child views as well.
+    YES if this menu item represents a separator.
 
-    @type Boolean
+    @property {Boolean}
   */
-  isSubMenuViewVisible: null,
+  isSeparator: function() {
+    return this.getContentProperty('itemSeparatorKey') === YES;
+  }.property('content').cacheable(),
 
   /**
-    This property specifies whether this menu item is currently in focus
+    Whether the menu item is enabled.
 
-    @type Boolean
+    @property {Boolean}
   */
-  hasMouseExited: NO,
+  isEnabled: function() {
+    return this.getContentProperty('itemIsEnabledKey') !== NO &&
+           this.getContentProperty('itemSeparatorKey') !== YES;
+  }.property('content.isEnabled').cacheable(),
 
   /**
     This menu item's submenu, if it exists.
 
-    @type SC.MenuView
+    @property {SC.MenuView}
   */
   subMenu: function() {
     var content = this.get('content'), menuItems, parentMenu;
@@ -97,11 +92,19 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   /**
     Whether or not this menu item has a submenu.
 
-    @type Boolean
+    @property {Boolean}
   */
   hasSubMenu: function() {
     return !!this.get('subMenu');
   }.property('subMenu').cacheable(),
+
+  /**
+    @private
+  */
+  init: function() {
+    sc_super();
+    this.contentDidChange();
+  },
 
   /**
     Fills the passed html-array with strings that can be joined to form the
@@ -218,16 +221,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
 
   /**
-    This method checks if the menu item is a separator.
-
-    @param {}
-    @returns Boolean
-  */
-  isSeparator: function() {
-    return this.getContentProperty('itemSeparatorKey') === YES;
-  }.property('content').cacheable(),
-
-  /**
     This method will check whether the current Menu Item is still
     selected and then create a submenu accordignly.
 
@@ -240,11 +233,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       subMenu.popup(this,[0,0,0]) ;
     }
   },
-
-  isEnabled: function() {
-    return this.getContentProperty('itemIsEnabledKey') !== NO &&
-           this.getContentProperty('itemSeparatorKey') !== YES;
-  }.property('content.isEnabled').cacheable(),
 
   title: function() {
     var ret = this.getContentProperty('itemTitleKey'),
@@ -402,26 +390,26 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
     return YES ;
   },
-  
-  
+
+
   touchStart: function(evt){
     return YES;
   },
-  
+
   touchEnd: function(evt){
     return this.mouseUp(evt);
   },
-  
+
   touchEntered: function(evt){
     return this.mouseEntered(evt);
   },
-  
+
   touchExited: function(evt){
     return this.mouseExited(evt);
   },
-  
-  
-  
+
+
+
 
   checkMouseLocation: function() {
     var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu'),
@@ -533,32 +521,32 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   clickInside: function(frame, evt) {
     return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame) ;
   },
-  
-  
+
+
   // ..........................................................
   // CONTENT OBSERVING
   //
-  
+
   /**
     @private
-    
+
     Add an observer to ensure that we invalidate our cached properties
     whenever the content object’s associated property changes.
   */
-  contentDidChange: function() {  
+  contentDidChange: function() {
     var content    = this.get('content'),
         oldContent = this._content;
-  
+
     if (content === oldContent) return ;
-    
+
     var f = this.contentPropertyDidChange;
     // remove an observer from the old content if necessary
     if (oldContent  &&  oldContent.removeObserver) oldContent.removeObserver('*', this, f) ;
-    
+
     // add observer to new content if necessary.
     this._content = content ;
     if (content  &&  content.addObserver) content.addObserver('*', this, f) ;
-    
+
     // notify that value did change.
     this.contentPropertyDidChange(content, '*') ;
   }.observes('content'),
@@ -566,7 +554,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
   /**
     @private
-    
+
     Invalidate our cached property whenever the content object’s associated
     property changes.
   */
@@ -575,12 +563,12 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     // we (potentially) cache a value, update our cache.
     var menu = this.get('parentMenu') ;
     if (!menu) return ;
-    
+
     var mapping           = SC.MenuItemView._contentPropertyToMenuItemPropertyMapping,
         contentProperties = SC.keys(mapping),
         i, len, contentProperty, menuItemProperty ;
-    
-    
+
+
     // Are we invalidating all keys?
     if (key === '*') {
       for (i = 0, len = contentProperties.length;  i < len;  ++i) {
@@ -595,7 +583,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
         if (menu.get(contentProperty) === key) {
           menuItemProperty = mapping[contentProperty] ;
           this.notifyPropertyChange(menuItemProperty) ;
-          
+
           // Note:  We won't break here in case the menu is set up to map
           //        multiple properties to the same content key.
         }
@@ -615,7 +603,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   wrap them.  This hash is used in 'contentPropertyDidChange' to ensure that
   when the content changes a property that is locally cached inside the menu
   item, the cache is properly invalidated.
-  
+
   Implementor note:  If you add such a cached property, you must add it to
                      this mapping.
 */
