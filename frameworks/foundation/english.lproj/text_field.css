@@ -2,7 +2,6 @@
 
 .sc-view .sc-text-field-view {
   border:none;
-  z-index:100;
   overflow: visible;
   background :white;
 }
@@ -78,20 +77,11 @@
 	background: transparent;
 	vertical-align: middle;
 }
-	
-.msie .sc-text-field-view input {
-  	line-height:1.8em;
-}
-
-.mozilla .sc-text-field-view input {
-  	top: 3px;
-}
-
 
 .sc-text-field-view input {
 	border: none;
 	outline: none;
-	}
+}
 
 .sc-text-field-view textarea {
 	border: none;
@@ -111,12 +101,7 @@
 	background: transparent;
 	vertical-align: middle;
 	resize: none;
-	line-height: 1.8em;
 	overflow: auto;
-}
-
-.mozilla .sc-text-field-view textarea {
-  
 }
 
 
