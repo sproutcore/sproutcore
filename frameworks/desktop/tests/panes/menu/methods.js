@@ -57,7 +57,7 @@ test('popup() without anchor', function(){
   equals(layout.centerX, 0, 'menu should be horizontally centered');
   equals(layout.centerY, 0, 'menu should be vertically centered');
   equals(layout.width, 206, 'menu should maintain the width specified');
-  equals(layout.height, 178, 'menu height should resize based on item content');
+  equals(layout.height, 184, 'menu height should resize based on item content');
   menu.remove();
 });
 
@@ -70,7 +70,7 @@ test('popup() with anchor', function(){
   equals(layout.left, 16, 'menu should be aligned to the left of the anchor');
   equals(layout.top, 119, 'menu should be positioned below the anchor');
   equals(layout.width, 206, 'menu should maintain the width specified');
-  equals(layout.height, 178, 'menu height should resize based on item content');
+  equals(layout.height, 184, 'menu height should resize based on item content');
   menu.remove();
 });
 

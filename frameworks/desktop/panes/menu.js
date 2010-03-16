@@ -7,15 +7,6 @@
 require('panes/picker');
 require('views/menu_item');
 
-
-/** 
-  Default heights for menu items.
-*/
-if (!SC.DEFAULT_MENU_ITEM_HEIGHT)           SC.DEFAULT_MENU_ITEM_HEIGHT           = 20;
-if (!SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT) SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT = 9;
-if (!SC.DEFAULT_MENU_HEIGHT_PADDING)        SC.DEFAULT_MENU_HEIGHT_PADDING        = 0;
-
-
 /**
   @class
 
@@ -68,6 +59,7 @@ if (!SC.DEFAULT_MENU_HEIGHT_PADDING)        SC.DEFAULT_MENU_HEIGHT_PADDING      
   @extends SC.PickerPane
   @since SproutCore 1.0
 */
+
 SC.MenuPane = SC.PickerPane.extend(
 /** @scope SC.MenuPane.prototype */ {
 
@@ -88,26 +80,51 @@ SC.MenuPane = SC.PickerPane.extend(
   items: [],
 
   /**
-    The default height for each menu item, in pixels.
+    The size of the menu. This will set a CSS style on the menu that can be
+    used by the current theme to style the appearance of the control. This
+    value will also determine the default itemHeight, itemSeparatorHeight and
+    menuHeightPadding if you don't explicitly set these properties.
 
-    You can override this on a per-item basis by setting the (by default)
-    @height@ property on your object.
+    Your theme can override the default values for each control size. For
+    example, to set the height of menu items for small menus, you could set
+    {{{
+      SC.MenuPane.SMALL_MENU_ITEM_HEIGHT = 10;
+    }}}
 
-    @type Number
-    @default SC.DEFAULT_MENU_ITEM_HEIGHT
+    Changing the controlSize once the menu is instantiated has no effect.
+
+    @type String
+    @default SC.REGULAR_CONTROL_SIZE
   */
-  itemHeight: SC.DEFAULT_MENU_ITEM_HEIGHT,
+  controlSize: SC.REGULAR_CONTROL_SIZE,
 
   /**
-    The default height for separator menu items.
+    The height of each menu item, in pixels.
 
     You can override this on a per-item basis by setting the (by default)
     @height@ property on your object.
 
+    If you don't specify a value, the item height will be inferred from
+    controlSize.
+
     @type Number
-    @default SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT
+    @default null
   */
-  itemSeparatorHeight: SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT,
+  itemHeight: null,
+
+  /**
+    The height of separator menu items.
+
+    You can override this on a per-item basis by setting the (by default)
+    @height@ property on your object.
+
+    If you don't specify a value, the height of the separator menu items will
+    be inferred from controlSize.
+
+    @type Number
+    @default null
+  */
+  itemSeparatorHeight: null,
 
   /**
     The height of the menu pane.  This is updated every time menuItemViews
@@ -125,10 +142,13 @@ SC.MenuPane = SC.PickerPane.extend(
     added to the height of the menu, such that a space between the top and the
     bottom is created.
 
+    If you don't specify a value, the padding will be inferred from the
+    controlSize.
+
     @type Number
-    @default SC.DEFAULT_MENU_HEIGHT_PADDING
+    @default null
   */
-  menuHeightPadding: SC.DEFAULT_MENU_HEIGHT_PADDING,
+  menuHeightPadding: null,
 
   /**
     The last menu item to be selected by the user.
@@ -415,6 +435,71 @@ SC.MenuPane = SC.PickerPane.extend(
   // ..........................................................
   // INTERNAL METHODS
   //
+
+  /**
+    If an itemHeight, itemSeparatorHeight, or menuHeightPadding have not been
+    explicitly set, we set them here based on the controlSize.
+
+    @returns {SC.MenuPane} the newly instantiated menu pane
+    @private
+  */
+  init: function() {
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        this.setIfNull('itemHeight', SC.MenuPane.TINY_MENU_ITEM_HEIGHT);
+        this.setIfNull('itemSeparatorHeight', SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT);
+        this.setIfNull('menuHeightPadding', SC.MenuPane.TINY_MENU_HEIGHT_PADDING);
+        break;
+      case SC.SMALL_CONTROL_SIZE:
+        this.setIfNull('itemHeight', SC.MenuPane.SMALL_MENU_ITEM_HEIGHT);
+        this.setIfNull('itemSeparatorHeight', SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT);
+        this.setIfNull('menuHeightPadding', SC.MenuPane.SMALL_MENU_HEIGHT_PADDING);
+        break;
+      case SC.REGULAR_CONTROL_SIZE:
+        this.setIfNull('itemHeight', SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT);
+        this.setIfNull('itemSeparatorHeight', SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT);
+        this.setIfNull('menuHeightPadding', SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING);
+        break;
+      case SC.LARGE_CONTROL_SIZE:
+        this.setIfNull('itemHeight', SC.MenuPane.LARGE_MENU_ITEM_HEIGHT);
+        this.setIfNull('itemSeparatorHeight', SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT);
+        this.setIfNull('menuHeightPadding', SC.MenuPane.LARGE_MENU_HEIGHT_PADDING);
+        break;
+      case SC.HUGE_CONTROL_SIZE:
+        this.setIfNull('itemHeight', SC.MenuPane.HUGE_MENU_ITEM_HEIGHT);
+        this.setIfNull('itemSeparatorHeight', SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT);
+        this.setIfNull('menuHeightPadding', SC.MenuPane.HUGE_MENU_HEIGHT_PADDING);
+        break;
+    }
+
+    return sc_super();
+  },
+
+  /**
+    Helper method that only sets a property if it is null.
+
+    @param {String} key the property to set
+    @param {Object} value
+    @private
+  */
+  setIfNull: function(key, value) {
+    if (this.get(key) === null) {
+      this.set(key, value);
+    }
+  },
+
+  /** @private
+    The render method is responsible for adding the control size class
+    name to the menu pane.
+
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} firstTime YES if this is creating a layer
+  */
+  render: function(context, firstTime) {
+    context.addClass(this.get('controlSize'));
+
+    return sc_super();
+  },
 
   /**
     Creates the child scroll view, and sets its contentView to a new
@@ -889,3 +974,26 @@ SC._menu_fetchItem = function(k) {
   if (!k) return null ;
   return this.get ? this.get(k) : this[k] ;
 };
+
+/**
+  Default metrics for the different control sizes.
+*/
+SC.MenuPane.TINY_MENU_ITEM_HEIGHT = 10;
+SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT = 2;
+SC.MenuPane.TINY_MENU_HEIGHT_PADDING = 2;
+
+SC.MenuPane.SMALL_MENU_ITEM_HEIGHT = 16;
+SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT = 7;
+SC.MenuPane.SMALL_MENU_HEIGHT_PADDING = 4;
+
+SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT = 20;
+SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING = 6;
+
+SC.MenuPane.LARGE_MENU_ITEM_HEIGHT = 60;
+SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT = 20;
+SC.MenuPane.LARGE_MENU_HEIGHT_PADDING = 0;
+
+SC.MenuPane.HUGE_MENU_ITEM_HEIGHT = 20;
+SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+SC.MenuPane.HUGE_MENU_HEIGHT_PADDING = 0;

@@ -83,6 +83,7 @@ function clickOn(view, shiftKey, ctrlKey) {
 test('Basic UI', function(){
   menu.popup();
   ok(menu.$().hasClass('sc-menu'), 'pane should have "sc-menu" class');
+  ok(menu.$().hasClass('sc-regular-size'), 'pane should have default control size class');
   ok(!menu.get('isSubMenu'), 'isSubMenu should be NO on menus that are not submenus');
   var menuItem = menu.get('menuItemViews')[0], selectedItem;
   menuItem.mouseEntered();
@@ -100,6 +101,36 @@ test('Basic UI', function(){
     equals(menu.get('currentMenuItem'), null, 'currentMenuItem should be null after being removed');
     start();
   }, 250);
+});
+
+test('Control size', function() {
+  var smallPane, largePane, views, items = [
+    { title: 'Can I get get get' },
+    { title: 'To know know know know', separator: YES },
+    { title: 'Ya better better baby' }
+  ];
+
+  smallPane = SC.MenuPane.create({
+    controlSize: SC.SMALL_CONTROL_SIZE,
+    items: items
+  });
+  smallPane.popup();
+  views = smallPane.get('menuItemViews');
+  equals(views[0].get('frame').height, SC.MenuPane.SMALL_MENU_ITEM_HEIGHT, 'should change itemHeight');
+  equals(views[1].get('frame').height, SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT, 'should change itemSeparatorHeight');
+  equals(views[0].get('frame').y, SC.MenuPane.SMALL_MENU_HEIGHT_PADDING/2, 'should change menuHeightPadding');
+  smallPane.remove();
+
+  largePane = SC.MenuPane.create({
+    controlSize: SC.LARGE_CONTROL_SIZE,
+    items: items
+  });
+  largePane.popup();
+  views = largePane.get('menuItemViews');
+  equals(views[0].get('frame').height, SC.MenuPane.LARGE_MENU_ITEM_HEIGHT, 'should change itemHeight');
+  equals(views[1].get('frame').height, SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT, 'should change itemSeparatorHeight');
+  equals(views[0].get('frame').y, SC.MenuPane.LARGE_MENU_HEIGHT_PADDING/2, 'should change menuHeightPadding');
+  largePane.remove();
 });
 
 test('Legacy Function Support', function(){
