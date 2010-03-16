@@ -676,7 +676,8 @@ SC.MenuPane = SC.PickerPane.extend(
 
   _sc_menu_currentMenuItemDidChange: function() {
     var currentMenuItem = this.get('currentMenuItem'),
-        previousMenuItem = this.get('previousMenuItem');
+        previousMenuItem = this.get('previousMenuItem'),
+        scrollView, scrollOffset, height, itemTop;
 
     if (previousMenuItem) {
       if (previousMenuItem.get('hasSubMenu') && currentMenuItem === null) {
@@ -688,7 +689,21 @@ SC.MenuPane = SC.PickerPane.extend(
     }
 
     if (currentMenuItem && currentMenuItem.get('isEnabled') && !currentMenuItem.get('isSeparator')) {
-     currentMenuItem.becomeFirstResponder();
+      currentMenuItem.becomeFirstResponder();
+
+      // Scroll to the selected menu item if it's not visible on screen.
+      // This is useful for keyboard navigation and programmaticaly selecting
+      // the selected menu item, as in SelectButtonView.
+      scrollView = this.childViews[0];
+      if (scrollView) {
+        scrollOffset = scrollView.get('verticalScrollOffset');
+        itemTop = currentMenuItem.get('frame').y;
+        height = scrollView.getPath('containerView.frame').height;
+
+        if ( (itemTop < scrollOffset) || (itemTop+20 > scrollOffset+height) ) {
+          scrollView.scrollTo(0, itemTop);
+        }
+      }
     }
   }.observes('currentMenuItem'),
 

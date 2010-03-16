@@ -299,28 +299,47 @@ SC.PickerPane = SC.PalettePane.extend({
   },
 
   /** @private
-    re-position rule optimized for Menu to enforce min left(7px)/right(20px) padding to the window
+    Reposition the pane in a way that is optimized for menus.
+
+    Specifically, we want to ensure that the pane is at least 7 pixels from
+    the left side of the screen, and 20 pixels from the right side.
+
+    If the menu is a submenu, we also want to reposition the pane to the left
+    of the parent menu if it would otherwise exceed the width of the viewport.
   */
-  fitPositionToScreenMenu: function(w, f, subMenu) {
-    // min left/right padding to the window
-    if( (f.x + f.width) > (w.width-20) ) {
-      // sub-menus should be re-anchored to the left of the parent menu
-      if (subMenu) f.x = f.x - (f.width*2);
-      else f.x = w.width - f.width - 20;
-    }
-    if( f.x < 7 ) f.x = 7;
-    
-    // if the height of the menu is bigger than the window height resize it.
-    if( f.height+f.y+35 >= w.height){
-      if (f.height+50 >= w.height) {
-        f.y = 15;
-        f.height = w.height - 50;
+  fitPositionToScreenMenu: function(windowFrame, paneFrame, subMenu) {
+
+    // If the right edge of the pane is within 20 pixels of the right edge
+    // of the window, we need to reposition it.
+    if( (paneFrame.x + paneFrame.width) > (windowFrame.width-20) ) {
+      if (subMenu) {
+        // Submenus should be re-anchored to the left of the parent menu
+        paneFrame.x = paneFrame.x - (paneFrame.width*2);
       } else {
-        f.y += (w.height - (f.height+f.y+35));
+        // Otherwise, just position the pane 20 pixels from the right edge
+        paneFrame.x = windowFrame.width - paneFrame.width - 20;
       }
     }
 
-    return f ;    
+    // Make sure we are at least 7 pixels from the left edge of the screen.
+    if( paneFrame.x < 7 ) paneFrame.x = 7;
+    
+    if (paneFrame.y < 7) {
+      paneFrame.height += paneFrame.y;
+      paneFrame.y = 7;
+    }
+
+    // If the height of the menu is bigger than the window height, resize it.
+    if( paneFrame.height+paneFrame.y+35 >= windowFrame.height){
+      if (paneFrame.height+50 >= windowFrame.height) {
+        paneFrame.y = 15;
+        paneFrame.height = windowFrame.height - 50;
+      } else {
+        paneFrame.y += (windowFrame.height - (paneFrame.height+paneFrame.y+35));
+      }
+    }
+
+    return paneFrame ;
   },
 
   /** @private
