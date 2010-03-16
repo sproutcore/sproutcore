@@ -686,6 +686,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
+    Returns YES if the receiver is a subview of a given view or if it’s 
+    identical to that view. Otherwise, it returns NO.
+    
+    @property {SC.View} view
+  */
+  isDescendantOf: function(view) {
+    var parentView = this.get('owner');
+    
+    if(this===view) return YES;
+    else if(parentView) return parentView.isDescendantOf(view);
+    else return NO;
+  },
+  
+  /**
     This method is invoked whenever a display property changes.  It will set 
     the layerNeedsUpdate method to YES.  If you need to perform additional
     setup whenever the display changes, you can override this method as well.
