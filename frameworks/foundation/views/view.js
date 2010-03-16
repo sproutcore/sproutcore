@@ -692,7 +692,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {SC.View} view
   */
   isDescendantOf: function(view) {
-    var parentView = this.get('owner');
+    var parentView = this.get('parentView');
     
     if(this===view) return YES;
     else if(parentView) return parentView.isDescendantOf(view);
