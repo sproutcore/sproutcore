@@ -461,21 +461,28 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   },
   
   mouseMoved: function(evt) {
-    var idx = this.displayItemIndexForEvent(evt);
-    if (this._isMouseDown) this.set('activeIndex', idx);
+    if (this._isMouseDown) {
+      var idx = this.displayItemIndexForEvent(evt);
+      this.set('activeIndex', idx);
+    }
     return YES;
   },
   
-  mouseOver: function(evt) {
+  mouseExited: function(evt) {
     // if mouse was pressed down initially, start detection again
-    var idx = this.displayItemIndexForEvent(evt);
-    if (this._isMouseDown) this.set('activeIndex', idx);
+    if (this._isMouseDown) {
+      var idx = this.displayItemIndexForEvent(evt);
+      this.set('activeIndex', idx);
+    }
     return YES;
   },
   
-  mouseOut: function(evt) {
+  mouseEntered: function(evt) {
     // if mouse was down, hide active index
-    if (this._isMouseDown) this.set('activeIndex', -1);
+    if (this._isMouseDown) {
+      var idx = this.displayItemIndexForEvent(evt);
+      this.set('activeIndex', -1);
+    }
     return YES ;
   },
   
@@ -491,6 +498,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return this.mouseMoved(evt);
   },
   
+  touchEntered: function(evt){
+    return this.mouseEntered(evt);
+  },
+  
+  touchExited: function(evt){
+    return this.mouseExited(evt);
+  },
   /** 
     Simulates the user clicking on the segment at the specified index. This
     will update the value if possible and fire the action.
@@ -545,10 +559,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
     
     // also, trigger target if needed.
-    var actionKey = this.get('itemActionKey');
-    var targetKey = this.get('itemTargetKey');
-    var action, target = null;
-    var resp = this.getPath('pane.rootResponder');
+    var actionKey = this.get('itemActionKey'),
+        targetKey = this.get('itemTargetKey'),
+        action, target = null,
+        resp = this.getPath('pane.rootResponder');
 
     if (actionKey && (item = this.get('items').objectAt(item[6]))) {
       // get the source item from the item array.  use the index stored...
