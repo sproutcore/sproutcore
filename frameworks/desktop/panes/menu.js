@@ -90,7 +90,8 @@ SC.MenuPane = SC.PickerPane.extend(
   /**
     The default height for each menu item, in pixels.
 
-    You can override this on a per-item basis by setting the (by default) @height@ property on your object.
+    You can override this on a per-item basis by setting the (by default)
+    @height@ property on your object.
 
     @type Number
     @default SC.DEFAULT_MENU_ITEM_HEIGHT
