@@ -316,7 +316,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   sendAction: function() {
     var action = this.getContentProperty('itemActionKey'),
         target = this.getContentProperty('itemTargetKey'),
-        rootMenu = this.getPath('parentMenu.rootMenu'), responder;
+        rootMenu = this.getPath('parentMenu.rootMenu'),
+        responder;
 
     action = (action === undefined) ? rootMenu.get('action') : action;
     target = (target === undefined) ? rootMenu.get('target') : target;
@@ -331,7 +332,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     } else {
       responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
       if (responder) {
-        responder.sendAction(action, target, this, this.get('pane'));
+        responder.sendAction(action, target, this, responder.get('mainPane'));
       }
     }
 
