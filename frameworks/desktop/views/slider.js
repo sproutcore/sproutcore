@@ -142,10 +142,12 @@ SC.SliderView = SC.View.extend(SC.Control,
   mouseWheel: function(evt) {
     var min = this.get('minimum'),
         max = this.get('maximum'),
-        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*0.01);
-    if (newVal< min) this.set('value', min);
-    else if (newVal> max) this.set('value', max);
-    else this.set('value', newVal);
+        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*0.01),
+        step = this.get('step');
+        value = Math.round(newVal / step) * step ;
+    if (newVal< min) this.setIfChanged('value', min);
+    else if (newVal> max) this.setIfChanged('value', max);
+    else this.setIfChanged('value', newVal);
     return YES ;  
   },
   
