@@ -566,6 +566,8 @@ SC.RootResponder = SC.Object.extend({
 
   touchend: function(evt) {
     try {
+      SC.RunLoop.begin();
+
       evt.cancel = NO ;
       var handler = null, views = this._touchViews, idx, len, view ;
 
@@ -583,6 +585,8 @@ SC.RootResponder = SC.Object.extend({
       }
       // cleanup
       this._touchViews = null ;
+
+      SC.RunLoop.end();
     } catch (e) {
       SC.Logger.warn('Exception during touchEnd: %@'.fmt(e)) ;
       this._touchViews = null ;
