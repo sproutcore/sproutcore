@@ -549,9 +549,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       layout: { width: lastMenuWidth },
       controlSize: menuControlSize,
       itemWidth: lastMenuWidth,
-      itemHeight: this.get('itemHeight') || 20,
-      contentView: SC.View.extend({
-      })
+      itemHeight: this.get('itemHeight') || 20
     }) ;
 
     // no menu to toggle... bail...
