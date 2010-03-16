@@ -148,7 +148,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     if (delay===0) delay = 1000/30;
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
       this.displayDidChange();
-      this.invokeLater(this._animateProgressBar, delay, 30);
+      this.invokeLater(this._animateProgressBar, delay, 600);
     }
   },
   
@@ -169,18 +169,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     } else if (isIndeterminate) {
       value = "120%";
     } else {
-      var minimum = this.get('minimum') || 0.0;
-      var maximum = this.get('maximum') || 1.0;
-      value = this.get('value') || 0.0;
-      value = (value - minimum) / (maximum - minimum);
-      if (value > 1.0) value = 1.0;
-
-      if(isNaN(value)) value = 0.0;
-      // cannot be smaller then minimum
-      if(value<minimum) value = 0.0;
-      // cannot be larger then maximum
-      if(value>maximum) value = 1.0;
-      value = (value * 100) + "%";
+      value = (this.get("_percentageNumeric") * 100) + "%";
     }
 
     var classNames = {
@@ -228,6 +217,21 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       .updatePropertyFromContent('isIndeterminate', key, 'contentIsIndeterminateKey', content)
     .endPropertyChanges();
   },
+  
+  _percentageNumeric: function(){
+    var minimum = this.get('minimum') || 0.0,
+        maximum = this.get('maximum') || 1.0,
+        value = this.get('value') || 0.0;
+    value = (value - minimum) / (maximum - minimum);
+    if (value > 1.0) value = 1.0;
+
+    if(isNaN(value)) value = 0.0;
+    // cannot be smaller then minimum
+    if(value<minimum) value = 0.0;
+    // cannot be larger then maximum
+    if(value>maximum) value = 1.0;
+    return value;
+  }.property('value').cacheable(),
   
   _createClassNameString: function(classNames) {
     var classNameArray = [], key;
