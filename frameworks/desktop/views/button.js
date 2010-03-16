@@ -527,8 +527,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   didAppendToDocument: function() {
    if(parseInt(SC.browser.msie, 0)===7){
       var layout = this.get('layout');
-      if(this.get('useStaticLayout') && layout.width
-          && layout.width.indexOf && layout.width.indexOf('auto')!== -1) {
+      if(this.get('useStaticLayout') && layout.width && 
+        (layout.width.indexOf && layout.width.indexOf('auto')!=-1)){
         var elem = this.$();
         if(elem && elem[0]){
           var w = elem[0].clientWidth;
