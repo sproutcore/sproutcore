@@ -320,7 +320,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     } else {
       responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
       if (responder) {
-        responder.sendAction(action, target, this, responder.get('mainPane'));
+        // Send the action up the responder chain of the key pane
+        responder.sendAction(action, target, this, responder.get('keyPane'));
       }
     }
 
