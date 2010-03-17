@@ -253,8 +253,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
 
   //..........................................
-  //Mouse Events Handling
-  //..........................................
+  // Mouse Events Handling
+  //
 
   mouseUp: function(evt) {
     // SproutCore's event system will deliver the mouseUp event to the view

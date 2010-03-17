@@ -248,9 +248,16 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns {SC.MenuPane} receiver
   */
   remove: function() {
+    var parentMenu = this.get('parentMenu');
+
     this.set('currentMenuItem', null);
     this.closeOpenMenus();
-    this.resignKeyPane();
+    this.resignMenuPane();
+
+    if (parentMenu) {
+      parentMenu.becomeMenuPane();
+    }
+
     return sc_super();
   },
 
@@ -525,6 +532,58 @@ SC.MenuPane = SC.PickerPane.extend(
     this.childViews = [scroll];
 
     return this;
+  },
+
+  /**
+    When the pane is attached to a DOM element in the window, set up the
+    view to be visible in the window and register with the RootResponder.
+
+    We don't call sc_super() here because PanelPane sets the current pane to
+    be the key pane when attached.
+
+    @returns {SC.MenuPane} receiver
+  */
+  paneDidAttach: function() {
+    // hook into root responder
+    var responder = (this.rootResponder = SC.RootResponder.responder);
+    responder.panes.add(this);
+
+    // set currentWindowSize
+    this.set('currentWindowSize', responder.computeWindowSize()) ;
+
+    // update my own location
+    this.set('isPaneAttached', YES) ;
+    this.parentViewDidChange() ;
+
+    //notify that the layers have been appended to the document
+    this._notifyDidAppendToDocument();
+
+    this.becomeMenuPane();
+
+    return this ;
+  },
+
+  /**
+    Make the pane the menu pane. When you call this, all key events will
+    temporarily be routed to this pane. Make sure that you call
+    resignMenuPane; otherwise all key events will be blocked to other panes.
+
+    @returns {SC.Pane} receiver
+  */
+  becomeMenuPane: function() {
+    if (this.rootResponder) this.rootResponder.makeMenuPane(this) ;
+    return this ;
+  },
+
+  /**
+    Remove the menu pane status from the pane.  This will simply set the 
+    menuPane on the rootResponder to null.
+
+    @returns {SC.Pane} receiver
+  */
+  resignMenuPane: function() {
+    if (this.rootResponder) this.rootResponder.makeMenuPane(null);
+    return this ;
   },
 
   /**
