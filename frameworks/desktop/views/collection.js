@@ -2100,6 +2100,7 @@ SC.CollectionView = SC.View.extend(
     isSelected = sel ? sel.contains(contentIndex) : NO;
     info.modifierKeyPressed = modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
     
+    
     // holding down a modifier key while clicking a selected item should 
     // deselect that item...deselect and bail.
     if (modifierKeyPressed && isSelected) {
@@ -2121,6 +2122,11 @@ SC.CollectionView = SC.View.extend(
     // Otherwise, if selecting on mouse down,  simply select the clicked on 
     // item, adding it to the current selection if a modifier key was pressed.
     } else {
+    
+      if((ev.shiftKey || modifierKeyPressed) && !content.get('allowsMultipleSelection')){
+        this.select(null, false);
+      }
+    
       if (this.get("selectOnMouseDown")) {
         this.select(contentIndex, modifierKeyPressed);
       } else {
