@@ -1353,16 +1353,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @type SC.View
   */
   nextValidKeyView: function() {
-    var seen = [],
-        rootView = this.pane(), ret; 
-    ret = rootView._computeNextValidKeyView(this, seen);
-    if(SC.TABBING_ONLY_IN_DOCUMENT && SC.ret === null){
+    var seen = [], 
+        rootView = this.pane(), ret = this.get('nextKeyView');
+    
+    if(!ret) ret = rootView._computeNextValidKeyView(this, seen);
+    
+    if(SC.TABBING_ONLY_INSIDE_DOCUMENT && !ret) {
       ret = rootView._computeNextValidKeyView(rootView, seen);
     }
+    
     return ret ;
   }.property('nextKeyView'),
   
-  _computeNextValidKeyView: function(currentView, seen) {  
+  _computeNextValidKeyView: function(currentView, seen) {
     var ret = this.get('nextKeyView'),
         children, i, childLen, child;
     if(this !== currentView && seen.indexOf(currentView)!=-1 && 
@@ -1374,7 +1377,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // find next sibling
     if (!ret) {
       children = this.get('childViews');
-      for(i=0, childLen= children.length; i<childLen; i++){
+      for(i=0, childLen = children.length; i<childLen; i++){
         child = children[i];
         if(child.get('isVisibleInWindow') && child.get('isVisible')){
           ret = child._computeNextValidKeyView(currentView, seen);
@@ -1402,8 +1405,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   previousValidKeyView: function() {
     var seen = [],
-        rootView = this.pane(), ret; 
-    ret = rootView._computePreviousValidKeyView(this, seen);
+        rootView = this.pane(), ret = this.get('previousKeyView'); 
+    if(!ret) ret = rootView._computePreviousValidKeyView(this, seen);
     return ret ;
   }.property('previousKeyView'),
   
