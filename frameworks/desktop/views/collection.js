@@ -2331,6 +2331,10 @@ SC.CollectionView = SC.View.extend(
     }, this);
 
   },
+  
+  touchEnd: function(touch) {
+    
+  },
 
   touchCancelled: function(evt) {
     this.select(null, NO);
