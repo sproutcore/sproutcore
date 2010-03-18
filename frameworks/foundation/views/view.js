@@ -1523,8 +1523,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
-     
-    sc_super();
     
     // remove from parent if found
     this.removeFromParent() ;
@@ -1535,6 +1533,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // unregister for autoscroll during drags
     if (this.get('isScrollable')) SC.Drag.removeScrollableView(this) ;
+    
+    //Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
+    sc_super();
     return this; // done with cleanup
   },
   
@@ -1557,8 +1558,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     delete this._CQ ; 
     delete this.page ;
     
-    // mark as destroyed so we don't do this again
-    this.set('isDestroyed', YES) ;
     return this ;
   },
   
