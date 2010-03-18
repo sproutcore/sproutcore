@@ -92,13 +92,37 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   ownerScrollValueKey: function() {
     return 'verticalScrollOffset' ;  
   }.property('layoutDirection').cacheable(),
-  
+
   // ..........................................................
   // INTERNAL SUPPORT
-  // 
+  //
+
+  init: function() {
+    // Set the scrollerThickness based on controlSize
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        this.set('scrollerThickness', SC.MenuScrollerView.TINY_SCROLLER_THICKNESS);
+        break;
+      case SC.SMALL_CONTROL_SIZE:
+        this.set('scrollerThickness', SC.MenuScrollerView.SMALL_SCROLLER_THICKNESS);
+        break;
+      case SC.REGULAR_CONTROL_SIZE:
+        this.set('scrollerThickness', SC.MenuScrollerView.REGULAR_SCROLLER_THICKNESS);
+        break;
+      case SC.LARGE_CONTROL_SIZE:
+        this.set('scrollerThickness', SC.MenuScrollerView.LARGE_SCROLLER_THICKNESS);
+        break;
+      case SC.HUGE_CONTROL_SIZE:
+        this.set('scrollerThickness', SC.MenuScrollerView.HUGE_SCROLLER_THICKNESS);
+        break;
+    }
+
+    return sc_super();
+  },
   
   render: function(context, firstTime) {
     context.addClass('sc-vertical') ;
+    context.addClass(this.get('controlSize'));
     if (firstTime) {
       var direction = this.get('scrollDown') ? 'arrowDown' : 'arrowUp' ;
       context.push('<span class="'+direction+'">&nbsp;</span>') ;
@@ -212,6 +236,16 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   }
   
 });
+
+/**
+  Default metrics for scroller size.
+*/
+SC.MenuScrollerView.REGULAR_SCROLLER_THICKNESS = 18;
+SC.MenuScrollerView.TINY_SCROLLER_THICKNESS    = 10;
+SC.MenuScrollerView.SMALL_SCROLLER_THICKNESS   = 14;
+SC.MenuScrollerView.LARGE_SCROLLER_THICKNESS   = 23;
+SC.MenuScrollerView.HUGE_SCROLLER_THICKNESS    = 26;
+
 
 /** @class
 
@@ -433,7 +467,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     in the regular properties.
   */
   createChildViews: function() {
-    var childViews = [], view, view2 ;
+    var childViews = [], view, view2, controlSize = this.get('controlSize') ;
     
     // create the containerView.  We must always have a container view. 
     // also, setup the contentView as the child of the containerView...
@@ -449,17 +483,16 @@ SC.MenuScrollView = SC.ScrollView.extend({
     // create a vertical scroller 
     if ((view=this.verticalScrollerView) && (view2=this.verticalScrollerView2)) {
       if (this.get('hasVerticalScroller')) {
-        var scrollerThickness = (this.get('controlSize') === SC.SMALL_CONTROL_SIZE) ? 14 : 16;
         view = this.verticalScrollerView = this.createChildView(view, {
-          layout: {top: 0, left: 0, right: 0, height: scrollerThickness},
-          scrollerThickness: scrollerThickness,
+          layout: {top: 0, left: 0, right: 0},
+          controlSize: controlSize,
           valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view);
         view2 = this.verticalScrollerView2 = this.createChildView(view2, {
           scrollDown: YES,
-          layout: {bottom: 0, left: 0, right: 0, height: scrollerThickness},
-          scrollerThickness: scrollerThickness,
+          layout: {bottom: 0, left: 0, right: 0 },
+          controlSize: controlSize,
           valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view2);

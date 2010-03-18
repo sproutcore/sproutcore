@@ -520,7 +520,8 @@ SC.MenuPane = SC.PickerPane.extend(
     var scroll, menuView, menuItemViews;
 
     scroll = this.createChildView(SC.MenuScrollView, {
-      borderStyle: SC.BORDER_NONE
+      borderStyle: SC.BORDER_NONE,
+      controlSize: this.get('controlSize')
     });
 
     menuView = this._menuView = SC.View.create();
