@@ -163,8 +163,12 @@ test('Custom MenuItemView Class', function() {
 });
 
 test('Basic Submenus', function() {
-  var menuItem = menu.get('menuItemViews')[8], subMenu;
-  menu.popup();
+  var smallMenu = SC.MenuPane.create({
+    controlSize: SC.SMALL_CONTROL_SIZE,
+    items: items
+  });
+  var menuItem = smallMenu.get('menuItemViews')[8], subMenu;
+  smallMenu.popup();
   menuItem.mouseEntered();
   SC.RunLoop.begin().end();
   ok(menuItem.get('hasSubMenu'), 'precond - menu item has a submenu');
@@ -174,7 +178,8 @@ test('Basic Submenus', function() {
   setTimeout(function() {
     ok(subMenu.get('isVisibleInWindow'), 'submenu should open after 100ms delay');
     ok(subMenu.get('isSubMenu'), 'isSubMenu should be YES on submenus');
-    menu.remove();
+    ok(subMenu.get('controlSize'), SC.SMALL_CONTROL_SIZE, "submenu should inherit parent's controlSize");
+    smallMenu.remove();
     ok(!subMenu.get('isVisibleInWindow'), 'submenus should close if their parent menu is closed');
     start();
   }, 150);
