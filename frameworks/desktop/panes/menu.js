@@ -877,6 +877,17 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES ;
   },
 
+  /** @private
+    Note when the mouse has entered, so that if this is a submenu,
+    the menu item to which it belongs knows whether to maintain its highlight
+    or not.
+
+    @param {Event} evt
+  */
+  mouseEntered: function(evt) {
+    this.set('mouseHasEntered', YES);
+  },
+
   keyUp: function(evt) {
     var ret = this.interpretKeyEvents(evt) ;
     return !ret ? NO : ret ;
