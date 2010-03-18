@@ -87,7 +87,7 @@
 .sc-text-field-view textarea {
 	border: none;
 	outline: none;
-	
+	-webkit-appearance:none;
 }
 
 
