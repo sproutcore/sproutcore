@@ -234,6 +234,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     return ret ;
   }.property('parentView', 'isEnabled'),
   
+  /**
+    Observer that resigns firstResponder if the view is Disabled and is first
+    responder. This will avoid cases like disabled view with focus rings.
+  */
+  isEnabledObserver: function(){
+    if(!this.get('isEnabled') && this.get('isFirstResponder')){
+      this.resignFirstResponder();
+    } 
+  }.observes('isEnabled'),
+  
   // ..........................................................
   // IS VISIBLE IN WINDOW SUPPORT
   // 
