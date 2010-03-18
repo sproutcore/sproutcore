@@ -322,6 +322,30 @@ SC.Array = {
     return ret ;
   },
   
+  /**
+    Returns the largest Number in an array of Numbers. Make sure the array
+    only contains values of type Number to get expected result.
+    
+    Note: This only works for dense arrays.
+    
+    @returns {Number}
+  */
+  max: function() {
+    return Math.max.apply(Math, this);
+  },
+  
+  /**
+    Returns the smallest Number in an array of Numbers. Make sure the array
+    only contains values of type Number to get expected result.
+    
+    Note: This only works for dense arrays.
+    
+    @returns {Number}
+  */
+  min: function() {
+    return Math.min.apply(Math, this);
+  },
+  
   rangeObserverClass: SC.RangeObserver,
   
   /**
