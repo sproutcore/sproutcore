@@ -215,16 +215,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
   SELECT_BUTTON_SPRITE_WIDTH: 28,
 
   /**
-    Property to set the menu item height. This in turn is used for
-    the calculation of prefMatrix.
-
-    @property
-    @type {Number}
-    @default 20
-  */
-  CUSTOM_MENU_ITEM_HEIGHT: 20,
-
-  /**
     Binds the button's selection state to the menu's visibility.
 
     @private
@@ -294,10 +284,24 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @private
   */
   leftAlign: function() {
-    var val = 0, controlSize = this.get('controlSize') ;
-    if(controlSize === SC.SMALL_CONTROL_SIZE) val = -12 ;
-    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -15 ;
-    return val;
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        return SC.SelectButtonView.TINY_OFFSET_X;
+        break;
+      case SC.SMALL_CONTROL_SIZE:
+        return SC.SelectButtonView.SMALL_OFFSET_X;
+        break;
+      case SC.REGULAR_CONTROL_SIZE:
+        return SC.SelectButtonView.REGULAR_OFFSET_X;
+        break;
+      case SC.LARGE_CONTROL_SIZE:
+        return SC.SelectButtonView.LARGE_OFFSET_X;
+        break;
+      case SC.HUGE_CONTROL_SIZE:
+        return SC.SelectButtonView.HUGE_OFFSET_X;
+        break;
+    }
+    return 0;
   }.property('controlSize'),
 
   /**
@@ -454,7 +458,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     //Set the preference matrix for the menu pane
-    this.set('CUSTOM_MENU_ITEM_HEIGHT', this.get('controlSize')===SC.SMALL_CONTROL_SIZE ? 18 : 20);
     this.changeSelectButtonPreferMatrix(this.itemIdx) ;
 
   },
@@ -474,7 +477,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     buttonLabel = this.$('.sc-button-label')[0] ;
     // Get the length of the text on the button in pixels
-    menuWidth = this.get('layer').offsetWidth ;
+    menuWidth = this.get('layer').offsetWidth + SC.SelectButtonView.MENU_WIDTH_OFFSET ;
     scrollWidth = buttonLabel.scrollWidth ;
     lastMenuWidth = this.get('lastMenuWidth') ;
     if(scrollWidth) {
@@ -572,19 +575,41 @@ SC.SelectButtonView = SC.ButtonView.extend(
      place aligned to the item on the button when menu is opened.
   */
   changeSelectButtonPreferMatrix: function() {
-    var controlSizeTuning =
-      this.get('controlSize')===SC.SMALL_CONTROL_SIZE ? 0 : -2;
+    var controlSizeTuning = 0, customMenuItemHeight = 0 ;
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectButtonView.TINY_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
+        break;
+      case SC.SMALL_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectButtonView.SMALL_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
+        break;
+      case SC.REGULAR_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectButtonView.REGULAR_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
+        break;
+      case SC.LARGE_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectButtonView.LARGE_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
+        break;
+      case SC.HUGE_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectButtonView.HUGE_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
+        break;
+    }
+
     var preferMatrixAttributeTop = controlSizeTuning ,
       itemIdx = this.get('itemIdx') ,
       leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
 
     if(this.get('isDefaultPosition')) {
-      defPreferMatrix = [leftAlign, 4, 3] ;
+      defPreferMatrix = [1, 0, 3] ;
       this.set('preferMatrix', defPreferMatrix) ;
     }
     else {
       if(itemIdx) {
-        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT +
+        preferMatrixAttributeTop = itemIdx * customMenuItemHeight +
           controlSizeTuning ;
       }
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
@@ -644,3 +669,22 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
 }) ;
 
+/**
+  Default metrics for the different control sizes.
+*/
+SC.SelectButtonView.TINY_OFFSET_X = 0;
+SC.SelectButtonView.TINY_OFFSET_Y = 0;
+
+SC.SelectButtonView.SMALL_OFFSET_X = -18;
+SC.SelectButtonView.SMALL_OFFSET_Y = 3;
+
+SC.SelectButtonView.REGULAR_OFFSET_X = -18;
+SC.SelectButtonView.REGULAR_OFFSET_Y = 3;
+
+SC.SelectButtonView.LARGE_OFFSET_X = -20;
+SC.SelectButtonView.LARGE_OFFSET_Y = 6;
+
+SC.SelectButtonView.HUGE_OFFSET_X = 0;
+SC.SelectButtonView.HUGE_OFFSET_Y = 0;
+
+SC.SelectButtonView.MENU_WIDTH_OFFSET = -2;
