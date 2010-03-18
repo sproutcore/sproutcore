@@ -81,7 +81,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
           items: menuItems,
           isModal: NO,
           isSubMenu: YES,
-          parentMenu: parentMenu
+          parentMenu: parentMenu,
+          controlSize: parentMenu.get('controlSize')
         });
       }
     }
