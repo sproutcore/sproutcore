@@ -167,7 +167,7 @@ SC.PickerPane = SC.PalettePane.extend({
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
-        origin ;
+        origin, maxHeight, minHeight;
     
     // usually an anchorElement will be passed.  The ideal position is just 
     // below the anchor + default or custom offset according to preferType.
@@ -175,6 +175,7 @@ SC.PickerPane = SC.PalettePane.extend({
     // other alternative and fallback position.
     if (anchor) {
       anchor = this.computeAnchorRect(anchor);
+      if(anchor.x ===0 && anchor.y ===0) return ;
       origin = SC.cloneRect(anchor);
 
       if (preferType) {
@@ -199,8 +200,19 @@ SC.PickerPane = SC.PalettePane.extend({
         origin.y += origin.height ;
       }
       origin = this.fitPositionToScreen(origin, this.get('frame'), anchor) ;
+      if(!SC.none(layout.minHeight)) {
+        minHeight = this.layout.minHeight;
+      }
+      if(!SC.none(layout.maxHeight)) {
+        maxHeight = this.layout.maxHeight;
+      }
       layout = { width: origin.width, height: origin.height, left: origin.x, top: origin.y };
-
+      if(!SC.none(minHeight)) {
+        layout.minHeight = minHeight;
+      }
+      if(!SC.none(maxHeight)) {
+        layout.maxHeight = maxHeight;
+      }
     // if no anchor view has been set for some reason, just center.
     } else {
       layout = { width: layout.width, height: layout.height, centerX: 0, centerY: 0 };
