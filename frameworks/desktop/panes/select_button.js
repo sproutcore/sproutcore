@@ -526,7 +526,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
     value = this.get('value') ;
     itemList = this.get('itemList') ;
     menuControlSize = this.get('controlSize') ;
-    menuHeightPadding = this.get('menuPaneHeightPadding') ;
 
     // get the user defined custom view
     customView = this.get('customView') ;
@@ -541,15 +540,11 @@ SC.SelectButtonView = SC.ButtonView.extend(
       exampleView: customMenuView,
 
       isEnabled: YES,
-
-      menuHeightPadding: menuHeightPadding,
-
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
       layout: { width: lastMenuWidth },
       controlSize: menuControlSize,
-      itemWidth: lastMenuWidth,
-      itemHeight: this.get('itemHeight') || 20
+      itemWidth: lastMenuWidth
     }) ;
 
     // no menu to toggle... bail...
