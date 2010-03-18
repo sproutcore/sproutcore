@@ -81,11 +81,13 @@
 .sc-text-field-view input {
 	border: none;
 	outline: none;
+	-webkit-appearance:none;
 }
 
 .sc-text-field-view textarea {
 	border: none;
 	outline: none;
+	
 }
 
 
