@@ -216,7 +216,10 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   /** @private - save keyEquivalent for later use */
   init: function() {
-    if (this.theme && (this.theme === "square" || this.theme === "rounded")) {
+    if (
+        this.theme && 
+        (this.theme === "square" || this.theme === "capsule" || this.theme === "checkbox" || this.theme === "radio")
+      ) {
       this.set("oldButtonTheme", this.theme);
       this.theme = "";
     }
