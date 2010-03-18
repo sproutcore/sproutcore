@@ -234,6 +234,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       subMenu.set('mouseHasEntered', NO);
       subMenu.popup(this,[0,0,0]) ;
     }
+
+    this._subMenuTimer = null;
   },
 
   title: function() {
@@ -367,22 +369,30 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     menu.set('currentMenuItem', this);
 
     if(this.get('hasSubMenu')) {
-      this.invokeLater(this.showSubMenu,100) ;
+      this._subMenuTimer = this.invokeLater(this.showSubMenu,100) ;
     }
 	  return YES ;
   },
 
   /** @private
-    Set the focus based on whether the current Menu item is selected or not.
+    Set the focus based on whether the current menu item is selected or not.
 
     @returns Boolean
   */
   mouseExited: function(evt) {
-    var subMenu, parentMenu;
+    var parentMenu, timer;
 
+    // If we have a submenu, we need to give the user's mouse time to get
+    // to the new menu before we remove highlight.
     if (this.get('hasSubMenu')) {
-      subMenu = this.get('subMenu');
-      this.invokeLater(this.checkMouseLocation, 200);
+      // If they are exiting the view before we opened the submenu,
+      // make sure we don't open it once they've left.
+      timer = this._subMenuTimer;
+      if (timer) {
+        timer.invalidate();
+      } else {
+        this.invokeLater(this.checkMouseLocation, 100);
+      }
     } else {
       parentMenu = this.get('parentMenu');
 
