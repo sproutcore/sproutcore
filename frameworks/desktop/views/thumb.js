@@ -44,6 +44,10 @@ SC.ThumbView = SC.View.extend(
     
     var splitView = this.get('splitView');
     return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
+  },
+  
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
   }
     
 });

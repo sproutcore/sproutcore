@@ -352,8 +352,7 @@ SC.ListItemView = SC.View.extend(
     }
     
     // generate the img element...
-    classArray.push(className);
-    classArray.push('icon');
+    classArray.push(className,'icon');
     context.begin('img')
             .addClass(classArray)
             .attr('src', url)
@@ -403,8 +402,7 @@ SC.ListItemView = SC.View.extend(
     }
     
     // generate the img element...
-    classArray.push('right-icon');
-    classArray.push(className);
+    classArray.push('right-icon',className);
     context.begin('img')
       .addClass(classArray)
       .attr('src', url)
@@ -447,8 +445,7 @@ SC.ListItemView = SC.View.extend(
   */
   renderBranch: function(context, hasBranch) {
     var classArray=[];
-    classArray.push('branch');
-    classArray.push(hasBranch ? 'branch-visible' : 'branch-hidden');
+    classArray.push('branch',hasBranch ? 'branch-visible' : 'branch-hidden');
     context.begin('span')
           .addClass(classArray)
           .push('&nbsp;')
@@ -623,6 +620,23 @@ SC.ListItemView = SC.View.extend(
    }
    return NO ;
   },
+  
+  touchStart: function(evt){
+    return this.mouseDown(evt);
+  },
+  
+  touchEnd: function(evt){
+    return this.mouseUp(evt);
+  },
+  
+  touchEntered: function(evt){
+    return this.mouseEntered(evt);
+  },
+  
+  touchExited: function(evt){
+    return this.mouseExited(evt);
+  },
+  
   
   _addCheckboxActiveState: function() {
    var enabled = this.get('isEnabled');
