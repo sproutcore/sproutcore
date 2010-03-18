@@ -368,6 +368,11 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     menu.set('mouseHasEntered', YES);
     menu.set('currentMenuItem', this);
 
+    // Become first responder to show highlight
+    if (this.get('isEnabled')) {
+      this.becomeFirstResponder();
+    }
+
     if(this.get('hasSubMenu')) {
       this._subMenuTimer = this.invokeLater(this.showSubMenu,100) ;
     }
@@ -404,7 +409,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return YES ;
   },
 
-
   touchStart: function(evt){
     return YES;
   },
@@ -421,12 +425,10 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return this.mouseExited(evt);
   },
 
-
-
-
   checkMouseLocation: function() {
     var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu'),
         currentMenuItem, previousMenuItem;
+
     if (!subMenu.get('mouseHasEntered')) {
       currentMenuItem = parentMenu.get('currentMenuItem');
       if (currentMenuItem === this || currentMenuItem === null) {
@@ -435,6 +437,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
         if (previousMenuItem) {
           previousMenuItem.resignFirstResponder();
         }
+        this.resignFirstResponder();
         subMenu.remove();
       }
     }
