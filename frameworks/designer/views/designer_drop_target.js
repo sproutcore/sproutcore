@@ -104,14 +104,18 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
         cv = this.get('contentView'),
         loc = drag.get('location'),
         frame = drag.iframeFrame,
-        design, size, newView;
+        design, size, newView, defaults, layout;
     //size and location
     size = data.get('size');
     loc.x = loc.x - frame.x;
     loc.y = loc.y - frame.y;
     //setup design (use eval to make sure code comes from iframe)
     design = eval(data.get('scClass'));
-    design = design.design({layout: {top: loc.y, left: loc.x, width: size.width, height: size.height}});
+    defaults = data.get('defaults') || {};
+    layout = defaults.layout || {};
+    layout = SC.merge(layout, {top: loc.y, left: loc.x});
+    defaults.layout = layout;
+    design = design.design(defaults);
     newView = design.create({page: cv.get('page')});
     if(cv && newView) cv.appendChild(newView);
     
