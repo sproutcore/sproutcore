@@ -336,6 +336,10 @@ SC.PickerPane = SC.PalettePane.extend({
     // Make sure we are at least 7 pixels from the left edge of the screen.
     if( paneFrame.x < 7 ) paneFrame.x = 7;
     
+    if (subMenu) {
+      paneFrame.y -= Math.floor(this.get('menuHeightPadding')/2);
+    }
+    
     if (paneFrame.y < 7) {
       paneFrame.height += paneFrame.y;
       paneFrame.y = 7;
