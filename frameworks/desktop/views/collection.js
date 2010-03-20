@@ -938,6 +938,7 @@ SC.CollectionView = SC.View.extend(
       //this.replaceAllChildren(views);
       containerView.beginPropertyChanges();
       // views = containerView.get('views');
+      if (this.willRemoveAllChildren) this.willRemoveAllChildren() ;
       containerView.destroyLayer().removeAllChildren();
       
       // For all previous views that can be re-used, return them to the pool.

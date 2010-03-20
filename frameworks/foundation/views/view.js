@@ -328,7 +328,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
-      if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
+      if (!cur && this.get('isFirstResponder')) {
+        this.resignFirstResponder();
+      }
       
     // }
     return this ;
@@ -409,7 +411,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (view.parentView !== this) {
       throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
     }
-    
     // notify views
     if (view.willRemoveFromParent) view.willRemoveFromParent() ;
     if (this.willRemoveChild) this.willRemoveChild(view) ;
