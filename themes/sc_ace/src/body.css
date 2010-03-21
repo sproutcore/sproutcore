@@ -1,0 +1,5 @@
+.sc-main {
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#bbb));
+  height: 100%;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, sans-serif;
+}

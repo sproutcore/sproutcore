@@ -1,0 +1,21 @@
+/* Main */
+.disclosure.button {
+  width: 14px;
+  height: 14px;
+}
+
+.disclosure.button.open {
+  background:sprite("disclosure_open.png");
+}
+
+.disclosure.button.open.active {
+  background:sprite("disclosure_open_active.png");
+}
+
+.disclosure.button.closed {
+  background:sprite("disclosure_closed.png");
+}
+
+.disclosure.button.closed.active {
+  background:sprite("disclosure_closed_active.png");
+}

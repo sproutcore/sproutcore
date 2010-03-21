@@ -1,0 +1,1 @@
+config :all, :required => [:"sproutcore/empty_theme"]
