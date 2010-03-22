@@ -2074,7 +2074,8 @@ SC.CollectionView = SC.View.extend(
     var itemView      = this.itemViewForEvent(ev),
         content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1, 
-        info, anchor ;
+        info, anchor,
+        allowsMultipleSel = content.get('allowsMultipleSelection');
         
     info = this.mouseDownInfo = {
       event:        ev,  
@@ -2108,7 +2109,7 @@ SC.CollectionView = SC.View.extend(
 
     // if the shiftKey was pressed, then we want to extend the selection
     // from the last selected item
-    } else if (ev.shiftKey && sel && sel.get('length') > 0) {
+    } else if (ev.shiftKey && sel && sel.get('length') > 0 && allowsMultipleSel) {
       sel = this._findSelectionExtendedByShift(sel, contentIndex);
       anchor = this._selectionAnchor ; 
       this.select(sel) ;
@@ -2123,7 +2124,7 @@ SC.CollectionView = SC.View.extend(
     // item, adding it to the current selection if a modifier key was pressed.
     } else {
     
-      if((ev.shiftKey || modifierKeyPressed) && !content.get('allowsMultipleSelection')){
+      if((ev.shiftKey || modifierKeyPressed) && !allowsMultipleSel){
         this.select(null, false);
       }
     
