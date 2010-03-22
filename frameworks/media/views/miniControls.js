@@ -13,11 +13,11 @@ sc_require('views/mediaSlider');
 
   @extends SC.View
 */
-SC.MediaControlsView = SC.View.extend({
+SC.MiniMediaControlsView = SC.View.extend({
 
   target: null,
   
-  childViews: 'playButton progressView timeView minusLabelView volumeView plusLabelView theaterButton'.w(),
+  childViews: 'playButton timeView minusLabelView volumeView'.w(),
   classNames: 'sc-media-controls',
   
   playObserver: function(){
@@ -40,48 +40,24 @@ SC.MediaControlsView = SC.View.extend({
     renderStyle: 'renderImage',
     theme: ''
   }),
-  progressView: SC.mediaSlider.design({
-    layout: { top: 0, left: 20, right: 220, height:20},
-    value:0,
-    minimum: 0,
-    step:0.1,
-    valueBinding: "*owner.target.currentTime" ,
-    maximumBinding: "*owner.target.duration",
-    mediaViewBinding: "*owner.target"
-  }),
   
   timeView: SC.LabelView.design({
-    layout: { top: 0, right: 160, width: 60, height:20},
+    layout: { top: 0, left: 20, width: 60, height:20},
     classNames: 'time',
     textAlign: SC.ALIGN_CENTER,
     valueBinding: '*owner.target.time'
   }),
-  theaterButton: SC.ButtonView.design({
-    title: '',
-    icon: 'theater',
-    renderStyle: 'renderImage',
-    theme: '',
-    titleMinWidth: 35,
-    layout: { top: 0, right: 140, width: 20, height:20},
-    action: "fullScreen",
-    targetBinding: "*owner.target"
-  }),
   minusLabelView: SC.LabelView.design({
-    layout: { top: 0, right: 120, width: 20, height:20},
+    layout: { top: 0, left: 80, width: 20, height:20},
     value: '',
     icon: 'minus'
   }),
   volumeView: SC.SliderView.design({
-    layout: { top: 0, right: 20, width: 100, height:20},
+    layout: { top: 0, left: 100, width: 100, height:20},
     value:0,
     valueBinding: "*owner.target.volume" ,
     minimum: 0,
     maximum: 1,
     step: 0.01
-  }),
-  plusLabelView: SC.LabelView.design({
-    layout: { top: 0, right: 0, width: 20, height:20},
-    value: '',
-    icon: 'plus'
-  })  
+  })
 });

@@ -39,26 +39,26 @@
   line-height: 20px !important;
 }
 
-.controllers{
+.sc-media-controls{
   background: black;
   opacity:0.8;
 }
 
-.sc-theme .sc-slider-view .sc-inner{
+.sc-media-controls .sc-view.sc-slider-view .sc-inner{
   background:white;
   height:2px;
   top:9px;
 }
 
-.sc-theme .sc-slider-view .sc-inner .sc-leftcap{
+.sc-media-controls .sc-view.sc-slider-view .sc-inner .sc-leftcap{
   background:white;
 }
 
-.sc-theme .sc-slider-view .sc-inner .sc-rightcap{
+.sc-media-controls .sc-view.sc-slider-view .sc-inner .sc-rightcap{
   background:white;
 }
 
-.sc-theme .sc-slider-view .sc-handle{
+.sc-media-controls .sc-view.sc-slider-view .sc-handle{
   background:white;
   height: 10px;
   width:10px;

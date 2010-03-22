@@ -5,22 +5,20 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-
 sc_require('views/controls');
 sc_require('views/miniControls');
-
 /** 
   @class
   
-  Renders a videoView using different technologies like HTML5 video tag, 
+  Renders a audioView using different technologies like HTML5 audio tag, 
   quicktime and flash.
   
   This view wraps the different technologies so you can use one standard and 
-  simple API to play videos.
+  simple API to play audio.
   
-  You can specify and array with the order of how the technologies will degrad
+  You can specify and array with the order of how the technologies will degrade
   depending on availability. For example you can set degradeList to be 
-  ['html5', 'flash'] and it will load your video in a video tag if the 
+  ['html5', 'flash'] and it will load your audio in an audio tag if the 
   technology is available otherwise flash and if neither of the technologies 
   are available it will show a message saying that your machine needs to install
   one of this technologies.
@@ -29,28 +27,28 @@ sc_require('views/miniControls');
   @since SproutCore 1.1
 */
 
-SC.VideoView = SC.View.extend({
+SC.AudioView = SC.View.extend({
 
   /** 
-    Video view className. 
+    Audio view className. 
     @property {String}
   */
-  classNames: 'sc-video-view',
+  classNames: 'sc-audio-view',
   
   /** 
     Properties that trigger a re render of the view. If the value changes, it
-    means that the video url changed.
+    means that the audio url changed.
     
     @property {Array}
   */
   displayProperties: ['value', 'shouldAutoResize'],
   
   /** 
-    Reference to the video object once is created. 
+    Reference to the audio object once is created. 
     @property {Object}
   */
   
-  videoObject:null,
+  audioObject:null,
   
   /** 
     Array containing the technologies and the order to load them depending
@@ -70,7 +68,7 @@ SC.VideoView = SC.View.extend({
     Duration in secs
     @property {Number}
   */
-  duration: 0, //video duration in secs
+  duration: 0, //audio duration in secs
   
   /** 
     Volume. The value should be between 0 and 1
@@ -79,53 +77,35 @@ SC.VideoView = SC.View.extend({
   volume:0, //volume value from 0 to 1
   
   /** 
-    Tells you if the video is paused or not.
+    Tells you if the audio is paused or not.
     @property {Boolean}
   */
-  paused: YES, //is the video paused
+  paused: YES, //is the audio paused
 
   /** 
-    Tells you if the video is loaded.
+    Tells you if the audio is loaded.
     @property {Boolean}
   */
 
-  loaded: NO, //has the video loaded
+  loaded: NO, //has the audio loaded
   
   /** 
-    Indicates if the video has reached the end
+    Indicates if the audio has reached the end
     @property {Boolean}
   */
   
-  ended: NO, //did the video finished playing
+  ended: NO, //did the audio finished playing
   
   /** 
-    Indicates if the video is ready to be played.
+    Indicates if the audio is ready to be played.
     @property {Boolean}
   */
   
-  canPlay: NO, //can the video be played
-  
-  /** 
-    Width of the video in pixels.
-    @property {Number}
-  */
-  videoWidth:0,
-  
-  /** 
-    Width of the video in pixels.
-    @property {Number}
-  */
-  videoHeight:0,
-  
-  /** 
-    Flag to enable captions if available.
-    @property {Boolean}
-  */
-  captionsEnabled: NO,
+  canPlay: NO, //can the audio be played
   
   loadedTimeRanges:[], //loaded bits
   
-  mediaControl: 'normal', //support normal, mini, none
+  mediaControl: 'mini', //support normal, mini, none
   
   
   init: function() {
@@ -142,14 +122,14 @@ SC.VideoView = SC.View.extend({
   },
   
   normal: SC.MediaControlsView.design({
-    layout: { bottom:0, left: 0, right: 0, height: 20 },
-    targetBinding: '*parentView'
-  }),
+     layout: { bottom:0, left: 0, right: 0, height: 20 },
+     targetBinding: '*parentView'
+   }),
 
-  mini: SC.MiniMediaControlsView.design({
-    layout: { bottom:0, left: 0, right: 0, height: 20 },
-    targetBinding: '*parentView'
-  }),
+   mini: SC.MiniMediaControlsView.design({
+     layout: { bottom:0, left: 0, right: 0, height: 20 },
+     targetBinding: '*parentView'
+   }),
   
   /** 
     Formatted currentTime. (00:00)
@@ -176,7 +156,7 @@ SC.VideoView = SC.View.extend({
         switch(this.degradeList[i]){
         case "html5":
           if(SC.browser.safari){
-            context.push('<video src="'+this.get('value')+
+            context.push('<audio src="'+this.get('value')+
                           '" poster="'+this.poster+'"/>');
             this.loaded='html5';
             return;
@@ -259,40 +239,25 @@ SC.VideoView = SC.View.extend({
         	              'pluginspage="http://www.adobe.com/go/getflashplayer" />'+
         	              '</object>');
           this.loaded='flash';
-          SC.VideoView.addToVideoFlashViews(this);
+          SC.AudioView.addToAudioFlashViews(this);
           return;
         default:
-          context.push('video is not supported by your browser');
+          context.push('audio is not supported by your browser');
           return;
         }
       }
     }
   },
 
-
-  /** 
-    This function is called everytime the frame changes. This is done to get 
-    the right video dimensions for HTML5 video tag.
-    
-    @returns {void}
-  */
-  frameDidChange: function() { 
-    if(this.loaded==="html5"){
-      var fr= this.get('frame'),
-          elem = this.$('video');
-      elem.attr('width', fr.width);
-      elem.attr('height', fr.height);
-    }
-  }.observes('frame'),
   
   /** 
-    In didCreateLayer we add DOM events for video tag or quicktime.
+    In didCreateLayer we add DOM events for audio tag or quicktime.
     
     @returns {void}
   */
   didCreateLayer :function(){
     if(this.loaded==="html5"){
-      this.addVideoDOMEvents();
+      this.addAudioDOMEvents();
     }
     if(this.loaded==="quicktime"){
       this.addQTDOMEvents();
@@ -306,63 +271,63 @@ SC.VideoView = SC.View.extend({
   },
   
   /** 
-    Adds all the neccesary video DOM elements.
+    Adds all the neccesary audio DOM elements.
     
     @returns {void}
   */
-  addVideoDOMEvents: function() {
-    var videoElem, view=this;
-    videoElem = this.$('video')[0];
-    this.set('videoObject', videoElem);
-    SC.Event.add(videoElem, 'durationchange', this, function () {
+  addAudioDOMEvents: function() {
+    var audioElem, view=this;
+    audioElem = this.$('audio')[0];
+    this.set('audioObject', audioElem);
+    SC.Event.add(audioElem, 'durationchange', this, function () {
       SC.RunLoop.begin();
-      view.set('duration', videoElem.duration);
+      view.set('duration', audioElem.duration);
       SC.RunLoop.end();
     }) ;
-    SC.Event.add(videoElem, 'timeupdate', this, function () {
+    SC.Event.add(audioElem, 'timeupdate', this, function () {
       SC.RunLoop.begin();
-      view.set('currentTime', videoElem.currentTime);
+      view.set('currentTime', audioElem.currentTime);
       SC.RunLoop.end();
     }) ;
-    SC.Event.add(videoElem, 'loadstart', this, function () {
+    SC.Event.add(audioElem, 'loadstart', this, function () {
       SC.RunLoop.begin();
-      view.set('volume', videoElem.volume);
+      view.set('volume', audioElem.volume);
       SC.RunLoop.end();
     });     
-    SC.Event.add(videoElem, 'play', this, function () {
+    SC.Event.add(audioElem, 'play', this, function () {
       SC.RunLoop.begin();
       view.set('paused', NO);
       SC.RunLoop.end();
     });     
-    SC.Event.add(videoElem, 'pause', this, function () {
+    SC.Event.add(audioElem, 'pause', this, function () {
       SC.RunLoop.begin();
       view.set('paused', YES);
       SC.RunLoop.end();
     });     
-    SC.Event.add(videoElem, 'loadedmetadata', this, function () {
+    SC.Event.add(audioElem, 'loadedmetadata', this, function () {
       SC.RunLoop.begin();
-      view.set('videoWidth', videoElem.videoWidth);
-      view.set('videoHeight', videoElem.videoHeight);
+      // view.set('audioWidth', audioElem.audioWidth);
+      //       view.set('audioHeight', audioElem.audioHeight);
       SC.RunLoop.end();
     });     
        
-    SC.Event.add(videoElem, 'canplay', this, function () {
+    SC.Event.add(audioElem, 'canplay', this, function () {
       SC.RunLoop.begin();
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });     
          
-    SC.Event.add(videoElem, 'ended', this, function () {
+    SC.Event.add(audioElem, 'ended', this, function () {
       SC.RunLoop.begin();
       view.set('ended', YES);
       SC.RunLoop.end();
     });
-    SC.Event.add(videoElem, 'progress', this, function (e) {
+    SC.Event.add(audioElem, 'progress', this, function (e) {
       SC.RunLoop.begin();
       this.loadedTimeRanges=[];
-      for (var j=0, jLen = videoElem.seekable.length; j<jLen; j++){
-        this.loadedTimeRanges.push(videoElem.seekable.start(j));
-        this.loadedTimeRanges.push(videoElem.seekable.end(j));
+      for (var j=0, jLen = audioElem.seekable.length; j<jLen; j++){
+        this.loadedTimeRanges.push(audioElem.seekable.start(j));
+        this.loadedTimeRanges.push(audioElem.seekable.end(j));
       }
        try{
           var trackCount=view.GetTrackCount(),i;
@@ -377,77 +342,77 @@ SC.VideoView = SC.View.extend({
       SC.RunLoop.end();
     });     
          
-    // SC.Event.add(videoElem, 'suspend', this, function () {
+    // SC.Event.add(audioElem, 'suspend', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('suspend');
     //       SC.RunLoop.end();
     //     });     
-    // SC.Event.add(videoElem, 'load', this, function () {
+    // SC.Event.add(audioElem, 'load', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('load');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'abort', this, function () {
+    //     SC.Event.add(audioElem, 'abort', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('abort');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'error', this, function () {
+    //     SC.Event.add(audioElem, 'error', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('error');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'loadend', this, function () {
+    //     SC.Event.add(audioElem, 'loadend', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('loadend');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'emptied', this, function () {
+    //     SC.Event.add(audioElem, 'emptied', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('emptied');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'stalled', this, function () {
+    //     SC.Event.add(audioElem, 'stalled', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('stalled');
     //       SC.RunLoop.end();
     //     });     
-    // SC.Event.add(videoElem, 'loadeddata', this, function () {
+    // SC.Event.add(audioElem, 'loadeddata', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('loadeddata');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'waiting', this, function () {
+    //     SC.Event.add(audioElem, 'waiting', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('waiting');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'playing', this, function () {
+    //     SC.Event.add(audioElem, 'playing', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('playing');
     //       SC.RunLoop.end();
     //     });
-    // SC.Event.add(videoElem, 'canplaythrough', this, function () {
+    // SC.Event.add(audioElem, 'canplaythrough', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('canplaythrough');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'seeking', this, function () {
+    //     SC.Event.add(audioElem, 'seeking', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('seeking');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'seeked', this, function () {
+    //     SC.Event.add(audioElem, 'seeked', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('seeked');
     //       SC.RunLoop.end();
     //     });
-    // SC.Event.add(videoElem, 'ratechange', this, function () {
+    // SC.Event.add(audioElem, 'ratechange', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('ratechange');
     //       SC.RunLoop.end();
     //     });     
-    //     SC.Event.add(videoElem, 'volumechange', this, function () {
+    //     SC.Event.add(audioElem, 'volumechange', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('volumechange');
     //       SC.RunLoop.end();
@@ -461,8 +426,8 @@ SC.VideoView = SC.View.extend({
      @returns {void}
    */
   addQTDOMEvents: function() {
-    var vid=this._getVideoObject(),
-        videoElem = this.$()[0],
+    var vid=this._getAudioObject(),
+        audioElem = this.$()[0],
         view=this,
         dimensions;
     try{
@@ -472,75 +437,75 @@ SC.VideoView = SC.View.extend({
       this.invokeLater(this.didAppendToDocument, 100);
       return;
     }
-    this.set('videoObject', vid);
+    this.set('audioObject', vid);
     view.set('duration', vid.GetDuration()/vid.GetTimeScale());
     view.set('volume', vid.GetVolume()/256);
     dimensions=vid.GetRectangle().split(',');
-    view.set('videoWidth', dimensions[2]);
-    view.set('videoHeight', dimensions[3]);
+    // view.set('audioWidth', dimensions[2]);
+    //     view.set('audioHeight', dimensions[3]);
     
-    SC.Event.add(videoElem, 'qt_durationchange', this, function () {
+    SC.Event.add(audioElem, 'qt_durationchange', this, function () {
       SC.RunLoop.begin();
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
       SC.RunLoop.end();
     });
-    SC.Event.add(videoElem, 'qt_begin', this, function () {
+    SC.Event.add(audioElem, 'qt_begin', this, function () {
       SC.RunLoop.begin();
       view.set('volume', vid.GetVolume()/256);
       SC.RunLoop.end();
     });
-    SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
+    SC.Event.add(audioElem, 'qt_loadedmetadata', this, function () {
       SC.RunLoop.begin();
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-      var dimensions=vid.GetRectangle().split(',');
-      view.set('videoWidth', dimensions[2]);
-      view.set('videoHeight', dimensions[3]);
+      // var dimensions=vid.GetRectangle().split(',');
+      //       view.set('audioWidth', dimensions[2]);
+      //       view.set('audioHeight', dimensions[3]);
       SC.RunLoop.end();
     });
-    SC.Event.add(videoElem, 'qt_canplay', this, function () {
+    SC.Event.add(audioElem, 'qt_canplay', this, function () {
       SC.RunLoop.begin();
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });
     
-    SC.Event.add(videoElem, 'qt_ended', this, function () {
+    SC.Event.add(audioElem, 'qt_ended', this, function () {
       view.set('ended', YES);
     });
-    SC.Event.add(videoElem, 'qt_pause', this, function () {
+    SC.Event.add(audioElem, 'qt_pause', this, function () {
       SC.RunLoop.begin();
       view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       view.set('paused', YES);
     });
-    SC.Event.add(videoElem, 'qt_play', this, function () {
+    SC.Event.add(audioElem, 'qt_play', this, function () {
       SC.RunLoop.begin();
       view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       view.set('paused', NO);
     });
-    // SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
+    // SC.Event.add(audioElem, 'qt_loadedfirstframe', this, function () {
     //       console.log('qt_loadedfirstframe');
     //     });
-    // SC.Event.add(videoElem, 'qt_error', this, function () {
+    // SC.Event.add(audioElem, 'qt_error', this, function () {
     //       console.log('qt_error');
     //     });
-    // SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
+    // SC.Event.add(audioElem, 'qt_canplaythrough', this, function () {
     //       console.log('qt_canplaythrough');
     //     });
-    //     SC.Event.add(videoElem, 'qt_load', this, function () {
+    //     SC.Event.add(audioElem, 'qt_load', this, function () {
     //       console.log('qt_load');
     //     });
-    // SC.Event.add(videoElem, 'qt_progress', this, function () {
+    // SC.Event.add(audioElem, 'qt_progress', this, function () {
     //       console.log('qt_progress');
     //     });
-    //     SC.Event.add(videoElem, 'qt_waiting', this, function () {
+    //     SC.Event.add(audioElem, 'qt_waiting', this, function () {
     //       console.log('qt_waiting');
     //     });
-    //     SC.Event.add(videoElem, 'qt_stalled', this, function () {
+    //     SC.Event.add(audioElem, 'qt_stalled', this, function () {
     //       console.log('qt_stalled');
     //     });
-    //     SC.Event.add(videoElem, 'qt_volumechange', this, function () {
+    //     SC.Event.add(audioElem, 'qt_volumechange', this, function () {
     //       console.log('qt_volumechange');
     //     });
-    // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
+    // SC.Event.add(audioElem, 'qt_timechanged', this, function () {
       // SC.RunLoop.begin();
       //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       //         console.log('qt_timechanged');
@@ -553,7 +518,7 @@ SC.VideoView = SC.View.extend({
   /** 
      For Quicktime we need to simulated the timer as there is no data,
      coming back from the plugin that reports back the currentTime of the 
-     video.
+     audio.
 
      @returns {void}
    */
@@ -571,7 +536,7 @@ SC.VideoView = SC.View.extend({
     @returns {void}
   */
   seek:function(){
-    var timeInSecs, totaltimeInSecs, formattedTime, vid=this._getVideoObject();
+    var timeInSecs, totaltimeInSecs, formattedTime, vid=this._getAudioObject();
     if(this.loaded==='html5'){
       if(this.get('paused')) vid.currentTime=this.get('currentTime');
     }
@@ -613,12 +578,12 @@ SC.VideoView = SC.View.extend({
   
   
   /** 
-    Set the volume of the video.
+    Set the volume of the audio.
     
     @returns {void}
   */
   setVolume:function(){
-    var vid=this._getVideoObject();
+    var vid=this._getAudioObject();
     if(this.loaded==="html5") vid.volume=this.get('volume');
     if(this.loaded==="quicktime") vid.SetVolume(this.get('volume')*256);
     if(this.loaded==="flash") vid.setVolume(this.get('volume'));
@@ -629,7 +594,7 @@ SC.VideoView = SC.View.extend({
     @returns {void}
   */
   play: function(){
-    var vid=this._getVideoObject();
+    var vid=this._getAudioObject();
     if(this.loaded==="html5") vid.play();
     if(this.loaded==="quicktime") vid.Play();
     if(this.loaded==="flash") vid.playVideo();
@@ -641,7 +606,7 @@ SC.VideoView = SC.View.extend({
     @returns {void}
   */
   stop: function(){
-    var vid=this._getVideoObject();
+    var vid=this._getAudioObject();
     if(this.loaded==="html5")  vid.pause();
     if(this.loaded==="quicktime")  vid.Stop();
     if(this.loaded==="flash")  vid.pauseVideo();
@@ -649,7 +614,7 @@ SC.VideoView = SC.View.extend({
   },
   
   /** 
-    Plays or stops the video.
+    Plays or stops the audio.
     @returns {void}
   */
   playPause: function(){
@@ -660,17 +625,6 @@ SC.VideoView = SC.View.extend({
     }   
   },
    
-  /** 
-    Goes into fullscreen mode if available
-    @returns {void}
-  */ 
-  fullScreen: function(){
-    var vid=this._getVideoObject();
-    if(this.loaded==="html5") this.$('video')[0].webkitEnterFullScreen();
-    if(this.loaded==="flash") vid.fullScreen();
-    return; 
-  },
-  
   /** 
     Enables captions if available
     @returns {void}
@@ -696,11 +650,11 @@ SC.VideoView = SC.View.extend({
   
   
   /** 
-    Gets the right video object depending on the browser.
+    Gets the right audio object depending on the browser.
     @returns {void}
   */
-  _getVideoObject:function(){
-    if(this.loaded==="html5") return this.get('videoObject');
+  _getAudioObject:function(){
+    if(this.loaded==="html5") return this.get('audioObject');
     if(this.loaded==="quicktime") return document['qt_'+SC.guidFor(this)];
     if(this.loaded==="flash") {
       var movieName='flash_'+SC.guidFor(this);
@@ -729,23 +683,23 @@ SC.VideoView = SC.View.extend({
 });
 
 /** 
-  Hash to store references to the different flash videos.
+  Hash to store references to the different flash audios.
 */
-SC.VideoView.flashViews={};
+SC.AudioView.flashViews={};
 
 /**
   Adds the flash view to the flashViews hash.
 */
-SC.VideoView.addToVideoFlashViews = function(view) {
-  SC.VideoView.flashViews[SC.guidFor(view)]=view;
+SC.AudioView.addToAudioFlashViews = function(view) {
+  SC.AudioView.flashViews[SC.guidFor(view)]=view;
 } ;
 
 /**
   This function is called from flash to update the properties of the corresponding
   flash view.
 */
-SC.VideoView.updateProperty = function(scid, property, value) {
-  var view = SC.VideoView.flashViews[scid];
+SC.AudioView.updateProperty = function(scid, property, value) {
+  var view = SC.AudioView.flashViews[scid];
   if(view){
     SC.RunLoop.begin();
     //console.log("setting property from flash"+property+","+value);
@@ -757,6 +711,6 @@ SC.VideoView.updateProperty = function(scid, property, value) {
 /**
   Function to log events coming from flash.
 */
-SC.VideoView.logFlash = function(message) {
+SC.AudioView.logFlash = function(message) {
   console.log("FLASHLOG: "+message);
 } ;
