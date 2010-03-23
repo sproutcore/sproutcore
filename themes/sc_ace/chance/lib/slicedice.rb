@@ -1,6 +1,7 @@
 # The Slicer object takes a set of images and slices them as needed, producing a set of images
 # located in a hierarchy (for debugging purposes) in the output directory.
 # The name will be: (output)/path/to/image.png_slice_rect_here.png
+require 'rubygems'
 require 'RMagick'
 require 'FileUtils'
 require 'pp'
@@ -49,16 +50,16 @@ class Slicer
       # Crop image
       result = image.crop(x, y, width, height)
       
-      # Write image
-      FileUtils.mkdir_p @output_dir + "slices/" + File.dirname(path)
-      slice_path = @output_dir + "slices/" + path + "_" + [x, y, width, height].join("_") + ".png"
-      result.write(slice_path)
+      # Write image: Skipped because we never read it back from disk
+      # Besides, not good to put it in resources/, where it will get added to the build.
+      # FileUtils.mkdir_p @output_dir + "slices/" + File.dirname(path)
+      # slice_path = @output_dir + "slices/" + path + "_" + [x, y, width, height].join("_") + ".png"
+      # result.write(slice_path)
       
       # update definition
       definition[:width] = width
       definition[:height] = height
       definition[:key] = key
-      definition[:slice] = slice_path
       definition[:image] = result
       
       # add to new images collection
@@ -86,9 +87,12 @@ class Slicer
     
     images = @image_list
     
-    ximages = images.select {|v| v[:repeat] == "repeat-x" }
-    yimages = images.select {|v| v[:repeat] == "repeat-y" }
-    nimages = images.select {|v| v[:repeat] == "no-repeat" }
+    sprites = images.select {|v| not v[:nosprite] }
+    nonsprites = images.select {|v| v[:nosprite] }
+    
+    ximages = sprites.select {|v| v[:repeat] == "repeat-x" }
+    yimages = sprites.select {|v| v[:repeat] == "repeat-y" }
+    nimages = sprites.select {|v| v[:repeat] == "no-repeat" }
     
     plans = []
     tries.each {|try|
@@ -118,6 +122,17 @@ class Slicer
     i = 0
     
     FileUtils.mkdir_p @output_dir + "images/"
+    
+    # Write static
+    nonsprites.each {|nonsprite|
+      i += 1
+      filename = i.to_s + ".png"
+      nonsprite[:sprite_path] = "images/" + filename
+      new_image_hash[nonsprite[:key]] = nonsprite
+      nonsprite[:image].write(@output_dir + "images/" + filename)
+    }
+    
+    # Write plan
     planset.each {|plan|
       if not (plan and plan[:width] and plan[:width] > 0)
         next
@@ -248,7 +263,7 @@ class Slicer
       i[:anchor] == :left
     }
     anchor_right_images = images.select {|i|
-      i[:anchor] == :right or i[:clear]
+      i[:anchor] == :right #or i[:clear] this was causing duplication if a left anchored image was also cleared :)
     }
     
     max = 0
@@ -315,6 +330,7 @@ class Slicer
         
         row_height = [row_height, right[:height]].max
         row_space -= right[:width]
+        row_space = 0 if right[:clear]
       end
       
       # Find first (largest) image that will fit

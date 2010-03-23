@@ -1,13 +1,17 @@
 require 'set'
 
 class CSSParser
-  attr_accessor :images, :contents
+  attr_accessor :images, :contents, :static_images
   def initialize(directory, file, config)
     @directory = directory
     @file = file
-    @theme = config[:theme_name]
+    @theme = ""
+    if !config[:theme_name].nil?
+      @theme = "." + config[:theme_name]
+    end
     @config = config
     @images = {  }
+    @static_images = { }
   end
   
   def parse
@@ -31,7 +35,37 @@ class CSSParser
     theme_name = @theme
     contents.gsub!(view_rule) do |match|
       #".sc-view." + $1 + "." + theme_name # If SproutCore changes some
-      ".sc-theme .sc-view." + @theme + "." + $1
+      ".sc-theme .sc-view" + @theme + "." + $1
+    end
+    
+    boxshadow_rule = /\-sc\-box\-shadow:\s*([^;]*)/
+    contents.gsub!(boxshadow_rule) do |match|
+      "-moz-box-shadow: " + $1 + "; -webkit-box-shadow: " + $1 + "; box-shadow: " + $1
+    end
+    
+    borderradius_rule = /\-sc\-border\-radius:\s*([^;]*)/
+    contents.gsub!(borderradius_rule) do |match|
+      "-moz-border-radius: " + $1 + "; -webkit-border-radius: " + $1 + "; border-radius: " + $1
+    end
+    
+    borderradius_topleft_rule = /\-sc\-border\-top\-left\-radius:\s*([^;]*)/
+    contents.gsub!(borderradius_topleft_rule) do |match|
+      "-moz-border-radius-topleft: " + $1 + "; -webkit-border-top-left-radius: " + $1 + "; border-top-left-radius: " + $1
+    end
+    
+    borderradius_topright_rule = /\-sc\-border\-top\-right\-radius:\s*([^;]*)/
+    contents.gsub!(borderradius_topright_rule) do |match|
+      "-moz-border-radius-topright: " + $1 + "; -webkit-border-top-right-radius: " + $1 + "; border-top-right-radius: " + $1
+    end
+    
+    borderradius_bottomleft_rule = /\-sc\-border\-bottom\-left\-radius:\s*([^;]*)/
+    contents.gsub!(borderradius_bottomleft_rule) do |match|
+      "-moz-border-radius-bottomleft: " + $1 + "; -webkit-border-bottom-left-radius: " + $1 + "; border-bottom-left-radius: " + $1
+    end
+    
+    borderradius_bottomright_rule = /\-sc\-border\-bottom\-right\-radius:\s*([^;]*)/
+    contents.gsub!(borderradius_bottomright_rule) do |match|
+      "-moz-border-radius-bottomright: " + $1 + "; -webkit-border-bottom-right-radius: " + $1 + "; border-bottom-right-radius: " + $1
     end
     
     @contents = contents
@@ -42,21 +76,22 @@ class CSSParser
     
     # A whole regexp would include: ([\s,]+(repeat-x|repeat-y))?([\s,]+\[(.*)\])?
     # but let's keep it simple:
-    sprite_directive = /sprite\(\s*(["']{2}|["'].*?[^\\]['"]|[^\s]+)(.*?)\s*\)/
+    sprite_directive = /(sprite|static_url)\(\s*(["']{2}|["'].*?[^\\]['"]|[^\s]+)(.*?)\s*\)/
     contents = contents.gsub(sprite_directive) do | match |
       # prepare replacement string
       replace_with_prefix = "sprite_for("
       replace_with_suffix = ")"
       
       # get name and add to replacement
-      image_name = $1
-      args = $2
-      image_name = $1.sub(/^["'](.*)["']$/, '\1')
+      type = $1
+      image_name = $2
+      args = $3
+      image_name = $2.sub(/^["'](.*)["']$/, '\1')
       
       result_hash = { 
         :path => File.expand_path(@directory + "/" + image_name), :image => image_name,
         :repeat => "no-repeat", :rect => [], :target => "",
-        :anchor => :none, :clear => false
+        :anchor => :none, :clear => false, :nosprite => (type == "static_url")
       }
       
       # Replacement string is made to be replaced again in a second pass
@@ -65,6 +100,7 @@ class CSSParser
       # match: key words (Separated by whitespace) or rects.
       args.scan(/(\[.*?\]|[^\s]+)/) {|r|
         arg = $1.strip
+        
         if arg.match(/^\[/)
           # A rectangle specifying a slice
           full_rect = []
@@ -115,14 +151,17 @@ class CSSParser
         image = @images[key]
         result = (@config[:url_template] % [image[:sprite_path]])
         
-        if image[:anchor] == :none
-          result += " -" + image[:sprite_x].to_s + "px"
-        else
-          result += (image[:anchor] == :right ? " right" : " left")
+        # Only put repeat data if not sprited
+        if not image[:nosprite]
+          result += " #{image[:repeat]}"
+          if image[:anchor] == :none
+            result += image[:sprite_x] == 0 ? " #{image[:sprite_x]}" : " -#{image[:sprite_x]}px"
+          else
+            result += (image[:anchor] == :right ? " right" : " left")
+          end
+          result += image[:sprite_y] == 0 ? " #{image[:sprite_y]}" : " -#{image[:sprite_y]}px"
         end
         
-        result += " -" + image[:sprite_y].to_s + "px"
-        result += " " + image[:repeat]
       else
         puts "Did not find image with key: ", key
       end
