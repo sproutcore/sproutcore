@@ -228,7 +228,6 @@ SC.MenuPane = SC.PickerPane.extend(
     this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
     this.set('anchor',anchorViewOrElement);
-    this.set('preferType',SC.PICKER_MENU) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
 
     this.endPropertyChanges();

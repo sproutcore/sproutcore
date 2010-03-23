@@ -19,10 +19,14 @@ sc_require('panes/palette');
   pointer :take default [0,1,2,3,2] or custom matrix to choose one of four perfect pointer positions.Ex:
            perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
            fallback to perfect top (2)
+  menu-pointer :take default [3,0,1,2,3] or custom matrix to choose one of four perfect pointer positions.Ex:
+          perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
+          fallback to perfect bottom (3)
 */
 SC.PICKER_MENU = 'menu';
 SC.PICKER_FIXED = 'fixed';
 SC.PICKER_POINTER = 'pointer';
+SC.PICKER_MENU_POINTER = 'menu-pointer';
 /** 
   Pointer layout for perfect right/left/top/bottom
 */
@@ -98,6 +102,14 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 
   perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
   fallback to perfect top (2)
+
+  8. menu-pointer with default position pref matrix [3,0,1,2,3]:
+  {{{
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    }).popup(anchor, SC.PICKER_MENU_POINTER);
+  }}}
+  perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
+  fallback to perfect bottom (3)
   
   @extends SC.PalettePane
   @since SproutCore 1.0
@@ -252,6 +264,7 @@ SC.PickerPane = SC.PalettePane.extend({
           picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu')) ;
           break;
         case SC.PICKER_POINTER:
+        case SC.PICKER_MENU_POINTER:
           // apply pointer re-position rule
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
           break;
@@ -359,7 +372,9 @@ SC.PickerPane = SC.PalettePane.extend({
   },
 
   /** @private
-    re-position rule for triangle pointer picker: take default [0,1,2,3,2] or custom matrix to choose one of four perfect pointer positions.
+    re-position rule for triangle pointer picker: take default [0,1,2,3,2] for
+    picker, [3,0,1,2,3] for menu picker or custom matrix to choose one of four
+    perfect pointer positions.
   */
   fitPositionToScreenPointer: function(w, f, a) {
     // initiate perfect positions matrix
@@ -385,9 +400,13 @@ SC.PickerPane = SC.PalettePane.extend({
                       [prefP1[3][1]>0 ? 0 : 0-prefP1[3][1], prefP2[3][0]<w.width ? 0 : prefP2[3][0]-w.width, prefP2[3][1]<w.height ? 0 : prefP2[3][1]-w.height, prefP1[3][0]>0 ? 0 : 0-prefP1[3][0]]];
 
     if(!this.preferMatrix || this.preferMatrix.length !== 5) {
-      // default re-position rule : perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
+      // menu-picker default re-position rule :
+      // perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
+      // fallback to perfect bottom (3)
+      // picker default re-position rule :
+      // perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
       // fallback to perfect top (2)
-      this.set('preferMatrix', [0,1,2,3,2]) ;
+      this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,0,1,2,3] : [0,1,2,3,2]) ;
     }
     var m = this.preferMatrix;
     //var pointer = this.contentView.childViews[this.contentView.childViews.length-1];
@@ -445,7 +464,7 @@ SC.PickerPane = SC.PalettePane.extend({
   render: function(context, firstTime) {
     var ret = sc_super();
     if (context.needsContent) {
-      if (this.get('preferType') == SC.PICKER_POINTER) {
+      if (this.get('preferType') == SC.PICKER_POINTER || this.get('preferType') == SC.PICKER_MENU_POINTER) {
         context.push('<div class="sc-pointer '+this.get('pointerPos')+'" style="margin-top: '+this.get('pointerPosY')+'px"></div>');
         context.addClass(this.get('pointerPos'));
       }
