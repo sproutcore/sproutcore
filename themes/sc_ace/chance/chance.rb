@@ -23,6 +23,8 @@ require 'css'
 require 'slicedice'
 
 require 'optparse'
+require 'pp'
+require 'FileUtils'
 
 config = {}
 argparser = OptionParser.new {|opts|
@@ -66,16 +68,13 @@ argparser = OptionParser.new {|opts|
 }
 
 argparser.parse!
-if ARGV.length == 0
-  puts "Error: No theme name specified. Example theme name: ace.light"
-  exit
-else
+if ARGV.length > 0
   config[:theme_name] = ARGV[0]
 end
 
-
 require 'find'
 images = {}
+static_images = {}
 parsers = []
 Find.find(config[:input]) do |f|
   if f =~ /^\.\/(resources)|\/\./
@@ -86,8 +85,30 @@ Find.find(config[:input]) do |f|
     parsers << parser
     parser.parse
     images.merge! parser.images
+    static_images.merge! parser.static_images
   end
 end
+
+#---------------------------------------------------------------------------
+# TODO: ?
+#   I should probably make this a boolean option and wrap this in an if
+#   statement based on that option.
+#---------------------------------------------------------------------------
+# Copy all non-sprited images to respective dirs.
+if static_images.length > 0
+  static_images.values.each do |hsh|
+    src_path = hsh[:path]
+    match = /((\/images\/.*)(\/.*(\.png|\.jpg|\.gif)))/.match(src_path)
+    if match
+      location = match[2]
+      new_loc = "#{config[:output].sub(/\/$/,'')}#{location}"
+      FileUtils.mkdir_p(new_loc) if !File.exist?(new_loc)
+      FileUtils.cp("#{src_path}", new_loc) if File.exist?(src_path)
+    end
+  end
+end
+# END Non-sprited image copy 
+
 
 slicer = Slicer.new(config)
 slicer.images = images
