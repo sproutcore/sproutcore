@@ -125,6 +125,8 @@ SC.VideoView = SC.View.extend({
   
   loadedTimeRanges:[], //loaded bits
   
+  poster: null,
+  
   mediaControl: 'normal', //support normal, mini, none
   
   
@@ -176,8 +178,11 @@ SC.VideoView = SC.View.extend({
         switch(this.degradeList[i]){
         case "html5":
           if(SC.browser.safari){
-            context.push('<video src="'+this.get('value')+
-                          '" poster="'+this.poster+'"/>');
+            context.push('<video src="'+this.get('value')+'"');
+            if(this.poster){
+              context.push(' poster="'+this.poster+'"');
+            }
+            context.push('/>');
             this.loaded='html5';
             return;
           }
