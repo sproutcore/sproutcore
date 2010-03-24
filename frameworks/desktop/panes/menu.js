@@ -82,8 +82,9 @@ SC.MenuPane = SC.PickerPane.extend(
   /**
     The size of the menu. This will set a CSS style on the menu that can be
     used by the current theme to style the appearance of the control. This
-    value will also determine the default itemHeight, itemSeparatorHeight and
-    menuHeightPadding if you don't explicitly set these properties.
+    value will also determine the default itemHeight, itemSeparatorHeight,
+    menuHeightPadding, and submenuOffsetX if you don't explicitly set these
+    properties.
 
     Your theme can override the default values for each control size. For
     example, to set the height of menu items for small menus, you could set
@@ -149,6 +150,17 @@ SC.MenuPane = SC.PickerPane.extend(
     @default null
   */
   menuHeightPadding: null,
+
+  /**
+    The amount of offset x while positioning submenu.
+
+    If you don't specify a value, the padding will be inferred from the
+    controlSize.
+
+    @type Number
+    @default null
+  */
+  submenuOffsetX: null,
 
   /**
     The last menu item to be selected by the user.
@@ -455,26 +467,31 @@ SC.MenuPane = SC.PickerPane.extend(
         this.setIfNull('itemHeight', SC.MenuPane.TINY_MENU_ITEM_HEIGHT);
         this.setIfNull('itemSeparatorHeight', SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT);
         this.setIfNull('menuHeightPadding', SC.MenuPane.TINY_MENU_HEIGHT_PADDING);
+        this.setIfNull('submenuOffsetX', SC.MenuPane.TINY_SUBMENU_OFFSET_X);
         break;
       case SC.SMALL_CONTROL_SIZE:
         this.setIfNull('itemHeight', SC.MenuPane.SMALL_MENU_ITEM_HEIGHT);
         this.setIfNull('itemSeparatorHeight', SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT);
         this.setIfNull('menuHeightPadding', SC.MenuPane.SMALL_MENU_HEIGHT_PADDING);
+        this.setIfNull('submenuOffsetX', SC.MenuPane.SMALL_SUBMENU_OFFSET_X);
         break;
       case SC.REGULAR_CONTROL_SIZE:
         this.setIfNull('itemHeight', SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT);
         this.setIfNull('itemSeparatorHeight', SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT);
         this.setIfNull('menuHeightPadding', SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING);
+        this.setIfNull('submenuOffsetX', SC.MenuPane.REGULAR_SUBMENU_OFFSET_X);
         break;
       case SC.LARGE_CONTROL_SIZE:
         this.setIfNull('itemHeight', SC.MenuPane.LARGE_MENU_ITEM_HEIGHT);
         this.setIfNull('itemSeparatorHeight', SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT);
         this.setIfNull('menuHeightPadding', SC.MenuPane.LARGE_MENU_HEIGHT_PADDING);
+        this.setIfNull('submenuOffsetX', SC.MenuPane.LARGE_SUBMENU_OFFSET_X);
         break;
       case SC.HUGE_CONTROL_SIZE:
         this.setIfNull('itemHeight', SC.MenuPane.HUGE_MENU_ITEM_HEIGHT);
         this.setIfNull('itemSeparatorHeight', SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT);
         this.setIfNull('menuHeightPadding', SC.MenuPane.HUGE_MENU_HEIGHT_PADDING);
+        this.setIfNull('submenuOffsetX', SC.MenuPane.HUGE_SUBMENU_OFFSET_X);
         break;
     }
 
@@ -1049,19 +1066,24 @@ SC._menu_fetchItem = function(k) {
 SC.MenuPane.TINY_MENU_ITEM_HEIGHT = 10;
 SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT = 2;
 SC.MenuPane.TINY_MENU_HEIGHT_PADDING = 2;
+SC.MenuPane.TINY_SUBMENU_OFFSET_X = 0;
 
 SC.MenuPane.SMALL_MENU_ITEM_HEIGHT = 16;
 SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT = 7;
 SC.MenuPane.SMALL_MENU_HEIGHT_PADDING = 4;
+SC.MenuPane.SMALL_SUBMENU_OFFSET_X = 2;
 
 SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT = 20;
 SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT = 9;
 SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING = 6;
+SC.MenuPane.REGULAR_SUBMENU_OFFSET_X = 2;
 
 SC.MenuPane.LARGE_MENU_ITEM_HEIGHT = 60;
 SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT = 20;
 SC.MenuPane.LARGE_MENU_HEIGHT_PADDING = 0;
+SC.MenuPane.LARGE_SUBMENU_OFFSET_X = 4;
 
 SC.MenuPane.HUGE_MENU_ITEM_HEIGHT = 20;
 SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT = 9;
 SC.MenuPane.HUGE_MENU_HEIGHT_PADDING = 0;
+SC.MenuPane.HUGE_SUBMENU_OFFSET_X = 0;

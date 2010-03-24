@@ -334,6 +334,12 @@ SC.PickerPane = SC.PalettePane.extend({
   */
   fitPositionToScreenMenu: function(windowFrame, paneFrame, subMenu) {
 
+    // Set up init location for submenu
+    if (subMenu) {
+      paneFrame.x -= this.get('submenuOffsetX');
+      paneFrame.y -= Math.floor(this.get('menuHeightPadding')/2);
+    }
+
     // If the right edge of the pane is within 20 pixels of the right edge
     // of the window, we need to reposition it.
     if( (paneFrame.x + paneFrame.width) > (windowFrame.width-20) ) {
@@ -348,10 +354,6 @@ SC.PickerPane = SC.PalettePane.extend({
 
     // Make sure we are at least 7 pixels from the left edge of the screen.
     if( paneFrame.x < 7 ) paneFrame.x = 7;
-    
-    if (subMenu) {
-      paneFrame.y -= Math.floor(this.get('menuHeightPadding')/2);
-    }
     
     if (paneFrame.y < 7) {
       paneFrame.height += paneFrame.y;
