@@ -12,7 +12,7 @@
 config :all, 
   :layout         => 'sproutcore:lib/index.rhtml',
   :test_layout    => 'sproutcore:lib/index.rhtml',
-  :test_required  => ['sproutcore/testing', 'sproutcore/empty_theme'],
+  :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug', 'sproutcore/testing']
 
 # in debug mode, combine the JS for SC by default.  This will improve perf
@@ -36,7 +36,8 @@ config :media,      :required => [:desktop]
 
 # APP-LEVEL FRAMEWORKS
 %w(mobile designer).each do |app_framework|
-  config app_framework, :required => [:runtime, :datastore, :foundation]
+  config app_framework, :required => [:runtime, :datastore, :foundation],
+		:test_required => ["sproutcore/testing", :empty_theme]
 end
 
 config :mobile, 
