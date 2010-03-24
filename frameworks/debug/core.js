@@ -71,6 +71,11 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
     if (key === "superclass") continue ;
     if (key === "document") continue ;
 
+    // Avoid TypeError's in WebKit based browsers
+    if (obj.type && obj.type === 'file') {
+      if (key === 'selectionStart' || key === 'selectionEnd') continue;
+    }
+
     val = obj[key];
     if (key === "SproutCore") key = "SC";
     t   = SC.typeOf(val);
