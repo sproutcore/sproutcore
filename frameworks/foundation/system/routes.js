@@ -6,527 +6,417 @@
 // ==========================================================================
 
 /**
-  @class
-  
-  Routes makes it possible to load a location in the browser.
-  
-  This is useful when application need to change state depending upon the URL 
-  change. Applications can support deep-linking using routes, which means user 
-  can type specific URL to see certain state of the app e.g.
-  http://localhost:4020/routes_demo#Documents/Photographs
-  
-  To use Routes, first add routes by using SC.routes.add(route, target, 
-  method).
-  
-  - *route* - Route is the part of the URL that come after hash (#).
-  - *target* - Object whose route handler needs to be invoked.
-  - *method* - Method that is the route handler.
-  
-  This registers the route to the routes system. When application's URL 
-  matches a registered route, system triggers the route handler. Route handler 
-  should contain the app logic to bring the app to the required state.
-  
-  Second thing to do with routes is to set location. Whenever you want to 
-  register any URL location in browser history you can use 
-  SC.routes.set('location', 'some_path'); 
-  
-  This will register the URL to browser history and also change the URL of the 
-  application. Ideally when you set the location you would like route handler 
-  to get invoked. You should have a route registered to match this pattern of 
-  the location.
-  
-  h2. Example
+  SC.routes manages the browser location. You can change the hash part of the
+  current location. The following code
   
   {{{
-    SC.routes.add(':', RoutesDemo, 'routeHandler');
+    SC.routes.set('location', 'notes/edit/4');
   }}}
   
-  This route would match any URL change. Whatever comes after # would get 
-  passed as parameter. RouteDemo is the object that contains method 
-  'routeHandler'.
+  will change the location to http://domain.tld/my_app#notes/edit/4. Adding
+  routes will register a handler that will be called whenever the location
+  changes and matches the route:
   
   {{{
-    SC.routes.set('location', 'Documents/Photographs');
+    SC.routes.add(':controller/:action/:id', MyApp, MyApp.route);
   }}}
   
-  Doing this changes the location to #Documents/Photographs. Part after #, 
-  Documents/Photographs in this case, gets passed as parameter to route 
-  handler.
+  You can pass additional parameters in the location hash that will be relayed
+  to the route handler:
   
-  If your url has a route, the corresponding routeHandler is fired only after 
-  the app's main function is executed. If you need the routeHandlers to be fired
-  much before running main(), then you probably read the location hash manually, 
-  possibly in the bootstrap of your app and not use routes.
-
-  @extends SC.Object
-  @since SproutCore 1.0
+  {{{
+    SC.routes.set('location', 'notes/show/4?format=xml&language=fr');
+  }}}
+  
+  The syntax for the location hash is described in the location property
+  documentation, and the syntax for adding handlers is described in the
+  add method documentation.
+  
+  Browsers keep track of the locations in their history, so when the user
+  presses the 'back' or 'forward' button, the location is changed, SC.route
+  catches it and calls your handler. Except for Internet Explorer versions 7
+  and earlier, which do not modify the history stack when the location hash
+  changes.
+  
+  @since SproutCore 1.1
 */
-SC.routes = SC.Object.create(
-/** @scope SC.routes.prototype */ {
+SC.routes = SC.Object.create({
+    
+  /** @private
+    A boolean value indicating whether or the ping method has been called
+    to setup the SC.routes.
   
-  // set this property to your current app lication
-  location: function(key,value) {
-    if (value !== undefined) {
-      if (value === null) value = '' ;
-      
-      // convert an object hash to a string, if it was passed.
-      if (typeof(value) == "object") {
-        
-        // get the original route and any params
-        var parts = value.route ? value.route.split('&') : [''] ,
-            route = parts.shift() ,
-            params = {} ;
-        parts.forEach(function(p) {
-          var bits = p.split('=') ;
-          params[bits[0]] = bits[1] ;
-        }) ;
-        
-        // overlay any params passed in the object.
-        for(key in value) {
-          if (!value.hasOwnProperty(key)) continue ;
-          if (key != 'route') {
-            params[key] = encodeURIComponent(''+value[key]) ;
-          }
-        }
-        
-        // now build params.
-        parts = [route] ;
-        for(key in params) {
-          if (!params.hasOwnProperty(key)) continue ;
-          parts.push([key,params[key]].join('=')) ;          
-        }
-        
-        // and combine.
-        value = parts.join('&') ;
-      }
-      
-      if (this._location != value) {
-        this._location = value ;
-        this._setWindowLocation(value) ;
-        //this.gotoRoute(value) ;
-      }
-    }
-    return this._location ;
-  }.property(),
-  
-  /**
-    Ensures we are at the current route location.
+    @property
+    @type {Boolean}
   */
-  ping: function() { 
-    if (!this._didSetupHistory) {
-      this._didSetupHistory = true ;
-      this._setupHistory() ;
+  _didSetup: NO,
+  
+  
+  /** @private
+    Internal representation of the current location hash.
+  
+    @property
+    @type {String}
+  */
+  _location: null,
+  
+  /** @private
+    Routes are stored in a tree structure, this is the root node.
+  
+    @property
+    @type {SC.routes._Route}
+  */
+  _firstRoute: null,
+  
+  /** @private
+    Internal method used to extract and merge the parameters of a URL.
+    
+    @returns {Hash}
+  */
+  _extractParametersAndRoute: function(obj) {
+    var params = {},
+        route = obj.route || '',
+        separator, parts, i, len, crumbs, key;
+    
+    separator = (route.indexOf('?') < 0 && route.indexOf('&') >= 0) ? '&' : '?';
+    parts = route.split(separator);
+    route = parts[0];
+    if (parts.length === 1) {
+      parts = [];
+    } else if (parts.length === 2) {
+      parts = parts[1].split('&');
+    } else if (parts.length > 2) {
+      parts.shift();
     }
-    this._checkWindowLocation(); 
+    
+    // extract the parameters from the route string
+    len = parts.length;
+    for (i = 0; i < len; ++i) {
+      crumbs = parts[i].split('=');
+      params[crumbs[0]] = crumbs[1];
+    }
+    
+    // overlay any parameter passed in obj
+    for (key in obj) {
+      if (obj.hasOwnProperty(key) && key !== 'route') {
+        params[key] = '' + obj[key];
+      }
+    }
+    
+    // build the route
+    parts = [];
+    for (key in params) {
+      parts.push([key, params[key]].join('='));
+    }
+    params.params = separator + parts.join('&');
+    params.route = route;
+    
+    return params;
   },
   
   /**
-    Register a route here.  Routes have the following format:
+    The current location hash. It is the part in the browser's location after
+    the '#' mark.
     
-    static/route/path -- matches this path only.
-    static/route/:path -- matches any static/route, :path passed as param.
-    static/ *route -- matches any static, route gets rest of URL.
+    The following code
     
-    parameters can also be passed using &.
-    static/route&param1=value&param2=value2
+    {{{
+      SC.routes.set('location', 'notes/edit/4');
+    }}}
     
-    @param {string} route
-    @param {Object} target
-    @param {Function or String} method or method name on target
-    @returns {SC.routes} receiver
+    will change the location to http://domain.tld/my_app#notes/edit/4 and call
+    the correct route handler if it has been registered with the add method.
+    
+    You can also pass additional parameters. They will be relayed to the route
+    handler. For example, the following code
+    
+    {{{
+      SC.routes.add(':controller/:action/:id', MyApp, MyApp.route);
+      SC.routes.set('location', 'notes/show/4?format=xml&language=fr');
+    }}}
+    
+    will change the location to 
+    http://domain.tld/my_app#notes/show/4?format=xml&language=fr and call the
+    MyApp.route method with the following argument:
+    
+    {{{
+      { route: 'notes/show/4',
+        params: '?format=xml&language=fr',
+        controller: 'notes',
+        action: 'show',
+        id: '4',
+        format: 'xml',
+        language: 'fr' }
+    }}}
+    
+    The location can also be set with a hash, the following code
+    
+    {{{
+      SC.routes.set('location',
+        { route: 'notes/edit/4', format: 'xml', language: 'fr' });
+    }}}
+    
+    will change the location to
+    http://domain.tld/my_app#notes/show/4?format=xml&language=fr.
+    
+    The 'notes/show/4&format=xml&language=fr' syntax for passing parameters,
+    using a '&' instead of a '?', as used in SproutCore 1.0 is still supported.
+    
+    @property
+    @type {String}
   */
-  add: function(route, target, method) {
-    // normalize the target/method
-    if (method===undefined && SC.typeOf(target) === SC.T_FUNCTION) {
-      method = target; target = null ;
-    } else if (SC.typeOf(method) === SC.T_STRING) {
-      method = target[method] ;
+  location: function(key, value) {
+    var crumbs;
+    
+    if (value !== undefined) {
+      if (value === null) {
+        value = '';
+      }
+      
+      if (typeof(value) === 'object') {
+        crumbs = this._extractParametersAndRoute(value);
+        value = crumbs.route + crumbs.params;
+      }
+      
+      this._location = value;
+      window.location.hash = value === '' ? '#' : encodeURI(value);
+      
+      return this;
+    }
+    return this._location;
+  }.property(),
+  
+  /**
+    You usually don't need to call this method. It is done automatically after
+    the application has been initialized.
+    
+    It registers for the hashchange event if available. If not, it creates a
+    timer that looks for location changes every 150ms.
+  */
+  ping: function() {
+    var that;
+    
+    if (!this._didSetup) {
+      this._didSetup = YES;
+      
+      if (this.get('supportsOnHashChange')) {
+        this.hashChange();
+        SC.Event.add(window, 'hashchange', this, this.hashChange);
+      
+      } else {
+        // we don't use a SC.Timer because we don't want
+        // a run loop to be triggered at each ping
+        that = this;
+        this._invokeHashChange = function() {
+          that.hashChange();
+          setTimeout(that._invokeHashChange, 100);
+        };
+        this._invokeHashChange();
+      }
+    }
+  },
+  
+  /**
+    Whether the browser supports HTML5 history management.
+    
+    Code copied from Google's closure library which is under the Apache 2
+    license.
+    
+    {@link http://closure-library.googlecode.com/svn/trunk/closure/goog/history/history.js}
+    {@link http://www.w3.org/TR/html5/history.html}
+    @property
+    @returns {Boolean}
+  */
+  supportsOnHashChange: function() {
+    return SC.browser.isSafari && SC.browser.compareVersion(532,1) >= 0 ||
+           SC.browser.isMozilla && SC.browser.compareVersion(1,9,2) >= 0 ||
+           SC.browser.isIE && document.documentMode >= 8;
+  }.property().cacheable(),
+  
+  /**
+    Event handler for the hashchange event. Called automatically by the browser
+    if it supports the hashchange event, or by our timer if not.
+  */
+  hashChange: function(event) {
+    var loc = window.location.hash;
+    
+    loc = (loc && loc.length > 0) ? loc.slice(1, loc.length) : '';
+    if (!SC.browser.isMozilla) {
+      // because of bug https://bugzilla.mozilla.org/show_bug.cgi?id=483304
+      loc = decodeURI(loc);
     }
     
-    var parts = route.split('/') ;
-    if (!this._routes) this._routes = SC.routes._Route.create() ;
-    this._routes.addRoute(parts, target, method) ;
+    if (this.get('location') !== loc) {
+      SC.RunLoop.begin();
+      this.set('location', loc);
+      SC.RunLoop.end();
+    }
+  },
+  
+  /**
+    Adds a route handler. Routes have the following format:
+      - 'users/show/5' is a static route and only matches this exact string,
+      - ':action/:controller/:id' is a dynamic route and the handler will be
+        called with the 'action', 'controller' and 'id' parameters passed in a
+        hash,
+      - '*url' is a wildcard route, it matches the whole route and the handler
+        will be called with the 'url' parameter passed in a hash.
+    
+    Route types can be combined, the following are valid routes:
+      - 'users/:action/:id'
+      - ':controller/show/:id'
+      - ':controller/ *url' (ignore the space, because of jslint)
+    
+    @param {String} route the route to be registered
+    @param {Object} target the object on which the method will be called, or
+      directly the function to be called to handle the route
+    @param {Function} method the method to be called on target to handle the
+      route, can be a function or a string
+  */
+  add: function(route, target, method) {
+    if (!this._didSetup) {
+      this.invokeLast(this.ping);
+    }
+    
+    if (method === undefined && SC.typeOf(target) === SC.T_FUNCTION) {
+      method = target;
+      target = null;
+    } else if (SC.typeOf(method) === SC.T_STRING) {
+      method = target[method];
+    }
+    
+    if (!this._firstRoute) this._firstRoute = this._Route.create();
+    this._firstRoute.add(route.split('/'), target, method);
+    
     return this;
   },
   
   /**
-    Eval routes.
-    
-    @param {String} route
+    Observer of the 'location' property that calls the correct route handler
+    when the location changes.
   */
-  gotoRoute: function(route) {
-    var params = {},
-        parts, routeHandler, target, method ;
+  locationDidChange: function() {
+    var firstRoute = this._firstRoute,
+        location = this.get('location'),
+        params, route;
     
-    // save this route for window location sensing
-    this._lastRoute = route ;
-    
-    // step 1: split out parameters
-    parts = route.split('&') ;
-    if (parts && parts.length > 0) {
-      route = parts.shift() ;
-      parts.forEach(function(part) {
-        var param = part.split('=') ;
-        if (param && param.length > 1) params[param[0]] = decodeURIComponent(param[1]) ;
-      }) ;
-    } else route = '' ;
-    
-    // step 2: split our route parts
-    parts = route.split('/') ;
-    
-    // step 3: evaluate route.
-    if (!this._routes) this._routes = SC.routes._Route.create() ;
-    
-    routeHandler = this._routes.functionForRoute(parts,params) ;
-    
-    if (routeHandler) {
-      target = routeHandler._target;
-      method = routeHandler._method;
-      if (method) method.call(target, params);
+    if (firstRoute) {
+      params = this._extractParametersAndRoute({ route: location });
+      location = params.route;
+      delete params.route;
+      delete params.params;
+      route = firstRoute.routeForParts(location.split('/'), params);
+      if (route && route.target && route.method) {
+        route.method.call(route.target, params);
+      }
     }
-      //else console.log('could not find route for: "'+route+'"') ;
-  },
+  }.observes('location'),
   
-  /** @private */
-  init: function() {
-    arguments.callee.base.call(this) ;
-    if (SC.browser.isSafari && parseInt(SC.browser.version,0) < 417) {
-      SC.mixin(this,this.browserFuncs.safari) ;  
-    } else if (SC.browser.isIE) {
-      SC.mixin(this,this.browserFuncs.ie) ;  
-    } else if (SC.browser.isMozilla) {
-      SC.mixin(this,this.browserFuncs.firefox);
-    }
-    this._didSetupHistory = false ;
-  },
-  
-  // use this method instead of invokeLater() to check windowLocation since
-  // we don't want to trigger runLoops.
-  invokeCheckWindowLocation: function(after) {
-    var f = this.__checkWindowLocation, that = this;
-    if (!f) {
-      f = this.__checkWindowLocation = function() {
-        that._checkWindowLocation();
-      };
-    }
-    setTimeout(f, after);
-  },
-  
-  /** @private
-    _checkWindowLocation and _setWindowLocation are implemented separately for
-    each browser.  Below are the implementations, which get copied during init.
+  /**
+    @private
+    @class
+
+    SC.routes._Route is a class used internally by SC.routes. The routes defined by your
+    application are stored in a tree structure, and this is the class for the
+    nodes.
   */
-  browserFuncs: {
-    
-    // for Safari2 and earlier.
-    safari: {
-      
-      _setupHistory: function() {
-        // get initial cloc.
-        var cloc = location.hash ;
-        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-        this._cloc = cloc ;
-        
-        // create back stack.
-        this._backStack = [] ;
-        this._backStack.length = history.length ;
-        this._backStack.push(cloc) ;
-        
-        // create forward stack.
-        this._forwardStack = [] ;
-        
-        this.invokeCheckWindowLocation(1000) ;
-      },
-      
-      _checkWindowLocation: function() { 
-        // The way we know the user has moved forward or back in the history 
-        // is when the length of the history array no longer matched our own 
-        // copy of the history. However, when we first change locations, it 
-        // takes a little while for Safari to catch up.  So what we do instead 
-        // is first check to see if Safari's length has changed from its last 
-        // known length and only then check for a delta.
-        var historyDidChange = (history.length - this._lastLength) !== 0,
-            delta = (historyDidChange) ? (history.length - this._backStack.length) : 0 ,
-            i, iLen;
-        this._lastLength = history.length ;
-        
-        if (historyDidChange) console.log('historyDidChange') ;
-        
-        // if the history length has changed, then we need to move forward or 
-        // back in the history.
-        if (delta) {
-          if (delta < 0) { // back button has been pushed
-            
-            // shift out the current loc.
-            this._forwardStack.push(this._cloc) ; 
-            
-            // shift out other items.
-            for(i=0, iLen = Math.abs(delta+1); i < iLen;i++) {
-              this._forwardStack.push(this._backStack.pop()) ;
-            }
-            
-            // set new cloc.
-            this._cloc = this._backStack.pop() ;
-            
-            
-          } else { // forward button has been pushed
-            
-            // shift out the current loc.
-            this._backStack.push(this._cloc) ;
-            
-            for(i=0, iLen = Math.abs(delta-1); i < iLen; i++) {
-              this._backStack.push(this._forwardStack.pop()) ;
-            }
-            
-            this._cloc = this._forwardStack.pop() ;
-          }
-          
-        // if the history has changed but the delta hasn't, then that means
-        // a new location was set via _setWindowLocation().  Normally we would
-        // call gotoRoute in that method, but doing so will crash Safari.
-        // Instead, we wait until Safari registers the change and then do the
-        // route change.
-        } else if (historyDidChange && this._locationDidChange) {
-          this.gotoRoute(this._cloc) ;
-          this._locationDidChange = false ;
-        }
-        
-        var cloc = this._cloc,
-            loc = this.get('location') ;
-        if (cloc != loc) {
-          this.set('location',(cloc) ? cloc : '') ;
-          this.gotoRoute(cloc) ;
-        }
-        
-        this.invokeCheckWindowLocation(150) ;
-      },
-      
-      _setWindowLocation: function(loc) {
-        var cloc = this._cloc ;
-        if (cloc != loc) {
-          this._backStack.push(this._cloc) ;
-          this._forwardStack.length = 0 ;
-          this._cloc = loc ;          
-          location.hash = (loc && loc.length > 0) ? loc : '' ;
-          this._locationDidChange = true ;
-        }
-      }
-      
-    },
-    
-    // for IE.
-    ie: {
-      _setupHistory: function() {
-        this.invokeCheckWindowLocation(1000) ;
-      },
-      
-      _checkWindowLocation: function() {
-        var loc = this.get('location'),
-            cloc = location.hash ;
-        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-        if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
-        this.invokeCheckWindowLocation(150) ;
-      },
-      
-      _setWindowLocation: function(loc) {
-        //console.log('_setWindowLocation('+loc+')') ;
-        var cloc = location.hash ;
-        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-        if (cloc != loc) {
-          location.hash = (loc && loc.length > 0) ? loc : '#' ;
-        }
-        this.gotoRoute(loc) ;
-      }
-    },
-    
-    // Firefox
-    // Because of bugs:
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=378962
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=483304
-    firefox: {
-      
-      _checkWindowLocation: function() {
-        var loc = this.get('location'),
-            cloc = location.hash ;
-        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-        if (cloc != loc) {
-          SC.RunLoop.begin();
-          this.set('location',(cloc) ? cloc : '') ;
-          SC.RunLoop.end();
+  _Route: SC.Object.extend(
+  /** @scope SC.routes._Route.prototype */ {
+
+    target: null,
+
+    method: null,
+
+    staticRoutes: null,
+
+    dynamicRoutes: null,
+
+    wildcardRoutes: null,
+
+    add: function(parts, target, method) {
+      var part, nextRoute;
+
+      // clone the parts array because we are going to alter it
+      parts = SC.clone(parts);
+
+      if (!parts || parts.length === 0) {
+        this.target = target;
+        this.method = method;
+
+      } else {
+        part = parts.shift();
+
+        // there are 3 types of routes
+        switch (part.slice(0, 1)) {
+
+        // 1. dynamic routes
+        case ':':
+          part = part.slice(1, part.length);
+          if (!this.dynamicRoutes) this.dynamicRoutes = {};
+          if (!this.dynamicRoutes[part]) this.dynamicRoutes[part] = this.constructor.create();
+          nextRoute = this.dynamicRoutes[part];
+          break;
+
+        // 2. wildcard routes
+        case '*':
+          part = part.slice(1, part.length);
+          if (!this.wildcardRoutes) this.wildcardRoutes = {};
+          nextRoute = this.wildcardRoutes[part] = this.constructor.create();
+          break;
+
+        // 3. static routes
+        default:
+          if (!this.staticRoutes) this.staticRoutes = {};
+          if (!this.staticRoutes[part]) this.staticRoutes[part] = this.constructor.create();
+          nextRoute = this.staticRoutes[part];
         }
 
-        this.invokeCheckWindowLocation(150) ;
-      },
-      
-      _setWindowLocation: function(loc) {
-        //console.log('_setWindowLocation('+loc+')') ;
-        var cloc = location.hash ;
-        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-        if (cloc != loc) {
-          location.hash = (loc && loc.length > 0) ? loc : '#' ;
-        }
-        this.gotoRoute(loc) ;
-      }
-      
-    }
-  },
-  
-  /** @private */
-  _setupHistory: function() {
-    var that = this ;
-    this.invokeCheckWindowLocation(1000) ;
-  },
-  
-  /** @private */
-  _checkWindowLocation: function() {
-    var loc = this.get('location'), cloc;
-    if(location.hash !== this._locationCache){
-      cloc = decodeURI(location.hash) ;
-      this._locationCacheDecoded = cloc;
-      this._locationCache = location.hash;
-    }
-    else cloc = this._locationCacheDecoded ;
-    
-    cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-    if (cloc !== loc) {
-      SC.RunLoop.begin();
-      this.set('location',(cloc) ? cloc : '') ;
-      SC.RunLoop.end();
-    }
-    
-    this.invokeCheckWindowLocation(150) ;
-  },
-  
-  /** @private */
-  _setWindowLocation: function(loc) {
-    //console.log('_setWindowLocation('+loc+')') ;
-    var cloc = location.hash ;
-    cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-    if (cloc != loc) {
-      location.hash = (loc && loc.length > 0) ? encodeURI(loc) : '#' ;
-    }
-    this.gotoRoute(loc) ;
-  },
-  
-  /** @private */
-  _routes: null,
-  
-  /** @private This object handles a single route level. */
-  _Route: SC.Object.extend({
-    
-    // route handler class.
-    _target: null,
-    
-    // route handler
-    _method: null,
-    
-    // staticly named routes.
-    _static: null,
-    
-    // dynamically named routes.
-    _dynamic: null,
-    
-    // set the wildcard route name here.
-    _wildcard: null,
-    
-    addRoute: function(parts, target, method) {
-      
-      if (!parts || parts.length === 0) {
-        this._target = target;
-        this._method = method;
-        
-      // add to route table.
-      } else {
-        var part = parts.shift() ; // get next route.
-        var nextRoute = null ;
-        switch(part.slice(0,1)) {
-          
-          // add a dynamic route
-          case ':':
-            part = part.slice(1,part.length) ;
-            var routes = this._dynamic[part] || [] ;
-            nextRoute = SC.routes._Route.create() ;
-            routes.push(nextRoute) ;
-            this._dynamic[part] = routes ;
-            break ;
-            
-          // setup wildcard route
-          case '*':
-            part = part.slice(1,part.length) ;
-            this._wildcard = part ;
-            this._target = target;        
-            this._method = method;
-            break ;
-            
-          // setup a normal static route.
-          default:
-            routes = this._static[part] || [] ;
-            nextRoute = SC.routes._Route.create() ;
-            routes.push(nextRoute) ;
-            this._static[part] = routes ;
-        }
-        
-        // if we need to go another level deeper, call nextRoute
-        if (nextRoute) nextRoute.addRoute(parts, target, method) ;
+        // recursively add the rest of the route
+        if (nextRoute) nextRoute.add(parts, target, method);
       }
     },
-    
-    // process the next level of the route and pass on.
-    functionForRoute: function(parts, params) {
-      
-      // if parts it empty, then we are here, so return func
-      if (!parts || parts.length === 0) {
-        return this ;        
-        
-      // process the next part
-      } else {
-        var part = parts.shift(),
-            ret  = null,
-           routes, nextRoute, loc , routesLen;
-        
-        // try to match to static
-        routes = this._static[part] ;
-        if (routes) {
-          for(loc=0, routesLen = routes.length;(loc < routesLen) && (ret===null);loc++) {
-            var clone = parts.slice() ;
-            ret = routes[loc].functionForRoute(clone, params) ;
-          }
-        }
-        
-        // try to match dynamic if no static match was found.
-        if (ret === null) {
-          for(var key in this._dynamic) {
-            routes = this._dynamic[key] ;
-            if (routes) {
-              for(loc=0, routesLen = routes.length; (loc<routesLen) && (ret === null);loc++) {
-                clone = parts.slice() ;
-                ret = routes[loc].functionForRoute(clone,params) ;
-            
-                // if a route was found, save the current part in params.
-                if (ret && params) params[key] = part ;
-              }
-            }
 
-            if (ret) break ; 
+    routeForParts: function(parts, params) {
+      var part, key, route;
+
+      // clone the parts array because we are going to alter it
+      parts = SC.clone(parts);
+
+      // if parts is empty, we are done
+      if (!parts || parts.length === 0) {
+        return this.method ? this : null;
+
+      } else {
+        part = parts.shift();
+
+        // try to match a static route
+        if (this.staticRoutes && this.staticRoutes[part]) {
+          return this.staticRoutes[part].routeForParts(parts, params);
+
+        } else {
+
+          // else, try to match a dynamic route
+          for (key in this.dynamicRoutes) {
+            route = this.dynamicRoutes[key].routeForParts(parts, params);
+            if (route) {
+              params[key] = part;
+              return route;
+            }
           }
+
+          // else, try to match a wilcard route
+          for (key in this.wildcardRoutes) {
+            parts.unshift(part);
+            params[key] = parts.join('/');
+            return this.wildcardRoutes[key].routeForParts(null, params);
+          }
+
+          // if nothing was found, it means that there is no match
+          return null;
         }
-        
-        
-        // if nothing still found, and there is a wildcard, match that.
-        if ((ret === null) && this._wildcard) {
-          parts.unshift(part) ;
-          if (params) params[this._wildcard] = parts.join('/') ;
-          ret = this;
-        }
-        
-        return ret ;
       }
-    },
-    
-    init: function() {
-      arguments.callee.base.call(this) ;
-      this._static = {} ; this._dynamic = {} ;
     }
+
   })
   
 });

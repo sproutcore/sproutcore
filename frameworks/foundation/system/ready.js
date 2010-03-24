@@ -146,9 +146,6 @@ SC.mixin({
       SC.userDefaults.readyCallback(window, main);
     }
     
-    // handle routes, if modules is installed.
-    if (SC.routes && SC.routes.ping) SC.routes.ping() ; 
-    
     // end run loop.  This is probably where a lot of bindings will trigger
     SC.RunLoop.end() ; 
     
