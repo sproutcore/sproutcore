@@ -339,7 +339,7 @@ SC.routes = SC.Object.create({
       // clone the parts array because we are going to alter it
       parts = SC.clone(parts);
 
-      if (!parts || parts.length === 0) {
+      if (!parts || parts.length === 0) {
         this.target = target;
         this.method = method;
 
@@ -383,7 +383,7 @@ SC.routes = SC.Object.create({
       parts = SC.clone(parts);
 
       // if parts is empty, we are done
-      if (!parts || parts.length === 0) {
+      if (!parts || parts.length === 0) {
         return this.method ? this : null;
 
       } else {
