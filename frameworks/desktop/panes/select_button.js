@@ -109,6 +109,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
   classNames: ['select-button'],
 
   /**
+    Menu attached to the selectButton
+    @default SC.MenuView
+  */
+  menu : null,
+
+  /**
     Menu item list
 
     @property
@@ -552,6 +558,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     // no menu to toggle... bail...
     if (!menu) return NO ;
+    this.set('menu', menu);
     menu.popup(this, this.preferMatrix) ;
     menu.set('currentMenuItem', menu.menuItemViewForContentIndex(this.get('itemIdx'))) ;
     return YES ;
