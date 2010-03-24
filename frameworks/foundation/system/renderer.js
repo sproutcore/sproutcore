@@ -12,7 +12,9 @@
   to a context, to produce one giant string of rendered output. Updating is done
   to layers, usually using CoreQuery.
   
-  
+  You should implement at _least_ two functions in a renderer: render and update. You
+  may also want to implement init, didAttachLayer, and willDetachLayer if you are using
+  sub-renderers.
 */
 SC.Renderer = SC.Renderer = {
   //
@@ -20,21 +22,28 @@ SC.Renderer = SC.Renderer = {
   //
   
   /**
-    Renders into the supplied context.
+    Should render into the supplied context.
+    
+    You should implement this by using the RenderContext API. You can use this.propertyName to
+    fetch the value of properties.
   */
   render: function(context) {
     
   },
   
   /**
-    Updates the attached layer, if there is any.
+    Should update the attached layer, if there is one.
+    
+    You should implement primarily by using CoreQuery functions. If you use CoreQuery, the renderer itself will
+    detect whether the layer exists, and do nothing if it does not. If you do _not_ use CoreQuery, you will need
+    to call layer() to get the layer, and manually do nothing if there is none.
   */
   update: function() {
     
   },
   
   /**
-    You usually do not need to implement this. It is more proper to add code to didDetachLayer instead.
+    You usually should not implement this. It is more proper to implement willDetachLayer instead.
   */
   destroy: function() {
     
@@ -45,7 +54,6 @@ SC.Renderer = SC.Renderer = {
     
     The "layer" parameter is not necessarily the layer itself; it may be a layer provider.
     To get the real layer, use the renderer's "layer" method.
-    
     If you have sub-renderers, you may want to relay this to them by calling their attachLayer methods.
     
     If event handling is necessary, this is the place to do it.
@@ -60,7 +68,7 @@ SC.Renderer = SC.Renderer = {
   },
   
   /**
-    Called when a layer is being detached (a good ).
+    Called when a layer is being detached.
   */
   willDetachLayer: function() {
     
@@ -96,6 +104,9 @@ SC.Renderer = SC.Renderer = {
     Call this to attach the renderer to a layer.
     If the layer is a layer provider (views, for instance, are layer providers), then
     the layer provider will be saved, allowing lazy-access.
+    
+    Views will call this on their own. However, if you use sub-renderers, you may call this
+    from didAttachLayer to inform them that their layers have been attached.
   */
   attachLayer: function(layer) {
     // if there is any layer or layer provider, we must detach (because we would attach if it were the other way around)
@@ -116,6 +127,9 @@ SC.Renderer = SC.Renderer = {
   
   /**
     Called to detach the renderer from a layer.
+    
+    Views will call this on their own. However, if you have sub-renderers, you'll need to inform them
+    that their layer is being detached by calling this method on them from willDetachLayer.
   */
   detachLayer: function() {
     this.willDetachLayer();
