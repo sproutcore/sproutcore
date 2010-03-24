@@ -60,13 +60,6 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
   This property should be set when the view is created. Changing it
   dynamically will have an unknown effect.
   
-  @property {Boolean} layoutDirection Either SC.HORIZONTAL or SC.VERTICAL.
-  Defaults to SC.HORIZONTAL. Use the :direction option with the split_view
-  viewhelper.
-  
-  @property {Boolean} canCollapseViews Set to NO when you don't want any of
-  the child views to collapse. Defaults to YES. 
-  
   In addition, the top/left and bottom/right child views can have these
   properties:
   
