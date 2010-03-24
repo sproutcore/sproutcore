@@ -288,6 +288,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   */
   renderImage: function(context, firstTime){
     var icon = this.get('icon');
+    context.addClass('no-min-width');
     if(icon) context.push("<div class='img "+icon+"'></div>");
     else context.push("<div class='img'></div>");
   },

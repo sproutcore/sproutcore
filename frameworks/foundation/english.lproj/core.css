@@ -460,4 +460,9 @@ version: 2.7.0
 }
 
 
+.no-min-width {
+  min-width: 20px !important;
+}
+
+
 /* @end */
