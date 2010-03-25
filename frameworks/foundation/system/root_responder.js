@@ -129,7 +129,7 @@ SC.RootResponder = SC.Object.extend({
   makeMenuPane: function(pane) {
     // Does the specified pane accept being the menu pane?  If not, there's
     // nothing to do.
-    if (!pane.get('acceptsMenuPane')) {
+    if (pane  &&  !pane.get('acceptsMenuPane')) {
       return this;
     }
     else {
