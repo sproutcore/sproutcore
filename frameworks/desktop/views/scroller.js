@@ -362,7 +362,7 @@ SC.ScrollerView = SC.View.extend(
     position = (value/max)*(trackLength-thumbLength);
     position += capLength - capOverlap; // account for the top/left cap
 
-    return Math.floor(position);
+    return Math.floor(isNaN(position) ? 0 : position);
   }.property('value', 'maximum', 'trackLength', 'thumbLength').cacheable(),
 
   /**

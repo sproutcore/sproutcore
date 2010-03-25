@@ -886,7 +886,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         f      = (view) ? view.get('frame') : null,
         width  = (f) ? f.width : 0,  
         height = (f) ? f.height : 0,
-        dim    = this.get('frame') ;
+        dim    = this.get('frame'),
+        proportion ;
     
     // cache out scroll settings...
     //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
@@ -899,7 +900,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         this.set('isHorizontalScrollerVisible', width > dim.width);
       }
       view.setIfChanged('maximum', width-dim.width) ;
-      view.setIfChanged('proportion', dim.width/width);
+      proportion = dim.width/width;
+      view.setIfChanged('proportion',isNaN(proportion) ? 0 : proportion);
     }
     
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
@@ -909,7 +911,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       }
       height -= this.get('verticalScrollerBottom') ;
       view.setIfChanged('maximum', height-dim.height) ;
-      view.setIfChanged('proportion', dim.height/height);
+      proportion = dim.height/height;
+      view.setIfChanged('proportion', isNaN(proportion) ? 0 : proportion);
     }
     
     // If there is no vertical scroller and auto hiding is on, make
