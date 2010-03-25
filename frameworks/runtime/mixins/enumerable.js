@@ -387,7 +387,6 @@ SC.Enumerable = {
     @returns {Object} Found item or null.
   */
   find: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
     var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
 
