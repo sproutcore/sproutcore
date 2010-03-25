@@ -1855,8 +1855,8 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   
   /** @private - better loggin */
   toString: function() {
-    var values = [];
-    var len = this.length, idx=0;
+    var values = [],
+        len = this.length, idx=0;
     for(idx=0;idx<len;idx++) {
       values[idx] = '%@: %@'.fmt(idx, this[idx] ? this[idx].toString() : '(null)');
     }
@@ -1895,10 +1895,10 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
     return this.map(function() { 
       var ret=null, guidKey = SC.viewKey, dom = this, value;
       while(!ret && dom && (dom !== document)) {
-        if (value = dom.getAttribute('id')) ret = SC.View.views[value] ;
+        if (dom.nodeType===1 && (value = dom.getAttribute('id'))) ret = SC.View.views[value] ;
         dom = dom.parentNode;
       }
-      dom =null;
+      dom = null;
       return ret ;
     });
   },
@@ -1917,8 +1917,8 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   */
   setClass: function(className, shouldAdd) {
     if (SC.none(className)) return this; //nothing to do
-    var isHash = SC.typeOf(className) !== SC.T_STRING ;
-    var fix = this._fixupClass, key;
+    var isHash = SC.typeOf(className) !== SC.T_STRING,
+        fix = this._fixupClass, key;
     this.each(function() {
       if (this.nodeType !== 1) return; // nothing to do
       
@@ -1956,8 +1956,8 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   */
   within: function(el) {
     el = SC.$(el); // make into CQ object
-    var ret, elCur, myCur, idx, len = el.length;
-    var loc = this.length;
+    var ret, elCur, myCur, idx, len = el.length,
+        loc = this.length;
     while(!ret && (--loc >= 0)) {
       myCur = this[loc];
       for(idx=0; !ret && (idx<len); idx++) {
@@ -1981,9 +1981,8 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   SC.Builder though, so we reapply SC.Enumerable just to be safe.
 */
 (function() {
-  var original = {};
-  
-  var wrappers = {
+  var original = {},
+      wrappers = {
     
     // if you call find with a selector, then use the jQuery way.  If you 
     // call with a function/target, use Enumerable way
