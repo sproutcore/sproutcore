@@ -204,6 +204,15 @@ SC.Renderer = SC.Renderer = {
       }
       return this;
     }
+  },
+  
+  didChange: function(key){
+    if (!this.changes) return NO;
+    return (this.changes.contains(key));
+  },
+  
+  resetChanges: function() {
+    this.changes = null;
   }
  
   // other methods
