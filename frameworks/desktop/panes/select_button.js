@@ -710,11 +710,11 @@ SC.SelectButtonView.SMALL_POPUP_MENU_WIDTH_OFFSET = 7;
 
 SC.SelectButtonView.REGULAR_OFFSET_X = -17;
 SC.SelectButtonView.REGULAR_OFFSET_Y = 3;
-SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET = 5;
+SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET = 4;
 
 SC.SelectButtonView.LARGE_OFFSET_X = -17;
 SC.SelectButtonView.LARGE_OFFSET_Y = 6;
-SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET = 6;
+SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET = 3;
 
 SC.SelectButtonView.HUGE_OFFSET_X = 0;
 SC.SelectButtonView.HUGE_OFFSET_Y = 0;
