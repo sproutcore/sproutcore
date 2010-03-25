@@ -458,21 +458,24 @@ SC.RootResponder = SC.RootResponder.extend(
     trigger a keyDown.
   */
   keypress: function(evt) {
-    var ret ;
+    var ret,
+        keyCode   = evt.keyCode,
+        isFirefox = !!SC.browser.mozilla;
     
     // delete is handled in keydown() for most browsers
-    if (SC.browser.mozilla && (evt.which === 8)) {
+    if (isFirefox && (evt.which === 8)) {
       //get the keycode and set it for which.
-      evt.which=evt.keyCode;
+      evt.which = keyCode;
       ret = this.sendEvent('keyDown', evt);
       return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
 
     // normal processing.  send keyDown for printable keys... 
     //there is a special case for arrow key repeating of events in FF.
     } else {
-      var isFirefoxArrowKeys = (evt.keyCode>=37 && evt.keyCode<=40 && SC.browser.mozilla);
-      if ((evt.charCode !== undefined && evt.charCode === 0) && !isFirefoxArrowKeys) return YES;
-      if (isFirefoxArrowKeys) evt.which=evt.keyCode;
+      var isFirefoxArrowKeys = (keyCode >= 37 && keyCode <= 40 && isFirefox),
+          charCode           = evt.charCode;
+      if ((charCode !== undefined && charCode === 0) && !isFirefoxArrowKeys) return YES;
+      if (isFirefoxArrowKeys) evt.which = keyCode;
       return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
   },
