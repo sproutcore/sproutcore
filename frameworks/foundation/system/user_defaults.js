@@ -361,7 +361,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
                     hash[row['key']]=row['value'];
                   }
                   transaction.parent.dataHash = hash;
-                  SC.userDefaults.set('ready', YES);
+                  SC.run(function() { SC.userDefaults.set('ready', YES); });
                 }, obj.killTransaction);
           }
         );
