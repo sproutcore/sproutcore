@@ -497,13 +497,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   mousedown: function(evt) {
     try {
-      // make sure the window gets focus no matter what.  FF is inconsistant 
-      // about this. You have to regain focus on the window for the key events
-      // to get triggered. This happens when we don't let the browser trigger
-      // the default action and we have something in the app like an iframe.
-      window.focus();
-      this.focus();
-
+      evt.target.focus();
       // First, save the click count. The click count resets if the mouse down
       // event occurs more than 200 ms later than the mouse up event or more
       // than 8 pixels away from the mouse down event.
@@ -511,9 +505,9 @@ SC.RootResponder = SC.RootResponder.extend(
       if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
         this._clickCount = 1 ;
       } else {
-        var deltaX = this._lastMouseDownX - evt.clientX ;
-        var deltaY = this._lastMouseDownY - evt.clientY ;
-        var distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
+        var deltaX = this._lastMouseDownX - evt.clientX,
+            deltaY = this._lastMouseDownY - evt.clientY,
+            distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
         if (distance > 8.0) this._clickCount = 1 ;
       }
       evt.clickCount = this._clickCount ;
@@ -719,8 +713,8 @@ SC.RootResponder = SC.RootResponder.extend(
   _mouseCanDrag: YES,
   
   selectstart: function(evt) { 
-    var targetView = this.targetViewForEvent(evt);
-    var result = this.sendEvent('selectStart', evt, targetView);
+    var targetView = this.targetViewForEvent(evt),
+        result = this.sendEvent('selectStart', evt, targetView);
     
     // If the target view implements mouseDragged, then we want to ignore the
     // 'selectstart' event.
