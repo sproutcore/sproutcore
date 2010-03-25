@@ -201,7 +201,7 @@ SC.AlertPane = SC.PanelPane.extend({
   */
   buttonThreeWrapper: SC.outlet('contentView.childViews.2'),
   
-  layout: { centerX: 0, width: 500, top: 55 },
+  layout: { top : 0.3, centerX: 0, width: 500 },
 
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
