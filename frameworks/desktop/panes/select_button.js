@@ -482,8 +482,29 @@ SC.SelectButtonView = SC.ButtonView.extend(
       customMenuView, menu, itemsLength;
 
     buttonLabel = this.$('.sc-button-label')[0] ;
+
+    var menuWidthOffset = SC.SelectButtonView.MENU_WIDTH_OFFSET ;
+    if(!this.get('isDefaultPosition')) {
+      switch (this.get('controlSize')) {
+        case SC.TINY_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectButtonView.TINY_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.SMALL_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectButtonView.SMALL_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.REGULAR_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.LARGE_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.HUGE_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectButtonView.HUGE_POPUP_MENU_WIDTH_OFFSET;
+          break;
+      }
+    }
     // Get the length of the text on the button in pixels
-    menuWidth = this.get('layer').offsetWidth + SC.SelectButtonView.MENU_WIDTH_OFFSET ;
+    menuWidth = this.get('layer').offsetWidth + menuWidthOffset ;
     scrollWidth = buttonLabel.scrollWidth ;
     lastMenuWidth = this.get('lastMenuWidth') ;
     if(scrollWidth) {
@@ -681,17 +702,22 @@ SC.SelectButtonView = SC.ButtonView.extend(
 */
 SC.SelectButtonView.TINY_OFFSET_X = 0;
 SC.SelectButtonView.TINY_OFFSET_Y = 0;
+SC.SelectButtonView.TINY_POPUP_MENU_WIDTH_OFFSET = 0;
 
 SC.SelectButtonView.SMALL_OFFSET_X = -18;
 SC.SelectButtonView.SMALL_OFFSET_Y = 3;
+SC.SelectButtonView.SMALL_POPUP_MENU_WIDTH_OFFSET = 7;
 
-SC.SelectButtonView.REGULAR_OFFSET_X = -18;
+SC.SelectButtonView.REGULAR_OFFSET_X = -17;
 SC.SelectButtonView.REGULAR_OFFSET_Y = 3;
+SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET = 5;
 
-SC.SelectButtonView.LARGE_OFFSET_X = -20;
+SC.SelectButtonView.LARGE_OFFSET_X = -17;
 SC.SelectButtonView.LARGE_OFFSET_Y = 6;
+SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET = 6;
 
 SC.SelectButtonView.HUGE_OFFSET_X = 0;
 SC.SelectButtonView.HUGE_OFFSET_Y = 0;
+SC.SelectButtonView.HUGE_POPUP_MENU_WIDTH_OFFSET = 0;
 
 SC.SelectButtonView.MENU_WIDTH_OFFSET = -2;
