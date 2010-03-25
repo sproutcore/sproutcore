@@ -213,6 +213,17 @@ SC.MenuPane = SC.PickerPane.extend(
     @default YES
   */
   localize: YES,
+  
+  /**
+    Whether or not this menu pane should accept the “current menu pane”
+    designation when visible, which is the highest-priority pane when routing
+    events.  Generally you want this set to YES so that your menu pane can
+    intercept keyboard events.
+
+    @type Boolean
+    @default YES
+  */
+  acceptsMenuPane: YES,
 
   // ..........................................................
   // METHODS

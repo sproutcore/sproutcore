@@ -127,10 +127,17 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.RootResponder} receiver
   */
   makeMenuPane: function(pane) {
-    var currentMenu = this.get('menuPane');
-    if (currentMenu === pane) return this; // nothing to do
+    // Does the specified pane accept being the menu pane?  If not, there's
+    // nothing to do.
+    if (!pane.get('acceptsMenuPane')) {
+      return this;
+    }
+    else {
+      var currentMenu = this.get('menuPane');
+      if (currentMenu === pane) return this; // nothing to do
 
-    this.set('menuPane', pane);
+      this.set('menuPane', pane);
+    }
 
     return this;
   },
@@ -287,7 +294,7 @@ SC.RootResponder = SC.Object.extend({
       target = target.get('firstResponder') || target;
       do {
         if (target.respondsTo(methodName)) return target ;
-      } while (target = target.get('nextResponder')) ;
+      } while ((target = target.get('nextResponder'))) ;
     }
 
     // HACK: Eventually we need to normalize the sendAction() method between
