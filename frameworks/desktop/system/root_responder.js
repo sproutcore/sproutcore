@@ -158,7 +158,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   setup: function() {
     // handle basic events        
-    this.listenFor('keydown keyup mousedown mouseup click dblclick mouseout mouseover mousemove selectstart contextmenu'.w(), document)
+    this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mouseout mouseover mousemove selectstart contextmenu'.w(), document)
         .listenFor('resize focus blur'.w(), window);
 
     // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
@@ -493,6 +493,28 @@ SC.RootResponder = SC.RootResponder.extend(
       this._IMEInputON = NO;
     } 
     return this.sendEvent('keyUp', evt) ? evt.hasCustomEventHandling:YES;
+  },
+  
+  /**
+    We'll listen for the 'beforedeactivate' event in IE because the default
+    behavior is for the active element to be deactivated whenever another
+    element is clicked, regardless of whether that element belongs to a view
+    that has 'acceptsFirstResponder' set to NO.
+    
+    If we detect that the active element is “losing out” to an element that
+    belongs to a view that does not accept keyPane or firstResponder, then
+    cancel the event.  In this way, clients can create elements that behave as
+    if they're part of a single user interface element — for example, a text
+    field with a drop-down menu.  (Without this, clicking on a menu item
+    element would cause the text field to lose focus!)
+  */
+  beforedeactivate: function(evt) {
+    var toElement = evt.toElement;
+    if (toElement) {
+      var view = SC.$(toElement).view()[0];
+      if (view  &&  !view.get('acceptsKeyPane')  &&  !view.get('acceptsFirstResponder')) return NO;
+    }
+    return YES;
   },
   
   mousedown: function(evt) {
