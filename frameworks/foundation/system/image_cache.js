@@ -336,7 +336,6 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     // browser decides not to follow up.
     if (this._loading.indexOf(entry) >= 0) {
       queue.image.abort();
-      // this.imageStatusDidChange(entry.url, this.ABORTED);
       this.imageStatusDidChange(entry, this.ABORTED);
     }
     
@@ -345,26 +344,27 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
   
   /** @private invoked by Image().  Note that this is the image instance */
   _imageDidAbort: function() {
-    // SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.ABORTED);
+    SC.RunLoop.begin();
     SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ABORTED);
+    SC.RunLoop.end();
   },
   
   _imageDidError: function() {
-    // SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.ERROR);
+    SC.RunLoop.begin();
     SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ERROR);
+    SC.RunLoop.end();
   },
   
   _imageDidLoad: function() {
-    // SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.LOADED);
+    SC.RunLoop.begin();
     SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.LOADED);
+    SC.RunLoop.end();
   },
 
   /** @private called whenever the image loading status changes.  Notifies
     items in the queue and then cleans up the entry.
   */
-  // imageStatusDidChange: function(url, status) {
   imageStatusDidChange: function(entry, status) {
-    // var entry = this._imageEntryFor(url, NO);
     if (!entry) return; // nothing to do...
     
     var url = entry.url ;
