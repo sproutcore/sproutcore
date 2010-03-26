@@ -79,7 +79,10 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   },
   
   mouseUp: function(evt) {
-    if(!this.get('isEnabled') || !this.$().within(evt.target)) return YES;
+    if(!this.get('isEnabled') || 
+      (evt && evt.target && !this.$().within(evt.target))) {
+      return YES;
+    }
     var val = this.get('value');
     if (val === this.get('toggleOnValue')) {
       this.$().attr('aria-checked', 'false');

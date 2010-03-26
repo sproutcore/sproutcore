@@ -214,7 +214,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
   test("2_items,toolTip has toolTips assigned.", function() {
-    var segments=pane.view('2_items,toolTip').$('div');
+    var segments=pane.view('2_items,toolTip').$('a');
     ok((segments[0].title=="this is title1's tip"), 'first segment has expected tool tip assigned.');
     ok((segments[1].title=="this is title2's tip"), 'second segment has expected tool tip assigned.');
   });

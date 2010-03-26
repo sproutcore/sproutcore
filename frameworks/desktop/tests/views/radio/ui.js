@@ -169,7 +169,7 @@ test("disabled", function() {
 test("enabled first", function() {
   var view = pane.view('enabled first');
   
-  ok(!view.$().hasClass('disabled'), 'should have disabled class');
+  ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   
   var radioButtons = view.$('.sc-radio-button');
   equals(radioButtons.length, 3, 'number of radio buttons should be 3');
@@ -184,9 +184,10 @@ test("enabled first", function() {
       
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
     ok(theInput.attr('aria-checked'), 'false', 'radio button #%@ should not be checked'.fmt(idx));
-      ok(theInput.attr('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
     i++;
   });
+  
+  ok(view.$().hasClass('disabled'), 'should have disabled class');
   
   var labels = view.$('span.sc-button-label');
   equals(labels.length, 3, 'number of labels should be 3');

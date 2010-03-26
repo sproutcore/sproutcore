@@ -88,8 +88,8 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   var elem = view.get('layer'), 
       r = view.$('.sc-radio-button');
   SC.Event.trigger(r[0], 'mousedown');
-  ok(view.$('label').first().hasClass('active'), 'radio button should be active');
   equals(view.get('value'), 'Red', 'value should not change yet');
+  ok(r[0].hasClass('active'), 'radio button should be active');
   
   // simulate mouseUp and browser-native change to control
   SC.Event.trigger(r[0],'mouseup');
@@ -98,7 +98,7 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   SC.Event.trigger(r[1],'mousedown');
   SC.Event.trigger(r[1],'mouseup');
   
-  ok(!view.$('label').first().hasClass('active'), 'radio button should no longer be active');
+  ok(!r[0].hasClass('active'), 'radio button should no longer be active');
   equals(view.get('value'), 'Green', 'value should be undefined (none checked)');
   
   elem = null ;
