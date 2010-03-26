@@ -513,9 +513,10 @@ SC.RootResponder = SC.RootResponder.extend(
   */
   beforedeactivate: function(evt) {
     var toElement = evt.toElement;
-    if (toElement) {
+    if (toElement && toElement.tagName && toElement.tagName!=="IFRAME") {
       var view = SC.$(toElement).view()[0];
-      if (view  &&  !view.get('acceptsKeyPane')  &&  !view.get('acceptsFirstResponder')) return NO;
+      if (view && !view.get('acceptsKeyPane') 
+        && !view.get('acceptsFirstResponder') ) return NO;
     }
     return YES;
   },
