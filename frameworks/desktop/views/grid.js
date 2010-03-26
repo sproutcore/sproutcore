@@ -142,7 +142,7 @@ SC.GridView = SC.ListView.extend(
         insertionPoint.set('frame', f) ;
       }
 
-      if (insertionPoint.parentNode != itemView.parentNode) {
+      if (insertionPoint.parentNode !== itemView.parentNode) {
         itemView.parentNode.appendChild(insertionPoint) ;
       }
     }
@@ -162,7 +162,7 @@ SC.GridView = SC.ListView.extend(
   // // We can do this much faster programatically using the rowHeight
   insertionIndexForLocation: function(loc, dropOperation) {  
     var f = this.get('frame'),
-        sf = this.get('scrollFrame'),
+        sf = this.get('clippingFrame'),
         itemsPerRow = this.get('itemsPerRow'),
         columnWidth = Math.floor(f.width / itemsPerRow),
         row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight')) ;
