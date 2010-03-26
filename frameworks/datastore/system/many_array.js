@@ -170,7 +170,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   length: function() {
     var storeIds = this.get('readOnlyStoreIds');
     return storeIds ? storeIds.get('length') : 0;
-  }.property('readOnlyStoreIds').cacheable(),
+  }.property('readOnlyStoreIds'),
 
   /** @private
     Looks up the store id in the store ids array and materializes a
