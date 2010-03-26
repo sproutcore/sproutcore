@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-var view, content, pane ;
+var view, content, contentController, pane ;
 
 module("SC.CollectionView Mouse Events", {
   setup: function() {
@@ -16,8 +16,13 @@ module("SC.CollectionView Mouse Events", {
       return SC.Object.create({ value: x });
     });
     
+    contentController = SC.ArrayController.create({
+      content: content,
+      allowsMultipleSelection: YES
+    });
+
     view = SC.CollectionView.create({
-      content: content, 
+      content: contentController,
 
       layout: { top: 0, left: 0, width: 300, height: 500 },
       
