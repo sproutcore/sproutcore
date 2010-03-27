@@ -206,6 +206,11 @@ SC.Renderer = SC.Renderer = {
     }
   },
   
+  hasChanges: function() {
+    if (!this.changes || this.changes.length === 0) return NO;
+    return YES;
+  },
+  
   didChange: function(key){
     if (!this.changes) return NO;
     return (this.changes.contains(key));

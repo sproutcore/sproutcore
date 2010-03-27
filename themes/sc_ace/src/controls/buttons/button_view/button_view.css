@@ -34,14 +34,14 @@
   left: 8px;
   right: 8px;
   height: 24px;
-  padding-top:1px;
+  padding-top:2px;
 }
 
 /* Selected */
 @view(sc-button-view).sel {
   color: #d5dde9;
   font-weight:200;
-  text-shadow: 0px -1px 1px rgba(0,0,0,.7);
+  text-shadow: 0px -1px 1px rgba(0,0,0,.6);
 }
 
 @view(sc-button-view).sel .button-left {

@@ -43,8 +43,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   classNames: ['sc-segmented-view'],
   
-  theme: 'square',
-  
   /**
     The value of the segmented view.
     
@@ -196,7 +194,16 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // if the item is a string, build the array using defaults...
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        cur = [item.humanize().titleize(), item, YES, null, null,  null, idx] ;
+        cur = {
+          title: item.humanize().titleize(),
+          value: item,
+          isEnabled: YES,
+          icon: null,
+          width: null,
+          toolTip: null,
+          index: idx
+        };
+        // cur = [item.humanize().titleize(), item, YES, null, null,  null, idx] ;
         
       // if the item is not an array, try to use the itemKeys.
       } else if (itemType !== SC.T_ARRAY) {
@@ -207,23 +214,33 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         
         // now loop through the keys and try to get the values on the item
         cur = keys.map(fetchItem, item);
-        cur[cur.length] = idx; // save current index
+        
+        // create the actual item
+        cur = {
+          title: cur[0],
+          value: cur[1],
+          isEnabled: cur[2],
+          icon: cur[3],
+          width: cur[4],
+          toolTip: cur[5],
+          index: idx
+        };
         
         // special case 1...if title key is null, try to make into string
-        if (!keys[0] && item.toString) cur[0] = item.toString(); 
+        if (!keys[0] && item.toString) cur.title = item.toString(); 
         
         // special case 2...if value key is null, use item itself
-        if (!keys[1]) cur[1] = item;
+        if (!keys[1]) cur.value = item;
         
         // special case 3...if isEnabled is null, default to yes.
-        if (!keys[2]) cur[2] = YES ; 
+        if (!keys[2]) cur.isEnabled = YES ; 
       }
       
       // finally, be sure to loc the title if needed
-      if (loc && cur[0]) cur[0] = cur[0].loc();
+      if (loc && cur.title) cur.title = cur.title.loc();
 
       // finally, be sure to loc the toolTip if needed
-      if (loc && cur[5] && SC.typeOf(cur[5]) === SC.T_STRING) cur[5] = cur[5].loc();
+      if (loc && cur.toolTip && SC.typeOf(cur.toolTip) === SC.T_STRING) cur.toolTip = cur.toolTip.loc();
       
       // add to return array
       ret[ret.length] = cur;
@@ -266,7 +283,36 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   displayProperties: ['displayItems', 'value', 'activeIndex'],
   
+  createRenderer: function(theme) {
+    return theme.segmented();
+  },
   
+  updateRenderer: function(r) {
+    var items = this.get('displayItems'), value = this.get('value'), isArray = SC.isArray(value),
+        activeIndex = this.get("activeIndex"), item;
+    for (var idx = 0, len = items.length; idx < len; idx++) {
+      item = items[idx];
+      
+      // change active
+      if (activeIndex == idx) item.isActive = YES;
+      else item.isActive = NO;
+      
+      // chance selection
+      if (isArray ? value.indexOf(item.value) : value === item.value) {
+        item.isSelected = YES;
+      }
+      else item.isSelected = NO;
+    }
+    
+    // set the attributes
+    r.attr({
+      segments: items,
+      align: this.get('align'),
+      layoutDirection: this.get('layoutDirection')
+    });
+  },
+  
+  /*
   render: function(context, firstTime) { 
     
     // collect some data 
@@ -298,7 +344,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
       names = items = value = items = null; // cleanup
     }
-  },
+  },*/
   
   /**
     Actually generates the segment HTML for the display items.  This method 
@@ -380,7 +426,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
-    return this.displayItemIndexForPosition(evt.pageX, evt.pageY);
+    if (this.renderer) return this.renderer.indexForEvent(evt);
   },
   
   /**
@@ -443,7 +489,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (evt.which === 39 || evt.which === 40) {  
         for(i=0; i< len-1; i++){
           item=items[i];
-          if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value)){
+          if( isArray ? (value.indexOf(item.value)>=0) : (item.value===value)){
             this.triggerItemAtIndex(i+1);
           }
         }
@@ -452,7 +498,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       else if (evt.which === 37 || evt.which === 38) {
         for(i=1; i< len; i++){
           item=items[i];
-          if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value)){
+          if( isArray ? (value.indexOf(item.value)>=0) : (item.value===value)){
             this.triggerItemAtIndex(i-1);
           }
         }
@@ -582,14 +628,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         item  = items.objectAt(idx),
         sel, value, val, empty, mult;
         
-    if (!item[2]) return this; // nothing to do!
+    if (!item.isEnabled) return this; // nothing to do!
 
     empty = this.get('allowsEmptySelection');
     mult = this.get('allowsMultipleSelection');
     
     
     // get new value... bail if not enabled. Also save original for later.
-    sel = item[1];
+    sel = item.value;
     value = val = this.get('value') ;
     if (!SC.isArray(value)) value = [value]; // force to array
     
@@ -632,7 +678,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         action, target = null,
         resp = this.getPath('pane.rootResponder');
 
-    if (actionKey && (item = this.get('items').objectAt(item[6]))) {
+    if (actionKey && (item = this.get('items').objectAt(item.index))) {
       // get the source item from the item array.  use the index stored...
       action = item.get ? item.get(actionKey) : item[actionKey];
       if (targetKey) {
