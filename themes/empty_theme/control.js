@@ -24,11 +24,15 @@ SC.EmptyTheme.renderers.Control = SC.Renderer.extend({
     // update the CSS classes for the control.  note we reuse the same hash
     // to avoid consuming more memory
     
-    context.setClass(this.calculateClasses()).addClass(this.controlSize);
+    context.setClass(this.calculateClasses());
+    if (this.controlSize) context.addClass(this.controlSize);
+    this._last_control_size = this.controlSize;
   },
   
   update: function() {
-    this.$().setClass(this.calculateClasses()).addClass(this.controlSize);
+    if (this._last_control_size != this.controlSize) this.$().setClass(this._last_control_size, NO);
+    if (this.controlSize) this.$().setClass(this.controlSize, YES);
+    this.$().setClass(this.calculateClasses());
   }
 });
 
