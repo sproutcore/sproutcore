@@ -344,9 +344,9 @@
 /* Selected */
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel {
   background:none;
-  color: #d5dde9;
+  color: #fff;
   font-weight:200;
-  text-shadow: 0px -1px 1px rgba(0,0,0,.6);
+  text-shadow: 0px -1px 1px rgba(0,0,0,.5);
 }
 
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-left {
@@ -755,9 +755,9 @@ theme-name is specified as an argument when building.
 
 /* Selected */
 .sc-theme .sc-view.ace.light.sc-button-view.sel {
-  color: #d5dde9;
+  color: #fff;
   font-weight:200;
-  text-shadow: 0px -1px 1px rgba(0,0,0,.6);
+  text-shadow: 0px -1px 1px rgba(0,0,0,.5);
 }
 
 .sc-theme .sc-view.ace.light.sc-button-view.sel .button-left {
