@@ -149,6 +149,13 @@ SC.PickerPane = SC.PalettePane.extend({
   preferMatrix: null,
 
   /**
+    default/custom offset of pointer for picker-pointer or pointer-menu
+
+    @property {Array}
+  */
+  pointerOffset: null,
+
+  /**
     Displays a new picker pane according to the passed parameters.
     Every parameter except for the anchorViewOrElement is optional.
   
@@ -157,12 +164,13 @@ SC.PickerPane = SC.PalettePane.extend({
     @param {Array} preferMatrix optional apply custom offset or position pref matrix for specific preferType
     @returns {SC.PickerPane} receiver
   */
-  popup: function(anchorViewOrElement, preferType, preferMatrix) {
+  popup: function(anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
     var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
     this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
+    if (pointerOffset) this.set('pointerOffset',pointerOffset) ;
     this.endPropertyChanges();
     this.positionPane();
     this.append();
@@ -260,12 +268,13 @@ SC.PickerPane = SC.PalettePane.extend({
     if(this.preferType) {
       switch(this.preferType) {
         case SC.PICKER_MENU:
-          // apply default + menu re-position rule
+          // apply menu re-position rule
           picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu')) ;
           break;
         case SC.PICKER_POINTER:
         case SC.PICKER_MENU_POINTER:
           // apply pointer re-position rule
+          this.setupPointer();
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
           break;
           
@@ -374,44 +383,37 @@ SC.PickerPane = SC.PalettePane.extend({
   },
 
   /** @private
-    re-position rule for triangle pointer picker: take default [0,1,2,3,2] for
-    picker, [3,0,1,2,3] for menu picker or custom matrix to choose one of four
-    perfect pointer positions.
+    re-position rule for triangle pointer picker.
   */
   fitPositionToScreenPointer: function(w, f, a) {
+    var overlapTunningX = (a.height > 12) ? 0 : 1;
+    var overlapTunningY = (a.height > 12) ? 0 : 3;
+
+    var offset = [this.pointerOffset[0]+overlapTunningX,
+                  this.pointerOffset[1]-overlapTunningX,
+                  this.pointerOffset[2]-overlapTunningY,
+                  this.pointerOffset[3]+overlapTunningY];
+
     // initiate perfect positions matrix
     // 4 perfect positions: right > left > top > bottom
     // 2 coordinates: x, y
     // top-left corner of 4 perfect positioned f  (4x2)
-    var overlapTunningX = (a.height > 12) ? 0 : 1;
-    var overlapTunningY = (a.height > 12) ? 0 : 3;
-
-    var prefP1    =[[a.x+a.width+(7+overlapTunningX), a.y+parseInt(a.height/2,0)-40], 
-                    [a.x-f.width-(7+overlapTunningX),  a.y+parseInt(a.height/2,0)-40], 
-                    [a.x+parseInt((a.width/2)-(f.width/2),0), a.y-f.height-(17+overlapTunningY)],
-                    [a.x+parseInt((a.width/2)-(f.width/2),0), a.y+a.height+(17+overlapTunningY)]];
+    var prefP1    =[[a.x+a.width+offset[0],                   a.y+parseInt(a.height/2,0)-40],
+                    [a.x-f.width+offset[1],                   a.y+parseInt(a.height/2,0)-40],
+                    [a.x+parseInt((a.width/2)-(f.width/2),0), a.y-f.height+offset[2]],
+                    [a.x+parseInt((a.width/2)-(f.width/2),0), a.y+a.height+offset[3]]];
     // bottom-right corner of 4 perfect positioned f  (4x2)
-    var prefP2    =[[a.x+a.width+f.width+(7+overlapTunningX), a.y+parseInt(a.height/2,0)+f.height-24], 
-                    [a.x-(7+overlapTunningX),                  a.y+parseInt(a.height/2,0)+f.height-24], 
-                    [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y-(17+overlapTunningY)],
-                    [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y+a.height+f.height+(17+overlapTunningY)]];
+    var prefP2    =[[a.x+a.width+f.width+offset[0],                   a.y+parseInt(a.height/2,0)+f.height-24],
+                    [a.x+offset[1],                                   a.y+parseInt(a.height/2,0)+f.height-24],
+                    [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y+offset[2]],
+                    [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y+a.height+f.height+offset[3]]];
     // cutoff of 4 perfect positioned f: top, right, bottom, left  (4x4)
     var cutoffPrefP =[[prefP1[0][1]>0 ? 0 : 0-prefP1[0][1], prefP2[0][0]<w.width ? 0 : prefP2[0][0]-w.width, prefP2[0][1]<w.height ? 0 : prefP2[0][1]-w.height, prefP1[0][0]>0 ? 0 : 0-prefP1[0][0]], 
                       [prefP1[1][1]>0 ? 0 : 0-prefP1[1][1], prefP2[1][0]<w.width ? 0 : prefP2[1][0]-w.width, prefP2[1][1]<w.height ? 0 : prefP2[1][1]-w.height, prefP1[1][0]>0 ? 0 : 0-prefP1[1][0]],
                       [prefP1[2][1]>0 ? 0 : 0-prefP1[2][1], prefP2[2][0]<w.width ? 0 : prefP2[2][0]-w.width, prefP2[2][1]<w.height ? 0 : prefP2[2][1]-w.height, prefP1[2][0]>0 ? 0 : 0-prefP1[2][0]],
                       [prefP1[3][1]>0 ? 0 : 0-prefP1[3][1], prefP2[3][0]<w.width ? 0 : prefP2[3][0]-w.width, prefP2[3][1]<w.height ? 0 : prefP2[3][1]-w.height, prefP1[3][0]>0 ? 0 : 0-prefP1[3][0]]];
 
-    if(!this.preferMatrix || this.preferMatrix.length !== 5) {
-      // menu-picker default re-position rule :
-      // perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
-      // fallback to perfect bottom (3)
-      // picker default re-position rule :
-      // perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
-      // fallback to perfect top (2)
-      this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,0,1,2,3] : [0,1,2,3,2]) ;
-    }
     var m = this.preferMatrix;
-    //var pointer = this.contentView.childViews[this.contentView.childViews.length-1];
 
     // initiated with fallback position
     // Will be used only if the following preferred alternative can not be found
@@ -460,6 +462,50 @@ SC.PickerPane = SC.PalettePane.extend({
     }
     return f ;    
   },
+
+  /** @private
+    This method will set up pointerOffset and preferMatrix according to type
+    and size if not provided excplicitly.
+  */
+  setupPointer: function() {
+    // set up pointerOffset according to type and size if not provided excplicitly
+    if(!this.pointerOffset || this.pointerOffset.length !== 4) {
+      if(this.get('preferType') == SC.PICKER_MENU_POINTER) {
+        switch (this.get('controlSize')) {
+          case SC.TINY_CONTROL_SIZE:
+            this.set('pointerOffset', SC.PickerPane.TINY_PICKER_MENU_POINTER_OFFSET) ;
+            break;
+          case SC.SMALL_CONTROL_SIZE:
+            this.set('pointerOffset', SC.PickerPane.SMALL_PICKER_MENU_POINTER_OFFSET) ;
+            break;
+          case SC.REGULAR_CONTROL_SIZE:
+            this.set('pointerOffset', SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET) ;
+            break;
+          case SC.LARGE_CONTROL_SIZE:
+            this.set('pointerOffset', SC.PickerPane.LARGE_PICKER_MENU_POINTER_OFFSET) ;
+            break;
+          case SC.HUGE_CONTROL_SIZE:
+            this.set('pointerOffset', SC.PickerPane.HUGE_PICKER_MENU_POINTER_OFFSET) ;
+            break;
+        }
+      } else {
+        this.set('pointerOffset', SC.PickerPane.PICKER_POINTER_OFFSET) ;
+      }
+    }
+
+    // set up preferMatrix according to type if not provided excplicitly:
+    // take default [0,1,2,3,2] for picker, [3,0,1,2,3] for menu picker if
+    // custom matrix not provided excplicitly
+    if(!this.preferMatrix || this.preferMatrix.length !== 5) {
+      // menu-picker default re-position rule :
+      // perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
+      // fallback to perfect bottom (3)
+      // picker default re-position rule :
+      // perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
+      // fallback to perfect top (2)
+      this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,0,1,2,3] : [0,1,2,3,2]) ;
+    }
+  },
   
   displayProperties: ["pointerPosY"],
 
@@ -471,10 +517,12 @@ SC.PickerPane = SC.PalettePane.extend({
         context.addClass(this.get('pointerPos'));
       }
     } else {
-      var el = this.$('.sc-pointer');
-      el.attr('class', "sc-pointer "+this.get('pointerPos'));
-      el.attr('style', "margin-top: "+this.get('pointerPosY')+"px");
-      context.addClass(this.get('pointerPos'));
+      if (this.get('preferType') == SC.PICKER_POINTER || this.get('preferType') == SC.PICKER_MENU_POINTER) {
+        var el = this.$('.sc-pointer');
+        el.attr('class', "sc-pointer "+this.get('pointerPos'));
+        el.attr('style', "margin-top: "+this.get('pointerPosY')+"px");
+        context.addClass(this.get('pointerPos'));
+      }
     }
     return ret ;
   },
@@ -508,3 +556,17 @@ SC.PickerPane = SC.PalettePane.extend({
 
 });
 
+/**
+  Default metrics for the different control sizes.
+*/
+SC.PickerPane.PICKER_POINTER_OFFSET = [9, -9, -18, 18];
+
+SC.PickerPane.TINY_PICKER_MENU_POINTER_OFFSET = [9, -9, -18, 18];
+
+SC.PickerPane.SMALL_PICKER_MENU_POINTER_OFFSET = [9, -9, -8, 8];
+
+SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET = [9, -9, -12, 12];
+
+SC.PickerPane.LARGE_PICKER_MENU_POINTER_OFFSET = [9, -9, -16, 16];
+
+SC.PickerPane.HUGE_PICKER_MENU_POINTER_OFFSET = [9, -9, -18, 18];
