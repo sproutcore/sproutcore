@@ -303,7 +303,7 @@ SC.PickerPane = SC.PalettePane.extend({
           break;
         case SC.PICKER_POINTER:
           // apply pointer re-position rule
-          this.setupPointer(anchor);
+          this.setupPointer();
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
           break;
           
@@ -435,8 +435,13 @@ SC.PickerPane = SC.PalettePane.extend({
     re-position rule for triangle pointer picker.
   */
   fitPositionToScreenPointer: function(w, f, a) {
-    var offset = [this.pointerOffset[0], this.pointerOffset[1],
-                  this.pointerOffset[2], this.pointerOffset[3]];
+    var overlapTunningX = (a.height > 12) ? 0 : 1;
+    var overlapTunningY = (a.height > 12) ? 0 : 3;
+
+    var offset = [this.pointerOffset[0]+overlapTunningX,
+                  this.pointerOffset[1]-overlapTunningX,
+                  this.pointerOffset[2]-overlapTunningY,
+                  this.pointerOffset[3]+overlapTunningY];
 
     // initiate perfect positions matrix
     // 4 perfect positions: right > left > top > bottom
@@ -525,7 +530,7 @@ SC.PickerPane = SC.PalettePane.extend({
     This method will set up pointerOffset and preferMatrix according to type
     and size if not provided explicitly.
   */
-  setupPointer: function(a) {
+  setupPointer: function() {
     var pointerOffset = this.pointerOffset,
         K             = SC.PickerPane;
     
@@ -559,7 +564,6 @@ SC.PickerPane = SC.PalettePane.extend({
         var overlapTuningX = (a.width < 16)  ? ((a.width < 4)  ? 9 : 6) : 0,
             overlapTuningY = (a.height < 16) ? ((a.height < 4) ? 9 : 6) : 0,
             offsetKey      = K.PICKER_POINTER_OFFSET;
-
         var offset = [offsetKey[0]+overlapTuningX,
                       offsetKey[1]-overlapTuningX,
                       offsetKey[2]-overlapTuningY,
