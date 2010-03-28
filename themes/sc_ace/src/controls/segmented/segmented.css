@@ -1,12 +1,17 @@
+@view(sc-segmented-view) {
+  overflow: visible;
+}
+
 @view(sc-segmented-view) .sc-segment {
   background: none;
   border: 0px none;
   color: #555;
   height: 25px;
   text-shadow: 0px 1px 1px white;
-  overflow: visible;
   display:inline-block;
   zoom: 1;
+  height:25px;
+  overflow:hidden;
 }
 
 @view(sc-segmented-view) .sc-segment .button-left {
