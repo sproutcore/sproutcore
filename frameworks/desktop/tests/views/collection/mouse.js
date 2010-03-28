@@ -133,10 +133,10 @@ test("clicking on an item should select it", function() {
   clickOn(view, 3, NO, NO, selectionFromIndex(3));
 });
 
-test("clicking on a selected item should clear selection after 301ms and reselect it", function() {
+test("clicking on a selected item should clear selection after 300ms and reselect it", function() {
   view.select(SC.IndexSet.create(1,5));
   SC.RootResponder.responder._lastMouseUpAt = null ; // HACK: don't want a doubleClick from previous tests
-  clickOn(view, 3, NO, NO, selectionFromIndex(3), 301);
+  clickOn(view, 3, NO, NO, selectionFromIndex(3), 500);
 });
 
 test("clicking on unselected item should clear selection and select it", function() {

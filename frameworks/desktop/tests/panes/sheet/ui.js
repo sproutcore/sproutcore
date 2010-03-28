@@ -40,5 +40,5 @@ test("verify sheet pane slide down works", function() {
     slidePane.remove();
   };
   stop();
-  setTimeout(f, 250);
+  setTimeout(f, 400);
 }) ;
