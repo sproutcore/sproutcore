@@ -23,6 +23,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
   classNames: ['sc-checkbox-view'],
   tagName: 'label',
+  controlStyle: '', 
 
   /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,

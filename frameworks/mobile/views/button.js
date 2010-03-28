@@ -30,7 +30,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     
     The default SproutCore theme supports "regular", "checkbox", and "radio"
   */
-  theme: 'square',
+  controlStyle: 'square',
   
   /**
     The button href value.  This can be used to create localized button href values.  Setting an empty or null href will set it to javascript:;

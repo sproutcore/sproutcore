@@ -38,7 +38,7 @@ SC.MiniMediaControlsView = SC.View.extend({
     action: "playPause",
     targetBinding: "*owner.target",
     renderStyle: 'renderImage',
-    theme: ''
+    controlStyle: ''
   }),
   
   timeView: SC.LabelView.design({
