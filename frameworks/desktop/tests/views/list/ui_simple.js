@@ -79,7 +79,7 @@ function verifyChildViewsMatch(views, set) {
 
 test("rendering only incremental portion", function() {
   var listView = pane.view("basic").contentView; 
-  same(listView.get("nowShowing"), SC.IndexSet.create(0, 16), 'nowShowing should be smaller IndexSet');
+  ok(listView.getPath("nowShowing.length") < listView.get('length'), 'nowShowing should be a subset of content items');
   equals(listView.get('childViews').length, listView.get('nowShowing').get('length'), 'should have same number of childViews as nowShowing length');  
 });
 
@@ -87,8 +87,8 @@ test("scrolling by small amount should update incremental rendering", function()
   var scrollView = pane.view('basic'),
       listView   = scrollView.contentView,
       exp;
-  
-  same(listView.get('nowShowing'), SC.IndexSet.create(0,16), 'precond - nowShowing has incremental range');
+
+  ok(listView.getPath('nowShowing.length') < listView.get('length'), 'precond - nowShowing has incremental range');
 
   // SCROLL DOWN ONE LINE
   SC.run(function() {
@@ -96,7 +96,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(1,16);
+  exp = SC.IndexSet.create(1,15);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
@@ -119,7 +119,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(1,16);
+  exp = SC.IndexSet.create(1,15);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);

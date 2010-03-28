@@ -146,7 +146,7 @@ test("manually calling rowHeightDidChangeForIndexes()", function() {
   var scrollView = pane.view('Custom Row Heights'),
       listView   = scrollView.contentView,
       exp;
-  
+
   same(listView.get('nowShowing'), SC.IndexSet.create(0,10), 'precond - nowShowing has incremental range');
   
   // adjust row height and then invalidate a portion range
@@ -156,7 +156,7 @@ test("manually calling rowHeightDidChangeForIndexes()", function() {
   });
 
   // nowShowing should adjust
-  same(listView.get('nowShowing'), SC.IndexSet.create(0,5), 'visible range should decrease since row heights for some rows doubled');
+  same(listView.get('nowShowing'), SC.IndexSet.create(0,4), 'visible range should decrease since row heights for some rows doubled');
   
   // as well as offset and heights for rows - spot check
   var view = listView.itemViewForContentIndex(3);
