@@ -1,4 +1,6 @@
-@view(sc-checkbox-view) {
+@view(sc-button-view.sc-checkbox-view) {
+  color: black;
+  text-shadow: white 0px 1px 1px;
   line-height: 18px;
   vertical-align: middle;
 }
@@ -24,6 +26,10 @@
 }
 
 /* Checked */
+@view(sc-button-view.sc-checkbox-view).sel {
+  text-shadow: white 0px 1px 1px;
+}
+
 @view(sc-checkbox-view).sel span.button {
   background: sprite("checkbox_checked.png");
 }
@@ -33,6 +39,10 @@
 }
 
 /* Active */
+@view(sc-button-view.sc-checkbox-view).active {
+  text-shadow: white 0px 1px 1px;
+}
+
 @view(sc-checkbox-view).active span.button {
   background: sprite("checkbox_unchecked_active.png");
 }
