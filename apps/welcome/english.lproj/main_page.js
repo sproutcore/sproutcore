@@ -42,7 +42,7 @@ Welcome.mainPage = SC.Page.design({
         isEnabledBinding: "Welcome.targetsController.canLoadApp",
 
         title: "Load Application",
-        theme: "capsule",
+        controlStyle: "capsule",
         isDefault: YES,
         
         target: "Welcome.targetsController",

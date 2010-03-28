@@ -1214,6 +1214,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!this.get('isEnabled')) classArray.push('disabled') ;
     if (!this.get('isVisible')) classArray.push('hidden') ;
     if (this.get('isFirstResponder')) classArray.push('focus');
+    if (this.get('hasStaticLayout') && this.get('useStaticLayout')) classArray.push('sc-static-layout');
 
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
@@ -1259,6 +1260,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!this.get('isEnabled')) classSet["disabled"] = YES;
     if (!this.get('isVisible')) classSet["hidden"] = YES;
     if (this.get('isFirstResponder')) classSet["focus"] = YES;
+    if (this.get('hasStaticLayout') && this.get('useStaticLayout')) classSet["sc-static-layout"] = YES;
     
     bgcolor = this.get('backgroundColor');
     if (bgcolor) q.css('backgroundColor', bgcolor);

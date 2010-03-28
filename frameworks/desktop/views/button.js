@@ -47,6 +47,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   classNames: ['sc-button-view'],
   
   /**
+    This property used to be called theme. We changed it now 
     optionally set this to the theme you want this button to have.  
     
     This is used to determine the type of button this is.  You generally 
@@ -58,7 +59,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     
     @property {String}
   */
-  theme: 'square',
+  controlStyle: 'square',
   
   /**
     Optionally set the behavioral mode of this button.  
@@ -221,13 +222,11 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   /** @private - save keyEquivalent for later use */
   init: function() {
-    if (
-        this.theme && 
-        (this.theme === "square" || this.theme === "capsule" || this.theme === "checkbox" || this.theme === "radio")
-      ) {
-      this.set("oldButtonTheme", this.theme);
-      this.theme = "";
-    }
+    //Add to the classNames array the controlStyle
+    var classnames = SC.clone(this.get('classNames'));
+    classnames.push(this.get('controlStyle'));
+    this.set('classNames', classnames);
+    
     sc_super();
     
     //cache the key equivalent

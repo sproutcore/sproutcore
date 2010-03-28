@@ -188,7 +188,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     The button theme will be popup
   */
-  theme: 'popup',
+  controlStyle: 'popup',
 
   /**
     Render method gets triggered when these properties change

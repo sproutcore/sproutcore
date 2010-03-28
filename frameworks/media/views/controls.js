@@ -41,7 +41,7 @@ SC.MediaControlsView = SC.View.extend({
     action: "playPause",
     targetBinding: "*owner.target",
     renderStyle: 'renderImage',
-    theme: ''
+    controlStyle: ''
   }),
   progressView: SC.MediaSlider.design({
     layout: { top: 0, left: 20, right: 220, height:20},
@@ -63,7 +63,7 @@ SC.MediaControlsView = SC.View.extend({
     title: '',
     icon: 'theater',
     renderStyle: 'renderImage',
-    theme: '',
+    controlStyle: '',
     titleMinWidth: 35,
     layout: { top: 0, right: 140, width: 20, height:20},
     action: "fullScreen",
