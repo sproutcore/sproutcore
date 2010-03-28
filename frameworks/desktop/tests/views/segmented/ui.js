@@ -9,11 +9,11 @@
 
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
+var pane;
 (function() {
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
   
-  var pane = SC.ControlTestPane.design()
+  pane = SC.ControlTestPane.design()
     
     .add("3_empty", SC.SegmentedView, { 
       items: [ '', '' , ''],
@@ -138,7 +138,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   test("Check that all segments have the right classes set", function() {
     var viewElem=pane.view('3_empty').$();
-    var segments=pane.view('3_empty').$('div');
+    var segments=pane.view('3_empty').$('a');
+    equals(segments.length, 3, 'precond - segmented view should have 3 segments');
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
     for (var i=0, ilen=segments.length; i<ilen; i++){
@@ -164,7 +165,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   test("Check that all segments have the right classes set", function() {
     var viewElem=pane.view('3_empty,icon').$();
-    var segments=pane.view('3_empty,icon').$('div');
+    var segments=pane.view('3_empty,icon').$('a');
+    equals(segments.length, 3, 'precond - segmented view should have 3 segments');
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
     for (var i=0, ilen=segments.length; i<ilen; i++){
@@ -190,7 +192,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
   test("Check that the selected segments have the right classes assigned.", function() {
-    var segments=pane.view('3_empty').$('div');
+    var segments=pane.view('3_empty').$('a');
+    equals(segments.length, 3, 'precond - segmented view should have 3 segments');
     for (var i=0, ilen=segments.length; i<ilen; i++){
       var seg=segments[i];
       ok((seg.className.indexOf('sel')==-1), 'this element should not be selected.');
@@ -200,15 +203,16 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
   test("Check that two items are selected.", function() {
-    var segments=pane.view('3_items,icon,2_sel').$('div');
+    var segments=pane.view('3_items,icon,2_sel').$('a');
     var count=0;
+    equals(segments.length, 3, 'precond - segmented view should have 3 segments');
     for (var i=0, ilen=segments.length; i<ilen; i++){
       var seg=segments[i];
       if(seg.className.indexOf('sel')!=-1){
         count++;
       }
     }
-    ok((count==2), '3_items,2_sel,disabled should have two segments selected.');
+    equals(count, 2, '3_items,2_sel,disabled should have two segments selected.');
 
   });
   
