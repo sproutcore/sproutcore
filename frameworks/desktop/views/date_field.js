@@ -4,9 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 /*globals Shared */
-sc_require('validators/date_time');
 
 /** @class
 
@@ -171,7 +169,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
   updateTextSelecitonObserver: function() {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
-    this.selection(null, ts[as].get('textSelection'));
+    if (this.get('isEditing')) {
+      this.selection(null, ts[as].get('textSelection'));
+    }
   }.observes('activeSelection', 'value'),
   
   /** @private
@@ -207,14 +207,14 @@ SC.DateFieldView = SC.TextFieldView.extend(
     }*/
   },
 
-  _textField_fieldDidFocus: function(evt) {
+  /*_textField_fieldDidFocus: function(evt) {
     SC.RunLoop.begin();
-    console.log(evt);
+    //console.log(evt);
     //console.log(event);
     //console.log(evt.originalEvent);
     this.fieldDidFocus();
     SC.RunLoop.end();
-  },
+  },*/
   
   /////////////////////////
   // KEY EVENTS SUPPORTS
