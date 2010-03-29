@@ -11,8 +11,20 @@
 */
 require("theme");
 SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
+  controlSizeArray: [18, 24, 30, 44], // pre-create for performance (purely optional optimization)
+  controlSizes: {
+    18: SC.SMALL_CONTROL_SIZE,
+    24: SC.REGULAR_CONTROL_SIZE,
+    30: SC.HUGE_CONTROL_SIZE,
+    44: SC.JUMBO_CONTROL_SIZE
+  },
+  
   init: function(settings) {
-    this._controlRenderer = this.theme.control();
+    this._controlRenderer = this.theme.control({
+      controlSizes: this.controlSizes,
+      controlSizeArray: this.controlSizeArray // purely optional optimization
+    });
+    
     this._titleRenderer = this.theme.title();
     this.attr(settings);
   },

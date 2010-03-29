@@ -27,6 +27,7 @@
 
 /* Checked */
 @view(sc-button-view.sc-checkbox-view).sel {
+  color: black;
   text-shadow: white 0px 1px 1px;
 }
 
@@ -40,6 +41,7 @@
 
 /* Active */
 @view(sc-button-view.sc-checkbox-view).active {
+  color: black;
   text-shadow: white 0px 1px 1px;
 }
 

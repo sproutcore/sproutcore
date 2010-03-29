@@ -679,6 +679,7 @@ theme-name is specified as an argument when building.
 
 /* Checked */
 .sc-theme .sc-view.sc-button-view.sc-checkbox-view.sel {
+  color: black;
   text-shadow: white 0px 1px 1px;
 }
 
@@ -692,6 +693,7 @@ theme-name is specified as an argument when building.
 
 /* Active */
 .sc-theme .sc-view.sc-button-view.sc-checkbox-view.active {
+  color: black;
   text-shadow: white 0px 1px 1px;
 }
 
@@ -896,5 +898,9 @@ img.disclosure.button.closed.active {
 }.sc-main {
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#bbb));
   height: 100%;
-  font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, sans-serif;
+  font-family: Helvetica, sans-serif;
+}
+
+.sc-view {
+  font-family: Helvetica, sans-serif;
 }

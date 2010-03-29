@@ -17,6 +17,7 @@
   sub-renderers.
 */
 SC.Renderer = SC.Renderer = {
+  
   //
   // FUNCTIONS SUBCLASSES SHOULD/MAY IMPLEMENT
   //
@@ -213,7 +214,7 @@ SC.Renderer = SC.Renderer = {
   
   didChange: function(key){
     if (!this.changes) return NO;
-    return (this.changes.contains(key));
+    return this.changes.contains(key);
   },
   
   resetChanges: function() {
