@@ -490,21 +490,6 @@ SC.RootResponder = SC.Object.extend({
   */
   setup: function() {
     this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
-    
-    if (SC.browser.touch) {
-      var elem = document.createElement('div');
-      elem.id = 'sc-touch-intercept';
-      elem.style.position = 'absolute';
-      elem.style.top = '0px';
-      elem.style.left = '0px';
-      elem.style.bottom = '0px';
-      elem.style.right = '0px';
-      elem.style.zIndex = 999;
-
-      document.body.appendChild(elem);
-      this._touchInterceptElement = elem;
-      elem = null;
-    }
   },
 
   /**
