@@ -33,17 +33,17 @@ SC.EmptyTheme.renderers.Image = SC.Renderer.extend({
     var src = this.src, toolTip = this.toolTip || '', image = '';
     
     if ((this.isSprite !== YES && src.indexOf('/') >= 0) || this.isSprite === NO) {
-      context.attr('src', src);
+      cq.attr('src', src);
       this._last_sprite_class = NO;
     } else {
       if (this._last_sprite_class) context.setClass(this._last_sprite_class, NO);
-      context.attr('src', SC.BLANK_IMAGE_URL);
-      context.setClass(src, YES);
+      cq.attr('src', SC.BLANK_IMAGE_URL);
+      cq.setClass(src, YES);
       this._last_sprite_class = src;
     }
     
-    context.attr('title', toolTip);
-    context.attr('alt', toolTip);
+    cq.attr('title', toolTip);
+    cq.attr('alt', toolTip);
 
   }
 });

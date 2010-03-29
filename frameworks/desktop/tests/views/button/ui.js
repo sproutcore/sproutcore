@@ -11,40 +11,57 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
 (function() {
-var pane = SC.ControlTestPane.design()
-  .add("basic", SC.ButtonView, { 
+var pane = SC.ControlTestPane.design({height:24})
+  .add("basic", SC.ButtonView, {
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
   
   .add("title", SC.ButtonView, { 
-     title: "Hello World" 
+     title: "Hello World",
+     controlSize: SC.CALCULATED_CONTROL_SIZE
   })
    
   .add("icon", SC.ButtonView, { 
-    icon: iconURL 
+    icon: iconURL,
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
     
   .add("title,icon", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL  
+    title: "Hello World", icon: iconURL,
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
      
   .add("title,icon,disabled", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL , isEnabled: NO 
+    title: "Hello World", icon: iconURL , isEnabled: NO,
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
   
   .add("title,icon,default", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL , isDefault: YES 
+    title: "Hello World", icon: iconURL , isDefault: YES,
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
 
   .add("title,icon,selected", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL , isSelected: YES 
+    title: "Hello World", icon: iconURL , isSelected: YES,
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
 
   .add("title,toolTip", SC.ButtonView, { 
-    title: "Hello World", toolTip: 'Hello World is my tool tip' 
+    title: "Hello World", toolTip: 'Hello World is my tool tip',
+    controlSize: SC.CALCULATED_CONTROL_SIZE // to prevent warning
+  })
+  
+  .add("autocontrolsize", SC.ButtonView, { 
+    title: "Hello Cheese", layout: { left: 0, top: 0, right: 0, height: 37 }
+  })
+  
+  .add("calculatedcontrolsize", SC.ButtonView, {
+    // control size should end up small
+    title: "Smelly Severus", layout: { left: 0, top: 2, right: 0, bottom: 2 },
+    controlSize: SC.CALCULATED_CONTROL_SIZE
   });
 
 pane.show(); // add a test to show the test pane
-
 
 module('SC.ButtonView ui');
 
@@ -158,6 +175,16 @@ test("Check that the title is set or not and if it is in the appropriate element
 test("Check if title,toolTip has the tool tip set", function() {
   var viewElem=pane.view('title,toolTip').$('div');
   ok(viewElem.defaultClass[0].title == 'Hello World is my tool tip', 'title,toolTip has the expected tool tip set.');
+});
+
+test("Check if AUTO_CONTROL_SIZE button automatically calculated the correct controlSize", function() {
+  var viewElem=pane.view('autocontrolsize').$();
+  ok(viewElem.hasClass('sc-huge-size'), 'HUGE button has sc-huge-size class.');
+});
+
+test("Check if CALCULATED_CONTROL_SIZE automatically found the correct controlSize", function() {
+  var viewElem=pane.view('calculatedcontrolsize').$();
+  ok(viewElem.hasClass('sc-small-size'), 'CALCULATED_CONTROL_SIZE button has sc-small-size class.');
 });
 
 })();
