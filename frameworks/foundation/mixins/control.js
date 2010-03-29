@@ -403,7 +403,7 @@ SC.Control = {
       // determine if we have height
       if (SC.none(controlSize.height)) {
         // throw a performance warning
-        if (controlSize !== SC.CALCULATED_CONTROL_SIZE) {
+        if (this.get("controlSize") !== SC.CALCULATED_CONTROL_SIZE) {
           SC.Logger.warn(
             "PERFORMANCE WARNING!!! When your control lacks a height, but is set to automatically " + 
             "calculate what theme control size to use, it can impact performance. To hide this warning, " +
@@ -412,10 +412,13 @@ SC.Control = {
           );
         }
         
-        controlSize = SC.clone(this.get("frame"));
-        
-        // I don't know of any renderer that will need these properties, but hey, we should be consistent.
-        controlSize.left = controlSize.x; controlSize.top = controlSize.y;
+        var frame = SC.clone(this.get("frame"));
+        if (frame) {
+          controlSize = frame;
+          
+          // I don't know of any renderer that will need these properties, but hey, we should be consistent.
+          controlSize.left = controlSize.x; controlSize.top = controlSize.y;
+        }
       }
       
       // okay, we've preprocessed all we need.

@@ -29,7 +29,7 @@ SC.EmptyTheme.renderers.Control = SC.Renderer.extend({
     // return exact matches immediately: 
     if (controlSizeNames[size]) return controlSizeNames[size];
     
-    var idx, len, val;
+    var idx, len, val = null;
     len = controlSizes.length;
     
     // if we haven't got nothing, don't do nothing.
@@ -42,6 +42,7 @@ SC.EmptyTheme.renderers.Control = SC.Renderer.extend({
     }
     
     // and now find actual size.
+    if (!val) return null;
     return controlSizeNames[val];
   },
   
