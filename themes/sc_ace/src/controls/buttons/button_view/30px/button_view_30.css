@@ -1,0 +1,68 @@
+@view(sc-button-view).sc-huge-size .button-left {
+  margin-top:-15px;
+  height: 30px;
+  background: sprite("normal_button.png" [0 8]);
+}
+
+@view(sc-button-view).sc-huge-size .button-right {
+  margin-top:-15px;
+  height: 30px;
+  background: sprite("normal_button.png" [-8]);
+}
+
+@view(sc-button-view).sc-huge-size .button-middle {
+  margin-top:-15px;
+  height: 30px;
+  background: sprite("normal_button.png" repeat-x [8, 1]);
+  
+}
+
+@view(sc-button-view).sc-huge-size .sc-button-label {
+  margin-top:-12px;
+  height: 24px;
+  font-size: 13px;
+}
+
+/* Active */
+@view(sc-button-view).sc-huge-size.active .button-left {
+  background: sprite("active_button.png" [0 8]);
+}
+
+@view(sc-button-view).sc-huge-size.active .button-right {
+  background: sprite("active_button.png" [-8]);
+}
+
+@view(sc-button-view).sc-huge-size.active .button-middle {
+  background: sprite("active_button.png" repeat-x [8, 1]);
+}
+
+/* Selected */
+@view(sc-button-view).sc-huge-size.sel .button-left {
+  background: sprite("selected_button.png" [0 8]);
+}
+
+@view(sc-button-view).sc-huge-size.sel .button-right {
+  background: sprite("selected_button.png" [-8]);
+}
+
+@view(sc-button-view).sc-huge-size.sel .button-middle {
+  background: sprite("selected_button.png" repeat-x [8, 1]);
+}
+
+/* Selected and Active */
+@view(sc-button-view).sc-huge-size.sel.active .button-left {
+  background: sprite("selected_active_button.png" [0 8]);
+}
+
+@view(sc-button-view).sc-huge-size.sel.active .button-right {
+  background: sprite("selected_active_button.png" [-8]);
+}
+
+@view(sc-button-view).sc-huge-size.sel.active .button-middle {
+  background: sprite("selected_active_button.png" repeat-x [8, 1]);
+}
+
+/* Disabled */
+@view(sc-button-view).sc-huge-size.disabled {
+  opacity: .5;
+}
