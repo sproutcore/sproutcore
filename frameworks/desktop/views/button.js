@@ -251,7 +251,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     Creates the button view's renderer.
   */
   createRenderer: function(theme) {
-    var ret = theme.button();
+    var ret, style = this.get('renderStyle');
+    if (style==="renderDefault") ret = theme.button();
+    if (style==="renderImage") ret = theme.image();
     this.updateRenderer(ret); // updating looks _exactly_ like normal stuff for us.
     return ret;
   },
