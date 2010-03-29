@@ -948,8 +948,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   contentViewLayerDidChange: function() {
     // Invalidate these cached values, as they're no longer valid
-    this._verticalScrollOffset = -1;
-    this._horizontalScrollOffset = -1;
+    if (this._verticalScrollOffset !== 0) this._verticalScrollOffset = -1;
+    if (this._horizontalScrollOffset !== 0) this._horizontalScrollOffset = -1;
     this.invokeLast(this.adjustElementScroll);
   },
 
