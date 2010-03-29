@@ -16,6 +16,7 @@ function evaluatePicker(pane) {
   ok(pane.$().hasClass('sc-picker'), 'pane should have sc-picker class');
   ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
   ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
+  equals(pane.$('.sc-empty').length, 1, 'pane should have only one content view');
   
   var ret = pane.layoutStyle();
 
