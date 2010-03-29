@@ -98,28 +98,6 @@ SC.Event = function(originalEvent) {
     this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
     this.wheelDeltaX = 0 ;
   }
-  
-  // translate X/Y coordinates of touch into a real target
-  if (SC.browser.touch) {
-    var touches = this.changedTouches, target, elem;
-    if (touches && touches.length > 0) {
-      var firstTouch = touches[0];
-      this.pageX = firstTouch.pageX;
-      this.pageY = firstTouch.pageY;
-    }
-
-    target = elem = this.target;
-
-    if (target === SC.RootResponder.responder._touchInterceptElement) {
-      elem.style.display = 'none';
-      // document.body.removeChild(elem);
-      target = document.elementFromPoint(this.pageX, this.pageY);
-      this.target = target;
-      // document.body.appendChild(elem);
-      elem.style.display = 'block';
-    }
-    target = elem = null; //cleanup
-  }
 
   return this; 
 } ;
