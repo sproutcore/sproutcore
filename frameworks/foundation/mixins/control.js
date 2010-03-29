@@ -14,6 +14,29 @@ sc_require('mixins/string');
 */
 SC.MIXED_STATE = '__MIXED__' ;
 
+/**
+  Option for controls to automatically calculate their size (default on controls
+  converted to the newerer, betterer, renderer method).
+  
+  Note: if your control does not have a 'height' set, this will give a warning
+  that it impacts performance. If you want to damn the performance, full speed
+  ahead, use SC.CALCULATED_CONTROL_SIZE.
+*/
+SC.AUTO_CONTROL_SIZE = '__AUTO__';
+
+/**
+  Option for controls to automatically calculate their size, even if the control
+  has no height specified.
+*/
+SC.CALCULATED_CONTROL_SIZE = '__CALCULATED__';
+
+/** 
+  Option for HUGE control size.
+  
+  @property {String}
+*/
+SC.JUMBO_CONTROL_SIZE = 'sc-jumbo-size' ;
+
 /** 
   Option for HUGE control size.
   
@@ -321,6 +344,12 @@ SC.Control = {
     The control size.  This will set a CSS style on the element that can be 
     used by the current theme to vary the appearance of the control.
     
+    Some controls will default to SC.AUTO_CONTROL_SIZE, which will allow you
+    to simply size the control, and the most appropriate control size will
+    automatically be picked; be warned, though, that if you don't specify
+    a height, performance will be impacted as it must be calculated; if you do
+    this, a warning will be issued. If you don't care, use SC.CALCULATED_CONTROL_SIZE.
+    
     @property {String}
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
@@ -343,14 +372,57 @@ SC.Control = {
     names.mixed = sel === SC.MIXED_STATE;
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
     names.active = this.get('isActive') ;
-    context.setClass(names).addClass(this.get('controlSize'));
+    
+    var controlSize = this.get("controlSize");
+    if (controlSize === SC.AUTO_CONTROL_SIZE || controlSize === SC.CALCULATED_CONTROL_SIZE) {
+      controlSize = SC.REGULAR_CONTROL_SIZE;
+    }
+    context.setClass(names).addClass(controlSize);
+    
+    // if the control implements the $input() helper, then fixup the input
+    // tags
+    if (!firstTime && this.$input) {
+      var inps = this.$input();
+      if(inps.attr('type')!=="radio"){
+        this.$input().attr('disabled', disabled);
+      }
+    }
   },
   
   updateRendererMixin: function(r) {
     r.isSelected = this.get("isSelected");
     r.isEnabled = this.get("isEnabled");
     r.isActive = this.get("isActive");
-    r.controlSize = this.get("controlSize");
+    
+    // we have to figure out if we are passing control size through, or our layout.
+    var controlSize = this.get('controlSize');
+    if (controlSize === SC.AUTO_CONTROL_SIZE || controlSize === SC.CALCULATED_CONTROL_SIZE) {
+      // get the layout
+      controlSize = this.get("layout");
+      
+      // determine if we have height
+      if (SC.none(controlSize.height)) {
+        // throw a performance warning
+        if (controlSize !== SC.CALCULATED_CONTROL_SIZE) {
+          SC.Logger.warn(
+            "PERFORMANCE WARNING!!! When your control lacks a height, but is set to automatically " + 
+            "calculate what theme control size to use, it can impact performance. To hide this warning, " +
+            "set controlSize on this control to SC.CALCULATED_CONTROL_SIZE, or if you know the control size, " +
+            "set controlSize to the numeric or string control size."
+          );
+        }
+        
+        controlSize = SC.clone(this.get("frame"));
+        
+        // I don't know of any renderer that will need these properties, but hey, we should be consistent.
+        controlSize.left = controlSize.x; controlSize.top = controlSize.y;
+      }
+      
+      // okay, we've preprocessed all we need.
+    }
+    
+    // set control size
+    r.controlSize = controlSize;
   },
   
   /** @private

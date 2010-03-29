@@ -33,6 +33,11 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     @property {String}
   */
   tagName: 'div',
+  
+  /**
+    ButtonView's renderers should be smart enough to...
+  */
+  controlSize: SC.AUTO_CONTROL_SIZE,
 
   /**
     Class names that will be applied to this view
