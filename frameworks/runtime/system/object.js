@@ -701,7 +701,7 @@ SC.Object.prototype = {
     Note that in development mode only, the object and method that call this
     method will be recorded, for help in debugging scheduled code.
     
-    @param {Funciton|String} method method or method name
+    @param {Function|String} method method or method name
     @returns {SC.Object} receiver
   */
   invokeLast: function(method) {
