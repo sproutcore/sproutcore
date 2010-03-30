@@ -1354,13 +1354,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */
   render: function(context, firstTime) {
-    if (firstTime) this.renderChildViews(context, firstTime) ;
     if (this.createRenderer) {
       if (firstTime) { 
         if (this.renderer) this.renderer.render(context);
       } else {
         if (this.renderer) this.renderer.update();
       }
+    } else {
+      if (firstTime) this.renderChildViews(context, firstTime);
     }
   },
   
