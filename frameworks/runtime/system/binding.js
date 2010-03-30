@@ -459,7 +459,7 @@ SC.Binding = {
     
     // if the new value is different from the current binding value, then 
     // schedule to register an update.
-    if (v !== this._bindingValue) {
+    if (v !== this._bindingValue || key === '[]') {
 
       this._setBindingValue(target, key) ;
       this._changePending = YES ;
@@ -650,7 +650,7 @@ SC.Binding = {
 
       // if the new value is different from the current binding value, then 
       // schedule to register an update.
-      if (v !== this._bindingValue) {
+      if (v !== this._bindingValue || key === '[]') {
         this._setBindingValue(target, key) ;
         this._changePending = YES ;
         SC.Binding._changeQueue.add(this) ; // save for later.  

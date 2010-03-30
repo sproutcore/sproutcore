@@ -377,3 +377,19 @@ test("toObject.value should be second value if first is falsy", function() {
   SC.Binding.flushPendingChanges();
   equals(toObject.get('value'), 'second value');
 });
+
+module("Binding with '[]'", {
+  setup: function() {
+    fromObject = SC.Object.create({ value: [] });
+    toObject = SC.Object.create({ value: '' });
+    binding = SC.Binding.transform(function(v) {
+      return v ? v.join(',') : '';
+    }).from("value.[]", fromObject).to("value", toObject).connect();
+  }
+});
+
+test("Binding refreshes after a couple of items have been pushed in the array", function() {
+  fromObject.get('value').pushObjects(['foo', 'bar']);
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('value'), 'foo,bar');
+});
