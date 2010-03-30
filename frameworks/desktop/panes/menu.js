@@ -261,7 +261,16 @@ SC.MenuPane = SC.PickerPane.extend(
     // pane's defaultResponder to itself. This way key events can be
     // interpreted in keyUp.
     this.set('defaultResponder', this);
-    this.append();
+
+    // IE7 has a bug where, intermittently, appending a menu pane will cause
+    // the other panes to blank out, until the user interacts with the window.
+    // If we wait until the end of the RunLoop to append the pane, IE redraws
+    // correctly.
+    if (parseInt(SC.browser.msie, 0)===7) {
+      this.invokeLast(this.append);
+    } else {
+      this.append();
+    }
   },
 
   /**
