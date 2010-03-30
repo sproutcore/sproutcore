@@ -1554,7 +1554,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var childViews = this.get('childViews'), len = childViews.length, idx ;
     if (len) {
       childViews = childViews.slice() ;
-      for (idx=0; idx<len; ++idx) childViews[idx]._destroy() ;
+      for (idx=0; idx<len; ++idx) childViews[idx].destroy() ;
     }
     
     // next remove view from global hash
@@ -2310,14 +2310,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.left = "50%";
       if(lW && SC.isPercentage(lW)) ret.width = (lW*100)+"%" ; //percentage width
       else ret.width = Math.floor(lW || 0) ;
-      if(lW && SC.isPercentage(lW) && lcX >= 0 && lcX < 1){
+      if(lW && SC.isPercentage(lW) && (SC.isPercentage(lcX) || SC.isPercentage(lcX*-1))){
         ret.marginLeft = Math.floor((lcX - lW/2)*100)+"%" ;
-      }else if(lW && lW > 1 && (lcX >= 1 || lcX <= 0)){
+      }else if(lW && lW >= 1 && !SC.isPercentage(lcX)){
         ret.marginLeft = Math.floor(lcX - ret.width/2) ;
       }else {
         // This error message happens whenever width is not set.
-        // console.error("You have to set width and centerX usign both percentages or pixels");
-        ret.marginLeft = 0;
+        console.warn("You have to set width and centerX usign both percentages or pixels");
+        ret.marginLeft = "50%";
       }
       ret.right = null ;
     
@@ -2384,15 +2384,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+ "%" ;
       else ret.height = Math.floor(lH || 0) ;
       
-      if(lH && SC.isPercentage(lH) && lcY >= 0 && lcY < 1){
+      if(lH && SC.isPercentage(lH) && (SC.isPercentage(lcY) || SC.isPercentage(lcY*-1))){ //height is percentage and lcy too
         ret.marginTop = Math.floor((lcY - lH/2)*100)+"%" ;
-      }else if(lH && lH > 1 && (lcY >= 1 || lcY <= 0)){
+      }else if(lH && lH >= 1 && !SC.isPercentage(lcY)){
         ret.marginTop = Math.floor(lcY - ret.height/2) ;
       }else {
-        console.error("You have to set height and centerY to use both percentages or pixels");
-        ret.marginTop = 0;
+        console.warn("You have to set height and centerY to use both percentages or pixels");
+        ret.marginTop = "50%";
       }
-    
     } else if (!SC.none(lH)) {
       ret.top = 0;
       ret.bottom = null;
