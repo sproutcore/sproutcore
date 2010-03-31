@@ -182,6 +182,24 @@ SC.Record = SC.Object.extend(
         storeKey = this.storeKey;
     return store.readEditableDataHash(storeKey);
   }.property(),
+
+  /**
+    This will return the raw attributes that you cannot edit directly.  It is
+    useful if you want to efficiently look at multiple attributes in bulk.  If
+    you would like to edit the attributes, see the @attributes@ property
+    instead.
+  
+    @property {Hash}
+  **/
+  readOnlyAttributes: function() {
+    var store    = this.get('store'), 
+        storeKey = this.storeKey;
+        ret      = store.readDataHash(storeKey);
+    
+    if (ret) ret = SC.clone(ret);
+
+    return ret;
+  }.property(),
   
   /**
    * The child record cache.
@@ -609,7 +627,7 @@ SC.Record = SC.Object.extend(
   */
   
   toString: function() {
-    var attrs = this.get('attributes');
+    var attrs = this.get('readOnlyAttributes');
     return "%@(%@) %@".fmt(this.constructor.toString(), SC.inspect(attrs), this.statusString());
   },
   

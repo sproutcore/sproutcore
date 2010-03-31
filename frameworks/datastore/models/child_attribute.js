@@ -106,7 +106,7 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
         store, storeKey, attrs, key, param, cRef;
     cRef = parentRecord ? parentRecord[cacheKey] : null;
     if (cRef) {
-      attrs = cRef.get('attributes');
+      attrs = cRef.get('readOnlyAttributes');
       for(key in attrs) {
         param = cRef[key];
         // Orphan all the child record and child records in a tree to clean up the store

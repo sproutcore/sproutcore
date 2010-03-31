@@ -64,7 +64,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
     
     if (cArray) {
       cArray.forEach( function(cr){
-        attrs = cr.get('attributes');
+        attrs = cr.get('readOnlyAttributes');
         for(key in attrs) {
           param = cr[key];
           // Orphan all the child record and child records in a tree to clean up the store
