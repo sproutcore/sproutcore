@@ -952,6 +952,7 @@ SC.MenuPane = SC.PickerPane.extend(
     while (idx >= 0) {
       if (items[idx].get('isEnabled')) {
         this.set('currentMenuItem', items[idx]);
+        items[idx].becomeFirstResponder();
         break;
       }
       idx--;
@@ -983,6 +984,7 @@ SC.MenuPane = SC.PickerPane.extend(
     while (idx < len) {
       if (items[idx].get('isEnabled')) {
         this.set('currentMenuItem', items[idx]);
+        items[idx].becomeFirstResponder();
         break;
       }
       idx++;
@@ -1038,6 +1040,7 @@ SC.MenuPane = SC.PickerPane.extend(
       title = title.replace(/ /g,'').substr(0,bufferLength).toUpperCase();
       if (title === buffer) {
         this.set('currentMenuItem', item);
+        item.becomeFirstResponder();
         break;
       }
     }
