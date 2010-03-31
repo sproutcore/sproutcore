@@ -319,7 +319,9 @@ SC.RadioView = SC.View.extend(SC.Control,
     if(target.hasClass('disabled')) return YES;
     target.addClass('active');
     this._activeRadioButton = target;
-
+    // even if radiobuttons are not set to get firstResponder, allow default 
+    // action, that way textfields loose focus as expected.
+    evt.allowDefault();
     return YES;
   },
 
