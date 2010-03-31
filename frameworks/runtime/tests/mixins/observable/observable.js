@@ -662,7 +662,6 @@ test("changing chained observer object to null should not raise exception", func
     obj.foo.set('bar', null);
   });
 
-  //debugger ;
   equals(callCount, 1, 'changing bar should trigger observer');
   expect(3);
 });

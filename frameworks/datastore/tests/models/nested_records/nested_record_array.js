@@ -202,10 +202,8 @@ test("Basic Write", function() {
    { type: 'ChildRecordTest1', name: 'Dick', value: 'Smothers'},
    { type: 'ChildRecordTest1', name: 'Harry', value: 'Balls'}
   ];
-  //debugger;
-  //SC.RunLoop.begin();
+
   testParent.set('elements', newChildren);
-  //SC.RunLoop.end();
   var newArray = testParent.get('elements');
   ok(SC.instanceOf(newArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
   equals(newArray.get('length'), 3, "after set() on parent, check that the length of the array of child records is 3");

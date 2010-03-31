@@ -694,7 +694,6 @@ SC.ViewDesigner = SC.Object.extend(
           
       if (frame && pview) frame = pview.convertFrameToView(frame, null);
 
-      //debugger;
       if (!frame || SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame)) {
         var controller = this.get('designController');
         if (info.metaKey) controller.deselect(this);

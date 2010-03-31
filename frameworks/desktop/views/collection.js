@@ -2178,7 +2178,6 @@ SC.CollectionView = SC.View.extend(
       // selection and reselect the clicked on item.
       if (info.shouldReselect) {
         
-        //debugger ;
         // - contentValueIsEditable is true
         canEdit = this.get('isEditable') && this.get('canEditContent') ;
         

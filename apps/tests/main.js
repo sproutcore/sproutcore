@@ -16,7 +16,6 @@ TestRunner.main = function main() {
   // setup views
   TestRunner.getPath('mainPage.mainPane').append() ;
 
-  //debugger;
   TestRunner.makeFirstResponder(TestRunner.START);
 
   // load initial data
