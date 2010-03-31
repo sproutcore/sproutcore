@@ -393,6 +393,9 @@ SC.RecordAttribute.registerTransform(Date, {
 
   /** @private - convert a string to a Date */
   to: function(str, attr) {
+    if (str === null)
+      return null;
+
     var ret ;
     str = str.toString() || '';
     

@@ -163,6 +163,11 @@ test("reading date should parse non-ISO date", function() {
   equals(rec2.get('nonIsoDate').toString(), d.toString(), 'should have matched date');
 });
 
+test("reading no date should produce null", function() {
+  var d = new Date(1235968200000); // should be proper date
+  equals(rec2.get('date'), null, 'should have yielded null');
+});
+
 test("reading computed default value", function() {
   var value = rec.get('defaultComputedValue');
   var validValues = [1,2,3,4];
