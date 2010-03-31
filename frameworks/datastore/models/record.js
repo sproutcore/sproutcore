@@ -627,7 +627,9 @@ SC.Record = SC.Object.extend(
   */
   
   toString: function() {
-    var attrs = this.get('readOnlyAttributes');
+    // We won't use 'readOnlyAttributes' here because accessing them directly
+    // avoids a SC.clone() -- we'll be careful not to edit anything.
+    var attrs = this.get('store').readDataHash(this.get('storeKey'));
     return "%@(%@) %@".fmt(this.constructor.toString(), SC.inspect(attrs), this.statusString());
   },
   
