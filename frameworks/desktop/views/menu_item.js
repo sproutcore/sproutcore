@@ -479,6 +479,17 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return YES;
   },
 
+  /** @private
+    Proxies insertText events to the parent menu so items can be selected
+    by typing their titles.
+  */
+  insertText: function(chr, evt) {
+    var menu = this.get('parentMenu');
+    if (menu) {
+      menu.insertText(chr, evt);
+    }
+  },
+
   /** @private*/
   keyDown: function(evt) {
     return this.interpretKeyEvents(evt) ;
