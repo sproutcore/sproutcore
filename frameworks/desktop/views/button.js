@@ -253,7 +253,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   createRenderer: function(theme) {
     var ret, style = this.get('renderStyle');
     if (style==="renderDefault") ret = theme.button();
-    if (style==="renderImage") ret = theme.image();
+    if (style==="renderImage") ret = theme.imageButton();
     this.updateRenderer(ret); // updating looks _exactly_ like normal stuff for us.
     return ret;
   },
@@ -273,22 +273,10 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       
       title: this.get("displayTitle"),
       escapeHTML: this.get("escapeHTML"),
-      needsEllipsis: this.get("needsEllipsis"),
-      
-      oldButtonTheme: this.get("oldButtonTheme")
+      needsEllipsis: this.get("needsEllipsis")
     });
   },
   
-  /**
-    Render the button with the image render style. To set image 
-    set the icon property with the classname that has the style with the image
-  */
-  renderImage: function(context, firstTime){
-    var icon = this.get('icon');
-    context.addClass('no-min-width');
-    if(icon) context.push("<div class='img "+icon+"'></div>");
-    else context.push("<div class='img'></div>");
-  },
   
   /** @private {String} used to store a previously defined key equiv */
   _defaultKeyEquivalent: null,

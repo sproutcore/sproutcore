@@ -12,42 +12,22 @@
   @since SproutCore 1.1
 */
 require("theme");
-SC.EmptyTheme.renderers.Image = SC.Renderer.extend({
+SC.EmptyTheme.renderers.ImageButton = SC.Renderer.extend({
   render: function(context) {
-    var src = this.icon, toolTip = this.toolTip || '', image = '';
-    
-    if (src && ((this.isSprite !== YES && src.indexOf('/') >= 0) || this.isSprite === NO)) {
-      context.attr('src', src);
-      this._last_sprite_class = NO;
-    } else {
-      context.attr('src', SC.BLANK_IMAGE_URL);
-      context.addClass(src);
-      this._last_sprite_class = src;
-    }
-    
-    context.attr('title', toolTip);
-    context.attr('alt', toolTip);
+    var icon = this.icon;
+    context.addClass('no-min-width');
+    if(icon) context.push("<div class='img "+icon+"'></div>");
+    else context.push("<div class='img'></div>");
   },
   
   update: function() {
-    var cq = this.$();
-    
-    var src = this.src, toolTip = this.toolTip || '', image = '';
-    
-    if ((this.isSprite !== YES && src.indexOf('/') >= 0) || this.isSprite === NO) {
-      cq.attr('src', src);
-      this._last_sprite_class = NO;
+    var cq = this.$(), src = this.icon;
+    if (src) {
+      cq.attr('class', "img "+src);
     } else {
-      if (this._last_sprite_class) context.setClass(this._last_sprite_class, NO);
-      cq.attr('src', SC.BLANK_IMAGE_URL);
-      cq.setClass(src, YES);
-      this._last_sprite_class = src;
-    }
-    
-    cq.attr('title', toolTip);
-    cq.attr('alt', toolTip);
- 
+      cq.attr('class', "img");
+    }  
   }
 });
  
-SC.EmptyTheme.renderers.image = SC.EmptyTheme.renderers.Image.create();
+SC.EmptyTheme.renderers.imageButton = SC.EmptyTheme.renderers.ImageButton.create();
