@@ -313,6 +313,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
 
   render: function(context, firstTime) {
+    console.log('render');
     sc_super() ;
 
     var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"',
@@ -627,9 +628,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if(inp) inp.focus();
       
       if(!this._txtFieldMouseDown){
-        if(SC.browser.mozilla) this.invokeOnce(this._selectRootElement) ;
-        else if(SC.browser.safari) this.invokeLater(this._selectRootElement, 1) ; 
-        else this._selectRootElement();
+        this.invokeLast(this._selectRootElement) ;
       }
     }
   },
@@ -731,7 +730,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       evt.stop();
       return YES;
     } else if((this.value && this.value.length===0) || !this.value) {
-      if(parseInt(SC.browser.msie)<8){
+      if(parseInt(SC.browser.msie,0)<8){
         this.invokeLater(this.focusIE7, 1);
       }else{
         this.$input()[0].focus();

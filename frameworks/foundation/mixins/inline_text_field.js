@@ -164,8 +164,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
    
     pane.appendChild(this);
     
-    SC.RunLoop.begin().end();
-    
     var del = this._delegate ;
 
     this._className = this.getDelegateProperty(del,"inlineEditorClassName");
@@ -177,14 +175,13 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     // this.resizeToFit(this.getFieldValue()) ;
 
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
-   
+    this.becomeFirstResponder();
     this.endPropertyChanges() ;
     
     // TODO: remove? if(SC.browser.mozilla)this.invokeOnce(this.becomeFirstResponder) ;
       
     // Become first responder and notify the delegate after run loop completes
     this.invokeLast(function() {
-      this.becomeFirstResponder();
       this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this);
     });
   },
@@ -448,16 +445,15 @@ SC.InlineTextFieldView.mixin(
     // If exampleInlineTextFieldView is set, load this class otherwise use
     // the default, this.
     var klass = options.exampleInlineTextFieldView 
-              ? options.exampleInlineTextFieldView : this;
-    
-    var layout = options.delegate.get('layout');
-    var s = this.updateViewStyle();
-    var p = this.updateViewPaddingStyle();
+              ? options.exampleInlineTextFieldView : this,
+        layout = options.delegate.get('layout'),
+        s = this.updateViewStyle(),
+        p = this.updateViewPaddingStyle();
     
     var str= ".inline-editor input{"+s+"} ";
     str= str+".inline-editor textarea{"+s+"} .inline-editor .padding{"+p+"}";
-    var pa= document.getElementsByTagName('head')[0] ;
-    var el= document.createElement('style');
+    var pa= document.getElementsByTagName('head')[0],
+    el= document.createElement('style');
     el.type= 'text/css';
     el.media= 'screen';
     if(el.styleSheet) el.styleSheet.cssText= str;// IE method
@@ -498,9 +494,9 @@ SC.InlineTextFieldView.mixin(
   
   /** @private */
   updateViewStyle: function() {
-    var el = this._exampleElement[0] ;   
-    var styles = '';
-    var s=SC.getStyle(el,'font-size');
+    var el = this._exampleElement[0],
+        styles = '',
+        s=SC.getStyle(el,'font-size');
     if(s && s.length>0) styles = styles + "font-size: "+ s + " !important; ";
     s=SC.getStyle(el,'font-family');
     if(s && s.length>0) styles = styles + "font-family: " + s + " !important; ";

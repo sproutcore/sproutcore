@@ -82,8 +82,10 @@ SC.Editable = {
     if (this.get('isEditing')) return YES ;
     
     // begin editing
+    this.beginPropertyChanges();
     this.set('isEditing', YES) ;
     this.becomeFirstResponder() ;
+    this.endPropertyChanges();
     return YES ;
   },
   
