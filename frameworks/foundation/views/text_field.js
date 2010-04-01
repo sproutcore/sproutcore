@@ -407,6 +407,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   render: function(context, firstTime) {
+    console.log('render');
     sc_super() ;
     var v, accessoryViewWidths, leftAdjustment, rightAdjustment;
 
