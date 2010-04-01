@@ -177,7 +177,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
    
     pane.appendChild(this);
     
-    del = this._delegate ;
+    var del = this._delegate ;
 
     this._className = this.getDelegateProperty(del,"inlineEditorClassName");
     if(this._className && !this.hasClassName(this._className)) {
