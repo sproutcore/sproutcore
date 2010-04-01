@@ -15,7 +15,7 @@
   @since SproutCore 1.0
 */
 SC.WebView = SC.View.extend(SC.Control, {
-
+/** @scope SC.WebView.prototype */
   classNames: 'sc-web-view',
   displayProperties: ['value', 'shouldAutoResize'],
 
