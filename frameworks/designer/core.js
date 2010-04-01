@@ -8,3 +8,18 @@
 SC.Designer = SC.Object.extend({
   
 });
+
+SC.mixin(SC.Designer,{
+  pages: [],
+  
+  controllers: [],
+  
+  registerPage: function(page){
+    SC.Designer.pages.pushObject(page);
+  },
+  
+  registerController: function(controller){
+    SC.Designer.controllers.pushObject(controller);
+  }
+  
+});

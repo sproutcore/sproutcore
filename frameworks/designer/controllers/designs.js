@@ -103,6 +103,11 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
     @returns the allowed drag operation.  Defaults to proposedDragOperation
   */
   collectionViewPerformDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
+    var data = drag.dataForType('SC.View');
+    if(data){
+      SC._Greenhouse.sendAction('addToPage', SC.Object.create({type: 'view', data: data}));
+      return SC.DRAG_ANY;
+    }
     return SC.DRAG_NONE ;
   }
 }) ;

@@ -19,7 +19,7 @@ SC.designPage = SC.Page.create({
     
     viewList: SC.ScrollView.design({
       layout: {left:0, right: 0, bottom: 0, height: 48},
-      hasHorizontalScroller: NO,
+      hasVerticalScroller: NO,
       contentView: SC.GridView.design({
         rowHeight: 48,
         columnWidth: 48,
