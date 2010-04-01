@@ -272,19 +272,19 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return YES ;
   },
 
-  /**
+  /** @private
     Called on mouse down to send the action to the target.
 
     This method will start flashing the menu item to indicate to the user that
     their selection has been received, unless disableMenuFlash has been set to
     YES on the menu item.
 
-    @private
+    @returns {Boolean}
   */
   performAction: function() {
     // Disabled menu items and menu items with submenus should not have
     // actions.
-    if (!this.get('isEnabled')||this.get('hasSubMenu')) return;
+    if (!this.get('isEnabled')||this.get('hasSubMenu')) return NO;
 
     var disableFlash = this.getContentProperty('itemDisableMenuFlashKey');
 
@@ -299,6 +299,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       this.invokeLater(this.flashHighlight, 25);
       this.invokeLater(this.sendAction, 200);
     }
+
+    return YES;
   },
 
   /**
