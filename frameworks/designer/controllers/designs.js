@@ -2,6 +2,7 @@
 // Project:   SC.designsController
 // ==========================================================================
 /*globals SC */
+/*jslint evil: true*/
 
 /** @class
 
@@ -103,9 +104,20 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
     @returns the allowed drag operation.  Defaults to proposedDragOperation
   */
   collectionViewPerformDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
-    var data = drag.dataForType('SC.View');
+    var data = drag.dataForType('SC.View'),
+        page = this.get('page'),
+        that = this;
     if(data){
-      SC._Greenhouse.sendAction('addToPage', SC.Object.create({type: 'view', data: data}));
+      var actionObj = SC.Object.create({
+        type: 'view', 
+        data: data,
+        addViewToPage: function(name){
+          page[name] = eval(this.getPath('data.scClass')).design().create({page: page});
+          that.pushObject(SC.Object.create({type: this.get('type'), view: page.get(name), name: name}));
+        }
+      });
+      
+      SC._Greenhouse.sendAction('addToPage', actionObj);
       return SC.DRAG_ANY;
     }
     return SC.DRAG_NONE ;
