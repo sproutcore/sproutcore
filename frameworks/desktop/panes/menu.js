@@ -7,15 +7,6 @@
 require('panes/picker');
 require('views/menu_item');
 
-
-/** 
-  Default heights for menu items.
-*/
-if (!SC.DEFAULT_MENU_ITEM_HEIGHT)           SC.DEFAULT_MENU_ITEM_HEIGHT           = 20;
-if (!SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT) SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT = 9;
-if (!SC.DEFAULT_MENU_HEIGHT_PADDING)        SC.DEFAULT_MENU_HEIGHT_PADDING        = 0;
-
-
 /**
   @class
 
@@ -132,9 +123,9 @@ SC.MenuPane = SC.PickerPane.extend(
     be inferred from controlSize.
 
     @type Number
-    @default SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT
+    @default null
   */
-  itemSeparatorHeight: SC.DEFAULT_MENU_ITEM_SEPARATOR_HEIGHT,
+  itemSeparatorHeight: null,
 
   /**
     The height of the menu pane.  This is updated every time menuItemViews
@@ -156,9 +147,9 @@ SC.MenuPane = SC.PickerPane.extend(
     controlSize.
 
     @type Number
-    @default SC.DEFAULT_MENU_HEIGHT_PADDING
+    @default null
   */
-  menuHeightPadding: SC.DEFAULT_MENU_HEIGHT_PADDING,
+  menuHeightPadding: null,
 
   /**
     The amount of offset x while positioning submenu.
@@ -862,7 +853,8 @@ SC.MenuPane = SC.PickerPane.extend(
 
   _sc_menu_currentMenuItemDidChange: function() {
     var currentMenuItem = this.get('currentMenuItem'),
-        previousMenuItem = this.get('previousMenuItem');
+        previousMenuItem = this.get('previousMenuItem'),
+        scrollView, scrollOffset, height, itemTop;
 
     if (previousMenuItem) {
       if (previousMenuItem.get('hasSubMenu') && currentMenuItem === null) {
@@ -873,11 +865,20 @@ SC.MenuPane = SC.PickerPane.extend(
       }
     }
 
-    // Scroll to the selected menu item if it's not visible on screen.
-    // This is useful for keyboard navigation and programmaticaly selecting
-    // the selected menu item, as in SelectButtonView.
-    if (currentMenuItem && currentMenuItem.get('isEnabled')) {
-      currentMenuItem.scrollToVisible();
+    if (currentMenuItem && currentMenuItem.get('isEnabled') && !currentMenuItem.get('isSeparator')) {
+      // Scroll to the selected menu item if it's not visible on screen.
+      // This is useful for keyboard navigation and programmaticaly selecting
+      // the selected menu item, as in SelectButtonView.
+      scrollView = this.childViews[0];
+      if (scrollView) {
+        scrollOffset = scrollView.get('verticalScrollOffset');
+        itemTop = currentMenuItem.get('frame').y;
+        height = scrollView.getPath('containerView.frame').height;
+
+        if ( (itemTop < scrollOffset) || (itemTop+20 > scrollOffset+height) ) {
+          scrollView.scrollTo(0, itemTop);
+        }
+      }
     }
   }.observes('currentMenuItem'),
 
