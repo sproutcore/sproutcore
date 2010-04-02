@@ -7,23 +7,6 @@
 /** Set to NO to leave the backspace key under the control of the browser.*/
 SC.CAPTURE_BACKSPACE_KEY = NO ;
 
-/**
-  Order layer for regular Panels.  Panels appear in front of the main view, 
-  but behind palettes, popups.
-*/
-SC.PANEL_ORDER_LAYER = 0x1000 ;
-
-/** 
-  Order layer for Palettes.  Palettes appear in front of the main view and 
-  panels, but behind popups.
-*/
-SC.PALETTE_ORDER_LAYER = 0x2000 ;
-
-/**
-  Order layer for Popups.  Popups appear in fron of hte main view and panels.
-*/
-SC.POPUP_ORDER_LAYER = 0x3000 ;
-
 /*
   This is the root responder subclass for desktop-style applications.  It 
   supports mouse events and window resize events in addition to the built
@@ -34,128 +17,10 @@ SC.RootResponder = SC.RootResponder.extend(
 
   platform: 'desktop',
 
-  // ..........................................................
-  // ORDERED PANES
-  // 
-  
-  /** @property
-    The current front view.  This view should have the highest z-index of all 
-    the other views.
-  */
-  focusedPane: function() {
-    var views = this.get('orderedPanes');
-    return views[views.length-1];
-  }.property('orderedPanes'),
-  
-  
-  /** @property
-    Array of panes currently displayed that can be reordered.  This property 
-    changes when you orderBack() or orderOut() a pane to determine the next 
-    frontmost pane.
-  */
-  orderedPanes: null,
-
-  /**
-    Inserts the passed panes into the orderedPanes array before the named pane 
-    array.  Pass null to order at the front.  If this changes the frontmost 
-    view, then focus will also be shifted.  The pane you request must have the 
-    same orderLayer property at the pane you are passing in.  If it does not, 
-    the pane will be placed nearest to the target as possible.
-    
-    @param {SC.Pane} pane
-    @param {SC.Pane} beforePane
-    @returns {SC.RootResponder} receiver
-  */
-  orderBefore: function(pane, beforePane) {
-    var currentFocus = this.get('focusedPane'),
-        panes = this.get('orderedPanes').without(pane),
-        len, idx, currentOrder, newFocus ;
-
-    // adjust the beforePane to match orderLayer
-    var orderLayer = pane.get('orderLayer');
-    if (beforePane) {
-      len = panes.length;
-      idx = panes.indexOf(beforePane);
-      currentOrder = beforePane.get('orderLayer');
-      
-      if (currentOrder<orderLayer) {
-        while((beforePane.get('orderLayer')<orderLayer) && (++idx<len)) beforePane = panes[idx];
-        if (idx>=len) beforePane = null ; // insert at end if needed 
-      } else if (currentOrder>orderLayer) {
-        while((beforePane.get('orderLayer')>orderLayer) && (--idx>=0)) beforePane = panes[idx];
-        beforePane = (idx<0) ? panes[0] : panes[idx+1]; // go to next pane
-      }
-    
-    // otherwise, find the highest pane matching the order...
-    } else {
-      idx = panes.length ;
-      while((--idx >= 0) && !beforePane) {
-        beforePane = panes[idx] ;
-        if (beforePane.get('orderLayer') > orderLayer) beforePane = null; // try next one
-      }
-      if (idx<0) { // did not find a match, insert at beginning
-        beforePane = panes[0];
-      } else beforePane = panes[idx+1]; // go to next pane
-    }
-    
-    // adjust array
-    if (beforePane) {
-      idx = panes.indexOf(beforePane);
-      panes.insertAt(idx, pane);
-    } else panes.push(pane);
-    this.set('orderedPanes', panes); // update
-
-    newFocus = this.get('focusedPane'); 
-    if (newFocus !== currentFocus) {
-      if (currentFocus) currentFocus.blurTo(newFocus);
-      if (newFocus) newFocus.focusFrom(currentFocus);
-    }
-    
-    return this ;
-  },
-
-  /**
-    Removes the named pane from the orderedPanes array.  If the pane was also 
-    focused, it will also blur the pane and focus the next view.  If the view 
-    is key, it will also determine the next view to make key by going down the 
-    list of ordered panes, finally ending with the mainPane.
-    
-    @param {SC.Pane} pane
-    @param {SC.Pane} beforePane
-    @returns {SC.RootResponder} receiver
-  */
-  orderOut: function(pane) {
-    var currentFocus = this.get('focusedPane'), currentKey = this.get('keyPane');
-    
-    var panes = this.get('orderedPanes').without(pane) ;
-    this.set('orderedPanes', panes) ;
-    
-    // focus only changes if we are removing the current focus view.
-    // in this case, blur the old view and focus the new.  Also, if the view was
-    // key, try to make the new focus view key or make main key.
-    if (currentFocus === pane) {
-      var newFocus = this.get('focusedPane') ;
-      if (currentFocus) currentFocus.blurTo(newFocus) ;
-      if (newFocus) newFocus.focusFrom(currentFocus) ;
-      if (currentKey === pane) this.makeKeyPane(newFocus); 
-      
-    // if the front is not changing, just check for key view.  Go back to main...
-    } else if (currentKey === pane) {
-      this.makeKeyPane(null);
-    }
-    
-    return this ;
-  },
-  
-  init: function() {
-    sc_super();
-    this.orderedPanes = []; // create new array  
-  },
-  
   // .......................................................
   // EVENT HANDLING
   //
-  
+
   setup: function() {
     // handle basic events        
     this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mouseout mouseover mousemove selectstart contextmenu'.w(), document)
