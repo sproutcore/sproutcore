@@ -223,13 +223,12 @@ SC.RecordAttribute = SC.Object.extend(
       record.writeAttribute(attrKey, nvalue); 
     } 
 
-    value = record.readAttribute(attrKey);
+    nvalue = value = record.readAttribute(attrKey);
     if (SC.none(value) && (value = this.get('defaultValue'))) {
        if (typeof value === SC.T_FUNCTION) {
-        nvalue = this.defaultValue(record, key, this);
+        value = this.defaultValue(record, key, this);
         // write default value so it doesn't have to be executed again
         if ((nvalue !== value)  &&  record.get('store').readDataHash(record.get('storeKey'))) {
-          value = nvalue;
           record.writeAttribute(attrKey, value, true);
         }
       }
