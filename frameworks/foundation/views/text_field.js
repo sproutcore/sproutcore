@@ -983,9 +983,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     the hint text if needed.
   */
   didLoseKeyResponderTo: function(keyView) {
-    SC.run(function() {
-      this.fieldDidBlur();
-    }, this);
+    var el = this.$input()[0];
+    if (el) el.blur();
     this.invokeLater("scrollToOriginIfNeeded", 100);
   },
   
