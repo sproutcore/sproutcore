@@ -219,6 +219,27 @@ SC.Renderer = SC.Renderer = {
   
   resetChanges: function() {
     this.changes = null;
+  },
+  
+  /**
+    @private
+    Added to other layer providers.
+  */
+  _layerFinder: function() {
+    var cq = this.renderer.$(this.sel);
+    return cq[0];
+  },
+  
+  /**
+    Generates a layer provider that will provide the layer determined by the result
+    of the provided CoreQuery selector (the first item, if any).
+  */
+  provide: function(sel) {
+    return {
+      renderer: this,
+      getLayer: this._layerFinder,
+      selector: sel
+    };
   }
  
   // other methods

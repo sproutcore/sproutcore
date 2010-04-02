@@ -27,43 +27,30 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
   /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,
-
-  render: function(context, firstTime) {
-    var dt, elem,
-        value = this.get('value'),
-        ariaValue = value === SC.MIXED_MODE ? 
-                'mixed' : (value === this.get('toggleOnValue') ? 
-                    'true': 'false');
+  
+  /** 
+    This is temporary , while we reimplement radio buttons without input 
+    tags.
+  */
+  routeTouch: NO,
+  
+  createRenderer: function(t) {
+    return t.checkbox();
+  },
+  
+  updateRenderer: function(r) {
+    // get value; we're gonna need it.
+    var value = this.get('value');
     
-    // add checkbox -- set name to view guid to separate it from others
-    if (firstTime) {
-      var blank = SC.BLANK_IMAGE_URL,
-          disabled = this.get('isEnabled') ? '' : 'disabled="disabled"',
-          guid = SC.guidFor(this);
-      
-      context.attr('role', 'checkbox');
-      dt = this._field_currentDisplayTitle = this.get('displayTitle');
-
-      if(SC.browser.msie) context.attr('for', guid);
-      context.push('<span class="button" ></span>');
-      if(this.get('needsEllipsis')){
-        context.push('<span class="label ellipsis">', dt, '</span>');
-      }else{
-        context.push('<span class="label">', dt, '</span>');  
-      }
-      context.attr('name', guid);
-
-    // since we don't want to regenerate the contents each time 
-    // actually search for and update the displayTitle.
-    } else {
-      
-      dt = this.get('displayTitle');
-      if (dt !== this._field_currentDisplayTitle) {
-        this._field_currentDisplayTitle = dt;
-        this.$('span.label').text(dt);
-      }
-    }
-    context.attr('aria-checked', ariaValue);
+    // set settings
+    r.attr({
+      title: this.get("displayTitle"),
+      name: SC.guidFor(this),
+      ariaValue: value === SC.MIXED_MODE ? 'mixed' : (value === this.get('toggleOnValue') ? 'true' : 'false'),
+      needsEllipsis: this.get('needsEllipsis'),
+      escapeHTML: this.get('escapeHTML'),
+      icon: this.get('icon')
+    });
   },
   
   acceptsFirstResponder: function() {
@@ -89,11 +76,13 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     }
     var val = this.get('value');
     if (val === this.get('toggleOnValue')) {
-      this.$().attr('aria-checked', 'false');
+      this.renderer.attr('ariaValue', 'false');
+      this.renderer.update();
       this.set('value', this.get('toggleOffValue'));
     }
     else {
-      this.$().attr('aria-checked', 'true');
+      this.renderer.attr('ariaValue', 'true');
+      this.renderer.update();
       this.set('value', this.get('toggleOnValue'));
     }
     this.set('isActive', NO);
