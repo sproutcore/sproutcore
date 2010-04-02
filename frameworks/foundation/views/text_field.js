@@ -313,7 +313,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
 
   render: function(context, firstTime) {
-    console.log('render');
     sc_super() ;
 
     var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"',
@@ -539,6 +538,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidBlur: function() {
+    
     this.commitEditing();
   },
 
@@ -705,17 +705,27 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   mouseDown: function(evt) {
-    this._txtFieldMouseDown=YES;
-    if (!this.get('isEnabled')) {
-      evt.stop();
-      return YES;
-    } else if((this.value && this.value.length===0) || !this.value) {
-      this.$input()[0].focus();
-      return YES;
-    } else {
+    if(evt.target && evt.target.tagName && evt.target.tagName!="INPUT"){
+            
+      this._txtFieldMouseDown=YES;
+      if (!this.get('isEnabled')) {
+        evt.stop();
+        return YES;
+      } else if((this.value && this.value.length===0) || !this.value) {
+        if(SC.browser.msie){
+          this.invokeLater(this.focusIE7,1);
+        }else{
+          this.$input()[0].focus();
+        }
+        return YES;
+      } else {
+        evt.stop();
       // This fixes the double click issue in firefox
-      if(!SC.browser.safari) this.$input()[0].focus();
-      return sc_super();
+        if(!SC.browser.safari) this.$input()[0].focus();
+        return sc_super();
+      }
+    }else{
+      return NO;
     }
   },
 
@@ -729,16 +739,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
-    } else if((this.value && this.value.length===0) || !this.value) {
-      if(parseInt(SC.browser.msie,0)<8){
-        this.invokeLater(this.focusIE7, 1);
-      }else{
-        this.$input()[0].focus();
-      }
-      return YES;
     } else return sc_super();
   },
-
+  
   focusIE7: function (){
     this.$input()[0].focus();
   },
