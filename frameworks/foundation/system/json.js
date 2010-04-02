@@ -33,13 +33,21 @@ SC.json = {
 
 /*
     http://www.JSON.org/json2.js
-    2009-09-29
+    2010-03-20
 
     Public Domain.
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
 
     See http://www.JSON.org/js.html
+
+
+    This code should be minified before deployment.
+    See http://javascript.crockford.com/jsmin.html
+
+    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
+    NOT CONTROL.
+
 
     This file creates a global JSON object containing two methods: stringify
     and parse.
@@ -169,12 +177,6 @@ SC.json = {
 
     This is a reference implementation. You are free to copy, modify, or
     redistribute.
-
-    This code should be minified before deployment.
-    See http://javascript.crockford.com/jsmin.html
-
-    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
-    NOT CONTROL.
 */
 
 /*jslint evil: true, strict: false */
@@ -464,6 +466,7 @@ if (!this.JSON) {
 // Unicode characters with escape sequences. JavaScript handles many characters
 // incorrectly, either silently deleting them, or treating them as line endings.
 
+            text = String(text);
             cx.lastIndex = 0;
             if (cx.test(text)) {
                 text = text.replace(cx, function (a) {

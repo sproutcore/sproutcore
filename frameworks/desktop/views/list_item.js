@@ -152,7 +152,7 @@ SC.ListItemView = SC.View.extend(
   disclosureState: SC.LEAF_NODE,
 
   /**
-    The validator to use ifor the inline text field created when the list item
+    The validator to use for the inline text field created when the list item
     is edited.
   */
   validator: null,
