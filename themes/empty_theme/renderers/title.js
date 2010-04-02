@@ -33,11 +33,15 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
       needsTitle = YES ;
     }
     imgTitle = image + title;
+    
+    // handle ellipsis
     if(this.needsEllipsis){
-      context.push('<label class="sc-button-label ellipsis">'+imgTitle+'</label>'); 
-    } else {
-      context.push('<label class="sc-button-label">'+imgTitle+'</label>'); 
+      context.addClass('sc-button-label');
     }
+    
+    // push title.
+    context.push(imgTitle);
+    
     this._ImageTitleCached = imgTitle;
   },
   
@@ -61,7 +65,7 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
     }
     imgTitle = image + title;
     
-    elem = this.$('label');  
+    elem = this.$();  
     if ( (htmlNode = elem[0])){
       if(needsTitle) { 
         if(this.needsEllipsis){

@@ -18,7 +18,7 @@
 }
 
 @view(sc-button-view).sc-huge-size .sc-button-label {
-  margin-top:-12px;
+  margin-top:-11px;
   height: 24px;
   font-size: 13px;
 }

@@ -80,7 +80,9 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     context = context.push("<span class='sc-button-inner'>");
     
     /* Render title */
+    context = context.begin("label").addClass("sc-button-label");
     this._titleRenderer.render(context);
+    context = context.end();
     
     context.push("</span>") ;
     
@@ -132,7 +134,7 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
   },
   
   didAttachLayer: function(layer){
-    this._titleRenderer.attachLayer(layer);
+    this._titleRenderer.attachLayer(this.provide("label"));
     this._controlRenderer.attachLayer(layer);
   },
   
