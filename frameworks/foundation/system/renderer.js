@@ -227,7 +227,6 @@ SC.Renderer = SC.Renderer = {
   */
   _layerFinder: function() {
     var cq = this.renderer.$(this.selector);
-    console.error("FINDING " + cq + " " + this.selector + " " + cq[0]);
     return cq[0];
   },
   
