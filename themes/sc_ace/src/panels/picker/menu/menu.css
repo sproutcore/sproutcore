@@ -12,7 +12,7 @@
 }
 
 @view(sc-panel.sc-picker.sc-menu) .sc-menu-item a span.value {
-  margin-left: 10px;
+  margin-left: 20px;
   line-height: 20px; /* You want it slightly high for characters with descenders */
 }
 

@@ -226,7 +226,8 @@ SC.Renderer = SC.Renderer = {
     Added to other layer providers.
   */
   _layerFinder: function() {
-    var cq = this.renderer.$(this.sel);
+    var cq = this.renderer.$(this.selector);
+    console.error("FINDING " + cq + " " + this.selector + " " + cq[0]);
     return cq[0];
   },
   
@@ -236,6 +237,7 @@ SC.Renderer = SC.Renderer = {
   */
   provide: function(sel) {
     return {
+      isLayerProvider: YES,
       renderer: this,
       getLayer: this._layerFinder,
       selector: sel
