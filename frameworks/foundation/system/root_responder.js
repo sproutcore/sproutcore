@@ -16,36 +16,31 @@ require('system/ready');
   
   h1. RootResponder and Platforms
   
-  RootResponder is implemented differently on the desktop and mobile platforms
-  using a technique called a "class cluster".  That is, although you get a 
-  RootResponder instance at some point, you will likely be working with a 
-  subclass of RootResponder that implements functionality unique to that 
-  platform.
+  RootResponder contains core functionality common among the different web
+  platforms. You will likely be working with a subclass of RootResponder that
+  implements functionality unique to that platform.
   
-  The RootResponder you use depends on the active platform you have set and
-  the framework you have loaded.
+  The correct instance of RootResponder is detected at runtime and loaded
+  transparently.
   
   h1. Event Types 
   
   RootResponders can route four types of events:
   
-  - Direct events.  Such as mouse and touch events.  These are routed to the 
-    nearest view managing the target DOM elment.
-  - Keyboard events.  These are sent to the keyPane, which will send it 
-    to the current firstResponder.
-  - resize. This event is sent to all panes.
-  - shortcuts.  Shortcuts are sent to the focusedPane first, which will go 
-    down its view hierarchy.  Then they go to the mainPane, which will go down
-    its view hierarchy.  Then they go to the mainMenu.  Usually any handler 
-    that picks this up will then try to do a sendAction().
-  - actions.  Actions are sent down the responder chain.  They go to 
-    focusedPane -> mainPane.  Each of these will start at the firstResponder 
-    and work their way up the chain.
-  
-  Differences between Mobile + Desktop RootResponder
-  
-  The Desktop root responder can deal with the following kinds of events:
-   mousedown, mouseup, mouseover, mouseout, mousemoved
+  - Direct events, such as mouse and touch events.  These are routed to the 
+    nearest view managing the target DOM elment. RootResponder also handles
+    multitouch events so that they are delegated to the correct views.
+  - Keyboard events. These are sent to the keyPane, which will then send the
+    event to the current firstResponder and up the responder chain.
+  - Resize events. When the viewport resizes, these events will be sent to all
+    panes.
+  - Keyboard shortcuts. Shortcuts are sent to the keyPane first, which
+    will go down its view hierarchy. Then they go to the mainPane, which will
+    go down its view hierarchy.
+  - Actions. Actions are generic messages that your application can send in
+    response to user action or other events. You can either specify an
+    explicit target, or allow the action to traverse the hierarchy until a
+    view is found that handles it.
 */
 SC.RootResponder = SC.Object.extend({
   
@@ -61,7 +56,7 @@ SC.RootResponder = SC.Object.extend({
   },
   
   // .......................................................
-  // MAIN Pane
+  // MAIN PANE
   // 
   
   /** @property
@@ -115,13 +110,19 @@ SC.RootResponder = SC.Object.extend({
     The current menu pane. This pane receives keyboard events before all other
     panes, but tends to be transient, as it is only set when a pane is open.
 
-    @property {SC.MenuPane}
+    @type SC.MenuPane
   */
   menuPane: null,
 
   /**
     Sets a pane as the menu pane. All key events will be directed to this
     pane, but the current key pane will not lose focus.
+    
+    Usually you would not call this method directly, but allow instances of
+    SC.MenuPane to manage the menu pane for you. If your pane does need to
+    become menu pane, you should relinquish control by calling this method
+    with a null parameter. Otherwise, key events will always be delivered to
+    that pane.
 
     @param {SC.MenuPane} pane
     @returns {SC.RootResponder} receiver
@@ -131,8 +132,7 @@ SC.RootResponder = SC.Object.extend({
     // nothing to do.
     if (pane  &&  !pane.get('acceptsMenuPane')) {
       return this;
-    }
-    else {
+    } else {
       var currentMenu = this.get('menuPane');
       if (currentMenu === pane) return this; // nothing to do
 
@@ -143,25 +143,27 @@ SC.RootResponder = SC.Object.extend({
   },
 
   // .......................................................
-  // KEY ROOT VIEW
+  // KEY PANE
   // 
-  
-  /** @property
-    The current key pane.  This pane receives keyboard events, shortcuts, and 
-    actions first.  This pane is usually the highest ordered pane or the 
-    mainPane.
+
+  /**
+    The current key pane. This pane receives keyboard events, shortcuts, and
+    actions first, unless a menu is open. This pane is usually the highest
+    ordered pane or the mainPane.
+    
+    @type SC.Pane
   */
   keyPane: null,
-    
+
   /** @property
     A stack of the previous key panes.
-    
+
     *IMPORTANT: Property is not observable*
   */
   previousKeyPanes: [],
-  
+
   /**
-    Makes the passed pane the new key pane.  If you pass nil or if the pane 
+    Makes the passed pane the new key pane.  If you pass null or if the pane 
     does not accept key focus, then key focus will transfer to the previous
     key pane (if it is still attached), and so on down the stack.  This will
     notify both the old pane and the new root View that key focus has changed.
