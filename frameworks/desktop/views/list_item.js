@@ -150,7 +150,13 @@ SC.ListItemView = SC.View.extend(
     when the list item is created.
   */
   disclosureState: SC.LEAF_NODE,
-  
+
+  /**
+    The validator to use ifor the inline text field created when the list item
+    is edited.
+  */
+  validator: null,
+
   contentPropertyDidChange: function() {
     //if (this.get('isEditing')) this.discardEditing() ;
     if (this.get('contentIsEditable') !== this.contentIsEditable()) {
@@ -700,12 +706,13 @@ SC.ListItemView = SC.View.extend(
   },
   
   _beginEditing: function(scrollIfNeeded) {
-    var content  = this.get('content'),
-        del      = this.get('displayDelegate'),
-        labelKey = this.getDelegateProperty('contentValueKey', del),
-        parent   = this.get('parentView'),
-        pf       = parent ? parent.get('frame') : null,
-        el       = this.$label(),
+    var content   = this.get('content'),
+        del       = this.get('displayDelegate'),
+        labelKey  = this.getDelegateProperty('contentValueKey', del),
+        parent    = this.get('parentView'),
+        pf        = parent ? parent.get('frame') : null,
+        el        = this.$label(),
+        validator = this.get('validator'),
         f, v, offset, oldLineHeight, fontSize, top, lineHeight, 
         lineHeightShift, targetLineHeight, ret ;
 
@@ -761,7 +768,8 @@ SC.ListItemView = SC.View.extend(
       delegate: this, 
       value: v,
       multiline: NO,
-      isCollection: YES
+      isCollection: YES,
+      validator: validator
     }) ;
 
     // restore old line height for original item if the old line height 
