@@ -227,8 +227,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // couldn't build a keystring for this key event, nothing to do
     if (!keystring) return NO;
     
-    var keyPane  = this.get('keyPane'), mainPane = this.get('mainPane'), 
-        mainMenu = this.get('mainMenu');
+    var keyPane  = this.get('keyPane'), mainPane = this.get('mainPane');
 
     // Try the keyPane.  If it's modal, then try the equivalent there but on
     // nobody else.
@@ -241,11 +240,6 @@ SC.RootResponder = SC.RootResponder.extend(
     if (!ret && mainPane && (mainPane!==keyPane)) {
       ret = mainPane.performKeyEquivalent(keystring, evt);
       if (ret || mainPane.get('isModal')) return ret ;
-    }
-
-    // if not, then try the main menu
-    if (!ret && mainMenu) {
-      ret = mainMenu.performKeyEquivalent(keystring, evt);
     }
     
     return ret ;
