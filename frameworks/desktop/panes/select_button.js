@@ -223,9 +223,11 @@ SC.SelectButtonView = SC.ButtonView.extend(
   SELECT_BUTTON_SPRITE_WIDTH: 28,
 
   /**
-    Binds the select button's active state to the visibility of its menu.
+    Binds the button's selection state to the menu's visibility.
+
+    @private
   */
-  isActiveBinding: '*menu.isVisibleInWindow',
+  isSelectedBinding: '*menu.isVisibleInWindow',
 
   /**
     If this property is set to 'YES', the menu pane will be positioned
@@ -293,14 +295,19 @@ SC.SelectButtonView = SC.ButtonView.extend(
     switch (this.get('controlSize')) {
       case SC.TINY_CONTROL_SIZE:
         return SC.SelectButtonView.TINY_OFFSET_X;
+        break;
       case SC.SMALL_CONTROL_SIZE:
         return SC.SelectButtonView.SMALL_OFFSET_X;
+        break;
       case SC.REGULAR_CONTROL_SIZE:
         return SC.SelectButtonView.REGULAR_OFFSET_X;
+        break;
       case SC.LARGE_CONTROL_SIZE:
         return SC.SelectButtonView.LARGE_OFFSET_X;
+        break;
       case SC.HUGE_CONTROL_SIZE:
         return SC.SelectButtonView.HUGE_OFFSET_X;
+        break;
     }
     return 0;
   }.property('controlSize'),
@@ -576,6 +583,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     // no menu to toggle... bail...
     if (!menu) return NO ;
+    this.set('menu', menu);
     menu.popup(this, this.preferMatrix) ;
     this.set('menu', menu);
 

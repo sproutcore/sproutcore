@@ -194,7 +194,7 @@ SC.PickerPane = SC.PalettePane.extend({
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
-        origin;
+        origin, maxHeight, minHeight;
     
     // usually an anchorElement will be passed.  The ideal position is just 
     // below the anchor + default or custom offset according to preferType.
@@ -227,8 +227,19 @@ SC.PickerPane = SC.PalettePane.extend({
         origin.y += origin.height ;
       }
       origin = this.fitPositionToScreen(origin, this.get('frame'), anchor) ;
-
-      this.adjust({ width: origin.width, height: origin.height, left: origin.x, top: origin.y });
+      if(!SC.none(layout.minHeight)) {
+        minHeight = this.layout.minHeight;
+      }
+      if(!SC.none(layout.maxHeight)) {
+        maxHeight = this.layout.maxHeight;
+      }
+      layout = { width: origin.width, height: origin.height, left: origin.x, top: origin.y };
+      if(!SC.none(minHeight)) {
+        layout.minHeight = minHeight;
+      }
+      if(!SC.none(maxHeight)) {
+        layout.maxHeight = maxHeight;
+      }
     // if no anchor view has been set for some reason, just center.
     } else {
       this.adjust({ width: layout.width, height: layout.height, centerX: 0, centerY: 0 });
@@ -303,7 +314,7 @@ SC.PickerPane = SC.PalettePane.extend({
           break;
         case SC.PICKER_POINTER:
           // apply pointer re-position rule
-          this.setupPointer(anchor);
+          this.setupPointer();
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
           break;
           
@@ -435,8 +446,13 @@ SC.PickerPane = SC.PalettePane.extend({
     re-position rule for triangle pointer picker.
   */
   fitPositionToScreenPointer: function(w, f, a) {
-    var offset = [this.pointerOffset[0], this.pointerOffset[1],
-                  this.pointerOffset[2], this.pointerOffset[3]];
+    var overlapTunningX = (a.height > 12) ? 0 : 1;
+    var overlapTunningY = (a.height > 12) ? 0 : 3;
+
+    var offset = [this.pointerOffset[0]+overlapTunningX,
+                  this.pointerOffset[1]-overlapTunningX,
+                  this.pointerOffset[2]-overlapTunningY,
+                  this.pointerOffset[3]+overlapTunningY];
 
     // initiate perfect positions matrix
     // 4 perfect positions: right > left > top > bottom
@@ -525,7 +541,7 @@ SC.PickerPane = SC.PalettePane.extend({
     This method will set up pointerOffset and preferMatrix according to type
     and size if not provided explicitly.
   */
-  setupPointer: function(a) {
+  setupPointer: function() {
     var pointerOffset = this.pointerOffset,
         K             = SC.PickerPane;
     
@@ -554,6 +570,7 @@ SC.PickerPane = SC.PalettePane.extend({
             this.set('extraRightOffset', K.HUGE_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
             break;
         }
+        this.set('pointerOffset', SC.PickerPane.PICKER_POINTER_OFFSET) ;
       }
       else {
         var overlapTuningX = (a.width < 16)  ? ((a.width < 4)  ? 9 : 6) : 0,
@@ -563,7 +580,6 @@ SC.PickerPane = SC.PalettePane.extend({
                       offsetKey[1]-overlapTuningX,
                       offsetKey[2]-overlapTuningY,
                       offsetKey[3]+overlapTuningY];
-        this.set('pointerOffset', offset) ;
         this.set('extraRightOffset', K.PICKER_EXTRA_RIGHT_OFFSET) ;
       }
     }
