@@ -30,12 +30,23 @@ class CSSParser
     # and @view(viewname)
     contents = @contents
     
-    view_rule = /@view\(\s*(["']{2}|["'].*?[^\\]"|[^\s]+)\s*\)/
+    view_rule = /(@view|@theme|@end)(\(\s*(["']{2}|["'].*?[^\\]"|[^\s]+)\s*\))?;?/
     
     theme_name = @theme
+    theme_parts = [theme_name]
     contents.gsub!(view_rule) do |match|
       #".sc-view." + $1 + "." + theme_name # If SproutCore changes some
-      ".sc-theme .sc-view" + @theme + "." + $1
+      if $1 == "@view"
+        ".sc-theme .sc-view" + theme_name + "." + $3
+      elsif $1 == "@theme"
+        theme_parts.push $3
+        theme_name = theme_parts.join "."
+        ""
+      elsif $1 == "@end"
+        theme_parts.pop
+        theme_name = theme_parts.join "."
+        ""
+      end
     end
     
     boxshadow_rule = /\-sc\-box\-shadow:\s*([^;]*)/

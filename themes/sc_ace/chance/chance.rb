@@ -55,7 +55,7 @@ argparser = OptionParser.new {|opts|
   }
   
   config[:output] = "resources/"
-  opts.on('-o', '--output', 'Set output path (default: resources/)') {|out|
+  opts.on('-o', '--output [directory]', 'Set output path (default: resources/)') {|out|
     out += "." if out.length == 0
     out += "/" if out[out.length - 1] != '/'
     config[:output] = out
@@ -64,6 +64,16 @@ argparser = OptionParser.new {|opts|
   config[:url_template] = "static_url(\"%s\")"
   opts.on('-u', '--url [PATTERN]', 'The URL template (default: static_url(\"%s\") )') {|template|
     config[:url_template] = template
+  }
+  
+  config[:extension] = "css"
+  opts.on('-e', '--extension [ext]', "The extension for CSS files.") {|ext|
+    config[:extension] = ext
+  }
+  
+  config[:less] = false
+  opts.on('--less', "Postprocess using LESS.") {
+    config[:less] = true
   }
 }
 
@@ -115,10 +125,30 @@ slicer.images = images
 slicer.slice
 slicer.dice
 
+# Add all the code together
 css_code = ""
 parsers.each {|parser|
   parser.images = slicer.images
-  css_code += parser.generate
+  css_code += parser.generate + "\n"
 }
 
-File.open(config[:output] + "theme.css", File::WRONLY|File::TRUNC|File::CREAT) {|f| f.write(css_code) }
+# Do some cleanup of whitespace
+cleaned = ""
+css_code.each_line {|line|
+  cleaned += line.strip + "\n"
+}
+
+final = cleaned
+
+if config[:less]
+  begin
+    require 'less'
+  rescue
+    raise "Lest less doth be installed, less shall remain unusable. Sad."
+  end
+  
+  final = Less.parse cleaned
+end
+
+
+File.open(config[:output] + "theme." + config[:extension], File::WRONLY|File::TRUNC|File::CREAT) {|f| f.write(final) }
