@@ -31,12 +31,16 @@ module("SC.Checkbox", {
   }
 });
 
-test("renders an input tag with appropriate attributes", function() {
+test("renders something that is NOT an input tag with appropriate attributes", function() {
   equals(view.get('value'), YES, 'precon - value should be YES');
 
   var q = view.$();
   equals(q.attr('role'), 'checkbox', 'should have type=checkbox');
   equals(q.attr('aria-checked'), 'true', 'should be checked');
+});
+
+test("double-check that there is NO input element. Just in case.", function(){
+  equals(view.$("input").length, 0, "CoreQuery lookup for inputs should have length of 0.");
 });
 
 test("should have span with title inside", function() {
@@ -79,7 +83,7 @@ test("isSelected should alter sel classname and sync with value property", funct
   
   ok(!view.get('isSelected'), 'isSelected should now be NO');
   ok(!view.$().hasClass('sel'), 'should no longer have sel class');
-  equals(view.$().attr('aria-checked'), 'false', 'input should not be checked');
+  equals(view.$().attr('aria-checked'), 'false', 'view should not be checked');
   
   // update isSelected -- make sure it edits the value
   SC.RunLoop.begin();
@@ -88,34 +92,24 @@ test("isSelected should alter sel classname and sync with value property", funct
   
   ok(view.get('isSelected'), 'isSelected should match value');
   ok(view.$().hasClass('sel'), 'should have sel class');
-  equals(view.$().attr('aria-checked'), 'true', 'input should be checked');
+  equals(view.$().attr('aria-checked'), 'true', 'aria-checked should be true');
 });
 
-test("clicking on the checkbox will change toggle the value", function() {
+test("mouseDown and then mouseUp anywhere in the checkbox should toggle the selection", function() {
 
-  ok(view.get('value'), 'precond - value should be YES');
-  view.mouseDown();
-  view.mouseUp();
-  ok(!view.get('value'), 'value should now be NO');
-});
-
-
-test("pressing mouseDown and then mouseUp anywhere in the checkbox should toggle the selection", function() {
-
-  var elem = view.get('layer'), input = SC.$('input', elem);
+  var elem = view.get('layer');
+  
   SC.Event.trigger(elem, 'mousedown');
   ok(view.get('isActive'), 'view should be active');
   ok(view.get('value'), 'value should not change yet');
   
   // simulate mouseUp and browser-native change to control
   SC.Event.trigger(elem,'mouseup');
-  input.attr('checked', NO);
-  SC.Event.trigger(input.get(0),'click');
   
   ok(!view.get('isActive'), 'view should no longer be active');
   ok(!view.get('value'), 'value should change to NO');
   
-  input = elem = null ;
+  elem = null ;
 });
 
 test("isEnabled=NO should add disabled attr to input", function() {
