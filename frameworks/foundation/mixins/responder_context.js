@@ -7,7 +7,7 @@
 
 sc_require('system/responder');
 
-/** @class
+/** @namespace
 
   The root object for a responder chain.  A responder context can dispatch
   actions directly to a first responder; walking up the responder chain until
@@ -19,12 +19,12 @@ sc_require('system/responder');
   You can have as many ResponderContext's as you want within your application.
   Every SC.Pane and SC.Application automatically implements this mixin.
   
-  Note that to implement this you must be a responder yourself.
-  
-  @extends SC.Responder
+  Note that to implement this, you should mix SC.ResponderContext into an
+  SC.Responder or SC.Responder subclass.
+
   @since SproutCore 1.0
 */
-SC.ResponderContext = SC.Responder.extend({
+SC.ResponderContext = {
 
   // ..........................................................
   // PROPERTIES
@@ -43,8 +43,7 @@ SC.ResponderContext = SC.Responder.extend({
     The default responder.  Set this to point to a responder object that can 
     respond to events when no other view in the hierarchy handles them.
     
-    You can also implement actions directly on the application object if you
-    prefer.
+    @type SC.Responder
   */
   defaultResponder: null,
   
@@ -253,4 +252,4 @@ SC.ResponderContext = SC.Responder.extend({
     return working ;
   }
 
-});
+};

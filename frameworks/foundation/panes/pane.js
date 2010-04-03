@@ -5,7 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('views/view');
+sc_require('views/view');
+sc_require('mixins/responder_context');
 
 /** @class
   A Pane is like a regular view except that it does not need to live within a 
@@ -78,7 +79,8 @@ require('views/view');
   @extends SC.ResponderContext
   @since SproutCore 1.0
 */
-SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
+SC.Pane = SC.View.extend(SC.ResponderContext,
+/** @scope SC.Pane.prototype */ {
 
   /** 
     Returns YES for easy detection of when you reached the pane. 
@@ -235,27 +237,19 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
   },
 
   // .......................................................
-  // HANDLE FIRST RESPONDER AND KEY RESPONDER STATUS
+  // RESPONDER CONTEXT
   //
 
   /**
-    The default responder.  Set this to point to a responder object that can 
-    respond to events when no other view in the hierarchy handles them.
-    
-    @property {SC.Responder}
-  */
-  defaultResponder: null,
-  
-  /**
-    Pane's never have a next responder
-    
+    Pane's never have a next responder.
+
     @property {SC.Responder}
     @readOnly
   */
   nextResponder: function() {
     return null;
   }.property().cacheable(),
-  
+
   /**
     The first responder.  This is the first view that should receive action 
     events.  Whenever you click on a view, it will usually become 

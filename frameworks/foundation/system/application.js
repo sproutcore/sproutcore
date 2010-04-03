@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/responder_context');
+sc_require('mixins/responder_context');
 
 /** @class
 
@@ -31,6 +31,7 @@ sc_require('system/responder_context');
   @extends SC.ResponderContext
   @since SproutCore 1.0
 */
-SC.Application = SC.ResponderContext.extend(/** SC.Application.prototype */ {
+SC.Application = SC.Responder.extend(SC.ResponderContext,
+/** SC.Application.prototype */ {
 
 });
