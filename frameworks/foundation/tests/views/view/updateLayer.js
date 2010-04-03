@@ -14,12 +14,12 @@
 // 
 module("SC.View#updateLayer");
 
-test("invokes prepareContext() and then updates layer element", function() {
+test("invokes updateViewSettings() and then updates layer element", function() {
   var layer = document.createElement('div');
   var view = SC.View.create({
     layer: layer, // fake it...
-    prepareContext: function(context) {
-      context.addClass('did-update');
+    updateViewSettings: function() {
+      this.$(this.get("layer")).addClass('did-update');
     }
   });
   

@@ -43,18 +43,21 @@ test("default implementation invokes renderChildViews if firstTime = YES", funct
   
 module("SC.View#renderChildViews");
 
-test("creates a context and then invokes prepareContext on each childView", function() {
+test("creates a context and then invokes renderToContext or updateLayer on each childView", function() {
 
 	var runCount = 0, curContext, curFirstTime ;
 	
 	var ChildView = SC.View.extend({
-	  prepareContext: function(context, firstTime) {
+	  renderToContext: function(context) {
 	  	equals(context.prevObject, curContext, 'passed child context of curContext');
-	  	equals(firstTime, curFirstTime, 'passed first time flag');
 	  	
 	  	equals(context.tagName(), this.get('tagName'), 'context setup with current tag name');
 	  	
 	  	runCount++; // record run
+	  },
+	  
+	  updateLayer: function() {
+	    runCount++;
 	  }
 	});
 	
@@ -70,7 +73,7 @@ test("creates a context and then invokes prepareContext on each childView", func
 	curContext = view.renderContext('div');
 	curFirstTime= YES ;
 	equals(view.renderChildViews(curContext, curFirstTime), curContext, 'returns context');
-	equals(runCount, 3, 'prepareContext() invoked for each child view');
+	equals(runCount, 3, 'renderToContext() invoked for each child view');
 	
 
 	// VERIFY: firstTime= NO 	
@@ -78,6 +81,46 @@ test("creates a context and then invokes prepareContext on each childView", func
 	curContext = view.renderContext('div');
 	curFirstTime= NO ;
 	equals(view.renderChildViews(curContext, curFirstTime), curContext, 'returns context');
-	equals(runCount, 3, 'prepareContext() invoked for each child view');
+	equals(runCount, 3, 'updateLayer() invoked for each child view');
+
+});
+
+test("creates a context and then invokes renderContent and updateContent to call renderToContext or updateLayer on each childView", function() {
+
+	var runCount = 0, curContext ;
+	
+	var ChildView = SC.View.extend({
+	  renderToContext: function(context) {
+	  	equals(context.prevObject, curContext, 'passed child context of curContext');
+	  	
+	  	equals(context.tagName(), this.get('tagName'), 'context setup with current tag name');
+	  	
+	  	runCount++; // record run
+	  },
+	  
+	  updateLayer: function() {
+	    runCount++;
+	  }
+	});
+	
+	var view = SC.View.create({
+		childViews: [
+			ChildView.extend({ tagName: 'foo' }),
+			ChildView.extend({ tagName: 'bar' }),
+			ChildView.extend({ tagName: 'baz' })
+		]
+	});
+
+	// VERIFY: firstTime= YES 	
+	curContext = view.renderContext('div');
+	equals(view.renderContent(curContext), undefined, 'returns nothing');
+	equals(runCount, 3, 'renderToContext() invoked for each child view');
+	
+
+	// VERIFY: firstTime= NO 	
+	runCount = 0 ; //reset
+	curContext = view.renderContext('div');
+	equals(view.updateContent(curContext), undefined, 'returns nothing');
+	equals(runCount, 3, 'updateLayer() invoked for each child view');
 
 });

@@ -375,6 +375,8 @@ test("layout {centerX, centerY} - assume width/height=0", function() {
   var layout = { centerX: 0.1, centerY: 0.1 };
   var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
   var with_f = { x: 110, y: 110, width: 0, height: 0 } ;
+  
+  // we have changed to expect 50%
   var s = { width: 0, height: 0, top: "50%", left: "50%", marginTop: "50%", marginLeft: "50%" } ;
   performLayoutTest(layout, no_f, s, with_f, s) ;
   
