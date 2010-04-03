@@ -1,68 +1,52 @@
-@view(sc-button-view).sc-regular-size .button-left {
-  margin-top:-12px;
-  height: 24px;
-  background: sprite("normal_button.png" [0 8]);
-}
+@theme(sc-regular-size)
 
-@view(sc-button-view).sc-regular-size .button-right {
-  margin-top:-12px;
-  height: 24px;
-  background: sprite("normal_button.png" [-8]);
-}
-
-@view(sc-button-view).sc-regular-size .button-middle {
-  margin-top:-12px;
-  height: 24px;
-  background: sprite("normal_button.png" repeat-x [8, 1]);
+@view(sc-button-view) {
   
+  /* NORMAL STATE */
+  .button-left {
+    margin-top:-12px;
+    height: 24px;
+    background: sprite("normal_button.png" [0 8]);
+  }
+  
+  .button-right {
+    margin-top:-12px;
+    height: 24px;
+    background: sprite("normal_button.png" [-8]);
+  }
+  
+  .button-middle {
+    margin-top:-12px;
+    height: 24px;
+    background: sprite("normal_button.png" repeat-x [8, 1]);
+
+  }
+  
+  .sc-button-label {
+    margin-top:-12px;
+    height: 24px;
+    padding-top:2px;
+  }
 }
 
-@view(sc-button-view).sc-regular-size .sc-button-label {
-  margin-top:-12px;
-  height: 24px;
-  padding-top:2px;
+@view(sc-button-view).active {
+  .button-left { background: sprite("active_button.png" [0 8]); }
+  .button-right { background: sprite("active_button.png" [-8]); }
+  .button-middle { background: sprite("active_button.png" [8 1] repeat-x); }
 }
 
-/* Active */
-@view(sc-button-view).sc-regular-size.active .button-left {
-  background: sprite("active_button.png" [0 8]);
+@view(sc-button-view).sel {
+  .button-left { background: sprite("selected_button.png" [0 8]); }
+  .button-right { background: sprite("selected_button.png" [-8]); }
+  .button-middle { background: sprite("selected_button.png" [8 1] repeat-x); }
 }
 
-@view(sc-button-view).sc-regular-size.active .button-right {
-  background: sprite("active_button.png" [-8]);
+@view(sc-button-view).sel.active {
+  .button-left { background: sprite("selected_active_button.png" [0 8]); }
+  .button-right { background: sprite("selected_active_button.png" [-8]); }
+  .button-middle { background: sprite("selected_active_button.png" [8 1] repeat-x); }
 }
 
-@view(sc-button-view).sc-regular-size.active .button-middle {
-  background: sprite("active_button.png" repeat-x [8, 1]);
-}
+@end
 
-/* Selected */
-@view(sc-button-view).sc-regular-size.sel .button-left {
-  background: sprite("selected_button.png" [0 8]);
-}
 
-@view(sc-button-view).sc-regular-size.sel .button-right {
-  background: sprite("selected_button.png" [-8]);
-}
-
-@view(sc-button-view).sc-regular-size.sel .button-middle {
-  background: sprite("selected_button.png" repeat-x [8, 1]);
-}
-
-/* Selected and Active */
-@view(sc-button-view).sc-regular-size.sel.active .button-left {
-  background: sprite("selected_active_button.png" [0 8]);
-}
-
-@view(sc-button-view).sc-regular-size.sel.active .button-right {
-  background: sprite("selected_active_button.png" [-8]);
-}
-
-@view(sc-button-view).sc-regular-size.sel.active .button-middle {
-  background: sprite("selected_active_button.png" repeat-x [8, 1]);
-}
-
-/* Disabled */
-@view(sc-button-view).sc-regular-size.disabled {
-  opacity: .5;
-}
