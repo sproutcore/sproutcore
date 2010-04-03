@@ -932,9 +932,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     do not want your render() method called when updating a layer, then you
     should override this method instead.
     
+    @param optionalContext provided only for backwards-compatibility.
+    
     @returns {SC.View} receiver 
   */
-  updateLayer: function() {
+  updateLayer: function(optionalContext) {
     var mixins, idx, len, renderer;
     this.updateViewSettings();
     
@@ -950,7 +952,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!this._useRenderFirst && this.createRenderer) {
       if (renderer) renderer.update();
     } else {
-      var context = this.renderContext(this.get('layer')) ;
+      var context = optionalContext || this.renderContext(this.get('layer')) ;
       this.render(context, NO) ;
       if (mixins = this.renderMixin) {
         len = mixins.length;
@@ -1292,7 +1294,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (firstTime) {
       this.renderToContext(context);
     } else {
-      this.updateLayer();
+      this.updateLayer(context);
     }
   },
   
@@ -1313,6 +1315,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     } else {
       this.updateContent();
     }
+    return context;
   },
   
   /**
@@ -2830,7 +2833,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         ret.marginLeft = Math.floor(lcX - ret.width/2) ;
       }else {
         // This error message happens whenever width is not set.
-        console.warn("You have to set width and centerX usign both percentages or pixels");
+        console.warn("You have to set width and centerX using both percentages or pixels");
         ret.marginLeft = "50%";
       }
       ret.right = null ;
