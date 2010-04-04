@@ -75,6 +75,11 @@ argparser = OptionParser.new {|opts|
   opts.on('--less', "Postprocess using LESS.") {
     config[:less] = true
   }
+  
+  config[:include_sc_theme] = true
+  opts.on('--no-sc-theme', "Exclude 'sc-theme' prefix (newer themes with SC 1.1 can do this).") {
+    config[:include_sc_theme] = false
+  }
 }
 
 argparser.parse!
