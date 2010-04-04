@@ -48,7 +48,8 @@ config :mobile,
 config :designer, :required => [:runtime, :foundation]
 config :sproutcore, :required => [:desktop, :datastore]
 config :mini, :required => [:runtime, :datastore]
-
+config :animation, :required => :foundation
+config :forms, :required => :desktop
 
 # SPECIAL FRAMEWORKS AND THEMES
 # These do not require any of the built-in SproutCore frameworks
@@ -75,22 +76,28 @@ config :standard_theme,
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
+config :sc_ace, 
+  :required => :empty_theme, 
+  :theme_name => 'sc-theme',
+  :test_required  => ['sproutcore/testing'],
+  :debug_required => ['sproutcore/debug']
+
+
 # CONFIGURE DOCUMENTATION
 config :documentation,
   :required => [:desktop, :animation]
 
 # CONFIGURE APPS
-
-config :core_tools, :required => [:desktop, :datastore]
+config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
 
 # mode :debug do
 #   config :core_tools, :combine_javascript => false
 # end
 
-%w(tests docs welcome).each do |app_target|
+%w(tests test_controls docs welcome).each do |app_target|
   config app_target, 
-    :required => [:desktop, :datastore, :core_tools], 
-    :theme => :standard_theme
+    :required => [:desktop, :datastore, :core_tools],
+    :theme => :sc_ace
     
   # mode :debug do
   #   config app_target, :combine_javascript => false
