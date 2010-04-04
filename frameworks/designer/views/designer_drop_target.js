@@ -80,7 +80,9 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
   
 
   acceptDragOperation: function(drag, op) { 
-    return YES;
+    var data = drag.dataForType('SC.Object'),
+        scClass = eval(data.get('scClass'));
+    return scClass.kindOf(SC.View);
   },
   
   /**
@@ -100,7 +102,7 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     @return {DragOp} Drag Operation actually performed
   */
   performDragOperation: function(drag, op) {
-    var data = drag.dataForType('SC.View'),
+    var data = drag.dataForType('SC.Object'),
         cv = this.get('contentView'),
         loc = drag.get('location'),
         frame = drag.iframeFrame,

@@ -36,3 +36,19 @@ SC.View.prototype.emitLocalization = function(design) {
   ret = ret.replace(/\)$/, ", '%@')".fmt(emptyElement)) ;
   return ret ;
 } ;
+
+/** 
+  Patch SC.View to respond to encodeDesign().  This will proxy to the paired
+  designer, if there is one.  If there is no paired designer, returns NO.
+*/
+SC.View.prototype.encodeDesign = function(coder) {
+  return this.designer ? this.designer.encodeDesign(coder) : NO ;
+};
+
+/** 
+  Patch SC.View to respond to encodeDesign().  This will proxy to the paired
+  designer, if there is one.  If there is no paired designer, returns NO.
+*/
+SC.View.prototype.encodeLoc = function(coder) {
+  return this.designer ? this.designer.encodeLoc(coder) : NO ;
+};
