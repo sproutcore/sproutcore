@@ -77,6 +77,7 @@ SC.IndexSet = SC.mixin({},
   create: function(start, length) { 
     var ret = SC.beget(this);
     ret.initObservable();
+    ret.registerDependentKey('min', '[]');
     
     // optimized method to clone an index set.
     if (start && start.isIndexSet) {
