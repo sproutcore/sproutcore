@@ -11,11 +11,33 @@ TestControls.flowLayoutPage = SC.View.design({
       value: "Text Fields",
       fieldLabel: NO
     }),
-    normal: Forms.FormView.row(SC.View.extend(SC.FlowedLayout, {
+    normal: Forms.FormView.row(SC.View.extend(SC.Animatable, SC.FlowedLayout, SC.AutoMixin, {
+      init: function() {
+        sc_super();
+        this.style.overflow = "visible";
+        SC.Timer.schedule({
+          target: this,
+          action: "hideOne",
+          interval: 1000,
+          repeats: YES
+        });
+      },
+      
+      hideOne: function() {
+        if (this._hasHidden) this.b.set("isVisible", YES);
+        else this.b.set("isVisible", NO);
+        this._hasHidden = !this._hasHidden;
+      },
+      
+      autoMixins: [SC.Animatable, {
+        transitions: { left: .25, top: .25, width: .25 }
+      }],
+      
       childViews: "a s b s2 c d".w(),
       layout: { width: 600 },
       align: SC.ALIGN_RIGHT,
       layoutDirection: SC.LAYOUT_HORIZONTAL,
+      flowPadding: { left: 10, right: 10, top: 10, bottom: 10 },
       defaultFlowSpacing: {
         left: 10, top: 10, right: 10, bottom: 0
       },
