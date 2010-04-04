@@ -44,11 +44,6 @@ SC.FlowedLayout = {
   canWrap: YES,
   
   /**
-    An array of mixins to mix in to child views. Is a concatenated property.
-  */
-  childMixins: [],
-  
-  /**
     A set of spacings (left, top, right, bottom) for subviews. Defaults to 0s all around.
     This is the amount of space that will be before, after, above, and below the view. These
     spacings do not collapse into each other.
@@ -74,7 +69,17 @@ SC.FlowedLayout = {
   */
   _scfl_childViewsDidChange: function(c) {
     this._scfl_tile();
-  }.observes("childViews"),
+  },
+  
+  removeChild: function(c) {
+    sc_super();
+    this._scfl_childViewsDidChange();
+  },
+  
+  appendChild: function(c) {
+    sc_super();
+    this._scfl_childViewsDidChange();    
+  },
   
   _scfl_layoutPropertyDidChange: function(){
     this._scfl_tile();
