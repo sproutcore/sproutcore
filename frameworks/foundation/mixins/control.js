@@ -390,9 +390,11 @@ SC.Control = {
   },
   
   updateRendererMixin: function(r) {
-    r.isSelected = this.get("isSelected");
-    r.isEnabled = this.get("isEnabled");
-    r.isActive = this.get("isActive");
+    r.attr({
+      isSelected: this.get('isSelected'),
+      isEnabled: this.get('isEnabled'),
+      isActive: this.get('isActive')
+    });
     
     // we have to figure out if we are passing control size through, or our layout.
     var controlSize = this.get('controlSize');
@@ -414,10 +416,8 @@ SC.Control = {
         
         var frame = SC.clone(this.get("frame"));
         if (frame) {
-          controlSize = frame;
-          
-          // I don't know of any renderer that will need these properties, but hey, we should be consistent.
-          controlSize.left = controlSize.x; controlSize.top = controlSize.y;
+          controlSize.width = frame.width;
+          controlSize.height = frame.height;
         }
       }
       
@@ -425,7 +425,7 @@ SC.Control = {
     }
     
     // set control size
-    r.controlSize = controlSize;
+    r.attr('controlSize', controlSize);
   },
   
   /** @private
