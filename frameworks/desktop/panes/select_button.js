@@ -225,7 +225,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     @private
   */
-  isSelectedBinding: '*menu.isVisible',
+  isSelectedBinding: '*menu.isVisibleInWindow',
 
   /**
     If this property is set to 'YES', the menu pane will be positioned
