@@ -8,7 +8,7 @@
 # various frameworks that make up SproutCore.  If you want to override some
 # of these settings, you should make changes to your project Buildfile 
 # instead.
-config :all, :url_prefix => "/static/suite/"
+
 config :all, 
   :layout         => 'sproutcore:lib/index.rhtml',
   :test_layout    => 'sproutcore:lib/index.rhtml',

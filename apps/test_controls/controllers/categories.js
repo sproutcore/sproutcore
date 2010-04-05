@@ -51,6 +51,7 @@ TestControls.rootCategory = SC.Object.create({
         })
       ]
     }),
+    
     SC.Object.create({
       treeItemIsExpanded: YES,
       group: true,
@@ -71,6 +72,18 @@ TestControls.rootCategory = SC.Object.create({
         SC.Object.create({
           name: "Flow Layout",
           show: "flow_layout_page"
+        })
+      ]
+    }),
+    
+    SC.Object.create({
+      treeItemIsExpanded: YES,
+      group: true,
+      name: "Scroll",
+      treeItemChildren: [
+        SC.Object.create({
+          name: "Simple",
+          show: "scroll_page"
         })
       ]
     })

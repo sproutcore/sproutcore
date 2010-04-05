@@ -1,24 +1,25 @@
 /*globals TestControls Forms*/
 TestControls.textFieldPage = SC.View.design({
   childViews: "form".w(),
-  form: Forms.FormView.design({
+  form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    fields: "header normal disabled".w(),
-    header: Forms.FormView.row(SC.LabelView, {
-      autoResize: YES,
+    childViews: "header normal disabled".w(),
+    
+    header: SC.LabelView.design({
       classNames: "header".w(),
-      value: "Text Fields",
-      fieldLabel: NO
+      value: "Text Fields"
     }),
-    normal: Forms.FormView.row(SC.TextFieldView, {
+    
+    normal: SC.FormView.row(SC.TextFieldView.design({
       layout: { left: 0, width: 150, height: 24, centerY: 0},
       value: "Text"
-    }),
-    disabled: Forms.FormView.row(SC.TextFieldView, {
+    })),
+    
+    disabled: SC.FormView.row(SC.TextFieldView.design({
       layout: { left: 0, width: 150, height: 24, centerY: 0},
       isEnabled: NO,
       value: "Disabled"
-    })
+    }))
   })
 });
