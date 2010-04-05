@@ -68,21 +68,11 @@ SC.FlowedLayout = {
     Detects when the child views change.
   */
   _scfl_childViewsDidChange: function(c) {
-    this._scfl_tile();
-  },
-  
-  removeChild: function(c) {
-    sc_super();
-    this._scfl_childViewsDidChange();
-  },
-  
-  appendChild: function(c) {
-    sc_super();
-    this._scfl_childViewsDidChange();    
-  },
+    this.invokeOnce("_scfl_tile");
+  }.observes("childViews"),
   
   _scfl_layoutPropertyDidChange: function(){
-    this._scfl_tile();
+    this.invokeOnce("_scfl_tile");
   },
   
   /**
@@ -90,7 +80,7 @@ SC.FlowedLayout = {
     views after a certain view, sometime in future.
   */
   layoutChildViews: function() {
-    this._scfl_tile();
+    this.invokeOnce("_scfl_tile");
   },
   
   /**
@@ -99,7 +89,8 @@ SC.FlowedLayout = {
   */
   layoutDidChangeFor: function(c) {
     if (c.get("useAbsoluteLayout")) return sc_super();
-
+    if (!this._scfl_itemLayouts) return sc_super();
+    
     var l = this._scfl_itemLayouts[SC.guidFor(c)];
     if (!l) return sc_super();
     if (c.layout.width !== l.width || c.layout.height !== l.height) return sc_super();
