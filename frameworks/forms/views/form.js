@@ -1,5 +1,5 @@
 // ==========================================================================
-// Project:   Forms.FormView
+// Project:   SC.FormView
 // Copyright: ©2009 Alex Iskander and TPSi
 // ==========================================================================
 /*globals Forms */
@@ -42,8 +42,10 @@ beginEditing.
 */
 require("mixins/auto_hide");
 require("mixins/edit_mode");
-Forms.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode, /** @scope Forms.FormView.prototype */ {
-  layoutDirection: SC.LAYOUT_VERTICAL,
+SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
+  layoutDirection: SC.LAYOUT_HORIZONTAL, canWrap: YES,
+  
+  defaultFlowSpacing: { left: 5, top: 5, bottom: 5, right: 5 },
   
   classNames: ["sc-form-view"],
 
@@ -115,12 +117,15 @@ Forms.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
             v.set("content", content);
           }
           // set label (if possible)
-          if (v.get("isFormRow") && v.get("label") === "") {
+          if (v.get("isFormRow") && SC.none(v.get("label"))) {
             v.set("label", key.humanize().titleize());
           }
         }
       }
     }
+    
+    // our internal bookeeping to prevent .
+    this._hasCreatedRows = YES;
     
   },
 
@@ -174,7 +179,7 @@ Forms.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
   }
 });
 
-SC.mixin(Forms.FormView, {
+SC.mixin(SC.FormView, {
   /**
   Creates a form row.
 
@@ -199,6 +204,6 @@ SC.mixin(Forms.FormView, {
   */
   field: function(fieldClass, properties)
   {
-    return Forms.FormFieldView.field(fieldClass, properties);
+    return SC.FormFieldView.field(fieldClass, properties);
   }
 });

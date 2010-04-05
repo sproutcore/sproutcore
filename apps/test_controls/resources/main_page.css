@@ -12,13 +12,13 @@
   font-size: 22px;
 }
 
-.sample_controls .sc-form-row-view .form-row-label {
+.sample_controls .sc-form-row-view .sc-form-label {
   font-weight: bold;
   color: #555;
   text-shadow: 0px 1px 1px white;
 }
 
-.header .sc-label-view {
+.sc-label-view.header {
   font-size: 24px;
   color:#555;
   text-shadow:0px 1px 1px white;

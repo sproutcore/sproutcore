@@ -1,17 +1,17 @@
 /*globals TestControls Forms*/
 TestControls.progressPage = SC.View.design({
   childViews: "form".w(),
-  form: Forms.FormView.design({
+  form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
     
-    childViews: "header normal".w(),
+    childViews: "header normal disabled".w(),
     
     // Plain Views
     header: SC.LabelView.design({
-      layout: { width: 150, height: 18 },
+      layout: { width: 250, height: 18 },
       value: "Progress Bars",
-      className: "header".w()
+      classNames: "header".w()
     }),
     
     // RAW
@@ -24,12 +24,12 @@ TestControls.progressPage = SC.View.design({
         layout: { height: 20, width: 200 },
         value: 0.25
       })
-    }) /*,
+    }),
     
     // Helper
-    disabled: SC.FormView.row("Normal", SC.ProgressView.design({
+    disabled: SC.FormView.row(SC.ProgressView.design({
       layout: { height: 20, width: 200 },
       isEnabled: NO      
-    }))*/
+    }))
   })
 });

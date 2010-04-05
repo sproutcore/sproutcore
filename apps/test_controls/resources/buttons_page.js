@@ -1,61 +1,61 @@
 /*globals TestControls Forms*/
 TestControls.buttonsPage = SC.View.design({
   childViews: "form".w(),
-  form: Forms.FormView.design({
+  form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    fields: "header small normal huge jumbo disabled disclosureHeader disclosureClosed disclosureOpen".w(),
-    header: Forms.FormView.row(SC.LabelView, {
-      autoResize: YES,
+    childViews: "header small normal huge jumbo disabled space disclosureHeader disclosureClosed disclosureOpen".w(),
+    header: SC.LabelView.design({
+      layout: {width: 200, height: 24 },
       classNames: "header".w(),
-      value: "Buttons",
-      fieldLabel: NO
+      value: "Buttons"
     }),
-    normal: Forms.FormView.row(SC.ButtonView, {
-      layout: { height: 24, centerY: 0, left: 0, width: 100 },
+    normal: SC.FormView.row(SC.ButtonView.design({
+      layout: { height: 24, width: 100 },
       title: "Click Me",
       buttonBehavior: SC.TOGGLE_BEHAVIOR
-    }),
-    disabled: Forms.FormView.row(SC.ButtonView, {
-      layout: { height: 24, centerY: 0, left: 0, width: 150 },
+    })),
+    
+    disabled: SC.FormView.row(SC.ButtonView.design({
+      layout: { height: 24, width: 150 },
       isEnabled: NO,
       title: "Don't Click Me"
-    }),
+    })),
     
-    small: Forms.FormView.row(SC.ButtonView, {
-      layout: { height: 18, centerY: 0, left: 0, width: 100 },
+    small: SC.FormView.row(SC.ButtonView.design({
+      layout: { height: 18, width: 100 },
       title: "Click Me",
       buttonBehavior: SC.TOGGLE_BEHAVIOR
-    }),
+    })),
     
-    huge: Forms.FormView.row(SC.ButtonView, {
-      layout: { height: 30, centerY: 0, left: 0, width: 100 },
+    huge: SC.FormView.row(SC.ButtonView.design({
+      layout: { height: 30, width: 100 },
       title: "Click Me",
       buttonBehavior: SC.TOGGLE_BEHAVIOR
-    }),
+    })),
     
-    jumbo: Forms.FormView.row(SC.ButtonView, {
-      layout: { height: 44, centerY: 0, left: 0, width: 100 },
+    jumbo: SC.FormView.row(SC.ButtonView.design({
+      layout: { height: 44, width: 100 },
       title: "Click Me",
       buttonBehavior: SC.TOGGLE_BEHAVIOR
+    })),
+    space: SC.View.design({
+      flowSize: { widthPercentage: 1, height: 24 }
     }),
-
-    disclosureHeader: Forms.FormView.row(SC.LabelView, {
-      layout: { width: 400 },
-      autoResize: YES,
+    disclosureHeader: SC.LabelView.design({
+      layout: { width: 400, height: 24 },
       classNames: "header".w(),
-      value: "Disclosure Buttons",
-      fieldLabel: NO
+      value: "Disclosure Buttons"
     }),
-    disclosureClosed: Forms.FormView.row(SC.DisclosureView, {
-      layout: { height: 24, centerY: 0, left: 0, width: 100 },
+    disclosureClosed: SC.FormView.row(SC.DisclosureView.design({
+      layout: { height: 24, width: 100 },
       title: "Disclosure Closed",
       value: NO
-    }),
-    disclosureOpen: Forms.FormView.row(SC.DisclosureView, {
-      layout: { height: 24, centerY: 0, left: 0, width: 150 },
+    })),
+    disclosureOpen: SC.FormView.row(SC.DisclosureView.design({
+      layout: { height: 24, width: 150 },
       title: "Disclosure Open",
       value: YES
-    })
+    }))
   })
 });

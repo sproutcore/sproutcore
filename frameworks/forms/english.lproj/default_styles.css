@@ -1,16 +1,2 @@
 /* This default stylesheet for forms maximizes fluidity. */
-
-/* The hint should have the same alignment as the text inside the box */
-.sc-text-field-view .sc-hint { top:0px; left: 0px; right: 0px; bottom: 0px; }
-
-/* Stuff for measuring */
-.sc-text-field-view textarea, .sc-text-field-view input { white-space:pre-wrap; overflow: hidden; }
-
-.sc-label-view.forms-label { white-space:pre-wrap; }
-
-/* Show overflow so field effects will be visible */
-.sc-form-row-view { overflow:visible; }
-.sc-form-field-view { overflow:visible; }
-
-/* Radio button labels need to support auto-resize nicely. Usually, they should not wrap. */
-.sc-radio-button .sc-button-label { white-space:pre; }
+.sc-label-view.sc-form-label { white-space:pre; }
