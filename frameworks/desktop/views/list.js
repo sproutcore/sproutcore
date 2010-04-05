@@ -363,8 +363,8 @@ SC.ListView = SC.CollectionView.extend(
     // go forwards until bottom of row is after top edge
     offset += this.rowHeightForContentIndex(start);
     while(start<len && offset<top) {
+      start++;
       offset += this.rowHeightForContentIndex(start);
-      start++ ;
     }
     if (start<0) start = 0;
     if (start>=len) start=len;
@@ -378,15 +378,15 @@ SC.ListView = SC.CollectionView.extend(
     
     // walk backwards until top of row is before or at bottom edge
     while(end>=start && offset>=bottom) {
-      end-- ;
+      end--;
       offset -= this.rowHeightForContentIndex(end);
     }
     
     // go forwards until bottom of row is after bottom edge
     offset += this.rowHeightForContentIndex(end);
     while(end<len && offset<=bottom) {
+      end++;
       offset += this.rowHeightForContentIndex(end);
-      end++ ;
     }
     
     end++; // end should be after start

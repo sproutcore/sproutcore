@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /*
-  This test evaluates a plain list with no custom row heights, outlines, 
+  This test evaluates a list with custom row heights, outlines, 
   group views or any other non-standard behavior.
 */
 
@@ -60,8 +60,34 @@ var pane = SC.ControlTestPane.design()
 
     })
   }));
-  
+
+var pane2 = SC.ControlTestPane.design()
+  .add("Custom Row Heights 2", SC.ScrollView.design({
+    layout: { left: 0, right: 0, top: 0, height: 200 },
+    hasHorizontalScroller: NO,
+    contentView: SC.ListView.design({
+      content: ContentArray.create({ length: 100 }),
+      customRowHeightIndexes: SC.IndexSet.create(0,1000),
+      
+      contentIndexRowHeight: function(view, content, index) {
+        if (index % 2 === 0) {
+          return 17;
+        }
+        else {
+          return 48;
+        }
+      },
+      
+      contentValueKey: "title",
+      contentCheckboxKey: "isDone",
+      contentUnreadCountKey: "unread",
+      rowHeight: 48
+
+    })
+  }));
+
 pane.show(); // add a test to show the test pane
+pane2.show();
 window.pane = pane ;
 
 function verifyChildViewsMatch(views, set) {
@@ -119,7 +145,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(6,8);
+  exp = SC.IndexSet.create(5,9);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
@@ -136,6 +162,19 @@ test("scrolling by small amount should update incremental rendering", function()
 
   verifyChildViewsMatch(listView.childViews, exp);
   
+});
+
+test("the 'nowShowing' property should be correct when scrolling", function() {
+  var scrollView = pane2.view('Custom Row Heights 2'),
+      listView   = scrollView.contentView,
+      correctSet = SC.IndexSet.create(1, 7);
+  
+  // Scroll to point 36, which demonstrates a problem with the older list view
+  // contentIndexesInRect code.
+  SC.run(function() {
+    scrollView.scrollTo(0,36);
+  });
+  same(listView.get("nowShowing"), correctSet, 'nowShowing should %@'.fmt(correctSet));
 });
 
 // ..........................................................
