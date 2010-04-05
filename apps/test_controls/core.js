@@ -3,7 +3,9 @@
 // Copyright: ©2010 My Company, Inc.
 // ==========================================================================
 /*globals TestControls */
-
+Forms = {};
+Forms.FormView = {design:function(){}};
+Forms.FormView.row = function(){};
 /** @namespace
 
   My cool new app.  Describe your application.

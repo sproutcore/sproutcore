@@ -204,35 +204,31 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // THEME SUPPORT
   // 
   
-  /**
-    @private
-    The theme to use.
-  */
-  _theme: null,
   _last_theme: null, // used to determine if theme has changed since last time the property was evaluated.
+  themeName: false,
   
   _themeProperty: function(key, value) {
-    var ret = null;
-    
+    // if it is a string, set theme name
     if (SC.typeOf(value) === SC.T_STRING) {
-      // find
-      var theme = SC.Theme.find(value);
+      this.set("themeName", value);
+    }
+    
+    // find theme, if possible
+    if (this.get("themeName")) {
+      var theme = SC.Theme.find(this.get("themeName"));
       if (theme) {
-        this._theme = theme;
+        return theme;
       }
     }
     
-    if (!SC.none(this._theme)){
-      ret = this._theme; 
-    } else {
-      var parent = this.get("parentView");
-      if (parent) {
-        ret = parent.get("theme");
-      }
+    // otherwise, return parent's theme if possible
+    var parent = this.get("parentView");
+    if (parent) {
+      return parent.get("theme");
     }
-    
-    return ret;
-  }.cacheable(),
+
+    return null;
+  }.property().cacheable(),
   
   _notifyThemeDidChange: function() {
     var len, idx, childViews = this.get("childViews");

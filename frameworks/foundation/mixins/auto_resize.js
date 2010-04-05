@@ -6,6 +6,7 @@ SC.AutoResize = {
   
   shouldAutoResize: YES, // if NO, only measuredSize is changed.
   shouldMeasureSize: YES, // if NO, nothing happens.
+  measuredSize: {width: 0, height: 0},
   
   autoSizePadding: 10, // just to add some nice space.
   
@@ -14,6 +15,8 @@ SC.AutoResize = {
   },
   
   measureSize: function() {
+    if (!this.get("shouldMeasureSize")) return;
+    
     // get the layer
     var layer = this.get("layer");
     
@@ -21,11 +24,11 @@ SC.AutoResize = {
     if (!layer) return;
     
     // get metrics, using layer as example element
-    var metrics = SC.metricsForString(this.get(this.get("autoResizeValue")), layer);
+    var metrics = SC.metricsForString(this.get(this.get("autoResizeField")), layer);
     
     // set it
     this.set("measuredSize", metrics);
-    this.adjust("width", metrics.width + this.get("autoSizePadding"));
+    if (this.get("shouldAutoResize")) this.adjust("width", metrics.width + this.get("autoSizePadding"));
   },
   
   // we need to update the measurement when the value changes

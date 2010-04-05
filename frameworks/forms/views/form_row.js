@@ -15,6 +15,10 @@ require("mixins/auto_hide");
 require("mixins/edit_mode");
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
+  flowSize: { widthPercentage: 1 },
+  
+  classNames: ["sc-form-row-view"],
+  
   /**
     Walks like a duck.
   */
@@ -45,6 +49,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
 	*/
 	labelView: SC.LabelView.design(SC.AutoResize, {
 	  shouldAutoResize: NO, // only change the measuredSize so we can update.
+	  layout: { left:0, top:0, width: 0, height: 18 },
 	  classNames: ["sc-form-label"]
 	}),
 	
@@ -58,14 +63,18 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
   */
   createChildViews: function()
   {
-    // add label
-    if (this.labelView.isClass) {
-      this.labelView = this.createChildView(this.labelView);
-      this.labelView.addObserver("measuredSize", this, "labelSizeDidChange");
-    }
-    
     // keep array of keys so we can pass on key to child.
     var cv = SC.clone(this.get("childViews"));
+    
+    // add label
+    if (this.labelView.isClass) {
+      this.labelView = this.createChildView(this.labelView, {
+        value: this.get("label")
+      });
+      this.labelView.addObserver("measuredSize", this, "labelSizeDidChange");
+      this.get("childViews").unshift(this.labelView);
+    }
+    
     var content = this.get("content");
     
     sc_super();
@@ -109,7 +118,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
   
   labelSizeDidChange: function() {
     var size = this.get("labelView").get("measuredSize");
-    this.set("rowLabelMeasuredSize", size);
+    this.set("rowLabelMeasuredSize", size.width);
     
     // alert parent view if it is a row delegate
     var pv = this.get("parentView");
@@ -125,9 +134,17 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
 });
 
 SC.FormRowView.mixin({
-	row: function(optionalClass, settings)
+	row: function(label, fieldType)
 	{
+	  if (!fieldType) {
+	    fieldType = label;
+	    label = null;
+	  }
 		// now, create like normal
-		return SC.FormRowView.extend(settings);
+		return SC.FormRowView.extend({
+		  label: label,
+		  childViews: "_singleField".w(),
+		  _singleField: fieldType
+		});
 	}
 });

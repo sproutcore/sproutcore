@@ -18,6 +18,9 @@ SC.ALIGN_JUSTIFY = "justify";
   Child views with useAbsoluteLayout===YES will be ignored in the layout process.
   This mixin detects when child views have changed their size, and will adjust accordingly.
   It also observes child views' isVisible and calculatedWidth/Height properties.
+  If flowSize is implemented but specifies widthPercent and heightPercent, the width and height
+  will be calculated based on padding-adjusted size; values not specified in flowSize will always
+  be taken from the flowed view's frame (calculatedWidth/Height ignored).
   
   This view mixes very well with animation. Further, it is able to automatically mix
   in to child views it manages, created or not yet created, allowing you to specify
@@ -141,8 +144,26 @@ SC.FlowedLayout = {
   */
   flowSizeForView: function(idx, view) {
     // first try flowSize
-    var fs = view.get("flowSize");
-    if (!SC.none(fs)) return fs;
+    var fs = SC.clone(view.get("flowSize"));
+    if (!SC.none(fs)) {
+      // if we have a flow size, adjust for a) width/heightPercentage and b) missing params.
+      var frame = this.get("frame"), padding = this.get("flowPadding"), spacing = this.flowSpacingForView(idx, view);
+      
+      // you can't set it w/percentage for the expand direction
+      var expandsHorizontal = (this.get("layoutDirection") === SC.LAYOUT_HORIZONTAL && !this.get("canWrap")) ||
+        (this.get("layoutDirection") === SC.LAYOUT_VERTICAL && this.get("canWrap"));
+      
+      if (!SC.none(fs.widthPercentage) && !expandsHorizontal) {
+        fs.width = (frame.width - padding.left - padding.right) * fs.widthPercentage - spacing.left - spacing.right;
+      }
+      if (!SC.none(fs.heightPercentage) && expandsHorizontal) {
+        fs.height = (frame.height - padding.top - padding.bottom) * fs.heightPercentage - spacing.top - spacing.bottom;
+      }
+      if (SC.none(fs.width)) fs.width = view.get("frame").width;
+      if (SC.none(fs.height)) fs.height = view.get("frame").height;
+      
+      return fs;
+    }
     if (view.get("isSpacer")) return { width: 0, height: 0 };
     
     // then calculated size
@@ -243,8 +264,13 @@ SC.FlowedLayout = {
     // and we get a crash.
     this._scfl_itemLayouts[SC.guidFor(item)] = l;
     
-    // Also, never set if the same.
-    if (last && last.left == l.left && last.top == l.top && last.width == l.width && last.height == l.height) return;
+    // Also, never set if the same. We only want to compare layout properties, though
+    if (last && 
+      last.left == l.left && last.top == l.top && 
+      last.width == l.width && last.height == l.height
+    ) {
+      return;
+    }
 
     item.set("layout", l);
     item.updateLayout();
@@ -297,7 +323,7 @@ SC.FlowedLayout = {
       
       // get spacing, size, and cache
       childSize = this.flowSizeForView(idx, child);
-      child._scfl_cachedFlowSize = { width: childSize.width, height: childSize.height}; // supply a clone, since we are about to modify
+      child._scfl_cachedFlowSize = { width: childSize.width, height: childSize.height }; // supply a clone, since we are about to modify
       
       childSpacing = this.flowSpacingForView(idx, child);
       childSize.width += childSpacing.left + childSpacing.right;
@@ -333,10 +359,14 @@ SC.FlowedLayout = {
     this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
     
     // update calculated width/height
+    this._scfl_lastFrameSize = this.get("frame");
     if (!canWrap) {
+      this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
       this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
+    } else {
+      this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
+      this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
     }
-    this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
     
     
     // cleanup on aisle 7
@@ -350,6 +380,15 @@ SC.FlowedLayout = {
     
     this._scfl_isObserving = nowObserving;
   },
+  
+  _scfl_frameDidChange: function() {
+    var frame = this.get("frame"), lf = this._scfl_lastFrameSize;
+    this._scfl_lastFrameSize = frame;
+
+    if (lf && lf.width == frame.width && lf.height == frame.height) return;
+    
+    this.invokeOnce("_scfl_tile");
+  }.observes("frame"),
   
   destroyMixin: function() {
     var isObserving = this._scfl_isObserving || SC.CoreSet.create();
