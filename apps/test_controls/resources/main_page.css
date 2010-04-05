@@ -5,6 +5,7 @@
 }
 .sc-theme .sc-view.sc-toolbar-view.ace.light {
   -webkit-transform: translate3d(0px, 0px, 10px);
+  -webkit-box-shadow: none;
   z-index: auto;
 }
 

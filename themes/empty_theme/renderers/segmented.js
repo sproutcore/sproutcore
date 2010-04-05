@@ -55,6 +55,9 @@ SC.EmptyTheme.renderers.Segmented = SC.Renderer.extend({
       
       // add renderer to our list
       segs.push(ren);
+      
+      // finally, if we have a layer, we need to attach the renderer to the layer.
+      ren.attachLayer(this.provide(".segment-" + idx));
     }
     
     this._segments = segs;
@@ -92,32 +95,13 @@ SC.EmptyTheme.renderers.Segmented = SC.Renderer.extend({
     }
   },
   
-  getLayerForIndex: function(idx) {
-    // find the proper segment and return it.
-    return this.$(".segment-" + idx)[0];
-  },
-  
-  /**
-    @private
-    The layer fetcher function that we put in objects. This is not a method of the renderer
-    class; it is a method we will add to layer providers we create in didAttachLayer
-  */
-  layerFetcher: function() { // "this" === a layer provder created in didAttachLayer
-    return this.provider.getLayerForIndex(this.rendererIndex);
-  },
-  
   didAttachLayer: function(provier) {
     var segments = this._segments, segment, idx, len = segments.length;
     for (idx = 0; idx < len; idx++) {
       segment = segments[idx];
       
       // make a layer provider
-      segment.attachLayer({
-        isLayerProvider: YES,
-        provider: this,
-        rendererIndex: idx,
-        getLayer: this.layerFetcher
-      });
+      segment.attachLayer(this.provide(".segment-" + idx));
     }
   },
   

@@ -1,42 +1,42 @@
 /*globals TestControls Forms*/
 TestControls.segmentedPage = SC.View.design({
   childViews: "form".w(),
-  form: Forms.FormView.design({
+  form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    fields: "header normal disabled multiple multiple_side_by_side".w(),
-    header: Forms.FormView.row(SC.LabelView, {
+    childViews: "header normal disabled multiple multiple_side_by_side".w(),
+    
+    header: SC.LabelView.design({
       layout: {width:300, height:24},
-      autoResize: YES,
       classNames: "header".w(),
-      value: "Segmented Views ",
-      fieldLabel: NO
+      value: "Segmented Views "
     }),
-    normal: Forms.FormView.row(SC.SegmentedView, {
+    
+    normal: SC.FormView.row(SC.SegmentedView.design({
       layout: { left: 0, width: 150, height: 24, centerY: 0},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: null
-    }),
-    disabled: Forms.FormView.row(SC.SegmentedView, {
+    })),
+    disabled: SC.FormView.row(SC.SegmentedView.design({
       layout: { left: 0, width: 150, height: 24, centerY: 0},
       isEnabled: NO,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: "one"
-    }),
-    multiple: Forms.FormView.row(SC.SegmentedView, {
+    })),
+    multiple: SC.FormView.row(SC.SegmentedView.design({
       layout: { left: 0, width: 150, height: 24, centerY: 0},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "three"]
-    }),
+    })),
     
-    multiple_side_by_side: Forms.FormView.row(SC.SegmentedView, {
+    multiple_side_by_side: SC.FormView.row(SC.SegmentedView.design({
       layout: { left: 0, width: 150, height: 24, centerY: 0},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "two"]
-    })
+    }))
   })
 });
