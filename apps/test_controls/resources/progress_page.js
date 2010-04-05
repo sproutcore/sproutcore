@@ -4,20 +4,32 @@ TestControls.progressPage = SC.View.design({
   form: Forms.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    fields: "header normal disabled".w(),
-    header: Forms.FormView.row(SC.LabelView, {
-      autoResize: YES,
-      classNames: "header".w(),
+    
+    childViews: "header normal".w(),
+    
+    // Plain Views
+    header: SC.LabelView.design({
+      layout: { width: 150, height: 18 },
       value: "Progress Bars",
-      fieldLabel: NO
+      className: "header".w()
     }),
-    normal: Forms.FormView.row(SC.ProgressView, {
-      layout: { height: 20, centerY: 0, left: 0, width: 200 },
-      value: 0.25
-    }),
-    disabled: Forms.FormView.row(SC.ProgressView, {
-      layout: { height: 20, centerY: 0, left: 0, width: 200 },
-      isEnabled: NO
-    })
+    
+    // RAW
+    normal: SC.FormRowView.design({
+      // rowDelegate: automatically calculated because parent.isRowDelegate
+      label: "Normal", // Also, FormView can set this automatically by going over childViews.
+      
+      childViews: "progress".w(), // this is what makes this rather tedious...
+      progress: SC.ProgressView.design({
+        layout: { height: 20, width: 200 },
+        value: 0.25
+      })
+    }) /*,
+    
+    // Helper
+    disabled: SC.FormView.row("Normal", SC.ProgressView.design({
+      layout: { height: 20, width: 200 },
+      isEnabled: NO      
+    }))*/
   })
 });

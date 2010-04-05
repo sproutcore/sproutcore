@@ -15,8 +15,7 @@ require("resources/flow_layout_page");
 
 TestControls.mainPage = SC.Page.create({
   
-  mainPane: SC.PanelPane.design(SC.Animatable, {
-    contentView: SC.View.design({
+  mainPane: SC.MainPane.design(SC.Animatable, {
     childViews: "toolbar split".w(),
     
     toolbar: SC.ToolbarView.design({
@@ -42,7 +41,6 @@ TestControls.mainPage = SC.Page.create({
         nowShowing: "welcome",
         nowShowingBinding: "TestControls.categoryController.show"
       })
-    })
     })
   }),
 

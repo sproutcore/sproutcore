@@ -1,4 +1,12 @@
 /* @group Welcome */
+.sc-view {
+  -webkit-transform-style: preserves-3d;
+  -webkit-transform: translate3d(0px, 0px, 1px);
+}
+.sc-theme .sc-view.sc-toolbar-view.ace.light {
+  -webkit-transform: translate3d(0px, 0px, 10px);
+  z-index: auto;
+}
 
 .sc-toolbar-view .embossed {
   font-size: 22px;
