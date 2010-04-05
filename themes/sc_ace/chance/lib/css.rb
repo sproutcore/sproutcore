@@ -39,7 +39,7 @@ class CSSParser
       if $1 == "@view"
         tn = ""
         if @config[:include_sc_theme]
-          tn = ".sc-theme"
+          tn = ".sc-theme "
         end
         tn + ".sc-view" + theme_name + "." + $3
       elsif $1 == "@theme"

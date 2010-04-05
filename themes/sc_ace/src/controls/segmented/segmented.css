@@ -106,3 +106,7 @@
 @view(sc-segmented-view) .sc-segment.sel.sc-last-segment .button-right {
   background: sprite("segmented_selected.png" [-8]);
 }
+
+@view(sc-segmented-view).disabled {
+  opacity: 0.5;
+}

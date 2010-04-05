@@ -1,17 +1,15 @@
 /*globals TestControls Forms*/
 TestControls.selectPage = SC.View.design({
   childViews: "form".w(),
-  form: Forms.FormView.design({
+  form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    fields: "header normal disabled".w(),
-    header: Forms.FormView.row(SC.LabelView, {
-      autoResize: YES,
+    childViews: "header normal disabled".w(),
+    header: SC.LabelView.design({
       classNames: "header".w(),
-      value: "Select Views",
-      fieldLabel: NO
+      value: "Select Views"
     }),
-    normal: Forms.FormView.row(SC.SelectView, {
+    normal: SC.FormView.row(SC.SelectView.design({
       controlSize: SC.REGULAR_CONTROL_SIZE,
       items: [
         {"name": "Printer A", "value": "printer:a"},
@@ -26,8 +24,8 @@ TestControls.selectPage = SC.View.design({
       ],
       itemTitleKey: "name", itemValueKey: "value", itemSeparatorKey: "separator",
       value: null
-    }),
-    disabled: Forms.FormView.row(SC.SelectView, {
+    })),
+    disabled: SC.FormView.row(SC.SelectView.design({
       controlSize: SC.REGULAR_CONTROL_SIZE,
       isEnabled: NO,
       
@@ -44,6 +42,6 @@ TestControls.selectPage = SC.View.design({
       ],
       itemTitleKey: "name", itemValueKey: "value", itemSeparatorKey: "separator",
       value: null
-    })
+    }))
   })
 });

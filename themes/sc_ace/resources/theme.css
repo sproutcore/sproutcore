@@ -274,6 +274,7 @@
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -372px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -14px -1809px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -14px -1834px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .track {
   position: absolute;
   top: 0px;

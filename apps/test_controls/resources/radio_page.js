@@ -1,34 +1,32 @@
 /*globals TestControls Forms*/
 TestControls.radioPage = SC.View.design({
   childViews: "form".w(),
-  form: Forms.FormView.design({
+  form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    fields: "header normal disabled multiple".w(),
-    header: Forms.FormView.row(SC.LabelView, {
-      autoResize: YES,
+    childViews: "header normal disabled multiple".w(),
+    header: SC.LabelView.design({
       classNames: "header".w(),
-      value: "Radio Views",
-      fieldLabel: NO
+      value: "Radio Views"
     }),
-    normal: Forms.FormView.row(SC.RadioView, {
-      layout: { left: 0, width: 150, height: 24, centerY: 0},
+    normal: SC.FormView.row(SC.RadioView.design({
+      layout: { width: 150, height: 24},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: null
-    }),
-    disabled: Forms.FormView.row(SC.RadioView, {
-      layout: { left: 0, width: 150, height: 24, centerY: 0},
+    })),
+    disabled: SC.FormView.row(SC.RadioView.design({
+      layout: { width: 150, height: 24},
       isEnabled: NO,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: "one"
-    }),
-    multiple: Forms.FormView.row(SC.RadioView, {
-      layout: { left: 0, width: 150, height: 24, centerY: 0},
+    })),
+    multiple: SC.FormView.row(SC.RadioView.design({
+      layout: {width: 150, height: 240},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "three"]
-    })
+    }))
   })
 });
