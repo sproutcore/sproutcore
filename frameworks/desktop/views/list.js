@@ -308,7 +308,7 @@ SC.ListView = SC.CollectionView.extend(
     // default layout
     var ret = this._sclv_layout;
     if (!ret) ret = this._sclv_layout = {};
-    ret.minHeight = this.rowOffsetForContentIndex(this.get('length'))+4;
+    ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
     this.set('calculatedHeight',ret.minHeight);
     return ret ;
   },
