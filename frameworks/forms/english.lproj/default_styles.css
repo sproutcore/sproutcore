@@ -1,2 +1,2 @@
 /* This default stylesheet for forms maximizes fluidity. */
-.sc-label-view.sc-form-label { white-space:pre; }
+.sc-label-view.sc-form-label { white-space:pre; text-align: right; }

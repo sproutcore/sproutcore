@@ -42,6 +42,7 @@ beginEditing.
 */
 require("mixins/auto_hide");
 require("mixins/edit_mode");
+require("views/form_row");
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_HORIZONTAL, canWrap: YES,
   
@@ -75,7 +76,14 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
   own content object.
   */
   content: null,
-
+  
+  /**
+    Rows in the form do not have to be full objects at load time. They can also be simple hashes
+    which are then passed to exampleRow.extend.
+  */
+  exampleRow: SC.FormRowView.extend({
+    labelView: SC.FormRowView.LabelView.extend({ textAlign: SC.ALIGN_RIGHT })
+  }),
 
   /**
   Init function.
@@ -93,11 +101,24 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
   {
     // keep array of keys so we can pass on key to child.
     var cv = SC.clone(this.get("childViews"));
+    var idx, len = cv.length, key, v, exampleRow = this.get("exampleRow");
+    
+    // preprocess to handle templated rows (rows that use exampleRow to initialize)
+    for (idx = 0; idx < len; idx++) {
+      key = cv[idx];
+      if (SC.typeOf(key) === SC.T_STRING) {
+        v = this.get(key);
+        if (v && !v.isClass && SC.typeOf(v) === SC.T_HASH) {
+          this[key] = exampleRow.extend(v);
+        }
+      }
+    }
+    
+    // get content for further ops
     var content = this.get("content");
     sc_super();
     
     // now, do the actual passing it
-    var idx, len = cv.length, key, v;
     for (idx = 0; idx < len; idx++) {
       key = cv[idx];
       
