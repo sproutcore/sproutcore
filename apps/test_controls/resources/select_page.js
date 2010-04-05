@@ -10,6 +10,7 @@ TestControls.selectPage = SC.View.design({
       value: "Select Views"
     }),
     normal: SC.FormView.row(SC.SelectView.design({
+      layout: { width: 150, height: 24 },
       controlSize: SC.REGULAR_CONTROL_SIZE,
       items: [
         {"name": "Printer A", "value": "printer:a"},
@@ -26,6 +27,8 @@ TestControls.selectPage = SC.View.design({
       value: null
     })),
     disabled: SC.FormView.row(SC.SelectView.design({
+      layout: { width: 150, height: 24 },
+      
       controlSize: SC.REGULAR_CONTROL_SIZE,
       isEnabled: NO,
       

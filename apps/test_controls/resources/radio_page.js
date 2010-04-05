@@ -10,20 +10,20 @@ TestControls.radioPage = SC.View.design({
       value: "Radio Views"
     }),
     normal: SC.FormView.row(SC.RadioView.design({
-      layout: { width: 150, height: 24},
+      layout: { width: 150, height: 60},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: null
     })),
     disabled: SC.FormView.row(SC.RadioView.design({
-      layout: { width: 150, height: 24},
+      layout: { width: 150, height: 60},
       isEnabled: NO,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: "one"
     })),
     multiple: SC.FormView.row(SC.RadioView.design({
-      layout: {width: 150, height: 240},
+      layout: {width: 150, height: 60},
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "three"]

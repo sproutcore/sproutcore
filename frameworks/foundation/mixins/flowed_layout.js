@@ -164,7 +164,6 @@ SC.FlowedLayout = {
       
       return fs;
     }
-    if (view.get("isSpacer")) return { width: 0, height: 0 };
     
     // then calculated size
     var cw = view.get("calculatedWidth"), ch = view.get("calculatedHeight");
@@ -323,6 +322,12 @@ SC.FlowedLayout = {
       
       // get spacing, size, and cache
       childSize = this.flowSizeForView(idx, child);
+      
+      // adjust for spacer
+      if (child.get("isSpacer")) {
+        childSize[primary_d] = 0;
+      }
+      
       child._scfl_cachedFlowSize = { width: childSize.width, height: childSize.height }; // supply a clone, since we are about to modify
       
       childSpacing = this.flowSpacingForView(idx, child);

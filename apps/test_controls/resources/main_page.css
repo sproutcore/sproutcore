@@ -1,12 +1,16 @@
 /* @group Welcome */
 .sc-view {
-  -webkit-transform-style: preserves-3d;
-  -webkit-transform: translate3d(0px, 0px, 1px);
+  
 }
 .sc-theme .sc-view.sc-toolbar-view.ace.light {
   -webkit-transform: translate3d(0px, 0px, 10px);
   -webkit-box-shadow: none;
-  z-index: auto;
+}
+
+.sc-theme .sc-view.sc-label-view.list-item {
+	font-size: 32px;
+	font-weight: bold;
+	border-bottom: 1px solid #999;
 }
 
 .sc-toolbar-view .embossed {
@@ -14,6 +18,7 @@
 }
 
 .sample_controls .sc-form-row-view .sc-form-label {
+  -webkit-transform: translate3d(0px, 0px, 1px);
   font-weight: bold;
   color: #555;
   text-shadow: 0px 1px 1px white;
