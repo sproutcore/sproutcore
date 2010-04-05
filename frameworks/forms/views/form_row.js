@@ -16,6 +16,7 @@ require("mixins/edit_mode");
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
   flowSize: { widthPercentage: 1 },
+  defaultFlowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
   
   classNames: ["sc-form-row-view"],
   
@@ -47,11 +48,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
 	/**
 	  The label view.
 	*/
-	labelView: SC.LabelView.design(SC.AutoResize, {
-	  shouldAutoResize: NO, // only change the measuredSize so we can update.
-	  layout: { left:0, top:0, width: 0, height: 18 },
-	  classNames: ["sc-form-label"]
-	}),
+	labelView: null,
 	
 	/**
 	  Direction of the flow.
@@ -140,11 +137,19 @@ SC.FormRowView.mixin({
 	    fieldType = label;
 	    label = null;
 	  }
-		// now, create like normal
-		return SC.FormRowView.extend({
+		// now, create a hash (will be used by the parent form's exampleRow)
+		return {
 		  label: label,
 		  childViews: "_singleField".w(),
 		  _singleField: fieldType
-		});
-	}
+		};
+	},
+	
+	LabelView: SC.LabelView.extend(SC.AutoResize, {
+	  shouldAutoResize: NO, // only change the measuredSize so we can update.
+	  layout: { left:0, top:0, width: 0, height: 18 },
+	  classNames: ["sc-form-label"]
+	})
 });
+
+SC.FormRowView.prototype.labelView = SC.FormRowView.LabelView.design();
