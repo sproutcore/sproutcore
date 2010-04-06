@@ -1309,7 +1309,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (firstTime) {
       this.renderContent(context);
     } else {
-      this.updateContent();
+      this.updateContent(context);
     }
     return context;
   },
@@ -1336,13 +1336,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Views are content suppliers for renderers. That is, views pass themselves to renderers
     for renderers' "content" properties. Content providers have two functions: renderContent and updateContent.
     This is the first of those.
+    
+    For old-style rendering, the render context created by the parent renderer is passed along
+    as well.
   */
-  updateContent: function() {
+  updateContent: function(optionalContext) {
     var cv = this.get('childViews'), len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
       if (!view) continue;
-      view.updateLayer();
+      view.updateLayer(optionalContext);
     }
   },
   
