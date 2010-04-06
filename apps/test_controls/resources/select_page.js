@@ -11,7 +11,6 @@ TestControls.selectPage = SC.View.design({
     }),
     normal: SC.FormView.row(SC.SelectView.design({
       layout: { width: 150, height: 24 },
-      controlSize: SC.REGULAR_CONTROL_SIZE,
       items: [
         {"name": "Printer A", "value": "printer:a"},
         {"name": "Printer B", "value": "printer:b"},

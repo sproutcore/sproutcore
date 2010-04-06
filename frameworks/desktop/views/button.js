@@ -37,7 +37,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   /**
     ButtonView's renderers should be smart enough to...
   */
-  controlSize: SC.AUTO_CONTROL_SIZE,
+  controlSize: SC.REGULAR_CONTROL_SIZE,
 
   /**
     Class names that will be applied to this view
