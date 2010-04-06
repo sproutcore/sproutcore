@@ -74,7 +74,7 @@ SC.EmptyTheme.renderers.Segmented = SC.Renderer.extend({
       if (!layer) return;
       
       // re-render
-      var context = SC.RenderContext.create(layer);
+      var context = SC.RenderContext(layer);
       this.render(context);
       context.update();
       
