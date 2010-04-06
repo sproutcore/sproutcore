@@ -77,7 +77,7 @@ config :standard_theme,
   :debug_required => ['sproutcore/debug']
 
 config :ace, 
-  :required => :empty_theme, 
+  :required => "sproutcore/empty_theme", 
   :theme_name => 'sc-theme',
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
