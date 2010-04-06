@@ -225,12 +225,16 @@ SC.ResponderContext = {
     if (trace) {
       console.log("%@: begin action '%@' (%@, %@)".fmt(this, action, sender, context));
     }
-    
+
+    if (!handled && !working && this.tryToPerform) {
+      handled = this.tryToPerform(action, sender, context);
+    }
+
     while (!handled && working) {
       if (working.tryToPerform) {
         handled = working.tryToPerform(action, sender, context);
       }
-      
+
       if (!handled) {
         working = (working===last) ? null : this.nextResponderFor(working);
       }
