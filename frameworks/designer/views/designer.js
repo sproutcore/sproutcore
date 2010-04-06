@@ -663,12 +663,41 @@ SC.ViewDesigner = SC.Object.extend(
     if (!this.get('designIsEnabled')) return NO ;
     var info = this._mouseDownInfo, 
         view = this.get('view'),
-        layout;
+        layout, startX, startY;
     //do some binding!!!
     if(evt.altKey && SC._Greenhouse){
+      startX = evt.pageX;
+      startY = evt.pageY;
+
+      var dragLink = SC.DrawingView.create({
+        layout: {left: 0, top: 0, right: 0, bottom: 0},
+        startPoint: {x: startX, y: startY},
+        endPoint: {x: startX, y: startY},
+        // private update
+        _pointsDidChange: function(){
+          console.log('_pointsDidChange...');
+          var sp = this.get('startPoint'),
+              ep = this.get('endPoint'),
+              xDiff, yDiff, newLink;
+
+          xDiff = Math.abs(sp.x - ep.x);
+          yDiff = Math.abs(sp.y - ep.y);
+          if (xDiff > 5 || yDiff > 5){
+            newLink = {};
+            newLink.shape = SC.LINE;
+            newLink.start = {x: sp.x, y: sp.y};
+            newLink.end = {x: ep.x, y: ep.y};
+            newLink.style = { color: 'green', width: 3 };
+            this.setIfChanged('shapes', [newLink]);
+          }    
+        }.observes('startPoint', 'endPoint')
+      });
+      SC.designPage.get('designMainPane').appendChild(dragLink);
+      
       SC.Drag.start({
         event: evt,
         source: this,
+        dragLink: dragLink,
         dragView: SC.View.create({ layout: {left: 0, top: 0, width: 0, height: 0}}),
         ghost: NO,
         slideBack: YES,
@@ -693,10 +722,7 @@ SC.ViewDesigner = SC.Object.extend(
   
   // ..........................................................
   // Drag source and drag data source
-  // 
-  
-  dragSourceOperationMaskFor: function(drag, dropTarget) { return SC.DRAG_LINK ; },
-  
+  //   
   dragDataTypes: ['SC.Binding'],
 
   dragDataForType: function(drag, dataType) { 
@@ -917,21 +943,40 @@ SC.ViewDesigner = SC.Object.extend(
       coordinates.
   */
   dragDidMove: function(drag, loc) {
-    // var dragLink = drag.dragLink;
-    // var endX, endY;
-    // 
-    // if (dragLink) {
-    //   // if using latest SproutCore 1.0, loc is expressed in browser window coordinates
-    //   var pv = dragLink.get('parentView');
-    //   var frame = dragLink.get('frame');
-    //   var globalFrame = pv ? pv.convertFrameToView(frame, null) : frame;
-    //   if (globalFrame) {
-    //     endX = loc.x - globalFrame.x;
-    //     endY = loc.y - globalFrame.y;
-    //     dragLink.set('endPt', {x: endX , y: endY});
-    //   }
-    // }
-  }  
+    var dragLink = drag.dragLink;
+    var endX, endY, pv, frame, globalFrame;
+    console.log('dragDidMove called...');
+    if (dragLink) {
+      // if using latest SproutCore 1.0, loc is expressed in browser window coordinates
+      pv = dragLink.get('parentView');
+      frame = dragLink.get('frame');
+      globalFrame = pv ? pv.convertFrameToView(frame, null) : frame;
+      if (globalFrame) {
+        endX = loc.x - globalFrame.x;
+        endY = loc.y - globalFrame.y;
+        dragLink.set('endPoint', {x: endX , y: endY});
+        console.log('endPoint: %@ %@'.fmt(endX, endY));
+      }
+    }
+  },
+  
+  /**  
+    This method is called when the drag ended. You can use this to do any
+    cleanup.  The operation is the actual operation performed on the drag.
+  
+    @param {SC.Drag} drag The drag instance managing the drag.
+  
+    @param {Point} loc The point in WINDOW coordinates where the drag 
+      ended. 
+  
+    @param {DragOp} op The drag operation that was performed. One of 
+      SC.DRAG_COPY, SC.DRAG_MOVE, SC.DRAG_LINK, or SC.DRAG_NONE.
+  
+  */
+  dragDidEnd: function(drag, loc, op) {
+    var dragLink = drag.dragLink;
+    if (dragLink) dragLink.destroy();
+  }
 }) ;
 
 // Set default Designer for view
