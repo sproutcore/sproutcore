@@ -707,27 +707,21 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   mouseDown: function(evt) {
-    if(evt.target && evt.target.tagName && evt.target.tagName!="INPUT"){
-            
-      this._txtFieldMouseDown=YES;
-      if (!this.get('isEnabled')) {
-        evt.stop();
-        return YES;
-      } else if((this.value && this.value.length===0) || !this.value) {
-        if(SC.browser.msie){
-          this.invokeLater(this.focusIE7,1);
-        }else{
-          this.$input()[0].focus();
-        }
-        return YES;
-      } else {
-        evt.stop();
-      // This fixes the double click issue in firefox
-        if(!SC.browser.safari) this.$input()[0].focus();
-        return sc_super();
+    this._txtFieldMouseDown=YES;
+    if (!this.get('isEnabled')) {
+      evt.stop();
+      return YES;
+    } else if((this.value && this.value.length===0) || !this.value) {
+      if(SC.browser.msie){
+        this.invokeLater(this.focusIE7,1);
+      }else{
+        this.$input()[0].focus();
       }
-    }else{
-      return NO;
+      return YES;
+    } else {
+    // This fixes the double click issue in firefox
+      if(!SC.browser.safari) this.$input()[0].focus();
+      return sc_super();
     }
   },
 
@@ -741,7 +735,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
-    } else return sc_super();
+    } 
+    return sc_super();
   },
   
   focusIE7: function (){
