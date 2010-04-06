@@ -15,6 +15,7 @@ SC.Controller.prototype.emitDesign = function(coder){
 };
 
 SC.Controller.prototype.encodeDesign = function(coder){
+  //TODO: figure out a better way to encode controllers...
   coder.set('className', "SC.ObjectController");
   var val, proto = SC.ObjectController.prototype, prop;
   for(prop in this){

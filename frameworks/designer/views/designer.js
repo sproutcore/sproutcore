@@ -665,7 +665,7 @@ SC.ViewDesigner = SC.Object.extend(
         view = this.get('view'),
         layout;
     //do some binding!!!
-    if(evt.altKey){
+    if(evt.altKey && SC._Greenhouse){
       SC.Drag.start({
         event: evt,
         source: this,
@@ -689,6 +689,18 @@ SC.ViewDesigner = SC.Object.extend(
       }
     }
 
+  },
+  
+  // ..........................................................
+  // Drag source and drag data source
+  // 
+  
+  dragSourceOperationMaskFor: function(drag, dropTarget) { return SC.DRAG_LINK ; },
+  
+  dragDataTypes: ['SC.Binding'],
+
+  dragDataForType: function(drag, dataType) { 
+    return dataType === 'SC.Binding' ? this.get('view') : null; 
   },
   
   /**
