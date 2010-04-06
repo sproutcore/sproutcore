@@ -16,7 +16,7 @@
   may also want to implement init, didAttachLayer, and willDetachLayer if you are using
   sub-renderers.
 */
-SC.Renderer = SC.Renderer = {
+SC.Renderer = {
   
   //
   // FUNCTIONS SUBCLASSES SHOULD/MAY IMPLEMENT
