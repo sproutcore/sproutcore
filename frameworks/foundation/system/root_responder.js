@@ -926,7 +926,7 @@ SC.RootResponder = SC.Object.extend({
     }
     // work up the chain until we get the root
     while (view && (view !== startingPoint)) {
-      chain.push(view);
+      chain.unshift(view);
       view = view.get('nextResponder');
     }
 

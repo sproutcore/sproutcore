@@ -869,14 +869,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         horizontalScrollOffset = this._scroll_horizontalScrollOffset || 0;
     
     if (this.touch && this.touch.timeout) {
-      // first, finish up the hack to boost deceleration
-      SC.RunLoop.begin();
-      this.set("scale", this._scale);
-      this.set("verticalScrollOffset", verticalScrollOffset);
-      this.set("horizontalScrollOffset", horizontalScrollOffset);
-      SC.RunLoop.end();
-      
-      // now clear the timeout
+      // clear the timeout
       clearTimeout(this.touch.timeout);
       this.touch.timeout = null;
     }
@@ -1587,7 +1580,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
   },
 
-  _verticalScrollOffset: 0,
-  _horizontalScrollOffset: 0
+  _scroll_verticalScrollOffset: 0,
+  _scroll_horizontalScrollOffset: 0
   
 });
