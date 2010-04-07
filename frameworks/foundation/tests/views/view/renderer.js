@@ -234,3 +234,76 @@ test("calling createLayer and updateLayer on renderFirst views render and update
   // title should now be from render
   equals(view.$().attr("title"), "renderOverride", "title should now be");
 });
+
+test("rendering and updating a view with various kinds of non-renderer children works, without updating children.", function() {
+  /* 
+  We test 4 kinds of children:
+  plain
+  render function that pushes to context on firstTime
+  render function that pushes to context no matter what
+  render function that pushes on firstTime and updates otherwise.
+  
+  Note: We are, in fact, testing that updates do NOT happen.
+  */
+  var childViewsView = SC.View.extend({
+    childViews: "child1 child2 child3 child4".w(),
+    child1: SC.View.extend({
+      classNames: "test test-1".w()
+    }),
+    child2: SC.View.extend({
+      classNames: "test test-2".w(),
+      render: function(context, firstTime) {
+        // this one will render a-special, but only on firstTime
+        if (firstTime) {
+          context.push("<a class='test-2-content'>content</a>");
+        }
+      }
+    }),
+    child3: SC.View.extend({
+      classNames: "test test-3".w(),
+      render: function(context, firstTime) {
+        // this one will always render fully.
+        if (firstTime) context.push("<a class='test-3-content'>content</a>");
+        else context.push("<a class='test-3-content'>content-updated</a>")
+      }
+    }),
+    
+    child4: SC.View.extend({
+      classNames: "test test-4".w(),
+      render: function(context, firstTime) {
+        if (firstTime) {
+          context.push("<a class='test-4-content'>content</a>");
+        } else {
+          console.error("update child 4");
+          this.$(".test-4-content").text("content-updated");
+        }
+      }
+    })
+  });
+  
+  var view = childViewsView.create();
+  view.createLayer();
+  
+  // check if rendering happened
+  equals(view.$(".test").length, 4, "number of child views rendered should be");
+  
+  // now, check if the children themselves can access their layer
+  ok(view.child1.$().hasClass("test-1"), "child view gets its layer and has class name");
+  equals(view.child2.$(".test-2-content").text(), "content", "child view 2 has content");
+  equals(view.child3.$(".test-3-content").text(), "content", "child view 3 has content");
+  equals(view.child4.$(".test-4-content").text(), "content", "child view 4 has content");
+  
+  // now, update and try again
+  view.updateLayer();
+  
+  // make sure we're still fine
+  equals(view.$(".test").length, 4, "number of child views after updating should be");
+  
+  // now, check if the children themselves can access their layer
+  // and note: they should NOT have updated (they get to do that themselves)
+  ok(view.child1.$().hasClass("test-1"), "after updating child view gets its layer and has class name");
+  equals(view.child2.$(".test-2-content").text(), "content", "child view 2 has content");
+  equals(view.child3.$(".test-3-content").text(), "content", "child view 3 has NON-updated content");
+  equals(view.child4.$(".test-4-content").text(), "content", "child view 4 has NOT updated content");
+});
+
