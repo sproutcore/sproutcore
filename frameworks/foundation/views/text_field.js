@@ -604,9 +604,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     document to see the event, we'll manually forward the event along.
   */
   _firefox_dispatch_keypress: function(evt) {
-    var input = this.$input();
-    var responder = SC.RootResponder.responder;
-    responder.keypress.call(responder, evt);
+    var selection = this.get('selection'),
+        value     = this.get('value'),
+        valueLen  = value ? value.length : 0,
+        responder;
+    
+    if (!selection  ||  (selection.get('length') === 0  &&  (selection.get('start') === 0  ||  selection.get('end') === valueLen))) {
+      responder = SC.RootResponder.responder;
+      responder.keypress.call(responder, evt);
+      evt.stopPropagation();
+    }
   },
   
   
