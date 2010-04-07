@@ -5,13 +5,14 @@
 // ==========================================================================
 
 /*global module test equals context ok same */
-var testRenderer, rendererView, renderView, expected_theme;
+var testRenderer, rendererView, renderView, replacingRenderView, renderSkipUpdateView, expected_theme;
 
 module("SC.View#renderer", {
   setup: function() {
     testRenderer = SC.Renderer.extend({
       render: function(context) {
         this.didRender = YES;
+        context.attr("alt", "test");
         context.push("<a class='test'>Hello</a>");
       },
       update: function() {
@@ -51,6 +52,25 @@ module("SC.View#renderer", {
         } else {
           context.attr("title", "test");
           this.$(".test").text("Hi");
+        }
+      }
+    });
+    
+    renderSkipUpdateView = SC.View.extend({
+      render: function(context, firstTime) {
+        if (firstTime) {
+          context.push("<a class='test'>Hello</a>");
+        }
+      }
+    });
+    
+    replacingRenderView = SC.View.extend({
+      render: function(context, firstTime) {
+        if (firstTime) {
+          context.push("<a class='test'>Hello</a>");
+        } else {
+          context.push("<a class='test'>Hi</a>");
+          context.attr("title", "test");
         }
       }
     });
@@ -142,4 +162,75 @@ test("calling createLayer and updateLayer on render-only views render and update
   ok(view.$(".test").length > 0, "Test element is still present");
   equals(view.$(".test").text(), "Hi", "Test element text has changed to ");
   equals(view.$().attr("title"), "test", "Test element has a title of ");
+});
+
+test("calling createLayer and updateLayer on render-only views that replace content render and update properly.", function() {
+  var view = replacingRenderView.create();
+  view.createLayer();
+  ok(view.$(".test").length > 0, "Created test element");
+  equals(view.$(".test").text(), "Hello", "Test element text is");
+  
+  view.updateLayer();
+  ok(view.$(".test").length > 0, "Test element is still present");
+  equals(view.$(".test").text(), "Hi", "Test element text has changed to ");
+  equals(view.$().attr("title"), "test", "Test element has a title of ");
+});
+
+test("calling createLayer and updateLayer on render-only views that ONLY do anything on firstTime works.", function() {
+  var view = renderSkipUpdateView.create();
+  view.createLayer();
+  ok(view.$(".test").length > 0, "Created test element");
+  equals(view.$(".test").text(), "Hello", "Test element text is");
+  
+  var oldHTML = view.get("layer").innerHTML;
+  view.updateLayer();
+  equals(view.get("layer").innerHTML, oldHTML, "HTML is still");
+});
+
+test("calling createLayer and displayDidChange on render-only views that ONLY do anything on firstTime works.", function() {
+  var view = renderSkipUpdateView.create();
+  view.createLayer();
+  ok(view.$(".test").length > 0, "Created test element");
+  equals(view.$(".test").text(), "Hello", "Test element text is");
+  
+  var oldHTML = view.get("layer").innerHTML;
+  view.displayDidChange();
+  equals(view.get("layer").innerHTML, oldHTML, "HTML is still");
+});
+
+test("calling createLayer and updateLayer on renderFirst views render and update properly.", function() {
+  var renderFirstView = rendererView.extend({
+    render: function(context, firstTime){
+      context.attr("alt", "fromRender"); // will get overriden by renderer...
+      sc_super();
+      if (firstTime) {
+        context.push("<a class='render'>original</a>");
+      } else {
+        context.attr("title", "renderOverride");
+        this.$(".render").text("new");
+      }
+    }
+  });
+  
+  var view = renderFirstView.create();
+  view.createLayer();
+  
+  // check that the properties are all fine
+  ok(view.$(".render").length > 0, "Render created its element");
+  ok(view.$(".test").length > 0, "Renderer created its element");
+  equals(view.$(".render").text(), "original", "Render set text to");
+  
+  // we should have "alt" from renderer: test
+  equals(view.$().attr("alt"), "test", "alt should have been overridden by renderer");
+  
+  // update
+  view.updateLayer();
+  
+  // and check again
+  ok(view.$(".render").length > 0, "Render created its element");
+  ok(view.$(".test").length > 0, "Renderer created its element");
+  equals(view.$(".render").text(), "new", "Render changed its text to");
+  
+  // title should now be from render
+  equals(view.$().attr("title"), "renderOverride", "title should now be");
 });
