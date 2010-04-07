@@ -36,8 +36,9 @@ config :media,      :required => [:desktop]
 
 # APP-LEVEL FRAMEWORKS
 %w(mobile designer).each do |app_framework|
-  config app_framework, :required => [:runtime, :datastore, :foundation],
-		:test_required => ["sproutcore/testing", :empty_theme]
+  config app_framework, 
+    :required => [:runtime, :datastore, :foundation],
+    :test_required => ["sproutcore/testing", "sproutcore/empty_theme"]
 end
 
 config :mobile, 
