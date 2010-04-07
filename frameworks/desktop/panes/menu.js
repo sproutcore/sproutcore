@@ -1110,3 +1110,8 @@ SC.MenuPane.HUGE_MENU_ITEM_HEIGHT = 20;
 SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT = 9;
 SC.MenuPane.HUGE_MENU_HEIGHT_PADDING = 0;
 SC.MenuPane.HUGE_SUBMENU_OFFSET_X = 0;
+
+// If a menu pane exceeds the height of the viewport, it will
+// be truncated to fit. This value determines the amount by which
+// the menu will be offset from the top and bottom of the viewport.
+SC.MenuPane.VERTICAL_OFFSET = 23;
