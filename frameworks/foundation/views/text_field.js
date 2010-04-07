@@ -669,11 +669,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // responder chain.
     // If the event is triggered by a return while entering IME input,
     // don't got through this path.
-    if ((evt.which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) return NO ;
-    if (evt.which === 27) return NO ;
+    var which = evt.which;
+    if ((which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) return NO ;
+    if (which === 27) return NO ;
 
     // handle tab key
-    if (evt.which === 9) {
+    if (which === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if(view) view.becomeFirstResponder();
       else evt.allowDefault();
