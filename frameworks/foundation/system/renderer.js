@@ -241,8 +241,10 @@ SC.Renderer = SC.Renderer = {
       getLayer: this._layerFinder,
       selector: sel
     };
-  }
+  },
  
   // other methods
- 
+  toString: function() {
+    return "SC.Renderer#" + SC.guidFor(this);
+  }
 };
