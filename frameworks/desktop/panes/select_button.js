@@ -680,7 +680,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     if (menu) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
 
-      if (targetMenuItem) {
+      if (targetMenuItem && menu.get('mouseHasEntered')) {
         // Have the menu item perform its action.
         // If the menu returns NO, it had no action to
         // perform, so we should close the menu immediately.
