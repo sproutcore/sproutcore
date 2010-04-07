@@ -324,20 +324,37 @@ SC.NestedStore = SC.Store.extend(
     much. 
   */
   writeDataHash: function(storeKey, hash, status) {
-    var locks = this.locks, rev ;
+    var locks = this.locks, didLock = NO, rev ;
+
+    // Update our dataHash and/or status, depending on what was passed in.
+    // Note that if no new hash was passed in, we'll lock the storeKey to
+    // properly fork our dataHash from our parent store.  Similarly, if no
+    // status was passed in, we'll save our own copy of the value.
+    if (hash) {
+      this.dataHashes[storeKey] = hash;
+    }
+    else {
+      this._lock(storeKey);
+      didLock = YES;
+    }
+
+    if (status) {
+      this.statuses[storeKey] = status;
+    }
+    else {
+      if (!didLock) this.statuses[storeKey] = (this.statuses[storeKey] || SC.Record.READY_NEW);
+    }
+
+    if (!didLock) {
+      rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
     
-    // update dataHashes and optionally status.  Note that if status is not
-    // passed, we want to copy the reference to the status anyway to lock it
-    // in.
-    if (hash) this.dataHashes[storeKey] = hash;
-    this.statuses[storeKey] = status ? status : (this.statuses[storeKey] || SC.Record.READY_NEW);
-    rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
+      // make sure we lock if needed.
+      if (!locks) locks = this.locks = [];
+      if (!locks[storeKey]) locks[storeKey] = rev || 1;
+    }
     
-    // make sure we lock if needed.
-    if (!locks) locks = this.locks = [];
-    if (!locks[storeKey]) locks[storeKey] = rev || 1;
-    
-    // also note that this hash is now editable
+    // Also note that this hash is now editable.  (Even if we locked it,
+    // above, it may not have been marked as editable.)
     var editables = this.editables;
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
