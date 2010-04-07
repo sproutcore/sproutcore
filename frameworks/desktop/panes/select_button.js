@@ -221,11 +221,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
   SELECT_BUTTON_SPRITE_WIDTH: 28,
 
   /**
-    Binds the button's selection state to the menu's visibility.
-
-    @private
+    Binds the select button's active state to the visibility of its menu.
   */
-  isSelectedBinding: '*menu.isVisibleInWindow',
+  isActiveBinding: '*menu.isVisibleInWindow',
 
   /**
     If this property is set to 'YES', the menu pane will be positioned
@@ -576,7 +574,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
     if (!menu) return NO ;
     menu.popup(this, this.preferMatrix) ;
     this.set('menu', menu);
-    menu.set('currentMenuItem', menu.menuItemViewForContentIndex(this.get('itemIdx'))) ;
+
+    customView = menu.menuItemViewForContentIndex(this.get('itemIdx'));
+    menu.set('currentMenuItem', customView) ;
+    customView.becomeFirstResponder();
+
+    this.set('isActive', YES);
     return YES ;
   },
 
@@ -649,9 +652,60 @@ SC.SelectButtonView = SC.ButtonView.extend(
     if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
+    this._mouseDownTimestamp = evt.timeStamp;
     this.becomeFirstResponder() ;
     this._action() ;
     return YES ;
+  },
+
+  /** @private
+    Because we responded YES to the mouseDown event, we have responsibility
+    for handling the corresponding mouseUp event.
+
+    However, the user may click on this button, then drag the mouse down to a
+    menu item, and release the mouse over the menu item. We therefore need to
+    delegate any mouseUp events to the menu's menu item, if one is selected.
+
+    We also need to differentiate between a single click and a click and hold.
+    If the user clicks and holds, we want to close the menu when they release.
+    Otherwise, we should wait until they click on the menu's modal pane before
+    removing our active state.
+
+    @param {SC.Event} evt
+    @returns {Boolean}
+  */
+  mouseUp: function(evt) {
+    var menu = this.get('menu'), targetMenuItem, success;
+
+    if (menu) {
+      targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
+
+      if (targetMenuItem) {
+        // Have the menu item perform its action.
+        // If the menu returns NO, it had no action to
+        // perform, so we should close the menu immediately.
+        if (!targetMenuItem.performAction()) menu.remove();
+      } else {
+        // If the user waits more than 200ms between mouseDown and mouseUp,
+        // we can assume that they are clicking and dragging to the menu item,
+        // and we should close the menu if they mouseup anywhere not inside
+        // the menu.
+        if (evt.timeStamp - this._mouseDownTimestamp > 400) {
+          menu.remove();
+        }
+      }
+    }
+
+    // Reset state.
+    this._isMouseDown = NO;
+    return YES;
+  },
+
+  /**
+    Override mouseExited to not remove the active state on mouseexit.
+  */
+  mouseExited: function() {
+    return YES;
   },
 
   /**
