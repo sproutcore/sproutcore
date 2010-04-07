@@ -5,12 +5,14 @@
 // ==========================================================================
 
 /*global module test equals context ok same */
-var testRenderer, rendererView, renderView, replacingRenderView, renderSkipUpdateView, expected_theme;
+var testRenderer, rendererView, renderView, replacingRenderView, renderSkipUpdateView, expected_theme, viewSettingsWithChildren;
 
 module("SC.View#renderer", {
   setup: function() {
     testRenderer = SC.Renderer.extend({
       render: function(context) {
+        if (this.contentProvider) this.contentProvider.renderContent(context);
+        
         this.didRender = YES;
         context.attr("alt", "test");
         context.push("<a class='test'>Hello</a>");
@@ -74,6 +76,46 @@ module("SC.View#renderer", {
         }
       }
     });
+    
+    viewSettingsWithChildren = {
+      childViews: "child1 child2 child3 child4".w(),
+      child1: SC.View.extend({
+        classNames: "test-child test-1".w()
+      }),
+      child2: SC.View.extend({
+        classNames: "test-child test-2".w(),
+        render: function(context, firstTime) {
+          // this one will render a-special, but only on firstTime
+          if (firstTime) {
+            context.push("<a class='test-2-content'>content</a>");
+          }
+        }
+      }),
+      child3: SC.View.extend({
+        classNames: "test-child test-3".w(),
+        render: function(context, firstTime) {
+          this.didReceiveRender = YES;
+          this.didReceiveRenderFirstTime = firstTime;
+          
+          // this one will always render fully.
+          if (firstTime) context.push("<a class='test-3-content'>content</a>");
+          else context.push("<a class='test-3-content'>content-updated</a>")
+        }
+      }),
+
+      child4: SC.View.extend({
+        classNames: "test-child test-4".w(),
+        render: function(context, firstTime) {
+          this.didReceiveRender = YES;
+          this.didReceiveRenderFirstTime = firstTime;
+          if (firstTime) {
+            context.push("<a class='test-4-content'>content</a>");
+          } else {
+            this.$(".test-4-content").text("content-updated");
+          }
+        }
+      })
+    };
   },
   
   teardown: function() {
@@ -245,47 +287,13 @@ test("rendering and updating a view with various kinds of non-renderer children 
   
   Note: We are, in fact, testing that updates do NOT happen.
   */
-  var childViewsView = SC.View.extend({
-    childViews: "child1 child2 child3 child4".w(),
-    child1: SC.View.extend({
-      classNames: "test test-1".w()
-    }),
-    child2: SC.View.extend({
-      classNames: "test test-2".w(),
-      render: function(context, firstTime) {
-        // this one will render a-special, but only on firstTime
-        if (firstTime) {
-          context.push("<a class='test-2-content'>content</a>");
-        }
-      }
-    }),
-    child3: SC.View.extend({
-      classNames: "test test-3".w(),
-      render: function(context, firstTime) {
-        // this one will always render fully.
-        if (firstTime) context.push("<a class='test-3-content'>content</a>");
-        else context.push("<a class='test-3-content'>content-updated</a>")
-      }
-    }),
-    
-    child4: SC.View.extend({
-      classNames: "test test-4".w(),
-      render: function(context, firstTime) {
-        if (firstTime) {
-          context.push("<a class='test-4-content'>content</a>");
-        } else {
-          console.error("update child 4");
-          this.$(".test-4-content").text("content-updated");
-        }
-      }
-    })
-  });
+  var childViewsView = SC.View.extend(viewSettingsWithChildren);
   
   var view = childViewsView.create();
   view.createLayer();
   
   // check if rendering happened
-  equals(view.$(".test").length, 4, "number of child views rendered should be");
+  equals(view.$(".test-child").length, 4, "number of child views rendered should be");
   
   // now, check if the children themselves can access their layer
   ok(view.child1.$().hasClass("test-1"), "child view gets its layer and has class name");
@@ -297,7 +305,7 @@ test("rendering and updating a view with various kinds of non-renderer children 
   view.updateLayer();
   
   // make sure we're still fine
-  equals(view.$(".test").length, 4, "number of child views after updating should be");
+  equals(view.$(".test-child").length, 4, "number of child views after updating should be");
   
   // now, check if the children themselves can access their layer
   // and note: they should NOT have updated (they get to do that themselves)
@@ -305,5 +313,115 @@ test("rendering and updating a view with various kinds of non-renderer children 
   equals(view.child2.$(".test-2-content").text(), "content", "child view 2 has content");
   equals(view.child3.$(".test-3-content").text(), "content", "child view 3 has NON-updated content");
   equals(view.child4.$(".test-4-content").text(), "content", "child view 4 has NOT updated content");
+});
+
+test("rendering and updating a view with a renderer-based parent.", function() {
+  /* 
+  We test 4 kinds of children:
+  plain
+  render function that pushes to context on firstTime
+  render function that pushes to context no matter what
+  render function that pushes on firstTime and updates otherwise.
+  
+  Note: We are, in fact, testing that updates do NOT happen.
+  */
+  var childViewsView = rendererView.extend(viewSettingsWithChildren);
+
+  var view = childViewsView.create();
+  view.createLayer();
+  
+  // check if rendering happened
+  equals(view.$(".test-child").length, 4, "number of child views rendered should be");
+  
+  // now, check if the children themselves can access their layer
+  ok(view.child1.$().hasClass("test-1"), "child view gets its layer and has class name");
+  equals(view.child2.$(".test-2-content").text(), "content", "child view 2 has content");
+  equals(view.child3.$(".test-3-content").text(), "content", "child view 3 has content");
+  equals(view.child4.$(".test-4-content").text(), "content", "child view 4 has content");
+  
+  // now, update and try again
+  view.updateLayer();
+  
+  // make sure we're still fine
+  equals(view.$(".test-child").length, 4, "number of child views after updating should be");
+  
+  // now, check if the children themselves can access their layer
+  // and note: they should NOT have updated (they get to do that themselves)
+  ok(view.child1.$().hasClass("test-1"), "after updating child view gets its layer and has class name");
+  equals(view.child2.$(".test-2-content").text(), "content", "child view 2 has content");
+  equals(view.child3.$(".test-3-content").text(), "content", "child view 3 has NON-updated content");
+  equals(view.child4.$(".test-4-content").text(), "content", "child view 4 has NOT updated content");
+});
+
+test("test that updateContents using a context works properly.", function() {
+  var childViewsView = SC.View.extend(viewSettingsWithChildren);
+
+  var view = childViewsView.create();
+  view.createLayer();
+  
+  // now, update contents
+  var context = SC.RenderContext(view.get("layer"));
+  
+  // reset settings that we'll check again
+  view.child3.didReceiveRender = NO;
+  view.child3.didReceiveRenderFirstTime = null;
+  view.child4.didReceiveRender = NO;
+  view.child4.didReceiveRenderFirstTime = null;
+  
+  // update
+  view.renderChildViews(context, YES);
+  context.update();
+  
+  // make sure we're still fine
+  equals(view.$(".test-child").length, 4, "number of child views after updating should be");
+  
+  // ensure render was called on 3 and 4 (the trickiest of the bunch)
+  ok(view.child3.didReceiveRender, "Child 3 was rendered.");
+  ok(view.child4.didReceiveRender, "Child 4 was rendered.");
+  ok(view.child3.didReceiveRenderFirstTime, "Child 3 should be first time.");
+  ok(view.child4.didReceiveRenderFirstTime, "Child 4 should be first time.");
+  
+  // now, check if the children themselves can access their layer
+  // and note: they should NOT have updated--we rendered firstTime (any other way will fail)
+  ok(view.child1.$().hasClass("test-1"), "after updating child view gets its layer and has class name");
+  equals(view.child2.$(".test-2-content").text(), "content", "child view 2 has content");
+  equals(view.child3.$(".test-3-content").text(), "content", "child view 3 should not have updated content");
+  equals(view.child4.$(".test-4-content").text(), "content", "child view 4 should not have updated content");
+});
+
+test("test that updateContents with a context but without firstTime works properly--updating children..", function() {
+  var childViewsView = SC.View.extend(viewSettingsWithChildren);
+
+  var view = childViewsView.create();
+  view.createLayer();
+  
+  // now, update contents
+  var context = SC.RenderContext(view.get("layer"));
+  
+  // reset settings that we'll check again
+  view.child3.didReceiveRender = NO;
+  view.child3.didReceiveRenderFirstTime = null;
+  view.child4.didReceiveRender = NO;
+  view.child4.didReceiveRenderFirstTime = null;
+  
+  // update
+  view.renderChildViews(context, NO);
+  context.update();
+  
+  // make sure we're still fine
+  equals(view.$(".test-child").length, 4, "number of child views after updating should be");
+  
+  // ensure render was called on 3 and 4 (the trickiest of the bunch)
+  ok(view.child3.didReceiveRender, "Child 3 was rendered.");
+  ok(view.child4.didReceiveRender, "Child 4 was rendered.");
+  ok(!view.child3.didReceiveRenderFirstTime, "Child 3 should not be first time.");
+  ok(!view.child4.didReceiveRenderFirstTime, "Child 4 should not be first time.");
+  
+  // now, check if the children themselves can access their layer
+  // and note: they should NOT have updated--we rendered firstTime (any other way will fail)
+  ok(view.child1.$().hasClass("test-1"), "after updating child view gets its layer and has class name");
+  equals(view.child2.$(".test-2-content").length, 0, "child view 2 should NOT have content (only renders on firstTime)");
+  equals(view.child3.$(".test-3-content").text(), "content-updated", "child view 3 should have updated content");
+  equals(view.child4.$(".test-4-content").text(), "content-updated", "child view 4 should have updated content");
 });
 

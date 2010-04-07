@@ -1118,11 +1118,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.set('layer', null) ;
   },
   
+  
+  isLayerProvider: YES,
   /**
     @private (semi)
     Returns the layer. Meant only for use from renderers and such—this is a layer provider function.
   */
-  isLayerProvider: YES,
   getLayer: function() {
     return this.get("layer");
   },
@@ -1140,8 +1141,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Note: You should not generally override nor directly call this method. This method is only
     called by createLayer to set up the layer initially, and by renderChildViews, to write to
     a context.
+    
+    @param {SC.RenderContext} context the render context.
+    @param {Boolean} firstTime Provided for compatibility when rendering legacy views only.
   */
-  renderToContext: function(context) {
+  renderToContext: function(context, firstTime) {
     var mixins, idx, len;
     
     this.beginPropertyChanges() ;
@@ -1181,10 +1185,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!this._useRenderFirst && this.createRenderer) {
       if (this.renderer) this.renderer.render(context);
     } else {
-      this.render(context, YES);
+      if (SC.none(firstTime)) firstTime = YES;
+      
+      this.render(context, firstTime);
       if (mixins = this.renderMixin) {
         len = mixins.length;
-        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, YES) ;
+        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
       }
     }
     
@@ -1300,14 +1306,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     walk down the childView chain, rendering all of the children in a nested
     way.
     
+    If a context is provided, it is always assumed to be firstTime.
+    
+    @deprecated In SproutCore 1.1. Use renderContent and updateContent explicitly instead.
     @param {SC.RenderContext} context the context
     @param {Boolean} firstName true if the layer is being created
     @returns {SC.RenderContext} the render context
-    @test in render
+    @test in render and renderer
   */
   renderChildViews: function(context, firstTime) {
-    if (firstTime) {
-      this.renderContent(context);
+    if (firstTime || context) {
+      // we pass along firstTime for compatibility. Some older (less wise) views may
+      // think it will work. Well, it wouldn't, but we'll make it work.
+      this.renderContent(context, firstTime);
     } else {
       this.updateContent(context);
     }
@@ -1319,14 +1330,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Views are content suppliers for renderers. That is, views pass themselves to renderers
     for renderers' "content" properties. Content providers have two functions: renderContent and updateContent.
     This is the first of those.
+    
+    @param {SC.RenderContext} context
+    @param {Boolean} firstTime For compatibility (do not use; if not first time, call updateContent).
   */
-  renderContent: function(context) {
+  renderContent: function(context, firstTime) {
     var cv = this.get('childViews'), len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
       if (!view) continue;
       context = context.begin(view.get('tagName')) ;
-      view.renderToContext(context);
+      view.renderToContext(context, firstTime);
       context = context.end() ;
     }
   },
@@ -1345,6 +1359,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
       if (!view) continue;
+      
       view.updateLayer(optionalContext);
     }
   },

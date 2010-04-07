@@ -27,7 +27,7 @@ SC.EmptyTheme.renderers.Panel = SC.Renderer.extend({
   },
   
   update: function() {
-    if (this.contentProvider) this.contentProvider.updateContent();
+    // we NEVER update child views. They get to do that on their own.
   }
 });
 
