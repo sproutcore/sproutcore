@@ -16,11 +16,11 @@ test("returns the receiver", function() {
   equals(v.createLayer(), v, 'returns receiver');
 });
 
-test("calls prepareContext() and sets layer to resulting element", function() {
+test("calls renderToContext() and sets layer to resulting element", function() {
   var v= SC.View.create({
     tagName: 'span',
     
-    prepareContext: function(context, firstTime) {
+    renderToContext: function(context, firstTime) {
       context.push("foo");
     }
   });

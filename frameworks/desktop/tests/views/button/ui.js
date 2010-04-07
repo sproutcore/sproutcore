@@ -13,45 +13,38 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
 var pane = SC.ControlTestPane.design({height:24})
   .add("basic", SC.ButtonView, {
-    controlSize: SC.CALCULATED_CONTROL_SIZE
   })
   
   .add("title", SC.ButtonView, { 
-     title: "Hello World",
-     controlSize: SC.CALCULATED_CONTROL_SIZE
+     title: "Hello World"
   })
    
   .add("icon", SC.ButtonView, { 
-    icon: iconURL,
-    controlSize: SC.CALCULATED_CONTROL_SIZE
+    icon: iconURL
   })
     
   .add("title,icon", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL,
-    controlSize: SC.CALCULATED_CONTROL_SIZE
+    title: "Hello World", icon: iconURL
   })
      
   .add("title,icon,disabled", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL , isEnabled: NO,
-    controlSize: SC.CALCULATED_CONTROL_SIZE
+    title: "Hello World", icon: iconURL , isEnabled: NO
   })
   
   .add("title,icon,default", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL , isDefault: YES,
-    controlSize: SC.CALCULATED_CONTROL_SIZE
+    title: "Hello World", icon: iconURL , isDefault: YES
   })
 
   .add("title,icon,selected", SC.ButtonView, { 
-    title: "Hello World", icon: iconURL , isSelected: YES,
-    controlSize: SC.CALCULATED_CONTROL_SIZE
+    title: "Hello World", icon: iconURL , isSelected: YES
   })
 
   .add("title,toolTip", SC.ButtonView, { 
-    title: "Hello World", toolTip: 'Hello World is my tool tip',
-    controlSize: SC.CALCULATED_CONTROL_SIZE // to prevent warning
+    title: "Hello World", toolTip: 'Hello World is my tool tip'
   })
   
   .add("autocontrolsize", SC.ButtonView, { 
+    controlSize: SC.AUTO_CONTROL_SIZE,
     title: "Hello Cheese", layout: { left: 0, top: 0, right: 0, height: 37 }
   })
   
