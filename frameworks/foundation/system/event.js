@@ -713,6 +713,21 @@ SC.Event.prototype = {
   hasCustomEventHandling: NO,
   
   /**
+    Returns the touches owned by the supplied view.
+  */
+  touchesForView: function(view) {
+    if (this.touchContext) return this.touchContext.touchesForView(view);
+  },
+  
+  /**
+    Returns average data--x, y, and d (distance)--for the touches owned by the supplied view.
+  */
+  averagedTouchesForView: function(view) {
+    if (this.touchContext) return this.touchContext.averagedTouchesForView(view);
+    return null;
+  },
+  
+  /**
     Indicates that you want to allow the normal default behavior.  Sets
     the hasCustomEventHandling property to YES but does not cancel the event.
     

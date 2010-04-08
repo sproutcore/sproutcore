@@ -24,7 +24,7 @@ sc_require('mixins/border');
   @since SproutCore 1.0
 */
 SC.ScrollView = SC.View.extend(SC.Border, {
-
+  /** @scope SC.ScrollView.prototype */
   classNames: ['sc-scroll-view'],
   
   // ..........................................................
@@ -37,13 +37,25 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     The content view you want the scroll view to manage. This will be assigned to the contentView of the clipView also.
   */
   contentView: null,
+  
+  /**
+    The horizontal alignment for non-filling content inside of the ScrollView.
+  */
+  horizontalAlign: SC.ALIGN_LEFT,
+  
+  /**
+    The vertical alignment for non-filling content inside of the ScrollView.
+  */
+  verticalAlign: SC.ALIGN_TOP,
 
   /**
     The current horizontal scroll offset. Changing this value will update both the contentView and the horizontal scroller, if there is one.
   */
   horizontalScrollOffset: function(key, value) {
     if (value !== undefined) {
-      this._scroll_horizontalScrollOffset = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), value)) ;
+      var minOffset = this.minimumHorizontalScrollOffset(),
+          maxOffset = this.get('maximumHorizontalScrollOffset');
+      this._scroll_horizontalScrollOffset = Math.max(minOffset,Math.min(maxOffset, value)) ;
     }
 
     return this._scroll_horizontalScrollOffset||0;
@@ -54,12 +66,63 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   verticalScrollOffset: function(key, value) {
     if (value !== undefined) {
-      this._scroll_verticalScrollOffset = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), value)) ;
+      var minOffset = this.get('minimumVerticalScrollOffset'),
+          maxOffset = this.get('maximumVerticalScrollOffset');
+      this._scroll_verticalScrollOffset = Math.max(minOffset,Math.min(maxOffset, value)) ;
     }
 
     return this._scroll_verticalScrollOffset||0;
   }.property().cacheable(),
-
+  
+  /**
+    @private
+    Calculates the maximum offset given content and container sizes, and the
+    alignment.
+  */
+  maximumScrollOffset: function(contentSize, containerSize, align) {
+    // if our content size is larger than or the same size as the container, it's quite
+    // simple to calculate the answer. Otherwise, we need to do some fancy-pants
+    // alignment logic (read: simple math)
+    if (contentSize >= containerSize) return contentSize - containerSize;
+    
+    // alignment, yeah
+    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
+      // if we left-align something, and it is smaller than the view, does that not mean
+      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
+      return 0;
+    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
+      // middle align means the difference divided by two, because we want equal parts on each side.
+      return 0 - Math.round((containerSize - contentSize) / 2);
+    } else {
+      // right align means the entire difference, because we want all that space on the left
+      return 0 - (containerSize - contentSize);
+    }
+  },
+  
+  /**
+    @private
+    Calculates the minimum offset given content and container sizes, and the
+    alignment.
+  */
+  minimumScrollOffset: function(contentSize, containerSize, align) {
+    // if the content is larger than the container, we have no need to change the minimum
+    // away from the natural 0 position.
+    if (contentSize > containerSize) return 0;
+    
+    // alignment, yeah
+    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
+      // if we left-align something, and it is smaller than the view, does that not mean
+      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
+      return 0;
+    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
+      // middle align means the difference divided by two, because we want equal parts on each side.
+      return 0 - Math.round((containerSize - contentSize) / 2);
+    } else {
+      // right align means the entire difference, because we want all that space on the left
+      return 0 - (containerSize - contentSize);
+    }
+  },
+  
   /**
     The maximum horizontal scroll offset allowed given the current contentView 
     size and the size of the scroll view.  If horizontal scrolling is 
@@ -68,7 +131,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     @property {Number}
   */
   maximumHorizontalScrollOffset: function() {
-    if (!this.get('canScrollHorizontal')) return 0 ;
     var view = this.get('contentView') ;
     var contentWidth = view ? view.get('frame').width : 0 ;
     
@@ -77,19 +139,24 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if(view.calculatedWidth && view.calculatedWidth!==0){
       contentWidth = view.calculatedWidth; 
     }
+    contentWidth *= this._scale;
+    
     var containerWidth = this.get('containerView').get('frame').width ;
-    return Math.max(0, contentWidth-containerWidth) ;
+    
+    // we still must go through minimumScrollOffset even if we can't scroll
+    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
+    if (!this.get('canScrollHorizontal')) contentWidth = Math.min(contentWidth, containerWidth);
+    return this.maximumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
   }.property(),
   
   /**
     The maximum vertical scroll offset allowed given the current contentView 
     size and the size of the scroll view.  If vertical scrolling is disabled,
-    this will always return 0.
+    this will always return 0 (or whatever alignment dictates).
     
     @property {Number}
   */
   maximumVerticalScrollOffset: function() {
-    if (!this.get('canScrollVertical')) return 0 ;
     var view = this.get('contentView') ;
     var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0 ;
     
@@ -98,9 +165,70 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if(view.calculatedHeight && view.calculatedHeight!==0){
       contentHeight = view.calculatedHeight; 
     }
+    contentHeight *= this._scale;
+    
     var containerHeight = this.get('containerView').get('frame').height ;
-    return Math.max(0, contentHeight-containerHeight) ;
+    
+    // we still must go through minimumScrollOffset even if we can't scroll
+    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
+    if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
+    return this.maximumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
   }.property(),
+  
+  
+  /**
+    The minimum horizontal scroll offset allowed given the current contentView 
+    size and the size of the scroll view.  If horizontal scrolling is 
+    disabled, this will always return 0 (or whatever alignment dictates).
+    
+    @property {Number}
+  */
+  minimumHorizontalScrollOffset: function() {
+    var view = this.get('contentView') ;
+    var contentWidth = view ? view.get('frame').width : 0 ;
+    
+    // The following code checks if there is a calculatedWidth (collections)
+    // to avoid looking at the incorrect value calculated by frame.
+    if(view.calculatedWidth && view.calculatedWidth!==0){
+      contentWidth = view.calculatedWidth; 
+    }
+    contentWidth *= this._scale;
+    
+    var containerWidth = this.get('containerView').get('frame').width ;
+    
+    // we still must go through minimumScrollOffset even if we can't scroll
+    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
+    if (!this.get('canScrollHorizontal')) contentWidth = Math.min(contentWidth, containerWidth);
+    return this.minimumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
+  }.property(),
+  
+  /**
+    The minimum vertical scroll offset allowed given the current contentView 
+    size and the size of the scroll view.  If vertical scrolling is disabled,
+    this will always return 0 (or whatever alignment dictates).
+    
+    @property {Number}
+  */
+  minimumVerticalScrollOffset: function() {
+    var view = this.get('contentView') ;
+    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0 ;
+    
+    // The following code checks if there is a calculatedWidth (collections)
+    // to avoid looking at the incorrect value calculated by frame.
+    if(view.calculatedHeight && view.calculatedHeight!==0){
+      contentHeight = view.calculatedHeight; 
+    }
+    contentHeight *= this._scale;
+    
+    var containerHeight = this.get('containerView').get('frame').height ;
+    
+    // we still must go through minimumScrollOffset even if we can't scroll
+    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
+    if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
+    return this.minimumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
+  }.property(),
+  
+  
   
   /** 
     Amount to scroll one vertical line.
@@ -300,9 +428,24 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     The container view that will contain your main content view.  You can 
     replace this property with your own custom subclass if you prefer.
     
+    The default is a ContainerView which has a contentClippingFrame that will
+    be normal on desktop, but will show three screenfulls on touch devices (making
+    scrolling a bit nicer).
+    
     @type {SC.ContainerView}
   */
-  containerView: SC.ContainerView,
+  containerView: SC.ContainerView.extend({
+    contentClippingFrame: function() {
+      var f = SC.clone(this.get("clippingFrame"));
+      if (SC.browser.touch) {
+        f.x -= f.width;
+        f.width += f.width * 2;
+        f.y -= f.height;
+        f.height += f.height * 2;
+      }
+      return f;
+    }.property("clippingFrame")
+  }),
   
   // ..........................................................
   // METHODS
@@ -332,12 +475,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
     
     if (!SC.none(x)) {
-      x = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), x)) ;
+      x = Math.max(this.get('minimumHorizontalScrollOffset'),Math.min(this.get('maximumHorizontalScrollOffset'), x)) ;
       this.set('horizontalScrollOffset', x) ;
     }
     
     if (!SC.none(y)) {
-      y = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), y)) ;
+      y = Math.max(this.get('minimumVerticalScrollOffset'),Math.min(this.get('maximumVerticalScrollOffset'), y)) ;
       this.set('verticalScrollOffset', y) ;
     }
     
@@ -538,6 +681,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null ;
     var hasVertical = vscroll && this.get('isVerticalScrollerVisible') ;
     
+    if (SC.browser.touch) hasVertical = hasHorizontal = NO;
+    
     // get the containerView
     var clip = this.get('containerView') ;
     var clipLayout = { left: 0, top: 0 } ;
@@ -621,23 +766,85 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_wheelDeltaX = 0;
     }
   },
-
-  touchStart: function(evt) {
-    // Initialize start state
-    this.beginTouchTracking(evt);
-    this.invokeLater(this.beginTouchesInContent, 150);
-
-    // Indicate that we want a non-exclusive subscription to future
-    // touch events
-    return SC.MIXED_STATE;
+  
+  /*..............................................
+    SCALING SUPPORT
+  */
+  
+  /**
+    Determines whether scaling is allowed.
+  */
+  canScale: NO,
+  
+  /**
+    The current scale.
+  */
+  _scale: 1.0,
+  scale: function(key, value) {
+    if (value !== undefined) {
+      this._scale = Math.min(Math.max(this.get("minimumScale"), value), this.get("maximumScale"));
+    }
+    return this._scale;
+  }.property().cacheable(),
+  
+  /**
+    The minimum scale.
+  */
+  minimumScale: 0.25,
+  
+  /**
+    The maximum scale.
+  */
+  maximumScale: 2.0,
+  
+  /**
+    Whether to automatically determine the scale range based on the size of the content.
+  */
+  autoScaleRange: NO,
+  
+  _scale_css: "",
+  
+  updateScale: function(scale) {
+    if (this.get("contentView").isScalable) {
+      this.get("contentView").applyScale(scale);
+      this._scale_css = "";
+    } else {
+      this._scale_css = "scale3d(" + scale + ", " + scale + ", 1)";
+    }
+  },
+  
+  /*..............................................
+    TOUCH SUPPORT
+  */
+  acceptsMultitouch: YES,
+  
+  _applyCSSTransforms: function(layer) {
+    var transform = "";
+    this.updateScale(this._scale);
+    transform += 'translate3d('+ -this._scroll_horizontalScrollOffset +'px, '+ -this._scroll_verticalScrollOffset+'px,0) ';
+    transform += this._scale_css;
+    layer.style.webkitTransform = transform;
+    layer.style.webkitTransformOrigin = "top left";
+  },
+  
+  captureTouch: function(touch) {
+    return YES;
+  },
+  
+  touchGeneration: 0,
+  touchStart: function(touch) {
+    if (!this.tracking) {
+      var generation = ++this.touchGeneration;
+      this.invokeLater(this.beginTouchesInContent, 150, generation);
+    }
+    this.beginTouchTracking(touch, YES);
   },
 
-  beginTouchesInContent: function() {
+  beginTouchesInContent: function(gen) {
+    if (gen !== this.touchGeneration) return;
     var touch = this.touch, itemView;
-    if (touch.tracking && !touch.dragging) {
-      var ev = touch.originalEvent;
-      ev.manufactured = YES;
-      this.contentView.mouseDown(ev);
+    if (touch && this.tracking && !this.dragging) {
+      touch.touch.captureTouch(this, YES);
     }
   },
 
@@ -649,106 +856,456 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
     @param {Event} evt
   */
-  beginTouchTracking: function(evt) {
-    var verticalScrollOffset = this.get('verticalScrollOffset');
+  beginTouchTracking: function(touch, starting) {
+    var avg = touch.averagedTouchesForView(this, starting);
+    
+    var verticalScrollOffset = this._scroll_verticalScrollOffset || 0,
+        horizontalScrollOffset = this._scroll_horizontalScrollOffset || 0;
+    
+    if (this.touch && this.touch.timeout) {
+      // first, finish up the hack to boost deceleration
+      SC.RunLoop.begin();
+      this.set("scale", this._scale);
+      this.set("verticalScrollOffset", verticalScrollOffset);
+      this.set("horizontalScrollOffset", horizontalScrollOffset);
+      SC.RunLoop.end();
+      
+      // now clear the timeout
+      clearTimeout(this.touch.timeout);
+      this.touch.timeout = null;
+    }
+    
+    // calculate container+content width/height
+    var view = this.get('contentView') ;
+    var contentWidth = view ? view.get('frame').width : 0,
+        contentHeight = view ? view.get('frame').height : 0;
+    
+    if(view.calculatedWidth && view.calculatedWidth!==0) contentWidth = view.calculatedWidth;
+    if (view.calculatedHeight && view.calculatedHeight !==0) contentHeight = view.calculatedHeight;
+    
+    var containerWidth = this.get('containerView').get('frame').width,
+        containerHeight = this.get('containerView').get('frame').height;
+    
 
+    // calculate position in content
+    var globalFrame = this.convertFrameToView(this.get("frame"), null),
+        positionInContentX = (horizontalScrollOffset + (avg.x - globalFrame.x)) / this._scale,
+        positionInContentY = (verticalScrollOffset + (avg.y - globalFrame.y)) / this._scale;
+    
     this.touch = {
-      startScrollOffset: { x: this.horizontalScrollOffset, y: verticalScrollOffset },
-      startTime: evt.timeStamp,
-      startTimePosition: verticalScrollOffset,
-      startTouchOffset: { x: evt.pageX, y: evt.pageY },
-      decelerationVelocity: { y: 0 },
-      originalTarget: SC.RootResponder.responder.targetViewForEvent(evt),
-      originalPane: this.get('pane'),
-      originalEvent: SC.copy(evt),
+      startTime: touch.timeStamp,
+      notCalculated: YES,
+      
+      enableScrolling: { 
+        x: contentWidth * this._scale > containerWidth, 
+        y: contentHeight * this._scale > containerHeight }, // TODO: get from class properties
+      scrolling: { x: NO, y: NO },
+      
+      // offsets and velocities
+      // startScrollOffset: { x: horizontalScrollOffset, y: verticalScrollOffset },
+      lastScrollOffset: { x: horizontalScrollOffset, y: verticalScrollOffset },
+      startTouchOffset: { x: avg.x, y: avg.y },
+      scrollVelocity: { x: 0, y: 0 },
+      
+      startTouchOffsetInContent: { x: positionInContentX, y: positionInContentY },
+      
+      containerSize: { width: containerWidth, height: containerHeight },
+      contentSize: { width: contentWidth, height: contentHeight },
+      
+      startScale: this._scale,
+      startDistance: avg.d,
+      canScale: this.get("canScale"),
+      minimumScale: this.get("minimumScale"),
+      maximumScale: this.get("maximumScale"),
+      
+      globalFrame: globalFrame,
+      
+      // cache some things
+      layer: this.get("contentView").get('layer'),
 
-      tracking: YES,
-      dragging: NO,
-      decelerating: NO
+      // some constants
+      resistanceCoefficient: 0.998,
+      resistanceAsymptote: 320,
+      decelerationFromEdge: 0.05,
+      accelerationToEdge: 0.1,
+      
+      // how much percent of the other drag direction you must drag to start dragging that direction too.
+      scrollTolerance: { x: 5, y: 5 },
+      scaleTolerance: 5,
+      secondaryScrollTolerance: 20,
+      scrollLock: 100,
+
+      // general status
+      lastEventTime: touch.timeStamp,      
+      
+      // the touch used
+      touch: touch
     };
 
-    this.tracking = YES;
-    this.dragging = NO;
+    if (!this.tracking) {
+      this.tracking = YES;
+      this.dragging = NO;
+    }
   },
-
-  touchDragged: function(evt) {
+  
+  _adjustForEdgeResistance: function(offset, minOffset, maxOffset, resistanceCoefficient, asymptote) {
+    var distanceFromEdge;
+    
+    // find distance from edge
+    if (offset < minOffset) distanceFromEdge = offset - minOffset;
+    else if (offset > maxOffset) distanceFromEdge = maxOffset - offset;
+    else return offset;
+    
+    // manipulate logarithmically
+    distanceFromEdge = Math.pow(resistanceCoefficient, Math.abs(distanceFromEdge)) * asymptote;
+    
+    // adjust mathematically
+    if (offset < minOffset) distanceFromEdge = distanceFromEdge - asymptote;
+    else distanceFromEdge = -distanceFromEdge + asymptote;
+    
+    // generate final value
+    return Math.min(Math.max(minOffset, offset), maxOffset) + distanceFromEdge;
+  },
+  
+  touchesDragged: function(evt, touches) {
+    var avg = evt.averagedTouchesForView(this);
+    this.updateTouchScroll(avg.x, avg.y, avg.d, evt.timeStamp);
+  },
+  
+  updateTouchScroll: function(touchX, touchY, distance, timeStamp) {
+    // get some vars
     var touch = this.touch,
-        touchY = evt.pageY,
-        offsetY = touch.startScrollOffset.y,
-        maxOffset = this.get('maximumVerticalScrollOffset');
+        touchXInFrame = touchX - touch.globalFrame.x,
+        touchYInFrame = touchY - touch.globalFrame.y,
+        offsetY,
+        maxOffsetY,
+        offsetX,
+        maxOffsetX,
+        minOffsetX, minOffsetY;
+        
+    // calculate new position in content
+    var positionInContentX = ((this._scroll_horizontalScrollOffset||0) + touchXInFrame) / this._scale,
+        positionInContentY = ((this._scroll_verticalScrollOffset||0) + touchYInFrame) / this._scale;
+    
+    // calculate deltas
+    var deltaX = positionInContentX - touch.startTouchOffset.x,
+        deltaY = positionInContentY - touch.startTouchOffset.y;
+    
+    if (!touch.scrolling.x && Math.abs(deltaX) > touch.scrollTolerance.x && touch.enableScrolling.x) {
+      // say we are scrolling
+      this.dragging = YES;
+      touch.scrolling.x = YES;
+      touch.scrollTolerance.y = touch.secondaryScrollTolerance;
+      
+      // reset position
+      touch.startTouchOffset.x = touchX;
+      deltaX = 0;
+    }
+    if (!touch.scrolling.y && Math.abs(deltaY) > touch.scrollTolerance.y && touch.enableScrolling.y) {
+      // say we are scrolling
+      this.dragging = YES;
+      touch.scrolling.y = YES;
+      touch.scrollTolerance.x = touch.secondaryScrollTolerance;
+      
+      // reset position
+      touch.startTouchOffset.y = touchY;
+      deltaY = 0;
+    }
+    
+    // calculate new offset
+    if (!touch.scrolling.x && !touch.scrolling.y && !touch.canScale) return;
+    if (touch.scrolling.x && !touch.scrolling.y) {
+      if (deltaX > touch.scrollLock && !touch.scrolling.y) touch.enableScrolling.y = NO;
+    }
+    if (touch.scrolling.y && !touch.scrolling.x) {
+      if (deltaY > touch.scrollLock && !touch.scrolling.x) touch.enableScrolling.x = NO;
+    }
+    
+    // handle scaling
+    if (touch.canScale) {
+      
+      var startDistance = touch.startDistance, dd = distance - startDistance;
+      if (Math.abs(dd) > touch.scaleTolerance) {
+        touch.scrolling.y = YES; // if you scale, you can scroll.
+        touch.scrolling.x = YES;
+        
+        var scale = touch.startScale * (1 + (dd / 200));
 
-    var deltaY = touchY - touch.startTouchOffset.y;
-
-    if (!touch.dragging) {
-      // give the user 5 pixels of wiggle room before we begin a drag
-      if (Math.abs(deltaY) > 5) {
-        touch.dragging = YES;
-        touch.firstDrag = YES;
-        // this.contentView.select(SC.IndexSet.create());
+        var newScale = this._adjustForEdgeResistance(scale, touch.minimumScale, touch.maximumScale, touch.resistanceCoefficient, touch.resistanceAsymptote);
+        this.dragging = YES;
+        this._scale = newScale;
+        var newPositionInContentX = positionInContentX * this._scale,
+            newPositionInContentY = positionInContentY * this._scale;
       }
     }
+    
 
-    if (touch.dragging) {
-      offsetY = offsetY - deltaY;
-
-      if (touch.firstDrag) {
-        touch.firstDrag = NO;
-        // this._scroll_startTouchOffset.y = offsetY;
-        return;
-      }
+    minOffsetX = this.minimumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign"));
+    minOffsetY = this.minimumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
+    
+    maxOffsetX = this.maximumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign"));
+    maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
+    
+    // (offsetY + touchYInFrame) / this._scale = touch.startTouchOffsetInContent.y
+    // offsetY + touchYInFrame = touch.startTouchOffsetInContent.y * this._scale;
+    // offsetY = touch.startTouchOffset * this._scale - touchYInFrame
+    offsetX = touch.startTouchOffsetInContent.x * this._scale - touchXInFrame;
+    offsetY = touch.startTouchOffsetInContent.y * this._scale - touchYInFrame;
+    
+    
+    // update immediately, without consulting anyone else.
+    offsetX = this._adjustForEdgeResistance(offsetX, minOffsetX, maxOffsetX, touch.resistanceCoefficient, touch.resistanceAsymptote);
+    offsetY = this._adjustForEdgeResistance(offsetY, minOffsetY, maxOffsetY, touch.resistanceCoefficient, touch.resistanceAsymptote);
+    
+    if (touch.scrolling.x) this._scroll_horizontalScrollOffset = offsetX;
+    if (touch.scrolling.y) this._scroll_verticalScrollOffset = offsetY;
+    
+    this._applyCSSTransforms(touch.layer);
+    
+    if (timeStamp - touch.lastEventTime >= 1 || touch.notCalculated) {
+      touch.notCalculated = NO;
+      var horizontalOffset = this._scroll_horizontalScrollOffset;
+      var verticalOffset = this._scroll_verticalScrollOffset;
+      
+      touch.scrollVelocity.x = ((horizontalOffset - touch.lastScrollOffset.x) / Math.max(1, timeStamp - touch.lastEventTime)); // in px per ms
+      touch.scrollVelocity.y = ((verticalOffset - touch.lastScrollOffset.y) / Math.max(1, timeStamp - touch.lastEventTime)); // in px per ms
+      touch.lastScrollOffset.x = horizontalOffset;
+      touch.lastScrollOffset.y = verticalOffset;
+      touch.lastEventTime = timeStamp;
     }
-    this.set('verticalScrollOffset', Math.max(0,Math.min(offsetY, maxOffset)));
-
-    if (evt.timeStamp - touch.lastEventTime > 50) {
-      touch.startTime = evt.timeStamp;
-      touch.startTimePosition = this.get('verticalScrollOffset');
-    }
-    touch.lastEventTime = evt.timeStamp;
   },
 
-  touchEnd: function(evt) {
-    var touch = this.touch;
+  touchEnd: function(touch) {
+    var touchStatus = this.touch,
+        avg = touch.averagedTouchesForView(this);
+    
+    if (avg.touchCount > 0) {
+      this.beginTouchTracking(touch, NO);
+    } else {
+      if (this.dragging) {
+        touchStatus.dragging = NO;
 
-    this.tracking = NO;
-    touch.tracking = NO;
-    this.dragging = NO;
-    if (touch.dragging) {
-      touch.dragging = NO;
+        // reset last event time
+        touchStatus.lastEventTime = touch.timeStamp;
 
-      if (evt.timeStamp - touch.lastEventTime <= 100) {
-        touch.offsetBeforeDeceleration = { y: this.get('verticalScrollOffset') };
-        this.startDecelerationAnimation(evt);
+        this.startDecelerationAnimation();
+      } else {
+        // trigger touchStart/End on actual target view if possible
+        touch.captureTouch(this);
+        if (touch.touchResponder && touch.touchResponder !== this) touch.touchResponder.tryToPerform("touchEnd", touch);
       }
+      
+      this.tracking = NO;
+      this.dragging = NO;
     }
+  },
+  
+  touchCancelled: function(touch) {
+    this.tracking = NO;
+    this.dragging = NO;
+    this.touch = null;
   },
 
   startDecelerationAnimation: function(evt) {
     var touch = this.touch;
-
-    var scrollDistance = this.get('verticalScrollOffset') - touch.startTimePosition;
-    var scrollDuration = (evt.timeStamp - touch.startTime)/15;
-    touch.decelerationVelocity = { y: scrollDistance / scrollDuration };
+    touch.decelerationVelocity = {
+      x: touch.scrollVelocity.x * 10,
+      y: touch.scrollVelocity.y * 10
+    };
+    
     this.decelerateAnimation();
+  },
+  
+  /**
+    @private
+    Does bounce calculations, adjusting velocity.
+    
+    Bouncing is fun. Functions that handle it should have fun names,
+    don'tcha think?
+    
+    P.S.: should this be named "bouncityBounce" instead?
+  */
+  bouncyBounce: function(velocity, value, minValue, maxValue, de, ac, additionalAcceleration) {
+    // we have 4 possible paths. On a higher level, we have two leaf paths that can be applied
+    // for either of two super-paths.
+    //
+    // The first path is if we are decelerating past an edge: in this case, this function must
+    // must enhance that deceleration. In this case, our math boils down to taking the amount
+    // by which we are past the edge, multiplying it by our deceleration factor, and reducing
+    // velocity by that amount.
+    //
+    // The second path is if we are not decelerating, but are still past the edge. In this case,
+    // we must start acceleration back _to_ the edge. The math here takes the distance we are from
+    // the edge, multiplies by the acceleration factor, and then performs two additional things:
+    // First, it speeds up the acceleration artificially  with additionalAcceleration; this will
+    // make the stop feel more sudden, as it will still have this additional acceleration when it reaches
+    // the edge. Second, it ensures the result does not go past the final value, so we don't end up
+    // bouncing back and forth all crazy-like.
+    if (value < minValue) {
+      if (velocity < 0) velocity = velocity + ((minValue - value) * de);
+      else {
+        velocity = Math.min((minValue-value) * ac + additionalAcceleration, minValue - value - 0.01);
+      }
+    } else if (value > maxValue) {
+      if (velocity > 0) velocity = velocity - ((value - maxValue) * de);
+      else {
+        velocity = -Math.min((value - maxValue) * ac + additionalAcceleration, value - maxValue - 0.01);
+      }
+    }
+    return velocity;
   },
 
   decelerateAnimation: function() {
+    // get a bunch of properties. They are named well, so not much explanation of what they are...
+    // However, note maxOffsetX/Y takes into account the scale;
+    // also, newX/Y adds in the current deceleration velocity (the deceleration velocity will
+    // be changed later in this function).
     var touch = this.touch,
-        maxOffset = this.get('maximumVerticalScrollOffset'),
-        newY = this.get('verticalScrollOffset') + touch.decelerationVelocity.y;
-    this.set('verticalScrollOffset', Math.max(0,Math.min(Math.round(newY), maxOffset)));
-
-    touch.decelerationVelocity.y *= 0.950;
-
+        scale = this._scale,
+        minOffsetX = this.minimumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign")),
+        minOffsetY = this.minimumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign")),
+        maxOffsetX = this.maximumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign")),
+        maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign")),
+        
+        newX = this._scroll_horizontalScrollOffset + touch.decelerationVelocity.x,
+        newY = this._scroll_verticalScrollOffset + touch.decelerationVelocity.y,
+        now = Date.now(),
+        t = Math.max(now - touch.lastEventTime, 1);
+    
+    var de = touch.decelerationFromEdge, ac = touch.accelerationToEdge;
+    
+    // determine if position was okay before adjusting scale (which we do, in
+    // a lovely, animated way, for the scaled out/in too far bounce-back).
+    // if the position was okay, then we are going to make sure that we keep the
+    // position okay when adjusting the scale.
+    //
+    // Position OKness, here, referring to if the position is valid (within
+    // minimum and maximum scroll offsets)
+    var validXPosition = newX >= minOffsetX && newX <= maxOffsetX;
+    var validYPosition = newY >= minOffsetY && newY <= maxOffsetY;
+    
+    // We are going to change scale in a moment, but the position should stay the
+    // same, if possible (unless it would be more jarring, as described above, in
+    // the case of starting with a valid position and ending with an invalid one).
+    //
+    // Because we are changing the scale, we need to make the position scale-neutral.
+    // we'll make it non-scale-neutral after applying scale.
+    //
+    // Question: might it be better to save the center position instead, so scaling
+    // bounces back around the center of the screen?
+    newX /= this._scale;
+    newY /= this._scale;
+    
+    // scale velocity (amount to change) starts out at 0 each time, because 
+    // it is calculated by how far out of bounds it is, rather than by the
+    // previous such velocity.
+    var sv = 0;
+    
+    // do said calculation; we'll use the same bouncyBounce method used for everything
+    // else, but our adjustor that gives a minimum amount to change by and (which, as we'll
+    // discuss, is to make the stop feel slightly more like a stop), we'll leave at 0 
+    // (scale doesn't really need it as much; if you disagree, at least come up with 
+    // numbers more appropriate for scale than the ones for X/Y)
+    sv = this.bouncyBounce(sv, scale, touch.minimumScale, touch.maximumScale, de, ac, 0);
+    
+    // add the amount to scale. This is linear, rather than multiplicative. If you think
+    // it should be multiplicative (or however you say that), come up with a new formula.
+    this._scale = scale = scale + sv;
+    
+    // now we can convert newX/Y back to scale-specific coordinates...
+    newX *= this._scale;
+    newY *= this._scale;
+    
+    // It looks very weird if the content started in-bounds, but the scale animation
+    // made it not be in bounds; it causes the position to animate snapping back, and,
+    // well, it looks very weird. It is more proper to just make sure it stays in a valid
+    // position. So, we'll determine the new maximum/minimum offsets, and then, if it was
+    // originally a valid position, we'll adjust the new position to a valid position as well.
+    
+    
+    // determine new max offset
+    minOffsetX = this.minimumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign"));
+    minOffsetY = this.minimumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
+    maxOffsetX = this.maximumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign"));
+    maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
+    
+    // see if scaling messed up the X position (but ignore if 'tweren't right to begin with).
+    if (validXPosition && (newX < minOffsetX || newX > maxOffsetX)) {
+      // Correct the position
+      newX = Math.max(minOffsetX, Math.min(newX, maxOffsetX));
+    }
+    
+    // now the y
+    if (validYPosition && (newY < minOffsetY || newY > maxOffsetY)) {
+      // again, correct it...
+      newY = Math.max(minOffsetY, Math.min(newY, maxOffsetY));
+    }
+    
+    
+    // now that we are done modifying the position, we may update the actual scroll
+    this._scroll_horizontalScrollOffset = newX;
+    this._scroll_verticalScrollOffset = newY;
+    this._applyCSSTransforms(touch.layer); // <- Does what it sounds like.
+    
+    // Now we have to adjust the velocities. The velocities are simple x and y numbers that
+    // get added to the scroll X/Y positions each frame.
+    // The decay rate is .950 per frame. To achieve some semblance of accuracy, we
+    // make it to the power of the elapsed number of frames. This is not fully accurate,
+    // as this is applying the elapsed time between this frame and the previous time to
+    // modify the velocity for the next frame. My mind goes blank when I try to figure out
+    // a way to fix this (given that we don't want to change the velocity on the first frame),
+    // and as it seems to work great as-is, I'm just leaving it.
+    var decay = 0.950;
+    touch.decelerationVelocity.y *= Math.pow(decay, (t / 10));
+    touch.decelerationVelocity.x *= Math.pow(decay, (t / 10));
+    
+    // We have a bouncyBounce method that adjusts the velocity for bounce. That is, if it is
+    // out of range and still going, it will slow it down. This step is decelerationFromEdge.
+    // If it is not moving (or has come to a stop from decelerating), but is still out of range, 
+    // it will start it moving back into range (accelerationToEdge)
+    // we supply de and ac as these properties.
+    // The .3 artificially increases the acceleration by .3; this is actually to make the final
+    // stop a bit more abrupt.
+    touch.decelerationVelocity.x = this.bouncyBounce(touch.decelerationVelocity.x, newX, minOffsetX, maxOffsetX, de, ac, 0.3);
+    touch.decelerationVelocity.y = this.bouncyBounce(touch.decelerationVelocity.y, newY, minOffsetY, maxOffsetY, de, ac, 0.3);
+ 
+    // if we ain't got no velocity... then we must be finished, as there is no where else to go.
+    // to determine our velocity, we take the absolue value, and use that; if it is less than .01, we
+    // must be done. Note that we check scale's most recent velocity, calculated above using bouncyBounce,
+    // as well.
+    var absXVelocity = Math.abs(touch.decelerationVelocity.x);
     var absYVelocity = Math.abs(touch.decelerationVelocity.y);
-    if (absYVelocity < 1) {
-      touch.decelerationVelocity.y = 0;
-      touch.decelerating = NO;
+    if (absYVelocity < 0.01 && absXVelocity < 0.01 && Math.abs(sv) < 0.01) {
+      // we can reset the timeout, as it will no longer be required, and we don't want to re-cancel it later.
+      touch.timeout = null;
+      
+      // we aren't in a run loop right now (see below, where we trigger the timer)
+      // so, we must start one.
+      SC.RunLoop.begin();
+      
+      // set the scale, vertical, and horizontal offsets to what they technically already are,
+      // but don't know they are yet. This will finally update things like, say, the clipping frame.
+      this.set("scale", this._scale);
+      this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
+      this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+      
+      // and now we're done, so just end the run loop and return.
+      SC.RunLoop.end();
       return;
     }
-
-    this.invokeLater(this.decelerateAnimation, 16);
+    
+    // We now set up the next round. We are doing this as raw as we possibly can, not touching the
+    // run loop at all. This speeds up performance drastically--keep in mind, we're on comparatively
+    // slow devices, here. So, we'll just make a closure, saving "this" into "self" and calling
+    // 10ms later (or however long it takes). Note also that we save both the last event time
+    // (so we may calculate elapsed time) and the timeout we are creating, so we may cancel it in future.
+    var self = this;
+    touch.lastEventTime = Date.now();
+    this.touch.timeout = setTimeout(function(){
+      self.decelerateAnimation();
+    }, 10);
   },
-
+  
   // ..........................................................
   // INTERNAL SUPPORT
   // 
@@ -884,10 +1441,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   contentViewFrameDidChange: function() {
     var view   = this.get('contentView'), 
         f      = (view) ? view.get('frame') : null,
-        width  = (f) ? f.width : 0,  
-        height = (f) ? f.height : 0,
+        width  = (f) ? f.width * this._scale : 0,  
+        height = (f) ? f.height * this._scale : 0,
         dim    = this.get('frame'),
-        proportion ;
+        ourFrame = this.get("frame");
     
     // cache out scroll settings...
     //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
@@ -900,8 +1457,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         this.set('isHorizontalScrollerVisible', width > dim.width);
       }
       view.setIfChanged('maximum', width-dim.width) ;
-      proportion = dim.width/width;
-      view.setIfChanged('proportion',isNaN(proportion) ? 0 : proportion);
+      view.setIfChanged('proportion', dim.width/width);
     }
     
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
@@ -911,8 +1467,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       }
       height -= this.get('verticalScrollerBottom') ;
       view.setIfChanged('maximum', height-dim.height) ;
-      proportion = dim.height/height;
-      view.setIfChanged('proportion', isNaN(proportion) ? 0 : proportion);
+      view.setIfChanged('proportion', dim.height/height);
     }
     
     // If there is no vertical scroller and auto hiding is on, make
@@ -990,8 +1545,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
       // Use accelerated drawing if the browser supports it
       if (SC.browser.touch) {
-        var transform = 'translate3d(-'+horizontalScrollOffset+'px, -'+verticalScrollOffset+'px, 0)';
-        content.get('layer').style.webkitTransform = transform;
+        this._applyCSSTransforms(content.get('layer'));
       }
     }
 
