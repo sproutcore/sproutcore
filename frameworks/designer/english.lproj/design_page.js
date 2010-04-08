@@ -4,7 +4,7 @@
 // ==========================================================================
 /*globals SC */
 require('views/designer_drop_target');
-
+require('views/page_item_view');
 SC.designPage = SC.Page.create({
   // ..........................................................
   // Views used inside iframe...
@@ -23,6 +23,7 @@ SC.designPage = SC.Page.create({
       layout: {left:0, right: 0, bottom: 0, height: 48},
       hasVerticalScroller: NO,
       contentView: SC.GridView.design({
+        exampleView: SC.pageItemView,
         rowHeight: 48,
         columnWidth: 48,
         //contentBinding: 'SC.designsController',

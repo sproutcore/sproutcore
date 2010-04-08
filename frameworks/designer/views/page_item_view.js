@@ -14,110 +14,109 @@
 
 SC.pageItemView = SC.ListItemView.extend(
 /** @scope SC.ListItemView.prototype */ { 
-   isDropTarget: YES,
-   
-   dragEntered: function(drag, evt) {},
+  isDropTarget: YES,
 
-   /**
-     Called periodically when a drag is over your droppable area.
+  dragEntered: function(drag, evt) {
+    this.$().addClass('highlight');
+  },
 
-     Override this method this to update various elements of the drag state, 
-     including the location of ghost view.  You should  use this method to 
-     implement snapping.
+  dragExited: function(drag, evt) {
+    this.$().removeClass('highlight');
+ 
+  },
 
-     This method will be called periodically, even if the user is not moving
-     the drag.  If you perform expensive operations, be sure to check the
-     mouseLocation property of the drag to determine if you actually need to
-     update anything before doing your expensive work.
+  dragEnded: function(drag, evt) {
+    this.$().removeClass('highlight');
+ 
+  },
 
-     The default implementation does nothing.
+  /**
+   Called when the drag needs to determine which drag operations are
+   valid in a given area.
 
-     @param {SC.Drag} drag The current drag object.
-     @param {SC.Event} evt The most recent mouse move event. Use to get location
-   */
-   dragUpdated: function(drag, evt) {},
+   Override this method to return an OR'd mask of the allowed drag 
+   operations.  If the user drags over a droppable area within another 
+   droppable area, the drag will latch onto the deepest view that returns one 
+   or more available operations.
 
-   /**
-     Called when the user exits your droppable area or the drag ends
-     and you were the last targeted droppable area.
+   The default implementation returns SC.DRAG_NONE
 
-     Override this method to perform any clean up on your UI such as hiding 
-     a special highlight state or removing insertion points.
+   @param {SC.Drag} drag The current drag object
+   @param {SC.Event} evt The most recent mouse move event.  Use to get 
+     location 
+   @returns {DragOps} A mask of all the drag operations allowed or 
+     SC.DRAG_NONE
+  */
+  computeDragOperations: function(drag, evt) { 
+    if(drag.hasDataType('SC.Binding')){
+      return SC.DRAG_LINK;
+    }
+    return SC.DRAG_NONE; 
+  },
 
-     The default implementation does nothing.
+  /**
+   Called when the user releases the mouse.
 
-     @param {SC.Drag} drag The current drag object
-     @param {SC.Event}   evt  The most recent mouse move event. Use to get location.
-   */
-   dragExited: function(drag, evt) {},
+   This method gives your drop target one last opportunity to choose to 
+   accept the proposed drop operation.  You might use this method to
+   perform fine-grained checks on the drop location, for example.
+   Return true to accept the drop operation.
 
-   /**
-     Called on all drop targets when the drag ends.  
+   The default implementation returns YES.
 
-     For example, the user might have dragged the view off the screen and let 
-     go or they might have hit escape.  Override this method to perform any 
-     final cleanup.  This will be called instead of dragExited.
+   @param {SC.Drag} drag The drag instance managing this drag
+   @param {DragOp} op The proposed drag operation. A drag constant
 
-     The default implementation does nothing.
+   @return {Boolean} YES if operation is OK, NO to cancel.
+  */  
+  acceptDragOperation: function(drag, op) { return YES; },
 
-     @param {SC.Drag} drag The current drag object
-     @param {SC.Event}   evt  The most recent mouse move event. Use to get location.
-   */
-   dragEnded: function(drag, evt) {},
+  /**
+   Called to actually perform the drag operation.
 
-   /**
-     Called when the drag needs to determine which drag operations are
-     valid in a given area.
+   Overide this method to actually perform the drag operation.  This method
+   is only called if you returned YES in acceptDragOperation(). 
 
-     Override this method to return an OR'd mask of the allowed drag 
-     operations.  If the user drags over a droppable area within another 
-     droppable area, the drag will latch onto the deepest view that returns one 
-     or more available operations.
+   Return the operation that was actually performed or SC.DRAG_NONE if the 
+   operation was aborted.
 
-     The default implementation returns SC.DRAG_NONE
+   The default implementation returns SC.DRAG_NONE
 
-     @param {SC.Drag} drag The current drag object
-     @param {SC.Event} evt The most recent mouse move event.  Use to get 
-       location 
-     @returns {DragOps} A mask of all the drag operations allowed or 
-       SC.DRAG_NONE
-   */
-   computeDragOperations: function(drag, evt) { return SC.DRAG_NONE; },
+   @param {SC.Drag} drag The drag instance managing this drag
+   @param {DragOp} op The proposed drag operation. A drag constant.
 
-   /**
-     Called when the user releases the mouse.
+   @return {DragOp} Drag Operation actually performed
+  */
+  performDragOperation: function(drag, op) { 
+    var data = drag.dataForType('SC.Binding'), that = this;
+    if(data && SC._Greenhouse){
+      var actionObj = SC.Object.create({
+        type: 'Binding', 
+        receiver: data,
+        target: that.get('content'),
+        addItem: function(from, to, designAttrs){
+          var view = this.getPath('target.view');
+          var value = that._propertyPathForProp(this.getPath('target.view.page'),view);
+          designAttrs[to+"Binding"] = value+"."+from;
+        }
+      });
 
-     This method gives your drop target one last opportunity to choose to 
-     accept the proposed drop operation.  You might use this method to
-     perform fine-grained checks on the drop location, for example.
-     Return true to accept the drop operation.
+      SC._Greenhouse.sendAction('createBindingPopup', actionObj);
 
-     The default implementation returns YES.
-
-     @param {SC.Drag} drag The drag instance managing this drag
-     @param {DragOp} op The proposed drag operation. A drag constant
-
-     @return {Boolean} YES if operation is OK, NO to cancel.
-   */  
-   acceptDragOperation: function(drag, op) { return YES; },
-
-   /**
-     Called to actually perform the drag operation.
-
-     Overide this method to actually perform the drag operation.  This method
-     is only called if you returned YES in acceptDragOperation(). 
-
-     Return the operation that was actually performed or SC.DRAG_NONE if the 
-     operation was aborted.
-
-     The default implementation returns SC.DRAG_NONE
-
-     @param {SC.Drag} drag The drag instance managing this drag
-     @param {DragOp} op The proposed drag operation. A drag constant.
-
-     @return {DragOp} Drag Operation actually performed
-   */
-   performDragOperation: function(drag, op) { return SC.DRAG_NONE; }
+      return SC.DRAG_LINK;
+    }
+    else{
+      return SC.DRAG_NONE; 
+    }
+  },
+  
+  _propertyPathForProp: function(page, prop){
+    for(var key in page){
+      if(page.hasOwnProperty(key)){
+        if(page[key] === prop) return page.get('pageName')+"."+key.toString();
+      }
+    }
+  }
    
 });
 

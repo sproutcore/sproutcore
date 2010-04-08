@@ -675,7 +675,6 @@ SC.ViewDesigner = SC.Object.extend(
         endPoint: {x: startX, y: startY},
         // private update
         _pointsDidChange: function(){
-          console.log('_pointsDidChange...');
           var sp = this.get('startPoint'),
               ep = this.get('endPoint'),
               xDiff, yDiff, newLink;
@@ -945,7 +944,6 @@ SC.ViewDesigner = SC.Object.extend(
   dragDidMove: function(drag, loc) {
     var dragLink = drag.dragLink;
     var endX, endY, pv, frame, globalFrame;
-    console.log('dragDidMove called...');
     if (dragLink) {
       // if using latest SproutCore 1.0, loc is expressed in browser window coordinates
       pv = dragLink.get('parentView');
@@ -955,7 +953,6 @@ SC.ViewDesigner = SC.Object.extend(
         endX = loc.x - globalFrame.x;
         endY = loc.y - globalFrame.y;
         dragLink.set('endPoint', {x: endX , y: endY});
-        console.log('endPoint: %@ %@'.fmt(endX, endY));
       }
     }
   },
