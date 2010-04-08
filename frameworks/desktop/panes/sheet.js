@@ -32,6 +32,9 @@ sc_require('panes/panel');
 SC.SheetPane = SC.PanelPane.extend({
   classNames: 'sc-sheet',
 
+  /** Do not show smoke behind palettes */
+  modalPane: SC.ModalPane,
+
   /**
     Speed of transition.  Should be expressed in msec.
 
