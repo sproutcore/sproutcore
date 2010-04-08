@@ -733,6 +733,15 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -8px -2237px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -16px -2237px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -703px; }
+.sc-theme .sc-view.ace.light.sc-tab-view { overflow: visible; }
+.sc-theme .sc-view.ace.light.sc-tab-view .sc-container-view {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #999999;
+  -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
 .sc-theme .sc-view.ace.light.sc-split-divider-view {
   background: #555555;
   border: 0px none;

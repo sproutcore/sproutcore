@@ -37,6 +37,10 @@ TestControls.rootCategory = SC.Object.create({
         SC.Object.create({
           name: "Select Button",
           show: "select_page"
+        }),
+        SC.Object.create({
+          name: "Tabbed View",
+          show: "tab_page"
         })
       ]
     }),

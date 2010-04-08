@@ -14,6 +14,7 @@ require("resources/text_field_page");
 require("resources/flow_layout_page");
 require("resources/scroll_page");
 require("resources/list_page");
+require("resources/tab_page");
 
 TestControls.mainPage = SC.Page.create({
   
@@ -33,11 +34,13 @@ TestControls.mainPage = SC.Page.create({
       layout: {left: 0, top: 32, right: 0, bottom: 0},
       dividerThickness: 1,
       defaultThickness: 200,
-      topLeftView: SC.SourceListView.design({
-        layout: { left: 0, top: 0, right: 0, bottom: 0 },
-        contentValueKey: "name",
-        contentBinding: "TestControls.categoriesController.arrangedObjects",
-        selectionBinding: "TestControls.categoriesController.selection"
+      topLeftView: SC.ScrollView.design({
+        contentView: SC.SourceListView.design({
+          layout: { left: 0, top: 0, right: 0, bottom: 0 },
+          contentValueKey: "name",
+          contentBinding: "TestControls.categoriesController.arrangedObjects",
+          selectionBinding: "TestControls.categoriesController.selection"
+        })
       }),
       bottomRightView: SC.ContainerView.design({
         nowShowing: "welcome",
@@ -70,5 +73,7 @@ TestControls.mainPage = SC.Page.create({
   
   scroll_page: TestControls.scrollPage,
   
-  list_page: TestControls.listPage
+  list_page: TestControls.listPage,
+  
+  tab_page: TestControls.tabPage
 });
