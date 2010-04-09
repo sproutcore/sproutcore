@@ -115,14 +115,14 @@ SC.GridView = SC.ListView.extend(
     if (dropOperation === SC.DROP_ON) {
       if (itemView !== this._dropOnInsertionPoint) {
         this.hideInsertionPoint() ;
-        itemView.addClassName('drop-target') ;
+        //itemView.addClassName('drop-target') ;
         this._dropOnInsertionPoint = itemView ;
       }
       
     } else {
       
       if (this._dropOnInsertionPoint) {
-        this._dropOnInsertionPoint.removeClassName('drop-target') ;
+        //this._dropOnInsertionPoint.removeClassName('drop-target') ;
         this._dropOnInsertionPoint = null ;
       }
     
@@ -154,7 +154,7 @@ SC.GridView = SC.ListView.extend(
     if (insertionPoint) insertionPoint.removeFromParent() ;
 
     if (this._dropOnInsertionPoint) {
-      this._dropOnInsertionPoint.removeClassName('drop-target') ;
+      //this._dropOnInsertionPoint.removeClassName('drop-target') ;
       this._dropOnInsertionPoint = null ;
     }
   },
