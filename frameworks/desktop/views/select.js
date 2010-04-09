@@ -244,7 +244,7 @@ SC.SelectView = SC.ButtonView.extend(
     @private
     @default NO
   */
-  positionMenuBelow: NO,
+  isDefaultPosition: NO,
 
   /**
     lastMenuWidth is the width of the last menu which was created from
