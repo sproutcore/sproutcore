@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple Inc.  All rights reserved.
 // ========================================================================
 
-sc_require('views/designer');
+sc_require('designers/view_designer');
 sc_require('mixins/button');
 
 SC.ButtonView.Designer = SC.ViewDesigner.extend( SC.Button.Designer,
@@ -12,7 +12,7 @@ SC.ButtonView.Designer = SC.ViewDesigner.extend( SC.Button.Designer,
   
   encodeChildViews: NO,
   
-  designProperties: 'theme buttonBehavior href'.w(),
+  designProperties: 'theme buttonBehavior href isDefault'.w(),
   
   canResizeVertical: NO,
   

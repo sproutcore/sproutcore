@@ -67,7 +67,7 @@ SC.ObjectDesigner = SC.Object.extend(
     the coder.  This is used by encodeDesignProperties() and 
     encodeLocalizedProperties().
   */
-  encodeSimpleProperties: function(props, coder) {    
+  encodeSimpleProperties: function(props, coder) {
     var object = this.get('object'), proto = this.get('objectClass').prototype ;
     props.forEach(function(prop) {
       var val = object[prop] ; // avoid get() since we don't want to exec props
@@ -86,7 +86,7 @@ SC.ObjectDesigner = SC.Object.extend(
     
     You can add to this array in your subclasses.
   */
-  designProperties: 'layout isVisible isEnabled styleClass'.w(),
+  designProperties: ''.w(),
   
   /** 
     Invoked by a design coder to encode design properties.  The default 
@@ -242,7 +242,7 @@ SC.ObjectDesigner.mixin({
       // find the designer class
       var cur = design, origDesign = design;
       while(cur && !cur.Designer) cur = cur.superclass;
-      var DesignerClass = (cur) ? cur.Designer : SC.View.Designer;
+      var DesignerClass = (cur) ? cur.Designer : SC.Object.Designer;
       
       // next find the first superclass object that is not a design (and a real
       // class).  This is important to make sure that we can determine the 
@@ -254,7 +254,7 @@ SC.ObjectDesigner.mixin({
         object: object,
         objectClass: design,
         designAttrs: origDesign.designAttrs,
-        sourceView: origDesign.sourceView
+        sourceObject: origDesign.sourceObject
       });
     }
   }

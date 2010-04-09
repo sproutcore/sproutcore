@@ -113,12 +113,13 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
         that = this;
     if(data){
       var actionObj = SC.Object.create({
-        type: 'view', 
         data: data,
         addItemToPage: function(name){
           scClass = eval(this.getPath('data.scClass'));
-          page[name] = scClass.kindOf(SC.View) ? scClass.design().create({page: page}) : scClass.create();
-          that.pushObject(SC.Object.create({type: this.get('type'), view: page.get(name), name: name}));
+          var type = SC.kindOf(scClass, SC.View) ? 'view' : 'controller';
+          
+          page[name] = scClass.design().create({page: page});
+          that.pushObject(SC.Object.create({type: type, view: page.get(name), name: name}));
         }
       });
       

@@ -364,7 +364,7 @@ SC.ViewDesigner = SC.Object.extend(
   */
   encodeChildViewsDesign: function(coder) {
     if (!this.get('encodeChildViews')) return;
-    var view = this.view, childViews = view.childViews;
+    var view = this.view, childViews = view.get('childViews');
     if (childViews.length>0) coder.object('childViews', childViews);
   },
 

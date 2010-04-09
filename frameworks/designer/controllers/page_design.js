@@ -114,7 +114,7 @@ SC.PageDesignController = SC.Object.extend({
         first = first.get('view');
         parentView = first.get('parentView');
         first.removeFromParent();
-        parent.displayDidChange();
+        if(parent.displayDidChange) parent.displayDidChange();
         first = null;
       //}
       //this.endPropertyChanges();

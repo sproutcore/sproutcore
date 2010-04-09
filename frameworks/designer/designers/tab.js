@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple Inc.  All rights reserved.
 // ========================================================================
 
-sc_require('views/designer');
+sc_require('designers/view_designer');
 
 SC.TabView.Designer = SC.ViewDesigner.extend(
 /** @scope SC.TabView.Designer.prototype */ {
