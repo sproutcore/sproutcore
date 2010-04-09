@@ -194,7 +194,7 @@ SC.PickerPane = SC.PalettePane.extend({
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
-        origin, maxHeight, minHeight, minWidth, maxWidth;
+        origin;
     
     // usually an anchorElement will be passed.  The ideal position is just 
     // below the anchor + default or custom offset according to preferType.
@@ -227,40 +227,13 @@ SC.PickerPane = SC.PalettePane.extend({
         origin.y += origin.height ;
       }
       origin = this.fitPositionToScreen(origin, this.get('frame'), anchor) ;
-      // Set the minHeight, maxHeight, minWidth, maxWidth parameters
-      if(!SC.none(layout.minHeight)) {
-        minHeight = this.layout.minHeight;
-      }
-      if(!SC.none(layout.maxHeight)) {
-        maxHeight = this.layout.maxHeight;
-      }
-      if(!SC.none(layout.minWidth)) {
-        minWidth = this.layout.minWidth;
-      }
-      if(!SC.none(layout.maxWidth)) {
-        maxWidth = this.layout.maxWidth;
-      }
-      layout = { width: origin.width, height: origin.height, left: origin.x, top: origin.y };
 
-      // Set the layout's minHeight, maxHeight, minWidth, maxWidth parameters if any
-      // This is a bad way to do this but currently other way is not working around
-      if(!SC.none(minHeight)) {
-        layout.minHeight = minHeight;
-      }
-      if(!SC.none(maxHeight)) {
-        layout.maxHeight = maxHeight;
-      }
-      if(!SC.none(minWidth)) {
-        layout.minWidth = minWidth;
-      }
-      if(!SC.none(maxWidth)) {
-        layout.maxWidth = maxWidth;
-      }
+      this.adjust({ width: origin.width, height: origin.height, left: origin.x, top: origin.y });
     // if no anchor view has been set for some reason, just center.
     } else {
-      layout = { width: layout.width, height: layout.height, centerX: 0, centerY: 0 };
+      this.adjust({ width: layout.width, height: layout.height, centerX: 0, centerY: 0 });
     }
-    this.set('layout', layout).updateLayout();
+    this.updateLayout();
     return this ;
   },
 
