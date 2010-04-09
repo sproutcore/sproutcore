@@ -191,4 +191,3 @@ SC.ControlTestPane.show = function() {
     SC.RunLoop.end();
   });
 };
-

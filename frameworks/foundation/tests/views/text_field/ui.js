@@ -72,9 +72,14 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   
   if (expectedHint) {
     var hint = view.$('.sc-hint');
-    equals(hint.length, 1, 'should have a hint span');
-    equals(hint.text(), expectedHint, 'hint span should have expected hint');
+    if (hint.length===1) {
+    hint = hint.text();
+  } else {
+    hint = view.$('input');
+    hint = hint.attr('placeholder');
   }
+  equals(hint, expectedHint, 'hint span should have expected hint');  }
+
 };
 
 pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint) {
@@ -86,9 +91,14 @@ pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint)
   
   if (expectedHint) {
     var hint = view.$('.sc-hint');
-    equals(hint.length, 1, 'should have a hint span');
-    equals(hint.text(), expectedHint, 'hint span should have expected hint');
+    if (hint.length===1) {
+    hint = hint.text();
+  } else {
+    hint = view.$('input');
+    hint = hint.attr('placeholder');
   }
+  equals(hint, expectedHint, 'hint span should have expected hint');  }
+
 };
 
 pane.verifyDisabled = function verifyDisabled(view, isDisabled) {

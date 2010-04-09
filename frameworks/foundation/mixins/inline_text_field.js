@@ -98,15 +98,22 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     @returns {Boolean} YES if editor began editing, NO if it failed.
   */
   beginEditing: function(options) {
-    if (!options) return;
+
+    // options are required
+//@if(debug)
+    if (!options) throw "InlineTextFiedl.beginEditing() requires options";
+//@end
+
+    // can't begin editing again if already editing
+    if (this.get('isEditing')) return NO ;
     
-    var layout={}, pane, delLayout, paneElem;
-    
-    // end existing editing if necessary
-    
-    if (this.get('isEditing')) {
-      return NO ;
-    }
+    var layout={}, pane, delLayout, paneElem, del;
+
+    del = this._delegate = options.delegate ;
+    this.set('delegate', this._delegate);
+
+    // continue only if the delegate allows it
+    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldBeginEditing', this)) return NO;
     
     this.beginPropertyChanges();
     
@@ -115,8 +122,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this._optframe = options.frame ;
     this._optIsCollection = options.isCollection;
     this._exampleElement = options.exampleElement ;
-    this._delegate = options.delegate ;
-    this.set('delegate', this._delegate);
 
     if (!this._optframe || !this._delegate) {
       throw "At least frame and delegate options are required for inline editor";
@@ -146,17 +151,18 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     layout.width=this._optframe.width;
     delLayout = this._delegate.get('layout');
     paneElem = pane.$()[0];
-    if(this._optIsCollection && delLayout.left){
+    if (this._optIsCollection && delLayout.left) {
       layout.left=this._optframe.x-delLayout.left-paneElem.offsetLeft-1;
       if(SC.browser.msie==7) layout.left--;
-    }else{
+    } else {
       layout.left=this._optframe.x-paneElem.offsetLeft-1;
       if(SC.browser.msie==7) layout.left--;
     }
-    if(this._optIsCollection && delLayout.top){
+    
+    if (this._optIsCollection && delLayout.top) {
       layout.top=this._optframe.y-delLayout.top-paneElem.offsetTop;
       if(SC.browser.msie==7) layout.top=layout.top-2;
-    }else{
+    } else {
       layout.top=this._optframe.y-paneElem.offsetTop;
       if(SC.browser.msie==7) layout.top=layout.top-2;  
     }
@@ -168,7 +174,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
    
     pane.appendChild(this);
     
-    var del = this._delegate ;
+    del = this._delegate ;
 
     this._className = this.getDelegateProperty(del,"inlineEditorClassName");
     if(this._className && !this.hasClassName(this._className)) {
@@ -326,11 +332,17 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   
   //keyUp: function() { return true; },
 
+  _scitf_blurInput: function() {
+    var el = this.$input()[0];
+    if (el) el.blur();
+    el = null;
+  },
+
   // [Safari] if you don't take key focus away from an element before you 
   // remove it from the DOM key events are no longer sent to the browser.
   /** @private */
   willRemoveFromParent: function() {
-    this.$input()[0].blur();
+    return this._scitf_blurInput();
   },
   
   // ask owner to end editing.
@@ -349,7 +361,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     // should have been covered by willRemoveFromParent, but this was needed 
     // too.
-    this.$input()[0].blur();
+    this._scitf_blurInput();
     return this.blurEditor(evt) ;
   },
   

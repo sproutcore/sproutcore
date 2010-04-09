@@ -38,6 +38,8 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   // set layout
   child.set('layout', layout) ;
 
+  console.log(child.get('layoutStyle'));
+  
   // test
   keys.forEach(function(key) {
     equals(child.get('layoutStyle')[key], no_s[key], "STYLE NO PARENT %@".fmt(key)) ;  
@@ -50,7 +52,7 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   
   // test again
   keys.forEach(function(key) {
-    equals(child.get('layoutStyle')[key], with_s[key], "STYLE NO PARENT %@".fmt(key)) ;  
+    equals(child.get('layoutStyle')[key], with_s[key], "STYLE W/ PARENT %@".fmt(key)) ;  
   });
 }
 
@@ -295,7 +297,7 @@ test("layout {centerX, centerY} - assume width/height=0", function() {
   var layout = { centerX: 0.1, centerY: 0.1 };
   var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
   var with_f = { x: 110, y: 110, width: 0, height: 0 } ;
-  var s = { width: 0, height: 0, top: "50%", left: "50%", marginTop: null, marginLeft: null } ;
+  var s = { width: 0, height: 0, top: "50%", left: "50%", marginTop: "50%", marginLeft: "50%" } ;
   performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
@@ -423,20 +425,6 @@ test("frame loc shifts with centerX/centerY", function(){
   var after =  { x: 60, y: 60, width: 180, height: 180 };
   verifyFrameResize(layout, before, after);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

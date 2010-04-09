@@ -21,8 +21,8 @@ pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
     this.set('notifiedWillBegin', YES);
 
     // The inline editor is the last view appended to the pane
-    var length = pane._showPane.childViews.length,
-    editor = pane._showPane.childViews[length - 1];
+    var length = pane._pane.childViews.length,
+    editor = pane._pane.childViews[length - 1];
 
     ok(!editor.get('isFirstResponder'), "should not be first responder yet");
   },
@@ -31,8 +31,8 @@ pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
     this.set('notifiedDidBegin', YES);
 
     // The inline editor is the last view appended to the pane
-    var length = pane._showPane.childViews.length,
-    editor = pane._showPane.childViews[length - 1];
+    var length = pane._pane.childViews.length,
+    editor = pane._pane.childViews[length - 1];
 
     ok(editor.get('isFirstResponder'), "should be first responder now");
   }
@@ -40,11 +40,10 @@ pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
   value: 'Can\'t Touch This',
 
   inlineEditorShouldBeginEditing: function(inlineEditor) {
+    console.log('inlineEditorShouldBeginEditing');
     return NO;
   }
 });
-
-pane.show();
 
 pane.resetView = function(view) {
   view.set('notifiedWillBegin', NO);
@@ -57,6 +56,8 @@ pane.resetView = function(view) {
 module("Test the beginEditing() function of SC.InlineTextFieldView", {
   setup: function() {
 
+    pane.standardSetup().setup();
+    
     var view1 = pane.view('label1'),
     view2 = pane.view("label2");
 
@@ -103,6 +104,8 @@ module("Test the beginEditing() function of SC.InlineTextFieldView", {
   teardown: function() {
     optionsForLabel1 = optionsForLabel2 = null;
     SC.InlineTextFieldView.discardEditing();
+    pane.standardSetup().teardown();
+    
   }
 });
 
@@ -146,13 +149,14 @@ function() {
 
 test("value of inline editor same as label",
 function() {
+  
   SC.RunLoop.begin();
   SC.InlineTextFieldView.beginEditing(optionsForLabel1);
   SC.RunLoop.end();
 
   // The inline editor is the last view appended to the pane
-  var length = pane._showPane.childViews.length,
-  editor = pane._showPane.childViews[length - 1],
+  var length = pane._pane.childViews.length,
+  editor = pane._pane.childViews[length - 1],
   view = pane.view('label1');
 
   equals(editor.get('value'), view.get('value'), "editor should have the same initial value as its label");
@@ -165,8 +169,8 @@ function() {
   SC.RunLoop.end();
 
   // The inline editor is the last view appended to the pane
-  var length = pane._showPane.childViews.length,
-  editor = pane._showPane.childViews[length - 1];
+  var length = pane._pane.childViews.length,
+  editor = pane._pane.childViews[length - 1];
 
   ok(editor.$("input").length > 0, "should be using an input element");
 });
@@ -180,8 +184,8 @@ function() {
   SC.RunLoop.end();
 
   // The inline editor is the last view appended to the pane
-  var length = pane._showPane.childViews.length,
-  editor = pane._showPane.childViews[length - 1];
+  var length = pane._pane.childViews.length,
+  editor = pane._pane.childViews[length - 1];
 
   ok(editor.$("textarea").length > 0, "should be using a textarea element");
 });
@@ -191,8 +195,8 @@ function() {
   SC.InlineTextFieldView.beginEditing(optionsForLabel2);
 
   // The inline editor is the last view appended to the pane
-  var length = pane._showPane.childViews.length,
-  editor = pane._showPane.childViews[length - 1];
+  var length = pane._pane.childViews.length,
+  editor = pane._pane.childViews[length - 1];
 
   ok(!editor.get('isEditing'), "editor should have isEditing set to NO");
 });
