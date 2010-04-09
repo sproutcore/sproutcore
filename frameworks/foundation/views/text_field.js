@@ -156,53 +156,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   }.property('isEnabled').cacheable(),
 
   /**
-    Override SC.Editable.beginEditing() here so we have a chance
-    to preserve the original 'value' before we edit it.
-  */
-  beginEditing: function() {
-    if (!this.get('isEditable')) return NO ;
-  
-    if (!this.get('isEditing')) {
-      this._originalValue = this.get('value'); // save our last value
-      this.setIfChanged('editingValue', this._originalValue); // init the editing value to current value
-      
-      // begin editing
-      this.set('isEditing', YES) ;
-      this.becomeFirstResponder() ;
-    }
-  
-    return YES ;
-  },
-
-  /**
-    Override SC.Editable.commitEditing() here so we can update
-    'value' if needed when committing.
-  */
-  commitEditing: function() {
-    var value, type;
-
-    if (this.get('isEditing')) {
-      this.beginPropertyChanges();
-      value = this.getValidatedValueFromFieldValue(NO); // transform raw text into validated value
-      
-      // optionally revert to previous value if SC.Error is not allowed as 'value'
-      value = ((SC.typeOf(value) !== SC.T_ERROR) || this.get('allowsErrorAsValue')) ? value : this._originalValue;
-
-      this.setIfChanged('value', value);
-      this.setIfChanged('editingValue', value);
-      this._originalValue = null; // clean up
-
-      this.applyValueToField(value); // write raw text into the field, via transform
-      this.endPropertyChanges();
-
-      this.set('isEditing', NO);
-      this.resignFirstResponder();
-    }
-  
-    return YES ;
-  },
-
-  /**
     The current selection of the text field, returned as an SC.TextSelection
     object.
 
@@ -313,7 +266,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'hint fieldValue editingValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
+  displayProperties: 'hint fieldValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
 
   createChildViews: function() {
     sc_super();
@@ -407,7 +360,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   render: function(context, firstTime) {
-    console.log('render');
     sc_super() ;
     var v, accessoryViewWidths, leftAdjustment, rightAdjustment;
 
@@ -677,36 +629,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   /**
     This function is called by the event when the textfield gets focus
   */
-
-  /**
-    Overridden from SC.FieldView, called whenever input field value changes.
-    Special implementation for SC.TextFieldView so that we can support
-    'continuouslyUpdatesValue'.
-  */
-  fieldValueDidChange: function() {
-    var value = this.getValidatedValueFromFieldValue(YES);
-    
-    this.beginPropertyChanges();
-    
-    // keep track of our edited value even if we aren't changing 'value'    
-    this.setIfChanged('editingValue', value);
-
-    // update value if desired and possible
-    if (this.get('continuouslyUpdatesValue') && ((SC.typeOf(value) !== SC.T_ERROR) || this.get('allowsErrorAsValue'))) {
-      this.setIfChanged('value', value);
-    }
-    
-    // make sure raw text gets in sync with whatever transforms and
-    // validation we have applied
-    this.applyValueToField(value);
-    this.endPropertyChanges();
-  },
-  
-  _textField_valueDidChange: function() {
-    var value = this.get('value');
-    this.setIfChanged('editingValue', value);
-    this.applyValueToField(value); // sync text in text field
-  }.observes('value'),
 
   _textField_fieldDidFocus: function(evt) {
     SC.run(function() {
@@ -1033,26 +955,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   mouseWheel: function(evt) {
     evt.allowDefault();
-    return YES;
-  },
-  
-  // some touch events (may be improvable, though)
-  touchStart: function(evt) {
-    if (!this.get('isEnabled')) {
-      evt.stop();
-    } else {
-      evt.allowDefault();
-    }
-    return YES;
-  },
-  
-  touchEnd: function(evt) {
-    this.notifyPropertyChange('selection');
-    if (!this.get('isEnabled')) {
-      evt.stop();
-    } else {
-      evt.allowDefault();
-    }
     return YES;
   },
 
