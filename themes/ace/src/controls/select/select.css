@@ -25,7 +25,9 @@
   }
 }
 
-@view(sc-button-view.sc-select-view).sel.active {
+@view(sc-button-view.sc-select-view).sel.active,
+@view(sc-button-view.sc-select-view).sel,
+@view(sc-button-view.sc-select-view).active {
   .button-left {
     background: sprite("active_select.png" clear [0 8]);
   }

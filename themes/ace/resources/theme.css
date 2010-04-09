@@ -216,6 +216,18 @@
   background: static_url("images/1.png") repeat-x 0 -472px;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
 }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-right { background: static_url("images/1.png") no-repeat right -835px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-middle {
+  background: static_url("images/1.png") repeat-x 0 -472px;
+  text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
+}
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-right { background: static_url("images/1.png") no-repeat right -835px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-middle {
+  background: static_url("images/1.png") repeat-x 0 -472px;
+  text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
+}
 .sc-theme .sc-view.ace.light.sc-segmented-view { overflow: visible; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment {
   background: none;
