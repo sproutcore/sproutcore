@@ -97,7 +97,9 @@ SC.pageItemView = SC.ListItemView.extend(
         addItem: function(from, to, designAttrs){
           var view = this.getPath('target.view');
           var value = that._propertyPathForProp(this.getPath('target.view.page'),view);
-          designAttrs[to+"Binding"] = value+"."+from;
+          view[to+"Binding"] = designAttrs[to+"Binding"] = value+"."+from;
+          view.propertyDidChange(to+"Binding");
+          view.displayDidChange();
         }
       });
 
