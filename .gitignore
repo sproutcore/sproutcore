@@ -5,4 +5,5 @@
 .gitattributes
 *.swp
 *.swo
+themes/sc_ace/resources/slices/
 tmp/
