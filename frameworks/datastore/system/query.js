@@ -546,9 +546,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     },
 
     'NUMBER': {
-      firstCharacter:   /\d/,
-      notAllowed:       /[^\d\.]/,
-      format:           /^\d+$|^\d+\.\d+$/,
+      firstCharacter:   /[\d\-]/,
+      notAllowed:       /[^\d\-\.]/,
+      format:           /^-?\d+$|^-?\d+\.\d+$/,
       evalType:         'PRIMITIVE',
       
       /** @ignore */
