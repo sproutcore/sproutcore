@@ -381,17 +381,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
         adjustmentStyle += '"' ;
       }
-      context.push('<span class="padding" '+adjustmentStyle+'>',
-                  '<span class="sc-hint">', hint, '</span>');
+      context.push('<span class="padding" '+adjustmentStyle+'>');
+      if(!SC.browser.safari) context.push('<span class="sc-hint">', hint, '</span>');
                   
       value = this.get('escapeHTML')?SC.RenderContext.escapeHTML(value):value; 
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
-        context.push('<textarea name="', name, '" ', disabled, '>', value, '</textarea></span>') ;
+        context.push('<textarea name="', name, '" ', disabled, ' placeholder="', hint,'">', value, '</textarea></span>') ;
       }
       else {
         type = this.get('isPassword') ? 'password' : 'text' ;
-        context.push('<input type="', type,'" name="', name, '" ', disabled, ' value="', value,'"/></span>') ;
+        context.push('<input type="', type,'" name="', name, '" ', disabled, ' value="', value,'" placeholder="',hint,'"/></span>') ;
       }
 
     }
