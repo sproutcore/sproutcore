@@ -2279,7 +2279,7 @@ SC.CollectionView = SC.View.extend(
     return SC.MIXED_STATE;
   },
 
-  touchDragged: function(evt) {
+  touchesDragged: function(evt) {
     this.select(null, NO);
     return SC.MIXED_STATE;
   },

@@ -160,7 +160,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return this.mouseUp(evt);
   },
   
-  touchDragged: function(evt){
+  touchesDragged: function(evt){
     return this.mouseDragged(evt);
   },
   

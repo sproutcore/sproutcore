@@ -533,7 +533,7 @@ SC.ScrollerView = SC.View.extend(
     return this.mouseUp(evt);
   },
   
-  touchDragged: function(evt){
+  touchesDragged: function(evt){
     return this.mouseDragged(evt);
   },
 
