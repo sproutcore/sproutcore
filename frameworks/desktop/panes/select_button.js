@@ -772,6 +772,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     // Reset state.
     this._isMouseDown = NO;
+    this.set('isActive', NO);
     return YES;
   },
 
