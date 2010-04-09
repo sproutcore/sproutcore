@@ -5,6 +5,7 @@
 // ========================================================================
 
 /**
+  This View is used by Greenhouse when application is in design mode
   This view draws selection handles for a given designer.  It will also 
   forward any mouse events to the underlying designer.
 */

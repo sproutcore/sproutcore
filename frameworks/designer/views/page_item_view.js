@@ -4,7 +4,7 @@
 /*globals SC */
 
 /** @class
-
+  This View is used by Greenhouse when application is in design mode
 	Used for displaying page items
 
   @extends SC.ListItemVIew

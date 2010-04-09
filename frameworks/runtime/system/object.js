@@ -297,8 +297,13 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
       
     @returns {SC.Object} new instance of the receiver class.
   */
-  create: function(props) { var C=this; return new C(arguments); },
-
+  create: function() {
+    var C=this, ret = new C(arguments); 
+    if (SC.ObjectDesigner) {
+      SC.ObjectDesigner.didCreateObject(ret, SC.$A(arguments));
+    }
+    return ret ; 
+  },
   /**
     Walk like a duck.  You can use this to quickly test classes.
     
@@ -378,8 +383,28 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   */
   kindOf: function(scClass) { 
     return (this === scClass) || this.subclassOf(scClass) ;
-  }  
+  },
   
+  // ..........................................................
+  // Designers
+  //   
+  /**
+    This method works just like extend() except that it will also preserve
+    the passed attributes.
+    
+    @param {Hash} attrs Attributes to add to view
+    @returns {Class} SC.Object subclass to create
+    @function
+  */ 
+  design: function() {
+    if (this.isDesign) return this; // only run design one time
+    var ret = this.extend.apply(this, arguments);
+    ret.isDesign = YES ;
+    if (SC.ObjectDesigner) {
+      SC.ObjectDesigner.didLoadDesign(ret, this, SC.A(arguments));
+    }
+    return ret ;
+  }
 }) ;
 
 // ..........................................

@@ -6,6 +6,8 @@
 /*jslint evil: true*/
 /** 
   @class
+  This View is used by Greenhouse when application is in design mode
+  
   
   @extends SC.ContainerView
 */
