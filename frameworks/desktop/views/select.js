@@ -117,6 +117,12 @@ SC.SelectView = SC.ButtonView.extend(
   classNames: ['sc-select-view'],
 
   /**
+    Menu attached to the SelectView.
+    @default SC.MenuView
+  */
+  menu: null,
+
+  /**
     List of actual menu items, handed off to the menu view.
 
     @property
@@ -137,12 +143,21 @@ SC.SelectView = SC.ButtonView.extend(
   _itemIdx: null,
 
   /**
-     Current Value of the selectButton
+     Current Value of the SelectView
 
      @property
      @default null
   */
   value: null ,
+
+  /**
+    if this property is set to 'YES', a checbox is shown next to the
+    selected menu item.
+
+    @private
+    @default YES
+  */
+  checkboxEnabled: YES,
 
   /**
     if this property is set to 'YES', a checbox is shown next to the
@@ -286,14 +301,19 @@ SC.SelectView = SC.ButtonView.extend(
     @private
   */
   leftAlign: function() {
-    var val = 0, controlSize = this.get('controlSize') ;
-    
-    // what. the. heck?
-    // no, I don't want to shift the menu to the left. Yet.
-    if(controlSize === SC.SMALL_CONTROL_SIZE) val = -12;
-    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -15;
-    
-    return val;
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        return SC.SelectView.TINY_OFFSET_X;
+      case SC.SMALL_CONTROL_SIZE:
+        return SC.SelectView.SMALL_OFFSET_X;
+      case SC.REGULAR_CONTROL_SIZE:
+        return SC.SelectView.REGULAR_OFFSET_X;
+      case SC.LARGE_CONTROL_SIZE:
+        return SC.SelectView.LARGE_OFFSET_X;
+      case SC.HUGE_CONTROL_SIZE:
+        return SC.SelectView.HUGE_OFFSET_X;
+    }
+    return 0;
   }.property('controlSize'),
 
   /**
@@ -440,8 +460,7 @@ SC.SelectView = SC.ButtonView.extend(
     }
 
     //Set the preference matrix for the menu pane
-    this.set('CUSTOM_MENU_ITEM_HIEGHT', this.get('controlSize') === SC.SMALL_CONTROL_SIZE ? 18 : 20);
-    this.changeSelectButtonPreferMatrix(this.get("_itemIdx")) ;
+    this.changeSelectPreferMatrix(this.get("_itemIdx")) ;
 
   },
 
@@ -457,8 +476,32 @@ SC.SelectView = SC.ButtonView.extend(
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
       customMenuView, menu, itemsLength;
-      
+    
     buttonLabel = this.$('.sc-button-label')[0] ;
+    
+    var menuWidthOffset = SC.SelectView.MENU_WIDTH_OFFSET ;
+    if(!this.get('isDefaultPosition')) {
+      switch (this.get('controlSize')) {
+        case SC.TINY_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.TINY_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.SMALL_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.SMALL_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.REGULAR_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.REGULAR_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.LARGE_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.LARGE_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.HUGE_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.HUGE_POPUP_MENU_WIDTH_OFFSET;
+          break;
+      }
+    }
+    // Get the length of the text on the button in pixels
+    menuWidth = this.get('layer').offsetWidth + menuWidthOffset ;
+    
     // Get the length of the text on the button in pixels
     menuWidth = this.get('layer').offsetWidth ;
     scrollWidth = buttonLabel.scrollWidth ;
@@ -522,7 +565,7 @@ SC.SelectView = SC.ButtonView.extend(
       classNames: ['select-button'],
 
       /**
-        The menu items are set from the itemList property of SelectButton
+        The menu items are set from the itemList property of SelectView
 
         @property
       */
@@ -549,15 +592,19 @@ SC.SelectView = SC.ButtonView.extend(
       itemHeightKey: 'height',
       layout: { width: lastMenuWidth },
       controlSize: menuControlSize,
-      itemWidth: lastMenuWidth,
-      contentView: SC.View.extend({
-      })
+      itemWidth: lastMenuWidth
     }) ;
 
     // no menu to toggle... bail...
     if (!menu) return NO ;
-    menu.set('currentSelectedMenuItem', value) ;
+    this.set('menu', menu);
     menu.popup(this, this.preferMatrix) ;
+    this.set('menu', menu);
+
+    customView = menu.menuItemViewForContentIndex(this.get('_itemIdx'));
+    customView.becomeFirstResponder();
+
+    this.set('isActive', YES);
     return YES ;
   },
 
@@ -567,6 +614,7 @@ SC.SelectView = SC.ButtonView.extend(
   */
   displaySelectedItem: function(menuView) {
     var currentItem = menuView.get("selectedItem");
+    
     this.set("value", currentItem.get("value"));
     this.set("title", currentItem.get("title"));
     this.set("_itemIdx", currentItem.get("contentIndex"));
@@ -577,19 +625,43 @@ SC.SelectView = SC.ButtonView.extend(
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
   */
-  changeSelectButtonPreferMatrix: function() {
-    var controlSizeTuning = this.get('controlSize') === SC.SMALL_CONTROL_SIZE ? 0 : -2;
+  changeSelectPreferMatrix: function() {
+    var controlSizeTuning = 0, customMenuItemHeight = 0 ;
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.TINY_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
+        break;
+      case SC.SMALL_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.SMALL_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
+        break;
+      case SC.REGULAR_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.REGULAR_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
+        break;
+      case SC.LARGE_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.LARGE_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
+        break;
+      case SC.HUGE_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.HUGE_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
+        break;
+    }
+
     var preferMatrixAttributeTop = controlSizeTuning ,
       itemIdx = this.get('_itemIdx') ,
       leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
 
-    if(this.get('positionMenuBelow')) {
-      defPreferMatrix = [leftAlign, 4, 3] ;
+    if(this.get('isDefaultPosition')) {
+      defPreferMatrix = [1, 0, 3] ;
       this.set('preferMatrix', defPreferMatrix) ;
     }
     else {
       if(itemIdx) {
-        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT + controlSizeTuning;
+        preferMatrixAttributeTop = itemIdx * customMenuItemHeight +
+          controlSizeTuning ;
       }
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
       this.set('preferMatrix', tempPreferMatrix) ;
@@ -610,6 +682,56 @@ SC.SelectView = SC.ButtonView.extend(
     return YES ;
   },
 
+  /** @private
+    Because we responded YES to the mouseDown event, we have responsibility
+    for handling the corresponding mouseUp event.
+
+    However, the user may click on this button, then drag the mouse down to a
+    menu item, and release the mouse over the menu item. We therefore need to
+    delegate any mouseUp events to the menu's menu item, if one is selected.
+
+    We also need to differentiate between a single click and a click and hold.
+    If the user clicks and holds, we want to close the menu when they release.
+    Otherwise, we should wait until they click on the menu's modal pane before
+    removing our active state.
+
+    @param {SC.Event} evt
+    @returns {Boolean}
+  */
+  mouseUp: function(evt) {
+    var menu = this.get('menu'), targetMenuItem, success;
+
+    if (menu) {
+      targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
+
+      if (targetMenuItem && menu.get('mouseHasEntered')) {
+        // Have the menu item perform its action.
+        // If the menu returns NO, it had no action to
+        // perform, so we should close the menu immediately.
+        if (!targetMenuItem.performAction()) menu.remove();
+      } else {
+        // If the user waits more than 200ms between mouseDown and mouseUp,
+        // we can assume that they are clicking and dragging to the menu item,
+        // and we should close the menu if they mouseup anywhere not inside
+        // the menu.
+        if (evt.timeStamp - this._mouseDownTimestamp > 400) {
+          menu.remove();
+        }
+      }
+    }
+
+    // Reset state.
+    this._isMouseDown = NO;
+    return YES;
+  },
+
+  /**
+    Override mouseExited to not remove the active state on mouseexit.
+  */
+  mouseExited: function() {
+    return YES;
+  },
+  
   /**
     @private
 
@@ -641,9 +763,42 @@ SC.SelectView = SC.ButtonView.extend(
     return arguments.callee.base.apply(this,arguments);
   },
   
+  /** Function overridden - tied to the isEnabled state */
   acceptsFirstResponder: function() {
-    return this.get("isEnabled");
-  }.property("isEnabled")
+    return this.get('isEnabled');
+  }.property('isEnabled'),
+  
+  /** @private
+    Override the button isSelectedDidChange function in order to not perform any action
+    on selecting the select_button
+  */
+  _button_isSelectedDidChange: function() {
+    
+  }.observes('isSelected')
 
 }) ;
 
+/**
+  Default metrics for the different control sizes.
+*/
+SC.SelectView.TINY_OFFSET_X = 0;
+SC.SelectView.TINY_OFFSET_Y = 0;
+SC.SelectView.TINY_POPUP_MENU_WIDTH_OFFSET = 0;
+
+SC.SelectView.SMALL_OFFSET_X = -18;
+SC.SelectView.SMALL_OFFSET_Y = 3;
+SC.SelectView.SMALL_POPUP_MENU_WIDTH_OFFSET = 7;
+
+SC.SelectView.REGULAR_OFFSET_X = -17;
+SC.SelectView.REGULAR_OFFSET_Y = 3;
+SC.SelectView.REGULAR_POPUP_MENU_WIDTH_OFFSET = 4;
+
+SC.SelectView.LARGE_OFFSET_X = -17;
+SC.SelectView.LARGE_OFFSET_Y = 6;
+SC.SelectView.LARGE_POPUP_MENU_WIDTH_OFFSET = 3;
+
+SC.SelectView.HUGE_OFFSET_X = 0;
+SC.SelectView.HUGE_OFFSET_Y = 0;
+SC.SelectView.HUGE_POPUP_MENU_WIDTH_OFFSET = 0;
+
+SC.SelectView.MENU_WIDTH_OFFSET = -2;
