@@ -99,11 +99,11 @@ SC.pageItemView = SC.ListItemView.extend(
           var value = that._propertyPathForProp(this.getPath('target.view.page'),view);
           view[to+"Binding"] = designAttrs[to+"Binding"] = value+"."+from;
           view.propertyDidChange(to+"Binding");
-          view.displayDidChange();
+          if(view.displayDidChange) view.displayDidChange();
         }
       });
 
-      SC._Greenhouse.sendAction('createBindingPopup', actionObj);
+      SC._Greenhouse.sendAction('newBindingPopup', actionObj);
 
       return SC.DRAG_LINK;
     }

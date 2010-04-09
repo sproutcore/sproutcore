@@ -123,7 +123,7 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
         }
       });
       
-      SC._Greenhouse.sendAction('addToPage', actionObj);
+      SC._Greenhouse.sendAction('newPageElement', actionObj);
       return SC.DRAG_ANY;
     }
     return SC.DRAG_NONE ;
