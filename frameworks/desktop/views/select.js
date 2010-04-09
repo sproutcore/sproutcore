@@ -235,7 +235,7 @@ SC.SelectView = SC.ButtonView.extend(
 
     @private
   */
-  isSelectedBinding: '*menu.isVisibleInWindow',
+  isActiveBinding: '*menu.isVisibleInWindow',
 
   /**
     If this property is set to 'YES', the menu pane will be positioned
@@ -597,7 +597,6 @@ SC.SelectView = SC.ButtonView.extend(
 
     // no menu to toggle... bail...
     if (!menu) return NO ;
-    this.set('menu', menu);
     menu.popup(this, this.preferMatrix) ;
     this.set('menu', menu);
 
