@@ -77,7 +77,8 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
   
   renderContents: function(context) {
     // render inner html 
-    context = context.push("<span class='sc-button-inner'>");
+    var minWidth = (this.titleMinWidth ? "style='min-width: " + this.titleMinWidth + "px'" : "");
+    context = context.push("<span class='sc-button-inner' " + minWidth + ">");
     
     /* Render title */
     context = context.begin("label").addClass("sc-button-label");
