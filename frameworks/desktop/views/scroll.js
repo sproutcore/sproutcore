@@ -131,13 +131,16 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     @property {Number}
   */
   maximumHorizontalScrollOffset: function() {
-    var view = this.get('contentView') ;
-    var contentWidth = view ? view.get('frame').width : 0 ;
+    var view = this.get('contentView'),
+        contentWidth = 0, calculatedWidth = 0;
+        
+    if (view && view.get('frame')) contentWidth = view.get('frame').width;
+    if (view) calculatedWidth = view.calculatedWidth || 0;
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view.calculatedWidth && view.calculatedWidth!==0){
-      contentWidth = view.calculatedWidth; 
+    if(calculatedWidth && calculatedWidth!==0){
+      contentWidth = calculatedWidth; 
     }
     contentWidth *= this._scale;
     
@@ -157,13 +160,16 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     @property {Number}
   */
   maximumVerticalScrollOffset: function() {
-    var view = this.get('contentView') ;
-    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0 ;
+    var view = this.get('contentView'),
+        contentHeight = 0, calculatedHeight = 0;
+        
+    if (view && view.get('frame')) contentHeight = view.get('frame').height;
+    if (view) calculatedHeight = view.calculatedHeight || 0;
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view.calculatedHeight && view.calculatedHeight!==0){
-      contentHeight = view.calculatedHeight; 
+    if(calculatedHeight && calculatedHeight!==0){
+      contentHeight = calculatedHeight; 
     }
     contentHeight *= this._scale;
     
