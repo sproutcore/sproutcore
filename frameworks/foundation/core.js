@@ -38,6 +38,35 @@ SC.DROP_AFTER = 0x04 ;
 */
 SC.DROP_ANY = 0x07 ;
 
+/**
+  Indicates that the content should be aligned to the left.
+*/
+SC.ALIGN_LEFT = 'left';
+
+/**
+  Indicates that the content should be aligned to the right.
+*/
+SC.ALIGN_RIGHT = 'right';
+
+/**
+  Indicates that the content should be aligned to the center.
+*/
+SC.ALIGN_CENTER = 'center';
+
+/**
+  Indicates that the content should be aligned to the top.
+*/
+SC.ALIGN_TOP = 'top';
+
+/**
+  Indicates that the content should be aligned to the middle.
+*/
+SC.ALIGN_MIDDLE = 'middle';
+
+/**
+  Indicates that the content should be aligned to the bottom.
+*/
+SC.ALIGN_BOTTOM = 'bottom';
 
 /**
   This variable is here to make the tab focus behavior work like safari's.

@@ -8,10 +8,6 @@
 sc_require('views/view') ;
 sc_require('mixins/control') ;
 
-SC.ALIGN_LEFT = 'left';
-SC.ALIGN_RIGHT = 'right';
-SC.ALIGN_CENTER = 'center';
-
 SC.REGULAR_WEIGHT = 'normal';
 SC.BOLD_WEIGHT = 'bold';
 
