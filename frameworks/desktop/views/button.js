@@ -270,6 +270,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       isCancel: this.get('isCancel'),
       icon: this.get('icon'),
       supportFocusRing: this.get("supportFocusRing"),
+      titleMinWidth: this.get('titleMinWidth'),
       
       title: this.get("displayTitle"),
       escapeHTML: this.get("escapeHTML"),
