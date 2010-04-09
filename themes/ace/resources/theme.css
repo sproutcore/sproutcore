@@ -193,26 +193,26 @@
   width: 16px;
   background: static_url("images/2.png") repeat-y -48px 0;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size .button-left { background: static_url("images/1.png") no-repeat -14px -1959px; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size .button-right {
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-left { background: static_url("images/1.png") no-repeat -14px -1959px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-right {
   right: 0px;
   width: 25px;
   background: static_url("images/1.png") no-repeat right -860px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size .button-middle {
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-middle {
   background: static_url("images/1.png") repeat-x 0 -422px;
   right: 25px;
   left: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size .sc-button-label {
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .sc-button-label {
   text-align: left;
   right: 25px;
   vertical-align: top;
   color: #333333;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size.active .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size.active .button-right { background: static_url("images/1.png") no-repeat right -835px; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-select-view.sc-regular-size.active .button-middle {
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-right { background: static_url("images/1.png") no-repeat right -835px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-middle {
   background: static_url("images/1.png") repeat-x 0 -472px;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
 }
