@@ -119,6 +119,19 @@ SC.MasterDetailView = SC.View.extend({
     layout: { width: 250, height: 480 }
   }),
   
+  /**
+    The distance the pointer should be from the edge.
+    Keep in mind that this will not necessarily apply to the theme--it merely
+    changes the position of the picker itself.
+    
+    TODO: MAKE PICKERPANE DO IT!
+  */
+  pointerDistanceFromEdge: function(){
+    var t = this.get("theme");
+    if (t && t.picker) return t.picker().POINTER_DISTANCE_FROM_EDGE;
+    return null;
+  }.property("theme").cacheable(),
+  
   /// INTERNAL CODE. HERE, THERE BE MONSTERS!
   _picker: null,
   
@@ -127,7 +140,8 @@ SC.MasterDetailView = SC.View.extend({
     this._picker = pp.create({
     });
     this._picker.set("contentView", this.get("masterView"));
-    this._picker.popup(view);
+    this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge") || 20);
+    this._picker.popup(view, SC.PICKER_POINTER, [3, 0, 1, 2, 3], [9, -9, -18, 18]);
   },
   
   _pickerDidHide: function() {
@@ -190,6 +204,11 @@ SC.MasterDetailView = SC.View.extend({
         detail = this.get("detailView");
     
     if (masterIsVisible) {
+      // hide picker if needed
+      if (this._picker && this._picker.get("isVisibleInWindow")) {
+        this._picker.remove();
+      }
+      
       // draw master if needed
       if (!this._masterIsDrawn) {
         this.appendChild(master);
