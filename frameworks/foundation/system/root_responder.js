@@ -422,8 +422,8 @@ SC.RootResponder = SC.Object.extend({
     @returns {Boolean} YES if action was performed, NO otherwise
     @test in targetForAction
   */
-  sendAction: function( action, target, sender, pane, context) {
-    target = this.targetForAction(action, target, sender, pane) ;
+  sendAction: function( action, target, sender, pane, context, firstResponder) {
+    target = this.targetForAction(action, target, sender, pane, firstResponder) ;
 
     // HACK: If the target is a ResponderContext, forward the action.
     if (target && target.isResponderContext) {
