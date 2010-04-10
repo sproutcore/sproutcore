@@ -14,68 +14,80 @@ TestControls.buttonsPage = SC.View.design({
         value: "Buttons"
       }),
       normal: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 24, width: 100 },
         title: "Click Me"
       })),
 
       small: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 18, width: 100 },
         title: "Click Me"
       })),
 
       huge: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 30, width: 100 },
         title: "Click Me"
       })),
 
       jumbo: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 44, width: 100 },
         title: "Click Me"
       })),
       
       normalToggle: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 24, width: 100 },
         title: "Click Me",
         buttonBehavior: SC.TOGGLE_BEHAVIOR
       })),
 
       smallToggle: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 18, width: 100 },
         title: "Click Me",
         buttonBehavior: SC.TOGGLE_BEHAVIOR
       })),
 
       hugeToggle: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 30, width: 100 },
         title: "Click Me",
         buttonBehavior: SC.TOGGLE_BEHAVIOR
       })),
 
       jumboToggle: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 44, width: 100 },
         title: "Click Me",
         buttonBehavior: SC.TOGGLE_BEHAVIOR
       })),
       
       disabledSmall: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 18, width: 150 },
         isEnabled: NO,
         title: "Don't Click Me"
       })),
       
       disabledNormal: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 24, width: 150 },
         isEnabled: NO,
         title: "Don't Click Me"
       })),
       
       disabledHuge: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 30, width: 150 },
         isEnabled: NO,
         title: "Don't Click Me"
       })),
       
       disabledJumbo: SC.FormView.row(SC.ButtonView.design({
+        controlSize: SC.AUTO_CONTROL_SIZE,
         layout: { height: 44, width: 150 },
         isEnabled: NO,
         title: "Don't Click Me"
