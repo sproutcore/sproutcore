@@ -21,7 +21,23 @@ SC.Theme = SC.Object.extend({
     using this theme (including child views of views using this theme) will have class
     names like "sc-view sc-type-view sc-blah-blah ace light".
   */
-  classNames: []
+  classNames: [],
+  
+  /**
+    Finds a theme within this theme or any parent theme.
+  */
+  find: function(name) {
+    var p = this.themeClass, theme = null;
+
+    // call find on our class and each parent.
+    while (p && !theme) {
+      p.find(name); // this is on the class, mind, not the instance
+      p = p.baseThemeClass;
+    }
+    
+    return theme;
+  }
+  
 });
 
 SC.mixin(SC.Theme, {
@@ -31,8 +47,26 @@ SC.mixin(SC.Theme, {
   */
   extend: function() {
     var result = SC.Object.extend.apply(this, arguments);
+    result.prototype.baseThemeClass = this;
+    result.prototype.themeClass = result; // a convenience.
     result.renderers = result.prototype; // make a renderers object so you don't keep typing .prototype.whatever
     return result;
+  },
+  
+  /**
+    Creates a light subtheme based on this theme with the specified class names. 
+    This basically is a shortcut for extending in certain simple cases.
+    
+    It automatically adds it to the parent theme (this).
+  */
+  subtheme: function(name, classNames) {
+    // extend the theme
+    var t = this.extend({
+      classNames: SC.$A(classNames)
+    });
+    
+    // add to our set of themes
+    this.register(name, t);
   },
   
   /* Theme management */
@@ -42,7 +76,7 @@ SC.mixin(SC.Theme, {
     Finds a theme by name.
   */
   find: function(themeName) {
-    var theme = SC.Theme.themes[themeName];
+    var theme = this.themes[themeName];
     if (SC.none(theme)) return null;
     return theme;
   },
@@ -51,6 +85,6 @@ SC.mixin(SC.Theme, {
     Registers a theme with SproutCore, creating an instance of it.
   */
   register: function(themeName, theme) {
-    SC.Theme.themes[themeName] = theme.create();
+    this[themeName] = theme.create();
   }
 });

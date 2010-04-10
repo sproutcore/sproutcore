@@ -204,31 +204,65 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // THEME SUPPORT
   // 
   
+  _baseThemeName: false,
+  
+  /**
+    The base theme to start from; the "theme" property looks in this theme.
+    baseTheme is inherited from parent's theme property.
+  */
+  baseTheme: null,
+  
+  /**
+    This sets the base theme 
+  */
+  _baseThemeProperty: function(key, value) {
+    if (SC.typeOf(value) === SC.T_STRING) {
+      this.set("_baseThemeName", value);
+    }
+    
+    // find the base theme by name if we have a name.
+    if (this.get("_baseThemeName")) {
+      var theme = SC.Theme.find(this.get("_baseThemeName"));
+      if (theme) return theme;
+    }
+    
+    // otherwise, return parent's theme.
+    var parent = this.get("parentView");
+    if (parent) return parent.get("theme");
+    
+    return null;
+  }.property().cacheable(),
+  
+  
   _last_theme: null, // used to determine if theme has changed since last time the property was evaluated.
-  themeName: false,
+  _themeName: false,
   
   _themeProperty: function(key, value) {
     // if it is a string, set theme name
     if (SC.typeOf(value) === SC.T_STRING) {
-      this.set("themeName", value);
+      this.set("_themeName", value);
     }
+    
+    // get the base theme
+    var base = this.get("baseTheme");
     
     // find theme, if possible
-    if (this.get("themeName")) {
-      var theme = SC.Theme.find(this.get("themeName"));
-      if (theme) {
-        return theme;
+    if (this.get("_themeName")) {
+      // Note: theme instance "find" function will search every parent
+      // _except_ global (which is not a parent)
+      var theme;
+      if (base) {
+        theme = base.find(this.get("_themeName"));
+        if (theme) return theme;
       }
+      
+      theme = SC.Theme.find(this.get("_themeName"));
+      if (theme) return theme;
     }
     
-    // otherwise, return parent's theme if possible
-    var parent = this.get("parentView");
-    if (parent) {
-      return parent.get("theme");
-    }
-
-    return null;
-  }.property().cacheable(),
+    // can't find anything, return base.
+    return base;
+  }.property("baseTheme").cacheable(),
   
   _notifyThemeDidChange: function() {
     var len, idx, childViews = this.get("childViews");
@@ -646,8 +680,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   parentViewDidChange: function() {
     this.recomputeIsVisibleInWindow() ;
     
-    this.notifyPropertyChange("theme");
-    
+    this.notifyPropertyChange("baseTheme");
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
     
@@ -1849,6 +1882,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     sc_super() ;
     
     // set up theme
+    var baseTheme = this.baseTheme;
+    this.baseTheme = this._baseThemeProperty;
+    this.set("baseTheme", baseTheme);
+    
     var theme = this.theme;
     this.theme = this._themeProperty;
     this.set("theme", theme);
