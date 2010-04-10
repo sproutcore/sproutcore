@@ -66,7 +66,7 @@ SC.mixin(SC.Theme, {
     });
     
     // add to our set of themes
-    this.register(name, t);
+    return this.register(name, t);
   },
   
   /* Theme management */
@@ -85,6 +85,8 @@ SC.mixin(SC.Theme, {
     Registers a theme with SproutCore, creating an instance of it.
   */
   register: function(themeName, theme) {
-    this[themeName] = theme.create();
+    var t = theme.create();
+    this.themes[themeName] = t;
+    return t;
   }
 });
