@@ -30,7 +30,7 @@ config :bootstrap,  :required => [], :use_modules => false
 config :runtime,    :required => []
 config :foundation, :required => [:runtime]
 config :datastore,  :required => [:runtime]
-
+config :statechart, :required => [:runtime]
 
 # APP-LEVEL FRAMEWORKS
 %w(desktop mobile designer media).each do |app_framework|
