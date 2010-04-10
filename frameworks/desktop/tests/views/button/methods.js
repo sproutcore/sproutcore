@@ -42,6 +42,30 @@ test("Test different moused states", function() {
   equals(b.get('value'), b.get('toggleOffValue'), "the value should be the same as the toggle value");
 });
 
+test("Actions should be sent up the responder chain", function() {
+  var methodOnParentWasCalled = NO;
+  
+  // create a pane to test with. It has a child view, and under that, a button.
+  // the button sends an action up to its parent. We hope. :)
+  var pane = SC.Pane.create({
+    childViews: "v".w(),
+    v: SC.View.extend({
+      methodOnParent: function() {
+        methodOnParentWasCalled = YES;
+      },
+      childViews: "b".w(),
+      b: SC.ButtonView.extend({
+        action: "methodOnParent"
+      })
+    })
+  });
+  
+  // the pane has to be in DOM for this to work, apparently.
+  pane.append();
+  pane.v.b.triggerAction();
+  ok(methodOnParentWasCalled, "method on parent should have been called");
+  pane.remove();
+});
 
 module("SC.ButtonView#actions - SC.HOLD_BEHAVIOR", {
   setup: function() {
@@ -122,3 +146,4 @@ test("Should stop when inactive", function(){
   stop();
   setTimeout(assertions, 10);
 });
+
