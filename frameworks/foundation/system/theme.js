@@ -66,7 +66,10 @@ SC.mixin(SC.Theme, {
     });
     
     // add to our set of themes
-    return this.register(name, t);
+    this.register(name, t);
+    
+    // and return the theme class
+    return t;
   },
   
   /* Theme management */
