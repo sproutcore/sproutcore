@@ -108,7 +108,8 @@ end
 
 config :greenhouse, 
   :required => [:sproutcore, :'sproutcore/designer', :statechart],
-  :theme    => :standard_theme
+  :theme    => :ace
+
   
 
  
