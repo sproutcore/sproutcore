@@ -237,6 +237,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _last_theme: null, // used to determine if theme has changed since last time the property was evaluated.
   _themeName: false,
   
+  // baseTheme is a "property"; since it gets set after extension of the view,
+  // we need an observer in addition to it to actually do notifications.
+  _baseThemeDidChange: function() {
+    this.notifyPropertyChange("theme");
+  }.observes("baseTheme"),
+  
   _themeProperty: function(key, value) {
     // if it is a string, set theme name
     if (SC.typeOf(value) === SC.T_STRING) {
@@ -262,12 +268,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // can't find anything, return base.
     return base;
-  }.property("baseTheme").cacheable(),
+  }.property().cacheable(),
   
   _notifyThemeDidChange: function() {
     var len, idx, childViews = this.get("childViews");
     len = childViews.length;
     for (idx = 0; idx < len; idx++){
+      childViews[idx].notifyPropertyChange("baseTheme");
       childViews[idx].notifyPropertyChange("theme");
     }
   },
