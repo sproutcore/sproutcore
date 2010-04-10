@@ -841,6 +841,12 @@ SC.RootResponder = SC.Object.extend({
   },
 
   assignTouch: function(touch, view) {
+    // unassign from old view if necessary
+    if (touch.view === view) return;
+    if (touch.view) {
+      this.unassignTouch(touch);
+    }
+    
     // create view entry if needed
     if (!this._touchedViews[SC.guidFor(view)]) {
       this._touchedViews[SC.guidFor(view)] = {
@@ -1239,6 +1245,10 @@ SC.RootResponder = SC.Object.extend({
             a = "touchCancelled"; // any further ones receive cancelled
           }
         }
+        
+        // as any of the above might have retriggered the touch temporarily, we should
+        // clear things once more just to be certain things are okay.
+        this.unassignTouch(touchEntry);
 
         // clear responders (just to be thorough)
         touchEntry.touchResponders = null;
