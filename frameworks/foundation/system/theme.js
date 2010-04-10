@@ -31,8 +31,8 @@ SC.Theme = SC.Object.extend({
 
     // call find on our class and each parent.
     while (p && !theme) {
-      p.find(name); // this is on the class, mind, not the instance
-      p = p.baseThemeClass;
+      theme = p.find(name); // this is on the class, mind, not the instance
+      p = p.baseTheme;
     }
     
     return theme;
@@ -47,7 +47,8 @@ SC.mixin(SC.Theme, {
   */
   extend: function() {
     var result = SC.Object.extend.apply(this, arguments);
-    result.prototype.baseThemeClass = this;
+    result.themes = {}; // make sure each has their own theme set
+    result.baseTheme = this;
     result.prototype.themeClass = result; // a convenience.
     result.renderers = result.prototype; // make a renderers object so you don't keep typing .prototype.whatever
     return result;
