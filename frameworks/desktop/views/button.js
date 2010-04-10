@@ -483,7 +483,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       } else {
         if (rootResponder) {
           // newer action method + optional target syntax...
-          rootResponder.sendAction(action, target, this, this.get('pane'));
+          this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'), null, this);
         }
       }
     }
