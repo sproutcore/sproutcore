@@ -420,15 +420,15 @@ SC.RootResponder = SC.Object.extend({
 
     // HACK: If the target is a ResponderContext, forward the action.
     if (target && target.isResponderContext) {
-      return !!target.sendAction(action, sender, context);
+      return !!target.sendAction(action, sender, context, firstResponder);
     } else return target && target.tryToPerform(action, sender);
   },
 
-  _responderFor: function(target, methodName) {
+  _responderFor: function(target, methodName, firstResponder) {
     var defaultResponder = target ? target.get('defaultResponder') : null;
 
     if (target) {
-      target = target.get('firstResponder') || target;
+      target = firstResponder || target.get('firstResponder') || target;
       do {
         if (target.respondsTo(methodName)) return target ;
       } while ((target = target.get('nextResponder'))) ;
@@ -465,9 +465,10 @@ SC.RootResponder = SC.Object.extend({
     @param {String} method name for target
     @param {Object} sender optional sender
     @param {SC.Pane} optional pane
+    @param {firstResponder} a first responder to use
     @returns {Object} target object or null if none found
   */
-  targetForAction: function(methodName, target, sender, pane) {
+  targetForAction: function(methodName, target, sender, pane, firstResponder) {
 
     // 1. no action, no target...
     if (!methodName || (SC.typeOf(methodName) !== SC.T_STRING)) {
@@ -494,7 +495,7 @@ SC.RootResponder = SC.Object.extend({
 
     // 3. an explicit pane was passed...
     if (pane) {
-      return this._responderFor(pane, methodName) ;
+      return this._responderFor(pane, methodName, firstResponder) ;
     }
 
     // 4. no target or pane passed... try to find target in the active panes

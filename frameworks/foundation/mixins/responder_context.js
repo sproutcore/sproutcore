@@ -224,8 +224,8 @@ SC.ResponderContext = {
     @param {Object} context optional additonal context info
     @returns {SC.Responder} the responder that handled it or null
   */
-  sendAction: function(action, sender, context, firstResponder) {
-    var working = firstResponder || this.get('firstResponder'),
+  sendAction: function(action, sender, context) {
+    var working = this.get('firstResponder'),
         last    = this.get('nextResponder'),
         trace   = this.get('trace'),
         handled = NO,
