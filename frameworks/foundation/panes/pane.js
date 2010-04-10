@@ -94,7 +94,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   page: null,
   
-  theme : "sc-empty",
+  baseTheme : "sc-empty",
   
   // .......................................................
   // ROOT RESPONDER SUPPORT
