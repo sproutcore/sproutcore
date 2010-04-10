@@ -1,0 +1,15 @@
+img.sc-view.logo {
+  -webkit-box-reflect:below 5px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.8, transparent), to(white));
+}
+
+h1.sc-view.welcome {
+  font-size: 24px;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin: 0;
+  padding: 0;
+}
+
+body { 
+  overflow: hidden;
+}
