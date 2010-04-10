@@ -90,4 +90,10 @@ config :core_tools, :required => [:desktop]
   # end
   
 end
+
+config :greenhouse, 
+  :required => [:sproutcore, :'sproutcore/designer', :statechart],
+  :theme    => :standard_theme
+  
+
  
