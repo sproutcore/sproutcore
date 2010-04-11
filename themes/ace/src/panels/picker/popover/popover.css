@@ -7,12 +7,13 @@
 
 /* First, we do change toolbars. They are rendered by the workspace part */
 @view(sc-toolbar-view) {
-  background-image: none;
+  background: none;
+  color: white;
+  text-shadow: none;
+  border-bottom: 0px none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
-  border: 0px none;
 }
-
 /* Now, said "workspace part" */
 
 /*************** BASIC ****************/
@@ -20,23 +21,27 @@
   overflow: visible;
   background: none;
   
+  /* z-index can't go at top--it would interrupt events */
+  
   .sc-workspace-overlay {
-    z-index: 10;
     position: absolute; left: 0; top: 0; bottom: 0; right: 0;
     /* TOP */
     .top-left-edge {
+      z-index: 5;
       position: absolute;
       left: -25px; top: -25px; width: 40px; height: 40px;
       background: sprite("popover_notoolbar.png" [0 0 40 40]);
     }
     
     .top-right-edge {
+      z-index: 5;
       position: absolute;
       right: -25px; top: -25px; width: 40px; height: 40px;
       background: sprite("popover_notoolbar.png" [-40 0 40 40]);
     }
     
     .top-edge {
+      z-index: 5;
       position: absolute;
       left: 15px; right: 15px; top: -25px; height: 40px;
       background: sprite("popover_notoolbar.png" [40 0 1 40] repeat-x);
@@ -44,18 +49,21 @@
     
     /* BOTTOM */
     .bottom-left-edge {
+      z-index: 5;
       position: absolute;
       left: -25px; bottom: -25px; width: 40px; height: 40px;
       background: sprite("popover_notoolbar.png" [0 -40 40 40]);
     }
     
     .bottom-right-edge {
+      z-index: 5;
       position: absolute;
       right: -25px; bottom: -25px; width: 40px; height: 40px;
       background: sprite("popover_notoolbar.png" [-40 -40 40 40]);
     }
     
     .bottom-edge {
+      z-index: 5;
       position: absolute;
       left: 15px; right: 15px; bottom: -25px; height: 40px;
       background: sprite("popover_notoolbar.png" [40 -40 1 40] repeat-x);
@@ -63,20 +71,27 @@
     
     /* LEFT AND RIGHT SIDES */
     .left-edge {
+      z-index: 5;
       position: absolute;
       left: -25px; top: 15px; bottom: 15px; width: 40px;
       background: sprite("popover_notoolbar.png" [0 40 40 1] repeat-y);
     }
     
     .right-edge {
+      z-index: 5;
       position: absolute;
       right: -25px; top: 15px; bottom: 15px; width: 40px;
       background: sprite("popover_notoolbar.png" [-40 40 40 1] repeat-y);
+    }
+    
+    .sc-pointer {
+      z-index:6;
     }
   }
   
 }
 
+/* TOOLBARS */
 @view(sc-workspace-view).top-toolbar {
   .sc-workspace-overlay {
     
@@ -121,6 +136,39 @@
     .left-edge { bottom: 60px; }
     .right-edge { bottom: 60px; }
   }
+}
+
+
+/* TOP POINTERS (for bottom-alignment) */
+@view(sc-picker).perfectBottom {
+  .sc-pointer {
+    position: absolute; width: 50px; height: 25px; margin-left: -25px; left: 50%; top: -25px;
+    background: sprite("popover_pointers.png" [155 0 50 25]);
+  }
+}
+
+@view(sc-picker).perfectBottom .top-toolbar {
+  .sc-pointer { top: -20px; }
+}
+
+@view(sc-picker).perfectBottom.extra-left {
+  .sc-pointer { left: 45px; }
+}
+
+/* BOTTOM POINTERS (for top-alignment) */
+@view(sc-picker).perfectTop {
+  .sc-pointer {
+    position: absolute; width: 50px; height: 23px; margin-left: -25px; left: 50%; bottom: -25px;
+    background: sprite("popover_pointers.png" [155 -23 50 23]);
+  }
+}
+
+@view(sc-picker).perfectTop .bottom-toolbar {
+  .sc-pointer { bottom: -20px; }
+}
+
+@view(sc-picker).perfectTop.extra-left {
+  .sc-pointer { left: 45px; }
 }
 
 @end
