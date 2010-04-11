@@ -19,32 +19,55 @@ require("resources/tab_page");
 TestControls.mainPage = SC.Page.create({
   
   mainPane: SC.MainPane.design(SC.Animatable, {
-    childViews: "toolbar split".w(),
+    childViews: "split".w(),
     
-    toolbar: SC.ToolbarView.design({
-      layout: { top: 0, left: 0, right: 0, height: 32 },
-      childViews: "label".w(),
-      label: SC.LabelView.design({
-        layout: { left: 10, centerY: 0, height: 21, width: 200 },
-        value: "Test Controls",
-        classNames: "embossed".w()
-      })
-    }),
-    split: SC.SplitView.design ({
-      layout: {left: 0, top: 32, right: 0, bottom: 0},
-      dividerThickness: 1,
-      defaultThickness: 200,
-      topLeftView: SC.ScrollView.design({
-        contentView: SC.SourceListView.design({
-          layout: { left: 0, top: 0, right: 0, bottom: 0 },
-          contentValueKey: "name",
-          contentBinding: "TestControls.categoriesController.arrangedObjects",
-          selectionBinding: "TestControls.categoriesController.selection"
+    split: SC.MasterDetailView.design ({
+      autoHideMaster: YES,
+      masterView: SC.WorkspaceView.design({
+        topToolbar: SC.ToolbarView.design({
+          layout: { top: 0, left: 0, right: 0, height: 32 },
+          childViews: "label".w(),
+          label: SC.LabelView.design({
+            layout: { left: 10, centerY: 0, height: 21, width: 200 },
+            value: "Test Controls",
+            classNames: "embossed".w()
+          })
+        }),
+        
+        contentView: SC.ScrollView.design({
+          contentView: SC.SourceListView.design({
+            layout: { left: 0, top: 0, right: 0, bottom: 0 },
+            contentValueKey: "name",
+            contentBinding: "TestControls.categoriesController.arrangedObjects",
+            selectionBinding: "TestControls.categoriesController.selection"
+          })
         })
       }),
-      bottomRightView: SC.ContainerView.design({
-        nowShowing: "welcome",
-        nowShowingBinding: "TestControls.categoryController.show"
+      detailView: SC.WorkspaceView.design({
+        topToolbar: SC.ToolbarView.design({
+          layout: { top: 0, left: 0, right: 0, height: 32 },
+          childViews: "showMaster label".w(),
+          showMaster: SC.ButtonView.design({
+            layout: { left: 7, centerY: 0, height: 30, width: 100 },
+            controlSize: SC.AUTO_CONTROL_SIZE,
+            isVisible: NO,
+            isVisibleBinding: ".parentView.masterIsHidden",
+            title: "Tests",
+            action: "toggleMasterPicker"
+          }),
+          
+          label: SC.LabelView.design({
+            layout: { left: 7, centerY: 0, height: 21, width: 200 },
+            value: "Test Controls",
+            classNames: "embossed".w(),
+            isVisible: NO,
+            isVisibleBinding: SC.Binding.from(".parentView.masterIsHidden").not()
+          })
+        }),
+        contentView: SC.ContainerView.design({
+          nowShowing: "welcome",
+          nowShowingBinding: "TestControls.categoryController.show"
+        })
       })
     })
   }),
