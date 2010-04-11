@@ -32,6 +32,7 @@ SC.VERTICAL_ORIENTATION = "vertical";
 SC.HORIZONTAL_ORIENTATION = "horizontal";
 
 SC.MasterDetailView = SC.View.extend({
+  classNames: ["sc-master-detail-view"],
   
   /**
     The master view. For your development pleasure, it defaults to a
@@ -210,7 +211,8 @@ SC.MasterDetailView = SC.View.extend({
       });
       
       // and child, naturally
-      detail.set("layout", { left: masterWidth, right: 0, top: 0, bottom: 0 });
+      var extra = this.renderer ? this.renderer.BORDER : 0;
+      detail.set("layout", { left: masterWidth + extra, right: 0, top: 0, bottom: 0 });
     } else {
       // remove master if needed
       if (this._masterIsDrawn) {
@@ -221,5 +223,13 @@ SC.MasterDetailView = SC.View.extend({
       // and child, naturally
       detail.set("layout", { left: 0, right: 0, top: 0, bottom: 0 });
     }
+  },
+  
+  createRenderer: function(t) {
+    return t.masterDetail();
+  },
+  
+  updateRenderer: function(r) {
+    
   }
 });
