@@ -1,5 +1,5 @@
 .sc-source-list-background,
-.sc-source-list-background > .sc-container-view {
+@view(sc-scroll-view).sc-source-list-background .sc-container-view {
   background: #d0dae3;
 }
 
