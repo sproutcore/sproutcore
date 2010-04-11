@@ -31,11 +31,9 @@
   padding-bottom:10px;
 }
 
-.welcome-tab {
+.sc-label-view.welcome-tab {
  padding: 30px;
  background-color: white ;
- border-radius: 4px;
- -webkit-border-radius: 4px;
 }
 
 .welcome-tab h1 {
