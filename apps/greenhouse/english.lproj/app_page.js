@@ -6,6 +6,7 @@
 require('views/list_item');
 require('views/web');
 require('views/tear_off_picker');
+require('mixins/drop_down');
 // This page has the main UI layout
 Greenhouse.appPage = SC.Page.design({
   
@@ -22,7 +23,7 @@ Greenhouse.appPage = SC.Page.design({
       anchorLocation: SC.ANCHOR_TOP,
       borderStyle: SC.BORDER_BOTTOM,
 
-      childViews: 'project save run library title'.w(),
+      childViews: 'project action run library title'.w(),
       
       project: SC.ButtonView.design({
         title: "_Project".loc(),
@@ -48,6 +49,28 @@ Greenhouse.appPage = SC.Page.design({
         action: 'openLibrary'
       }),
       
+      action: SC.ButtonView.design(Greenhouse.DropDown, {
+        layout: {right: 5, top: 4, width: 90, height: 24},
+        titleMinWidth: 0,
+        hasIcon: YES,
+        title: "_Actions".loc(),
+        icon: 'actions-icon',
+        dropDown: SC.MenuPane.design({
+          defaultResponder: 'Orion',
+          layout: { width: 150, height: 0 },
+          itemTitleKey: 'title',
+          itemTargetKey: 'target',
+          itemActionKey: 'action',
+          itemSeparatorKey: 'isSeparator',
+          itemIsEnabledKey: 'isEnabled',
+          items:[
+            {title: "_Run".loc(), action: 'run', isEnabled: YES},
+            {title: "_Dock Library".loc(), action: 'dockLibrary', isEnabled: YES},
+            {title: "_Dock Inspector".loc(), action: 'dockInspector', isEnabled: YES},
+            {title: "_Save".loc(), action: 'save', isEnabled: YES }
+          ]
+        })
+      }),      
       save: SC.ButtonView.design({
         title: "_Save".loc(),
         layout: {right: 5, top: 4, width: 100, height: 24},

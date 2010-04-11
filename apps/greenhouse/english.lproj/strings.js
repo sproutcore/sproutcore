@@ -74,6 +74,9 @@ SC.stringsFor('English', {
   "_To": "To",
   "_From": "From",
   "_Add Page...": "Add Page...",
-  "_Project": "Project"
-  
+  "_Project": "Project",
+  "_Dock Library": "Dock Library",
+  "_Dock Inspector": "Dock Inspector",
+  "_Actions": "Actions",
+  "_Inspector": "Inspector"  
 }) ;
