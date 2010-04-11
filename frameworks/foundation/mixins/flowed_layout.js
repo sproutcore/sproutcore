@@ -278,8 +278,8 @@ SC.FlowedLayout = {
   _scfl_tile: function() {
     if (!this._scfl_itemLayouts) this._scfl_itemLayouts = {};
     
-    var isObserving = this._scfl_isObserving || SC.CoreSet.create(),
-        nowObserving = SC.CoreSet.create();
+    var isObserving = this._scfl_isObserving || {},
+        nowObserving = {};
     
     var children = this.get("childViews"), child, idx, len = children.length,
         rows = [], row = [], rowSize = 0, 
@@ -314,8 +314,8 @@ SC.FlowedLayout = {
       if (child.get("useAbsoluteLayout")) continue;
       
       // update observing lists
-      isObserving.remove(child);
-      nowObserving.add(child);
+      delete isObserving[SC.guidFor(child)];
+      nowObserving[SC.guidFor(child)] = child;
       
       // skip positioning of items with isVisible===false
       if (!child.get("isVisible")) continue;
@@ -362,6 +362,7 @@ SC.FlowedLayout = {
     
     // flow last row
     this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
+
     
     // update calculated width/height
     this._scfl_lastFrameSize = this.get("frame");
@@ -375,13 +376,13 @@ SC.FlowedLayout = {
     
     
     // cleanup on aisle 7
-    isObserving.forEach(function(item) {
-      this._scfl_unobserveChild(item);
-    }, this);
-    
-    nowObserving.forEach(function(item) {
-      this._scfl_observeChild(item);
-    }, this);
+    for (idx in isObserving) {
+      this._scfl_unobserveChild(isObserving[idx]);
+    }
+
+    for (idx in nowObserving) {
+      this._scfl_observeChild(nowObserving[idx]);
+    }
     
     this._scfl_isObserving = nowObserving;
   },
