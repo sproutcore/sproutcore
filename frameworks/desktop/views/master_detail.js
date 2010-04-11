@@ -116,7 +116,8 @@ SC.MasterDetailView = SC.View.extend({
     This defaults to one with a special theme.
   */
   pickerPane: SC.PickerPane.extend({
-    layout: { width: 250, height: 480 }
+    layout: { width: 250, height: 480 },
+    theme: "popover"
   }),
   
   /**
