@@ -200,6 +200,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   routeTouch: YES,
   
+  /**
+    Activates use of brower's static layout.  You can apply this mixin and
+    still use absolute positioning.  To activate static positioning, set this
+    property to YES.
+
+    @property {Boolean}
+  */
+  useStaticLayout: NO,  
+  
   // ..........................................................
   // IS ENABLED SUPPORT
   // 
@@ -964,6 +973,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!this.get('isEnabled')) context.addClass('disabled') ;
     if (!this.get('isVisible')) context.addClass('hidden') ;
     if (this.get('isFirstResponder')) context.addClass('focus');
+    if (this.get('useStaticLayout')) context.addClass('sc-static-layout');
   
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
@@ -2137,6 +2147,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var cvs = this.get('childViews'), len = cvs.length, idx, cv ;
     for (idx=0; idx<len; ++idx) {
       cv = cvs[idx] ;
+      
+      // In SC 1.0 views with static layout did not receive notifications 
+      // of frame changes because they didn't support frames.  In SC 1.1 they
+      // do support frames, so they should receive notifications.  Also in
+      // SC 1.1 SC.StaticLayout is merged into SC.View.  The mixin is only 
+      // for compatibility.  This property is defined on the mixin. 
+      //
+      // frame changes should be sent all the time unless this property is 
+      // present to indicate that we want the old 1.0 API behavior instead.
+      // 
       if (!cv.hasStaticLayout) cv.notifyPropertyChange('clippingFrame') ;
     }
   }.observes('clippingFrame'),

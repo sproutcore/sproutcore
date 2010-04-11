@@ -8,6 +8,9 @@
 /**
   @namespace 
 
+  __NOTE:__ SC.StaticLayout is now built in to SC.View.  You do not need to 
+  apply this mixin to use static layout.  Just set useStaticLayout to YES.
+  
   Normally, SproutCore views use absolute positioning to display themselves
   on the screen.  While this is both the fastest and most efficient way to 
   display content in the web browser, sometimes your user interface might need
@@ -57,10 +60,11 @@
     
   }}}
   
+  @deprecated
   @since SproutCore 1.0
 */
 SC.StaticLayout = {
-
+  
   /**
     Walk like a duck.  Used to determine that this mixin has been applied.  
     Note that a view that hasStaticLayout still may not actually use static
@@ -68,60 +72,6 @@ SC.StaticLayout = {
     
     @property {Boolean}
   */
-  hasStaticLayout: YES,
-  
-  /**
-    Activates use of brower's static layout.  You can apply this mixin and
-    still use absolute positioning.  To activate static positioning, set this
-    property to YES.
-
-    @property {Boolean}
-  */
-  useStaticLayout: NO,
-  
-  /** @private - add sc-static-layout class if needed. */
-  renderMixin: function(context, firstTime) {
-    context.setClass('sc-static-layout', this.get('useStaticLayout'));
-  },
-  
-  /**
-    This method is not supported on static layout views. This 
-    method will return null.
-    
-    @function
-  */
-  parentViewDidResize: function() {
-    return null;
-  },
-  
-  /**
-    This method is not supported on static layout views. This 
-    method will return null.
-    
-    @function
-  */
-  beginLiveResize: function() {
-    return null;
-  },
-
-  /**
-    This method is not supported on static layout views. This 
-    method will return null.
-    
-    @function
-  */
-  endLiveResize: function() {
-    return null;
-  },
-
-  /**
-    This method is not supported on static layout views. This 
-    method will return null.
-    
-    @function
-  */
-  viewDidResize: function() {
-    return null;
-  }
+  hasStaticLayout: YES
   
 };
