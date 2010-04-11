@@ -924,8 +924,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.updateScale(this._scale);
     transform += 'translate3d('+ -this._scroll_horizontalScrollOffset +'px, '+ -Math.round(this._scroll_verticalScrollOffset)+'px,0) ';
     transform += this._scale_css;
-    layer.style.webkitTransform = transform;
-    layer.style.webkitTransformOrigin = "top left";
+    if (layer) {
+      layer.style.webkitTransform = transform;
+      layer.style.webkitTransformOrigin = "top left";
+    }
   },
   
   captureTouch: function(touch) {
@@ -1018,7 +1020,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       
       enableScrolling: { 
         x: contentWidth * this._scale > containerWidth || this.get("alwaysBounceHorizontal"), 
-        y: contentHeight * this._scale > containerHeight || this.get("alwaysBounceVertical") }, // TODO: get from class properties
+        y: contentHeight * this._scale > containerHeight || this.get("alwaysBounceVertical") 
+      },
       scrolling: { x: NO, y: NO },
       
       // offsets and velocities
