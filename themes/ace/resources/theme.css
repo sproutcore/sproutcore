@@ -916,7 +916,7 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 }
 .sc-theme .sc-view.ace.light.sc-container-view { background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dddddd), to(#bbbbbb)); }
 .sc-source-list-background { background: #d0dae3; }
-.sc-source-list-background > .sc-container-view { background: #d0dae3; }
+.sc-theme .sc-view.ace.light.sc-scroll-view.sc-source-list-background .sc-container-view { background: #d0dae3; }
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list { background: #d0dae3; }
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-list-item-view label {
   top: 50%;
