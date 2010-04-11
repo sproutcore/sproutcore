@@ -1,11 +1,128 @@
 .sc-theme .sc-view.ace.light.sc-toolbar-view {
-  background: static_url("images/1.png") repeat-x 0 0;
+  background: static_url("images/1.png") repeat-x 0 -160px;
   color: #555555;
   text-shadow: 0px 1px 1px white;
   border-bottom: 1px solid #999999;
   -webkit-box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
+.sc-theme .sc-view.ace.light.popover.sc-pane.sc-panel.sc-palette.sc-picker { background: none; }
+.sc-theme .sc-view.ace.light.popover.sc-toolbar-view {
+  background-image: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  border: 0px none;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view {
+  overflow: visible;
+  background: none;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay {
+  z-index: 10;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .top-left-edge {
+  position: absolute;
+  left: -25px;
+  top: -25px;
+  width: 40px;
+  height: 40px;
+  background: static_url("images/1.png") no-repeat 0 -1585px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .top-right-edge {
+  position: absolute;
+  right: -25px;
+  top: -25px;
+  width: 40px;
+  height: 40px;
+  background: static_url("images/1.png") no-repeat 0 -1505px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .top-edge {
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  top: -25px;
+  height: 40px;
+  background: static_url("images/1.png") repeat-x 0 -420px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .bottom-left-edge {
+  position: absolute;
+  left: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 40px;
+  background: static_url("images/1.png") no-repeat 0 -1465px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .bottom-right-edge {
+  position: absolute;
+  right: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 40px;
+  background: static_url("images/1.png") no-repeat 0 -1545px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .bottom-edge {
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  bottom: -25px;
+  height: 40px;
+  background: static_url("images/1.png") repeat-x 0 -380px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .left-edge {
+  position: absolute;
+  left: -25px;
+  top: 15px;
+  bottom: 15px;
+  width: 40px;
+  background: static_url("images/2.png") repeat-y 0 0;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .right-edge {
+  position: absolute;
+  right: -25px;
+  top: 15px;
+  bottom: 15px;
+  width: 40px;
+  background: static_url("images/2.png") repeat-y -40px 0;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-left-edge {
+  top: -20px;
+  height: 80px;
+  background: static_url("images/1.png") no-repeat 0 -1305px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-right-edge {
+  top: -20px;
+  height: 80px;
+  background: static_url("images/1.png") no-repeat 0 -1225px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-edge {
+  top: -20px;
+  height: 80px;
+  background: static_url("images/1.png") repeat-x 0 0;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .left-edge { top: 60px; }
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .right-edge { top: 60px; }
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-left-edge {
+  bottom: -20px;
+  height: 80px;
+  background: static_url("images/1.png") no-repeat 0 -1385px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-right-edge {
+  bottom: -20px;
+  height: 80px;
+  background: static_url("images/1.png") no-repeat 0 -1145px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-edge {
+  bottom: -20px;
+  height: 80px;
+  background: static_url("images/1.png") repeat-x 0 -80px;
+}
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .left-edge { bottom: 60px; }
+.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .right-edge { bottom: 60px; }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-scroll-view {
   background: rgba(251, 251, 251, 0.92);
   border: 0px none;
@@ -22,12 +139,12 @@
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-button-view.focus a {
   color: white;
-  background: static_url("images/1.png") repeat-x 0 -663px;
+  background: static_url("images/1.png") repeat-x 0 -923px;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.6);
 }
 .sc-menu-item a:hover {
   color: white;
-  background: static_url("images/1.png") repeat-x 0 -663px;
+  background: static_url("images/1.png") repeat-x 0 -923px;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.6);
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-button-view.disabled.focus a {
@@ -42,15 +159,15 @@
   top: 3px;
   width: 12px;
   height: 12px;
-  background: static_url("images/1.png") no-repeat -14px -1657px;
+  background: static_url("images/1.png") no-repeat -28px -2118px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item.focus .checkbox {
   top: 4px;
-  background: static_url("images/1.png") no-repeat -14px -1683px;
+  background: static_url("images/1.png") no-repeat -28px -2132px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item:hover .checkbox {
   top: 4px;
-  background: static_url("images/1.png") no-repeat -14px -1683px;
+  background: static_url("images/1.png") no-repeat -28px -2132px;
 }
 .sc-menu-item span.separator {
   margin-left: 0px;
@@ -69,7 +186,7 @@
   margin-left: -7px;
   height: 14px;
   width: 14px;
-  background: static_url("images/1.png") no-repeat 0 -2009px;
+  background: static_url("images/1.png") no-repeat 0 -2160px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view .arrowDown {
   position: absolute;
@@ -78,59 +195,59 @@
   margin-left: -7px;
   height: 14px;
   width: 14px;
-  background: static_url("images/1.png") no-repeat 0 -1959px;
+  background: static_url("images/1.png") no-repeat -14px -2160px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .top-left-edge {
-  background: static_url("images/1.png") no-repeat 0 -933px;
+  background: static_url("images/1.png") no-repeat 0 -1651px;
   left: -16px;
   top: -25px;
   width: 25px;
   height: 25px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .top-right-edge {
-  background: static_url("images/1.png") no-repeat 0 -958px;
+  background: static_url("images/1.png") no-repeat 0 -1677px;
   right: -16px;
   top: -25px;
   width: 25px;
   height: 25px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .bottom-left-edge {
-  background: static_url("images/1.png") no-repeat 0 -1008px;
+  background: static_url("images/1.png") no-repeat 0 -1702px;
   left: -16px;
   bottom: -25px;
   width: 25px;
   height: 25px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .bottom-right-edge {
-  background: static_url("images/1.png") no-repeat 0 -983px;
+  background: static_url("images/1.png") no-repeat 0 -1727px;
   right: -16px;
   bottom: -25px;
   width: 25px;
   height: 25px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .bottom-edge {
-  background: static_url("images/1.png") repeat-x 0 -397px;
+  background: static_url("images/1.png") repeat-x 0 -737px;
   left: 9px;
   right: 9px;
   bottom: -25px;
   height: 25px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .top-edge {
-  background: static_url("images/1.png") repeat-x 0 -447px;
+  background: static_url("images/1.png") repeat-x 0 -612px;
   left: 9px;
   right: 9px;
   top: -25px;
   height: 25px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .left-edge {
-  background: static_url("images/2.png") repeat-y 0 0;
+  background: static_url("images/2.png") repeat-y -80px 0;
   top: 0px;
   bottom: 0px;
   left: -16px;
   width: 16px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .right-edge {
-  background: static_url("images/2.png") repeat-y -16px 0;
+  background: static_url("images/2.png") repeat-y -96px 0;
   top: 0px;
   bottom: 0px;
   right: -16px;
@@ -142,65 +259,65 @@
   top: -16px;
   width: 16px;
   height: 16px;
-  background: static_url("images/1.png") no-repeat 0 -885px;
+  background: static_url("images/1.png") no-repeat -16px -1796px;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .top-edge {
   top: -16px;
   left: 0px;
   right: 0px;
   height: 16px;
-  background: static_url("images/1.png") repeat-x 0 -775px;
+  background: static_url("images/1.png") repeat-x 0 -1015px;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .top-right-edge {
   right: -16px;
   top: -16px;
   width: 16px;
   height: 16px;
-  background: static_url("images/1.png") no-repeat 0 -1033px;
+  background: static_url("images/1.png") no-repeat -16px -1752px;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .bottom-left-edge {
   left: -16px;
   bottom: -16px;
   width: 16px;
   height: 16px;
-  background: static_url("images/1.png") no-repeat 0 -1049px;
+  background: static_url("images/1.png") no-repeat 0 -1796px;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .bottom-edge {
   bottom: -16px;
   left: 0px;
   right: 0px;
   height: 16px;
-  background: static_url("images/1.png") repeat-x 0 -791px;
+  background: static_url("images/1.png") repeat-x 0 -1031px;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .bottom-right-edge {
   right: -16px;
   bottom: -16px;
   width: 16px;
   height: 16px;
-  background: static_url("images/1.png") no-repeat 0 -1065px;
+  background: static_url("images/1.png") no-repeat 0 -1752px;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .left-edge {
   top: 0px;
   left: -16px;
   bottom: 0px;
   width: 16px;
-  background: static_url("images/2.png") repeat-y -32px 0;
+  background: static_url("images/2.png") repeat-y -128px 0;
 }
 .sc-theme .sc-view.ace.light.sc-pane.sc-panel .right-edge {
   top: 0px;
   right: -16px;
   bottom: 0px;
   width: 16px;
-  background: static_url("images/2.png") repeat-y -48px 0;
+  background: static_url("images/2.png") repeat-y -112px 0;
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-left { background: static_url("images/1.png") no-repeat -14px -1959px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-left { background: static_url("images/1.png") no-repeat -16px -2280px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-right {
   right: 0px;
   width: 25px;
-  background: static_url("images/1.png") no-repeat right -860px;
+  background: static_url("images/1.png") no-repeat right -1075px;
 }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-middle {
-  background: static_url("images/1.png") repeat-x 0 -422px;
+  background: static_url("images/1.png") repeat-x 0 -637px;
   right: 25px;
   left: 8px;
 }
@@ -210,22 +327,22 @@
   vertical-align: top;
   color: #333333;
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-right { background: static_url("images/1.png") no-repeat right -835px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-left { background: static_url("images/1.png") no-repeat 0 -2310px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-right { background: static_url("images/1.png") no-repeat right -1100px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-middle {
-  background: static_url("images/1.png") repeat-x 0 -472px;
+  background: static_url("images/1.png") repeat-x 0 -687px;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-right { background: static_url("images/1.png") no-repeat right -835px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -2310px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-right { background: static_url("images/1.png") no-repeat right -1100px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel .button-middle {
-  background: static_url("images/1.png") repeat-x 0 -472px;
+  background: static_url("images/1.png") repeat-x 0 -687px;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-left { background: static_url("images/1.png") no-repeat -14px -1984px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-right { background: static_url("images/1.png") no-repeat right -835px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-left { background: static_url("images/1.png") no-repeat 0 -2310px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-right { background: static_url("images/1.png") no-repeat right -1100px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-middle {
-  background: static_url("images/1.png") repeat-x 0 -472px;
+  background: static_url("images/1.png") repeat-x 0 -687px;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
 }
 .sc-theme .sc-view.ace.light.sc-segmented-view { overflow: visible; }
@@ -244,14 +361,14 @@
   display: inline-block;
   width: 8px;
   height: 25px;
-  background: static_url("images/1.png") no-repeat -14px -2009px;
+  background: static_url("images/1.png") no-repeat -32px -2335px;
   zoom: 1;
 }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment .button-right {
   display: inline-block;
   width: 8px;
   height: 25px;
-  background: static_url("images/1.png") no-repeat -14px -1934px;
+  background: static_url("images/1.png") no-repeat 0 -2360px;
   zoom: 1;
 }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment .button-middle {
@@ -261,31 +378,31 @@
   padding-top: 1px;
   height: 25px;
   vertical-align: top;
-  background: static_url("images/1.png") repeat-x 0 -497px;
+  background: static_url("images/1.png") repeat-x 0 -712px;
   zoom: 1;
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -14px -1909px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -14px -1884px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -8px -2360px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -16px -2360px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active {
   color: #333333;
   text-shadow: 0px 1px 1px white;
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active .button-left { background: static_url("images/1.png") no-repeat -14px -2034px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active .button-right { background: static_url("images/1.png") no-repeat -14px -1709px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active .button-middle { background: static_url("images/1.png") repeat-x 0 -522px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -14px -1859px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -14px -1734px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active .button-left { background: static_url("images/1.png") no-repeat -24px -2360px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active .button-right { background: static_url("images/1.png") no-repeat -32px -2360px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active .button-middle { background: static_url("images/1.png") repeat-x 0 -762px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat 0 -2385px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.active.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat 0 -2335px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel {
   background: none;
   color: #ffffff;
   font-weight: 200;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-left { background: static_url("images/1.png") no-repeat -14px -1759px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-right { background: static_url("images/1.png") no-repeat -14px -1784px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -372px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -14px -1809px; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -14px -1834px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-left { background: static_url("images/1.png") no-repeat -24px -2335px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-right { background: static_url("images/1.png") no-repeat -16px -2335px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -662px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -8px -2335px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -8px -2385px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .track {
   position: absolute;
@@ -293,7 +410,7 @@
   bottom: 0px;
   left: 0;
   right: 0;
-  background: static_url("images/2.png") repeat-y -64px 0;
+  background: static_url("images/2.png") repeat-y -144px 0;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .cap {
   position: absolute;
@@ -301,45 +418,45 @@
   width: 14px;
   height: 16px;
   top: 0px;
-  background: static_url("images/1.png") no-repeat 0 -1709px;
+  background: static_url("images/1.png") no-repeat -25px -1677px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-top {
   position: absolute;
-  background: static_url("images/1.png") no-repeat 0 -1683px;
+  background: static_url("images/1.png") no-repeat -25px -1651px;
   height: 26px;
   width: 14px;
   bottom: 16px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-bottom {
   position: absolute;
-  background: static_url("images/1.png") no-repeat 0 -1734px;
+  background: static_url("images/1.png") no-repeat -25px -1702px;
   height: 16px;
   width: 14px;
   bottom: 0px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-top:active { background: static_url("images/1.png") no-repeat 0 -1657px; }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-bottom:active { background: static_url("images/1.png") no-repeat 0 -1759px; }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-top:active { background: static_url("images/1.png") no-repeat -26px -1625px; }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-bottom:active { background: static_url("images/1.png") no-repeat -25px -1727px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb { position: absolute; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb-center {
   position: absolute;
   width: 14px;
   top: 10px;
   bottom: 10px;
-  background: static_url("images/2.png") repeat-y -78px 0;
+  background: static_url("images/2.png") repeat-y -158px 0;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb-top {
   position: absolute;
   width: 14px;
   top: 0px;
   height: 10px;
-  background: static_url("images/1.png") no-repeat 0 -2083px;
+  background: static_url("images/1.png") no-repeat 0 -2250px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb-bottom {
   position: absolute;
   width: 14px;
   bottom: 0px;
   height: 10px;
-  background: static_url("images/1.png") no-repeat 0 -2107px;
+  background: static_url("images/1.png") no-repeat -14px -2220px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .track {
   position: absolute;
@@ -347,7 +464,7 @@
   right: 0px;
   top: 0;
   bottom: 0;
-  background: static_url("images/1.png") repeat-x 0 -821px;
+  background: static_url("images/1.png") repeat-x 0 -1047px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .cap {
   position: absolute;
@@ -355,45 +472,45 @@
   height: 14px;
   width: 16px;
   left: 0px;
-  background: static_url("images/1.png") no-repeat 0 -1567px;
+  background: static_url("images/1.png") no-repeat 0 -2104px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-left {
   position: absolute;
-  background: static_url("images/1.png") no-repeat 0 -919px;
+  background: static_url("images/1.png") no-repeat 0 -1125px;
   width: 26px;
   height: 14px;
   right: 14px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right {
   position: absolute;
-  background: static_url("images/1.png") no-repeat 0 -1627px;
+  background: static_url("images/1.png") no-repeat 0 -1075px;
   width: 15px;
   height: 14px;
   right: 0px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-left:active { background: static_url("images/1.png") no-repeat 0 -905px; }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right:active { background: static_url("images/1.png") no-repeat 0 -1597px; }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-left:active { background: static_url("images/1.png") no-repeat 0 -1625px; }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right:active { background: static_url("images/1.png") no-repeat 0 -1100px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb { position: absolute; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-center {
   position: absolute;
   height: 14px;
   left: 10px;
   right: 10px;
-  background: static_url("images/1.png") repeat-x 0 -807px;
+  background: static_url("images/1.png") repeat-x 0 -1061px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-left {
   position: absolute;
   height: 14px;
   left: 0px;
   width: 10px;
-  background: static_url("images/1.png") no-repeat -16px -1033px;
+  background: static_url("images/1.png") no-repeat -30px -2104px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-right {
   position: absolute;
   height: 14px;
   right: 0px;
   width: 10px;
-  background: static_url("images/1.png") no-repeat -16px -1049px;
+  background: static_url("images/1.png") no-repeat -28px -2146px;
 }
 .sc-theme .sc-view.ace.light.sc-radio-view {
   line-height: 18px;
@@ -412,7 +529,7 @@
   line-height: 18px;
 }
 .sc-theme .sc-view.ace.light.sc-radio-view span.button {
-  background: static_url("images/1.png") no-repeat 0 -1197px;
+  background: static_url("images/1.png") no-repeat -16px -2016px;
   width: 16px;
   height: 16px;
   vertical-align: middle;
@@ -422,14 +539,14 @@
   margin: 0px;
 }
 .sc-theme .sc-view.ace.light.sc-radio-view input { visibility: hidden; }
-.sc-theme .sc-view.ace.light.sc-radio-view .sel span.button { background: static_url("images/1.png") no-repeat 0 -1153px; }
-.sc-theme .sc-view.ace.light.sc-radio-view .mixed span.button { background: static_url("images/1.png") no-repeat 0 -1109px; }
-.sc-theme .sc-view.ace.light.sc-radio-view .active span.button { background: static_url("images/1.png") no-repeat 0 -1329px; }
-.sc-theme .sc-view.ace.light.sc-radio-view .sel.active span.button { background: static_url("images/1.png") no-repeat 0 -1241px; }
-.sc-theme .sc-view.ace.light.sc-radio-view .mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1285px; }
+.sc-theme .sc-view.ace.light.sc-radio-view .sel span.button { background: static_url("images/1.png") no-repeat 0 -2016px; }
+.sc-theme .sc-view.ace.light.sc-radio-view .mixed span.button { background: static_url("images/1.png") no-repeat -16px -1972px; }
+.sc-theme .sc-view.ace.light.sc-radio-view .active span.button { background: static_url("images/1.png") no-repeat 0 -1972px; }
+.sc-theme .sc-view.ace.light.sc-radio-view .sel.active span.button { background: static_url("images/1.png") no-repeat -16px -1928px; }
+.sc-theme .sc-view.ace.light.sc-radio-view .mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1928px; }
 .sc-theme .sc-view.ace.light.sc-radio-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-progress-view {
-  background: static_url("images/1.png") no-repeat -16px -2155px;
+  background: static_url("images/1.png") no-repeat 0 -2434px;
   z-index: 0;
   border: 0px none;
 }
@@ -438,7 +555,7 @@
   right: 8px;
   position: absolute;
   height: 20px;
-  background: static_url("images/1.png") repeat-x 0 -643px;
+  background: static_url("images/1.png") repeat-x 0 -903px;
   z-index: 0;
   border: 0px none;
 }
@@ -447,12 +564,12 @@
   width: 8px;
   position: absolute;
   height: 20px;
-  background: static_url("images/1.png") no-repeat 0 -2199px;
+  background: static_url("images/1.png") no-repeat 0 -2474px;
   z-index: 0;
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-progress-view .sc-inner {
-  background: static_url("images/1.png") no-repeat 0 -2179px;
+  background: static_url("images/1.png") no-repeat 0 -2454px;
   z-index: 1;
   border: 0px none;
 }
@@ -461,7 +578,7 @@
   right: 0px;
   position: absolute;
   height: 20px;
-  background: static_url("images/1.png") no-repeat right -885px;
+  background: static_url("images/1.png") no-repeat right -1125px;
   z-index: 1;
   border: 0px none;
 }
@@ -470,7 +587,7 @@
   right: 8px;
   position: absolute;
   height: 20px;
-  background: static_url("images/1.png") repeat-x 0 -683px;
+  background: static_url("images/1.png") repeat-x 0 -883px;
   z-index: 1;
   border: 0px none;
 }
@@ -487,7 +604,7 @@
   line-height: 18px;
 }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size span.button {
-  background: static_url("images/1.png") no-repeat 0 -1373px;
+  background: static_url("images/1.png") no-repeat -16px -2060px;
   width: 16px;
   height: 16px;
   position: absolute;
@@ -501,15 +618,15 @@
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -1537px; }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.mixed span.button { background: static_url("images/1.png") no-repeat 0 -1447px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -1840px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.mixed span.button { background: static_url("images/1.png") no-repeat -16px -1840px; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-regular-size.active {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.active span.button { background: static_url("images/1.png") no-repeat 0 -1477px; }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.sel.active span.button { background: static_url("images/1.png") no-repeat 0 -1417px; }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1507px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.active span.button { background: static_url("images/1.png") no-repeat 0 -1884px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.sel.active span.button { background: static_url("images/1.png") no-repeat -16px -1884px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -2060px; }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-small-size {
   color: black;
@@ -523,7 +640,7 @@
   line-height: 16px;
 }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size span.button {
-  background: static_url("images/1.png") no-repeat 0 -1834px;
+  background: static_url("images/1.png") no-repeat -14px -2146px;
   width: 14px;
   height: 14px;
   position: absolute;
@@ -537,15 +654,15 @@
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -2059px; }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.mixed span.button { background: static_url("images/1.png") no-repeat 0 -1909px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -2146px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.mixed span.button { background: static_url("images/1.png") no-repeat -16px -2104px; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-small-size.active {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.active span.button { background: static_url("images/1.png") no-repeat 0 -1859px; }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.sel.active span.button { background: static_url("images/1.png") no-repeat 0 -1784px; }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1984px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.active span.button { background: static_url("images/1.png") no-repeat -14px -2118px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.sel.active span.button { background: static_url("images/1.png") no-repeat 0 -2118px; }
+.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.mixed.active span.button { background: static_url("images/1.png") no-repeat -14px -2132px; }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view {
   color: black;
@@ -567,21 +684,21 @@
 .sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view img {
   position: absolute;
   top: 3px;
-  background: static_url("images/1.png") no-repeat 0 -2034px;
+  background: static_url("images/1.png") no-repeat 0 -2220px;
   width: 14px;
   height: 14px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel img { background: static_url("images/1.png") no-repeat 0 -1809px; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.active img { background: static_url("images/1.png") no-repeat 0 -1884px; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel.active img { background: static_url("images/1.png") no-repeat 0 -1934px; }
+.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel img { background: static_url("images/1.png") no-repeat 0 -2132px; }
+.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.active img { background: static_url("images/1.png") no-repeat 0 -2190px; }
+.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel.active img { background: static_url("images/1.png") no-repeat -14px -2190px; }
 img.disclosure.button {
   width: 14px;
   height: 14px;
 }
-img.disclosure.button.open { background: static_url("images/1.png") no-repeat 0 -1809px; }
-img.disclosure.button.open.active { background: static_url("images/1.png") no-repeat 0 -1934px; }
-img.disclosure.button.closed { background: static_url("images/1.png") no-repeat 0 -2034px; }
-img.disclosure.button.closed.active { background: static_url("images/1.png") no-repeat 0 -1884px; }
+img.disclosure.button.open { background: static_url("images/1.png") no-repeat 0 -2132px; }
+img.disclosure.button.open.active { background: static_url("images/1.png") no-repeat -14px -2190px; }
+img.disclosure.button.closed { background: static_url("images/1.png") no-repeat 0 -2220px; }
+img.disclosure.button.closed.active { background: static_url("images/1.png") no-repeat 0 -2190px; }
 .sc-theme .sc-view.ace.light.sc-button-view {
   border: 0px none;
   color: #555555;
@@ -624,17 +741,17 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .button-left {
   margin-top: -22px;
   height: 44px;
-  background: static_url("images/1.png") no-repeat -16px -1285px;
+  background: static_url("images/1.png") no-repeat -32px -1796px;
 }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .button-right {
   margin-top: -22px;
   height: 44px;
-  background: static_url("images/1.png") no-repeat -16px -1241px;
+  background: static_url("images/1.png") no-repeat -32px -1928px;
 }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .button-middle {
   margin-top: -22px;
   height: 44px;
-  background: static_url("images/1.png") repeat-x 0 -132px;
+  background: static_url("images/1.png") repeat-x 0 -204px;
 }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .sc-button-label {
   margin-top: -10px;
@@ -644,91 +761,91 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   color: #777777;
   text-shadow: 0px 1px 1px white;
 }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -16px -1197px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -16px -1153px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -176px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -16px -1329px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -16px -1373px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -44px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -32px -1884px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -32px -2016px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -292px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -32px -2060px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -32px -1972px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -336px; }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel .sc-button-label {
   color: white;
   text-shadow: 0px -1px 1px black;
 }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -16px -1065px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -16px -1109px; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -88px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -32px -1840px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -32px -1752px; }
+.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -248px; }
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .button-left {
   margin-top: -15px;
   height: 30px;
-  background: static_url("images/1.png") no-repeat -15px -1627px;
+  background: static_url("images/1.png") no-repeat -28px -2160px;
 }
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .button-right {
   margin-top: -15px;
   height: 30px;
-  background: static_url("images/1.png") no-repeat -15px -1597px;
+  background: static_url("images/1.png") no-repeat -22px -2250px;
 }
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .button-middle {
   margin-top: -15px;
   height: 30px;
-  background: static_url("images/1.png") repeat-x 0 -342px;
+  background: static_url("images/1.png") repeat-x 0 -522px;
 }
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .sc-button-label {
   margin-top: -11px;
   height: 30px;
   font-size: 13px;
 }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -16px -1567px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -16px -1417px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -312px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -16px -1537px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -16px -1507px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -252px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -16px -1477px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -16px -1447px; }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -282px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -14px -2250px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat 0 -2280px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -492px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -28px -2190px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -28px -2220px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -582px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -8px -2280px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -30px -2250px; }
+.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -552px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .button-left {
   margin-top: -12px;
   height: 24px;
-  background: static_url("images/1.png") no-repeat -8px -2131px;
+  background: static_url("images/1.png") no-repeat -8px -2410px;
 }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .button-right {
   margin-top: -12px;
   height: 24px;
-  background: static_url("images/1.png") no-repeat -16px -2131px;
+  background: static_url("images/1.png") no-repeat -16px -2410px;
 }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .button-middle {
   margin-top: -12px;
   height: 24px;
-  background: static_url("images/1.png") repeat-x 0 -547px;
+  background: static_url("images/1.png") repeat-x 0 -859px;
 }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .sc-button-label {
   margin-top: -12px;
   height: 24px;
   padding-top: 2px;
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat 0 -2155px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -8px -2155px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -619px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -2131px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -14px -2107px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -571px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -14px -2059px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -14px -2083px; }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -595px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -24px -2410px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -32px -2410px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -811px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -2410px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -32px -2385px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -787px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -16px -2385px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -24px -2385px; }
+.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -835px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-left {
   margin-top: -9px;
   height: 18px;
-  background: static_url("images/1.png") no-repeat 0 -2219px;
+  background: static_url("images/1.png") no-repeat -24px -2474px;
 }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-right {
   margin-top: -9px;
   height: 18px;
-  background: static_url("images/1.png") no-repeat -16px -2199px;
+  background: static_url("images/1.png") no-repeat -16px -2474px;
 }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-middle {
   margin-top: -9px;
   height: 18px;
-  background: static_url("images/1.png") repeat-x 0 -757px;
+  background: static_url("images/1.png") repeat-x 0 -979px;
 }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .sc-button-label {
   font-size: 11px;
@@ -736,15 +853,15 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   height: 18px;
   padding-top: 2px;
 }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -8px -2199px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -8px -2219px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -739px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -16px -2219px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat 0 -2237px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -721px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -8px -2237px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -16px -2237px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -703px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -8px -2474px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -32px -2474px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-middle { background: static_url("images/1.png") repeat-x 0 -943px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -2494px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -8px -2494px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-middle { background: static_url("images/1.png") repeat-x 0 -997px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -16px -2494px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -24px -2494px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-middle { background: static_url("images/1.png") repeat-x 0 -961px; }
 .sc-theme .sc-view.ace.light.sc-tab-view { overflow: visible; }
 .sc-theme .sc-view.ace.light.sc-tab-view .sc-container-view {
   -moz-border-radius: 5px;
@@ -760,7 +877,7 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 }
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list { background: #d0dae3; }
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-collection-item.sel {
-  background: static_url("images/1.png") repeat-x 0 -220px;
+  background: static_url("images/1.png") repeat-x 0 -460px;
   border-top: 1px solid #43638d;
   border-bottom: 1px solid #43638d;
   color: white;
