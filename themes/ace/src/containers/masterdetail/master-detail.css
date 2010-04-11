@@ -2,7 +2,7 @@
   background: #333;
 }
 
-@view(sc-master-detail-view) .sc-workspace-view .sc-toolbar-view {
+@view(sc-master-detail-view) .sc-workspace-view.rounded-corners .sc-toolbar-view {
   -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
