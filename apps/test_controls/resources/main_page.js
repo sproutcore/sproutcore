@@ -35,6 +35,7 @@ TestControls.mainPage = SC.Page.create({
         }),
         
         contentView: SC.ScrollView.design({
+          classNames: ["sc-source-list-background"],
           contentView: SC.SourceListView.design({
             layout: { left: 0, top: 0, right: 0, bottom: 0 },
             contentValueKey: "name",
@@ -57,16 +58,16 @@ TestControls.mainPage = SC.Page.create({
           }),
           
           label: SC.LabelView.design({
-            layout: { left: 7, centerY: 0, height: 21, width: 200 },
+            layout: { left: 120, centerY: 0, height: 21, width: 200 },
             value: "Test Controls",
             classNames: "embossed".w(),
             isVisible: NO,
-            isVisibleBinding: SC.Binding.from(".parentView.masterIsHidden").not()
+            isVisibleBinding: SC.Binding.from(".parentView.masterIsHidden")
           })
         }),
         contentView: SC.ContainerView.design({
           nowShowing: "welcome",
-          nowShowingBinding: "TestControls.categoryController.show"
+          nowShowingBinding: SC.Binding.notEmpty("TestControls.categoryController.show", "welcome")
         })
       })
     })
