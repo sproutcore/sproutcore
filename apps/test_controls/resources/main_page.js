@@ -22,7 +22,29 @@ TestControls.mainPage = SC.Page.create({
     childViews: "split".w(),
     
     split: SC.MasterDetailView.design ({
+      classNames: [ window.navigator.standalone ? "round-toolbars" : "normal" ],
       autoHideMaster: YES,
+      
+      pickerPane: SC.PickerPane.extend(SC.Animatable, {
+        transitions: { 
+          opacity: { 
+            duration: 0.25, 
+            timing: SC.Animatable.TRANSITION_EASE_IN_OUT,
+            action: function(){ 
+              if (this.style.opacity === 0) this._call_when_done();
+            } 
+          }
+        },
+        style: { opacity: 1 },
+        layout: { width: 250, height: 480 },
+        theme: "popover",
+        
+        remove: function() {
+          this._call_when_done = arguments.callee.base;
+          this.adjust("opacity", 0);
+        }
+      }),
+      
       masterView: SC.WorkspaceView.design({
         topToolbar: SC.ToolbarView.design({
           layout: { top: 0, left: 0, right: 0, height: 32 },
