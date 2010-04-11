@@ -1891,22 +1891,35 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (lW !== undefined &&
         lW === SC.LAYOUT_AUTO &&
         stLayout !== undefined && !stLayout) {
-     error = SC.Error.desc("%@.layout() you cannot use width:auto if "+
-              "staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
-     console.error(error.toString()) ;
-     throw error ;
+      error = SC.Error.desc(("%@.layout() cannot use width:auto if "+
+                "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+      console.error(error.toString()) ;
+      throw error ;
     }
     
     if (lH !== undefined &&
         lH === SC.LAYOUT_AUTO &&
         stLayout !== undefined && !stLayout) {
-      error = SC.Error.desc("%@.layout() you cannot use height:auto if "+
-              "staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
-      console.error(error.toString())  ;
+       error = SC.Error.desc(("%@.layout() cannot use height:auto if "+
+                "staticLayout is disabled").fmt(this),"%@".fmt(this), -1);
+       console.error(error.toString())  ;
       throw error ;
     }
     
-    if (stLayout) return null; // can't compute
+    if (stLayout) {
+      // need layer to be able to compute rect
+      if (layer = this.get('layer')) {
+        f = SC.viewportOffset(layer); // x,y
+        /*
+          TODO Can probably have some better width/height values - CC
+        */
+        f.width = layer.offsetWidth;
+        f.height = layer.offsetHeight;
+        return f;
+      }
+      return null; // can't compute
+    }
+    
 
     if (!pdim) pdim = this.computeParentDimensions(layout) ;
     dH = pdim.height;
@@ -2079,18 +2092,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   /**
     The clipping frame returns the visible portion of the view, taking into
-    account the clippingFrame of the parent view.  Keep in mind that the 
-    clippingFrame is in the context of the view itself, not it's parent view.
+    account the contentClippingFrame of the parent view.  Keep in mind that 
+    the clippingFrame is in the context of the view itself, not it's parent 
+    view.
     
     Normally this will be calculate based on the intersection of your own 
-    clippingFrame and your parentView's clippingFrame.  
+    clippingFrame and your parentView's contentClippingFrame.  
 
     @property {Rect}
   */
   clippingFrame: function() {
     var pv= this.get('parentView'), f = this.get('frame'), ret = f, cf ;
     if (pv) {
-      cf = pv.get('clippingFrame');
+      cf = pv.get('contentClippingFrame');
       ret = SC.intersectRects(cf, f);
     }
 
@@ -2099,6 +2113,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     return ret ;
   }.property('parentView', 'frame').cacheable(),
+  
+  /**
+    The clipping frame child views should interset with.  Normally this is 
+    the same as the regular clippingFrame.  However, you may override this 
+    method if you want the child views to actually draw more or less content
+    than is actually visible for some reason.
+    
+    Usually this is only used by the ScrollView to optimize drawing on touch
+    devices.
+    
+    @property {Rect}
+  */
+  contentClippingFrame: function() {
+    return this.get("clippingFrame");
+  }.property('clippingFrame').cacheable(),
   
   /** @private
     Whenever the clippingFrame changes, this observer will fire, notifying

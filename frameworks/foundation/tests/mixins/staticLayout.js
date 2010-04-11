@@ -123,4 +123,20 @@ test("Test that an exception is thrown when calling adjust and setting to auto",
    
 });
 
-
+test("Test SC.StaticLayout frame support", function() {
+  child = SC.View.create({
+    useStaticLayout: YES
+  });
+  
+  equals(child.get('frame'), null, "View's frame property will be null when useStaticLayout is YES and layer is not attached to DOM.");
+  
+  parent.createLayer();
+  var layer = parent.get('layer');
+  document.body.appendChild(layer);
+  
+  SC.RunLoop.begin();
+  parent.appendChild(child);
+  SC.RunLoop.end();
+  
+  ok(SC.typeOf(child.get('frame')) === SC.T_HASH, "View's frame property will be an object when useStaticLayout is YES and layer is attached to DOM.");
+});
