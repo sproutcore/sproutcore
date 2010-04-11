@@ -908,14 +908,21 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-master-detail-view { background: #333333; }
-.sc-theme .sc-view.ace.light.sc-master-detail-view > .sc-view { background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dddddd), to(#bbbbbb)); }
 .sc-theme .sc-view.ace.light.sc-master-detail-view .sc-workspace-view .sc-toolbar-view {
   -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
   -moz-border-raidus-topright: 5px;
 }
+.sc-theme .sc-view.ace.light.sc-container-view { background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dddddd), to(#bbbbbb)); }
+.sc-source-list-background { background: #d0dae3; }
+.sc-source-list-background > .sc-container-view { background: #d0dae3; }
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list { background: #d0dae3; }
+.sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-list-item-view label {
+  top: 50%;
+  margin-top: -9px;
+  font-size: 14px;
+}
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-collection-item.sel {
   background: static_url("images/2.png") repeat-x 0 -360px;
   border-top: 1px solid #43638d;
