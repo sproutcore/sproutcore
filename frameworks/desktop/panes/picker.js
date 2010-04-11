@@ -536,22 +536,16 @@ SC.PickerPane = SC.PalettePane.extend({
   
   displayProperties: ["pointerPosY"],
 
-  render: function(context, firstTime) {
-    var ret = sc_super();
-    if (context.needsContent) {
-      if (this.get('preferType') == SC.PICKER_POINTER || this.get('preferType') == SC.PICKER_MENU_POINTER) {
-        context.push('<div class="sc-pointer '+this.get('pointerPos')+'" style="margin-top: '+this.get('pointerPosY')+'px"></div>');
-        context.addClass(this.get('pointerPos'));
-      }
-    } else {
-      if (this.get('preferType') == SC.PICKER_POINTER || this.get('preferType') == SC.PICKER_MENU_POINTER) {
-        var el = this.$('.sc-pointer');
-        el.attr('class', "sc-pointer "+this.get('pointerPos'));
-        el.attr('style', "margin-top: "+this.get('pointerPosY')+"px");
-        context.addClass(this.get('pointerPos'));
-      }
-    }
-    return ret ;
+  createRenderer: function(t) {
+    return t.picker();
+  },
+  
+  updateRenderer: function(r) {
+    r.attr({
+      preferType: this.preferType,
+      pointerPos: this.pointerPos,
+      pointerPosY: this.pointerPosY
+    });
   },
   
   /** @private - click away picker. */
