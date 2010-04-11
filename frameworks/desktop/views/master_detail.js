@@ -108,7 +108,35 @@ SC.MasterDetailView = SC.View.extend({
   */
   toggleMasterPicker: function(view) {
     if (!this.get("masterIsHidden")) return;
-    this._showPicker(view);
+    if (this._picker && this._picker.get("isVisibleInWindow")) {
+      this.hideMasterPicker();
+    } else {
+      this.showMasterPicker(view);
+    }
+  },
+  
+  showMasterPicker: function(view) {
+    if (this._picker && this._picker.get("isVisibleInWindow")) return;
+    var pp = this.get("pickerPane");
+    this._picker = pp.create({ });
+    this._picker.set("contentView", this.get("masterView"));
+    this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge")); 
+    this.showPicker(this._picker, view);
+  },
+  
+  hideMasterPicker: function() {
+    if (this._picker && this._picker.get("isVisibleInWindow")) {
+      this.hidePicker(this._picker);
+      this._picker = null;
+    }
+  },
+  
+  showPicker: function(p, view) {
+    p.popup(view, SC.PICKER_POINTER, [3, 0, 1, 2, 3], [9, -9, -18, 18]);
+  },
+  
+  hidePicker: function(p) {
+    p.remove();
   },
   
   /**
@@ -124,19 +152,6 @@ SC.MasterDetailView = SC.View.extend({
   /// INTERNAL CODE. HERE, THERE BE MONSTERS!
   _picker: null,
   pointerDistanceFromEdge: 46,
-  
-  _showPicker: function(view) {
-    var pp = this.get("pickerPane");
-    this._picker = pp.create({
-    });
-    this._picker.set("contentView", this.get("masterView"));
-    this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge")); 
-    this._picker.popup(view, SC.PICKER_POINTER, [3, 0, 1, 2, 3], [9, -9, -18, 18]);
-  },
-  
-  _pickerDidHide: function() {
-    
-  },
   
   
   /**
@@ -195,9 +210,7 @@ SC.MasterDetailView = SC.View.extend({
     
     if (masterIsVisible) {
       // hide picker if needed
-      if (this._picker && this._picker.get("isVisibleInWindow")) {
-        this._picker.remove();
-      }
+      this.hideMasterPicker();
       
       // draw master if needed
       if (!this._masterIsDrawn) {
