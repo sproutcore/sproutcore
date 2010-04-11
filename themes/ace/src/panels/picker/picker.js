@@ -1,7 +1,7 @@
 require("src/theme");
 
-SC.AceTheme.renderers.Picker = SC.Renderer.extend({
-  POINTER_DISTANCE_FROM_EDGE: 50,
+SC.AceTheme.renderers.Picker = SC.EmptyTheme.renderers.Picker.extend({
+  POINTER_DISTANCE_FROM_EDGE: 44,
   render: function(context){
     
   },

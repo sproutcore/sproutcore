@@ -1,0 +1,1 @@
+SC.AceTheme.Popover = SC.AceTheme.subtheme("popover", "popover");

@@ -1,1 +1,126 @@
-/* Popovers are not themed. Well, their PickerPane part is not. */
+@theme(popover)
+
+/* Popovers are not themed. Well, they are--but their PickerPane part is not. */
+@view(sc-pane.sc-panel.sc-palette.sc-picker) {
+  background: none;
+}
+
+/* First, we do change toolbars. They are rendered by the workspace part */
+@view(sc-toolbar-view) {
+  background-image: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  border: 0px none;
+}
+
+/* Now, said "workspace part" */
+
+/*************** BASIC ****************/
+@view(sc-workspace-view) {
+  overflow: visible;
+  background: none;
+  
+  .sc-workspace-overlay {
+    z-index: 10;
+    position: absolute; left: 0; top: 0; bottom: 0; right: 0;
+    /* TOP */
+    .top-left-edge {
+      position: absolute;
+      left: -25px; top: -25px; width: 40px; height: 40px;
+      background: sprite("popover_notoolbar.png" [0 0 40 40]);
+    }
+    
+    .top-right-edge {
+      position: absolute;
+      right: -25px; top: -25px; width: 40px; height: 40px;
+      background: sprite("popover_notoolbar.png" [-40 0 40 40]);
+    }
+    
+    .top-edge {
+      position: absolute;
+      left: 15px; right: 15px; top: -25px; height: 40px;
+      background: sprite("popover_notoolbar.png" [40 0 1 40] repeat-x);
+    }
+    
+    /* BOTTOM */
+    .bottom-left-edge {
+      position: absolute;
+      left: -25px; bottom: -25px; width: 40px; height: 40px;
+      background: sprite("popover_notoolbar.png" [0 -40 40 40]);
+    }
+    
+    .bottom-right-edge {
+      position: absolute;
+      right: -25px; bottom: -25px; width: 40px; height: 40px;
+      background: sprite("popover_notoolbar.png" [-40 -40 40 40]);
+    }
+    
+    .bottom-edge {
+      position: absolute;
+      left: 15px; right: 15px; bottom: -25px; height: 40px;
+      background: sprite("popover_notoolbar.png" [40 -40 1 40] repeat-x);
+    }
+    
+    /* LEFT AND RIGHT SIDES */
+    .left-edge {
+      position: absolute;
+      left: -25px; top: 15px; bottom: 15px; width: 40px;
+      background: sprite("popover_notoolbar.png" [0 40 40 1] repeat-y);
+    }
+    
+    .right-edge {
+      position: absolute;
+      right: -25px; top: 15px; bottom: 15px; width: 40px;
+      background: sprite("popover_notoolbar.png" [-40 40 40 1] repeat-y);
+    }
+  }
+  
+}
+
+@view(sc-workspace-view).top-toolbar {
+  .sc-workspace-overlay {
+    
+    /* TOP */
+    .top-left-edge {
+      top: -20px; height: 80px;
+      background: sprite("popover.png" [0 0 40 80]);
+    }
+    
+    .top-right-edge {
+      top: -20px; height: 80px;
+      background: sprite("popover.png" [-40 0 40 80]);
+    }
+    
+    .top-edge {
+      top: -20px; height: 80px;
+      background: sprite("popover.png" [40 0 1 80] repeat-x);
+    }
+    .left-edge { top: 60px; }
+    .right-edge { top: 60px; }
+  }
+}
+
+@view(sc-workspace-view).bottom-toolbar {
+  .sc-workspace-overlay {
+    
+    /* TOP */
+    .bottom-left-edge {
+      bottom: -20px; height: 80px;
+      background: sprite("popover.png" [0 -80 40 80]);
+    }
+    
+    .bottom-right-edge {
+      bottom: -20px; height: 80px;
+      background: sprite("popover.png" [-40 -80 40 80]);
+    }
+    
+    .bottom-edge {
+      bottom: -20px; height: 80px;
+      background: sprite("popover.png" [40 -80 1 80] repeat-x);
+    }
+    .left-edge { bottom: 60px; }
+    .right-edge { bottom: 60px; }
+  }
+}
+
+@end
