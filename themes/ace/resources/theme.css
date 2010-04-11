@@ -908,7 +908,7 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-master-detail-view { background: #333333; }
-.sc-theme .sc-view.ace.light.sc-master-detail-view .sc-workspace-view .sc-toolbar-view {
+.sc-theme .sc-view.ace.light.sc-master-detail-view .sc-workspace-view.rounded-corners .sc-toolbar-view {
   -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-radius-topleft: 5px;
