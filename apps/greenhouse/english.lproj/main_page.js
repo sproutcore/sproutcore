@@ -63,7 +63,6 @@ Greenhouse.mainPage = SC.Page.design({
       title: "Load Application",
       theme: "capsule",
       isDefault: YES,
-      target: 'Greenhouse.targetsController',
       action: "loadApplication"
               
     }),
@@ -80,7 +79,6 @@ Greenhouse.mainPage = SC.Page.design({
         contentValueKey: "displayName",
         contentIconKey: "targetIcon",
         hasContentIcon: YES,
-        
         action: "loadApplication"
       })
       
