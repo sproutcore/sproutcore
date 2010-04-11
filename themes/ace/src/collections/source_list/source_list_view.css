@@ -1,5 +1,17 @@
+.sc-source-list-background,
+.sc-source-list-background > .sc-container-view {
+  background: #d0dae3;
+}
+
 @view(sc-collection-view).sc-source-list {
   background: #d0dae3;
+}
+
+
+@view(sc-collection-view).sc-source-list .sc-list-item-view label {
+  top: 50%;
+  margin-top: -9px;
+  font-size:14px;
 }
 
 @view(sc-collection-view).sc-source-list .sc-collection-item.sel {
