@@ -25,8 +25,6 @@ SC.AceTheme.Popover.renderers.Workspace = SC.EmptyTheme.renderers.Workspace.exte
   },
   
   render: function(context) {
-    if (this.contentProvider) this.contentProvider.renderContent(context);
-    
     context.setClass(this.computeClassNames());
     
     context.push("<div class='sc-workspace-overlay'>",
@@ -41,6 +39,8 @@ SC.AceTheme.Popover.renderers.Workspace = SC.EmptyTheme.renderers.Workspace.exte
       "<div class='left-edge'></div>",
       "<div class='sc-pointer'></div>",
     "</div>");
+    
+    if (this.contentProvider) this.contentProvider.renderContent(context);
   },
   
   update: function() {
