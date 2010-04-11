@@ -159,5 +159,26 @@ SC.WorkspaceView = SC.View.extend({
     this.contentView.set("layout", {
       left: 0, right: 0, top: contentTop, bottom: contentBottom
     });
+  },
+  
+  /**
+    Wow, there is actually a reason to occasionally render the WorkspaceView itself!
+    How about that?
+    @private
+  */
+  createRenderer: function(t) {
+    return t.workspace();
+  },
+  
+  /**
+    We must update as well.
+    @private
+  */
+  updateRenderer: function(r) {
+    r.attr({
+      hasTopToolbar: !!this.get("topToolbar"),
+      hasBottomToolbar: !!this.get("bottomToolbar")
+    });
   }
+  
 });
