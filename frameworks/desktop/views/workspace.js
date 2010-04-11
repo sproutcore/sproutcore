@@ -20,6 +20,7 @@ SC.VERTICAL_ORIENTATION = "vertical";
 SC.HORIZONTAL_ORIENTATION = "horizontal";
 
 SC.WorkspaceView = SC.View.extend({
+  classNames: ["sc-workspace-view"],
   /**
     The top toolbar. This defaults to an empty toolbar.
   */
