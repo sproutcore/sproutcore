@@ -88,6 +88,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       this._setupRunLoops();
       this._grabDropTargets();
       this._setupGreenhouse();
+      this._setupEventBlocker();
       this.invokeLater(function(){this.goState('readyWaiting');}); //totally cheating!!
     },
     exitState: function(){
@@ -212,6 +213,11 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     _setupGreenhouse: function(){
       var iframe = Greenhouse.get('iframe');
       iframe.SC._Greenhouse = Greenhouse;
+    },
+    
+    _setupEventBlocker: function(){
+      var eventBlocker = Greenhouse.appPage.get('eventBlocker');
+      Greenhouse.set('eventBlocker', eventBlocker);
     }
   })
 });

@@ -40,19 +40,28 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     parallelStatechart: 'inspector',
 
     enterState: function(){
-     
+      var picker = Greenhouse.appPage.get('inspectorPicker'),
+          button = Greenhouse.appPage.getPath('mainView.toolBar.inspector');
+
+      picker.popup(button, SC.PICKER_POINTER);
+      picker.becomeFirstResponder();
     },
     exitState: function(){
-
+      var picker = Greenhouse.appPage.get('inspectorPicker');
+      picker.remove();
     },
    
     // ..........................................................
     // Events
     //
-    closeInspector: function(){
+    cancel: function(){
       this.goState('closeInspectorPicker');
     },
-   
+    
+    floatInspector: function(){
+      this.goState('inspectorPalette');
+    },
+    
     dockInspector: function(){
       this.goState('dockedInspector');
     },
@@ -67,17 +76,35 @@ Greenhouse.mixin( /** @scope Greenhouse */{
    parallelStatechart: 'inspector',
 
    enterState: function(){
+     var picker = Greenhouse.appPage.get('inspectorPicker');
+     picker.append();
+     picker.set('isModal', NO);
+     picker.set('isAnchored', NO);
+     picker.$().toggleClass('sc-picker', NO);
+     var content = picker.getPath('contentView.content'),
+         toolbar = picker.getPath('contentView.toolbar');
      
+     content.adjust('top', 28);    
+     toolbar.set('isVisible', YES); 
    },
    exitState: function(){
-
+     var picker = Greenhouse.appPage.get('inspectorPicker');
+     picker.set('isModal', YES);
+     picker.set('isAnchored', YES);
+     picker.remove();
+     
+     var content = picker.getPath('contentView.content'),
+         toolbar = picker.getPath('contentView.toolbar');
+     
+     content.adjust('top', 0);    
+     toolbar.set('isVisible', NO);
    },
    
    // ..........................................................
    // Events
    //
    closeInspector: function(){
-     this.goState('closeInspectorPicker');
+     this.goState('inspectorClosed');
    },
    
    dockInspector: function(){

@@ -10,10 +10,37 @@
 Greenhouse.TearOffPicker = SC.PickerPane.extend(
 /** @scope Greenhouse.TearOffPicker.prototype */ {
   
+  dragAction: '',
+  
   mouseDragged: function(evt){
-    this.set('isModal', NO);
-    this.set('isAnchored', NO);
+    
+    Greenhouse.sendAction(this.get('dragAction'));
+    this._blockedIframe = YES;
+    Greenhouse.eventBlocker.set('isVisible', YES);
     
     return sc_super();
+  },
+  
+  mouseUp: function(evt){
+    if(this._blockedIframe){
+      Greenhouse.eventBlocker.set('isVisible', NO);
+      this._blockedIframe = NO;
+    }
+    return sc_super();
+  },
+  
+  mouseDown: function(evt) {
+    var f=this.get('frame');
+    this._mouseOffsetX = f ? (f.x - evt.pageX) : 0;
+    this._mouseOffsetY = f ? (f.y - evt.pageY) : 0;
+    return this.modalPaneDidClick(evt);
+  },
+  
+  modalPaneDidClick: function(evt) {
+    var f = this.get("frame");
+    if(!this.clickInside(f, evt)){ 
+      Greenhouse.sendAction('cancel');
+    }
+    return YES ; 
   }
 });
