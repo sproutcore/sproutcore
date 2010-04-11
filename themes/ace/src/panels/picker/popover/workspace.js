@@ -39,6 +39,7 @@ SC.AceTheme.Popover.renderers.Workspace = SC.EmptyTheme.renderers.Workspace.exte
       "<div class='bottom-edge'></div>",
       "<div class='bottom-left-edge'></div>",
       "<div class='left-edge'></div>",
+      "<div class='sc-pointer'></div>",
     "</div>");
   },
   
