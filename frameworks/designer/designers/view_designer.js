@@ -559,7 +559,7 @@ SC.ViewDesigner = SC.Object.extend(
   // MOUSE HANDLING
   // 
   
-  HANDLE_MARGIN: 5,
+  HANDLE_MARGIN: 10,
   
   /**
     Select on mouseDown.  If metaKey or shiftKey is pressed, add to
