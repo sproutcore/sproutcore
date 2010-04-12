@@ -1,0 +1,2 @@
+#!/usr/bin/env ruby
+system('chance/chance.rb --data-url --less ace.light')
