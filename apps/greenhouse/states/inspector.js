@@ -79,8 +79,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       picker.set('isModal', NO);
       picker.set('isAnchored', NO);
       picker.$().toggleClass('sc-picker', NO);
-      var content = ap.getPath('inspectorPickerContentView.content'),
-          toolbar = ap.getPath('inspectorPickerContentView.toolbar');
+      var content = ap.getPath('inspectorContentView.content'),
+          toolbar = ap.getPath('inspectorContentView.toolbar');
      
       content.adjust('top', 28);    
       toolbar.set('isVisible', YES); 
@@ -95,8 +95,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       picker.set('isAnchored', YES);
       picker.remove();
      
-      var content = ap.getPath('inspectorPickerContentView.content'),
-          toolbar = ap.getPath('inspectorPickerContentView.toolbar');
+      var content = ap.getPath('inspectorContentView.content'),
+          toolbar = ap.getPath('inspectorContentView.toolbar');
      
       content.adjust('top', 0);    
       toolbar.set('isVisible', NO);
