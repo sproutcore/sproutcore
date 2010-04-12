@@ -21,7 +21,7 @@ SC.designController = SC.ObjectController.create(
       pane = c.get('view');
       if(pane.kindOf && pane.kindOf(SC.View)){
         designer = pane.get('designer');
-        //disable design mode
+        //disable design mode(since this is the root view)
         if(designer) designer.set('designIsEnabled', NO);
 
         //remove any existing panes
@@ -29,13 +29,14 @@ SC.designController = SC.ObjectController.create(
           this._currentPane.remove();
           this._currentPane = null;
         }
-        //append if necessary..
-        if(c.get('type') === 'pane' && this._currentPane !== pane){
-          pane.append();
-          pane.adjust({bottom: 63}); //TODO: figure out how to reverse this....
-          pane.set('isModal', NO);
-          this._currentPane = pane;
-        } 
+        //append if necessary.. 
+        //TODO: remove this if charles approves my pane changes....
+        // if(c.get('type') === 'pane' && this._currentPane !== pane){
+        //   pane.append();
+        //   pane.adjust({bottom: 60}); //TODO: figure out how to reverse this....
+        //   pane.set('isModal', NO);
+        //   this._currentPane = pane;
+        //         } 
       }
     }
   }

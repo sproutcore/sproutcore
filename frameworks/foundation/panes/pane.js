@@ -120,6 +120,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {Rect} current window size 
   */
   computeParentDimensions: function(frame) {
+    if(this.get('designer') && SC.suppressMain) return sc_super();
+    
     var wframe = this.get('currentWindowSize');
     var wDim = {x: 0, y: 0, width: 1000, height: 1000};
     if (wframe){
@@ -153,6 +155,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     
   /** @private Disable caching due to an known bug in SC. */
   frame: function() {
+    if(this.get('designer') && SC.suppressMain) return sc_super();    
     return this.computeFrameWithParentFrame(null) ;
   }.property(),
   
@@ -664,6 +667,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+    if(this.get('designer') && SC.suppressMain) return sc_super();
     var last = this.get('isVisibleInWindow'),
         cur = this.get('isVisible') ;
 
@@ -700,6 +704,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   
   /** @private */
   updateLayerLocation: function() {
+    if(this.get('designer') && SC.suppressMain) return sc_super();
     // note: the normal code here to update node location is removed 
     // because we don't need it for panes.
     return this ; 
