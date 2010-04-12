@@ -14,11 +14,11 @@ TestControls.categoryController = SC.ObjectController.create(
   contentBinding: "TestControls.categoriesController.selection",
   contentBindingDefault: SC.Binding.single(),
   
-  delayedShow: "welcome",
+  nowShowing: "welcome",
   
   delayShow: function() {
     // wait a moment before loading to let things finish...
-    this.invokeLater(this.set, 100, "delayedShow", this.get("show"));
+    this.invokeLater(this.set, 100, "nowShowing", this.get("show") || "welcome");
     this.hideMasterPicker();
   }.observes("show"),
   
