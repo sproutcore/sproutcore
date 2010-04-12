@@ -719,6 +719,14 @@ SC.ViewDesigner = SC.Object.extend(
 
   },
   
+  doubleClick: function(evt){
+    console.log('doubleClick');
+    if (!this.get('designIsEnabled')) return NO ;
+    if(SC._Greenhouse){
+     SC._Greenhouse.sendAction('openInspector');
+    }
+  },
+  
   // ..........................................................
   // Drag source and drag data source
   //   

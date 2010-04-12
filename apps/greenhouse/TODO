@@ -2,12 +2,16 @@ DEMO Punch-list:
 - adding a base view to a new page [MB] @done
 - exceptions when dragging view or controller into page [MB] @done
 - cleanup dimensions of modals [EG] @done
-- Inner run loop not triggering re-draw of anchor view [CJ]
+- finish tear-off picker panes [MB/EG] @done
 - binding value is undefined [EG/MB]
 - fix add custom view event [MB] @done
-- finish tear-off picker panes [MB/EG]
-- figure out location for SC meetup [MB/EG]
 - add js beautifier [MB] @done
+
+
+
+- Inner run loop not triggering re-draw of anchor view [CJ]
+- figure out location for SC meetup [MB/EG]
+
 
 
 TODO for demo:
