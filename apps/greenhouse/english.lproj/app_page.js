@@ -72,7 +72,7 @@ Greenhouse.appPage = SC.Page.design({
           itemIsEnabledKey: 'isEnabled',
           items:[
             {title: "_Run".loc(), action: 'run', isEnabled: YES},
-            {title: "_Dock Library".loc(), action: 'dockLibrary', isEnabled: YES},
+            {title: "_Dock Library".loc(), action: 'toggleDockedLibrary', isEnabled: YES},
             {title: "_Dock Inspector".loc(), action: 'dockInspector', isEnabled: YES},
             {title: "_Save".loc(), action: 'save', isEnabled: YES }
           ]
@@ -177,56 +177,64 @@ Greenhouse.appPage = SC.Page.design({
     layout: {width: 230, height: 400},
     dragAction: 'floatLibrary',
     defaultResponder: 'Greenhouse',
-    contentView: SC.View.design({
-      childViews: 'toolbar content'.w(),
-      
-      toolbar: SC.View.design({
-        layout: {top:0, left: 0, right:0, height: 28},
-        isVisible: NO,
-        childViews: 'remove'.w(),
-        remove: SC.View.design(Greenhouse.SimpleButton,{
-          layout: {right: 5, top: 2, width: 20, height: 24},
-          action: 'closeLibrary'
+    contentView: SC.ContainerView.design({
+      nowShowing: 'Greenhouse.appPage.libraryContentView'
+    })
+  }),
+  libraryPickerContentView: SC.outlet('libraryPicker.contentView'),
+  
+  // ..........................................................
+  // Library Content View
+  // 
+  libraryContentView: SC.View.design({
+    childViews: 'toolbar content'.w(),
+    
+    toolbar: SC.View.design({
+      layout: {top:0, left: 0, right:0, height: 28},
+      isVisible: NO,
+      childViews: 'remove'.w(),
+      remove: SC.View.design(Greenhouse.SimpleButton,{
+        layout: {right: 5, top: 2, width: 20, height: 24},
+        action: 'closeLibrary'
+      })
+    }),
+    
+    content: SC.View.design({
+      childViews: 'title library libSearch addCustomView'.w(),
+    
+      title: SC.LabelView.design({
+        layout: {top: 4, left: 5, width: 50, height: 22},
+        value: "_Library".loc()
+      }),
+    
+      libSearch: SC.TextFieldView.design({
+        layout: {top: 2, left: 60, right: 5, height: 24},
+        valueBinding: 'Greenhouse.libraryController.search'
+      }),
+    
+      library: SC.ScrollView.design({
+        layout: {top: 30, left: 0, right: 0, bottom: 40},
+        hasHorizontalScroller: NO,
+        contentView: SC.ListView.design({
+          rowHeight: 36,
+          isEditable: NO,
+          contentValueKey: 'name',
+          contentBinding: 'Greenhouse.libraryController.arrangedObjects',
+          selectionBinding: 'Greenhouse.libraryController.selection',
+          delegate: Greenhouse.libraryController,
+          canReorderContent: YES,
+          dragDidBegin: function(drag, loc) {
+            Greenhouse.sendAction('cancel');
+          }
         })
       }),
-      
-      content: SC.View.design({
-        childViews: 'title library libSearch addCustomView'.w(),
-      
-        title: SC.LabelView.design({
-          layout: {top: 4, left: 5, width: 50, height: 22},
-          value: "_Library".loc()
-        }),
-      
-        libSearch: SC.TextFieldView.design({
-          layout: {top: 2, left: 60, right: 5, height: 24},
-          valueBinding: 'Greenhouse.libraryController.search'
-        }),
-      
-        library: SC.ScrollView.design({
-          layout: {top: 30, left: 0, right: 0, bottom: 40},
-          hasHorizontalScroller: NO,
-          contentView: SC.ListView.design({
-            rowHeight: 36,
-            isEditable: NO,
-            contentValueKey: 'name',
-            contentBinding: 'Greenhouse.libraryController.arrangedObjects',
-            selectionBinding: 'Greenhouse.libraryController.selection',
-            delegate: Greenhouse.libraryController,
-            canReorderContent: YES,
-            dragDidBegin: function(drag, loc) {
-              Greenhouse.sendAction('cancel');
-            }
-          })
-        }),
-      
-        addCustomView: SC.ButtonView.design({
-          layout: { bottom: 5, right: 5, height: 24, width: 90 },
-          titleMinWidth: 0,
-          hasIcon: NO,
-          title: "_Add View".loc(),
-          action: 'newCustomView'
-        })
+    
+      addCustomView: SC.ButtonView.design({
+        layout: { bottom: 5, right: 5, height: 24, width: 90 },
+        titleMinWidth: 0,
+        hasIcon: NO,
+        title: "_Add View".loc(),
+        action: 'newCustomView'
       })
     })
   }),

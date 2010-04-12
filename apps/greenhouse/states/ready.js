@@ -162,7 +162,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     // ..........................................................
     // Events
     //
-    dockLibrary: function(){
+    toggleDockedLibrary: function(){
       this.goState('docked');
     },
 

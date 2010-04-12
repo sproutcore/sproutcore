@@ -14,7 +14,6 @@
 */
 Greenhouse.mixin( /** @scope Greenhouse */{
   libraryClosed: SC.State.create({
-    
     parallelStatechart: 'library',
    
     // ..........................................................
@@ -24,7 +23,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       this.goState('openLibraryPicker');
     },
    
-    dockLibrary: function(){
+    toggleDockedLibrary: function(){
       this.goState('dockedLibrary');
     }
   }),
@@ -35,14 +34,18 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     
     enterState: function(){
       var picker = Greenhouse.appPage.get('libraryPicker'),
-          button = Greenhouse.appPage.getPath('mainView.toolBar.library');
+          button = Greenhouse.appPage.getPath('mainView.toolBar.library'),
+          pickerContentView = Greenhouse.appPage.get('libraryPickerContentView');
 
+      pickerContentView.setIfChanged('nowShowing', 'Greenhouse.appPage.libraryContentView');
       picker.popup(button, SC.PICKER_POINTER);
       picker.becomeFirstResponder();
     },
    
     exitState: function(){
-      var picker = Greenhouse.appPage.get('libraryPicker');
+      var picker = Greenhouse.appPage.get('libraryPicker'),
+          pickerContentView = Greenhouse.appPage.get('libraryPickerContentView');
+      pickerContentView.setIfChanged('nowShowing', null);
       picker.remove();
     },
    
@@ -51,58 +54,77 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     },
     
     floatLibrary: function(){
-      this.goState('libraryPicker');
-    }
- }),
- 
- libraryPicker: SC.State.create({
-   
-   parallelStatechart: 'library',
-
-   enterState: function(){
-     var picker = Greenhouse.appPage.get('libraryPicker');
-     picker.append();
-     picker.set('isModal', NO);
-     picker.set('isAnchored', NO);
-     picker.$().toggleClass('sc-picker', NO);
-     var content = picker.getPath('contentView.content'),
-         toolbar = picker.getPath('contentView.toolbar');
-     
-     content.adjust('top', 28);    
-     toolbar.set('isVisible', YES); 
-   },
-   exitState: function(){
-     var picker = Greenhouse.appPage.get('libraryPicker');
-     picker.set('isModal', YES);
-     picker.set('isAnchored', YES);
-     picker.remove();
-     
-     var content = picker.getPath('contentView.content'),
-         toolbar = picker.getPath('contentView.toolbar');
-     
-     content.adjust('top', 0);    
-     toolbar.set('isVisible', NO);
-   },
-   
-   closeLibrary: function(){
-     this.goState('libraryClosed');
-   }
- }),
- 
- 
- dockedLibrary: SC.State.create({
-
-  parallelStatechart: 'library',
-
-  enterState: function(){
+      this.goState('libraryPalette');
+    },
     
-  },
-  exitState: function(){
+    toggleDockedLibrary: function(){
+      this.goState('dockedLibrary');
+    }
+  }),
+ 
+  libraryPalette: SC.State.create({
+    parallelStatechart: 'library',
 
-  }
+    enterState: function(){
+      var ap = Greenhouse.appPage;
+      var picker = ap.get('libraryPicker'),
+          pickerContentView = ap.get('libraryPickerContentView');
+          
+      pickerContentView.setIfChanged('nowShowing', 'Greenhouse.appPage.libraryContentView');
+      picker.append();
+      picker.set('isModal', NO);
+      picker.set('isAnchored', NO);
+      picker.$().toggleClass('sc-picker', NO);
+      var content = ap.getPath('libraryContentView.content'),
+          toolbar = ap.getPath('libraryContentView.toolbar');
+     
+      content.adjust('top', 28);    
+      toolbar.set('isVisible', YES); 
+    },
+    exitState: function(){
+      var ap = Greenhouse.appPage;
+      var picker = ap.get('libraryPicker'),
+          pickerContentView = ap.get('libraryPickerContentView');
+      
+      pickerContentView.setIfChanged('nowShowing', null);
+      picker.set('isModal', YES);
+      picker.set('isAnchored', YES);
+      picker.remove();
+     
+      var content = ap.getPath('libraryContentView.content'),
+          toolbar = ap.getPath('libraryContentView.toolbar');
+     
+      content.adjust('top', 0);    
+      toolbar.set('isVisible', NO);
+    },
+   
+    closeLibrary: function(){
+      this.goState('libraryClosed');
+    },
+    
+    toggleDockedLibrary: function(){
+      this.goState('dockedLibrary');
+    }
+  }),
+ 
+  dockedLibrary: SC.State.create({
+
+    parallelStatechart: 'library',
+
+    enterState: function(){
+      var libDock = Greenhouse.appPage.get('libraryDockView');
+      libDock.setIfChanged('nowShowing', 'Greenhouse.appPage.libraryContentView');
+    },
+    exitState: function(){
+      var libDock = Greenhouse.appPage.get('libraryDockView');
+      libDock.setIfChanged('nowShowing', null);
+    },
   
-  // ..........................................................
-  // Events
-  //
- })
+    // ..........................................................
+    // Events
+    //
+    toggleDockedLibrary: function(){
+      this.goState('libraryClosed');
+    }
+  })
 });
