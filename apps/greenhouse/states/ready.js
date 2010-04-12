@@ -166,7 +166,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       this.goState('docked');
     },
 
-    dockInspector: function(){
+    toggleDockedInspector: function(){
       this.goState('docked');
     }
   }),

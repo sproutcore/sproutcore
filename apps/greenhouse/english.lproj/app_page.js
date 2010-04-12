@@ -73,7 +73,7 @@ Greenhouse.appPage = SC.Page.design({
           items:[
             {title: "_Run".loc(), action: 'run', isEnabled: YES},
             {title: "_Dock Library".loc(), action: 'toggleDockedLibrary', isEnabled: YES},
-            {title: "_Dock Inspector".loc(), action: 'dockInspector', isEnabled: YES},
+            {title: "_Dock Inspector".loc(), action: 'toggleDockedInspector', isEnabled: YES},
             {title: "_Save".loc(), action: 'save', isEnabled: YES }
           ]
         })
@@ -124,67 +124,62 @@ Greenhouse.appPage = SC.Page.design({
 
       inspectorArea: SC.ContainerView.design({
         layout: { right: 0, bottom: 0, left: 0, height: 350 },
-        nowShowing: 'Greenhouse.appPage.inspectorTab'
+        nowShowing: null
       })
     })
   }),
   
-  inspectorTab: SC.TabView.design({
-    layout: {left: 0, right:0, bottom: 0, height:350},
-    itemTitleKey: 'title',
-    itemValueKey: 'value',
-    nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
-    items: [
-      {title: "Layout", value: 'Greenhouse.inspectorsPage.layoutInspector'},
-      {title: "All Properties", value: 'Greenhouse.inspectorsPage.propertiesInspector'}]
+  inspectorContentView: SC.View.design({
+    childViews: 'toolbar content'.w(),
+  
+    toolbar: SC.View.design({
+      layout: {top:0, left: 0, right:0, height: 28},
+      isVisible: NO,
+      childViews: 'title remove'.w(),
+      title: SC.LabelView.design({
+        layout: {centerX: 0, top: 2, height: 24, width: 50},
+        title: "_Inspector".loc()
+      }),
+      
+      remove: SC.View.design(Greenhouse.SimpleButton,{
+        layout: {right: 5, top: 2, width: 20, height: 24},
+        action: 'closeInspector'
+      })
+    }),
+  
+    content: SC.TabView.design({
+      layout: {left: 0, right:0, bottom: 0, height:350},
+      itemTitleKey: 'title',
+      itemValueKey: 'value',
+      nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
+      items: [
+        {title: "Layout", value: 'Greenhouse.inspectorsPage.layoutInspector'},
+        {title: "All Properties", value: 'Greenhouse.inspectorsPage.propertiesInspector'}]
+    })
   }),
   
+  // inspectorTab: SC.TabView.design({
+  //   layout: {left: 0, right:0, bottom: 0, height:350},
+  //   itemTitleKey: 'title',
+  //   itemValueKey: 'value',
+  //   nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
+  //   items: [
+  //     {title: "Layout", value: 'Greenhouse.inspectorsPage.layoutInspector'},
+  //     {title: "All Properties", value: 'Greenhouse.inspectorsPage.propertiesInspector'}]
+  // }),
+  
+  inspectorPickerContentView: SC.outlet('inspectorPicker.contentView'), 
   inspectorPicker: Greenhouse.TearOffPicker.design({
     layout: {width: 300, height: 380},
     defaultResponder: 'Greenhouse',
     dragAction: 'floatInspector',
-    contentView: SC.View.design({
-      childViews: 'toolbar content'.w(),
-    
-      toolbar: SC.View.design({
-        layout: {top:0, left: 0, right:0, height: 28},
-        isVisible: NO,
-        childViews: 'title remove'.w(),
-        title: SC.LabelView.design({
-          layout: {centerX: 0, top: 2, height: 24, width: 50},
-          title: "_Inspector".loc()
-        }),
-        
-        remove: SC.View.design(Greenhouse.SimpleButton,{
-          layout: {right: 5, top: 2, width: 20, height: 24},
-          action: 'closeInspector'
-        })
-      }),
-    
-      content: SC.TabView.design({
-        layout: {left: 0, right:0, bottom: 0, height:350},
-        itemTitleKey: 'title',
-        itemValueKey: 'value',
-        nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
-        items: [
-          {title: "Layout", value: 'Greenhouse.inspectorsPage.layoutInspector'},
-          {title: "All Properties", value: 'Greenhouse.inspectorsPage.propertiesInspector'}]
-      })
-    })
-  }),
-  
-  libraryPicker: Greenhouse.TearOffPicker.design({
-    layout: {width: 230, height: 400},
-    dragAction: 'floatLibrary',
-    defaultResponder: 'Greenhouse',
     contentView: SC.ContainerView.design({
-      nowShowing: 'Greenhouse.appPage.libraryContentView'
+      nowShowing: 'Greenhouse.appPage.inspectorContentView'
     })
   }),
-  libraryPickerContentView: SC.outlet('libraryPicker.contentView'),
   
   // ..........................................................
-  // Library Content View
+  // Library Views
   // 
   libraryContentView: SC.View.design({
     childViews: 'toolbar content'.w(),
@@ -239,6 +234,19 @@ Greenhouse.appPage = SC.Page.design({
     })
   }),
   
+  libraryPickerContentView: SC.outlet('libraryPicker.contentView'),
+  libraryPicker: Greenhouse.TearOffPicker.design({
+    layout: {width: 230, height: 400},
+    dragAction: 'floatLibrary',
+    defaultResponder: 'Greenhouse',
+    contentView: SC.ContainerView.design({
+      nowShowing: 'Greenhouse.appPage.libraryContentView'
+    })
+  }),
+  
+  // ..........................................................
+  // Project Views
+  // 
   projectPicker: SC.PickerPane.design({
     layout: {width: 200, height: 500},
     defaultResponder: 'Greenhouse',

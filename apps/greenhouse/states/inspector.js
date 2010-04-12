@@ -15,39 +15,38 @@
 Greenhouse.mixin( /** @scope Greenhouse */{
   inspectorClosed: SC.State.create({
     
-   parallelStatechart: 'inspector',
+    parallelStatechart: 'inspector',
 
-   enterState: function(){
-     
-   },
-   exitState: function(){
-
-   },
+    // ..........................................................
+    // Events
+    //
+    openInspector: function(){
+      this.goState('openInspectorPicker');
+    },
    
-   // ..........................................................
-   // Events
-   //
-   openInspector: function(){
-     this.goState('openInspectorPicker');
-   },
-   
-   dockInspector: function(){
-     this.goState('dockedInspector');
-   }
+    toggleDockedInspector: function(){
+      this.goState('dockedInspector');
+    }
   }),
   
   openInspectorPicker: SC.State.create({
     parallelStatechart: 'inspector',
 
     enterState: function(){
-      var picker = Greenhouse.appPage.get('inspectorPicker'),
-          button = Greenhouse.appPage.getPath('mainView.toolBar.inspector');
-
+      var ap = Greenhouse.appPage;
+      var picker = ap.get('inspectorPicker'),
+          button = ap.getPath('mainView.toolBar.inspector'),
+          pickerContentView = ap.get('inspectorPickerContentView');
+      
+      pickerContentView.setIfChanged('nowShowing', 'Greenhouse.appPage.inspectorContentView');
       picker.popup(button, SC.PICKER_POINTER);
       picker.becomeFirstResponder();
     },
     exitState: function(){
-      var picker = Greenhouse.appPage.get('inspectorPicker');
+      var ap = Greenhouse.appPage; 
+      var picker = ap.get('inspectorPicker'),
+          pickerContentView = ap.get('inspectorPickerContentView');
+      pickerContentView.setIfChanged('nowShowing', null);
       picker.remove();
     },
    
@@ -62,53 +61,78 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       this.goState('inspectorPalette');
     },
     
-    dockInspector: function(){
+    toggleDockedInspector: function(){
       this.goState('dockedInspector');
-    },
-    
-    undockInspector: function(){
-      this.goState('inspectorPalette');
     }
   }),
   
   inspectorPalette: SC.State.create({
-    
-   parallelStatechart: 'inspector',
+    parallelStatechart: 'inspector',
 
-   enterState: function(){
-     var picker = Greenhouse.appPage.get('inspectorPicker');
-     picker.append();
-     picker.set('isModal', NO);
-     picker.set('isAnchored', NO);
-     picker.$().toggleClass('sc-picker', NO);
-     var content = picker.getPath('contentView.content'),
-         toolbar = picker.getPath('contentView.toolbar');
+    enterState: function(){
+      var ap = Greenhouse.appPage; 
+      var picker = ap.get('inspectorPicker'),
+          pickerContentView = ap.get('inspectorPickerContentView');
+          
+      pickerContentView.setIfChanged('nowShowing', 'Greenhouse.appPage.inspectorContentView');
+      picker.append();
+      picker.set('isModal', NO);
+      picker.set('isAnchored', NO);
+      picker.$().toggleClass('sc-picker', NO);
+      var content = ap.getPath('inspectorPickerContentView.content'),
+          toolbar = ap.getPath('inspectorPickerContentView.toolbar');
      
-     content.adjust('top', 28);    
-     toolbar.set('isVisible', YES); 
-   },
-   exitState: function(){
-     var picker = Greenhouse.appPage.get('inspectorPicker');
-     picker.set('isModal', YES);
-     picker.set('isAnchored', YES);
-     picker.remove();
+      content.adjust('top', 28);    
+      toolbar.set('isVisible', YES); 
+    },
+    exitState: function(){
+      var ap = Greenhouse.appPage; 
+      var picker = ap.get('inspectorPicker'),
+          pickerContentView = ap.get('inspectorPickerContentView');
+      
+      pickerContentView.setIfChanged('nowShowing', null);
+      picker.set('isModal', YES);
+      picker.set('isAnchored', YES);
+      picker.remove();
      
-     var content = picker.getPath('contentView.content'),
-         toolbar = picker.getPath('contentView.toolbar');
+      var content = ap.getPath('inspectorPickerContentView.content'),
+          toolbar = ap.getPath('inspectorPickerContentView.toolbar');
      
-     content.adjust('top', 0);    
-     toolbar.set('isVisible', NO);
-   },
+      content.adjust('top', 0);    
+      toolbar.set('isVisible', NO);
+    },
    
-   // ..........................................................
-   // Events
-   //
-   closeInspector: function(){
-     this.goState('inspectorClosed');
-   },
+    // ..........................................................
+    // Events
+    //
+    closeInspector: function(){
+      this.goState('inspectorClosed');
+    },
    
-   dockInspector: function(){
-     this.goState('dockedInspector');
-   }
- })
+    toggleDockedInspector: function(){
+      this.goState('dockedInspector');
+    }
+  }),
+ 
+  dockedInspector: SC.State.create({
+    parallelStatechart: 'inspector',
+
+    enterState: function(){
+      var iDock = Greenhouse.appPage.get('inspectorDockView');
+      iDock.setIfChanged('nowShowing', 'Greenhouse.appPage.inspectorContentView');
+    },
+    exitState: function(){
+      var iDock = Greenhouse.appPage.get('inspectorDockView');
+      iDock.setIfChanged('nowShowing', null);
+    },
+ 
+    // ..........................................................
+    // Events
+    //
+    toggleDockedInspector: function(){
+      var libState = Greenhouse.get('libraryClosed').state();
+      if (libState !== Greenhouse.get('dockedLibrary')) Greenhouse.sendEvent('undock');
+      this.goState('inspectorClosed');
+    }
+  })
 });
