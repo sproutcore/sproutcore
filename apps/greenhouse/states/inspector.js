@@ -55,7 +55,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     // Events
     //
     cancel: function(){
-      this.goState('closeInspectorPicker');
+      this.goState('inspectorClosed');
     },
     
     floatInspector: function(){
