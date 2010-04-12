@@ -153,7 +153,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       var dock = Greenhouse.appPage.get('dockView');
       dock.set('layout', {top: 0, bottom: 0, right: 0, width: 0});
       var design = Greenhouse.appPage.get('designAreaView');
-      design.set('layout', {top: 0, bottom: 50, right: 0, left: 0});
+      design.set('layout', {top: 0, bottom: 0, right: 0, left: 0});
     },
     exitState: function(){
 

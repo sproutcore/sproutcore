@@ -14,7 +14,6 @@
 SC.DesignerDropTarget = SC.ContainerView.extend(
   /** @scope SC.DesignerDropTarget.prototype */ {
   
-  backgroundColor: 'white',
   // ..........................................................
   // Key Events
   // 
