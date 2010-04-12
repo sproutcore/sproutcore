@@ -80,6 +80,11 @@ argparser = OptionParser.new {|opts|
   opts.on('--no-sc-theme', "Exclude 'sc-theme' prefix (newer themes with SC 1.1 can do this).") {
     config[:include_sc_theme] = false
   }
+  
+  config[:use_data_url] = false
+  opts.on('--data-url', "Use data urls embedded in the CSS.") {
+    config[:use_data_url] = true
+  }
 }
 
 argparser.parse!
@@ -152,7 +157,16 @@ if config[:less]
     raise "Lest less doth be installed, less shall remain unusable. Sad."
   end
   
-  final = Less.parse cleaned
+  lessed = Less.parse cleaned
+  final = ""
+  
+  # LESS messes things up
+  lessed.each_line {|line|
+    final += line.gsub(/url\('data:image\/png;base64,(.*?)'\)/) do |match|
+      res = $1.gsub(" ", "+")
+      "url('data:image/png;base64," + res + "')"
+    end
+  }
 end
 
 

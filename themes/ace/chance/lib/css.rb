@@ -1,5 +1,5 @@
 require 'set'
-
+require 'base64'
 class CSSParser
   attr_accessor :images, :contents, :static_images
   def initialize(directory, file, config)
@@ -164,17 +164,31 @@ class CSSParser
       result = ""
       if @images.key? key
         image = @images[key]
-        result = (@config[:url_template] % [image[:sprite_path]])
+        
+        # if it is not sprited or we are not doing data urls, we use the url template.
+        if image[:nosprite] or not @config[:use_data_url]
+          result = (@config[:url_template] % [image[:sprite_path]])
+        else
+          # otherwise, we need to use a data url.
+          data = image[:image].to_blob
+          data = Base64.encode64(data)
+          data = data.gsub(/[ \n]/, '')
+        
+          result = "url(\'data:image/png;base64,#{data}\')"
+        end
         
         # Only put repeat data if not sprited
         if not image[:nosprite]
           result += " #{image[:repeat]}"
-          if image[:anchor] == :none
-            result += image[:sprite_x] == 0 ? " #{image[:sprite_x]}" : " -#{image[:sprite_x]}px"
-          else
-            result += (image[:anchor] == :right ? " right" : " left")
+          
+          if not @config[:use_data_url]
+            if image[:anchor] == :none
+              result += image[:sprite_x] == 0 ? " #{image[:sprite_x]}" : " -#{image[:sprite_x]}px"
+            else
+              result += (image[:anchor] == :right ? " right" : " left")
+            end
+            result += image[:sprite_y] == 0 ? " #{image[:sprite_y]}" : " -#{image[:sprite_y]}px"
           end
-          result += image[:sprite_y] == 0 ? " #{image[:sprite_y]}" : " -#{image[:sprite_y]}px"
         end
         
       else
