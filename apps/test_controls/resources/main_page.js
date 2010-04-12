@@ -88,13 +88,7 @@ TestControls.mainPage = SC.Page.create({
           })
         }),
         contentView: SC.ContainerView.design({
-          nowShowing: "welcome",
-          shouldBeShowing: "welcome",
-          shouldBeShowingBinding: SC.Binding.notEmpty("TestControls.categoryController.show", "welcome"),
-          shouldBeShowingDidChange: function() {
-            // delay for performance
-            this.invokeLater("set", 10, "nowShowing", this.get("shouldBeShowing"));
-          }.observes("shouldBeShowing")
+          nowShowingBinding: "TestControls.categoryController.nowShowing"
         })
       })
     })
