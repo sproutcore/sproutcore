@@ -92,6 +92,7 @@ Greenhouse.appPage = SC.Page.design({
           itemIsEnabledKey: 'isEnabled',
           items:[
             {title: "_Run".loc(), action: 'run', isEnabled: YES},
+            {title: "_Reload App".loc(), action: 'reloadIframe', isEnabled: YES},
             {title: "_Dock Library".loc(), action: 'toggleDockedLibrary', isEnabled: YES},
             {title: "_Dock Inspector".loc(), action: 'toggleDockedInspector', isEnabled: YES},
             {title: "_Save".loc(), action: 'save', isEnabled: YES }

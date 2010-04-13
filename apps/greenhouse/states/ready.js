@@ -42,10 +42,17 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     },
     
     unselectFile: function(){
-       // TODO: [EG, MB] add the action for unselecting 
-       this.goState('readyWaiting');
-     }
-    
+     // TODO: [EG, MB] add the action for unselecting 
+     this.goState('readyWaiting');
+    },
+     
+    reloadIframe: function(){
+      Greenhouse.filesController.set('selection', null);
+      Greenhouse.gettingFile._firstTime = YES;
+
+      Greenhouse.iframe.location.reload();
+      this.goState('iframeLoading');
+    }
   }),
   
   readyWaiting: SC.State.create({

@@ -78,6 +78,7 @@ SC.stringsFor('English', {
   "_Dock Library": "Dock Library",
   "_Dock Inspector": "Dock Inspector",
   "_Actions": "Actions",
-  "_Inspector": "Inspector"
+  "_Inspector": "Inspector",
+  "_Reload App": "Reload App"
   
 }) ;
