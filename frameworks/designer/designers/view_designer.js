@@ -342,6 +342,8 @@ SC.ViewDesigner = SC.Object.extend(
   encodeDesign: function(coder) {
     coder.set('className', SC._object_className(this.get('viewClass')));
     this.encodeDesignProperties(coder);
+    this.encodeDesignAttributeProperties(coder);
+    
     this.encodeChildViewsDesign(coder);
     return YES ;
   },
@@ -354,6 +356,22 @@ SC.ViewDesigner = SC.Object.extend(
   */
   encodeDesignProperties: function(coder) {
     return this.encodeSimpleProperties(this.get('designProperties'), coder);
+  },
+  
+  
+  encodeDesignAttributeProperties: function(coder){
+    var designProps = this.get('designProperties'),
+        designAttrs = this.get('designAttrs'),
+        simpleProps = [];
+        
+    if(designAttrs) designAttrs = designAttrs[0];
+    
+    for(var attr in designAttrs){
+      if(designAttrs.hasOwnProperty(attr) && designProps.indexOf(attr) < 0 && attr !== 'childViews'){
+        simpleProps.push(attr);
+      }
+    }
+    return this.encodeSimpleProperties(simpleProps, coder);
   },
   
   /**
