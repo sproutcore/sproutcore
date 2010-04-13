@@ -92,13 +92,13 @@ SC.pageItemView = SC.ListItemView.extend(
     if(data && SC._Greenhouse){
       var actionObj = SC.Object.create({
         type: 'Binding', 
-        receiver: data,
+        source: data,
         target: that.get('content'),
         addItem: function(from, to, designAttrs){
-          var view = this.getPath('target.view');
-          var value = that._propertyPathForProp(this.getPath('target.view.page'),view);
-          view[to+"Binding"] = designAttrs[to+"Binding"] = value+"."+from;
-          view.propertyDidChange(to+"Binding");
+          var view = this.getPath('source');
+          var value = that._propertyPathForProp(this.getPath('target.view.page'),this.getPath('target.view'));
+          view[from+"Binding"] = designAttrs[from+"Binding"] = value+"."+to;
+          view.propertyDidChange(from+"Binding");
           if(view.displayDidChange) view.displayDidChange();
         }
       });
