@@ -719,14 +719,6 @@ SC.ViewDesigner = SC.Object.extend(
 
   },
   
-  doubleClick: function(evt){
-    console.log('doubleClick');
-    if (!this.get('designIsEnabled')) return NO ;
-    if(SC._Greenhouse){
-     SC._Greenhouse.sendAction('openInspector');
-    }
-  },
-  
   // ..........................................................
   // Drag source and drag data source
   //   
@@ -741,7 +733,7 @@ SC.ViewDesigner = SC.Object.extend(
   */
   mouseUp: function(evt) {
     if (!this.get('designIsEnabled')) return NO ;
-    
+
     var info = this._mouseDownInfo;
         
     // if selected on mouse down and we didn't do any dragging, then deselect.
@@ -759,6 +751,10 @@ SC.ViewDesigner = SC.Object.extend(
         if (info.metaKey) controller.deselect(this);
         else controller.select(this, NO);
       }
+    }
+    //double click
+    if(SC._Greenhouse && evt.clickCount === 2){
+     SC._Greenhouse.sendAction('floatInspector');
     }
     
     this._mouseDownInfo = null;

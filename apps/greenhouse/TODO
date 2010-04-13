@@ -1,11 +1,11 @@
 DEMO Punch-list:
-- adding a base view to a new page [MB] @done
-- exceptions when dragging view or controller into page [MB] @done
-- cleanup dimensions of modals [EG] @done
-- finish tear-off picker panes [MB/EG] @done
+- adding a base view to a new page [MB] @Done
+- exceptions when dragging view or controller into page [MB] @Done
+- cleanup dimensions of modals [EG] @Done
+- finish tear-off picker panes [MB/EG] @Done
 - binding value is undefined [EG/MB]
-- fix add custom view event [MB] @done
-- add js beautifier [MB] @done
+- fix add custom view event [MB] @Done
+- add js beautifier [MB] @Done
 
 
 
@@ -32,32 +32,32 @@ New UI Changes:
 
 Done stuff...
 =========================
-v add a controller (or execute any sc-gen command via greenhouse) @done
-- page creation broken! @done
-^ draw lines to hook up bindings @done
-- move project file list to picker/tear-off @done
-- add design to SC.Object @done
-- move library to picker @done
-- register all pages files if in design mode @done
-- register all controllers if in design mode @done
-- grid.js this.get('scrollFrame') in insertionIndexForLocation @bug @done
-- delete views from main view @done
-- button to launch app @done
-- drag and drop views onto page @done
-- remove type from property editor and add quotes for string value @done
-- List of controls/views @done
+v add a controller (or execute any sc-gen command via greenhouse) @Done
+- page creation broken! @Done
+^ draw lines to hook up bindings @Done
+- move project file list to picker/tear-off @Done
+- add design to SC.Object @Done
+- move library to picker @Done
+- register all pages files if in design mode @Done
+- register all controllers if in design mode @Done
+- grid.js this.get('scrollFrame') in insertionIndexForLocation @bug @Done
+- delete views from main view @Done
+- button to launch app @Done
+- drag and drop views onto page @Done
+- remove type from property editor and add quotes for string value @Done
+- List of controls/views @Done
   |1. hardcode and allow one time custom view add
-- Create Page File @done
-- property editor @done
-- change project name in github @done
-- binding into iframe (use two object controllers one on either side of the frame) @done
+- Create Page File @Done
+- property editor @Done
+- change project name in github @Done
+- binding into iframe (use two object controllers one on either side of the frame) @Done
   |hack runloop so that both run loop start and end each other 
   |  1. Whenever a RunLoop.begin() (begin outer, begin inner, end inner, end outer)
   |  2. If iframe.RunLoop.begin() => should call the above process...
-- loading up app without main (SC.suppressMain) @done
-- how much filesystem tree to load up? (keep extra junk out?) @done
-- loading up views => (hardcode, special service?) @done
-- handle panes in the designPage... @done
-- handle panes in the designPage... @done
-- blueprint github @done
-- designer folder that loads in development mode but not in prod @done
+- loading up app without main (SC.suppressMain) @Done
+- how much filesystem tree to load up? (keep extra junk out?) @Done
+- loading up views => (hardcode, special service?) @Done
+- handle panes in the designPage... @Done
+- handle panes in the designPage... @Done
+- blueprint github @Done
+- designer folder that loads in development mode but not in prod @Done

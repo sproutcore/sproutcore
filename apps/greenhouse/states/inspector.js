@@ -26,6 +26,10 @@ Greenhouse.mixin( /** @scope Greenhouse */{
    
     toggleDockedInspector: function(){
       this.goState('dockedInspector');
+    },
+    
+    floatInspector: function(){
+      this.goState('inspectorPalette');
     }
   }),
   
