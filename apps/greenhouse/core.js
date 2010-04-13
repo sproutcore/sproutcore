@@ -40,9 +40,10 @@ Greenhouse = SC.Object.create( SC.Statechart,
     namespace = r[1];
     page = r[2];
     
-    if(namespace && page && !namespace[page]) iframe.eval(c.get('body'));
   
     if(namespace && page && iframe){
+      if(iframe[namespace] && !iframe[namespace][page]) iframe.eval(c.get('body'));
+      
       //just change main view for now...
       namespace = iframe[namespace];
       //setup the designer container
@@ -59,7 +60,7 @@ Greenhouse = SC.Object.create( SC.Statechart,
       iframe.SC.RunLoop.begin();
       if(!firstTime) iframe.SC.designController.set('content', null);
       iframe.SC.designsController.setDesigns(namespace[page],iframe);
-      Greenhouse.iframe.SC.designPage.designMainPane.viewList.contentView.set('content', Greenhouse.iframe.SC.designsController.get('content'));
+      iframe.SC.designPage.designMainPane.viewList.contentView.set('content', Greenhouse.iframe.SC.designsController.get('content'));
       iframe.SC.RunLoop.end();
     }
   }
