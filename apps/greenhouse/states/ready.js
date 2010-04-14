@@ -142,7 +142,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         delete view[prop.key]; //FIXME: [MB] this isn't removing the property...
         designer.designProperties.removeObject(prop.key);
         view.propertyDidChange(prop.key);
-        view.displayDidChange();
+        if(view.displayDidChange) view.displayDidChange();
         designer.propertyDidChange('editableProperties');
       }
     }

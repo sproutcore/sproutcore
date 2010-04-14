@@ -240,7 +240,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
 
       view[key] = eval(val);
       view.propertyDidChange(key);
-      view.displayDidChange();
+      if(view.displayDidChange) view.displayDidChange();
 
       Greenhouse.propertyController.set('key',key);
       Greenhouse.propertyController.set('value', val);

@@ -9,7 +9,7 @@
   This is a basic designer used for all SC.Objects that are created in design
   mode.
   
-  TODO: have SC.ViewDesigner subclass this designer.....
+  FIXME: have SC.ViewDesigner subclass this designer.....
 
   @extends SC.Object
   @since SproutCore 1.0
@@ -50,7 +50,7 @@ SC.ObjectDesigner = SC.Object.extend(
   }.property('page').cacheable(),
   
   
-  concatenatedProperties: ['designProperties', 'localizedProperties'],
+  concatenatedProperties: ['designProperties', 'localizedProperties', 'excludeProperties'],
 
   // ..........................................................
   // GENERIC PROPERTIES
@@ -86,7 +86,41 @@ SC.ObjectDesigner = SC.Object.extend(
     
     You can add to this array in your subclasses.
   */
-  designProperties: ''.w(),
+  designProperties: [],
+  
+  /*
+    Array of properties specifically not displayed in the editable properties
+    list
+  */
+  
+  excludeProperties: [],
+  
+  
+  /*
+    Array of properties avaliaible to edit in greenhouse
+    
+  */
+  editableProperties: function(){
+
+    var con = this.get('designAttrs'), 
+        obj = this.get('object'),
+        ret = [],
+        designProperties = this.get('designProperties'),
+        excludeProperties = this.get('excludeProperties');
+    if(con) con = con[0];
+    for(var i in con){
+      if(con.hasOwnProperty(i) && excludeProperties.indexOf(i) < 0){
+        if(!SC.none(obj[i])) ret.pushObject(SC.Object.create({value: obj[i], key: i, view: obj}));
+      }
+    }
+    designProperties.forEach(function(k){
+      if(excludeProperties.indexOf(k) < 0){
+        ret.pushObject(SC.Object.create({value: obj[k], key: k, view: obj}));
+      }
+    });
+    
+    return ret; 
+  }.property('designProperties').cacheable(),
   
   /** 
     Invoked by a design coder to encode design properties.  The default 

@@ -13,7 +13,7 @@
 Greenhouse.designController = SC.ObjectController.create(
 /** @scope Greenhouse.designController.prototype */ {
   contentBinding: 'Greenhouse.pageController*designController.selection',
-  contentBindingDefault: SC.Binding.single(),
+  contentBindingDefault: SC.Binding.single().oneWay(),
   
   propertySelection: null
   

@@ -23,20 +23,10 @@ SC.designController = SC.ObjectController.create(
         designer = pane.get('designer');
         //disable design mode(since this is the root view)
         if(designer) designer.set('designIsEnabled', NO);
-
-        //remove any existing panes
-        if(this._currentPane && pane !== this._currentPane){
-          this._currentPane.remove();
-          this._currentPane = null;
-        }
-        //append if necessary.. 
-        //TODO: remove this if charles approves my pane changes....
-        // if(c.get('type') === 'pane' && this._currentPane !== pane){
-        //   pane.append();
-        //   pane.adjust({bottom: 60}); //TODO: figure out how to reverse this....
-        //   pane.set('isModal', NO);
-        //   this._currentPane = pane;
-        //         } 
+      }
+      else if(SC._Greenhouse){
+        SC._Greenhouse.designController.set('content', pane.get('designer'));
+        SC._Greenhouse.sendAction('floatInspector');
       }
     }
   }
