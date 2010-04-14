@@ -138,6 +138,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
           view;
       if(prop && designer){
         view = prop.view;
+        view[prop.view] = undefined;
         delete view[prop.key]; //FIXME: [MB] this isn't removing the property...
         designer.designProperties.removeObject(prop.key);
         view.propertyDidChange(prop.key);
