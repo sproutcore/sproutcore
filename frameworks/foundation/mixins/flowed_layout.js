@@ -35,6 +35,11 @@ SC.FlowedLayout = {
     The direction of flow.
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
+
+  /**
+    Whether the view should automatically resize (to allow scrolling, for instance)
+  */
+  autoResize: YES,
   
   /**
     The alignment of items within rows or columns.
@@ -366,10 +371,10 @@ SC.FlowedLayout = {
     
     // update calculated width/height
     this._scfl_lastFrameSize = this.get("frame");
-    if (!canWrap) {
+    if (!canWrap && this.get("autoResize")) {
       this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
       this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
-    } else {
+    } else if (this.get("autoResize")) {
       this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
       this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
     }
