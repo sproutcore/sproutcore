@@ -32,7 +32,7 @@ SC.designController = SC.ObjectController.create(
         //append if necessary..
         if(c.get('type') === 'pane' && this._currentPane !== pane){
           pane.append();
-          pane.adjust({bottom: 60}); //TODO: figure out how to reverse this....
+          pane.adjust({bottom: 63}); //TODO: figure out how to reverse this....
           pane.set('isModal', NO);
           this._currentPane = pane;
         } 

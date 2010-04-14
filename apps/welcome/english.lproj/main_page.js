@@ -51,7 +51,7 @@ Welcome.mainPage = SC.Page.design({
       }),
       
       scrollView: SC.ScrollView.design({
-        layout: { left: 20, top: 80, right: 20, bottom: 60 },
+        layout: { left: 20, top: 80, right: 20, bottom: 63 },
         hasHorizontalScroller: NO,
         
         contentView: SC.ListView.design({  

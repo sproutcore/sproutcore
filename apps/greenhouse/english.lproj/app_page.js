@@ -16,48 +16,56 @@ Greenhouse.appPage = SC.Page.design({
     defaultResponder: "Greenhouse",
     
     mainContainer: SC.ContainerView.design({
-      layout: { left: 0, top: 32, right: 0, bottom: 0 },
+      layout: { left: 0, top: 46, right: 0, bottom: 0 },
       nowShowingBinding: 'Greenhouse.fileController.editorMode' 
     }),
     
-    toolBar: SC.ToolbarView.design(SC.Border, {
+    toolBar: SC.ToolbarView.design({
+      layout: { left: 0, right: 0, top: 0, height: 46 },
       anchorLocation: SC.ANCHOR_TOP,
-      borderStyle: SC.BORDER_BOTTOM,
+      classNames: ['toolbar'],
 
-      childViews: 'project action run library title inspector'.w(),
+      childViews: 'logo project action run library title inspector'.w(),
+      
+      logo: SC.View.design({
+        layout: {left: 20, width: 131, height: 32, centerY: 0},
+        classNames: ['greenhouse-logo-s']
+      }),
       
       project: SC.ButtonView.design({
         title: "_Project".loc(),
-        layout: {left: 75, width: 90, height: 24, top: 4},
+        layout: {left: 171, width: 90, height: 24, centerY: 0},
         action: 'openProjectPicker'
       }),
       
       title: SC.LabelView.design({
-        layout: {centerX: 0, top: 4, height: 24, width: 150},
+        layout: {centerX: 0, centerY: 0, height: 24, width: 150},
+        classNames: ['title'],
+        textAlign: SC.ALIGN_CENTER,
         valueBinding: SC.Binding.oneWay('Greenhouse.fileController.name')
       }),
       
       run: SC.ButtonView.design({
         title: "_Run".loc(),
-        layout: {right: 120, top: 4, width: 45, height: 24},
+        layout: {right: 120, centerY: 0, width: 45, height: 24},
         titleMinWidth: 30,
         action: 'run'
       }),
       
       inspector: SC.ButtonView.design({
         title: "_Inspector".loc(),
-        layout: {right: 300, width: 90, height: 24, top: 4},
+        layout: {right: 300, width: 90, height: 24, centerY: 0},
         action: 'openInspector'
       }),
       
       library: SC.ButtonView.design({
         title: "_Library".loc(),
-        layout: {right: 180, width: 90, height: 24, top: 4},
+        layout: {right: 180, width: 90, height: 24, centerY: 0},
         action: 'openLibrary'
       }),
       
       action: SC.ButtonView.design(Greenhouse.DropDown, {
-        layout: {right: 5, top: 4, width: 90, height: 24},
+        layout: {right: 5, centerY: 0, width: 90, height: 24},
         titleMinWidth: 0,
         hasIcon: YES,
         title: "_Actions".loc(),
@@ -104,6 +112,7 @@ Greenhouse.appPage = SC.Page.design({
     
     designArea: SC.View.design({
       layout: {top: 0, left: 0, right: 0, bottom: 0},
+      classNames: ['workspace'],
       childViews: 'web eventBlocker'.w(),
 
       web: Greenhouse.WebView.design({

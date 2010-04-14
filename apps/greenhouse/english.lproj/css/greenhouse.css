@@ -23,7 +23,8 @@
 /* General Styles
 ---------------------------------------------- */
 
-body { 
+body.sc-theme,
+body.sc-theme > .sc-pane.sc-main{ 
   overflow: hidden;
   background: static_url('images/main-bg.png');
 }
@@ -129,24 +130,46 @@ body {
   color: #313131 !important;
 }
 
-/* Footers */
+/* Footer / Loading Bar */
 
-.loading {
-  height: 30px !important;
-  border-top: 1px solid #494949 !important;
-  background: #1d1d1d !important;
-  color: #b3d93b !important;
-  line-height: 30px !important;
-  text-shadow: 0 1px 0 #000;
-  font-size: 11px !important;
-}
-
-.app-picker .footer {
+.footer,
+.sc-label-view.sc-regular-size.footer {
   border-top: 1px solid #494949;
   background: #1d1d1d;
   color: #b3d93b;
   line-height: 30px;
   text-shadow: 0 1px 0 #000;
-  font-size: 11px;
+  font-size: 12px;
+}
+
+/* Main Application Interface
+---------------------------------------------- */
+
+
+/* Toolbar */
+
+.toolbar {
+  background: static_url('images/toolbar-bg.png') repeat-x;
+}
+
+.greenhouse-logo-s {
+  background: static_url('images/logos/greenhouse-s.png') no-repeat;
+}
+
+.toolbar .title {
+  font-size: 14px;
+  text-shadow: 0 1px 0 #000;
+}
+
+.workspace,
+.workspace > div.sc-web-view {
+  background: static_url('images/main-bg.png');
+}
+
+.workspace .design {
+  border: 1px solid #1c1c1c;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
+  -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
 }
 

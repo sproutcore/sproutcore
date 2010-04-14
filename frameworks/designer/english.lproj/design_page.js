@@ -10,22 +10,26 @@ SC.designPage = SC.Page.create({
   // Views used inside iframe...
   // 
   designMainPane: SC.MainPane.design({
+    classNames: ['workspace'],
     childViews: 'container viewList'.w(),
     
     container: SC.DesignerDropTarget.design({
-      layout: {top: 10, left: 10, right: 10, bottom: 60},
+      layout: {top: 20, left: 20, right: 20, bottom: 83},
+      classNames: ['design'],
       contentViewBinding: SC.Binding.transform(function(value, binding){
         return value && value.kindOf && value.kindOf(SC.View) ? value : null;
       }).from('SC.designController.view')
     }),
     
     viewList: SC.ScrollView.design({
-      layout: {left:0, right: 0, bottom: 0, height: 48},
+      layout: {left:0, right: 0, bottom: 0, height: 63},
+      classNames: ['dock'],
+      hasBorder: NO,
       hasVerticalScroller: NO,
       contentView: SC.GridView.design({
         exampleView: SC.pageItemView,
-        rowHeight: 48,
-        columnWidth: 48,
+        rowHeight: 62,
+        columnWidth: 100,
         //contentBinding: 'SC.designsController',
         delegate: SC.designsController,
         selectionBinding: 'SC.designsController.selection',
