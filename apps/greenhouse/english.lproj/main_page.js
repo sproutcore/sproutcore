@@ -20,68 +20,70 @@ Greenhouse.mainPage = SC.Page.design({
     })
   }),
   
-  loading: SC.View.design({
-    render: function(context, firstTime){
-      context.begin('p').id('loading').addClass('loading').push('Loading...').end();
-    }
+  loading: SC.LabelView.design({
+    layout: { bottom: 0, height: 30, left: 0, right: 0},
+    value: 'Loading...',
+    textAlign: SC.ALIGN_CENTER,
+    classNames: ['footer']
   }),
   
   appPicker: SC.View.design({
-    layout: { width: 600, height: 300, centerX: 0, centerY: 0 },
-    childViews: 'heading subText prompt icon scrollView button'.w(),
+    childViews: 'scLogo picker footer'.w(),
+    classNames: ['app-picker'],
     
-    icon: SC.View.design({
-      layout: { width: 128, left: 54, top: 32, height: 128 },
-      tagName: 'img',
-      render: function(context, firstTime) {
-        //TODO: get a better logo...
-        context.attr('src', sc_static('images/greenhouseicon'));
-      }
+    scLogo: SC.View.design({
+      layout: { width: 140, left: 10, top: 10, height: 32 },
+      classNames: ['sc-logo']
     }),
     
-    heading: SC.LabelView.design({
-      layout: { left: 12, top: 160, width: 300, height: 32 },
-      tagName: "h1",
-      value: "Welcome to Greenhouse",
-      classNames: 'welcome'.w()
-    }),
+    picker: SC.View.design({
+      layout: { width: 548, height: 400, centerX: -102, centerY: -60},
+      childViews: 'ghLogo prompt scrollView button'.w(),
+      classNames: ['app-picker'],
     
-    subText: SC.LabelView.design({
-      layout: { left: 12, top: 190, width: 300, height: 32 },
-      value: "A SproutCore Application Designer"
-    }),
+      ghLogo: SC.View.design({
+        layout: { width: 279, left: 168, top: 0, height: 64 },
+        classNames: ['greenhouse-logo-l']
+      }),
     
-    prompt: SC.LabelView.design({
-      layout: { left: 280, top: 18, right: 20, height: 20 },
-      escapeHTML: NO,
-      value: "Choose an application:"
-    }),
+      prompt: SC.View.design({
+        layout: { width: 175, left: 0, top: 62, height: 128 },
+        classNames: ['helper']
+      }),
     
-    button: SC.ButtonView.design({
-      layout: { bottom: 18, height: 24, width: 140, right: 20 },
-      isEnabledBinding: "Greenhouse.targetController.content",
-      title: "Load Application",
-      theme: "capsule",
-      isDefault: YES,
-      action: "loadApplication"
-              
-    }),
-    
-    scrollView: SC.ScrollView.design({
-      layout: { right: 20, top: 40, width: 300, bottom: 60 },
-      hasHorizontalScroller: NO,
-      
-      contentView: SC.ListView.design({  
-        rowHeight: 32,
-
-        contentBinding: "Greenhouse.targetsController.applications",
-        selectionBinding: "Greenhouse.targetsController.selection",        
-        contentValueKey: "displayName",
-        contentIconKey: "targetIcon",
-        hasContentIcon: YES,
+      button: SC.ButtonView.design({
+        layout: { bottom: 18, height: 28, width: 140, right: 0 },
+        isEnabledBinding: "Greenhouse.targetController.content",
+        title: "Load Application",
+        theme: "capsule",
+        isDefault: YES,
         action: "loadApplication"
-      })
+      }),
+    
+      scrollView: SC.ScrollView.design({
+        layout: { right: 0, top: 60, width: 332, bottom: 54 },
+        hasHorizontalScroller: NO,
       
+        contentView: SC.ListView.design({  
+          rowHeight: 41,
+
+          contentBinding: "Greenhouse.targetsController.applications",
+          selectionBinding: "Greenhouse.targetsController.selection",        
+          contentValueKey: "displayName",
+          contentIconKey: "targetIcon",
+          hasContentIcon: YES,
+          action: "loadApplication"
+        })
+      
+      })
+    
+    }),
+    
+    footer: SC.LabelView.design({
+      layout: { bottom: 0, height: 30, left: 0, right: 0},
+      value: '©2010 Sprout Systems Inc. & Contributors',
+      textAlign: SC.ALIGN_CENTER,
+      classNames: ['footer']
     })
     
   }) 

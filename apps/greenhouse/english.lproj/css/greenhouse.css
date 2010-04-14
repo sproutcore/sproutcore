@@ -1,15 +1,152 @@
-img.sc-view.logo {
-  -webkit-box-reflect:below 5px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.8, transparent), to(white));
+/*
+==========================================================================
+ Project: Greenhouse - Styling
+ Author: Matt Grantham - @MattGrantham
+==========================================================================
+*/
+
+/* Custom Fonts
+---------------------------------------------- */
+
+@font-face {
+	font-family: 'MuseoSans500';
+	src: url('fonts/museosans_500.eot');
+	src: local('Museo Sans'), local('MuseoSans-500'), url('fonts/museosans_500.woff') format('woff'), url('fonts/museosans_500.otf') format('opentype');
 }
 
-h1.sc-view.welcome {
-  font-size: 24px;
-  letter-spacing: -2px;
-  line-height: 1.1;
-  margin: 0;
-  padding: 0;
+@font-face {
+	font-family: 'MuseoSans500Italic';
+	src: url('fonts/museosans_500_italic.eot');
+	src: local('Museo Sans'), local('fonts/MuseoSans-500Italic'), url('fonts/museosans_500_italic.woff') format('woff'), url('fonts/museosans_500_italic.otf') format('opentype');
 }
+
+/* General Styles
+---------------------------------------------- */
 
 body { 
   overflow: hidden;
+  background: static_url('images/main-bg.png');
 }
+
+.sc-view {
+	font: 12px/1.5 MuseoSans500, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+/* Application Picker Page
+---------------------------------------------- */
+
+.sc-logo {
+  background: static_url('images/logos/sproutcore.png');
+}
+
+.greenhouse-logo-l {
+  background: static_url('images/logos/greenhouse-l.png');
+}
+
+.app-picker .helper {
+  background: static_url('images/choose-app.png');
+}
+
+/* List of Application */
+
+.app-picker .sc-view.sc-scroll-view.sc-gray-border {
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  background: #2c2c2c;
+  border: 1px solid #1d1d1d;
+  -moz-box-shadow: 0 1px 0 #494949;
+  -webkit-box-shadow: 0 1px 0 #494949;
+}
+
+.app-picker .sc-collection-view {
+  background: none;
+}
+
+.app-picker .sc-scroll-view .sc-list-item-view {
+  font-size: 16px;
+  color: #fff;
+  text-shadow: 0 1px 0 #000;
+  border-top: 1px solid #3d3d3d;
+  border-bottom: 1px solid #1c1c1c;
+}
+.sc-theme.focus .app-picker .sc-collection-view.focus .sc-collection-item.sel,
+.app-picker .sc-scroll-view .sc-list-item-view.sel {
+  color: #e8ffb0;
+  border-top: 1px solid #727272;
+  background: static_url('images/list-item-sel.png') repeat-x;
+  border-bottom: 1px solid #1c1c1c;
+}
+.app-picker .sc-scroll-view .sc-list-item-view.first {
+  border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  -webkit-border-radius: 4px 4px 0 0;
+  border-top: none;
+}
+
+.app-picker .sc-list-item-view img {
+  margin-top: -8px !important;
+}
+
+.app-picker .sc-list-item-view label {
+  left: 26px !important;
+}
+
+/* Load App Button */
+
+/* HACK: Overriding Default Sproutcore button styling...quick and dirty */
+
+.app-picker .sc-button-view.def.capsule {
+  background: static_url('images/buttons/app-picker-button-r.png') no-repeat right !important;
+  height: 28px !important;
+  max-height: 28px !important;
+}
+.app-picker .sc-button-view.def.capsule span {
+  background: static_url('images/buttons/app-picker-button-l.png') no-repeat !important;
+  height: 28px !important;
+  max-height: 28px !important;
+}
+.app-picker .sc-button-view.def.capsule label {
+  background: static_url('images/buttons/app-picker-button-m.png') repeat-x !important;
+  font-size: 14px !important;
+  color: #000 !important;
+  text-shadow: 0 1px 0 #c5c5c5 !important;
+  height: 28px !important;
+  max-height: 28px !important;
+  line-height: 28px;
+}
+
+.app-picker .sc-button-view.def.capsule.active {
+  background: static_url('images/buttons/app-picker-button-active-r.png') no-repeat right !important;
+  color: #313131 !important;
+}
+.app-picker .sc-button-view.def.capsule.active span {
+  background: static_url('images/buttons/app-picker-button-active-l.png') no-repeat !important;
+  color: #313131 !important;
+}
+.app-picker .sc-button-view.def.capsule.active label {
+  background: static_url('images/buttons/app-picker-button-active-m.png') repeat-x !important;
+  color: #313131 !important;
+}
+
+/* Footers */
+
+.loading {
+  height: 30px !important;
+  border-top: 1px solid #494949 !important;
+  background: #1d1d1d !important;
+  color: #b3d93b !important;
+  line-height: 30px !important;
+  text-shadow: 0 1px 0 #000;
+  font-size: 11px !important;
+}
+
+.app-picker .footer {
+  border-top: 1px solid #494949;
+  background: #1d1d1d;
+  color: #b3d93b;
+  line-height: 30px;
+  text-shadow: 0 1px 0 #000;
+  font-size: 11px;
+}
+
