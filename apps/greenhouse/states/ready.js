@@ -125,30 +125,24 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       content.commitRecord(); 
     },
     addProperty: function(){
-      var view = Greenhouse.designController.get('view'), 
-          c = Greenhouse.designController.get('content');
+      var designer = Greenhouse.designController.get('content');
 
-      if(view && c){
-        Greenhouse.designController.propertyWillChange('content');
-        var designAttrs = c.get('designAttrs');
-        if(designAttrs) designAttrs = designAttrs[0];
-        designAttrs.newProperty = null; //TODO: generate better name....
-        Greenhouse.designController.propertyDidChange('content'); 
+      if(designer){
+        designer.designProperties.pushObject("newProperty"); //TODO: generate better name....
+        designer.propertyDidChange('editableProperties');
       }
     },
     deleteProperty: function(){
-      var c = Greenhouse.propertyController.get('content'),
-          view = c.get('view');
-      if(c && view){
-        var designAttrs = view.designer.get('designAttrs');
-        if(designAttrs) designAttrs = designAttrs[0];
-        delete designAttrs[c.key];
-        view.designer.set('designAttrs', [designAttrs]);      
-        delete view[c.key];
-        view.propertyDidChange(c.key);
+      var prop = Greenhouse.propertyController.get('content'),
+          designer = Greenhouse.designController.get('content'),
+          view;
+      if(prop && designer){
+        view = prop.view;
+        delete view[prop.key]; //FIXME: [MB] this isn't removing the property...
+        designer.designProperties.removeObject(prop.key);
+        view.propertyDidChange(prop.key);
         view.displayDidChange();
-        Greenhouse.designController.propertyDidChange('content'); 
-        //TODO: MB this isn't forcing property changes to work
+        designer.propertyDidChange('editableProperties');
       }
     }
   }),

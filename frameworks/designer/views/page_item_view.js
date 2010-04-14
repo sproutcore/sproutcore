@@ -99,6 +99,12 @@ SC.pageItemView = SC.ListItemView.extend(
           var value = that._propertyPathForProp(this.getPath('target.view.page'),this.getPath('target.view'));
           view[from+"Binding"] = designAttrs[from+"Binding"] = value+"."+to;
           view.propertyDidChange(from+"Binding");
+          
+          var designer = view.get('designer');
+          if(designer){
+            designer.designProperties.pushObject(from+"Binding");
+            designer.propertyDidChange('editableProperties');
+          }
           if(view.displayDidChange) view.displayDidChange();
         }
       });

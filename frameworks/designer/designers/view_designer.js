@@ -78,7 +78,7 @@ SC.ViewDesigner = SC.Object.extend(
   */
   encodeChildViews: YES,
   
-  concatenatedProperties: ['designProperties', 'localizedProperties'],
+  concatenatedProperties: ['designProperties', 'localizedProperties', 'excludeProperties'],
 
 
   // ..........................................................
@@ -333,6 +333,42 @@ SC.ViewDesigner = SC.Object.extend(
   */
   designProperties: 'layout isVisible isEnabled styleClass'.w(),
   
+  
+  /*
+    Array of properties specifically not displayed in the editable properties
+    list
+  */
+  
+  excludeProperties: 'layout childViews'.w(),
+  
+  
+  /*
+    Array of properties avaliaible to edit in greenhouse
+    
+  */
+  editableProperties: function(){
+
+    var con = this.get('designAttrs'), 
+        view = this.get('view'),
+        ret = [],
+        designProperties = this.get('designProperties'),
+        excludeProperties = this.get('excludeProperties');
+    if(con) con = con[0];
+    for(var i in con){
+      if(con.hasOwnProperty(i) && excludeProperties.indexOf(i) < 0){
+        if(!SC.none(view[i])) ret.pushObject(SC.Object.create({value: view[i], key: i, view: view}));
+      }
+    }
+    designProperties.forEach(function(k){
+      if(excludeProperties.indexOf(k) < 0){
+        ret.pushObject(SC.Object.create({value: view[k], key: k, view: view}));
+      }
+    });
+    
+    return ret; 
+  }.property('designProperties').cacheable(),
+  
+  
   /** 
     Invoked by a design coder to encode design properties.  The default 
     implementation invoked encodeDesignProperties() and 
@@ -341,9 +377,7 @@ SC.ViewDesigner = SC.Object.extend(
   */
   encodeDesign: function(coder) {
     coder.set('className', SC._object_className(this.get('viewClass')));
-    this.encodeDesignProperties(coder);
-    this.encodeDesignAttributeProperties(coder);
-    
+    this.encodeDesignProperties(coder);    
     this.encodeChildViewsDesign(coder);
     return YES ;
   },

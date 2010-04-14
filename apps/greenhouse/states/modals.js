@@ -226,15 +226,17 @@ Greenhouse.mixin( /** @scope Greenhouse */{
 
 
 
-      designAttrs = content.get('designAttrs');
-      if(designAttrs) designAttrs = designAttrs[0];
-
+      // designAttrs = content.get('designAttrs');
+      //  if(designAttrs) designAttrs = designAttrs[0];
+ 
       if(key !== origKey){
         delete view[origKey];
-        delete designAttrs[origKey];
+        view.designer.designProperties.removeObject(origKey);
+        view.designer.designProperties.pushObject(key);
+        //delete designAttrs[origKey];
       }
 
-      view[key] = designAttrs[key] = eval(val);
+      view[key] = eval(val);
       view.propertyDidChange(key);
       view.displayDidChange();
 
