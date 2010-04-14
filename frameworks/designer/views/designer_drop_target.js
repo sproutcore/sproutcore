@@ -108,6 +108,7 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
         loc = drag.get('location'),
         frame = drag.iframeFrame,
         design, size, newView, defaults, layout;
+    var page = cv.get('page');
     //size and location
     size = data.get('size');
     loc.x = loc.x - frame.x;
@@ -119,9 +120,9 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     layout = SC.merge(layout, {top: loc.y, left: loc.x});
     defaults.layout = layout;
     design = design.design(defaults);
-    newView = design.create({page: cv.get('page')});
+    newView = design.create({page: page});
     if(cv && newView) cv.appendChild(newView);
-    
+    page.get('designController').select(newView.get('designer'));
     return SC.DRAG_ANY; 
   }
   

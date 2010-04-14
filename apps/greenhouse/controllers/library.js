@@ -40,7 +40,7 @@ Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelega
           SC.Object.create({name: 'Scroll', scClass: 'SC.ScrollView', defaults: {layout: {width: 200, height: 200}} } ),
           SC.Object.create({name: 'Container', scClass: 'SC.ContainerView', defaults: {layout: {width: 200, height: 200}}}),
           SC.Object.create({name: 'View', scClass: 'SC.View', defaults: {layout: {width: 100, height: 100}}}),
-          SC.Object.create({name: 'Label', scClass: 'SC.LabelView', defaults: {layout: {width: 100, height: 24}}})
+          SC.Object.create({name: 'Label', scClass: 'SC.LabelView', defaults: {layout: {width: 100, height: 24}, value: 'Label'}})
         ]
       }),
       SC.Object.create({
