@@ -30,6 +30,7 @@ SC.designPage = SC.Page.create({
         exampleView: SC.pageItemView,
         rowHeight: 63,
         columnWidth: 100,
+        hasContentIcon: YES,
         //contentBinding: 'SC.designsController',
         delegate: SC.designsController,
         selectionBinding: 'SC.designsController.selection',

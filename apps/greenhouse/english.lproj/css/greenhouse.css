@@ -33,6 +33,237 @@ body.sc-theme > .sc-pane.sc-main{
 	font: 12px/1.5 MuseoSans500, "Helvetica Neue", Helvetica, sans-serif;
 }
 
+.sc-view select, .sc-view input, .sc-view textarea, .sc-view button {
+  font: 12px/1.5 MuseoSans500, "Helvetica Neue", Helvetica, sans-serif !important;
+}
+
+/* Modals
+---------------------------------------------- */
+
+
+.sc-modal.for-sc-panel {
+  background: #000;
+  opacity: 0.3;  
+}
+
+.sc-modal.for-sc-panel + .sc-panel {
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+  -moz-box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+  -webkit-box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+  background: #efefef;
+}
+
+.sc-modal.for-sc-panel + .sc-panel > .sc-view {
+  background: none;
+}
+
+/* Hide superfluous divs (css3 baby!) */
+.sc-modal.for-sc-panel + .sc-panel .top-left-edge,
+.sc-modal.for-sc-panel + .sc-panel .top-edge,
+.sc-modal.for-sc-panel + .sc-panel .top-right-edge,
+.sc-modal.for-sc-panel + .sc-panel .right-edge,
+.sc-modal.for-sc-panel + .sc-panel .bottom-right-edge,
+.sc-modal.for-sc-panel + .sc-panel .bottom-edge,
+.sc-modal.for-sc-panel + .sc-panel .bottom-left-edge,
+.sc-modal.for-sc-panel + .sc-panel .left-edge {
+  display: none;
+}
+
+/* Capsule Buttons
+---------------------------------------------- */
+
+
+/* Regular */
+.sc-theme .sc-button-view.sc-regular-size.capsule {
+  background: static_url('images/buttons/capsule-r.png') no-repeat right;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.capsule .sc-button-inner {
+  background: static_url('images/buttons/capsule-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule .sc-button-label {
+  background: static_url('images/buttons/capsule-m.png') repeat-x;
+  margin-left: 12px;
+  margin-right: 12px;
+  color: #000;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+  line-height: 26px;
+}
+
+/* Active */
+.sc-theme .sc-button-view.sc-regular-size.capsule.active {
+  background: static_url('images/buttons/capsule-active-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule.active .sc-button-inner {
+  background: static_url('images/buttons/capsule-active-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule.active .sc-button-label {
+  background: static_url('images/buttons/capsule-active-m.png') repeat-x;
+  color: #222;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+}
+
+/* Selected or Default */
+.sc-theme .sc-button-view.sc-regular-size.capsule.def,
+.sc-theme .sc-button-view.sc-regular-size.capsule.sel {
+  background: static_url('images/buttons/capsule-sel-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule.def .sc-button-inner, 
+.sc-theme .sc-button-view.sc-regular-size.capsule.sel .sc-button-inner {
+  background: static_url('images/buttons/capsule-sel-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule.def .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.capsule.sel .sc-button-label {
+  background: static_url('images/buttons/capsule-sel-m.png') repeat-x;
+  color: #334511;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+}
+
+/* Selected or Default & Active */
+.sc-theme .sc-button-view.sc-regular-size.capsule.def.active,
+.sc-theme .sc-button-view.sc-regular-size.capsule.sel.active {
+  background: static_url('images/buttons/capsule-sel-active-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule.def.active .sc-button-inner,
+.sc-theme .sc-button-view.sc-regular-size.capsule.sel.active .sc-button-inner {
+  background: static_url('images/buttons/capsule-sel-active-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.capsule.def.active .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.capsule.sel.active .sc-button-label {
+  background: static_url('images/buttons/capsule-sel-active-m.png') repeat-x;
+  color: #44581d;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+}
+
+/* Square Buttons
+---------------------------------------------- */
+
+
+/* Regular */
+.sc-theme .sc-button-view.sc-regular-size.square {
+  background: static_url('images/buttons/square-r.png') no-repeat right;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square .sc-button-inner {
+  background: static_url('images/buttons/square-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square .sc-button-label {
+  background: static_url('images/buttons/capsule-m.png') repeat-x;
+  margin-left: 6px;
+  margin-right: 6px;
+  color: #000;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+  line-height: 26px;
+}
+
+/* Active */
+.sc-theme .sc-button-view.sc-regular-size.square.active {
+  background: static_url('images/buttons/square-active-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.active .sc-button-inner {
+  background: static_url('images/buttons/square-active-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.active .sc-button-label {
+  background: static_url('images/buttons/capsule-active-m.png') repeat-x;
+  color: #222;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+}
+
+/* Selected or Default */
+.sc-theme .sc-button-view.sc-regular-size.square.def,
+.sc-theme .sc-button-view.sc-regular-size.square.sel {
+  background: static_url('images/buttons/square-sel-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.def .sc-button-inner, 
+.sc-theme .sc-button-view.sc-regular-size.square.sel .sc-button-inner {
+  background: static_url('images/buttons/square-sel-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.def .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel .sc-button-label {
+  background: static_url('images/buttons/capsule-sel-m.png') repeat-x;
+  color: #334511;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+}
+
+/* Selected or Default & Active */
+.sc-theme .sc-button-view.sc-regular-size.square.def.active,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.active {
+  background: static_url('images/buttons/square-sel-active-r.png') no-repeat right;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.def.active .sc-button-inner,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.active .sc-button-inner {
+  background: static_url('images/buttons/square-sel-active-l.png') no-repeat;
+}
+.sc-theme .sc-button-view.sc-regular-size.square.def.active .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.active .sc-button-label {
+  background: static_url('images/buttons/capsule-sel-active-m.png') repeat-x;
+  color: #44581d;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);  
+}
+
+/* Text Fields
+---------------------------------------------- */
+
+.sc-view .sc-text-field-view {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #848484 #c1c1c1 #e1e1e1;
+  background: #fff;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+  -moz-box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+  -webkit-box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.safari .sc-view .sc-text-field-view.focus,
+.mozilla .sc-view .sc-text-field-view.focus,
+.msie .sc-view .sc-text-field-view.focus {
+  outline: 0;
+}
+
+.sc-view .sc-text-field-view.focus {
+  border-color: #9ec450;
+}
+
+.sc-view .sc-text-field-view.disabled {
+  border-color: #cdcdcd #e6e6e6 #f3f3f3;
+}
+
+.safari .sc-text-field-view .border {
+  -webkit-appearance: none;
+}
+
+.mozilla .sc-view .sc-text-field-view .border {
+  -moz-appearance: none;
+}
+
+.msie .sc-view .sc-text-field-view .border {
+  border: 0;
+}
+
+.mozilla .sc-text-field-view .padding {
+  top: 1px;
+}
+
+.sc-view .sc-text-field-view.disabled input,
+.sc-view .sc-text-field-view.disabled textarea {
+  color: #dfdfdf;
+}
+
+.sc-text-field-view .sc-hint {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  line-height: 22px;
+}
+
+.mozilla .sc-text-field-view .sc-hint {
+  top: -1px;
+}
+
 /* Application Picker Page
 ---------------------------------------------- */
 
@@ -163,6 +394,7 @@ body.sc-theme > .sc-pane.sc-main{
 
 /* Dark Buttons */
 
+/* Regular */
 .sc-theme .toolbar .sc-button-view.sc-regular-size.square {
   background: static_url('images/buttons/toolbar-button-r.png') no-repeat right;
   color: #fff;
@@ -178,6 +410,7 @@ body.sc-theme > .sc-pane.sc-main{
   margin-right: 5px;
 }
 
+/* Active */
 .sc-theme .toolbar .sc-button-view.sc-regular-size.square.active {
   background: static_url('images/buttons/toolbar-button-active-r.png') no-repeat right;
   color: #d0d0d0;
@@ -292,4 +525,3 @@ body.sc-theme > .sc-pane.sc-main{
   -moz-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
   -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
 }
-

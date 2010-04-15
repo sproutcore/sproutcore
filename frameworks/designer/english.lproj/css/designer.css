@@ -55,3 +55,21 @@ body.sc-theme > .sc-pane.sc-main.workspace {
 .workspace .dock .sc-collection-view .sc-collection-item.sel .sc-outline {
   background: static_url('images/dock-item-sel-divider.png') no-repeat right;
 }
+
+.workspace .dock .sc-list-item-view.has-icon label {
+  left: 4px;
+  right: 4px;
+  bottom: 6px;
+  height: 18px;
+  margin-top: 10px;
+}
+.workspace .dock .sc-collection-item .icon {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 10px;
+  margin-top: 0;
+  left: 50%;
+  margin-left: -16px;
+  background: static_url('images/dock-object-icon.png') no-repeat;
+}
