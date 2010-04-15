@@ -161,6 +161,8 @@ body.sc-theme > .sc-pane.sc-main{
   text-shadow: 0 1px 0 #000;
 }
 
+/* Dark Buttons */
+
 .sc-theme .toolbar .sc-button-view.sc-regular-size.square {
   background: static_url('images/buttons/toolbar-button-r.png') no-repeat right;
   color: #fff;
@@ -186,6 +188,40 @@ body.sc-theme > .sc-pane.sc-main{
 }
 .sc-theme .toolbar .sc-button-view.sc-regular-size.square.active .sc-button-label {
   background: static_url('images/buttons/toolbar-button-active-m.png') repeat-x;
+}
+
+/* Toolbar Icons */
+
+.toolbar .projects {
+  background: static_url('images/icons/projects.png') no-repeat;
+}
+.toolbar .library {
+  background: static_url('images/icons/library.png') no-repeat;
+}
+.toolbar .inspector {
+  background: static_url('images/icons/inspector.png') no-repeat;
+}
+.toolbar .run {
+  background: static_url('images/icons/run.png') no-repeat;
+}
+.toolbar .actions {
+  background: static_url('images/icons/actions.png') no-repeat;
+}
+
+.toolbar .projects.active {
+  background: static_url('images/icons/projects-active.png') no-repeat;
+}
+.toolbar .library.active {
+  background: static_url('images/icons/library-active.png') no-repeat;
+}
+.toolbar .inspector.active {
+  background: static_url('images/icons/inspector-active.png') no-repeat;
+}
+.toolbar .run.active {
+  background: static_url('images/icons/run-active.png') no-repeat;
+}
+.toolbar .actions.active {
+  background: static_url('images/icons/actions-active.png') no-repeat;
 }
 
 /* Workspace */
