@@ -190,6 +190,13 @@ body.sc-theme > .sc-pane.sc-main{
   background: static_url('images/buttons/toolbar-button-active-m.png') repeat-x;
 }
 
+.toolbar .title {
+  color: #B3D93B;
+  text-shadow: 0 1px 0 #000;
+  line-height: 24px;
+  font-size: 13px;
+}
+
 /* Toolbar Icons */
 
 .toolbar .projects {
@@ -201,6 +208,26 @@ body.sc-theme > .sc-pane.sc-main{
   margin-top: -7px;
   left: 50%;
   margin-left: -14px;
+}
+.toolbar .save {
+  background: static_url('images/icons/save.png') no-repeat;
+  width: 14px;
+  height: 15px;
+  position: absolute;
+  top: 50%;
+  margin-top: -8px;
+  left: 50%;
+  margin-left: -7px;
+}
+.toolbar .run {
+  background: static_url('images/icons/run.png') no-repeat;
+  width: 10px;
+  height: 12px;
+  position: absolute;
+  top: 50%;
+  margin-top: -6px;
+  left: 50%;
+  margin-left: -5px;
 }
 .toolbar .library {
   background: static_url('images/icons/library.png') no-repeat;
@@ -222,16 +249,6 @@ body.sc-theme > .sc-pane.sc-main{
   left: 50%;
   margin-left: -12px;
 }
-.toolbar .run {
-  background: static_url('images/icons/run.png') no-repeat;
-  width: 10px;
-  height: 12px;
-  position: absolute;
-  top: 50%;
-  margin-top: -6px;
-  left: 50%;
-  margin-left: -5px;
-}
 .toolbar .actions {
   background: static_url('images/icons/actions.png') no-repeat;
   width: 28px;
@@ -246,14 +263,17 @@ body.sc-theme > .sc-pane.sc-main{
 .toolbar .projects.active {
   background: static_url('images/icons/projects-active.png') no-repeat;
 }
+.toolbar .save.active {
+  background: static_url('images/icons/save-active.png') no-repeat;
+}
+.toolbar .run.active {
+  background: static_url('images/icons/run-active.png') no-repeat;
+}
 .toolbar .library.active {
   background: static_url('images/icons/library-active.png') no-repeat;
 }
 .toolbar .inspector.active {
   background: static_url('images/icons/inspector-active.png') no-repeat;
-}
-.toolbar .run.active {
-  background: static_url('images/icons/run-active.png') no-repeat;
 }
 .toolbar .actions.active {
   background: static_url('images/icons/actions-active.png') no-repeat;

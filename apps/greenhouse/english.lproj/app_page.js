@@ -26,7 +26,7 @@ Greenhouse.appPage = SC.Page.design({
       anchorLocation: SC.ANCHOR_TOP,
       classNames: ['toolbar'],
 
-      childViews: 'logo project run title library inspector  action '.w(),
+      childViews: 'logo project save run title library inspector action '.w(),
       
       logo: SC.View.design({
         layout: {left: 20, width: 131, height: 32, centerY: -1},
@@ -42,42 +42,51 @@ Greenhouse.appPage = SC.Page.design({
         action: 'openProjectPicker'
       }),
       
-      title: SC.LabelView.design({
-        layout: {centerX: 0, centerY: 0, height: 24, width: 47},
-        classNames: ['title'],
-        textAlign: SC.ALIGN_CENTER,
-        valueBinding: SC.Binding.oneWay('Greenhouse.fileController.name')
+      save: SC.ButtonView.design({
+        toolTip: "_Save".loc(),
+        layout: {left: 251, centerY: -1, width: 47, height: 24},
+        titleMinWidth: 37,
+        hasIcon: YES,
+        icon: 'save',
+        action: 'save'
       }),
       
       run: SC.ButtonView.design({
         toolTip: "_Run".loc(),
-        layout: {right: 120, centerY: 0, width: 47, height: 24},
+        layout: {left: 304, centerY: -1, width: 47, height: 24},
         titleMinWidth: 37,
         hasIcon: YES,
         icon: 'run',
         action: 'run'
       }),
       
-      inspector: SC.ButtonView.design({
-        toolTip: "_Inspector".loc(),
-        layout: {right: 300, width: 47, height: 24, centerY: -1},
-        titleMinWidth: 37,
-        hasIcon: YES,
-        icon: 'inspector',
-        action: 'openInspector'
+      title: SC.LabelView.design({
+        layout: {centerX: 75, centerY: -2, height: 24, width: 300 },
+        classNames: ['title'],
+        textAlign: SC.ALIGN_CENTER,
+        valueBinding: SC.Binding.oneWay('Greenhouse.fileController.name')
       }),
       
       library: SC.ButtonView.design({
         toolTip: "_Library".loc(),
-        layout: {right: 180, width: 47, height: 24, centerY: -1},
+        layout: {right: 153, width: 47, height: 24, centerY: -1},
         titleMinWidth: 37,
         hasIcon: YES,
         icon: 'library',
         action: 'openLibrary'
       }),
       
+      inspector: SC.ButtonView.design({
+        toolTip: "_Inspector".loc(),
+        layout: {right: 100, width: 47, height: 24, centerY: -1},
+        titleMinWidth: 37,
+        hasIcon: YES,
+        icon: 'inspector',
+        action: 'openInspector'
+      }),
+      
       action: SC.ButtonView.design(Greenhouse.DropDown, {
-        layout: {right: 5, centerY: -1, width: 47, height: 24},
+        layout: {right: 20, centerY: -1, width: 47, height: 24},
         titleMinWidth: 37,
         hasIcon: YES,
         toolTip: "_Actions".loc(),
@@ -98,14 +107,6 @@ Greenhouse.appPage = SC.Page.design({
             {title: "_Save".loc(), action: 'save', isEnabled: YES }
           ]
         })
-      }),
-      save: SC.ButtonView.design({
-        toolTip: "_Save".loc(),
-        layout: {right: 5, top: -1, width: 47, height: 24},
-        titleMinWidth: 37,
-        hasIcon: YES,
-        icon: 'save',
-        action: 'save'
       })
       
     })
