@@ -20,7 +20,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     // ..........................................................
     // Events
     //
-    openInspector: function(){
+    openInspector: function(anchor){
+      if(anchor) Greenhouse.openInspectorPicker.set('anchor', anchor);
       this.goState('openInspectorPicker');
     },
    
@@ -39,11 +40,11 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     enterState: function(){
       var ap = Greenhouse.appPage;
       var picker = ap.get('inspectorPicker'),
-          button = ap.getPath('mainView.toolBar.inspector'),
           pickerContentView = ap.get('inspectorPickerContentView');
+      var anchor = this.get('anchor') || ap.getPath('mainView.toolBar.inspector');
       
       pickerContentView.setIfChanged('nowShowing', 'Greenhouse.appPage.inspectorContentView');
-      picker.popup(button, SC.PICKER_POINTER);
+      picker.popup(anchor, SC.PICKER_POINTER);
       picker.becomeFirstResponder();
     },
     exitState: function(){
@@ -52,6 +53,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
           pickerContentView = ap.get('inspectorPickerContentView');
       pickerContentView.setIfChanged('nowShowing', null);
       picker.remove();
+      this.set('anchor', null);
     },
    
     // ..........................................................

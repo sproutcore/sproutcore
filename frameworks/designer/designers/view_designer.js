@@ -806,7 +806,7 @@ SC.ViewDesigner = SC.Object.extend(
     }
     //double click
     if(SC._Greenhouse && evt.clickCount === 2){
-     SC._Greenhouse.sendAction('floatInspector');
+     SC._Greenhouse.sendAction('openInspector', view);
     }
     
     this._mouseDownInfo = null;
