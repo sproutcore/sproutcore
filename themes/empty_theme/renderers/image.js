@@ -36,7 +36,7 @@ SC.EmptyTheme.renderers.Image = SC.Renderer.extend({
       cq.attr('src', src);
       this._last_sprite_class = NO;
     } else {
-      if (this._last_sprite_class) context.setClass(this._last_sprite_class, NO);
+      if (this._last_sprite_class) cq.setClass(this._last_sprite_class, NO);
       cq.attr('src', SC.BLANK_IMAGE_URL);
       cq.setClass(src, YES);
       this._last_sprite_class = src;
