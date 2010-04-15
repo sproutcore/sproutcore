@@ -12,6 +12,7 @@ require('views/simple_button');
 Greenhouse.appPage = SC.Page.design({
   
   mainView: SC.View.design({
+    layout: { top: -1, bottom: 0, left: 0, right: 0 },
     childViews: 'mainContainer toolBar'.w(),
     defaultResponder: "Greenhouse",
     

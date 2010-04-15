@@ -28,7 +28,7 @@ SC.designPage = SC.Page.create({
       hasVerticalScroller: NO,
       contentView: SC.GridView.design({
         exampleView: SC.pageItemView,
-        rowHeight: 62,
+        rowHeight: 63,
         columnWidth: 100,
         //contentBinding: 'SC.designsController',
         delegate: SC.designsController,

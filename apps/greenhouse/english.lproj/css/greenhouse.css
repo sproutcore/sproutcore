@@ -161,6 +161,35 @@ body.sc-theme > .sc-pane.sc-main{
   text-shadow: 0 1px 0 #000;
 }
 
+.sc-theme .toolbar .sc-button-view.sc-regular-size.square {
+  background: static_url('images/buttons/toolbar-button-r.png') no-repeat right;
+  color: #fff;
+  text-shadow: 0 1px 0 #242424;
+}
+
+.sc-theme .toolbar .sc-button-view.sc-regular-size.square .sc-button-inner {
+  background: static_url('images/buttons/toolbar-button-l.png') no-repeat;
+}
+.sc-theme .toolbar .sc-button-view.sc-regular-size.square .sc-button-label {
+  background: static_url('images/buttons/toolbar-button-m.png') repeat-x;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.sc-theme .toolbar .sc-button-view.sc-regular-size.square.active {
+  background: static_url('images/buttons/toolbar-button-active-r.png') no-repeat right;
+  color: #d0d0d0;
+  text-shadow: 0 -1px 0 #242424;
+}
+.sc-theme .toolbar .sc-button-view.sc-regular-size.square.active .sc-button-inner {
+  background: static_url('images/buttons/toolbar-button-active-l.png') no-repeat;
+}
+.sc-theme .toolbar .sc-button-view.sc-regular-size.square.active .sc-button-label {
+  background: static_url('images/buttons/toolbar-button-active-m.png') repeat-x;
+}
+
+/* Workspace */
+
 .workspace,
 .workspace > div.sc-web-view {
   background: static_url('images/main-bg.png');

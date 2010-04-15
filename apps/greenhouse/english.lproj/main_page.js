@@ -52,7 +52,7 @@ Greenhouse.mainPage = SC.Page.design({
       }),
     
       button: SC.ButtonView.design({
-        layout: { bottom: 18, height: 28, width: 140, right: 0 },
+        layout: { bottom: 12, height: 28, width: 140, right: 0 },
         isEnabledBinding: "Greenhouse.targetController.content",
         title: "Load Application",
         theme: "capsule",
