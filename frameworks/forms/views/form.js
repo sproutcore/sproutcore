@@ -13,18 +13,22 @@ just like childViews, but marks fields to be laid out automatically.
 
 Usually, you will place rows into the FormView:
 {{{
-fields: "name gender".w(),
-name: SC.FormView.row(SC.TextFieldView, {
-fieldKey: "fullName",
-fieldLabel: "Name:"
-}),
-gender: SC.FormView.row(SC.RadioView, {
-items: "male female".w(),
-fieldKey: "contactGender",
-fieldLabel: "Gender: "
-})
+childViews: "fullName gender".w(),
+contentBinding: 'MyApp.personController',
+
+fullName: SC.FormView.row("Name:", SC.TextFieldView.extend({
+  layout: {height: 20, width: 150}
+})),
+
+gender: SC.FormView.row("Gender:", SC.RadioView.design({
+  layout: {width: 150, height: 40, centerY: 0},
+  items: ["male", "female"]
+}))
 }}}
 
+The name of the row (ie. 'fullName'), is passed down to the *FieldView, and used as the key
+to bind the value property to the content. In this case it will bind content.fullName to the
+value property of the textFieldView. Easy!
 
 One important thing about the field collection: It can contain any type of
 view, including other FormViews or subclasses of FormView.
@@ -114,6 +118,17 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
       }
     }
     
+    // We need to add in contentValueKey before we call sc_super
+    for (idx = 0; idx < len; idx++) {
+      key = cv[idx];
+      if (SC.typeOf(key) === SC.T_STRING) {
+        v = this.get(key);
+        if (!v.prototype.contentValueKey) {
+          v.prototype.contentValueKey = key ;
+        }
+      }
+    }
+    
     // get content for further ops
     var content = this.get("content");
     sc_super();
@@ -129,13 +144,9 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
         
         // see if it does indeed exist, and if it doesn't have a value already
         if (v && !v.isClass) {
-          // set value key
-          if (!v.get("contentValueKey")) {
-            v.set("contentValueKey", key);
-          }
           // set content
           if (!v.get("content")) {
-            v.set("content", content);
+            v.bind('content', '.owner.content') ;
           }
           // set label (if possible)
           if (v.get("isFormRow") && SC.none(v.get("label"))) {

@@ -99,7 +99,12 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
             }
           }
           if (!v.get("content")) {
-            v.set("content", content);
+            v.bind('content', '.owner.content') ;
+          }
+          // Bind the value property of the view to the 'contentValueKey' property of content.
+          var vKey = v.get('contentValueKey') ;
+          if (vKey && !v.get('value')) {
+            v.bind('value', '.content.'+vKey) ;
           }
         }
         
