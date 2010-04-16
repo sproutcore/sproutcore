@@ -1,0 +1,65 @@
+/*
+==========================================================================
+ Project: Greenhouse - Docked Panels
+ Author: Matt Grantham - @MattGrantham
+==========================================================================
+*/
+
+/* Docked Panel
+---------------------------------------------- */
+
+.anchored {
+  border-left: 1px solid #000;
+  background: #222;
+  box-shadow: inset 2px 0px 6px rgba(0,0,0,0.7);
+  -moz-box-shadow: inset 2px 0px 6px rgba(0,0,0,0.7);
+  -webkit-box-shadow: inset 2px 0px 6px rgba(0,0,0,0.7);  
+}
+
+/* Library
+---------------------------------------------- */
+
+.anchored .library-docked {
+  border-bottom: 1px solid #000;
+}
+
+.anchored .library-docked .content .library-list {
+  border: 1px solid #000;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  -moz-box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  -webkit-box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  background:rgba(205, 205, 205, 0.25);
+}
+
+.anchored .library-docked .content .sc-list-view {
+  background: none;
+  color: #fff;
+}
+
+/* Customize Scrollbar */
+.anchored .library-docked .sc-scroller-view.sc-vertical .track,
+.anchored .library-docked .sc-scroller-view.sc-vertical .cap,
+.anchored .library-docked .sc-scroller-view.sc-vertical .button-bottom,
+.anchored .library-docked .sc-scroller-view.sc-vertical .button-top {
+  display: none;
+}
+
+/* Inspector
+---------------------------------------------- */
+
+.anchored .inspector-docked {
+  border-top: 1px solid #333;
+}
+
+.anchored .sc-tab-view > .sc-container-view {
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  -moz-box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  -webkit-box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+}
+

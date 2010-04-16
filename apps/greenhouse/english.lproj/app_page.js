@@ -148,14 +148,17 @@ Greenhouse.appPage = SC.Page.design({
     dock: SC.View.design({
       layout: {top: 0, bottom: 0, right: 0, width: 0},
       childViews: 'libraryArea inspectorArea'.w(),
-
+      classNames: ['anchored'],
+      
       libraryArea: SC.ContainerView.design({
-        layout: { left: 0, top: 0, right: 0, bottom: 376 },
+        classNames: ['library-docked'],
+        layout: { left: 0, top: 0, right: 0, bottom: 386 },
         nowShowing: null
       }),
 
       inspectorArea: SC.ContainerView.design({
-        layout: { right: 0, bottom: 0, left: 0, height: 370 },
+        classNames: ['inspector-docked'],
+        layout: { right: 0, bottom: 0, left: 0, height: 385 },
         nowShowing: null
       })
     })
@@ -181,7 +184,7 @@ Greenhouse.appPage = SC.Page.design({
     }),
   
     content: SC.TabView.design({
-      layout: {left: 0, right:0, bottom: 0, height:368},
+      layout: { left: 6, right: 6, bottom: 6, height: 368 },
       itemTitleKey: 'title',
       itemValueKey: 'value',
       nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',

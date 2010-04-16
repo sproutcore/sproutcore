@@ -1,0 +1,60 @@
+/*
+==========================================================================
+ Project: Greenhouse - Search Fields
+ Author: Matt Grantham - @MattGrantham
+==========================================================================
+*/
+
+.sc-view .sc-text-field-view.search {
+  border: none;
+  background: static_url('images/picker/search.png') no-repeat;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.sc-view .sc-text-field-view.search.focus {
+  border-color: none;
+  background: static_url('images/picker/search-active.png') no-repeat;
+}
+
+.sc-view .sc-text-field-view.search input {
+  left: 20px;
+  width: 148px;
+}
+
+.sc-view .sc-text-field-view.search.disabled {
+  border-color: none;
+}
+
+.safari .sc-view  .sc-text-field-view.search .border {
+  -webkit-appearance: none;
+}
+
+.mozilla .sc-view  .sc-text-field-view.search .border {
+  -moz-appearance: none;
+}
+
+.mozilla .sc-view  .sc-text-field-view.search .sc-hint {
+  top: -1px;
+}
+
+.msie .sc-view .sc-text-field-view.search .border {
+  border: 0;
+}
+
+.mozilla .sc-view  .sc-text-field-view.search .padding {
+  top: 1px;
+}
+
+.sc-view  .sc-text-field-view.search.disabled input {
+  color: #dfdfdf;
+}
+
+.sc-view .sc-text-field-view.search .sc-hint {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  line-height: 24px;
+}
