@@ -292,6 +292,15 @@ Greenhouse.appPage = SC.Page.design({
     classNames: ['gh-picker'],
     layout: {width: 200, height: 500},
     defaultResponder: 'Greenhouse',
+    computeAnchorRect: function(anchor) {
+      var ret = SC.viewportOffset(anchor); // get x & y
+      var cq = SC.$(anchor);
+      var wsize = SC.RootResponder.responder.computeWindowSize() ;
+      ret.width = cq.outerWidth();
+      ret.height = (wsize.height-ret.y) < cq.outerHeight() ? (wsize.height-ret.y) : cq.outerHeight();
+      ret.y = ret.y -11;
+      return ret ;
+    },
     modalPaneDidClick: function(evt) {
       var f = this.get("frame");
       if(!this.clickInside(f, evt)){ 

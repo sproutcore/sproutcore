@@ -42,5 +42,15 @@ Greenhouse.TearOffPicker = SC.PickerPane.extend(
       Greenhouse.sendAction('cancel');
     }
     return YES ; 
+  },
+  
+  computeAnchorRect: function(anchor) {
+    var ret = SC.viewportOffset(anchor); // get x & y
+    var cq = SC.$(anchor);
+    var wsize = SC.RootResponder.responder.computeWindowSize() ;
+    ret.width = cq.outerWidth();
+    ret.height = (wsize.height-ret.y) < cq.outerHeight() ? (wsize.height-ret.y) : cq.outerHeight();
+    ret.y = ret.y -11;
+    return ret ;
   }
 });
