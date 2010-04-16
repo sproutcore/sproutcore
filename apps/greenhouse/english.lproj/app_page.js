@@ -274,6 +274,7 @@ Greenhouse.appPage = SC.Page.design({
   // Project Views
   // 
   projectPicker: SC.PickerPane.design({
+    classNames: ['gh-picker'],
     layout: {width: 200, height: 500},
     defaultResponder: 'Greenhouse',
     modalPaneDidClick: function(evt) {
@@ -284,10 +285,24 @@ Greenhouse.appPage = SC.Page.design({
       return YES ; 
     },
     contentView: SC.View.design({
-      childViews: 'fileList addPage'.w(),
+      childViews: 'controlBar fileList'.w(),
+      
+      toolBar: SC.View.design({
+        classNames: ['control-bar'],
+        layout: { left: 10, right: 10, top: 10, height: 24 },
+        childViews: 'addPage'.w(),
+        
+        addPage: SC.ButtonView.design({
+          layout: { width: 90, height: 24, left: 0 },
+          titleMinWidth: 0,
+          hasIcon: NO,
+          title: "_Add Page...".loc(),
+          action: 'newPageFile'
+        })
+      }),
 
       fileList: SC.ScrollView.design({
-        layout: { top: 0, bottom: 32, left: 0, right: 0 },
+        layout: { top: 49, bottom: 11, left: 8, right: 8 },
         hasHorizontalScroller: NO,
         contentView: SC.ListView.design({
           exampleView: Greenhouse.ListItem,
@@ -301,14 +316,8 @@ Greenhouse.appPage = SC.Page.design({
           selectionBinding: 'Greenhouse.filesController.selection',
           action: 'selectFile'
        })
-      }), 
-      addPage: SC.ButtonView.design({
-        layout: { bottom: 5, right: 5, height: 24, width: 90 },
-        titleMinWidth: 0,
-        hasIcon: NO,
-        title: "_Add Page...".loc(),
-        action: 'newPageFile'
       })
+
 
       // fileActions: SC.ButtonView.design(Greenhouse.DropDown, {
       //   layout: { bottom: 5, left: 10, height: 24, width: 35 },

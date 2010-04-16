@@ -1,0 +1,97 @@
+/*
+==========================================================================
+ Project: Greenhouse - iPad-Style Pickers (but hotter)
+ Author: Matt Grantham - @MattGrantham
+==========================================================================
+*/
+
+.gh-picker.sc-pane.sc-panel.sc-picker .perfectBottom {
+  width: 25px;
+  height: 15px;
+  top: -11px;
+  left: 50%;
+  margin-left: -13px;
+  background: static_url('images/picker/pointer.png') no-repeat;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .top-left-edge {
+  width: 18px;
+  height: 53px;
+  top: 0px;
+  left: -9px;
+  margin-left: -px;
+  background: static_url('images/picker/top-left.png') no-repeat;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .top-edge {
+  left: 9px;
+  right: 9px;
+  height: 53px;
+  top: 0px;
+  background: static_url('images/picker/top.png') repeat-x;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .top-right-edge {
+  width: 18px;
+  height: 53px;
+  top: 0px;
+  right: -9px;
+  margin-left: -px;
+  background: static_url('images/picker/top-right.png') no-repeat;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .right-edge {
+  top: 53px;
+  bottom: 11px;
+  width: 18px;
+  right: -9px;
+  background: static_url('images/picker/right.png') repeat-y;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .bottom-right-edge {
+  width: 18px;
+  height: 23px;
+  bottom: -12px;
+  right: -9px;
+  margin-left: -px;
+  background: static_url('images/picker/bottom-right.png') no-repeat;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .bottom-edge {
+  left: 9px;
+  right: 9px;
+  height: 23px;
+  bottom: -12px;
+  background: static_url('images/picker/bottom.png') repeat-x;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .bottom-left-edge {
+  width: 18px;
+  height: 23px;
+  bottom: -12px;
+  left: -9px;
+  margin-left: -px;
+  background: static_url('images/picker/bottom-left.png') no-repeat;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker .left-edge {
+  top: 53px;
+  bottom: 11px;
+  width: 18px;
+  left: -9px;
+  background: static_url('images/picker/left.png') repeat-y;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker > .sc-view { 
+  background: none;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker > .sc-view .sc-view { 
+  background: #ebebeb;
+  border: none;
+}
+
+.gh-picker.sc-pane.sc-panel.sc-picker > .sc-view .sc-view.control-bar {
+  z-index: 10;
+  background: none;
+}
