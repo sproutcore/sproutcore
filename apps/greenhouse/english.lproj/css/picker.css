@@ -86,12 +86,20 @@
   background: none;
 }
 
+/* List Styling */
 .gh-picker.sc-pane.sc-panel .content .sc-list-view,
 .gh-picker.sc-pane.sc-panel .content {
   background: #ebebeb;
   border: none;
 }
 
+.sc-theme.focus .sc-panel.sc-palette .sc-collection-view.focus .sc-collection-item.sel {
+  background: #718600;
+  color: #eaeaea;
+  text-shadow: 0 1px 0 #000;
+}
+
+/* Kill Grey Border */
 body.sc-theme .gh-picker .sc-view.sc-gray-border {
   border: none;
 }
@@ -100,6 +108,7 @@ body.sc-theme .gh-picker .sc-view.library-list.sc-gray-border {
   border-bottom: 1px dashed #aaa;
 }
 
+/* Allow control bar to spawn above picker frame */
 .gh-picker.sc-pane.sc-panel.sc-picker > .sc-view .sc-view.control-bar {
   z-index: 10;
   background: none;
