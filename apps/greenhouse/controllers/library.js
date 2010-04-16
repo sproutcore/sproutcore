@@ -47,6 +47,7 @@ Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelega
         name: 'Controllers',
         treeItemIsExpanded: YES,
         treeItemChildren: [
+          SC.Object.create({name: 'SC.Object', scClass: 'SC.Object' }),
           SC.Object.create({name: 'Object Controller', scClass: 'SC.ObjectController' }),
           SC.Object.create({name: 'Array Controller', scClass: 'SC.ArrayController'  }),
           SC.Object.create({name: 'Tree Controller', scClass: 'SC.TreeController'})
