@@ -36,7 +36,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       var picker = Greenhouse.appPage.get('libraryPicker'),
           button = Greenhouse.appPage.getPath('mainView.toolBar.library'),
           pickerContentView = Greenhouse.appPage.get('libraryPickerContentView');
-
+      
       pickerContentView.setIfChanged('nowShowing', 'Greenhouse.appPage.libraryContentView');
       picker.popup(button, SC.PICKER_POINTER);
       picker.becomeFirstResponder();
@@ -97,7 +97,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       content.adjust('top', 0);    
       toolbar.set('isVisible', NO);
     },
-   
+    
     closeLibrary: function(){
       this.goState('libraryClosed');
     },

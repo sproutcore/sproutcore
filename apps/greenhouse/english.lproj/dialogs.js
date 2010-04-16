@@ -51,8 +51,6 @@ Greenhouse.dialogPage = SC.Page.design({
       
     }),
     
-    
-    
     cancel: SC.ButtonView.design({
       layout: {bottom: 12, right: 103, width:84, height: 24},
       isCancel: YES,
@@ -217,6 +215,7 @@ Greenhouse.dialogPage = SC.Page.design({
       theme: 'capsule',
       title: "_Cancel".loc()
     }),
+    
     add: SC.ButtonView.design({
       layout: {bottom: 12, right: 12, width:84, height: 24},
       isDefault: YES,
@@ -238,10 +237,12 @@ Greenhouse.dialogPage = SC.Page.design({
       value: "_Specifiy Keys".loc(),
       fontWeight: SC.BOLD_WEIGHT
     }),
+    
     fromText: SC.LabelView.design({
       layout: {left: 15, top: 30, right: 5, height: 22},
       value: "_From".loc()
     }),
+    
     from: SC.TextFieldView.design({
       layout: {top: 48, left: 15, right: 15, height: 22},
       valueBinding: 'Greenhouse.newBindingFromKey'
@@ -251,6 +252,7 @@ Greenhouse.dialogPage = SC.Page.design({
       layout: {left: 15, top: 78, right: 5, height: 22},
       value: "_To".loc()
     }),
+    
     to: SC.TextFieldView.design({
       layout: {top: 96, left: 15, right: 15, height: 22},
       valueBinding: 'Greenhouse.newBindingToKey'
@@ -263,6 +265,7 @@ Greenhouse.dialogPage = SC.Page.design({
       theme: 'capsule',
       title: "_Cancel".loc()
     }),
+    
     add: SC.ButtonView.design({
       layout: {bottom: 12, right: 12, width:84, height: 24},
       isDefault: YES,
