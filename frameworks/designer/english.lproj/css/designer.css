@@ -79,5 +79,18 @@ body.sc-theme > .sc-pane.sc-main.workspace {
   margin-top: 0;
   left: 50%;
   margin-left: -16px;
-  background: static_url('images/dock-object-icon.png') no-repeat;
 }
+
+.workspace .dock .sc-collection-item .icon.pane {
+  background: static_url('images/pane.png') no-repeat;
+}
+.workspace .dock .sc-collection-item .icon.controller {
+  background: static_url('images/controller.png') no-repeat;
+}
+.workspace .dock .sc-collection-item .icon.view {
+  background: static_url('images/view.png') no-repeat;
+}
+.workspace .dock .sc-collection-item .icon.page {
+  background: static_url('images/page.png') no-repeat;
+}
+
