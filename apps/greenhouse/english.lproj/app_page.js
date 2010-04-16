@@ -35,6 +35,7 @@ Greenhouse.appPage = SC.Page.design({
       
       project: SC.ButtonView.design({
         toolTip: "_Project".loc(),
+        classNames: ['dark'],
         layout: {left: 171, width: 47, height: 24, centerY: -1},
         titleMinWidth: 37,
         hasIcon: YES,
@@ -44,6 +45,7 @@ Greenhouse.appPage = SC.Page.design({
       
       save: SC.ButtonView.design({
         toolTip: "_Save".loc(),
+        classNames: ['dark'],
         layout: {left: 251, centerY: -1, width: 47, height: 24},
         titleMinWidth: 37,
         hasIcon: YES,
@@ -53,6 +55,7 @@ Greenhouse.appPage = SC.Page.design({
       
       run: SC.ButtonView.design({
         toolTip: "_Run".loc(),
+        classNames: ['dark'],
         layout: {left: 304, centerY: -1, width: 47, height: 24},
         titleMinWidth: 37,
         hasIcon: YES,
@@ -69,6 +72,7 @@ Greenhouse.appPage = SC.Page.design({
       
       library: SC.ButtonView.design({
         toolTip: "_Library".loc(),
+        classNames: ['dark'],
         layout: {right: 153, width: 47, height: 24, centerY: -1},
         titleMinWidth: 37,
         hasIcon: YES,
@@ -78,6 +82,7 @@ Greenhouse.appPage = SC.Page.design({
       
       inspector: SC.ButtonView.design({
         toolTip: "_Inspector".loc(),
+        classNames: ['dark'],
         layout: {right: 100, width: 47, height: 24, centerY: -1},
         titleMinWidth: 37,
         hasIcon: YES,
@@ -86,6 +91,7 @@ Greenhouse.appPage = SC.Page.design({
       }),
       
       action: SC.ButtonView.design(Greenhouse.DropDown, {
+        classNames: ['dark'],
         layout: {right: 20, centerY: -1, width: 47, height: 24},
         titleMinWidth: 37,
         hasIcon: YES,
@@ -93,7 +99,7 @@ Greenhouse.appPage = SC.Page.design({
         icon: 'actions',
         dropDown: SC.MenuPane.design({
           defaultResponder: 'Orion',
-          layout: { width: 110, height: 0 },
+          layout: { width: 140, height: 0 },
           itemTitleKey: 'title',
           itemTargetKey: 'target',
           itemActionKey: 'action',
@@ -168,7 +174,8 @@ Greenhouse.appPage = SC.Page.design({
       }),
       
       remove: SC.View.design(Greenhouse.SimpleButton,{
-        layout: {right: 5, top: 2, width: 20, height: 24},
+        classNames: ['close-button'],
+        layout: {right: 1, top: 6, width: 18, height: 17},
         action: 'closeInspector'
       })
     }),
@@ -228,7 +235,8 @@ Greenhouse.appPage = SC.Page.design({
       isVisible: NO,
       childViews: 'remove'.w(),
       remove: SC.View.design(Greenhouse.SimpleButton,{
-        layout: {right: 5, top: 2, width: 20, height: 24},
+        classNames: ['close-button'],
+        layout: {right: 1, top: 6, width: 18, height: 17},
         action: 'closeLibrary'
       })
     }),
@@ -300,6 +308,7 @@ Greenhouse.appPage = SC.Page.design({
         childViews: 'addPage'.w(),
         
         addPage: SC.ButtonView.design({
+          classNames: ['dark'],
           layout: { width: 90, height: 24, left: 0 },
           titleMinWidth: 0,
           hasIcon: NO,

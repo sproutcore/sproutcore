@@ -78,7 +78,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       var content = ap.getPath('libraryContentView.content'),
           toolbar = ap.getPath('libraryContentView.toolbar');
      
-      content.adjust('top', 28);    
+      content.adjust('top', 49);    
       toolbar.set('isVisible', YES); 
     },
     exitState: function(){
@@ -94,7 +94,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       var content = ap.getPath('libraryContentView.content'),
           toolbar = ap.getPath('libraryContentView.toolbar');
      
-      content.adjust('top', 0);    
+      content.adjust('top', 49);    
       toolbar.set('isVisible', NO);
     },
     

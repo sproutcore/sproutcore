@@ -23,37 +23,6 @@
   font-size: 13px;
 }
 
-/* Dark Buttons */
-
-/* Regular */
-.sc-theme .toolbar .sc-button-view.sc-regular-size.square {
-  background: static_url('images/buttons/toolbar/regular-r.png') no-repeat right;
-  color: #fff;
-  text-shadow: 0 1px 0 #242424;
-}
-
-.sc-theme .toolbar .sc-button-view.sc-regular-size.square .sc-button-inner {
-  background: static_url('images/buttons/toolbar/regular-l.png') no-repeat;
-}
-.sc-theme .toolbar .sc-button-view.sc-regular-size.square .sc-button-label {
-  background: static_url('images/buttons/toolbar/regular-m.png') repeat-x;
-  margin-left: 5px;
-  margin-right: 5px;
-}
-
-/* Active */
-.sc-theme .toolbar .sc-button-view.sc-regular-size.square.active {
-  background: static_url('images/buttons/toolbar/active-r.png') no-repeat right;
-  color: #d0d0d0;
-  text-shadow: 0 -1px 0 #242424;
-}
-.sc-theme .toolbar .sc-button-view.sc-regular-size.square.active .sc-button-inner {
-  background: static_url('images/buttons/toolbar/active-l.png') no-repeat;
-}
-.sc-theme .toolbar .sc-button-view.sc-regular-size.square.active .sc-button-label {
-  background: static_url('images/buttons/toolbar/active-m.png') repeat-x;
-}
-
 /* Toolbar Icons */
 
 .toolbar .projects {

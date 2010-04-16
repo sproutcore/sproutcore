@@ -1,11 +1,11 @@
 /*
 ==========================================================================
- Project: Greenhouse - iPad-Style Pickers (but hotter)
+ Project: Greenhouse - Epic Tear-Off Pickers
  Author: Matt Grantham - @MattGrantham
 ==========================================================================
 */
 
-.gh-picker.sc-pane.sc-panel.sc-picker .perfectBottom {
+.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectBottom {
   width: 25px;
   height: 15px;
   top: -11px;
@@ -14,77 +14,72 @@
   background: static_url('images/picker/pointer.png') no-repeat;
 }
 
-/* Pointer Position Override for Inspector */
-.gh-picker.inspector.sc-pane.sc-panel.sc-picker .perfectBottom {
-  left: 93%;
-}
-
-.gh-picker.sc-pane.sc-panel.sc-picker .top-left-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .top-left-edge {
   width: 18px;
   height: 53px;
   top: 0px;
   left: -9px;
   margin-left: -px;
-  background: static_url('images/picker/top-left.png') no-repeat !important;
+  background: static_url('images/picker/top-left.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .top-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .top-edge {
   left: 9px;
   right: 9px;
   height: 53px;
   top: 0px;
-  background: static_url('images/picker/top.png') repeat-x !important;
+  background: static_url('images/picker/top.png') repeat-x;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .top-right-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .top-right-edge{
   width: 18px;
   height: 53px;
   top: 0px;
   right: -9px;
   margin-left: -px;
-  background: static_url('images/picker/top-right.png') no-repeat !important;
+  background: static_url('images/picker/top-right.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .right-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .right-edge{
   top: 53px;
   bottom: 11px;
   width: 18px;
   right: -9px;
-  background: static_url('images/picker/right.png') repeat-y !important;
+  background: static_url('images/picker/right.png') repeat-y;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .bottom-right-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .bottom-right-edge {
   width: 18px;
   height: 23px;
   bottom: -12px;
   right: -9px;
   margin-left: -px;
-  background: static_url('images/picker/bottom-right.png') no-repeat !important;
+  background: static_url('images/picker/bottom-right.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .bottom-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .bottom-edge {
   left: 9px;
   right: 9px;
   height: 23px;
   bottom: -12px;
-  background: static_url('images/picker/bottom.png') repeat-x !important;
+  background: static_url('images/picker/bottom.png') repeat-x;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .bottom-left-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .bottom-left-edge {
   width: 18px;
   height: 23px;
   bottom: -12px;
   left: -9px;
   margin-left: -px;
-  background: static_url('images/picker/bottom-left.png') no-repeat !important;
+  background: static_url('images/picker/bottom-left.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker .left-edge {
+.gh-picker.sc-pane.sc-panel.sc-palette .left-edge {
   top: 53px;
   bottom: 11px;
   width: 18px;
   left: -9px;
-  background: static_url('images/picker/left.png') repeat-y !important;
+  background: static_url('images/picker/left.png') repeat-y;
 }
 
 .gh-picker.sc-pane.sc-panel > .sc-view {
@@ -109,6 +104,18 @@ body.sc-theme .gh-picker .sc-view.library-list.sc-gray-border {
   z-index: 10;
   background: none;
 }
+
+/* Teared State
+---------------------------------------------- */
+
+.gh-picker.sc-pane.sc-panel.sc-palette .close-button {
+  background: static_url('images/picker/close.png') no-repeat;
+  z-index: 12;
+}
+.gh-picker.sc-pane.sc-panel.sc-palette .close-button.active {
+  background: static_url('images/picker/close-active.png') no-repeat;
+}
+
 
 /* Control Bar Search Field
 ---------------------------------------------- */

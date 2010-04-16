@@ -9,7 +9,7 @@
 */
 Greenhouse.TearOffPicker = SC.PickerPane.extend(
 /** @scope Greenhouse.TearOffPicker.prototype */ {
-  
+    
   dragAction: '',
   
   mouseDragged: function(evt){
