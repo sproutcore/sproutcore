@@ -403,9 +403,9 @@ SC.FlowedLayout = {
   
   destroyMixin: function() {
     var isObserving = this._scfl_isObserving || SC.CoreSet.create();
-    isObserving.forEach(function(item) {
-      this._scfl_unobserveChild(item);
-    }, this);
+    for (idx in isObserving) {
+      this._scfl_unobserveChild(isObserving[idx]);
+    }
   }
   
 };
