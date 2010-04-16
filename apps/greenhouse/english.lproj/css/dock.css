@@ -16,6 +16,26 @@
   -webkit-box-shadow: inset 2px 0px 6px rgba(0,0,0,0.7);  
 }
 
+/* List Styling */
+.anchored .sc-list-view {
+  background: #ebebeb;
+  border: none;
+}
+
+.sc-theme.focus .anchored .sc-collection-view.focus .sc-collection-item.sel {
+  background: #718600;
+  color: #eaeaea;
+  text-shadow: 0 1px 0 #000;
+}
+
+/* Customize Scrollbar */
+.anchored .sc-scroller-view.sc-vertical .track,
+.anchored .sc-scroller-view.sc-vertical .cap,
+.anchored .sc-scroller-view.sc-vertical .button-bottom,
+.anchored .sc-scroller-view.sc-vertical .button-top {
+  display: none;
+}
+
 /* Library
 ---------------------------------------------- */
 
@@ -37,14 +57,6 @@
 .anchored .library-docked .content .sc-list-view {
   background: none;
   color: #fff;
-}
-
-/* Customize Scrollbar */
-.anchored .library-docked .sc-scroller-view.sc-vertical .track,
-.anchored .library-docked .sc-scroller-view.sc-vertical .cap,
-.anchored .library-docked .sc-scroller-view.sc-vertical .button-bottom,
-.anchored .library-docked .sc-scroller-view.sc-vertical .button-top {
-  display: none;
 }
 
 /* Inspector
