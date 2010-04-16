@@ -81,7 +81,7 @@
       z-index: 5;
       position: absolute;
       right: -25px; top: 5px; bottom: 5px; width: 30px;
-      background: sprite("popover_notoolbar.png" [-30 30 40 1] repeat-y);
+      background: sprite("popover_notoolbar.png" [-30 40 30 1] repeat-y);
     }
     
     .sc-pointer {
@@ -91,27 +91,105 @@
   
 }
 
+
+@theme(solid)
+@view(sc-workspace-view) {
+  overflow: visible;
+  background: none;
+  
+  /* z-index can't go at top--it would interrupt events */
+  
+  .sc-workspace-overlay {
+    opacity: 0.9; /* This is below content, so we can indeed make it transparent */
+    
+    /* TOP */
+    .top-left-edge {
+      z-index: auto;
+      height: 70px;
+      background: sprite("popover_empty.png" [0 0 40 70]);
+    }
+    
+    .top-right-edge {
+      z-index: auto;
+      height: 70px;
+      background: sprite("popover_empty.png" [-40 0 40 70]);
+    }
+    
+    .top-edge {
+      z-index: auto;
+      height: 70px;
+      background: sprite("popover_empty.png" [40 0 1 70] repeat-x);
+    }
+    
+    /* BOTTOM */
+    .bottom-left-edge {
+      z-index: auto;
+      background: sprite("popover_empty.png" [0 -30 40 30]);
+    }
+    
+    .bottom-right-edge {
+      z-index: auto;
+      background: sprite("popover_empty.png" [-40 -30 40 30]);
+    }
+    
+    .bottom-edge {
+      z-index: auto;
+      background: sprite("popover_empty.png" [40 -30 1 30] repeat-x);
+    }
+    
+    
+    /* LEFT AND RIGHT SIDES */
+    .left-edge {
+      z-index: auto;
+      top: 45px;
+      width: 30px;
+    }
+    
+    .right-edge {
+      z-index: auto;
+      top: 45px;
+      right: -25px;
+      width: 30px;
+    }
+    
+    .middle {
+      background: rgb(0,0,0);
+      position: absolute;
+      top: 45px; right: 0px; bottom: 0px; left: 0px;
+    }
+    
+    .sc-pointer {
+      z-index:6;
+    }
+  }
+  
+}
+
+
+@end
+
+
 /* TOOLBARS */
 @view(sc-workspace-view).top-toolbar {
   .sc-workspace-overlay {
     
     /* TOP */
     .top-left-edge {
-      top: -20px; height: 70px;
-      background: sprite("popover.png" [0 0 40 70]);
+      top: -20px; height: 75px;
+      background: sprite("popover.png" [0 0 40 75]);
     }
     
     .top-right-edge {
-      top: -20px; height: 70px;
-      background: sprite("popover.png" [-40 0 40 70]);
+      top: -20px; height: 75px;
+      background: sprite("popover.png" [-40 0 40 75]);
     }
     
     .top-edge {
-      top: -20px; height: 70px;
-      background: sprite("popover.png" [40 0 1 70] repeat-x);
+      top: -20px; height: 75px;
+      background: sprite("popover.png" [40 0 1 75] repeat-x);
     }
-    .left-edge { top: 50px; }
-    .right-edge { top: 50px; }
+    .left-edge { top: 55px; }
+    .right-edge { top: 55px; }
   }
 }
 
@@ -120,21 +198,21 @@
     
     /* TOP */
     .bottom-left-edge {
-      bottom: -20px; height: 70px;
-      background: sprite("popover.png" [0 -70 40 70]);
+      bottom: -20px; height: 75px;
+      background: sprite("popover.png" [0 -75 40 75]);
     }
     
     .bottom-right-edge {
-      bottom: -20px; height: 70px;
-      background: sprite("popover.png" [-40 -70 40 70]);
+      bottom: -20px; height: 75px;
+      background: sprite("popover.png" [-40 -75 40 75]);
     }
     
     .bottom-edge {
-      bottom: -20px; height: 70px;
-      background: sprite("popover.png" [40 -70 1 70] repeat-x);
+      bottom: -20px; height: 75px;
+      background: sprite("popover.png" [40 -75 1 75] repeat-x);
     }
-    .left-edge { bottom: 50px; }
-    .right-edge { bottom: 50px; }
+    .left-edge { bottom: 55px; }
+    .right-edge { bottom: 55px; }
   }
 }
 
@@ -146,6 +224,14 @@
     background: sprite("popover_pointers_notoolbar.png" [155 0 50 25]);
   }
 }
+
+/* Special case where you theme the workspace rather than the picker */
+@view(sc-picker).perfectBottom .solid .sc-pointer,
+@view(sc-picker).solid.perfectBottom .sc-pointer {
+    top: -25px;
+    background: sprite("popover_pointers.png" [155 0 50 25]);
+}
+
 
 @view(sc-picker).perfectBottom .top-toolbar {
   .sc-pointer { top: -20px;background: sprite("popover_pointers.png" [155 0 50 25]); }
