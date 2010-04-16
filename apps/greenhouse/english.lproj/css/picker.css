@@ -25,7 +25,7 @@
   top: 0px;
   left: -9px;
   margin-left: -px;
-  background: static_url('images/picker/top-left.png') no-repeat;
+  background: static_url('images/picker/top-left.png') no-repeat !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .top-edge {
@@ -33,7 +33,7 @@
   right: 9px;
   height: 53px;
   top: 0px;
-  background: static_url('images/picker/top.png') repeat-x;
+  background: static_url('images/picker/top.png') repeat-x !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .top-right-edge {
@@ -42,7 +42,7 @@
   top: 0px;
   right: -9px;
   margin-left: -px;
-  background: static_url('images/picker/top-right.png') no-repeat;
+  background: static_url('images/picker/top-right.png') no-repeat !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .right-edge {
@@ -50,7 +50,7 @@
   bottom: 11px;
   width: 18px;
   right: -9px;
-  background: static_url('images/picker/right.png') repeat-y;
+  background: static_url('images/picker/right.png') repeat-y !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .bottom-right-edge {
@@ -59,7 +59,7 @@
   bottom: -12px;
   right: -9px;
   margin-left: -px;
-  background: static_url('images/picker/bottom-right.png') no-repeat;
+  background: static_url('images/picker/bottom-right.png') no-repeat !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .bottom-edge {
@@ -67,7 +67,7 @@
   right: 9px;
   height: 23px;
   bottom: -12px;
-  background: static_url('images/picker/bottom.png') repeat-x;
+  background: static_url('images/picker/bottom.png') repeat-x !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .bottom-left-edge {
@@ -76,7 +76,7 @@
   bottom: -12px;
   left: -9px;
   margin-left: -px;
-  background: static_url('images/picker/bottom-left.png') no-repeat;
+  background: static_url('images/picker/bottom-left.png') no-repeat !important;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker .left-edge {
@@ -84,7 +84,7 @@
   bottom: 11px;
   width: 18px;
   left: -9px;
-  background: static_url('images/picker/left.png') repeat-y;
+  background: static_url('images/picker/left.png') repeat-y !important;
 }
 
 .gh-picker.sc-pane.sc-panel > .sc-view {
