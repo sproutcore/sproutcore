@@ -14,6 +14,11 @@
   background: static_url('images/picker/pointer.png') no-repeat;
 }
 
+/* Pointer Position Override for Inspector */
+.gh-picker.inspector.sc-pane.sc-panel.sc-picker .perfectBottom {
+  left: 93%;
+}
+
 .gh-picker.sc-pane.sc-panel.sc-picker .top-left-edge {
   width: 18px;
   height: 53px;
@@ -82,16 +87,108 @@
   background: static_url('images/picker/left.png') repeat-y;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker > .sc-view { 
+.gh-picker.sc-pane.sc-panel > .sc-view {
   background: none;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-picker > .sc-view .sc-view { 
+.gh-picker.sc-pane.sc-panel .content .sc-list-view,
+.gh-picker.sc-pane.sc-panel .content {
   background: #ebebeb;
   border: none;
+}
+
+body.sc-theme .gh-picker .sc-view.sc-gray-border {
+  border: none;
+}
+
+body.sc-theme .gh-picker .sc-view.library-list.sc-gray-border {
+  border-bottom: 1px dashed #aaa;
 }
 
 .gh-picker.sc-pane.sc-panel.sc-picker > .sc-view .sc-view.control-bar {
   z-index: 10;
   background: none;
+}
+
+/* Control Bar Search Field
+---------------------------------------------- */
+
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view {
+  border: none;
+  background: static_url('images/picker/search.png') no-repeat;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view.focus {
+  border-color: none;
+  background: static_url('images/picker/search-active.png') no-repeat;
+}
+
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view input {
+  left: 20px;
+  width: 148px;
+}
+
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view.disabled {
+  border-color: none;
+}
+
+.safari .gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view .border {
+  -webkit-appearance: none;
+}
+
+.mozilla .gh-picker.sc-pane.sc-panel .control-bar .sc-view .sc-text-field-view .border {
+  -moz-appearance: none;
+}
+
+.msie .gh-picker.sc-pane.sc-panel .control-bar .sc-view .sc-text-field-view .border {
+  border: 0;
+}
+
+.mozilla .gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view .padding {
+  top: 1px;
+}
+
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view.disabled input,
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view.disabled textarea {
+  color: #dfdfdf;
+}
+
+.gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view .sc-hint {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  line-height: 24px;
+}
+
+.mozilla .gh-picker.sc-pane.sc-panel .control-bar .sc-text-field-view .sc-hint {
+  top: -1px;
+}
+
+/* Scrollbar - Vertical
+---------------------------------------------- */
+.gh-picker.sc-pane.sc-panel .sc-scroller-view.sc-vertical .track,
+.gh-picker.sc-pane.sc-panel .sc-scroller-view.sc-vertical .cap,
+.gh-picker.sc-pane.sc-panel .sc-scroller-view.sc-vertical .button-bottom,
+.gh-picker.sc-pane.sc-panel .sc-scroller-view.sc-vertical .button-top {
+  display: none;
+}
+
+/* Inspector Positioning Overrides & Styling
+---------------------------------------------- */
+
+.gh-picker.sc-pane.sc-panel.inspector .sc-tab-view {
+  top: 12px !important;
+}
+
+.gh-picker.sc-pane.sc-panel.inspector .sc-tab-view > .sc-container-view {
+  top: 41px !important;
+  bottom: 11px !important;
+  left: 8px !important;
+  right: 8px !important;
+  background: #ebebeb;
+  border: none;
 }

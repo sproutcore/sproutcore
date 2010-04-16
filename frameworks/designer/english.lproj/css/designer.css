@@ -27,6 +27,14 @@ body.sc-theme > .sc-pane.sc-main.workspace {
   -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
 }
 
+.workspace .rotated-page {
+  transform: rotate(0.8deg);
+  -moz-transform: rotate(0.8deg);
+  -webkit-transform: rotate(0.8deg);
+  border: 1px solid #111;
+  background: #ccc;
+}
+
 /* Dock
 ---------------------------------------------- */
 

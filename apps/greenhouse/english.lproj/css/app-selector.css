@@ -57,6 +57,14 @@
   border-top: none;
 }
 
+.sc-theme.focus .app-picker .sc-collection-view.focus .sc-collection-item.sel.first, 
+.app-picker .sc-scroll-view .sc-list-item-view.sel.first {
+  border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  -webkit-border-radius: 4px 4px 0 0;
+  border-top: none;
+}
+
 .app-picker .sc-list-item-view img {
   margin-top: -8px !important;
 }

@@ -144,12 +144,12 @@ Greenhouse.appPage = SC.Page.design({
       childViews: 'libraryArea inspectorArea'.w(),
 
       libraryArea: SC.ContainerView.design({
-        layout: { left: 0, top: 0, right: 0, bottom: 350 },
+        layout: { left: 0, top: 0, right: 0, bottom: 376 },
         nowShowing: null
       }),
 
       inspectorArea: SC.ContainerView.design({
-        layout: { right: 0, bottom: 0, left: 0, height: 350 },
+        layout: { right: 0, bottom: 0, left: 0, height: 370 },
         nowShowing: null
       })
     })
@@ -174,7 +174,7 @@ Greenhouse.appPage = SC.Page.design({
     }),
   
     content: SC.TabView.design({
-      layout: {left: 0, right:0, bottom: 0, height:350},
+      layout: {left: 0, right:0, bottom: 0, height:368},
       itemTitleKey: 'title',
       itemValueKey: 'value',
       nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
@@ -196,6 +196,7 @@ Greenhouse.appPage = SC.Page.design({
   
   inspectorPickerContentView: SC.outlet('inspectorPicker.contentView'), 
   inspectorPicker: Greenhouse.TearOffPicker.design({
+    classNames: ['gh-picker', 'inspector'],
     layout: {width: 230, height: 380},
     defaultResponder: 'Greenhouse',
     dragAction: 'floatInspector',
@@ -208,7 +209,19 @@ Greenhouse.appPage = SC.Page.design({
   // Library Views
   // 
   libraryContentView: SC.View.design({
-    childViews: 'toolbar content'.w(),
+    childViews: 'controlBar toolbar content'.w(),
+    
+    controlBar: SC.View.design({
+      classNames: ['control-bar'],
+      layout: { left: 10, right: 10, top: 12, height: 24 },
+      childViews: 'search'.w(),
+      
+      search: SC.TextFieldView.design({
+        classNames: ['search'],
+        layout: {top: 0, centerX: 0, width: 180, height: 24 },
+        valueBinding: 'Greenhouse.libraryController.search'
+      })
+    }),
     
     toolbar: SC.View.design({
       layout: {top:0, left: 0, right:0, height: 28},
@@ -221,20 +234,13 @@ Greenhouse.appPage = SC.Page.design({
     }),
     
     content: SC.View.design({
-      childViews: 'title library libSearch addCustomView'.w(),
-    
-      title: SC.LabelView.design({
-        layout: {top: 4, left: 5, width: 50, height: 22},
-        value: "_Library".loc()
-      }),
-    
-      libSearch: SC.TextFieldView.design({
-        layout: {top: 2, left: 60, right: 5, height: 24},
-        valueBinding: 'Greenhouse.libraryController.search'
-      }),
+      classNames: ['content'],
+      layout: { top: 49, bottom: 11, left: 8, right: 8 },
+      childViews: 'library addCustomView'.w(),
     
       library: SC.ScrollView.design({
-        layout: {top: 30, left: 0, right: 0, bottom: 40},
+        classNames: ['library-list'],
+        layout: {top: 0, bottom: 32, left: 0, right: 0 },
         hasHorizontalScroller: NO,
         contentView: SC.ListView.design({
           rowHeight: 36,
@@ -251,7 +257,7 @@ Greenhouse.appPage = SC.Page.design({
       }),
     
       addCustomView: SC.ButtonView.design({
-        layout: { bottom: 5, right: 5, height: 24, width: 90 },
+        layout: { bottom: 1, right: 0, height: 24, width: 90 },
         titleMinWidth: 0,
         hasIcon: NO,
         title: "_Add View".loc(),
@@ -262,6 +268,7 @@ Greenhouse.appPage = SC.Page.design({
   
   libraryPickerContentView: SC.outlet('libraryPicker.contentView'),
   libraryPicker: Greenhouse.TearOffPicker.design({
+    classNames: ['gh-picker'],
     layout: {width: 230, height: 400},
     dragAction: 'floatLibrary',
     defaultResponder: 'Greenhouse',
@@ -287,9 +294,9 @@ Greenhouse.appPage = SC.Page.design({
     contentView: SC.View.design({
       childViews: 'controlBar fileList'.w(),
       
-      toolBar: SC.View.design({
+      controlBar: SC.View.design({
         classNames: ['control-bar'],
-        layout: { left: 10, right: 10, top: 10, height: 24 },
+        layout: { left: 10, right: 10, top: 12, height: 24 },
         childViews: 'addPage'.w(),
         
         addPage: SC.ButtonView.design({
@@ -302,6 +309,7 @@ Greenhouse.appPage = SC.Page.design({
       }),
 
       fileList: SC.ScrollView.design({
+        classNames: ['content'],
         layout: { top: 49, bottom: 11, left: 8, right: 8 },
         hasHorizontalScroller: NO,
         contentView: SC.ListView.design({
