@@ -11,7 +11,7 @@ SC.designPage = SC.Page.create({
   // 
   designMainPane: SC.MainPane.design({
     classNames: ['workspace'],
-    childViews: 'container viewList'.w(),
+    childViews: 'container rotated viewList'.w(),
     
     container: SC.DesignerDropTarget.design({
       layout: {top: 20, left: 20, right: 20, bottom: 83},
@@ -21,12 +21,18 @@ SC.designPage = SC.Page.create({
       }).from('SC.designController.view')
     }),
     
+    rotated: SC.View.design({
+      layout: {top: 20, left: 20, right: 20, bottom: 83},
+      classNames: ['rotated-page']
+    }),
+    
     viewList: SC.ScrollView.design({
       layout: {left:0, right: 0, bottom: 0, height: 63},
       classNames: ['dock'],
       hasBorder: NO,
       hasVerticalScroller: NO,
       contentView: SC.GridView.design({
+        contentIconKey: 'type',
         exampleView: SC.pageItemView,
         rowHeight: 63,
         columnWidth: 100,

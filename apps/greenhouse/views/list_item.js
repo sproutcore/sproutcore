@@ -3,7 +3,6 @@
 // Copyright: ©2009 Mike Ball
 // ==========================================================================
 /*globals Greenhouse */
-sc_require('core');
 /** @class
 
   This class is here to receive custom editor events
