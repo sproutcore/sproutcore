@@ -196,7 +196,7 @@ Greenhouse.appPage = SC.Page.design({
   
   inspectorPickerContentView: SC.outlet('inspectorPicker.contentView'), 
   inspectorPicker: Greenhouse.TearOffPicker.design({
-    layout: {width: 300, height: 380},
+    layout: {width: 230, height: 380},
     defaultResponder: 'Greenhouse',
     dragAction: 'floatInspector',
     contentView: SC.ContainerView.design({
