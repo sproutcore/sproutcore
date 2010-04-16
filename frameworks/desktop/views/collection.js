@@ -2155,7 +2155,7 @@ SC.CollectionView = SC.View.extend(
       // determine if item is selected. If so, then go on.
       sel = this.get('selection') ;
       contentIndex = (view) ? view.get('contentIndex') : -1 ;
-      isSelected = sel && sel.include(contentIndex) ;
+      isSelected = sel && sel.contains(contentIndex) ;
 
       if (isSelected) this.deselect(contentIndex) ;
       else this.select(contentIndex, YES) ;
