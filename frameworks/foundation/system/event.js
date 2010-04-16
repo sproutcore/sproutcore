@@ -538,13 +538,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     mouseenter: {
       setup: function() {
         if ( SC.browser.msie ) return NO;
-        SC.Event.add(this, 'mouseover', SC.Event.special.mouseover.handler);
+        SC.Event.add(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
 
       teardown: function() {
         if ( SC.browser.msie ) return NO;
-        SC.Event.remove(this, 'mouseover', SC.Event.special.mouseover.handler);
+        SC.Event.remove(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
 
