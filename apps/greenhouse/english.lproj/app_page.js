@@ -93,7 +93,7 @@ Greenhouse.appPage = SC.Page.design({
         icon: 'actions',
         dropDown: SC.MenuPane.design({
           defaultResponder: 'Orion',
-          layout: { width: 150, height: 0 },
+          layout: { width: 110, height: 0 },
           itemTitleKey: 'title',
           itemTargetKey: 'target',
           itemActionKey: 'action',

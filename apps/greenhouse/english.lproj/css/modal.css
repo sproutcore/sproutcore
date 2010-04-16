@@ -15,10 +15,12 @@
   border-radius: 4px;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
+  border: 1px solid #555;
   box-shadow: 0 4px 14px rgba(0,0,0,0.8);
   -moz-box-shadow: 0 4px 14px rgba(0,0,0,0.8);
   -webkit-box-shadow: 0 4px 14px rgba(0,0,0,0.8);
-  background: #efefef;
+  background: #333;
+  color: #fff;
 }
 
 .sc-modal.for-sc-panel + .sc-panel > .sc-view {

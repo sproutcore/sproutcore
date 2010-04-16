@@ -26,6 +26,7 @@
 
 .sc-view .sc-text-field-view.focus {
   border-color: #9ec450;
+  background: #fbffe6;
 }
 
 .sc-view .sc-text-field-view.disabled {

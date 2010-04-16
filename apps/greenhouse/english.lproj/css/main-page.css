@@ -17,8 +17,10 @@
 }
 
 .toolbar .title {
-  font-size: 14px;
+  color: #B3D93B;
   text-shadow: 0 1px 0 #000;
+  line-height: 24px;
+  font-size: 13px;
 }
 
 /* Dark Buttons */
@@ -50,13 +52,6 @@
 }
 .sc-theme .toolbar .sc-button-view.sc-regular-size.square.active .sc-button-label {
   background: static_url('images/buttons/toolbar/active-m.png') repeat-x;
-}
-
-.toolbar .title {
-  color: #B3D93B;
-  text-shadow: 0 1px 0 #000;
-  line-height: 24px;
-  font-size: 13px;
 }
 
 /* Toolbar Icons */
