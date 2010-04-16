@@ -57,7 +57,7 @@ SC.Animatable = {
     "right": "right", "bottom": "bottom",
     "width": "width", "height": "height",
     "opacity": "opacity",
-    "transform": (SC.platform.supportsCSSTransforms ? '-'+SC.platform.cssPrefix+'-transform' : "transform")
+    "transform": "transform"
   },
 
   // properties that adjust should relay to style
