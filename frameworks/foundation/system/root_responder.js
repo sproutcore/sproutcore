@@ -1068,29 +1068,37 @@ SC.RootResponder = SC.Object.extend({
     // end said touches
     for (idx = 0, len = end.length; idx < len; idx++) {
       this.endTouch(end[idx]);
+      this.finishTouch(end[idx]);
     }
   },
   
   _touchCount: 0,
   /** @private
-    Ends a specific touch. touchend calls this to end the internal representation of any given touch.
+    Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
+    touchEnd, touchCancelled, etc. A re-dispatch (through recapture or makeTouchResponder) will terminate
+    the process; it would have to be restarted separately, through touch.end().
   */
   endTouch: function(touchEntry, action, evt) {
     if (!action) action = "touchEnd";
     
-    var responderIdx, responders, responder;
+    var responderIdx, responders, responder, originalResponder;
     
     // unassign
     this.unassignTouch(touchEntry);
 
     // call end for all items in chain
     if (touchEntry.touchResponder) {
+      originalResponder = touchEntry.touchResponder;
+      
       responders = touchEntry.touchResponders;
       responderIdx = responders.length - 1;
       responder = responders[responderIdx];
       while (responder) {
         // tell it
         responder.tryToPerform(action, touchEntry, evt);
+        
+        // check to see if the responder changed, and stop immediately if so.
+        if (touchEntry.touchResponder !== originalResponder) break;
 
         // next
         responderIdx--;
@@ -1098,19 +1106,24 @@ SC.RootResponder = SC.Object.extend({
         action = "touchCancelled"; // any further ones receive cancelled
       }
     }
+  },
+  
+  /**
+    @private
+    "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
+  */
+  finishTouch: function(touch) {
+    // ensure the touch is indeed unassigned.
+    this.unassignTouch(touch);
     
-    // as any of the above might have retriggered the touch temporarily, we should
-    // clear things once more just to be certain things are okay.
-    this.unassignTouch(touchEntry);
-
     // clear responders (just to be thorough)
-    touchEntry.touchResponders = null;
-    touchEntry.touchResponder = null;
-    touchEntry.nextTouchResponder = null;
-    touchEntry.isDoneFor = YES;
+    touch.touchResponders = null;
+    touch.touchResponder = null;
+    touch.nextTouchResponder = null;
+    touch.isDoneFor = YES;
 
     // and remove from our set
-    if (this._touches[touchEntry.identifier]) delete this._touches[touchEntry.identifier];
+    if (this._touches[touch.identifier]) delete this._touches[touch.identifier];
   },
 
   /** @private
@@ -1307,6 +1320,7 @@ SC.RootResponder = SC.Object.extend({
         }
 
         this.endTouch(touchEntry, action, evt);
+        this.finishTouch(touchEntry);
       }
     } catch (e) {
       SC.Logger.warn('Exception during touchEnd: %@'.fmt(e)) ;
@@ -1899,6 +1913,13 @@ SC.Touch.prototype = {
 
   stop: function() {
     if (this.event) this.event.stop();
+  },
+  
+  /**
+    Removes from and calls touchEnd on the touch responder.
+  */
+  end: function() {
+    this.touchContext.endTouch(this);
   },
 
   /**
