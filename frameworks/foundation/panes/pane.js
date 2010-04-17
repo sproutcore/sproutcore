@@ -199,8 +199,18 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // walk up the responder chain looking for a method to handle the event
     if (!target) target = this.get('firstResponder') ;
     while(target) {
-      if (action === 'touchStart' && !target.get("acceptsMultitouch")) {
-        if (!target.get("hasTouch")) {
+      if (action === 'touchStart') {
+        // first, we must check that the target is not already touch responder
+        // if it is, we don't want to have "found" it; that kind of recursion is sure to
+        // cause really severe, and even worse, really odd bugs.
+        if (evt.touchResponder === target) {
+          target = null;
+          break;
+        }
+        
+        // now, only pass along if the target does not already have any touches, or is
+        // capable of accepting multitouch.
+        if (!target.get("hasTouch") || target.get("acceptsMultitouch")) {
           if (target.tryToPerform("touchStart", evt)) break;
         }
       } else if (action === 'touchEnd' && !target.get("acceptsMultitouch")) {
