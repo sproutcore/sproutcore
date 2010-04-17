@@ -184,7 +184,7 @@ Greenhouse.appPage = SC.Page.design({
     }),
   
     content: SC.TabView.design({
-      layout: { left: 6, right: 6, bottom: 6, height: 368 },
+      layout: { left: 0, right: 0, bottom: 6, height: 368 },
       itemTitleKey: 'title',
       itemValueKey: 'value',
       nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
