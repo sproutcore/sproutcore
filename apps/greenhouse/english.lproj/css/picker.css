@@ -5,15 +5,40 @@
 ==========================================================================
 */
 
+
+/* Pointers */
 .gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectBottom {
   width: 25px;
   height: 15px;
   top: -11px;
   left: 50%;
   margin-left: -13px;
-  background: static_url('images/picker/pointer.png') no-repeat;
+  background: static_url('images/picker/pointer-top.png') no-repeat;
+}
+.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectTop {
+  width: 21px;
+  height: 11px;
+  bottom: -11px;
+  left: 50%;
+  margin-left: -11px;
+  background: static_url('images/picker/pointer-bottom.png') no-repeat;
+}
+.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectLeft {
+  width: 12px;
+  height: 22px;
+  right: -13px;
+  top: 22%;
+  background: static_url('images/picker/pointer-right.png') no-repeat;
+}
+.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectRight {
+  width: 12px;
+  height: 22px;
+  left: -13px;
+  top: 22%;
+  background: static_url('images/picker/pointer-left.png') no-repeat;
 }
 
+/* Edges */
 .gh-picker.sc-pane.sc-panel.sc-palette .top-left-edge {
   width: 18px;
   height: 53px;
@@ -94,9 +119,9 @@
 }
 
 .sc-theme.focus .sc-panel.sc-palette .sc-collection-view.focus .sc-collection-item.sel {
-  background: #718600;
-  color: #eaeaea;
-  text-shadow: 0 1px 0 #000;
+  background: #A4BE49;
+  color: #000;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Kill Grey Border */
@@ -137,15 +162,27 @@ body.sc-theme .gh-picker .sc-view.library-list.sc-gray-border {
 /* Inspector Positioning Overrides & Styling
 ---------------------------------------------- */
 
+.inspector .title {
+  font-size: 14px;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.gh-picker.sc-pane.sc-panel.inspector .sc-scroll-view {
+  border: 1px solid #CCCCCC
+}
+
 .gh-picker.sc-pane.sc-panel.inspector .sc-tab-view {
   top: 12px !important;
 }
 
+.gh-picker.sc-pane.sc-panel.inspector .sc-button-view.sc-regular-size.square.prop-control .sc-button-label {
+  font-size: 24px;
+  line-height: 23px;
+}
+
 .gh-picker.sc-pane.sc-panel.inspector .sc-tab-view > .sc-container-view {
   top: 41px !important;
-  bottom: 11px !important;
-  left: 8px !important;
-  right: 8px !important;
+  bottom: 10px !important;
   background: #ebebeb;
   border: none;
 }

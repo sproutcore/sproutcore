@@ -184,7 +184,7 @@ Greenhouse.appPage = SC.Page.design({
     }),
   
     content: SC.TabView.design({
-      layout: { left: 0, right: 0, bottom: 6, height: 368 },
+      layout: { left: 6, right: 6, bottom: 6, height: 368 },
       itemTitleKey: 'title',
       itemValueKey: 'value',
       nowShowing: 'Greenhouse.inspectorsPage.layoutInspector',
@@ -268,6 +268,7 @@ Greenhouse.appPage = SC.Page.design({
       }),
     
       addCustomView: SC.ButtonView.design({
+        classNames: ['dark'],
         layout: { bottom: 1, right: 0, height: 24, width: 90 },
         titleMinWidth: 0,
         hasIcon: NO,

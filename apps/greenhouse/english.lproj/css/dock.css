@@ -23,9 +23,9 @@
 }
 
 .sc-theme.focus .anchored .sc-collection-view.focus .sc-collection-item.sel {
-  background: #718600;
-  color: #eaeaea;
-  text-shadow: 0 1px 0 #000;
+  background: #A4BE49;
+  color: #000;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
 }
 
 /* Customize Scrollbar */
@@ -64,6 +64,14 @@
 
 .anchored .inspector-docked {
   border-top: 1px solid #333;
+}
+
+.anchored .sc-label-view.title {
+  top: 12px !important;
+}
+
+.anchored .prop-control {
+  bottom: 3px !important;
 }
 
 .anchored .sc-tab-view > .sc-container-view {

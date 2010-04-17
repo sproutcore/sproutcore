@@ -13,13 +13,15 @@ Greenhouse.inspectorsPage = SC.Page.design({
     childViews: 'viewClass list addProperty deleteProperty'.w(),
     
     viewClass: SC.LabelView.design({
-      layout: {top: 15, left: 5, right: 5, height: 22},
+      classNames: ['title'],
+      layout: {top: 5, left: 5, right: 5, height: 22},
+      textAlign: SC.ALIGN_CENTER,
       isEditable: YES,
       valueBinding: 'Greenhouse.designController.viewClass'
     }),
     
     list: SC.ScrollView.design({
-      layout: {top: 40, left:0, right: 0, bottom: 30},
+      layout: {top: 34, left:0, right: 0, bottom: 30},
       hasHorizontalScroller: NO,
       contentView: SC.ListView.design({
         rowHeight: 44,
@@ -34,7 +36,8 @@ Greenhouse.inspectorsPage = SC.Page.design({
     }),
     
     addProperty: SC.ButtonView.design({
-      layout: { bottom: 5, right: 5, height: 24, width: 35 },
+      classNames:['prop-control', 'dark'],
+      layout: { bottom: 0, right: 0, height: 24, width: 35 },
       titleMinWidth: 0,
       hasIcon: NO,
       title: "+",
@@ -42,7 +45,8 @@ Greenhouse.inspectorsPage = SC.Page.design({
       isEnabledBinding: 'Greenhouse.designController.content'
     }),
     deleteProperty: SC.ButtonView.design({
-      layout: { bottom: 5, right: 45, height: 24, width: 35 },
+      classNames:['prop-control', 'dark'],
+      layout: { bottom: 0, right: 36, height: 24, width: 35 },
       titleMinWidth: 0,
       hasIcon: NO,
       title: "-",
