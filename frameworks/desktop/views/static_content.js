@@ -103,7 +103,7 @@ SC.StaticContentView = SC.View.extend(SC.StaticLayout, {
   /** @private
     If the layer changes, make sure we recalculate the frame.
   */
-  didCreateLayer: function() {
+  didUpdateLayer: function() {
     this.contentLayoutDidChange();
   },
 
