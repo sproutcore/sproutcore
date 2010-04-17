@@ -34,6 +34,9 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
           else if(page[v].kindOf(iframe.SC.Controller)){
             designs.push(SC.Object.create({type: 'controller', name: v, view: page.get(v)}));
           }
+          else if(page[v].kindOf(iframe.SC.Object) && !page[v].isPageDesignController){
+            designs.push(SC.Object.create({type: 'controller', name: v, view: page.get(v)}));
+          }
 
         }
       }

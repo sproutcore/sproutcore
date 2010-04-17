@@ -18,6 +18,8 @@
 */
 SC.PageDesignController = SC.Object.extend({
   
+  isPageDesignController: YES,
+  
   // ..........................................................
   // SELECTION
   // 
