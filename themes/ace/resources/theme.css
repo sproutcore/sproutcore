@@ -576,7 +576,14 @@
   background: static_url("images/1.png") no-repeat 0 -813px;
   width: 26px;
   height: 14px;
-  right: 14px;
+  right: 15px;
+}
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-top {
+  position: absolute;
+  background: static_url("images/1.png") no-repeat 0 -813px;
+  width: 26px;
+  height: 14px;
+  right: 15px;
 }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right {
   position: absolute;
@@ -585,8 +592,17 @@
   height: 14px;
   right: 0px;
 }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-bottom {
+  position: absolute;
+  background: static_url("images/1.png") no-repeat -15px -978px;
+  width: 15px;
+  height: 14px;
+  right: 0px;
+}
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-left:active { background: static_url("images/1.png") no-repeat 0 -843px; }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-top:active { background: static_url("images/1.png") no-repeat 0 -843px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right:active { background: static_url("images/1.png") no-repeat 0 -978px; }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-bottom:active { background: static_url("images/1.png") no-repeat 0 -978px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb { position: absolute; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-center {
   position: absolute;
@@ -602,7 +618,21 @@
   width: 10px;
   background: static_url("images/1.png") no-repeat -40px -198px;
 }
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-top {
+  position: absolute;
+  height: 14px;
+  left: 0px;
+  width: 10px;
+  background: static_url("images/1.png") no-repeat -40px -198px;
+}
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-right {
+  position: absolute;
+  height: 14px;
+  right: 0px;
+  width: 10px;
+  background: static_url("images/1.png") no-repeat -40px -273px;
+}
+.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-bottom {
   position: absolute;
   height: 14px;
   right: 0px;
