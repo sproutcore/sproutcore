@@ -41,7 +41,7 @@ SC.AutoResize = {
   // note: not so much need to update when the layer is updated; 
   // we could then end up changing the size due to the layer being updated, causing another layer update;
   // which would not be great for performance.
-  didCreateLayer: function(){
+  didAppendToDocument: function(){
     sc_super(); // just in case
     this.measureSize();
   }
