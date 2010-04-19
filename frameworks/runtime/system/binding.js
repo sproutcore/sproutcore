@@ -906,7 +906,7 @@ SC.Binding = {
     something is selected in a list and whether the current user is allowed to delete:
     
       deleteButton: SC.ButtonView.design({
-        isEnabledBinding: SC.Binding.logicalAnd('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
+        isEnabledBinding: SC.Binding.and('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
       })
 
   */
