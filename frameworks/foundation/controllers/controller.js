@@ -39,14 +39,6 @@ SC.Controller = SC.Object.extend(
     
     @property {Boolean}
   */
-  isEditable: YES,
-  
-  /*
-    @private
-  */
-  init: function(){
-    sc_super(); 
-    if(SC.Designer) SC.Designer.registerController(this);  
-  }
-  
+  isEditable: YES
+
 });
