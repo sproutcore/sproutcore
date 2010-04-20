@@ -10,6 +10,11 @@
 }
 
 @view(sc-master-detail-view) > .sc-view {
+  background: #ccc;
+}
+
+@view(sc-master-detail-view) > .sc-view {
+  background: -moz-linear-gradient(top,#ddd,#bbb);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#bbb));
 }
 
