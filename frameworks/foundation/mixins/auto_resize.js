@@ -6,7 +6,25 @@ SC.AutoResize = {
   
   shouldAutoResize: YES, // if NO, only measuredSize is changed.
   shouldMeasureSize: YES, // if NO, nothing happens.
-  measuredSize: {width: 0, height: 0},
+  
+  /**
+    Determines if the view's width should be resized
+    on calculation. Default is YES.
+    
+    @property {Boolean}
+  */
+  shouldResizeWidth: YES,
+  
+  /**
+    Determines if the view's height should be resized
+    on calculation. Default is NO to retain backwards
+    compatibility.
+    
+    @property {Boolean}
+  */
+  shouldResizeHeight: NO,
+  
+  measuredSize: { width: 0, height: 0 },
   
   autoSizePadding: 10, // just to add some nice space.
   
@@ -28,7 +46,10 @@ SC.AutoResize = {
     
     // set it
     this.set("measuredSize", metrics);
-    if (this.get("shouldAutoResize")) this.adjust("width", metrics.width + this.get("autoSizePadding"));
+    if (this.get("shouldAutoResize")) {
+      if (this.get('shouldResizeWidth')) this.adjust("width", metrics.width + this.get("autoSizePadding"));
+      if (this.get('shouldResizeHeight')) this.adjust("height", metrics.height + this.get("autoSizePadding"));
+    }
   },
   
   // we need to update the measurement when the value changes
