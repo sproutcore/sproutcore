@@ -47,7 +47,7 @@ SC.EmptyTheme.renderers.Checkbox = SC.Renderer.extend({
     /* Render OUR stuff */
     // write button
     context.attr('role', 'checkbox');
-    if (SC.browser.msie) context.attr('for', guid);
+    if (SC.browser.msie) context.attr('for', this.guid);
     context.push('<span class="button"></span>');
     
     // write label
