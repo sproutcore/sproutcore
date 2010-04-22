@@ -138,6 +138,18 @@ test("Make sure that setting an attribute on a record will only notify respectiv
   file.writeAttribute('name', 'My Great New Name');
   SC.RunLoop.end();
   
-  equals(Application._nameDidChange, 1, 'observer was only fired once');
+  equals(Application._nameDidChange, 1, 'observer should have been fired only once');
 
 });
+
+
+test("Calling replaceIdFor() should notify the record that its id has changed", function() {
+  
+  var file = store.find(Application.File, '14');
+
+  SC.Store.replaceIdFor(file.get('storeKey'), 999);
+
+  equals(file.get('id'), 999, 'the record should have the new id');
+
+});
+
