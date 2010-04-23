@@ -54,6 +54,16 @@ module("SC.Record normalize method", {
       relatedToMany: SC.Record.toMany('MyApp.Foo')
  
     });
+
+    // A parent record
+    MyApp.FooParent = SC.Record.extend({
+      childRecordNamespace: MyApp,
+      myChild: SC.ChildAttribute.attr('MyApp.FooChild')
+    });
+
+    // A child record
+    MyApp.FooChild = SC.ChildRecord.extend({
+    });
     
     MyApp.Bar = SC.Record.extend({
       // test toOne relationships
@@ -242,4 +252,22 @@ test("normalizing a new record with no guid should work with defaultValue" ,func
   
   equals(findRecord.get('guid'), firstGuid, 'guid should be the same as first');
   
+});
+
+test("normalizing a new record with a null child reference", function() {
+  var recHash = {
+    guid: 'testId1'
+  };
+
+  // Create a parent record with an ChildAttribute property referring to no child.
+  // Make sure normalize() can handle that.
+  var newRecord = MyApp.store.createRecord(MyApp.FooParent, recHash);
+  var newRecordId, findRecord;
+  
+  MyApp.store.commitRecords();
+  newRecordId = newRecord.get('id');
+  newRecord.normalize();
+
+  findRecord = MyApp.store.find(MyApp.FooParent, newRecordId);
+  equals(findRecord.get('id'), newRecordId, 'id should be the same as the first');
 });
