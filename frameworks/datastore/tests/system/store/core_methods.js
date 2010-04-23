@@ -147,8 +147,9 @@ test("Calling replaceIdFor() should notify the record that its id has changed", 
   
   var file = store.find(Application.File, '14');
 
-  SC.Store.replaceIdFor(file.get('storeKey'), 999);
+  file.get('id'); // Just getting the id, so it gets cached.
 
+  SC.Store.replaceIdFor(file.get('storeKey'), 999);
   equals(file.get('id'), 999, 'the record should have the new id');
 
 });
