@@ -1024,6 +1024,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       },
       scrolling: { x: NO, y: NO },
       
+      enableBouncing: SC.browser.mobileSafari,
+      
       // offsets and velocities
       startClipOffset: { x: startClipOffsetX, y: startClipOffsetY },
       lastScrollOffset: { x: horizontalScrollOffset, y: verticalScrollOffset },
@@ -1037,7 +1039,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       
       startScale: this._scale,
       startDistance: avg.d,
-      canScale: this.get("canScale"),
+      canScale: this.get("canScale") && SC.browser.mobileSafari,
       minimumScale: this.get("minimumScale"),
       maximumScale: this.get("maximumScale"),
       
@@ -1163,7 +1165,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       if (deltaY > touch.scrollLock && !touch.scrolling.x) touch.enableScrolling.x = NO;
     }
     
-    // handle scaling
+    // handle scaling through pinch gesture
     if (touch.canScale) {
       
       var startDistance = touch.startDistance, dd = distance - startDistance;
@@ -1183,30 +1185,46 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       }
     }
     
-
+    // these do exactly what they sound like. So, this comment is just to
+    // block off the code a bit
+    // In english, these calculate the minimum X/Y offsets
     minOffsetX = this.minimumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign"));
     minOffsetY = this.minimumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
     
+    // and now, maximum...
     maxOffsetX = this.maximumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign"));
     maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
     
+    
+    // So, the following is the completely written out algebra:
     // (offsetY + touchYInFrame) / this._scale = touch.startTouchOffsetInContent.y
     // offsetY + touchYInFrame = touch.startTouchOffsetInContent.y * this._scale;
     // offsetY = touch.startTouchOffset * this._scale - touchYInFrame
+    
+    // and the result applied:
     offsetX = touch.startTouchOffsetInContent.x * this._scale - touchXInFrame;
     offsetY = touch.startTouchOffsetInContent.y * this._scale - touchYInFrame;
     
     
-    // update immediately, without consulting anyone else.
-    offsetX = this._adjustForEdgeResistance(offsetX, minOffsetX, maxOffsetX, touch.resistanceCoefficient, touch.resistanceAsymptote);
-    offsetY = this._adjustForEdgeResistance(offsetY, minOffsetY, maxOffsetY, touch.resistanceCoefficient, touch.resistanceAsymptote);
+    // we need to adjust for edge resistance, or, if bouncing is disabled, just stop flat.
+    if (touch.enableBouncing) {
+      offsetX = this._adjustForEdgeResistance(offsetX, minOffsetX, maxOffsetX, touch.resistanceCoefficient, touch.resistanceAsymptote);
+      offsetY = this._adjustForEdgeResistance(offsetY, minOffsetY, maxOffsetY, touch.resistanceCoefficient, touch.resistanceAsymptote);
+    } else {
+      offsetX = Math.max(minOffsetX, Math.min(maxOffsetX, offsetX));
+      offsetY = Math.max(minOffsetY, Math.min(maxOffsetY, offsetY));
+    }
     
+    // and now, _if_ scrolling is enabled, set the new coordinates
     if (touch.scrolling.x) this._scroll_horizontalScrollOffset = offsetX;
     if (touch.scrolling.y) this._scroll_verticalScrollOffset = offsetY;
     
+    // and apply the CSS transforms.
     this._applyCSSTransforms(touch.layer);
     this._touchScrollDidChange();
     
+    
+    // now we must prepare for momentum scrolling by calculating the momentum.
     if (timeStamp - touch.lastEventTime >= 1 || touch.notCalculated) {
       touch.notCalculated = NO;
       var horizontalOffset = this._scroll_horizontalScrollOffset;
@@ -1357,6 +1375,11 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     var de = touch.decelerationFromEdge, ac = touch.accelerationToEdge;
     
+    // under a few circumstances, we may want to force a valid X/Y position.
+    // For instance, if bouncing is disabled, or if position was okay before
+    // adjusting scale.
+    var forceValidXPosition = !touch.enableBouncing, forceValidYPosition = !touch.enableBouncing;
+    
     // determine if position was okay before adjusting scale (which we do, in
     // a lovely, animated way, for the scaled out/in too far bounce-back).
     // if the position was okay, then we are going to make sure that we keep the
@@ -1364,8 +1387,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     //
     // Position OKness, here, referring to if the position is valid (within
     // minimum and maximum scroll offsets)
-    var validXPosition = newX >= minOffsetX && newX <= maxOffsetX;
-    var validYPosition = newY >= minOffsetY && newY <= maxOffsetY;
+    if (newX >= minOffsetX && newX <= maxOffsetX) forceValidXPosition = YES;
+    if (newY >= minOffsetY && newY <= maxOffsetY) forceValidYPosition = YES;
     
     // We are going to change scale in a moment, but the position should stay the
     // same, if possible (unless it would be more jarring, as described above, in
@@ -1413,15 +1436,21 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign"));
     
     // see if scaling messed up the X position (but ignore if 'tweren't right to begin with).
-    if (validXPosition && (newX < minOffsetX || newX > maxOffsetX)) {
+    if (forceValidXPosition && (newX < minOffsetX || newX > maxOffsetX)) {
       // Correct the position
       newX = Math.max(minOffsetX, Math.min(newX, maxOffsetX));
+      
+      // also, make the velocity be ZERO; it is obviously not needed...
+      touch.decelerationVelocity.x = 0;
     }
     
     // now the y
-    if (validYPosition && (newY < minOffsetY || newY > maxOffsetY)) {
+    if (forceValidYPosition && (newY < minOffsetY || newY > maxOffsetY)) {
       // again, correct it...
       newY = Math.max(minOffsetY, Math.min(newY, maxOffsetY));
+      
+      // also, make the velocity be ZERO; it is obviously not needed...
+      touch.decelerationVelocity.y = 0;
     }
     
     
