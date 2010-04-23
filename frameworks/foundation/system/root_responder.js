@@ -957,9 +957,14 @@ SC.RootResponder = SC.Object.extend({
 
     // if the item is in the stack, we will go to it (whether shouldStack is true or not)
     // as it is already stacked
-    this.unassignTouch(touch);
     if (!shouldStack || (stack.indexOf(responder) > -1 && stack[stack.length - 1] !== responder)) {
-
+      // first, we should unassign the touch. Note that we only do this IF WE ARE removing
+      // the current touch responder. Otherwise we cause all sorts of headaches; why? Because,
+      // if we are not (suppose, for instance, that it is stacked), then the touch does not
+      // get passed back to the touch responder-- even while it continues to get events because
+      // the touchResponder is still set!
+      this.unassignTouch(touch);
+      
       // pop all other items
       var idx = stack.length - 1, last = stack[idx];
       while (last && last !== responder) {
