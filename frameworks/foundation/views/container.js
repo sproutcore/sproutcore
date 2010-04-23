@@ -96,32 +96,32 @@ SC.ContainerView = SC.View.extend(
     SC.CONTENT_SET_DIRECTLY
   */
   nowShowingDidChange: function() {
-    var nowShowing = this.get('nowShowing') ;
-    var content = null;
-    //its a property path
-    if(SC.typeOf(nowShowing) === SC.T_STRING){
-      // if nowShowing was set because the content was set directly, then 
-      // do nothing.
-      if (nowShowing === SC.CONTENT_SET_DIRECTLY) return ;
-
-      // otherwise, if nowShowing is a non-empty string, try to find it...
-      if (nowShowing && nowShowing.length>0) {
-        if (nowShowing.indexOf('.')>0) {
-          content = SC.objectForPropertyPath(nowShowing, null);
-        } else {
-          content = SC.objectForPropertyPath(nowShowing, this.get('page'));
-        }
-      }
-    }else{ //its a view
-      content = nowShowing;
-    }
-
+    // This code turns this.nowShowing into a view object by any means necessary.
     
-    // only allow views
+    var content = this.get('nowShowing') ;
+    
+    // If nowShowing was changed because the content was set directly, then do nothing.
+    if (content === SC.CONTENT_SET_DIRECTLY) return ;
+    
+    // If it's a string, try to turn it into the object it references...
+    if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
+      if (content.indexOf('.') > 0) {
+        content = SC.objectForPropertyPath(content);
+      } else {
+        content = SC.objectForPropertyPath(content, this.get('page'));
+      }
+    }
+    
+    // If it's an uninstantiated view, then attempt to instantiate it.
+    // (Uninstantiated views have a create() method; instantiated ones do not.)
+    if (SC.typeOf(content.create) === SC.T_FUNCTION) content = content.create();
+    
+    // If content has not been turned into a view by now, it's hopeless.
     if (content && !(content instanceof SC.View)) content = null;
     
-    // set content
+    // Sets the content.
     this.set('contentView', content) ;
+    
   }.observes('nowShowing'),
   
   /**
