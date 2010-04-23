@@ -492,7 +492,12 @@ SC.Record = SC.Object.extend(
           }
           else if (isChild) {
             attrValue = this.get(key);
-            attrValue.normalize();
+
+            // Sometimes a child attribute property does not refer to a child record.
+            // Catch this and don't try to normalize.
+            if (attrValue && attrValue.normalize) {
+              attrValue.normalize();
+            }
           }
           else if (isRecord) {
             attrValue = recHash[key];
