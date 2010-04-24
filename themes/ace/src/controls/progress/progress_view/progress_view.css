@@ -41,28 +41,26 @@ theme-name is specified as an argument when building.
 
 /* Inner */
 @view(sc-progress-view) .sc-inner {
-  background: sprite("progress_view_content.png" clear [0, 8]);
+  background: sprite("progress_view_content.png" clear [0, 4]);
   z-index:1;
   border:0px none;
 }
 
 @view(sc-progress-view) .sc-inner-head {
-  left: 8px;
+  width: 4px;
   right: 0px;
   position:absolute;
   height:20px;
-  background: sprite("progress_view_content.png" anchor-right [-8]);
-  z-index:1;
+  background: sprite("progress_view_content.png" anchor-right [-4]);
   border:0px none;
 }
 
 @view(sc-progress-view) .sc-inner-tail {
-  left: 8px;
-  right: 8px;
+  left: 4px;
+  right: 4px;
   position:absolute;
   height:20px;
   background: sprite("progress_view_content.png" repeat-x [8, 1]);
-  z-index:1;
   border:0px none;
 }
 
