@@ -1045,6 +1045,10 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   left: -12px;
   top: 9px;
 }
+.sc-theme .sc-view.ace.light.sc-collection-view .sc-collection-item.sel {
+  color: white;
+  background: #608ab9;
+}
 .sc-main { background: #cccccc; }
 .sc-main {
   background: -moz-linear-gradient(top, #dddddd, #bbbbbb);
