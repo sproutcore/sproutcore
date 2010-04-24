@@ -691,31 +691,29 @@
   width: 8px;
   position: absolute;
   height: 20px;
-  background: static_url("images/1.png") no-repeat 0 -1323px;
+  background: static_url("images/1.png") no-repeat 0 -1303px;
   z-index: 0;
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-progress-view .sc-inner {
-  background: static_url("images/1.png") no-repeat 0 -1303px;
+  background: static_url("images/1.png") no-repeat -40px -50px;
   z-index: 1;
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-progress-view .sc-inner-head {
-  left: 8px;
+  width: 4px;
   right: 0px;
   position: absolute;
   height: 20px;
   background: static_url("images/1.png") no-repeat right -50px;
-  z-index: 1;
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-progress-view .sc-inner-tail {
-  left: 8px;
-  right: 8px;
+  left: 4px;
+  right: 4px;
   position: absolute;
   height: 20px;
   background: static_url("images/2.png") repeat-x 0 -973px;
-  z-index: 1;
   border: 0px none;
 }
 .sc-theme .sc-view.ace.light.sc-progress-view.disabled { opacity: 0.5; }
@@ -962,12 +960,12 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-left {
   margin-top: -9px;
   height: 18px;
-  background: static_url("images/1.png") no-repeat -24px -1323px;
+  background: static_url("images/1.png") no-repeat -24px -1303px;
 }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-right {
   margin-top: -9px;
   height: 18px;
-  background: static_url("images/1.png") no-repeat -16px -1323px;
+  background: static_url("images/1.png") no-repeat -8px -1303px;
 }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-middle {
   margin-top: -9px;
@@ -980,14 +978,14 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   height: 18px;
   padding-top: 2px;
 }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -8px -1323px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -32px -1323px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -16px -1323px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat 0 -1323px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1067px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -40px -1323px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat 0 -1343px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -8px -1323px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -40px -1303px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -1013px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -8px -1343px; }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -16px -1343px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -32px -1303px; }
+.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -16px -1303px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1049px; }
 .sc-theme .sc-view.ace.light.sc-tab-view { overflow: visible; }
 .sc-theme .sc-view.ace.light.sc-tab-view .sc-container-view {
