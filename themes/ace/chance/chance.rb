@@ -85,6 +85,22 @@ argparser = OptionParser.new {|opts|
   opts.on('--data-url', "Use data urls embedded in the CSS.") {
     config[:use_data_url] = true
   }
+  
+  config[:hue] = 1.0
+  config[:saturation] = 1.0
+  config[:brightness] = 1.0
+  
+  opts.on('--hue [def]', Float, 'Adjust hue (default 1.0)') {|v|
+    config[:hue] = v
+  }
+  
+  opts.on('--saturation [def]', Float, 'Adjust hue (saturation 1.0)') {|v|
+    config[:saturation] = v
+  }
+  
+  opts.on('--brightness [def]', Float, 'Adjust brightness (default 1.0)') {|v|
+    config[:brightness] = v
+  }
 }
 
 argparser.parse!

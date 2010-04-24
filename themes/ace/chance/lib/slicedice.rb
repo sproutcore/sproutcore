@@ -10,12 +10,15 @@ class Slicer
   attr_accessor :images
   
   def initialize(config)
+    @config = config
     @output_dir = config[:output]
     @optimization_limit = config[:optimization_limit]
   end
   
   # slice performs the slicing operations, putting the images in the output directory
   def slice
+    config = @config
+    
     image_set = []
     @images.each do |key, definition|
       path = definition[:path]
@@ -48,7 +51,7 @@ class Slicer
       if height == 0 then height = image_height - y end
       
       # Crop image
-      result = image.crop(x, y, width, height)
+      result = image.crop(x, y, width, height).modulate(config[:brightness], config[:saturation], config[:hue])
       
       # Write image: Skipped because we never read it back from disk
       # Besides, not good to put it in resources/, where it will get added to the build.
