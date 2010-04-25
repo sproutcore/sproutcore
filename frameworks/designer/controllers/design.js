@@ -16,13 +16,17 @@ SC.designController = SC.ObjectController.create(
   contentBindingDefault: SC.Binding.single(),
   
   viewSelected: function(){
-    var c = this.get('content'), pane, designer;
+    var c = this.get('content'), pane, designer, pageController;
     if(c){
       pane = c.get('view');
       if(pane.kindOf && pane.kindOf(SC.View)){
+        pageController = SC.designsController.getPath('page.designController');
         designer = pane.get('designer');
-        //disable design mode(since this is the root view)
-        if(designer) designer.set('designIsEnabled', NO);
+        //make this designer the rootDesigner
+        if(pageController && designer) {
+          designer.set('designIsEnabled', NO);
+          pageController.makeRootDesigner(designer);
+        }
       }
       else if(SC._Greenhouse){
         SC._Greenhouse.designController.set('content', pane.get('designer'));

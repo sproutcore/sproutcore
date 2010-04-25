@@ -141,6 +141,23 @@ SC.PageDesignController = SC.Object.extend({
   },
   
   // ..........................................................
+  // ROOT DESIGNER
+  // 
+  rootDesigner: null,
+  
+  makeRootDesigner: function(designer){
+    var currRoot = this.get('rootDesigner');
+    
+    if(currRoot) currRoot.set('isRootDesigner', NO);
+    
+    this.deselect(designer);
+    designer.set('isRootDesigner', YES);
+    //TODO: allow greenhouse to hightlight the root view!
+    this.set('rootDesigner', designer);
+  },
+  
+  
+  // ..........................................................
   // INTERNAL SUPPORT
   // 
   init: function() {

@@ -608,6 +608,45 @@ SC.ViewDesigner = SC.Object.extend(
   willDestroyLayer: function() {},
   
   // ..........................................................
+  // ROOT DESIGNER SUPPORT
+  // 
+  
+  parentDesignerIsRoot: function(){
+    var dc = this.get('designController'), view = this.get('view');
+    return dc.get('rootDesigner') === view.getPath('parentView.designer');
+  }.property(),
+  
+  /**
+    set this property to YES if you want your designer to become Root
+  */
+  acceptRootDesigner: NO,
+  
+  isRootDesigner: NO,
+  
+  isRootDesignerDidChange: function() {
+    
+    var isRoot = this.get('isRootDesigner'),
+        highLight = this._highLight;
+    
+    if (isRoot && this.get('designIsEnabled')) {
+      
+      if (!highLight) {
+        highLight = this._highLight = SC.RootDesignerHighLight.create({ 
+          designer: this 
+        });
+      }
+      
+      var parent = this.view.get('parentView');
+
+      if (!highLight.get('parentView') !== parent) parent.appendChild(highLight);
+      highLight.set('targetFrame', this.view.get('frame'));
+    } 
+    else if (highLight) {
+      if (highLight.get('parentView')) highLight.removeFromParent();
+    }
+  }.observes('isRootDesigner'),
+  
+  // ..........................................................
   // MOUSE HANDLING
   // 
   
@@ -618,7 +657,7 @@ SC.ViewDesigner = SC.Object.extend(
     selection.  Otherwise just save starting info for dragging
   */
   mouseDown: function(evt) {
-    if (!this.get('designIsEnabled')) return NO ;
+    if (!this.get('designIsEnabled') || !this.get('parentDesignerIsRoot')) return NO ;
     
     // save mouse down info
     var view = this.get('view'), 
@@ -712,7 +751,7 @@ SC.ViewDesigner = SC.Object.extend(
     mousedown.
   */
   mouseDragged: function(evt) {
-    if (!this.get('designIsEnabled')) return NO ;
+    if (!this.get('designIsEnabled') || !this.get('parentDesignerIsRoot')) return NO ;
     var info = this._mouseDownInfo, 
         view = this.get('view'),
         layout, startX, startY;
@@ -784,7 +823,7 @@ SC.ViewDesigner = SC.Object.extend(
     On mouseUp potentially change selection and cleanup.
   */
   mouseUp: function(evt) {
-    if (!this.get('designIsEnabled')) return NO ;
+    if (!this.get('designIsEnabled') || !this.get('parentDesignerIsRoot')) return NO ;
 
     var info = this._mouseDownInfo;
         
@@ -806,7 +845,14 @@ SC.ViewDesigner = SC.Object.extend(
     }
     //double click
     if(SC._Greenhouse && evt.clickCount === 2){
-     SC._Greenhouse.sendAction('openInspector', view);
+      var dc = this.get('designController');
+      if(this.acceptRootDesigner && dc) {
+        dc.makeRootDesigner(this); 
+      }
+      else{
+        //TODO: [MB] decide if this is the functionality I want...
+        SC._Greenhouse.sendAction('openInspector', view);
+      }
     }
     
     this._mouseDownInfo = null;

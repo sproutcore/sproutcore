@@ -11,6 +11,8 @@ SC.TabView.Designer = SC.ViewDesigner.extend(
   
   encodeChildViews: NO,
   
+  acceptRootDesigner: YES,
+  
   designProperties: 'nowShowing items itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey tabLocation userDefaultKey'.w()
   
 });
