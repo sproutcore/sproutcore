@@ -32,26 +32,40 @@ SC.RootDesignerHighLight = SC.View.extend(
   // ..........................................................
   // EVENT HANDLING
   // 
-  // By default just forward to designer
   
-  mouseDown: function(evt) {
-    var d = this.designer;
-    return (d && d.mouseDown) ? d.mouseDown(evt) : null;
+  mouseDown: function(evt){
+    return this._handle_click_event(evt);
   },
   
   mouseUp: function(evt) {
-    var d = this.designer;
-    return (d && d.mouseUp) ? d.mouseUp(evt) : null;
+    return this._handle_click_event(evt);
   },
   
   mouseMoved: function(evt) {
-    var d = this.designer;
-    return (d && d.mouseMoved) ? d.mouseMoved(evt) : null;
+    return this._handle_click_event(evt);
   },
   
   mouseDragged: function(evt) {
-    var d = this.designer;
-    return (d && d.mouseDragged) ? d.mouseDragged(evt) : null;
+    return this._handle_click_event(evt);
+  },
+  
+  clickInside: function(frame, evt) {
+    return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
+  },
+  
+  _handle_click_event: function(evt) {
+    var d = this.designer,
+        targetFrame = this.get('targetFrame');    
+    if(this.clickInside(targetFrame, evt) && d){
+      return (d && d.mouseDown) ? d.mouseDown(evt) : null;
+    }
+    else if(d){
+      d.resignRootDesigner();
+      return YES;
+    }
+    else{
+      return NO;
+    }
   }
   
 });

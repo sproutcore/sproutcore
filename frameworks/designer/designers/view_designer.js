@@ -646,6 +646,14 @@ SC.ViewDesigner = SC.Object.extend(
     }
   }.observes('isRootDesigner'),
   
+  resignRootDesigner: function(){
+    var prevRoot = this.get('prevRootDesigner');
+    if(this.get('isRootDesigner') && prevRoot){
+      var dc = this.get('designController');
+      if(dc) dc.makeRootDesigner(prevRoot);
+    }
+  },
+  
   // ..........................................................
   // MOUSE HANDLING
   // 
