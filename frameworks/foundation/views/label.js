@@ -262,6 +262,13 @@ SC.LabelView = SC.View.extend(SC.Control,
     layer.css('opacity', 0.0);
   },
 
+  /**
+    Could check with a validator someday...
+  */
+  inlineEditorShouldBeginEditing: function(inlineEditor) {
+    return YES;
+  },
+
   /** @private
     Could check with a validator someday...
   */
