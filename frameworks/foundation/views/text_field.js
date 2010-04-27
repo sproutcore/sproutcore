@@ -436,18 +436,27 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     for (i = 0;  i < numberOfAccessoryViewPositions;  i++) {
       position = accessoryViewPositions[i];
       accessoryView = this.get(position + 'AccessoryView');
-      if (accessoryView  &&  accessoryView.get) {
-        frame = accessoryView.get('frame');
-        if (frame) {
-          width = frame.width;
-          if (width) {
-            // Also account for the accessory view's inset.
-            layout = accessoryView.get('layout');
-            if (layout) {
-              offset = layout[position];
-              width += offset;
+      if (accessoryView) {
+        // need acessoryView as an instance, not class...
+        if (accessoryView.isClass) {
+          accessoryView = accessoryView.create({
+            layoutView: this
+          });
+        }
+        // sanity check
+        if (accessoryView.get) {
+          frame = accessoryView.get('frame');
+          if (frame) {
+            width = frame.width;
+            if (width) {
+              // Also account for the accessory view's inset.
+              layout = accessoryView.get('layout');
+              if (layout) {
+                offset = layout[position];
+                width += offset;
+              }
+              widths[position] = width;
             }
-            widths[position] = width;
           }
         }
       }
