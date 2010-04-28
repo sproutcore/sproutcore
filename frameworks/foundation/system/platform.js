@@ -13,7 +13,6 @@
   and events are supported by the browser, allowing you to create much more
   robust apps.
 */
-
 SC.platform = {
   /**
     YES if the current device supports touch events, NO otherwise.
