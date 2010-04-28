@@ -72,7 +72,7 @@ SC.MasterDetailView = SC.View.extend({
     browser changes.
   */
   autoHideMaster: function() {
-    if (SC.browser.touch) return YES;
+    if (SC.platform.touch) return YES;
     return NO;
   }.property().cacheable(),
   
