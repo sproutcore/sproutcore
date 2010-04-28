@@ -49,6 +49,7 @@ SC.AutoResize = {
     if (this.get("shouldAutoResize")) {
       if (this.get('shouldResizeWidth')) this.adjust("width", metrics.width + this.get("autoSizePadding"));
       if (this.get('shouldResizeHeight')) this.adjust("height", metrics.height + this.get("autoSizePadding"));
+      console.error(this.get("layout").get("width"));
     }
   },
   
@@ -64,6 +65,11 @@ SC.AutoResize = {
   // which would not be great for performance.
   didAppendToDocument: function(){
     sc_super(); // just in case
+    this.measureSize();
+  },
+  
+  didCreateLayer: function() {
+    sc_super();
     this.measureSize();
   }
 };
