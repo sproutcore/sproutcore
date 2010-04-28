@@ -500,6 +500,13 @@
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -807px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -8px -1204px; }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat 0 -1229px; }
+.sc-theme .sc-view.ace.light.sc-segmented-view img {
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+  left: -2px;
+  margin-right: 2px;
+}
 .sc-theme .sc-view.ace.light.sc-segmented-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .track {
   position: absolute;

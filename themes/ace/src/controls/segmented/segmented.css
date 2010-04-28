@@ -1,110 +1,123 @@
 @view(sc-segmented-view) {
   overflow: visible;
-}
 
-@view(sc-segmented-view) .sc-segment {
-  background: none;
-  border: 0px none;
-  color: #555;
-  height: 25px;
-  text-shadow: 0px 1px 1px white;
-  display:inline-block;
-  zoom: 1;
-  height:25px;
-  overflow:hidden;
-}
-
-@view(sc-segmented-view) .sc-segment .button-left {
-  display: inline-block;
-  width: 8px;
-  height: 25px;
-  background: sprite("segmented_normal.png" [100 8]);
-  zoom: 1;
-}
-
-@view(sc-segmented-view) .sc-segment .button-right {
-  display: inline-block;
-  width: 8px;
-  height: 25px;
-  background: sprite("segmented_normal.png" [92 8]);
-  zoom: 1;
-}
-
-@view(sc-segmented-view) .sc-segment .button-middle {
-  display: inline-block;
-  margin: 0px;
-  padding: 0px;
-  padding-top:1px;
-  height: 25px;
-  vertical-align:top;
-  background: sprite("segmented_normal.png" repeat-x [8, 1]);
-  zoom: 1;
-}
-
-@view(sc-segmented-view) .sc-segment.sc-first-segment .button-left {
-  background: sprite("segmented_normal.png" [0 8]);  
-}
-
-@view(sc-segmented-view) .sc-segment.sc-last-segment .button-right {
-  background: sprite("segmented_normal.png" [-8]);  
-}
-
-@view(sc-segmented-view) .sc-segment .sc-button-label {
+  /*
+    DEFAULT STATE
+  */
+  .sc-segment {
+    background: none;
+    border: 0px none;
+    color: #555;
+    height: 25px;
+    text-shadow: 0px 1px 1px white;
+    display:inline-block;
+    zoom: 1;
+    height:25px;
+    overflow:hidden;
+    
+    .button-left {
+      display: inline-block;
+      width: 8px;
+      height: 25px;
+      background: sprite("segmented_normal.png" [100 8]);
+      zoom: 1;
+    }
+    
+    .button-right {
+      display: inline-block;
+      width: 8px;
+      height: 25px;
+      background: sprite("segmented_normal.png" [92 8]);
+      zoom: 1;
+    }
+    
+    .button-middle {
+      display: inline-block;
+      margin: 0px;
+      padding: 0px;
+      padding-top:1px;
+      height: 25px;
+      vertical-align:top;
+      background: sprite("segmented_normal.png" repeat-x [8, 1]);
+      zoom: 1;      
+    }
+  }
   
-}
+  .sc-segment.sc-first-segment .button-left {
+    background: sprite("segmented_normal.png" [0 8]);  
+  }
+    
+  .sc-segment.sc-last-segment .button-right {
+    background: sprite("segmented_normal.png" [-8]);  
+  }
+  
+  
+  /* ACTIVE STATE */
+  .sc-segment.active {
+    color: #333;
+    text-shadow: 0px 1px 1px white;
+    
+    .button-left {
+      background: sprite("segmented_active.png" [100 8]);
+    }
+    
+    .button-right {
+      background: sprite("segmented_active.png" [92 8]);
+    }
+    
+    .button-middle {
+      background: sprite("segmented_active.png" repeat-x [8, 1]);
+    }
+    
+  }
+  
+  .sc-segment.active.sc-first-segment {
+    .button-left {
+      background: sprite("segmented_active.png" [0 8]);  
+    }  
+  }
+  
+  .sc-segment.active.sc-last-segment {
+    .button-right {
+      background: sprite("segmented_active.png" [-8]);
+    }
+  }
+  
+  /* SELECTED STATE */
+  .sc-segment.sel {
+    background:none;
+    color: #fff;
+    font-weight:200;
+    text-shadow: 0px -1px 1px rgba(0,0,0,.5);
+    
+    .button-left {
+      background: sprite("segmented_selected.png" [100 8]);
+    }
+    
+    .button-right {
+      background: sprite("segmented_selected.png" [92 8]);
+    }  
+    
+    .button-middle {
+      background: sprite("segmented_selected.png" repeat-x [8, 1]);
+    }
+  }
 
-/* Active */
-@view(sc-segmented-view) .sc-segment.active {
-  color: #333;
-  text-shadow: 0px 1px 1px white;
-}
+  .sc-segment.sel.sc-first-segment .button-left {
+    background: sprite("segmented_selected.png" [0 8]);  
+  }
 
-@view(sc-segmented-view) .sc-segment.active .button-left {
-  background: sprite("segmented_active.png" [100 8]);
-}
-
-@view(sc-segmented-view) .sc-segment.active .button-right {
-  background: sprite("segmented_active.png" [92 8]);
-}
-
-@view(sc-segmented-view) .sc-segment.active .button-middle {
-  background: sprite("segmented_active.png" repeat-x [8, 1]);
-}
-
-@view(sc-segmented-view) .sc-segment.active.sc-first-segment .button-left {
-  background: sprite("segmented_active.png" [0 8]);  
-}
-
-@view(sc-segmented-view) .sc-segment.active.sc-last-segment .button-right {
-  background: sprite("segmented_active.png" [-8]);
-}
-
-/* Selected */
-@view(sc-segmented-view) .sc-segment.sel {
-  background:none;
-  color: #fff;
-  font-weight:200;
-  text-shadow: 0px -1px 1px rgba(0,0,0,.5);
-}
-
-@view(sc-segmented-view) .sc-segment.sel .button-left {
-  background: sprite("segmented_selected.png" [100 8]);
-}
-
-@view(sc-segmented-view) .sc-segment.sel .button-right {
-  background: sprite("segmented_selected.png" [92 8]);
-}
-
-@view(sc-segmented-view) .sc-segment.sel .button-middle {
-  background: sprite("segmented_selected.png" repeat-x [8, 1]);
-}
-
-@view(sc-segmented-view) .sc-segment.sel.sc-first-segment .button-left {
-  background: sprite("segmented_selected.png" [0 8]);  
-}
-
-@view(sc-segmented-view) .sc-segment.sel.sc-last-segment .button-right {
-  background: sprite("segmented_selected.png" [-8]);
+  .sc-segment.sel.sc-last-segment .button-right {
+    background: sprite("segmented_selected.png" [-8]);
+  }
+  
+  img {
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    left: -2px;
+    margin-right:2px;
+  }
 }
 
 @view(sc-segmented-view).disabled {
