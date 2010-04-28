@@ -303,6 +303,30 @@ test("Adding left accessory view", function() {
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
+test("Adding left accessory view changes style -- using design()", function() {  
+  var view = pane.view('with value');
+  
+  // test adding accessory view adds the view like it should
+  SC.RunLoop.begin();
+  var accessoryView = SC.View.design({
+    layout:  { top:1, left:2, width:16, height:16 }
+  });
+  view.set('leftAccessoryView', accessoryView);
+  SC.RunLoop.end();
+
+  // The hint and padding elements should automatically have their 'left'
+  // values set to the accessory view's offset + width
+  // (18 = 2 left offset + 16 width)
+  var paddingElement = view.$('.padding')[0];
+  ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
+  
+  // Test removing the accessory view.
+  SC.RunLoop.begin();
+  view.set('leftAccessoryView', null);
+  SC.RunLoop.end();
+  ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
+});
+
 test("Adding right accessory view", function() {  
   var view = pane.view('with value');
   
@@ -348,6 +372,31 @@ test("Adding right accessory view", function() {
   ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
 });
 
+test("Adding right accessory view changes style -- using design()", function() {  
+  var view = pane.view('with value');
+  
+  // test adding accessory view adds the view like it should
+  SC.RunLoop.begin();
+  var accessoryView = SC.View.design({
+    layout:  { top:1, right:3, width:17, height:16 }
+  });
+  view.set('rightAccessoryView', accessoryView);
+  SC.RunLoop.end();
+
+  // The hint and padding elements should automatically have their 'right'
+  // values set to the accessory view's offset + width
+  // (20 = 3 right offset + 17 width)
+  var paddingElement = view.$('.padding')[0];
+  ok(paddingElement.style.right === '20px', 'padding element should get 20px right');  
+  
+  // Test removing the accessory view.
+  SC.RunLoop.begin();
+  view.set('rightAccessoryView', null);
+  SC.RunLoop.end();
+  ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
+});
+
+
 test("Adding both left and right accessory views", function() {  
   var view = pane.view('with value');
   
@@ -385,6 +434,41 @@ test("Adding both left and right accessory views", function() {
   view.set('leftAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing both accessory views there should be no child views left');
+  ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
+});
+
+test("Adding both left and right accessory views changes style -- using design()", function() {  
+  var view = pane.view('with value');
+  
+  // test adding accessory view adds the view like it should
+  SC.RunLoop.begin();
+  var leftAccessoryView = SC.View.design({
+    layout:  { top:1, left:2, width:16, height:16 }
+  });
+  view.set('leftAccessoryView', leftAccessoryView);
+  var rightAccessoryView = SC.View.design({
+    layout:  { top:1, right:3, width:17, height:16 }
+  });
+  view.set('rightAccessoryView', rightAccessoryView);
+  SC.RunLoop.end();  
+  
+  // The hint and padding elements should automatically have their 'left' and
+  // 'right' values set to the accessory views' offset + width
+  //   *  left:   18 = 2 left offset + 16 width)
+  //   *  right:  20 = 3 left offset + 17 width)
+  var paddingElement = view.$('.padding')[0];
+  ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
+  ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
+  
+  
+  // Test removing the accessory views.
+  SC.RunLoop.begin();
+  view.set('rightAccessoryView', null);
+  SC.RunLoop.end();
+  ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
+  SC.RunLoop.begin();
+  view.set('leftAccessoryView', null);
+  SC.RunLoop.end();
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
