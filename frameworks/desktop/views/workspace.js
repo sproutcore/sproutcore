@@ -112,18 +112,18 @@ SC.WorkspaceView = SC.View.extend({
     
     var topToolbar = this.get("topToolbar");
     if (topToolbar) {
-      topToolbar = this.topToolbar = this.createChildView(topToolbar);
+      topToolbar = this.topToolbar = this.activeTopToolbar = this.createChildView(topToolbar);
       this.appendChild(topToolbar); 
     }
     
     var bottomToolbar = this.get("bottomToolbar");
     if (bottomToolbar) {
-      bottomToolbar = this.bottomToolbar = this.createChildView(bottomToolbar);
+      bottomToolbar = this.bottomToolbar = this.activeBottomToolbar = this.createChildView(bottomToolbar);
       this.appendChild(bottomToolbar); 
     }
     
     var content = this.get("contentView");
-    content = this.contentView = this.createChildView(content);
+    content = this.contentView = this.activeContentView = this.createChildView(content);
     this.appendChild(content); 
     
     this.invokeOnce("_scws_tile");
@@ -161,6 +161,91 @@ SC.WorkspaceView = SC.View.extend({
       left: 0, right: 0, top: contentTop, bottom: contentBottom
     });
   },
+  
+  /**
+    Returns YES if a top toolbar is present.
+  */
+  hasTopToolbar: function() {
+    if (this.get("topToolbar")) return YES;
+    return NO;    
+  },
+  
+  /**
+    Returns YES if a bottom toolbar is present.
+  */
+  hasBottomToolbar: function() {
+    if (this.get("bottomToolbar")) return YES;
+    return NO;
+  }.observes("bottomToolbar"),
+  
+  /**
+    Called by the individual toolbar/contentView observers at runloop end when the toolbars change.
+  */
+  childDidChange: function() {
+    this._scws_tile();
+  },
+  
+  /**
+    For subclassing, this is the currently displaying top toolbar.
+  */
+  activeTopToolbar: null,
+  
+  /**
+    For subclassing, this is the currently displaying bottom toolbar.
+  */
+  activeBottomToolbar: null,
+  
+  /**
+    For subclassing, this is the currently displaying content view.
+  */
+  activeContentView: null,
+  
+  /**
+    Called when the top toolbar changes. It appends it, removes any old ones, and calls toolbarsDidChange. 
+    
+    You may want to override this if, for instance, you want to add transitions of some sort (should be trivial).
+  */
+  topToolbarDidChange: function() {
+    var active = this.activeTopToolbar, replacement = this.get("topToolbar");
+    if (active) {
+      this.removeChild(active);
+    }
+    if (replacement) {
+      this.appendChild(replacement);
+    }
+    
+    this.activeTopToolbar = replacement;
+    this.invokeLast("childDidChange");
+  }.observes("topToolbar"),
+  
+  bottomToolbarDidChange: function() {
+    var active = this.activeBottomToolbar, replacement = this.get("bottomToolbar");
+    if (active) {
+      this.removeChild(active);
+    }
+    if (replacement) {
+      this.appendChild(replacement);
+    }
+    
+    this.activeBottomToolbar = replacement;
+    this.invokeLast("childDidChange");
+  }.observes("bottomToolbar"),
+  
+  contentViewDidChange: function() {
+    var active = this.activeContentView, replacement = this.get("contentView");
+    if (active) {
+      this.removeChild(active);
+    }
+    if (replacement) {
+      this.appendChild(replacement);
+    }
+    
+    this.activeContentView = replacement;
+    this.invokeLast("childDidChange");
+  }.observes("contentView"),
+  
+  
+  displayProperties: "hasTopToolbar hasBottomToolbar".w(),
   
   /**
     Wow, there is actually a reason to occasionally render the WorkspaceView itself!
