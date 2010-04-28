@@ -17,13 +17,13 @@ SC.browser = (function() {
     opera: (/opera/).test( userAgent ) ? version : 0,
     msie: (/msie/).test( userAgent ) && !(/opera/).test( userAgent ) ? version : 0,
     mozilla: (/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent ) ? version : 0,
-    mobileSafari: (/apple.*mobile.*safari/).test(userAgent) ? version : 0,
+    mobileSafari: (/apple.*mobile/).test(userAgent) ? version : 0,
     chrome: (/chrome/).test( userAgent ) ? version : 0,
     windows: !!(/(windows)/).test(userAgent),
     mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
     language: (navigator.language || navigator.browserLanguage).split('-', 1)[0]
   };
   
-    browser.current = browser.msie ? 'msie' : browser.mozilla ? 'mozilla' : browser.safari ? 'safari' : browser.opera ? 'opera' : 'unknown' ;
+  browser.current = browser.msie ? 'msie' : browser.mozilla ? 'mozilla' : browser.safari ? 'safari' : browser.opera ? 'opera' : 'unknown' ;
   return browser ;
 })();
