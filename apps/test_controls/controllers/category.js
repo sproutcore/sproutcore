@@ -18,7 +18,7 @@ TestControls.categoryController = SC.ObjectController.create(
   
   delayShow: function() {
     // wait a moment before loading to let things finish...
-    this.invokeLater(this.set, 100, "nowShowing", this.get("show") || "welcome");
+    this.invokeLater(this.set, 50, "nowShowing", this.get("show") || "welcome");
     this.hideMasterPicker();
   }.observes("show"),
   
