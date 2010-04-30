@@ -35,13 +35,13 @@
   .button-middle { background: sprite("active_button.png" [8 1] repeat-x); }
 }
 
-@view(sc-button-view).sel {
+@view(sc-button-view).sel, @view(sc-button-view).def {
   .button-left { background: sprite("selected_button.png" [0 8]); }
   .button-right { background: sprite("selected_button.png" [-8]); }
   .button-middle { background: sprite("selected_button.png" [8 1] repeat-x); }
 }
 
-@view(sc-button-view).sel.active {
+@view(sc-button-view).sel.active, @view(sc-button-view).def.active {
   .button-left { background: sprite("selected_active_button.png" [0 8]); }
   .button-right { background: sprite("selected_active_button.png" [-8]); }
   .button-middle { background: sprite("selected_active_button.png" [8 1] repeat-x); }
