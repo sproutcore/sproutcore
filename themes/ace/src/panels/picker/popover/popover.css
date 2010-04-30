@@ -24,6 +24,11 @@
   /* z-index can't go at top--it would interrupt events */
   
   .sc-workspace-overlay {
+    div {
+      /** Give it a webkit transform both for performance and to get around a weird WebKit scroll bug */
+      -webkit-transform: translate3d(0px,0px,0px);
+    }
+    
     position: absolute; left: 0; top: 0; bottom: 0; right: 0;
     /* TOP */
     .top-left-edge {
