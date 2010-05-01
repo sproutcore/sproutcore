@@ -104,9 +104,12 @@ test("basic", function() {
   pane.verifyLabels(view, itemList);
   
   // Modify the items array in place
-  itemList[0] = { title: "Hue", value: "hue", enabled: YES };
-  itemList[1] = { title: "Saturation", value: "saturation" };
-  itemList[2] = { title: "Brightness", value: "brightness"};
+  itemList.replace(0, {title: "Hue", value: "hue", enabled: YES });
+  itemList.replace(1, { title: "Saturation", value: "saturation" });
+  itemList.replace(2, { title: "Brightness", value: "brightness"});
+  
+  // Allow the radio view a chance to update
+  SC.RunLoop.begin().end();
   
   pane.verifyButtons(view, itemList);
   pane.verifyLabels(view, itemList);
@@ -121,9 +124,9 @@ test("basic", function() {
   pane.verifyLabels(view, itemList2);
   
   // Reset the items array before moving on
-  itemList[0] = { title: "Red", value: "red", enabled: YES };
-  itemList[1] = { title: "Green", value: "green" };
-  itemList[2] = { title: "Blue", value: "blue" };
+  itemList.replace(0, { title: "Red", value: "red", enabled: YES });
+  itemList.replace(1, { title: "Green", value: "green" });
+  itemList.replace(2, { title: "Blue", value: "blue" });
 });
 
 
