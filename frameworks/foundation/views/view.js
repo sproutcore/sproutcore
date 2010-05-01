@@ -293,7 +293,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     Detects when the theme changes. Replaces the layer if necessary.
   */
-  themeDidChange: function() {
+  _themeDidChange: function() {
     var theme = this.get("theme");
     if (theme === this._last_theme) return;
     this._last_theme = theme;
