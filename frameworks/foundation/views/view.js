@@ -86,6 +86,11 @@ SC.CONTEXT_MENU_ENABLED = YES;
 */
 SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
 
+/**
+  Tells the property (when fetched with themed()) to get its value from the renderer (if any).
+*/
+SC.FROM_THEME = "__FROM_THEME__"; // doesn't really matter what it is, so long as it is unique. Readability is a plus.
+
 /** @private - custom array used for child views */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
 SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
@@ -299,6 +304,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // notify child views
     if (this._hasCreatedChildViews) this._notifyThemeDidChange();
   }.observes("theme"),
+  
+  /**
+    Like "get", but if the value is SC.FROM_THEME, it will find the value from the view's
+    renderer, if any; if none, then it will look for <property>Default and return that.
+  */
+  themed: function(property) {
+    var val = this.get(property);
+    if (val === SC.FROM_THEME) {
+      if (this.renderer) return this.renderer[property];
+      else return this.get(property + "Default");
+    }
+    return val;
+  },
   
   // ..........................................................
   // IS ENABLED SUPPORT
