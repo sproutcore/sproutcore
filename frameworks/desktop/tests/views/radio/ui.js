@@ -9,7 +9,8 @@
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
-var itemList = [{ title: "Red", value: "red", enabled: YES }, { title: "Green", value: "green" }, { title: "Blue", value: "blue" }];
+var itemList = [{ title: "Red", value: "red", enabled: YES }, { title: "Green", value: "green" }, { title: "Blue", value: "blue" }],
+itemList2 = [{ title: "Cyan", value: "cyan", enabled: YES }, { title: "Magenta", value: "magenta" }, { title: "Yellow", value: "yellow" },{ title: "blacK", value: "black"}];
 
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.RadioView, {
@@ -59,19 +60,9 @@ var pane = SC.ControlTestPane.design()
 
 pane.show(); // add a test to show the test pane
 
-// ..........................................................
-// TEST VIEWS
-// 
-module('SC.RadioView UI');
-
-test("basic", function() {
-  
-  var view = pane.view('basic');
-  
-  ok(!view.$().hasClass('disabled'), 'should not have disabled class');
-  
+pane.verifyButtons = function verifyButtons(view, items) {
   var radioButtons = view.$('.sc-radio-button');
-  equals(radioButtons.length, 3, 'number of radio buttons should be 3');
+  equals(radioButtons.length, items.length, 'number of radio buttons should be %@'.fmt(items.length));
   
   var i = 0;
   radioButtons.forEach(function(radioInput) {
@@ -86,16 +77,53 @@ test("basic", function() {
     
     i++;
   });
-  
+};
+
+pane.verifyLabels = function verifyLabels(view, items) {
   var labels = view.$('span.sc-button-label');
-  equals(labels.length, 3, 'number of labels should be 3');
+  equals(labels.length, items.length, 'number of labels should be %@'.fmt(items.length));
   
   var idx = 0;
   labels.forEach(function(label) {
-    equals(label.innerHTML, itemList[idx].title, 'radio button #%@ should have original label'.fmt(idx));
+    equals(label.innerHTML, items[idx].title, 'radio button #%@ should have original label'.fmt(idx));
     idx++;
   });
+};
+
+// ..........................................................
+// TEST VIEWS
+// 
+module('SC.RadioView UI');
+
+test("basic", function() {
   
+  var view = pane.view('basic');
+  
+  ok(!view.$().hasClass('disabled'), 'should not have disabled class');
+  pane.verifyButtons(view, itemList);
+  pane.verifyLabels(view, itemList);
+  
+  // Modify the items array in place
+  itemList[0] = { title: "Hue", value: "hue", enabled: YES };
+  itemList[1] = { title: "Saturation", value: "saturation" };
+  itemList[2] = { title: "Brightness", value: "brightness"};
+  
+  pane.verifyButtons(view, itemList);
+  pane.verifyLabels(view, itemList);
+  
+  // Swap out the items array
+  view.set('items', itemList2);
+  
+  // Allow the radio view a chance to update
+  SC.RunLoop.begin().end();
+  
+  pane.verifyButtons(view, itemList2);
+  pane.verifyLabels(view, itemList2);
+  
+  // Reset the items array before moving on
+  itemList[0] = { title: "Red", value: "red", enabled: YES };
+  itemList[1] = { title: "Green", value: "green" };
+  itemList[2] = { title: "Blue", value: "blue" };
 });
 
 
