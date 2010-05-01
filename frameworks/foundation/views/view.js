@@ -679,6 +679,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   parentViewDidChange: function() {
     this.recomputeIsVisibleInWindow() ;
     
+    this.resetBuildState();
     this.notifyPropertyChange("baseTheme");
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
@@ -3238,6 +3239,188 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     if (x > 100 || y > 100) return NO;
     return YES;
+  },
+  
+  ///
+  /// BUILDING IN/OUT
+  ///
+  
+  /**
+    Call this to append a child while building it in. If the child is not
+    buildable, this is the same as calling appendChild.
+  */
+  buildInChild: function(view) {
+    view.willBuildInToView(this);
+    this.appendChild(view);
+    view.buildInToView(this);
+  },
+  
+  /**
+    Call to remove a child after building it out. If the child is not buildable,
+    this will simply call removeChild.
+  */
+  buildOutChild: function(view) {
+    view.buildOutFromView(this);
+  },
+  
+  /**
+    Called by child view when build in finishes. By default, does nothing.
+    
+  */
+  buildInDidFinishFor: function(child) {
+  },
+  
+  /**
+    @private
+    Called by child view when build out finishes. By default removes the child view.
+  */
+  buildOutDidFinishFor: function(child) {
+    this.removeChild(child);
+  },
+  
+  /**
+    Whether the view is currently building in.
+  */
+  isBuildingIn: NO,
+  
+  /**
+    Whether the view is currently building out.
+  */
+  isBuildingOut: NO,
+  
+  /**
+    Implement this, and call didFinishBuildIn when you are done.
+  */
+  buildIn: function() {
+    this.buildInDidFinish();
+  },
+  
+  /**
+    Implement this, and call didFinsihBuildOut when you are done.
+  */
+  buildOut: function() {
+    this.buildOutDidFinish();
+  },
+  
+  /**
+    This should reset (without animation) any internal states; sometimes called before.
+    
+    It is usually called before a build in, by the parent view.
+  */
+  resetBuild: function() {
+    
+  },
+  
+  /**
+    Implement this if you need to do anything special when cancelling build out;
+    note that buildIn will subsequently be called, so you usually won't need to do
+    anything.
+    
+    This is basically called whenever build in happens.
+  */
+  buildOutDidCancel: function() {
+    
+  },
+  
+  /**
+    Implement this if you need to do anything special when cancelling build in.
+    You probably won't be able to do anything. I mean, what are you gonna do?
+    
+    If build in was cancelled, it means build out is probably happening. 
+    So, any timers or anything you had going, you can cancel. 
+    Then buildOut will happen.
+  */
+  buildInDidCancel: function() {
+    
+  },
+  
+  /**
+    Call this when you have built in.
+  */
+  buildInDidFinish: function() {
+    this.isBuildingIn = NO;
+    this._buildingInTo.buildInDidFinishFor(this);
+    this._buildingInTo = null;
+  },
+  
+  /**
+    Call this when you have finished building out.
+  */
+  buildOutDidFinish: function() {
+    this.isBuildingOut = NO;
+    this._buildingOutFrom.buildOutDidFinishFor(this);
+    this._buildingOutFrom = null;
+  },
+  
+  /**
+    Usually called by parentViewDidChange, this resets the build state (calling resetBuild in the process).
+  */
+  resetBuildState: function() {
+    if (this.isBuildingIn) {
+      this.buildInDidCancel();
+      this.isBuildingIn = NO;
+    }
+    if (this.isBuildingOut) {
+      this.buildOutDidCancel();
+      this.isBuildingOut = NO;
+    }
+    
+    // finish cleaning up
+    this.buildingInTo = null;
+    this.buildingOutFrom = null;
+    
+    this.resetBuild();
+  },
+  
+  /**
+    @private (semi)
+    Called by building parent view's buildInChild method. This prepares
+    to build in, but unlike buildInToView, this is called _before_ the child
+    is appended.
+    
+    Mostly, this cancels any build out _before_ the view is removed through parent change.
+  */
+  willBuildInToView: function(view) {
+    // stop any current build outs (and if we need to, we also need to build in again)
+    if (this.isBuildingOut) {
+      this.buildOutDidCancel();
+    }
+  },
+  
+  /**
+    @private (semi)
+    Called by building parent view's buildInChild method.
+  */
+  buildInToView: function(view) {
+    // if we are already building in, do nothing.
+    if (this.isBuildingIn) return;
+    
+    this._buildingInTo = view;
+    this.isBuildingOut = NO;
+    this.isBuildingIn = YES;
+    this.buildIn();
+  },
+  
+  /**
+    @private (semi)
+    Called by building parent view's buildOutChild method.
+    
+    The supplied view should always be the parent view.
+  */
+  buildOutFromView: function(view) {
+    // if we are already building out, do nothing.
+    if (this.isBuildingOut) return;
+    
+    // cancel any build ins
+    if (this.isBuildingIn) {
+      this.buildInDidCancel();
+    }
+    
+    // in any case, we need to build out
+    this.isBuildingOut = YES;
+    this.isBuildingIn = NO;
+    this._buildingOutFrom = view;
+    this.buildOut();
   }
 });
 
