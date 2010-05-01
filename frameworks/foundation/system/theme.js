@@ -16,6 +16,11 @@ SC.Theme = SC.Object.extend({
   concatenatedProperties: "classNames".w(),
   
   /**
+    Walks like a duck.
+  */
+  isTheme: YES,
+  
+  /**
     Class names for the theme. All controls using this theme will have these class names
     in their class names; for instance, if the value is ["ace", "light"], all views
     using this theme (including child views of views using this theme) will have class

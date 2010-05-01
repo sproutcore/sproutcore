@@ -303,6 +303,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // notify child views
     if (this._hasCreatedChildViews) this._notifyThemeDidChange();
+    
+    // and now, regenerate renderer
+    this._generateRenderer();
   }.observes("theme"),
   
   /**
@@ -316,6 +319,56 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       else return this.get(property + "Default");
     }
     return val;
+  },
+  
+  /**
+    @private
+    Generates the view's renderer (calling _destroyRenderer on any old ones if needed).
+  */
+  _generateRenderer: function() {
+    var theme = this.get("theme"); // renderers need a theme
+    
+    // reset the renderer (the theme changed, hello!)
+    this._destroyRenderer();
+    
+    // now, if we do have a theme, we can try to create the renderer.
+    if (theme && theme.isTheme && this.createRenderer) {
+      this.renderer = this.createRenderer(theme);
+      
+      // the renderer was not necessarily successfully created.
+      if (this.renderer) {
+        var mixins, idx, len;
+        this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
+        if (mixins = this.createRendererMixin) {
+          len = mixins.length;
+          for (idx = 0; idx < len; idx++) mixins[idx].call(this, theme);
+        }
+      }
+    }
+    
+    // update!
+    this._updateRenderer();
+  },
+  
+  /**
+    @private
+    Updates the view's renderer, if one exists, calling all mixins to renderer as well.
+  */
+  _updateRenderer: function() {
+    var mixins, idx, len;
+    if (this.renderer){
+      this.updateRenderer(this.renderer);
+      if (mixins = this.updateRendererMixin) {
+        len = mixins.length;
+        for (idx = 0; idx < len; idx++) mixins[idx].call(this, this.renderer);
+      }
+    }
+  },
+  
+  _destroyRenderer: function() {
+    if (!this.renderer) return;
+    this.renderer.destroy();
+    this.renderer = null;    
   },
   
   // ..........................................................
@@ -992,16 +1045,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   updateLayer: function(optionalContext) {
-    var mixins, idx, len, renderer;
+    var mixins, idx, len, renderer = this.renderer;
     this.updateViewSettings();
     
-    if (renderer = this.renderer) {
-      this.updateRenderer(renderer); // renderers always update.
-      if (mixins = this.updateRendererMixin) {
-        len = mixins.length;
-        for (idx = 0; idx < len; idx++) mixins[idx].call(this, renderer);
-      }
-    }
+    // make sure to update any renderers
+    this._updateRenderer();
     
     // Now, update using renderer if possible; render() otherwise
     if (!this._useRenderFirst && this.createRenderer) {
@@ -1132,11 +1180,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // layer property to null.
       this._notifyWillDestroyLayer() ;
       
-      // tell the renderer
+      // tell the renderer the layer has gone away
       if (this.renderer) {
         this.renderer.detachLayer();
-        this.renderer.destroy();
-        this.renderer = null;
       }
       
       // do final cleanup
@@ -1213,32 +1259,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.renderViewSettings(context);
     
     /* Now, the actual rendering, which will use a renderer if possible */
-    // even if we don't use the renderer to update, we must make sure we create it if there is one
-    // because inheriting views will build on top of the renderer (even if they don't know it)
+    // the renderer will have been created when the theme was found; if it is around,
+    // we just need to ensure it is up-to-date
     if (this.createRenderer) {
-      // create if needed
-      var theme = this.get("theme"); // renderers need a theme
-      if (!this.renderer && theme) {
-        this.renderer = this.createRenderer(theme);
-        
-        // the renderer was not necessarily successfully created.
-        if (this.renderer) {
-          this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
-          if (mixins = this.createRendererMixin) {
-            len = mixins.length;
-            for (idx = 0; idx < len; idx++) mixins[idx].call(this, theme);
-          }
-        }
-      }
-      
-      // update!
-      if (this.renderer){
-        this.updateRenderer(this.renderer);
-        if (mixins = this.updateRendererMixin) {
-          len = mixins.length;
-          for (idx = 0; idx < len; idx++) mixins[idx].call(this, this.renderer);
-        }
-      }
+      // our private version does mixins too! Yay!
+      this._updateRenderer();
     }
     
     if (!this._useRenderFirst && this.createRenderer) {
