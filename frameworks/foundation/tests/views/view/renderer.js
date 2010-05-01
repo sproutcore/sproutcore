@@ -10,6 +10,7 @@ var testRenderer, rendererView, renderView, replacingRenderView, renderSkipUpdat
 module("SC.View#renderer", {
   setup: function() {
     testRenderer = SC.Renderer.extend({
+      someRenderProperty: 123,
       render: function(context) {
         if (this.contentProvider) this.contentProvider.renderContent(context);
         
@@ -425,3 +426,22 @@ test("test that updateContents with a context but without firstTime works proper
   equals(view.child4.$(".test-4-content").text(), "content-updated", "child view 4 should have updated content");
 });
 
+test("Grab values from renderer.", function() {
+  
+  var view = rendererView.create(), view_ft = rendererView.create({
+    someRenderProperty: SC.FROM_THEME
+  }), 
+  view_def = rendererView.create({
+    someRenderProperty: SC.FROM_THEME,
+    someRenderPropertyDefault: "abc"
+  });
+  
+  view.createLayer();
+  view_def.createLayer();
+  view_ft.createLayer();
+  view_def.renderer = null;
+  
+  equals(view.themed("someRenderProperty"), undefined, "The property should not be defined for this view");
+  equals(view_ft.themed("someRenderProperty"), 123, "This should have fetched from renderer");
+  equals(view_def.themed("someRenderProperty"), "abc", "This should have fetched from default value");
+});
