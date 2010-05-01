@@ -127,9 +127,8 @@ module("SC.View#renderer", {
 // themes may not be loaded in foundation, but we still need to test
 SC.Theme.register("sc-test", SC.Theme.extend({}));
 
-test("calling createLayer calls createRenderer and updateRenderer when createRenderer is present", function() {
+test("creating the view calls createRenderer and updateRenderer when createRenderer is present", function() {
   var view = rendererView.create();
-  view.createLayer();
   ok(view.createRendererWasCalled, "createRenderer was called.");
   ok(view.updateRendererWasCalled, "updateRenderer was called.");
 });
@@ -436,9 +435,6 @@ test("Grab values from renderer.", function() {
     someRenderPropertyDefault: "abc"
   });
   
-  view.createLayer();
-  view_def.createLayer();
-  view_ft.createLayer();
   view_def.renderer = null;
   
   equals(view.themed("someRenderProperty"), undefined, "The property should not be defined for this view");
