@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since Quilmes
 */
-require("theme");
-SC.EmptyTheme.renderers.Label = SC.Renderer.extend({
+sc_require("renderers/renderer");
+SC.BaseTheme.renderers.Label = SC.Renderer.extend({
   init: function(attrs) {
     this.titleRenderer = this.theme.title();
     this.controlRenderer = this.theme.control();
@@ -85,4 +85,4 @@ SC.EmptyTheme.renderers.Label = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.label = SC.EmptyTheme.renderers.Label.create();
+SC.BaseTheme.renderers.label = SC.BaseTheme.renderers.Label.create();

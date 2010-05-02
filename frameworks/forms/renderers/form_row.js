@@ -9,10 +9,10 @@
   @extends SC.Renderer
   @since Quilmes
 */
-require("theme");
-SC.EmptyTheme.renderers.Form = SC.Renderer.extend({
-  formFlowSpacing: { left: 5, top: 5, bottom: 5, right: 5 },
-  
+
+SC.BaseTheme.renderers.FormRow = SC.Renderer.extend({
+  rowFlowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
+  rowFlowPadding: { left: 0, right: 0 , bottom: 0, top: 0 },
   render: function(context) {
     if (this.contentProvider) this.contentProvider.renderContent(context);
   },
@@ -21,4 +21,4 @@ SC.EmptyTheme.renderers.Form = SC.Renderer.extend({
     
   }
 });
-SC.EmptyTheme.renderers.form = SC.EmptyTheme.renderers.Form.create();
+SC.BaseTheme.renderers.formRow = SC.BaseTheme.renderers.FormRow.create();

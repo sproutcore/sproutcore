@@ -10,8 +10,7 @@
   @since SproutCore 1.1
 */
 
-require("theme");
-SC.EmptyTheme.renderers.Picker = SC.Renderer.extend({
+SC.BaseTheme.renderers.Picker = SC.Renderer.extend({
   init: function(attr) {
     this.attr(attr);
     
@@ -48,4 +47,4 @@ SC.EmptyTheme.renderers.Picker = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.picker = SC.EmptyTheme.renderers.Picker.create();
+SC.BaseTheme.renderers.picker = SC.BaseTheme.renderers.Picker.create();

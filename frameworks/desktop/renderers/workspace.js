@@ -9,26 +9,14 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Panel = SC.Renderer.extend({
+
+SC.BaseTheme.renderers.Workspace = SC.Renderer.extend({
   render: function(context) {
     if (this.contentProvider) this.contentProvider.renderContent(context);
-    context.push(
-      "<div class='middle'></div>",
-      "<div class='top-left-edge'></div>",
-      "<div class='top-edge'></div>",
-      "<div class='top-right-edge'></div>",
-      "<div class='right-edge'></div>",
-      "<div class='bottom-right-edge'></div>",
-      "<div class='bottom-edge'></div>",
-      "<div class='bottom-left-edge'></div>",
-      "<div class='left-edge'></div>"
-    );
   },
   
   update: function() {
-    // we NEVER update child views. They get to do that on their own.
   }
 });
 
-SC.EmptyTheme.renderers.panel = SC.EmptyTheme.renderers.Panel.create();
+SC.BaseTheme.renderers.workspace = SC.BaseTheme.renderers.Workspace.create();

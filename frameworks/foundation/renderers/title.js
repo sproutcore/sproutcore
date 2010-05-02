@@ -9,8 +9,9 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
+
+sc_require("renderers/renderer");
+SC.BaseTheme.renderers.Title = SC.Renderer.extend({
   render: function(context) {
     var icon = this.icon,
         image = '',
@@ -101,4 +102,4 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.title = SC.EmptyTheme.renderers.Title.create();
+SC.BaseTheme.renderers.title = SC.BaseTheme.renderers.Title.create();

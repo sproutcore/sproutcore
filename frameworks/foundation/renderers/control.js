@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Control = SC.Renderer.extend({
+sc_require("renderers/renderer");
+SC.BaseTheme.renderers.Control = SC.Renderer.extend({
   /**
     Returns the control size for a given numeric size.
   */
@@ -119,4 +119,4 @@ SC.EmptyTheme.renderers.Control = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.control = SC.EmptyTheme.renderers.Control.create();
+SC.BaseTheme.renderers.control = SC.BaseTheme.renderers.Control.create();

@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Image = SC.Renderer.extend({
+sc_require("renderers/renderer");
+SC.BaseTheme.renderers.Image = SC.Renderer.extend({
   render: function(context) {
     var src = this.src, toolTip = this.toolTip || '', image = '';
     
@@ -48,4 +48,4 @@ SC.EmptyTheme.renderers.Image = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.image = SC.EmptyTheme.renderers.Image.create();
+SC.BaseTheme.renderers.image = SC.BaseTheme.renderers.Image.create();
