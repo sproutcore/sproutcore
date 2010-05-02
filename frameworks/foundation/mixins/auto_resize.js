@@ -40,7 +40,7 @@ SC.AutoResize = {
     
     // return if there wasn't one (no font sizes, etc. to use with measuring)
     if (!layer) return;
-    
+     
     // get metrics, using layer as example element
     var metrics = SC.metricsForString(this.get(this.get("autoResizeField")), layer);
     
@@ -65,11 +65,11 @@ SC.AutoResize = {
   // which would not be great for performance.
   didAppendToDocument: function(){
     sc_super(); // just in case
-    this.measureSize();
+    this.invokeLast("measureSize");
   },
   
   didCreateLayer: function() {
     sc_super();
-    this.measureSize();
+    this.invokeLast("measureSize");
   }
 };
