@@ -16,7 +16,20 @@ require("mixins/edit_mode");
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
   flowSize: { widthPercentage: 1 },
-  defaultFlowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
+
+  rowFlowSpacing: SC.FROM_THEME,
+  rowFlowSpacingDefault: { right: 15, left: 0, top: 0, bottom: 0 },
+  
+  rowFlowPadding: SC.FROM_THEME,
+  rowFlowPaddingDefault: { right: 0, left: 0, top: 0, bottom: 0 },
+  
+  defaultFlowSpacing: function() {
+    return this.themed("rowFlowSpacing");
+  }.property("rowFlowSpacing", "theme"),
+  
+  flowPadding: function() {
+    return this.themed("rowFlowPadding");
+  }.property("rowFlowPadding", "theme"),
   
   classNames: ["sc-form-row-view"],
   
@@ -128,31 +141,40 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
   },
   
   rowLabelSizeDidChange: function() {
-    this.get("labelView").adjust("width", this.get("rowLabelSize"));
-  }.observes("rowLabelSize")
+    this.get("labelView").adjust({
+      "width": this.get("rowLabelSize")
+    });
+  }.observes("rowLabelSize"),
   
   
+  //
+  // RENDERING
+  //
+  createRenderer: function(t) { return t.formRow(); },
+  updateRenderer: function(r) {}
   
 });
 
 SC.FormRowView.mixin({
-	row: function(label, fieldType)
+	row: function(label, fieldType, ext)
 	{
-	  if (!fieldType) {
+	  if (label.isClass) {
+	    ext = fieldType;
 	    fieldType = label;
 	    label = null;
 	  }
 		// now, create a hash (will be used by the parent form's exampleRow)
-		return {
-		  label: label,
-		  childViews: "_singleField".w(),
-		  _singleField: fieldType
-		};
+		if (!ext) ext = {};
+		ext.label = label;
+		ext.childViews = ["_singleField"];
+		ext._singleField = fieldType;
+		return ext;
 	},
 	
 	LabelView: SC.LabelView.extend(SC.AutoResize, {
 	  shouldAutoResize: NO, // only change the measuredSize so we can update.
 	  layout: { left:0, top:0, width: 0, height: 18 },
+	  fillHeight: YES,
 	  classNames: ["sc-form-label"]
 	})
 });
