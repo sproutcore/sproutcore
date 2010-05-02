@@ -293,50 +293,19 @@ SC.LabelView = SC.View.extend(SC.Control,
   
   _TEMPORARY_CLASS_HASH: {},
   
-  render: function(context, firstTime) {
-    var value = this.get('displayValue'),
-        icon = this.get('icon'),
-        hint = this.get('hintValue'),
-        classes, stylesHash, text,
-        iconChanged = false, textChanged = false;
-    
-    if (icon) {
-      var url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL,
-          className = (url === icon) ? '' : icon ;
-      icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
-      if(icon!==this._iconCache) {
-        this._iconCache=icon;
-        iconChanged = true;
-      }
-    }
-    
-    if (hint && (!value || value === '')) {
-      text = '<span class="sc-hint">'+hint+'</span>';
-    }else{
-      text = value;
-    }
-    if(text!==this._textCache) {
-      this._textCache=text;
-      textChanged = true;
-    }
-        
-    if(firstTime || textChanged || iconChanged){
-      context.push(icon, text);
-    }
-    
-    // and setup alignment and font-weight on styles
-    stylesHash = { 
-      'text-align': this.get('textAlign'), 
-      'font-weight': this.get('fontWeight')
-    };
-           
-    // if we are editing, set the opacity to 0
-    if (this.get('isEditing')) stylesHash['opacity']=0;
-    context.addStyle(stylesHash);
-    
-    classes = this._TEMPORARY_CLASS_HASH;
-    classes.icon = !!this.get('icon');
-    context.setClass(classes);
-  }
+  createRenderer: function(t) {
+    return t.label();
+  },
   
+  updateRenderer: function(r) {
+    r.attr({
+      "value": this.get("displayValue"),
+      "icon": this.get("icon"),
+      "hint": this.get("hint"),
+      "escapeHTML": this.get("escapeHTML"),
+      "isEditing": this.get("isEditing"),
+      "textAlign": this.get("textAlign"),
+      "fontWeight": this.get("fontWeight")
+    });
+  }  
 });
