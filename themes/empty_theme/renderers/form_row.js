@@ -12,6 +12,7 @@
 require("theme");
 SC.EmptyTheme.renderers.FormRow = SC.Renderer.extend({
   rowFlowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
+  rowFlowPadding: { left: 0, right: 0 , bottom: 0, top: 0 },
   render: function(context) {
     if (this.contentProvider) this.contentProvider.renderContent(context);
   },
