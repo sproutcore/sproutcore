@@ -227,6 +227,10 @@ SC.FlowedLayout = {
         y = itemOffset + padding.top;
       }
       
+      // handle auto size
+      if (item.get("fillHeight") && secondary === "top") item._scfl_cachedFlowSize["height"] = rowSize;
+      if (item.get("fillWidth") && secondary === "left") item._scfl_cachedFlowSize["width"] = rowSize;
+      
       // update offset
       if (item.get("isSpacer")) {
         // the cached size is the minimum size for the spacer
@@ -403,7 +407,7 @@ SC.FlowedLayout = {
   
   destroyMixin: function() {
     var isObserving = this._scfl_isObserving || SC.CoreSet.create();
-    for (idx in isObserving) {
+    for (var idx in isObserving) {
       this._scfl_unobserveChild(isObserving[idx]);
     }
   }
