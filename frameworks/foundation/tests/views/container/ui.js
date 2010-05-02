@@ -57,7 +57,8 @@
     ok(!view.$().hasClass('disabled'), 'should not have disabled class');
     ok(!view.$().hasClass('sel'), 'should not have sel class');
     
-    // var contentView = view.get('contentView') ;
+    var contentView = view.get('contentView') ;
+    
     // ok(contentView.kindOf(SC.ContainerView), 'default contentView is an SC.ContainerView');
     // ok(contentView.get('contentView') === null, 'default contentView should have no contentView itself');
   });
@@ -79,5 +80,36 @@
   //    ok(view.itemViewAtContentIndex(0).$().hasClass('sc-collection-item'), 'should have sc-collection-item class');
   //    ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
   //   });
+
+  test("changing nowShowing", function() {
+    var view = pane.view('basic');
+    // Set nowShowing to an instantiated object.
+    var viewToAdd = SC.LabelView.create({value = 'Test view.'});
+    view.set('nowShowing', viewToAdd);
+    ok(view.get('contentView') instanceof SC.View, 'contentView changes as intended when an instantiated view is passed to nowShowing');
+    
+    // Set nowShowing to an uninstantiated object.
+    var viewToAdd = SC.LabelView.design({value = 'Test view.'});
+    view.set('nowShowing', viewToAdd);
+    ok(view.get('contentView') instanceof SC.View, 'contentView changes as intended when an uninstantiated view (class) is passed to nowShowing');
+    
+    // Set nowShowing to a non-view object.
+    var viewToAdd = SC.Record;
+    view.set('nowShowing', viewToAdd);
+    ok(SC.typeOf(view.get('contentView')) === SC.T_NULL, 'contentView changes to null when nowShowing is set to a non-view');
+    
+    // Set nowShowing to a string.  (How, here?) (No idea.)
+    
+    // Set nowShowing to a nonexistent string.
+    var viewToAdd = 'NonexistentNamespace.NonexistentViewClass';
+    view.set('nowShowing', viewToAdd);
+    ok(SC.typeOf(view.get('contentView')) === SC.T_NULL, 'contentView changes to null when nowShowing is set to a string pointing at nothing');
+    
+    // Set nowShowing to null.
+    var viewToAdd = null;
+    view.set('nowShowing', viewToAdd);
+    ok(SC.typeOf(view.get('contentView')) === SC.T_NULL, 'contentView changes to null when nowShowing is set to null');
+    
+  });
 
 })();
