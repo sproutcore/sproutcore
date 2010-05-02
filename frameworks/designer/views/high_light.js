@@ -6,7 +6,7 @@
   This View is used by Greenhouse when application is in design mode
   It darkens the area around the rootDesigner
 */
-SC.RootDesignerHighLight = SC.View.extend(
+SC.RootDesignerHighLightView = SC.View.extend(
 /** @scope SC.RootDesignerHighLight.prototype */ {
 
   /**
@@ -27,45 +27,42 @@ SC.RootDesignerHighLight = SC.View.extend(
       .begin('div').classNames(['right', 'cover']).addStyle({left: targetFrame.x + targetFrame.width, right:0, top: targetFrame.y, height: targetFrame.height}).end();
     }
     
-  },
+  }
 
   // ..........................................................
   // EVENT HANDLING
   // 
   
-  mouseDown: function(evt){
-    return this._handle_click_event(evt);
-  },
-  
-  mouseUp: function(evt) {
-    return this._handle_click_event(evt);
-  },
-  
-  mouseMoved: function(evt) {
-    return this._handle_click_event(evt);
-  },
-  
-  mouseDragged: function(evt) {
-    return this._handle_click_event(evt);
-  },
-  
-  clickInside: function(frame, evt) {
-    return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
-  },
-  
-  _handle_click_event: function(evt) {
-    var d = this.designer,
-        targetFrame = this.get('targetFrame');    
-    if(this.clickInside(targetFrame, evt) && d){
-      return (d && d.mouseDown) ? d.mouseDown(evt) : null;
-    }
-    else if(d){
-      d.resignRootDesigner();
-      return YES;
-    }
-    else{
-      return NO;
-    }
-  }
+  // mouseDown: function(evt){
+  //   return this._handle_click_event(evt);
+  // },
+  // 
+  // mouseUp: function(evt) {
+  //   return this._handle_click_event(evt);
+  // },
+  // 
+  // mouseMoved: function(evt) {
+  //   return this._handle_click_event(evt);
+  // },
+  // 
+  // mouseDragged: function(evt) {
+  //   return this._handle_click_event(evt);
+  // },
+  // 
+  // 
+  // _handle_click_event: function(evt) {
+  //   var d = this.designer,
+  //       targetFrame = this.get('targetFrame');    
+  //   if(this.clickInside(targetFrame, evt) && d){
+  //     return (d && d.mouseDown) ? d.mouseDown(evt) : null;
+  //   }
+  //   else if(d){
+  //     d.resignRootDesigner();
+  //     return YES;
+  //   }
+  //   else{
+  //     return NO;
+  //   }
+  // }
   
 });

@@ -5,7 +5,7 @@
 // ========================================================================
 
 /*global ViewBuilder */
-
+sc_require('views/high_light');
 /** @class
 
   A Designer class provides the core editing functionality you need to edit
@@ -631,7 +631,7 @@ SC.ViewDesigner = SC.Object.extend(
     if (isRoot && this.get('designIsEnabled')) {
       
       if (!highLight) {
-        highLight = this._highLight = SC.RootDesignerHighLight.create({ 
+        highLight = this._highLight = SC.RootDesignerHighLightView.create({ 
           designer: this 
         });
       }
@@ -654,6 +654,15 @@ SC.ViewDesigner = SC.Object.extend(
     }
   },
   
+  shouldReleaseRootDesigner: function(evt){
+    var frame = this.view.get('frame');
+    if(this.get('isRootDesigner') && !SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame)){
+      this.resignRootDesigner();
+      return YES;
+    }
+    return NO;
+  },
+  
   // ..........................................................
   // MOUSE HANDLING
   // 
@@ -665,6 +674,7 @@ SC.ViewDesigner = SC.Object.extend(
     selection.  Otherwise just save starting info for dragging
   */
   mouseDown: function(evt) {
+    this.shouldReleaseRootDesigner(evt);
     if (!this.get('designIsEnabled') || !this.get('parentDesignerIsRoot')) return NO ;
     
     // save mouse down info
