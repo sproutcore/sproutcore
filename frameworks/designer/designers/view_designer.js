@@ -473,6 +473,17 @@ SC.ViewDesigner = SC.Object.extend(
   */
   awakeDesign: function() {},
   
+  
+  /**
+    over-ride this method in your designers to customies drop operations
+    default just calls appendChild
+    
+    TODO: Come up with a better name for this method.
+  */
+  addView: function(view){
+    this.view.appendChild(view);
+  },
+  
   // ..........................................................
   // VIEW RELAYING
   // 
@@ -1021,7 +1032,7 @@ SC.ViewDesigner = SC.Object.extend(
   },
   
   // ..........................................................
-  // Drag data source
+  // Drag data source (for binding lines)
   //   
   /**
     This method must be overridden for drag operations to be allowed. 
