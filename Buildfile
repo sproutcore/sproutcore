@@ -62,7 +62,7 @@ end
 # CONFIGURE THEMES
 config :empty_theme, 
   :theme_name => 'empty-theme',
-  :test_required  => ['sproutcore/testing'],
+  :test_required  => ['sproutcore/foundation', 'sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
 config :iphone_theme, 
