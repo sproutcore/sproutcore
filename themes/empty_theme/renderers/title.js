@@ -13,8 +13,9 @@ require("theme");
 SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
   render: function(context) {
     var icon = this.icon,
-        image = '' ,
-        title = this.title ,
+        image = '',
+        title = this.title,
+        hint = this.hint,
         needsTitle = (!SC.none(title) && title.length>0), imgTitle;
     if(this.escapeHTML) title = SC.RenderContext.escapeHTML(title) ;
         
@@ -32,11 +33,17 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
       }
       needsTitle = YES ;
     }
+    
+    if (hint && (!title || title === '')) {
+      if (this.escapeHTML) hint = SC.RenderContext.escapeHTML(hint);
+      title = "<span class='sc-hint'>" + hint + "</span>";
+    }
+    
     imgTitle = image + title;
     
     // handle ellipsis
     if(this.needsEllipsis){
-      context.addClass('sc-button-label');
+      context.addClass('ellipsis');
     }
     
     // push title.
@@ -49,6 +56,7 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
     var icon = this.icon,
         image = '' ,
         title = this.title ,
+        hint = this.hint,
         needsTitle = (!SC.none(title) && title.length>0), imgTitle,
         elem, htmlNode;
     if(this.escapeHTML) title = SC.RenderContext.escapeHTML(title);
@@ -63,6 +71,12 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
       }
       needsTitle = YES ;
     }
+    
+    if (hint && (!title || title === '')) {
+      if (this.escapeHTML) hint = SC.RenderContext.escapeHTML(hint);
+      title = "<span class='sc-hint'>" + hint + "</span>";
+    }
+    
     imgTitle = image + title;
     
     elem = this.$();  
