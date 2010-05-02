@@ -50,7 +50,12 @@ require("views/form_row");
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_HORIZONTAL, canWrap: YES,
   
-  defaultFlowSpacing: { left: 5, top: 5, bottom: 5, right: 5 },
+  formFlowSpacing: SC.FROM_THEME,
+  formFlowSpacingDefault: { left: 5, top: 5, bottom: 5, right: 5 },
+  
+  defaultFlowSpacing: function() {
+    return this.themed("formFlowSpacing");
+  }.property("formFlowSpacing", "theme"),
   
   classNames: ["sc-form-view"],
 
@@ -208,7 +213,14 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
   */
   rowLabelMeasuredSizeDidChange: function(row, labelSize) {
     this.invokeOnce("recalculateLabelWidth");
-  }
+  },
+  
+  
+  //
+  // RENDERING
+  //
+  createRenderer: function(t) { return t.form(); },
+  updateRenderer: function(r) {}
 });
 
 SC.mixin(SC.FormView, {
@@ -219,10 +231,12 @@ SC.mixin(SC.FormView, {
   a field with the properties, and puts it in a new row;
   and row(properties), which creates a new row—and it is up to you to add
   any fields you want in the row.
+  
+  You can also supply some properties to extend the row itself with.
   */
-  row: function(optionalClass, properties)
+  row: function(optionalClass, properties, rowExt)
   {
-    return SC.FormRowView.row(optionalClass, properties);
+    return SC.FormRowView.row(optionalClass, properties, rowExt);
   },
 
   /**
