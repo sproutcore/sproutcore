@@ -1,25 +1,33 @@
 /*globals TestControls Forms*/
 TestControls.textFieldPage = SC.View.design({
   childViews: "form".w(),
-  form: SC.FormView.design({
-    classNames: ["sample_controls"],
-    layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    childViews: "header normal disabled".w(),
+  form: SC.ScrollView.design({
     
-    header: SC.LabelView.design({
-      classNames: "header".w(),
-      value: "Text Fields"
-    }),
     
-    normal: SC.FormView.row(SC.TextFieldView.design({
-      layout: { left: 0, width: 150, height: 24, centerY: 0},
-      value: "Text"
-    })),
+    contentView: SC.FormView.design({
+      theme: "iphone-form",
     
-    disabled: SC.FormView.row(SC.TextFieldView.design({
-      layout: { left: 0, width: 150, height: 24, centerY: 0},
-      isEnabled: NO,
-      value: "Disabled"
-    }))
+      classNames: ["sample_controls"],
+      layout: { left: 20, top: 40, right: 20, bottom: 40 },
+      childViews: "header normal disabled".w(),
+    
+      header: SC.LabelView.design({
+        layout: { width: 200, height: 44 },
+        classNames: "header".w(),
+        value: "Text Fields"
+      }),
+    
+      normal: SC.FormView.row(SC.TextFieldView.design({
+        layout: { left: 0, width: 150, height: 44, centerY: 0},
+        value: "Text",
+        isSpacer: YES
+      }), { classNames: ["first"] }),
+    
+      disabled: SC.FormView.row(SC.TextFieldView.design({
+        layout: { left: 0, width: 150, height: 44, centerY: 0},
+        isEnabled: NO,
+        value: "Disabled"
+      }))
+    })
   })
 });
