@@ -114,7 +114,7 @@ SC.ContainerView = SC.View.extend(
     
     // If it's an uninstantiated view, then attempt to instantiate it.
     // (Uninstantiated views have a create() method; instantiated ones do not.)
-    if (content && SC.typeOf(content.create) === SC.T_FUNCTION) content = content.create();
+    if (SC.typeOf(content) === SC.T_CLASS) content = content.create();
     
     // If content has not been turned into a view by now, it's hopeless.
     if (content && !(content instanceof SC.View)) content = null;
