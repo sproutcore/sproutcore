@@ -5,6 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+// technically, _we_ don't need it. But the individual renderers that sc_require this
+// DO need it.
+sc_require("system/theme");
+
 /** @class
   Handles rendering for a view.
   

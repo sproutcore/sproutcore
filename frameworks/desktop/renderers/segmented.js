@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Segmented = SC.Renderer.extend({
+
+SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
   init: function(attrs) {
     this._segments = [];
     this.attr(attrs);
@@ -135,4 +135,4 @@ SC.EmptyTheme.renderers.Segmented = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.segmented = SC.EmptyTheme.renderers.Segmented.create();
+SC.BaseTheme.renderers.segmented = SC.BaseTheme.renderers.Segmented.create();

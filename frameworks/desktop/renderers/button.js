@@ -9,8 +9,7 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
+SC.BaseTheme.renderers.Button = SC.Renderer.extend({
   controlSizeArray: [18, 24, 30, 44], // pre-create for performance (purely optional optimization)
   controlSizes: {
     18: SC.SMALL_CONTROL_SIZE,
@@ -145,4 +144,4 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.button = SC.EmptyTheme.renderers.Button.create();
+SC.BaseTheme.renderers.button = SC.BaseTheme.renderers.Button.create();

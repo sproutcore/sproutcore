@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Checkbox = SC.Renderer.extend({
+
+SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
   controlSizeArray: [14, 16], // pre-create for performance (purely optional optimization)
   controlSizes: {
     14: SC.SMALL_CONTROL_SIZE,
@@ -96,4 +96,4 @@ SC.EmptyTheme.renderers.Checkbox = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.checkbox = SC.EmptyTheme.renderers.Checkbox.create();
+SC.BaseTheme.renderers.checkbox = SC.BaseTheme.renderers.Checkbox.create();

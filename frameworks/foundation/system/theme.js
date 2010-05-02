@@ -99,3 +99,10 @@ SC.mixin(SC.Theme, {
     return t;
   }
 });
+
+// SproutCore _always_ has its base theme (worst case scenario, eh?)
+SC.BaseTheme = SC.Theme.extend({
+  classNames: []
+});
+
+SC.Theme.register("sc-base", SC.BaseTheme);

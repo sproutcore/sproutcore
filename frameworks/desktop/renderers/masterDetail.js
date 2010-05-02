@@ -10,8 +10,8 @@
   @since SproutCore 1.1
 */
 
-require("theme");
-SC.EmptyTheme.renderers.Workspace = SC.Renderer.extend({
+SC.BaseTheme.renderers.MasterDetail = SC.Renderer.extend({
+  BORDER: 1,
   render: function(context) {
     if (this.contentProvider) this.contentProvider.renderContent(context);
   },
@@ -20,4 +20,4 @@ SC.EmptyTheme.renderers.Workspace = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.workspace = SC.EmptyTheme.renderers.Workspace.create();
+SC.BaseTheme.renderers.masterDetail = SC.BaseTheme.renderers.MasterDetail.create();

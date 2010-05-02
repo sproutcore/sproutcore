@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-require("theme");
-SC.EmptyTheme.renderers.Segment = SC.Renderer.extend({
+
+SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
   init: function(settings) {
     this._buttonRenderer = this.theme.button();
     this.attr(settings);
@@ -75,4 +75,4 @@ SC.EmptyTheme.renderers.Segment = SC.Renderer.extend({
   }
 });
 
-SC.EmptyTheme.renderers.segment = SC.EmptyTheme.renderers.Segment.create();
+SC.BaseTheme.renderers.segment = SC.BaseTheme.renderers.Segment.create();
