@@ -971,9 +971,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
   
-    cursor = this.get('cursor') ;
-    if (cursor) context.addClass(cursor.get('className')) ;
-  
+    // Sets cursor class, if present.
+    cursor = this.get('cursor');
+    if (!cursor) {
+      // Forces cursor inheritence if available.
+      this.set('cursor', this.getPath('parentView.cursor'));
+      cursor = this.get('cursor');
+    }
+    if (SC.typeOf(cursor) === SC.T_STRING) cursor = SC.objectForPropertyPath(cursor);
+    if (cursor instanceof SC.Cursor) context.addClass(cursor.get('className'));
+    
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
     this.render(context, firstTime) ;
