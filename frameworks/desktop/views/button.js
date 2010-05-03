@@ -73,6 +73,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       true no matter the previous value.
     - *SC.TOGGLE_OFF_BEHAVIOR* Pressing the button will set the current state to 
       false no matter the previous value.
+    - *SC.HOLD_BEHAVIOR* Pressing the button will cause the action to repeat at a
+      regular interval specifed by 'holdInterval'
       
     @property {String}
   */
