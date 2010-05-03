@@ -648,9 +648,9 @@ SC.ViewDesigner = SC.Object.extend(
       }
       
       var parent = this.view.get('parentView');
-
-      if (!highLight.get('parentView') !== parent) parent.appendChild(highLight);
       highLight.set('targetFrame', this.view.get('frame'));
+  
+      if (!highLight.get('parentView') !== parent) parent.appendChild(highLight);
     } 
     else if (highLight) {
       if (highLight.get('parentView')) highLight.removeFromParent();

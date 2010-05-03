@@ -19,13 +19,11 @@ SC.RootDesignerHighLightView = SC.View.extend(
   render: function(context, firstTime) {
     var targetFrame = this.get('targetFrame');
     // render shadows
-    if (firstTime){
-      context
-      .begin('div').classNames(['top', 'cover']).addStyle({top: 0, height: targetFrame.y, left:0, right: 0}).end()
-      .begin('div').classNames(['bottom', 'cover']).addStyle({top: targetFrame.y + targetFrame.height, bottom:0, left: 0, right:0}).end()
-      .begin('div').classNames(['left', 'cover']).addStyle({left: 0, width: targetFrame.x, top: targetFrame.y, height: targetFrame.height}).end()
-      .begin('div').classNames(['right', 'cover']).addStyle({left: targetFrame.x + targetFrame.width, right:0, top: targetFrame.y, height: targetFrame.height}).end();
-    }
+    context
+    .begin('div').classNames(['top', 'cover']).addStyle({top: 0, height: targetFrame.y, left:0, right: 0}).end()
+    .begin('div').classNames(['bottom', 'cover']).addStyle({top: targetFrame.y + targetFrame.height, bottom:0, left: 0, right:0}).end()
+    .begin('div').classNames(['left', 'cover']).addStyle({left: 0, width: targetFrame.x, top: targetFrame.y, height: targetFrame.height}).end()
+    .begin('div').classNames(['right', 'cover']).addStyle({left: targetFrame.x + targetFrame.width, right:0, top: targetFrame.y, height: targetFrame.height}).end();
     
   }
 
