@@ -337,8 +337,7 @@ SC.Animatable = {
   styleDidChange: function() {
     this.invokeLast("updateStyle");
   }, // observer set up manually in initMixin to allow live mixins
-
-
+  
   /**
     Since transforms can only be animated singly, we don't accelerate the layer unless
     top and left transitions have the same duration.
