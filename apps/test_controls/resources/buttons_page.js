@@ -5,6 +5,7 @@ TestControls.buttonsPage = SC.View.design({
     delaysContentTouches: NO,
     
     contentView: SC.FormView.design({
+      labelWidth: 100,
       flowPadding: { left: 20, top: 10, bottom: 40, right: 20 },
       classNames: ["sample_controls"],
       childViews: "header small normal huge jumbo smallToggle normalToggle hugeToggle jumboToggle disabledSmall disabledNormal disabledHuge disabledJumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
