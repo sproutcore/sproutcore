@@ -894,9 +894,10 @@ SC.RootResponder = SC.Object.extend({
     The touch responder for any given touch is the view which will receive touch events
     for that touch. Quite simple.
 
-    makeTouchResponder takes a potential responder as an argument, and, by calling touchStart on each
-    nextResponder, finds the actual responder. As a side-effect of how it does this, touchStart is called
-    on the new responder before touchCancelled is called on the old one (touchStart has to accept the touch
+    By default, makeTouchResponder takes the supplied responder and just uses it. However, if upViewChain
+    is supplied and is YES, makeTouchResponder takes a potential responder as an argument, and, by calling 
+    touchStart on each nextResponder, finds the actual responder. As a side-effect of how it does this, touchStart 
+    is called on the new responder before touchCancelled is called on the old one (touchStart has to accept the touch
     before it can be considered cancelled).
 
     You usually don't have to think about this at all. However, if you don't want your view to,
@@ -928,7 +929,7 @@ SC.RootResponder = SC.Object.extend({
     makeTouchResponder is called with an event object. However, it usually triggers custom touchStart/touchCancelled
     events on the views. The event object is passed so that functions such as stopPropagation may be called.
   */
-  makeTouchResponder: function(touch, responder, shouldStack) {
+  makeTouchResponder: function(touch, responder, shouldStack, upViewChain) {
     var stack = touch.touchResponders, touchesForView;
 
     // find the actual responder (if any, I suppose)
@@ -946,12 +947,22 @@ SC.RootResponder = SC.Object.extend({
     // if the responder is not already in the stack...
     
     if (stack.indexOf(responder) < 0) {
-      // if we found a valid pane, send the event to it
-      try {
-        responder = (pane) ? pane.sendEvent("touchStart", touch, responder) : null ;
-      } catch (e) {
-        SC.Logger.error("Error in touchStart: " + e);
-        responder = null;
+      // if we need to go up the view chain, do so
+      if (upViewChain) {
+        // if we found a valid pane, send the event to it
+        try {
+          responder = (pane) ? pane.sendEvent("touchStart", touch, responder) : null ;
+        } catch (e) {
+          SC.Logger.error("Error in touchStart: " + e);
+          responder = null;
+        }
+      } else {
+        
+        if ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch) {
+          if (!responder.touchStart(touch)) responder = null;
+        } else {
+          // do nothing; the responder is the responder, and may stay the responder, and all will be fine
+        }
       }
     }
 
@@ -972,8 +983,8 @@ SC.RootResponder = SC.Object.extend({
         touchesForView = this.touchesForView(last); // won't even exist if there are no touches
 
         // send touchCancelled (or, don't, if the view doesn't accept multitouch and it is not the last touch)
-        if (last.get("acceptsMultitouch") || !touchesForView) {
-          last.tryToPerform("touchCancelled", touch);
+        if ((last.get ? last.get("acceptsMultitouch") : last.acceptsMultitouch) || !touchesForView) {
+          if (last.touchCancelled) last.touchCancelled(touch);
         }
 
         // go to next (if < 0, it will be undefined, so lovely)
@@ -1042,7 +1053,7 @@ SC.RootResponder = SC.Object.extend({
         if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('   -- Making %@ touch responder because it returns YES to captureTouch'.fmt(view.toString()));
 
         // if so, make it the touch's responder
-        this.makeTouchResponder(touch, view, shouldStack); // triggers touchStart/Cancel/etc. event.
+        this.makeTouchResponder(touch, view, shouldStack, YES); // triggers touchStart/Cancel/etc. event.
         return; // and that's all we need
       }
     }
@@ -1051,7 +1062,7 @@ SC.RootResponder = SC.Object.extend({
     // if we did not capture the touch (obviously we didn't)
     // we need to figure out what view _will_
     // Thankfully, makeTouchResponder does exactly that: starts at the view it is supplied and keeps calling startTouch
-    this.makeTouchResponder(touch, target, shouldStack);
+    this.makeTouchResponder(touch, target, shouldStack, YES);
   },
   
   
@@ -1104,7 +1115,7 @@ SC.RootResponder = SC.Object.extend({
       responder = responders[responderIdx];
       while (responder) {
         // tell it
-        responder.tryToPerform(action, touchEntry, evt);
+        if (responder[action]) responder[action](touchEntry, evt);
         
         // check to see if the responder changed, and stop immediately if so.
         if (touchEntry.touchResponder !== originalResponder) break;
@@ -1280,7 +1291,7 @@ SC.RootResponder = SC.Object.extend({
         evt.touchContext = this; // so it can call touchesForView
 
         // and go
-        view.tryToPerform("touchesDragged", evt, viewTouches);
+        if (view.touchesDragged) view.touchesDragged(evt, viewTouches);
       }
       
       // clear references to event
@@ -1936,8 +1947,8 @@ SC.Touch.prototype = {
     the current responder will be saved so that the next responder may
     return to it.
   */
-  makeTouchResponder: function(responder, shouldStack) {
-    this.touchContext.makeTouchResponder(this, responder, shouldStack);
+  makeTouchResponder: function(responder, shouldStack, upViewChain) {
+    this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
   },
 
   /**
