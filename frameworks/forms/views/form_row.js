@@ -54,6 +54,11 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
 	rowLabelMeasuredSize: 0,
 	
 	/**
+	  If NO, the label will not automatically measure itself.
+	*/
+	shouldMeasureLabel: YES,
+	
+	/**
 	  A value set so that FormView knows to tell us about the row label size change.
 	*/
 	hasRowLabel: YES,
@@ -82,6 +87,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
         value: this.get("label")
       });
       this.labelView.addObserver("measuredSize", this, "labelSizeDidChange");
+      this.labelView.bind("shouldMeasureSize", this, "shouldMeasureLabel");
       this.get("childViews").unshift(this.labelView);
     }
     

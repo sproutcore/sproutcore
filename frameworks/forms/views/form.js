@@ -153,6 +153,10 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
           if (!v.get("content")) {
             v.bind('content', '.owner.content') ;
           }
+          
+          // set the label size measuring stuff
+          if (this.get("labelWidth") !== null) v.set("shouldMeasureLabel", NO);
+          
           // set label (if possible)
           if (v.get("isFormRow") && SC.none(v.get("label"))) {
             v.set("label", key.humanize().titleize());
@@ -163,7 +167,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
     
     // our internal bookeeping to prevent .
     this._hasCreatedRows = YES;
-    
+    this.recalculateLabelWidth();
   },
 
   
@@ -173,21 +177,28 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode
   isRowDelegate: YES,
   
   /**
-    The current row label width.
+    The manually specified label width (null to automatically calculate, which is the default).
+  */
+  labelWidth: null,
+  
+  /**
+    Calculates the current label width (if labelWidth is not null, it sets using the label width)
   */
   recalculateLabelWidth: function() {
     if (!this._hasCreatedRows) return;
     
-    var ret = 0;
+    var ret = this.get("labelWidth"), children = this.get("childViews"), idx, len = children.length, child;
     
     // calculate by looping through child views and getting size (if possible)
-    var children = this.get("childViews"), idx, len = children.length, child;
-    for (idx = 0; idx < len; idx++) {
-      child = children[idx];
+    if (ret === null) {
+      ret = 0;
+      for (idx = 0; idx < len; idx++) {
+        child = children[idx];
       
-      // if it has a measurable row label
-      if (child.get("rowLabelMeasuredSize")) {
-        ret = Math.max(child.get("rowLabelMeasuredSize"), ret);
+        // if it has a measurable row label
+        if (child.get("rowLabelMeasuredSize")) {
+          ret = Math.max(child.get("rowLabelMeasuredSize"), ret);
+        }
       }
     }
     
