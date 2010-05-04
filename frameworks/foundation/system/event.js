@@ -722,6 +722,13 @@ SC.Event.prototype = {
   },
   
   /**
+    Same as touchesForView, but sounds better for responders.
+  */
+  touchesForResponder: function(responder) {
+    if (this.touchContext) return this.touchContext.touchesForView(responder);
+  },
+  
+  /**
     Returns average data--x, y, and d (distance)--for the touches owned by the supplied view.
   */
   averagedTouchesForView: function(view) {

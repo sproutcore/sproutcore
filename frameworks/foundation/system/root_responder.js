@@ -773,7 +773,7 @@ SC.RootResponder = SC.Object.extend({
   _touches: {},
 
   /**
-    Returns the touches that are registered to the specified view; undefined if none.
+    Returns the touches that are registered to the specified view or responder; undefined if none.
 
     When views receive a touch event, they have the option to subscribe to it.
     They are then mapped to touch events and vice-versa. This returns touches mapped to the view.
@@ -1966,6 +1966,13 @@ SC.Touch.prototype = {
   */
   touchesForView: function(view) {
     return this.touchContext.touchesForView(view);
+  },
+  
+  /**
+    Same as touchesForView, but sounds better for responders.
+  */
+  touchesForResponder: function(responder) {
+    return this.touchContext.touchesForView(responder);
   },
 
   /**
