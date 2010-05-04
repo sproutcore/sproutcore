@@ -1,11 +1,11 @@
 // ==========================================================================
-// Project:   TestControls
-// Copyright: ©2010 My Company, Inc.
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2010 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*globals TestControls */
-Forms = {};
-Forms.FormView = {design:function(){}};
-Forms.FormView.row = function(){};
+
 /** @namespace
 
   My cool new app.  Describe your application.
