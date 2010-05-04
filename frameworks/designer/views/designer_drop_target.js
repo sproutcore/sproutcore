@@ -111,11 +111,12 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     var page = cv.get('page');
     var designController = page.get('designController'),
         rootDesigner = designController.get('rootDesigner');
+    var rootDesignerFrame = rootDesigner.get('frame');
     //TODO: [MB] should we move most of this into the designer's addView?
     //size and location
     size = data.get('size');
-    loc.x = loc.x - frame.x;
-    loc.y = loc.y - frame.y;
+    loc.x = loc.x - frame.x - rootDesignerFrame.x;
+    loc.y = loc.y - frame.y - rootDesignerFrame.y;
     //setup design (use eval to make sure code comes from iframe)
     design = eval(data.get('scClass'));
     defaults = data.get('defaults') || {};
