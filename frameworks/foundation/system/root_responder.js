@@ -842,7 +842,7 @@ SC.RootResponder = SC.Object.extend({
 
   assignTouch: function(touch, view) {
     // sanity-check
-    if (touch.isDoneFor) throw "This touch is done for! Yet something tried to assign it.";
+    if (touch.hasEnded) throw "This touch is done for! Yet something tried to assign it.";
     
     // unassign from old view if necessary
     if (touch.view === view) return;
@@ -1140,7 +1140,7 @@ SC.RootResponder = SC.Object.extend({
     touch.touchResponders = null;
     touch.touchResponder = null;
     touch.nextTouchResponder = null;
-    touch.isDoneFor = YES;
+    touch.hasEnded = YES;
 
     // and remove from our set
     if (this._touches[touch.identifier]) delete this._touches[touch.identifier];
@@ -1891,6 +1891,7 @@ SC.Touch = function(touch, touchContext) {
   }
   this.targetView = targetView;
   this.target = target;
+  this.hasEnded = NO;
   this.type = touch.type;
   this.clickCount = 1;
 
