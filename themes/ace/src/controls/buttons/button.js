@@ -1,5 +1,8 @@
 require("src/theme");
 
+SC.AceTheme.PointLeft = SC.AceTheme.subtheme("point-left", "point-left");
+SC.AceTheme.PointRight = SC.AceTheme.subtheme("point-right", "point-right");
+
 SC.AceTheme.renderers.Button = SC.EmptyTheme.renderers.Button.extend({
   renderContents: function(context) {
     // render background slices
