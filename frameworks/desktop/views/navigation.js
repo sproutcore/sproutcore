@@ -27,14 +27,33 @@ sc_require("views/workspace");
 SC.NavigationView = SC.WorkspaceView.extend({
   _views: null,
   _current: null,
+  navigationContentView: SC.View.extend(),
   
   /**
     Initializes the NavigationView by creating the view stack.
   */
   init: function() {
     sc_super();
-    this._defaultContent = this.get("contentView");
     this._views = [];
+  },
+  
+  /**
+    Creates the navigation content view and places it inside the content view.
+  */
+  createChildViews: function() {
+    sc_super();
+    
+    // get the content
+    var content = this.get("navigationContentView");
+    
+    // instantiate if needed
+    if (content.isClass) content = this.createChildView(content);
+    
+    // set internal values
+    this._defaultContent = this.navigationContentView = content;
+    
+    // append to the content view
+    this.contentView.appendChild(content);
   },
   
   /**
@@ -66,7 +85,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
     
     // update current, etc. etc.
     this._current = view;
-    this.set("contentView", view ? view : this._defaultContent);
+    this.set("navigationContentView", view ? view : this._defaultContent);
     
     // set the top/bottom appropriately
     this.set("topToolbar", top);
@@ -176,7 +195,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
   }.observes("topToolbar"),
   
   contentViewDidChange: function() {
-    var active = this.activeContentView, replacement = this.get("contentView");
+    var active = this.activeNavigationContentView, replacement = this.get("navigationContentView");
     
     // mix in navigationbuilder if needed
     if (!replacement.isNavigationBuilder) {
@@ -188,18 +207,18 @@ SC.NavigationView = SC.WorkspaceView.extend({
     this._pendingBuildOut = active;
     this._pendingBuildIn = replacement;
     
-    this.activeContentView = replacement;
+    this.activeNavigationContentView = replacement;
     this.invokeOnce("childDidChange");
-  }.observes("contentView"),
+  }.observes("navigationContentView"),
   
   childDidChange: function() {
     var replacement = this._pendingBuildIn, active = this._pendingBuildOut;
     if (active) {
       if (this._currentDirection !== null) {
         active.set("buildDirection", this._currentDirection);
-        this.buildOutChild(active);
+        this.contentView.buildOutChild(active);
       } else {
-        this.removeChild(active);
+        this.contentView.removeChild(active);
       }
     }
 
@@ -208,9 +227,9 @@ SC.NavigationView = SC.WorkspaceView.extend({
     if (replacement) {
       if (this._currentDirection !== null) {
         replacement.set("buildDirection", this._currentDirection);
-        this.buildInChild(replacement);
+        this.contentView.buildInChild(replacement);
       } else {
-        this.appendChild(replacement);
+        this.contentView.appendChild(replacement);
       }
     }
   }
