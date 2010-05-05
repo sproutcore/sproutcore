@@ -168,7 +168,7 @@ SC.WorkspaceView = SC.View.extend({
   hasTopToolbar: function() {
     if (this.get("topToolbar")) return YES;
     return NO;    
-  },
+  }.property("topToolbar").cacheable(),
   
   /**
     Returns YES if a bottom toolbar is present.
@@ -176,7 +176,7 @@ SC.WorkspaceView = SC.View.extend({
   hasBottomToolbar: function() {
     if (this.get("bottomToolbar")) return YES;
     return NO;
-  }.observes("bottomToolbar"),
+  }.property("bottomToolbar").cacheable(),
   
   /**
     Called by the individual toolbar/contentView observers at runloop end when the toolbars change.
