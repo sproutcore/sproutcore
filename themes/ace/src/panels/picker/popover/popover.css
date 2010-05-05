@@ -97,83 +97,6 @@
 }
 
 
-@theme(solid)
-@view(sc-workspace-view) {
-  overflow: visible;
-  background: none;
-  
-  /* z-index can't go at top--it would interrupt events */
-  
-  .sc-workspace-overlay {
-    opacity: 0.9; /* This is below content, so we can indeed make it transparent */
-    
-    /* TOP */
-    .top-left-edge {
-      z-index: auto;
-      height: 70px;
-      background: sprite("popover_empty.png" [0 0 40 70]);
-    }
-    
-    .top-right-edge {
-      z-index: auto;
-      height: 70px;
-      background: sprite("popover_empty.png" [-40 0 40 70]);
-    }
-    
-    .top-edge {
-      z-index: auto;
-      height: 70px;
-      background: sprite("popover_empty.png" [40 0 1 70] repeat-x);
-    }
-    
-    /* BOTTOM */
-    .bottom-left-edge {
-      z-index: auto;
-      background: sprite("popover_empty.png" [0 -30 40 30]);
-    }
-    
-    .bottom-right-edge {
-      z-index: auto;
-      background: sprite("popover_empty.png" [-40 -30 40 30]);
-    }
-    
-    .bottom-edge {
-      z-index: auto;
-      background: sprite("popover_empty.png" [40 -30 1 30] repeat-x);
-    }
-    
-    
-    /* LEFT AND RIGHT SIDES */
-    .left-edge {
-      z-index: auto;
-      top: 45px;
-      width: 30px;
-    }
-    
-    .right-edge {
-      z-index: auto;
-      top: 45px;
-      right: -25px;
-      width: 30px;
-    }
-    
-    .middle {
-      background: rgb(0,0,0);
-      position: absolute;
-      top: 45px; right: 0px; bottom: 0px; left: 0px;
-    }
-    
-    .sc-pointer {
-      z-index:6;
-    }
-  }
-  
-}
-
-
-@end
-
-
 /* TOOLBARS */
 @view(sc-workspace-view).top-toolbar {
   .sc-workspace-overlay {
@@ -220,6 +143,89 @@
     .right-edge { bottom: 55px; }
   }
 }
+
+
+@theme(solid)
+@view(sc-workspace-view), @view(sc-workspace-view).top-toolbar, @view(sc-workspace-view).bottom-toolbar {
+  overflow: visible;
+  background: none;
+  
+  /* z-index can't go at top--it would interrupt events */
+  
+  .sc-workspace-overlay {
+    opacity: 0.9; /* This is below content, so we can indeed make it transparent */
+    
+    /* TOP */
+    .top-left-edge {
+      z-index: auto;
+      height: 70px;
+      background: sprite("popover_empty.png" [0 0 40 70]);
+    }
+    
+    .top-right-edge {
+      z-index: auto;
+      height: 70px;
+      background: sprite("popover_empty.png" [-40 0 40 70]);
+    }
+    
+    .top-edge {
+      z-index: auto;
+      height: 70px;
+      background: sprite("popover_empty.png" [40 0 1 70] repeat-x);
+    }
+    
+    /* BOTTOM */
+    .bottom-left-edge {
+      left: -25px; bottom: -25px; width: 40px; height: 30px;
+      z-index: auto;
+      background: sprite("popover_empty.png" [0 -30 40 30]);
+    }
+    
+    .bottom-right-edge {
+      z-index: auto;
+      background: sprite("popover_empty.png" [-40 -30 40 30]);
+      right: -25px; bottom: -25px; width: 40px; height: 30px;
+    }
+    
+    .bottom-edge {
+      z-index: auto;
+      background: sprite("popover_empty.png" [40 -30 1 30] repeat-x);
+      left: 15px; right: 15px; bottom: -25px; height: 30px;
+    }
+    
+    
+    /* LEFT AND RIGHT SIDES */
+    .left-edge {
+      z-index: auto;
+      top: 50px;
+      bottom: 5px;
+      width: 30px;
+    }
+    
+    .right-edge {
+      z-index: auto;
+      top: 50px;
+      right: -25px;
+      width: 30px;
+      bottom: 5px;
+    }
+    
+    .middle {
+      background: rgb(0,0,0);
+      position: absolute;
+      top: 45px; right: 0px; bottom: 0px; left: 0px;
+    }
+    
+    .sc-pointer {
+      z-index:6;
+    }
+  }
+  
+}
+
+
+@end
+
 
 
 /* TOP POINTERS (for bottom-alignment) */
