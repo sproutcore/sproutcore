@@ -58,10 +58,10 @@ code and ideas:
 
 ## Acknowledgements
 
-SproutCore includes code from a number of different open source projects,
+SproutCore includes code from a number of different open source projects
 including:
 
-* jQuery (http://www.jquery.com/)
-* Prototype (http://www.prototypejs.org/)
-* DateJS (http://www.datejs.com/)
-* JSON2 (http://www.json.org/)
+* [jQuery](http://www.jquery.com/)
+* [Prototype](http://www.prototypejs.org/)
+* [Datejs](http://www.datejs.com/)
+* [JSON2](http://www.json.org/)
