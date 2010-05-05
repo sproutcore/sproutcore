@@ -14,7 +14,7 @@ information.
     http://www.sproutcore.com/
 
 If you would like to contact the authors, you can reach the current maintainer
-at charles@sproutit.com
+at <charles@sproutit.com>.
 
 ## Contributors
 
