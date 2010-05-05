@@ -15,7 +15,11 @@ sc_require("views/toolbar");
   @extends SC.ToolbarView
   @since SproutCore 1.0
 */
-SC.NavigationBarView = SC.ToolbarView.extend({
+SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
+  gestures: ["swipeGesture"],
+  swipeGesture: SC.SwipeGesture,
+
+  
   init: function() {
     sc_super();
     
@@ -52,6 +56,29 @@ SC.NavigationBarView = SC.ToolbarView.extend({
     opacity: 1
   },
   
+  //
+  // GESTURE SUPPORT
+  //
+  
+  swipe: function(gesture, touch, direction) {
+    var lookingFor = (direction === SC.SWIPE_LEFT) ? "isSwipeLeft" : "isSwipeRight",
+        cv = this.get("childViews"), 
+        child, idx, len = cv.get("length");
+    
+    // loop through the children
+    for (idx = 0; idx < len; idx++) {
+      child = cv[idx];
+      
+      // see if this is the view we are looking for
+      if (child.get(lookingFor)) {
+        // just give it touch responder and end right away, just like ScrollView. Good times, eh?
+        touch.makeTouchResponder(child);
+        touch.end();
+        return;
+      }
+    }
+    
+  },
   
   //
   // BUILD IN/OUT
