@@ -1,2 +1,2 @@
 #!/usr/bin/env ruby
-system('chance/chance.rb --less ace.light --saturation .6')
+system('chance/chance.rb --less ace --saturation .6')

@@ -1,14 +1,19 @@
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-toolbar-view {
   background: static_url("images/2.png") repeat-x 0 -220px;
+=======
+.sc-theme .sc-view.ace.sc-toolbar-view {
+  background: static_url("images/2.png") repeat-x 0 -264px;
+>>>>>>> Start on dark theme.
   color: #555555;
   text-shadow: 0px 1px 1px white;
   border-bottom: 1px solid #999999;
   -webkit-box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
-.sc-theme .sc-view.ace.light.popover.sc-collection-view.sc-list-view.sc-source-list { background-color: white; }
-.sc-theme .sc-view.ace.light.popover.sc-pane.sc-panel.sc-palette.sc-picker { background: none; }
-.sc-theme .sc-view.ace.light.popover.sc-toolbar-view {
+.sc-theme .sc-view.ace.popover.sc-collection-view.sc-list-view.sc-source-list { background-color: white; }
+.sc-theme .sc-view.ace.popover.sc-pane.sc-panel.sc-palette.sc-picker { background: none; }
+.sc-theme .sc-view.ace.popover.sc-toolbar-view {
   background: none;
   color: white;
   text-shadow: none;
@@ -16,19 +21,19 @@
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view {
+.sc-theme .sc-view.ace.popover.sc-workspace-view {
   overflow: visible;
   background: none;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
   right: 0;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay div { -webkit-transform: translate3d(0px,0px,0px); }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .top-left-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay div { -webkit-transform: translate3d(0px,0px,0px); }
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .top-left-edge {
   z-index: 5;
   position: absolute;
   left: -25px;
@@ -37,7 +42,7 @@
   height: 30px;
   background: static_url("images/1.png") no-repeat 0 -563px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .top-right-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .top-right-edge {
   z-index: 5;
   position: absolute;
   right: -25px;
@@ -46,16 +51,20 @@
   height: 30px;
   background: static_url("images/1.png") no-repeat 0 -739px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .top-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .top-edge {
   z-index: 5;
   position: absolute;
   left: 15px;
   right: 15px;
   top: -25px;
   height: 30px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -708px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -742px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .bottom-left-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .bottom-left-edge {
   z-index: 5;
   position: absolute;
   left: -25px;
@@ -64,7 +73,7 @@
   height: 30px;
   background: static_url("images/1.png") no-repeat 0 -783px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .bottom-right-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .bottom-right-edge {
   z-index: 5;
   position: absolute;
   right: -25px;
@@ -73,16 +82,20 @@
   height: 30px;
   background: static_url("images/1.png") no-repeat 0 -695px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .bottom-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .bottom-edge {
   z-index: 5;
   position: absolute;
   left: 15px;
   right: 15px;
   bottom: -25px;
   height: 30px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -648px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -712px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .left-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .left-edge {
   z-index: 5;
   position: absolute;
   left: -25px;
@@ -91,7 +104,7 @@
   width: 30px;
   background: static_url("images/3.png") repeat-y 0 0;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .right-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .right-edge {
   z-index: 5;
   position: absolute;
   right: -25px;
@@ -100,51 +113,55 @@
   width: 30px;
   background: static_url("images/3.png") repeat-y -30px 0;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view .sc-workspace-overlay .sc-pointer { z-index: 6; }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view {
+.sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .sc-pointer { z-index: 6; }
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view {
   overflow: visible;
   background: none;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay { opacity: 0.9; }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .top-left-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay { opacity: 0.9; }
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .top-left-edge {
   z-index: auto;
   height: 70px;
   background: static_url("images/1.png") no-repeat 0 -493px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .top-right-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .top-right-edge {
   z-index: auto;
   height: 70px;
   background: static_url("images/1.png") no-repeat 0 -423px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .top-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .top-edge {
   z-index: auto;
   height: 70px;
   background: static_url("images/2.png") repeat-x 0 -150px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-left-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-left-edge {
   z-index: auto;
   background: static_url("images/1.png") no-repeat 0 -607px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-right-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-right-edge {
   z-index: auto;
   background: static_url("images/1.png") no-repeat 0 -651px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-edge {
   z-index: auto;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -738px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -472px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .left-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .left-edge {
   z-index: auto;
   top: 45px;
   width: 30px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .right-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .right-edge {
   z-index: auto;
   top: 45px;
   right: -25px;
   width: 30px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .middle {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .middle {
   background: #000000;
   position: absolute;
   top: 45px;
@@ -152,42 +169,42 @@
   bottom: 0px;
   left: 0px;
 }
-.sc-theme .sc-view.ace.light.popover.solid.sc-workspace-view .sc-workspace-overlay .sc-pointer { z-index: 6; }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-left-edge {
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .sc-pointer { z-index: 6; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-left-edge {
   top: -20px;
   height: 75px;
   background: static_url("images/1.png") no-repeat 0 -348px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-right-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-right-edge {
   top: -20px;
   height: 75px;
   background: static_url("images/1.png") no-repeat 0 -273px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-edge {
   top: -20px;
   height: 75px;
   background: static_url("images/2.png") repeat-x 0 -75px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .left-edge { top: 55px; }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .right-edge { top: 55px; }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-left-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .left-edge { top: 55px; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .right-edge { top: 55px; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-left-edge {
   bottom: -20px;
   height: 75px;
   background: static_url("images/1.png") no-repeat 0 -198px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-right-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-right-edge {
   bottom: -20px;
   height: 75px;
   background: static_url("images/1.png") no-repeat 0 -50px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-edge {
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-edge {
   bottom: -20px;
   height: 75px;
   background: static_url("images/2.png") repeat-x 0 0;
 }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .left-edge { bottom: 55px; }
-.sc-theme .sc-view.ace.light.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .right-edge { bottom: 55px; }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectBottom .sc-pointer {
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .left-edge { bottom: 55px; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .right-edge { bottom: 55px; }
+.sc-theme .sc-view.ace.popover.sc-picker.perfectBottom .sc-pointer {
   position: absolute;
   width: 50px;
   height: 25px;
@@ -196,20 +213,20 @@
   top: -25px;
   background: static_url("images/1.png") no-repeat 0 -125px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectBottom .solid .sc-pointer {
+.sc-theme .sc-view.ace.popover.sc-picker.perfectBottom .solid .sc-pointer {
   top: -25px;
   background: static_url("images/1.png") no-repeat 0 -150px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-picker.solid.perfectBottom .sc-pointer {
+.sc-theme .sc-view.ace.popover.sc-picker.solid.perfectBottom .sc-pointer {
   top: -25px;
   background: static_url("images/1.png") no-repeat 0 -150px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectBottom .top-toolbar .sc-pointer {
+.sc-theme .sc-view.ace.popover.sc-picker.perfectBottom .top-toolbar .sc-pointer {
   top: -20px;
   background: static_url("images/1.png") no-repeat 0 -150px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectBottom.extra-left .sc-pointer { left: 45px; }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectTop .sc-pointer {
+.sc-theme .sc-view.ace.popover.sc-picker.perfectBottom.extra-left .sc-pointer { left: 45px; }
+.sc-theme .sc-view.ace.popover.sc-picker.perfectTop .sc-pointer {
   position: absolute;
   width: 50px;
   height: 23px;
@@ -218,33 +235,41 @@
   bottom: -25px;
   background: static_url("images/1.png") no-repeat 0 -175px;
 }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectTop .bottom-toolbar .sc-pointer { bottom: -20px; }
-.sc-theme .sc-view.ace.light.popover.sc-picker.perfectTop.extra-left .sc-pointer { left: 45px; }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-scroll-view {
+.sc-theme .sc-view.ace.popover.sc-picker.perfectTop .bottom-toolbar .sc-pointer { bottom: -20px; }
+.sc-theme .sc-view.ace.popover.sc-picker.perfectTop.extra-left .sc-pointer { left: 45px; }
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-scroll-view {
   background: rgba(251, 251, 251, 0.92);
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-item {
   background: transparent;
   border: 0px none;
   -webkit-box-shadow: none;
   -webkit-border-radius: 0px;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item a span.value {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-item a span.value {
   margin-left: 20px;
   line-height: 20px;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-button-view.focus a {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-button-view.focus a {
   color: white;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1270px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1209px;
+>>>>>>> Start on dark theme.
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.6);
 }
 .sc-menu-item a:hover {
   color: white;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1270px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1209px;
+>>>>>>> Start on dark theme.
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.6);
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-button-view.disabled.focus a {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-button-view.disabled.focus a {
   color: white;
   background: transparent;
 }
@@ -252,19 +277,31 @@
   color: white;
   background: transparent;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item .checkbox {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-item .checkbox {
   top: 3px;
   width: 12px;
   height: 12px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -12px -1648px;
+=======
+  background: static_url("images/1.png") no-repeat -12px -1619px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item.focus .checkbox {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-item.focus .checkbox {
   top: 4px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1648px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -1619px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-item:hover .checkbox {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-item:hover .checkbox {
   top: 4px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1648px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -1619px;
+>>>>>>> Start on dark theme.
 }
 .sc-menu-item span.separator {
   margin-left: 0px;
@@ -275,132 +312,175 @@
   border-top: 1px solid #ffffff;
   border-bottom: 1px solid #c8c8c8;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view { background: transparent; }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view .arrowUp {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view { background: transparent; }
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view .arrowUp {
   position: absolute;
   left: 50%;
   top: -3px;
   margin-left: -7px;
   height: 14px;
   width: 14px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1222px;
+=======
+  background: static_url("images/1.png") no-repeat -14px -1034px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view .arrowDown {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-scroller-view .arrowDown {
   position: absolute;
   left: 50%;
   bottom: -3px;
   margin-left: -7px;
   height: 14px;
   width: 14px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -28px -1178px;
 }
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .top-left-edge {
   background: static_url("images/1.png") no-repeat -25px -915px;
+=======
+  background: static_url("images/1.png") no-repeat -14px -1124px;
+}
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .top-left-edge {
+  background: static_url("images/1.png") no-repeat 0 0;
+>>>>>>> Start on dark theme.
   left: -16px;
   top: -25px;
   width: 25px;
   height: 25px;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .top-right-edge {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .top-right-edge {
   background: static_url("images/1.png") no-repeat 0 -25px;
   right: -16px;
   top: -25px;
   width: 25px;
   height: 25px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .bottom-left-edge {
   background: static_url("images/1.png") no-repeat 0 -915px;
+=======
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .bottom-left-edge {
+  background: static_url("images/1.png") no-repeat 0 -873px;
+>>>>>>> Start on dark theme.
   left: -16px;
   bottom: -25px;
   width: 25px;
   height: 25px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .bottom-right-edge {
   background: static_url("images/1.png") no-repeat 0 0;
+=======
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .bottom-right-edge {
+  background: static_url("images/1.png") no-repeat -25px -873px;
+>>>>>>> Start on dark theme.
   right: -16px;
   bottom: -25px;
   width: 25px;
   height: 25px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .bottom-edge {
   background: static_url("images/2.png") repeat-x 0 -1003px;
+=======
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .bottom-edge {
+  background: static_url("images/2.png") repeat-x 0 -877px;
+>>>>>>> Start on dark theme.
   left: 9px;
   right: 9px;
   bottom: -25px;
   height: 25px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .top-edge {
   background: static_url("images/2.png") repeat-x 0 -978px;
+=======
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .top-edge {
+  background: static_url("images/2.png") repeat-x 0 -927px;
+>>>>>>> Start on dark theme.
   left: 9px;
   right: 9px;
   top: -25px;
   height: 25px;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .left-edge {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .left-edge {
   background: static_url("images/3.png") repeat-y -60px 0;
   top: 0px;
   bottom: 0px;
   left: -16px;
   width: 16px;
 }
-.sc-theme .sc-view.ace.light.sc-panel.sc-picker.sc-menu .right-edge {
+.sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .right-edge {
   background: static_url("images/3.png") repeat-y -76px 0;
   top: 0px;
   bottom: 0px;
   right: -16px;
   width: 16px;
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel { background: rgba(251, 251, 251, 0.92); }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .top-left-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel { background: rgba(251, 251, 251, 0.92); }
+.sc-theme .sc-view.ace.sc-pane.sc-panel .top-left-edge {
   left: -16px;
   top: -16px;
   width: 16px;
   height: 16px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -26px -827px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -914px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .top-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .top-edge {
   top: -16px;
   left: 0px;
   right: 0px;
   height: 16px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1474px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1317px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .top-right-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .top-right-edge {
   right: -16px;
   top: -16px;
   width: 16px;
   height: 16px;
   background: static_url("images/1.png") no-repeat -26px -871px;
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .bottom-left-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .bottom-left-edge {
   left: -16px;
   bottom: -16px;
   width: 16px;
   height: 16px;
   background: static_url("images/1.png") no-repeat 0 -940px;
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .bottom-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .bottom-edge {
   bottom: -16px;
   left: 0px;
   right: 0px;
   height: 16px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1490px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1301px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .bottom-right-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .bottom-right-edge {
   right: -16px;
   bottom: -16px;
   width: 16px;
   height: 16px;
   background: static_url("images/1.png") no-repeat -16px -940px;
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .left-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .left-edge {
   top: 0px;
   left: -16px;
   bottom: 0px;
   width: 16px;
   background: static_url("images/3.png") repeat-y -108px 0;
 }
-.sc-theme .sc-view.ace.light.sc-pane.sc-panel .right-edge {
+.sc-theme .sc-view.ace.sc-pane.sc-panel .right-edge {
   top: 0px;
   right: -16px;
   bottom: 0px;
@@ -408,8 +488,8 @@
   background: static_url("images/3.png") repeat-y -92px 0;
 }
 .sc-pane { -webkit-transform: translate3d(0px, 0px, 0px); }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-view { overflow: visible; }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-row-view:first-child {
+.sc-theme .sc-view.ace.iphone-form.sc-form-view { overflow: visible; }
+.sc-theme .sc-view.ace.iphone-form.sc-form-row-view:first-child {
   -moz-border-radius-topleft: 10px;
   -webkit-border-top-left-radius: 10px;
   border-top-left-radius: 10px;
@@ -417,7 +497,7 @@
   -webkit-border-top-right-radius: 10px;
   border-top-right-radius: 10px;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-row-view.first {
+.sc-theme .sc-view.ace.iphone-form.sc-form-row-view.first {
   -moz-border-radius-topleft: 10px;
   -webkit-border-top-left-radius: 10px;
   border-top-left-radius: 10px;
@@ -425,7 +505,7 @@
   -webkit-border-top-right-radius: 10px;
   border-top-right-radius: 10px;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-row-view:last-child {
+.sc-theme .sc-view.ace.iphone-form.sc-form-row-view:last-child {
   -moz-border-radius-bottomleft: 10px;
   -webkit-border-bottom-left-radius: 10px;
   border-bottom-left-radius: 10px;
@@ -434,7 +514,7 @@
   border-bottom-right-radius: 10px;
   border-bottom: 1px solid #999999;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-row-view.last {
+.sc-theme .sc-view.ace.iphone-form.sc-form-row-view.last {
   -moz-border-radius-bottomleft: 10px;
   -webkit-border-bottom-left-radius: 10px;
   border-bottom-left-radius: 10px;
@@ -443,16 +523,16 @@
   border-bottom-right-radius: 10px;
   border-bottom: 1px solid #999999;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-row-view {
+.sc-theme .sc-view.ace.iphone-form.sc-form-row-view {
   background-color: white;
   border: 1px solid #999999;
   border-bottom: 0px none;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-label {
+.sc-theme .sc-view.ace.iphone-form.sc-form-label {
   font-size: 16px;
   font-weight: bold;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-form-label .inner {
+.sc-theme .sc-view.ace.iphone-form.sc-form-label .inner {
   color: black;
   text-align: left;
   position: absolute;
@@ -461,29 +541,174 @@
   right: 0px;
   top: 50%;
 }
-.sc-theme .sc-view.ace.light.iphone-form.sc-text-field-view {
+.sc-theme .sc-view.ace.iphone-form.sc-text-field-view {
   font-size: 16px;
   background: transparent;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.iphone-form.sc-text-field-view .border { display: none; }
 .sc-theme .sc-view.ace.light.iphone-form.sc-text-field-view input { color: #005082; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-left { background: static_url("images/1.png") no-repeat 0 -1798px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-right {
+=======
+.sc-theme .sc-view.ace.iphone-form.sc-text-field-view .border { display: none; }
+.sc-theme .sc-view.ace.iphone-form.sc-text-field-view input { color: #005082; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view .button-left {
+  margin-top: -15px;
+  height: 30px;
+  background: static_url("images/1.png") no-repeat -40px -783px;
+}
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view .button-right {
+  margin-top: -15px;
+  height: 30px;
+  background: static_url("images/1.png") no-repeat -39px -1184px;
+}
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view .button-middle {
+  margin-top: -15px;
+  height: 30px;
+  background: static_url("images/2.png") repeat-x 0 -562px;
+}
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view .sc-button-label {
+  margin-top: -11px;
+  height: 30px;
+  font-size: 13px;
+}
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -42px -1094px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -42px -1064px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -592px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -42px -1034px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -42px -1004px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -622px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -42px -1034px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -42px -1004px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -622px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -42px -843px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -42px -813px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -652px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -42px -843px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -42px -813px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -652px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view .button-left {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -26px -1184px;
+}
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view .button-middle { left: 13px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -13px -1184px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -1274px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat 0 -1274px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -13px -1244px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-left.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -13px -1244px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view .button-right {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat 0 -1334px;
+}
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view .button-middle { right: 13px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat 0 -1184px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -26px -1214px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -26px -1214px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -13px -1214px; }
+.sc-theme .sc-view.ace.dark.sc-huge-size.point-right.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -13px -1214px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view .button-left {
+  margin-top: -12px;
+  height: 24px;
+  background: static_url("images/1.png") no-repeat -24px -1669px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view .button-right {
+  margin-top: -12px;
+  height: 24px;
+  background: static_url("images/1.png") no-repeat -40px -1669px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view .button-middle {
+  margin-top: -12px;
+  height: 24px;
+  background: static_url("images/2.png") repeat-x 0 -1145px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view .sc-button-label {
+  margin-top: -12px;
+  height: 24px;
+  padding-top: 2px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat 0 -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -8px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1121px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -16px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -32px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -1097px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -16px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -32px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -1097px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -24px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -40px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1073px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -24px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -40px -1693px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1073px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view .button-left {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -13px -1519px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view .button-middle { left: 13px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat 0 -1519px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -26px -1494px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -26px -1494px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -13px -1494px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-left.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -13px -1494px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view .button-right {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat 0 -1494px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view .button-middle { right: 13px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -26px -1469px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -13px -1469px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -13px -1469px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat 0 -1469px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.point-right.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat 0 -1469px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view .button-left {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -26px -1444px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view .button-right {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -13px -1444px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view .button-middle {
+  left: 13px;
+  right: 13px;
+}
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat 0 -1444px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -26px -1419px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -26px -1594px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -13px -1419px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -26px -1594px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -13px -1419px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat 0 -1419px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -26px -1394px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat 0 -1419px; }
+.sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -26px -1394px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view .button-left { background: static_url("images/1.png") no-repeat -39px -1419px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view .button-right {
+>>>>>>> Start on dark theme.
   right: 0px;
   width: 25px;
   background: static_url("images/1.png") no-repeat right 0;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .button-middle {
   background: static_url("images/2.png") repeat-x 0 -1028px;
+=======
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view .button-middle {
+  background: static_url("images/2.png") repeat-x 0 -802px;
+>>>>>>> Start on dark theme.
   right: 25px;
   left: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view .sc-button-label {
   text-align: left;
   right: 25px;
   vertical-align: top;
   color: #333333;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -16px -1768px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-right { background: static_url("images/1.png") no-repeat right -25px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-middle {
@@ -500,10 +725,28 @@
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-right { background: static_url("images/1.png") no-repeat right -25px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.sc-select-view.active .button-middle {
   background: static_url("images/2.png") repeat-x 0 -1053px;
+=======
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -39px -1444px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-right { background: static_url("images/1.png") no-repeat right 0; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.sel.active .button-middle {
+  background: static_url("images/2.png") repeat-x 0 -827px;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view { overflow: visible; }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment {
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.sel .button-left { background: static_url("images/1.png") no-repeat -39px -1444px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.sel .button-right { background: static_url("images/1.png") no-repeat right 0; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.sel .button-middle {
+  background: static_url("images/2.png") repeat-x 0 -827px;
+  text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
+}
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.active .button-left { background: static_url("images/1.png") no-repeat -39px -1444px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.active .button-right { background: static_url("images/1.png") no-repeat right 0; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sc-select-view.active .button-middle {
+  background: static_url("images/2.png") repeat-x 0 -827px;
+>>>>>>> Start on dark theme.
+  text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
+}
+.sc-theme .sc-view.ace.sc-segmented-view { overflow: visible; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment {
   background: none;
   border: 0px none;
   color: #555555;
@@ -512,20 +755,33 @@
   zoom: 1;
   overflow: hidden;
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment .button-left {
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment .button-left {
   display: inline-block;
+<<<<<<< HEAD
+=======
+  width: 8px;
+  height: 25px;
+  background: static_url("images/1.png") no-repeat -39px -1469px;
+>>>>>>> Start on dark theme.
   zoom: 1;
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment .button-right {
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment .button-right {
   display: inline-block;
+<<<<<<< HEAD
+=======
+  width: 8px;
+  height: 25px;
+  background: static_url("images/1.png") no-repeat -32px -1619px;
+>>>>>>> Start on dark theme.
   zoom: 1;
 }
-.sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment .button-middle {
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment .button-middle {
   display: inline-block;
   margin: 0px;
   padding: 0px;
   padding-top: 1px;
   vertical-align: top;
+<<<<<<< HEAD
   zoom: 1;
 }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment .sc-button-label { display: block; }
@@ -534,11 +790,29 @@
   text-shadow: 0px 1px 1px white;
 }
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel {
+=======
+  background: static_url("images/2.png") repeat-x 0 -852px;
+  zoom: 1;
+}
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -39px -1394px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -40px -1619px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active {
+  color: #333333;
+  text-shadow: 0px 1px 1px white;
+}
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active .button-left { background: static_url("images/1.png") no-repeat -8px -1644px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active .button-right { background: static_url("images/1.png") no-repeat 0 -1644px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active .button-middle { background: static_url("images/2.png") repeat-x 0 -952px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -24px -1619px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -39px -1594px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel {
+>>>>>>> Start on dark theme.
   background: none;
   color: #ffffff;
   font-weight: 200;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-segmented-view .sc-segment.sel.active {
   background: none;
   color: #ffffff;
@@ -546,12 +820,21 @@
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
 .sc-theme .sc-view.ace.light.sc-segmented-view img {
+=======
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel .button-left { background: static_url("images/1.png") no-repeat -39px -1569px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel .button-right { background: static_url("images/1.png") no-repeat -39px -1544px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -902px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat -39px -1519px; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -39px -1494px; }
+.sc-theme .sc-view.ace.sc-segmented-view img {
+>>>>>>> Start on dark theme.
   vertical-align: middle;
   position: relative;
   top: -2px;
   left: -2px;
   margin-right: 2px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-segmented-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-segmented-view .sc-segment { height: 44px; }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-segmented-view .sc-segment .button-left {
@@ -701,6 +984,10 @@
 .sc-theme .sc-view.ace.light.sc-small-size.sc-segmented-view .sc-segment.sel.active.sc-first-segment .button-left { background: static_url("images/1.png") no-repeat 0 -1995px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-segmented-view .sc-segment.sel.active.sc-last-segment .button-right { background: static_url("images/1.png") no-repeat -8px -1939px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .track {
+=======
+.sc-theme .sc-view.ace.sc-segmented-view.disabled { opacity: 0.5; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .track {
+>>>>>>> Start on dark theme.
   position: absolute;
   top: 0px;
   bottom: 0px;
@@ -708,7 +995,7 @@
   right: 0;
   background: static_url("images/3.png") repeat-y -124px 0;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .cap {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .cap {
   position: absolute;
   height: 16;
   width: 14px;
@@ -716,53 +1003,76 @@
   top: 0px;
   background: static_url("images/1.png") no-repeat -14px -1046px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-top {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .button-top {
   position: absolute;
   background: static_url("images/1.png") no-repeat -30px -1020px;
   height: 26px;
   width: 14px;
   bottom: 16px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-bottom {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .button-bottom {
   position: absolute;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1090px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -1034px;
+>>>>>>> Start on dark theme.
   height: 16px;
   width: 14px;
   bottom: 0px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-top:active { background: static_url("images/1.png") no-repeat 0 -1046px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .button-bottom:active { background: static_url("images/1.png") no-repeat -28px -1046px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb { position: absolute; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb-center {
+=======
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .button-top:active { background: static_url("images/1.png") no-repeat -30px -978px; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .button-bottom:active { background: static_url("images/1.png") no-repeat -28px -1004px; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .thumb { position: absolute; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .thumb-center {
+>>>>>>> Start on dark theme.
   position: absolute;
   width: 14px;
   top: 10px;
   bottom: 10px;
   background: static_url("images/3.png") repeat-y -138px 0;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb-top {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .thumb-top {
   position: absolute;
   width: 14px;
   top: 0px;
   height: 10px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -28px -1266px;
+=======
+  background: static_url("images/1.png") no-repeat -28px -1154px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-vertical .thumb-bottom {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-vertical .thumb-bottom {
   position: absolute;
   width: 14px;
   bottom: 0px;
   height: 10px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -14px -1266px;
+=======
+  background: static_url("images/1.png") no-repeat -14px -1154px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .track {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .track {
   position: absolute;
   left: 0px;
   right: 0px;
   top: 0;
   bottom: 0;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1520px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1333px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .cap {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .cap {
   position: absolute;
   width: 16;
   height: 14px;
@@ -770,92 +1080,118 @@
   left: 0px;
   background: static_url("images/1.png") no-repeat -32px -1004px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-left {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-left {
   position: absolute;
   background: static_url("images/1.png") no-repeat 0 -827px;
   width: 26px;
   height: 14px;
   right: 15px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-top {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-top {
   position: absolute;
   background: static_url("images/1.png") no-repeat 0 -827px;
   width: 26px;
   height: 14px;
   right: 15px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-right {
   position: absolute;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1020px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -978px;
+>>>>>>> Start on dark theme.
   width: 15px;
   height: 14px;
   right: 0px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-bottom {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-bottom {
   position: absolute;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1020px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -978px;
+>>>>>>> Start on dark theme.
   width: 15px;
   height: 14px;
   right: 0px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-left:active { background: static_url("images/1.png") no-repeat 0 -871px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-top:active { background: static_url("images/1.png") no-repeat 0 -871px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-right:active { background: static_url("images/1.png") no-repeat -15px -1020px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .button-bottom:active { background: static_url("images/1.png") no-repeat -15px -1020px; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb { position: absolute; }
 .sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-center {
+=======
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-left:active { background: static_url("images/1.png") no-repeat 0 -843px; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-top:active { background: static_url("images/1.png") no-repeat 0 -843px; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-right:active { background: static_url("images/1.png") no-repeat -15px -978px; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .button-bottom:active { background: static_url("images/1.png") no-repeat -15px -978px; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .thumb { position: absolute; }
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .thumb-center {
+>>>>>>> Start on dark theme.
   position: absolute;
   height: 14px;
   left: 10px;
   right: 10px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1506px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1347px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-left {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .thumb-left {
   position: absolute;
   height: 14px;
   left: 0px;
   width: 10px;
   background: static_url("images/1.png") no-repeat -40px -198px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-top {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .thumb-top {
   position: absolute;
   height: 14px;
   left: 0px;
   width: 10px;
   background: static_url("images/1.png") no-repeat -40px -198px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-right {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .thumb-right {
   position: absolute;
   height: 14px;
   right: 0px;
   width: 10px;
   background: static_url("images/1.png") no-repeat -40px -273px;
 }
-.sc-theme .sc-view.ace.light.sc-scroller-view.sc-horizontal .thumb-bottom {
+.sc-theme .sc-view.ace.sc-scroller-view.sc-horizontal .thumb-bottom {
   position: absolute;
   height: 14px;
   right: 0px;
   width: 10px;
   background: static_url("images/1.png") no-repeat -40px -273px;
 }
-.sc-theme .sc-view.ace.light.sc-radio-view {
+.sc-theme .sc-view.ace.sc-radio-view {
   line-height: 18px;
   vertical-align: middle;
 }
-.sc-theme .sc-view.ace.light.sc-radio-view .sc-radio-button {
+.sc-theme .sc-view.ace.sc-radio-view .sc-radio-button {
   position: relative;
   display: block;
   height: 18px;
   padding-left: 18px;
   margin-bottom: 3px;
 }
-.sc-theme .sc-view.ace.light.sc-radio-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-radio-view .sc-button-label {
   position: absolute;
   left: 20px;
   line-height: 18px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-radio-view span.button {
   background: static_url("images/1.png") no-repeat 0 -956px;
+=======
+.sc-theme .sc-view.ace.sc-radio-view span.button {
+  background: static_url("images/1.png") no-repeat 0 -946px;
+>>>>>>> Start on dark theme.
   width: 16px;
   height: 16px;
   vertical-align: middle;
@@ -864,6 +1200,7 @@
   top: 0px;
   margin: 0px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-radio-view input { visibility: hidden; }
 .sc-theme .sc-view.ace.light.sc-radio-view .sel span.button { background: static_url("images/1.png") no-repeat -32px -956px; }
 .sc-theme .sc-view.ace.light.sc-radio-view .mixed span.button { background: static_url("images/1.png") no-repeat -16px -1004px; }
@@ -873,33 +1210,52 @@
 .sc-theme .sc-view.ace.light.sc-radio-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-progress-view {
   background: static_url("images/1.png") no-repeat 0 -1919px;
+=======
+.sc-theme .sc-view.ace.sc-radio-view input { visibility: hidden; }
+.sc-theme .sc-view.ace.sc-radio-view .sel span.button { background: static_url("images/1.png") no-repeat -32px -930px; }
+.sc-theme .sc-view.ace.sc-radio-view .mixed span.button { background: static_url("images/1.png") no-repeat -16px -930px; }
+.sc-theme .sc-view.ace.sc-radio-view .active span.button { background: static_url("images/1.png") no-repeat 0 -930px; }
+.sc-theme .sc-view.ace.sc-radio-view .sel.active span.button { background: static_url("images/1.png") no-repeat -32px -914px; }
+.sc-theme .sc-view.ace.sc-radio-view .mixed.active span.button { background: static_url("images/1.png") no-repeat -16px -962px; }
+.sc-theme .sc-view.ace.sc-radio-view.disabled { opacity: 0.5; }
+.sc-theme .sc-view.ace.sc-progress-view {
+  background: static_url("images/1.png") no-repeat -8px -1717px;
+>>>>>>> Start on dark theme.
   z-index: 0;
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-progress-view .sc-outer-head {
+.sc-theme .sc-view.ace.sc-progress-view .sc-outer-head {
   left: 8px;
   right: 8px;
   position: absolute;
   height: 20px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1310px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1169px;
+>>>>>>> Start on dark theme.
   z-index: 0;
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-progress-view .sc-outer-tail {
+.sc-theme .sc-view.ace.sc-progress-view .sc-outer-tail {
   right: 0px;
   width: 8px;
   position: absolute;
   height: 20px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1939px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -1717px;
+>>>>>>> Start on dark theme.
   z-index: 0;
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-progress-view .sc-inner {
+.sc-theme .sc-view.ace.sc-progress-view .sc-inner {
   background: static_url("images/1.png") no-repeat -40px -50px;
   z-index: 1;
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-progress-view .sc-inner-head {
+.sc-theme .sc-view.ace.sc-progress-view .sc-inner-head {
   width: 4px;
   right: 0px;
   position: absolute;
@@ -907,41 +1263,51 @@
   background: static_url("images/1.png") no-repeat right -50px;
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-progress-view .sc-inner-tail {
+.sc-theme .sc-view.ace.sc-progress-view .sc-inner-tail {
   left: 4px;
   right: 4px;
   position: absolute;
   height: 20px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1290px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1189px;
+>>>>>>> Start on dark theme.
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-progress-view.disabled { opacity: 0.5; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-regular-size {
+.sc-theme .sc-view.ace.sc-progress-view.disabled { opacity: 0.5; }
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-regular-size {
   color: black;
   text-shadow: white 0px 1px 1px;
   line-height: 18px;
   vertical-align: middle;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size .label {
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size .label {
   position: absolute;
   left: 20px;
   line-height: 18px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size span.button {
   background: static_url("images/1.png") no-repeat 0 -972px;
+=======
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size span.button {
+  background: static_url("images/1.png") no-repeat -26px -813px;
+>>>>>>> Start on dark theme.
   width: 16px;
   height: 16px;
   position: absolute;
   margin-right: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size input {
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size input {
   visibility: hidden;
   z-index: 1;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-regular-size.sel {
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-regular-size.sel {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.sel span.button { background: static_url("images/1.png") no-repeat -16px -972px; }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.mixed span.button { background: static_url("images/1.png") no-repeat -32px -972px; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-regular-size.active {
@@ -953,31 +1319,50 @@
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.mixed.active span.button { background: static_url("images/1.png") no-repeat -32px -988px; }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-regular-size.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-small-size {
+=======
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.sel span.button { background: static_url("images/1.png") no-repeat -32px -898px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.mixed span.button { background: static_url("images/1.png") no-repeat 0 -962px; }
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-regular-size.active {
+  color: black;
+  text-shadow: white 0px 1px 1px;
+}
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.active span.button { background: static_url("images/1.png") no-repeat -16px -914px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.sel.active span.button { background: static_url("images/1.png") no-repeat -16px -946px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.mixed.active span.button { background: static_url("images/1.png") no-repeat -32px -946px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.disabled { opacity: 0.5; }
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-small-size {
+>>>>>>> Start on dark theme.
   color: black;
   text-shadow: white 0px 1px 1px;
   line-height: 16px;
   vertical-align: middle;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size .label {
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size .label {
   position: absolute;
   left: 20px;
   line-height: 16px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size span.button {
   background: static_url("images/1.png") no-repeat -28px -1134px;
+=======
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size span.button {
+  background: static_url("images/1.png") no-repeat 0 -1124px;
+>>>>>>> Start on dark theme.
   width: 14px;
   height: 14px;
   position: absolute;
   margin-right: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size input {
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size input {
   visibility: hidden;
   z-index: 1;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-small-size.sel {
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-small-size.sel {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.sel span.button { background: static_url("images/1.png") no-repeat -28px -1222px; }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.mixed span.button { background: static_url("images/1.png") no-repeat -14px -1222px; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-checkbox-view.sc-small-size.active {
@@ -989,100 +1374,135 @@
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1178px; }
 .sc-theme .sc-view.ace.light.sc-checkbox-view.sc-small-size.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view {
+=======
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -1154px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.mixed span.button { background: static_url("images/1.png") no-repeat -28px -1124px; }
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-small-size.active {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view .sc-button-label { left: 18px; }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel {
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.active span.button { background: static_url("images/1.png") no-repeat -28px -1034px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.sel.active span.button { background: static_url("images/1.png") no-repeat 0 -1064px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.mixed.active span.button { background: static_url("images/1.png") no-repeat -14px -1064px; }
+.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.disabled { opacity: 0.5; }
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view {
+>>>>>>> Start on dark theme.
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel.active {
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view .sc-button-label { left: 18px; }
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view.sel {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.active {
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view.sel.active {
   color: black;
   text-shadow: white 0px 1px 1px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view img {
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view.active {
+  color: black;
+  text-shadow: white 0px 1px 1px;
+}
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view img {
   position: absolute;
   top: 3px;
   background: static_url("images/1.png") no-repeat -28px -1090px;
   width: 14px;
   height: 14px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel img { background: static_url("images/1.png") no-repeat -14px -1090px; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.active img { background: static_url("images/1.png") no-repeat 0 -1134px; }
 .sc-theme .sc-view.ace.light.sc-button-view.sc-disclosure-view.sel.active img { background: static_url("images/1.png") no-repeat -14px -1134px; }
+=======
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view.sel img { background: static_url("images/1.png") no-repeat 0 -1094px; }
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view.active img { background: static_url("images/1.png") no-repeat -14px -1094px; }
+.sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view.sel.active img { background: static_url("images/1.png") no-repeat -28px -1094px; }
+>>>>>>> Start on dark theme.
 img.disclosure.button {
   width: 14px;
   height: 14px;
 }
+<<<<<<< HEAD
 img.disclosure.button.open { background: static_url("images/1.png") no-repeat -14px -1090px; }
 img.disclosure.button.open.active { background: static_url("images/1.png") no-repeat -14px -1134px; }
 img.disclosure.button.closed { background: static_url("images/1.png") no-repeat -28px -1090px; }
 img.disclosure.button.closed.active { background: static_url("images/1.png") no-repeat 0 -1134px; }
 .sc-theme .sc-view.ace.light.sc-button-view {
+=======
+img.disclosure.button.open { background: static_url("images/1.png") no-repeat 0 -1094px; }
+img.disclosure.button.open.active { background: static_url("images/1.png") no-repeat -28px -1094px; }
+img.disclosure.button.closed { background: static_url("images/1.png") no-repeat -28px -1064px; }
+img.disclosure.button.closed.active { background: static_url("images/1.png") no-repeat -14px -1094px; }
+.sc-theme .sc-view.ace.sc-button-view {
+>>>>>>> Start on dark theme.
   border: 0px none;
   color: #555555;
   text-shadow: 0px 1px 1px white;
 }
-.sc-theme .sc-view.ace.light.sc-button-view .button-left {
+.sc-theme .sc-view.ace.sc-button-view .button-left {
   position: absolute;
   top: 50%;
   left: 0px;
   width: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view .button-right {
+.sc-theme .sc-view.ace.sc-button-view .button-right {
   position: absolute;
   top: 50%;
   right: 0px;
   width: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view .button-middle {
+.sc-theme .sc-view.ace.sc-button-view .button-middle {
   position: absolute;
   top: 50%;
   left: 8px;
   right: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-button-view .sc-button-label {
   position: absolute;
   top: 50%;
   left: 8px;
   right: 8px;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.active {
+.sc-theme .sc-view.ace.sc-button-view.active {
   color: #333333;
   text-shadow: 0px 1px 1px white;
 }
-.sc-theme .sc-view.ace.light.sc-button-view.sel {
+.sc-theme .sc-view.ace.sc-button-view.sel {
   color: #ffffff;
   font-weight: 200;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
-.sc-theme .sc-view.ace.light.sc-button-view.def {
+.sc-theme .sc-view.ace.sc-button-view.def {
   color: #ffffff;
   font-weight: 200;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
-.sc-theme .sc-view.ace.light.sc-button-view.disabled { opacity: 0.5; }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .button-left {
+.sc-theme .sc-view.ace.sc-button-view.disabled { opacity: 0.5; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view .button-left {
   margin-top: -22px;
   height: 44px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -39px -1486px;
+=======
+  background: static_url("images/1.png") no-repeat -40px -695px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .button-right {
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view .button-right {
   margin-top: -22px;
   height: 44px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -40px -607px;
+=======
+  background: static_url("images/1.png") no-repeat -40px -651px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .button-middle {
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view .button-middle {
   margin-top: -22px;
   height: 44px;
   background: static_url("images/2.png") repeat-x 0 -396px;
 }
-.sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view .sc-button-label {
   margin-top: -10px;
   height: 24px;
   font-size: 16px;
@@ -1090,6 +1510,7 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   color: #777777;
   text-shadow: 0px 1px 1px white;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -40px -651px; }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -40px -695px; }
 .sc-theme .sc-view.ace.light.sc-jumbo-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -264px; }
@@ -1117,22 +1538,60 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   margin-top: -15px;
   height: 30px;
   background: static_url("images/1.png") no-repeat -39px -1618px;
+=======
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -40px -607px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -40px -563px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -220px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -40px -739px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -40px -423px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -308px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .sc-button-label {
+  color: white;
+  text-shadow: 0px -1px 1px black;
 }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .button-right {
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -40px -739px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -40px -423px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -308px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .sc-button-label {
+  color: white;
+  text-shadow: 0px -1px 1px black;
+}
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -40px -348px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -40px -493px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -352px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -40px -348px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -40px -493px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -352px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view .button-left {
   margin-top: -15px;
   height: 30px;
+  background: static_url("images/1.png") no-repeat -39px -1214px;
+>>>>>>> Start on dark theme.
+}
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view .button-right {
+  margin-top: -15px;
+  height: 30px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat 0 -1678px;
+=======
+  background: static_url("images/1.png") no-repeat -39px -1244px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .button-middle {
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view .button-middle {
   margin-top: -15px;
   height: 30px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -918px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -772px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view .sc-button-label {
   margin-top: -11px;
   height: 30px;
   font-size: 13px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -24px -1708px; }
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat 0 -1768px; }
 .sc-theme .sc-view.ace.light.sc-huge-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -858px; }
@@ -1172,22 +1631,72 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   margin-top: -12px;
   height: 24px;
   background: static_url("images/1.png") no-repeat -16px -1895px;
+=======
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -39px -1364px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -39px -1304px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -682px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -39px -1334px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -39px -1274px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -532px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -39px -1334px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -39px -1274px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -532px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -42px -1154px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -42px -1124px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -502px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -42px -1154px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -42px -1124px; }
+.sc-theme .sc-view.ace.sc-huge-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -502px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view .button-left {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat 0 -1244px;
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .button-right {
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view .button-middle { left: 13px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat 0 -1214px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -26px -1244px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -26px -1244px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -13px -1274px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-left.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -13px -1274px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view .button-right {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -26px -1274px;
+}
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view .button-middle { right: 13px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -13px -1304px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -26px -1304px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -26px -1304px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat 0 -1304px; }
+.sc-theme .sc-view.ace.sc-huge-size.point-right.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat 0 -1304px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view .button-left {
   margin-top: -12px;
   height: 24px;
+  background: static_url("images/1.png") no-repeat -32px -1669px;
+>>>>>>> Start on dark theme.
+}
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view .button-right {
+  margin-top: -12px;
+  height: 24px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -24px -1895px;
+=======
+  background: static_url("images/1.png") no-repeat -16px -1669px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .button-middle {
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view .button-middle {
   margin-top: -12px;
   height: 24px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1078px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1049px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view .sc-button-label {
   margin-top: -12px;
   height: 24px;
   padding-top: 2px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -32px -1895px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -8px -1871px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1102px; }
@@ -1226,15 +1735,60 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 .sc-theme .sc-view.ace.light.sc-regular-size.capsule.sc-button-view .button-left {
   width: 13px;
   background: static_url("images/1.png") no-repeat 0 -1486px;
-}
-.sc-theme .sc-view.ace.light.sc-regular-size.capsule.sc-button-view .button-right {
+=======
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -8px -1669px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat 0 -1669px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1025px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -16px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -24px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -1001px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -16px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -24px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -1001px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -32px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -40px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -977px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -32px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -40px -1644px; }
+.sc-theme .sc-view.ace.sc-regular-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -977px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view .button-left {
   width: 13px;
-  background: static_url("images/1.png") no-repeat 0 -1530px;
+  background: static_url("images/1.png") no-repeat -13px -1334px;
 }
-.sc-theme .sc-view.ace.light.sc-regular-size.capsule.sc-button-view .button-middle {
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view .button-middle { left: 13px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -26px -1334px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -1364px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat 0 -1364px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -13px -1594px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-left.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -13px -1594px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view .button-right {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -13px -1364px;
+}
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view .button-middle { right: 13px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -26px -1364px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat 0 -1394px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat 0 -1394px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -13px -1394px; }
+.sc-theme .sc-view.ace.sc-regular-size.point-right.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -13px -1394px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view .button-left {
+  width: 13px;
+  background: static_url("images/1.png") no-repeat -26px -1519px;
+>>>>>>> Start on dark theme.
+}
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view .button-right {
+  width: 13px;
+<<<<<<< HEAD
+  background: static_url("images/1.png") no-repeat 0 -1530px;
+=======
+  background: static_url("images/1.png") no-repeat 0 -1544px;
+>>>>>>> Start on dark theme.
+}
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view .button-middle {
   left: 13px;
   right: 13px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-regular-size.capsule.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -13px -1530px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.capsule.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -26px -1530px; }
 .sc-theme .sc-view.ace.light.sc-regular-size.capsule.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -1574px; }
@@ -1249,23 +1803,48 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   margin-top: -9px;
   height: 18px;
   background: static_url("images/1.png") no-repeat -8px -1995px;
-}
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-right {
+=======
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -13px -1544px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -26px -1544px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -1569px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -13px -1569px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat 0 -1569px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -13px -1569px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -26px -1569px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat 0 -1594px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -26px -1569px; }
+.sc-theme .sc-view.ace.sc-regular-size.capsule.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat 0 -1594px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view .button-left {
   margin-top: -9px;
   height: 18px;
+  background: static_url("images/1.png") no-repeat 0 -1737px;
+>>>>>>> Start on dark theme.
+}
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view .button-right {
+  margin-top: -9px;
+  height: 18px;
+<<<<<<< HEAD
   background: static_url("images/1.png") no-repeat -16px -1995px;
+=======
+  background: static_url("images/1.png") no-repeat -24px -1737px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .button-middle {
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view .button-middle {
   margin-top: -9px;
   height: 18px;
+<<<<<<< HEAD
   background: static_url("images/2.png") repeat-x 0 -1402px;
+=======
+  background: static_url("images/2.png") repeat-x 0 -1265px;
+>>>>>>> Start on dark theme.
 }
-.sc-theme .sc-view.ace.light.sc-small-size.sc-button-view .sc-button-label {
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view .sc-button-label {
   font-size: 11px;
   margin-top: -13px;
   height: 18px;
   padding-top: 2px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -24px -1995px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -32px -1995px; }
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1420px; }
@@ -1283,6 +1862,25 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 .sc-theme .sc-view.ace.light.sc-small-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1456px; }
 .sc-theme .sc-view.ace.light.sc-tab-view { overflow: visible; }
 .sc-theme .sc-view.ace.light.sc-tab-view .sc-container-view {
+=======
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -32px -1737px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -40px -1737px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1283px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat 0 -1755px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -8px -1737px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -1247px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat 0 -1755px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -8px -1737px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -1247px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.sel.active .button-left { background: static_url("images/1.png") no-repeat -16px -1737px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -8px -1755px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.sel.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1229px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -16px -1737px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -8px -1755px; }
+.sc-theme .sc-view.ace.sc-small-size.sc-button-view.def.active .button-middle { background: static_url("images/2.png") repeat-x 0 -1229px; }
+.sc-theme .sc-view.ace.sc-tab-view { overflow: visible; }
+.sc-theme .sc-view.ace.sc-tab-view .sc-container-view {
+>>>>>>> Start on dark theme.
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   border-radius: 5px;
@@ -1290,56 +1888,61 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
   overflow: hidden;
 }
-.sc-theme .sc-view.ace.light.sc-split-divider-view {
+.sc-theme .sc-view.ace.sc-split-divider-view {
   background: #555555;
   border: 0px none;
 }
-.sc-theme .sc-view.ace.light.sc-master-detail-view { background: #333333; }
-.sc-theme .sc-view.ace.light.sc-master-detail-view.round-toolbars .sc-toolbar-view {
+.sc-theme .sc-view.ace.sc-master-detail-view { background: #333333; }
+.sc-theme .sc-view.ace.sc-master-detail-view.round-toolbars .sc-toolbar-view {
   -webkit-border-top-left-radius: 10px;
   -webkit-border-top-right-radius: 10px;
   -moz-border-radius-topleft: 10px;
   -moz-border-raidus-topright: 10px;
 }
-.sc-theme .sc-view.ace.light.sc-master-detail-view > .sc-view { background: #cccccc; }
-.sc-theme .sc-view.ace.light.sc-master-detail-view > .sc-view {
+.sc-theme .sc-view.ace.sc-master-detail-view > .sc-view { background: #cccccc; }
+.sc-theme .sc-view.ace.sc-master-detail-view > .sc-view {
   background: -moz-linear-gradient(top, #dddddd, #bbbbbb);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dddddd), to(#bbbbbb));
 }
-.sc-theme .sc-view.ace.light.sc-master-detail-view.round-toolbars > .sc-view {
+.sc-theme .sc-view.ace.sc-master-detail-view.round-toolbars > .sc-view {
   -webkit-border-top-left-radius: 10px;
   -webkit-border-top-right-radius: 10px;
   -moz-border-radius-topleft: 10px;
   -moz-border-raidus-topright: 10px;
 }
 .sc-source-list-background { background: #d0dae3; }
-.sc-theme .sc-view.ace.light.sc-scroll-view.sc-source-list-background .sc-container-view { background: #d0dae3; }
-.sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list { background: #d0dae3; }
-.sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-list-item-view label {
+.sc-theme .sc-view.ace.sc-scroll-view.sc-source-list-background .sc-container-view { background: #d0dae3; }
+.sc-theme .sc-view.ace.sc-collection-view.sc-source-list { background: #d0dae3; }
+.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .sc-list-item-view label {
   top: 50%;
   margin-top: -9px;
   font-size: 14px;
 }
+<<<<<<< HEAD
 .sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-collection-item.sel {
   background: static_url("images/2.png") repeat-x 0 -616px;
+=======
+.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .sc-collection-item.sel {
+  background: static_url("images/2.png") repeat-x 0 -440px;
+>>>>>>> Start on dark theme.
   border-top: 1px solid #43638d;
   border-bottom: 1px solid #43638d;
   color: white;
   font-weight: bold;
   text-shadow: 0px 1px 1px black;
 }
-.sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .sc-collection-item.sc-group-item {
+.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .sc-collection-item.sc-group-item {
   font-weight: bold;
   color: #4a4a4a;
   text-shadow: 0px 1px 1px white;
   font-size: 12px;
 }
-.sc-theme .sc-view.ace.light.sc-collection-view.sc-source-list .disclosure {
+.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .disclosure {
   position: absolute;
   left: -12px;
   top: 9px;
 }
-.sc-theme .sc-view.ace.light.sc-collection-view .sc-collection-item.sel {
+.sc-theme .sc-view.ace.sc-collection-view .sc-collection-item.sel {
   color: white;
   background: #608ab9;
 }
