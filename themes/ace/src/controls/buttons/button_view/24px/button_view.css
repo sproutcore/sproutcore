@@ -105,6 +105,40 @@
 @end
 
 
+/* CAPSULE */
+@theme(capsule)
+  @view(sc-button-view) {
+    .button-left {
+      width: 13px;
+      background: sprite("normal_button_capsule.png" [0 13]);
+    }
+    .button-right {
+      width: 13px;
+      background: sprite("normal_button_capsule.png" [-13]);
+    }
+    .button-middle {
+      left: 13px;
+      right: 13px;
+    }
+  }
+
+  @view(sc-button-view).active {
+    .button-left { background: sprite("active_button_capsule.png" [0 13]); }
+    .button-right { background: sprite("active_button_capsule.png" [-13]); }
+  }
+
+  @view(sc-button-view).sel, @view(sc-button-view).def {
+    .button-left { background: sprite("selected_button_capsule.png" [0 13]); }
+    .button-right { background: sprite("selected_button_capsule.png" [-13]); }
+  }
+
+  @view(sc-button-view).sel.active, @view(sc-button-view).def.active {
+    .button-left { background: sprite("selected_active_button_capsule.png" [0 13]); }  
+    .button-right { background: sprite("selected_active_button_capsule.png" [-13]); }  
+  }
+  
+@end
+
 @end
 
 
