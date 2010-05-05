@@ -1,28 +1,34 @@
-@theme(sc-regular-size)
+
+@theme(sc-large-size)
 
 @view(sc-segmented-view) {
-    
+  
   /*
     DEFAULT STATE
   */
   .sc-segment {
-    height: 24px;
+    height: 30px;
     
     .button-left {
       width: 8px;
-      height: 24px;
+      height: 30px;
       background: sprite("segmented_normal.png" [100 8]);
     }
     
     .button-right {
       width: 8px;
-      height: 24px;
+      height: 30px;
       background: sprite("segmented_normal.png" [92 8]);
     }
     
     .button-middle {
-      height: 24px;
+      height: 30px;
       background: sprite("segmented_normal.png" repeat-x [8, 1]);
+    }
+    
+    .sc-button-label {
+      font-size: 13px;
+      margin-top: 3px;
     }
   }
   
