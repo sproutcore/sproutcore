@@ -23,7 +23,8 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
       toolTip: this.toolTip,
       isEnabled: this.isEnabled,
       isSelected: this.isSelected,
-      isActive: this.isActive
+      isActive: this.isActive,
+      controlSize: this.controlSize
     });
   },
   

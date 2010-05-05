@@ -11,7 +11,21 @@
 */
 
 SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
+
+  controlSizeArray: [18, 24, 30, 44], // pre-create for performance (purely optional optimization)
+  controlSizes: {
+    18: SC.SMALL_CONTROL_SIZE,
+    24: SC.REGULAR_CONTROL_SIZE,
+    30: SC.HUGE_CONTROL_SIZE,
+    44: SC.JUMBO_CONTROL_SIZE
+  },
+
   init: function(attrs) {
+    this._controlRenderer = this.theme.control({
+      controlSizes: this.controlSizes,
+      controlSizeArray: this.controlSizeArray // purely optional optimization
+    });
+
     this._segments = [];
     this.attr(attrs);
   },
@@ -21,6 +35,14 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
     var segments = this.segments, idx, len, segs = [],
         reusables = this._segments,
         segment, ren;
+    
+    this._controlRenderer.attr({
+      isEnabled: this.isEnabled,
+      isActive: this.isActive,
+      isSelected: this.isSelected,
+      controlSize: this.controlSize
+    });
+    this._controlRenderer.render(context);
     
     // clean up; get rid of layers on our existing segments
     for (idx = 0, len = reusables.length; idx < len; idx++) reusables[idx].detachLayer();
@@ -46,6 +68,7 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
       ren.attr('isFirstSegment', idx === 0);
       ren.attr('isLastSegment', idx === len - 1);
       ren.attr('isMiddleSegment', idx < len - 1 && idx > 0);
+      ren.attr('controlSize', this.controlSize);
       
       // render to context
       ren.render(context);
@@ -86,17 +109,29 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
     var segments = this.segments, idx, len = segments.length, renderers = this._segments,
         segment, renderer;
     
+    this._controlRenderer.attr({
+      isEnabled: this.isEnabled,
+      isActive: this.isActive,
+      isSelected: this.isSelected,
+      controlSize: this.controlSize
+    });
+    this._controlRenderer.update();    
+        
     // loop through renderers+segments, and update them all
     for (idx = 0; idx < len; idx ++) {
       segment = segments[idx]; renderer = renderers[idx];
       renderer.attr(segment);
       renderer.attr('layoutDirection', this.layoutDirection);
+      renderer.attr('controlSize', this.controlSize);
       renderer.update();
     }
   },
   
-  didAttachLayer: function(provier) {
+  didAttachLayer: function(layer) {
     var segments = this._segments, segment, idx, len = segments.length;
+
+    this._controlRenderer.attachLayer(layer);
+
     for (idx = 0; idx < len; idx++) {
       segment = segments[idx];
       
@@ -107,6 +142,8 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
   
   willDetachLayer: function() {
     var segments = this._segments, segment, idx, len = segments.length;
+
+    this._controlRenderer.detachLayer();
     
     // just detach the layer.
     for (idx = 0; idx < len; idx++) {
