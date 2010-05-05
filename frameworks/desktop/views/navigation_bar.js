@@ -25,19 +25,41 @@ SC.NavigationBarView = SC.ToolbarView.extend({
         "Please make your app or framework require the animation framework. CRASH."
       );
     }
-    
+  },
+
+  /**
+    @private
+    Mixies in animatable and the navigation bar transitions.
+  */
+  mixinAnimatable: function() {
     this.mixin(SC.Animatable);
-    this.transitions = this._transitions;
+    this.transitions = this.navigationTransitions;    
   },
   
-  _transitions: { 
+  /**
+    The default navigation transitions.
+  */
+  navigationTransitions: { 
     opacity: {
       duration: 0.25, action: "didFinishTransition"
     } 
   },
   
+  /**
+    The default style (opacity is 1)
+  */
   style: {
     opacity: 1
+  },
+  
+  
+  //
+  // BUILD IN/OUT
+  //
+  
+  // for various reasons, including the fact that mixing in init  is VERY BAD, we do this lazily.
+  resetBuild: function() {
+    if (!this.isAnimatable) this.mixinAnimatable();
   },
   
   // callback
