@@ -1,5 +1,5 @@
 .sc-theme .sc-view.ace.sc-toolbar-view {
-  background: static_url("images/2.png") repeat-x 0 -220px;
+  background: static_url("images/2.png") repeat-x 0 -352px;
   color: #555555;
   text-shadow: 0px 1px 1px white;
   border-bottom: 1px solid #999999;
@@ -101,6 +101,40 @@
   background: static_url("images/3.png") repeat-y -30px 0;
 }
 .sc-theme .sc-view.ace.popover.sc-workspace-view .sc-workspace-overlay .sc-pointer { z-index: 6; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-left-edge {
+  top: -20px;
+  height: 75px;
+  background: static_url("images/1.png") no-repeat 0 -50px;
+}
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-right-edge {
+  top: -20px;
+  height: 75px;
+  background: static_url("images/1.png") no-repeat 0 -273px;
+}
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-edge {
+  top: -20px;
+  height: 75px;
+  background: static_url("images/2.png") repeat-x 0 0;
+}
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .left-edge { top: 55px; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .right-edge { top: 55px; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-left-edge {
+  bottom: -20px;
+  height: 75px;
+  background: static_url("images/1.png") no-repeat 0 -348px;
+}
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-right-edge {
+  bottom: -20px;
+  height: 75px;
+  background: static_url("images/1.png") no-repeat 0 -198px;
+}
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-edge {
+  bottom: -20px;
+  height: 75px;
+  background: static_url("images/2.png") repeat-x 0 -75px;
+}
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .left-edge { bottom: 55px; }
+.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .right-edge { bottom: 55px; }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view {
   overflow: visible;
   background: none;
@@ -109,12 +143,12 @@
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .top-left-edge {
   z-index: auto;
   height: 70px;
-  background: static_url("images/1.png") no-repeat 0 -493px;
+  background: static_url("images/1.png") no-repeat 0 -423px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .top-right-edge {
   z-index: auto;
   height: 70px;
-  background: static_url("images/1.png") no-repeat 0 -423px;
+  background: static_url("images/1.png") no-repeat 0 -493px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .top-edge {
   z-index: auto;
@@ -122,27 +156,41 @@
   background: static_url("images/2.png") repeat-x 0 -150px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-left-edge {
+  left: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 30px;
   z-index: auto;
-  background: static_url("images/1.png") no-repeat 0 -651px;
+  background: static_url("images/1.png") no-repeat 0 -607px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-right-edge {
   z-index: auto;
-  background: static_url("images/1.png") no-repeat 0 -607px;
+  background: static_url("images/1.png") no-repeat 0 -651px;
+  right: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 30px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .bottom-edge {
   z-index: auto;
   background: static_url("images/2.png") repeat-x 0 -948px;
+  left: 15px;
+  right: 15px;
+  bottom: -25px;
+  height: 30px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .left-edge {
   z-index: auto;
-  top: 45px;
+  top: 50px;
+  bottom: 5px;
   width: 30px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .right-edge {
   z-index: auto;
-  top: 45px;
+  top: 50px;
   right: -25px;
   width: 30px;
+  bottom: 5px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .middle {
   background: #000000;
@@ -153,40 +201,138 @@
   left: 0px;
 }
 .sc-theme .sc-view.ace.popover.solid.sc-workspace-view .sc-workspace-overlay .sc-pointer { z-index: 6; }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-left-edge {
-  top: -20px;
-  height: 75px;
-  background: static_url("images/1.png") no-repeat 0 -50px;
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar {
+  overflow: visible;
+  background: none;
 }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-right-edge {
-  top: -20px;
-  height: 75px;
-  background: static_url("images/1.png") no-repeat 0 -348px;
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay { opacity: 0.9; }
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-left-edge {
+  z-index: auto;
+  height: 70px;
+  background: static_url("images/1.png") no-repeat 0 -423px;
 }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-edge {
-  top: -20px;
-  height: 75px;
-  background: static_url("images/2.png") repeat-x 0 -75px;
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-right-edge {
+  z-index: auto;
+  height: 70px;
+  background: static_url("images/1.png") no-repeat 0 -493px;
 }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .left-edge { top: 55px; }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.top-toolbar .sc-workspace-overlay .right-edge { top: 55px; }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-left-edge {
-  bottom: -20px;
-  height: 75px;
-  background: static_url("images/1.png") no-repeat 0 -273px;
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .top-edge {
+  z-index: auto;
+  height: 70px;
+  background: static_url("images/2.png") repeat-x 0 -150px;
 }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-right-edge {
-  bottom: -20px;
-  height: 75px;
-  background: static_url("images/1.png") no-repeat 0 -198px;
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .bottom-left-edge {
+  left: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 30px;
+  z-index: auto;
+  background: static_url("images/1.png") no-repeat 0 -607px;
 }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-edge {
-  bottom: -20px;
-  height: 75px;
-  background: static_url("images/2.png") repeat-x 0 0;
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .bottom-right-edge {
+  z-index: auto;
+  background: static_url("images/1.png") no-repeat 0 -651px;
+  right: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 30px;
 }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .left-edge { bottom: 55px; }
-.sc-theme .sc-view.ace.popover.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .right-edge { bottom: 55px; }
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .bottom-edge {
+  z-index: auto;
+  background: static_url("images/2.png") repeat-x 0 -948px;
+  left: 15px;
+  right: 15px;
+  bottom: -25px;
+  height: 30px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .left-edge {
+  z-index: auto;
+  top: 50px;
+  bottom: 5px;
+  width: 30px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .right-edge {
+  z-index: auto;
+  top: 50px;
+  right: -25px;
+  width: 30px;
+  bottom: 5px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .middle {
+  background: #000000;
+  position: absolute;
+  top: 45px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.top-toolbar .sc-workspace-overlay .sc-pointer { z-index: 6; }
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar {
+  overflow: visible;
+  background: none;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay { opacity: 0.9; }
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .top-left-edge {
+  z-index: auto;
+  height: 70px;
+  background: static_url("images/1.png") no-repeat 0 -423px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .top-right-edge {
+  z-index: auto;
+  height: 70px;
+  background: static_url("images/1.png") no-repeat 0 -493px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .top-edge {
+  z-index: auto;
+  height: 70px;
+  background: static_url("images/2.png") repeat-x 0 -150px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-left-edge {
+  left: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 30px;
+  z-index: auto;
+  background: static_url("images/1.png") no-repeat 0 -607px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-right-edge {
+  z-index: auto;
+  background: static_url("images/1.png") no-repeat 0 -651px;
+  right: -25px;
+  bottom: -25px;
+  width: 40px;
+  height: 30px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .bottom-edge {
+  z-index: auto;
+  background: static_url("images/2.png") repeat-x 0 -948px;
+  left: 15px;
+  right: 15px;
+  bottom: -25px;
+  height: 30px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .left-edge {
+  z-index: auto;
+  top: 50px;
+  bottom: 5px;
+  width: 30px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .right-edge {
+  z-index: auto;
+  top: 50px;
+  right: -25px;
+  width: 30px;
+  bottom: 5px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .middle {
+  background: #000000;
+  position: absolute;
+  top: 45px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
+.sc-theme .sc-view.ace.popover.solid.sc-workspace-view.bottom-toolbar .sc-workspace-overlay .sc-pointer { z-index: 6; }
 .sc-theme .sc-view.ace.popover.sc-picker.perfectBottom .sc-pointer {
   position: absolute;
   width: 50px;
@@ -1240,17 +1386,17 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-left { background: static_url("images/1.png") no-repeat -42px -1266px; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-right { background: static_url("images/1.png") no-repeat -42px -1046px; }
-.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -264px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.active .button-middle { background: static_url("images/2.png") repeat-x 0 -220px; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-left { background: static_url("images/1.png") no-repeat -42px -827px; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-right { background: static_url("images/1.png") no-repeat -40px -423px; }
-.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -352px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .button-middle { background: static_url("images/2.png") repeat-x 0 -264px; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.sel .sc-button-label {
   color: white;
   text-shadow: 0px -1px 1px black;
 }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-left { background: static_url("images/1.png") no-repeat -42px -827px; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-right { background: static_url("images/1.png") no-repeat -40px -423px; }
-.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -352px; }
+.sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .button-middle { background: static_url("images/2.png") repeat-x 0 -264px; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-button-view.def .sc-button-label {
   color: white;
   text-shadow: 0px -1px 1px black;
