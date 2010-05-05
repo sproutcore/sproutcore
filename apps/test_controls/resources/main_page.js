@@ -41,6 +41,13 @@ TestControls.mainPage = SC.Page.create({
         layout: { width: 250, height: 480 },
         theme: "popover",
         
+        append: function() {
+          this.disableAnimation();
+          this.adjust("opacity", 1).updateLayout();
+          this.enableAnimation();
+          sc_super();
+        },
+        
         remove: function() {
           this._call_when_done = arguments.callee.base;
           this.adjust("opacity", 0);
