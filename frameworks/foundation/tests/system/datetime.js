@@ -199,10 +199,8 @@ test('compare', function() {
   equals(dt.advance({hour: 1}).isEqual(dt), NO);
   equals(SC.compare(dt, dt.advance({hour: 1})), -1);
   equals(SC.compare(dt.advance({hour: 1}), dt), 1);
-  equals(SC.DateTime.compareDate(dt, dt.advance({hour: 1})), 0, 
-    "When using Compare Date, advancing 1 hour within the same day, the dates should be equal");
-  equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1, second: -1})), 0,
-    "When using Compare Date, advancing 1 day, then rolling back 1 second, the dates should be equal");
+  equals(SC.DateTime.compareDate(dt, dt.advance({hour: 1})), 0);
+  equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1, second: -1})), 0);
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1})), -1);
   equals(SC.DateTime.compareDate(dt, dt.advance({day: 1})), -1);
   equals(SC.compare(
@@ -218,7 +216,7 @@ test('compare', function() {
   } catch(e) {
     exception = e;
   } finally {
-    ok(SC.none(exception), "Comparing two dates with a different timezone via compareDate() should not throw an exception.");
+    ok(!SC.none(exception), "Comparing two dates with a different timezone via compareDate() should throw an exception.");
   }
 });
 

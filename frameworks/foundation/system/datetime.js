@@ -33,6 +33,14 @@ SC.SCANNER_SKIP_ERROR = new Error("Did not find the string to skip.");
 SC.SCANNER_SCAN_ARRAY_ERROR = new Error("Did not find any string of the given array to scan.");
 
 /**
+  Standard error thrown when trying to compare two dates in different 
+  timezones.
+  
+  @property {Error}
+*/
+SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
+
+/**
   Standard ISO8601 date format
   
   @property {String}
@@ -1057,21 +1065,12 @@ SC.DateTime.mixin(SC.Comparable,
                        0 if a == b
     @throws {SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR} if the passed arguments
       don't have the same timezone
-      
-    CHANGED: [Josh Holt (JH2)] Instead of throwing the above error we are
-    going to ensure that both of the dates are in the same timezone. To do this
-    we will always convert the timezone of the second DateTime Instance to the 
-    timezone of the first DateTime Instance
-    
   */
   compareDate: function(a, b) {
-    // adjust b's timezone to a's timezone
-    var mb = b.toTimezone(a.get('timezone'));
-    // adjust DateTime Instances to hour 0
-    var ma = a.adjust({ hour: 0 });
-    mb = mb.adjust({ hour: 0 });
-    var ret = ma < mb ? -1 : ma === mb ? 0 : 1;
-    return ret;
+    if (a.get('timezone') !== b.get('timezone')) throw SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR;
+    var ma = a.adjust({hour: 0}).get('milliseconds');
+    var mb = b.adjust({hour: 0}).get('milliseconds');
+    return ma < mb ? -1 : ma === mb ? 0 : 1;
   }
   
 });
