@@ -117,17 +117,18 @@ SC.MasterDetailView = SC.View.extend({
   
   showMasterPicker: function(view) {
     if (this._picker && this._picker.get("isVisibleInWindow")) return;
-    var pp = this.get("pickerPane");
-    this._picker = pp.create({ });
-    this._picker.set("contentView", this.get("masterView"));
-    this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge")); 
+    if (!this._picker) {
+      var pp = this.get("pickerPane");
+      this._picker = pp.create({ });
+      this._picker.set("contentView", this.get("masterView"));
+      this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge"));
+    }
     this.showPicker(this._picker, view);
   },
   
   hideMasterPicker: function() {
     if (this._picker && this._picker.get("isVisibleInWindow")) {
       this.hidePicker(this._picker);
-      this._picker = null;
     }
   },
   
