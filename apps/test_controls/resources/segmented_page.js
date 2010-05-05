@@ -11,7 +11,7 @@ TestControls.segmentedPage = SC.View.design({
   form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    childViews: "header normal disabled multiple multiple_side_by_side".w(),
+    childViews: "header small normal large jumbo disabled multiple multiple_side_by_side".w(),
     
     header: SC.LabelView.design({
       layout: {width:300, height:24},
@@ -19,12 +19,38 @@ TestControls.segmentedPage = SC.View.design({
       value: "Segmented Views "
     }),
     
-    normal: SC.FormView.row(SC.SegmentedView.design({
-      layout: { left: 0, width: 200, height: 24, centerY: 0},
+    small: SC.FormView.row(SC.SegmentedView.design({
+      layout: { left: 0, width: 200, height: 18, centerY: 0},
+      controlSize: SC.SMALL_CONTROL_SIZE,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: null
     })),
+    
+    normal: SC.FormView.row(SC.SegmentedView.design({
+      layout: { left: 0, width: 200, height: 24, centerY: 0},
+      controlSize: SC.REGULAR_CONTROL_SIZE,
+      items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
+      itemTitleKey: "title", itemValueKey: "value",
+      value: null
+    })),
+
+    large: SC.FormView.row(SC.SegmentedView.design({
+      layout: { left: 0, width: 200, height: 30, centerY: 0},
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
+      itemTitleKey: "title", itemValueKey: "value",
+      value: null
+    })),
+
+    jumbo: SC.FormView.row(SC.SegmentedView.design({
+      layout: { left: 0, width: 200, height: 44, centerY: 0},
+      controlSize: SC.JUMBO_CONTROL_SIZE,
+      items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
+      itemTitleKey: "title", itemValueKey: "value",
+      value: null
+    })),
+    
     disabled: SC.FormView.row(SC.SegmentedView.design({
       layout: { left: 0, width: 200, height: 24, centerY: 0},
       isEnabled: NO,
