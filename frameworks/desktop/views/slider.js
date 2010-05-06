@@ -25,13 +25,6 @@ SC.SliderView = SC.View.extend(SC.Control,
   
   classNames: 'sc-slider-view',
   
-  /** 
-    The DOM element that displays the handle.  This element will have its
-    top-left corner updated to reflect the current state of the slider.  Use
-    margin-offsets to properly position your handle over this location.
-  */
-  handleSelector: 'img.sc-handle',
-  
   /**
     Bind this to the current value of the progress bar.  Note that by default 
     an empty value will disable the progress bar and a multiple value too make 
@@ -83,9 +76,11 @@ SC.SliderView = SC.View.extend(SC.Control,
   
   displayProperties: 'value minimum maximum'.w(),
   
-  render: function(context, firstTime) {
-    sc_super();
-    
+  createRenderer: function(t) {
+    return t.slider();
+  },
+  
+  updateRenderer: function(r) {
     var min = this.get('minimum'),
         max = this.get('maximum'),
         value = this.get('value'),
@@ -102,19 +97,10 @@ SC.SliderView = SC.View.extend(SC.Control,
     // determine the percent across
     if(value!==0) value = Math.floor((value - min) / (max - min) * 100);
     
-    if(firstTime) {
-      var blankImage = SC.BLANK_IMAGE_URL;
-      context.push('<span class="sc-inner">',
-                    '<span class="sc-leftcap"></span>',
-                    '<span class="sc-rightcap"></span>',
-                    '<img src="', blankImage, 
-                    '" class="sc-handle" style="left: ', value, '%" />',
-                    '</span>');
-    }
-    else {
-      this.$(this.get('handleSelector')).css('left', value + "%");
-    }
-    
+    // set atributes
+    r.attr({
+      "value": value
+    });
   },
   
   _isMouseDown: NO,
@@ -123,7 +109,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (!this.get('isEnabled')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;
-    return this._triggerHandle(evt, true);
+    return this._triggerHandle(evt, YES);
   },
   
   // mouseDragged uses same technique as mouseDown.
@@ -221,7 +207,7 @@ SC.SliderView = SC.View.extend(SC.Control,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        this.$()[0].focus();
+        if (this.renderer) this.renderer.focus();
       }
     }
   },
