@@ -42,6 +42,10 @@ TestControls.rootCategory = SC.Object.create({
           show: "select_page"
         }),
         SC.Object.create({
+          name: "Sliders",
+          show: "sliders_page"
+        }),
+        SC.Object.create({
           name: "Tabbed View",
           show: "tab_page"
         })

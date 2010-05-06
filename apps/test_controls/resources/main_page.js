@@ -12,6 +12,7 @@ require("resources/checkboxes_page");
 require("resources/radio_page");
 require("resources/select_page");
 require("resources/segmented_page");
+require("resources/sliders_page");
 require("resources/text_field_page");
 require("resources/flow_layout_page");
 require("resources/scroll_page");
@@ -118,6 +119,8 @@ TestControls.mainPage = SC.Page.create({
   radio_page: TestControls.radioPage,
   
   select_page: TestControls.selectPage,
+
+  sliders_page: TestControls.slidersPage,
   
   text_field_page: TestControls.textFieldPage,
   
