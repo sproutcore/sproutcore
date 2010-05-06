@@ -12,10 +12,14 @@ TestControls.selectPage = SC.View.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
     childViews: "header normal disabled".w(),
+    
+    // Plain Views
     header: SC.LabelView.design({
-      classNames: "header".w(),
-      value: "Select Views"
+      layout: { width: 250, height: 18 },
+      value: "Select View",
+      classNames: "header".w()
     }),
+    
     normal: SC.FormView.row(SC.SelectView.design({
       layout: { width: 150, height: 24 },
       items: [

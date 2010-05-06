@@ -12,9 +12,11 @@ TestControls.radioPage = SC.View.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
     childViews: "header normal disabled multiple".w(),
+    // Plain Views
     header: SC.LabelView.design({
-      classNames: "header".w(),
-      value: "Radio Views"
+      layout: { width: 250, height: 18 },
+      value: "Radio Views",
+      classNames: "header".w()
     }),
     normal: SC.FormView.row(SC.RadioView.design({
       layout: { width: 150, height: 60},
