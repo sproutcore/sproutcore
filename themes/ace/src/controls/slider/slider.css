@@ -1,0 +1,3 @@
+@view(sc-slider-view).disabled {
+  opacity: 0.5;
+}
