@@ -1,4 +1,4 @@
-@theme(sc-regular-size)
+@theme(sc-small-size)
 
 @view(sc-slider-view) {
   overflow:visible;
@@ -28,7 +28,7 @@
   
   .sc-handle {
     display: block; position: absolute;
-    width: 16px; height: 18px; top: 50%; margin-top: -8px;
+    width: 14px; height: 16px; top: 50%; margin-top: -7px;
     background: sprite("knob.png");
   }
   
@@ -39,6 +39,5 @@
     background: sprite("knob_active.png");    
   }
 }
-
 
 @end
