@@ -170,7 +170,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   */
   _triggerHandle: function(evt, firstEvent) {
     var width = this.get('frame').width,
-        min = this.get('minimum'), max=this.get('maximum'),  
+        min = this.get('minimum'), max=this.get('maximum'),
         step = this.get('step'), v=this.get('value'), loc;
         
     if(firstEvent){    
@@ -180,19 +180,32 @@ SC.SliderView = SC.View.extend(SC.Control,
       loc = evt.pageX-this._evtDiff;
     }
     
-    // constrain loc to 8px on either side (left to allow knob overhang)
-    loc = Math.max(Math.min(loc,width-8), 8) - 8;
-    width -= 16 ; // reduce by margin
-    
     // convert to percentage
-    loc = loc / width ;
+    loc = Math.max(0, Math.min(loc / width, 1));
+    
+    // if the location is NOT in the general vicinity of the slider, we assume
+    // that the mouse pointer or touch is in the center of where the knob should be.
+    // otherwise, if we are starting, we need to do extra to add an offset
+    if (firstEvent) {
+      var value = this.get("value");
+      value = (value - min) / (max - min);
+      
+      // if the value and the loc are within 16px
+      if (Math.abs(value * width - loc * width) < 16) this._offset = value - loc;
+      else this._offset = 0;
+    }
+    
+    // add offset
+    loc = loc + this._offset;
     
     // convert to value using minimum/maximum then constrain to steps
     loc = min + ((max-min)*loc);
     if (step !== 0) loc = Math.round(loc / step) * step ;
-
+    
     // if changes by more than a rounding amount, set v.
-    if (Math.abs(v-loc)>=0.01) this.set('value', loc); // adjust 
+    if (Math.abs(v-loc)>=0.01) {
+      this.set('value', loc); // adjust 
+    }
     return YES ;
   },
   
