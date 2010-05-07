@@ -111,7 +111,7 @@ CoreTest.Runner = {
     }
 
     if (r.warnings > 0) {
-      str += CoreTest.fmt('&nbsp;<span class="warnings">%@ warnings%@</span>',
+      str += CoreTest.fmt('&nbsp;<span class="warnings">%@ warning%@</span>',
             r.warnings, (r.warnings !== 1 ? 's' : ''));
     }
 
