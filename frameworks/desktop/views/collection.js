@@ -2309,7 +2309,7 @@ SC.CollectionView = SC.View.extend(
         content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1,
         info, anchor ;
-
+        
     // become first responder if possible.
     this.becomeFirstResponder() ;
     
@@ -2332,7 +2332,10 @@ SC.CollectionView = SC.View.extend(
   },
   
   touchEnd: function(touch) {
+    var itemView = this.itemViewForEvent(touch);
     
+    // If actOnSelect is implemented, the action will be fired.
+    this._cv_performSelectAction(itemView, touch, 0);
   },
 
   touchCancelled: function(evt) {
