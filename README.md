@@ -39,6 +39,7 @@ code and ideas:
 - Joshua Dickens
 - Juan Pinzon
 - Majd Taby
+- Matthias Loitsch
 - Martin Ottenwaelter 
 - Maurits Lamers
 - Mike Ball
