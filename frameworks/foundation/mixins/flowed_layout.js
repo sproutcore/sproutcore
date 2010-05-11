@@ -172,7 +172,7 @@ SC.FlowedLayout = {
     
     // then calculated size
     var cw = view.get("calculatedWidth"), ch = view.get("calculatedHeight");
-    if (!SC.none(cw) && !SC.none("calculatedHeight")) return { width: cw, height: ch };
+    if (!SC.none(cw) && !SC.none(ch)) return { width: cw, height: ch };
     
     // finally, use frame
     var f = view.get("frame");
