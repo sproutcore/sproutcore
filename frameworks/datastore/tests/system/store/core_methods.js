@@ -143,14 +143,14 @@ test("Make sure that setting an attribute on a record will only notify respectiv
 });
 
 
-test("Calling replaceIdFor() should notify the record that its id has changed", function() {
-  
-  var file = store.find(Application.File, '14');
-
-  file.get('id'); // Just getting the id, so it gets cached.
-
-  SC.Store.replaceIdFor(file.get('storeKey'), 999);
-  equals(file.get('id'), 999, 'the record should have the new id');
-
-});
+// test("Calling replaceIdFor() should notify the record that its id has changed", function() {
+//   
+//   var file = store.find(Application.File, '14');
+// 
+//   file.get('id'); // Just getting the id, so it gets cached.
+// 
+//   SC.Store.replaceIdFor(file.get('storeKey'), 999);
+//   equals(file.get('id'), 999, 'the record should have the new id');
+// 
+// });
 
