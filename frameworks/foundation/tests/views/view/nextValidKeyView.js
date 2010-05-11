@@ -7,6 +7,8 @@
 /*global module test equals context ok same Q$ htmlbody */
 
 var pane, textfield_view1, textfield_view2, textfield_view3, view1, view2, view3, view4, view5;
+
+var OLD;
     
 module("SC.View#nextValidKeyView", {
   setup: function() {
@@ -44,10 +46,24 @@ module("SC.View#nextValidKeyView", {
     view3 = pane.childViews[4];
     view4 = pane.childViews[5];
     view5 = pane.childViews[7];
+    
+    OLD = {
+      SAFARI_FOCUS_BEHAVIOR: SC.SAFARI_FOCUS_BEHAVIOR,
+      TABBING_ONLY_INSIDE_DOCUMENT: SC.TABBING_ONLY_INSIDE_DOCUMENT
+    };
+
+    SC.SAFARI_FOCUS_BEHAVIOR = YES;
+    SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
+    
   },
   
 
   teardown: function() { 
+    
+    // restore old settings
+    SC.SAFARI_FOCUS_BEHAVIOR = OLD.SAFARI_FOCUS_BEHAVIOR;
+    SC.TABBING_ONLY_INSIDE_DOCUMENT = OLD.TABBING_ONLY_INSIDE_DOCUMENT;
+
     SC.RunLoop.begin();
     pane.remove();
     pane = textfield_view1 = textfield_view2 = textfield_view3 = view1 = view2 = view3 = null;
@@ -57,8 +73,11 @@ module("SC.View#nextValidKeyView", {
 
 test("Navigate between textfields- going forward", function() {
   SC.SAFARI_FOCUS_BEHAVIOR = YES;
+  SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
+  
   var v = view2.nextValidKeyView();
   same(v, textfield_view3, "The next view should be " + textfield_view3.toString());
+  
   v = textfield_view3.nextValidKeyView();
   same(v, null, "The next view should be null");
 });

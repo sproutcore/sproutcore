@@ -84,31 +84,31 @@
   test("changing nowShowing", function() {
     var view = pane.view('basic');
     // Set nowShowing to an instantiated object.
-    var viewToAdd = SC.LabelView.create({value = 'Test view.'});
+    var viewToAdd = SC.LabelView.create({value: 'Test view.'});
     view.set('nowShowing', viewToAdd);
     ok(view.get('contentView') instanceof SC.View, 'contentView changes as intended when an instantiated view is passed to nowShowing');
     
     // Set nowShowing to an uninstantiated object.
-    var viewToAdd = SC.LabelView.design({value = 'Test view.'});
+    viewToAdd = SC.LabelView.design({value: 'Test view.'});
     view.set('nowShowing', viewToAdd);
     ok(view.get('contentView') instanceof SC.View, 'contentView changes as intended when an uninstantiated view (class) is passed to nowShowing');
     
     // Set nowShowing to a non-view object.
-    var viewToAdd = SC.Record;
+    viewToAdd = SC.Object;
     view.set('nowShowing', viewToAdd);
-    ok(SC.typeOf(view.get('contentView')) === SC.T_NULL, 'contentView changes to null when nowShowing is set to a non-view');
+    equals(view.get('contentView'), null, 'contentView changes to null when nowShowing is set to a non-view');
     
     // Set nowShowing to a string.  (How, here?) (No idea.)
     
     // Set nowShowing to a nonexistent string.
-    var viewToAdd = 'NonexistentNamespace.NonexistentViewClass';
+    viewToAdd = 'NonexistentNamespace.NonexistentViewClass';
     view.set('nowShowing', viewToAdd);
-    ok(SC.typeOf(view.get('contentView')) === SC.T_NULL, 'contentView changes to null when nowShowing is set to a string pointing at nothing');
+    equals(view.get('contentView'), null, 'contentView changes to null when nowShowing is set to a string pointing at nothing');
     
     // Set nowShowing to null.
-    var viewToAdd = null;
+    viewToAdd = null;
     view.set('nowShowing', viewToAdd);
-    ok(SC.typeOf(view.get('contentView')) === SC.T_NULL, 'contentView changes to null when nowShowing is set to null');
+    equals(view.get('contentView'), null, 'contentView changes to null when nowShowing is set to null');
     
   });
 
