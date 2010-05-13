@@ -199,11 +199,15 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   },
   
   renderRightIcon: function(context) {
-    this.renderIcon(context, this.rightIcon, "right-icon");
+    if (this.rightIcon) {
+      this.renderIcon(context, this.rightIcon, "right-icon");
+    }
   },
   
   updateRightIcon: function() {
-    this.updateIcon(this.rightIcon, "right-icon");
+    if (this.rightIcon) {
+      this.updateIcon(this.rightIcon, "right-icon");
+    }
   },
   
   renderCount: function(context) {
