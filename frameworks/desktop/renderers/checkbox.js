@@ -26,38 +26,40 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
     this._titleRenderer = this.theme.title();
     this.attr(settings);
   },
+
   render: function(context) {
-    // configure sub renderers
     this._controlRenderer.attr({
       isEnabled: this.isEnabled,
       isActive: this.isActive,
       isSelected: this.isSelected,
       controlSize: this.controlSize
     });
-    this._titleRenderer.attr({
-      title: this.title,
-      icon: this.icon,
-      needsEllipsis: this.needsEllipsis,
-      escapeHTML: this.escapeHTML
-    });
     
-    // render control renderer
     this._controlRenderer.render(context);
     
-    /* Render OUR stuff */
     // write button
     context.attr('role', 'checkbox');
     if (SC.browser.msie) context.attr('for', this.guid);
     context.push('<span class="button"></span>');
     
     // write label
-    context = context.begin("span").addClass("label");
-    this._titleRenderer.render(context);
-    context = context.end();
-    
+    if (this.title || this.icon) {
+      this._titleRenderer.attr({
+        title: this.title,
+        icon: this.icon,
+        needsEllipsis: this.needsEllipsis,
+        escapeHTML: this.escapeHTML
+      });
+
+      context = context.begin("span").addClass("label");
+      this._titleRenderer.render(context);
+      context = context.end();
+    }
+
     // set name
     context.attr('name', this.name);
     context.attr("aria-checked", this.ariaValue);
+
     this.resetChanges();
   },
   
@@ -68,20 +70,20 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
       isSelected: this.isSelected,
       controlSize: this.controlSize
     });
-    this._titleRenderer.attr({
-      title: this.title,
-      icon: this.icon,
-      needsEllipsis: this.needsEllipsis,
-      escapeHTML: this.escapeHTML
-    });
     
-    // do actual updating
-    this._controlRenderer.update();    
-    var classes, theme, q = this.$();
+    this._controlRenderer.update();
+
+    if (this.didChange('title') || this.didChange('icon')) {
+      this._titleRenderer.attr({
+        title: this.title,
+        icon: this.icon,
+        needsEllipsis: this.needsEllipsis,
+        escapeHTML: this.escapeHTML
+      });
+      this._titleRenderer.update();
+    }
     
-    this._titleRenderer.update();
-    
-    if (this.didChange('ariaValue')) q.attr("aria-checked", this.ariaValue);
+    if (this.didChange('ariaValue')) this.$().attr("aria-checked", this.ariaValue);
     this.resetChanges();
   },
   
