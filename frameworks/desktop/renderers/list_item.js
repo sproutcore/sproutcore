@@ -32,9 +32,10 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     classes.push((this.contentIndex % 2 === 0) ? 'even' : 'odd');
     if (!this.isEnabled) classes.push('disabled');
     if (this.disclosureState) classes.push('has-disclosure');
-    if (this.checkbox) classes.push('has-checkbox');
+    if (!SC.none(this.checkbox)) classes.push('has-checkbox');
     if (this.icon) classes.push('has-icon');
     if (this.rightIcon) classes.push('has-right-icon');
+    if (!SC.none(this.branch)) classes.push('has-branch');
     if (this.count) {
       classes.push('has-count');
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
@@ -76,9 +77,10 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     classes[(this.contentIndex % 2 === 0) ? 'even' : 'odd'] = YES;
     if (!this.isEnabled) classes['disabled'] = YES;
     if (this.disclosureState) classes['has-disclosure'];
-    if (this.checkbox) classes['has-checkbox'] = YES;
+    if (!SC.none(this.checkbox)) classes['has-checkbox'] = YES;
     if (this.icon) classes['has-icon'] = YES;
     if (this.rightIcon) classes['has-right-icon'] = YES;
+    if (!SC.none(this.branch)) classes['has-branch'] = YES;
     if (this.count) {
       classes['has-count'] = YES;
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
@@ -101,7 +103,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   didAttachLayer: function(layer){
     this._controlRenderer.attachLayer(layer);
     if (this._disclosureRenderer) this._disclosureRenderer.attachLayer(layer);
-    if (this._checkboxRenderer) this._checkboxRenderer.attachLayer(this.provide("div"));
+    if (this._checkboxRenderer) this._checkboxRenderer.attachLayer(this.provide(".sc-checkbox-view"));
   },
   
   willDetachLayer: function() {
@@ -135,14 +137,14 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   renderCheckbox: function(context) {
     var state = this.checkbox, renderer;
-    if (state) {
+    if (!SC.none(state)) {
       if (!(renderer = this._checkboxRenderer)) {
         renderer = this._checkboxRenderer = this.theme.checkbox();
       }
-      
       renderer.attr({
-        ariaValue: state,
+        ariaValue: state ? "true" : "false",
         isEnabled: this.isEnabled && this.contentIsEditable,
+        isSelected: state,
         name: SC.guidFor(this)
       });
       
@@ -156,8 +158,9 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     var renderer = this._checkboxRenderer;
     if (renderer) {
       renderer.attr({
-        ariaValue: this.checkbox,
+        ariaValue: this.checkbox ? "true" : "false",
         isEnabled: this.isEnabled && this.contentIsEditable,
+        isSelected: this.checkbox,
         name: SC.guidFor(this)
       });
       renderer.update();
@@ -192,7 +195,8 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   updateLabel: function() {
     var label = this.escapeHTML ? SC.RenderContext.escapeHTML(this.label) : this.label;
-    this.$("label")[0].innerHtml = label;
+    SC.Logger.log("Label update", label);
+    this.$("label")[0].innerHTML = label;
   },
   
   renderRightIcon: function(context) {
@@ -205,7 +209,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   renderCount: function(context) {
     var count = this.count;
-    if (count) {
+    if (!SC.none(count) && (count !== 0)) {
       context.push(
         '<span class="count"><span class="inner">',
           count.toString(),
@@ -215,25 +219,28 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   },
   
   updateCount: function() {
-    var count = this.count;
-    if (count) {
-      this.$(".count .inner").text(count.toString());
+    var count = this.count,
+        cq = this.$(".count");
+    if (!SC.none(count) && (count !== 0)) {
+      cq.find(".inner").text(count.toString());
+    } else if (cq.size() > 0) {
+      cq[0].parentNode.removeChild(cq[0]);
     }
   },
   
   renderBranch: function(context) {
-    var hasBranch = this.hasBranch;
-    if (hasBranch) {
-      context.push('<span class="' + (hasBranch ? 'branch-visible' : 'branch-hidden') + '">&nbsp;</span>');
+    var branch = this.branch;
+    if (!SC.none(branch)) {
+      context.push('<span class="branch ' + (branch ? 'branch-visible' : 'branch-hidden') + '">&nbsp;</span>');
     }
   },
   
   updateBranch: function() {
-    var hasBranch = this.hasBranch;
-    if (hasBranch) {
+    var branch = this.branch;
+    if (!SC.none(branch)) {
       var elem = this.$("span.branch");
-      elem.setClass('branch-visible', hasBranch);
-      elem.setClass('branch-hidden', !hasBranch);
+      elem.setClass('branch-visible', branch);
+      elem.setClass('branch-hidden', !branch);
     }
   }
   

@@ -233,9 +233,7 @@ SC.ListItemView = SC.View.extend(
     // unread count
     key = this.getDelegateProperty('contentUnreadCountKey', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
-    if (!SC.none(value) && (value !== 0)) {
-      attrs.count = value;
-    }
+    attrs.count = value;
     
     // WTF does the listItemActionProperty do?
     // its render function does essentially nothing?
