@@ -60,15 +60,39 @@
 
 /* @group Icon */
 
-.sc-list-item-view img.icon {
-	position: absolute ;
-	left: 5px;
-	top: 50%;
+.sc-list-item-view img.icon,
+.sc-list-item-view img.right-icon {
 	margin-top: -9px;
+	position: absolute;
+	top: 50%;
+}
+
+.sc-list-item-view img.icon {
+	left: 5px;
 }
 
 .sc-list-item-view.has-checkbox img.icon {
 	left: 25px;
+}
+
+.sc-list-item-view img.right-icon {
+  right: 5px;
+}
+
+.sc-list-item-view.has-count img.right-icon {
+  right: 32px;
+}
+.sc-list-item-view.has-count.two-digit img.right-icon {
+  right: 38px;
+}
+.sc-list-item-view.has-count.three-digit img.right-icon {
+  right: 44px;
+}
+.sc-list-item-view.has-count.four-digit img.right-icon {
+  right: 50px;
+}
+.sc-list-item-view.has-count.five-digit img.right-icon {
+  right: 56px;
 }
 
 /* @end */
