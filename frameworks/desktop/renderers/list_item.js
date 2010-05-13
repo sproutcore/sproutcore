@@ -41,7 +41,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
       var valueLength = this.count.toString().length;
       var digitsLength = digits.length;
       var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
-      classes.push('has-count ' + digit + '-digit');
+      classes.push(digit + '-digit');
     }
     context.addClass(classes);
     
@@ -63,7 +63,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   },
   
   update: function() {
-    var classes = [];
+    var classes = {};
     
     this._controlRenderer.attr({
       isEnabled: this.isEnabled,
@@ -73,23 +73,20 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     });
     this._controlRenderer.update();
     
-    classes.push((this.contentIndex % 2 === 0) ? 'even' : 'odd');
-    if (!this.isEnabled) classes.push('disabled');
-    if (this.disclosureState) classes.push('has-disclosure');
-    if (this.checkbox) classes.push('has-checkbox');
-    if (this.icon) classes.push('has-icon');
-    if (this.rightIcon) classes.push('has-right-icon');
+    classes[(this.contentIndex % 2 === 0) ? 'even' : 'odd'] = YES;
+    if (!this.isEnabled) classes['disabled'] = YES;
+    if (this.disclosureState) classes['has-disclosure'];
+    if (this.checkbox) classes['has-checkbox'] = YES;
+    if (this.icon) classes['has-icon'] = YES;
+    if (this.rightIcon) classes['has-right-icon'] = YES;
     if (this.count) {
-      classes.push('has-count');
+      classes['has-count'] = YES;
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
       var valueLength = this.count.toString().length;
       var digitsLength = digits.length;
       var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
-      classes.push(digit + '-digit');
+      classes[digit + '-digit'] = YES;
     }
-    /*
-      TODO For some reason, these classes aren't applying to the element
-    */
     this.$().setClass(classes);
     
     this.updateDisclosure();
