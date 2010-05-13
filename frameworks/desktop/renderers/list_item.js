@@ -195,7 +195,6 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   updateLabel: function() {
     var label = this.escapeHTML ? SC.RenderContext.escapeHTML(this.label) : this.label;
-    SC.Logger.log("Label update", label);
     this.$("label")[0].innerHTML = label;
   },
   
