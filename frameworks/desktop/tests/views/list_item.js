@@ -129,7 +129,7 @@ function basic(view, sel, disabled) {
   equals(cq.hasClass('disabled'), !!disabled, 'expect disabled class');
   
   var idx = view.get('contentIndex');
-  var evenOrOdd = (idx % 2 == 0) ? 'even' : 'odd';
+  var evenOrOdd = (idx % 2 === 0) ? 'even' : 'odd';
   ok(cq.hasClass(evenOrOdd), 'should have an %@ class'.fmt(evenOrOdd));
 }
 
