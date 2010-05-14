@@ -35,7 +35,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   routeTouch: NO,
   
   createRenderer: function(t) {
-    return t.checkbox();
+    return t.checkboxControl();
   },
   
   updateRenderer: function(r) {
