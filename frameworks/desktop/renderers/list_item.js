@@ -18,33 +18,11 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   render: function(context) {
     var indent = this.outlineIndent,
-        level = this.outlineLevel,
-        classes = [];
+        level = this.outlineLevel;
     
-    this._controlRenderer.attr({
-      isEnabled: this.isEnabled,
-      isActive: this.isActive,
-      isSelected: this.isSelected,
-      controlSize: this.controlSize
-    });
-    this._controlRenderer.render(context);
+    this.renderControlRenderer(context);
     
-    classes.push((this.contentIndex % 2 === 0) ? 'even' : 'odd');
-    if (!this.isEnabled) classes.push('disabled');
-    if (this.disclosureState) classes.push('has-disclosure');
-    if (!SC.none(this.checkbox)) classes.push('has-checkbox');
-    if (this.icon) classes.push('has-icon');
-    if (this.rightIcon) classes.push('has-right-icon');
-    if (!SC.none(this.branch)) classes.push('has-branch');
-    if (this.count) {
-      classes.push('has-count');
-      var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
-      var valueLength = this.count.toString().length;
-      var digitsLength = digits.length;
-      var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
-      classes.push(digit + '-digit');
-    }
-    context.addClass(classes);
+    context.setClass(this.calculateClasses());
     
     context = context.begin("div").addClass("sc-outline");
     
@@ -64,32 +42,8 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   },
   
   update: function() {
-    var classes = {};
-    
-    this._controlRenderer.attr({
-      isEnabled: this.isEnabled,
-      isActive: this.isActive,
-      isSelected: this.isSelected,
-      controlSize: this.controlSize
-    });
-    this._controlRenderer.update();
-    
-    classes[(this.contentIndex % 2 === 0) ? 'even' : 'odd'] = YES;
-    if (!this.isEnabled) classes['disabled'] = YES;
-    if (this.disclosureState) classes['has-disclosure'];
-    if (!SC.none(this.checkbox)) classes['has-checkbox'] = YES;
-    if (this.icon) classes['has-icon'] = YES;
-    if (this.rightIcon) classes['has-right-icon'] = YES;
-    if (!SC.none(this.branch)) classes['has-branch'] = YES;
-    if (this.count) {
-      classes['has-count'] = YES;
-      var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
-      var valueLength = this.count.toString().length;
-      var digitsLength = digits.length;
-      var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
-      classes[digit + '-digit'] = YES;
-    }
-    this.$().setClass(classes);
+    this.updateControlRenderer();
+    this.$().setClass(this.calculateClasses());
     
     this.updateDisclosure();
     this.updateCheckbox();
@@ -110,6 +64,46 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     this._controlRenderer.detachLayer();
     if (this._disclosureRenderer) this._disclosureRenderer.detachLayer();
     if (this._checkboxRenderer) this._checkboxRenderer.detachLayer();
+  },
+  
+  calculateClasses: function() {
+    var classes = {};
+    classes[(this.contentIndex % 2 === 0) ? 'even' : 'odd'] = YES;
+    if (!this.isEnabled) classes['disabled'] = YES;
+    if (this.disclosureState) classes['has-disclosure'];
+    if (!SC.none(this.checkbox)) classes['has-checkbox'] = YES;
+    if (this.icon) classes['has-icon'] = YES;
+    if (this.rightIcon) classes['has-right-icon'] = YES;
+    if (!SC.none(this.branch)) classes['has-branch'] = YES;
+    if (this.count) {
+      classes['has-count'] = YES;
+      var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
+      var valueLength = this.count.toString().length;
+      var digitsLength = digits.length;
+      var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
+      classes[digit + '-digit'] = YES;
+    }
+    return classes;
+  },
+  
+  renderControlRenderer: function(context) {
+    this._controlRenderer.attr({
+      isEnabled: this.isEnabled,
+      isActive: this.isActive,
+      isSelected: this.isSelected,
+      controlSize: this.controlSize
+    });
+    this._controlRenderer.render(context);
+  },
+  
+  updateControlRenderer: function() {
+    this._controlRenderer.attr({
+      isEnabled: this.isEnabled,
+      isActive: this.isActive,
+      isSelected: this.isSelected,
+      controlSize: this.controlSize
+    });
+    this._controlRenderer.update();
   },
   
   renderDisclosure: function(context) {
