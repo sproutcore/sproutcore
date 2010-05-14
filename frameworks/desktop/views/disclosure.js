@@ -56,24 +56,7 @@ SC.DisclosureView = SC.ButtonView.extend(
       title: this.get('displayTitle')
     });
   },
-  
-  /** @private */
-  // render: function(context, firstTime) {
-  //   var title = this.get('displayTitle');
-  //   if(firstTime) {
-  //     context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" alt="" />');
-  //     if(this.get('needsEllipsis')) {
-  //       context.push('<span class="ellipsis sc-button-label">',title,'</span>');
-  //     }
-  //     else {
-  //       context.push('<span class="sc-button-label">', title,'</span>');  
-  //     }
-  //   }
-  //   else {
-  //     this.$('label').text(title);
-  //   }
-  // },
-  
+    
   /**
     Allows toggling of the value with the right and left arrow keys. 
     Extends the behavior inherted from SC.ButtonView.
