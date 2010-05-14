@@ -199,7 +199,7 @@ SC.ListItemView = SC.View.extend(
     // disclosure
     value = this.get('disclosureState');
     if (value !== SC.LEAF_NODE) {
-      attrs.disclosureState = value;
+      attrs.disclosureState = value === SC.BRANCH_OPEN ? YES : NO;
     }
     
     // checkbox

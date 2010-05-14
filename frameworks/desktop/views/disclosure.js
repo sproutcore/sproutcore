@@ -39,22 +39,40 @@ SC.DisclosureView = SC.ButtonView.extend(
   /** @private */
   valueBindingDefault: SC.Binding.bool() ,
   
-  /** @private */
-  render: function(context, firstTime) {
-    var title = this.get('displayTitle');
-    if(firstTime) {
-      context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" alt="" />');
-      if(this.get('needsEllipsis')) {
-        context.push('<span class="ellipsis sc-button-label">',title,'</span>');
-      }
-      else {
-        context.push('<span class="sc-button-label">', title,'</span>');  
-      }
-    }
-    else {
-      this.$('label').text(title);
-    }
+  createRenderer: function(theme) {
+    var ret = theme.disclosureControl();
+    this.updateRenderer(ret);
+    return ret;
   },
+  
+  updateRenderer: function(renderer) {
+    renderer.attr({
+      icon: this.get('icon'),
+      isActive: this.get('isActive'),
+      isEnabled: this.get('isEnabled'),
+      isSelected: this.get('isSelected'),
+      needsEllipsis: this.get('needsEllipsis'),
+      state: this.value === this.get('toggleOnValue') ? YES : NO,
+      title: this.get('displayTitle')
+    });
+  },
+  
+  /** @private */
+  // render: function(context, firstTime) {
+  //   var title = this.get('displayTitle');
+  //   if(firstTime) {
+  //     context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" alt="" />');
+  //     if(this.get('needsEllipsis')) {
+  //       context.push('<span class="ellipsis sc-button-label">',title,'</span>');
+  //     }
+  //     else {
+  //       context.push('<span class="sc-button-label">', title,'</span>');  
+  //     }
+  //   }
+  //   else {
+  //     this.$('label').text(title);
+  //   }
+  // },
   
   /**
     Allows toggling of the value with the right and left arrow keys. 
