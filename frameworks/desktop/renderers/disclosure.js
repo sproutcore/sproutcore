@@ -12,20 +12,60 @@
 SC.BaseTheme.renderers.Disclosure = SC.Renderer.extend({
   
   init: function(settings) {
+    this._controlRenderer = this.theme.control();
     this.attr(settings);
   },
   
   render: function(context) {
-    var state = this.state === SC.BRANCH_OPEN ? "open" : "closed";
-    context.push('<img src="' + SC.BLANK_IMAGE_URL + '" class="disclosure button ' + state + '" />');
+    this.renderControlRenderer(context);
+    
+    var state = this.state ? "open" : "closed";
+    context.push('<img src="' + SC.BLANK_IMAGE_URL + '" class="disclosure button ' + state + '" />');    
   },
   
   update: function(context) {
-    var state = this.state === SC.BRANCH_OPEN ? "open" : "closed",
-        elem = this.$();
+    this.updateControlRenderer();
     
-    elem.setClass("open", state === "open");
-    elem.setClass("closed", state !== "closed");
+    var state = this.state,
+        elem = this.$("img");
+    
+    elem.setClass("open", state);
+    elem.setClass("closed", !state);
+  },
+  
+  renderControlRenderer: function(context) {
+    this._controlRenderer.attr({
+      controlSize: this.controlSize,
+      isActive: this.isActive,
+      isEnabled: this.isEnabled,
+      isSelected: this.isSelected
+    });
+    
+    this._controlRenderer.render(context);
+  },
+  
+  updateControlRenderer: function() {
+    this._controlRenderer.attr({
+      controlSize: this.controlSize,
+      isActive: this.isActive,
+      isEnabled: this.isEnabled,
+      isSelected: this.isSelected
+    });
+    
+    this._controlRenderer.update();
+  },
+  
+  focus: function() {
+    var elem = this.$()[0];
+    elem.focus();
+  },
+  
+  didAttachLayer: function(layer){
+    this._controlRenderer.attachLayer(layer);
+  },
+  
+  willDetachLayer: function() {
+    this._controlRenderer.detachLayer();
   }
   
 });

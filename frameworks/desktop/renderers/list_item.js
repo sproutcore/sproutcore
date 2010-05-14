@@ -114,10 +114,10 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   renderDisclosure: function(context) {
     var state = this.disclosureState, renderer;
-    if (state) {
+    if (!SC.none(state)) {
       if (!(renderer = this._disclosureRenderer)) {
         renderer = this._disclosureRenderer = this.theme.disclosure();
-      }      
+      }
       renderer.attr({
         state: this.disclosureState
       });
