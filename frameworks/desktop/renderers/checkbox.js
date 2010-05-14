@@ -9,8 +9,8 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-
 SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
+
   controlSizeArray: [14, 16], // pre-create for performance (purely optional optimization)
   controlSizes: {
     14: SC.SMALL_CONTROL_SIZE,
@@ -22,12 +22,30 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
       controlSizes: this.controlSizes,
       controlSizeArray: this.controlSizeArray // purely optional optimization
     });
-    
-    this._titleRenderer = this.theme.title();
     this.attr(settings);
   },
 
   render: function(context) {
+    this.renderControlRenderer(context);
+    
+    context.attr('role', 'checkbox');
+    if (SC.browser.msie) context.attr('for', this.guid);
+    context.attr('name', this.name);
+    context.attr("aria-checked", this.ariaValue);
+    context.push('<span class="button"></span>');
+    
+    this.resetChanges();
+  },
+
+  update: function() {
+    this.updateControlRenderer();
+    
+    if (this.didChange('ariaValue')) this.$().attr("aria-checked", this.ariaValue);
+    
+    this.resetChanges();
+  },
+  
+  renderControlRenderer: function(context) {
     this._controlRenderer.attr({
       isEnabled: this.isEnabled,
       isActive: this.isActive,
@@ -36,66 +54,26 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
     });
     
     this._controlRenderer.render(context);
-    
-    // write button
-    context.attr('role', 'checkbox');
-    if (SC.browser.msie) context.attr('for', this.guid);
-    context.push('<span class="button"></span>');
-    
-    // write label
-    if (this.title || this.icon) {
-      this._titleRenderer.attr({
-        title: this.title,
-        icon: this.icon,
-        needsEllipsis: this.needsEllipsis,
-        escapeHTML: this.escapeHTML
-      });
-
-      context = context.begin("span").addClass("label");
-      this._titleRenderer.render(context);
-      context = context.end();
-    }
-
-    // set name
-    context.attr('name', this.name);
-    context.attr("aria-checked", this.ariaValue);
-
-    this.resetChanges();
   },
   
-  update: function() {
+  updateControlRenderer: function() {
     this._controlRenderer.attr({
       isEnabled: this.isEnabled,
       isActive: this.isActive,
       isSelected: this.isSelected,
       controlSize: this.controlSize
     });
-    
     this._controlRenderer.update();
-
-    if (this.didChange('title') || this.didChange('icon')) {
-      this._titleRenderer.attr({
-        title: this.title,
-        icon: this.icon,
-        needsEllipsis: this.needsEllipsis,
-        escapeHTML: this.escapeHTML
-      });
-      this._titleRenderer.update();
-    }
-    
-    if (this.didChange('ariaValue')) this.$().attr("aria-checked", this.ariaValue);
-    this.resetChanges();
   },
   
   didAttachLayer: function(layer){
-    this._titleRenderer.attachLayer(this.provide("span.label"));
     this._controlRenderer.attachLayer(layer);
   },
   
   willDetachLayer: function() {
-    this._titleRenderer.detachLayer();
     this._controlRenderer.detachLayer();
   }
+
 });
 
 SC.BaseTheme.renderers.checkbox = SC.BaseTheme.renderers.Checkbox.create();
