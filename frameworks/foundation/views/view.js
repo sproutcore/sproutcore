@@ -973,8 +973,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
     // Sets cursor class, if present.
     cursor = this.get('cursor');
-    if (!cursor) {
-      // Forces cursor inheritence if available.
+    if (!cursor && this.get('shouldInheritCursor')) {
+      // If this view has no cursor and should inherit it from the parent, then
+      // it sets its own cursor view.  This sets the cursor rather than simply
+      // using the parent's cursor object so that its cursorless childViews can
+      // also inherit it.
       this.set('cursor', this.getPath('parentView.cursor'));
       cursor = this.get('cursor');
     }
