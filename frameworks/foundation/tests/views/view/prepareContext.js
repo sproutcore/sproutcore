@@ -170,7 +170,7 @@ test("Properly sets cursor class", function() {
   var cursor = SC.Cursor.create({className: 'testClass'});
   view.set('cursor', cursor);
   view.prepareContext(context, YES);
-  ok(context.hasClass(cursor.get('className')), 'Should have cursor object's class');
+  ok(context.hasClass(cursor.get('className')), "Should have cursor object's class");
   //TODO: Test for setting string.
   //TODO: Test for string inheritance.
 });
