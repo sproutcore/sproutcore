@@ -1119,6 +1119,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   cursor: null,
   
+  /**
+    A child view without a cursor of its own inherits its parent's cursor by
+    default.  Set this to NO to prevent this behavior.
+    
+    @property {Boolean}
+  */
+  shouldInheritCursor: YES,
+  
   // ..........................................................
   // LAYER LOCATION
   // 
