@@ -1110,12 +1110,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   displayProperties: ['isFirstResponder', 'isVisible'],
   
   /**
-    You can set this to an SC.Cursor instance; it's className will 
-    automatically be added to the layer's classNames. The cursor is only used 
-    when a layer is first created.  If you change the cursor for an element, 
-    you must destroy and recreate the view layer.
+    You can set this to an SC.Cursor instance; its class name will 
+    automatically be added to the layer's classNames, allowing you
+    to efficiently change the cursor for a large group of views with
+    just one change to the SC.Cursor object.  The cursor property
+    is only used when the layer is created, so if you need to change
+    it to a different cursor object, you will have to destroy and
+    recreate the view layer.  (In this case you might investigate
+    setting cursors using CSS directly instead of SC.Cursor.)
     
-    @property {SC.Cursor}
+    @property {SC.Cursor String}
   */
   cursor: null,
   
