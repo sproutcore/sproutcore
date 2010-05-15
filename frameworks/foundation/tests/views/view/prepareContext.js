@@ -172,5 +172,9 @@ test("Properly sets cursor class", function() {
   view.prepareContext(context, YES);
   ok(context.hasClass(cursor.get('className')), "Should have cursor object's class");
   //TODO: Test for setting string.
-  //TODO: Test for string inheritance.
+  var view2 = SC.View.create();
+  view.appendChild(view2);
+  var context = view2.renderContext();
+  view2.prepareContext(context, YES);
+  ok(context.hasClass(cursor.get('className')), "Cursorless child view should inherit parent view's cursor.");
 });
