@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2009 Apple Inc. and contributors.
+// Copyright: ï¿½2006-2009 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -164,3 +164,13 @@ test("invokes renderMixin() from mixins, passing context & firstTime", function(
 	equals(runCount, 2, 'did invoke renderMixin() from both mixins');
 });
 
+test("Properly sets cursor class", function() {
+  var view = SC.View.create();
+  var context = view.renderContext();
+  var cursor = SC.Cursor.create({className: 'testClass'});
+  view.set('cursor', cursor);
+  view.prepareContext(context, YES);
+  ok(context.hasClass(cursor.get('className')), 'Should have cursor object's class');
+  //TODO: Test for setting string.
+  //TODO: Test for string inheritance.
+});
