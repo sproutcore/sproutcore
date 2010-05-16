@@ -339,6 +339,14 @@ test("changing checkbox value should update display", function() {
   var view = pane.view('full');
   adjustContent(view, 'checkbox', NO);
   checkbox(view, NO); // verify change
+  
+  // changing to null should remove checkbox view
+  adjustContent(view, 'checkbox', null);
+  checkbox(view, null);
+
+  // changing back to YES should add the checkbox back
+  adjustContent(view, 'checkbox', YES);
+  checkbox(view, YES);
 });
 
 test("changing count value should update display", function() {
