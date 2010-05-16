@@ -28,7 +28,9 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentCheckboxKey: 'checkbox',
     contentIconKey:  "icon",
     contentUnreadCountKey: 'count',
-    contentIsBranchKey: 'branch'
+    contentIsBranchKey: 'branch',
+    
+    disclosureState: SC.BRANCH_OPEN
 
   }))
 
@@ -55,7 +57,9 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentCheckboxKey: 'checkbox',
     contentIconKey:  "icon",
     contentUnreadCountKey: 'count',
-    contentIsBranchKey: 'branch'
+    contentIsBranchKey: 'branch',
+    
+    disclosureState: SC.BRANCH_OPEN
 
   }))
   
@@ -70,6 +74,18 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentIconKey:  "icon",
     hasContentIcon:  YES
 
+  }))
+
+  .add("disclosure - YES", SC.ListItemView.design({ 
+    content: SC.Object.create({ title: "List Item" }),
+    contentValueKey: "title",
+    disclosureState: SC.BRANCH_OPEN
+  }))
+
+  .add("disclosure - NO", SC.ListItemView.design({ 
+    content: SC.Object.create({ title: "List Item" }),
+    contentValueKey: "title",
+    disclosureState: SC.BRANCH_CLOSED
   }))
 
   .add("checkbox - YES", SC.ListItemView.design({ 
@@ -151,6 +167,16 @@ function icon(view, spriteName) {
   }
 }
 
+function disclosure(view, state) {
+  if (state === null) {
+    equals(view.$('.sc-disclosure-view').size(), 0, "should not have disclosure");
+  } else {
+    var cq = view.$('.sc-disclosure-view');
+    equals(cq.size(), 1, "should have disclosure element");
+    equals(cq.hasClass('sel'), state === true, "disclosure expects sel class");
+  }
+}
+
 function checkbox(view, state) {
   if (state === null) {
     equals(view.$('.sc-checkbox-view').size(), 0, 'should not have checkbox');
@@ -194,6 +220,7 @@ test("basic", function() {
   basic(view, NO, NO);
   icon(view, null);
   label(view, 'List Item');
+  disclosure(view, null);
   checkbox(view, null);
   count(view, null);
   branch(view, null);
@@ -204,6 +231,7 @@ test("full", function() {
   basic(view, NO, NO);
   icon(view, 'sc-icon-folder-16');
   label(view, 'List Item');
+  disclosure(view, YES);
   checkbox(view, YES);
   count(view, 23);
   branch(view, YES);
@@ -214,6 +242,7 @@ test("full - sel", function() {
   basic(view, YES, NO);
   icon(view, 'sc-icon-folder-16');
   label(view, 'List Item');
+  disclosure(view, YES);
   checkbox(view, YES);
   count(view, 23);
   branch(view, YES);
@@ -222,6 +251,11 @@ test("full - sel", function() {
 test("icon", function() {
   var view = pane.view('icon');
   icon(view, 'sc-icon-folder-16');
+});
+
+test('disclosure', function() {
+  disclosure(pane.view('disclosure - YES'), YES);
+  disclosure(pane.view('disclosure - NO'), NO);
 });
 
 test('checkbox', function() {
