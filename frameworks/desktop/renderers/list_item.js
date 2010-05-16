@@ -189,9 +189,21 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     }
   },
   
+  renderCheckboxViaQuery: function() {
+    var context = SC.RenderContext();
+    this.renderCheckbox(context);
+    this.applyContextToLayer(context, this.$(".sc-outline"));
+    this._checkboxRenderer.attachLayer(this.provide(".sc-checkbox-view"));
+  },
+  
   updateCheckbox: function(context) {
-    var renderer = this._checkboxRenderer;
-    if (renderer) {
+    var renderer, newRenderer = NO;
+    if (this.didChange('checkbox')) {
+      if (!(renderer = this._checkboxRenderer)) {
+        renderer = this._checkboxRenderer = this.theme.checkbox();
+        newRenderer = YES;
+      }
+      
       renderer.attr({
         ariaValue: this.checkbox ? "true" : "false",
         isActive: this.checkboxActive || NO,
@@ -199,7 +211,23 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
         isSelected: this.checkbox,
         name: SC.guidFor(this)
       });
-      renderer.update();
+      
+      // needs to create/update DOM
+      if (!SC.none(this.checkbox)) {
+        if (!newRenderer) {
+          renderer.update();
+        } else {
+          this.renderCheckboxViaQuery();
+        }
+      }
+      // needs to destroy DOM
+      else {
+        if (!newRenderer) {
+          this._checkboxRenderer.detachLayer();
+          this.$(".sc-checkbox-view").remove(); // remove from DOM
+          this._checkboxRenderer = null;
+        }
+      }
     }
   },
   
