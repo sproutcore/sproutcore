@@ -72,7 +72,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     var classes = {};
     classes[(this.contentIndex % 2 === 0) ? 'even' : 'odd'] = YES;
     if (!SC.none(this.isEnabled) && !this.isEnabled) classes['disabled'] = YES;
-    if (this.disclosureState) classes['has-disclosure'] = YES;
+    if (!SC.none(this.disclosureState)) classes['has-disclosure'] = YES;
     if (!SC.none(this.checkbox)) classes['has-checkbox'] = YES;
     if (this.icon) classes['has-icon'] = YES;
     if (this.rightIcon) classes['has-right-icon'] = YES;
