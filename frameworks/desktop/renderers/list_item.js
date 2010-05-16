@@ -56,7 +56,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
   
   didAttachLayer: function(layer){
     this._controlRenderer.attachLayer(layer);
-    if (this._disclosureRenderer) this._disclosureRenderer.attachLayer(layer);
+    if (this._disclosureRenderer) this._disclosureRenderer.attachLayer(this.provide(".sc-disclosure-view"));
     if (this._checkboxRenderer) this._checkboxRenderer.attachLayer(this.provide(".sc-checkbox-view"));
   },
   
@@ -115,7 +115,10 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
       renderer.attr({
         state: this.disclosureState
       });
+      
+      context = context.begin("div").addClass("sc-disclosure-view");
       renderer.render(context);
+      context = context.end();
     }
   },
   
