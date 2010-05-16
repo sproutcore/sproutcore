@@ -52,6 +52,8 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     this.updateRightIcon();
     this.updateCount();
     this.updateBranch();
+    
+    this.resetChanges();
   },
   
   didAttachLayer: function(layer){
@@ -125,16 +127,45 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     }
   },
   
+  renderDisclosureViaQuery: function() {
+    var context = SC.RenderContext();
+    this.renderDisclosure(context);
+    this.applyContextToLayer(context, this.$(".sc-outline"));
+    this._disclosureRenderer.attachLayer(this.provide(".sc-disclosure-view"));
+  },
+  
   updateDisclosure: function() {
-    var renderer = this._disclosureRenderer;
-    if (renderer) {
+    var renderer, newRenderer = NO;
+    if (this.didChange('disclosureState')) {
+      // acquire the renderer
+      if (!(renderer = this._disclosureRenderer)) {
+        renderer = this._disclosureRenderer = this.theme.disclosure();
+        newRenderer = YES;
+      }
+      
       renderer.attr({
         isActive: this.disclosureActive || NO,
         isEnabled: this.isEnabled,
         isSelected: this.disclosureState,
         state: this.disclosureState
       });
-      renderer.update();
+      
+      // needs to create/update DOM
+      if (!SC.none(this.disclosureState)) {
+        if (!newRenderer) {
+          renderer.update();
+        } else {
+          this.renderDisclosureViaQuery();
+        }
+      }
+      // needs to destroy DOM
+      else {
+        if (!newRenderer) {
+          this._disclosureRenderer.detachLayer();
+          this.$(".sc-disclosure-view").remove(); // remove from DOM
+          this._disclosureRenderer = null;
+        }
+      }
     }
   },
   

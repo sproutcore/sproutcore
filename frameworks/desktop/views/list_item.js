@@ -33,6 +33,8 @@ SC.ListItemView = SC.View.extend(
   
   classNames: ['sc-list-item-view'],
   
+  displayProperties: ['disclosureState', 'escapeHTML'],
+  
   // ..........................................................
   // KEY PROPERTIES
   // 
@@ -200,6 +202,9 @@ SC.ListItemView = SC.View.extend(
     value = this.get('disclosureState');
     if (value !== SC.LEAF_NODE) {
       attrs.disclosureState = value === SC.BRANCH_OPEN ? YES : NO;
+    } else {
+      // nullify as renderer may have been true/false before
+      attrs.disclosureState = null;
     }
     
     // checkbox

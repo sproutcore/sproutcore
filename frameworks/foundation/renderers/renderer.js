@@ -95,6 +95,27 @@ SC.Renderer = {
   },
   
   /**
+    Applies a context object's attributes and structure to a layer via (j/Core)Query
+  */
+  applyContextToLayer: function(context, cq) {
+    var contextCQ = SC.$(context.join()), attrs, key;
+    
+    // get classes across to our layer
+    cq.addClass(context.classNames().join(" "));
+    
+    // get attributes across as well
+    attrs = contextCQ.attr();
+    for (key in attrs) {
+      if (!attrs.hasOwnProperty(key)) continue;
+      cq.attr(key, attrs[key]);
+    }
+    
+    // finally, append the children on contextCQ to our layer
+    // might be better to accomplish this via innerHTML
+    cq.append(contextCQ.children());
+  },
+  
+  /**
     Returns YES if the event took place within this view.
   */
   causedEvent: function(evt) {
