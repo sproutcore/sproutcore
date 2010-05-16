@@ -158,53 +158,63 @@ function label(view, labelText) {
 }
 
 function icon(view, spriteName) {
+  var cq = view.$(), iconCQ = cq.find('img.icon');
   if (spriteName === null) {
-    equals(view.$('img.icon').size(), 0, 'should not have image');
+    ok(!cq.hasClass('has-icon'), "should not have has-icon class");
+    equals(iconCQ.size(), 0, 'should not have image');
   } else {
-    var cq = view.$('img.icon');
-    equals(cq.size(), 1, 'should have icon');
-    ok(cq.hasClass(spriteName), 'icon should have class name %@'.fmt(spriteName));
+    ok(cq.hasClass('has-icon'), "should have has-icon class");
+    equals(iconCQ.size(), 1, 'should have icon');
+    ok(iconCQ.hasClass(spriteName), 'icon should have class name %@'.fmt(spriteName));
   }
 }
 
 function disclosure(view, state) {
+  var cq = view.$(), disclosureCQ = cq.find('.sc-disclosure-view');
   if (state === null) {
-    equals(view.$('.sc-disclosure-view').size(), 0, "should not have disclosure");
+    ok(!cq.hasClass('has-disclosure'), "should not have has-disclosure class");
+    equals(disclosureCQ.size(), 0, "should not have disclosure");
   } else {
-    var cq = view.$('.sc-disclosure-view');
-    equals(cq.size(), 1, "should have disclosure element");
-    equals(cq.hasClass('sel'), state === true, "disclosure expects sel class");
+    ok(cq.hasClass('has-disclosure'), "should have has-disclosure class");
+    equals(disclosureCQ.size(), 1, "should have disclosure element");
+    equals(disclosureCQ.hasClass('sel'), state === true, "disclosure expects sel class");
   }
 }
 
 function checkbox(view, state) {
+  var cq = view.$(), checkboxCQ = cq.find('.sc-checkbox-view');
   if (state === null) {
-    equals(view.$('.sc-checkbox-view').size(), 0, 'should not have checkbox');
+    ok(!cq.hasClass('has-checkbox'), "should not have has-checkbox class");
+    equals(checkboxCQ.size(), 0, 'should not have checkbox');
   } else {
-    var cq =view.$('.sc-checkbox-view');
-    equals(cq.size(), 1, 'should have checkbox element');
-    equals(cq.hasClass('sel'), state === true, 'expects sel class');
-    equals(cq.hasClass('mixed'), state === SC.MIXED_STATE, 'expects mixed class');
+    ok(cq.hasClass('has-checkbox'), "should have has-checkbox class");
+    equals(checkboxCQ.size(), 1, 'should have checkbox element');
+    equals(checkboxCQ.hasClass('sel'), state === true, 'expects sel class');
+    equals(checkboxCQ.hasClass('mixed'), state === SC.MIXED_STATE, 'expects mixed class');
   }
 }
 
 function count(view, cnt) {
+  var cq = view.$(), countCQ = cq.find('.count');
   if (cnt === null) {
-    equals(view.$('.count').size(), 0, 'should not have count') ;
+    ok(!cq.hasClass('has-count'), "should not have has-count class");
+    equals(countCQ.size(), 0, 'should not have count') ;
   } else {
-    var cq = view.$('.count');
-    equals(cq.size(), 1, 'should have count');
-    equals(cq.text(), cnt.toString(), 'should have count');
+    ok(cq.hasClass('has-count'), "should have has-count class");
+    equals(countCQ.size(), 1, 'should have count');
+    equals(countCQ.text(), cnt.toString(), 'should have count text');
   }
 }
 
 function branch(view, visible) {
+  var cq = view.$(), branchCQ = cq.find('.branch');
   if (visible === null) {
-    equals(view.$('.branch').size(), 0, 'should not have branch') ;
+    ok(!cq.hasClass('has-branch'), "should not have has-branch class");
+    equals(branchCQ.size(), 0, 'should not have branch') ;
   } else {
-    var cq = view.$('.branch');
-    equals(cq.size(), 1, 'should have branch');
-    equals(cq.hasClass('branch-visible'), visible, 'is visible');
+    ok(cq.hasClass('has-branch'), "should have has-branch class");
+    equals(branchCQ.size(), 1, 'should have branch');
+    equals(branchCQ.hasClass('branch-visible'), visible, 'is visible');
   }
 }
 
