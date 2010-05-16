@@ -113,7 +113,10 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
         renderer = this._disclosureRenderer = this.theme.disclosure();
       }
       renderer.attr({
-        state: this.disclosureState
+        isActive: this.disclosureActive || NO,
+        isEnabled: this.isEnabled,
+        isSelected: state,
+        state: state
       });
       
       context = context.begin("div").addClass("sc-disclosure-view");
@@ -126,6 +129,9 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     var renderer = this._disclosureRenderer;
     if (renderer) {
       renderer.attr({
+        isActive: this.disclosureActive || NO,
+        isEnabled: this.isEnabled,
+        isSelected: this.disclosureState,
         state: this.disclosureState
       });
       renderer.update();
@@ -140,6 +146,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
       }
       renderer.attr({
         ariaValue: state ? "true" : "false",
+        isActive: this.checkboxActive || NO,
         isEnabled: this.isEnabled && this.contentIsEditable,
         isSelected: state,
         name: SC.guidFor(this)
@@ -156,6 +163,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     if (renderer) {
       renderer.attr({
         ariaValue: this.checkbox ? "true" : "false",
+        isActive: this.checkboxActive || NO,
         isEnabled: this.isEnabled && this.contentIsEditable,
         isSelected: this.checkbox,
         name: SC.guidFor(this)

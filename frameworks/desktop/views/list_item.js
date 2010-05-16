@@ -421,22 +421,22 @@ SC.ListItemView = SC.View.extend(
       this._addCheckboxActiveState() ;
       this._isMouseInsideCheckbox = YES ;
     } else if (this._isMouseDownOnCheckbox) {
-      this._removeCheckboxActiveState() ;
-      this._isMouseInsideCheckbox = NO ;
+     this._removeCheckboxActiveState() ;
+     this._isMouseInsideCheckbox = NO ;
     } else if (this._isMouseDownOnDisclosure && this._isInsideDisclosure(evt)) {
       this._addDisclosureActiveState();
       this._isMouseInsideDisclosure = YES;
-    } else if (this._isMouseDownOnDisclosure) {
-      this._removeDisclosureActiveState();
-      this._isMouseInsideDisclosure = NO ;
+   } else if (this._isMouseDownOnDisclosure) {
+     this._removeDisclosureActiveState();
+     this._isMouseInsideDisclosure = NO ;
     } else if (this._isMouseDownOnRightIcon && this._isInsideRightIcon(evt)) {
       this._addRightIconActiveState();
       this._isMouseInsideRightIcon = YES;
-    } else if (this._isMouseDownOnRightIcon) {
-      this._removeRightIconActiveState();
-      this._isMouseInsideRightIcon = NO ;
-    }
-    return NO ;
+   } else if (this._isMouseDownOnRightIcon) {
+     this._removeRightIconActiveState();
+     this._isMouseInsideRightIcon = NO ;
+   }
+   return NO ;
   },
   
   touchStart: function(evt){
@@ -457,29 +457,43 @@ SC.ListItemView = SC.View.extend(
   
   
   _addCheckboxActiveState: function() {
-    var enabled = this.get('isEnabled');
-    this.$('.sc-checkbox-view').setClass('active', enabled);
+    if (this.get('isEnabled')) {
+      this.renderer.attr({
+        checkboxActive: YES
+      });
+      this.displayDidChange();
+    }
   },
   
   _removeCheckboxActiveState: function() {
-    this.$('.sc-checkbox-view').removeClass('active');
+   this.renderer.attr({
+     checkboxActive: NO
+   });
+   this.displayDidChange();
   },
 
   _addDisclosureActiveState: function() {
-    var enabled = this.get('isEnabled');
-    this.$('img.disclosure').setClass('active', enabled);
+    if (this.get('isEnabled')) {
+      this.renderer.attr({
+        disclosureActive: YES
+      });
+      this.displayDidChange();
+    }
   },
   
   _removeDisclosureActiveState: function() {
-    this.$('img.disclosure').removeClass('active');
+    this.renderer.attr({
+      disclosureActive: NO
+    });
+    this.displayDidChange();
   },
 
   _addRightIconActiveState: function() {
-    this.$('img.right-icon').setClass('active', YES);
+   this.$('img.right-icon').setClass('active', YES);
   },
   
   _removeRightIconActiveState: function() {
-    this.$('img.right-icon').removeClass('active');
+   this.$('img.right-icon').removeClass('active');
   },
   
   /**
@@ -493,22 +507,22 @@ SC.ListItemView = SC.View.extend(
     @returns {Boolean} YES if the mouse was on the content element itself.
   */
   contentHitTest: function(evt) {
-    // if not content value is returned, not much to do.
-    var del = this.displayDelegate ;
-    var labelKey = this.getDelegateProperty('contentValueKey', del) ;
-    if (!labelKey) return NO ;
-
-    // get the element to check for.
-    var el = this.$label()[0] ;
-    if (!el) return NO ; // no label to check for.
-
-    var cur = evt.target, layer = this.get('layer') ;
-    while(cur && (cur !== layer) && (cur !== window)) {
-      if (cur === el) return YES ;
-      cur = cur.parentNode ;
-    }
-
-    return NO;
+   // if not content value is returned, not much to do.
+   var del = this.displayDelegate ;
+   var labelKey = this.getDelegateProperty('contentValueKey', del) ;
+   if (!labelKey) return NO ;
+   
+   // get the element to check for.
+   var el = this.$label()[0] ;
+   if (!el) return NO ; // no label to check for.
+   
+   var cur = evt.target, layer = this.get('layer') ;
+   while(cur && (cur !== layer) && (cur !== window)) {
+     if (cur === el) return YES ;
+     cur = cur.parentNode ;
+   }
+   
+   return NO;
   },
   
   beginEditing: function() {
@@ -544,10 +558,10 @@ SC.ListItemView = SC.View.extend(
     // nothing to do...    
     if (!parent || !el || el.get('length')===0) return NO ;
     v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
-    
+
     f = this.computeFrameWithParentFrame(null);
     offset = SC.viewportOffset(el[0]);
-    
+
     // if the label has a large line height, try to adjust it to something
     // more reasonable so that it looks right when we show the popup editor.
     oldLineHeight = el.css('lineHeight');
