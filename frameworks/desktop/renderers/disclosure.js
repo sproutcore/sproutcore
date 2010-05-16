@@ -31,6 +31,7 @@ SC.BaseTheme.renderers.Disclosure = SC.Renderer.extend({
     
     elem.setClass("open", state);
     elem.setClass("closed", !state);
+    elem.setClass("active", this.isActive);
   },
   
   renderControlRenderer: function(context) {
