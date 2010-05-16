@@ -289,6 +289,12 @@ test("outline - 2", function() {
 // EDITING CONTENT
 // 
 
+function adjustView(view, key, value) {
+  SC.RunLoop.begin();
+  view.set(key, value);
+  SC.RunLoop.end();
+}
+
 // gets the view content and adjusts the value inside of a runloop, ensuring
 // the UI gets an update also.
 function adjustContent(view, key, value) {
@@ -302,6 +308,21 @@ test("changing label should change display", function() {
   var view = pane.view('full');
   adjustContent(view, 'title', 'FOO');
   label(view, 'FOO'); // verify change
+});
+
+
+test("changing disclosure value should update display", function() {
+  var view = pane.view('full');
+  adjustView(view, 'disclosureState', SC.BRANCH_CLOSED);
+  disclosure(view, NO);
+  
+  // changing to leaf node should remove disclosure view
+  adjustView(view, 'disclosureState', SC.LEAF_NODE);
+  disclosure(view, null);
+  
+  // changing back to open/closed should add the disclosure back
+  adjustView(view, 'disclosureState', SC.BRANCH_OPEN);
+  disclosure(view, YES);
 });
 
 test("changing checkbox value should update display", function() {
