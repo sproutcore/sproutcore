@@ -2112,16 +2112,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {Rect}
   */
   clippingFrame: function() {
-    var pv= this.get('parentView'), f = this.get('frame'), ret = f, cf ;
-    if (pv) {
-      cf = pv.get('contentClippingFrame');
-      ret = SC.intersectRects(cf, f);
+    var f = this.get('frame'),
+        ret = f,
+        pv, cf;
+    
+    if (f) {
+      pv = this.get('parentView');
+      if (pv) {
+        cf = pv.get('contentClippingFrame');
+        if (cf) {
+          ret = SC.intersectRects(cf, f);
+        }
+      }
+      ret.x -= f.x;
+      ret.y -= f.y;
     }
-
-    ret.x -= f.x ;
-    ret.y -= f.y ;
-
-    return ret ;
+    
+    return ret;
   }.property('parentView', 'frame').cacheable(),
   
   /**
