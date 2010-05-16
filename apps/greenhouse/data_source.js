@@ -27,7 +27,7 @@ Greenhouse.DataSource = SC.DataSource.extend({
   // Get file list
   // 
   listFiles: function(store, query){
-    SC.Request.create({type: 'GET', isJSON: YES, address: '/sproutcore/fs?action=list'})
+    SC.Request.create({type: 'GET', isJSON: YES, address: '/sproutcore/fs/apps%@/?action=list'.fmt(query.get('urlPath'))})
       .notify(this,this.listFilesDidComplete, {query: query, store: store})
       .send();
   },
