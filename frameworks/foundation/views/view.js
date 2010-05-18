@@ -86,13 +86,6 @@ SC.CONTEXT_MENU_ENABLED = YES;
 */
 SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
 
-/**
-  This will enable touch events to be routed into mouse events. 
-  It is enabled by default.
-*/
-SC.ROUTE_TOUCH = NO;
-
-
 /** @private - custom array used for child views */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
 SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
@@ -198,8 +191,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   backgroundColor: null,
   
-  routeTouch: YES,
-  
   /**
     Activates use of brower's static layout.  You can apply this mixin and
     still use absolute positioning.  To activate static positioning, set this
@@ -244,10 +235,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.property('parentView', 'isEnabled'),
   
   /**
+    @private
+    
     Observer that resigns firstResponder if the view is Disabled and is first
     responder. This will avoid cases like disabled view with focus rings.
   */
-  isEnabledObserver: function(){
+  _scv_isEnabledDidChange: function(){
     if(!this.get('isEnabled') && this.get('isFirstResponder')){
       this.resignFirstResponder();
     } 
@@ -1045,7 +1038,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   
   _notifyDidAppendToDocument: function() {
-    if(this.didAppendToDocument) this.didAppendToDocument();
+    if (this.didAppendToDocument) this.didAppendToDocument();
+    if (this.useStaticLayout) this.notifyPropertyChange('frame');
+    
     var i=0, child, childLen, children = this.get('childViews');
     for(i=0, childLen=children.length; i<childLen; i++) {
       child = children[i];
@@ -1486,26 +1481,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // register scroll views for autoscroll during drags
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
-    
-    if(SC.ROUTE_TOUCH && this.get('routeTouch')) this.routeTouchEvents();
-  },
-  
-  routeTouchEvents: function(){
-    if(!this.respondsTo('touchStart') && this.respondsTo('mouseDown')) {
-      this.touchStart=this.mouseDown;
-    }
-    if(!this.respondsTo('touchEnd') && this.respondsTo('mouseUp')) {
-      this.touchEnd=this.mouseUp;
-    }
-    if(!this.respondsTo('touchMoved') && this.respondsTo('mouseMove')) {
-      this.touchMoved=this.mouseMoved;
-    }
-    if(!this.respondsTo('touchEntered') && this.respondsTo('mouseEntered')) {
-      this.touchEntered=this.mouseEntered;
-    }
-    if(!this.respondsTo('touchExited') && this.respondsTo('mouseExited')) {
-      this.touchExited=this.mouseExited;
-    }
   },
   
   /**
@@ -1765,10 +1740,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   convertFrameToView: function(frame, targetView) {
     var myX=0, myY=0, targetX=0, targetY=0, view = this, f ;
     
-    if (this.get('useStaticLayout')) {
-      throw "convertFrameToView is not available with static layout";
-    }
-    
     // walk up this side
     while (view) {
       f = view.get('frame'); myX += f.x; myY += f.y ;
@@ -1810,10 +1781,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   convertFrameFromView: function(frame, targetView) {
     var myX=0, myY=0, targetX=0, targetY=0, view = this, f ;
-    
-    if (this.get('useStaticLayout')) {
-      throw "convertFrameToView is not available with static layout";
-    }
     
     // walk up this side
     while (view && view.get('frame')) {
@@ -1920,6 +1887,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // need layer to be able to compute rect
       if (layer = this.get('layer')) {
         f = SC.viewportOffset(layer); // x,y
+        if (pv) f = pv.convertFrameFromView(f, null);
+        
         /*
           TODO Can probably have some better width/height values - CC
         */
@@ -2116,17 +2085,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         ret = f,
         pv, cf;
     
-    if (f) {
-      pv = this.get('parentView');
-      if (pv) {
-        cf = pv.get('contentClippingFrame');
-        if (cf) {
-          ret = SC.intersectRects(cf, f);
-        }
-      }
-      ret.x -= f.x;
-      ret.y -= f.y;
-    }
+    if (!f) return null;
+    pv = this.get('parentView');
+    if (pv) {
+      cf = pv.get('contentClippingFrame');
+      if (!cf) return f;
+      ret = SC.intersectRects(cf, f);
+    } 
+    ret.x -= f.x;
+    ret.y -= f.y;
     
     return ret;
   }.property('parentView', 'frame').cacheable(),
