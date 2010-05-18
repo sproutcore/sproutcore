@@ -974,15 +974,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // Sets cursor class, if present.
     cursor = this.get('cursor');
     if (!cursor && this.get('shouldInheritCursor')) {
-      // If this view has no cursor and should inherit it from the parent, then
-      // it sets its own cursor view.  This sets the cursor rather than simply
-      // using the parent's cursor object so that its cursorless childViews can
-      // also inherit it.
-      this.set('cursor', this.getPath('parentView.cursor'));
-      cursor = this.get('cursor');
+      // If this view has no cursor and should inherit it from the parent, 
+      // then it sets its own cursor view.  This sets the cursor rather than 
+      // simply using the parent's cursor object so that its cursorless 
+      // childViews can also inherit it.
+      cursor = this.getPath('parentView.cursor');
     }
-    if (SC.typeOf(cursor) === SC.T_STRING) cursor = SC.objectForPropertyPath(cursor);
-    if (cursor instanceof SC.Cursor) context.addClass(cursor.get('className'));
+
+    if (SC.typeOf(cursor) === SC.T_STRING) {
+      cursor = SC.objectForPropertyPath(cursor);
+    }
+    
+    if (cursor instanceof SC.Cursor) {
+      context.addClass(cursor.get('className'));
+    }
     
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
