@@ -79,6 +79,12 @@ SC.ListItemView = SC.View.extend(
   contentCheckboxKey: null,
   
   /**
+    The URL or CSS class name to use for the icon. This is only used if
+    contentIconKey is null, or returns null from the delegate.
+  */
+  icon: null,
+  
+  /**
     (displayDelegate) Property key to use for the icon url
 
     This property will be checked on the content object to determine the 
@@ -86,6 +92,12 @@ SC.ListItemView = SC.View.extend(
   */
   contentIconKey: null,
  
+  /**
+    The URL or CSS class name to use for the right icon. This is only used if
+    contentRightIconKey is null, or returns null from the delegate.
+  */
+  rightIcon: null,
+  
   /**
     (displayDelegate) Property key to use for the right icon url
 
@@ -217,6 +229,8 @@ SC.ListItemView = SC.View.extend(
       key = this.getDelegateProperty('contentIconKey', del);
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
       attrs.icon = value;
+    } else if (!SC.none(this.icon)) {
+      attrs.icon = this.get('icon');
     }
     
     // label, always on
@@ -232,6 +246,8 @@ SC.ListItemView = SC.View.extend(
       key = this.getDelegateProperty('contentRightIconKey', del);
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
       attrs.rightIcon = value;
+    } else if (!SC.none(this.rightIcon)) {
+      attrs.rightIcon = this.get('rightIcon');
     }
     
     // unread count

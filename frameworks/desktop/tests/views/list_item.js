@@ -75,7 +75,32 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     hasContentIcon:  YES
 
   }))
+  
+  .add("icon - contentandview", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item",
+      icon: "sc-icon-folder-16"
+    }),
 
+    icon: "sc-icon-info-16",
+
+    contentValueKey: "title",
+
+    contentIconKey:  "icon",
+    hasContentIcon:  YES
+
+  }))
+  
+  .add("icon - view", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item"
+    }),
+
+    icon: "sc-icon-info-16",
+
+    contentValueKey: "title"
+  }))
+  
   .add("disclosure - YES", SC.ListItemView.design({ 
     content: SC.Object.create({ title: "List Item" }),
     contentValueKey: "title",
@@ -261,6 +286,16 @@ test("full - sel", function() {
 test("icon", function() {
   var view = pane.view('icon');
   icon(view, 'sc-icon-folder-16');
+});
+
+test("icon defined in view and in content", function() {
+  var view = pane.view('icon - contentandview');
+  icon(view, 'sc-icon-folder-16');
+});
+
+test("icon defined only in view", function() {
+  var view = pane.view('icon - view');
+  icon(view, 'sc-icon-info-16');
 });
 
 test('disclosure', function() {
