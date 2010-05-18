@@ -816,7 +816,7 @@ SC.CollectionView = SC.View.extend(
         nowShowing = this.get('nowShowing'),
         itemViews  = this._sc_itemViews,
         containerView = this.get('containerView') || this,
-        exampleView, exampleGroupView,
+        exampleView, groupExampleView,
         shouldReuseViews, shouldReuseGroupViews, shouldReuse,
         viewsToRemove, viewsToRedraw, viewsToCreate,
         views, idx, view, layer, parentNode, viewPool,
@@ -834,8 +834,8 @@ SC.CollectionView = SC.View.extend(
     // new ones, because that will maximize the potential for re-use.
     exampleView = this.get('exampleView');
     shouldReuseViews = exampleView ? exampleView.isReusableInCollections : NO;
-    exampleGroupView = this.get('exampleGroupView');
-    shouldReuseGroupViews = exampleGroupView ? exampleGroupView.isReusableInCollections : NO;
+    groupExampleView = this.get('groupExampleView');
+    shouldReuseGroupViews = groupExampleView ? groupExampleView.isReusableInCollections : NO;
 
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
