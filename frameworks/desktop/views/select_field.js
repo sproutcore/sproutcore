@@ -253,6 +253,7 @@ SC.SelectFieldView = SC.FieldView.extend(
       found = null ; // matching object goes here.
       while(!found && (--loc >= 0)) {
         object = objects.objectAt? objects.objectAt(loc) : objects[loc] ;
+        if (!object) continue; // null means placeholder; just skip
       
         // get value using valueKey if there is one or use object
         // map to _guid or toString.
