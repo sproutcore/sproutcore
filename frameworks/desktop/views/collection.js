@@ -610,6 +610,7 @@ SC.CollectionView = SC.View.extend(
   */
   contentRangeDidChange: function(content, object, key, indexes) {
     if (!object && (key === '[]')) {
+      this.notifyPropertyChange('_contentGroupIndexes');
       this.reload(indexes); // note: if indexes == null, reloads all
     } else {
       this.contentPropertyDidChange(object, key, indexes);
@@ -995,8 +996,6 @@ SC.CollectionView = SC.View.extend(
     child views still need to be added, go ahead and add them.
   */
   render: function(context, firstTime) {
-    if (firstTime && this._needsReload) this.reloadIfNeeded() ;
-    
     // add classes for other state.
     context.setClass('focus', this.get('isFirstResponder'));
     context.setClass('disabled', !this.get('isEnabled'));

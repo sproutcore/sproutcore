@@ -207,6 +207,18 @@ test("contentGroupExampleViewKey is set and content property is empty", function
   ok(itemView.isGroupView, 'itemView.isGroupView should be YES');
 });
 
+test("_contentGroupIndexes's cache should be properly invalidated", function() {
+  view.testAsGroup = YES;
+  
+  // force setup of range observers
+  view.updateContentRangeObserver();
+  
+  ok(view.get('_contentGroupIndexes').isEqual(SC.IndexSet.create(0, 3)), "contentGroupIndexes should have correct initial value");
+    
+  view.get('content').removeAt(2, 1);
+  ok(view.get('_contentGroupIndexes').isEqual(SC.IndexSet.create(0, 2)), "contentGroupIndexes should have updated value after deletion");
+});
+
 
 // ..........................................................
 // DELEGATE SUPPORT
