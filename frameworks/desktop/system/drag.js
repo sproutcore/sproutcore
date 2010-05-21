@@ -12,13 +12,13 @@ SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20;
   @class
   
   An instance of this object is created whenever a drag occurs.  The instance
-  manages the mouse events and coordinating with droppable targets until the
+  manages the mouse/touch events and coordinating with droppable targets until the
   user releases the mouse button. 
   
   To initiate a drag, you should call SC.Drag.start() with the options below
   specified in a hash. Pass the ones you need to get the drag you want:  
   
-  - *event: (req)* The mouse event that triggered the drag.  This will be used
+  - *event: (req)* The mouse event/touch that triggered the drag.  This will be used
     to position the element.
   
   - *source: (req)* The drag source object that should be consulted during 
@@ -80,7 +80,7 @@ SC.Drag = SC.Object.extend(
   
   /**
     If YES, then the ghostView will acts like a cursor and attach directly
-    to the mouse location.
+    to the mouse/touch location.
     
     @readOnly
     @type Boolean
@@ -117,15 +117,7 @@ SC.Drag = SC.Object.extend(
     @type Boolean
   */
   slideBack: YES,
-  
-  /**
-    The original mouse down event.
-    
-    @readOnly
-    @type SC.Event
-  */
-  mouseDownEvent: null,
-  
+
   /**
     The origin to slide back to in the coordinate of the dragView's 
     containerView.
@@ -136,7 +128,7 @@ SC.Drag = SC.Object.extend(
   
   /**
     The current location of the mouse pointer in window coordinates. This is 
-    updated as long as the mouse button is pressed. Drop targets are 
+    updated as long as the mouse button is pressed or touch is active. Drop targets are 
     encouraged to update this property in their dragUpdated() method 
     implementations.
     
@@ -290,7 +282,7 @@ SC.Drag = SC.Object.extend(
     
     var evt = this.event ;
     
-    // compute the ghost offset from the original mouse location
+    // compute the ghost offset from the original start location
     
     var loc = { x: evt.pageX, y: evt.pageY } ;
     this.set('location', loc) ;
@@ -313,8 +305,14 @@ SC.Drag = SC.Object.extend(
     // position the ghost view
     if(!this._ghostViewHidden) this._positionGhostView(evt) ;
     
-    // notify root responder that a drag is in process
-    this.ghostView.rootResponder.dragDidStart(this) ;
+    if (evt.makeTouchResponder) {
+      // Should use invokeLater if I can figure it out
+      var self = this;
+      SC.Timer.schedule({ target: evt, action: function(){ if (!evt.hasEnded) evt.makeTouchResponder(self, YES); }, interval: 1 });
+    } else {
+      // notify root responder that a drag is in process
+      this.ghostView.rootResponder.dragDidStart(this, evt) ;
+    }
     
     var source = this.source ;
     if (source && source.dragDidBegin) source.dragDidBegin(this, loc) ;
@@ -329,7 +327,11 @@ SC.Drag = SC.Object.extend(
   // ..........................................
   // PRIVATE PROPERTIES AND METHODS
   //
-  
+
+  touchStart: function(evt) {
+    return YES;
+  },
+
   /** @private
     This method is called repeatedly during a mouse drag.  It updates the
     position of the ghost image, then it looks for a current drop target and
@@ -393,7 +395,11 @@ SC.Drag = SC.Object.extend(
     // reposition the ghostView
     if(!this._ghostViewHidden) this._positionGhostView(evt) ;
   },
-  
+
+  touchesDragged: function(evt){
+    this.mouseDragged(evt);
+  },
+
   /**
     @private
     
@@ -452,6 +458,10 @@ SC.Drag = SC.Object.extend(
     this._dragInProgress = NO ; // required by autoscroll (invoked by a timer)
   },
 
+  touchEnd: function(evt){
+    this.mouseUp(evt);
+  },
+
   /** @private
     Returns the dragView. If it is not set, the source is returned.
   */
@@ -494,7 +504,7 @@ SC.Drag = SC.Object.extend(
   },
   
   /** @private
-    Positions the ghost view underneath the mouse with the initial offset
+    Positions the ghost view underneath the mouse/touch with the initial offset
     recorded by when the drag started.
   */
   _positionGhostView: function(evt) {
@@ -639,7 +649,7 @@ SC.Drag = SC.Object.extend(
   
   /** @private
     Performs auto-scrolling for the drag.  This will only do anything if
-    the user keeps the mouse within a few pixels of one location for a little
+    the user keeps the mouse/touch within a few pixels of one location for a little
     while.
     
     Returns YES if a scroll was performed.
@@ -653,7 +663,7 @@ SC.Drag = SC.Object.extend(
     // STEP 1: Find the first view that we can actually scroll.  This view 
     // must be:
     // - scrollable
-    // - the mouse pointer must be within a scrolling hot zone
+    // - the mouse pointer or touch must be within a scrolling hot zone
     // - there must be room left to scroll in that direction. 
     
     // NOTE: an event is passed only when called from mouseDragged
