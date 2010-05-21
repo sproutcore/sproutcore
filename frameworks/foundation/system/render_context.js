@@ -866,9 +866,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   removeStyle: function(styleName) {
     // avoid case where no styles have been defined
     if (!this._styles && !this._elem) return this;
-
-    styleName = styleName.dasherize();
-
+    
     // get styles hash.  this will clone if needed.
     var styles = this.styles();
     if (styles[styleName]) {
@@ -941,6 +939,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   _dasherizeStyleName: function(name) {
     var dasherized = name.dasherize();
     if (dasherized.match(/^(webkit|moz|ms|o)-/)) dasherized = '-'+dasherized;
+    return dasherized;
+    Converts camelCased style names to dasherized forms
+  */
+  _dasherizeStyleName: function(name) {
+    var dasherized = name.dasherize();
+    if (dasherized.match(/^(webkit|moz|msie|o)[A-Z]/)) dasherized = '-'+dasherized;
     return dasherized;
   }
   
