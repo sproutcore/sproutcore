@@ -53,7 +53,7 @@ test("extracts styles from element on first retrieval", function() {
   var result = context.styles();
   
   
-  same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink', webkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
+  same(result, { color: 'black', height: '20px', 'border-top': '1px solid hotpink', '-webkit-column-count', '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
   
   equals(context.styles(), result, "should reuse same instance thereafter");
 });

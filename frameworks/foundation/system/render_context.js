@@ -776,7 +776,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           regex = this._STYLE_REGEX ;
           regex.lastIndex = 0;
           
+          while(match = regex.exec(attr)) styles[match[1].camelize()] = match[2];
           while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
+          while(match = regex.exec(attr)) styles[match[1].dasherize()] = match[2];
           
           this._styles = styles;
           this._cloneStyles = NO;
@@ -864,7 +866,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   removeStyle: function(styleName) {
     // avoid case where no styles have been defined
     if (!this._styles && !this._elem) return this;
-    
+
+    styleName = styleName.dasherize();
+
     // get styles hash.  this will clone if needed.
     var styles = this.styles();
     if (styles[styleName]) {
