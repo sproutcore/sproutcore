@@ -56,6 +56,17 @@ Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelega
     ]
   }),
   
+  /**
+    Call this method whenever you want to relaod the library from hte server
+  */
+  reload: function() {
+    var configQuery = Greenhouse.CONFIG_QUERY, target = Greenhouse.targetController.get('content');
+    configQuery.set('app', target.get('name'));
+    var files = Greenhouse.store.find(configQuery), root = SC.Object.create({treeItemIsExpanded: YES});
+    root.set('contents', files);
+    this.set('content', root);
+  },
+  
   views: SC.outlet('content.treeItemChildren.0.treeItemChildren'),
   // ..........................................................
   // Collection View delegate drag methods

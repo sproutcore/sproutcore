@@ -19,7 +19,10 @@ Greenhouse.DataSource = SC.DataSource.extend({
     }   
     else if(rt === Greenhouse.Target){
       ret = this.fetchTargets(store, query);
-    } 
+    }
+    else if(rt === Greenhouse.ViewConfig){
+      ret = this.fetchViewConfigs(store,query);
+    }
     return ret;
   },
   
@@ -81,6 +84,31 @@ Greenhouse.DataSource = SC.DataSource.extend({
       storeKeys = store.loadRecords(Greenhouse.Target, response);
       store.loadQueryResults(query, storeKeys);
       Greenhouse.sendAction('fetchTargetsDidComplete');
+    }
+  },
+  
+  // ..........................................................
+  // FETCHING VIEW CONFIGS
+  // 
+  fetchViewConfigs: function(store, query){
+    if (!query.get('isRemote')) return NO ; 
+    
+    SC.Request.getUrl('/sc/greenhouse-config.json?app=%@'.fmt(query.get('app')))
+      .set('isJSON', YES)
+      .notify(this, 'fetchViewConfigsDidComplete', { query: query, store: store })
+      .send();
+    return YES ;
+  },
+  fetchViewConfigsDidComplete: function(request, opts){
+    var response = request.get('response'),
+        query    = opts.query,
+        store    = opts.store,
+        storeKeys;
+    if (!SC.$ok(response)) {
+      console.error("TODO: Add handler when fetching view configs fails");
+    } else {
+      storeKeys = store.loadRecords(Greenhouse.ViewConfig, response);
+      store.loadQueryResults(query, storeKeys);
     }
   },
   

@@ -1,3 +1,12 @@
+-JS config file to store all custom files (in design/greenhouse.json or ./greenhouse.json) and load all configs of all frameworks currently required
+- move all desingers into the /designer folder of their respective frameworks
+- open main page if it exists 
+
+
+
+
+
+
 DEMO Punch-list:
 - adding a base view to a new page [MB] @Done
 - exceptions when dragging view or controller into page [MB] @Done
