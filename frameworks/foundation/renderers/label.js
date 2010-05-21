@@ -45,8 +45,8 @@ SC.BaseTheme.renderers.Label = SC.Renderer.extend({
     this.updateTitleRenderer();
     this.updateControlRenderer();
     context.addStyle({
-      'text-align': this.textAlign,
-      'font-weight': this.fontWeight,
+      'textAlign': this.textAlign,
+      'fontWeight': this.fontWeight,
       'opacity': this.isEditing ? 0 : 1
     });
     context.setClass("icon", !!this.icon);
