@@ -943,7 +943,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   _dasherizeStyleName: function(name) {
     var dasherized = name.dasherize();
-    if (dasherized.match(/^(webkit|moz|msie|o)[A-Z]/)) dasherized = '-'+dasherized;
+    if (dasherized.match(/^(webkit|moz|ms|o)-/)) dasherized = '-'+dasherized;
     return dasherized;
   }
   
