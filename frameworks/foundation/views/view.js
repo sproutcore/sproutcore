@@ -3058,9 +3058,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     if (hasAcceleratedLayer) {
-      var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
-      if (SC.platform.supportsCSS3DTransforms) transform += ' translateZ(0px)'
-      ret[SC.platform.domCSSPrefix+'Transform'] = transform;
+      // We want at least one to be non-zero
+      if (translateTop || translateLeft) {
+        ret.webkitTransform = 'translate3d('+translateLeft+'px, '+translateTop+'px, 0)';
+      } else {
+        ret.webkitTransform = 'translateZ(0px)';
+      }
     }
 
     // convert any numbers into a number + "px".
