@@ -57,7 +57,7 @@ SC.Animatable = {
     "right": "right", "bottom": "bottom",
     "width": "width", "height": "height",
     "opacity": "opacity",
-    "transform": "transform"
+    "transform": (SC.platform.supportsCSSTransforms ? '-'+SC.platform.cssPrefix+'-transform' : "transform")
   },
 
   // properties that adjust should relay to style
@@ -374,23 +374,18 @@ SC.Animatable = {
     /* SPECIAL CASES (done now because they need to happen whether or not animation will take place) */
     ////**SPECIAL TRANSFORM CASE**////
     var specialTransform = NO, specialTransformValue = "";
-    if (this.get('hasAcceleratedLayer')) {
-
-      var nT = newStyle['top'],
-          nB = newStyle['bottom'],
-          nL = newStyle['left'],
-          nR = newStyle['right'];
-
-      // NOTE: This needs to match exactly the conditions in layoutStyles
-      if (
-        (SC.empty(nT) || (!SC.isPercentage(nT) && SC.empty(nB))) &&
-        (SC.empty(nL) || (!SC.isPercentage(nL) && SC.empty(nR)))
-      ) {
-        specialTransform = YES;
-        this._useSpecialCaseTransform = YES;
-      } else {
-        this._useSpecialCaseTransform = NO;
-      }
+    if (
+      SC.platform.supportsCSSTransforms &&
+      this.transitions["left"] && this.transitions["top"] && 
+      this.transitions["left"].duration === this.transitions["top"].duration &&
+      this.transitions["left"].timing === this.transitions["top"].timing &&
+      (SC.none(newStyle["right"]) || newStyle["right"] === "") &&
+      (SC.none(newStyle["bottom"]) || newStyle["bottom"] === "")
+    ) {
+      specialTransform = YES;
+      this._useSpecialCaseTransform = YES;
+    } else {
+      this._useSpecialCaseTransform = NO;
     }
     ////**/SPECIAL TRANSFORM CASE**////
 

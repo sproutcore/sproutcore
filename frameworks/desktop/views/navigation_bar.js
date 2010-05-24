@@ -167,7 +167,7 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
       },
       naturalLayout: child.get("layout"),
       transform: function(pos) {
-        if (SC.Animatable.enableCSS3DTransforms) {
+        if (SC.platform.supportsCSS3DTransforms) {
           this.adjust("transform", "translate3d(" + pos + "px,0px,0px)");
         } else {
           this.adjust("transform", "translate(" + pos + "px,0px)");          
