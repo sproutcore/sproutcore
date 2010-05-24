@@ -762,7 +762,7 @@ SC.DateTime.mixin(SC.Comparable,
     
     // the time options (hour, minute, sec, millisecond)
     // reset cascadingly (see documentation)
-    if (resetCascadingly === undefined || resetCascadingly === YES) {
+    if (resetCascadingly === undefined || resetCascadingly === YES) {
       if ( !SC.none(opts.hour) && SC.none(opts.minute)) {
         opts.minute = 0;
       }

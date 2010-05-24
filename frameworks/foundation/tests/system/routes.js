@@ -13,7 +13,7 @@ test('Setup', function() {
 
 module('SC.routes setup', {
   
-  setup: function() {
+  setup: function() {
     router = SC.Object.create({
       route: function() {
         return;
@@ -36,7 +36,7 @@ test('Initial route', function() {
 
 module('SC.routes._Route', {
   
-  setup: function() {
+  setup: function() {
     router = SC.Object.create({
       route: function() {
         return;
@@ -142,7 +142,7 @@ test('Already escaped route', function() {
 
 module('SC.routes defined routes', {
   
-  setup: function() {
+  setup: function() {
     router = SC.Object.create({
       params: null,
       route: function(params) {
@@ -255,7 +255,7 @@ test('A mix of everything', function() {
 
 module('SC.routes location observing', {
   
-  setup: function() {
+  setup: function() {
     router = SC.Object.create({
       hasBeenNotified: NO,
       route: function(params) {
