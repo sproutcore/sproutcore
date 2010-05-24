@@ -28,7 +28,7 @@ Greenhouse.mainPage = SC.Page.design({
   }),
   
   appPicker: SC.View.design({
-    childViews: 'scLogo picker footer'.w(),
+    childViews: 'scLogo picker footer warning'.w(),
     classNames: ['app-picker'],
     
     scLogo: SC.View.design({
@@ -77,6 +77,11 @@ Greenhouse.mainPage = SC.Page.design({
       
       })
     
+    }),
+    
+    warning: SC.LabelView.design({
+      layout: {bottom: 60, centerX: 0, width: 400, height: 58},
+      value: "NOTE: Greenhouse is under active development and not yet ready for general use.  At the moment, Greenhouse works best with Google Chrome."
     }),
     
     footer: SC.LabelView.design({
