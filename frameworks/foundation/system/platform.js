@@ -27,6 +27,10 @@ SC.platform = {
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
 
+  input: {
+    placeholder: (function() { return 'placeholder' in document.createElement('input'); })()
+  },
+
   /**
     A hash that contains properties that indicate support for new HTML5
     input attributes.
