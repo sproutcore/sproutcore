@@ -345,7 +345,14 @@ SC.Animatable = {
   hasAcceleratedLayer: function(){
     var leftDuration = this.transitions['left'] && this.transitions['left'].duration,
         topDuration = this.transitions['top'] && this.transitions['top'].duration;
-    return sc_super() && leftDuration == topDuration;
+
+    if (leftDuration !== topDuration) {
+      return NO;
+    } else if ((topDuration || leftDuration) && !SC.platform.supportsCSSTransitions) {
+      return NO;
+    } else {
+      return sc_super();
+    }
   }.property('wantsAcceleratedLayer', 'transitions'),
 
   /**
@@ -437,9 +444,9 @@ SC.Animatable = {
       // this is a VERY special case. If right or bottom are supplied, can't do it. If left+top need
       // animation at different speeds: can't do it.
       if (specialTransform) {
-        specialTransform = YES;
-        timing_function = this.cssTimingStringFor(this.transitions["left"]);
-        cssTransitions.push("-"+SC.platform.cssPrefix+"-transform " + this.transitions["left"].duration + "s " + timing_function);
+        var transitionForTiming = this.transitions['left'] || this.transitions['top'];
+        timing_function = this.cssTimingStringFor(transitionForTiming);
+        cssTransitions.push("-"+SC.platform.cssPrefix+"-transform " + transitionForTiming.duration + "s " + timing_function);
       }
       ////**END SPECIAL TRANSFORM CASE**////
       
@@ -692,8 +699,6 @@ SC.Animatable = {
       else style[i] = styles[i];
     }
     
-    style[SC.platform.cssPrefix+"Transform"] = transform;
-
     // don't want to set because we don't want updateLayout... again.
     if (updateLayout) {
       var prev = this.holder.layout;
