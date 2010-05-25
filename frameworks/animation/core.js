@@ -131,12 +131,12 @@ SC.Animatable = {
 
   _animatable_didCreateLayer: function(){
     this.resetAnimation();
-    SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
+    SC.Event.add(this.get('layer'), SC.platform.domCSSPrefix+"TransitionEnd", this, this.transitionEnd);
     return this._animatable_original_didCreateLayer();
   },
 
   _animatable_willDestroyLayer: function(){
-    SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
+    SC.Event.remove(this.get('layer'), SC.platform.domCSSPrefix+"TransitionEnd", this, this.transitionEnd);
     return this._animatable_original_willDestroyLayer();
   },
   
@@ -631,8 +631,7 @@ SC.Animatable = {
 
     // set CSS transitions very first thing
     if (this._animatableSetCSS != this._last_transition_css) {
-      layer.style["-"+SC.platform.cssPrefix+"-transition"] = this._animatableSetCSS;
-      layer.style["-moz-transition"] = this._animatableSetCSS;
+      layer.style[SC.platform.domCSSPrefix+"Transition"] = this._animatableSetCSS;
       this._last_transition_css = this._animatableSetCSS;
       needsRender = YES;
     }
