@@ -775,9 +775,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           regex = this._STYLE_REGEX ;
           regex.lastIndex = 0;
           
-          while(match = regex.exec(attr)) styles[match[1].camelize()] = match[2];
           while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
-          while(match = regex.exec(attr)) styles[match[1].dasherize()] = match[2];
           
           this._styles = styles;
           this._cloneStyles = NO;
