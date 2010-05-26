@@ -10,6 +10,8 @@ SC.PinchGesture = SC.Gesture.extend({
   name: "pinch",
   acceptsMultitouch: YES,
 
+  scale: 1,
+
   /**
     The default for this method is to loop through each touch one by one to see if it qualifies.
     Here, however, we want to take the touches when there are 2, and only 2 of them. As a result
@@ -29,7 +31,10 @@ SC.PinchGesture = SC.Gesture.extend({
   */
   touchStart: function(touch) {
     var touches = touch.touchesForResponder(this);
-    if (!touches || touches.length < 2) {
+    if (!touches || touches.length == 0) {
+      return YES;
+    } else if (touches.length == 1) {
+      this.start([touches[0], touch]);
       return YES;
     } else {
       return NO;
@@ -50,9 +55,9 @@ SC.PinchGesture = SC.Gesture.extend({
         this._startDistance = avg.d;
       }
 
-      var scale = avg.d / this._startDistance;
+      this.scale = avg.d / this._startDistance;
 
-      this.trigger(touches, scale);
+      this.change(touches, this.scale);
     }
   },
 
@@ -63,6 +68,10 @@ SC.PinchGesture = SC.Gesture.extend({
     this._startDistance = null;
 
     var touches = touch.touchesForResponder(this);
+
+    this.trigger(touches, this.scale)
+    this.end(touches, this.scale);
+
     if (touches) {
       touches.forEach(function(touch){
         this.release(touch);
