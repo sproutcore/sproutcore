@@ -347,7 +347,17 @@ SC.Array = {
   },
   
   rangeObserverClass: SC.RangeObserver,
-  
+
+  /**
+    Returns YES if object is in the array
+
+    @param {Object} object to look for
+    @returns {Boolean}
+  */
+  contains: function(obj){
+    return this.indexOf(obj) >= 0;
+  },
+
   /**
     Creates a new range observer on the receiver.  The target/method callback
     you provide will be invoked anytime any property on the objects in the 
