@@ -131,12 +131,14 @@ SC.Animatable = {
 
   _animatable_didCreateLayer: function(){
     this.resetAnimation();
-    SC.Event.add(this.get('layer'), SC.platform.domCSSPrefix+"TransitionEnd", this, this.transitionEnd);
+    SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
+    SC.Event.add(this.get('layer'), "transitionEnd", this, this.transitionEnd);
     return this._animatable_original_didCreateLayer();
   },
 
   _animatable_willDestroyLayer: function(){
-    SC.Event.remove(this.get('layer'), SC.platform.domCSSPrefix+"TransitionEnd", this, this.transitionEnd);
+    SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
+    SC.Event.remove(this.get('layer'), "transitionEnd", this, this.transitionEnd);
     return this._animatable_original_willDestroyLayer();
   },
   
