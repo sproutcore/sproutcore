@@ -1039,7 +1039,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       
       startScale: this._scale,
       startDistance: avg.d,
-      canScale: this.get("canScale") && SC.platform.pinchToScale,
+      canScale: this.get("canScale") && SC.platform.pinchToZoom,
       minimumScale: this.get("minimumScale"),
       maximumScale: this.get("maximumScale"),
       
