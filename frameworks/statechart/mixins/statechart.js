@@ -141,13 +141,14 @@ SC.Statechart = {
         enterMatchIndex,
         exitMatchIndex,
         pivotState, pState, cState, 
-        i, hasLogging = this.get('log'), loggingStr;
+        i, hasLogging = this.get('log'), loggingStr, _tmpRequestedState;
              
     if (!tree) throw '#goState: State requesting go does not have a valid parallel tree';
     
+    _tmpRequestedState = requestedState;
     requestedState = this._all_states[tree][requestedState];
     
-    if (!requestedState) throw '#goState: Could not find the requested state!';
+    if(!requestedState) throw '#goState: Could not find the requested state! (%@ in %@)'.fmt(_tmpRequestedState, tree);
 
     if (this._goStateLocked) {
       // There is a state transition currently happening. Add this requested state
