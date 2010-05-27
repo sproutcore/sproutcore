@@ -2823,13 +2823,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   /**
-    Setting wantsAcceleratedLayer to YES will use 3d transforms to move the
-    layer when available. On some platforms 3d transforms are hardware accelerated.
+    Setting wantsAcceleratedLayer to YES will use transforms to move the
+    layer when available. On some platforms transforms are hardware accelerated.
   */
   wantsAcceleratedLayer: NO,
 
   /**
-    Specifies whether 3d transforms can be used to move the layer.
+    Specifies whether transforms can be used to move the layer.
   */
   hasAcceleratedLayer: function(){
     return this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers;
@@ -3058,7 +3058,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     if (hasAcceleratedLayer) {
-      ret[SC.platform.domCSSPrefix+'Transform'] = 'translate3d('+translateLeft+'px, '+translateTop+'px, 0px)';
+      var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
+      if (SC.platform.supportsCSS3DTransforms) transform += ' translateZ(0px)'
+      ret[SC.platform.domCSSPrefix+'Transform'] = transform;
     }
 
     // convert any numbers into a number + "px".
