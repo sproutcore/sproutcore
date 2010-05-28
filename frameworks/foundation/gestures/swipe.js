@@ -94,6 +94,9 @@ SC.SwipeGesture = SC.Gesture.extend({
     ) {
       // does not qualify anymore
       this.release(touch);
+
+      var allTouches = touch.touchesForResponder(this);
+      if (!allTouches || allTouches.length == 0) this.end(touch, swipeDirection, delta);
     } else {
       this.change(touch, swipeDirection, delta);
     }
