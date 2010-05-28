@@ -53,11 +53,6 @@ SC.Gesture = SC.Object.extend({
   name: "gesture",
 
   /**
-    Whether gesture is active.
-  */
-  isActive: NO,
-
-  /**
     Return YES to take the touch, starting the gesture if it is not already started, or
     trigger() to trigger the one-off gesture and call discardTouch(touch) to get rid of the touch.
   */
@@ -120,13 +115,32 @@ SC.Gesture = SC.Object.extend({
     Alert that the gesture has changed.
   */
   change: function() {
-    var args = SC.$A(arguments);
-    args.unshift(this);
-    
-    var act = this.name + "Changed";
-    if (this.view[act]) this.view[act].apply(this.view, args);
+    if (this.get('isActive')) {
+      var args = SC.$A(arguments);
+      args.unshift(this);
+
+      var act = this.name + "Changed";
+      if (this.view[act]) this.view[act].apply(this.view, args);
+    }
   },
-  
+
+  /**
+    Cancel the gesture.
+  */
+  cancel: function(){
+    if (this.get('isActive')) {
+      this.set('isActive', NO);
+
+      var args = SC.$A(arguments);
+      args.unshift(this);
+
+      var act = this.name + "Cancelled";
+      if (this.view[act]) this.view[act].apply(this.view, args);
+
+      if (this.didCancel) this.didCancel.apply(this, arguments);
+    }
+  },
+
   /**
     Takes possession of a touch. This does not take effect immediately; it takes effect after
     the run loop finishes to prevent it from being called during another makeTouchResponder.

@@ -132,5 +132,11 @@ SC.SwipeGesture = SC.Gesture.extend({
         this.release(touch);
       }, this);
     }
+  },
+
+  didCancel: function(){
+    sc_super();
+    this.set('currentDirection', null);
   }
+
 });
