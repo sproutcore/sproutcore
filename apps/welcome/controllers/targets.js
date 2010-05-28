@@ -39,6 +39,13 @@ Welcome.targetsController = SC.ArrayController.create(
       });
     }
   },
+  
+  launchEnabled: function() {
+    var canLoadApp = this.get('canLoadApp'),
+        selection = this.get('selection'),
+        selectedObject = selection.firstObject();
+    return canLoadApp && selectedObject && selectedObject.get('name') !== '/sproutcore';
+  }.property('canLoadApp', 'selection').cacheable(),
 
   // used to disable all controls
   canLoadApp: YES,

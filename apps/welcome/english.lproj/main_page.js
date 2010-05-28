@@ -10,65 +10,55 @@ Welcome.mainPage = SC.Page.design({
   // The main pane is made visible on screen as soon as your app is loaded.
   // Add childViews to this pane for views to display immediately on page 
   // load.
-  mainPane: SC.PanelPane.design({
-    layout: { width: 360, height: 300, centerX: 0, centerY: 0 },
-
+  mainPane: SC.MainPane.design({
+    childViews: 'contentView'.w(),
+    
     contentView: SC.View.design({
-      childViews: 'heading prompt icon scrollView button'.w(),
+      layout: { width: 280, height: 340, centerX: 0, centerY: 0 },
+      childViews: 'heading appSelector launchApplication'.w(),
       
-      icon: SC.View.design({
-        layout: { width: 32, left: 20, top: 18, height: 32 },
+      heading: SC.View.design({
+        layout: { width: 271, centerX: 0, top: 0, height: 60 },
         tagName: 'img',
         render: function(context, firstTime) {
-          context.attr('src', sc_static('images/sproutcore-logo'));
+          context.attr('src', sc_static('images/sproutcore'));
         }
       }),
       
-      heading: SC.LabelView.design({
-        layout: { left: 56, top: 20, right: 20, height: 32 },
-        tagName: "h1",
-        classNames: "heading",
-        valueBinding: 'Welcome.displayTitle' 
-      }),
-      
-      prompt: SC.LabelView.design({
-        layout: { left: 20, top: 60, right: 20, height: 20 },
-        escapeHTML: NO,
-        value: "Choose an application:"
-      }),
-      
-      button: SC.ButtonView.design({
-        layout: { bottom: 18, height: 24, width: 140, centerX: 0 },
-        isEnabledBinding: "Welcome.targetsController.canLoadApp",
-
-        title: "Load Application",
-        controlStyle: "capsule",
-        isDefault: YES,
+      appSelector: SC.View.design({
+        layout: {top:80, left:0, right:0, bottom:46},
+        childViews: 'scrollView'.w(),
+        classNames: 'app-selector',
         
+        scrollView: SC.ScrollView.design({
+          layout: { left: 0, top: 0, right: 0, bottom: 0 },
+          hasHorizontalScroller: NO,
+        
+          contentView: SC.ListView.design({  
+            rowHeight: 40,
+
+            contentBinding: "Welcome.targetsController.appsOnly",
+            selectionBinding: "Welcome.targetsController.selection",
+            isEnabledBinding: "Welcome.targetsController.canLoadApp",
+          
+            contentValueKey: "displayName",
+            contentIconKey: "targetIcon",
+            hasContentIcon: YES,
+          
+            target: "Welcome.targetsController",
+            action: "loadApplication"
+          })
+        })
+      }),
+      
+      launchApplication: SC.ButtonView.design({
+        layout: {bottom:0, height:30, width:160, centerX:0},
+        isEnabledBinding: "Welcome.targetsController.launchEnabled",
+        controlSize: SC.HUGE_CONTROL_SIZE,
+        title: "Launch Application",
+        isDefault: YES,
         target: "Welcome.targetsController",
         action: "loadApplication"
-        
-      }),
-      
-      scrollView: SC.ScrollView.design({
-        layout: { left: 20, top: 80, right: 20, bottom: 63 },
-        hasHorizontalScroller: NO,
-        
-        contentView: SC.ListView.design({  
-          rowHeight: 32,
-
-          contentBinding: "Welcome.targetsController.appsOnly",
-          selectionBinding: "Welcome.targetsController.selection",
-          isEnabledBinding: "Welcome.targetsController.canLoadApp",
-          
-          contentValueKey: "displayName",
-          contentIconKey: "targetIcon",
-          hasContentIcon: YES,
-          
-          target: "Welcome.targetsController",
-          action: "loadApplication"
-        })
-        
       })
       
     }) 
