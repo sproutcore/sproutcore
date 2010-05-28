@@ -86,7 +86,9 @@ SC.SwipeGesture = SC.Gesture.extend({
     // determine swipe direction
     if (delta < 0) swipeDirection = (d === SC.SWIPE_HORIZONTAL) ? SC.SWIPE_LEFT : SC.SWIPE_UP;
     else swipeDirection = (d === SC.SWIPE_HORIZONTAL) ? SC.SWIPE_RIGHT : SC.SWIPE_DOWN;
-    
+
+    this.end(touch, swipeDirection, delta);
+
     // trigger
     if (
       Math.abs(delta) > this.get("swipeDistance") ||
