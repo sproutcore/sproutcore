@@ -1,0 +1,29 @@
+
+#loading {
+  background: #eee;
+  background: -webkit-gradient(linear, left top, left bottom, from(#e0e0e0), to(#f4f4f4));
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+#loading p.loading {
+  -sc-box-shadow: rgba(0,0,0,0.3) 0 0 4px;
+  background-color: #f4f4f4;
+  -sc-border-bottom-left-radius: 4px;
+  -sc-border-bottom-right-radius: 4px;
+  color: #666;
+  font-family: Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  height: 18px;
+  left: 50%;
+  margin: 0 0 0 -50px;
+  padding-top: 5px;
+  position: absolute;
+  text-align: center;
+  text-shadow: 0 1px 1px #fff;
+  width: 100px;
+}
