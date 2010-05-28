@@ -8,6 +8,7 @@ sc_require("system/gesture");
 
 SC.SWIPE_HORIZONTAL = "X";
 SC.SWIPE_VERTICAL = "Y";
+SC.SWIPE_ANY = "XY";
 SC.SWIPE_LEFT = "LEFT";
 SC.SWIPE_RIGHT = "RIGHT";
 SC.SWIPE_UP = "UP";
@@ -18,6 +19,13 @@ SC.SwipeGesture = SC.Gesture.extend({
   acceptsMultitouch: YES,
   
   direction: SC.SWIPE_HORIZONTAL,
+
+  /**
+    Will be populated with the current direction of the swipe once
+    one has been determined.
+  */
+  currentDirection: null,
+
   startDistance: 5,
   swipeDistance: 40,
   
@@ -26,24 +34,39 @@ SC.SwipeGesture = SC.Gesture.extend({
   touchIsInGesture: function(touch, status) {
     // if we have not "flunked" the touch before, and it has moved 
     if (!status.flunked) {
-      var d = this.get("direction"), 
-          o = (d === SC.SWIPE_HORIZONTAL ? "Y" : "X"),
-          delta = touch["page" + d] - touch["start" + d],
-          oDelta = touch["page" + o] - touch["start" + o];
-      
-      if (
-        Math.abs(delta) > this.get("startDistance") &&
-        Math.abs(delta) * this.get("tolerance") > Math.abs(oDelta)
-      ) {
-        return YES;
+      var d = this.get('direction'),
+          cd = this.get('currentDirection'),
+          startDistance = this.get('startDistance'),
+          deltaX = touch.pageX - touch.startX,
+          deltaY = touch.pageY - touch.startY;
+
+      if (Math.abs(deltaX) > startDistance || Math.abs(deltaY) > startDistance) {
+
+        if (!cd) {
+          if (d == SC.SWIPE_ANY) {
+            if      (deltaX > deltaY) cd = SC.SWIPE_HORIZONTAL;
+            else if (deltaY > deltaX) cd = SC.SWIPE_VERTICAL;
+            else                      return NO; // We can't determine a direction yet
+          } else {
+            cd = d;
+          }
+          this.set('currentDirection', cd);
+        }
+
+        var delta  = (cd == SC.SWIPE_HORIZONTAL) ? deltaX : deltaY,
+            oDelta = (cd == SC.SWIPE_HORIZONTAL) ? deltaY : deltaX;
+
+        if (Math.abs(delta) * this.get("tolerance") > Math.abs(oDelta)) {
+          return YES;
+        }
+
       }
-      
     }
     return NO;
   },
   
   touchStart: function(touch) {
-    var d = this.get("direction"), 
+    var d = this.get("currentDirection"), 
         delta = touch["page" + d] - touch["start" + d],
         swipeDirection;
     
@@ -56,7 +79,7 @@ SC.SwipeGesture = SC.Gesture.extend({
   
   touchesDragged: function(evt, touches) {
     var touch = touches.firstObject();
-    var d = this.get("direction"), 
+    var d = this.get("currentDirection"), 
         o = (d === SC.SWIPE_HORIZONTAL ? "Y" : "X"),
         delta = touch["page" + d] - touch["start" + d],
         oDelta = touch["page" + o] - touch["start" + o],
@@ -77,7 +100,7 @@ SC.SwipeGesture = SC.Gesture.extend({
   },
   
   touchEnd: function(touch) {
-    var d = this.get("direction"), 
+    var d = this.get("currentDirection"), 
         o = (d === SC.SWIPE_HORIZONTAL ? "Y" : "X"),
         delta = touch["page" + d] - touch["start" + d],
         oDelta = touch["page" + o] - touch["start" + o],
@@ -96,6 +119,8 @@ SC.SwipeGesture = SC.Gesture.extend({
     }
 
     this.end(touch, swipeDirection, delta);
+
+    this.set('currentDirection', null);
 
     // and release all others
     var touches = touch.touchesForResponder(this);
