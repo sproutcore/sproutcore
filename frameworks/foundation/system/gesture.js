@@ -51,7 +51,12 @@ SC.Gesture = SC.Object.extend({
     The gesture name
   */
   name: "gesture",
-  
+
+  /**
+    Whether gesture is active.
+  */
+  isActive: NO,
+
   /**
     Return YES to take the touch, starting the gesture if it is not already started, or
     trigger() to trigger the one-off gesture and call discardTouch(touch) to get rid of the touch.
