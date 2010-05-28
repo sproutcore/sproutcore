@@ -136,8 +136,6 @@ SC.Gesture = SC.Object.extend({
 
       var act = this.name + "Cancelled";
       if (this.view[act]) this.view[act].apply(this.view, args);
-
-      if (this.didCancel) this.didCancel.apply(this, arguments);
     }
   },
 
