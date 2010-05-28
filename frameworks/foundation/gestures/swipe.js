@@ -134,7 +134,7 @@ SC.SwipeGesture = SC.Gesture.extend({
     }
   },
 
-  didCancel: function(){
+  cancel: function(){
     sc_super();
     this.set('currentDirection', null);
   }
