@@ -761,6 +761,9 @@
 .sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.sel.active .button-right { background: static_url("images/1.png") no-repeat -26px -1852px; }
 .sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.def.active .button-left { background: static_url("images/1.png") no-repeat -26px -1882px; }
 .sc-theme .sc-view.ace.dark.sc-regular-size.capsule.sc-button-view.def.active .button-right { background: static_url("images/1.png") no-repeat -26px -1852px; }
+@-webkit-keyframes startup{ 
+0% { bottom: -33px; }
+100% { bottom: -10px; }}
 @-webkit-keyframes loading{ 
 0% { color: #444; }
 50% { color: #777; }
@@ -777,9 +780,10 @@
   top: 0;
 }
 #loading p.loading {
-  -webkit-animation-name: loading;
-  -webkit-animation-duration: 1.5s;
-  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-name: startup, loading;
+  -webkit-animation-duration: 0.8s, 1.5s;
+  -webkit-animation-iteration-count: 1, infinite;
+  -webkit-animation-timing-function: ease-out ease;
   -moz-box-shadow: inset rgba(0, 0, 0, 0.5) 0 0 3px;
   -webkit-box-shadow: inset rgba(0, 0, 0, 0.5) 0 0 3px;
   box-shadow: inset rgba(0, 0, 0, 0.5) 0 0 3px;
