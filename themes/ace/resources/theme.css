@@ -771,6 +771,7 @@
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dddddd), to(#bbbbbb));
   bottom: 0;
   left: 0;
+  overflow: hidden;
   position: absolute;
   right: 0;
   top: 0;
@@ -779,28 +780,24 @@
   -webkit-animation-name: loading;
   -webkit-animation-duration: 1.5s;
   -webkit-animation-iteration-count: infinite;
-  -moz-box-shadow: inset rgba(0, 0, 0, 0.5) 0 1px 4px;
-  -webkit-box-shadow: inset rgba(0, 0, 0, 0.5) 0 1px 4px;
-  box-shadow: inset rgba(0, 0, 0, 0.5) 0 1px 4px;
+  -moz-box-shadow: inset rgba(0, 0, 0, 0.5) 0 0 3px;
+  -webkit-box-shadow: inset rgba(0, 0, 0, 0.5) 0 0 3px;
+  box-shadow: inset rgba(0, 0, 0, 0.5) 0 0 3px;
   background-color: #e4e4e4;
-  -moz-border-radius: 8px;
-  -webkit-border-radius: 8px;
-  border-radius: 8px;
-  border-top: 1px solid #bbbbbb;
-  border-bottom: 1px solid #eeeeee;
+  border-top: 1px solid #999999;
+  bottom: -10px;
   color: #666666;
   font-family: Helvetica, sans-serif;
   font-size: 13px;
   font-weight: bold;
-  height: 23px;
-  left: 50%;
-  margin: -16px 0 0 -80px;
+  height: 33px;
+  left: -10px;
+  margin: 0;
+  padding-left: 30px;
   padding-top: 10px;
   position: absolute;
-  text-align: center;
+  right: -10px;
   text-shadow: 0 1px 1px #ffffff;
-  top: 50%;
-  width: 160px;
 }
 .sc-theme .sc-view.ace.sc-slider-view.disabled { opacity: 0.5; }
 .sc-theme .sc-view.ace.sc-jumbo-size.sc-slider-view { overflow: visible; }
