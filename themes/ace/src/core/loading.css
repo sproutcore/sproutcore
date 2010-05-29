@@ -1,7 +1,14 @@
 
+@-webkit-keyframes loading {
+  0% { color: #444; }
+  50% { color: #777; }
+  100% { color: #444; }
+}
+
 #loading {
   background: #eee;
-  background: -webkit-gradient(linear, left top, left bottom, from(#e0e0e0), to(#f4f4f4));
+  background: -moz-linear-gradient(top,#ddd,#bbb);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#bbb));
   bottom: 0;
   left: 0;
   position: absolute;
@@ -10,20 +17,26 @@
 }
 
 #loading p.loading {
-  -sc-box-shadow: rgba(0,0,0,0.3) 0 0 4px;
-  background-color: #f4f4f4;
-  -sc-border-bottom-left-radius: 4px;
-  -sc-border-bottom-right-radius: 4px;
+  -webkit-animation-name: loading;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-iteration-count: infinite;
+
+  -sc-box-shadow: inset rgba(0,0,0,0.5) 0 1px 4px;
+  background-color: #e4e4e4;
+  -sc-border-radius: 8px;
+  border-top: 1px solid #bbb;
+  border-bottom: 1px solid #eee;
   color: #666;
   font-family: Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
-  height: 18px;
+  height: 23px;
   left: 50%;
-  margin: 0 0 0 -50px;
-  padding-top: 5px;
+  margin: -16px 0 0 -80px;
+  padding-top: 10px;
   position: absolute;
   text-align: center;
   text-shadow: 0 1px 1px #fff;
-  width: 100px;
+  top: 50%;
+  width: 160px;
 }
