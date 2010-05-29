@@ -180,7 +180,18 @@ SC.Renderer = {
     Extends this renderer.
   */
   extend: function(ext) {
-    return SC.mixin(SC.beget(this), ext);
+    var ret = SC.mixin(SC.beget(this), ext),
+        key, value, cur;
+    
+    ret.superclass = this;
+    for(key in ret) {
+      value = ret[key];
+      if (value instanceof Function && !value.superclass && (value !== (cur=this[key]))) {
+        value.base = cur;
+      }
+    }
+    
+    return ret;
   },
  
   /**
