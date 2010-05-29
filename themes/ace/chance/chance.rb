@@ -180,13 +180,13 @@ if config[:less]
   webkitkeyframes_rule = /@\-webkit\-keyframes\s*([\w-]*)\s*{((\s*[\d]*%\s*{[^}]*})*)\s*}/
   cleaned.gsub!(webkitkeyframes_rule) do |match|
     keyframes[$1] = $2
-    ".less-sucks-webkit-keyframes-" + $1 + " { less: sucks; }"
+    ".less-sucks-" + $1 + " { less: " + $1 + "; }"
   end
   
   lessed = Less.parse cleaned
   final = ""
   
-  rev_webkitkeyframes_rule = /.less\-sucks\-webkit\-keyframes\-([\w-]*) {[^}]*}/
+  rev_webkitkeyframes_rule = /.less\-sucks\-\s*([^\s]*) { less: \1; }/
   lessed.gsub!(rev_webkitkeyframes_rule) do |match|
     "@-webkit-keyframes " + $1 + "{ " + keyframes[$1] + "}"
   end
