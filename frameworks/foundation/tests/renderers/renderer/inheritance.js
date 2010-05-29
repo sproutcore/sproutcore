@@ -34,7 +34,6 @@ test("inheritance", function() {
 
 test("sc_super support", function() {
   var child = childRenderer();
-  SC.Logger.log(child, child.func);
   child.func();
   equals(child.prop, "super", "property should have been set by superclass function");
 });
