@@ -11,6 +11,7 @@
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#bbb));
   bottom: 0;
   left: 0;
+  overflow: hidden;
   position: absolute;
   right: 0;
   top: 0;
@@ -21,22 +22,20 @@
   -webkit-animation-duration: 1.5s;
   -webkit-animation-iteration-count: infinite;
 
-  -sc-box-shadow: inset rgba(0,0,0,0.5) 0 1px 4px;
+  -sc-box-shadow: inset rgba(0,0,0,0.5) 0 0 3px;
   background-color: #e4e4e4;
-  -sc-border-radius: 8px;
-  border-top: 1px solid #bbb;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #999;
+  bottom: -10px; /* hide inner shadow */
   color: #666;
   font-family: Helvetica, sans-serif;
   font-size: 13px;
   font-weight: bold;
-  height: 23px;
-  left: 50%;
-  margin: -16px 0 0 -80px;
+  height: 33px;
+  left: -10px; /* hide inner shadow */
+  margin: 0;
+  padding-left: 30px;
   padding-top: 10px;
   position: absolute;
-  text-align: center;
+  right: -10px;
   text-shadow: 0 1px 1px #fff;
-  top: 50%;
-  width: 160px;
 }
