@@ -193,9 +193,8 @@ if config[:less]
   
   # LESS messes things up
   lessed.each_line {|line|
-    final += line.gsub(/url\('data:image\/png;base64,(.*?)'\)/) do |match|
-      res = $1.gsub(" ", "+")
-      "url('data:image/png;base64," + res + "')"
+    final += line.gsub(/url\('data:image\/(gif|png);base64,(.*?)'\)/) do |match|
+      "url('data:image/" + $1 + ";base64," + $2.gsub(" ", "+") + "')"
     end
   }
 end
