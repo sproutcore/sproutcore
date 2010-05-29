@@ -9,6 +9,7 @@
   border: 1px solid #f4f4f4;
   border-bottom-color: #fff;
   -webkit-box-shadow: inset rgba(0,0,0,0.3) 0 3px 8px;
+  -moz-box-shadow: inset rgba(0,0,0,0.3) 0 3px 8px;
 }
 
 .sc-list-view .sc-list-item-view {
