@@ -173,8 +173,23 @@ if config[:less]
     raise "Lest less doth be installed, less shall remain unusable. Sad."
   end
   
+  keyframes = {}
+  
+  # this is dirty; I took a shower after writing this
+  # first group gets the animation name, the second captures the % keyframes
+  webkitkeyframes_rule = /@\-webkit\-keyframes\s*([\w-]*)\s*{((\s*[\d]*%\s*{[^}]*})*)\s*}/
+  cleaned.gsub!(webkitkeyframes_rule) do |match|
+    keyframes[$1] = $2
+    ".less-sucks-webkit-keyframes-" + $1 + " { less: sucks; }"
+  end
+  
   lessed = Less.parse cleaned
   final = ""
+  
+  rev_webkitkeyframes_rule = /.less\-sucks\-webkit\-keyframes\-([\w-]*) {[^}]*}/
+  lessed.gsub!(rev_webkitkeyframes_rule) do |match|
+    "@-webkit-keyframes " + $1 + "{ " + keyframes[$1] + "}"
+  end
   
   # LESS messes things up
   lessed.each_line {|line|
