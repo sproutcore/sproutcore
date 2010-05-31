@@ -700,7 +700,10 @@ SC.Animatable = {
       else if (styleHelpers[i]) styleHelpers[i](style, i, styles);
       else style[i] = styles[i];
     }
-    
+
+    // apply transform
+    style[SC.platform.cssPrefix+"Transform"] = transform;
+
     // don't want to set because we don't want updateLayout... again.
     if (updateLayout) {
       var prev = this.holder.layout;
