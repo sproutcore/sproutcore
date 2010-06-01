@@ -4,7 +4,6 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 /**
   @namespace
   
@@ -29,39 +28,38 @@
   @since SproutCore 1.0
 */
 SC.SelectionSupport = {
-  
+
   // ..........................................................
   // PROPERTIES
   // 
-  
   /**
     Walk like a duck.
     
     @property {Boolean}
   */
   hasSelectionSupport: YES,
-  
+
   /**
     If YES, selection is allowed. Default is YES.
     
     @property {Boolean}
   */
   allowsSelection: YES,
-  
+
   /**
     If YES, multiple selection is allowed. Default is YES.
     
     @property {Boolean}
   */
   allowsMultipleSelection: YES,
-  
+
   /**
     If YES, allow empty selection Default is YES.
     
     @property {Boolean}
   */
   allowsEmptySelection: YES,
-  
+
   /**
     Override to return the first selectable object.  For example, if you 
     have groups or want to otherwise limit the kinds of objects that can be
@@ -74,7 +72,7 @@ SC.SelectionSupport = {
   firstSelectableObject: function() {
     return this.get('firstObject');
   }.property(),
-  
+
   /**
     This is the current selection.  You can make this selection and another
     controller's selection work in concert by binding them together. You
@@ -83,10 +81,12 @@ SC.SelectionSupport = {
     @property {SC.SelectionSet}
   */
   selection: function(key, value) {
-        
+
     var old = this._scsel_selection,
-        oldlen = old ? old.get('length') : 0,
-        content, empty, len;
+    oldlen = old ? old.get('length') : 0,
+    content,
+    empty,
+    len;
 
     // whenever we have to recompute selection, reapply all the conditions to
     // the selection.  This ensures that changing the conditions immediately
@@ -94,64 +94,61 @@ SC.SelectionSupport = {
     // 
     // Note also if we don't allowSelection, we don't clear the old selection;
     // we just don't allow it to be changed.
-    if ((value === undefined) || !this.get('allowsSelection')) value = old ;
+    if ((value === undefined) || !this.get('allowsSelection')) value = old;
 
     len = (value && value.isEnumerable) ? value.get('length') : 0;
-    
-    // if we don't allow multiple selection
-    if ((len>1) && !this.get('allowsMultipleSelection')) {
 
-      if (oldlen>1) {
-        value = SC.SelectionSet.create()
-                  .addObject(old.get('firstObject')).freeze();
-        len   = 1;
+    // if we don't allow multiple selection
+    if ((len > 1) && !this.get('allowsMultipleSelection')) {
+
+      if (oldlen > 1) {
+        value = SC.SelectionSet.create().addObject(old.get('firstObject')).freeze();
+        len = 1;
       } else {
         value = old;
         len = oldlen;
       }
     }
-    
+
     // if we don't allow empty selection, block that also.  select first 
     // selectable item if necessary.
-    if ((len===0) && !this.get('allowsEmptySelection')) {
-      if (oldlen===0) {
+    if ((len === 0) && !this.get('allowsEmptySelection')) {
+      if (oldlen === 0) {
         value = this.get('firstSelectableObject');
         if (value) value = SC.SelectionSet.create().addObject(value).freeze();
         else value = SC.SelectionSet.EMPTY;
         len = value.get('length');
-        
+
       } else {
         value = old;
         len = oldlen;
       }
     }
-    
+
     // if value is empty or is not enumerable, then use empty set
-    if (len===0) value = SC.SelectionSet.EMPTY;
-    
+    if (len === 0) value = SC.SelectionSet.EMPTY;
+
     // always use a frozen copy...
     value = value.frozenCopy();
     this._scsel_selection = value;
-    
+
     return value;
-    
-  }.property('arrangedObjects', 'allowsEmptySelection', 
-      'allowsMultipleSelection', 'allowsSelection').cacheable(),
-  
+
+  }.property('arrangedObjects', 'allowsEmptySelection', 'allowsMultipleSelection', 'allowsSelection').cacheable(),
+
   /**
     YES if the receiver currently has a non-zero selection.
     
     @property {Boolean}
   */
   hasSelection: function() {
-    var sel = this.get('selection') ;
-    return !!sel && (sel.get('length') > 0) ;
+    var sel = this.get('selection');
+    return !! sel && (sel.get('length') > 0);
   }.property('selection').cacheable(),
-  
+
   // ..........................................................
   // METHODS
   // 
-
   /**
     Selects the passed objects in your content.  If you set "extend" to YES,
     then this will attempt to extend your selection as well.
@@ -163,20 +160,20 @@ SC.SelectionSupport = {
   selectObjects: function(objects, extend) {
 
     // handle passing an empty array
-    if (!objects || objects.get('length')===0) {
+    if (!objects || objects.get('length') === 0) {
       if (!extend) this.set('selection', SC.SelectionSet.EMPTY);
       return this;
     }
-    
+
     var sel = this.get('selection');
     if (extend && sel) sel = sel.copy();
     else sel = SC.SelectionSet.create();
-    
+
     sel.addObjects(objects).freeze();
     this.set('selection', sel);
-    return this ;
+    return this;
   },
-  
+
   /**
     Selects a single passed object in your content.  If you set "extend" to 
     YES then this will attempt to extend your selection as well.
