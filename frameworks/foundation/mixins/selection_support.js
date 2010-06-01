@@ -185,10 +185,10 @@ SC.SelectionSupport = {
   selectObject: function(object, extend) {
     if (object === null) {
       if (!extend) this.set('selection', null);
-      return this ;
-      
+      return this;
+
     } else return this.selectObjects([object], extend);
-  },    
+  },
 
   /**
     Deselects the passed objects in your content.
@@ -198,17 +198,15 @@ SC.SelectionSupport = {
   */
   deselectObjects: function(objects) {
 
-    if (!objects || objects.get('length')===0) return this; // nothing to do
-    
+    if (!objects || objects.get('length') === 0) return this; // nothing to do
     var sel = this.get('selection');
-    if (!sel || sel.get('length')===0) return this; // nothing to do
-
+    if (!sel || sel.get('length') === 0) return this; // nothing to do
     // find index for each and remove it
     sel = sel.copy().removeObjects(objects).freeze();
     this.set('selection', sel.freeze());
-    return this ;
+    return this;
   },
-  
+
   /**
     Deselects the passed object in your content.
     
@@ -219,46 +217,32 @@ SC.SelectionSupport = {
     if (!object) return this; // nothing to do
     else return this.deselectObjects([object]);
   },
-  
-  /**  @private
+
+  /**
     Call this method whenever your source content changes to ensure the 
     selection always remains up-to-date and valid.
+    
+    @returns {Object}
   */
   updateSelectionAfterContentChange: function() {
+    var arrangedObjects = this.get('arrangedObjects');
+    var selectionSet = this.get('selection');
+    var allowsEmptySelection = this.get('allowsEmptySelection');
+    var indexSet; // Selection index set for arranged objects
+    //
+    // Remove any selection set objects that are no longer in the content
+    indexSet = selectionSet.indexSetForSource(arrangedObjects);
+    if ((indexSet && (indexSet.get('length') !== selectionSet.get('length'))) || (!indexSet && (selectionSet.get('length') > 0))) { // then the selection content has changed
+      selectionSet = selectionSet.copy().constrain(arrangedObjects).freeze();
+      this.set('selection', selectionSet);
+    }
     
-    var content = this.get('arrangedObjects'),
-        sel     = this.get('selection'),
-        ret     = sel,
-        indexes, len, max;
-
-    // first, make sure selection goes beyond current items...
-    if (ret && content && ret.get('sources').indexOf(content)>=0) {
-      indexes = ret.indexSetForSource(content);
-      len     = content.get('length') ;
-      max     = indexes ? indexes.get('max') : 0;
-      
-      // to clean this up, just copy the selection and remove the extra 
-      // indexes
-      if (max > len) {
-        ret = ret.copy().remove(content, len, max-len).freeze();
-        this.set('selection', ret);
-      }
+    // Reselect an object if required (if content length > 0)
+    if ((selectionSet.get('length') === 0) && (arrangedObjects.get('length') > 0) && !allowsEmptySelection) {
+      this.selectObject(this.get('firstSelectableObject'), NO);
     }
 
-    // if we didn't have to recompute the selection anyway, do a quick check
-    // to make sure there are no constraints that need to be recomputed.
-    if (ret === sel) {
-      len = sel ? sel.get('length') : 0;
-      max = content ? content.get('length') : 0;
-      
-      // need to recompute if the selection is empty and it shouldn't be but
-      // only if we have some content; otherwise what's the point?
-      if ((len===0) && !this.get('allowsEmptySelection') && max>0) {
-        this.notifyPropertyChange('selection');
-      }
-    }
-
-    return this ;
+    return this;
   }
-    
+
 };
