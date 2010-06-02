@@ -59,6 +59,49 @@ var SC = SC || {} ;
 var SproutCore = SproutCore || SC ;
 
 /**
+  @private
+
+  Adds properties to a target object. You must specify whether
+  to overwrite a value for a property or not.
+
+  Used as a base function for the wrapper functions SC.mixin and SC.supplement.
+
+  @param overwrite {Boolean} if a target has a value for a property, this specifies
+                  whether or not to overwrite that value with the copyied object's 
+                  property value.
+  @param target {Object} the target object to extend
+  @param properties {Object} one or more objects with properties to copy.
+  @returns {Object} the target object.
+  @static
+*/
+SC._baseMixin = function (override) {
+  var args = Array.prototype.slice.call(arguments, 1), src,
+  // copy reference to target object
+      target = args[0] || {},
+      idx = 1,
+      length = args.length ,
+      options, copy , key;
+
+  // Handle case where we have only one item...extend SC
+  if (length === 1) {
+    target = this || {};
+    idx=0;
+  }
+
+  for ( ; idx < length; idx++ ) {
+    if (!(options = args[idx])) continue ;
+    for(key in options) {
+      if (!options.hasOwnProperty(key)) continue ;
+      copy = options[key] ;
+      if (target===copy) continue ; // prevent never-ending loop
+      if (copy !== undefined && ( override || (target[key] === undefined) )) target[key] = copy ;
+    }
+  }
+  
+  return target;
+} ;
+
+/**
   Adds properties to a target object.
   
   Takes the root object and adds the attributes for any additional 
@@ -70,29 +113,9 @@ var SproutCore = SproutCore || SC ;
   @static
 */
 SC.mixin = function() {
-  // copy reference to target object
-  var target = arguments[0] || {},
-      idx = 1,
-      length = arguments.length ,
-      options, copy , key;
-
-  // Handle case where we have only one item...extend SC
-  if (length === 1) {
-    target = this || {};
-    idx=0;
-  }
-
-  for ( ; idx < length; idx++ ) {
-    if (!(options = arguments[idx])) continue ;
-    for(key in options) {
-      if (!options.hasOwnProperty(key)) continue ;
-      copy = options[key] ;
-      if (target===copy) continue ; // prevent never-ending loop
-      if (copy !== undefined) target[key] = copy ;
-    }
-  }
-  
-  return target;
+  var args = Array.prototype.slice.call(arguments);
+  args.unshift(true);
+  return SC._baseMixin.apply(this, args);
 } ;
 
 /**
@@ -108,30 +131,9 @@ SC.mixin = function() {
   @static
 */
 SC.supplement = function() {
-  // copy reference to target object
-  var target = arguments[0] || {};
-  var idx = 1;
-  var length = arguments.length ;
-  var options ;
-
-  // Handle case where we have only one item...extend SC
-  if (length === 1) {
-    target = this || {};
-    idx=0;
-  }
-
-  for ( ; idx < length; idx++ ) {
-    if (!(options = arguments[idx])) continue ;
-    for(var key in options) {
-      if (!options.hasOwnProperty(key)) continue ;
-      var src = target[key] ;
-      var copy = options[key] ;
-      if (target===copy) continue ; // prevent never-ending loop
-      if (copy !== undefined  &&  src === undefined) target[key] = copy ;
-    }
-  }
-  
-  return target;
+  var args = Array.prototype.slice.call(arguments);
+  args.unshift(false);
+  return SC._baseMixin.apply(this, args);
 } ;
 
 /** 
