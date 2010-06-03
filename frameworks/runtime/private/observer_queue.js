@@ -40,7 +40,7 @@ SC.Observers = {
     var tuple ;
 
     // try to get the tuple for this.
-    if (SC.typeOf(propertyPath) === SC.T_STRING) {
+    if (typeof propertyPath === "string") {
       tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     } else {
       tuple = propertyPath; 

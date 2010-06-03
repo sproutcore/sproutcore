@@ -89,7 +89,7 @@ SC._object_extend = function _object_extend(base, ext) {
     var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
 
     // Possibly add to a bindings.
-    if (key.slice(-7) === "Binding") {
+    if (key.length > 7 && key.slice(-7) === "Binding") {
       if (!clonedBindings) {
         bindings = (bindings || SC.EMPTY_ARRAY).slice() ;
         clonedBindings = YES ;
@@ -119,7 +119,7 @@ SC._object_extend = function _object_extend(base, ext) {
       } else if (paths = value.localPropertyPaths) {
         pathLoc = paths.length;
         while(--pathLoc >= 0) {
-          local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.Set);
+          local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.CoreSet);
           local.add(key);
           base._kvo_for('_kvo_observed_keys', SC.CoreSet).add(paths[pathLoc]);
         }
@@ -544,7 +544,7 @@ SC.Object.prototype = {
     @returns {Boolean}
   */
   respondsTo: function( methodName ) {
-    return !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
+    return !!(this[methodName] instanceof Function);
   },
   
   /**

@@ -389,7 +389,8 @@ SC.Binding = {
     // contentBinding: "*owner.value"
     //
     path = this._fromPropertyPath; root = this._fromRoot ;
-    if (SC.typeOf(path) === SC.T_STRING) {
+    
+    if (typeof path === "string") {
       
       // if the first character is a '.', this is a static path.  make the 
       // toRoot the default root.
@@ -672,7 +673,7 @@ SC.Binding = {
       // toRoot as the root object.  Similar code exists in connect() so if 
       // you make a change to one be sure to update the other.
       path = this._fromPropertyPath; root = this._fromRoot ;
-      if (SC.typeOf(path) === SC.T_STRING) {
+      if (typeof path === "string") {
         
         // static path beginning with the toRoot
         if (path.indexOf('.') === 0) {

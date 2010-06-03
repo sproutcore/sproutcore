@@ -555,7 +555,7 @@ SC.mixin(/** @scope SC */ {
     var K = SC.K; K.prototype = obj ;
     var ret = new K();
     K.prototype = null ; // avoid leaks
-    if (SC.typeOf(obj.didBeget) === SC.T_FUNCTION) ret = obj.didBeget(ret); 
+    if (typeof obj.didBeget === "function") ret = obj.didBeget(ret); 
     return ret ;
   },
 
@@ -651,7 +651,7 @@ SC.mixin(/** @scope SC */ {
   tupleForPropertyPath: function(path, root) {
 
     // if the passed path is itself a tuple, return it
-    if (SC.typeOf(path) === SC.T_ARRAY) return path ;
+    if (typeof path === "object" && (path instanceof Array)) return path ;
 
     // find the key.  It is the last . or first *
     var key ;

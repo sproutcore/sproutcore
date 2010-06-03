@@ -123,7 +123,8 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     if (method === undefined) { 
       method = target; target = this ;
     }
-    if (SC.typeOf(method) === SC.T_STRING) method = target[method];
+    
+    if (typeof method === "string") method = target[method];
     if (!this._invokeQueue) this._invokeQueue = SC.ObserverSet.create();
     this._invokeQueue.add(target, method);
     return this ;
@@ -153,7 +154,8 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     if (method === undefined) { 
       method = target; target = this ;
     }
-    if (SC.typeOf(method) === SC.T_STRING) method = target[method];
+    
+    if (typeof method === "string") method = target[method];
     if (!this._invokeLastQueue) this._invokeLastQueue = SC.ObserverSet.create();
     this._invokeLastQueue.add(target, method);
     return this ;

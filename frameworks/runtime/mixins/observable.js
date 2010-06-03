@@ -496,7 +496,7 @@ SC.Observable = {
         keys, idx, lim, dep, queue;
 
     // normalize input.
-    if (SC.typeOf(dependentKeys) === SC.T_ARRAY) {
+    if (typeof dependentKeys === "object" && (dependentKeys instanceof Array)) {
       keys = dependentKeys;
       lim  = 0;
     } else {
@@ -670,7 +670,8 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (!target) target = this ;
-    if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
+    
+    if (typeof method === "string") method = target[method] ;
     if (!method) throw "You must pass a method to addObserver()" ;
 
     // Normalize key...
@@ -722,7 +723,8 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (!target) target = this ;
-    if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
+    
+    if (typeof method === "string") method = target[method] ;
     if (!method) throw "You must pass a method to removeObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
@@ -1079,8 +1081,9 @@ SC.Observable = {
 
     // if a string or array (i.e. tuple) is passed, convert this into a
     // binding.  If a binding default was provided, use that.
-    pathType = SC.typeOf(target) ;
-    if (pathType === SC.T_STRING || pathType === SC.T_ARRAY) {
+    pathType = typeof target;
+    
+    if (pathType === "string" || (pathType === "object" && (target instanceof Array))) {
       binding = this[toKey + 'BindingDefault'] || SC.Binding;
       binding = binding.beget().from(target) ;
     } else binding = target ;
