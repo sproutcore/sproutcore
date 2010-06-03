@@ -12,7 +12,7 @@
 /**
   @namespace
 
-  This private class is used to store information about obversers on a 
+  This private class is used to store information about obversers on a
   particular key.  Note that this object is not observable.  You create new
   instances by calling SC.beget(SC.ObserverSet) ;
 
@@ -24,20 +24,20 @@ SC.ObserverSet = {
     the number of targets in the set.
   */
   targets: 0,
-  
+
   _membersCacheIsValid: NO,
-  
+
   /**
     Adds the named target/method observer to the set.  The method must be
     a function, not a string.
-    
+
     Note that in debugging mode only, this method is overridden to also record
     the name of the object and function that resulted in the target/method
     being added.
   */
   add: function(target, method, context) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
-    
+
     // get the set of methods
     var methods = this[targetGuid] ;
     if (!methods) {
@@ -47,32 +47,31 @@ SC.ObserverSet = {
       this.targets++ ;
     }
     methods.add(method) ;
-    
+
     // context is really useful sometimes but not used that often so this
     // implementation is intentionally lazy.
     if (context !== undefined) {
-      var contexts = methods.contexts ;
-      if (!contexts) contexts = methods.contexts = {} ;
-      contexts[SC.guidFor(method)] = context ;
+      if (!methods.contexts) context = methods.contexts = {} ;
+      methods.contexts[SC.guidFor(method)] = context ;
     }
-    
+
     this._membersCacheIsValid = NO ;
   },
-  
+
   /**
     removes the named target/method observer from the set.  If this is the
     last method for the named target, then the number of targets will also
     be reduced.
-  
+
     returns YES if the items was removed, NO if it was not found.
   */
   remove: function(target, method) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
-    
+
     // get the set of methods
-    var methods = this[targetGuid] ;    
+    var methods = this[targetGuid] ;
     if (!methods) return NO ;
-    
+
     methods.remove(method) ;
     if (methods.length <= 0) {
       methods.target = null;
@@ -80,23 +79,23 @@ SC.ObserverSet = {
       methods.contexts = null ;
       delete this[targetGuid] ;
       this.targets-- ;
-      
+
     } else if (methods.contexts) {
       delete methods.contexts[SC.guidFor(method)];
     }
 
     this._membersCacheIsValid = NO;
-    
+
     return YES ;
   },
-  
+
   /**
     Invokes the target/method pairs in the receiver.  Used by SC.RunLoop
     Note: does not support context
   */
   invokeMethods: function() {
     var key, value, idx, target, val;
-    
+
     // iterate through the set, look for sets.
     for(key in this) {
       if (!this.hasOwnProperty(key)) continue ;
@@ -111,13 +110,13 @@ SC.ObserverSet = {
       }
     }
   },
-  
+
   /**
     Returns an array of target/method pairs.  This is cached.
   */
   getMembers: function() {
     if (this._membersCacheIsValid) return this._members ;
-    
+
     // need to recache, reset the array...
     if (!this._members) {
       this._members = [] ;
@@ -131,7 +130,7 @@ SC.ObserverSet = {
       if (value && value.isTargetSet) {
         var idx = value.length;
         var target = value.target ;
-        
+
         // slightly slower - only do if we have contexts
         var contexts = value.contexts ;
         if (contexts) {
@@ -148,7 +147,7 @@ SC.ObserverSet = {
     this._membersCacheIsValid = YES ;
     return ret ;
   },
-  
+
   /**
     Returns a new instance of the set with the contents cloned.
   */
@@ -168,12 +167,12 @@ SC.ObserverSet = {
     ret._membersCacheIsValid = NO ;
     return ret ;
   },
-  
+
   /**
     Creates a new instance of the observer set.
   */
   create: function() { return SC.beget(this); }
-  
+
 } ;
 
 SC.ObserverSet.slice = SC.ObserverSet.clone ;
