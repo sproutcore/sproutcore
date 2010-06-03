@@ -1469,16 +1469,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */   
   render: function(context, firstTime) {
-      if (this.createRenderer) {
-        if (firstTime) { 
-          if (this.renderer) this.renderer.render(context);
-        } else {
-          if (this.renderer) this.renderer.update();
-        }
+    var renderer = this.renderer;
+    if (this.createRenderer && renderer) {
+      if (firstTime) { 
+        renderer.render(context);
       } else {
-        if (firstTime) this.renderChildViews(context, firstTime);
+        renderer.update();
       }
-    },
+    } else {
+      if (firstTime) this.renderChildViews(context, firstTime);
+    }
+  },
   
   
   /** @private - 
