@@ -130,7 +130,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
     override this behavior with your own custom updating code, you can 
     replace updateLayer() with your own implementation instead.
     
-  - *didAppendLayerToDocument:* in theory all DOM setup could be done
+  - *didAppendToDocument:* in theory all DOM setup could be done
     in didCreateLayer() as you already have a DOM element instantiated. 
     However there is cases where the element has to be first appended to the
     Document because there is either a bug on the browser or you are using 
@@ -1048,7 +1048,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   
   /** @private - 
-    Invokes the receivers didAppendLayerToDocument() method if it exists and then
+    Invokes the receivers didAppendToDocument() method if it exists and then
     invokes the same on all child views. 
   */
   
