@@ -267,14 +267,17 @@ SC.mixin( /** @scope SC */ {
     @param width {Number} The fixed width to assume the text will fill
     @param style {String} A CSS style declaration.  E.g., 'font-weight: bold'
     @param classNames {Array} An array of class names that may affect the style
+    @param ignoreEscape {Boolean} To NOT html escape the string.
     @returns {Number} The height of the text given the passed parameters
   */
-  heightForString: function(str, width, style, classNames) {
+  heightForString: function(str, width, style, classNames, ignoreEscape) {
     var elem = this._heightCalcElement, classes, height;
-
+    
+    if(!ignoreEscape) str = SC.RenderContext.escapeHTML(str);
+    
     // Coalesce the array of class names to one string, if the array exists
     classes = (classNames && SC.typeOf(classNames) === SC.T_ARRAY) ? classNames.join(' ') : '';
-
+    
     if (!width) width = 100; // default to 100 pixels
 
     // Only create the offscreen element once, then cache it
@@ -299,15 +302,16 @@ SC.mixin( /** @scope SC */ {
   },
   
   /**
-  Sets up a string measuring environment.
+    Sets up a string measuring environment.
   
-  You may want to use this, in conjunction with teardownStringMeasurement and
-  measureString, instead of metricsForString, if you will be measuring many strings
-  with the same settings. It would be a lot more efficient, as it would only prepare
-  and teardown once instead of several times.
+    You may want to use this, in conjunction with teardownStringMeasurement and
+    measureString, instead of metricsForString, if you will be measuring many 
+    strings with the same settings. It would be a lot more efficient, as it 
+    would only prepare and teardown once instead of several times.
   
-  @param exampleElement The example element to grab styles from, or the style string to use.
-  @param classNames {String} (Optional) Class names to add to the test element.
+    @param exampleElement The example element to grab styles from, or the style 
+                          string to use.
+    @param classNames {String} (Optional) Class names to add to the test element.
   */
   prepareStringMeasurement: function(exampleElement, classNames) {
     var element = this._metricsCalculationElement, classes, styles, style;
@@ -384,13 +388,13 @@ SC.mixin( /** @scope SC */ {
   },
   
   /**
-  Tears down the string measurement environment. Usually, this doesn't _have_
-  to be called, but there are too many what ifs: for example, what if the measurement
-  environment has a bright green background and is over 10,000px wide? Guess what: it will
-  become visible on the screen.
+    Tears down the string measurement environment. Usually, this doesn't _have_
+    to be called, but there are too many what ifs: for example, what if the measurement
+    environment has a bright green background and is over 10,000px wide? Guess what: it will
+    become visible on the screen.
   
-  So, generally, we tear the measurement environment down so that it doesn't cause issue.
-  However, we keep the DOM element for efficiency.
+    So, generally, we tear the measurement environment down so that it doesn't cause issue.
+    However, we keep the DOM element for efficiency.
   */
   teardownStringMeasurement: function() {
     var element = this._metricsCalculationElement;
@@ -403,13 +407,16 @@ SC.mixin( /** @scope SC */ {
   },
   
   /**
-  Measures a string in the prepared environment.
+    Measures a string in the prepared environment.
   
-  An easier and simpler alternative (but less efficient for bulk measuring) is metricsForString.
+    An easier and simpler alternative (but less efficient for bulk measuring) is metricsForString.
   
-  @param string {String} The string to measure.
+    @param string {String} The string to measure.
+    @param ignoreEscape {Boolean} To NOT html escape the string.
   */
-  measureString: function(string) {
+  measureString: function(string, ignoreEscape) {
+    if(!ignoreEscape) string = SC.RenderContext.escapeHTML(string);
+    
     var element = this._metricsCalculationElement;
     if (!element) {
       throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
@@ -429,19 +436,20 @@ SC.mixin( /** @scope SC */ {
     return result;
   },
   
-  
   /**
-  Given a string and an example element or style string, and an optional
-  set of class names, calculates the width and height of that block of text.
+    Given a string and an example element or style string, and an optional
+    set of class names, calculates the width and height of that block of text.
   
-  To constrain the width, set max-width on the exampleElement or in the style string.
+    To constrain the width, set max-width on the exampleElement or in the style string.
   
-  @param string {String} The string to measure.
-  @param exampleElement The example element to grab styles from, or the style string to use.
-  @param classNames {String} (Optional) Class names to add to the test element.
+    @param string {String} The string to measure.
+    @param exampleElement The example element to grab styles from, or the style string to use.
+    @param classNames {String} (Optional) Class names to add to the test element.
+    @param ignoreEscape {Boolean} To NOT html escape the string.
   */
-  metricsForString: function(string, exampleElement, classNames)
-  {
+  metricsForString: function(string, exampleElement, classNames, ignoreEscape) {
+    if(!ignoreEscape) string = SC.RenderContext.escapeHTML(string);
+    
     SC.prepareStringMeasurement(exampleElement, classNames);
     var result = SC.measureString(string);
     SC.teardownStringMeasurement();
