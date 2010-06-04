@@ -1310,6 +1310,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   renderViewSettings: function(context) {
     this._updateViewRenderer();
+    this.renderLayout(context, YES); // provide backwards compatibility
     this._viewRenderer.render(context);
   },
   
@@ -3197,7 +3198,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._viewRenderer.attr({
       layoutStyle: this.get('layoutStyle')
     });
-    this._viewRenderer.render(context);
   },
   
   /** walk like a duck */
