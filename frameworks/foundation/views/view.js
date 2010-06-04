@@ -9,6 +9,7 @@ sc_require('system/browser');
 sc_require('system/event');
 sc_require('system/cursor');
 sc_require('system/responder') ;
+sc_require('system/theme');
 
 sc_require('mixins/string') ;
 
@@ -332,21 +333,26 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._destroyRenderer();
     
     // now, if we do have a theme, we can try to create the renderer.
-    if (theme && theme.isTheme && this.createRenderer) {
-      this.renderer = this.createRenderer(theme);
+    if (theme && theme.isTheme) {
+      this._viewRenderer = this.get('theme').view();
       
-      // the renderer was not necessarily successfully created.
-      if (this.renderer) {
-        var mixins, idx, len;
-        this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
-        if (mixins = this.createRendererMixin) {
-          len = mixins.length;
-          for (idx = 0; idx < len; idx++) mixins[idx].call(this, theme);
+      if (this.createRenderer) {
+        this.renderer = this.createRenderer(theme);
+
+        // the renderer was not necessarily successfully created.
+        if (this.renderer) {
+          var mixins, idx, len;
+          this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
+          if (mixins = this.createRendererMixin) {
+            len = mixins.length;
+            for (idx = 0; idx < len; idx++) mixins[idx].call(this, theme);
+          }
         }
       }
     }
     
     // update!
+    this._updateViewRenderer();
     this._updateRenderer();
   },
   
@@ -1127,6 +1133,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _notifyDidCreateLayer: function() {
     // notify, not just the view, but also the view renderers
     this.notifyPropertyChange("layer");
+    this._viewRenderer.attachLayer(this);
     if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
     
@@ -1179,6 +1186,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
       this._notifyWillDestroyLayer() ;
+      
+      if (this._viewRenderer) {
+        this._viewRenderer.detachLayer();
+      }
       
       // tell the renderer the layer has gone away
       if (this.renderer) {
@@ -1283,38 +1294,35 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   /**
     @private
+    Updates the properties of the renderer used for the view
+  */
+  _updateViewRenderer: function() {
+    var classNames = this.get('classNames');
+    if (this.get('theme')) {
+      classNames = classNames.concat(this.get("theme").classNames);
+    }
+    
+    this._viewRenderer.attr({
+      layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
+      classNames: classNames,
+      backgroundColor: this.get('backgroundColor'),
+      cursor: this.get('cursor'),
+      layoutStyle: this.get('layoutStyle'),
+      isTextSelectable: this.get('isTextSelectable'),
+      isEnabled: this.get('isEnabled'),
+      isVisible: this.get('isVisible'),
+      isFirstResponder: this.get('isFirstResponder'),
+      hasStaticLayout: this.get('hasStaticLayout') && this.get('useStaticLayout')
+    });
+  },
+  
+  /**
+    @private
     Renders view settings (class names and id, for instance) to the context.
   */
-  //TODO consider moving into a "view renderer"
   renderViewSettings: function(context) {
-    // first, render view stuff.
-    var layerId, bgcolor, cursor, classArray=[], mixins, len, idx;
-
-    // do some initial setup only needed at create time.
-    layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
-    context.id(layerId).classNames(this.get('classNames'), YES) ;
-    
-    // VIEW LAYOUT RENDERER, ANYONE?
-    this.renderLayout(context, YES) ;
-
-    // do some standard setup...
-    if (this.get('isTextSelectable')) classArray.push('allow-select') ;
-    if (!this.get('isEnabled')) classArray.push('disabled') ;
-    if (!this.get('isVisible')) classArray.push('hidden') ;
-    if (this.get('isFirstResponder')) classArray.push('focus');
-    if (this.get('hasStaticLayout') && this.get('useStaticLayout')) classArray.push('sc-static-layout');
-
-    bgcolor = this.get('backgroundColor');
-    if (bgcolor) context.addStyle('backgroundColor', bgcolor);
-
-    cursor = this.get('cursor') ;
-    if (cursor) classArray.push(cursor.get('className')) ;
-    
-    if (this.get("theme")) {
-      classArray = classArray.concat(this.get("theme").classNames);
-    }
-
-    context.addClass(classArray);
+    this._updateViewRenderer();
+    this._viewRenderer.render(context);
   },
   
   /**
@@ -1322,41 +1330,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Updates view settings on the context (including class names).
   */
   updateViewSettings: function() {
-    var classNames = this.get("classNames"), mixins, len, idx, 
-        layerId, bgcolor, cursor, classSet = {};
-    
-    var q = this.$();
-    q.attr("class", "");
-
-    // do some standard setup...
-    // add view class names
-    len = classNames.length;
-    for (idx = 0; idx < len; idx++) {
-      classSet[classNames[idx]] = YES;
-    }
-    
-    if (this.get("theme")) {
-      classNames = this.get("theme").classNames;
-      len = classNames.length;
-      for (idx = 0; idx < len; idx++) {
-        classSet[classNames[idx]] = YES;
-      }
-    }
-    
-    // add special class names
-    if (this.get('isTextSelectable')) classSet["allow-select"] = YES;
-    if (!this.get('isEnabled')) classSet["disabled"] = YES;
-    if (!this.get('isVisible')) classSet["hidden"] = YES;
-    if (this.get('isFirstResponder')) classSet["focus"] = YES;
-    if (this.get('hasStaticLayout') && this.get('useStaticLayout')) classSet["sc-static-layout"] = YES;
-    
-    bgcolor = this.get('backgroundColor');
-    if (bgcolor) q.css('backgroundColor', bgcolor);
-
-    cursor = this.get('cursor') ;
-    if (cursor) classSet[cursor.get('className')] = YES;
-
-    q.setClass(classSet);
+    this._updateViewRenderer();
+    this._viewRenderer.update();
   },
   
   /**
@@ -1941,6 +1916,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var theme = this.theme;
     this.theme = this._themeProperty;
     this.set("theme", theme);
+    
+    // provide a default _viewRenderer
+    // once _generateTheme is called (if theme is set)
+    // it'll get set to that
+    this._viewRenderer = SC.BaseTheme.renderers.view();
     
     // find render path (to be removed in SC 2.0?)
     var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
@@ -3269,7 +3249,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    context.addStyle(this.get('layoutStyle'));
+    this._viewRenderer.attr({
+      layoutStyle: this.get('layoutStyle')
+    });
+    this._viewRenderer.render(context);
   },
   
   /** walk like a duck */
