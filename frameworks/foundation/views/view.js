@@ -3057,10 +3057,31 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (ret[x]===0) ret[x]=null;
     }
 
+    // if (hasAcceleratedLayer) {
+    //   var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
+    //   if (SC.platform.supportsCSS3DTransforms) transform += ' translateZ(0px)'
+    //   ret[SC.platform.domCSSPrefix+'Transform'] = transform;
+    // }
+
     if (hasAcceleratedLayer) {
+      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
+          layer = this.get('layer'),
+          currentTransforms = layer ? layer.style[transformAttribute] : '';
+
+      // Remove previous transforms
+      if (this._lastAcceleratedTransform) currentTransforms = currentTransforms.replace(this._lastAcceleratedTransform, '');
+
       var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
-      if (SC.platform.supportsCSS3DTransforms) transform += ' translateZ(0px)'
-      ret[SC.platform.domCSSPrefix+'Transform'] = transform;
+      if (SC.platform.supportsCSS3DTransforms && !currentTransforms.match('translateZ')) transform += ' translateZ(0px)';
+
+      // Add a separating space if necessary
+      if (!SC.empty(currentTransforms)) transform = ' '+transform;
+
+      // Store for next time
+      this._lastAcceleratedTransform = transform;
+
+      // Update
+      ret[transformAttribute] = currentTransforms + transform;
     }
 
     // convert any numbers into a number + "px".
