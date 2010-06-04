@@ -46,18 +46,19 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
   calculateClasses: function() {
     var classes = {},
         classNames = this.classNames,
-        oldClassNames = this._oldClassNames || [],
         l = classNames.length,
-        cursor, i;
+        oldClassNames, cursor, i;
     
     for (i=0; i<l; i++) {
       classes[classNames[i]] = YES;
     }
     
-    l = oldClassNames.length;
-    for (i=0; i<l; i++) {
-      if (classNames.indexOf(oldClassNames[i]) === -1) {
-        classes[oldClassNames[i]] = NO;
+    if (oldClassNames = this._oldClassNames) {
+      l = oldClassNames.length;
+      for (i=0; i<l; i++) {
+        if (classNames.indexOf(oldClassNames[i]) === -1) {
+          classes[oldClassNames[i]] = NO;
+        }
       }
     }
     
