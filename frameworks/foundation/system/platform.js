@@ -155,11 +155,12 @@ SC.platform = {
     are received.
   */
   _simtouch_mouseup: function(evt) {
+    var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchend'),
+        ret = SC.RootResponder.responder.touchend(manufacturedEvt);
+
     this._mousedown = NO;
     this._simtouch_counter++;
-
-    var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchend');
-    return SC.RootResponder.responder.touchend(manufacturedEvt);
+    return ret;
   },
 
   /** @private
