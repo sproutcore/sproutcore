@@ -21,11 +21,11 @@ SC.BaseTheme.renderers.ImageButton = SC.Renderer.extend({
   },
   
   update: function() {
-    var cq = this.$(), src = this.icon;
+    var img = this.$('img'), src = this.icon;
     if (src) {
-      cq.attr('class', "img "+src);
+      img.attr('class', "img "+src);
     } else {
-      cq.attr('class', "img");
+      img.attr('class', "img");
     }  
   }
 });
