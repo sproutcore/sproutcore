@@ -381,39 +381,38 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   displayItemIndexForEvent: function(evt) {
     return this.displayItemIndexForPosition(evt.pageX, evt.pageY);
-    var elem = SC.$(evt.target) ;
-    if (!elem || elem===document) return -1; // nothing found
-
-    // start at the target event and go upwards until we reach either the 
-    // root responder or find an element with an 'sc-segment' class.
-    var root = this.$(), match = null ;
-    while(!match && (elem.length>0) && (elem[0]!==root[0])) {
-      if (elem.hasClass('sc-segment')) {
-        match = elem;
-      } else elem = elem.parent();
-    }
-    
-    elem = root = null;
-
-    // if a match was found, return the index of the match in subtags
-    return (match) ? this.$('.sc-segment').index(match) : -1;
   },
   
   /**
-    NOTE: #renderer should implement
+    Determines an item index based on a position. The position does not have to be within the view's
+    bounding rectangle. If no item is at that position, this will return -1.
+    
+    NOTE: Eventually, this sort of function should be implemented in a renderer.
   */
   displayItemIndexForPosition: function(pageX, pageY) {
+    // find the segments
     var segments = this.$('.sc-segment'), len = segments.length, idx, segment, r;
+    
+    // loop through them (yes, this comment is mostly because it looks nice in TextMate)
     for (idx = 0; idx < len; idx++) {
+      // get the segment
       segment = segments[idx];
+      
+      // get its rectangle
       r = segment.getBoundingClientRect();
+      
+      // based on orientation, check the position left-to-right or up-to-down.
       if (this.get('layoutDirection') == SC.LAYOUT_VERTICAL) {
+        // if it fits, return it right away
         if (pageY > r.top && pageY < r.bottom) return idx;
       }
       else {
+        // if it fits, return it right away.
         if (pageX > r.left && pageX < r.right) return idx;
       }
     }
+    
+    // if we didn't find anything, return the old standard -1 for "not found."
     return -1;
   },
   
