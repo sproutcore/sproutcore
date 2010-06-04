@@ -83,7 +83,10 @@ SC.Animatable = {
     
     this._animatable_original_willRemoveFromParent = this.willRemoveFromParent || function(){};
     this.willRemoveFromParent = this._animatable_will_remove_from_parent;
-    
+
+    this._animatable_original_hasAcceleratedLayer = this.hasAcceleratedLayer || function(){};
+    this.hasAcceleratedLayer = this._animatable_hasAcceleratedLayer;
+
     // auto observers do not work when mixed in live, so make sure we do a manual observer
     this.addObserver("style", this, "styleDidChange");
 
@@ -344,7 +347,7 @@ SC.Animatable = {
     top and left transitions have the same duration.
     Not cacheable since transitions may be updated without using a setter.
   */
-  hasAcceleratedLayer: function(){
+  _animatable_hasAcceleratedLayer: function(){
     var leftDuration = this.transitions['left'] && this.transitions['left'].duration,
         topDuration = this.transitions['top'] && this.transitions['top'].duration;
 
@@ -353,7 +356,7 @@ SC.Animatable = {
     } else if ((topDuration || leftDuration) && !SC.platform.supportsCSSTransitions) {
       return NO;
     } else {
-      return sc_super();
+      return this._animatable_original_hasAcceleratedLayer();
     }
   }.property('wantsAcceleratedLayer', 'transitions'),
 
