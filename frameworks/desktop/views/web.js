@@ -33,7 +33,7 @@ SC.WebView = SC.View.extend(SC.Control, {
     var src = this.get('value');
     if (firstTime) {
       context.push('<iframe src="' + src + 
-      '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe>');
+      '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0px;"></iframe>');
     } else {
       var iframe = this.$('iframe');
       // clear out the previous src, to force a reload
