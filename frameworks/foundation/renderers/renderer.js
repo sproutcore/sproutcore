@@ -220,7 +220,7 @@ SC.Renderer = {
   attr: function(key, value) {
     var changes = this.changes, didChange, opts;
 
-    if (SC.T_STRING === typeof key) {
+    if (typeof key === SC.T_STRING) {
        if (value === undefined) return this[key];
        if (this[key] === value) return this; // nothing to do
        this[key] = value;
