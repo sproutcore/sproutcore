@@ -449,7 +449,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this.triggerAction(evt);
       return YES ; // handled
     }
-    return YES; 
+    return NO; 
   },
 
   /** @private  Perform an action based on the behavior of the button.
