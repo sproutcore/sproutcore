@@ -6,13 +6,11 @@
 // ==========================================================================
 
 /*global NodeList */
-
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
 var require = require || function require() { } ;
 var sc_require = sc_require || require;
 var sc_resource = sc_resource || function sc_resource() {};
-
 sc_require('license') ;
 
 // ........................................
@@ -249,9 +247,9 @@ SC.mixin(/** @scope SC */ {
   */
   isArray: function(obj) {
     if (obj && obj.objectAt) return YES ; // fast path
-
-    var len = (obj ? obj.length : null), type = SC.typeOf(obj);
-    return !(SC.none(len) || (type === SC.T_FUNCTION) || (type === SC.T_STRING) || obj.setInterval) ;
+    
+    var len = (obj ? obj.length : null), type = typeof obj;
+    return !((len === undefined) || (len === null) || (obj instanceof Function) || (type === "string") || obj.setInterval);
   },
 
   /**
@@ -276,7 +274,7 @@ SC.mixin(/** @scope SC */ {
   */
   A: function(obj) {
     // null or undefined -- fast path
-    if (SC.none(obj)) return [] ;
+    if (obj === null || obj === undefined) return [] ;
     
     // primitive -- fast path
     if (obj.slice instanceof Function) {
@@ -551,7 +549,7 @@ SC.mixin(/** @scope SC */ {
     @returns {Object} the new object.
   */
   beget: function(obj) {
-    if (SC.none(obj)) return null ;
+    if (obj === null || obj === undefined) return null ;
     var K = SC.K; K.prototype = obj ;
     var ret = new K();
     K.prototype = null ; // avoid leaks
