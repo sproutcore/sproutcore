@@ -134,7 +134,9 @@ SC.platform = {
   */
   _simtouch_mousemove: function(evt) {
     if (!this._mousedown) return NO;
-    SC.RootResponder.responder.touchmove(this.manufactureTouchEvent(evt, 'touchmove'));
+
+    var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchmove');
+    return SC.RootResponder.responder.touchmove(manufacturedEvt);
   },
 
   /** @private
@@ -143,7 +145,9 @@ SC.platform = {
   */
   _simtouch_mousedown: function(evt) {
     this._mousedown = YES;
-    SC.RootResponder.responder.touchstart(this.manufactureTouchEvent(evt, 'touchstart'));
+
+    var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchstart');
+    return SC.RootResponder.responder.touchstart(manufacturedEvt);
   },
 
   /** @private
@@ -152,8 +156,10 @@ SC.platform = {
   */
   _simtouch_mouseup: function(evt) {
     this._mousedown = NO;
-    SC.RootResponder.responder.touchend(this.manufactureTouchEvent(evt, 'touchend'));
     this._simtouch_counter++;
+
+    var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchend');
+    return SC.RootResponder.responder.touchend(manufacturedEvt);
   },
 
   /** @private
