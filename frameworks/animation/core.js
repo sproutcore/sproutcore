@@ -705,7 +705,7 @@ SC.Animatable = {
     }
 
     // apply transform
-    style[SC.platform.cssPrefix+"Transform"] = transform;
+    if (!SC.empty(transform)) style[SC.platform.cssPrefix+"Transform"] = transform;
 
     // don't want to set because we don't want updateLayout... again.
     if (updateLayout) {
