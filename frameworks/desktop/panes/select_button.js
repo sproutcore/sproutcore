@@ -516,9 +516,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     items = this.get('itemList') ;
 
-    var customViewClassName = this.get('customViewClassName') ;
-    var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth') ;
-    var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+    var customViewClassName = this.get('customViewClassName'),
+        customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth'),
+        className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
     className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
 
     dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
@@ -633,8 +633,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     var preferMatrixAttributeTop = controlSizeTuning ,
-      itemIdx = this.get('itemIdx') ,
-      leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
+        itemIdx = this.get('itemIdx') ,
+        leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
 
     if(this.get('isDefaultPosition')) {
       defPreferMatrix = [1, 0, 3] ;
@@ -754,10 +754,13 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   keyDown: function(event) {
     if ( this.interpretKeyEvents(event) ) {
+      console.log('h1');
       return YES;
     }
     else {
-      arguments.callee.base.apply(this,arguments);
+      console.log('h2');
+      debugger;
+      return sc_super();
     }
   },
 
@@ -775,7 +778,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
         this.resignFirstResponder() ;
       }
     }
-    return arguments.callee.base.apply(this,arguments);
+    return sc_super();
   },
 
   /** Function overridden - tied to the isEnabled state */
