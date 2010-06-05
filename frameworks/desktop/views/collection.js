@@ -2094,13 +2094,8 @@ SC.CollectionView = SC.View.extend(
         sel = this.get('selection') ;
         isSelected = sel && sel.containsObject(itemView.get('content')) ;
 
-        if (isSelected) {
-          this.deselect(contentIndex) ;
-        } else if (!allowsMultipleSel) {
-          this.select(contentIndex, NO) ;
-        } else {
-          this.select(contentIndex, YES) ;
-        }
+        if (isSelected) this.deselect(contentIndex) ;
+        else this.select(contentIndex, YES) ;
       }
       
       return YES;
@@ -2171,7 +2166,7 @@ SC.CollectionView = SC.View.extend(
         
     if (this.get('useToggleSelection')) {
       // Return if clicked outside of elements or if toggle was handled by mouseDown
-      if (!view || this.get('selectOnMouseDown')) return NO;
+      if (!view || this.get('selectOnMouseDown')) return ;
       
       // determine if item is selected. If so, then go on.
       sel = this.get('selection') ;
