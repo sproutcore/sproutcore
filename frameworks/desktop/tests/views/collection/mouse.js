@@ -202,3 +202,39 @@ test("shift-click below bottom of selection then shift click on top of selection
   clickOn(view, 5, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,3)));
   clickOn(view,3, YES, NO, selectionFromIndex(3));
 });
+
+test("clicking on an item should select it when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
+
+test("clicking on an unselected item should select it when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
+
+test("clicking on a selected item should deselect it when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  view.select(SC.IndexSet.create(3,1));
+  clickOn(view, 3, NO, NO, SC.SelectionSet.create());
+});
+
+test("clicking on an unselected item should select it and add it to the selection when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  clickOn(view, 1, NO, NO, selectionFromIndex(1));
+  clickOn(view, 3, NO, NO, selectionFromIndex(1).addObject(content.objectAt(3)));
+});
+
+test("clicking on a selected item should remove it from the selection when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  view.select(SC.IndexSet.create(1,5));
+  clickOn(view, 5, NO, NO, selectionFromIndexSet(SC.IndexSet.create(1,4)));
+});
+
+
+test("clicking on an unselected item should select it and clear the previous selection when useToggleSelection is true and allowsMultipleSelection is not", function() {
+  view.set('useToggleSelection', YES);
+  contentController.set('allowsMultipleSelection', NO);
+  clickOn(view, 1, NO, NO, selectionFromIndex(1));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
