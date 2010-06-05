@@ -2094,8 +2094,13 @@ SC.CollectionView = SC.View.extend(
         sel = this.get('selection') ;
         isSelected = sel && sel.containsObject(itemView.get('content')) ;
 
-        if (isSelected) this.deselect(contentIndex) ;
-        else this.select(contentIndex, YES) ;
+        if (isSelected) {
+          this.deselect(contentIndex) ;
+        } else if (!allowsMultipleSel) {
+          this.select(contentIndex, NO) ;
+        } else {
+          this.select(contentIndex, YES) ;
+        }
       }
       
       return YES;
@@ -2160,19 +2165,26 @@ SC.CollectionView = SC.View.extend(
     
     var view   = this.itemViewForEvent(ev),
         info   = this.mouseDownInfo,
-        contentIndex, sel, isSelected, canEdit, itemView, content, idx;
+        content       = this.get('content'),
+        contentIndex, sel, isSelected, canEdit, itemView, idx,
+        allowsMultipleSel = content.get('allowsMultipleSelection');
         
     if (this.get('useToggleSelection')) {
       // Return if clicked outside of elements or if toggle was handled by mouseDown
-      if (!view || this.get('selectOnMouseDown')) return ;
+      if (!view || this.get('selectOnMouseDown')) return NO;
       
       // determine if item is selected. If so, then go on.
       sel = this.get('selection') ;
       contentIndex = (view) ? view.get('contentIndex') : -1 ;
       isSelected = sel && sel.containsObject(view.get('content')) ;
-
-      if (isSelected) this.deselect(contentIndex) ;
-      else this.select(contentIndex, YES) ;
+      
+      if (isSelected) {
+        this.deselect(contentIndex) ;
+      } else if (!allowsMultipleSel) {
+        this.select(contentIndex, NO) ;
+      } else {
+        this.select(contentIndex, YES) ;
+      }
       
     } else if(info) {
       idx = info.contentIndex;
