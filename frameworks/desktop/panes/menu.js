@@ -1017,18 +1017,15 @@ SC.MenuPane = SC.PickerPane.extend(
       return YES;
     }
 
-    // If escape key was pressed and no menu item handled it,
-    // close the menu pane.
-    if (keyEquivalent === 'escape') {
+    // If escape key or the enter key was pressed and no menu item handled it,
+    // close the menu pane and return YES that the event was handled
+    if (keyEquivalent === 'escape'|| keyEquivalent === 'return') {
       this.remove();
       return YES;
     }
-    //If a menu is visible and you hit enter
-    // it shouldn't go down to other responders.
-    if (keyEquivalent === 'return') {
-      return YES;
-    }
+
     return NO;
+
   },
 
   selectMenuItemForString: function(buffer) {
