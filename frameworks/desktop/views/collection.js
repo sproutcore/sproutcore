@@ -2065,8 +2065,6 @@ SC.CollectionView = SC.View.extend(
     // Instead, we just need to save a bunch of state about the mouse down
     // so we can choose the right thing to do later.
     
-    // Toggle selection only triggers on mouse up.  Do nothing.
-    if (this.get('useToggleSelection')) return true;
     
     // find the actual view the mouse was pressed down on.  This will call
     // hitTest() on item views so they can implement non-square detection
@@ -2074,7 +2072,7 @@ SC.CollectionView = SC.View.extend(
     var itemView      = this.itemViewForEvent(ev),
         content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1, 
-        info, anchor,
+        info, anchor, sel, isSelected, modifierKeyPressed,
         allowsMultipleSel = content.get('allowsMultipleSelection');
         
     info = this.mouseDownInfo = {
@@ -2083,10 +2081,26 @@ SC.CollectionView = SC.View.extend(
       contentIndex: contentIndex,
       at:           Date.now()
     };
-      
+    
     // become first responder if possible.
     this.becomeFirstResponder() ;
     
+    // Toggle the selection if selectOnMouseDown is true
+    if (this.get('useToggleSelection')) {
+      if (this.get('selectOnMouseDown')) {
+        if (!itemView) return ; // do nothing when clicked outside of elements
+
+        // determine if item is selected. If so, then go on.
+        sel = this.get('selection') ;
+        isSelected = sel && sel.containsObject(itemView.get('content')) ;
+
+        if (isSelected) this.deselect(contentIndex) ;
+        else this.select(contentIndex, YES) ;
+      }
+      
+      return YES;
+    }
+        
     // recieved a mouseDown on the collection element, but not on one of the 
     // childItems... unless we do not allow empty selections, set it to empty.
     if (!itemView) {
@@ -2095,7 +2109,7 @@ SC.CollectionView = SC.View.extend(
     }
     
     // collection some basic setup info
-    var sel = this.get('selection'), isSelected, modifierKeyPressed;
+    sel = this.get('selection');
     if (sel) sel = sel.indexSetForSource(content);
     
     isSelected = sel ? sel.contains(contentIndex) : NO;
@@ -2149,12 +2163,13 @@ SC.CollectionView = SC.View.extend(
         contentIndex, sel, isSelected, canEdit, itemView, content, idx;
         
     if (this.get('useToggleSelection')) {
-      if (!view) return ; // do nothing when clicked outside of elements
+      // Return if clicked outside of elements or if toggle was handled by mouseDown
+      if (!view || this.get('selectOnMouseDown')) return ;
       
       // determine if item is selected. If so, then go on.
       sel = this.get('selection') ;
       contentIndex = (view) ? view.get('contentIndex') : -1 ;
-      isSelected = sel && sel.contains(contentIndex) ;
+      isSelected = sel && sel.containsObject(view.get('content')) ;
 
       if (isSelected) this.deselect(contentIndex) ;
       else this.select(contentIndex, YES) ;
