@@ -1141,7 +1141,7 @@ SC.CoreQuery = (function() {
     makeArray: function(array) {
       var ret = [];
 
-      if( array !== undefined || array != null ){
+      if( !SC.none(array) ){
         var i = array.length;
         // The window, strings (and functions) also have 'length'
         if( i == null || typeof array === 'string' || array.setInterval ) {
