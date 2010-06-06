@@ -257,6 +257,8 @@ SC.Button = {
     @returns {Boolean}  YES if handled, NO otherwise
   */
   performKeyEquivalent: function(keystring, evt) {
+    //If this is not visible
+    if (!this.get('isVisibleInWindow')) return NO;
 
     if (!this.get('isEnabled')) return NO;
     var equiv = this.get('keyEquivalent');

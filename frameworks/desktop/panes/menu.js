@@ -1005,6 +1005,9 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   performKeyEquivalent: function(keyEquivalent) {
+    //If menu is not visible
+    if (!this.get('isVisibleInWindow')) return NO;
+    
     // Look for menu item that has this key equivalent
     var menuItem = this._keyEquivalents[keyEquivalent];
 
