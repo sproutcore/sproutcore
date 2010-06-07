@@ -52,15 +52,75 @@ SC.PopupButtonView = SC.ButtonView.extend(
     @default null
   */
   menu: null,
+  
+  /**
+    If YES and the menu is a class, this will cause a task that will instantiate the menu
+    to be added to SC.backgroundTaskQueue.
+  */
+  shouldLoadInBackground: NO,
 
   // ..........................................................
   // INTERNAL SUPPORT
   //
+  
+  /**
+    @private
+    If necessary, adds the loading of the menu to the background task queue.
+  */
+  init: function() {
+    sc_super();
+    this._setupMenu();
+    if (this.get("shouldLoadInBackground")) {
+      SC.backgroundTaskQueue.push(SC.PopupButtonMenuLoader.create({ popupButton: this }));
+    }
+  },
+  
+  /**
+    @private
+    Sets up binding on the menu, removing any old ones if necessary.
+  */
+  _setupMenu: function() {
+    var menu = this.get("menu");
+    
+    // clear existing bindings
+    if (this.isActiveBinding) this.isActiveBinding.disconnect();
+    this.isActiveBinding = null;
+    
+    // if there is a menu
+    if (menu && !menu.isClass) {
+      this.isActiveBinding = this.bind("isActive", menu, "isVisibleInWindow");
+    }
+  },
+  
+  /**
+    Setup the bindings for menu...
+  */
+  _popup_menuDidChange: function() {
+    this._setupMenu();
+  }.observes("menu"),
 
   /** @private
-    Binds the button's selection state to the menu's visibility.
+    isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
   */
-  isActiveBinding: '*menu.isVisibleInWindow',
+  isActive: NO,
+  
+  /**
+    @private
+    Instantiates the menu if it is not already instantiated.
+  */
+  _instantiateMenu: function() {
+    // get menu
+    var menu = this.get("menu");
+    
+    // if it is already instantiated or does not exist, we cannot do anything
+    if (!menu.isClass || !menu) return;
+    
+    // create
+    this.menu = menu.create();
+    
+    // setup
+    this._setupMenu();
+  },
 
   /** @private
     Displays the menu.
@@ -70,6 +130,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
   action: function(evt)
   {
     var menu = this.get('menu') ;
+    
+    // handle the case of the menu being a class (we need to instantiate)
+    if (menu && menu.isClass) this._instantiateMenu();
 
     if (!menu) {
       //@ if (debug)
@@ -200,3 +263,15 @@ SC.PopupButtonView = SC.ButtonView.extend(
   }.property('isEnabled')
 
 });
+
+/**
+  @private
+  Handles lazy instantiation of popup button menu.
+*/
+SC.PopupButtonMenuLoader = SC.Task.extend({
+  popupButton: null,
+  run: function() {
+    if (this.popupButton) this.popupButton._instantiateMenu();
+  }
+});
+
