@@ -95,7 +95,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     instance.
 
     @params options {Hash} hash of options for editing
-    @returns {Boolean} YES if editor began editing, NO if it failed.
+    @returns {SC.InlineTextFieldView|Boolean} this if editor began editing, 
+      NO if it failed.
   */
   beginEditing: function(options) {
 
@@ -197,6 +198,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.invokeLast(function() {
       this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this);
     });
+    
+    return this;
   },
   
   
