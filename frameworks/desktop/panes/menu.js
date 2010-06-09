@@ -224,6 +224,11 @@ SC.MenuPane = SC.PickerPane.extend(
     @default YES
   */
   acceptsMenuPane: YES,
+  
+  /**
+    Disable context menu.
+  */
+  isContextMenuEnabled: NO,
 
   // ..........................................................
   // METHODS

@@ -78,7 +78,7 @@ SC.LAYOUT_AUTO = 'auto';
 /**
   Default property to disable or enable by default the contextMenu
 */
-SC.CONTEXT_MENU_ENABLED = NO;
+SC.CONTEXT_MENU_ENABLED = YES;
 
 /**
   Default property to disable or enable if the focus can jump to the address

@@ -283,6 +283,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @default YES
   */
   supportFocusRing: YES,
+  
+  /**
+    Disable context menu.
+  */
+  isContextMenuEnabled: NO,
+  
 
   /**
     Left Alignment based on the size of the button

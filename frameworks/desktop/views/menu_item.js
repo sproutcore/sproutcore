@@ -37,11 +37,9 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   blocksIEDeactivate: YES,
 
   /**
-    IE only attribute to block bluring of other controls
-
-    @type Boolean
+    Disable context menu.
   */
-  blocksIEDeactivate: YES,
+  isContextMenuEnabled: NO,
 
   // ..........................................................
   // KEY PROPERTIES

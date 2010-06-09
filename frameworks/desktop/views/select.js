@@ -276,6 +276,12 @@ SC.SelectView = SC.ButtonView.extend(
   determine the width of the menu pane.
   */
   menuItemPadding: 35,
+  
+  /**
+    Disable context menu.
+  */
+  isContextMenuEnabled: NO,
+  
 
   /**
     Left Alignment based on the size of the button
