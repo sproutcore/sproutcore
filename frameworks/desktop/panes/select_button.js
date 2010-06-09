@@ -760,12 +760,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   keyDown: function(event) {
     if ( this.interpretKeyEvents(event) ) {
-      console.log('h1');
       return YES;
     }
     else {
-      console.log('h2');
-      debugger;
       return sc_super();
     }
   },
