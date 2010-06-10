@@ -797,7 +797,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // responder chain.
     // If the event is triggered by a return while entering IME input,
     // don't got through this path.
-    var which = evt.which;
+    var which = evt.which, maxLengthReached = false;
     if ((which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) return NO ;
     if (which === 27) return NO ;
 
@@ -808,9 +808,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       else evt.allowDefault();
       return YES ; // handled
     }
- 
+    // maxlength for textareas
+    if(!SC.browser.safari && this.get('isTextArea')){
+      var val = this.get('value');
+      if(val && evt.which>47 && (val.length >= this.get('maxLength'))) {
+        maxLengthReached = true;
+      }
+    }
     // validate keyDown...
-    if (this.performValidateKeyDown(evt)) {
+    if (this.performValidateKeyDown(evt) && !maxLengthReached) {
       this._isKeyDown = YES ;
       evt.allowDefault();
     } else {
