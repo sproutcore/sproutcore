@@ -7,6 +7,8 @@
 
 /*global main */
 
+SC.BENCHMARK_LOG_READY = YES;
+
 sc_require('system/event') ;
 
 SC.mixin({
@@ -150,7 +152,7 @@ SC.mixin({
     SC.RunLoop.end() ; 
     
     SC.Benchmark.end('ready') ;
-    SC.Benchmark.log();
+    if (SC.BENCHMARK_LOG_READY) SC.Benchmark.log();
   },
   
   /** 
