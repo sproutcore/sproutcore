@@ -80,7 +80,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     Sets up binding on the menu, removing any old ones if necessary.
   */
   _setupMenu: function() {
-    var menu = this.get("menu");
+    var menu = this.get("instantiatedMenu");
     
     // clear existing bindings
     if (this.isActiveBinding) this.isActiveBinding.disconnect();
@@ -121,6 +121,26 @@ SC.PopupButtonView = SC.ButtonView.extend(
     // setup
     this._setupMenu();
   },
+  
+  /**
+    The guaranteed-instantiated menu.
+  */
+  instantiatedMenu: function() {
+    // get the menu
+    var menu = this.get("menu");
+    
+    // if it is a class, we need to instantiate it
+    if (menu && menu.isClass) {
+      // do so
+      this._instantiateMenu();
+      
+      // get the new version of the local
+      menu = this.get("menu");
+    }
+    
+    // return
+    return menu;
+  }.property("menu").cacheable(),
 
   /** @private
     Displays the menu.
@@ -129,10 +149,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   */
   action: function(evt)
   {
-    var menu = this.get('menu') ;
-    
-    // handle the case of the menu being a class (we need to instantiate)
-    if (menu && menu.isClass) this._instantiateMenu();
+    var menu = this.get('instantiatedMenu') ;
 
     if (!menu) {
       //@ if (debug)
@@ -199,7 +216,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   mouseUp: function(evt) {
     var timestamp = new Date().getTime(),
         previousTimestamp = this._menuRenderedTimestamp,
-        menu = this.get('menu'),
+        menu = this.get('instantiatedMenu'),
         touch = SC.platform.touch,
         targetMenuItem;
 
@@ -252,8 +269,8 @@ SC.PopupButtonView = SC.ButtonView.extend(
   performKeyEquivalent: function( charCode, evt )
   {
     if (!this.get('isEnabled')) return NO ;
-    var menu = this.get('menu') ;
-    return (!!menu && !!menu.performKeyEquivalent && menu.performKeyEquivalent(charCode, evt)) ;
+    var menu = this.get('instantiatedMenu') ;
+    return (!!menu && menu.performKeyEquivalent(charCode, evt)) ;
   },
 
   /** @private */
