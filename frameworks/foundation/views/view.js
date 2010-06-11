@@ -668,7 +668,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {String}
     @readOnly
   */
-  layerId: function() {
+  layerId: function(key, value) {
+    if (value) this._layerId = value;
+    if (this._layerId) return this._layerId;
     return SC.guidFor(this) ;
   }.property().cacheable(),
   
