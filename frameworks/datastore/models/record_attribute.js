@@ -357,7 +357,7 @@ SC.RecordAttribute.registerTransform = function(klass, transform) {
 SC.RecordAttribute.registerTransform(Boolean, {
   /** @private - convert an arbitrary object value to a boolean */
   to: function(obj) {
-    return SC.none(obj) ? null : !!obj;
+    return SC.none(obj) ? null : (obj === "0" ? !obj : !!obj);
   }
 });
 
