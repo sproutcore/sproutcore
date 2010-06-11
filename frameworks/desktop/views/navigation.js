@@ -186,7 +186,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
         replacement.set("buildDirection", this._currentDirection);
         this.buildInChild(replacement);
       } else {
-        this.removeChild(replacement);
+        this.appendChild(replacement);
       }
     }
     
