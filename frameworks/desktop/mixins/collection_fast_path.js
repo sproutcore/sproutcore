@@ -270,16 +270,25 @@ SC.CollectionFastPath = {
           it is not used). As such, use sparingly.
   */
   itemViewForContentIndex: function(index) {
-    var view = this._indexMap[index];
+    var content = this.get("content");
+    if (!content) return;
+    
+    var item = content.objectAt(index);
+    if (!item) return null;
+    
+    var exampleView = this.exampleViewForItem(item, index),
+        view = this._indexMap[index];
+    
+    if (view && view.createdFromExampleView !== exampleView) {
+      this.removeItemView(view);
+      this.unmapView(item, index);
+      view = null;
+    }
+    
     if (!view) {
-      var content = this.get("content"), item;
-      item = content.objectAt(index);
-      if (!item) return null;
-      
-      // get example view and create item view
-      var exampleView = this.exampleViewForItem(item, index);
       view = this.addItemView(exampleView, item, index);
     }
+    
     return view;
   },
   
@@ -622,7 +631,6 @@ SC.CollectionFastPath = {
   */
   updateItemView: function(current, exampleView, object, index) {
     if (!current.get("layerIsCacheable") || current.createdFromExampleView !== exampleView) {
-      console.error("BAD UPDATE");
       // unmap old and remove
       this.unmapView(current, index);
       delete this._indexMap[index];
