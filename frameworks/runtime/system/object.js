@@ -116,7 +116,9 @@ SC._object_extend = function _object_extend(base, ext) {
         observers[observers.length] = key ;
 
       // handle local properties
-      } else if (paths = value.localPropertyPaths) {
+      }
+      
+      if (paths = value.localPropertyPaths) {
         pathLoc = paths.length;
         while(--pathLoc >= 0) {
           local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.CoreSet);
@@ -125,7 +127,9 @@ SC._object_extend = function _object_extend(base, ext) {
         }
 
       // handle computed properties
-      } else if (value.dependentKeys) {
+      }
+      
+      if (value.dependentKeys) {
         if (!clonedProperties) {
           properties = (properties || SC.EMPTY_ARRAY).slice() ;
           clonedProperties = YES ;
@@ -133,7 +137,9 @@ SC._object_extend = function _object_extend(base, ext) {
         properties[properties.length] = key ;
 
       // handle outlets
-      } else if (value.autoconfiguredOutlet) {
+      }
+      
+      if (value.autoconfiguredOutlet) {
         if (!clonedOutlets) {
           outlets = (outlets || SC.EMPTY_ARRAY).slice();
           clonedOutlets = YES ;

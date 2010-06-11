@@ -1,7 +1,7 @@
 // ========================================================================
 // SC.Object Base Tests
 // ========================================================================
-/*globals module test ok isObj equals expects same plan */
+/*globals module test ok isObj equals expects same plan TestNamespace*/
 
 var obj, obj1, don, don1 ; // global variables
 
@@ -74,6 +74,53 @@ test("When the object is destroyed the 'isDestroyed' status should change accord
 	equals(obj.get('isDestroyed'), YES);
 });
 
+module("SC.Object observers", {
+  setup: function() {
+    // create a namespace
+    TestNamespace = {
+      obj: SC.Object.create({
+        value: "test"
+      })
+    };
+    
+    // create an object
+    obj = SC.Object.create({
+      prop1: null,
+      
+      // normal observer
+      observer: function(){
+        this._normal = YES;
+      }.observes("prop1"),
+      
+      globalObserver: function() {
+        this._global = YES;
+      }.observes("TestNamespace.obj.value"),
+      
+      bothObserver: function() {
+        this._both = YES;
+      }.observes("prop1", "TestNamespace.obj.value")
+    });
+    
+  }
+});
+
+test("Local observers work", function() {
+  obj._normal = NO;
+  obj.set("prop1", NO);
+  equals(obj._normal, YES, "Normal observer did change.");
+});
+
+test("Global observers work", function() {
+  obj._global = NO;
+  TestNamespace.obj.set("value", "test2");
+  equals(obj._global, YES, "Global observer did change.");
+});
+
+test("Global+Local observer works", function() {
+  obj._both = NO;
+  obj.set("prop1", NO);
+  equals(obj._both, YES, "Both observer did change.");
+});
 
 module("SC.Object instance extended", {  
   setup: function() {
