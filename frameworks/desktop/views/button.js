@@ -147,6 +147,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     @property {Boolean}
   */
   supportFocusRing: NO,
+  
+  _labelMinWidthIE7: 0,
 
   /**
     Called when the user presses a shortcut key, such as return or cancel,
@@ -571,17 +573,16 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   },
   
   didAppendToDocument: function() {
-   if(parseInt(SC.browser.msie, 0)===7){
+    if(parseInt(SC.browser.msie, 0)===7 && this.get('useStaticLayout')){
       var layout = this.get('layout');
-      if(this.get('useStaticLayout') && layout.width && 
-        (layout.width.indexOf && layout.width.indexOf('auto')!=-1)){
-        var elem = this.$();
-        if(elem && elem[0]){
-          var w = elem[0].clientWidth;
-          if(w!==0){
-            var padding = parseInt(elem.css('paddingRight'),0);
-            this.$('.sc-button-label').css('minWidth', w-(padding*2)+'px');
-          }
+      if(layout.width && (layout.width.indexOf && layout.width.indexOf('auto')!=-1)){
+        var elem = this.$(), w=0;
+        if(elem && elem[0] && (w=elem[0].clientWidth) && w!==0 && this._labelMinWidthIE7===0){
+          var padding = parseInt(elem.css('paddingRight'),0);
+          this._labelMinWidthIE7 = w-(padding*2);
+          this.$('.sc-button-label').css('minWidth', this._labelMinWidthIE7+'px');
+        }else{
+          this.invokeLater(this.didAppendToDocument, 1);
         }
       }
     }
