@@ -467,6 +467,7 @@ SC.ScrollerView = SC.View.extend(
       this.makeButtonActive('.button-top');
       // start a timer that will continue to fire until mouseUp is called
       this.startMouseDownTimer('scrollUp');
+      this._isScrollingUp = YES;
     } else if (target.className.indexOf('button-bottom') >= 0) {
       // User clicked the down/right button
       // Increment the value by a fixed amount
@@ -474,6 +475,7 @@ SC.ScrollerView = SC.View.extend(
       this.makeButtonActive('.button-bottom');
       // start a timer that will continue to fire until mouseUp is called
       this.startMouseDownTimer('scrollDown');
+      this._isScrollingDown = YES;
     } else {
       // User clicked in the track
           var scrollerLength = this.get('scrollerLength'),
@@ -529,6 +531,8 @@ SC.ScrollerView = SC.View.extend(
     }
 
     this._thumbDragging = NO;
+    this._isScrollingDown = NO;
+    this._isScrollingUp = NO;
 
     return ret;
   },
@@ -537,29 +541,80 @@ SC.ScrollerView = SC.View.extend(
     If the user began the drag on the thumb, we calculate the difference
     between the mouse position at click and where it is now.  We then
     offset the thumb by that amount, within the bounds of the track.
+    
+    If the user began scrolling up/down using the buttons, this will track
+    what component they are currently over, changing the scroll direction.
 
     @param evt {SC.Event} the mousedragged event
     @private
   */
   mouseDragged: function(evt) {
     var value, length, delta, thumbPosition,
-        thumbPositionAtDragStart = this._thumbPositionAtDragStart;
+        target = evt.target,
+        thumbPositionAtDragStart = this._thumbPositionAtDragStart,
+        isScrollingUp = this._isScrollingUp,
+        isScrollingDown = this._isScrollingDown,
+        active = this._scs_buttonActive,
+        timer;
 
     // Only move the thumb if the user clicked on the thumb during mouseDown
-    if (!this._thumbDragging) return NO;
+    if (this._thumbDragging) {
+      
+      switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+          delta = (evt.pageY - this._mouseDownLocation.y);
+          break;
+        case SC.LAYOUT_HORIZONTAL:
+          delta = (evt.pageX - this._mouseDownLocation.x);
+          break;
+      }
 
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        delta = (evt.pageY - this._mouseDownLocation.y);
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        delta = (evt.pageX - this._mouseDownLocation.x);
-        break;
+      thumbPosition = thumbPositionAtDragStart + delta;
+      length = this.get('trackLength') - this.get('thumbLength');
+      this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
+    
+    } else if (isScrollingUp || isScrollingDown) {
+      var nowScrollingUp = NO, nowScrollingDown = NO;
+      
+      var topButtonRect = this.$('.button-top')[0].getBoundingClientRect();
+      var bottomButtonRect = this.$('.button-bottom')[0].getBoundingClientRect();
+      
+      switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+          if (evt.pageY < topButtonRect.bottom) nowScrollingUp = YES;
+          else nowScrollingDown = YES;
+          break;
+        case SC.LAYOUT_HORIZONTAL:
+          if (evt.pageX < topButtonRect.left) nowScrollingUp = YES;
+          else nowScrollingDown = YES;
+          break;
+      }
+      
+      if ((nowScrollingUp || nowScrollingDown) && nowScrollingUp !== isScrollingUp){
+        //
+        // STOP OLD
+        //
+        
+        // If we have an element that was set as active in mouseDown,
+        // remove its active state
+        if (active) {
+         active.removeClass('active');
+        }
+
+        // Stop firing repeating events after mouseup
+        this._mouseDownTimerAction = nowScrollingUp ? "scrollUp" : "scrollDown";
+        
+        if (nowScrollingUp) {
+          this.makeButtonActive('.button-top');
+        } else if (nowScrollingDown) {
+          this.makeButtonActive('.button-bottom');
+        }
+        
+         this._isScrollingUp = nowScrollingUp;
+         this._isScrollingDown = nowScrollingDown;
+      }
     }
-
-    thumbPosition = thumbPositionAtDragStart + delta;
-    length = this.get('trackLength') - this.get('thumbLength');
-    this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
+    
     return YES;
   },
 
@@ -568,15 +623,17 @@ SC.ScrollerView = SC.View.extend(
     clicks a button or inside the track to move a page at a time. If they
     continue holding the mouse button down, we want to repeat that action
     after a small delay.  This timer will be invalidated in mouseUp.
+    
+    Specify "immediate" as YES if it should not wait.
 
     @private
   */
-  startMouseDownTimer: function(action) {
+  startMouseDownTimer: function(action, immediate) {
     var timer;
 
     this._mouseDownTimerAction = action;
     this._mouseDownTimer = SC.Timer.schedule({
-      target: this, action: this.mouseDownTimerDidFire, interval: 300
+      target: this, action: this.mouseDownTimerDidFire, interval: immediate ? 0 : 300
     });
   },
 
