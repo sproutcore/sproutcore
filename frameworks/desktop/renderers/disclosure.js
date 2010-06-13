@@ -11,12 +11,18 @@
 */
 SC.BaseTheme.renderers.Disclosure = SC.Renderer.extend({
   
+  classNames: {
+    'sc-disclosure': YES
+  },
+  
   init: function(settings) {
     this._controlRenderer = this.theme.control();
     this.attr(settings);
   },
   
   render: function(context) {
+    sc_super();
+    
     this.renderControlRenderer(context);
     
     var state = this.state ? "open" : "closed";
@@ -24,6 +30,8 @@ SC.BaseTheme.renderers.Disclosure = SC.Renderer.extend({
   },
   
   update: function(context) {
+    sc_super();
+    
     this.updateControlRenderer();
     
     var state = this.state,
