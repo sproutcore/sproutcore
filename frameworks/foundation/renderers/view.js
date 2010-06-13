@@ -19,7 +19,7 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
   render: function(context) {
     context
       .id(this.layerId)
-      .setClass(this.calculateClasses())
+      .setClass(this.calculateClassNames())
       .addStyle(this.layoutStyle);
     
     if (this.backgroundColor) {
@@ -33,7 +33,7 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
     var elem = this.$();
     
     elem
-      .setClass(this.calculateClasses())
+      .setClass(this.calculateClassNames())
       .css(this.layoutStyle);
     
     if (this.didChange('backgroundColor')) {
@@ -43,35 +43,18 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
     this.resetChanges();
   },
   
-  calculateClasses: function() {
-    var classes = {},
-        classNames = this.classNames,
-        l = classNames.length,
-        oldClassNames, cursor, i;
+  calculateClassNames: function() {
+    var classNames = this.classNames;
     
-    for (i=0; i<l; i++) {
-      classes[classNames[i]] = YES;
-    }
+    if (this.didChange('isTextSelectable')) classNames['allow-select'] = this.isTextSelectable;
+    if (this.didChange('isEnabled')) classNames['disabled'] = !this.isEnabled;
+    if (this.didChange('isVisible')) classNames['hidden'] = !this.isVisible;
+    if (this.didChange('isFirstResponder')) classNames['focus'] = this.isFirstResponder;
+    if (this.didChange('hasStaticLayout')) classNames['sc-static-layout'] = this.hasStaticLayout;
+    if (this.didChange('cursor') && this.cursor) classNames[this.cursor.get('className')] = YES;
     
-    if (oldClassNames = this._oldClassNames) {
-      l = oldClassNames.length;
-      for (i=0; i<l; i++) {
-        if (classNames.indexOf(oldClassNames[i]) === -1) {
-          classes[oldClassNames[i]] = NO;
-        }
-      }
-    }
-    
-    // these are resiliant to updates...
-    if (this.didChange('isTextSelectable')) classes['allow-select'] = this.isTextSelectable;
-    if (this.didChange('isEnabled')) classes['disabled'] = !this.isEnabled;
-    if (this.didChange('isVisible')) classes['hidden'] = !this.isVisible;
-    if (this.didChange('isFirstResponder')) classes['focus'] = this.isFirstResponder;
-    if (this.didChange('hasStaticLayout')) classes['sc-static-layout'] = this.hasStaticLayout;
-    if (cursor = this.cursor) classes[cursor.get('className')] = YES;
-    
-    this._oldClassNames = classNames;
-    return classes;
+    this.classNames = classNames;
+    return classNames;
   }
 
 });
