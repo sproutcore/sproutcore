@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+SC.LIST_ITEM_COUNT_DIGITS = ['zero', 'one', 'two', 'three', 'four', 'five'];
+
 /** @class
   @extends SC.Renderer
   @since SproutCore 1.1
@@ -22,7 +24,7 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     
     this.renderControlRenderer(context);
     
-    context.setClass(this.calculateClasses());
+    context.setClass(this.calculateClassNames());
     
     context = context.begin("div").addClass("sc-outline");
     
@@ -39,11 +41,13 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     this.renderBranch(context);
     
     context = context.end(); // end outline
+    
+    this.resetChanges();
   },
   
   update: function() {
     this.updateControlRenderer();
-    this.$().setClass(this.calculateClasses());
+    this.$().setClass(this.calculateClassNames());
     
     this.updateDisclosure();
     this.updateCheckbox();
@@ -68,24 +72,37 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     if (this._checkboxRenderer) this._checkboxRenderer.detachLayer();
   },
   
-  calculateClasses: function() {
-    var classes = {};
-    classes[(this.contentIndex % 2 === 0) ? 'even' : 'odd'] = YES;
-    if (!SC.none(this.isEnabled) && !this.isEnabled) classes['disabled'] = YES;
-    if (!SC.none(this.disclosureState)) classes['has-disclosure'] = YES;
-    if (!SC.none(this.checkbox)) classes['has-checkbox'] = YES;
-    if (this.icon) classes['has-icon'] = YES;
-    if (this.rightIcon) classes['has-right-icon'] = YES;
-    if (!SC.none(this.branch)) classes['has-branch'] = YES;
+  calculateClassNames: function() {
+    var classNames = this.classNames,
+        digits = SC.LIST_ITEM_COUNT_DIGITS,
+        even = this.contentIndex % 2 === 0,
+        l, i, digit;
+    
+    // handles unsetting of class case as well
+    classNames['even'] = even;
+    classNames['odd'] = !even;
+    
+    classNames['disabled'] = !SC.none(this.isEnabled) && !this.isEnabled;
+    classNames['has-disclosure'] = !SC.none(this.disclosureState);
+    classNames['has-checkbox'] = !SC.none(this.checkbox);
+    classNames['has-icon'] = !SC.none(this.icon);
+    classNames['has-right-icon'] = !SC.none(this.rightIcon);
+    classNames['has-branch'] = !SC.none(this.branch);
+    
+    l = digits.length;
     if (this.count) {
-      classes['has-count'] = YES;
-      var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
+      classNames['has-count'] = YES;
       var valueLength = this.count.toString().length;
-      var digitsLength = digits.length;
-      var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
-      classes[digit + '-digit'] = YES;
+      digit = (valueLength < l) ? digits[valueLength] : digits[l-1];
+    } else {
+      classNames['has-count'] = NO;
     }
-    return classes;
+    for (i=0; i<l; i++) {
+      classNames[digits[i] + "-digit"] = digits[i] === digit;
+    }
+    
+    this.classNames = classNames;
+    return classNames;
   },
   
   renderControlRenderer: function(context) {
