@@ -186,7 +186,7 @@ SC.Renderer = {
     ret.superclass = this;
     for(key in ret) {
       value = ret[key];
-      if (value instanceof Function && !value.superclass && (value !== (cur=this[key]))) {
+      if (value instanceof Function && !value.base && (value !== (cur=this[key]))) {
         value.base = cur;
       }
     }
