@@ -1394,78 +1394,74 @@
   border: 0px none;
 }
 .sc-theme .sc-view.ace.sc-progress-view.disabled { opacity: 0.5; }
-.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-regular-size {
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view {
   color: black;
   text-shadow: white 0px 1px 1px;
   line-height: 18px;
   vertical-align: middle;
 }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size .label {
+.sc-checkbox-control {
+  color: black;
+  text-shadow: white 0px 1px 1px;
+  line-height: 18px;
+  vertical-align: middle;
+}
+.sc-theme .sc-view.ace.sc-checkbox-view .label {
   position: absolute;
   left: 20px;
-  line-height: 18px;
+  line-height: 16px;
 }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size span.button {
+.sc-checkbox-control .label {
+  position: absolute;
+  left: 20px;
+  line-height: 16px;
+}
+.sc-theme .sc-view.ace.sc-checkbox-view input {
+  visibility: hidden;
+  z-index: 1;
+}
+.sc-checkbox-control input {
+  visibility: hidden;
+  z-index: 1;
+}
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sel {
+  color: black;
+  text-shadow: white 0px 1px 1px;
+}
+.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.active {
+  color: black;
+  text-shadow: white 0px 1px 1px;
+}
+.sc-checkbox-control.sel, .sc-checkbox-control.active {
+  color: black;
+  text-shadow: white 0px 1px 1px;
+}
+.sc-theme .sc-view.ace.sc-checkbox-view.disabled { opacity: 0.5; }
+.sc-checkbox-control.disabled { opacity: 0.5; }
+.sc-checkbox span.button {
+  position: absolute;
+  margin-right: 8px;
+}
+.sc-checkbox.sc-regular-size span.button {
   background: static_url("images/1.png") no-repeat -32px -982px;
   width: 16px;
   height: 16px;
-  position: absolute;
-  margin-right: 8px;
 }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size input {
-  visibility: hidden;
-  z-index: 1;
-}
-.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-regular-size.sel {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -966px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.mixed span.button { background: static_url("images/1.png") no-repeat -16px -966px; }
-.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-regular-size.active {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.active span.button { background: static_url("images/1.png") no-repeat -32px -966px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.sel.active span.button { background: static_url("images/1.png") no-repeat 0 -982px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.mixed.active span.button { background: static_url("images/1.png") no-repeat -16px -982px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-regular-size.disabled { opacity: 0.5; }
-.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-small-size {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-  line-height: 16px;
-  vertical-align: middle;
-}
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size .label {
-  position: absolute;
-  left: 20px;
-  line-height: 16px;
-}
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size span.button {
+.sc-checkbox.sc-regular-size.sel span.button { background: static_url("images/1.png") no-repeat 0 -966px; }
+.sc-checkbox.sc-regular-size.mixed span.button { background: static_url("images/1.png") no-repeat -16px -966px; }
+.sc-checkbox.sc-regular-size.active span.button { background: static_url("images/1.png") no-repeat -32px -966px; }
+.sc-checkbox.sc-regular-size.sel.active span.button { background: static_url("images/1.png") no-repeat 0 -982px; }
+.sc-checkbox.sc-regular-size.mixed.active span.button { background: static_url("images/1.png") no-repeat -16px -982px; }
+.sc-checkbox.sc-small-size span.button {
   background: static_url("images/1.png") no-repeat 0 -1232px;
   width: 14px;
   height: 14px;
-  position: absolute;
-  margin-right: 8px;
 }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size input {
-  visibility: hidden;
-  z-index: 1;
-}
-.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-small-size.sel {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.sel span.button { background: static_url("images/1.png") no-repeat -14px -1232px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.mixed span.button { background: static_url("images/1.png") no-repeat -28px -1232px; }
-.sc-theme .sc-view.ace.sc-button-view.sc-checkbox-view.sc-small-size.active {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.active span.button { background: static_url("images/1.png") no-repeat -28px -1188px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.sel.active span.button { background: static_url("images/1.png") no-repeat -14px -1188px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1144px; }
-.sc-theme .sc-view.ace.sc-checkbox-view.sc-small-size.disabled { opacity: 0.5; }
+.sc-checkbox.sc-small-size.sel span.button { background: static_url("images/1.png") no-repeat -14px -1232px; }
+.sc-checkbox.sc-small-size.mixed span.button { background: static_url("images/1.png") no-repeat -28px -1232px; }
+.sc-checkbox.sc-small-size.active span.button { background: static_url("images/1.png") no-repeat -28px -1188px; }
+.sc-checkbox.sc-small-size.sel.active span.button { background: static_url("images/1.png") no-repeat -14px -1188px; }
+.sc-checkbox.sc-small-size.mixed.active span.button { background: static_url("images/1.png") no-repeat 0 -1144px; }
 .sc-theme .sc-view.ace.sc-button-view.sc-disclosure-view {
   color: black;
   text-shadow: white 0px 1px 1px;
@@ -1816,6 +1812,11 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   position: absolute;
   left: -12px;
   top: 9px;
+}
+.sc-view.sc-list-item-view .sc-checkbox-view {
+  background-color: transparent;
+  border: 0 none;
+  margin-top: -9px;
 }
 .sc-theme .sc-view.ace.sc-collection-view .sc-collection-item.sel {
   color: white;
