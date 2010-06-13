@@ -11,6 +11,10 @@
 */
 SC.BaseTheme.renderers.CheckboxControl = SC.Renderer.extend({
 
+  classNames: {
+    'sc-checkbox-control': YES
+  },
+  
   init: function(settings) {
     this._checkboxRenderer = this.theme.checkbox();
     this._titleRenderer = this.theme.title();
@@ -18,6 +22,8 @@ SC.BaseTheme.renderers.CheckboxControl = SC.Renderer.extend({
   },
 
   render: function(context) {
+    sc_super();
+    
     this.renderCheckboxRenderer(context);
     this.renderTitleRenderer(context);
     
@@ -25,6 +31,8 @@ SC.BaseTheme.renderers.CheckboxControl = SC.Renderer.extend({
   },
   
   update: function() {
+    sc_super();
+    
     this.updateCheckboxRenderer();
     this.updateTitleRenderer();
     
