@@ -22,29 +22,31 @@ sc_require("system/theme");
 */
 SC.Renderer = {
   
+  classNames: {},
+  
   //
   // FUNCTIONS SUBCLASSES SHOULD/MAY IMPLEMENT
   //
   
   /**
-    Should render into the supplied context.
+    Renders the classNames property to the context. Should render into the supplied context in subclasses.
     
     You should implement this by using the RenderContext API. You can use this.propertyName to
     fetch the value of properties.
   */
   render: function(context) {
-    
+    context.setClass(this.classNames);
   },
   
   /**
-    Should update the attached layer, if there is one.
+    Sets the classNames property on the layer. Should update the attached layer, if there is one.
     
     You should implement primarily by using CoreQuery functions. If you use CoreQuery, the renderer itself will
     detect whether the layer exists, and do nothing if it does not. If you do _not_ use CoreQuery, you will need
     to call layer() to get the layer, and manually do nothing if there is none.
   */
   update: function() {
-    
+    this.$().setClass(this.classNames);
   },
   
   /**
@@ -183,6 +185,8 @@ SC.Renderer = {
     var ret = SC.mixin(SC.beget(this), ext),
         key, value, cur;
     
+    ret.classNames = SC.mixin({}, this.classNames, ext.classNames);
+    
     ret.superclass = this;
     for(key in ret) {
       value = ret[key];
@@ -212,29 +216,55 @@ SC.Renderer = {
       return ret ;
     };
   },
+  
+  init: function(attrs) {
+    this.classNames = SC.mixin({}, this.classNames);
+    if (attrs) {
+      this.attr(attrs);
+    }
+  },
  
   /**
     Sets one or more attributes. Also modifies a "changes" set (allowing, but not requiring you,
     to perform some optimizations).
   */
   attr: function(key, value) {
-    var changes = this.changes, didChange, opts;
+    var changes = this.changes, didChange, opts, l, i;
 
     if (typeof key === SC.T_STRING) {
        if (value === undefined) return this[key];
-       if (this[key] === value) return this; // nothing to do
-       this[key] = value;
+       if (key !== 'classNames' || !value.isEnumerable) {
+         if (this[key] === value) return this; // nothing to do
+         this[key] = value;
+       } else {
+         // need to put classNames array elements from view into our classNames hash
+         l = value.length;
+         for (i=0; i<l; i++) {
+           this.classNames[value[i]] = YES;
+         }
+       }
        if (!changes) changes = this.changes = SC.CoreSet.create(); 
        changes.add(key);
        return this;
-
     } else {
       opts = key;
       for(key in opts) {
         if (!opts.hasOwnProperty(key)) continue;
         value = opts[key];
-        if (this[key] !== value) {
-          this[key] = value;
+        if (key !== 'classNames' || !value.isEnumerable) {
+          if (this[key] !== value) {
+            this[key] = value;
+            didChange = YES;
+          }
+        } else {
+          l = value.length;
+          for (i=0; i<l; i++) {
+            this.classNames[value[i]] = YES;
+          }
+          didChange = YES;
+        }
+        
+        if (didChange) {
           if (!changes) changes = this.changes = SC.CoreSet.create();
           changes.add(key);
         }
