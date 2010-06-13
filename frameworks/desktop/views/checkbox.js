@@ -21,7 +21,7 @@
 SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   /** @scope SC.CheckboxView.prototype */ {
 
-  classNames: ['sc-checkbox-view'],
+  classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
   tagName: 'label',
   controlStyle: '', 
 

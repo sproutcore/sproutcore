@@ -1,63 +1,25 @@
-@view(sc-button-view.sc-checkbox-view).sc-small-size {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-  line-height: 16px;
-  vertical-align: middle;
-}
-
-@view(sc-checkbox-view).sc-small-size .label {
-  position: absolute;
-  left: 20px;
-  line-height: 16px;
-}
-
-/* Unchecked */
-@view(sc-checkbox-view).sc-small-size span.button {
+.sc-checkbox.sc-small-size span.button {
   background: sprite("checkbox_unchecked.png");
   width: 14px;
   height:14px;
-  position:absolute;
-  margin-right: 8px;
 }
 
-@view(sc-checkbox-view).sc-small-size input {
-  visibility: hidden;
-  z-index: 1;
-}
-
-/* Checked */
-@view(sc-button-view.sc-checkbox-view).sc-small-size.sel {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-
-@view(sc-checkbox-view).sc-small-size.sel span.button {
+.sc-checkbox.sc-small-size.sel span.button {
   background: sprite("checkbox_checked.png");
 }
 
-@view(sc-checkbox-view).sc-small-size.mixed span.button {
+.sc-checkbox.sc-small-size.mixed span.button {
   background: sprite("checkbox_mixed.png");
 }
 
-/* Active */
-@view(sc-button-view.sc-checkbox-view).sc-small-size.active {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-
-@view(sc-checkbox-view).sc-small-size.active span.button {
+.sc-checkbox.sc-small-size.active span.button {
   background: sprite("checkbox_unchecked_active.png");
 }
 
-@view(sc-checkbox-view).sc-small-size.sel.active span.button {
+.sc-checkbox.sc-small-size.sel.active span.button {
   background: sprite("checkbox_checked_active.png");
 }
 
-@view(sc-checkbox-view).sc-small-size.mixed.active span.button {
+.sc-checkbox.sc-small-size.mixed.active span.button {
   background: sprite("checkbox_mixed_active.png");
-}
-
-/* Disabled */
-@view(sc-checkbox-view).sc-small-size.disabled {
-  opacity: .5;
 }
