@@ -11,6 +11,10 @@
 */
 SC.BaseTheme.renderers.DisclosureControl = SC.Renderer.extend({
   
+  classNames: {
+    'sc-disclosure-control': YES
+  },
+  
   init: function(settings) {
     this._disclosureRenderer = this.theme.disclosure();
     this._titleRenderer = this.theme.title();
@@ -18,11 +22,15 @@ SC.BaseTheme.renderers.DisclosureControl = SC.Renderer.extend({
   },
   
   render: function(context) {
+    sc_super();
+    
     this.renderDisclosureRenderer(context);
     this.renderTitleRenderer(context);
   },
   
   update: function(context) {
+    sc_super();
+    
     this.updateDisclosureRenderer();
     this.updateTitleRenderer();
   },
