@@ -1051,15 +1051,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   updateLayer: function(optionalContext) {
-    var mixins, idx, len, renderer = this.renderer;
+    var mixins, idx, len, renderer = this.renderer, viewRenderer = this._viewRenderer;
     this.updateViewSettings();
     
     // make sure to update any renderers
+    this._updateViewRenderer();
     this._updateRenderer();
     
     // Now, update using renderer if possible; render() otherwise
     if (!this._useRenderFirst && this.createRenderer) {
       if (renderer) renderer.update();
+      if (viewRenderer) viewRenderer.update();
     } else {
       var context = optionalContext || this.renderContext(this.get('layer')) ;
       this.render(context, NO) ;
@@ -3253,6 +3255,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._viewRenderer.attr({
       layoutStyle: this.get('layoutStyle')
     });
+    this._viewRenderer.render(context);
   },
   
   /** walk like a duck */
