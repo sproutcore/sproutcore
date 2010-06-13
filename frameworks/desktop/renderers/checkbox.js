@@ -11,6 +11,10 @@
 */
 SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
 
+  classNames: {
+    'sc-checkbox': YES
+  },
+  
   controlSizeArray: [14, 16], // pre-create for performance (purely optional optimization)
   controlSizes: {
     14: SC.SMALL_CONTROL_SIZE,
@@ -26,6 +30,8 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
   },
 
   render: function(context) {
+    sc_super();
+    
     this.renderControlRenderer(context);
     
     context.attr('role', 'checkbox');
@@ -38,6 +44,8 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
   },
 
   update: function() {
+    sc_super();
+    
     this.updateControlRenderer();
     
     if (this.didChange('ariaValue')) this.$().attr("aria-checked", this.ariaValue);
