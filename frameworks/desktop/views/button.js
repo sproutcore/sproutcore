@@ -578,8 +578,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       if(layout.width && (layout.width.indexOf && layout.width.indexOf('auto')!=-1)){
         var elem = this.$(), w=0;
         if(elem && elem[0] && (w=elem[0].clientWidth) && w!==0 && this._labelMinWidthIE7===0){
-          var padding = parseInt(elem.css('paddingRight'),0);
-          this._labelMinWidthIE7 = w-(padding*2);
+          var padding = parseInt(this.$('.sc-button-label').css('paddingRight'),0) + parseInt(this.$('.sc-button-label').css('paddingLeft'),0);
+          var margin = parseInt(this.$('.sc-button-label').css('marginRight'),0) + parseInt(this.$('.sc-button-label').css('marginLeft'),0);
+          this._labelMinWidthIE7 = w-padding-margin;
           this.$('.sc-button-label').css('minWidth', this._labelMinWidthIE7+'px');
         }else{
           this.invokeLater(this.didAppendToDocument, 1);
