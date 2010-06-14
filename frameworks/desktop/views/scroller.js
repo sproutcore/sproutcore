@@ -473,6 +473,7 @@ SC.ScrollerView = SC.View.extend(
     
     // keep note of altIsDown for later.
     this._altIsDown = evt.altKey;
+    this._shiftIsDown = evt.shiftKey;
 
     var target = evt.target,
         thumbPosition = this.get('thumbPosition'),
@@ -623,12 +624,16 @@ SC.ScrollerView = SC.View.extend(
       
       // if we are in alt now, but were not before, update the old thumb position to the new one
       if (evt.altKey) {
-        if (!this._altIsDown) {
+        if (!this._altIsDown || (this._shiftIsDown !== evt.shiftKey)) {
           thumbPositionAtDragStart = this._thumbPositionAtDragStart = thumbPositionAtDragStart+delta;
           delta = 0;
           this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
           this._valueAtDragStart = this.get("value");
         }
+        
+        // because I feel like it. Probably almost no one will find this tiny, buried feature.
+        // Too bad.
+        if (evt.shiftKey) delta = -delta;
         
         this.set('value', Math.round(this._valueAtDragStart + delta * 2));
       } else {
@@ -681,6 +686,7 @@ SC.ScrollerView = SC.View.extend(
     
     
     this._altIsDown = evt.altKey;
+    this._shiftIsDown = evt.shiftKey;
     return YES;
   },
 
