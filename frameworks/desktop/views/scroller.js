@@ -645,7 +645,7 @@ SC.ScrollerView = SC.View.extend(
           else nowScrollingDown = YES;
           break;
         case SC.LAYOUT_HORIZONTAL:
-          if (evt.pageX < topButtonRect.left) nowScrollingUp = YES;
+          if (evt.pageX < topButtonRect.right) nowScrollingUp = YES;
           else nowScrollingDown = YES;
           break;
       }
