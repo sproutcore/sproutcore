@@ -125,7 +125,7 @@ module("SC.View#renderer", {
 });
 
 // themes may not be loaded in foundation, but we still need to test
-SC.Theme.register("sc-test", SC.Theme.extend({}));
+SC.Theme.register("sc-test", SC.BaseTheme.extend({}));
 
 test("creating the view calls createRenderer and updateRenderer when createRenderer is present", function() {
   var view = rendererView.create();

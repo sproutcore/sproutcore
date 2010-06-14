@@ -236,7 +236,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var parent = this.get("parentView");
     if (parent) return parent.get("theme");
     
-    return null;
+    return SC.Theme.find("sc-base");
   }.property().cacheable(),
   
   
@@ -334,7 +334,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // now, if we do have a theme, we can try to create the renderer.
     if (theme && theme.isTheme) {
-      this._viewRenderer = this.get('theme').view();
+      this._viewRenderer = theme.view();
       
       if (this.createRenderer) {
         this.renderer = this.createRenderer(theme);
@@ -1299,6 +1299,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Updates the properties of the renderer used for the view
   */
   _updateViewRenderer: function() {
+    if (!this._viewRenderer) return;
+    
     var classNames = this.get('classNames');
     if (this.get('theme')) {
       classNames = classNames.concat(this.get("theme").classNames);
@@ -1919,11 +1921,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var theme = this.theme;
     this.theme = this._themeProperty;
     this.set("theme", theme);
-    
-    // provide a default _viewRenderer
-    // once _generateTheme is called (if theme is set)
-    // it'll get set to that
-    this._viewRenderer = SC.BaseTheme.renderers.view();
     
     // find render path (to be removed in SC 2.0?)
     var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
