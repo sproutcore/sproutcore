@@ -9,8 +9,8 @@
 
 module("SC.View#themes");
 
-var t1 = SC.Theme.register("sc-test-1", SC.Theme.extend({classNames: ["test-1"]}));
-var t2 = SC.Theme.register("sc-test-2", SC.Theme.extend({classNames: ["test-2"]}));
+var t1 = SC.Theme.register("sc-test-1", SC.BaseTheme.extend({classNames: ["test-1"]}));
+var t2 = SC.Theme.register("sc-test-2", SC.BaseTheme.extend({classNames: ["test-2"]}));
 
 test("changing themes propagates to child view.", function() {
   var view = SC.View.create({
