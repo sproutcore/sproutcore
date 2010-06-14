@@ -122,6 +122,8 @@ SC.PopupButtonView = SC.ButtonView.extend(
     this._setupMenu();
   },
   
+  acceptsFirstResponder: YES,
+  
   /**
     The guaranteed-instantiated menu.
   */
@@ -184,6 +186,8 @@ SC.PopupButtonView = SC.ButtonView.extend(
     // One mouseUp, we'll use this value to determine how long the mouse was
     // pressed.
     this.invokeLast(this._recordMouseDownTimestamp);
+
+    this.becomeFirstResponder();
 
     return YES ;
   },
