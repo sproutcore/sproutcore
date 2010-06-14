@@ -133,7 +133,7 @@ SC.mixin({
     SC._readyQueue = null ;
     
     // trigger any bound ready events
-    SC.Event.trigger("ready", null, document, NO) ;
+    SC.Event.trigger(document, "ready", null, NO);
     
     // Remove any loading div
     if (SC.removeLoading) SC.$('#loading').remove();
