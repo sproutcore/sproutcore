@@ -59,6 +59,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     //
     loadApplication: function(){
       Greenhouse.filesController.reload();
+      Greenhouse.viewConfigsController.reload();
       this.goState('loading');
     }
   }),
