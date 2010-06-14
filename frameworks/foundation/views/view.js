@@ -679,19 +679,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Handles changes in the layer id.
   */
   layerIdDidChange: function() {
-    var layer = this.get("layer");
-    if (layer && this.get("layerId") !== this._lastLayerId) {
+    var layer = this.get("layer"), lid = this.get("layerId");
+    if (this.get("layerId") !== this._lastLayerId) {
       // if we had an earlier one, remove from view hash.
-      if (this._lastLayerId) delete SC.View.views[this._lastLayerId];
+      if (this._lastLayerId && SC.View.views[this._lastLayerId] === this) {
+        delete SC.View.views[this._lastLayerId];
+      }
       
       // set the current one as the new old one
-      this._lastLayerId = this.get("layerId");
+      this._lastLayerId = lid;
       
       // and add the new one
-      SC.View.views[this.get("layerId")] = this;
+      SC.View.views[lid] = this;
       
       // and finally, set the actual layer id.
-      layer.id = this.get("layerId");
+      if (layer) layer.id = lid;
     }
   }.observes("layerId"),
   
