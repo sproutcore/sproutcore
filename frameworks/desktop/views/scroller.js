@@ -493,6 +493,7 @@ SC.ScrollerView = SC.View.extend(
       this._thumbOffset = clickLocation;
       this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
       this._thumbPositionAtDragStart = this.get('thumbPosition');
+      this._valueAtDragStart = this.get("value");
     } else if (target.className.indexOf('button-top') >= 0) {
       // User clicked the up/left button
       // Decrement the value by a fixed amount or page size
@@ -538,6 +539,7 @@ SC.ScrollerView = SC.View.extend(
         this._thumbOffset = {x: frame.x - thumbPosition, y: frame.y - thumbPosition };
         this._mouseDownLocation = {x:evt.pageX, y:evt.pageY};
         this._thumbPositionAtDragStart = thumbPosition;
+        this._valueAtDragStart = this.get("value");
       } else {
         // Move the thumb up or down a page depending on whether the click
         // was above or below the thumb
@@ -625,13 +627,15 @@ SC.ScrollerView = SC.View.extend(
           thumbPositionAtDragStart = this._thumbPositionAtDragStart = thumbPositionAtDragStart+delta;
           delta = 0;
           this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
+          this._valueAtDragStart = this.get("value");
         }
-        delta /= 2;
+        
+        this.set('value', Math.round(this._valueAtDragStart + delta * 2));
+      } else {
+        thumbPosition = thumbPositionAtDragStart + delta;
+        length = this.get('trackLength') - this.get('thumbLength');
+        this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
       }
-
-      thumbPosition = thumbPositionAtDragStart + delta;
-      length = this.get('trackLength') - this.get('thumbLength');
-      this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
     
     } else if (isScrollingUp || isScrollingDown) {
       var nowScrollingUp = NO, nowScrollingDown = NO;
