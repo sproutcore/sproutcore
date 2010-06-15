@@ -441,7 +441,7 @@ SC.Animatable = {
     
     // also prepare an array of CSS transitions to set up. Do this always so we get (and keep) all transitions.
     var cssTransitions = this._TMP_CSS_TRANSITIONS;
-    if (SC.platform.supportsCSSTransitions && (this._disableAnimation<=0)) {
+    if (SC.platform.supportsCSSTransitions) {
       // first, handle special cases
       var timing_function;
       
