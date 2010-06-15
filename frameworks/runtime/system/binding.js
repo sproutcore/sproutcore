@@ -405,12 +405,14 @@ SC.Binding = {
         root = null ;
       }
     }
-    SC.Observers.addObserver(path, this, this.fromPropertyDidChange, root) ;
+    this._fromObserverData = [path, this, this.fromPropertyDidChange, root];
+    SC.Observers.addObserver.apply(SC.Observers, this._fromObserverData);
     
     // try to connect the to side
     if (!this._oneWay) {
       path = this._toPropertyPath; root = this._toRoot ;
-      SC.Observers.addObserver(path, this, this.toPropertyDidChange, root) ;  
+      this._toObserverData = [path, this, this.toPropertyDidChange, root];
+      SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
     }
 
     if (bench) SC.Benchmark.end("SC.Binding.connect()");
@@ -439,9 +441,9 @@ SC.Binding = {
       
     // connection is completed, disconnect.
     } else {
-      SC.Observers.removeObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, (this._fromRoot || this._toRoot)) ;
+      SC.Observers.removeObserver.apply(SC.Observers, this._fromObserverData);
       if (!this._oneWay) {
-        SC.Observers.removeObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;
+        SC.Observers.removeObserver.apply(SC.Observers, this._toObserverData);
       }
     }
     
