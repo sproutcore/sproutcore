@@ -615,7 +615,7 @@ SC.HOLD_BEHAVIOR = 'hold';
   @constant
   @type Number
 */
-SC.ButtonView.CLICK_AND_HOLD_DELAY = 300;
+SC.ButtonView.CLICK_AND_HOLD_DELAY = SC.browser.msie ? 600 : 300;
 
 SC.REGULAR_BUTTON_HEIGHT=24;
 
