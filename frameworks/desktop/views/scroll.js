@@ -294,10 +294,14 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     @property {SC.View}
   */
-  horizontalScrollerView: function() {
-    if (SC.platform.touch) return SC.TouchScrollerView;
-    return SC.ScrollerView;
-  }.property().cacheable(),
+  horizontalScrollerView: SC.ScrollerView,
+  
+  /**
+    The horizontal scroller view for touch. This will be replaced with a view
+    instance when touch is enabled when the ScrollView is created unless 
+    hasHorizontalScroller is NO.
+  */
+  horizontalTouchScrollerView: SC.TouchScrollerView,
   
   /**
     YES if the horizontal scroller should be visible.  You can change this 
@@ -343,10 +347,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     @property {SC.View}
   */
-  verticalScrollerView: function() {
-    if (SC.platform.touch) return SC.TouchScrollerView;
-    return SC.ScrollerView;
-  }.property().cacheable(),
+  verticalScrollerView: SC.ScrollerView,
+  
+  /**
+    The vertical touch scroller view class. This will be replaced with a view
+    instance when the ScrollView is created.
+  */
+  verticalTouchScrollerView: SC.TouchScrollerView,
   
   /**
     YES if the vertical scroller should be visible.  You can change this 
@@ -1464,7 +1471,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.contentView = this.containerView.get('contentView');
     
     // create a horizontal scroller view if needed...
-    view = this.get("horizontalScrollerView");
+    view = SC.platform.touch ? this.get("horizontalTouchScrollerView") : this.get("horizontalScrollerView");
     if (view) {
       if (this.get('hasHorizontalScroller')) {
         view = this.horizontalScrollerView = this.createChildView(view, {
@@ -1476,7 +1483,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
     
     // create a vertical scroller view if needed...
-    view = this.get("verticalScrollerView");
+    view = SC.platform.touch ? this.get("verticalTouchScrollerView") : this.get("verticalScrollerView");
     if (view) {
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
