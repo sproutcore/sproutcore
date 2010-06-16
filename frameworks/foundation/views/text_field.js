@@ -644,6 +644,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (pane && pane.get("usingTouchIntercept")) {
       pane.showTouchIntercept();
     }
+    
+    // HACK: Mobile WebKit sometimes does not remember to scroll to top.
+    // make sure the document is scrolled to top after.
+    document.body.scrollTop = 0;
+    document.body.scrollLeft = 0;
   },
   
   _field_fieldValueDidChange: function(evt) {
