@@ -263,8 +263,9 @@ SC.SelectFieldView = SC.FieldView.extend(
   },
   
   setFieldValue: function(newValue) {
-    if (SC.none(newValue)) { newValue = '' ; }
-    else {
+    if (SC.none(newValue)) { 
+      newValue = '***' ; 
+    } else {
       newValue = ((newValue) ? (SC.guidFor(newValue) ? SC.guidFor(newValue) : newValue.toString()) : null );
     }
     this.$input().val(newValue);
