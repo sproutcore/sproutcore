@@ -1392,12 +1392,23 @@ SC.RootResponder = SC.Object.extend({
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
 
+    var keyCode = evt.keyCode;
+
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
     // trigger a keyDown if it is is enter onKeyup.
-    if (evt.keyCode===229){
+    if (keyCode===229){
       this._IMEInputON = YES;
       return this.sendEvent('keyDown', evt);
+    }
+
+    // If user presses the escape key while we are in the middle of a
+    // drag operation, cancel the drag operation and handle the event.
+    if (keyCode === 27 && this._drag) {
+      this._drag.cancelDrag();
+      this._drag = null;
+      this._mouseDownView = null;
+      return YES;
     }
 
     // Firefox does NOT handle delete here...
@@ -1422,7 +1433,7 @@ SC.RootResponder = SC.Object.extend({
       // processing.
 
       // Arrow keys are handled in keypress for firefox
-      if (evt.keyCode>=37 && evt.keyCode<=40 && SC.browser.mozilla) return YES;
+      if (keyCode>=37 && keyCode<=40 && SC.browser.mozilla) return YES;
 
 
       ret = this.sendEvent('keyDown', evt) ;

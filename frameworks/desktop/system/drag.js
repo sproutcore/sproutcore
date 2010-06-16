@@ -325,6 +325,35 @@ SC.Drag = SC.Object.extend(
       ary[idx].tryToPerform('dragStarted', this, evt) ;
     }
   },
+
+  /** @private
+    Cancel the drag operation.
+
+    This notifies the data source that the drag ended and removes the
+    ghost view, but does not notify the drop target of a drop.
+
+    This is called by RootResponder's keyup method when the user presses
+    escape and a drag is in progress.
+  */
+  cancelDrag: function() {
+    var target = this._lastTarget,
+        loc = this.get('location');
+
+    if (target && target.dragExited) target.dragExited(this, this._lastMouseDraggedEvent);
+
+    this._destroyGhostView();
+
+    if (this.get('ghost')) {
+      if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES);
+      this._dragViewWasVisible = null;
+    }
+
+    var source = this.source;
+    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, SC.DRAG_NONE);
+
+    this._lastTarget = null;
+    this._dragInProgress = NO;
+  },
   
   // ..........................................
   // PRIVATE PROPERTIES AND METHODS
@@ -341,10 +370,11 @@ SC.Drag = SC.Object.extend(
     if (!scrolled && (evt.pageX === loc.x) && (evt.pageY === loc.y)) {
       return ; // quickly ignore duplicate calls
     } 
-    
+
     // save the new location to avoid duplicate mouseDragged event processing
     loc = { x: evt.pageX, y: evt.pageY };
     this.set('location', loc) ;
+    this._lastMouseDraggedEvent = evt;
     
     // STEP 1: Determine the deepest drop target that allows an operation.
     // if the drop target selected the last time this method was called 
