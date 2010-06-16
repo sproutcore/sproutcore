@@ -348,21 +348,21 @@ SC.ListView = SC.CollectionView.extend(
         height    = rect.height || 0,
         len       = this.get('length'),
         offset, start, end;
-    
+
     // estimate the starting row and then get actual offsets until we are 
     // right.
     start = (top - (top % rowHeight)) / rowHeight;
     offset = this.rowOffsetForContentIndex(start);
     
     // go backwards until top of row is before top edge
-    while(start>0 && offset>=top) {
+    while(start>0 && offset>top) {
       start--;
       offset -= this.rowHeightForContentIndex(start);
     }
     
     // go forwards until bottom of row is after top edge
     offset += this.rowHeightForContentIndex(start);
-    while(start<len && offset<top) {
+    while(start<len && offset<=top) {
       start++;
       offset += this.rowHeightForContentIndex(start);
     }
@@ -384,7 +384,7 @@ SC.ListView = SC.CollectionView.extend(
     
     // go forwards until bottom of row is after bottom edge
     offset += this.rowHeightForContentIndex(end);
-    while(end<len && offset<=bottom) {
+    while(end<len && offset<bottom) {
       end++;
       offset += this.rowHeightForContentIndex(end);
     }
@@ -508,8 +508,9 @@ SC.ListView = SC.CollectionView.extend(
     - if dropOperation = SC.DROP_ON and you are over the middle of a row, then
       use DROP_ON.
   */
-  insertionIndexForLocation: function(loc, dropOperation) { 
-    var indexes = this.contentIndexesInRect(loc),
+  insertionIndexForLocation: function(loc, dropOperation) {
+    var locRect = {x:loc.x, y:loc.y, width:1, height:1},
+        indexes = this.contentIndexesInRect(locRect),
         index   = indexes.get('min'),
         len     = this.get('length'),
         min, max, diff, clevel, cindent, plevel, pindent, itemView, pgroup;

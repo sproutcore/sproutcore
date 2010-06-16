@@ -45,6 +45,11 @@
   text-align:right;
 }
 
+/* 3D-accelerate panes in MobileSafari */
+.mobile-safari .sc-pane {
+  -webkit-transform: translate3d(0,0,0);
+}
+
 /*User the following to know what view has the focus in webkit*/
 /*.sc-view .focus {
   outline: auto 5px -webkit-focus-ring-color; 

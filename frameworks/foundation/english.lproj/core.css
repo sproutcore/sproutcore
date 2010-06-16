@@ -16,6 +16,15 @@
 
 /* YUI reset*/
 
+body {
+  position: absolute;
+  margin: 0px;
+  top:0px;
+  bottom: 0px;
+  left:0px;
+  right:0px;
+}
+
 .sc-view body,
 .sc-view div,
 .sc-view dl,
@@ -294,22 +303,19 @@ version: 2.7.0
 	/* Bringing lists on to the page with breathing room. */
 	margin-left: 2em;
 }
-
+/*
 .sc-view ol li {
-	/* Giving OL's LIs generated numbers. */
-	list-style: decimal outside;
+  list-style: decimal outside;
 }
 
 .sc-view ul li {
-	/* Giving UL's LIs generated disc markers. */
-	list-style: disc outside;
+  list-style: disc outside;
 }
 
 .sc-view dl dd {
-	/* Giving UL's LIs generated numbers. */
-	margin-left: 1em;
+  margin-left: 1em;
 }
-
+*/
 .sc-view th,
 .sc-view td {
 	/* Borders and padding to make the table readable. */

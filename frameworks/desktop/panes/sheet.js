@@ -140,11 +140,19 @@ SC.SheetPane = SC.PanelPane.extend({
       this.tick();
     }
   },
-  
+
   _complete: function() {
     var dir = this._direction;
+
     if (dir === SC.SheetPane.SLIDE_DOWN) {
       if (!SC.SheetPane.ANIMATABLE_AVAILABLE) this.adjust('top', 0);
+
+      // Make sure we recenter the panel after the animation
+      // is complete.
+      this.adjust({
+        centerX: 0,
+        left: null
+      });
       if(SC.browser.mozilla) this.parentViewDidChange();
     } else {
       var layout = this.get('layout');

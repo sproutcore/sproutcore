@@ -20,12 +20,28 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
   classNames: ['sc-menu-item'],
 
+  escapeHTML: YES,
+
   /**
     @private
     @property
     @type {Boolean}
   */
   acceptsFirstResponder: YES,
+  
+  /**
+    IE only attribute to block bluring of other controls
+
+    @type Boolean
+  */
+  blocksIEDeactivate: YES,
+
+  /**
+    IE only attribute to block bluring of other controls
+
+    @type Boolean
+  */
+  blocksIEDeactivate: YES,
 
   // ..........................................................
   // KEY PROPERTIES
@@ -117,15 +133,15 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @returns {void}
   */
   render: function(context, firstTime) {
-    var content = this.get('content') ;
-    var key, val ;
-    var menu = this.get('parentMenu');
-    var itemWidth = this.get('itemWidth') || menu.layout.width ;
-    var itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT ;
+    var content = this.get('content'),
+        key, val,
+        menu = this.get('parentMenu'),
+        itemWidth = this.get('itemWidth') || menu.layout.width,
+        itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT ;
     this.set('itemWidth',itemWidth);
     this.set('itemHeight',itemHeight);
 
-    context = context.begin('a');
+    context = context.begin('a').addClass('menu-item');
 
     if (content.get(menu.itemSeparatorKey)) {
       context.push('<span class="separator"></span>');
@@ -286,7 +302,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     // actions.
     if (!this.get('isEnabled')||this.get('hasSubMenu')) return NO;
 
-    var disableFlash = this.getContentProperty('itemDisableMenuFlashKey');
+    var disableFlash = this.getContentProperty('itemDisableMenuFlashKey'),
+        menu;
 
     if (disableFlash) {
       // Menu flashing has been disabled for this menu item, so perform
@@ -296,8 +313,14 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       // Flash the highlight of the menu item to indicate selection,
       // then actually send the action once its done.
       this._flashCounter = 0;
+
+      // Set a flag on the root menu to indicate that we are in a
+      // flashing state. In the flashing state, no other menu items
+      // should become selected.
+      menu = this.getPath('parentMenu.rootMenu');
+      menu._isFlashing = YES;
       this.invokeLater(this.flashHighlight, 25);
-      this.invokeLater(this.sendAction, 200);
+      this.invokeLater(this.sendAction, 150);
     }
 
     return YES;
@@ -313,6 +336,11 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
         rootMenu = this.getPath('parentMenu.rootMenu'),
         responder;
 
+    // Close the menu
+    this.getPath('parentMenu.rootMenu').remove();
+    // We're no longer flashing
+    rootMenu._isFlashing = NO;
+
     action = (action === undefined) ? rootMenu.get('action') : action;
     target = (target === undefined) ? rootMenu.get('target') : target;
 
@@ -322,17 +350,18 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     // Legacy support for actions that are functions
     if (SC.typeOf(action) === SC.T_FUNCTION) {
       action.apply(target, [rootMenu]);
+      //@if(debug)
       SC.Logger.warn('Support for menu item action functions has been deprecated. Please use target and action.');
+      //@endif
     } else {
       responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
+
       if (responder) {
         // Send the action down the responder chain
         responder.sendAction(action, target, this);
       }
     }
 
-    // Now that the action has been dispatched, close the menu
-    this.getPath('parentMenu.rootMenu').remove();
   },
 
   /**
@@ -366,8 +395,15 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
   /** @private */
   mouseEntered: function(evt) {
-    var menu = this.get('parentMenu');
+    var menu = this.get('parentMenu'),
+        rootMenu = menu.get('rootMenu');
+
+    // Ignore mouse entering if we're in the middle of
+    // a menu flash.
+    if (rootMenu._isFlashing) return;
+
     menu.set('mouseHasEntered', YES);
+    this.set('mouseHasEntered', YES);
     menu.set('currentMenuItem', this);
 
     // Become first responder to show highlight
@@ -412,6 +448,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
 
   touchStart: function(evt){
+    this.mouseEntered(evt);
     return YES;
   },
 

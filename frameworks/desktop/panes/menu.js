@@ -243,17 +243,15 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   popup: function(anchorViewOrElement, preferMatrix) {
     var anchor;
-
+    this.beginPropertyChanges();
     if (anchorViewOrElement) {
       anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
     }
 
-    this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
     this.set('anchor',anchorViewOrElement);
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
 
-    this.endPropertyChanges();
     this.adjust('height', this.get('menuHeight'));
     this.positionPane();
 
@@ -261,6 +259,7 @@ SC.MenuPane = SC.PickerPane.extend(
     // pane's defaultResponder to itself. This way key events can be
     // interpreted in keyUp.
     this.set('defaultResponder', this);
+    this.endPropertyChanges();
 
     // IE7 has a bug where, intermittently, appending a menu pane will cause
     // the other panes to blank out, until the user interacts with the window.
@@ -1006,10 +1005,24 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   performKeyEquivalent: function(keyEquivalent) {
+    // Look for menu item that has this key equivalent
     var menuItem = this._keyEquivalents[keyEquivalent];
 
+    // If found, have it perform its action
     if (menuItem) {
       menuItem.performAction(YES);
+      return YES;
+    }
+
+    // If escape key was pressed and no menu item handled it,
+    // close the menu pane.
+    if (keyEquivalent === 'escape') {
+      this.remove();
+      return YES;
+    }
+    //If a menu is visible and you hit enter
+    // it shouldn't go down to other responders.
+    if (keyEquivalent === 'return') {
       return YES;
     }
     return NO;
@@ -1058,7 +1071,6 @@ SC.MenuPane = SC.PickerPane.extend(
     @private
   */
   modalPaneDidClick: function(evt) {
-    this.closeOpenMenusFor(this.get('previousMenuItem'));
     this.remove();
 
     return YES;

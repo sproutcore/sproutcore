@@ -178,8 +178,10 @@ SC.routes = SC.Object.create({
         value = crumbs.route + crumbs.params;
       }
       
+      if(!SC.empty(value) || (this._location && this._location !== value)) {
+        window.location.hash = encodeURI(value);
+      }
       this._location = value;
-      window.location.hash = value === '' ? '#' : encodeURI(value);
       
       return this;
     }
@@ -296,6 +298,17 @@ SC.routes = SC.Object.create({
     when the location changes.
   */
   locationDidChange: function() {
+    this.trigger();
+  }.observes('location'),
+  
+  /**
+    Triggers a route even if already in that route (does change the location, if it
+    is not already changed, as well).
+    
+    If the location is not the same as the supplied location, this simply lets "location"
+    handle it (which ends up coming back to here).
+  */
+  trigger: function() {
     var firstRoute = this._firstRoute,
         location = this.get('location'),
         params, route;
@@ -310,7 +323,7 @@ SC.routes = SC.Object.create({
         route.method.call(route.target, params);
       }
     }
-  }.observes('location'),
+  },
   
   /**
     @private

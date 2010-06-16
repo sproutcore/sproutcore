@@ -84,6 +84,10 @@
 	-webkit-appearance:none;
 }
 
+.msie .sc-text-field-view input {
+  padding-bottom: 1px;
+}
+
 .sc-text-field-view textarea {
 	border: none;
 	outline: none;
@@ -98,12 +102,19 @@
 	width:100%;
   bottom: 0px;
 	right: 0px;
-	height: 100%;
 	display: block;
 	background: transparent;
 	vertical-align: middle;
 	resize: none;
 	overflow: auto;
+}
+
+.msie .sc-text-field-view textarea {
+	height: 100%;
+}
+
+.mozilla .sc-text-field-view textarea {
+	height: 100%;
 }
 
 
@@ -129,5 +140,9 @@
 .sc-text-field-view.focus .sc-hint,
 .sc-text-field-view.not-empty .sc-hint {
   display: none ;
+}
+
+.sc-text-field-view.sc-hint .field{
+  color: #B3B3B3 !important;
 }
 

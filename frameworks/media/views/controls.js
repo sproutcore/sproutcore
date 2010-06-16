@@ -20,6 +20,10 @@ SC.MediaControlsView = SC.View.extend({
   childViews: 'playButton progressView timeView minusLabelView volumeView plusLabelView theaterButton'.w(),
   classNames: 'sc-media-controls',
   
+  leftHandleInset:null,   //until a bug in the way bindings are handled is fixed, these have to be defined
+  rightHandleInset:null,  //for the slider to be able to have its notEmpty bindings function and drop in
+  handleWidth:null,       //their placeholder values.
+  
   playObserver: function(){
     if(this.getPath('target.paused')){
       this.get('playButton').set('icon', 'play');
@@ -27,7 +31,6 @@ SC.MediaControlsView = SC.View.extend({
       this.get('playButton').set('icon', 'stop');
     }
   }.observes('*target.paused'),
-  
   
   playButton: SC.ButtonView.design({
     title: '',
@@ -71,7 +74,7 @@ SC.MediaControlsView = SC.View.extend({
     value: '',
     icon: 'minus'
   }),
-  volumeView: SC.SliderView.design({
+  volumeView: SC.mediaSlider.design({
     layout: { top: 0, right: 20, width: 100, height:20},
     value:0,
     valueBinding: "*owner.target.volume" ,

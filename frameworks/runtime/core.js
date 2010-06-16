@@ -1020,3 +1020,13 @@ String.prototype.w = function() {
   }
   return ary ;
 };
+
+//
+// DATE ENHANCEMENT
+//
+if (!Date.now) {
+  Date.now = function() {
+    return new Date().getTime() ;
+  };
+}
+  

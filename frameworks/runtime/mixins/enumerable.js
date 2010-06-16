@@ -115,6 +115,17 @@ SC.Enumerable = {
   }.property(),
   
   /**
+    Helper method returns the last object from a collection.
+    
+    @returns {Object} the object or undefined
+  */
+  lastObject: function() {
+    var len = this.get('length');
+    if (len===0) return undefined ;
+    if (this.objectAt) return this.objectAt(len-1); // support arrays out of box
+  }.property(),
+  
+  /**
     Returns a new enumerator for this object.  See SC.Enumerator for
     documentation on how to use this object.  Enumeration is an alternative
     to using one of the other iterators described here.
@@ -993,6 +1004,7 @@ Array.prototype.isEnumerable = YES ;
     nextObject: SC.Enumerable.nextObject,
     enumerator: SC.Enumerable.enumerator,
     firstObject: SC.Enumerable.firstObject,
+    lastObject: SC.Enumerable.lastObject,
     sortProperty: SC.Enumerable.sortProperty,
     
     // see above...

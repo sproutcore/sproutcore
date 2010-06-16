@@ -380,6 +380,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
+    return this.displayItemIndexForPosition(evt.pageX, evt.pageY);
     var elem = SC.$(evt.target) ;
     if (!elem || elem===document) return -1; // nothing found
 
@@ -396,6 +397,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     // if a match was found, return the index of the match in subtags
     return (match) ? this.$('.sc-segment').index(match) : -1;
+  },
+  
+  /**
+    NOTE: #renderer should implement
+  */
+  displayItemIndexForPosition: function(pageX, pageY) {
+    var segments = this.$('.sc-segment'), len = segments.length, idx, segment, r;
+    for (idx = 0; idx < len; idx++) {
+      segment = segments[idx];
+      r = segment.getBoundingClientRect();
+      if (this.get('layoutDirection') == SC.LAYOUT_VERTICAL) {
+        if (pageY > r.top && pageY < r.bottom) return idx;
+      }
+      else {
+        if (pageX > r.left && pageX < r.right) return idx;
+      }
+    }
+    return -1;
   },
   
   keyDown: function(evt) {
@@ -449,7 +468,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   mouseUp: function(evt) {
     var idx = this.displayItemIndexForEvent(evt);
-    
     // if mouse was pressed on a button then detect where we where when we
     // release and use that one.
     if (this._isMouseDown && (idx>=0)) this.triggerItemAtIndex(idx);
@@ -486,25 +504,66 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES ;
   },
   
-  touchStart: function(evt){
-    return this.mouseDown(evt);
+  
+  
+  touchStart: function(touch) {
+    if (!this.get('isEnabled')) return YES; // nothing to do
+    var idx = this.displayItemIndexForEvent(touch);
+    
+    // if mouse was pressed on a button, then start detecting pressed events
+    if (idx>=0) {
+      this._isTouching = YES ;
+      this.set('activeIndex', idx);
+    }
+    
+    return YES ;
   },
   
-  touchEnd: function(evt){
-    return this.mouseUp(evt);
+  touchEnd: function(touch) {
+    var idx = this.displayItemIndexForEvent(touch);
+    // if mouse was pressed on a button then detect where we where when we
+    // release and use that one.
+    if (this._isTouching && (idx>=0)) this.triggerItemAtIndex(idx);
+    
+    // cleanup
+    this._isTouching = NO ;
+    this.set('activeIndex', -1);
+    return YES ;
   },
   
-  touchMoved: function(evt){
-    return this.mouseMoved(evt);
+  touchesDragged: function(evt, touches) {
+    var isTouching = this.touchIsInBoundary(evt);
+
+    if (isTouching) {
+      if (!this._isTouching) {
+        this._touchDidEnter(evt);
+      }
+      var idx = this.displayItemIndexForEvent(evt);
+      this.set('activeIndex', idx);
+    } else {
+      if (this._isTouching) this._touchDidExit(evt);
+    }
+    
+    this._isTouching = isTouching;
+    
+    return YES;
   },
   
-  touchEntered: function(evt){
-    return this.mouseEntered(evt);
+  _touchDidExit: function(evt) {
+    var idx = this.displayItemIndexForEvent(evt);
+    this.set('activeIndex', -1);
+
+    return YES;
   },
   
-  touchExited: function(evt){
-    return this.mouseExited(evt);
+  _touchDidEnter: function(evt) {
+    // if mouse was down, hide active index
+    var idx = this.displayItemIndexForEvent(evt);
+    this.set('activeIndex', idx);
+
+    return YES ;
   },
+
   /** 
     Simulates the user clicking on the segment at the specified index. This
     will update the value if possible and fire the action.

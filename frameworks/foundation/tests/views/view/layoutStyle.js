@@ -26,7 +26,7 @@ var parent, child;
 function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   
   // make sure we add null properties and convert numbers to 'XXpx' to style layout.
-  var keys = 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight'.w();
+  var keys = 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight webkitTransform'.w();
   keys.forEach(function(key) {
     if (no_s[key]===undefined) no_s[key] = null;
     if (with_s[key]===undefined) with_s[key] = null;  
@@ -242,6 +242,84 @@ test("layout {top, left, width: auto, height: auto}", function() {
 
 
 // ..........................................................
+// TEST FRAME/STYLEFRAME WITH ACCELERATE LAYOUT VARIATIONS
+// 
+// NOTE:  Each test evaluates the frame before and after adding it to the 
+// parent.
+
+module('ACCELERATED LAYOUT VARIATIONS', {
+  setup: function(){
+    commonSetup.setup();
+    // Force support
+    child.hasAcceleratedLayer = YES;
+  },
+
+  teardown: commonSetup.teardown
+});
+
+test("layout {top, left, width, height}", function() {
+
+  var layout = { top: 10, left: 10, width: 50, height: 50 };
+  var s = { top: 0, left: 0, width: 50, height: 50, webkitTransform: 'translate3d(10px, 10px, 0)' } ;
+  var no_f = { x: 0, y: 0, width: 50, height: 50, webkitTransform: 'translate3d(10px, 10px, 0)' } ;
+  var with_f = { x: 0, y: 0, width: 50, height: 50, webkitTransform: 'translate3d(10px, 10px, 0)' } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+test("layout {top, left, bottom, right}", function() {
+
+  var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+  var no_f = { x: 10, y: 10, width: 0, height: 0, webkitTransform: 'translateZ(0px)' } ;
+  var with_f = { x: 10, y: 10, width: 180, height: 180, webkitTransform: 'translateZ(0px)' } ;
+  var s = { top: 10, left: 10, bottom: 10, right: 10, webkitTransform: 'translateZ(0px)' } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+test("layout {top, left, width: auto, height: auto}", function() {
+  child = SC.View.create({
+    hasAcceleratedLayer: YES, // Force this
+    useStaticLayout: YES,
+    render: function(context) {
+      // needed for auto
+      context.push('<div style="padding: 10px"></div>');
+    }
+  });
+
+  // parent MUST have a layer.
+  parent.createLayer();
+  var layer = parent.get('layer');
+  document.body.appendChild(layer);
+  
+  var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
+  var no_f = { x: 0, y: 0, width: 0, height: 0, webkitTransform: 'translateZ(0px)' };
+  var with_f = { x: 0, y: 0, width: 20, height: 20, webkitTransform: 'translateZ(0px)' };
+  var s = { top: 0, left: 0, width: 'auto', height: 'auto', webkitTransform: 'translateZ(0px)' };
+  
+  performLayoutTest(layout, no_f, s, with_f, s);
+  
+  layer.parentNode.removeChild(layer);
+});
+
+test("layout w/ percentage {top, left, width, height}", function() {
+
+  var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
+  var s = { top: '10%', left: '10%', width: '50%', height: '50%', webkitTransform: 'translateZ(0px)' } ;
+  var no_f = { top: '10%', left: '10%', width: '50%', height: '50%', webkitTransform: 'translateZ(0px)' } ;
+  var with_f = { top: '10%', left: '10%', width: '50%', height: '50%', webkitTransform: 'translateZ(0px)' } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+
+
+
+
+
+
+
+// ..........................................................
 // TEST FRAME/STYLEFRAME WITH INVALID LAYOUT VARIATIONS
 // 
 // NOTE:  Each test evaluates the frame before and after adding it to the 
@@ -359,10 +437,10 @@ module('RESIZE FRAME', commonSetup);
  
 function verifyFrameResize(layout, before, after) {
   parent.appendChild(child);
-  child.set('layout', layout);
+  SC.run(function() { child.set('layout', layout); });
   
   same(child.get('frame'), before, "Before: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(before))) ;
-  parent.adjust('width', 300).adjust('height', 300);
+  SC.run(function() { parent.adjust('width', 300).adjust('height', 300); });
   
   same(child.get('frame'), after, "After: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(after)));
   

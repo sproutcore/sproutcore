@@ -701,7 +701,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   _global: {},
 
   /** @private properties to copy from native event onto the event */
-  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches".split(" ")
+  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches animationName elapsedTime".split(" ")
   
 }) ;
 
@@ -848,7 +848,8 @@ SC.Event.fire = SC.Event.trigger;
 // Register unload handler to eliminate any registered handlers
 // This avoids leaks in IE and issues with mouseout or other handlers on 
 // other browsers.
-SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
+
+if(SC.browser.msie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'

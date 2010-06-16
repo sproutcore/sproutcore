@@ -203,3 +203,14 @@ test("set styles override style attr", function() {
   equals(style.toLowerCase(), "color: black;", "attribute");
 });
 
+test("set styles handle custom browser attributes", function() {
+  context.styles({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' });
+  context.update();
+
+  // Browsers return single attribute styles differently, sometimes with a trailing ';'
+  // sometimes, without one. Normalize it here.
+  var style = SC.$(elem).attr("style");
+  if (!style.match(/;$/)) style += ';' ;
+
+  equals(style, "-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3;");
+});

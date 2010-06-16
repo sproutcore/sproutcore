@@ -125,7 +125,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     context.addClass(this.get('controlSize'));
     if (firstTime) {
       var direction = this.get('scrollDown') ? 'arrowDown' : 'arrowUp' ;
-      context.push('<span class="'+direction+'">&nbsp;</span>') ;
+      context.push('<span class="scrollArrow '+direction+'">&nbsp;</span>') ;
     } 
     context.setClass('disabled', !this.get('isEnabled')) ;
   },

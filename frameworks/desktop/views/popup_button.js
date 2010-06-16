@@ -1,5 +1,11 @@
 sc_require('views/button');
 
+/**
+  Describes the time after which "click and hold" behavior will replace the
+  standard "click and release" behavior.
+*/
+
+
 /** @class
 
   SC.PopupButtonView displays a pop-up menu when clicked, from which the user
@@ -87,13 +93,28 @@ SC.PopupButtonView = SC.ButtonView.extend(
     // If disabled, handle mouse down but ignore it.
     if (!this.get('isEnabled')) return YES ;
 
-    this.set('isActive', YES);
     this._isMouseDown = YES;
 
-    // Store the timestamp so we know how long between mouseDown and mouseUp.
-    this._mouseDownTimestamp = evt.timeStamp;
     this._action() ;
+
+    // Store the current timestamp. We register the timestamp at the end of
+    // the runloop so that the menu has been rendered, in case that operation
+    // takes more than a few hundred milliseconds.
+
+    // One mouseUp, we'll use this value to determine how long the mouse was
+    // pressed.
+    this.invokeLast(this._recordMouseDownTimestamp);
+
     return YES ;
+  },
+
+  /** @private
+    Records the current timestamp. This is invoked at the end of the runloop
+    by mouseDown. We use this value to determine the delay between mouseDown
+    and mouseUp.
+  */
+  _recordMouseDownTimestamp: function() {
+    this._menuRenderedTimestamp = new Date().getTime();
   },
 
   /** @private
@@ -113,7 +134,11 @@ SC.PopupButtonView = SC.ButtonView.extend(
     @returns {Boolean}
   */
   mouseUp: function(evt) {
-    var menu = this.get('menu'), targetMenuItem, success;
+    var timestamp = new Date().getTime(),
+        previousTimestamp = this._menuRenderedTimestamp,
+        menu = this.get('menu'),
+        touch = SC.platform.touch,
+        targetMenuItem;
 
     if (menu) {
       // Get the menu item the user is currently hovering their mouse over
@@ -125,11 +150,11 @@ SC.PopupButtonView = SC.ButtonView.extend(
         // perform, so we should close the menu immediately.
         if (!targetMenuItem.performAction()) menu.remove();
       } else {
-        // If the user waits more than 200ms between mouseDown and mouseUp,
-        // we can assume that they are clicking and dragging to the menu item,
-        // and we should close the menu if they mouseup anywhere not inside
-        // the menu.
-        if (evt.timeStamp - this._mouseDownTimestamp > 400) {
+        // If the user waits more than certain amount of time between
+        // mouseDown and mouseUp, we can assume that they are clicking and
+        // dragging to the menu item, and we should close the menu if they
+        //mouseup anywhere not inside the menu.
+        if (!touch && (timestamp - previousTimestamp > SC.ButtonView.CLICK_AND_HOLD_DELAY)) {
           menu.remove();
         }
       }

@@ -53,7 +53,7 @@ SC.mixin(/** @scope SC */ {
       if(SC.LAZY_INSTANTIATION[bundleName]) {
         var lazyInfo = SC.LAZY_INSTANTIATION[bundleName];
 
-      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' is marked for lazy instantiation, instantiating it now…".fmt(bundleName));            
+      if (SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' is marked for lazy instantiation, instantiating it now…".fmt(bundleName));            
         
         for(var i=0, iLen = lazyInfo.length; i<iLen; i++) {
           try { 
@@ -128,15 +128,16 @@ SC.mixin(/** @scope SC */ {
       target = null;
     }
 
-    var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
-    var args = SC.A(arguments).slice(3);
+    var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets,
+        args       = SC.A(arguments).slice(3),
+        log        = SC.logBundleLoading;
 
-    if(SC.logBundleLoading) {
+    if (log) {
       console.log("SC.loadBundle(): Attempting to load '%@'".fmt(bundleName));
     }
     
-    if(!bundleInfo) {
-      if(SC.logBundleLoading) console.log("SC.loadBundle(): Attemping to load %@ without SC.BUNDLE_INFO entry… could be loaded through other means.".fmt(bundleName));
+    if (!bundleInfo) {
+      if (log) console.log("SC.loadBundle(): Attemping to load %@ without SC.BUNDLE_INFO entry… could be loaded through other means.".fmt(bundleName));
       bundleInfo = this.tryToLoadBundle(bundleName, target, method, args);
     }
     
@@ -145,7 +146,7 @@ SC.mixin(/** @scope SC */ {
       throw "SC.loadBundle(): could not find bundle '%@'".fmt(bundleName) ;
     } else if (bundleInfo.loaded) {
 
-      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' already loaded, skipping.".fmt(bundleName));
+      if (log) console.log("SC.loadBundle(): Bundle '%@' already loaded, skipping.".fmt(bundleName));
 
       if(method) {
         // call callback immediately if we're already loaded and SC.isReady
@@ -160,7 +161,7 @@ SC.mixin(/** @scope SC */ {
       }
     } else {
 
-      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' is not loaded, loading now.".fmt(bundleName));
+      if (log) console.log("SC.loadBundle(): Bundle '%@' is not loaded, loading now.".fmt(bundleName));
 
       // queue callback for later
       callbacks = bundleInfo.callbacks || [] ;
@@ -197,7 +198,7 @@ SC.mixin(/** @scope SC */ {
 
               dependents.push(bundleName) ;
 
-              if(SC.logBundleLoading) console.log("SC.loadBundle(): '%@' depends on '%@', loading dependency…".fmt(bundleName, targetName));
+              if (log) console.log("SC.loadBundle(): '%@' depends on '%@', loading dependency…".fmt(bundleName, targetName));
               
               // recursively load targetName so it's own dependencies are
               // loaded first.
@@ -261,7 +262,7 @@ SC.mixin(/** @scope SC */ {
       if(q) {
         var url = q.shift();
         
-        if(SC.logBundleLoading) console.log("SC.scriptDidLoad(): Loading next file in '%@' -> '%@'".fmt(bundleName, url));
+        if (SC.logBundleLoading) console.log("SC.scriptDidLoad(): Loading next file in '%@' -> '%@'".fmt(bundleName, url));
 
         var el = document.createElement('script') ;
         el.setAttribute('type', "text/javascript") ;
@@ -280,12 +281,14 @@ SC.mixin(/** @scope SC */ {
     @param bundleName {String} the name of the bundle that just loaded
   */
   bundleDidLoad: function(bundleName) {
-    var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
+    var bundleInfo = SC.BUNDLE_INFO[bundleName], 
+        log        = SC.logBundleLoading,
+        callbacks, targets ;
     if (!bundleInfo) {
       bundleInfo = SC.BUNDLE_INFO[bundleName] = { loaded: YES} ;
       return;
     }
-    if (bundleInfo.loaded && SC.logBundleLoading) {
+    if (bundleInfo.loaded && log) {
       console.log("SC.bundleDidLoad() called more than once for bundle '%@'. Skipping.".fmt(bundleName));
       return ;
     }
@@ -306,7 +309,7 @@ SC.mixin(/** @scope SC */ {
     // for each dependent bundle, try and load them again...
     var dependents = bundleInfo.dependents || [] ;
     for (var idx=0, len=dependents.length; idx<len; ++idx) {
-      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' has completed loading, loading '%@' that depended on it.".fmt(bundleName, dependents[idx]));
+      if (log) console.log("SC.loadBundle(): Bundle '%@' has completed loading, loading '%@' that depended on it.".fmt(bundleName, dependents[idx]));
       SC.loadBundle(dependents[idx]) ;
     }
   },
@@ -316,7 +319,7 @@ SC.mixin(/** @scope SC */ {
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks ;
     if (!bundleInfo) return ; // shouldn't happen, but recover anyway
     
-    if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' has completed loading, invoking callbacks.".fmt(bundleName));
+    if (SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' has completed loading, invoking callbacks.".fmt(bundleName));
 
     callbacks = bundleInfo.callbacks || [] ;
     

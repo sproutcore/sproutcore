@@ -244,11 +244,38 @@ SC.PickerPane = SC.PalettePane.extend({
     But since our anchor can be element, we use this solution for now.
   */  
   computeAnchorRect: function(anchor) {
-    var ret = SC.viewportOffset(anchor); // get x & y
-    var cq = SC.$(anchor);
-    var wsize = SC.RootResponder.responder.computeWindowSize() ;
-    ret.width = cq.outerWidth();
-    ret.height = (wsize.height-ret.y) < cq.outerHeight() ? (wsize.height-ret.y) : cq.outerHeight();
+    var bounding, ret, cq,
+        wsize = SC.RootResponder.responder.computeWindowSize();
+
+    // Some browsers natively implement getBoundingClientRect, so if it's
+    // available we'll use it for speed.
+    if (anchor.getBoundingClientRect) {
+      // Webkit and Firefox 3.5 will get everything they need by
+      // calling getBoundingClientRect()
+      bounding = anchor.getBoundingClientRect();
+      ret = {
+        x:      bounding.left,
+        y:      bounding.top,
+        width:  bounding.width,
+        height: bounding.height
+      };
+      // If width and height are undefined this means we are in IE or FF<3.5
+      // if we didnt get the frame dimensions the do the calculations
+      // based on an element
+      if(ret.width===undefined || ret.height===undefined){
+        cq    = SC.$(anchor);
+        ret.width = cq.outerWidth();
+        ret.height = cq.outerHeight();
+      }
+    }
+    else {
+      // Only really old versions will have to go through this code path.
+      ret   = SC.viewportOffset(anchor); // get x & y
+      cq    = SC.$(anchor);
+      ret.width = cq.outerWidth();
+      ret.height = cq.outerHeight();
+    }
+    ret.height = (wsize.height-ret.y) < ret.height ? (wsize.height-ret.y) : ret.height;
     return ret ;
   },
 
@@ -257,7 +284,10 @@ SC.PickerPane = SC.PalettePane.extend({
   */  
   fitPositionToScreen: function(preferredPosition, picker, anchor) {
     // get window rect.
+    //if(this._prefPosX && this._prefPosY)
+    
     var wsize = SC.RootResponder.responder.computeWindowSize() ;
+
     var wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
@@ -267,8 +297,11 @@ SC.PickerPane = SC.PalettePane.extend({
           // apply menu re-position rule
           picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu')) ;
           break;
-        case SC.PICKER_POINTER:
         case SC.PICKER_MENU_POINTER:
+          this.setupPointer(anchor);
+          picker = this.fitPositionToScreenMenuPointer(wret, picker, anchor);
+          break;
+        case SC.PICKER_POINTER:
           // apply pointer re-position rule
           this.setupPointer(anchor);
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
@@ -379,6 +412,26 @@ SC.PickerPane = SC.PalettePane.extend({
   },
 
   /** @private
+    Reposition the pane in a way that is optimized for menus that have a
+    point element.
+
+    This simply calls fitPositionToScreenPointer, then ensures that the menu
+    does not exceed the height of the viewport.
+
+    @returns {Rect}
+  */
+  fitPositionToScreenMenuPointer: function(w, f, a) {
+    f = this.fitPositionToScreenPointer(w,f,a);
+
+    // If the height of the menu is bigger than the window height, resize it.
+    if( f.height+f.y+35 >= w.height){
+        f.height = w.height - f.y - (SC.MenuPane.VERTICAL_OFFSET*2) ;
+    }
+
+    return f;
+  },
+
+  /** @private
     re-position rule for triangle pointer picker.
   */
   fitPositionToScreenPointer: function(w, f, a) {
@@ -470,44 +523,49 @@ SC.PickerPane = SC.PalettePane.extend({
 
   /** @private
     This method will set up pointerOffset and preferMatrix according to type
-    and size if not provided excplicitly.
+    and size if not provided explicitly.
   */
   setupPointer: function(a) {
-    // set up pointerOffset according to type and size if not provided excplicitly
-    if(!this.pointerOffset || this.pointerOffset.length !== 4) {
-      if(this.get('preferType') == SC.PICKER_MENU_POINTER) {
+    var pointerOffset = this.pointerOffset,
+        K             = SC.PickerPane;
+    
+    // set up pointerOffset according to type and size if not provided explicitly
+    if (!pointerOffset || pointerOffset.length !== 4) {
+      if (this.get('preferType') == SC.PICKER_MENU_POINTER) {
         switch (this.get('controlSize')) {
           case SC.TINY_CONTROL_SIZE:
-            this.set('pointerOffset', SC.PickerPane.TINY_PICKER_MENU_POINTER_OFFSET) ;
-            this.set('extraRightOffset', SC.PickerPane.TINY_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
+            this.set('pointerOffset',    K.TINY_PICKER_MENU_POINTER_OFFSET) ;
+            this.set('extraRightOffset', K.TINY_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
             break;
           case SC.SMALL_CONTROL_SIZE:
-            this.set('pointerOffset', SC.PickerPane.SMALL_PICKER_MENU_POINTER_OFFSET) ;
-            this.set('extraRightOffset', SC.PickerPane.SMALL_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
+            this.set('pointerOffset',    K.SMALL_PICKER_MENU_POINTER_OFFSET) ;
+            this.set('extraRightOffset', K.SMALL_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
             break;
           case SC.REGULAR_CONTROL_SIZE:
-            this.set('pointerOffset', SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET) ;
-            this.set('extraRightOffset', SC.PickerPane.REGULAR_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
+            this.set('pointerOffset',    K.REGULAR_PICKER_MENU_POINTER_OFFSET) ;
+            this.set('extraRightOffset', K.REGULAR_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
             break;
           case SC.LARGE_CONTROL_SIZE:
-            this.set('pointerOffset', SC.PickerPane.LARGE_PICKER_MENU_POINTER_OFFSET) ;
-            this.set('extraRightOffset', SC.PickerPane.LARGE_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
+            this.set('pointerOffset',    K.LARGE_PICKER_MENU_POINTER_OFFSET) ;
+            this.set('extraRightOffset', K.LARGE_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
             break;
           case SC.HUGE_CONTROL_SIZE:
-            this.set('pointerOffset', SC.PickerPane.HUGE_PICKER_MENU_POINTER_OFFSET) ;
-            this.set('extraRightOffset', SC.PickerPane.HUGE_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
+            this.set('pointerOffset',    K.HUGE_PICKER_MENU_POINTER_OFFSET) ;
+            this.set('extraRightOffset', K.HUGE_PICKER_MENU_EXTRA_RIGHT_OFFSET) ;
             break;
         }
-      } else {
-        var overlapTunningX = (a.width < 16) ? ((a.width < 4) ? 9 : 6) : 0;
-        var overlapTunningY = (a.height < 16) ? ((a.height < 4) ? 9 : 6) : 0;
+      }
+      else {
+        var overlapTuningX = (a.width < 16)  ? ((a.width < 4)  ? 9 : 6) : 0,
+            overlapTuningY = (a.height < 16) ? ((a.height < 4) ? 9 : 6) : 0,
+            offsetKey      = K.PICKER_POINTER_OFFSET;
 
-        var offset = [SC.PickerPane.PICKER_POINTER_OFFSET[0]+overlapTunningX,
-                      SC.PickerPane.PICKER_POINTER_OFFSET[1]-overlapTunningX,
-                      SC.PickerPane.PICKER_POINTER_OFFSET[2]-overlapTunningY,
-                      SC.PickerPane.PICKER_POINTER_OFFSET[3]+overlapTunningY];
+        var offset = [offsetKey[0]+overlapTuningX,
+                      offsetKey[1]-overlapTuningX,
+                      offsetKey[2]-overlapTuningY,
+                      offsetKey[3]+overlapTuningY];
         this.set('pointerOffset', offset) ;
-        this.set('extraRightOffset', SC.PickerPane.PICKER_EXTRA_RIGHT_OFFSET) ;
+        this.set('extraRightOffset', K.PICKER_EXTRA_RIGHT_OFFSET) ;
       }
     }
 

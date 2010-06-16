@@ -76,7 +76,13 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
       if (key === 'selectionStart' || key === 'selectionEnd') continue;
     }
 
-    val = obj[key];
+    try{
+      val = obj[key];
+    }catch(e){
+      //This object might be special this get called when an app
+     // using webView adds an static C object to JS.
+      continue;
+    }
     if (key === "SproutCore") key = "SC";
     t   = SC.typeOf(val);
     if (t === SC.T_FUNCTION) {

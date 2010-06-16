@@ -42,5 +42,6 @@ SC.setupBodyClassNames = function() {
   classNames.push(platform) ;
   if (parseInt(SC.browser.msie,0)==7) classNames.push('ie7') ;
   if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
+  if ('createTouch' in document) classNames.push('touch');
   el.className = classNames.join(' ') ;
 } ;

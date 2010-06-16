@@ -62,6 +62,11 @@ SC.CollectionView = SC.View.extend(
   //
   
   /**
+    If YES, uses the VERY EXPERIMENTAL fast CollectionView path.
+  */
+  useFastPath: NO,
+  
+  /**
     An array of content objects
     
     This array should contain the content objects you want the collection view 
@@ -1889,7 +1894,11 @@ SC.CollectionView = SC.View.extend(
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
     If item is expandable, will collapse.
   */
-  moveLeft: function(sender, evt) {
+  moveLeft: function(evt) {
+    // If the control key is down, this may be a browser shortcut and
+    // we should not handle the arrow key.
+    if (evt.ctrlKey || evt.metaKey) return NO;
+
     if ((this.get('itemsPerRow') || 1) > 1) {
       this.selectPreviousItem(false, 1);
       this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
@@ -1953,7 +1962,11 @@ SC.CollectionView = SC.View.extend(
   /** @private
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
-  moveRight: function(sender, evt) {
+  moveRight: function(evt) {
+    // If the control key is down, this may be a browser shortcut and
+    // we should not handle the arrow key.
+    if (evt.ctrlKey || evt.metaKey) return NO;
+
     if ((this.get('itemsPerRow') || 1) > 1) {
       this.selectNextItem(false, 1) ;
       this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
@@ -2281,6 +2294,7 @@ SC.CollectionView = SC.View.extend(
   // ..........................................................
   // TOUCH EVENTS
   //
+  
   touchStart: function(ev) {
 
     // When the user presses the mouse down, we don't do much just yet.
@@ -2301,13 +2315,23 @@ SC.CollectionView = SC.View.extend(
     // become first responder if possible.
     this.becomeFirstResponder() ;
     this.select(contentIndex, NO);
-
-    return SC.MIXED_STATE;
+    
+    this._cv_performSelectAction(this, ev);
+    
+    return YES;
   },
 
-  touchesDragged: function(evt) {
-    this.select(null, NO);
-    return SC.MIXED_STATE;
+  touchesDragged: function(evt, touches) {
+    touches.forEach(function(touch){
+      if (
+        Math.abs(touch.pageX - touch.startX) > 5 ||
+        Math.abs(touch.pageY - touch.startY) > 5
+      ) {
+        this.select(null, NO);
+        touch.makeTouchResponder(touch.nextTouchResponder);
+      }
+    }, this);
+
   },
 
   touchCancelled: function(evt) {
@@ -2958,6 +2982,7 @@ SC.CollectionView = SC.View.extend(
   
   init: function() {
      sc_super();
+     if (this.useFastPath) this.mixin(SC.CollectionFastPath);
      if (this.get('canReorderContent')) this._cv_canReorderContentDidChange();
      this._sccv_lastNowShowing = this.get('nowShowing').clone();
      if (this.content) this._cv_contentDidChange();

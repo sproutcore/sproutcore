@@ -145,8 +145,12 @@ module('SC.routes defined routes', {
   setup: function() {
     router = SC.Object.create({
       params: null,
+      triggered: NO,
       route: function(params) {
         this.set('params', params);
+      },
+      triggerRoute: function() {
+        this.triggered = YES;
       }
     });
   },
@@ -155,6 +159,25 @@ module('SC.routes defined routes', {
     SC.routes.set('location', null);
   }
   
+});
+
+test('setting location simply triggers route', function() {
+  SC.routes.add("foo", router, "triggerRoute");
+  SC.routes.set('location', 'bar');
+  ok(!router.triggered, "Router not triggered with nonexistent route.");
+  
+  SC.routes.set('location', 'foo');
+  ok(router.triggered, "Router triggered.");
+});
+
+test('calling trigger() triggers current location (again)', function() {
+  SC.routes.add("foo", router, "triggerRoute");
+  SC.routes.set('location', 'foo');
+  ok(router.triggered, "Router triggered first time.");
+  router.triggered = NO;
+  
+  SC.routes.trigger();
+  ok(router.triggered, "Router triggered (again).");
 });
 
 test('A mix of static, dynamic and wildcard route', function() {

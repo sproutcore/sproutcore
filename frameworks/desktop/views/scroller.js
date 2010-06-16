@@ -41,6 +41,12 @@ SC.ScrollerView = SC.View.extend(
   // ..........................................................
   // PROPERTIES
   //
+  
+  /**
+    @private
+    The in-touch-scroll value.
+  */
+  _touchScrollValue: NO,
 
   /**
     The value of the scroller.
@@ -55,9 +61,16 @@ SC.ScrollerView = SC.View.extend(
       this._scs_value = val;
     }
 
-    val = this._scs_value||minimum; // default value is at top/left
+    val = this._scs_value || minimum; // default value is at top/left
     return Math.max(Math.min(val, this.get('maximum')), minimum) ;
   }.property('maximum', 'minimum').cacheable(),
+  
+  displayValue: function() {
+    var ret;
+    if (this.get("_touchScrollValue")) ret = this.get("_touchScrollValue");
+    else ret = this.get("value");
+    return ret;
+  }.property("value", "_touchScrollValue").cacheable(),
 
   /**
     The portion of the track that the thumb should fill. Usually the
@@ -241,14 +254,35 @@ SC.ScrollerView = SC.View.extend(
 
       thumbElement = this.$('.thumb');
 
-      this.adjustThumbSize(thumbElement, thumbLength);
-      this.adjustThumbPosition(thumbElement, thumbPosition);
+      this.adjustThumb(thumbElement, thumbPosition, thumbLength);
     }
+  },
+
+  /**
+  @private
+  */
+  touchScrollDidStart: function(value) {
+    this.set("_touchScrollValue", value);
+  },
+  
+  touchScrollDidEnd: function(value) {
+    this.set("_touchScrollValue", NO);
+  },
+  
+  touchScrollDidChange: function(value) {
+    this.set("_touchScrollValue", value);
   },
 
   // ..........................................................
   // THUMB MANAGEMENT
   //
+  /**
+    Adjusts the thumb (for backwards-compatibility calls adjustThumbPosition+adjustThumbSize by default)
+  */
+  adjustThumb: function(thumb, position, length) {
+    this.adjustThumbPosition(thumb, position);
+    this.adjustThumbSize(thumb, length);
+  },
 
   /**
     Updates the position of the thumb DOM element.
@@ -341,7 +375,12 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   thumbLength: function() {
-    return Math.max(Math.floor(this.get('trackLength') * this.get('proportion')),20);
+    var length;
+
+    length = Math.floor(this.get('trackLength') * this.get('proportion'));
+    length = isNaN(length) ? 0 : length;
+
+    return Math.max(length,20);
   }.property('trackLength', 'proportion').cacheable(),
 
   /**
@@ -352,18 +391,18 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   thumbPosition: function() {
-    var value = this.get('value'),
+    var value = this.get('displayValue'),
         max = this.get('maximum'),
         trackLength = this.get('trackLength'),
         thumbLength = this.get('thumbLength'),
         capLength = this.get('capLength'),
         capOverlap = this.get('capOverlap'), position;
-
+        
     position = (value/max)*(trackLength-thumbLength);
     position += capLength - capOverlap; // account for the top/left cap
 
     return Math.floor(isNaN(position) ? 0 : position);
-  }.property('value', 'maximum', 'trackLength', 'thumbLength').cacheable(),
+  }.property('displayValue', 'maximum', 'trackLength', 'thumbLength').cacheable(),
 
   /**
     YES if the maximum value exceeds the frame size of the scroller.  This
@@ -454,10 +493,10 @@ SC.ScrollerView = SC.View.extend(
       // was above or below the thumb
       if (mousePosition < thumbPosition) {
         this.decrementProperty('value',scrollerLength);
-        this.startMouseDownTimer('pageUp');
+        this.startMouseDownTimer('page');
       } else {
         this.incrementProperty('value', scrollerLength);
-        this.startMouseDownTimer('pageDown');
+        this.startMouseDownTimer('page');
       }
     }
 
@@ -523,19 +562,6 @@ SC.ScrollerView = SC.View.extend(
     this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
     return YES;
   },
-  
-  
-  touchStart: function(evt){
-    return this.mouseDown(evt);
-  },
-  
-  touchEnd: function(evt){
-    return this.mouseUp(evt);
-  },
-  
-  touchesDragged: function(evt){
-    return this.mouseDragged(evt);
-  },
 
   /**
     Starts a timer that fires after 300ms.  This is called when the user
@@ -562,8 +588,19 @@ SC.ScrollerView = SC.View.extend(
   */
   mouseDownTimerDidFire: function() {
     var scrollerLength = this.get('scrollerLength'),
-        mouseLocation = this._mouseDownLocation,
-        thumbPosition;
+        mouseLocation = SC.device.get('mouseLocation'),
+        thumbPosition = this.get('thumbPosition'),
+        thumbLength = this.get('thumbLength'),
+        timerInterval = 50;
+
+    switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+        mouseLocation = this.convertFrameFromView(mouseLocation).y;
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        mouseLocation = this.convertFrameFromView(mouseLocation).x;
+        break;
+    }
 
     switch (this._mouseDownTimerAction) {
       case 'scrollDown':
@@ -572,20 +609,17 @@ SC.ScrollerView = SC.View.extend(
       case 'scrollUp':
         this.decrementProperty('value', 30);
         break;
-      case 'pageDown':
-        thumbPosition = this._scs_thumbPosition+this._scs_thumbSize;
-        if (mouseLocation < thumbPosition) return;
-        this.incrementProperty('value', scrollerLength);
-        break;
-      case 'pageUp':
-        thumbPosition = this._scs_thumbPosition;
-        if (mouseLocation > thumbPosition) return;
-        this.decrementProperty('value', scrollerLength);
-        break;
+      case 'page':
+        timerInterval = 150;
+        if (mouseLocation < thumbPosition) {
+          this.decrementProperty('value', scrollerLength);
+        } else if (mouseLocation > thumbPosition+thumbLength) {
+          this.incrementProperty('value', scrollerLength);
+        }
     }
 
     this._mouseDownTimer = SC.Timer.schedule({
-      target: this, action: this.mouseDownTimerDidFire, interval: 50
+      target: this, action: this.mouseDownTimerDidFire, interval: timerInterval
     });
   },
 
@@ -601,3 +635,5 @@ SC.ScrollerView = SC.View.extend(
     this._scs_buttonActive = this.$(selector).addClass('active');
   }
 });
+
+

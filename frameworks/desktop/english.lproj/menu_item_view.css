@@ -3,7 +3,7 @@
   border: none;
 }
 
-.sc-button-view.sc-menu-item.sc-small-size a span {
+.sc-button-view.sc-menu-item.sc-small-size a {
   line-height: 11px;
   font-size: 11px;
 }

@@ -84,8 +84,8 @@ test("animatable should handle concatenated transitions properly", function(){
 });
 
 test("animatable handler for layer update should ensure both layout and styles are set in the 'current style'.", function() {
-  var original_transition_enabled = SC.Animatable.enableCSSTransitions;
-  SC.Animatable.enableCSSTransitions = NO;
+  var original_transition_enabled = SC.platform.supportsCSSTransitions;
+  SC.platform.supportsCSSTransitions = NO;
   
   // we should have a style (it is inside a pane)
   var current = view.getCurrentJavaScriptStyles();
@@ -96,7 +96,7 @@ test("animatable handler for layer update should ensure both layout and styles a
   equals(current["left"], 100, "left should be 100");
   
   // go back to the beginning
-  SC.Animatable.enableCSSTransitions = original_transition_enabled;
+  SC.platform.supportsCSSTransitions = original_transition_enabled;
 });
 
 test("animatable callbacks work in general", function(){

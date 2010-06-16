@@ -62,36 +62,49 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} receiver
   */
   init: function(tagNameOrElement, prevContext) {
-    if (tagNameOrElement === undefined) tagNameOrElement = 'div';
+    var strings, tagNameOrElementIsString;
     
     // if a prevContext was passed, setup with that first...
     if (prevContext) {
       this.prevObject = prevContext ;
-      this.strings = prevContext.strings ;
-      this.offset = prevContext.length + prevContext.offset ;
+      this.strings    = prevContext.strings ;
+      this.offset     = prevContext.length + prevContext.offset ;
     } 
 
     if (!this.strings) this.strings = [] ;
-    
+
     // if tagName is string, just setup for rendering new tagName
-    this.needsContent = YES ;
-    if (SC.typeOf(tagNameOrElement) === SC.T_STRING) {
-      this._tagName = tagNameOrElement.toLowerCase();
-      this._needsTag = YES ; // used to determine if end() needs to wrap tag
+    if (tagNameOrElement === undefined) {
+      tagNameOrElement = 'div' ;
+      tagNameOrElementIsString = YES ;
+    }
+    else if (tagNameOrElement === 'div'  ||  tagNameOrElement === 'label'  ||  tagNameOrElement === 'a') {
+      // Fast path for common tags.
+      tagNameOrElementIsString = YES ;
+    }
+    else if (SC.typeOf(tagNameOrElement) === SC.T_STRING) {
+      tagNameOrElement = tagNameOrElement.toLowerCase() ;
+      tagNameOrElementIsString = YES ;
+    }
+    
+    if (tagNameOrElementIsString) {
+      this._tagName     = tagNameOrElement ;
+      this._needsTag    = YES ; // used to determine if end() needs to wrap tag
+      this.needsContent = YES ;
       
       // increase length of all contexts to leave space for opening tag
       var c = this;
       while(c) { c.length++; c = c.prevObject; }
       
       this.strings.push(null);
-      this._selfClosing = this.SELF_CLOSING.contains(this._tagName);
-    } else {
-      this._elem = tagNameOrElement ;
-      this._needsTag = NO ;
-      this.length = 0 ;
+      this._selfClosing = this.SELF_CLOSING.contains(tagNameOrElement);
+    }
+    else {
+      this._elem        = tagNameOrElement ;
+      this._needsTag    = NO ;
+      this.length       = 0 ;
       this.needsContent = NO ;
     }
-    
     return this ;
   },
   
@@ -208,7 +221,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {String} joined string
   */
   join: function(joinChar) {
-
     // generate tag if needed...
     if (this._needsTag) this.end();
     
@@ -240,26 +252,38 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   element: function() {  
     if (this._elem) return this._elem;
+
     // create factory div if needed
-    var ret, child;
-    if (!SC.RenderContext.factory) {
-      SC.RenderContext.factory = document.createElement('div');
+    var K       = SC.RenderContext,
+        factory = K.factory,
+        ret, child;
+
+    if (!factory) {
+      factory = K.factory = document.createElement('div');
     }
-    SC.RenderContext.factory.innerHTML = this.join();
+    factory.innerHTML = this.join();
     
     // In IE something weird happens when reusing the same element.
-    // After setting innerHTML, the innerHTML of the element in the previous view
-    // turns blank. Seems that there is something weird with their garbage 
-    // collection algorithm. I tried just removing the nodes after keeping a 
-    // reference to the first child, but it didnt work. 
-    // Ended up cloning the first child.
-    
-    if(SC.RenderContext.factory.innerHTML.length>0){
-      child = SC.RenderContext.factory.firstChild.cloneNode(true);
-      SC.RenderContext.factory.innerHTML = '';
-    } else {
-      child = null;
+    // After setting innerHTML, the innerHTML of the element in the previous
+    // view turns blank.  It seems that there is something weird with their
+    // garbage  collection algorithm. I tried just removing the nodes after
+    // keeping a  reference to the first child, but it didn't work.  I ended
+    // up cloning the first child.
+    if (SC.browser.msie) {
+      if (factory.innerHTML.length > 0) {
+        child = factory.firstChild.cloneNode(true);
+        factory.innerHTML = '';
+      }
+      else {
+        child = null;
+      }
     }
+    else {
+      // Faster path (avoiding the unnecessary node clone) for non-IE
+      // browsers.
+      child = factory.firstChild;
+    }
+
     return child ;
   },
   
@@ -296,7 +320,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   update: function() {
     var elem = this._elem, 
         mode = this.updateMode,
-        key, value, styles, factory, cur, next, before;
+        cq, key, value, attr, styles, factory, cur, next, before;
         
     this._innerHTMLReplaced = NO;
     
@@ -304,6 +328,8 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       // throw "Cannot update context because there is no source element";
       return ;
     }
+
+    cq = SC.$(elem);
     
     // console.log('%@#update() called'.fmt(this));
     // if (this.length>0) console.log(this.join());
@@ -336,22 +362,23 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (this._attrsDidChange && (value = this._attrs)) {
       for(key in value) {
         if (!value.hasOwnProperty(key)) continue;
-        if (value[key] === null) { // remove empty attrs
+        attr = value[key];
+        if (attr === null) { // remove empty attrs
           elem.removeAttribute(key);
         } else {
-          SC.$(elem).attr(key, value[key]);
+          cq.attr(key, attr);
         }
       }
     }
     
     // class="foo bar"
     if (this._classNamesDidChange && (value = this._classNames)) {
-      SC.$(elem).attr('class', value.join(' '));
+      cq.attr('class', value.join(' '));
     }
     
     // id="foo"
     if (this._idDidChange && (value = this._id)) {
-      SC.$(elem).attr('id', value);
+      cq.attr('id', value);
     }
     
     // style="a:b; c:d;"
@@ -361,12 +388,13 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         if (!styles.hasOwnProperty(key)) continue ;
         value = styles[key];
         if (value === null) continue; // skip empty styles
-        if (typeof value === SC.T_NUMBER) value = value.toString() + "px";
-        pair[0] = key.dasherize(); pair[1] = value;
+        if (!isNaN(value) && key !== "zIndex") value += "px";
+        pair[0] = this._dasherizeStyleName(key);
+        pair[1] = value;
         joined.push(pair.join(': '));
       }
       
-      SC.$(elem).attr('style', joined.join('; '));
+      cq.attr('style', joined.join('; '));
       joined.length = 0; // reset temporary object
     }
     
@@ -401,7 +429,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // generate opening tag.
     
     // get attributes first.  Copy in className + styles...
-    var tag = this._TAG_ARRAY, pair, joined, key ,
+    var tag = this._TAG_ARRAY, pair, joined, key , value,
         attrs = this._attrs, className = this._classNames,
         id = this._id, styles = this._styles;
     
@@ -421,11 +449,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         pair = this._STYLE_PAIR_ARRAY;
         for(key in styles) {
           if(!styles.hasOwnProperty(key)) continue ;
-          pair[0] = key.dasherize() ;
-          pair[1] = styles[key];
-          if (pair[1] === null) continue; // skip empty styles
-          
-          if(typeof pair[1] === SC.T_NUMBER) pair[1] = pair[1]+"px";
+          value = styles[key];
+          if (value === null) continue; // skip empty styles
+          if (!isNaN(value) && key !== "zIndex") value += "px";
+
+          pair[0] = this._dasherizeStyleName(key);
+          pair[1] = value;
           joined.push(pair.join(': '));
         }
         attrs.style = joined.join('; ') ;
@@ -439,8 +468,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       tag.push(' '); // add space for joining0
       for(key in attrs) {
         if (!attrs.hasOwnProperty(key)) continue ;
-        if (attrs[key] === null) continue ; // skip empty attrs
-        tag.push(key, '="', attrs[key], '" ');
+        value = attrs[key];
+        if (value === null) continue ; // skip empty attrs
+        tag.push(key, '="', value, '" ');
       }
       
       // if we are using the DEFAULT_ATTRS temporary object, make sure we 
@@ -477,7 +507,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     
     // if there was a source element, cleanup to avoid memory leaks
     this._elem = null;
-    
     return this.prevObject || this ;
   },
   
@@ -547,7 +576,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     the shared array.
     
     @param {Array} classNames array 
-    @param {Boolean} cloneOnModifiy
+    @param {Boolean} cloneOnModify
     @returns {Array|SC.RenderContext} classNames array or receiver
   */
   classNames: function(classNames, cloneOnModify) {
@@ -711,7 +740,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   // CSS Styles Support
   // 
     
-  _STYLE_REGEX: /\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g,
+  _STYLE_REGEX: /-?\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g,
   
   /**
     Retrieves or sets the current styles for the outer tag.  If you retrieve
@@ -746,7 +775,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           regex = this._STYLE_REGEX ;
           regex.lastIndex = 0;
           
-          while(match = regex.exec(attr)) styles[match[1].camelize()] = match[2];
+          while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
           
           this._styles = styles;
           this._cloneStyles = NO;
@@ -885,6 +914,29 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     }
     
     return this ;
+  },
+
+  /** @private
+  */
+  _camelizeStyleName: function(name) {
+    // IE wants the first letter lowercase so we can allow normal behavior
+    var needsCap = name.match(/^-(webkit|moz|o)-/),
+        camelized = name.camelize();
+
+    if (needsCap) {
+      return camelized.substr(0,1).toUpperCase() + camelized.substr(1);
+    } else {
+      return camelized;
+    }
+  },
+
+  /** @private
+    Converts camelCased style names to dasherized forms
+  */
+  _dasherizeStyleName: function(name) {
+    var dasherized = name.dasherize();
+    if (dasherized.match(/^(webkit|moz|ms|o)-/)) dasherized = '-'+dasherized;
+    return dasherized;
   }
   
 });

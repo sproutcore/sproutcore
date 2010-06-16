@@ -261,14 +261,14 @@ SC.LabelView = SC.View.extend(SC.Control,
     this._oldOpacity = layer.css('opacity') ;
     layer.css('opacity', 0.0);
   },
-
-  /**
-    Could check with a validator someday...
+  
+  /** @private
+    Delegate method defaults to the isEditable property
   */
-  inlineEditorShouldBeginEditing: function(inlineEditor) {
-    return YES;
+  inlineEditorShouldBeginEditing: function(){
+    return this.get('isEditable');
   },
-
+  
   /** @private
     Could check with a validator someday...
   */

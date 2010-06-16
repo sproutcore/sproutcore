@@ -58,7 +58,7 @@ SC.StaticContentView = SC.View.extend(SC.StaticLayout, {
     automatically.
   */
   contentLayoutDidChange: function() {
-    this.notifyPropertyChange('frame');
+    this._viewFrameDidChange();
   },
 
   // ..........................................................

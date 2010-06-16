@@ -7,15 +7,6 @@
 
 /*jslint evil:true */
 
-// Constants
-SC.TOGGLE_BEHAVIOR = 'toggle';
-SC.PUSH_BEHAVIOR =   'push';
-SC.TOGGLE_ON_BEHAVIOR = 'on';
-SC.TOGGLE_OFF_BEHAVIOR = 'off';
-SC.HOLD_BEHAVIOR = 'hold';
-
-SC.REGULAR_BUTTON_HEIGHT=24;
-
 /** @class
 
   Implements a push-button-style button.  This class is used to implement 
@@ -156,25 +147,45 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     @property {Boolean}
   */
   supportFocusRing: NO,
-  
+
   /**
-    fakes a click... evt is optional.  
-    
-    Temporarily highlights the button to show that it is being triggered.  
-    Does nothing if the button is disabled. 
-    
+    Called when the user presses a shortcut key, such as return or cancel,
+    associated with this button.
+
+    Highlights the button to show that it is being triggered, then, after a
+    delay, performs the button's action.
+
+    Does nothing if the button is disabled.
+
     @param {Event} evt
     @returns {Boolean} success/failure of the request
-  */  
-  triggerAction: function(evt) {  
+  */
+  triggerAction: function(evt) {
+    // If this button is disabled, we have nothing to do
     if (!this.get('isEnabled')) return NO;
+
+    // Set active state of the button so it appears highlighted
     this.set('isActive', YES);
+
+    // Invoke the actual action method after a small delay to give the user a
+    // chance to see the highlight. This is especially important if the button
+    // closes a pane, for example.
+    this.invokeLater('_triggerActionAfterDelay', 200, evt);
+    return YES;
+  },
+
+  /** @private
+    Called by triggerAction after a delay; this method actually
+    performs the action and restores the button's state.
+
+    @param {Event} evt
+  */
+  _triggerActionAfterDelay: function(evt) {
     this._action(evt, YES);
     this.didTriggerAction();
-    this.invokeLater('set', 200, 'isActive', NO);
-    return true;
+    this.set('isActive', NO);
   },
-  
+
   /**
     This method is called anytime the button's action is triggered.  You can 
     implement this method in your own subclass to perform any cleanup needed 
@@ -377,20 +388,51 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     return YES ;
   },
   
-  touchStart: function(evt){
-    return this.mouseDown(evt);
-  },
-  
-  touchEnd: function(evt){
-    return this.mouseUp(evt);
-  },
-  
-  touchEntered: function(evt){
-    return this.mouseEntered(evt);
-  },
+  touchStart: function(touch){
+    var buttonBehavior = this.get('buttonBehavior');
 
-  touchExited: function(evt){
-    return this.mouseExited(evt);
+    if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
+    this.set('isActive', YES);
+
+    if (buttonBehavior === SC.HOLD_BEHAVIOR) {
+      this._action(touch);
+    } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$()[0].focus();
+      }
+    }
+
+    // don't want to do whatever default is...
+    touch.preventDefault();
+
+    return YES;
+  },
+  
+  touchesDragged: function(evt, touches) {
+    if (!this.touchIsInBoundary(evt)) {
+      if (!this._touch_exited) this.set('isActive', NO);
+      this._touch_exited = YES;
+    } else {
+      if (this._touch_exited) this.set('isActive', YES);
+      this._touch_exited = NO;
+    }
+    
+    evt.preventDefault();
+    return YES;
+  },
+  
+  touchEnd: function(touch){
+    this._touch_exited = NO;
+    this.set('isActive', NO); // track independently in case isEnabled has changed
+
+    if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
+      if (this.touchIsInBoundary(touch)) this._action();
+    }
+    
+    touch.preventDefault();
+    return YES ;
   },
   
   
@@ -454,15 +496,18 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   /** @private */
   _runAction: function(evt) {
     var action = this.get('action'),
-        target = this.get('target') || null;
+        target = this.get('target') || null,
+        rootResponder = this.getPath('pane.rootResponder');
 
     if (action) {
       if (this._hasLegacyActionHandler()) {
-        // old school... 
+        // old school... V
         this._triggerLegacyActionHandler(evt);
       } else {
-        // newer action method + optional target syntax...
-        this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
+        if (rootResponder) {
+          // newer action method + optional target syntax...
+          rootResponder.sendAction(action, target, this, this.get('pane'));
+        }
       }
     }
   },
@@ -543,4 +588,25 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   }
   
 }) ;
+
+// ..........................................................
+// CONSTANTS
+//
+SC.TOGGLE_BEHAVIOR = 'toggle';
+SC.PUSH_BEHAVIOR =   'push';
+SC.TOGGLE_ON_BEHAVIOR = 'on';
+SC.TOGGLE_OFF_BEHAVIOR = 'off';
+SC.HOLD_BEHAVIOR = 'hold';
+
+/**
+  The delay after which "click" behavior should transition to "click and hold"
+  behavior. This is used by subclasses such as PopupButtonView and
+  SelectButtonView.
+
+  @constant
+  @type Number
+*/
+SC.ButtonView.CLICK_AND_HOLD_DELAY = 300;
+
+SC.REGULAR_BUTTON_HEIGHT=24;
 

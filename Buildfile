@@ -31,9 +31,11 @@ config :runtime,    :required => []
 config :foundation, :required => [:runtime]
 config :datastore,  :required => [:runtime]
 config :statechart, :required => [:runtime]
+config :desktop,    :required => [:foundation]
+config :media,      :required => [:desktop]
 
 # APP-LEVEL FRAMEWORKS
-%w(desktop mobile designer media).each do |app_framework|
+%w(mobile designer).each do |app_framework|
   config app_framework, :required => [:runtime, :datastore, :foundation]
 end
 
@@ -43,7 +45,7 @@ config :mobile,
 
 # WRAPPER FRAMEWORKS
 config :designer, :required => [:runtime, :foundation]
-config :sproutcore, :required => :desktop
+config :sproutcore, :required => [:desktop, :datastore]
 config :mini, :required => [:runtime, :datastore]
 
 

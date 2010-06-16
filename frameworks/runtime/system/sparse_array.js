@@ -19,10 +19,10 @@ sc_require('mixins/delegate_support') ;
   array up front and paying the cost to load your data then.
   
   Although technically all arrays in JavaScript are "sparse" (in the sense 
-  that you can read and write properties are arbitrary indexes), this array
+  that you can read and write properties at arbitrary indexes), this array
   keeps track of which elements in the array have been populated already 
   and which ones have not.  If you try to get a value at an index that has 
-  not yet been populated, the SparseArray will notify a delegate object first
+  not yet been populated, the SparseArray will notify a delegate object first,
   giving the delegate a chance to populate the component.
   
   Most of the time, you will use a SparseArray to incrementally load data 

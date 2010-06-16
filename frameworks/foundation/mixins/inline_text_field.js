@@ -100,9 +100,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   beginEditing: function(options) {
 
     // options are required
-//@if(debug)
-    if (!options) throw "InlineTextFiedl.beginEditing() requires options";
-//@end
+    //@if(debug)
+    if (!options) throw "InlineTextField.beginEditing() requires options";
+    //@end
 
     // can't begin editing again if already editing
     if (this.get('isEditing')) return NO ;
@@ -111,13 +111,18 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
     del = this._delegate = options.delegate ;
     this.set('delegate', this._delegate);
-
-    // continue only if the delegate allows it
-    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldBeginEditing', this)) return NO;
     
+    // continue only if the delegate allows it
+    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldBeginEditing', this)) {
+      //@if(debug)
+      SC.Logger.warn('InlineTextField.beginEditing() cannot begin without inlineEditorShouldBeginEditing() on the delegate.');
+      //@end
+      return NO;
+    }
     this.beginPropertyChanges();
     
     this.set('isEditing', YES) ;
+    this.set('escapeHTML', options.escapeHTML) ;
     
     this._optframe = options.frame ;
     this._optIsCollection = options.isCollection;
@@ -140,8 +145,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.set('validator', options.validator) ;
     this.set('value', this._originalValue) ;
     //this.set('selectedRange', options.selectedRange || { start: this._originalValue.length, length: 0 }) ;
-
-    
     
     // add to window.
     
@@ -219,7 +222,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     @returns {Boolean}
   */
   discardEditing: function() {
-    return this._endEditing(this._originalValue) ;
+    return this._endEditing(this._originalValue, null, YES) ;
   },
   
   /**
@@ -235,20 +238,26 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   
   /** @private
     Called by commitEditing and discardEditing to actually end editing.
-
+    
+    @param {String} finalValue that will be set as value
     @param {Event} evt that triggered the end editing to occur
+    @param {Boolean} didDiscard if called from discardEditing
     @returns {Boolean} NO if editing did not exit
   */
-  _endEditing: function(finalValue, evt) {
+  _endEditing: function(finalValue, evt, didDiscard) {
     if (!this.get('isEditing')) return YES ;
     
     // get permission from the delegate.
     var del = this._delegate ;
-    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldEndEditing', this, finalValue, evt)) return NO ; 
-
+    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldEndEditing', this, finalValue, evt, didDiscard)) {
+      //@if(debug)
+      SC.Logger.warn('InlineTextField._endEditing() cannot end without inlineEditorShouldEndEditing() on the delegate.');
+      //@end
+      return NO;
+    }
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
-    this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue, evt) ;
+    this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue, evt, didDiscard) ;
 
     // If the delegate set a class name, let's clean it up:
     if(this._className) this.setClassName(this._className, false);

@@ -23,6 +23,8 @@ sc_require('views/button');
 SC.SelectButtonView = SC.ButtonView.extend(
 /** @scope SC.SelectButtonView.prototype */ {
 
+  escapeHTML: YES,
+
   /**
     An array of items that will be form the menu you want to show.
 
@@ -407,7 +409,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
       }
 
       //Check if item is enabled
-      itemEnabled = object[isEnabledKey] ;
+      itemEnabled = (isEnabledKey) ? (object.get ?
+      object.get(isEnabledKey) : object[isEnabledKey]) : object ;
+      
       if(NO !== itemEnabled) itemEnabled = YES ;
 
       //Set the first item from the list as default selected item
@@ -424,12 +428,11 @@ SC.SelectButtonView = SC.ButtonView.extend(
         isEnabled: itemEnabled,
         checkbox: isChecked,
         target: this,
-        action: this.displaySelectedItem
+        action: 'displaySelectedItem'
       }) ;
 
       //Set the items in the itemList array
       itemList.push(item);
-
     }
 
     idx += 1 ;
@@ -472,7 +475,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
-      customMenuView, menu, itemsLength;
+      customMenuView, menu, itemsLength, dummyMenuItemView, menuItemViewEscapeHTML;
 
     buttonLabel = this.$('.sc-button-label')[0] ;
 
@@ -518,13 +521,15 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
     className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
 
+    dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
+    menuItemViewEscapeHTML = dummyMenuItemView.get('escapeHTML') ;
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
       item = items.objectAt(idx) ;
       element = document.createElement('div') ;
       element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
       element.className = className ;
-      element.innerHTML = item.title ;
+      element.innerHTML = menuItemViewEscapeHTML ? SC.RenderContext.escapeHTML(item.title) : item.title ;
       document.body.appendChild(element) ;
       elementOffsetWidth = element.offsetWidth + customViewMenuOffsetWidth;
 
@@ -533,16 +538,15 @@ SC.SelectButtonView = SC.ButtonView.extend(
       }
       document.body.removeChild(element) ;
     }
-
-    lastMenuWidth = (largestMenuWidth > lastMenuWidth) ?
+    largestMenuWidth = (largestMenuWidth > lastMenuWidth) ?
                       largestMenuWidth: lastMenuWidth ;
 
     // Get the window size width and compare with the lastMenuWidth.
     // If it is greater than windows width then reduce the maxwidth by 25px
     // so that the ellipsis property is enabled by default
     var maxWidth = SC.RootResponder.responder.get('currentWindowSize').width;
-    if(lastMenuWidth > maxWidth) {
-      lastMenuWidth = (maxWidth - 25) ;
+    if(largestMenuWidth > maxWidth) {
+      largestMenuWidth = (maxWidth - 25) ;
     }
 
     this.set('lastMenuWidth',lastMenuWidth) ;
@@ -565,7 +569,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       isEnabled: YES,
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
-      layout: { width: lastMenuWidth },
+      layout: { width: largestMenuWidth },
       controlSize: menuControlSize,
       itemWidth: lastMenuWidth
     }) ;
@@ -588,11 +592,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   */
   displaySelectedItem: function(menuView) {
-    var currentItem = menuView.get('selectedItem');
+    var currentItem = this.getPath('menu.selectedItem');
+    if (!currentItem) return NO;
 
     this.set('value', currentItem.get('value')) ;
     this.set('title', currentItem.get('title')) ;
     this.set('itemIdx', currentItem.get('contentIndex')) ;
+
+    return YES;
   },
 
   /**
@@ -652,10 +659,26 @@ SC.SelectButtonView = SC.ButtonView.extend(
     if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
-    this._mouseDownTimestamp = evt.timeStamp;
     this.becomeFirstResponder() ;
     this._action() ;
+
+    // Store the current timestamp. We register the timestamp at the end of
+    // the runloop so that the menu has been rendered, in case that operation
+    // takes more than a few hundred milliseconds.
+
+    // One mouseUp, we'll use this value to determine how long the mouse was
+    // pressed.
+    this.invokeLast(this._recordMouseDownTimestamp);
     return YES ;
+  },
+
+  /** @private
+    Records the current timestamp. This is invoked at the end of the runloop
+    by mouseDown. We use this value to determine the delay between mouseDown
+    and mouseUp.
+  */
+  _recordMouseDownTimestamp: function() {
+    this._menuRenderedTimestamp = new Date().getTime();
   },
 
   /** @private
@@ -675,26 +698,42 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @returns {Boolean}
   */
   mouseUp: function(evt) {
-    var menu = this.get('menu'), targetMenuItem, success;
+    var timestamp = new Date().getTime(),
+        previousTimestamp = this._menuRenderedTimestamp,
+        menu = this.get('menu'),
+        touch = SC.platform.touch,
+        targetMenuItem;
 
     if (menu) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
 
-      if (targetMenuItem && menu.get('mouseHasEntered')) {
+      if (targetMenuItem && targetMenuItem.get('mouseHasEntered')) {
         // Have the menu item perform its action.
         // If the menu returns NO, it had no action to
         // perform, so we should close the menu immediately.
         if (!targetMenuItem.performAction()) menu.remove();
-      } else {
-        // If the user waits more than 200ms between mouseDown and mouseUp,
-        // we can assume that they are clicking and dragging to the menu item,
-        // and we should close the menu if they mouseup anywhere not inside
-        // the menu.
-        if (evt.timeStamp - this._mouseDownTimestamp > 400) {
+      } else if (!touch && (timestamp - previousTimestamp > SC.ButtonView.CLICK_AND_HOLD_DELAY)) {
+        // If the user waits more than a certain length of time between
+        // mouseDown and mouseUp, we can assume that they are clicking and
+        // dragging to the menu item, and we should close the menu if they
+        // mouseup anywhere not inside the menu.
+
+        // As a special case, we should trigger an action on the currently
+        // selected menu item if the menu item is under the mouse and the user
+        // never moved their mouse before mouseup.
+        if (!menu.get('mouseHasEntered') && !this.get('isDefaultPosition')) {
+          targetMenuItem = menu.get('currentMenuItem');
+          if (targetMenuItem && !targetMenuItem.performAction()) {
+            menu.remove();
+          }
+        } else {
+          // Otherwise, just remove the menu because no selection
+          // has been made.
           menu.remove();
         }
       }
     }
+
 
     // Reset state.
     this._isMouseDown = NO;
@@ -743,13 +782,13 @@ SC.SelectButtonView = SC.ButtonView.extend(
   acceptsFirstResponder: function() {
     return this.get('isEnabled');
   }.property('isEnabled'),
-  
+
   /** @private
     Override the button isSelectedDidChange function in order to not perform any action
     on selecting the select_button
   */
   _button_isSelectedDidChange: function() {
-    
+
   }.observes('isSelected')
 
 }) ;

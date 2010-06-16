@@ -27,8 +27,8 @@ SC.mixin( /** @scope SC */ {
     download also.
   */
   download: function(path) {
-    var tempDLIFrame=document.createElement('iframe');
-    var frameId = 'DownloadFrame_' + this._downloadFrames;
+    var tempDLIFrame=document.createElement('iframe'),
+        frameId = 'DownloadFrame_' + this._downloadFrames;
     SC.$(tempDLIFrame).attr('id',frameId);
     tempDLIFrame.style.border='10px';
     tempDLIFrame.style.width='0px';
@@ -211,7 +211,12 @@ SC.mixin( /** @scope SC */ {
     @returns {String} A string representation of the rect.
   */
   stringFromRect: function(r) {
-    return '{x:'+r.x+', y:'+r.y+', width:'+r.width+', height:'+r.height+'}';
+    if (!r) {
+      return "(null)";
+    }
+    else {
+      return '{x:'+r.x+', y:'+r.y+', width:'+r.width+', height:'+r.height+'}';
+    }
   },
   
   /**
@@ -240,12 +245,11 @@ SC.mixin( /** @scope SC */ {
     // quickly.
     var keys = ['maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'centerY',
                 'centerX', 'width', 'height', 'bottom', 'right', 'top',
-                'left'];
-
-    var keyValues = [];
-    var i = keys.length;
+                'left'],
+        keyValues = [], key,
+        i = keys.length;
     while (--i >= 0) {
-      var key = keys[i];
+      key = keys[i];
       if (layout.hasOwnProperty(key)) {
         keyValues.push(key + ':' + layout[key]);
       }
@@ -280,10 +284,11 @@ SC.mixin( /** @scope SC */ {
     }
 
     style = style+'; width: '+width+'px; left: '+(-1*width)+'px; position: absolute';
-    SC.$(elem).attr('style', style);
+    var cqElem = SC.$(elem);
+    cqElem.attr('style', style);
 
     if (classes !== '') {
-      SC.$(elem).attr('class', classes);
+      cqElem.attr('class', classes);
     }
 
     elem.innerHTML = str;
@@ -458,12 +463,12 @@ SC.mixin( /** @scope SC */ {
       return { x:boundingRect.left, y:boundingRect.top };
     }
     
-    var valueL = 0 ; var valueT = 0;
-
+    var valueL = 0, valueT = 0, cqElement, overflow, left, top, offsetParent,
+        element = el, isFirefox3 = SC.browser.mozilla >= 3 ;
     // add up all the offsets for the element.
-    var element = el ;
-    var isFirefox3 = SC.browser.mozilla >= 3 ;
+   
     while (element) {
+      cqElement = SC.$(element);
       valueT += (element.offsetTop  || 0);
       if (!isFirefox3 || (element !== el)) {
         valueT += (element.clientTop  || 0);
@@ -477,10 +482,10 @@ SC.mixin( /** @scope SC */ {
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset. 
       if (SC.browser.mozilla) {
-        var overflow = SC.$(element).attr('overflow') ;
+        overflow = cqElement.attr('overflow') ;
         if (overflow !== 'visible') {
-          var left = parseInt(SC.$(element).attr('borderLeftWidth'),0) || 0 ;
-          var top = parseInt(SC.$(element).attr('borderTopWidth'),0) || 0 ;
+          left = parseInt(cqElement.attr('borderLeftWidth'),0) || 0 ;
+          top = parseInt(cqElement.attr('borderTopWidth'),0) || 0 ;
           if (el !== element) {
             left *= 2; top *= 2 ;
           }
@@ -489,7 +494,7 @@ SC.mixin( /** @scope SC */ {
         
         // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
         // clientLeft of the offset parent.
-        var offsetParent = element.offsetParent ;
+        offsetParent = element.offsetParent ;
         if (SC.browser.mozilla.match(/1[.]9/) && offsetParent) {
           valueT -= offsetParent.clientTop ;
           valueL -= offsetParent.clientLeft;
@@ -498,7 +503,7 @@ SC.mixin( /** @scope SC */ {
 
       // Safari fix
       if (element.offsetParent == document.body &&
-        SC.$(element).attr('position') == 'absolute') break;
+        cqElement.attr('position') === 'absolute') break;
 
       element = element.offsetParent ;
 
@@ -506,7 +511,7 @@ SC.mixin( /** @scope SC */ {
 
     element = el;
     while (element) {
-      if (!SC.browser.isOpera || element.tagName == 'BODY') {
+      if (!SC.browser.isOpera || element.tagName === 'BODY') {
         valueT -= element.scrollTop  || 0;
         valueL -= element.scrollLeft || 0;
       }
@@ -542,8 +547,8 @@ SC.mixin( /** @scope SC */ {
     if ((r1 == null) || (r1.length < 0)) return r2 ;
     if ((r2 == null) || (r2.length < 0)) return r1 ;
     
-    var min = Math.min(r1.start, r2.start) ;
-    var max = Math.max(SC.maxRange(r1), SC.maxRange(r2)) ;
+    var min = Math.min(r1.start, r2.start),
+        max = Math.max(SC.maxRange(r1), SC.maxRange(r2)) ;
     return { start: min, length: max - min } ;
   },
   
@@ -551,8 +556,8 @@ SC.mixin( /** @scope SC */ {
   intersectRanges: function(r1, r2) {
     if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
     if ((r1.length < 0) || (r2.length < 0)) return SC.RANGE_NOT_FOUND;
-    var min = Math.max(SC.minRange(r1), SC.minRange(r2)) ;
-    var max = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
+    var min = Math.max(SC.minRange(r1), SC.minRange(r2)),
+        max = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
     if (max < min) return SC.RANGE_NOT_FOUND ;
     return { start: min, length: max-min };
   },
@@ -561,8 +566,8 @@ SC.mixin( /** @scope SC */ {
   subtractRanges: function(r1, r2) {
     if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
     if ((r1.length < 0) || (r2.length < 0)) return SC.RANGE_NOT_FOUND;
-    var max = Math.max(SC.minRange(r1), SC.minRange(r2)) ;
-    var min = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
+    var max = Math.max(SC.minRange(r1), SC.minRange(r2)),
+        min = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
     if (max < min) return SC.RANGE_NOT_FOUND ;
     return { start: min, length: max-min };
   },
@@ -584,17 +589,15 @@ SC.mixin( /** @scope SC */ {
 
   /** Returns hex color from hsv value */
   convertHsvToHex: function (h, s, v) {
-    var r = 0;
-    var g = 0;
-    var b = 0;
+    var r = 0, g = 0, b = 0;
 
     if (v > 0) {
-      var i = (h == 1) ? 0 : Math.floor(h * 6);
-      var f = (h == 1) ? 0 : (h * 6) - i;
-      var p = v * (1 - s);
-      var q = v * (1 - (s * f));
-      var t = v * (1 - (s * (1 - f)));
-      var rgb = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]];
+      var i = (h == 1) ? 0 : Math.floor(h * 6),
+          f = (h == 1) ? 0 : (h * 6) - i,
+          p = v * (1 - s),
+          q = v * (1 - (s * f)),
+          t = v * (1 - (s * (1 - f))),
+          rgb = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]];
       r = Math.round(255 * rgb[i][0]);
       g = Math.round(255 * rgb[i][1]);
       b = Math.round(255 * rgb[i][2]);
@@ -604,13 +607,13 @@ SC.mixin( /** @scope SC */ {
 
   /** Returns hsv color from hex value */
   convertHexToHsv: function (hex) {
-    var rgb = this.expandColor(hex);
-    var max = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
-    var min = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
+    var rgb = this.expandColor(hex),
+        max = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]),
+        min = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
 
     var h = (max == min) ? 0 : ((max == rgb[0]) ? ((rgb[1]-rgb[2])/(max-min)/6) : ((max == rgb[1]) ? ((rgb[2]-rgb[0])/(max-min)/6+1/3) : ((rgb[0]-rgb[1])/(max-min)/6+2/3)));
     h = (h < 0) ? (h + 1) : ((h > 1)  ? (h - 1) : h);
-    var s = (max == 0) ? 0 : (1 - min/max);
+    var s = (max === 0) ? 0 : (1 - min/max);
     var v = max/255;
     return [h, s, v];
   },
@@ -676,6 +679,23 @@ SC.mixin( /** @scope SC */ {
   		strValue = oElm.currentStyle[strCssRule];
   	}
   	return strValue;
-  }
+  },
 
+  // Convert double byte characters to standard Unicode. Considers only
+  // conversions from zenkaku to hankaky roomaji
+  uniJapaneseConvert: function (str){ 
+    var nChar, cString= '', j;
+    //here we cycle through the characters in the current value 
+    for (j=0; j<str.length; j++){ 
+      nChar = str.charCodeAt(j);
+
+      //here we do the unicode conversion from zenkaku to hankaku roomaji 
+      nChar = ((nChar>=65281 && nChar<=65392)?nChar-65248:nChar);
+
+      //MS IME seems to put this character in as the hyphen from keyboard but not numeric pad... 
+      nChar = ( nChar===12540?45:nChar) ;
+      cString = cString + String.fromCharCode(nChar); 
+    }
+    return cString; 
+  }
 }) ;

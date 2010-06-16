@@ -123,7 +123,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (!this.get('isEnabled')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;
-    return this._triggerHandle(evt);
+    return this._triggerHandle(evt, true);
   },
   
   // mouseDragged uses same technique as mouseDown.
@@ -168,12 +168,17 @@ SC.SliderView = SC.View.extend(SC.Control,
     Updates the handle based on the mouse location of the handle in the
     event.
   */
-  _triggerHandle: function(evt) {
+  _triggerHandle: function(evt, firstEvent) {
     var width = this.get('frame').width,
         min = this.get('minimum'), max=this.get('maximum'),  
         step = this.get('step'), v=this.get('value'), loc;
         
-    loc = this.convertFrameFromView({ x: evt.pageX }).x;
+    if(firstEvent){    
+      loc = this.convertFrameFromView({ x: evt.pageX }).x;
+      this._evtDiff = evt.pageX - loc;
+    }else{
+      loc = evt.pageX-this._evtDiff;
+    }
     
     // constrain loc to 8px on either side (left to allow knob overhang)
     loc = Math.max(Math.min(loc,width-8), 8) - 8;

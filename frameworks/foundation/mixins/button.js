@@ -326,7 +326,7 @@ SC.Button = {
     // for single values, just compare to the toggleOnValue...use truthiness
     } else {
       if(value === SC.MIXED_STATE) state = SC.MIXED_STATE;
-      else state = (value == targetValue) ;
+      else state = (value === targetValue) ;
     }
     return state ;
   },

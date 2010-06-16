@@ -671,8 +671,13 @@ SC.Object.prototype = {
     
     @returns {void}
   */
-  awake: function(key) { 
-    this.outlets.forEach(function(key) { this.get(key); },this) ;
+  awake: function(key) {
+    var outlets = this.outlets,
+        i, len, outlet;
+    for (i = 0, len = outlets.length;  i < len;  ++i) {
+      outlet = outlets[i];
+      this.get(outlet);
+    }
     this.bindings.invoke('sync'); 
   },
 

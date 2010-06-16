@@ -40,8 +40,8 @@ SC.Validator.Number = SC.Validator.extend(
   },
 
   objectForFieldValue: function(value, form, field) {
-    
     // strip out commas
+    var result;
     value = value.replace(/,/g,'');
     switch(SC.typeOf(value)) {
       case SC.T_STRING:
@@ -51,7 +51,14 @@ SC.Validator.Number = SC.Validator.extend(
           value = parseFloat(value) ;
         } else {
           if(value.length==1 && value.match(/-/)) value = null;
-          else value = parseInt(value,0) ;
+          else {
+            result = parseInt(value,0) ;
+            if(isNaN(result)){
+              value = SC.uniJapaneseConvert(value);
+              value = parseInt(value,0) ;
+              if(isNaN(value)) value='';
+            }else value = result;
+          }
         }
         break ;
       case SC.T_NULL:

@@ -597,34 +597,27 @@ SC.ListItemView = SC.View.extend(
     return ret ;
   },
   
-  mouseExited: function(evt) {
-   if (this._isMouseDownOnCheckbox) {
-     this._removeCheckboxActiveState() ;
-     this._isMouseInsideCheckbox = NO ;
-     
-   } else if (this._isMouseDownOnDisclosure) {
-     this._removeDisclosureActiveState();
-     this._isMouseInsideDisclosure = NO ;
-   } else if (this._isMouseDownOnRightIcon) {
-     this._removeRightIconActiveState();
-     this._isMouseInsideRightIcon = NO ;
-   }
-   return NO ;
-  },
-  
-  mouseEntered: function(evt) {
-   if (this._isMouseDownOnCheckbox) {
-     this._addCheckboxActiveState() ;
-     this._isMouseInsideCheckbox = YES ;
-     
-   } else if (this._isMouseDownOnDisclosure) {
-     this._addDisclosureActiveState();
-     this._isMouseInsideDisclosure = YES;
-   } else if (this._isMouseDownOnRightIcon) {
-     this._addRightIconActiveState();
-     this._isMouseInsideRightIcon = YES;
-   }
-   return NO ;
+  mouseMoved: function(evt) {
+    if (this._isMouseDownOnCheckbox && this._isInsideCheckbox(evt)) {
+      this._addCheckboxActiveState() ;
+      this._isMouseInsideCheckbox = YES ;
+    } else if (this._isMouseDownOnCheckbox) {
+      this._removeCheckboxActiveState() ;
+      this._isMouseInsideCheckbox = NO ;
+    } else if (this._isMouseDownOnDisclosure && this._isInsideDisclosure(evt)) {
+      this._addDisclosureActiveState();
+      this._isMouseInsideDisclosure = YES;
+    } else if (this._isMouseDownOnDisclosure) {
+      this._removeDisclosureActiveState();
+      this._isMouseInsideDisclosure = NO ;
+    } else if (this._isMouseDownOnRightIcon && this._isInsideRightIcon(evt)) {
+      this._addRightIconActiveState();
+      this._isMouseInsideRightIcon = YES;
+    } else if (this._isMouseDownOnRightIcon) {
+      this._removeRightIconActiveState();
+      this._isMouseInsideRightIcon = NO ;
+    }
+    return NO ;
   },
   
   touchStart: function(evt){
@@ -645,29 +638,29 @@ SC.ListItemView = SC.View.extend(
   
   
   _addCheckboxActiveState: function() {
-   var enabled = this.get('isEnabled');
-   this.$('.sc-checkbox-view').setClass('active', enabled);
+    var enabled = this.get('isEnabled');
+    this.$('.sc-checkbox-view').setClass('active', enabled);
   },
   
   _removeCheckboxActiveState: function() {
-   this.$('.sc-checkbox-view').removeClass('active');
+    this.$('.sc-checkbox-view').removeClass('active');
   },
 
   _addDisclosureActiveState: function() {
-   var enabled = this.get('isEnabled');
-   this.$('img.disclosure').setClass('active', enabled);
+    var enabled = this.get('isEnabled');
+    this.$('img.disclosure').setClass('active', enabled);
   },
   
   _removeDisclosureActiveState: function() {
-   this.$('img.disclosure').removeClass('active');
+    this.$('img.disclosure').removeClass('active');
   },
 
   _addRightIconActiveState: function() {
-   this.$('img.right-icon').setClass('active', YES);
+    this.$('img.right-icon').setClass('active', YES);
   },
   
   _removeRightIconActiveState: function() {
-   this.$('img.right-icon').removeClass('active');
+    this.$('img.right-icon').removeClass('active');
   },
   
   /**
@@ -681,22 +674,22 @@ SC.ListItemView = SC.View.extend(
     @returns {Boolean} YES if the mouse was on the content element itself.
   */
   contentHitTest: function(evt) {
-   // if not content value is returned, not much to do.
-   var del = this.displayDelegate ;
-   var labelKey = this.getDelegateProperty('contentValueKey', del) ;
-   if (!labelKey) return NO ;
-   
-   // get the element to check for.
-   var el = this.$label()[0] ;
-   if (!el) return NO ; // no label to check for.
-   
-   var cur = evt.target, layer = this.get('layer') ;
-   while(cur && (cur !== layer) && (cur !== window)) {
-     if (cur === el) return YES ;
-     cur = cur.parentNode ;
-   }
-   
-   return NO;
+    // if not content value is returned, not much to do.
+    var del = this.displayDelegate ;
+    var labelKey = this.getDelegateProperty('contentValueKey', del) ;
+    if (!labelKey) return NO ;
+
+    // get the element to check for.
+    var el = this.$label()[0] ;
+    if (!el) return NO ; // no label to check for.
+
+    var cur = evt.target, layer = this.get('layer') ;
+    while(cur && (cur !== layer) && (cur !== window)) {
+      if (cur === el) return YES ;
+      cur = cur.parentNode ;
+    }
+
+    return NO;
   },
   
   beginEditing: function() {
@@ -713,7 +706,7 @@ SC.ListItemView = SC.View.extend(
         pf        = parent ? parent.get('frame') : null,
         el        = this.$label(),
         validator = this.get('validator'),
-        f, v, offset, oldLineHeight, fontSize, top, lineHeight, 
+        f, v, offset, oldLineHeight, fontSize, top, lineHeight, escapeHTML,
         lineHeightShift, targetLineHeight, ret ;
 
     // if possible, find a nearby scroll view and scroll into view.
@@ -732,11 +725,10 @@ SC.ListItemView = SC.View.extend(
     // nothing to do...    
     if (!parent || !el || el.get('length')===0) return NO ;
     v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
-
-
+    
     f = this.computeFrameWithParentFrame(null);
     offset = SC.viewportOffset(el[0]);
-
+    
     // if the label has a large line height, try to adjust it to something
     // more reasonable so that it looks right when we show the popup editor.
     oldLineHeight = el.css('lineHeight');
@@ -762,6 +754,8 @@ SC.ListItemView = SC.View.extend(
     f.height = el[0].offsetHeight ;
     f.width = el[0].offsetWidth ;
 
+    escapeHTML = this.get('escapeHTML');
+
     ret = SC.InlineTextFieldView.beginEditing({
       frame: f, 
       exampleElement: el, 
@@ -769,7 +763,8 @@ SC.ListItemView = SC.View.extend(
       value: v,
       multiline: NO,
       isCollection: YES,
-      validator: validator
+      validator: validator,
+      escapeHTML: escapeHTML
     }) ;
 
     // restore old line height for original item if the old line height 
@@ -816,6 +811,10 @@ SC.ListItemView = SC.View.extend(
   /** @private
    Could check with a validator someday...
   */
+  inlineEditorShouldBeginEditing: function(inlineEditor, finalValue) {
+    return YES ;
+  },
+
   inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
    return YES ;
   },

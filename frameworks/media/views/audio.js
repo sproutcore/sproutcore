@@ -105,32 +105,6 @@ SC.AudioView = SC.View.extend({
   
   loadedTimeRanges:[], //loaded bits
   
-  mediaControl: 'mini', //support normal, mini, none
-  
-  
-  init: function() {
-    var controls = this.get('mediaControl');
-    if(controls==='normal'){
-      this.childViews='normal'.w();
-    }
-    if(controls==='mini'){
-      this.childViews='mini'.w();
-    } 
-    sc_super();
-    var controlsView = this.get('childViews')[0];
-    if(controlsView) this.appendChild(controlsView);
-  },
-  
-  normal: SC.MediaControlsView.design({
-     layout: { bottom:0, left: 0, right: 0, height: 20 },
-     targetBinding: '*parentView'
-   }),
-
-   mini: SC.MiniMediaControlsView.design({
-     layout: { bottom:0, left: 0, right: 0, height: 20 },
-     targetBinding: '*parentView'
-   }),
-  
   /** 
     Formatted currentTime. (00:00)
     @property {String}
@@ -140,7 +114,7 @@ SC.AudioView = SC.View.extend({
         totaltimeInSecs = this.get('duration');
     var formattedTime = this._addZeros(Math.floor(currentTime/60))+':'+this._addZeros(Math.floor(currentTime%60))+"/"+this._addZeros(Math.floor(totaltimeInSecs/60))+':'+this._addZeros(Math.floor(totaltimeInSecs%60));
     return formattedTime;
-  }.property('currentTime').cacheable(),
+  }.property('currentTime', 'duration').cacheable(),
   
   /** 
     Renders the appropiate HTML according for the technology to use.
@@ -155,9 +129,12 @@ SC.AudioView = SC.View.extend({
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
-          if(SC.browser.safari){
-            context.push('<audio src="'+this.get('value')+
-                          '" poster="'+this.poster+'"/>');
+          if(SC.browser.safari){                          
+            context.push('<audio src="'+this.get('value')+'"');
+            if(this.poster){
+              context.push(' poster="'+this.poster+'"');
+            }
+            context.push('/>');
             this.loaded='html5';
             return;
           }
@@ -249,6 +226,17 @@ SC.AudioView = SC.View.extend({
     }
   },
 
+  valueObserver:function(){
+    this.set('currentTime', 0); 
+    this.set('duration', 0); 
+    this.set('volume', 0); 
+    this.set('paused', YES); 
+    this.set('loaded', NO); 
+    this.set('ended', NO); 
+    this.set('canPlay', NO); 
+    this.set('loadedTimeRanges', []); 
+    this.replaceLayer();
+  }.observes('value'),
   
   /** 
     In didCreateLayer we add DOM events for audio tag or quicktime.
@@ -281,16 +269,19 @@ SC.AudioView = SC.View.extend({
     this.set('audioObject', audioElem);
     SC.Event.add(audioElem, 'durationchange', this, function () {
       SC.RunLoop.begin();
+      console.log('durationchange');
       view.set('duration', audioElem.duration);
       SC.RunLoop.end();
     }) ;
     SC.Event.add(audioElem, 'timeupdate', this, function () {
       SC.RunLoop.begin();
+      console.log('currenttime');
       view.set('currentTime', audioElem.currentTime);
       SC.RunLoop.end();
     }) ;
     SC.Event.add(audioElem, 'loadstart', this, function () {
       SC.RunLoop.begin();
+      console.log('volume');
       view.set('volume', audioElem.volume);
       SC.RunLoop.end();
     });     
@@ -313,6 +304,7 @@ SC.AudioView = SC.View.extend({
        
     SC.Event.add(audioElem, 'canplay', this, function () {
       SC.RunLoop.begin();
+      console.log('canplay');
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });     
@@ -426,59 +418,58 @@ SC.AudioView = SC.View.extend({
      @returns {void}
    */
   addQTDOMEvents: function() {
-    var vid=this._getAudioObject(),
+    var media=this._getAudioObject(),
         audioElem = this.$()[0],
         view=this,
         dimensions;
     try{
-      vid.GetVolume();
+      media.GetVolume();
     }catch(e){
       console.log('loaded fail trying later');
       this.invokeLater(this.didAppendToDocument, 100);
       return;
     }
-    this.set('audioObject', vid);
-    view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-    view.set('volume', vid.GetVolume()/256);
-    dimensions=vid.GetRectangle().split(',');
-    // view.set('audioWidth', dimensions[2]);
-    //     view.set('audioHeight', dimensions[3]);
+    this.set('audioObject', media);
+    view.set('duration', media.GetDuration()/media.GetTimeScale());
+    view.set('volume', media.GetVolume()/256);
     
     SC.Event.add(audioElem, 'qt_durationchange', this, function () {
       SC.RunLoop.begin();
-      view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+      console.log('qtdurationchange');
+      view.set('duration', media.GetDuration()/media.GetTimeScale());
       SC.RunLoop.end();
     });
     SC.Event.add(audioElem, 'qt_begin', this, function () {
       SC.RunLoop.begin();
-      view.set('volume', vid.GetVolume()/256);
+      console.log('qtbegin');
+      view.set('volume', media.GetVolume()/256);
       SC.RunLoop.end();
     });
     SC.Event.add(audioElem, 'qt_loadedmetadata', this, function () {
       SC.RunLoop.begin();
-      view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-      // var dimensions=vid.GetRectangle().split(',');
-      //       view.set('audioWidth', dimensions[2]);
-      //       view.set('audioHeight', dimensions[3]);
+      console.log('qtloadedmetadata');
+      view.set('duration', media.GetDuration()/media.GetTimeScale());
       SC.RunLoop.end();
     });
     SC.Event.add(audioElem, 'qt_canplay', this, function () {
       SC.RunLoop.begin();
+      console.log('qtcanplay');
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });
     
     SC.Event.add(audioElem, 'qt_ended', this, function () {
+      console.log('qtended');
       view.set('ended', YES);
     });
     SC.Event.add(audioElem, 'qt_pause', this, function () {
       SC.RunLoop.begin();
-      view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      view.set('currentTime', media.GetTime()/media.GetTimeScale());
       view.set('paused', YES);
     });
     SC.Event.add(audioElem, 'qt_play', this, function () {
       SC.RunLoop.begin();
-      view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      view.set('currentTime', media.GetTime()/media.GetTimeScale());
       view.set('paused', NO);
     });
     // SC.Event.add(audioElem, 'qt_loadedfirstframe', this, function () {
@@ -507,7 +498,7 @@ SC.AudioView = SC.View.extend({
     //     });
     // SC.Event.add(audioElem, 'qt_timechanged', this, function () {
       // SC.RunLoop.begin();
-      //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      //         view.set('currentTime', media.GetTime()/media.GetTimeScale());
       //         console.log('qt_timechanged');
       //         view.updateTime();
       //         SC.RunLoop.end();
@@ -522,7 +513,7 @@ SC.AudioView = SC.View.extend({
 
      @returns {void}
    */
-  qtTimer:function(){
+  _qtTimer:function(){
     if(this.loaded==='quicktime' && !this.get('paused')){
       this.incrementProperty('currentTime');
       this.invokeLater(this._qtTimer, 1000);
@@ -536,15 +527,15 @@ SC.AudioView = SC.View.extend({
     @returns {void}
   */
   seek:function(){
-    var timeInSecs, totaltimeInSecs, formattedTime, vid=this._getAudioObject();
+    var timeInSecs, totaltimeInSecs, formattedTime, media=this._getAudioObject();
     if(this.loaded==='html5'){
-      if(this.get('paused')) vid.currentTime=this.get('currentTime');
+      if(this.get('paused')) media.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
-      if(this.get('paused')) vid.SetTime(this.get('currentTime')*vid.GetTimeScale());
+      if(this.get('paused')) media.SetTime(this.get('currentTime')*media.GetTimeScale());
     }
     if(this.loaded==='flash'){
-      if(this.get('paused')) vid.setTime(this.get('currentTime'));
+      if(this.get('paused')) media.setTime(this.get('currentTime'));
     }
   }.observes('currentTime'),
   
@@ -583,10 +574,10 @@ SC.AudioView = SC.View.extend({
     @returns {void}
   */
   setVolume:function(){
-    var vid=this._getAudioObject();
-    if(this.loaded==="html5") vid.volume=this.get('volume');
-    if(this.loaded==="quicktime") vid.SetVolume(this.get('volume')*256);
-    if(this.loaded==="flash") vid.setVolume(this.get('volume'));
+    var media=this._getAudioObject();
+    if(this.loaded==="html5") media.volume=this.get('volume');
+    if(this.loaded==="quicktime") media.SetVolume(this.get('volume')*256);
+    if(this.loaded==="flash") media.setVolume(this.get('volume'));
   }.observes('volume'),
   
   /** 
@@ -594,10 +585,10 @@ SC.AudioView = SC.View.extend({
     @returns {void}
   */
   play: function(){
-    var vid=this._getAudioObject();
-    if(this.loaded==="html5") vid.play();
-    if(this.loaded==="quicktime") vid.Play();
-    if(this.loaded==="flash") vid.playVideo();
+    var media=this._getAudioObject();
+    if(this.loaded==="html5") media.play();
+    if(this.loaded==="quicktime") media.Play();
+    if(this.loaded==="flash") media.playVideo();
     this.set('paused', NO);
   },
   
@@ -606,10 +597,10 @@ SC.AudioView = SC.View.extend({
     @returns {void}
   */
   stop: function(){
-    var vid=this._getAudioObject();
-    if(this.loaded==="html5")  vid.pause();
-    if(this.loaded==="quicktime")  vid.Stop();
-    if(this.loaded==="flash")  vid.pauseVideo();
+    var media=this._getAudioObject();
+    if(this.loaded==="html5")  media.pause();
+    if(this.loaded==="quicktime")  media.Stop();
+    if(this.loaded==="flash")  media.pauseVideo();
     this.set('paused', YES);
   },
   
@@ -714,3 +705,25 @@ SC.AudioView.updateProperty = function(scid, property, value) {
 SC.AudioView.logFlash = function(message) {
   console.log("FLASHLOG: "+message);
 } ;
+
+
+SC.AudioPlayerView = SC.View.extend({
+  classNames: 'sc-audio-view',
+  
+  childViews: 'audioView mini'.w(),
+  
+  value: null,
+  
+  degradeList: null,
+  
+  audioView:SC.AudioView.design({
+    layout: { top: 0, left:0, width:100, height:100},
+    degradeListBinding: '*parentView.degradeList',
+    valueBinding: '*parentView.value'
+  }),
+  
+  mini: SC.MiniMediaControlsView.design({
+     layout: { bottom:0, left: 0, right: 0, height: 20 },
+     targetBinding: '*parentView.audioView'
+   })
+});

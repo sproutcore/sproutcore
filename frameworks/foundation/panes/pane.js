@@ -210,9 +210,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       }
 
       if (!target) target = null;
-      else if (target.isResponderContext) {
-        target = target.sendAction(action, this, evt);
-      } else target = target.tryToPerform(action, evt) ? target : null ;
+      target = target.tryToPerform(action, evt) ? target : null ;
     }
         
     return evt.mouseHandler || target ;
@@ -315,6 +313,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   makeFirstResponder: function(view, evt) {
     var current=this.get('firstResponder'), isKeyPane=this.get('isKeyPane');
     if (current === view) return this ; // nothing to do
+    if (SC.platform.touch && view && view.kindOf(SC.TextFieldView) && !view.get('focused')) return this;
     
     // notify current of firstResponder change
     if (current) current.willLoseFirstResponder(current, evt);
@@ -507,8 +506,11 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // remove layer...
     this.set('isVisibleInWindow', NO);
     var dom = this.get('layer') ;
-    if (dom.parentNode) dom.parentNode.removeChild(dom) ;
+    if (dom && dom.parentNode) dom.parentNode.removeChild(dom) ;
     dom = null ;
+    
+    // remove intercept
+    this._removeIntercept();
     
     // resign keyPane status, if we had it
     this.resignKeyPane();
@@ -647,6 +649,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     //notify that the layers have been appended to the document
     this._notifyDidAppendToDocument();
     
+    // handle intercept if needed
+    this._addIntercept();
     return this ;
   },
   
@@ -657,49 +661,107 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @readOnly
   */
   isPaneAttached: NO,
+  
+  /**
+    If YES, a touch itnercept pane will be added above this pane.
+  */
+  hasTouchIntercept: NO,
+  
+  /**
+    The Z-Index of the pane. Currently, you have to match this in CSS.
+    TODO: ALLOW THIS TO AUTOMATICALLY SET THE Z-INDEX OF THE PANE (as an option).
+  */
+  zIndex: 0,
+  
+  /**
+    The amount over the pane's z-index that the touch intercept should be.
+  */
+  touchZ: 99,
+
+  _addIntercept: function() {
+    if (this.get("hasTouchIntercept") && SC.platform.touch) {
+      this.set("usingTouchIntercept", YES);
+      var div = document.createElement("div");
+      div.style.position = "absolute";
+      div.style.left = "0px";
+      div.style.top = "0px";
+      div.style.right = "0px";
+      div.style.bottom = "0px";
+      div.style.webkitTransform = "translateZ(0px)";
+      div.style.zIndex = this.get("zIndex") + this.get("touchZ");
+      div.className = "touch-intercept";
+      div.id = "touch-intercept-" + SC.guidFor(this);
+      this._touchIntercept = div;
+      document.body.appendChild(div);
+    }
+  },
+  
+  _removeIntercept: function() {
+    if (this._touchIntercept) {
+      document.body.removeChild(this._touchIntercept);
+      this._touchIntercept = null;
+    }
+  },
+  
+  hideTouchIntercept: function() {
+    if (this._touchIntercept) this._touchIntercept.style.display = "none";
+  },
+  
+  showTouchIntercept: function() {
+    if (this._touchIntercept) this._touchIntercept.style.display = "block";
+  },
 
   /**
     Updates the isVisibleInWindow state on the pane and its childViews if 
     necessary.  This works much like SC.View's default implementation, but it
     does not need a parentView to function.
     
-    @param {Boolean} parentViewIsVisible (ignored)
     @returns {SC.Pane} receiver
   */
-  recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    if(this.get('designer') && SC.suppressMain) return sc_super();
-    var last = this.get('isVisibleInWindow'),
-        cur = this.get('isVisible') ;
+  recomputeIsVisibleInWindow: function() {
+    if (this.get('designer') && SC.suppressMain) return sc_super();
+    var previous = this.get('isVisibleInWindow'),
+        current  = this.get('isVisible');
 
-    // if the state has changed, update it and notify children
-    // if (last !== cur) {
-      this.set('isVisibleInWindow', cur) ;
-      this._needsVisibiltyChange = YES ; // update even if we aren't visible      
-      
-      // if we just became visible, update layer + layout if needed...
-      if (cur && this.get('layerNeedsUpdate')) this.updateLayerIfNeeded();
-      if (cur && this.get('childViewsNeedLayout')) this.layoutChildViewsIfNeeded();
+    // If our visibility has changed, then set the new value and notify our
+    // child views to update their value.
+    if (previous !== current) {
+      this.set('isVisibleInWindow', current) ;
       
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
-        childViews[idx].recomputeIsVisibleInWindow(cur);
+        childViews[idx].recomputeIsVisibleInWindow(current);
       }
-      
-      // if we were firstResponder, resign firstResponder also if no longer
-      // visible.
-      if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
-    // }
-    
-    // if we just became visible, update layer + layout if needed...
-    if (cur) {
-      if (this.parentViewDidResize) this.parentViewDidResize();
-      
-      if (this.get('childViewsNeedLayout')) {
-        this.invokeOnce(this.layoutChildViewsIfNeeded);
+
+
+      // We'll also kick off some necessary work when the visibility changes.
+      // This more appropriately belongs in a 'isVisibleInWindow' observer or
+      // some such helper method because this work is not strictly related to
+      // computing the visibility, but view performance is critical, so
+      // avoiding the extra observer is worthwhile.
+      if (current) {
+        // If we just became visible, update layer + layout if needed...
+        this.displayDidChange();
+
+        if (this.get('childViewsNeedLayout')) {
+          this.invokeOnce(this.layoutChildViewsIfNeeded);
+        }
+      }
+      else {
+        // We need to set some internal state to indicate that we went from
+        // visible to invisible.
+        //
+        // (Typically, invisible views are not updated for performance
+        // reasons, but if we went from visible to invisible, we need to
+        // update once.)
+        this._forceLayerUpdateDueToVisibilityChange = YES;
+        this.displayDidChange();
+
+        // Also, if we were previously 'firstResponder', resign it.
+        if (this.get('isFirstResponder')) this.resignFirstResponder();
       }
     }
-    
-    return this ;
+    return this;
   },
   
   /** @private */

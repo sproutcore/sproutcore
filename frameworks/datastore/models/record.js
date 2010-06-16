@@ -193,8 +193,8 @@ SC.Record = SC.Object.extend(
   **/
   readOnlyAttributes: function() {
     var store    = this.get('store'), 
-        storeKey = this.storeKey;
-    var ret      = store.readDataHash(storeKey);
+        storeKey = this.storeKey,
+        ret      = store.readDataHash(storeKey);
     
     if (ret) ret = SC.clone(ret);
 
@@ -238,7 +238,12 @@ SC.Record = SC.Object.extend(
   */
   destroy: function() { 
     this.get('store').destroyRecord(null, null, this.get('storeKey'));
-    this.propertyDidChange('status');
+    this.notifyPropertyChange('status');
+
+    // If there are any aggregate records, we might need to propagate our new
+    // status to them.
+    this.propagateToAggregates();
+
     return this ;
   },
 
@@ -259,6 +264,11 @@ SC.Record = SC.Object.extend(
   recordDidChange: function(key) {
     this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
     this.notifyPropertyChange('status');
+
+    // If there are any aggregate records, we might need to propagate our new
+    // status to them.
+    this.propagateToAggregates();
+
     return this ;
   },
   
@@ -332,8 +342,6 @@ SC.Record = SC.Object.extend(
     var store    = this.get('store'), 
         storeKey = this.storeKey,
         status   = store.peekStatus(storeKey),
-        recordAttr = this[key],
-        recordType = SC.Store.recordTypeFor(storeKey),
         attrs;
     
     attrs = store.readEditableDataHash(storeKey);
@@ -353,12 +361,6 @@ SC.Record = SC.Object.extend(
       
       if(!ignoreDidChange) this.endEditing(key);
     }
-    
-    // if any aggregates, propagate the state
-    if(!recordType.aggregates || recordType.aggregates.length>0) {
-      this.propagateToAggregates();
-    }
-    
     return this ;  
   },
   
@@ -390,30 +392,40 @@ SC.Record = SC.Object.extend(
     
     // now loop through all aggregate properties and mark their related
     // record objects as dirty
-    var K = SC.Record;
+    var K          = SC.Record,
+        dirty      = K.DIRTY,
+        readyNew   = K.READY_NEW,
+        destroyed  = K.DESTROYED,
+        readyClean = K.READY_CLEAN,
+        iter;
+        
+    // If the child is dirty, then make sure the parent gets a dirty
+    // status.  (If the child is created or destroyed, there's no need,
+    // because the parent will dirty itself when it modifies that
+    // relationship.)
+    iter =  function(rec) {
+      var childStatus, parentStatus;
+      
+      if (rec) { 
+        childStatus = this.get('status');
+        if ((childStatus & dirty)  ||  
+            (childStatus & readyNew)  ||  (childStatus & destroyed)) {
+          parentStatus = rec.get('status');
+          if (parentStatus === readyClean) {
+            // Note:  storeDidChangeProperties() won't put it in the
+            //        changelog!
+            rec.get('store').recordDidChange(rec.constructor, null, rec.get('storeKey'), null, YES);
+          }
+        }
+      }
+    };
+        
     for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
       val = this.get(key);
       recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
-      recs.forEach(function(rec) {
-        // If the child is dirty, then make sure the parent gets a dirty
-        // status.  (If the child is created or destroyed, there's no need,
-        // because the parent will dirty itself when it modifies that
-        // relationship.)
-        if (rec) { 
-          var childStatus = this.get('status');
-          if (childStatus & K.DIRTY) {
-            var parentStatus = rec.get('status');
-            if (parentStatus === K.READY_CLEAN) {
-              // Note:  storeDidChangeProperties() won't put it in the
-              //        changelog!
-              rec.get('store').recordDidChange(rec.constructor, null, rec.get('storeKey'), null, YES);
-            }
-          }
-        }
-      }, this);
+      recs.forEach(iter, this);
     }
-    
   },
   
   /**
@@ -426,6 +438,8 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   storeDidChangeProperties: function(statusOnly, keys) {
+    // TODO:  Should this function call propagateToAggregates() at the
+    //        appropriate times?
     if (statusOnly) this.notifyPropertyChange('status');
     else {      
       if (keys) {
@@ -433,7 +447,7 @@ SC.Record = SC.Object.extend(
         keys.forEach(function(k) { this.notifyPropertyChange(k); }, this);
         this.notifyPropertyChange('status'); 
         this.endPropertyChanges();
-        
+
       } else this.allPropertiesDidChange(); 
     
       // also notify manyArrays
@@ -469,7 +483,7 @@ SC.Record = SC.Object.extend(
         store      = this.get('store'), 
         storeKey   = this.get('storeKey'), 
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
-        isChild, defaultVal;
+        isChild, defaultVal, keyForDataHash;
       
     var dataHash = store.readEditableDataHash(storeKey) || {};
     dataHash[primaryKey] = recordId;
@@ -481,16 +495,17 @@ SC.Record = SC.Object.extend(
       if (valueForKey) {
         typeClass = valueForKey.typeClass;
         if (typeClass) {
+          keyForDataHash = valueForKey.get('key') || key; // handle alt keys
           isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
           isChild  = valueForKey.isChildRecordTransform;
           if (!isRecord && !isChild) {
             attrValue = this.get(key);
 
             if(attrValue!==undefined || (attrValue===null && includeNull)) {
-              dataHash[key] = attrValue;
+              dataHash[keyForDataHash] = attrValue;
             }
-          }
-          else if (isChild) {
+          
+          } else if (isChild) {
             attrValue = this.get(key);
 
             // Sometimes a child attribute property does not refer to a child record.
@@ -498,31 +513,28 @@ SC.Record = SC.Object.extend(
             if (attrValue && attrValue.normalize) {
               attrValue.normalize();
             }
-          }
-          else if (isRecord) {
+          } else if (isRecord) {
             attrValue = recHash[key];
             if (attrValue !== undefined) {
               // write value already there
-              dataHash[key] = attrValue;
-            }
-            else {
+              dataHash[keyForDataHash] = attrValue;
+            } else {
               // or write default
               defaultVal = valueForKey.get('defaultValue');
 
               // computed default value
               if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
-                dataHash[key] = defaultVal(this, key, defaultVal);
-              }
-              else {
+                dataHash[keyForDataHash] = defaultVal(this, key, defaultVal);
+              } else {
                 // plain value                
-                dataHash[key] = defaultVal;
+                dataHash[keyForDataHash] = defaultVal;
               }
             }
           }
         }
       }
     }
-  
+
     return this;
   },
 

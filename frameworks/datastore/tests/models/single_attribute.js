@@ -19,6 +19,11 @@ module("SC.RecordAttribute core methods", {
       
       // test toOne relationships
       relatedTo: SC.Record.toOne('MyApp.Foo'),
+
+      // test non-isEditable toOne relationships
+      readOnlyRelatedTo: SC.Record.toOne('MyApp.Bar', {
+        isEditable: NO
+      }),
       
       // test toOne relationship with computed type
       relatedToComputed: SC.Record.toOne(function() {
@@ -74,6 +79,13 @@ module("SC.RecordAttribute core methods", {
         firstName: 'Joe',
         lastName:  'Schmo',
         barId: 'bar1'
+      },
+      
+      { 
+        guid: 'foo5', 
+        firstName: "Jane", 
+        lastName: "Doe", 
+        readOnlyRelatedTo: 'bar1'
       }
       
     ]);
@@ -235,3 +247,38 @@ test("modifying a keyed toOne relationship", function(){
 
   equals(rec4.get('barId'), 'bar2', 'foo4.barId should == bar2');
 });
+
+test("isEditable NO should not allow editing", function() {
+  var bar1 = MyApp.store.find(MyApp.Bar, 'bar1');
+  var bar2 = MyApp.store.find(MyApp.Bar, 'bar2');
+  var rec5 = MyApp.store.find(MyApp.Foo, 'foo5');
+
+  equals(rec5.get('readOnlyRelatedTo'), bar1, 'precond - should find bar1');
+  equals(rec5.get('status'), SC.Record.READY_CLEAN, 'precond - foo5 should be READY_CLEAN');
+  
+  rec5.set('readOnlyRelatedTo', bar2);
+  
+  equals(rec5.get('readOnlyRelatedTo'), bar1, 'should still find bar1 after setting');
+  equals(rec5.get('status'), SC.Record.READY_CLEAN, 'foo5 status is still READY_CLEAN');
+});
+
+test("isEditable NO should not fire property change observer", function() {
+  var bar1 = MyApp.store.find(MyApp.Bar, 'bar1');
+  var bar2 = MyApp.store.find(MyApp.Bar, 'bar2');
+  var rec5 = MyApp.store.find(MyApp.Foo, 'foo5');
+
+  equals(rec5.get('readOnlyRelatedTo'), bar1, 'precond - should find bar1');
+  
+  var readOnlyWasModified = NO;
+  var modifierListener = function() {
+    readOnlyWasModified = YES;
+  };
+  rec5.addObserver('readOnlyRelatedTo', modifierListener);
+  
+  rec5.set('readOnlyRelatedTo', bar2);
+  
+  equals(readOnlyWasModified, NO, 'property change observer should not have fired');
+  
+  rec5.removeObserver('readOnlyRelatedTo', modifierListener);
+});
+

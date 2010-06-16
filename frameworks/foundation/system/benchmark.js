@@ -363,7 +363,10 @@ SC.Benchmark = {
     the console.
   */  
   log: function(key) {
-    console.log(this.report(key)) ;
+    // log each line to make this easier to read on an iPad
+    var lines = this.report(key).split('\n'),
+        len   = lines.length, idx;
+    for(idx=0;idx<len;idx++) console.log(lines[idx]);
   },
   
   /**

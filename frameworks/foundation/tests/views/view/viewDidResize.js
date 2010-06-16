@@ -25,7 +25,7 @@ test("invokes parentViewDidResize on all child views - ignoring views that do no
   view.childViews[2].parentViewDidResize = null ;
   
   // now test...
-  view.viewDidResize();
+  SC.run(function() { view.viewDidResize(); });
   equals(callCount, 2, 'should invoke parentViewDidResize() on two methods that support it');
 });
 
@@ -38,7 +38,7 @@ test("triggers whenever layout property is changed", function() {
     })]
   });
   
-  view.set('layout', { top: 10, left: 20, height: 50, width: 40 });
+  SC.run(function() { view.set('layout', { top: 10, left: 20, height: 50, width: 40 }); });
   equals(callCount, 1, 'viewDidResize should invoke once');
 });
 
@@ -156,13 +156,14 @@ test("invoked whenever view is added to a new parentView but not when it is remo
     parentViewDidResize: function() { callCount++; }
   });
   var parent = SC.Pane.create().append(); // must be visible in window...
-  
+  SC.RunLoop.begin().end();
+
   callCount = 0 ;
-  parent.appendChild(view);
+  SC.run(function() { parent.appendChild(view); });
   equals(callCount, 1, 'should call parentViewDidResize');
   
   callCount = 0;
-  parent.removeChild(view);
+  SC.run(function() { parent.removeChild(view); });
   equals(callCount, 0, 'should not call parentViewDidResize()');
   
   parent.remove();

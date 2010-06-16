@@ -8,8 +8,8 @@
 var SC = SC || { BUNDLE_INFO: {}, LAZY_INSTANTIATION: {} };
 
 SC.browser = (function() {
-  var userAgent = navigator.userAgent.toLowerCase();
-  var version = (userAgent.match( /.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [])[1] ;
+  var userAgent = navigator.userAgent.toLowerCase(),
+      version = (userAgent.match( /.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [])[1] ;
 
   var browser = {
     version: version,

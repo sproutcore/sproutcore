@@ -54,8 +54,18 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       console.log("-- SC.RunLoop.beginRunLoop at %@".fmt(this._start));
     } 
+    this._runLoopInProgress = YES;
     return this ; 
   },
+  
+  /**
+    YES when a run loop is in progress
+  
+    @property {Boolean}
+  */
+  isRunLoopInProgress: function() {
+    return this._runLoopInProgress;
+  }.property(),
   
   /**
     Call this method whenever you are done executing code.
@@ -86,6 +96,9 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       console.log("-- SC.RunLoop.endRunLoop ~ End");
     } 
+    
+    SC.RunLoop.lastRunLoopEnd = Date.now();
+    this._runLoopInProgress = NO;
     
     return this ; 
   },
@@ -234,17 +247,34 @@ SC.RunLoop.end = function() {
 } ;
 
 /**
+  Returns YES when a run loop is in progress
+
+  @return {Boolean}
+*/
+SC.RunLoop.isRunLoopInProgress = function() {
+  if(this.currentRunLoop) return this.currentRunLoop.get('isRunLoopInProgress');
+  return NO;
+};
+
+/**
   Helper method executes the passed function inside of a runloop.  Normally
   not needed but useful for testing.
   
   @param {Function} callback callback to execute
   @param {Object} target context for callback
+  @param {Boolean} if YES, does not start/end a new runloop if one is already running
   @returns {SC} receiver
 */
-SC.run = function(callback, target) {
-  SC.RunLoop.begin();
-  callback.call(target);
-  SC.RunLoop.end();
+SC.run = function(callback, target, useExistingRunLoop) {
+  if(useExistingRunLoop) {
+    var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
+    if(!alreadyRunning) SC.RunLoop.begin();
+    callback.call(target);
+    if(!alreadyRunning) SC.RunLoop.end();
+  } else {
+    SC.RunLoop.begin();
+    callback.call(target);
+    SC.RunLoop.end();
+  }
 };
-
 

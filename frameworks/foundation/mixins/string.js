@@ -19,6 +19,90 @@ SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
 SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
 SC.STRING_REGEXP_ESCAPED_REGEXP = (/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g);
 
+// Since there are many strings that are commonly dasherized(), we'll maintain
+// a cache.  Moreover, we'll pre-add some common ones.
+SC.STRING_DASHERIZE_CACHE = {
+  top:      'top',
+  left:     'left',
+  right:    'right',
+  bottom:   'bottom',
+  width:    'width',
+  height:   'height',
+  minWidth: 'min-width',
+  maxWidth: 'max-width'
+};
+
+// Active Support style inflection constants
+SC.INFLECTION_CONSTANTS = {
+  PLURAL: [
+      [/(quiz)$/i,               "$1zes"  ],
+      [/^(ox)$/i,                "$1en"   ],
+      [/([m|l])ouse$/i,          "$1ice"  ],
+      [/(matr|vert|ind)ix|ex$/i, "$1ices" ],
+      [/(x|ch|ss|sh)$/i,         "$1es"   ],
+      [/([^aeiouy]|qu)y$/i,      "$1ies"  ],
+      [/(hive)$/i,               "$1s"    ],
+      [/(?:([^f])fe|([lr])f)$/i, "$1$2ves"],
+      [/sis$/i,                  "ses"    ],
+      [/([ti])um$/i,             "$1a"    ],
+      [/(buffal|tomat)o$/i,      "$1oes"  ],
+      [/(bu)s$/i,                "$1ses"  ],
+      [/(alias|status)$/i,       "$1es"   ],
+      [/(octop|vir)us$/i,        "$1i"    ],
+      [/(ax|test)is$/i,          "$1es"   ],
+      [/s$/i,                    "s"      ],
+      [/$/,                      "s"      ]
+  ],
+
+  SINGULAR: [
+      [/(quiz)zes$/i,                                                    "$1"     ],
+      [/(matr)ices$/i,                                                   "$1ix"   ],
+      [/(vert|ind)ices$/i,                                               "$1ex"   ],
+      [/^(ox)en/i,                                                       "$1"     ],
+      [/(alias|status)es$/i,                                             "$1"     ],
+      [/(octop|vir)i$/i,                                                 "$1us"   ],
+      [/(cris|ax|test)es$/i,                                             "$1is"   ],
+      [/(shoe)s$/i,                                                      "$1"     ],
+      [/(o)es$/i,                                                        "$1"     ],
+      [/(bus)es$/i,                                                      "$1"     ],
+      [/([m|l])ice$/i,                                                   "$1ouse" ],
+      [/(x|ch|ss|sh)es$/i,                                               "$1"     ],
+      [/(m)ovies$/i,                                                     "$1ovie" ],
+      [/(s)eries$/i,                                                     "$1eries"],
+      [/([^aeiouy]|qu)ies$/i,                                            "$1y"    ],
+      [/([lr])ves$/i,                                                    "$1f"    ],
+      [/(tive)s$/i,                                                      "$1"     ],
+      [/(hive)s$/i,                                                      "$1"     ],
+      [/([^f])ves$/i,                                                    "$1fe"   ],
+      [/(^analy)ses$/i,                                                  "$1sis"  ],
+      [/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i, "$1$2sis"],
+      [/([ti])a$/i,                                                      "$1um"   ],
+      [/(n)ews$/i,                                                       "$1ews"  ],
+      [/s$/i,                                                            ""       ]
+  ],
+
+  IRREGULAR: [
+      ['move',   'moves'   ],
+      ['sex',    'sexes'   ],
+      ['child',  'children'],
+      ['man',    'men'     ],
+      ['person', 'people'  ]
+  ],
+
+  UNCOUNTABLE: [
+      "sheep",
+      "fish",
+      "series",
+      "species",
+      "money",
+      "rice",
+      "information",
+			"info",
+      "equipment"
+  ]					
+};
+
+
 /**
   @namespace
   
@@ -46,7 +130,8 @@ SC.String = {
     // it would add some overhead to deal with the arguments and adds stack
     // frames, so we are keeping the implementation separate.
     if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
-    var str = SC.Locale.currentLocale.locWithDefault(this) || this;
+    var str = SC.Locale.currentLocale.locWithDefault(this);
+    if (SC.typeOf(str) !== SC.T_STRING) str = this;
     return str.fmt.apply(str,arguments) ;
   },
 
@@ -60,7 +145,8 @@ SC.String = {
   */
   locWithDefault: function(def) {
     if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
-    var str = SC.Locale.currentLocale.locWithDefault(def) || this;
+    var str = SC.Locale.currentLocale.locWithDefault(this, def);
+    if (SC.typeOf(str) !== SC.T_STRING) str = this;
     var args = SC.$A(arguments); args.shift(); // remove def param
     return str.fmt.apply(str,args) ;
   },
@@ -203,7 +289,21 @@ SC.String = {
     @returns {String} the dasherized string.
   */
   dasherize: function() {
-    return this.decamelize().replace(SC.STRING_DASHERIZE_REGEXP,'-') ;  
+    // Do we have the item in our cache?
+    var cache = SC.STRING_DASHERIZE_CACHE,
+        ret   = cache[this];
+
+    if (ret) {
+      return ret;
+    }
+    else {
+      ret = this.decamelize().replace(SC.STRING_DASHERIZE_REGEXP,'-') ;
+
+      // Add the item to our cache.
+      cache[this] = ret;
+    }
+
+    return ret;
   },
   
   /**
@@ -356,8 +456,77 @@ SC.String = {
   */
   trimRight: function () {
     return this.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
-  }
+  },
+
+  /**
+    Converts a word into its plural form. 
     
+    @returns {String} the plural form of the string
+  */
+  pluralize: function() {
+			var idx, len,
+			 		compare = this.split(/\s/).pop(), //check only the last word of a string
+					restOfString = this.replace(compare,''),
+					isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;									
+
+			compare = compare.toLowerCase();
+      for (idx=0, len=SC.INFLECTION_CONSTANTS.UNCOUNTABLE.length; idx < len; idx++) {
+          var uncountable = SC.INFLECTION_CONSTANTS.UNCOUNTABLE[idx];
+          if (compare == uncountable) {	
+              return this.toString();
+          }
+      }
+      for (idx=0, len=SC.INFLECTION_CONSTANTS.IRREGULAR.length; idx < len; idx++) {
+          var singular = SC.INFLECTION_CONSTANTS.IRREGULAR[idx][0],
+							plural   = SC.INFLECTION_CONSTANTS.IRREGULAR[idx][1];
+          if ((compare == singular) || (compare == plural)) {
+							if(isCapitalized) plural = plural.capitalize();
+              return restOfString + plural;
+          }
+      }
+      for (idx=0, len=SC.INFLECTION_CONSTANTS.PLURAL.length; idx < len; idx++) {
+          var regex          = SC.INFLECTION_CONSTANTS.PLURAL[idx][0],
+							replace_string = SC.INFLECTION_CONSTANTS.PLURAL[idx][1];
+          if (regex.test(compare)) {
+              return this.replace(regex, replace_string);
+          }
+      }
+  },
+
+  /**
+    Converts a word into its singular form. 
+    
+    @returns {String} the singular form of the string
+  */
+  singularize: function() {
+			var idx, len,
+					compare = this.split(/\s/).pop(), //check only the last word of a string								
+					restOfString = this.replace(compare,''),	
+					isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
+
+			compare = compare.toLowerCase();
+      for (idx=0, len=SC.INFLECTION_CONSTANTS.UNCOUNTABLE.length; idx < len; idx++) {
+          var uncountable = SC.INFLECTION_CONSTANTS.UNCOUNTABLE[idx];
+          if (compare == uncountable) {
+              return this.toString();
+          }
+      }
+      for (idx=0, len=SC.INFLECTION_CONSTANTS.IRREGULAR.length; idx < len; idx++) {
+          var singular = SC.INFLECTION_CONSTANTS.IRREGULAR[idx][0],
+							plural   = SC.INFLECTION_CONSTANTS.IRREGULAR[idx][1];
+          if ((compare == singular) || (compare == plural)) {
+							if(isCapitalized) singular = singular.capitalize();
+              return restOfString + singular;
+          }
+      }
+      for (idx=0, len=SC.INFLECTION_CONSTANTS.SINGULAR.length; idx < len; idx++) {
+          var regex          = SC.INFLECTION_CONSTANTS.SINGULAR[idx][0],
+							replace_string = SC.INFLECTION_CONSTANTS.SINGULAR[idx][1];
+          if (regex.test(compare)) {
+              return this.replace(regex, replace_string);
+          }
+      }
+  }    
 };
 
 /** @private */

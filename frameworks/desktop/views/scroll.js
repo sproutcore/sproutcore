@@ -8,6 +8,9 @@
 sc_require('views/scroller');
 sc_require('mixins/border');
 
+SC.NORMAL_SCROLL_DECELERATION = 0.95;
+SC.FAST_SCROLL_DECELERATION = 0.85;
+
 /** @class
 
   Implements a complete scroll view.  This class uses a manual implementation
@@ -139,8 +142,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(calculatedWidth && calculatedWidth!==0){
-      contentWidth = calculatedWidth; 
+    if(view && view.calculatedWidth && view.calculatedWidth!==0){
+      contentWidth = view.calculatedWidth; 
     }
     contentWidth *= this._scale;
     
@@ -168,8 +171,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(calculatedHeight && calculatedHeight!==0){
-      contentHeight = calculatedHeight; 
+    if(view && view.calculatedHeight && view.calculatedHeight!==0){
+      contentHeight = view.calculatedHeight; 
     }
     contentHeight *= this._scale;
     
@@ -195,7 +198,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view.calculatedWidth && view.calculatedWidth!==0){
+    if(view && view.calculatedWidth && view.calculatedWidth!==0){
       contentWidth = view.calculatedWidth; 
     }
     contentWidth *= this._scale;
@@ -221,7 +224,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view.calculatedHeight && view.calculatedHeight!==0){
+    if(view && view.calculatedHeight && view.calculatedHeight!==0){
       contentHeight = view.calculatedHeight; 
     }
     contentHeight *= this._scale;
@@ -291,7 +294,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     @property {SC.View}
   */
-  horizontalScrollerView: SC.ScrollerView,
+  horizontalScrollerView: function() {
+    return SC.ScrollerView;
+  }.property().cacheable(),
   
   /**
     YES if the horizontal scroller should be visible.  You can change this 
@@ -337,7 +342,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     @property {SC.View}
   */
-  verticalScrollerView: SC.ScrollerView,
+  verticalScrollerView: function() {
+    return SC.ScrollerView;
+  }.property().cacheable(),
   
   /**
     YES if the vertical scroller should be visible.  You can change this 
@@ -386,7 +393,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   
     @property {Boolean}
   */
-  verticalOverlay: NO,
+  verticalOverlay: function() {
+    if (SC.platform.touch) return YES;
+    return NO;
+  }.property().cacheable(),
   
   /**
     Use this to overlay the horizontal scroller.
@@ -397,7 +407,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     @property {Boolean}
   */
-  horizontalOverlay: NO,
+  horizontalOverlay: function() {
+    if (SC.platform.touch) return YES;
+    return NO;
+  }.property().cacheable(),
   
   /**
     Use to control the positioning of the vertical scroller.  If you do not
@@ -434,23 +447,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     The container view that will contain your main content view.  You can 
     replace this property with your own custom subclass if you prefer.
     
-    The default is a ContainerView which has a contentClippingFrame that will
-    be normal on desktop, but will show three screenfulls on touch devices (making
-    scrolling a bit nicer).
-    
     @type {SC.ContainerView}
   */
   containerView: SC.ContainerView.extend({
-    contentClippingFrame: function() {
-      var f = SC.clone(this.get("clippingFrame"));
-      if (SC.browser.touch) {
-        f.x -= f.width;
-        f.width += f.width * 2;
-        f.y -= f.height;
-        f.height += f.height * 2;
-      }
-      return f;
-    }.property("clippingFrame")
+
   }),
   
   // ..........................................................
@@ -543,6 +543,15 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // will become the new scroll offset after some adjustment.
     vf = contentView.convertFrameFromView(vf, view.get('parentView')) ;
     
+    return this.scrollToRect(vf);
+  },
+  
+  /**
+    Scroll to the supplied rectangle.
+    @param {rect} Rectangle to scroll to.
+    @returns {Boolean} YES if scroll position was changed.
+  */
+  scrollToRect: function(rect) {
     // find current visible frame.
     var vo = SC.cloneRect(this.get('containerView').get('frame')) ;
     
@@ -552,12 +561,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var origX = vo.x, origY = vo.y;
     
     // if top edge is not visible, shift origin
-    vo.y -= Math.max(0, SC.minY(vo) - SC.minY(vf)) ;
-    vo.x -= Math.max(0, SC.minX(vo) - SC.minX(vf)) ;
+    vo.y -= Math.max(0, SC.minY(vo) - SC.minY(rect)) ;
+    vo.x -= Math.max(0, SC.minX(vo) - SC.minX(rect)) ;
     
     // if bottom edge is not visible, shift origin
-    vo.y += Math.max(0, SC.maxY(vf) - SC.maxY(vo)) ;
-    vo.x += Math.max(0, SC.maxX(vf) - SC.maxX(vo)) ;
+    vo.y += Math.max(0, SC.maxY(rect) - SC.maxY(vo)) ;
+    vo.x += Math.max(0, SC.maxX(rect) - SC.maxX(vo)) ;
     
     // scroll to that origin.
     if ((origX !== vo.x) || (origY !== vo.y)) {
@@ -565,6 +574,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       return YES ;
     } else return NO;
   },
+  
   
   /**
     Scrolls the receiver down one or more lines if allowed.  If number of
@@ -679,15 +689,17 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     additional controls you have added to the view.
   */
   tile: function() {
+    
+    // for now just hide scroll bars on touch platforms
+    var isTouch = SC.platform.touch;
+    
     // get horizontal scroller/determine if we should have a scroller
     var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null ;
-    var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
+    var hasHorizontal = hscroll && !isTouch && this.get('isHorizontalScrollerVisible');
     
     // get vertical scroller/determine if we should have a scroller
     var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null ;
-    var hasVertical = vscroll && this.get('isVerticalScrollerVisible') ;
-    
-    if (SC.browser.touch) hasVertical = hasHorizontal = NO;
+    var hasVertical = vscroll && !isTouch && this.get('isVerticalScrollerVisible') ;
     
     // get the containerView
     var clip = this.get('containerView') ;
@@ -729,8 +741,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       clipLayout.right = 0 ;
     }
     if (vscroll) vscroll.set('isVisible', hasVertical) ;
-    
-    clip.set('layout', clipLayout) ;
+
+    clip.adjust(clipLayout) ;
   },
   
   /** @private
@@ -750,8 +762,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   // save adjustment and then invoke the actual scroll code later.  This will
   // keep the view feeling smooth.
   mouseWheel: function(evt) {
-    this._scroll_wheelDeltaX += evt.wheelDeltaX;
-    this._scroll_wheelDeltaY += evt.wheelDeltaY;
+    var deltaAdjust = (SC.browser.safari && SC.browser.version > 533.0) ? 120 : 1;
+    
+    this._scroll_wheelDeltaX += evt.wheelDeltaX / deltaAdjust;
+    this._scroll_wheelDeltaY += evt.wheelDeltaY / deltaAdjust;
     this.invokeLater(this._scroll_mouseWheel, 10) ;
     return this.get('canScrollHorizontal') || this.get('canScrollVertical') ;  
   },
@@ -811,7 +825,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   _scale_css: "",
   
   updateScale: function(scale) {
-    if (this.get("contentView").isScalable) {
+    var contentView = this.get("contentView");
+    if (!contentView) return;
+    
+    if (contentView.isScalable) {
       this.get("contentView").applyScale(scale);
       this._scale_css = "";
     } else {
@@ -824,10 +841,83 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   acceptsMultitouch: YES,
   
+  /**
+    The scroll deceleration rate.
+  */
+  decelerationRate: SC.NORMAL_SCROLL_DECELERATION,
+  
+  /**
+    If YES, bouncing will always be enabled in the horizontal direction, even if the content
+    is smaller or the same size as the view. NO by default.
+  */
+  alwaysBounceHorizontal: NO,
+  
+  /**
+    If NO, bouncing will not be enabled in the vertical direction when the content is smaller
+    or the same size as the scroll view. YES by default.
+  */
+  alwaysBounceVertical: YES,
+  
+  /**
+    Whether to delay touches from passing through to the content.
+  */
+  delaysContentTouches: YES,
+  
+  /**
+    @private
+    If the view supports it, this 
+  */
+  _touchScrollDidChange: function() {
+    if (this.get("contentView").touchScrollDidChange) {
+      this.get("contentView").touchScrollDidChange(
+        this._scroll_horizontalScrollOffset,
+        this._scroll_verticalScrollOffset
+      );
+    }
+    
+    // tell scrollers
+    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidChange) {
+      this.verticalScrollerView.touchScrollDidChange(this._scroll_verticalScrollOffset);
+    }
+    
+    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidChange) {
+      this.horizontalScrollerView.touchScrollDidChange(this._scroll_horizontalScrollOffset);
+    }
+  },
+  
+  _touchScrollDidStart: function() {
+    if (this.get("contentView").touchScrollDidStart) {
+      this.get("contentView").touchScrollDidStart(this._scroll_horizontalScrollOffset, this._scroll_verticalScrollOffset);
+    }
+    
+    // tell scrollers
+    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidStart) {
+      this.verticalScrollerView.touchScrollDidStart(this._touch_verticalScrollOffset);
+    }
+    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidStart) {
+      this.horizontalScrollerView.touchScrollDidStart(this._touch_horizontalScrollOffset);
+    }
+  },
+  
+  _touchScrollDidEnd: function() {
+    if (this.get("contentView").touchScrollDidEnd) {
+      this.get("contentView").touchScrollDidEnd(this._scroll_horizontalScrollOffset, this._scroll_verticalScrollOffset);
+    }
+    
+    // tell scrollers
+    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidEnd) {
+      this.verticalScrollerView.touchScrollDidEnd(this._touch_verticalScrollOffset);
+    }
+    
+    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidEnd) {
+      this.horizontalScrollerView.touchScrollDidEnd(this._touch_horizontalScrollOffset);
+    }
+  },
+  
   _applyCSSTransforms: function(layer) {
     var transform = "";
     this.updateScale(this._scale);
-    transform += 'translate3d('+ -this._scroll_horizontalScrollOffset +'px, '+ -this._scroll_verticalScrollOffset+'px,0) ';
+    transform += 'translate3d('+ -this._scroll_horizontalScrollOffset +'px, '+ -Math.round(this._scroll_verticalScrollOffset)+'px,0) ';
     transform += this._scale_css;
     layer.style.webkitTransform = transform;
     layer.style.webkitTransformOrigin = "top left";
@@ -839,9 +929,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   
   touchGeneration: 0,
   touchStart: function(touch) {
-    if (!this.tracking) {
-      var generation = ++this.touchGeneration;
+    var generation = ++this.touchGeneration;
+    if (!this.tracking && this.get("delaysContentTouches")) {
       this.invokeLater(this.beginTouchesInContent, 150, generation);
+    } else if (!this.tracking) {
+      // NOTE: We still have to delay because we don't want to call touchStart
+      // while touchStart is itself being called...
+      this.invokeLater(this.beginTouchesInContent, 1, generation);
     }
     this.beginTouchTracking(touch, YES);
   },
@@ -851,6 +945,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var touch = this.touch, itemView;
     if (touch && this.tracking && !this.dragging) {
       touch.touch.captureTouch(this, YES);
+      if (!touch.touch.touchResponder) touch.touch.makeTouchResponder(this);
     }
   },
 
@@ -866,12 +961,18 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var avg = touch.averagedTouchesForView(this, starting);
     
     var verticalScrollOffset = this._scroll_verticalScrollOffset || 0,
-        horizontalScrollOffset = this._scroll_horizontalScrollOffset || 0;
+        horizontalScrollOffset = this._scroll_horizontalScrollOffset || 0,
+        startClipOffsetX = horizontalScrollOffset,
+        startClipOffsetY = verticalScrollOffset;
     
     if (this.touch && this.touch.timeout) {
       // clear the timeout
       clearTimeout(this.touch.timeout);
       this.touch.timeout = null;
+      
+      // get the scroll offsets
+      startClipOffsetX = this.touch.startClipOffset.x;
+      startClipOffsetY = this.touch.startClipOffset.y;
     }
     
     // calculate container+content width/height
@@ -896,12 +997,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       notCalculated: YES,
       
       enableScrolling: { 
-        x: contentWidth * this._scale > containerWidth, 
-        y: contentHeight * this._scale > containerHeight }, // TODO: get from class properties
+        x: contentWidth * this._scale > containerWidth || this.get("alwaysBounceHorizontal"), 
+        y: contentHeight * this._scale > containerHeight || this.get("alwaysBounceVertical") }, // TODO: get from class properties
       scrolling: { x: NO, y: NO },
       
       // offsets and velocities
-      // startScrollOffset: { x: horizontalScrollOffset, y: verticalScrollOffset },
+      startClipOffset: { x: startClipOffsetX, y: startClipOffsetY },
       lastScrollOffset: { x: horizontalScrollOffset, y: verticalScrollOffset },
       startTouchOffset: { x: avg.x, y: avg.y },
       scrollVelocity: { x: 0, y: 0 },
@@ -929,10 +1030,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       accelerationToEdge: 0.1,
       
       // how much percent of the other drag direction you must drag to start dragging that direction too.
-      scrollTolerance: { x: 5, y: 5 },
+      scrollTolerance: { x: 15, y: 15 },
       scaleTolerance: 5,
-      secondaryScrollTolerance: 20,
-      scrollLock: 100,
+      secondaryScrollTolerance: 30,
+      scrollLock: 500,
+      
+      decelerationRate: this.get("decelerationRate"),
 
       // general status
       lastEventTime: touch.timeStamp,      
@@ -990,9 +1093,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var deltaX = positionInContentX - touch.startTouchOffset.x,
         deltaY = positionInContentY - touch.startTouchOffset.y;
     
+    var isDragging = touch.dragging;
     if (!touch.scrolling.x && Math.abs(deltaX) > touch.scrollTolerance.x && touch.enableScrolling.x) {
       // say we are scrolling
-      this.dragging = YES;
+      isDragging = YES;
       touch.scrolling.x = YES;
       touch.scrollTolerance.y = touch.secondaryScrollTolerance;
       
@@ -1002,13 +1106,20 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
     if (!touch.scrolling.y && Math.abs(deltaY) > touch.scrollTolerance.y && touch.enableScrolling.y) {
       // say we are scrolling
-      this.dragging = YES;
+      isDragging = YES;
       touch.scrolling.y = YES;
       touch.scrollTolerance.x = touch.secondaryScrollTolerance;
       
       // reset position
       touch.startTouchOffset.y = touchY;
       deltaY = 0;
+    }
+    
+    // handle scroll start
+    if (isDragging && !touch.dragging) {
+      touch.dragging = YES;
+      this.dragging = YES;
+      this._touchScrollDidStart();
     }
     
     // calculate new offset
@@ -1028,7 +1139,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         touch.scrolling.y = YES; // if you scale, you can scroll.
         touch.scrolling.x = YES;
         
-        var scale = touch.startScale * (1 + (dd / 200));
+        // we want to say something that was the startDistance away from each other should now be
+        // distance away. So, if we are twice as far away as we started...
+        var scale = touch.startScale * (distance / Math.max(startDistance, 50));
 
         var newScale = this._adjustForEdgeResistance(scale, touch.minimumScale, touch.maximumScale, touch.resistanceCoefficient, touch.resistanceAsymptote);
         this.dragging = YES;
@@ -1060,6 +1173,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (touch.scrolling.y) this._scroll_verticalScrollOffset = offsetY;
     
     this._applyCSSTransforms(touch.layer);
+    this._touchScrollDidChange();
     
     if (timeStamp - touch.lastEventTime >= 1 || touch.notCalculated) {
       touch.notCalculated = NO;
@@ -1090,6 +1204,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         this.startDecelerationAnimation();
       } else {
         // trigger touchStart/End on actual target view if possible
+        this.touch = null;
         touch.captureTouch(this);
         if (touch.touchResponder && touch.touchResponder !== this) touch.touchResponder.tryToPerform("touchEnd", touch);
       }
@@ -1100,7 +1215,17 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   },
   
   touchCancelled: function(touch) {
+    this.beginPropertyChanges();
+    this.set("scale", this._scale);
+    this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
+    this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+    this.endPropertyChanges();
     this.tracking = NO;
+    
+    if (this.dragging) {
+      this._touchScrollDidEnd();
+    }
+    
     this.dragging = NO;
     this.touch = null;
   },
@@ -1166,10 +1291,11 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         maxOffsetX = this.maximumScrollOffset(touch.contentSize.width * this._scale, touch.containerSize.width, this.get("horizontalAlign")),
         maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale, touch.containerSize.height, this.get("verticalAlign")),
         
-        newX = this._scroll_horizontalScrollOffset + touch.decelerationVelocity.x,
-        newY = this._scroll_verticalScrollOffset + touch.decelerationVelocity.y,
         now = Date.now(),
-        t = Math.max(now - touch.lastEventTime, 1);
+        t = Math.max(now - touch.lastEventTime, 1),
+        
+        newX = this._scroll_horizontalScrollOffset + touch.decelerationVelocity.x * (t/10),
+        newY = this._scroll_verticalScrollOffset + touch.decelerationVelocity.y * (t/10);
     
     var de = touch.decelerationFromEdge, ac = touch.accelerationToEdge;
     
@@ -1244,17 +1370,22 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // now that we are done modifying the position, we may update the actual scroll
     this._scroll_horizontalScrollOffset = newX;
     this._scroll_verticalScrollOffset = newY;
+    
     this._applyCSSTransforms(touch.layer); // <- Does what it sounds like.
+
+    SC.RunLoop.begin();
+    this._touchScrollDidChange();
+    SC.RunLoop.end();
     
     // Now we have to adjust the velocities. The velocities are simple x and y numbers that
     // get added to the scroll X/Y positions each frame.
-    // The decay rate is .950 per frame. To achieve some semblance of accuracy, we
+    // The default decay rate is .950 per frame. To achieve some semblance of accuracy, we
     // make it to the power of the elapsed number of frames. This is not fully accurate,
     // as this is applying the elapsed time between this frame and the previous time to
     // modify the velocity for the next frame. My mind goes blank when I try to figure out
     // a way to fix this (given that we don't want to change the velocity on the first frame),
     // and as it seems to work great as-is, I'm just leaving it.
-    var decay = 0.950;
+    var decay = touch.decelerationRate;
     touch.decelerationVelocity.y *= Math.pow(decay, (t / 10));
     touch.decelerationVelocity.x *= Math.pow(decay, (t / 10));
     
@@ -1277,16 +1408,22 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (absYVelocity < 0.01 && absXVelocity < 0.01 && Math.abs(sv) < 0.01) {
       // we can reset the timeout, as it will no longer be required, and we don't want to re-cancel it later.
       touch.timeout = null;
+      this.touch = null;
       
       // we aren't in a run loop right now (see below, where we trigger the timer)
       // so, we must start one.
       SC.RunLoop.begin();
       
+      // trigger scroll end
+      this._touchScrollDidEnd();
+      
       // set the scale, vertical, and horizontal offsets to what they technically already are,
       // but don't know they are yet. This will finally update things like, say, the clipping frame.
+      this.beginPropertyChanges();
       this.set("scale", this._scale);
       this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
       this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+      this.endPropertyChanges();
       
       // and now we're done, so just end the run loop and return.
       SC.RunLoop.end();
@@ -1329,7 +1466,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.contentView = this.containerView.get('contentView');
     
     // create a horizontal scroller view if needed...
-    view = this.horizontalScrollerView;
+    view = this.get("horizontalScrollerView");
     if (view) {
       if (this.get('hasHorizontalScroller')) {
         view = this.horizontalScrollerView = this.createChildView(view, {
@@ -1341,7 +1478,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
     
     // create a vertical scroller view if needed...
-    view = this.verticalScrollerView;
+    view = this.get("verticalScrollerView");
     if (view) {
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
@@ -1432,41 +1569,47 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     scroller maxmimum and optionally update the scroller visibility if the
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
+
+    @param {Boolean} force (optional)  Re-calculate everything even if the contentView’s frame didn’t change size
   */
 
   oldMaxHOffset: 0,
   oldMaxVOffset: 0,
 
-  contentViewFrameDidChange: function() {
+  contentViewFrameDidChange: function(force) {
     var view   = this.get('contentView'), 
         f      = (view) ? view.get('frame') : null,
-        width  = (f) ? f.width * this._scale : 0,  
-        height = (f) ? f.height * this._scale : 0,
-        dim    = this.get('frame'),
-        ourFrame = this.get("frame");
+        scale  = this._scale,
+        width  = (f) ? f.width  * scale : 0,
+        height = (f) ? f.height * scale : 0,
+        dim, dimWidth, dimHeight;
     
     // cache out scroll settings...
-    //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
-    this._scroll_contentWidth = width;
-    this._scroll_contentHeight = height ;
+    if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
+    this._scroll_contentWidth  = width;
+    this._scroll_contentHeight = height;
+
+    dim       = this.get('frame');
+    dimWidth  = dim.width;
+    dimHeight = dim.height;
     
     if (this.get('hasHorizontalScroller') && (view = this.get('horizontalScrollerView'))) {
       // decide if it should be visible or not
       if (this.get('autohidesHorizontalScroller')) {
-        this.set('isHorizontalScrollerVisible', width > dim.width);
+        this.set('isHorizontalScrollerVisible', width > dimWidth);
       }
-      view.setIfChanged('maximum', width-dim.width) ;
-      view.setIfChanged('proportion', dim.width/width);
+      view.setIfChanged('maximum', width-dimWidth) ;
+      view.setIfChanged('proportion', dimWidth/width);
     }
     
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
       // decide if it should be visible or not
       if (this.get('autohidesVerticalScroller')) {
-        this.set('isVerticalScrollerVisible', height > dim.height);
+        this.set('isVerticalScrollerVisible', height > dimHeight);
       }
       height -= this.get('verticalScrollerBottom') ;
-      view.setIfChanged('maximum', height-dim.height) ;
-      view.setIfChanged('proportion', dim.height/height);
+      view.setIfChanged('maximum', height-dimHeight) ;
+      view.setIfChanged('proportion', dimHeight/height);
     }
     
     // If there is no vertical scroller and auto hiding is on, make
@@ -1484,17 +1627,24 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     // This forces to recalculate the height of the frame when is at the bottom
     // of the scroll and the content dimension are smaller that the previous one
-    
-    var mxVOffSet = this.get('maximumVerticalScrollOffset'),
-        vOffSet = this.get('verticalScrollOffset'),
-        mxHOffSet = this.get('maximumHorizontalScrollOffset'),
-        hOffSet = this.get('horizontalScrollOffset');
-    var forceHeight = mxVOffSet<vOffSet;
-    var forceWidth = mxHOffSet<hOffSet;
-    if(forceHeight || forceWidth){
+    var mxVOffSet   = this.get('maximumVerticalScrollOffset'),
+        vOffSet     = this.get('verticalScrollOffset'),
+        mxHOffSet   = this.get('maximumHorizontalScrollOffset'),
+        hOffSet     = this.get('horizontalScrollOffset'),
+        forceHeight = mxVOffSet < vOffSet,
+        forceWidth  = mxHOffSet < hOffSet;
+    if (forceHeight || forceWidth) {
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     }
   },
+
+  /** @private
+    If our frame changes, then we need to re-calculate the visiblility of our
+    scrollers, etc.
+  */
+  frameDidChange: function() {
+    this.contentViewFrameDidChange(YES);
+  }.observes('frame'),
 
   /** @private
     If the layer of the content view changes, we need to readjust the
@@ -1533,22 +1683,22 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         verticalScrollOffset = this.get('verticalScrollOffset'),
         horizontalScrollOffset = this.get('horizontalScrollOffset');
 
-    // We notify the content view that it's frame property has changed
+    // We notify the content view that its frame property has changed
     // before we actually update the scrollTop/scrollLeft properties.
     // This gives views that use incremental rendering a chance to render
     // newly-appearing elements before they come into view.
     if (content) {
       SC.RunLoop.begin();
-      content.notifyPropertyChange('frame');
+      content._viewFrameDidChange();
       SC.RunLoop.end();
 
       // Use accelerated drawing if the browser supports it
-      if (SC.browser.touch) {
+      if (SC.platform.touch) {
         this._applyCSSTransforms(content.get('layer'));
       }
     }
 
-    if (container && !SC.browser.touch) {
+    if (container && !SC.platform.touch) {
       container = container.$()[0];
       
       if (container) {

@@ -127,32 +127,6 @@ SC.VideoView = SC.View.extend({
   
   poster: null,
   
-  mediaControl: 'normal', //support normal, mini, none
-  
-  
-  init: function() {
-    var controls = this.get('mediaControl');
-    if(controls==='normal'){
-      this.childViews='normal'.w();
-    }
-    if(controls==='mini'){
-      this.childViews='mini'.w();
-    } 
-    sc_super();
-    var controlsView = this.get('childViews')[0];
-    if(controlsView) this.appendChild(controlsView);
-  },
-  
-  normal: SC.MediaControlsView.design({
-    layout: { bottom:0, left: 0, right: 0, height: 20 },
-    targetBinding: '*parentView'
-  }),
-
-  mini: SC.MiniMediaControlsView.design({
-    layout: { bottom:0, left: 0, right: 0, height: 20 },
-    targetBinding: '*parentView'
-  }),
-  
   /** 
     Formatted currentTime. (00:00)
     @property {String}
@@ -162,7 +136,7 @@ SC.VideoView = SC.View.extend({
         totaltimeInSecs = this.get('duration');
     var formattedTime = this._addZeros(Math.floor(currentTime/60))+':'+this._addZeros(Math.floor(currentTime%60))+"/"+this._addZeros(Math.floor(totaltimeInSecs/60))+':'+this._addZeros(Math.floor(totaltimeInSecs%60));
     return formattedTime;
-  }.property('currentTime').cacheable(),
+  }.property('currentTime', 'duration').cacheable(),
   
   /** 
     Renders the appropiate HTML according for the technology to use.
@@ -182,6 +156,9 @@ SC.VideoView = SC.View.extend({
             if(this.poster){
               context.push(' poster="'+this.poster+'"');
             }
+            // if(SC.browser.touch){
+            //               context.push(' controls="true"');
+            //             }
             context.push('/>');
             this.loaded='html5';
             return;
@@ -196,7 +173,7 @@ SC.VideoView = SC.View.extend({
           }
           context.push('<object width="100%" height="100%"');
           if(SC.browser.msie){
-            context.push('style="behavior:url(#qt_event_source);"');
+            context.push('style="position: absolute; top:0px; left:0px; behavior:url(#qt_event_source);"');
           }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
                       'id="qt_'+id+'" '+
@@ -273,6 +250,18 @@ SC.VideoView = SC.View.extend({
       }
     }
   },
+  
+  valueObserver:function(){
+    this.set('currentTime', 0); 
+    this.set('duration', 0); 
+    this.set('volume', 0); 
+    this.set('paused', YES); 
+    this.set('loaded', NO); 
+    this.set('ended', NO); 
+    this.set('canPlay', NO); 
+    this.set('loadedTimeRanges', []); 
+    this.replaceLayer();
+  }.observes('value'),
 
 
   /** 
@@ -298,6 +287,7 @@ SC.VideoView = SC.View.extend({
   didCreateLayer :function(){
     if(this.loaded==="html5"){
       this.addVideoDOMEvents();
+      this.frameDidChange();
     }
     if(this.loaded==="quicktime"){
       this.addQTDOMEvents();
@@ -331,6 +321,7 @@ SC.VideoView = SC.View.extend({
     }) ;
     SC.Event.add(videoElem, 'loadstart', this, function () {
       SC.RunLoop.begin();
+      this.updateVideoElementLoadedTimeRanges(videoElem);
       view.set('volume', videoElem.volume);
       SC.RunLoop.end();
     });     
@@ -353,6 +344,7 @@ SC.VideoView = SC.View.extend({
        
     SC.Event.add(videoElem, 'canplay', this, function () {
       SC.RunLoop.begin();
+      this.updateVideoElementLoadedTimeRanges(videoElem);
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });     
@@ -364,11 +356,7 @@ SC.VideoView = SC.View.extend({
     });
     SC.Event.add(videoElem, 'progress', this, function (e) {
       SC.RunLoop.begin();
-      this.loadedTimeRanges=[];
-      for (var j=0, jLen = videoElem.seekable.length; j<jLen; j++){
-        this.loadedTimeRanges.push(videoElem.seekable.start(j));
-        this.loadedTimeRanges.push(videoElem.seekable.end(j));
-      }
+      this.updateVideoElementLoadedTimeRanges(videoElem);
        try{
           var trackCount=view.GetTrackCount(),i;
           for(i=1; i<=trackCount;i++){
@@ -380,7 +368,7 @@ SC.VideoView = SC.View.extend({
       //view.set('loadedData', ev.loaded);
       //console.log('progress '+ev.loaded+","+ev.total );
       SC.RunLoop.end();
-    });     
+    });
          
     // SC.Event.add(videoElem, 'suspend', this, function () {
     //       SC.RunLoop.begin();
@@ -460,6 +448,18 @@ SC.VideoView = SC.View.extend({
     
   },
   
+  updateVideoElementLoadedTimeRanges: function(videoElem) {
+    if(!videoElem) videoElem = this.$('video')[0];
+    if(!this.loadedTimeRanges) this.loadedTimeRanges=[];
+    else this.loadedTimeRanges.length=0;
+    for (var j=0, jLen = videoElem.buffered.length; j<jLen; j++){
+      this.loadedTimeRanges.push(videoElem.buffered.start(j));
+      this.loadedTimeRanges.push(videoElem.buffered.end(j));
+    }                                             
+    //console.log('handled loadedTimeRanges='+this.loadedTimeRanges.toString());
+    this.notifyPropertyChange('loadedTimeRanges');
+  },
+  
   /** 
      Adds all the neccesary quicktime DOM elements.
 
@@ -478,25 +478,25 @@ SC.VideoView = SC.View.extend({
       return;
     }
     this.set('videoObject', vid);
-    view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-    view.set('volume', vid.GetVolume()/256);
-    dimensions=vid.GetRectangle().split(',');
-    view.set('videoWidth', dimensions[2]);
-    view.set('videoHeight', dimensions[3]);
+    this._setDurationFromQTVideoObject();
+    this.set('volume', vid.GetVolume()/256);
+    this._setDimensionsFromQTVideoObject();
     
     SC.Event.add(videoElem, 'qt_durationchange', this, function () {
       SC.RunLoop.begin();
-      view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+      this._setDurationFromQTVideoObject();
       SC.RunLoop.end();
     });
     SC.Event.add(videoElem, 'qt_begin', this, function () {
       SC.RunLoop.begin();
+      this.updateQTVideoObjectLoadedTimeRanges(vid);
       view.set('volume', vid.GetVolume()/256);
       SC.RunLoop.end();
     });
     SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
       SC.RunLoop.begin();
-      view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+      this._setDurationFromQTVideoObject();
+      this.updateQTVideoObjectLoadedTimeRanges(vid);
       var dimensions=vid.GetRectangle().split(',');
       view.set('videoWidth', dimensions[2]);
       view.set('videoHeight', dimensions[3]);
@@ -504,6 +504,7 @@ SC.VideoView = SC.View.extend({
     });
     SC.Event.add(videoElem, 'qt_canplay', this, function () {
       SC.RunLoop.begin();
+      this.updateQTVideoObjectLoadedTimeRanges(vid);
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });
@@ -515,11 +516,13 @@ SC.VideoView = SC.View.extend({
       SC.RunLoop.begin();
       view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       view.set('paused', YES);
+      SC.RunLoop.end();
     });
     SC.Event.add(videoElem, 'qt_play', this, function () {
       SC.RunLoop.begin();
       view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       view.set('paused', NO);
+      SC.RunLoop.end();
     });
     // SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
     //       console.log('qt_loadedfirstframe');
@@ -530,12 +533,16 @@ SC.VideoView = SC.View.extend({
     // SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
     //       console.log('qt_canplaythrough');
     //     });
-    //     SC.Event.add(videoElem, 'qt_load', this, function () {
-    //       console.log('qt_load');
-    //     });
-    // SC.Event.add(videoElem, 'qt_progress', this, function () {
-    //       console.log('qt_progress');
-    //     });
+    SC.Event.add(videoElem, 'qt_load', this, function () {
+      SC.RunLoop.begin();
+      this.updateQTVideoObjectLoadedTimeRanges(vid);
+      SC.RunLoop.end();
+    });
+    SC.Event.add(videoElem, 'qt_progress', this, function () {
+      SC.RunLoop.begin();
+      this.updateQTVideoObjectLoadedTimeRanges(vid);
+      SC.RunLoop.end();
+    });
     //     SC.Event.add(videoElem, 'qt_waiting', this, function () {
     //       console.log('qt_waiting');
     //     });
@@ -554,6 +561,29 @@ SC.VideoView = SC.View.extend({
     // });
   },
   
+  updateQTVideoObjectLoadedTimeRanges: function(vid) {
+    vid = vid || this._getVideoObject();
+    if(!this.loadedTimeRanges) this.loadedTimeRanges=[];
+    else this.loadedTimeRanges.length = 0;
+    this.loadedTimeRanges.push(0);
+    this.loadedTimeRanges.push(vid.GetMaxTimeLoaded()/vid.GetTimeScale());
+    this.notifyPropertyChange('loadedTimeRanges');
+  },
+  
+  _setDurationFromQTVideoObject: function(vid) {
+    if(!vid) vid = this._getVideoObject();
+    try{ this.set('duration', vid.GetDuration()/vid.GetTimeScale()); }
+    catch(e) { this.invokeLater('_setDurationFromQTVideoObject',100); }
+  },
+  
+  _setDimensionsFromQTVideoObject: function(vid) {
+    if(!vid) vid = this._getVideoObject();
+    try{
+      var dimensions=vid.GetRectangle().split(',');
+      this.set('videoWidth', dimensions[2]);
+      this.set('videoHeight', dimensions[3]);
+    } catch(e) { this.invokeLater('_setDimensionsFromQTVideoObject',100); }
+  },
   
   /** 
      For Quicktime we need to simulated the timer as there is no data,
@@ -562,7 +592,7 @@ SC.VideoView = SC.View.extend({
 
      @returns {void}
    */
-  qtTimer:function(){
+  _qtTimer:function(){
     if(this.loaded==='quicktime' && !this.get('paused')){
       this.incrementProperty('currentTime');
       this.invokeLater(this._qtTimer, 1000);
@@ -634,11 +664,15 @@ SC.VideoView = SC.View.extend({
     @returns {void}
   */
   play: function(){
-    var vid=this._getVideoObject();
-    if(this.loaded==="html5") vid.play();
-    if(this.loaded==="quicktime") vid.Play();
-    if(this.loaded==="flash") vid.playVideo();
-    this.set('paused', NO);
+    try{
+      var vid=this._getVideoObject();
+      if(this.loaded==="html5") vid.play();
+      if(this.loaded==="quicktime") vid.Play();
+      if(this.loaded==="flash") vid.playVideo();
+      this.set('paused', NO);
+    }catch(e){
+      console.warn('The video cannot play!!!! It might still be loading the plugging');
+    }
   },
   
   /** 
@@ -765,3 +799,31 @@ SC.VideoView.updateProperty = function(scid, property, value) {
 SC.VideoView.logFlash = function(message) {
   console.log("FLASHLOG: "+message);
 } ;
+
+
+SC.VideoPlayerView = SC.View.extend({
+  classNames: 'sc-video-player-view',
+  
+  childViews: 'videoView regular'.w(),
+  
+  value: null,
+  
+  degradeList: null,
+  
+  videoView:SC.VideoView.design({
+    layout: { top: 0, bottom:20, right:0, left:0},
+    degradeListBinding: '*parentView.degradeList',
+    valueBinding: '*parentView.value'
+  }),
+  
+  regular: SC.MediaControlsView.design({
+     layout: { bottom:0, left: 0, right: 0, height: 20 },
+     targetBinding: '*parentView.videoView'
+   }),
+
+  mini: SC.MiniMediaControlsView.design({
+     layout: { bottom:0, left: 0, right: 0, height: 20 },
+     targetBinding: '*parentView.videoView'
+   })
+});
+

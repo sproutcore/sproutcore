@@ -239,7 +239,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     you call commitRecords() without passing any other parameters, the keys
     in this set will be committed instead.
   
-    @property {Array}
+    @property {SC.Set}
   */
   changelog: null,
   
@@ -672,7 +672,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     time.
   
     @param {SC.Store} nestedStore the child store
-    @param {Array} changes the array of changed store keys
+    @param {SC.Set} changes the set of changed store keys
     @param {Boolean} force
     @returns {SC.Store} receiver
   */
@@ -1068,7 +1068,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} Returns the created record
   */
   createRecord: function(recordType, dataHash, id) {
-    var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal;
+    var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal,
+        ret;
     
     // First, try to get an id.  If no id is passed, look it up in the 
     // dataHash.
@@ -1117,8 +1118,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this.invokeLast(this.commitRecords);
     }
     
-    // finally return materialized record
-    return this.materializeRecord(storeKey) ;
+    // Finally return materialized record, after we propagate the status to
+    // any aggregrate records.
+    ret = this.materializeRecord(storeKey);
+    if (ret) ret.propagateToAggregates();
+    return ret;
   },
   
   /**
@@ -1580,7 +1584,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @param {Array} recordTypes the expected record types (SC.Record)
     @param {Array} ids to commit
-    @param {Array} storeKeys to commit
+    @param {SC.Set} storeKeys to commit
     @param {Hash} params optional additional parameters to pass along to the
       data source
 
@@ -1648,8 +1652,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     //remove all commited changes from changelog
-    if (ret && !recordTypes && !ids && storeKeys===this.changelog){ 
-      this.changelog = null; 
+    if (ret && !recordTypes && !ids) {
+      if (storeKeys === this.changelog) {
+        this.changelog = null;
+      }
+      else {
+        this.changelog.removeEach(storeKeys);
+      }
     }
     return ret ;
   },

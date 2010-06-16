@@ -204,6 +204,16 @@ SC.ResponderContext = {
   },
   
   /**
+    Re-enters the current responder (calling willLoseFirstResponder and didBecomeFirstResponder).
+  */
+  resetFirstResponder: function() {
+    var current = this.get('firstResponder');
+    if (!current) return;
+    current.willLoseFirstResponder();
+    current.didBecomeFirstResponder();
+  },
+  
+  /**
     Send the passed action down the responder chain, starting with the 
     current first responder.  This will look for the first responder that 
     actually implements the action method and returns YES or no value when 

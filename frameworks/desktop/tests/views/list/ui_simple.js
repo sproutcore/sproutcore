@@ -92,7 +92,7 @@ test("scrolling by small amount should update incremental rendering", function()
 
   // SCROLL DOWN ONE LINE
   SC.run(function() {
-    scrollView.scrollTo(0,21);
+    scrollView.scrollTo(0,20);
   });
   
   // top line should have scrolled out of view

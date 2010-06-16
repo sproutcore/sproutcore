@@ -78,7 +78,7 @@ SC.LAYOUT_AUTO = 'auto';
 /**
   Default property to disable or enable by default the contextMenu
 */
-SC.CONTEXT_MENU_ENABLED = YES;
+SC.CONTEXT_MENU_ENABLED = NO;
 
 /**
   Default property to disable or enable if the focus can jump to the address
@@ -93,7 +93,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 /** 
   @class
   
-  Base class for managing a view.  View's provide two functions:
+  Base class for managing a view.  Views provide two functions:
   
   1. They translate state and events into drawing instructions for the 
      web browser and
@@ -233,19 +233,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (ret && (pv = this.get('parentView'))) ret = pv.get('isEnabledInPane');
     return ret ;
   }.property('parentView', 'isEnabled'),
-  
-  /**
-    @private
-    
-    Observer that resigns firstResponder if the view is Disabled and is first
-    responder. This will avoid cases like disabled view with focus rings.
+
+  /** @private
+    Observes the isEnabled property and resigns first responder if set to NO.
+    This will avoid cases where, for example, a disabled text field retains
+    its focus rings.
+
+    @observes isEnabled
   */
-  _scv_isEnabledDidChange: function(){
+  _sc_view_isEnabledDidChange: function(){
     if(!this.get('isEnabled') && this.get('isFirstResponder')){
       this.resignFirstResponder();
-    } 
+    }
   }.observes('isEnabled'),
-  
+
   // ..........................................................
   // IS VISIBLE IN WINDOW SUPPORT
   // 
@@ -296,47 +297,74 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    var last = this.get('isVisibleInWindow'),
-        cur = this.get('isVisible'), parentView ;
+    var previous = this.get('isVisibleInWindow'),
+        current  = this.get('isVisible'),
+        parentView;
     
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
-    if (cur) {
-      cur = (parentViewIsVisible === undefined) ? 
-       ((parentView=this.get('parentView')) ? 
-         parentView.get('isVisibleInWindow') : NO) : parentViewIsVisible ;
+    if (current) {
+      // If we weren't passed in 'parentViewIsVisible' (we generally aren't;
+      // it's an optimization), then calculate it.
+      if (parentViewIsVisible === undefined) {
+        parentView = this.get('parentView');
+        parentViewIsVisible = parentView ? parentView.get('isVisibleInWindow') : NO;
+      }
+      current = current && parentViewIsVisible;
     }
     
-    // if the state has changed, update it and notify children
-    // if (last !== cur) {
-      this.set('isVisibleInWindow', cur) ;
-      this._needsVisibiltyChange = YES ; // update even if we aren't visible
+    // If our visibility has changed, then set the new value and notify our
+    // child views to update their value.
+    //if (previous !== current) {
+      this.set('isVisibleInWindow', current) ;
       
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
-        childViews[idx].recomputeIsVisibleInWindow(cur);
+        childViews[idx].recomputeIsVisibleInWindow(current);
       }
-        
-      // if we just became visible, update layer + layout if needed...
-      if (cur) {
-        if (this.parentViewDidResize) this.parentViewDidResize();
-        
+
+
+      // We'll also kick off some necessary work when the visibility changes.
+      // This more appropriately belongs in a 'isVisibleInWindow' observer or
+      // some such helper method because this work is not strictly related to
+      // computing the visibility, but view performance is critical, so
+      // avoiding the extra observer is worthwhile.
+      if (current) {
+        // If we just became visible, update layer + layout if needed...
+        this.displayDidChange();
+
         if (this.get('childViewsNeedLayout')) {
           this.invokeOnce(this.layoutChildViewsIfNeeded);
         }
       }
-      
-      this.set('layerNeedsUpdate', YES) ;
-      
-      // if we were firstResponder, resign firstResponder also if no longer
-      // visible.
-      if (!cur && this.get('isFirstResponder')) {
-        this.resignFirstResponder();
+      else {
+        // We need to set some internal state to indicate that we went from
+        // visible to invisible.
+        //
+        // (Typically, invisible views are not updated for performance
+        // reasons, but if we went from visible to invisible, we need to
+        // update once.)
+        this._forceLayerUpdateDueToVisibilityChange = YES;
+        this.displayDidChange();
+
+        // Also, if we were previously 'firstResponder', resign it.
+        if (this.get('isFirstResponder')) this.resignFirstResponder();
       }
-      
-    // }
-    return this ;
+    //}
+    return this;
+  },
+
+
+  /** @private
+    Whenever the view’s visibility changes, we need to recompute whether it is
+    actually visible inside the window (a view is only visible in the window
+    if it is marked as visibile and its parent view is as well).
+  */
+  _sc_isVisibleDidChange: function() {
+    this.recomputeIsVisibleInWindow();
   }.observes('isVisible'),
+
+
   
   // ..........................................................
   // CHILD VIEW SUPPORT
@@ -421,8 +449,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     view.set('parentView', null) ;
     
     // remove view from childViews array.
-    var childViews = this.get('childViews') ;
-    var idx = childViews.indexOf(view) ;
+    var childViews = this.get('childViews'),
+        idx = childViews.indexOf(view) ;
     if (idx>=0) childViews.removeAt(idx);
     
     // The DOM will need some fixing up, note this on the view.
@@ -545,7 +573,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._invalidatePaneCacheForSelfAndAllChildViews();
     
     return this ;
-  }.observes('isVisible'),
+  },
   
   /** @private
     We want to cache the 'pane' property, but it's impossible for us to
@@ -643,6 +671,27 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   layerId: function() {
     return SC.guidFor(this) ;
   }.property().cacheable(),
+  
+  _lastLayerId: null,
+  /**
+    Handles changes in the layer id.
+  */
+  layerIdDidChange: function() {
+    var layer = this.get("layer");
+    if (layer && this.get("layerId") !== this._lastLayerId) {
+      // if we had an earlier one, remove from view hash.
+      if (this._lastLayerId) delete SC.View.views[this._lastLayerId];
+      
+      // set the current one as the new old one
+      this._lastLayerId = this.get("layerId");
+      
+      // and add the new one
+      SC.View.views[this.get("layerId")] = this;
+      
+      // and finally, set the actual layer id.
+      layer.id = this.get("layerId");
+    }
+  }.observes("layerId"),
   
   /**
     Attempts to discover the layer in the parent layer.  The default 
@@ -759,14 +808,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     You should not override this method.  Instead override updateLayer() or
     render().
     
-    @param {Boolean} isVisible if true assume view is visible even if it is not.
     @returns {SC.View} receiver
     @test in updateLayer
   */
   updateLayerIfNeeded: function() {
-    var viz = this.get('isVisibleInWindow') ;
-    if ((viz || this._needsVisibiltyChange) && this.get('layerNeedsUpdate')) {
-      this._needsVisibiltyChange = NO ;
+    var force = this._forceLayerUpdateDueToVisibilityChange,
+        shouldUpdate = (force || this.get('isVisibleInWindow')) && this.get('layerNeedsUpdate');
+    if (shouldUpdate) {
       // only update a layer if it already exists
       if (this.get('layer')) {
         this.beginPropertyChanges() ;
@@ -776,6 +824,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
     else this.set('layerNeedsUpdate', NO) ;
+
+    // If we were forcing the layer update for this round, clear the flag.
+    this._forceLayerUpdateDueToVisibilityChange = NO;
+
     return this ;
   },
   
@@ -806,6 +858,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         this._notifyDidAppendToDocument();
       }
     }
+
+      // If this view uses static layout, then notify that the frame (likely)
+      // changed.
+      if (this.useStaticLayout) this.viewDidResize();
+
     if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
     if(this.designer && this.designer.viewDidUpdateLayer) {
       this.designer.viewDidUpdateLayer(); //let the designer know
@@ -947,7 +1004,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */
   prepareContext: function(context, firstTime) {
-    var mixins, len, idx, layerId, bgcolor, cursor;
+    var mixins, len, idx, layerId, bgcolor, cursor, classNames;
   
     // do some initial setup only needed at create time.
     if (firstTime) {
@@ -962,11 +1019,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
   
     // do some standard setup...
-    if (this.get('isTextSelectable')) context.addClass('allow-select') ;
-    if (!this.get('isEnabled')) context.addClass('disabled') ;
-    if (!this.get('isVisible')) context.addClass('hidden') ;
-    if (this.get('isFirstResponder')) context.addClass('focus');
-    if (this.get('useStaticLayout')) context.addClass('sc-static-layout');
+    classNames = [];
+    if (this.get('isTextSelectable')) classNames.push('allow-select') ;
+    if (!this.get('isEnabled')) classNames.push('disabled') ;
+    if (!this.get('isVisible')) classNames.push('hidden') ;
+    if (this.get('isFirstResponder')) classNames.push('focus');
+    if (this.get('useStaticLayout')) classNames.push('sc-static-layout');
   
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
@@ -986,9 +1044,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     if (cursor instanceof SC.Cursor) {
-      context.addClass(cursor.get('className'));
+      classNames.push(cursor.get('className')) ;
     }
     
+    // Doing a single call to 'addClass' is faster than multiple.
+    context.addClass(classNames);
+  
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
     this.render(context, firstTime) ;
@@ -1048,14 +1109,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   
   /** @private - 
-    Invokes the receivers didAppendToDocument() method if it exists and then
-    invokes the same on all child views. 
+    Invokes the receivers didAppendLayerToDocument() method if it exists and
+    then invokes the same on all child views. 
   */
   
   _notifyDidAppendToDocument: function() {
     if (this.didAppendToDocument) this.didAppendToDocument();
-    if (this.useStaticLayout) this.notifyPropertyChange('frame');
-    
+
     var i=0, child, childLen, children = this.get('childViews');
     for(i=0, childLen=children.length; i<childLen; i++) {
       child = children[i];
@@ -1220,12 +1280,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         nextNode = nextView.get('layer') ;
       }
       
-      // add to parentNode if needed.  If we do add, then also notify view
-      // that its parentView has resized since joining a parentView has the
-      // same effect.
+      // add to parentNode if needed.
       if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
         parentNode.insertBefore(node, nextNode) ;
-        if (this.parentViewDidResize) this.parentViewDidResize() ;
       }
     }
     
@@ -1540,9 +1597,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
     
+    this._destroy(); // core destroy method
+    
     // remove from parent if found
     this.removeFromParent() ;
-    this._destroy(); // core destroy method
     
     // unregister for drags
     if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
@@ -1658,7 +1716,29 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // ...........................................
   // LAYOUT
   //
-  
+
+  /**
+    The 'frame' property depends on the 'layout' property as well as the
+    parent view’s frame.  In order to properly invalidate any cached values,
+    we need to invalidate the cache whenever 'layout' changes.  However,
+    observing 'layout' does not guarantee that; the observer might not be run
+    immediately.
+    
+    In order to avoid any window of opportunity where the cached frame could
+    be invalid, we need to force layoutDidChange() to always immediately run
+    whenever 'layout' is set.
+  */
+  propertyDidChange: function(key, value, _keepCache) {
+    // If the key is 'layout', we need to call layoutDidChange() immediately
+    // so that if the frame has changed any cached values (for both this view
+    // and any child views) can be appropriately invalidated.
+    if (key === 'layout') this.layoutDidChange();
+
+    // Resume notification as usual.
+    sc_super();
+  },
+
+
   /** 
     This convenience method will take the current layout, apply any changes
     you pass and set it again.  It is more convenient than having to do this
@@ -1810,8 +1890,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var myX=0, myY=0, targetX=0, targetY=0, view = this, f ;
     
     // walk up this side
-    while (view && view.get('frame')) {
-      f = view.get('frame'); myX += f.x; myY += f.y ;
+    //Note: Intentional assignment of variable f
+    while (view && (f = view.get('frame'))) {
+      myX += f.x; myY += f.y ;
       view = view.get('parentView') ; 
     }
     
@@ -1859,7 +1940,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null) ;
-  }.property('layout', 'useStaticLayout').cacheable(),
+  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidChange to check the frame for us
   
   /**
     Computes what the frame of this view would be if the parent were resized
@@ -2102,7 +2183,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     the clippingFrame is in the context of the view itself, not it's parent 
     view.
     
-    Normally this will be calculate based on the intersection of your own 
+    Normally this will be calculated based on the intersection of your own 
     clippingFrame and your parentView's contentClippingFrame.  
 
     @property {Rect}
@@ -2126,7 +2207,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.property('parentView', 'frame').cacheable(),
   
   /**
-    The clipping frame child views should interset with.  Normally this is 
+    The clipping frame child views should intersect with.  Normally this is 
     the same as the regular clippingFrame.  However, you may override this 
     method if you want the child views to actually draw more or less content
     than is actually visible for some reason.
@@ -2139,10 +2220,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   contentClippingFrame: function() {
     return this.get("clippingFrame");
   }.property('clippingFrame').cacheable(),
-  
+
   /** @private
-    Whenever the clippingFrame changes, this observer will fire, notifying
-    child views that their frames have also changed.
+    This method is invoked whenever the clippingFrame changes, notifying
+    each child view that its clippingFrame has also changed.
   */
   _sc_view_clippingFrameDidChange: function() {
     var cvs = this.get('childViews'), len = cvs.length, idx, cv ;
@@ -2158,9 +2239,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // frame changes should be sent all the time unless this property is 
       // present to indicate that we want the old 1.0 API behavior instead.
       // 
-      if (!cv.hasStaticLayout) cv.notifyPropertyChange('clippingFrame') ;
+      if (!cv.hasStaticLayout) {
+        cv.notifyPropertyChange('clippingFrame') ;
+        cv._sc_view_clippingFrameDidChange();
+      }
     }
-  }.observes('clippingFrame'),
+  },
     
   /** 
     This method may be called on your view whenever the parent view resizes.
@@ -2173,7 +2257,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in viewDidResize
   */
   parentViewDidResize: function() {
-    var layout = this.get('layout') , isPercentage, isFixed;
+    var layout = this.get('layout'), isPercentageFunc, isPercentage, isFixed;
     
     // only resizes if the layout does something other than left/top - fixed
     // size.
@@ -2181,39 +2265,60 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       (layout.left !== undefined) && (layout.top !== undefined) &&
       (layout.width !== undefined) && (layout.height !== undefined)
     );
-    
-    isPercentage = (SC.isPercentage(layout.left) || 
-                    SC.isPercentage(layout.top) ||
-                    SC.isPercentage(layout.width) || 
-                    SC.isPercentage(layout.right) ||
-                    SC.isPercentage(layout.centerX) || 
-                    SC.isPercentage(layout.centerY));
-    
+
+    isPercentageFunc = SC.isPercentage;
+    isPercentage = (isPercentageFunc(layout.left) || 
+                    isPercentageFunc(layout.top) ||
+                    isPercentageFunc(layout.width) || 
+                    isPercentageFunc(layout.right) ||
+                    isPercentageFunc(layout.centerX) || 
+                    isPercentageFunc(layout.centerY));
+
+    // Do we think there's a chance our frame will have changed as a result?
     if (!isFixed || isPercentage) {
-      this.notifyPropertyChange('frame') ;
-      this.viewDidResize() ;
+      // There's a chance our frame changed.  Invoke viewDidResize(), which
+      // will notify about our change to 'frame' (if it actually changed) and
+      // appropriately notify our child views.
+      this.viewDidResize();
     }
   },
-  
+
+
+
   /**
     This method is invoked on your view when the view resizes due to a layout
-    change or due to the parent view resizing.  You can override this method
+    change or potentially due to the parent view resizing (if your view’s size
+    depends on the size of your parent view).  You can override this method
     to implement your own layout if you like, such as performing a grid 
     layout.
     
-    The default implementation simply calls parentViewDidResize on all of
-    your children.
+    The default implementation simply notifies about the change to 'frame' and
+    then calls parentViewDidResize on all of your children.
     
     @returns {void}
   */
   viewDidResize: function() {
+    this._viewFrameDidChange();
+
+    // Also notify our children.
     var cv = this.childViews, len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
-      view = cv[idx] ;
-      if (view.parentViewDidResize) view.parentViewDidResize() ;
+      view = cv[idx];
+      view.parentViewDidResize();
     }
-  }.observes('layout'),
-  
+  },
+
+  /** @private
+    Invoked by other views to notify this view that its frame has changed.
+
+    This notifies the view that its frame property has changed,
+    then propagates those changes to its child views.
+  */
+  _viewFrameDidChange: function() {
+    this.notifyPropertyChange('frame');
+    this._sc_view_clippingFrameDidChange();
+  },
+
   // Implementation note: As a general rule, paired method calls, such as 
   // beginLiveResize/endLiveResize that are called recursively on the tree
   // should reverse the order when doing the final half of the call. This 
@@ -2274,7 +2379,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.didEndLiveResize) this.didEndLiveResize() ;
     return this ;
   },
-  
+
+  /**
+    Setting wantsAcceleratedLayer to YES will use 3d transforms to move the
+    layer when available.
+  */
+  wantsAcceleratedLayer: NO,
+
+  /**
+    Specifies whether 3d transforms can be used to move the layer.
+  */
+  hasAcceleratedLayer: function(){
+    return this.get('wantsAcceleratedLayer') && SC.platform.supportsCSSTransforms;
+  }.property('wantsAcceleratedLayer').cacheable(),
+
+
   /**
     layoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
@@ -2301,7 +2420,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lMW = layout.maxWidth,
         lMH = layout.maxHeight,
         lcX = layout.centerX, 
-        lcY = layout.centerY;
+        lcY = layout.centerY,
+        hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
+        translateTop = 0,
+        translateLeft = 0;
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
       error= SC.Error.desc("%@.layout() you cannot use width:auto if "+
               "staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
@@ -2315,14 +2437,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       console.error(error.toString()) ;
       throw error ;
     }
-    
+
     // X DIRECTION
     
     // handle left aligned and left/right
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)) {
         ret.left = (lL*100)+"%";  //percentage left
-      }else{
+      } else if (hasAcceleratedLayer && SC.empty(lR)) {
+        translateLeft = Math.floor(lL);
+        ret.left = 0;
+      } else {
         ret.left = Math.floor(lL); //px left
       }
       ret.marginLeft = 0 ;
@@ -2399,8 +2524,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // handle top aligned and left/right
     if (!SC.none(lT)) {
-      if(SC.isPercentage(lT)) ret.top = (lT*100)+"%";
-      else ret.top = Math.floor(lT);
+      if(SC.isPercentage(lT)) {
+        ret.top = (lT*100)+"%";
+      } else if (hasAcceleratedLayer && SC.empty(lB)) {
+        translateTop = Math.floor(lT);
+        ret.top = 0;
+      } else {
+        ret.top = Math.floor(lT);
+      }
       if (lH !== undefined) {
         if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
         else if(SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
@@ -2483,7 +2614,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       x = dims[loc];
       if (ret[x]===0) ret[x]=null;
     }
-    
+
+    if (hasAcceleratedLayer) {
+      var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
+      if (SC.platform.supportsCSS3DTransforms) transform += ' translateZ(0px)'
+      ret[SC.platform.domCSSPrefix+'Transform'] = transform;
+    }
+
     // convert any numbers into a number + "px".
     for(key in ret) {
       value = ret[key];
@@ -2504,13 +2641,51 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     This method is called whenever a property changes that invalidates the 
     layout of the view.  Changing the layout will do this automatically, but 
     you can add others if you want.
+
+    Implementation Note:  In a traditional setup, we would simply observe
+    'layout' here, but as described above in the documentation for our custom
+    implementation of propertyDidChange(), this method must always run
+    immediately after 'layout' is updated to avoid the potential for stale
+    (incorrect) cached 'frame' values.
     
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
+    // Did our layout change in a way that could cause us to be resized?  If
+    // not, then there's no need to invalidate the frames of our child views.
+    var previousLayout = this._previousLayout,
+        currentLayout  = this.get('layout'),
+        didResize      = YES,
+        previousWidth, previousHeight, currentWidth, currentHeight;
+
+    if (previousLayout  &&  previousLayout !== currentLayout) {
+      // This is a simple check to see whether we think the view may have
+      // resized.  We could look for a number of cases, but for now we'll
+      // handle only one simple case:  if the width and height are both
+      // specified, and they have not changed.
+      previousWidth = previousLayout.width;
+      if (previousWidth !== undefined) {
+        currentWidth = currentLayout.width;
+        if (previousWidth === currentWidth) {
+          previousHeight = previousLayout.height;
+          if (previousLayout !== undefined) {
+            currentHeight = currentLayout.height;
+            if (previousHeight === currentHeight) didResize = NO;
+          }
+        }
+      }
+    }
+
     this.beginPropertyChanges() ;
-    if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;
+    if (didResize) {
+      this.viewDidResize();
+    }
+    else {
+      // Even if we didn't resize, our frame might have changed.
+      // viewDidResize() handles this in the other case.
+      this._viewFrameDidChange();
+    }
     this.endPropertyChanges() ;
     
     // notify layoutView...
@@ -2524,7 +2699,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     return this ;
-  }.observes('layout'),
+  },
   
   /**
     This this property to YES whenever the view needs to layout its child
@@ -2616,6 +2791,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       context = this.renderContext(layer);
       this.renderLayout(context);
       context.update();
+
+      // If this view uses static layout, then notify if the frame changed.
+      // (viewDidResize will do a comparison)
+      if (this.useStaticLayout) this.viewDidResize();
     }
     layer = null ;
     return this ;
@@ -2668,8 +2847,55 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   contextMenu: function(evt) {
     if(!this.get('isContextMenuEnabled')) evt.stop();
     return true;
-  }
+  },
   
+  /**
+    A boundary set of distances outside which the touch will not be considered "inside" the view anymore.
+    
+    By default, up to 50px on each side.
+  */
+  touchBoundary: { left: 50, right: 50, top: 50, bottom: 50 },
+  
+  /**
+    @private
+    A computed property based on frame.
+  */
+  _touchBoundaryFrame: function (){
+    return this.get("parentView").convertFrameToView(this.get('frame'), null);
+  }.property("frame", "parentView").cacheable(),
+  
+  /**
+    Returns YES if the provided touch is within the boundary.
+  */
+  touchIsInBoundary: function(touch) {
+    var f = this.get("_touchBoundaryFrame"), maxX = 0, maxY = 0, boundary = this.get("touchBoundary");
+    var x = touch.pageX, y = touch.pageY;
+    
+    if (x < f.x) {
+      x = f.x - x;
+      maxX = boundary.left;
+    } else if (x > f.x + f.width) {
+      x = x - (f.x + f.width);
+      maxX = boundary.right;
+    } else {
+      x = 0;
+      maxX = 1;
+    }
+    
+    if (y < f.y) {
+      y = f.y - y;
+      maxY = boundary.top;
+    } else if (y > f.y + f.height) {
+      y = y - (f.y + f.height);
+      maxY = boundary.bottom;
+    } else {
+      y = 0;
+      maxY = 1;
+    }
+    
+    if (x > 100 || y > 100) return NO;
+    return YES;
+  }
 });
 
 SC.View.mixin(/** @scope SC.View */ {
@@ -3009,25 +3235,24 @@ SC.View.mixin(/** @scope SC.View */ {
   define an outlet that points to another view or object.  The root object
   used for the path will be the receiver.
 */
-SC.outlet = function(path) {
+SC.outlet = function(path, root) {
   return function(key) {
-    return (this[key] = SC.objectForPropertyPath(path, this)) ;
+    return (this[key] = SC.objectForPropertyPath(path, (root !== undefined) ? root : this)) ;
   }.property();
 };
 
 /** @private on unload clear cached divs. */
 SC.View.unload = function() {
-  
   // delete view items this way to ensure the views are cleared.  The hash
   // itself may be owned by multiple view subclasses.
   var views = SC.View.views;
   if (views) {
-    for(var key in views) {
-      if (!views.hasOwnProperty(key)) continue ;
-      delete views[key];
-    }
-  }
-  
+   for(var key in views) {
+     if (!views.hasOwnProperty(key)) continue ;
+     delete views[key];
+   }
+  }   
 } ;
 
-SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
+//unload views for IE, trying to collect memory.
+if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;

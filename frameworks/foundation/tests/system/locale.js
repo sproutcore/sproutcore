@@ -7,7 +7,7 @@ module("object.SC.Locale()", {
 				init: function(){
 					sc_super();
 					//hash of new languages
-					var newLocales = { deflang: 'dl'};
+					var newLocales = { deflang: 'dl', empty: '' };
 					
 					//Added the new languages to the existing list of locales
 					SC.Locale.addStrings(newLocales);
@@ -31,6 +31,11 @@ test("Locale.locWithDefault() : localized version of the string or the string if
 	equals(LocaleObject.locWithDefault("en"), "en") ;
 	equals(LocaleObject.locWithDefault("jp", "Japanese"), "Japanese") ;
 	equals(LocaleObject.locWithDefault('deflang'), "dl") ;
+});
+
+test("Locale.locWithDefault() : localized version of the string even if localized version is blank", function() {
+  equals(LocaleObject.locWithDefault("empty"), "");
+  equals(LocaleObject.locWithDefault("empty", "Empty"), "");
 });
 
 test("Locale.addStrings() : Should be able to add the passed hash of strings to the locale's strings table", function() {		

@@ -161,11 +161,6 @@ SC.Locale.define('en', {
 
 SC.mixin(Date,{
   
-  // returns the current time as an offset
-  now: function() {
-    return new Date().getTime() ;
-  },
-  
   // ------------------------------------------------------------------
   // isDate ( date_string, format_string )
   // Returns true if date string matches format of format string and

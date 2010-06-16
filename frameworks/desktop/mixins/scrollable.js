@@ -20,6 +20,12 @@
 */
 SC.Scrollable = {
   
+//@if(debug)
+  initMixin: function() {
+    console.warn("SC.Scrollable is deprecated and will be removed in a future version of SproutCore.  Consider pulling the mixin into your own app if you want to keep using it.");
+  },
+//@endif 
+
   /** Informs the view system that the receiver is scrollable.
   
     Must always be true.

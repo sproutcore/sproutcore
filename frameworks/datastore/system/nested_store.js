@@ -95,7 +95,7 @@ SC.NestedStore = SC.Store.extend(
     chained stores.  For a log changes that may actually be committed back to
     the server see the changelog property.
     
-    @property {Array}
+    @property {SC.Set}
   */
   chainedChanges: null,
     
