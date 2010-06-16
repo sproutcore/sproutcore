@@ -119,7 +119,8 @@ SC.Animatable = {
     this._animators = {}; // keyAnimated => object describing it.
     this._animatableSetCSS = "";
     this._last_transition_css = ""; // to keep from re-setting unnecessarily
-    this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
+    // Setting this conditionally allows us to disableAnimation in the init method, before initMixin gets called
+    if (this._disableAnimation === undefined) this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
     this._transitionCallbacks = {}; // define callback set
     
     // alert if layer already created
@@ -159,7 +160,9 @@ SC.Animatable = {
   If you call disable twice, you need two enables to start it. Three times, you need
   three enables.
   */
-  disableAnimation: function() { 
+  disableAnimation: function() {
+    // This fallback is necessary if disableAnimation is called in the init method before initMixin is called
+    if (this._disableAnimation === undefined) this._disableAnimation = 0;
     this._disableAnimation++;
   },
   
