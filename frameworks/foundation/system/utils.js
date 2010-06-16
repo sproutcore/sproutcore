@@ -23,7 +23,7 @@ SC.mixin( /** @scope SC */ {
     
     Use this method when you want to cause a file to be downloaded to a users
     desktop instead of having it display in the web browser.  Note that your
-    server must return a header indicating that the file is intended for 
+    server must return a header indicating that the file  is intended for 
     download also.
   */
   download: function(path) {
@@ -50,7 +50,7 @@ SC.mixin( /** @scope SC */ {
         document.body.removeChild(document.getElementById(frameId)); 
         frameId = null;
       } ;
-      var t = r.invokeLater(null, 2000);
+      r.invokeLater(null, 2000);
     }
     //remove possible IE7 leak
     tempDLIFrame = null;
@@ -314,7 +314,8 @@ SC.mixin( /** @scope SC */ {
     @param classNames {String} (Optional) Class names to add to the test element.
   */
   prepareStringMeasurement: function(exampleElement, classNames) {
-    var element = this._metricsCalculationElement, classes, styles, style;
+    var element = this._metricsCalculationElement, classes, styles, style,
+        cqElem;
     
     // collect the class names
     classes = SC.A(classNames).join(' ');
@@ -324,7 +325,8 @@ SC.mixin( /** @scope SC */ {
       element = this._metricsCalculationElement = document.createElement("div");
       document.body.insertBefore(element, null);
     }
-    
+
+    cqElem = SC.$(element);    
     // two possibilities: example element or type string
     if (SC.typeOf(exampleElement) != SC.T_STRING) {
       var computed = null;
@@ -337,6 +339,7 @@ SC.mixin( /** @scope SC */ {
       // set (lovely cssText property here helps a lot—if it works. Unfortunately, only Safari supplies it.)
       style = computed.cssText;
       
+
       // if that didn't work (Safari-only?) go alternate route. This is SLOW code...
       if (!style || style.trim() === "") {
         // there is only one way to do it...
@@ -370,7 +373,7 @@ SC.mixin( /** @scope SC */ {
       else
       {
         // set style
-        element.setAttribute("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
+        cqElem.attr("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
       }
       
       // clean up
@@ -380,7 +383,7 @@ SC.mixin( /** @scope SC */ {
       style = exampleElement;
       
       // set style
-      element.setAttribute("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
+      cqElem.attr("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
     }
     
     element.className = classes;
@@ -617,12 +620,11 @@ SC.mixin( /** @scope SC */ {
   convertHexToHsv: function (hex) {
     var rgb = this.expandColor(hex),
         max = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]),
-        min = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
-
-    var h = (max == min) ? 0 : ((max == rgb[0]) ? ((rgb[1]-rgb[2])/(max-min)/6) : ((max == rgb[1]) ? ((rgb[2]-rgb[0])/(max-min)/6+1/3) : ((rgb[0]-rgb[1])/(max-min)/6+2/3)));
+        min = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]),
+        s = (max === 0) ? 0 : (1 - min/max),
+        v = max/255,
+        h = (max == min) ? 0 : ((max == rgb[0]) ? ((rgb[1]-rgb[2])/(max-min)/6) : ((max == rgb[1]) ? ((rgb[2]-rgb[0])/(max-min)/6+1/3) : ((rgb[0]-rgb[1])/(max-min)/6+2/3)));
     h = (h < 0) ? (h + 1) : ((h > 1)  ? (h - 1) : h);
-    var s = (max === 0) ? 0 : (1 - min/max);
-    var v = max/255;
     return [h, s, v];
   },
 
@@ -644,9 +646,8 @@ SC.mixin( /** @scope SC */ {
 
   // parse rgb color or 3-digit hex color to return a properly formatted 6-digit hex colour spec, or false
   parseColor: function(string) {
-    var i=0, color = '#', match;
+    var i=0, color = '#', match, part;
     if(match = this.PARSE_COLOR_RGBRE.exec(string)) {
-      var part;
       for (i=1; i<=3; i++) {
         part = Math.max(0, Math.min(255, parseInt(match[i],0)));
         color += this.toColorPart(part);
@@ -692,9 +693,9 @@ SC.mixin( /** @scope SC */ {
   // Convert double byte characters to standard Unicode. Considers only
   // conversions from zenkaku to hankaky roomaji
   uniJapaneseConvert: function (str){ 
-    var nChar, cString= '', j;
+    var nChar, cString= '', j, jLen;
     //here we cycle through the characters in the current value 
-    for (j=0; j<str.length; j++){ 
+    for (j=0, jLen = str.length; j<jLen; j++){ 
       nChar = str.charCodeAt(j);
 
       //here we do the unicode conversion from zenkaku to hankaku roomaji 
