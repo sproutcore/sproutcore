@@ -1068,6 +1068,9 @@ SC.RootResponder = SC.Object.extend({
         // Create an SC.Touch instance for every touch.
         touchEntry = SC.Touch.create(touch, this);
         
+        // skip the touch if there was no target
+        if (!touchEntry.targetView) continue;
+        
         // account for hidden touch intercept (passing through touches, etc.)
         if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
         
@@ -1130,13 +1133,13 @@ SC.RootResponder = SC.Object.extend({
 
         // get our touch
         touchEntry = this._touches[touch.identifier];
-        if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
 
-        // sanity-check
+        // we may have no touch entry; this can happen if somehow the touch came to a non-SC area.
         if (!touchEntry) {
-          console.warn("Received a touchmove for a touch we don't know about. This is bad.");
           continue;
         }
+        
+        if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
 
         // update touch
         touchEntry.pageX = touch.pageX;
@@ -1213,6 +1216,11 @@ SC.RootResponder = SC.Object.extend({
         touch = touches[idx];
         touch.type = 'touchend';
         touchEntry = this._touches[touch.identifier];
+        
+        // check if there is an entry
+        if (!touchEntry) continue;
+        
+        // continue work
         touchEntry.timeStamp = evt.timeStamp;
         touchEntry.pageX = touch.pageX;
         touchEntry.pageY = touch.pageY;
