@@ -809,6 +809,13 @@ SC.ListItemView = SC.View.extend(
   /** @private
    Could check with a validator someday...
   */
+  inlineEditorShouldBeginEditing: function(inlineEditor) {
+   return YES ;
+  },
+
+  /** @private
+   Could check with a validator someday...
+  */
   inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
    return YES ;
   },
