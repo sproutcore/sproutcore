@@ -330,49 +330,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this.renderer) return this.renderer.indexForEvent(evt);
   },
   
-  /**
-    Determines an item index based on a position. The position does not have to be within the view's
-    bounding rectangle. If no item is at that position, this will return -1.
-    
-    NOTE: Eventually, this sort of function should be implemented in a renderer.
-  */
-  displayItemIndexForPosition: function(pageX, pageY) {
-    // find the segments
-    var segments = this.$('.sc-segment'), len = segments.length, idx, segment, r;
-    
-    // loop through them (yes, this comment is mostly because it looks nice in TextMate)
-    for (idx = 0; idx < len; idx++) {
-      // get the segment
-      segment = segments[idx];
-      
-      // get its rectangle
-      if (segment.getBoundingClientRect) {
-        r = segment.getBoundingClientRect();
-      }else{
-        r = {};
-        var ret   = SC.viewportOffset(segment); // get x & y
-        var cq = SC.$(segment);
-        r.top = ret.y;
-        r.left = ret.x;
-        r.bottom = ret.y + cq.outerHeight();
-        r.right = ret.x + cq.outerWidth();
-      }
-      
-      // based on orientation, check the position left-to-right or up-to-down.
-      if (this.get('layoutDirection') == SC.LAYOUT_VERTICAL) {
-        // if it fits, return it right away
-        if (pageY > r.top && pageY < r.bottom) return idx;
-      }
-      else {
-        // if it fits, return it right away.
-        if (pageX > r.left && pageX < r.right) return idx;
-      }
-    }
-    
-    // if we didn't find anything, return the old standard -1 for "not found."
-    return -1;
-  },
-  
   keyDown: function(evt) {
     // handle tab key
     var i, item, items, len, value, isArray;

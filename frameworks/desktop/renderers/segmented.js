@@ -152,23 +152,20 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
   },
   
   indexForEvent: function(evt) {
-    var elem = SC.$(evt.target) ;
-    if (!elem || elem===document) return -1; // nothing found
+    var pageX = evt.pageX, pageY = evt.pageY;
     
-    // start at the target event and go upwards until we reach either the 
-    // root responder or find an element with an 'sc-segment' class.
-    var root = this.$(), match = null ;
-    while(!match && (elem.length>0) && (elem[0]!==root[0])) {
-      if (elem.hasClass('sc-segment')) {
-        match = elem;
-      } else elem = elem.parent();
+    var segments = this.$('.sc-segment'), len = segments.length, idx, segment, r;
+    for (idx = 0; idx < len; idx++) {
+      segment = segments[idx];
+      r = segment.getBoundingClientRect();
+      if (this.layoutDirection == SC.LAYOUT_VERTICAL) {
+        if (pageY > r.top && pageY < r.bottom) return idx;
+      }
+      else {
+        if (pageX > r.left && pageX < r.right) return idx;
+      }
     }
-    
-    elem = root = null;
-
-    // if a match was found, return the index of the match in subtags
-    var ret = (match) ? this.$('.sc-segment').index(match) : -1;
-    return ret;
+    return -1;
   }
 });
 
