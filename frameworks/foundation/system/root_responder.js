@@ -1629,6 +1629,11 @@ SC.RootResponder = SC.Object.extend({
   //
 
   mousedown: function(evt) {
+    if (SC.platform.touch) {
+      evt.allowDefault();
+      return YES;
+    }
+    
     try {
       if(!SC.browser.msie) window.focus();
       
@@ -1683,6 +1688,11 @@ SC.RootResponder = SC.Object.extend({
     sent.
   */
   mouseup: function(evt) {
+    if (SC.platform.touch) {
+      this.allowDefault();
+      return YES;
+    }
+    
     this.targetViewForEvent(evt);
     try {
       if (this._drag) {
@@ -1766,6 +1776,11 @@ SC.RootResponder = SC.Object.extend({
    trigger calls to mouseDragged.
   */
   mousemove: function(evt) {
+    if (SC.platform.touch) {
+      evt.allowDefault();
+      return YES;
+    }
+    
     if (SC.browser.msie) {
       if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
     }
