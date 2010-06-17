@@ -9,15 +9,22 @@
 require('system/builder') ;
 
 /**
-  CoreQuery is a DOM manipulation library used internally by SproutCore to
-  find and edit DOM elements.
+  CoreQuery is a simplified DOM manipulation library used internally by 
+  SproutCore to find and edit DOM elements.  Outside of SproutCore, you 
+  should generally use a more full-featured DOM library such as Prototype
+  or jQuery.
   
-  CoreQuery is jQuery with some additional plugins, including support for the
-  SC.Enumerable mixin.
+  CoreQuery itself is a subset of jQuery with some additional plugins.  If
+  you have jQuery already loaded when SproutCore loads, in fact, it will 
+  replace CoreQuery with the full jQuery library and install any CoreQuery
+  plugins, including support for the SC.Enumerable mixin.
+  
+  Much of this code is adapted from jQuery 1.2.6, which is available under an
+  MIT license just like SproutCore.
   
   h1. Using CoreQuery
   
-  You can work with CoreQuery like you would work with jQuery.  The core
+  You can work with CoreQuery much like you would work with jQuery.  The core
   manipulation object is exposed as SC.$.  To find some elements on the page
   you just pass in a selector like this:
   
@@ -81,10 +88,28 @@ require('system/builder') ;
   @class
   @extends SC.Builder.fn
 */
-SC.CoreQuery = jQuery.noConflict();
+SC.CoreQuery = (function() {
+  // Define CoreQuery inside of its own scope to support some jQuery idioms.
+  
+  // A simple way to check for HTML strings or ID strings
+  // (both of which we optimize for)
+  var quickExpr = /^[^<]*(<(.|\s)+>)[^>]*$|^#([\w-]+)$/,
+  // Is it a simple selector
+  isSimple = /^.[^:#\[\.]*$/;
+  
+  // Regular expressions
+  var CQHtmlRegEx =/ CQ\d+="(?:\d+|null)"/g,
+  tagSearchRegEx = /(<(\w+)[^>]*?)\/>/g,
+  xmlTagsRegEx = /^(abbr|br|col|img|input|link|meta|param|hr|area|embed)$/i,
+  checkforSpaceRegEx = /\s+/,
+  trimWhiteSpaceRegEx = /^\s+/,
+  bodyHTMLOffsetRegEx = /^body|html$/i,
+  specialAttributesRegEx = /href|src|style/,
+  tagsWithTabIndexRegEx = /(button|input|object|select|textarea)/i,
+  alphaDetectRegEx = /alpha\([^)]*\)/,
+  alphaReplaceRegEx = /opacity=([^)]*)/;
 
-// Install CoreQuery as SC.$().
-SC.$ = SC.CoreQuery;
+  var styleFloat = SC.browser.msie ? "styleFloat" : "cssFloat";
 
   // used for the find() method.
   var chars = (SC.browser.safari && parseInt(SC.browser.version,0) < 417) ?
@@ -1951,6 +1976,10 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
 /** 
   Make CoreQuery enumerable.  Since some methods need to be disambiguated,
   we will implement some wrapper functions here. 
+  
+  Note that SC.Enumerable is implemented on SC.Builder, which means the
+  CoreQuery object inherits this automatically.  jQuery does not extend from
+  SC.Builder though, so we reapply SC.Enumerable just to be safe.
 */
 (function() {
   var original = {},
@@ -1992,7 +2021,9 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   // loop through an update some enumerable methods.  If this is CoreQuery,
   // we just need to patch up the wrapped methods.  If this is jQuery, we
   // need to go through the entire set of SC.Enumerable.
-  var fn = SC.$.fn, enumerable = SC.Enumerable, value;
+  var isCoreQuery = SC.$.jquery === 'SC.CoreQuery',
+      fn = SC.$.fn, enumerable = isCoreQuery ? wrappers : SC.Enumerable ,
+      value;
   for(var key in enumerable) {
     if (!enumerable.hasOwnProperty(key)) continue ;
     value = enumerable[key];
