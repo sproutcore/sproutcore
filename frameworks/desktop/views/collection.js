@@ -2313,7 +2313,7 @@ SC.CollectionView = SC.View.extend(
     // become first responder if possible.
     this.becomeFirstResponder() ;
     
-    this._cv_performSelectAction(this, ev);
+    this.invokeLater("select", 1, contentIndex);
     
     return YES;
   },
