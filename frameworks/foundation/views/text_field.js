@@ -24,6 +24,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   tagName: 'label',
   classNames: ['sc-text-field-view'],
+  isTextField: YES,
 
   // ..........................................................
   // PROPERTIES
@@ -631,24 +632,33 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidFocus: function(evt) {
     this.beginEditing(evt);
     
-    // handle touch intercept
-    if (this.getPath("pane.usingTouchIntercept")) {
-      this.get("pane").hideTouchIntercept();
+    // We have to hide the intercept pane, as it blocks the events. 
+    // However, show any that we previously hid, first just in case something wacky happened.
+    if (this._didHideInterceptForPane) {
+      this._didHideInterceptForPane.showTouchIntercept();
+      this._didHideInterceptForPane = null;
+    }
+    
+    // now, hide the intercept on this pane if it has one
+    var pane = this.get('pane');
+    if (pane && pane.get("usingTouchIntercept")) {
+      // hide
+      pane.hideTouchIntercept();
+      
+      // and set our internal one so we can unhide it (even if the pane somehow changes)
+      this._didHideInterceptForPane = this.get("pane");
     }
   },
   
   fieldDidBlur: function(evt) {
     this.commitEditing(evt);
-    var pane = this.get("pane");
-    // handle touch intercept
-    if (pane && pane.get("usingTouchIntercept")) {
-      pane.showTouchIntercept();
-    }
     
-    // HACK: Mobile WebKit sometimes does not remember to scroll to top.
-    // make sure the document is scrolled to top after.
-    document.body.scrollTop = 0;
-    document.body.scrollLeft = 0;
+    // get the pane we hid intercept pane for (if any)
+    var touchPane = this._didHideInterceptForPane;
+    if (touchPane) {
+      touchPane.showTouchIntercept();
+      touchPane = null;
+    }
   },
   
   _field_fieldValueDidChange: function(evt) {
@@ -784,6 +794,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   didLoseKeyResponderTo: function(keyView) {
     var el = this.$input()[0];
     if (el) el.blur();
+    
+    this.invokeLater("scrollToOriginIfNeeded", 100);
+  },
+  
+  /**
+    @private
+    Scrolls to origin if necessary (if the pane's current firstResponder is not a text field).
+  */
+  scrollToOriginIfNeeded: function() {
+    var pane = this.get("pane"), first = pane.get("firstResponder");
+    if (!first || !first.get("isTextField")) {
+      document.body.scrollTop = document.body.scrollLeft = 0;
+    }
   },
 
   parentViewDidResize: function() {
@@ -889,7 +912,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   selectStart: function(evt) {
     return YES;
   },
-  
   
   /**
     This function is to notify if the browser supports the placeholder attribute
