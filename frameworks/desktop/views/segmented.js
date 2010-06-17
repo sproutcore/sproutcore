@@ -330,24 +330,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this.renderer) return this.renderer.indexForEvent(evt);
   },
   
-  /**
-    NOTE: #renderer should implement
-  */
-  displayItemIndexForPosition: function(pageX, pageY) {
-    var segments = this.$('.sc-segment'), len = segments.length, idx, segment, r;
-    for (idx = 0; idx < len; idx++) {
-      segment = segments[idx];
-      r = segment.getBoundingClientRect();
-      if (this.get('layoutDirection') == SC.LAYOUT_VERTICAL) {
-        if (pageY > r.top && pageY < r.bottom) return idx;
-      }
-      else {
-        if (pageX > r.left && pageX < r.right) return idx;
-      }
-    }
-    return -1;
-  },
-  
   keyDown: function(evt) {
     // handle tab key
     var i, item, items, len, value, isArray;
