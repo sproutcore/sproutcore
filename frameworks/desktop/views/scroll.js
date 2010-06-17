@@ -943,12 +943,15 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this.invokeLater(this.beginTouchesInContent, 1, generation);
     }
     this.beginTouchTracking(touch, YES);
+    return YES;
   },
 
   beginTouchesInContent: function(gen) {
     if (gen !== this.touchGeneration) return;
+    
     var touch = this.touch, itemView;
-    if (touch && this.tracking && !this.dragging) {
+    if (touch && this.tracking && !this.dragging && !touch.touch.scrollHasEnded) {
+      // try to capture the touch
       touch.touch.captureTouch(this, YES);
       if (!touch.touch.touchResponder) touch.touch.makeTouchResponder(this);
     }
@@ -1046,7 +1049,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       lastEventTime: touch.timeStamp,      
       
       // the touch used
-      touch: touch
+      touch: (starting ? touch : (this.touch ? this.touch.touch : null))
     };
 
     if (!this.tracking) {
@@ -1197,6 +1200,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var touchStatus = this.touch,
         avg = touch.averagedTouchesForView(this);
     
+    touch.scrollHasEnded = YES;
     if (avg.touchCount > 0) {
       this.beginTouchTracking(touch, NO);
     } else {
@@ -1208,10 +1212,27 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
         this.startDecelerationAnimation();
       } else {
-        // trigger touchStart/End on actual target view if possible
+        // this part looks weird, but it is actually quite simple.
+        // First, we send the touch off for capture+starting again, but telling it to return to us
+        // if nothing is found or if it is released.
+        touch.captureTouch(this, YES);
+        
+        // if we went anywhere, did anything, etc., call end()
+        if (touch.touchResponder && touch.touchResponder !== this) {
+          touch.end();
+        }
+        
+        // now check if it was released to us or stayed with us the whole time, or is for some
+        // wacky reason empty (in which case it is ours still). If so, and there is a next responder,
+        // relay to that.
+        if (!touch.touchResponder || touch.touchResponder === this) {
+          if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
+        } else {
+          // in this case, the view that captured it and changed responder should have handled
+          // everything for us.
+        }
+        
         this.touch = null;
-        touch.captureTouch(this);
-        if (touch.touchResponder && touch.touchResponder !== this) touch.touchResponder.tryToPerform("touchEnd", touch);
       }
       
       this.tracking = NO;

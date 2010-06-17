@@ -849,6 +849,15 @@ SC.RootResponder = SC.Object.extend({
   },
 
   assignTouch: function(touch, view) {
+    // sanity-check
+    if (touch.hasEnded) throw "This touch is done for! Yet something tried to assign it.";
+    
+    // unassign from old view if necessary
+    if (touch.view === view) return;
+    if (touch.view) {
+      this.unassignTouch(touch);
+    }
+    
     // create view entry if needed
     if (!this._touchedViews[SC.guidFor(view)]) {
       this._touchedViews[SC.guidFor(view)] = {
@@ -927,7 +936,7 @@ SC.RootResponder = SC.Object.extend({
     makeTouchResponder is called with an event object. However, it usually triggers custom touchStart/touchCancelled
     events on the views. The event object is passed so that functions such as stopPropagation may be called.
   */
-  makeTouchResponder: function(touch, responder, shouldStack) {
+  makeTouchResponder: function(touch, responder, shouldStack, upViewChain) {
     var stack = touch.touchResponders, touchesForView;
 
     // find the actual responder (if any, I suppose)
@@ -942,15 +951,38 @@ SC.RootResponder = SC.Object.extend({
     if (responder) pane = responder.get('pane') ;
     else pane = this.get('keyPane') || this.get('mainPane') ;
 
-    // if we found a valid pane, send the event to it
-    if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('     -- Sending touchStart to '+responder.toString());
-    responder = (pane) ? pane.sendEvent("touchStart", touch, responder) : null ;
+    // if the responder is not already in the stack...
+    
+    if (stack.indexOf(responder) < 0) {
+      // if we need to go up the view chain, do so
+      if (upViewChain) {
+        // if we found a valid pane, send the event to it
+        try {
+          responder = (pane) ? pane.sendEvent("touchStart", touch, responder) : null ;
+        } catch (e) {
+          SC.Logger.error("Error in touchStart: " + e);
+          responder = null;
+        }
+      } else {
+        
+        if ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch) {
+          if (!responder.touchStart(touch)) responder = null;
+        } else {
+          // do nothing; the responder is the responder, and may stay the responder, and all will be fine
+        }
+      }
+    }
 
     // if the item is in the stack, we will go to it (whether shouldStack is true or not)
     // as it is already stacked
-    this.unassignTouch(touch);
     if (!shouldStack || (stack.indexOf(responder) > -1 && stack[stack.length - 1] !== responder)) {
-
+      // first, we should unassign the touch. Note that we only do this IF WE ARE removing
+      // the current touch responder. Otherwise we cause all sorts of headaches; why? Because,
+      // if we are not (suppose, for instance, that it is stacked), then the touch does not
+      // get passed back to the touch responder-- even while it continues to get events because
+      // the touchResponder is still set!
+      this.unassignTouch(touch);
+      
       // pop all other items
       var idx = stack.length - 1, last = stack[idx];
       while (last && last !== responder) {
@@ -958,8 +990,8 @@ SC.RootResponder = SC.Object.extend({
         touchesForView = this.touchesForView(last); // won't even exist if there are no touches
 
         // send touchCancelled (or, don't, if the view doesn't accept multitouch and it is not the last touch)
-        if (last.get("acceptsMultitouch") || !touchesForView) {
-          last.tryToPerform("touchCancelled", touch);
+        if ((last.get ? last.get("acceptsMultitouch") : last.acceptsMultitouch) || !touchesForView) {
+          if (last.touchCancelled) last.touchCancelled(touch);
         }
 
         // go to next (if < 0, it will be undefined, so lovely)
@@ -1028,7 +1060,7 @@ SC.RootResponder = SC.Object.extend({
         if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('   -- Making %@ touch responder because it returns YES to captureTouch'.fmt(view.toString()));
 
         // if so, make it the touch's responder
-        this.makeTouchResponder(touch, view, shouldStack); // triggers touchStart/Cancel/etc. event.
+        this.makeTouchResponder(touch, view, shouldStack, YES); // triggers touchStart/Cancel/etc. event.
         return; // and that's all we need
       }
     }
@@ -1037,7 +1069,103 @@ SC.RootResponder = SC.Object.extend({
     // if we did not capture the touch (obviously we didn't)
     // we need to figure out what view _will_
     // Thankfully, makeTouchResponder does exactly that: starts at the view it is supplied and keeps calling startTouch
-    this.makeTouchResponder(touch, target, shouldStack);
+    this.makeTouchResponder(touch, target, shouldStack, YES);
+  },
+  
+  /** @private
+    Artificially calls endTouch for any touch which is no longer present. This is necessary because
+    _sometimes_, WebKit ends up not sending endtouch.
+  */
+  endMissingTouches: function(presentTouches) {
+    var idx, len = presentTouches.length, map = {}, end = [];
+    
+    // make a map of what touches _are_ present
+    for (idx = 0; idx < len; idx++) {
+      map[presentTouches[idx].identifier] = YES;
+    }
+    
+    // check if any of the touches we have recorded are NOT present
+    for (idx in this._touches) {
+      var id = this._touches[idx].identifier;
+      if (!map[id]) end.push(this._touches[idx]);
+    }
+    
+    // end said touches
+    for (idx = 0, len = end.length; idx < len; idx++) {
+      this.endTouch(end[idx]);
+      this.finishTouch(end[idx]);
+    }
+  },
+  
+  _touchCount: 0,
+  /** @private
+    Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
+    touchEnd, touchCancelled, etc. A re-dispatch (through recapture or makeTouchResponder) will terminate
+    the process; it would have to be restarted separately, through touch.end().
+  */
+  endTouch: function(touchEntry, action, evt) {
+    if (!action) action = "touchEnd";
+    
+    var responderIdx, responders, responder, originalResponder;
+    
+    // unassign
+    this.unassignTouch(touchEntry);
+
+    // call end for all items in chain
+    if (touchEntry.touchResponder) {
+      originalResponder = touchEntry.touchResponder;
+      
+      responders = touchEntry.touchResponders;
+      responderIdx = responders.length - 1;
+      responder = responders[responderIdx];
+      while (responder) {
+        // tell it
+        if (responder[action]) responder[action](touchEntry, evt);
+        
+        // check to see if the responder changed, and stop immediately if so.
+        if (touchEntry.touchResponder !== originalResponder) break;
+
+        // next
+        responderIdx--;
+        responder = responders[responderIdx];
+        action = "touchCancelled"; // any further ones receive cancelled
+      }
+    }
+  },
+  
+  /**
+    @private
+    "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
+  */
+  finishTouch: function(touch) {
+    var elem;
+    
+    // ensure the touch is indeed unassigned.
+    this.unassignTouch(touch);
+    
+    // If we rescued this touch's initial element, we should remove it 
+    // from the DOM and garbage collect now. See setup() for an 
+    // explanation of this bug/workaround.
+    if (elem = touch._rescuedElement) {
+      if (elem.swapNode && elem.swapNode.parentNode) {
+        elem.swapNode.parentNode.replaceChild(elem, elem.swapNode);
+      } else if (elem.parentNode === SC.touchHoldingPen) {
+        SC.touchHoldingPen.removeChild(elem);
+      }
+      delete touch._rescuedElement;
+      elem.swapNode = null;
+      elem = null;
+    }
+    
+    
+    // clear responders (just to be thorough)
+    touch.touchResponders = null;
+    touch.touchResponder = null;
+    touch.nextTouchResponder = null;
+    touch.hasEnded = YES;
+
+    // and remove from our set
+    if (this._touches[touch.identifier]) delete this._touches[touch.identifier];
   },
 
   /** @private
@@ -1053,6 +1181,12 @@ SC.RootResponder = SC.Object.extend({
   */
   touchstart: function(evt) {
     SC.RunLoop.begin();
+    
+    
+    // sometimes WebKit is a bit... iffy:
+    this.endMissingTouches(evt.touches);
+
+    // as you were...    
     try {
       // loop through changed touches, calling touchStart, etc.
       var idx, touches = evt.changedTouches, len = touches.length, target, view, touch, touchEntry,
@@ -1238,47 +1372,8 @@ SC.RootResponder = SC.Object.extend({
         }
 
         // unassign
-        this.unassignTouch(touchEntry);
-
-        // call end for all items in chain
-        if (touchEntry.touchResponder) {
-          responders = touchEntry.touchResponders;
-          responderIdx = responders.length - 1;
-          responder = responders[responderIdx];
-          a = action;
-          while (responder) {
-            if (SC.LOG_TOUCH_EVENTS) SC.Logger.info(' -- Sending %@ to %@'.fmt(a,responder));
-            // tell it
-            responder.tryToPerform(a, touchEntry, evt);
-
-            // next
-            responderIdx--;
-            responder = responders[responderIdx];
-            a = "touchCancelled"; // any further ones receive cancelled
-          }
-        }
-
-        // clear responders (just to be thorough)
-        touchEntry.touchResponders = null;
-        touchEntry.touchResponder = null;
-        touchEntry.nextTouchResponder = null;
-
-        // If we rescued this touch's initial element, we should remove it 
-        // from the DOM and garbage collect now. See setup() for an 
-        // explanation of this bug/workaround.
-        if (elem = touchEntry._rescuedElement) {
-          if (elem.swapNode && elem.swapNode.parentNode) {
-            elem.swapNode.parentNode.replaceChild(elem, elem.swapNode);
-          } else if (elem.parentNode === SC.touchHoldingPen) {
-            SC.touchHoldingPen.removeChild(elem);
-          }
-          delete touchEntry._rescuedElement;
-          elem.swapNode = null;
-          elem = null;
-        }
-
-        // and remove from our set
-        delete this._touches[touchEntry.identifier];
+        this.endTouch(touchEntry, action, evt);
+        this.finishTouch(touchEntry);
         
       }
     } catch (e) {
@@ -1841,6 +1936,7 @@ SC.Touch = function(touch, touchContext) {
   }
   this.targetView = targetView;
   this.target = target;
+  this.hasEnded = NO;
   this.type = touch.type;
   this.clickCount = 1;
 
@@ -1886,13 +1982,21 @@ SC.Touch.prototype = {
   },
 
   /**
+    Removes from and calls touchEnd on the touch responder.
+  */
+  end: function() {
+    this.touchContext.endTouch(this);
+  },
+
+  /**
     Changes the touch responder for the touch. If shouldStack === YES,
     the current responder will be saved so that the next responder may
     return to it.
   */
-  makeTouchResponder: function(responder, shouldStack) {
-    this.touchContext.makeTouchResponder(this, responder, shouldStack);
+  makeTouchResponder: function(responder, shouldStack, upViewChain) {
+    this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
   },
+
 
   /**
     Captures, or recaptures, the touch. This works from the touch's raw target view
@@ -1909,6 +2013,13 @@ SC.Touch.prototype = {
   */
   touchesForView: function(view) {
     return this.touchContext.touchesForView(view);
+  },
+  
+  /**
+    Same as touchesForView, but sounds better for responders.
+  */
+  touchesForResponder: function(responder) {
+    return this.touchContext.touchesForView(responder);
   },
 
   /**
