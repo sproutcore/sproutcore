@@ -481,7 +481,7 @@ SC.RootResponder = SC.Object.extend({
                   SC.objectForPropertyPath(target, sender);
       }
 
-      if (target) {
+      if (target && !target.isResponderContext) {
         if (target.respondsTo && !target.respondsTo(methodName)) {
           target = null ;
         } else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION) {
