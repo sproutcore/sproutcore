@@ -1218,6 +1218,7 @@ SC.RootResponder = SC.Object.extend({
         touchEntry.pageY = touch.pageY;
         touchEntry.type = 'touchend';
         
+        if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('-- Received touch end');
         if (touchEntry.hidesTouchIntercept) {
           touchEntry.unhideTouchIntercept();
           hidesTouchIntercept = YES;
@@ -1238,6 +1239,7 @@ SC.RootResponder = SC.Object.extend({
           responder = responders[responderIdx];
           a = action;
           while (responder) {
+            if (SC.LOG_TOUCH_EVENTS) SC.Logger.info(' -- Sending %@ to %@'.fmt(a,responder));
             // tell it
             responder.tryToPerform(a, touchEntry, evt);
 
