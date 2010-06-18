@@ -953,7 +953,17 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (touch && this.tracking && !this.dragging && !touch.touch.scrollHasEnded) {
       // try to capture the touch
       touch.touch.captureTouch(this, YES);
-      if (!touch.touch.touchResponder) touch.touch.makeTouchResponder(this);
+      
+      if (!touch.touch.touchResponder) {
+        // if it DIDN'T WORK!!!!!
+        // then we need to take possession again.
+        touch.touch.makeTouchResponder(this);
+      } else {
+        // Otherwise, it did work, and if we had a pending scroll end, we must do it now
+        if (touch.needsScrollEnd) {
+          this._touchScrollDidEnd();
+        }
+      }
     }
   },
 
@@ -971,7 +981,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var verticalScrollOffset = this._scroll_verticalScrollOffset || 0,
         horizontalScrollOffset = this._scroll_horizontalScrollOffset || 0,
         startClipOffsetX = horizontalScrollOffset,
-        startClipOffsetY = verticalScrollOffset;
+        startClipOffsetY = verticalScrollOffset,
+        needsScrollEnd = NO;
     
     if (this.touch && this.touch.timeout) {
       // clear the timeout
@@ -981,6 +992,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       // get the scroll offsets
       startClipOffsetX = this.touch.startClipOffset.x;
       startClipOffsetY = this.touch.startClipOffset.y;
+      needsScrollEnd = YES;
     }
     
     // calculate container+content width/height
@@ -1049,7 +1061,16 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       lastEventTime: touch.timeStamp,      
       
       // the touch used
-      touch: (starting ? touch : (this.touch ? this.touch.touch : null))
+      touch: (starting ? touch : (this.touch ? this.touch.touch : null)),
+      
+      // needsScrollEnd will cause a scrollDidEnd even if this particular touch does not start a scroll.
+      // the reason for this is because we don't want to say we've stopped scrolling just because we got
+      // another touch, but simultaneously, we still need to send a touch end eventually.
+      // there are two cases in which this will be used:
+      // 
+      //    1. If the touch was sent to content touches (in which case we will not be scrolling)
+      //    2. If the touch ends before scrolling starts (no scrolling then, either)
+      needsScrollEnd: needsScrollEnd
     };
 
     if (!this.tracking) {
@@ -1212,6 +1233,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
         this.startDecelerationAnimation();
       } else {
+        // well. The scrolling stopped. Let us tell everyone if there was a pending one that this non-drag op interrupted.
+        if (touchStatus.needsScrollEnd) this._touchScrollDidEnd();
+        
         // this part looks weird, but it is actually quite simple.
         // First, we send the touch off for capture+starting again, but telling it to return to us
         // if nothing is found or if it is released.
