@@ -1689,7 +1689,7 @@ SC.RootResponder = SC.Object.extend({
   */
   mouseup: function(evt) {
     if (SC.platform.touch) {
-      this.allowDefault();
+      evt.allowDefault();
       return YES;
     }
     
