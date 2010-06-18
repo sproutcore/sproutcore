@@ -844,7 +844,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
     }
     // validate keyDown...
-    if (this.performValidateKeyDown(evt) && !maxLengthReached) {
+    // do not validate on touch, as it prevents return.
+    if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
       this._isKeyDown = YES ;
       evt.allowDefault();
     } else {
