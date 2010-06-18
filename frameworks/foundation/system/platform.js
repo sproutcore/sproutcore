@@ -215,6 +215,13 @@ SC.platform = {
   supportsCSS3DTransforms: NO,
   
   /**
+    Whether the browser can handle accelerated layers. While supports3DTransforms tells us if they will
+    work in principle, sometimes accelerated layers interfere with things like getBoundingClientRect.
+    Then everything breaks.
+  */
+  supportsAcceleratedLayers: NO,
+  
+  /**
     Wether the browser supports the hashchange event.
   */
   supportsHashChange: function() {
@@ -282,5 +289,10 @@ SC.platform = {
   } else if(window.styleMedia && window.styleMedia.matchMedium) {
     if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;    
   }
-
+  
+  // Unfortunately, this has to be manual, as I can't think of a good way to test it
+  // webkit-only for now.
+  if (SC.platform.supportsCSSTransforms && SC.platform.cssPrefix === "webkit") {
+    SC.platform.supportsAcceleratedLayers = YES;
+  }
 })();

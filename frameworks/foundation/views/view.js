@@ -2403,7 +2403,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Specifies whether 3d transforms can be used to move the layer.
   */
   hasAcceleratedLayer: function(){
-    return this.get('wantsAcceleratedLayer') && SC.platform.supportsCSSTransforms;
+    return this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers;
   }.property('wantsAcceleratedLayer').cacheable(),
 
 
