@@ -574,18 +574,25 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   didAppendToDocument: function() {
     if(parseInt(SC.browser.msie, 0)===7 && this.get('useStaticLayout')){
-      var layout = this.get('layout');
-      // if(layout.width && (layout.width.indexOf && layout.width.indexOf('auto')!=-1)){
-      var elem = this.$(), w=0;
+      var layout = this.get('layout'),
+          elem = this.$(), w=0;
       if(elem && elem[0] && (w=elem[0].clientWidth) && w!==0 && this._labelMinWidthIE7===0){
-        var padding = parseInt(this.$('.sc-button-label').css('paddingRight'),0) + parseInt(this.$('.sc-button-label').css('paddingLeft'),0);
-        var margin = parseInt(this.$('.sc-button-label').css('marginRight'),0) + parseInt(this.$('.sc-button-label').css('marginLeft'),0);
-        this._labelMinWidthIE7 = w-padding-margin;
-        this.$('.sc-button-label').css('minWidth', this._labelMinWidthIE7+'px');
+        var label = this.$('.sc-button-label'),
+            paddingRight = parseInt(label.css('paddingRight'),0),
+            paddingLeft = parseInt(label.css('paddingLeft'),0),
+            marginRight = parseInt(label.css('marginRight'),0),
+            marginLeft = parseInt(label.css('marginLeft'),0);
+        if(marginRight=='auto') console.log(marginRight+","+marginLeft+","+paddingRight+","+paddingLeft);
+        if(!paddingRight && isNaN(paddingRight)) paddingRight = 0;
+        if(!paddingLeft && isNaN(paddingLeft)) paddingLeft = 0;
+        if(!marginRight && isNaN(marginRight)) marginRight = 0;
+        if(!marginLeft && isNaN(marginLeft)) marginLeft = 0;
+        
+        this._labelMinWidthIE7 = w-(paddingRight + paddingLeft)-(marginRight + marginLeft);
+        label.css('minWidth', this._labelMinWidthIE7+'px');
       }else{
         this.invokeLater(this.didAppendToDocument, 1);
       }
-      // }
     }
   }
   
