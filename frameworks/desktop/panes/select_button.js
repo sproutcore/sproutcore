@@ -795,7 +795,10 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   _button_isSelectedDidChange: function() {
 
-  }.observes('isSelected')
+  }.observes('isSelected'),
+  
+  didAppendToDocument: function() {
+  }
 
 }) ;
 
