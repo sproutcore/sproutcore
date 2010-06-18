@@ -219,6 +219,7 @@ SC.platform = {
     work in principle, sometimes accelerated layers interfere with things like getBoundingClientRect.
     Then everything breaks.
   */
+
   supportsAcceleratedLayers: NO,
   
   /**
@@ -230,6 +231,7 @@ SC.platform = {
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
   }()
 
+  supportsAcceleratedLayers: NO
 };
 
 /* Calculate CSS Prefixes */
