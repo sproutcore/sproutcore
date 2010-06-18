@@ -75,28 +75,42 @@ SC.Event = function(originalEvent) {
     this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
   }
   
-  // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-  if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
-    this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
-    this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
-    this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
-  // normalize wheelDelta for Firefox
-  // note that we multiple the delta on FF to make it's acceleration more 
-  // natural.
-  } else if (!SC.none(originalEvent.detail)) {
-    var detail = Math.floor(originalEvent.detail * 40);
-    if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
-      this.wheelDeltaX = detail;
-      this.wheelDeltaY = this.wheelDelta = 0;
+  // Normalize wheel delta values for mousewheel events
+  if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll') {
+    var deltaMultiplier = 1,
+        version = SC.browser.version;
+
+    // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
+    if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
+      this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
+      this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
+      this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
+
+      if (version < 533 || version >= 534) {
+        deltaMultiplier = 40;
+      }
+    // normalize wheelDelta for Firefox
+    // note that we multiple the delta on FF to make it's acceleration more 
+    // natural.
+    } else if (!SC.none(originalEvent.detail)) {
+      deltaMultiplier = 10;
+      if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
+        this.wheelDeltaX = originalEvent.detail;
+        this.wheelDeltaY = this.wheelDelta = 0;
+      } else {
+        this.wheelDeltaY = this.wheelDelta = originalEvent.detail ;
+        this.wheelDeltaX = 0 ;
+      }
+
+    // handle all other legacy browser
     } else {
-      this.wheelDeltaY = this.wheelDelta = detail ;
+      this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
     }
     
-  // handle all other legacy browser
-  } else {
-    this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
-    this.wheelDeltaX = 0 ;
+    this.wheelDelta *= deltaMultiplier;
+    this.wheelDeltaX *= deltaMultiplier;
+    this.wheelDeltaY *= deltaMultiplier;
   }
 
   return this; 
