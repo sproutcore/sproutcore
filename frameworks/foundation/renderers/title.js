@@ -97,7 +97,10 @@ SC.BaseTheme.renderers.Title = SC.Renderer.extend({
           }
         } 
       }
-      else { htmlNode.innerHTML = ''; } 
+      else {
+        this._ImageTitleCached = imgTitle; // update the cache.
+        htmlNode.innerHTML = '';
+      }
     }    
   }
 });
