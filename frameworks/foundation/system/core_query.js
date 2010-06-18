@@ -1307,9 +1307,10 @@ SC.CoreQuery = (function() {
           // (It would be better if we knew the exact display type that they 
           // had)
           for (stLen = stack.length ; i < stLen; i++ ) {
-            if (styleIsBorked(stack[i])) {
-              swap[i] = stack[i].style.display;
-              stack[i].style.display = "block";
+            var stackTmp =stack[i];
+            if (stackTmp && stackTmp.style && styleIsBorked(stackTmp)) {
+              swap[i] = stackTmp.style.display;
+              stackTmp.style.display = "block";
             }
           }
 
