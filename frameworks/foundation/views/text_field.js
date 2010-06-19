@@ -803,7 +803,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     Scrolls to origin if necessary (if the pane's current firstResponder is not a text field).
   */
   scrollToOriginIfNeeded: function() {
-    var pane = this.get("pane"), first = pane.get("firstResponder");
+    var pane = this.get("pane");
+    if (!pane) return;
+    
+    var first = pane.get("firstResponder");
     if (!first || !first.get("isTextField")) {
       document.body.scrollTop = document.body.scrollLeft = 0;
     }
