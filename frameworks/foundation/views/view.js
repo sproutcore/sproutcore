@@ -705,18 +705,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   findLayerInParentLayer: function(parentLayer) {
     var layerId = this.get('layerId'),
-        node, i, ilen,found, elem, querySelectorSupport=false;
+        node, i, ilen, childNodes, elem, usedQuerySelector;
     
     // first, let's try the fast path...
     elem = document.getElementById(layerId) ;
     
     // TODO: use code generation to only really do this check on IE
-    if (SC.browser.msie && elem && elem.id !== layerId) elem = null ;
+    if (SC.browser.msie && elem && elem.id !== layerId) elem = null;
     
     // if browser supports querySelector use that.
     if (!elem && parentLayer.querySelector) {
       // TODO: make querySelector work on all platforms...
-      querySelectorSupport=true;
+      usedQuerySelector = YES;
       elem = parentLayer.querySelector('#' + layerId);
     }
     
@@ -725,23 +725,22 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // DOM element will be discovered by the first method above.
     // This code uses a BFS algorithm as is expected to find the layer right 
     // below the parent.
-    if (!elem && !querySelectorSupport) {
+    if (!elem  &&  !usedQuerySelector) {
       elem = parentLayer.firstChild ;
-      var q=[];
+      var q = [];
       q.push(parentLayer);
-      while(q.length!==0){
-        node=q[0];
-        q.shift();
-        if(node.id===layerId){
-          found=true;
-          elem=node;
-          break;
-        } 
-        for(i=0, ilen=node.childNodes.length; i<ilen; i++){
-          q.push(node.childNodes[i]);
+      while (q.length !==0) {
+        node = q.shift();
+        if (node.id===layerId) {
+          return node;
+        }
+
+        childNodes = node.childNodes;
+        for (i=0, ilen=childNodes.length;  i < ilen;  ++i) {
+          q.push(childNodes[i]);
         }
       }
-      if(!found) elem=null;  
+      elem = null;  
     }
     
     return elem;
