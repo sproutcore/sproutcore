@@ -188,7 +188,7 @@ SC.platform = {
       clientY: evt.clientY
     };
 
-    evt.changedTouches = [ touch ];
+    evt.changedTouches = evt.touches = [ touch ];
     return evt;
   },
 
