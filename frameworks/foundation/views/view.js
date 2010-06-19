@@ -1125,6 +1125,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
   },
   
+  childViewsObserver: function(){
+    var childViews = this.get('childViews'), i, iLen, child;
+    for(i=0, iLen = childViews.length; i<iLen; i++){
+      child = childViews[i];
+      if(child._notifyDidAppendToDocument){
+        child._notifyDidAppendToDocument();
+      }
+    }    
+  }.observes('childViews'),
+  
   // ..........................................................
   // STANDARD RENDER PROPERTIES
   // 
