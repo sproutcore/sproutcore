@@ -659,6 +659,9 @@ SC.CollectionFastPath = {
     The fast-path that computes a special 
   */
   touchScrollDidChange: function(left, top) {
+    // prevent getting too many in close succession.
+    if (Date.now() - this._lastTouchScrollTime < 25) return;
+    
     var clippingFrame = this.get('clippingFrame');
     
     var cf = this._inScrollClippingFrame || (this._inScrollClippingFrame = {x: 0, y: 0, width: 0, height: 0});
@@ -684,6 +687,8 @@ SC.CollectionFastPath = {
     }
     this._lastNowShowing = r;
     this.reloadIfNeeded(r, YES);
+    
+    this._lastTouchScrollTime = Date.now();
   }
   
 };
