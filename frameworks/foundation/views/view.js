@@ -705,11 +705,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   findLayerInParentLayer: function(parentLayer) {
     var layerId = this.get('layerId'),
-        node, i, ilen,found, elem;
+        node, i, ilen,found, elem, querySelectorSupport=false;
     
     // first, let's try the fast path...
-    if(parentLayer.getElementById) elem = parentLayer.getElementById(layerId) ;
-    else elem = document.getElementById(layerId) ;
+    elem = document.getElementById(layerId) ;
     
     // TODO: use code generation to only really do this check on IE
     if (SC.browser.msie && elem && elem.id !== layerId) elem = null ;
@@ -717,6 +716,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // if browser supports querySelector use that.
     if (!elem && parentLayer.querySelector) {
       // TODO: make querySelector work on all platforms...
+      querySelectorSupport=true;
       elem = parentLayer.querySelector('#' + layerId);
     }
     
@@ -725,7 +725,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // DOM element will be discovered by the first method above.
     // This code uses a BFS algorithm as is expected to find the layer right 
     // below the parent.
-    if (!elem) {
+    if (!elem && !querySelectorSupport) {
       elem = parentLayer.firstChild ;
       var q=[];
       q.push(parentLayer);
