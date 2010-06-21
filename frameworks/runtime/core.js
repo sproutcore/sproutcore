@@ -317,19 +317,38 @@ SC.mixin(/** @scope SC */ {
   guidFor: function(obj) {
     
     // special cases where we don't want to add a key to object
-    if (obj === undefined) return "(undefined)" ;
-    if (obj === null) return '(null)' ;
+    if (obj === undefined) return "(undefined)";
+    if (obj === null) return '(null)';
+
+    var guidKey = this.guidKey;
+    if (obj[guidKey]) return obj[guidKey];
+
+    // More special cases; not as common, so we check for them after the cache
+    // lookup
     if (obj === Object) return '(Object)';
     if (obj === Array) return '(Array)';
-    
-    var guidKey = this.guidKey ;
-    if (obj[guidKey]) return obj[guidKey] ;
+
+    var cache, ret;
 
     switch(typeof obj) {
       case SC.T_NUMBER:
-        return (this._numberGuids[obj] = this._numberGuids[obj] || ("nu" + obj));
+        cache = this._numberGuids;
+        ret   = cache[obj];
+        if (!ret) {
+          ret = "nu" + obj;
+          cache[obj] = ret;
+        }
+        return ret;
+
       case SC.T_STRING:
-        return (this._stringGuids[obj] = this._stringGuids[obj] || ("st" + obj));
+        cache = this._stringGuids;
+        ret   = cache[obj];
+        if (!ret) {
+          ret = "st" + obj;
+          cache[obj] = ret;
+        }
+        return ret;
+
       case SC.T_BOOL:
         return (obj) ? "(true)" : "(false)" ;
       default:
