@@ -1639,7 +1639,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this._scroll_contentWidth  = width;
     this._scroll_contentHeight = height;
 
-    dim       = this.get('frame');
+    dim       = this.getPath('containerView.frame');
     dimWidth  = dim.width;
     dimHeight = dim.height;
     
@@ -1657,7 +1657,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       if (this.get('autohidesVerticalScroller')) {
         this.set('isVerticalScrollerVisible', height > dimHeight);
       }
-      height -= this.get('verticalScrollerBottom') ;
       view.setIfChanged('maximum', height-dimHeight) ;
       view.setIfChanged('proportion', dimHeight/height);
     }
