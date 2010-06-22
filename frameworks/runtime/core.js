@@ -404,7 +404,8 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the hash code for this instance.
   */
   hashFor: function(obj) {
-    return (obj && obj.hash && (typeof obj.hash === SC.T_FUNCTION)) ? obj.hash() : this.guidFor(obj) ;
+    var hashFunc;
+    return (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : this.guidFor(obj) ;
   },
     
   /**
