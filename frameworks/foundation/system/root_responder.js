@@ -1120,7 +1120,11 @@ SC.RootResponder = SC.Object.extend({
       responder = responders[responderIdx];
       while (responder) {
         // tell it
-        if (responder[action]) responder[action](touchEntry, evt);
+        try { // keep in mind that it might only _be_ here because it crashed...
+          if (responder[action]) responder[action](touchEntry, evt);
+        } catch(e) {
+          
+        }
         
         // check to see if the responder changed, and stop immediately if so.
         if (touchEntry.touchResponder !== originalResponder) break;
