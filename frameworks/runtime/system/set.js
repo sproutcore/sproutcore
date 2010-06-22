@@ -271,13 +271,17 @@ SC.Set = SC.mixin({},
   remove: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
-    if (SC.none(obj)) return this ;
+    // Implementation note:  SC.none is inlined because sets are fundamental
+    // in SproutCore, and the inlined code is ~ 25% faster than calling
+    // SC.none() in IE8.
+    if (obj === null || obj === undefined) return this ;
     var guid = SC.hashFor(obj);
     var idx = this[guid] ;
     var len = this.length;
 
     // not in set.
-    if (SC.none(idx) || (idx >= len) || (this[idx] !== obj)) return this; 
+    // (SC.none is inlined for the reasons given above)
+    if ((idx === null || idx === undefined) || (idx >= len) || (this[idx] !== obj)) return this; 
 
     // clear the guid key
     delete this[guid] ;
