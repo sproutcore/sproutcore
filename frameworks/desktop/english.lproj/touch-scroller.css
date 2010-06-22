@@ -36,7 +36,7 @@
 /* Thumb */
 .sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb {
   position: absolute;
-  opacity: 0.4;
+  opacity: 0.5;
   -webkit-transform: translateZ(0px);
   width: 16px;
   height: 1044px;
@@ -136,7 +136,7 @@
 /* Thumb */
 .sc-theme .sc-view.sc-touch-scroller-view.sc-horizontal .thumb {
   position: absolute;
-  opacity: 0.4;
+  opacity: 0.5;
   -webkit-transform: translateZ(0px);
   height: 16px;
   width: 1044px;
