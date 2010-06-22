@@ -219,12 +219,16 @@ SC.Set = SC.mixin({},
     // cannot add null to a set.
     if (obj===null || obj===undefined) return this; 
 
-    var guid = SC.hashFor(obj) ;
-    var idx = this[guid] ;
-    var len = this.length ;
-    if ((idx===null || idx===undefined) || (idx >= len) || (this[idx]!==obj)){
-      this[len] = obj ;
-      this[guid] = len ;
+    // Implementation note:  SC.hashFor() is inlined because sets are
+    // fundamental in SproutCore, and the inlined code is ~ 25% faster than
+    // calling SC.hashFor() in IE8.
+    var hashFunc,
+        guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
+        idx  = this[guid],
+        len  = this.length;
+    if ((idx===null || idx===undefined) || (idx >= len) || (this[idx]!==obj)) {
+      this[len] = obj;
+      this[guid] = len;
       this.length = len+1;
     }
     
@@ -271,26 +275,29 @@ SC.Set = SC.mixin({},
   remove: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
-    // Implementation note:  SC.none is inlined because sets are fundamental
-    // in SproutCore, and the inlined code is ~ 25% faster than calling
-    // SC.none() in IE8.
+    // Implementation note:  SC.none() and SC.hashFor() are inlined because
+    // sets are fundamental in SproutCore, and the inlined code is ~ 25%
+    // faster than calling them "normally" in IE8.
     if (obj === null || obj === undefined) return this ;
-    var guid = SC.hashFor(obj);
-    var idx = this[guid] ;
-    var len = this.length;
+
+    var hashFunc,
+        guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
+        idx  = this[guid],
+        len  = this.length;
 
     // not in set.
     // (SC.none is inlined for the reasons given above)
     if ((idx === null || idx === undefined) || (idx >= len) || (this[idx] !== obj)) return this; 
 
     // clear the guid key
-    delete this[guid] ;
+    delete this[guid];
 
     // to clear the index, we will swap the object stored in the last index.
     // if this is the last object, just reduce the length.
     if (idx < (len-1)) {
       obj = this[idx] = this[len-1];
-      this[SC.hashFor(obj)] = idx ;
+      guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj);
+      this[guid] = idx;
     }
 
     // reduce the length
