@@ -1677,12 +1677,14 @@ SC.CollectionView = SC.View.extend(
       
       // Ensure we are not out of bounds
       if (SC.none(selTop) || (selTop < 0)) selTop = 0 ;
+      if (!content.objectAt(selTop)) selTop = sel ? sel.get('min') : -1;
       if (selBottom < selTop) selBottom = selTop ;
       
     // if not extending, just select the item previous to the selTop
     } else {
       selTop = this._findPreviousSelectableItemFromIndex(selTop - numberOfItems);
       if (SC.none(selTop) || (selTop < 0)) selTop = 0 ;
+      if (!content.objectAt(selTop)) selTop = sel ? sel.get('min') : -1;
       selBottom = selTop ;
       anchor = null ;
     }
@@ -1740,6 +1742,11 @@ SC.CollectionView = SC.View.extend(
       
       // Ensure we are not out of bounds
       if (selBottom >= lim) selBottom = lim-1;
+      
+      // we also need to check that the item exists
+      if (!content.objectAt(selBottom)) selBottom = sel ? sel.get('max') - 1 : -1;
+      
+      // and if top has eclipsed bottom, handle that too.
       if (selTop > selBottom) selTop = selBottom ;
       
     // if not extending, just select the item next to the selBottom
@@ -1747,6 +1754,7 @@ SC.CollectionView = SC.View.extend(
       selBottom = this._findNextSelectableItemFromIndex(selBottom + numberOfItems, selBottom);
       
       if (selBottom >= lim) selBottom = lim-1;
+      if (!content.objectAt(selBottom)) selBottom = sel ? sel.get('max') - 1 : -1;
       selTop = selBottom ;
       anchor = null ;
     }
