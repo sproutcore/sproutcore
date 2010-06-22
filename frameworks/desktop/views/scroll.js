@@ -1265,19 +1265,25 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   },
   
   touchCancelled: function(touch) {
-    this.beginPropertyChanges();
-    this.set("scale", this._scale);
-    this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
-    this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
-    this.endPropertyChanges();
-    this.tracking = NO;
+    var touchStatus = this.touch,
+        avg = touch.averagedTouchesForView(this);
     
-    if (this.dragging) {
-      this._touchScrollDidEnd();
+    // if we are decelerating, we don't want to stop that. That would be bad. Because there's no point.
+    if (!this.touch || !this.touch.timeout) {
+      this.beginPropertyChanges();
+      this.set("scale", this._scale);
+      this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
+      this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+      this.endPropertyChanges();
+      this.tracking = NO;
+    
+      if (this.dragging) {
+        this._touchScrollDidEnd();
+      }
+    
+      this.dragging = NO;
+      this.touch = null;
     }
-    
-    this.dragging = NO;
-    this.touch = null;
   },
 
   startDecelerationAnimation: function(evt) {
