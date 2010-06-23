@@ -2270,6 +2270,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in viewDidResize
   */
   parentViewDidResize: function() {
+    // If the view is statically laid out there's nothing we can/should do to
+    // react; we'll call viewDidResize() when the browser tells us that our
+    // size has changed (for example, in updateLayout).
+    if (this.useStaticLayout) return;
+
     var layout = this.get('layout'), isPercentageFunc, isPercentage, isFixed;
     
     // only resizes if the layout does something other than left/top - fixed
