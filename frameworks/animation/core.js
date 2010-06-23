@@ -379,13 +379,15 @@ SC.Animatable = {
 
       var nT = newStyle['top'],
           nB = newStyle['bottom'],
+          nH = newStyle['height'],
           nL = newStyle['left'],
-          nR = newStyle['right'];
+          nR = newStyle['right'],
+          nW = newStyle['width'];
 
       // NOTE: This needs to match exactly the conditions in layoutStyles
       if (
-        (SC.empty(nT) || (!SC.isPercentage(nT) && SC.empty(nB))) &&
-        (SC.empty(nL) || (!SC.isPercentage(nL) && SC.empty(nR)))
+        (SC.empty(nT) || (!SC.isPercentage(nT) && !SC.empty(nH))) &&
+        (SC.empty(nL) || (!SC.isPercentage(nL) && !SC.empty(nW)))
       ) {
         specialTransform = YES;
         this._useSpecialCaseTransform = YES;
