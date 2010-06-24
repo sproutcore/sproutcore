@@ -312,45 +312,38 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
       current = current && parentViewIsVisible;
     }
-    
+
     // If our visibility has changed, then set the new value and notify our
     // child views to update their value.
-    //if (previous !== current) {
-      this.set('isVisibleInWindow', current) ;
-      
+    if (previous !== current) {
+      this.set('isVisibleInWindow', current);
+
+      // Update the layer if we need to.  We'll pass in force=YES to bypass
+      // the "only update it if it's visible in the window" check, because we
+      // want to update it to reflect the new visibility (for example, if it
+      // was just marked as isVisible=NO, we need to add the 'hidden' class).
+      this.updateLayerIfNeeded(YES);
+
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(current);
       }
 
-
-      // We'll also kick off some necessary work when the visibility changes.
-      // This more appropriately belongs in a 'isVisibleInWindow' observer or
-      // some such helper method because this work is not strictly related to
-      // computing the visibility, but view performance is critical, so
-      // avoiding the extra observer is worthwhile.
+      // For historical reasons, we'll also layout the child views if
+      // necessary.
       if (current) {
-        // If we just became visible, update layer + layout if needed...
-        this.displayDidChange();
-
-        if (this.get('childViewsNeedLayout')) {
-          this.invokeOnce(this.layoutChildViewsIfNeeded);
-        }
+        if (this.get('childViewsNeedLayout')) this.invokeOnce(this.layoutChildViewsIfNeeded);
       }
       else {
-        // We need to set some internal state to indicate that we went from
-        // visible to invisible.
-        //
-        // (Typically, invisible views are not updated for performance
-        // reasons, but if we went from visible to invisible, we need to
-        // update once.)
-        this._forceLayerUpdateDueToVisibilityChange = YES;
-        this.displayDidChange();
-
-        // Also, if we were previously 'firstResponder', resign it.
+        // Also, if we were previously visible and were the first responder,
+        // resign it.  This more appropriately belongs in a
+        // 'isVisibleInWindow' observer or some such helper method because
+        // this work is not strictly related to computing the visibility, but
+        // view performance is critical, so avoiding the extra observer is
+        // worthwhile.
         if (this.get('isFirstResponder')) this.resignFirstResponder();
       }
-    //}
+    }
     return this;
   },
 
@@ -358,7 +351,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /** @private
     Whenever the view’s visibility changes, we need to recompute whether it is
     actually visible inside the window (a view is only visible in the window
-    if it is marked as visibile and its parent view is as well).
+    if it is marked as visibile and its parent view is as well), in addition
+    to updating the layer accordingly.
   */
   _sc_isVisibleDidChange: function() {
     this.recomputeIsVisibleInWindow();
@@ -814,9 +808,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
     @test in updateLayer
   */
-  updateLayerIfNeeded: function() {
-    var force = this._forceLayerUpdateDueToVisibilityChange,
-        shouldUpdate = (force || this.get('isVisibleInWindow')) && this.get('layerNeedsUpdate');
+  updateLayerIfNeeded: function(force) {
+    var needsUpdate  = this.get('layerNeedsUpdate'),
+        shouldUpdate = needsUpdate  &&  (force || this.get('isVisibleInWindow'));
     if (shouldUpdate) {
       // only update a layer if it already exists
       if (this.get('layer')) {
@@ -826,10 +820,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         this.endPropertyChanges() ;
       }
     }
-    else this.set('layerNeedsUpdate', NO) ;
-
-    // If we were forcing the layer update for this round, clear the flag.
-    this._forceLayerUpdateDueToVisibilityChange = NO;
 
     return this ;
   },
