@@ -318,12 +318,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (previous !== current) {
       this.set('isVisibleInWindow', current);
 
-      // Update the layer if we need to.  We'll pass in force=YES to bypass
-      // the "only update it if it's visible in the window" check, because we
-      // want to update it to reflect the new visibility (for example, if it
-      // was just marked as isVisible=NO, we need to add the 'hidden' class).
-      this.updateLayerIfNeeded(YES);
-
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(current);
@@ -344,6 +338,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         if (this.get('isFirstResponder')) this.resignFirstResponder();
       }
     }
+
+    // If we're in this function, then that means one of our ancestor views
+    // changed, or changed its 'isVisibleInWindow' value.  That means that if
+    // we are out of sync with the layer, then we need to update our state
+    // now.
+    //
+    // For example, say we're isVisible=NO, but we have not yet added the
+    // 'hidden' class to the layer because of the "don't update the layer if
+    // we're not visible in the window" check.  If any of our parent views
+    // became visible, our layer would incorrectly be shown!
+    this.updateLayerIfNeeded(YES);
+
     return this;
   },
 
@@ -355,6 +361,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     to updating the layer accordingly.
   */
   _sc_isVisibleDidChange: function() {
+    // 'isVisible' is effectively a displayProperty, but we'll call
+    // displayDidChange() manually here instead of declaring it as a
+    // displayProperty because that avoids having two observers on
+    // 'isVisible'.  A single observer is:
+    //   a.  More efficient
+    //   b.  More correct, because we can guarantee the order of operations
+    this.displayDidChange();
+
     this.recomputeIsVisibleInWindow();
   }.observes('isVisible'),
 
@@ -800,7 +814,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     If you need to update view's layer sooner than the end of the runloop, you
     can call this method directly.  If your view is not visible in the window
     but you want it to update anyway, then call this method, passing YES for
-    the 'force' parameter.
+    the 'skipIsVisibleInWindowCheck' parameter.
     
     You should not override this method.  Instead override updateLayer() or
     render().
@@ -808,9 +822,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
     @test in updateLayer
   */
-  updateLayerIfNeeded: function(force) {
+  updateLayerIfNeeded: function(skipIsVisibleInWindowCheck) {
     var needsUpdate  = this.get('layerNeedsUpdate'),
-        shouldUpdate = needsUpdate  &&  (force || this.get('isVisibleInWindow'));
+        shouldUpdate = needsUpdate  &&  (skipIsVisibleInWindowCheck || this.get('isVisibleInWindow'));
     if (shouldUpdate) {
       // only update a layer if it already exists
       if (this.get('layer')) {
@@ -1174,11 +1188,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     You can set this array to include any properties that should immediately
     invalidate the display.  The display will be automatically invalidated
     when one of these properties change.
-    
+
+    Implementation note:  'isVisible' is also effectively a display property,
+    but it is not declared as such because the same effect is implemented
+    inside _sc_isVisibleDidChange().  This avoids having two observers on
+    'isVisible', which is:
+      a.  More efficient
+      b.  More correct, because we can guarantee the order of operations
+
     @property {Array}
     @readOnly
   */
-  displayProperties: ['isFirstResponder', 'isVisible'],
+  displayProperties: ['isFirstResponder'],
   
   /**
     You can set this to an SC.Cursor instance; its class name will 
