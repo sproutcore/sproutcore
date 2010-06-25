@@ -866,9 +866,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
 
-      // If this view uses static layout, then notify that the frame (likely)
-      // changed.
-      if (this.useStaticLayout) this.viewDidResize();
+    // If this view uses static layout, then notify that the frame (likely)
+    // changed.
+    if (this.useStaticLayout) this.viewDidResize();
 
     if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
     if(this.designer && this.designer.viewDidUpdateLayer) {
@@ -2281,30 +2281,42 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in viewDidResize
   */
   parentViewDidResize: function() {
-    // If the view is statically laid out there's nothing we can/should do to
-    // react; we'll call viewDidResize() when the browser tells us that our
-    // size has changed (for example, in updateLayout).
-    if (this.useStaticLayout) return;
+    var frameMayHaveChanged, layout, isFixed, isPercentageFunc, isPercentage;
 
-    var layout = this.get('layout'), isPercentageFunc, isPercentage, isFixed;
+    // If this view uses static layout, our "do we think the frame changed?"
+    // logic is not applicable and we simply have to assume that the frame may
+    // have changed.
+    if (this.useStaticLayout) {
+      frameMayHaveChanged = YES;
+    }
+    else {
+      layout = this.get('layout');
     
-    // only resizes if the layout does something other than left/top - fixed
-    // size.
-    isFixed = (
-      (layout.left !== undefined) && (layout.top !== undefined) &&
-      (layout.width !== undefined) && (layout.height !== undefined)
-    );
+      // only resizes if the layout does something other than left/top - fixed
+      // size.
+      isFixed = (
+        (layout.left !== undefined) && (layout.top !== undefined) &&
+        (layout.width !== undefined) && (layout.height !== undefined)
+      );
 
-    isPercentageFunc = SC.isPercentage;
-    isPercentage = (isPercentageFunc(layout.left) || 
-                    isPercentageFunc(layout.top) ||
-                    isPercentageFunc(layout.width) || 
-                    isPercentageFunc(layout.right) ||
-                    isPercentageFunc(layout.centerX) || 
-                    isPercentageFunc(layout.centerY));
+
+      // If it's fixed, our frame still could have changed if it's fixed to a
+      // percentage of the parent.
+      if (isFixed) {
+        isPercentageFunc = SC.isPercentage;
+        isPercentage = (isPercentageFunc(layout.left) || 
+                        isPercentageFunc(layout.top) ||
+                        isPercentageFunc(layout.width) || 
+                        isPercentageFunc(layout.right) ||
+                        isPercentageFunc(layout.centerX) || 
+                        isPercentageFunc(layout.centerY));
+      }
+
+      frameMayHaveChanged = (!isFixed || isPercentage);
+    }
 
     // Do we think there's a chance our frame will have changed as a result?
-    if (!isFixed || isPercentage) {
+    if (frameMayHaveChanged) {
       // There's a chance our frame changed.  Invoke viewDidResize(), which
       // will notify about our change to 'frame' (if it actually changed) and
       // appropriately notify our child views.
