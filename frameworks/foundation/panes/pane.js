@@ -504,7 +504,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (!this.get('isPaneAttached')) return this ; // nothing to do
     
     // remove layer...
-    this.set('isVisibleInWindow', NO);
     var dom = this.get('layer') ;
     if (dom && dom.parentNode) dom.parentNode.removeChild(dom) ;
     dom = null ;
@@ -523,6 +522,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     
     // clean up some of my own properties
     this.set('isPaneAttached', NO) ;
+    this.parentViewDidChange();
     return this ;
   },
   
@@ -721,7 +721,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   recomputeIsVisibleInWindow: function() {
     if (this.get('designer') && SC.suppressMain) return sc_super();
     var previous = this.get('isVisibleInWindow'),
-        current  = this.get('isVisible');
+        current  = this.get('isVisible') && this.get("isPaneAttached");
 
     // If our visibility has changed, then set the new value and notify our
     // child views to update their value.
