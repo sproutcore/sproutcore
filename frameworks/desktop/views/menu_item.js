@@ -18,6 +18,8 @@ sc_require('views/separator') ;
 SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
 
+  displayProperties: ['title', 'isEnabled', 'isSeparator'],
+
   classNames: ['sc-menu-item'],
 
   escapeHTML: YES,
