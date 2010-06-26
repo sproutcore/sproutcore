@@ -1244,12 +1244,11 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         // if we went anywhere, did anything, etc., call end()
         if (touch.touchResponder && touch.touchResponder !== this) {
           touch.end();
-        }
-        
-        // now check if it was released to us or stayed with us the whole time, or is for some
-        // wacky reason empty (in which case it is ours still). If so, and there is a next responder,
-        // relay to that.
-        if (!touch.touchResponder || touch.touchResponder === this) {
+        } else if (!touch.touchResponder || touch.touchResponder === this) {
+          // if it was released to us or stayed with us the whole time, or is for some
+          // wacky reason empty (in which case it is ours still). If so, and there is a next responder,
+          // relay to that.
+          
           if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
         } else {
           // in this case, the view that captured it and changed responder should have handled
