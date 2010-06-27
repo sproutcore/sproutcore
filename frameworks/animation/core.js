@@ -235,7 +235,11 @@ SC.Animatable = {
       var propertyName = evt.originalEvent.propertyName,
           callback = this._transitionCallbacks[propertyName];
 
-      if(callback) SC.Animatable.runCallback(callback);
+      // only callback is animation is not disabled; assume if anim was 
+      // disabled we already invoked the callback..
+      if(callback && this._disableAnimation<=0) {
+        SC.Animatable.runCallback(callback);
+      }
     }, this);
   },
 
