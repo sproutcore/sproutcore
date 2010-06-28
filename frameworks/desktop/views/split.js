@@ -113,7 +113,47 @@ SC.SplitView = SC.View.extend(
     @property {Number}
   */
   defaultThickness: 0.5,
-  
+
+  /**
+    Sets minimum thickness of topLeft view.
+
+    @property {Number}
+    @default null
+  */
+  topLeftMinThickness: null,
+
+  /**
+    Sets maximum thickness of topLeft view.
+
+    @property {Number}
+    @default null
+  */
+  topLeftMaxThickness: null,
+
+  /**
+    Sets minimum thickness of bottomRight view.
+
+    @property {Number}
+    @default null
+  */
+  bottomRightMinThickness: null,
+
+  /**
+    Sets maximum thickness of bottomRight view.
+
+    @property {Number}
+    @default null
+  */
+  bottomRightMaxThickness: null,
+
+  /**
+    Sets thickness of divider.
+
+    @property {Number}
+    @default null
+  */
+  dividerThickness: null,
+ 
   /**
     Yes, we're a split view.
   */
