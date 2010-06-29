@@ -657,6 +657,15 @@ SC.RootResponder = SC.Object.extend({
     var mousewheel = SC.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel';
     SC.Event.add(document, mousewheel, this, this.mousewheel);
 
+
+
+    // If the browser is identifying itself as a touch-enabled browser, but
+    // touch events are not present, assume this is a desktop browser doing
+    // user agent spoofing and simulate touch events automatically.
+    if (SC.browser && SC.platform && SC.browser.mobileSafari && !SC.platform.touch) {
+      SC.platform.simulateTouchEvents();
+    }
+
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
     this.focus(); // assume the window is focused when you load.

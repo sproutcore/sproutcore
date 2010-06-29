@@ -295,6 +295,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     @property {SC.View}
   */
   horizontalScrollerView: function() {
+    if (SC.platform.touch) return SC.TouchScrollerView;
     return SC.ScrollerView;
   }.property().cacheable(),
   
@@ -343,6 +344,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     @property {SC.View}
   */
   verticalScrollerView: function() {
+    if (SC.platform.touch) return SC.TouchScrollerView;
     return SC.ScrollerView;
   }.property().cacheable(),
   
@@ -689,17 +691,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     additional controls you have added to the view.
   */
   tile: function() {
-    
-    // for now just hide scroll bars on touch platforms
-    var isTouch = SC.platform.touch;
-    
     // get horizontal scroller/determine if we should have a scroller
     var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null ;
-    var hasHorizontal = hscroll && !isTouch && this.get('isHorizontalScrollerVisible');
+    var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
     
     // get vertical scroller/determine if we should have a scroller
     var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null ;
-    var hasVertical = vscroll && !isTouch && this.get('isVerticalScrollerVisible') ;
+    var hasVertical = vscroll && this.get('isVerticalScrollerVisible') ;
     
     // get the containerView
     var clip = this.get('containerView') ;

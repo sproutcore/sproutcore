@@ -18,6 +18,9 @@ SC.platform = {
   /**
     YES if the current device supports touch events, NO otherwise.
 
+    You can simulate touch events in environments that don't support them by
+    calling SC.platform.simulateTouchEvents() from your browser's console.
+
     @property {Boolean}
   */
   touch: ('createTouch' in document),
@@ -67,6 +70,40 @@ SC.platform = {
   */
   domCSSPrefix: null,
 
+  /**
+    Call this method to swap out the default mouse handlers with proxy methods
+    that will translate mouse events to touch events.
+
+    This is useful if you are debugging touch functionality on the desktop.
+  */
+  simulateTouchEvents: function() {
+    // Touch events are supported natively, no need for this.
+    if (this.touch) {
+      //@ if (debug)
+      SC.Logger.info("Can't simulate touch events in an environment that supports them.");
+      //@ endif
+      return;
+    }
+
+    // Tell the app that we now "speak" touch
+    SC.platform.touch = YES;
+
+    // CSS selectors may depend on the touch class name being present
+    document.body.className = document.body.className + ' touch';
+
+    // Initialize a counter, which we will use to generate unique ids for each
+    // fake touch.
+    this._simtouch_counter = 1;
+
+    // Remove events that don't exist in touch environments
+    this.removeEvents('click dblclick mouseout mouseover mousewheel'.w());
+
+    // Replace mouse events with our translation methods
+    this.replaceEvent('mousemove', this._simtouch_mousemove);
+    this.replaceEvent('mousedown', this._simtouch_mousedown);
+    this.replaceEvent('mouseup', this._simtouch_mouseup);
+  },
+
   /** @private
     Removes event listeners from the document.
 
@@ -91,6 +128,62 @@ SC.platform = {
     SC.Event.add(document, evt, this, replacement);
   },
 
+  /** @private
+    When simulating touch events, this method is called when mousemove events
+    are received.
+  */
+  _simtouch_mousemove: function(evt) {
+    if (!this._mousedown) return NO;
+    SC.RootResponder.responder.touchmove(this.manufactureTouchEvent(evt, 'touchmove'));
+  },
+
+  /** @private
+    When simulating touch events, this method is called when mousedown events
+    are received.
+  */
+  _simtouch_mousedown: function(evt) {
+    this._mousedown = YES;
+    SC.RootResponder.responder.touchstart(this.manufactureTouchEvent(evt, 'touchstart'));
+  },
+
+  /** @private
+    When simulating touch events, this method is called when mouseup events
+    are received.
+  */
+  _simtouch_mouseup: function(evt) {
+    this._mousedown = NO;
+    SC.RootResponder.responder.touchend(this.manufactureTouchEvent(evt, 'touchend'));
+    this._simtouch_counter++;
+  },
+
+  /** @private
+    Converts a mouse-style event to a touch-style event.
+
+    Note that this method edits the passed event in place, and returns
+    that same instance instead of a new, modified version.
+
+    @param {Event} evt the mouse event to modify
+    @param {String} type the type of event (e.g., touchstart)
+    @returns {Event} the mouse event with an added changedTouches array
+  */
+  manufactureTouchEvent: function(evt, type) {
+    var touch, touchIdentifier = this._simtouch_counter;
+
+    touch = {
+      type: type,
+      target: evt.target,
+      identifier: touchIdentifier,
+      pageX: evt.pageX,
+      pageY: evt.pageY,
+      screenX: evt.screenX,
+      screenY: evt.screenY,
+      clientX: evt.clientX,
+      clientY: evt.clientY
+    };
+
+    evt.changedTouches = [ touch ];
+    return evt;
+  },
 
   /**
     Whether the browser supports CSS transitions. Calculated later.
