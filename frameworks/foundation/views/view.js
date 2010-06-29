@@ -1533,7 +1533,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       return this;
     }
     seen.push(this); // avoid cycles
-    
+
     // find next sibling
     if (!ret) {
       children = this.get('childViews');
@@ -1548,7 +1548,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     return ret ;
   },
-  
+
   // .......................................................
   // CORE DISPLAY METHODS
   //
@@ -1563,13 +1563,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var parentView, path, root, idx, len, lp, dp ;
     
     sc_super() ;
-    
-    // register for event handling now if we're not a materialized view
-    // (materialized views register themselves as needed)
-    if (!this.get('isMaterialized')) {
-      SC.View.views[this.get('layerId')] = this ;
-    }
-    
+
+    // Register this view for event handling
+    SC.View.views[this.get('layerId')] = this ;
+
     var childViews = this.get('childViews');
     
     // setup child views.  be sure to clone the child views array first
