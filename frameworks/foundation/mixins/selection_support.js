@@ -229,7 +229,9 @@ SC.SelectionSupport = {
     var selectionSet = this.get('selection');
     var allowsEmptySelection = this.get('allowsEmptySelection');
     var indexSet; // Selection index set for arranged objects
-    //
+
+    // If we don't have any selection, there's nothing to update
+    if (!selectionSet) return this;
     // Remove any selection set objects that are no longer in the content
     indexSet = selectionSet.indexSetForSource(arrangedObjects);
     if ((indexSet && (indexSet.get('length') !== selectionSet.get('length'))) || (!indexSet && (selectionSet.get('length') > 0))) { // then the selection content has changed
