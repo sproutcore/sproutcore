@@ -185,7 +185,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     responder chain.  Otherwise, it will begin with the current rr 
     and walk up the chain looking for any responder that implements a handler 
     for the passed method and returns YES when executed.
-    
+
     @param {String} action
     @param {SC.Event} evt
     @param {Object} target
@@ -348,7 +348,35 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (view) view.didBecomeFirstResponder(view);
     return this ;
   },
-  
+
+  /** @private
+    If the user presses the tab key and the pane does not have a first
+    responder, try to give it to the next eligible responder.
+
+    If the keyDown event reaches the pane, we can assume that no responders in
+    the responder chain, nor the default responder, handled the event.
+  */
+  keyDown: function(evt) {
+    var nextValidKeyView;
+
+    // Handle tab key presses if we don't have a first responder already
+    if (evt.which === 9 && !this.get('firstResponder')) {
+      // Cycle forwards by default, backwards if the shift key is held
+      if (evt.shiftKey) {
+        nextValidKeyView = this.get('previousValidKeyView');
+      } else {
+        nextValidKeyView = this.get('nextValidKeyView');
+      }
+
+      if (nextValidKeyView) {
+        this.makeFirstResponder(nextValidKeyView);
+        return YES;
+      }
+    }
+
+    return NO;
+  },
+
   /** @private method forwards status changes in a generic way. */
   _forwardKeyChange: function(shouldForward, methodName, pane, isKey) {
     var keyView, responder, newKeyView;
