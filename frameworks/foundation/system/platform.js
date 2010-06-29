@@ -32,7 +32,7 @@ SC.platform = {
     For example, to test to see if the placeholder attribute is supported,
     you would verify that SC.platform.input.placeholder is YES.
   */
-  input: (function(attributes) {
+  input: function(attributes) {
     var ret = {},
         len = attributes.length,
         elem = document.createElement('input'),
@@ -45,7 +45,7 @@ SC.platform = {
     }
 
     return ret;
-  })(('autocomplete readonly list size required multiple maxlength '
+  }(('autocomplete readonly list size required multiple maxlength '
     +'pattern min max step placeholder').w()),
 
   /**
@@ -112,7 +112,16 @@ SC.platform = {
   /**
     Whether the browser can properly handle 3D CSS transforms. Calculated later.
   */
-  supportsCSS3DTransforms: NO
+  supportsCSS3DTransforms: NO,
+  
+  /**
+    Wether the browser supports the hashchange event.
+  */
+  supportsHashChange: function() {
+    // Code copied from Modernizr which copied code from YUI (MIT licenses)
+    // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
+    return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
+  }()
 
 };
 
@@ -132,7 +141,7 @@ SC.platform = {
   } else if((/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent )) {
     SC.platform.cssPrefix = 'moz';
     SC.platform.domCSSPrefix = 'Moz';
-  };
+  }
 })();
 
 /* Calculate transform support */

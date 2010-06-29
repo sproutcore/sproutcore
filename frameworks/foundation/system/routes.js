@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+require('system/platform');
+
 /**
   SC.routes manages the browser location. You can change the hash part of the
   current location. The following code
@@ -201,7 +203,7 @@ SC.routes = SC.Object.create({
     if (!this._didSetup) {
       this._didSetup = YES;
       
-      if (this.get('supportsOnHashChange')) {
+      if (SC.platform.supportsHashChange) {
         this.hashChange();
         SC.Event.add(window, 'hashchange', this, this.hashChange);
       
@@ -217,23 +219,6 @@ SC.routes = SC.Object.create({
       }
     }
   },
-  
-  /**
-    Whether the browser supports HTML5 history management.
-    
-    Code copied from Google's closure library which is under the Apache 2
-    license.
-    
-    {@link http://closure-library.googlecode.com/svn/trunk/closure/goog/history/history.js}
-    {@link http://www.w3.org/TR/html5/history.html}
-    @property
-    @returns {Boolean}
-  */
-  supportsOnHashChange: function() {
-    return SC.browser.isSafari && SC.browser.compareVersion(532,1) >= 0 ||
-           SC.browser.isMozilla && SC.browser.compareVersion(1,9,2) >= 0 ||
-           SC.browser.isIE && document.documentMode >= 8;
-  }.property().cacheable(),
   
   /**
     Event handler for the hashchange event. Called automatically by the browser
