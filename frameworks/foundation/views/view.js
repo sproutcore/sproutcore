@@ -1468,7 +1468,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   nextValidKeyView: function() {
     var seen = [], 
-        rootView = this.pane(), ret = this.get('nextKeyView');
+        rootView = this.get('pane'), ret = this.get('nextKeyView');
     
     if(!ret) ret = rootView._computeNextValidKeyView(this, seen);
     
