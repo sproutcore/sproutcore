@@ -382,9 +382,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var hint = this.get('hint'), disabled, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
-        maxLength = this.get('maxLength');
+        maxLength = this.get('maxLength'), isOldSafari;
         
     context.setClass('text-area', this.get('isTextArea'));
+    
+    //Adding this to differentiate between older and newer versions of safari
+    //since the internal default field padding changed 
+    isOldSafari= (parseInt(SC.browser.safari,0)<532);
+    context.setClass('oldWebKitFieldPadding', isOldSafari);
     
     spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
     if (firstTime || this._forceRenderFirstTime) {
