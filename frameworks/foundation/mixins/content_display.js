@@ -42,7 +42,14 @@ SC.ContentDisplay = {
     @property {Array}
   */
   contentDisplayProperties: [],
-  
+
+  /** @private
+    Setup observers on the content object when initializing the mixin.
+  */
+  initMixin: function() {
+    this._display_contentDidChange();
+  },
+
   /** @private */
   _display_contentDidChange: function(target, key, value) {
     // handle changes to the content...
