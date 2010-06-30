@@ -76,7 +76,7 @@ config :standard_theme,
 
 # CONFIGURE APPS
 
-config :core_tools, :required => [:desktop]
+config :core_tools, :required => [:desktop, :datastore]
 
 # mode :debug do
 #   config :core_tools, :combine_javascript => false
