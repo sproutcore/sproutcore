@@ -70,7 +70,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   init: function() {
     sc_super();
     this._setupMenu();
-    if (this.get("shouldLoadInBackground")) {
+    if (this.get('shouldLoadInBackground')) {
       SC.backgroundTaskQueue.push(SC.PopupButtonMenuLoader.create({ popupButton: this }));
     }
   },
@@ -80,7 +80,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     Sets up binding on the menu, removing any old ones if necessary.
   */
   _setupMenu: function() {
-    var menu = this.get("instantiatedMenu");
+    var menu = this.get('instantiatedMenu');
     
     // clear existing bindings
     if (this.isActiveBinding) this.isActiveBinding.disconnect();
@@ -88,7 +88,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     
     // if there is a menu
     if (menu && !menu.isClass) {
-      this.isActiveBinding = this.bind("isActive", menu, "isVisibleInWindow");
+      this.isActiveBinding = this.bind('isActive', menu, 'isVisibleInWindow');
     }
   },
   
@@ -97,7 +97,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   */
   _popup_menuDidChange: function() {
     this._setupMenu();
-  }.observes("menu"),
+  }.observes('menu'),
 
   /** @private
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
@@ -110,7 +110,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   */
   _instantiateMenu: function() {
     // get menu
-    var menu = this.get("menu");
+    var menu = this.get('menu');
     
     // if it is already instantiated or does not exist, we cannot do anything
     if (!menu.isClass || !menu) return;
@@ -129,7 +129,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   */
   instantiatedMenu: function() {
     // get the menu
-    var menu = this.get("menu");
+    var menu = this.get('menu');
     
     // if it is a class, we need to instantiate it
     if (menu && menu.isClass) {
@@ -137,12 +137,12 @@ SC.PopupButtonView = SC.ButtonView.extend(
       this._instantiateMenu();
       
       // get the new version of the local
-      menu = this.get("menu");
+      menu = this.get('menu');
     }
     
     // return
     return menu;
-  }.property("menu").cacheable(),
+  }.property('menu').cacheable(),
 
   /** @private
     Displays the menu.
