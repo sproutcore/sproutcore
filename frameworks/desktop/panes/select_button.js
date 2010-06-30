@@ -577,7 +577,26 @@ SC.SelectButtonView = SC.ButtonView.extend(
       itemHeightKey: 'height',
       layout: { width: largestMenuWidth },
       controlSize: menuControlSize,
-      itemWidth: lastMenuWidth
+      itemWidth: lastMenuWidth,
+
+      /**
+        PerformKeyEquivalent, for handling tab and shift + tab
+        Prevents the focus going to next fields when menu is open and you tab
+
+        @param {String} keystring
+        @param {SC.Event} evt
+        @returns {Boolean}  YES if handled
+      */
+
+      performKeyEquivalent: function( keystring, evt ) {
+        switch (keystring) {
+          case 'tab':
+          case 'shift_tab':
+            return YES ;
+          default:
+            return sc_super() ;
+        }
+      }
     }) ;
 
     // no menu to toggle... bail...
