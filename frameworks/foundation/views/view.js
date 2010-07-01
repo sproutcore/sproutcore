@@ -1757,12 +1757,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // To allow layout to be a computed property, we check if any property has 
     // changed and if layout is dependent on the property. 
     // If it is we call layoutDidChange. 
-
-    if(this._kvo_dependents) {
+    var layoutChange=false;
+    if(typeof this.layout === "function" && this._kvo_dependents) {
       var dependents = this._kvo_dependents[key];
-      if(dependents && dependents.indexOf('layout')!=-1) this.layoutDidChange();
+      if(dependents && dependents.indexOf('layout')!=-1) layoutChange = true;
     }
-    if(key==='layout') this.layoutDidChange();
+    if(key==='layout' || layoutChange) this.layoutDidChange();
     // Resume notification as usual.
     sc_super();
   },
