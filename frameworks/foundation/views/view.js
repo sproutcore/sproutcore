@@ -1753,8 +1753,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // If the key is 'layout', we need to call layoutDidChange() immediately
     // so that if the frame has changed any cached values (for both this view
     // and any child views) can be appropriately invalidated.
-    if (key === 'layout') this.layoutDidChange();
+    
+    // To allow layout to be a computed property, we check if any property has 
+    // changed and if layout is dependent on the property. 
+    // If it is we call layoutDidChange. 
 
+    if(this._kvo_dependents) {
+      var dependents = this._kvo_dependents[key];
+      if(dependents && dependents.indexOf('layout')!=-1) this.layoutDidChange();
+    }
+    if(key==='layout') this.layoutDidChange();
     // Resume notification as usual.
     sc_super();
   },
