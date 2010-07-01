@@ -122,8 +122,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   computeParentDimensions: function(frame) {
     if(this.get('designer') && SC.suppressMain) return sc_super();
     
-    var wframe = this.get('currentWindowSize');
-    var wDim = {x: 0, y: 0, width: 1000, height: 1000};
+    var wframe = this.get('currentWindowSize'),
+        wDim = {x: 0, y: 0, width: 1000, height: 1000},
+        layout = this.get('layout');
+
     if (wframe){
       wDim.width = wframe.width;
       wDim.height = wframe.height;
@@ -149,7 +151,18 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
         wDim.height = document.body.clientHeight;
       }
       this.windowSizeDidChange(null, wDim);
-    }    
+    }
+
+    // If there is a minWidth or minHeight set on the pane, take that
+    // into account when calculating dimensions.
+    if (layout.minHeight) {
+      wDim.height = Math.max(wDim.height, layout.minHeight);
+    }
+
+    if (layout.minWidth) {
+      wDim.width = Math.max(wDim.width, layout.minWidth);
+    }
+
     return wDim;
   },
     
