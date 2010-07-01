@@ -1139,7 +1139,7 @@ SC.RootResponder = SC.Object.extend({
         try { // keep in mind that it might only _be_ here because it crashed...
           if (responder[action]) responder[action](touchEntry, evt);
         } catch(e) {
-          
+          console.error('crashed on endTouch');
         }
         
         // check to see if the responder changed, and stop immediately if so.
@@ -1207,51 +1207,45 @@ SC.RootResponder = SC.Object.extend({
     this.endMissingTouches(evt.touches);
 
     // as you were...    
-    try {
-      // loop through changed touches, calling touchStart, etc.
-      var idx, touches = evt.changedTouches, len = touches.length, target, view, touch, touchEntry,
-          hidingTouchIntercept = NO;
+    // loop through changed touches, calling touchStart, etc.
+    var idx, touches = evt.changedTouches, len = touches.length, target, view, touch, touchEntry,
+        hidingTouchIntercept = NO;
 
-      // prepare event for touch mapping.
-      evt.touchContext = this;
+    // prepare event for touch mapping.
+    evt.touchContext = this;
 
-      // Loop through each touch we received in this event
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
+    // Loop through each touch we received in this event
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
 
-        // Create an SC.Touch instance for every touch.
-        touchEntry = SC.Touch.create(touch, this);
-        
-        // skip the touch if there was no target
-        if (!touchEntry.targetView) continue;
-        
-        // account for hidden touch intercept (passing through touches, etc.)
-        if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
-        
-        // set timestamp
-        touchEntry.timeStamp = evt.timeStamp;
+      // Create an SC.Touch instance for every touch.
+      touchEntry = SC.Touch.create(touch, this);
+      
+      // skip the touch if there was no target
+      if (!touchEntry.targetView) continue;
+      
+      // account for hidden touch intercept (passing through touches, etc.)
+      if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
+      
+      // set timestamp
+      touchEntry.timeStamp = evt.timeStamp;
 
-        // Store the SC.Touch object. We use the identifier property (provided
-        // by the browser) to disambiguate between touches. These will be used
-        // later to determine if the touches have changed.
-        this._touches[touch.identifier] = touchEntry;
+      // Store the SC.Touch object. We use the identifier property (provided
+      // by the browser) to disambiguate between touches. These will be used
+      // later to determine if the touches have changed.
+      this._touches[touch.identifier] = touchEntry;
 
-        // set the event (so default action, etc. can be stopped)
-        touch.event = evt; // will be unset momentarily
+      // set the event (so default action, etc. can be stopped)
+      touch.event = evt; // will be unset momentarily
 
-        // send out event thing: creates a chain, goes up it, then down it,
-        // with startTouch and cancelTouch. in this case, only startTouch, as
-        // there are no existing touch responders. We send the touchEntry
-        // because it is cached (we add the helpers only once)
-        this.captureTouch(touchEntry, this);
+      // send out event thing: creates a chain, goes up it, then down it,
+      // with startTouch and cancelTouch. in this case, only startTouch, as
+      // there are no existing touch responders. We send the touchEntry
+      // because it is cached (we add the helpers only once)
+      this.captureTouch(touchEntry, this);
 
-        // Unset the reference to the original event so we can garbage collect.
-        touch.event = null;
-      }
-    } catch (e) {
-      SC.Logger.warn('Exception during touchStart: %@'.fmt(e)) ;
-      SC.RunLoop.end();
-      return NO ;
+      // Unset the reference to the original event so we can garbage collect.
+      touch.event = null;
     }
 
     SC.RunLoop.end();
@@ -1270,87 +1264,84 @@ SC.RootResponder = SC.Object.extend({
   touchmove: function(evt) {
     SC.RunLoop.begin();
     
-    try {
-      // pretty much all we gotta do is update touches, and figure out which views need updating.
-      var touches = evt.changedTouches, touch, touchEntry,
-          idx, len = touches.length, view, changedTouches, viewTouches, firstTouch,
-          changedViews = {}, loc, guid, hidingTouchIntercept = NO;
+    // pretty much all we gotta do is update touches, and figure out which views need updating.
+    var touches = evt.changedTouches, touch, touchEntry,
+        idx, len = touches.length, view, changedTouches, viewTouches, firstTouch,
+        changedViews = {}, loc, guid, hidingTouchIntercept = NO;
 
-      if (this._drag) {
-        touch = SC.Touch.create(evt.changedTouches[0], this);
-        this._drag.tryToPerform('mouseDragged', touch);
-      }
+    if (this._drag) {
+      touch = SC.Touch.create(evt.changedTouches[0], this);
+      this._drag.tryToPerform('mouseDragged', touch);
+    }
 
-      // figure out what views had touches changed, and update our internal touch objects
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
+    // figure out what views had touches changed, and update our internal touch objects
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
 
-        // get our touch
-        touchEntry = this._touches[touch.identifier];
+      // get our touch
+      touchEntry = this._touches[touch.identifier];
 
-        // we may have no touch entry; this can happen if somehow the touch came to a non-SC area.
-        if (!touchEntry) {
-          continue;
-        }
-        
-        if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
-
-        // update touch
-        touchEntry.pageX = touch.pageX;
-        touchEntry.pageY = touch.pageY;
-        touchEntry.timeStamp = evt.timeStamp;
-        touchEntry.event = evt;
-
-        // if the touch entry has a view
-        if (touchEntry.touchResponder) {
-          view = touchEntry.touchResponder;
-          
-          guid = SC.guidFor(view);
-          // create a view entry
-          if (!changedViews[guid]) changedViews[guid] = { "view": view, "touches": [] };
-
-          // add touch
-          changedViews[guid].touches.push(touchEntry);
-        }
-      }
-
-      // HACK: DISABLE OTHER TOUCH DRAGS WHILE MESSING WITH TEXT FIELDS
-      if (hidingTouchIntercept) {
-        evt.allowDefault();
-        return YES;
-      }
-
-      // loop through changed views and send events
-      for (idx in changedViews) {
-        // get info
-        view = changedViews[idx].view;
-        changedTouches = changedViews[idx].touches;
-
-        // prepare event; note that views often won't use this method anyway (they'll call touchesForView instead)
-        evt.viewChangedTouches = changedTouches;
-
-        // the first VIEW touch should be the touch info sent
-        viewTouches = this.touchesForView(view);
-        firstTouch = viewTouches.firstObject();
-        evt.pageX = firstTouch.pageX;
-        evt.pageY = firstTouch.pageY;
-        evt.touchContext = this; // so it can call touchesForView
-
-        // and go
-        view.tryToPerform("touchesDragged", evt, viewTouches);
+      // we may have no touch entry; this can happen if somehow the touch came to a non-SC area.
+      if (!touchEntry) {
+        continue;
       }
       
-      // clear references to event
-      touches = evt.changedTouches;
-      len = touches.length;
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
-        touchEntry = this._touches[touch.identifier];
-        touchEntry.event = null;
+      if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
+
+      // update touch
+      touchEntry.pageX = touch.pageX;
+      touchEntry.pageY = touch.pageY;
+      touchEntry.timeStamp = evt.timeStamp;
+      touchEntry.event = evt;
+
+      // if the touch entry has a view
+      if (touchEntry.touchResponder) {
+        view = touchEntry.touchResponder;
+        
+        guid = SC.guidFor(view);
+        // create a view entry
+        if (!changedViews[guid]) changedViews[guid] = { "view": view, "touches": [] };
+
+        // add touch
+        changedViews[guid].touches.push(touchEntry);
       }
-    } catch (e) {
-      SC.Logger.warn('Exception during touchMove: %@'.fmt(e)) ;
     }
+
+    // HACK: DISABLE OTHER TOUCH DRAGS WHILE MESSING WITH TEXT FIELDS
+    if (hidingTouchIntercept) {
+      evt.allowDefault();
+      return YES;
+    }
+
+    // loop through changed views and send events
+    for (idx in changedViews) {
+      // get info
+      view = changedViews[idx].view;
+      changedTouches = changedViews[idx].touches;
+
+      // prepare event; note that views often won't use this method anyway (they'll call touchesForView instead)
+      evt.viewChangedTouches = changedTouches;
+
+      // the first VIEW touch should be the touch info sent
+      viewTouches = this.touchesForView(view);
+      firstTouch = viewTouches.firstObject();
+      evt.pageX = firstTouch.pageX;
+      evt.pageY = firstTouch.pageY;
+      evt.touchContext = this; // so it can call touchesForView
+
+      // and go
+      view.tryToPerform("touchesDragged", evt, viewTouches);
+    }
+    
+    // clear references to event
+    touches = evt.changedTouches;
+    len = touches.length;
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
+      touchEntry = this._touches[touch.identifier];
+      touchEntry.event = null;
+    }
+    
     SC.RunLoop.end();
     
     return NO;
@@ -1358,48 +1349,42 @@ SC.RootResponder = SC.Object.extend({
 
   touchend: function(evt) {
     SC.RunLoop.begin();
-    try {
-      var touches = evt.changedTouches, touch, touchEntry,
-          idx, len = touches.length,
-          view, elem,
-          action = evt.isCancel ? "touchCancelled" : "touchEnd", a,
-          responderIdx, responders, responder, hidesTouchIntercept = NO;
+    var touches = evt.changedTouches, touch, touchEntry,
+        idx, len = touches.length,
+        view, elem,
+        action = evt.isCancel ? "touchCancelled" : "touchEnd", a,
+        responderIdx, responders, responder, hidesTouchIntercept = NO;
 
-      for (idx = 0; idx < len; idx++) {
-        //get touch+entry
-        touch = touches[idx];
-        touch.type = 'touchend';
-        touchEntry = this._touches[touch.identifier];
-        
-        // check if there is an entry
-        if (!touchEntry) continue;
-        
-        // continue work
-        touchEntry.timeStamp = evt.timeStamp;
-        touchEntry.pageX = touch.pageX;
-        touchEntry.pageY = touch.pageY;
-        touchEntry.type = 'touchend';
-        
-        if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('-- Received touch end');
-        if (touchEntry.hidesTouchIntercept) {
-          touchEntry.unhideTouchIntercept();
-          hidesTouchIntercept = YES;
-        }
-        
-        if (this._drag) {
-          this._drag.tryToPerform('mouseUp', touch) ;
-          this._drag = null ;
-        }
-
-        // unassign
-        this.endTouch(touchEntry, action, evt);
-        this.finishTouch(touchEntry);
-        
+    for (idx = 0; idx < len; idx++) {
+      //get touch+entry
+      touch = touches[idx];
+      touch.type = 'touchend';
+      touchEntry = this._touches[touch.identifier];
+      
+      // check if there is an entry
+      if (!touchEntry) continue;
+      
+      // continue work
+      touchEntry.timeStamp = evt.timeStamp;
+      touchEntry.pageX = touch.pageX;
+      touchEntry.pageY = touch.pageY;
+      touchEntry.type = 'touchend';
+      
+      if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('-- Received touch end');
+      if (touchEntry.hidesTouchIntercept) {
+        touchEntry.unhideTouchIntercept();
+        hidesTouchIntercept = YES;
       }
-    } catch (e) {
-      SC.Logger.warn('Exception during touchEnd: %@'.fmt(e)) ;
-      SC.RunLoop.end();
-      return NO ;
+      
+      if (this._drag) {
+        this._drag.tryToPerform('mouseUp', touch) ;
+        this._drag = null ;
+      }
+
+      // unassign
+      this.endTouch(touchEntry, action, evt);
+      this.finishTouch(touchEntry);
+      
     }
 
     SC.RunLoop.end();
@@ -1654,48 +1639,41 @@ SC.RootResponder = SC.Object.extend({
       return YES;
     }
     
-    try {
-      if(!SC.browser.msie) window.focus();
-      
-      // First, save the click count. The click count resets if the mouse down
-      // event occurs more than 200 ms later than the mouse up event or more
-      // than 8 pixels away from the mouse down event.
-      this._clickCount += 1 ;
-      if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
-        this._clickCount = 1 ;
-      } else {
-        var deltaX = this._lastMouseDownX - evt.clientX,
-            deltaY = this._lastMouseDownY - evt.clientY,
-            distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
-        if (distance > 8.0) this._clickCount = 1 ;
-      }
-      evt.clickCount = this._clickCount ;
-
-      this._lastMouseDownX = evt.clientX ;
-      this._lastMouseDownY = evt.clientY ;
-
-      var fr, view = this.targetViewForEvent(evt) ;
-
-      // InlineTextField needs to loose firstResponder whenever you click outside
-      // the view. This is a special case as textfields are not supposed to loose
-      // focus unless you click on a list, another textfield or an special
-      // view/control.
-
-      if(view) fr=view.getPath('pane.firstResponder');
-
-      if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
-        fr.resignFirstResponder();
-      }
-
-      view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
-      if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
-    } catch (e) {
-
-      console.warn('Exception during mousedown: %@'.fmt(e)) ;
-      this._mouseDownView = null ;
-      this._mouseCanDrag = NO ;
-      throw e;
+    if(!SC.browser.msie) window.focus();
+    
+    // First, save the click count. The click count resets if the mouse down
+    // event occurs more than 200 ms later than the mouse up event or more
+    // than 8 pixels away from the mouse down event.
+    this._clickCount += 1 ;
+    if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
+      this._clickCount = 1 ;
+    } else {
+      var deltaX = this._lastMouseDownX - evt.clientX,
+          deltaY = this._lastMouseDownY - evt.clientY,
+          distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
+      if (distance > 8.0) this._clickCount = 1 ;
     }
+    evt.clickCount = this._clickCount ;
+
+    this._lastMouseDownX = evt.clientX ;
+    this._lastMouseDownY = evt.clientY ;
+
+    var fr, view = this.targetViewForEvent(evt) ;
+
+    // InlineTextField needs to loose firstResponder whenever you click outside
+    // the view. This is a special case as textfields are not supposed to loose
+    // focus unless you click on a list, another textfield or an special
+    // view/control.
+
+    if(view) fr=view.getPath('pane.firstResponder');
+
+    if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
+      fr.resignFirstResponder();
+    }
+
+    view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
+    if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
+  
 
     return view ? evt.hasCustomEventHandling : YES;
   },
@@ -1714,55 +1692,52 @@ SC.RootResponder = SC.Object.extend({
     }
     
     this.targetViewForEvent(evt);
-    try {
-      if (this._drag) {
-        this._drag.tryToPerform('mouseUp', evt) ;
-        this._drag = null ;
-      }
-
-      var handler = null, view = this._mouseDownView,
-          targetView = this.targetViewForEvent(evt);
-      this._lastMouseUpAt = Date.now() ;
-
-      // record click count.
-      evt.clickCount = this._clickCount ;
-
-      // attempt the mouseup call only if there's a target.
-      // don't want a mouseup going to anyone unless they handled the mousedown...
-      if (view) {
-        handler = this.sendEvent('mouseUp', evt, view) ;
-
-        // try doubleClick
-        if (!handler && (this._clickCount === 2)) {
-          handler = this.sendEvent('doubleClick', evt, view) ;
-        }
-
-        // try single click
-        if (!handler) {
-          handler = this.sendEvent('click', evt, view) ;
-        }
-      }
-
-      // try whoever's under the mouse if we haven't handle the mouse up yet
-      if (!handler) {
-
-        // try doubleClick
-        if (this._clickCount === 2) {
-          handler = this.sendEvent('doubleClick', evt, targetView);
-        }
-
-        // try singleClick
-        if (!handler) {
-          handler = this.sendEvent('click', evt, targetView) ;
-        }
-      }
-
-      // cleanup
-      this._mouseCanDrag = NO; this._mouseDownView = null ;
-    } catch (e) {
-      this._drag = null; this._mouseCanDrag = NO; this._mouseDownView = null ;
-      throw e;
+    
+    if (this._drag) {
+      this._drag.tryToPerform('mouseUp', evt) ;
+      this._drag = null ;
     }
+
+    var handler = null, view = this._mouseDownView,
+        targetView = this.targetViewForEvent(evt);
+    this._lastMouseUpAt = Date.now() ;
+
+    // record click count.
+    evt.clickCount = this._clickCount ;
+
+    // attempt the mouseup call only if there's a target.
+    // don't want a mouseup going to anyone unless they handled the mousedown...
+    if (view) {
+      handler = this.sendEvent('mouseUp', evt, view) ;
+
+      // try doubleClick
+      if (!handler && (this._clickCount === 2)) {
+        handler = this.sendEvent('doubleClick', evt, view) ;
+      }
+
+      // try single click
+      if (!handler) {
+        handler = this.sendEvent('click', evt, view) ;
+      }
+    }
+
+    // try whoever's under the mouse if we haven't handle the mouse up yet
+    if (!handler) {
+
+      // try doubleClick
+      if (this._clickCount === 2) {
+        handler = this.sendEvent('doubleClick', evt, targetView);
+      }
+
+      // try singleClick
+      if (!handler) {
+        handler = this.sendEvent('click', evt, targetView) ;
+      }
+    }
+
+    // cleanup
+    this._mouseCanDrag = NO; this._mouseDownView = null ;
+  
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
 
@@ -1775,12 +1750,9 @@ SC.RootResponder = SC.Object.extend({
   },
 
   mousewheel: function(evt) {
-    try {
-      var view = this.targetViewForEvent(evt) ,
-          handler = this.sendEvent('mouseWheel', evt, view) ;
-    } catch (e) {
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt) ,
+        handler = this.sendEvent('mouseWheel', evt, view) ;
+  
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
 
@@ -1811,66 +1783,64 @@ SC.RootResponder = SC.Object.extend({
     this._lastMoveY = evt.clientY;
 
     SC.RunLoop.begin();
-    try {
-      // make sure the view gets focus no matter what.  FF is inconsistant
-      // about this.
-     // this.focus();
-      // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
-      // drags send their own events, e.g. drag[Moved|Entered|Exited]
-      if (this._drag) {
-        //IE triggers mousemove at the same time as mousedown
-        if(SC.browser.msie){
-          if (this._lastMouseDownX !== evt.clientX || this._lastMouseDownY !== evt.clientY) {
-            this._drag.tryToPerform('mouseDragged', evt);
-          }
-        }
-        else {
+    
+    // make sure the view gets focus no matter what.  FF is inconsistant
+    // about this.
+   // this.focus();
+    // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
+    // drags send their own events, e.g. drag[Moved|Entered|Exited]
+    if (this._drag) {
+      //IE triggers mousemove at the same time as mousedown
+      if(SC.browser.msie){
+        if (this._lastMouseDownX !== evt.clientX || this._lastMouseDownY !== evt.clientY) {
           this._drag.tryToPerform('mouseDragged', evt);
         }
-      } else {
-        var lh = this._lastHovered || [] , nh = [] , exited, loc, len,
-            view = this.targetViewForEvent(evt) ;
+      }
+      else {
+        this._drag.tryToPerform('mouseDragged', evt);
+      }
+    } else {
+      var lh = this._lastHovered || [] , nh = [] , exited, loc, len,
+          view = this.targetViewForEvent(evt) ;
 
-        // work up the view chain.  Notify of mouse entered and
-        // mouseMoved if implemented.
-        while(view && (view !== this)) {
-          if (lh.indexOf(view) !== -1) {
-            view.tryToPerform('mouseMoved', evt);
-            nh.push(view) ;
-          } else {
-            view.tryToPerform('mouseEntered', evt);
-            nh.push(view) ;
-          }
-
-          view = view.get('nextResponder');
+      // work up the view chain.  Notify of mouse entered and
+      // mouseMoved if implemented.
+      while(view && (view !== this)) {
+        if (lh.indexOf(view) !== -1) {
+          view.tryToPerform('mouseMoved', evt);
+          nh.push(view) ;
+        } else {
+          view.tryToPerform('mouseEntered', evt);
+          nh.push(view) ;
         }
-        // now find those views last hovered over that were no longer found
-        // in this chain and notify of mouseExited.
-        for(loc=0, len=lh.length; loc < len; loc++) {
-          view = lh[loc] ;
-          exited = view.respondsTo('mouseExited') ;
-          if (exited && !(nh.indexOf(view) !== -1)) {
-            view.tryToPerform('mouseExited',evt);
-          }
-        }
-        this._lastHovered = nh;
 
-        // also, if a mouseDownView exists, call the mouseDragged action, if
-        // it exists.
-        if (this._mouseDownView) {
-          if(SC.browser.msie){
-            if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
-              this._mouseDownView.tryToPerform('mouseDragged', evt);
-            }
-          }
-          else {
+        view = view.get('nextResponder');
+      }
+      // now find those views last hovered over that were no longer found
+      // in this chain and notify of mouseExited.
+      for(loc=0, len=lh.length; loc < len; loc++) {
+        view = lh[loc] ;
+        exited = view.respondsTo('mouseExited') ;
+        if (exited && !(nh.indexOf(view) !== -1)) {
+          view.tryToPerform('mouseExited',evt);
+        }
+      }
+      this._lastHovered = nh;
+
+      // also, if a mouseDownView exists, call the mouseDragged action, if
+      // it exists.
+      if (this._mouseDownView) {
+        if(SC.browser.msie){
+          if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
             this._mouseDownView.tryToPerform('mouseDragged', evt);
           }
         }
+        else {
+          this._mouseDownView.tryToPerform('mouseDragged', evt);
+        }
       }
-    } catch (e) {
-      throw e;
     }
+    
     SC.RunLoop.end();
   },
 
