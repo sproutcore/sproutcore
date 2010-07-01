@@ -252,7 +252,6 @@ SC.MenuPane = SC.PickerPane.extend(
     if (anchorViewOrElement) {
       anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
     }
-
     this.set('anchorElement',anchor) ;
     this.set('anchor',anchorViewOrElement);
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
@@ -266,15 +265,7 @@ SC.MenuPane = SC.PickerPane.extend(
     this.set('defaultResponder', this);
     this.endPropertyChanges();
 
-    // IE7 has a bug where, intermittently, appending a menu pane will cause
-    // the other panes to blank out, until the user interacts with the window.
-    // If we wait until the end of the RunLoop to append the pane, IE redraws
-    // correctly.
-    if (parseInt(SC.browser.msie, 0)===7) {
-      this.invokeLast(this.append);
-    } else {
-      this.append();
-    }
+    this.append();
   },
 
   /**

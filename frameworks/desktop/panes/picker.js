@@ -246,7 +246,6 @@ SC.PickerPane = SC.PalettePane.extend({
   computeAnchorRect: function(anchor) {
     var bounding, ret, cq,
         wsize = SC.RootResponder.responder.computeWindowSize();
-
     // Some browsers natively implement getBoundingClientRect, so if it's
     // available we'll use it for speed.
     if (anchor.getBoundingClientRect) {
@@ -263,7 +262,7 @@ SC.PickerPane = SC.PalettePane.extend({
       // if we didnt get the frame dimensions the do the calculations
       // based on an element
       if(ret.width===undefined || ret.height===undefined){
-        cq    = SC.$(anchor);
+        cq = SC.$(anchor);
         ret.width = cq.outerWidth();
         ret.height = cq.outerHeight();
       }
@@ -276,6 +275,13 @@ SC.PickerPane = SC.PalettePane.extend({
       ret.height = cq.outerHeight();
     }
     ret.height = (wsize.height-ret.y) < ret.height ? (wsize.height-ret.y) : ret.height;
+    if(!SC.browser.msie && window.scrollX>0 || window.scrollY>0){
+      ret.x+=window.scrollX;
+      ret.y+=window.scrollY;
+    }else if(SC.browser.msie && (document.documentElement.scrollTop>0 || document.documentElement.scrollLeft>0)){
+      ret.x+=document.documentElement.scrollLeft;
+      ret.y+=document.documentElement.scrollTop;
+    }
     return ret ;
   },
 
