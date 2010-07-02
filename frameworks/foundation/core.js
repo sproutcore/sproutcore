@@ -170,8 +170,10 @@ SC.mixin(Function.prototype, /** @scope Function.prototype */ {
       var args = SC.$A(arguments).slice(2,arguments.length);
       args.unshift(target);
       // f = f.bind.apply(f, args) ;
-      var that = this, func = f ;
-      f = function() { return func.apply(that, args.slice(1)); } ;
+      var func = f ;
+      // Use "this" in inner func because it get its scope by 
+      // outer func f (=target). Could replace "this" with target for clarity.
+      f = function() { return func.apply(this, args.slice(1)); } ;
     }
     return SC.Timer.schedule({ target: target, action: f, interval: interval });
   }    
