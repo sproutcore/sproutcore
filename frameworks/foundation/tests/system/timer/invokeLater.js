@@ -77,11 +77,11 @@ test("should invoke method string immediately if no time passed", function() {
 test("should automatically bind with arguments if passed", function() {
   SC.RunLoop.begin() ;
   var fired = NO ;
-  var g1 = null, g2 = null ;
+  var g1 = null, g2 = null ; target = null ;
   
   var o = SC.Object.create({
     func: function(arg1, arg2) { 
-      g1 = arg1 ; g2 = arg2 ; fired = YES ; 
+      g1 = arg1 ; g2 = arg2 ; fired = YES ; target = this ;
     }
   });
   o.invokeLater('func', 200, 'ARG1', 'ARG2') ;
@@ -96,6 +96,7 @@ test("should automatically bind with arguments if passed", function() {
     equals(YES, fired, 'did not fire') ;
     equals(g1, 'ARG1', 'arg1') ;
     equals(g2, 'ARG2', 'arg2') ;
+    equals(target, o, 'target') ;
     window.start() ; // starts the test runner
   } ;
   
@@ -175,11 +176,11 @@ test("should invoke function immediately if no time passed", function() {
 test("should automatically bind with arguments if passed", function() {
   SC.RunLoop.begin() ;
   var fired = NO ;
-  var g1 = null, g2 = null ;
+  var g1 = null, g2 = null ; target = null ;
   
   var o = SC.Object.create() ;
   var func = function(arg1, arg2) { 
-    g1 = arg1 ; g2 = arg2 ; fired = YES ; 
+    g1 = arg1 ; g2 = arg2 ; fired = YES ; target = this ;
   } ; 
   func.invokeLater(o, 200, 'ARG1', 'ARG2') ;
   SC.RunLoop.end() ;
@@ -192,7 +193,8 @@ test("should automatically bind with arguments if passed", function() {
     }
     equals(YES, fired, 'did not fire') ;
     equals(g1, 'ARG1', 'arg1') ;
-    equals(g2, 'ARG2', 'arg2') ; 
+    equals(g2, 'ARG2', 'arg2') ;
+    equals(target, o, 'target') ;
     window.start() ; // starts the test runner
   } ;
   
