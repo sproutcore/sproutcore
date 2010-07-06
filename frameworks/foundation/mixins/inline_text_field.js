@@ -129,7 +129,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this._optIsCollection = options.isCollection;
     this._exampleElement = options.exampleElement ;
 
-    if (!this._optframe || !this._delegate) {
+    if (!this._optframe || !del) {
       throw "At least frame and delegate options are required for inline editor";
     }
     
