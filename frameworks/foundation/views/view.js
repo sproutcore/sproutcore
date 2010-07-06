@@ -2247,7 +2247,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {Rect}
   */
   contentClippingFrame: function() {
-    return this.get("clippingFrame");
+    return this.get('clippingFrame');
   }.property('clippingFrame').cacheable(),
 
   /** @private
