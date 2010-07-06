@@ -1899,7 +1899,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   /**
     Converts a frame offset in the coordinates of another view system to the 
-    reciever's view.
+    receiver's view.
     
     Note that the convext of a view's frame is relative to the view's 
     parentFrame.  For example, if you want to convert the frame of view that
