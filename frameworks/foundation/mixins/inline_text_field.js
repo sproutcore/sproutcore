@@ -111,7 +111,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     var layout={}, pane, delLayout, paneElem, del;
 
     del = this._delegate = options.delegate ;
-    this.set('delegate', this._delegate);
+    this.set('delegate', del);
     
     // continue only if the delegate allows it
     if (!this.invokeDelegateMethod(del, 'inlineEditorShouldBeginEditing', this)) {
