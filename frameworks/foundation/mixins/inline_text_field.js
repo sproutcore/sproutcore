@@ -149,7 +149,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     // add to window.
     
-    pane = this._delegate.pane();
+    pane = del.get('pane');
 
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
