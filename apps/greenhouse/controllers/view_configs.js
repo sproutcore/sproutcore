@@ -23,6 +23,32 @@ Greenhouse.viewConfigsController = SC.ArrayController.create(
     this.set('content', files);
   },
   
+  _content_status_changed: function(){
+    var c = this.get('content'), that = this;    
+    if(c && c.get && c.get('status') && c.get('status') === SC.Record.READY_CLEAN){
+      Greenhouse.libraryController.set('content', SC.Object.create({
+        treeItemIsExpanded: YES,
+        treeItemChildren: [
+          SC.Object.create({
+            name: 'Views',
+            treeItemIsExpanded: YES,
+            treeItemChildren: that.get('views')
+          }),
+          SC.Object.create({
+            name: 'Controllers',
+            treeItemIsExpanded: YES,
+            treeItemChildren: that.get('controllers')
+          }),
+          SC.Object.create({
+            name: 'Panes',
+            treeItemIsExpanded: YES,
+            treeItemChildren: that.get('panes')
+          })
+        ]
+      }));
+    }
+  }.observes('*content.status'),
+  
   /** 
     Generates the arrays of views, panes and controllers that can be dropped into this app
   */
@@ -48,7 +74,7 @@ Greenhouse.viewConfigsController = SC.ArrayController.create(
         subItem = vc.get(key);
         if(subItem){
           subItem.forEach(function(item){
-            ret.push(SC.Object.create(item));
+            ret.pushObject(item);
           });
         }
       });
