@@ -17,3 +17,14 @@ Sources of Intellectual Property Included in the YUI Library
 Where not otherwise indicated, all YUI content is authored by Yahoo! engineers and consists of Yahoo!-owned intellectual property. YUI is issued by Yahoo! under the BSD license above. In some specific instances, YUI will incorporate work done by developers outside of Yahoo! with their express permission.
 
 */
+
+/*! @license
+  jQuery 1.2.6 - New Wave Javascript
+
+  Copyright (c) 2008 John Resig (jquery.com)
+  Dual licensed under the MIT (MIT-LICENSE.txt)
+  and GPL (GPL-LICENSE.txt) licenses.
+  
+  $Date: 2008-05-24 14:22:17 -0400 (Sat, 24 May 2008) $
+  $Rev: 5685 $
+*/
