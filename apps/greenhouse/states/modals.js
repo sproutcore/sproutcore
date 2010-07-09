@@ -115,16 +115,21 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     enterState: function(){
       var modal = Greenhouse.dialogPage.get('modal');
       modal.set('contentView', Greenhouse.dialogPage.get('customViewModal'));
-      modal.set('layout', {centerX: 0, centerY: 0, width: 350, height: 300});
-      Greenhouse.set('newViewClass', null);
-      Greenhouse.set('newViewDefaults', null); 
+      modal.set('layout', {centerX: 0, centerY: 0, width: 350, height: 380});
+      Greenhouse.set('newDesignClass', null);
+      Greenhouse.set('newDesignDefaults', null);
+      Greenhouse.set('newDesignViewConfig', null);
+      Greenhouse.set('newDesignType', null);
       modal.append();
     },
     exitState: function(){
       var modal = Greenhouse.dialogPage.get('modal');
       modal.remove();
-      Greenhouse.set('newViewClass', null);
-      Greenhouse.set('newViewDefaults', null);
+      Greenhouse.set('newDesignClass', null);
+      Greenhouse.set('newDesignDefaults', null);
+      Greenhouse.set('newDesignViewConfig', null);
+      Greenhouse.set('newDesignType', null);
+      
     },
     
     cancel: function(){
@@ -132,12 +137,16 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     },
 
     add: function(){
-      var newView = SC.Object.create({name: Greenhouse.get('newViewClass'), 
-                                      scClass: Greenhouse.get('newViewClass'), 
-                                      defaults: eval("("+Greenhouse.get('newViewDefaults')+")")});
+      var viewConfig = Greenhouse.get('newDesignViewConfig');
+      var array = viewConfig.get(Greenhouse.get('newDesignType'));
+      
+      array.pushObject({name: Greenhouse.get('newDesignClass'), 
+                         scClass: Greenhouse.get('newDesignClass'), 
+                         defaults: eval("("+Greenhouse.get('newDesignDefaults')+")")});
 
-      var lib = Greenhouse.libraryController.get('views');
-      lib.pushObject(newView);
+
+      // var lib = Greenhouse.libraryController.get('views');
+      // lib.pushObject(newView);
       this.goState('modalReady');
     }
   }),

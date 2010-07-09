@@ -80,5 +80,17 @@ Greenhouse.viewConfigsController = SC.ArrayController.create(
       });
     }
     return ret;
-  }
+  },
+  /*
+    lists the editable views
+  */
+  editable: function(){
+    var ret = [], c =this.get('content');
+    if(c){
+      c.forEach(function(item){
+        if(item.get('canEdit') === YES) ret.pushObject(item);
+      });
+    }
+    return ret;
+  }.property('content').cacheable()
 }) ;

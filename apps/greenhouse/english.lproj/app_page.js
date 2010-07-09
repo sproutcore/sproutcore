@@ -272,7 +272,7 @@ Greenhouse.appPage = SC.Page.design({
         layout: { bottom: 1, right: 0, height: 24, width: 90 },
         titleMinWidth: 0,
         hasIcon: NO,
-        title: "_Add View".loc(),
+        title: "_Add Design".loc(),
         action: 'newCustomView'
       })
     })

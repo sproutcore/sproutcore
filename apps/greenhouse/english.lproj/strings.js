@@ -63,7 +63,7 @@ SC.stringsFor('English', {
   "_Run": "Run",
   "_Library": "Library",
   "_Add": "Add",
-  "_Add a Custom View to the Library": "Add a Custom View to the Library",
+  "_Add a Custom Designer to the Library": "Add a Custom Designer to the Library",
   "_MyApp.AwesomeView": "MyApp.AwesomeView",
   "_Class Name:": "Class Name:",
   "_Default Properties:": "Default Properties:",
@@ -79,6 +79,9 @@ SC.stringsFor('English', {
   "_Dock Inspector": "Dock Inspector",
   "_Actions": "Actions",
   "_Inspector": "Inspector",
-  "_Reload App": "Reload App"
+  "_Reload App": "Reload App",
+  "_Target:": "Target:",
+  "_Design Type:": "Design Type:",
+  "_Add Design": "Add Design"
   
 }) ;

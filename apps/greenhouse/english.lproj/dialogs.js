@@ -145,33 +145,57 @@ Greenhouse.dialogPage = SC.Page.design({
   // add custom view panel
   // 
   customViewModal: SC.View.design({
-    layout: {centerX: 0, centerY: 0, width: 350, height: 300},
-    childViews: 'title cancel add classNameLabel className defaultPropertiesLabel defaultProperties'.w(),
+    layout: {centerX: 0, centerY: 0, width: 350, height: 380},
+    childViews: 'title cancel add classNameLabel className defaultPropertiesLabel defaultProperties targetLabel targetSelect designTypeLabel designType'.w(),
     
     title: SC.LabelView.design({
       layout: {top: 2, left: 15, right: 5, height: 22},
-      value: "_Add a Custom View to the Library".loc(),
+      value: "_Add a Custom Designer to the Library".loc(),
       fontWeight: SC.BOLD_WEIGHT
+    }),
+    targetLabel: SC.LabelView.design({
+      layout: {top: 25, left: 15, right: 5, height: 22},
+      value: "_Target:".loc()
+    }),
+    
+    targetSelect: SC.SelectButtonView.design({
+      layout: {top: 48, left: 15, right: 15, height: 22},
+      objectsBinding: 'Greenhouse.viewConfigsController.editable',
+      valueBinding: 'Greenhouse.newDesignViewConfig',
+      nameKey: 'name'
+    }),
+    
+    designTypeLabel: SC.LabelView.design({
+      layout: {top: 80, left: 15, right: 5, height: 22},
+      value: "_Design Type:".loc()
+    }),
+    
+    designType: SC.SelectButtonView.design({
+      layout: {top:103, left: 15, right: 15, height: 22},
+      objects: [{name: 'Controller', value: 'controllers'}, {name: 'View', value: 'views'}, {name: 'Pane', value: 'panes'}],
+      valueBinding: 'Greenhouse.newDesignType',
+      nameKey: 'name',
+      valueKey: 'value'
     }),
     
     classNameLabel: SC.LabelView.design({
-      layout: {top: 25, left: 15, right: 5, height: 22},
+      layout: {top: 130, left: 15, right: 5, height: 22},
       value: "_Class Name:".loc()
     }),
     className: SC.TextFieldView.design({
-      layout: {top: 50, left: 15, right: 15, height: 22},
+      layout: {top: 153, left: 15, right: 15, height: 22},
       hint: "_MyApp.AwesomeView".loc(),
-      valueBinding: 'Greenhouse.newViewClass'
+      valueBinding: 'Greenhouse.newDesignClass'
     }),
     
     defaultPropertiesLabel: SC.LabelView.design({
-      layout: {top: 95, left: 15, right: 5, height: 22},
+      layout: {top: 176, left: 15, right: 5, height: 22},
       value: "_Default Properties:".loc()
     }),
     defaultProperties: SC.TextFieldView.design({
-      layout: {top: 115, left: 15, right: 15, height: 135},
+      layout: {top: 199, left: 15, right: 15, height: 135},
       isTextArea: YES,
-      valueBinding: 'Greenhouse.newViewDefaults'
+      valueBinding: 'Greenhouse.newDesignDefaults'
     }),
     
     cancel: SC.ButtonView.design({
