@@ -481,11 +481,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
-      customMenuView, menu, itemsLength, dummyMenuItemView, menuItemViewEscapeHTML;
+      customMenuView, menu, itemsLength, dummyMenuItemView, 
+      menuItemViewEscapeHTML, menuWidthOffset, body;
 
     buttonLabel = this.$('.sc-button-label')[0] ;
 
-    var menuWidthOffset = SC.SelectButtonView.MENU_WIDTH_OFFSET ;
+    menuWidthOffset = SC.SelectButtonView.MENU_WIDTH_OFFSET ;
     if(!this.get('isDefaultPosition')) {
       switch (this.get('controlSize')) {
         case SC.TINY_CONTROL_SIZE:
@@ -529,6 +530,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
     menuItemViewEscapeHTML = dummyMenuItemView.get('escapeHTML') ;
+    var body = document.body;
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
       item = items.objectAt(idx) ;
@@ -536,13 +538,13 @@ SC.SelectButtonView = SC.ButtonView.extend(
       element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
       element.className = className ;
       element.innerHTML = menuItemViewEscapeHTML ? SC.RenderContext.escapeHTML(item.title) : item.title ;
-      document.body.appendChild(element) ;
+      body.appendChild(element) ;
       elementOffsetWidth = element.offsetWidth + customViewMenuOffsetWidth;
 
       if (!largestMenuWidth || (elementOffsetWidth > largestMenuWidth)) {
         largestMenuWidth = elementOffsetWidth ;
       }
-      document.body.removeChild(element) ;
+      body.removeChild(element) ;
     }
     largestMenuWidth = (largestMenuWidth > lastMenuWidth) ?
                       largestMenuWidth: lastMenuWidth ;
