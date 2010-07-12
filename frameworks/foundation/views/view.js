@@ -725,19 +725,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // TODO: use code generation to only really do this check on IE
     if (SC.browser.msie && elem && elem.id !== layerId) elem = null;
     
-    // if browser supports querySelector use that.
-    if (!elem && parentLayer.querySelector) {
-      // TODO: make querySelector work on all platforms...
-      usedQuerySelector = YES;
-      elem = parentLayer.querySelector('#' + layerId);
-    }
-    
     // if no element was found the fast way, search down the parentLayer for
     // the element.  This code should not be invoked very often.  Usually a
     // DOM element will be discovered by the first method above.
     // This code uses a BFS algorithm as is expected to find the layer right 
     // below the parent.
-    if (!elem  &&  !usedQuerySelector) {
+    if (!elem) {
       elem = parentLayer.firstChild ;
       var q = [];
       q.push(parentLayer);
@@ -746,7 +739,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         if (node.id===layerId) {
           return node;
         }
-
         childNodes = node.childNodes;
         for (i=0, ilen=childNodes.length;  i < ilen;  ++i) {
           q.push(childNodes[i]);

@@ -140,18 +140,30 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
     // If all else fails then we need to Calculate it from the window size and DOM
     else {
+      var size, body, docElement;
+      if(!this._bod || !this._docElement){
+        body = document.body;
+        docElement = document.documentElement;
+        this._body=body;
+        this._docElement=docElement;
+      }else{
+        body = this._body;
+        docElement = this._docElement;
+      }
+      
       if (window.innerHeight) {
         wDim.width = window.innerWidth;
         wDim.height = window.innerHeight;
-      } else if (document.documentElement && document.documentElement.clientHeight) {
-        wDim.width = document.documentElement.clientWidth;
-        wDim.height = document.documentElement.clientHeight; 
-      } else if (document.body) {
-        wDim.width = document.body.clientWidth;
-        wDim.height = document.body.clientHeight;
+      } else if (docElement && docElement.clientHeight) {
+        wDim.width = docElement.clientWidth;
+        wDim.height = docElement.clientHeight; 
+      } else if (body) {
+        wDim.width = body.clientWidth;
+        wDim.height = body.clientHeight;
       }
       this.windowSizeDidChange(null, wDim);
     }
+
 
     // If there is a minWidth or minHeight set on the pane, take that
     // into account when calculating dimensions.

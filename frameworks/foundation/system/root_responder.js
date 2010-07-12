@@ -258,28 +258,35 @@ SC.RootResponder = SC.Object.extend({
 
     @returns Rect
   */
-  computeWindowSize: function() {
-    var size ;
-    if (window.innerHeight) {
-      size = {
-        width: window.innerWidth,
-        height: window.innerHeight
-      } ;
-
-    } else if (document.documentElement && document.documentElement.clientHeight) {
-      size = {
-        width: document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight
-      } ;
-
-    } else if (document.body) {
-      size = {
-        width: document.body.clientWidth,
-        height: document.body.clientHeight
-      } ;
-    }
-    return size;
-  },
+    computeWindowSize: function() {
+      var size, bod, docElement;
+      if(!this._bod || !this._docElement){
+        bod = document.body;
+        docElement = document.documentElement;
+        this._bod=bod;
+        this._docElement=docElement;
+      }else{
+        bod = this._bod;
+        docElement = this._docElement;
+      }
+      if (window.innerHeight) {
+        size = {
+          width: window.innerWidth,
+          height: window.innerHeight
+        } ;
+      } else if (docElement && docElement.clientHeight) {
+        size = {
+          width: docElement.clientWidth,
+          height: docElement.clientHeight
+        };
+      } else if (bod) {
+        size = {
+          width: bod.clientWidth,
+          height: bod.clientHeight
+        } ;
+      }
+      return size;
+    },
 
   /**
     On window resize, notifies panes of the change.
