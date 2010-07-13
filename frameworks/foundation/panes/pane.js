@@ -167,14 +167,18 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // If there is a minWidth or minHeight set on the pane, take that
     // into account when calculating dimensions.
-    if (layout.minHeight) {
-      wDim.height = Math.max(wDim.height, layout.minHeight);
+    
+    if(!layout.minHeight || !layout.minWidth){
+      console.warn('You have to set a minWidth/minHeight for the pane');
     }
-
-    if (layout.minWidth) {
-      wDim.width = Math.max(wDim.width, layout.minWidth);
+    if (layout.minHeight || layout.minWidth) {
+      if (layout.minHeight) {
+        wDim.height = Math.max(wDim.height, layout.minHeight);
+      }
+      if (layout.minWidth) {
+        wDim.width = Math.max(wDim.width, layout.minWidth);
+      }
     }
-
     return wDim;
   },
     
@@ -741,13 +745,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (this.get("hasTouchIntercept") && SC.platform.touch) {
       this.set("usingTouchIntercept", YES);
       var div = document.createElement("div");
-      div.style.position = "absolute";
-      div.style.left = "0px";
-      div.style.top = "0px";
-      div.style.right = "0px";
-      div.style.bottom = "0px";
-      div.style.webkitTransform = "translateZ(0px)";
-      div.style.zIndex = this.get("zIndex") + this.get("touchZ");
+      var divStyle = div.style;
+      divStyle.position = "absolute";
+      divStyle.left = "0px";
+      divStyle.top = "0px";
+      divStyle.right = "0px";
+      divStyle.bottom = "0px";
+      divStyle.webkitTransform = "translateZ(0px)";
+      divStyle.zIndex = this.get("zIndex") + this.get("touchZ");
       div.className = "touch-intercept";
       div.id = "touch-intercept-" + SC.guidFor(this);
       this._touchIntercept = div;

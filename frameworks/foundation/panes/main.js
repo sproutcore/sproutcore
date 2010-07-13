@@ -31,7 +31,7 @@ require('panes/pane');
 SC.MainPane = SC.Pane.extend({
 
   /** @private */
-  layout: { left:0, right:0, top:0, bottom:0 },
+  layout: { top: 0, left: 0, bottom: 0, right: 0, minHeight:200, minWidth:200 },
   
   /** @private - extends SC.Pane's method */
   paneDidAttach: function() {
