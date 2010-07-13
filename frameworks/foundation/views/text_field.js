@@ -441,23 +441,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     }
     else {
+      var input= this.$input();
       if(!this.get('_supportsPlaceHolder')){
         var val = this.get('value');
         if((!val || (val && val.length===0))){
           if(this.get('hintON') && !this.get('isFirstResponder')){
             //console.log('hint on render');
             context.setClass('sc-hint', YES);
-            this.$input().val(hint);
+            input.val(hint);
           }else{
             // console.log('removing hint on render');
             context.setClass('sc-hint', NO);
-            this.$input().val('');
+            input.val('');
           }
         }
+      }else{
+        input.attr('placeholder', hint);
       }
       
       // Enable/disable the actual input/textarea as appropriate.
-      element = this.$input()[0];
+      element = input[0];
       if (element) {
         if (!this.get('isEnabled')) {
           element.disabled = 'true' ;
