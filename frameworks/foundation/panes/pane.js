@@ -167,10 +167,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // If there is a minWidth or minHeight set on the pane, take that
     // into account when calculating dimensions.
-    
-    if(!layout.minHeight || !layout.minWidth){
-      console.warn('You have to set a minWidth/minHeight for the pane');
-    }
+  
     if (layout.minHeight || layout.minWidth) {
       if (layout.minHeight) {
         wDim.height = Math.max(wDim.height, layout.minHeight);
