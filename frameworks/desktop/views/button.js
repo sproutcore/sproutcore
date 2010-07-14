@@ -245,8 +245,6 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript:;";
       context.attr('href', href);
-    } else {
-      context.attr('role','button');
     }
 
     // If there is a toolTip set, grab it and localize if necessary.
@@ -264,7 +262,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     classes.icon = !!this.get('icon');
     context.attr('role', 'button').setClass(classes);
     theme = this.get('theme');
-    if (theme) context.addClass(theme);
+    if (theme && !context.hasClass(theme)) context.addClass(theme);
     
     // render inner html 
     this[this.get('renderStyle')](context, firstTime);

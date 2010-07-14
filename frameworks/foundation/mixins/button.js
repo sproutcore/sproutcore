@@ -193,18 +193,10 @@ SC.Button = {
       elem = this.$('label');  
       if ( (htmlNode = elem[0])){
         if(needsTitle) { 
-          if(this.get('needsEllipsis')){
-            elem.addClass('ellipsis');
-            if(this._ImageTitleCached !== imgTitle) {
-              this._ImageTitleCached = imgTitle; // Update the cache
-              htmlNode.innerHTML = imgTitle;
-            }
-          }else{
-            elem.removeClass('ellipsis');
-            if(this._ImageTitleCached !== imgTitle) {
-              this._ImageTitleCached = imgTitle; // Update the cache
-              htmlNode.innerHTML = imgTitle;
-            }
+          elem.setClass('ellipsis', this.get('needsEllipsis'));
+          if(this._ImageTitleCached !== imgTitle) {
+            this._ImageTitleCached = imgTitle; // Update the cache
+            htmlNode.innerHTML = imgTitle;
           } 
         }
         else { htmlNode.innerHTML = ''; } 
