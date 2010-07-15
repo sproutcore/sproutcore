@@ -29,13 +29,18 @@ sc_require('mixins/copyable');
   You can create a set to efficiently test for membership for an object. You 
   can also iterate through a set just like an array, even accessing objects
   by index, however there is no gaurantee as to their order.
+  
+  Whether or not property observing is enabled, sets offer very powerful
+  notifications of items being added and removed, through the 
+  `#js:addSetObserver` and `#js:removeSetObserver` methods; this can be
+  very useful, for instance, for filtering or mapping sets.
 
   Note that SC.Set is a primitive object, like an array.  It does implement
-  limited key-value observing support but it does not extend from SC.Object
+  limited key-value observing support, but it does not extend from SC.Object
   so you should not subclass it.
 
-  h1. Creating a Set
-
+  Creating a Set
+  --------------
   You can create a set like you would most objects using SC.Set.create().  
   Most new sets you create will be empty, but you can also initialize the set 
   with some content by passing an array or other enumerable of objects to the 
@@ -44,23 +49,22 @@ sc_require('mixins/copyable');
   Finally, you can pass in an existing set and the set will be copied.  You
   can also create a copy of a set by calling SC.Set#clone().
 
-  {{{
-    // creates a new empty set
-    var foundNames = SC.Set.create();
+      #js
+      // creates a new empty set
+      var foundNames = SC.Set.create();
 
-    // creates a set with four names in it.
-    var names = SC.Set.create(["Charles", "Peter", "Chris", "Erich"]) ;
+      // creates a set with four names in it.
+      var names = SC.Set.create(["Charles", "Tom", "Juan", "Alex"]) ; // :P
 
-    // creates a copy of the names set.
-    var namesCopy = SC.Set.create(names);
+      // creates a copy of the names set.
+      var namesCopy = SC.Set.create(names);
 
-    // same as above.
-    var anotherNamesCopy = names.clone();
-  }}}
+      // same as above.
+      var anotherNamesCopy = names.clone();
 
-  h1. Adding/Removing Objects
-
-  You generally add or removed objects from a set using add() or remove().
+  Adding/Removing Objects
+  -----------------------
+  You generally add or remove objects from a set using add() or remove().
   You can add any type of object including primitives such as numbers,
   strings, and booleans.
 
@@ -78,12 +82,38 @@ sc_require('mixins/copyable');
   it and return it.  This is a good way to use a set as a job queue when you
   don't care which order the jobs are executed in.
 
-  h1. Testing for an Object
-
+  Testing for an Object
+  ---------------------
   To test for an object's presence in a set you simply call SC.Set#contains().
   This method tests for the object's hash, which is generally the same as the
-  object's _guid but if you implement the hash() method on the object, it will
+  object's guid; however, if you implement the hash() method on the object, it will
   use the return value from that method instead.
+  
+  Observing changes
+  -----------------
+  When using `#js:SC.Set` (rather than `#js:SC.CoreSet`), you can observe the
+  `#js:"[]"` property to be alerted whenever the content changes.
+  
+  This is often unhelpful. If you are filtering sets of objects, for instance,
+  it is very inefficient to re-filter all of the items each time the set changes.
+  It would be better if you could just adjust the filtered set based on what
+  was changed on the original set. The same issue applies to merging sets,
+  as well.
+  
+  `#js:SC.Set` and `#js:SC.CoreSet` both offer another method of being observed:
+  `#js:addSetObserver` and `#js:removeSetObserver`. These take a single parameter:
+  an object which implements `#js:didAddItem(set, item)` and 
+  `#js:didRemoveItem(set, item)`.
+  
+  Whenever an item is added or removed from the set, all objects in the set
+  (a SC.CoreSet, actually) of observing objects will be alerted appropriately.
+  
+  BIG WARNING
+  ===========
+  SetObservers are not intended to be used "_creatively_"; for instance, do 
+  not expect to be alerted immediately to any changes. **While the notifications
+  are currently sent out immediately, if we find a fast way to send them at end
+  of run loop, we most likely will do so.**
 
   @extends SC.Enumerable 
   @extends SC.Observable
@@ -204,6 +234,36 @@ SC.Set = SC.mixin({},
     
     return YES;
   },
+  
+  /**
+    Adds a set observers. Set observers must implement two methods:
+    
+    - didAddItem(set, item)
+    - didRemoveItem(set, item)
+    
+    Set observers are, in fact, stored in another set (a CoreSet).
+  */
+  addSetObserver: function(setObserver) {
+    // create set observer set if needed
+    if (!this.setObservers) {
+      this.setObservers = SC.CoreSet.create();
+    }
+    
+    // add
+    this.setObservers.add(setObserver);
+  },
+  
+  /**
+    Removes a set observer.
+  */
+  removeSetObserver: function(setObserver) {
+    // if there is no set, there can be no currently observing set observers
+    if (!this.setObservers) return;
+    
+    // remove the set observer. Pretty simple, if you think about it. I mean,
+    // honestly.
+    this.setObservers.remove(setObserver);
+  },
 
   /**
     Call this method to add an object. performs a basic add.
@@ -230,6 +290,7 @@ SC.Set = SC.mixin({},
       this[len] = obj;
       this[guid] = len;
       this.length = len+1;
+      if (this.setObservers) this.didAddItem(obj);
     }
     
     if (this.isObservable) this.enumerableContentDidChange();
@@ -295,14 +356,17 @@ SC.Set = SC.mixin({},
     // to clear the index, we will swap the object stored in the last index.
     // if this is the last object, just reduce the length.
     if (idx < (len-1)) {
-      obj = this[idx] = this[len-1];
-      guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj);
+      // we need to keep a reference to "obj" so we can alert others below;
+      // so, no changing it. Instead, create a temporary variable.
+      tmp = this[idx] = this[len-1];
+      guid = (tmp && (hashFunc = tmp.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(tmp) : SC.guidFor(tmp);
       this[guid] = idx;
     }
 
     // reduce the length
     this.length = len-1;
     if (this.isObservable) this.enumerableContentDidChange();
+    if (this.setObservers) this.didRemoveItem(obj);
     return this ;
   },
 
@@ -381,6 +445,38 @@ SC.Set = SC.mixin({},
     var len = this.length, idx, ary = [];
     for(idx=0;idx<len;idx++) ary[idx] = this[idx];
     return "SC.Set<%@>".fmt(ary.join(',')) ;
+  },
+  
+  /**
+    @private
+    Alerts set observers that an item has been added.
+  */
+  didAddItem: function(item) {
+    // get the set observers
+    var o = this.setObservers;
+    
+    // return if there aren't any
+    if (!o) return;
+    
+    // loop through and call didAddItem.
+    var len = o.length, idx;
+    for (idx = 0; idx < len; idx++) o[idx].didAddItem(this, item);
+  },
+  
+  /**
+    @private
+    Alerts set observers that an item has been removed.
+  */
+  didRemoveItem: function(item) {
+    // get the set observers
+    var o = this.setObservers;
+    
+    // return if there aren't any
+    if (!o) return;
+    
+    // loop through and call didAddItem.
+    var len = o.length, idx;
+    for (idx = 0; idx < len; idx++) o[idx].didRemoveItem(this, item);
   },
   
   // the pool used for non-observable sets
