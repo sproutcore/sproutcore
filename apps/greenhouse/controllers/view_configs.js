@@ -49,6 +49,10 @@ Greenhouse.viewConfigsController = SC.ArrayController.create(
     }
   }.observes('*content.status'),
   
+  refreshContent: function(){
+   this._content_status_changed(); 
+  },
+  
   /** 
     Generates the arrays of views, panes and controllers that can be dropped into this app
   */

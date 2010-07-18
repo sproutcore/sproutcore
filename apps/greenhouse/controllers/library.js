@@ -14,48 +14,6 @@
 
 Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelegate,
 /** @scope Greenhouse.libraryController.prototype */ {
-  // ..........................................................
-  // Temporary content data
-  // 
- 
-  /*
-  Additional properties should include:
-  -defaultProperties
-  -guid line defaults
-  -icon
-  */
-  // content: SC.Object.create({
-  //   treeItemIsExpanded: YES,
-  //   treeItemChildren: [
-  //     SC.Object.create({
-  //       name: 'Views',
-  //       treeItemIsExpanded: YES,
-  //       treeItemChildren: [
-  //         SC.Object.create({name: 'Button', scClass: 'SC.ButtonView', defaults: {layout: {width: 100, height: 24}}}),
-  //         SC.Object.create({name: 'List', scClass: 'SC.ListView', defaults: {layout: {}} }),
-  //         SC.Object.create({name: 'Tab', scClass: 'SC.TabView', defaults: {layout: {width: 200, height: 200}} }),
-  //         SC.Object.create({name: 'TextField', scClass: 'SC.TextFieldView', defaults: {layout: {width: 100, height: 24}} }),
-  //         SC.Object.create({name: 'Segmented', scClass: 'SC.SegmentedView', defaults: {layout: {width: 200, height: 24}} }),
-  //         SC.Object.create({name: 'Web', scClass: 'SC.WebView', defaults: {layout: {width: 200, height: 200}} }),
-  //         SC.Object.create({name: 'Scroll', scClass: 'SC.ScrollView', defaults: {layout: {width: 200, height: 200}} } ),
-  //         SC.Object.create({name: 'Container', scClass: 'SC.ContainerView', defaults: {layout: {width: 200, height: 200}}}),
-  //         SC.Object.create({name: 'View', scClass: 'SC.View', defaults: {layout: {width: 100, height: 100}}}),
-  //         SC.Object.create({name: 'Label', scClass: 'SC.LabelView', defaults: {layout: {width: 100, height: 24}, value: 'Label'}})
-  //       ]
-  //     }),
-  //     SC.Object.create({
-  //       name: 'Controllers',
-  //       treeItemIsExpanded: YES,
-  //       treeItemChildren: [
-  //         SC.Object.create({name: 'SC.Object', scClass: 'SC.Object' }),
-  //         SC.Object.create({name: 'Object Controller', scClass: 'SC.ObjectController' }),
-  //         SC.Object.create({name: 'Array Controller', scClass: 'SC.ArrayController'  }),
-  //         SC.Object.create({name: 'Tree Controller', scClass: 'SC.TreeController'})
-  //       ]
-  //     }) 
-  //   ]
-  // }),
-  
   /**
     Call this method whenever you want to relaod the library from hte server
   */

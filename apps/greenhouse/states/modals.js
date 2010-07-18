@@ -140,13 +140,14 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       var viewConfig = Greenhouse.get('newDesignViewConfig');
       var array = viewConfig.get(Greenhouse.get('newDesignType'));
       
-      array.pushObject({name: Greenhouse.get('newDesignClass'), 
+      var newView = array.pushObject({name: Greenhouse.get('newDesignClass'), 
                          scClass: Greenhouse.get('newDesignClass'), 
                          defaults: eval("("+Greenhouse.get('newDesignDefaults')+")")});
 
-
-      // var lib = Greenhouse.libraryController.get('views');
-      // lib.pushObject(newView);
+      viewConfig.commitRecord();
+      Greenhouse.viewConfigsController.notifyPropertyChange(Greenhouse.get('newDesignType'));
+      Greenhouse.viewConfigsController.refreshContent();
+            
       this.goState('modalReady');
     }
   }),
