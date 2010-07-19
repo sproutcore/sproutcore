@@ -1239,7 +1239,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   updateLayerLocationIfNeeded: function(force) {
     if (this.get('layerLocationNeedsUpdate')) {
-      this.set('layerLocationNeedsUpdate', NO) ;
       this.updateLayerLocation() ;
     }
     return this ;
@@ -1303,6 +1302,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     parentNode = parentView = node = nextNode = null ; // avoid memory leaks
+
+    this.set('layerLocationNeedsUpdate', NO) ;
+
     return this ; 
   },
   
