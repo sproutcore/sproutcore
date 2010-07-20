@@ -206,8 +206,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   backgroundColor: null,
   
   /**
-    Activates use of brower's static layout.  You can apply this mixin and
-    still use absolute positioning.  To activate static positioning, set this
+    Activates use of brower's static layout. To activate, set this
     property to YES.
 
     @property {Boolean}
@@ -1344,7 +1343,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       isEnabled: this.get('isEnabled'),
       isVisible: this.get('isVisible'),
       isFirstResponder: this.get('isFirstResponder'),
-      hasStaticLayout: this.get('hasStaticLayout') && this.get('useStaticLayout')
+      hasStaticLayout: this.get('useStaticLayout')
     });
   },
   
@@ -2684,7 +2683,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // frame changes should be sent all the time unless this property is 
       // present to indicate that we want the old 1.0 API behavior instead.
       // 
-      if (!cv.hasStaticLayout) {
+      if (!cv.useStaticLayout) {
         cv.notifyPropertyChange('clippingFrame') ;
         cv._sc_view_clippingFrameDidChange();
       }
