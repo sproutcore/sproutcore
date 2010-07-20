@@ -2207,7 +2207,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   animate: function(key, value, options) {
     if (typeof options === SC.T_NUMBER) options = { duration: options };
-    if (!options.timing_function) options.timing_function = 'linear';
+
+    if (options.timing) {
+      if (SC.typeOf(options.timing) != SC.T_STRING) {
+        options.timing = "cubic-bezier("+options.timing[0]+", "+options.timing[1]+", "+
+                                         options.timing[2]+", "+options.timing[3]+")";
+      }
+    } else {
+      options.timing = 'linear';
+    }
 
     if (options.callback) {
       if (SC.typeOf(options.callback) !== SC.T_HASH) options.callback = { action: options.callback };
@@ -2221,7 +2229,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (this._activeAnimations[key]) console.warn("Already animating '"+key+"', will be overridden!");
 
       this._activeAnimations[key] = {
-        css:      key + " " + options.duration + "s " + options.timing_function,
+        css:      key + " " + options.duration + "s " + options.timing,
         callback: options.callback
       };
 
