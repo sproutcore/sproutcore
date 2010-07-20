@@ -2309,7 +2309,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     } else {
       console.warn("Animations not supported by this platform!");
       this.adjust(key, value);
-      SC.View.runCallback(animation.callback);
+      if (options.callback) SC.View.runCallback(options.callback);
     }
 
     return this;
