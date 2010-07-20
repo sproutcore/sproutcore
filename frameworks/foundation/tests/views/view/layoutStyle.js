@@ -237,9 +237,46 @@ test("layout {top, left, width: auto, height: auto}", function() {
 
 
 
+// ..........................................................
+// TEST CSS TRANSFORM LAYOUT VARIATIONS
+// 
+// NOTE:  Each test evaluates the frame before and after adding it to the 
+// parent.
 
+module('CSS TRANSFORM LAYOUT VARIATIONS', {
+  setup: function(){
+    commonSetup.setup();
+    child.createLayer();
+    document.body.appendChild(child.get('layer'));
+  },
 
+  teardown: commonSetup.teardown
+});
 
+test("layout {rotate}", function() {
+  child.adjust('rotate', 45).updateLayout();
+  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
+  equals(transform, 'rotate(45deg)', 'transform attribute should be "rotate(45deg)"')
+});
+
+test("layout {scale}", function() {
+  child.adjust('scale', 2).updateLayout();
+  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
+  equals(transform, 'scale(2)', 'transform attribute should be "scale(2)"')
+});
+
+test("layout {rotate, scale}", function() {
+  child.adjust({ rotate: 45, scale: 2 }).updateLayout();
+  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
+  equals(transform, 'rotate(45deg) scale(2)', 'transform attribute should be "rotate(45deg) scale(2)"')
+});
+
+test("layout {rotate} update", function() {
+  child.adjust('rotate', 45).updateLayout();
+  child.adjust('rotate', 90).updateLayout();
+  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
+  equals(transform, 'rotate(90deg)', 'transform attribute should be "rotate(90deg)"')
+});
 
 // ..........................................................
 // TEST FRAME/STYLEFRAME WITH ACCELERATE LAYOUT VARIATIONS

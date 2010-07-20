@@ -96,6 +96,14 @@ SC.FROM_THEME = "__FROM_THEME__"; // doesn't really matter what it is, so long a
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
 SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 
+/**
+  Map to CSS Transforms
+*/
+SC.CSS_TRANSFORM_MAP = {
+  rotate: function(val){ return 'rotate('+val+'deg)'; },
+  scale: function(val){ return 'scale('+val+')'; }
+};
+
 /** 
   @class
   
@@ -3069,26 +3077,49 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (ret[x]===0) ret[x]=null;
     }
 
+    // Handle transforms
+    var transformAttribute = SC.platform.domCSSPrefix+'Transform',
+        layer = this.get('layer'),
+        currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
+        halTransforms = [], specialTransforms = [], idx;
+
     if (hasAcceleratedLayer) {
-      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
-          layer = this.get('layer'),
-          currentTransforms = layer ? layer.style[transformAttribute] : '';
-
       // Remove previous transforms
-      if (this._lastAcceleratedTransform) currentTransforms = currentTransforms.replace(this._lastAcceleratedTransform, '');
+      if (this._lastAcceleratedTransforms) currentTransforms.removeObjects(this._lastAcceleratedTransforms);
 
-      var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
-      if (SC.platform.supportsCSS3DTransforms && !currentTransforms.match('translateZ')) transform += ' translateZ(0px)';
+      halTransforms = ['translateX('+translateLeft+'px)', 'translateY('+translateTop+'px)'];
 
-      // Add a separating space if necessary
-      if (!SC.empty(currentTransforms)) transform = ' '+transform;
+      // FIXME: This join.match is a bit hackish
+      if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
+        halTransforms.push('translateZ(0px)');
+      }
 
       // Store for next time
-      this._lastAcceleratedTransform = transform;
-
-      // Update
-      ret[transformAttribute] = currentTransforms + transform;
+      this._lastAcceleratedTransforms = halTransforms;
     }
+
+    // Handle special CSS transform attributes
+    var specialTransforms = [], transformName;
+    for(transformName in SC.CSS_TRANSFORM_MAP) {
+      var cleanedTransforms = [], idx;
+      for(idx=0; idx < currentTransforms.length; idx++) {
+        if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
+          cleanedTransforms.push(currentTransforms[idx]);
+        }
+      }
+      currentTransforms = cleanedTransforms;
+
+      if (layout[transformName]) {
+        specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
+      } 
+    }
+    specialTransforms = specialTransforms.join(' ');
+
+    var allTransforms = [currentTransforms, halTransforms, specialTransforms].without(undefined).without('');
+
+    // Set transform attribute
+    ret[transformAttribute] = allTransforms.join(' ');
+
 
     // convert any numbers into a number + "px".
     for(key in ret) {
