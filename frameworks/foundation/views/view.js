@@ -2235,7 +2235,95 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     return this ;
   },
-  
+
+
+  _activeAnimations: {},
+
+  /**
+    Animate a given property using CSS animations.
+
+    Takes a key, value and either a duration, or a hash of options.
+    The options hash has the following parameters
+      - duration: Duration of animation in seconds
+      - callback: Callback method to run when animation completes
+      - timing: Animation timing function
+
+    @param {String} key
+    @param {Object} value
+    @params {Number|Hash} duration or options
+    @returns {SC.View} receiver
+  */
+  animate: function(key, value, options) {
+    if (typeof options === SC.T_NUMBER) options = { duration: options };
+
+    if (options.timing) {
+      if (SC.typeOf(options.timing) != SC.T_STRING) {
+        options.timing = "cubic-bezier("+options.timing[0]+", "+options.timing[1]+", "+
+                                         options.timing[2]+", "+options.timing[3]+")";
+      }
+    } else {
+      options.timing = 'linear';
+    }
+
+    if (options.callback) {
+      if (SC.typeOf(options.callback) !== SC.T_HASH) options.callback = { action: options.callback };
+      options.callback.source = this;
+      if (!options.callback.target) options.callback.target = this;
+    }
+
+    if (SC.platform.supportsCSSTransitions) {
+      var layer = this.get('layer'), css = [], activeKey;
+
+      if (this._activeAnimations[key]) console.warn("Already animating '"+key+"', will be overridden!");
+
+      this._activeAnimations[key] = {
+        css:      key + " " + options.duration + "s " + options.timing,
+        callback: options.callback
+      };
+
+      for (activeKey in this._activeAnimations) css.push(this._activeAnimations[key].css);
+      layer.style[SC.platform.domCSSPrefix+"Transition"] = css.join(", ");
+
+      this.adjust(key, value);
+    } else {
+      console.warn("Animations not supported by this platform!");
+      this.adjust(key, value);
+      SC.View.runCallback(animation.callback);
+    }
+
+    return this;
+  },
+
+  /**
+  Resets animation, stopping all existing animations.
+  */
+  resetAnimation: function() {
+    this._activeAnimations = {};
+  },
+
+  /**
+    Called when animation ends, should not usually be called manually
+  */
+  animationEnd: function(evt){
+    SC.RunLoop.begin();
+    var propertyName = evt.originalEvent.propertyName,
+        animation = this._activeAnimations[propertyName];
+
+    if(animation) {
+      var layer = this.get('layer'),
+          styleKey = SC.platform.domCSSPrefix+"Transition",
+          currentCSS = layer.style[styleKey];
+      
+      if (animation.callback) SC.View.runCallback(animation.callback);
+
+      layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
+
+      this._activeAnimations[propertyName] = null;
+    } 
+    SC.RunLoop.end();
+  },
+
+
   /** 
     The layout describes how you want your view to be positions on the 
     screen.  You can define the following properties:
