@@ -87,6 +87,9 @@ SC.Animatable = {
     this._animatable_original_hasAcceleratedLayer = this.hasAcceleratedLayer || function(){};
     this.hasAcceleratedLayer = this._animatable_hasAcceleratedLayer;
 
+    this._animatable_original_animate = this.animate || function(){};
+    this.animate = this._animatable_animate;
+
     // auto observers do not work when mixed in live, so make sure we do a manual observer
     this.addObserver("style", this, "styleDidChange");
 
@@ -229,6 +232,15 @@ SC.Animatable = {
     return this;
   },
 
+  /**
+    Don't interfere with the built-in animate method.
+  */
+  _animatable_animate: function(){
+    this.disableAnimation();
+    var ret = this._animatable_original_animate.apply(this, arguments);
+    this.enableAnimation();
+    return ret;
+  },
 
   transitionEnd: function(evt){
     SC.run(function() {
