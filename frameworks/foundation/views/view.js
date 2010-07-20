@@ -3115,10 +3115,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     specialTransforms = specialTransforms.join(' ');
 
-    var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('');
+    var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
 
     // Set transform attribute
-    ret[transformAttribute] = allTransforms.join(' ');
+    if (allTransforms !== '') ret[transformAttribute] = allTransforms;
 
 
     // convert any numbers into a number + "px".
