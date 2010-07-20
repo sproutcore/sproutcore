@@ -3094,7 +3094,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var transformAttribute = SC.platform.domCSSPrefix+'Transform',
         layer = this.get('layer'),
         currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
-        halTransforms = [], specialTransforms = [], idx;
+        halTransforms, specialTransforms = [], idx;
 
     if (hasAcceleratedLayer) {
       // Remove previous transforms
@@ -3128,7 +3128,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     specialTransforms = specialTransforms.join(' ');
 
-    var allTransforms = [currentTransforms, halTransforms, specialTransforms].without(undefined).without('');
+    var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('');
 
     // Set transform attribute
     ret[transformAttribute] = allTransforms.join(' ');
