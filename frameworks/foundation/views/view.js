@@ -637,6 +637,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (view.parentView !== this) {
       throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
     }
+
+    // Animation cleanup
+    if (SC.platform.supportsCSSTransitions) this.resetAnimation();
+
     // notify views
     if (view.willRemoveFromParent) view.willRemoveFromParent() ;
     if (this.willRemoveChild) this.willRemoveChild(view) ;
@@ -1136,7 +1140,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._viewRenderer.attachLayer(this);
     if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
-    
+
+    // Animation prep
+    if (SC.platform.supportsCSSTransitions) {
+      this.resetAnimation();
+      SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.animationEnd);
+      SC.Event.add(this.get('layer'), "transitionEnd", this, this.animationEnd);
+    }
+
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
         childViews = this.get('childViews');
@@ -1173,6 +1184,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   destroyLayer: function() {
     var layer = this.get('layer') ;
     if (layer) {
+
+      // Teardown animations
+      if (SC.platform.supportsCSSTransitions) {
+        SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.animationEnd);
+        SC.Event.remove(this.get('layer'), "transitionEnd", this, this.animationEnd);
+        this._animatable_original_willDestroyLayer();
+      }
+
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
       this._notifyWillDestroyLayer() ;
@@ -2161,7 +2180,87 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     return this ;
   },
-  
+
+
+  _activeAnimations: {},
+
+  /**
+    Animate a given property using CSS animations.
+
+    Takes a key, value and either a duration, or a hash of options.
+    The options hash has the following parameters
+      - duration: Duration of animation in seconds
+      - callback: Callback method to run when animation completes
+      - timing: Animation timing function
+
+    @param {String} key
+    @param {Object} value
+    @params {Number|Hash} duration or options
+    @returns {SC.View} receiver
+  */
+  animate: function(key, value, options) {
+    if (typeof options === SC.T_NUMBER) options = { duration: options };
+    if (!options.timing_function) options.timing_function = 'linear';
+
+    if (options.callback) {
+      if (SC.typeOf(options.callback) !== SC.T_HASH) options.callback = { action: options.callback };
+      options.callback.source = this;
+      if (!options.callback.target) options.callback.target = this;
+    }
+
+    if (SC.platform.supportsCSSTransitions) {
+      var layer = this.get('layer'), css = [], activeKey;
+
+      if (this._activeAnimations[key]) console.warn("Already animating '"+key+"', will be overridden!");
+
+      this._activeAnimations[key] = {
+        css:      key + " " + options.duration + "s " + options.timing_function,
+        callback: options.callback
+      };
+
+      for (activeKey in this._activeAnimations) css.push(this._activeAnimations[key].css);
+      layer.style[SC.platform.domCSSPrefix+"Transition"] = css.join(", ");
+
+      this.adjust(key, value);
+    } else {
+      console.warn("Animations not supported by this platform!");
+      this.adjust(key, value);
+      SC.View.runCallback(animation.callback);
+    }
+
+    return this;
+  },
+
+  /**
+  Resets animation, stopping all existing animations.
+  */
+  resetAnimation: function() {
+    this._activeAnimations = {};
+  },
+
+  /**
+    Called when animation ends, should not usually be called manually
+  */
+  animationEnd: function(evt){
+    SC.RunLoop.begin();
+    var propertyName = evt.originalEvent.propertyName,
+        animation = this._activeAnimations[propertyName];
+
+    if(animation) {
+      var layer = this.get('layer'),
+          styleKey = SC.platform.domCSSPrefix+"Transition",
+          currentCSS = layer.style[styleKey];
+      
+      if (animation.callback) SC.View.runCallback(animation.callback);
+
+      layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
+
+      this._activeAnimations[propertyName] = null;
+    } 
+    SC.RunLoop.end();
+  },
+
+
   /** 
     The layout describes how you want your view to be positions on the 
     screen.  You can define the following properties:
@@ -3821,6 +3920,37 @@ SC.View.unload = function() {
    }
   }   
 } ;
+
+SC.View.runCallback = function(callback){
+  var typeOfAction = SC.typeOf(callback.action);
+
+  // if the action is a function, just try to call it.
+  if (typeOfAction == SC.T_FUNCTION) {
+    callback.action.call(callback.target, callback.source);
+
+  // otherwise, action should be a string.  If it has a period, treat it
+  // like a property path.
+  } else if (typeOfAction === SC.T_STRING) {
+    if (callback.action.indexOf('.') >= 0) {
+      var path = callback.action.split('.') ;
+      var property = path.pop() ;
+
+      var target = SC.objectForPropertyPath(path, window) ;
+      var action = target.get ? target.get(property) : target[property];
+      if (action && SC.typeOf(action) == SC.T_FUNCTION) {
+        action.call(target, callback.source);
+      } else {
+        throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
+      }
+
+    // otherwise, try to execute action direction on target or send down
+    // responder chain.
+    } else {
+      SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
+    }
+  }
+};
+
 
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
