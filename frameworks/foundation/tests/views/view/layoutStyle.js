@@ -259,30 +259,41 @@ module('CSS TRANSFORM LAYOUT VARIATIONS', {
   teardown: commonSetup.teardown
 });
 
+function transformFor(view){
+  return view.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
+}
+
 test("layout {rotate}", function() {
   child.adjust('rotate', 45).updateLayout();
-  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
-  equals(transform, 'rotate(45deg)', 'transform attribute should be "rotate(45deg)"')
+  equals(transformFor(child), 'rotate(45deg)', 'transform attribute should be "rotate(45deg)"')
+});
+
+test("layout {rotate} with units", function() {
+  child.adjust('rotate', '1rad').updateLayout();
+  equals(transformFor(child), 'rotate(1rad)', 'transform attribute should be "rotate(1rad)"')
 });
 
 test("layout {scale}", function() {
   child.adjust('scale', 2).updateLayout();
-  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
-  equals(transform, 'scale(2)', 'transform attribute should be "scale(2)"')
+  equals(transformFor(child), 'scale(2)', 'transform attribute should be "scale(2)"')
+});
+
+test("layout {scale} with multiple", function() {
+  child.adjust('scale', [2, 3]).updateLayout();
+  equals(transformFor(child), 'scale(2, 3)', 'transform attribute should be "scale(2, 3)"')
 });
 
 test("layout {rotate, scale}", function() {
   child.adjust({ rotate: 45, scale: 2 }).updateLayout();
-  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
-  equals(transform, 'rotate(45deg) scale(2)', 'transform attribute should be "rotate(45deg) scale(2)"')
+  equals(transformFor(child), 'rotate(45deg) scale(2)', 'transform attribute should be "rotate(45deg) scale(2)"')
 });
 
 test("layout {rotate} update", function() {
   child.adjust('rotate', 45).updateLayout();
   child.adjust('rotate', 90).updateLayout();
-  var transform = child.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
-  equals(transform, 'rotate(90deg)', 'transform attribute should be "rotate(90deg)"')
+  equals(transformFor(child), 'rotate(90deg)', 'transform attribute should be "rotate(90deg)"')
 });
+
 
 if (SC.platform.supportsCSSTransforms) {
 

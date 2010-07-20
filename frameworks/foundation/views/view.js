@@ -100,8 +100,14 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
   Map to CSS Transforms
 */
 SC.CSS_TRANSFORM_MAP = {
-  rotate: function(val){ return 'rotate('+val+'deg)'; },
-  scale: function(val){ return 'scale('+val+')'; }
+  rotate: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotate('+val+')';
+  },
+  scale: function(val){
+    if (SC.typeOf(val) === SC.T_ARRAY) val = val.join(', ');
+    return 'scale('+val+')';
+  }
 };
 
 /** 
