@@ -12,7 +12,7 @@ function transitionFor(view){
   return view.get('layer').style[SC.platform.domCSSPrefix+"Transition"];
 }
 
-module("ANIMATION", {
+var commonSetup = {
   setup: function() {
     SC.RunLoop.begin();
     pane = SC.Pane.create({
@@ -33,7 +33,9 @@ module("ANIMATION", {
   teardown: function(){
     pane.remove();
   }
-});
+};
+
+module("ANIMATION", commonSetup);
 
 test("should work", function(){
   view.animate('left', 100, { duration: 1 });
@@ -70,4 +72,27 @@ test("handles timing function string", function(){
 test("handles timing function array", function(){
   view.animate('left', 100, { duration: 1, timing: [0.1, 0.2, 0.3, 0.4] });
   equals(transitionFor(view), 'left 1s cubic-bezier(0.1, 0.2, 0.3, 0.4)', 'uses cubic-bezier timing');
+});
+
+
+
+module("ANIMATION WITH ACCELERATED LAYER", {
+  setup: function(){
+    commonSetup.setup();
+    // Force support
+    view.hasAcceleratedLayer = YES;
+  },
+
+  teardown: commonSetup.teardown
+});
+
+test("handles acceleration when appropriate", function(){
+  view.animate('top', 100, 1);
+  equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'transition is on transform');
+});
+
+test("doesn't use acceleration when not appropriate", function(){
+  view.adjust({ height: '', bottom: 0 });
+  view.animate('top', 100, 1);
+  equals(transitionFor(view), 'top 1s linear', 'transition is not on transform');
 });

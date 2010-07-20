@@ -2278,16 +2278,31 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     if (SC.platform.supportsCSSTransitions) {
-      var layer = this.get('layer'), css = [], activeKey;
+      var layer = this.get('layer'),
+          hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
+          layout = this.get('layout'),
+          actualKey, css = [], activeKey;
 
-      if (this._activeAnimations[key]) console.warn("Already animating '"+key+"', will be overridden!");
+      // These rules mirror the ones in layoutStyle
+      if (
+        hasAcceleratedLayer && (
+          (key === 'left' && !SC.empty(layout.width)) ||
+          (key === 'top' && !SC.empty(layout.height))
+        ) && !SC.none(value) && !SC.isPercentage(value)
+      ) {
+        actualKey = "-"+SC.platform.cssPrefix+"-transform";
+      } else {
+        actualKey = key;
+      }
 
-      this._activeAnimations[key] = {
-        css:      key + " " + options.duration + "s " + options.timing,
+      if (this._activeAnimations[actualKey]) console.warn("Already animating '"+actualKey+"', will be overridden!");
+
+      this._activeAnimations[actualKey] = {
+        css:      actualKey + " " + options.duration + "s " + options.timing,
         callback: options.callback
       };
 
-      for (activeKey in this._activeAnimations) css.push(this._activeAnimations[key].css);
+      for (activeKey in this._activeAnimations) css.push(this._activeAnimations[actualKey].css);
       layer.style[SC.platform.domCSSPrefix+"Transition"] = css.join(", ");
 
       this.adjust(key, value);
@@ -2994,7 +3009,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     // X DIRECTION
-    
+
+    // NOTE: If rules relating to hasAcceleratedLayer are altered make sure to change animate() as well
+
     // handle left aligned and left/right
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)) {
