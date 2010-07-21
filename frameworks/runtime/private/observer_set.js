@@ -51,14 +51,9 @@ SC.ObserverSet = {
     // context is really useful sometimes but not used that often so this
     // implementation is intentionally lazy.
     if (context !== undefined) {
-<<<<<<< HEAD
-      if (!methods.contexts) context = methods.contexts = {} ;
-      methods.contexts[SC.guidFor(method)] = context ;
-=======
       var contexts = methods.contexts ;
       if (!contexts) contexts = methods.contexts = {} ;
       contexts[SC.guidFor(method)] = context ;
->>>>>>> * fix sanity checking outcome missed in aaf894922c5a4468639d00f75046f61cb1e82b63 fix
     }
 
     this._membersCacheIsValid = NO ;
