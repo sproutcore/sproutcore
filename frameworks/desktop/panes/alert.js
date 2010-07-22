@@ -236,7 +236,7 @@ SC.AlertPane = SC.PanelPane.extend({
             localize: YES,
             titleMinWidth: 64,
             layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
-            controlStyle: 'capsule',
+            theme: 'capsule',
             title: "Cancel", 
             isCancel: YES,
             action: "dismiss",
@@ -249,7 +249,7 @@ SC.AlertPane = SC.PanelPane.extend({
             localize: YES,
             titleMinWidth: 64,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
-            controlStyle: 'capsule',
+            theme: 'capsule',
             title: "OK", 
             isDefault: YES,
             action: "dismiss"
@@ -266,7 +266,7 @@ SC.AlertPane = SC.PanelPane.extend({
             localize: YES,
             titleMinWidth: 64,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
-            controlStyle: 'capsule',
+            theme: 'capsule',
             title: "Extra", 
             action: "dismiss",
             isVisible: NO

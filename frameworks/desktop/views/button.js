@@ -59,7 +59,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     
     @property {String}
   */
-  controlStyle: 'square',
+  theme: 'square',
   
   /**
     Optionally set the behavioral mode of this button.  
@@ -224,11 +224,6 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   /** @private - save keyEquivalent for later use */
   init: function() {
-    //Add to the classNames array the controlStyle
-    var classnames = SC.clone(this.get('classNames'));
-    classnames.push(this.get('controlStyle'));
-    this.set('classNames', classnames);
-    
     sc_super();
     
     //cache the key equivalent

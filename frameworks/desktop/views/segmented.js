@@ -43,7 +43,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   classNames: ['sc-segmented-view'],
   
-  controlStyle: 'square',
+  theme: 'square',
   
   /**
     The value of the segmented view.
@@ -274,10 +274,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   },
   
   init: function() {
-    var classnames = SC.clone(this.get('classNames'));
-    classnames.push(this.get('controlStyle'));
-    this.set('classNames', classnames);
-      
     sc_super();
     this.itemsDidChange() ;
   },

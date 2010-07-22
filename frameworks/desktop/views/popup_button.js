@@ -37,7 +37,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
   // ..........................................................
   // PROPERTIES
   //
-
+  
+  theme: '',
+  
   /**
     The prefer matrix to use when displaying the menu.
 
