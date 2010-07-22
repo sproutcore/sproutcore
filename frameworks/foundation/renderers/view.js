@@ -19,8 +19,7 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
   render: function(context) {
     context
       .id(this.layerId)
-      .setClass(this.calculateClassNames())
-      .addStyle(this.layoutStyle);
+      .setClass(this.calculateClassNames());
     
     if (this.backgroundColor) {
       context.addStyle('backgroundColor', this.backgroundColor);
@@ -32,9 +31,14 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
   update: function() {
     var elem = this.$();
     
-    elem
-      .setClass(this.calculateClassNames())
-      .css(this.layoutStyle);
+    // and to maintain compatibility, we have to blow away the class names
+    // SC2.0: consider breaking this compatibility for SC 2.0
+    var names = [], n = this.calculateClassNames();
+    for (var i in n) {
+      if (n[i]) names.push(i);
+    }
+    
+    elem.attr("class", names.join(" "));
     
     if (this.didChange('backgroundColor')) {
       elem.css('backgroundColor', this.backgroundColor);

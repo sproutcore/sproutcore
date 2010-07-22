@@ -1060,8 +1060,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // Now, update using renderer if possible; render() otherwise
     if (!this._useRenderFirst && this.createRenderer) {
-      if (renderer) renderer.update();
       if (viewRenderer) viewRenderer.update();
+      if (renderer) renderer.update();
     } else {
       var context = optionalContext || this.renderContext(this.get('layer')) ;
       this.render(context, NO) ;
@@ -1305,13 +1305,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.get('theme')) {
       classNames = classNames.concat(this.get("theme").classNames);
     }
+    if (this._themeName && classNames.indexOf(this._themeName) < 0) classNames.push(this._themeName);
     
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
       classNames: classNames,
       backgroundColor: this.get('backgroundColor'),
       cursor: this.get('cursor'),
-      layoutStyle: this.get('layoutStyle'),
       isTextSelectable: this.get('isTextSelectable'),
       isEnabled: this.get('isEnabled'),
       isVisible: this.get('isVisible'),
@@ -1326,8 +1326,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   renderViewSettings: function(context) {
     this._updateViewRenderer();
-    this.renderLayout(context, YES); // provide backwards compatibility
     this._viewRenderer.render(context);
+    this.renderLayout(context, YES); // provide backwards compatibility
   },
   
   /**
@@ -3249,10 +3249,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    this._viewRenderer.attr({
-      layoutStyle: this.get('layoutStyle')
-    });
-    this._viewRenderer.render(context);
+    context.addStyle(this.get('layoutStyle'));
   },
   
   /** walk like a duck */
