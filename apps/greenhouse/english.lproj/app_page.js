@@ -247,7 +247,7 @@ Greenhouse.appPage = SC.Page.design({
     content: SC.View.design({
       classNames: ['content'],
       layout: { top: 49, bottom: 11, left: 8, right: 8 },
-      childViews: 'library addCustomView'.w(),
+      childViews: 'library addCustomView removeCustomView'.w(),
     
       library: SC.ScrollView.design({
         classNames: ['library-list'],
@@ -266,13 +266,23 @@ Greenhouse.appPage = SC.Page.design({
           }
         })
       }),
+      
+      removeCustomView: SC.ButtonView.design({
+        classNames: ['dark'],
+        layout: { bottom: 1, right: 70, height: 24, width: 70 },
+        titleMinWidth: 0,
+        hasIcon: NO,
+        isEnabledBinding: 'Greenhouse.libraryController*selection.firstObject.canEdit',
+        title: "_Remove".loc(),
+        action: 'removeCustomView'
+      }),
     
       addCustomView: SC.ButtonView.design({
         classNames: ['dark'],
-        layout: { bottom: 1, right: 0, height: 24, width: 90 },
+        layout: { bottom: 1, right: 0, height: 24, width: 50 },
         titleMinWidth: 0,
         hasIcon: NO,
-        title: "_Add Design".loc(),
+        title: "_Add".loc(),
         action: 'newCustomView'
       })
     })

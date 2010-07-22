@@ -13,10 +13,14 @@
 */
 Greenhouse.Design = SC.Record.extend(
 /** @scope Greenhouse.Design.prototype */ {
-  primaryKey: 'name',
+  primaryKey: 'scClass',
   
   name: SC.Record.attr(String),
   scClass: SC.Record.attr(String),
-  defaults: SC.Record.attr(Object)
+  defaults: SC.Record.attr(Object),
+  
+  canEdit: function(){
+    return this._parentRecord.get('canEdit');
+  }.property().cacheable()
   
 }) ;
