@@ -224,7 +224,25 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   /** @private - save keyEquivalent for later use */
   init: function() {
+    // figure out if we have to do deprecated API
+    // Note: We do this before sc_super, because SC.View has to determine whether we are using render() first or not.
+    if (this.renderTitle !== SC.Button.renderTitle) {
+      // @if(debug)
+      if (!SC.ButtonView.hasGivenDeprecationWarning) {
+        console.warn("Use of renderTitle by ButtonViews has been deprecated. Use renderers instead.");
+        SC.ButtonView.hasGivenDeprecationWarning = YES;
+      }
+      // @end
+      
+      if (this.render === SC.View.prototype.render) {
+        this.render = this._DEPRECATED_render;
+      } else {
+        this.render.base = this._DEPRECATED_render;
+      }
+    }
+
     sc_super();
+  
     
     //cache the key equivalent
     if(this.get("keyEquivalent")) this._defaultKeyEquivalent = this.get("keyEquivalent"); 
@@ -276,6 +294,73 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       needsEllipsis: this.get("needsEllipsis")
     });
   },
+  
+  _DEPRECATED_render: function(context, firstTime) {
+    // add href attr if tagName is anchor...
+    var href, toolTip, classes, theme;
+    if (this.get('tagName') === 'a') {
+      href = this.get('href');
+      if (!href || (href.length === 0)) href = "javascript:;";
+      context.attr('href', href);
+    }
+
+    // If there is a toolTip set, grab it and localize if necessary.
+    toolTip = this.get('toolTip') ;
+    if (SC.typeOf(toolTip) === SC.T_STRING) {
+      if (this.get('localize')) toolTip = toolTip.loc() ;
+      context.attr('title', toolTip) ;
+      context.attr('alt', toolTip) ;
+    }
+    
+    // add some standard attributes & classes.
+    classes = this._TEMPORARY_CLASS_HASH;
+    classes.def = this.get('isDefault');
+    classes.cancel = this.get('isCancel');
+    classes.icon = !!this.get('icon');
+    context.attr('role', 'button').setClass(classes);
+    theme = this.get('theme');
+    if (theme && !context.hasClass(theme)) context.addClass(theme);
+    
+    // render inner html 
+    this[this.get('renderStyle')](context, firstTime);
+  },
+   
+   
+  /**
+    Render the button with the default render style.
+  */
+  renderDefault: function(context, firstTime){
+    if(firstTime) {
+      context = context.push("<span class='sc-button-inner' style = 'min-width:"
+        ,this.get('titleMinWidth'),
+        "px'>");
+    
+      this.renderTitle(context, firstTime) ; // from button mixin
+      context.push("</span>") ;
+    
+      if(this.get('supportFocusRing')) {
+        context.push('<div class="focus-ring">',
+                      '<div class="focus-left"></div>',
+                      '<div class="focus-middle"></div>',
+                      '<div class="focus-right"></div></div>');
+      }
+    }
+    else {
+      this.renderTitle(context, firstTime) ;
+    }
+  },
+  
+  /**
+    Render the button with the image render style. To set image 
+    set the icon property with the classname that has the style with the image
+  */
+  renderImage: function(context, firstTime){
+    var icon = this.get('icon');
+    context.addClass('no-min-width');
+    if(icon) context.push("<div class='img "+icon+"'></div>");
+    else context.push("<div class='img'></div>");
+  },
+  
   
   
   /** @private {String} used to store a previously defined key equiv */
@@ -590,3 +675,4 @@ SC.ButtonView.CLICK_AND_HOLD_DELAY = SC.browser.msie ? 600 : 300;
 
 SC.REGULAR_BUTTON_HEIGHT=24;
 
+SC.ButtonView.hasGivenDeprecationWarning = NO;
