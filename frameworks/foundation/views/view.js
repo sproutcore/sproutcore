@@ -2055,7 +2055,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // handle right aligned
     } else if (!SC.none(lR)) {
       if (SC.none(lW)) {
-        if (SC.isPercentage(lL)) f.width = dW - (dW*lR) ;
+        if (SC.isPercentage(lR)) {
+          f.width = dW - (dW*lR) ;
+        }
         else f.width = dW - lR ;
         f.x = 0 ;
       } else {
