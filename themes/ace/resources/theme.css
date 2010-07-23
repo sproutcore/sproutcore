@@ -65,7 +65,7 @@
   border: 0px none;
 }
 .sc-theme .sc-view.ace.sc-tab-view { overflow: visible; }
-.sc-theme .sc-view.ace.sc-tab-view .sc-container-view {
+.sc-theme .sc-view.ace.sc-tab-view > .sc-container-view {
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   border-radius: 5px;
