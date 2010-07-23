@@ -73,6 +73,14 @@
   -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
   overflow: hidden;
 }
+.sc-theme .sc-view.ace.sc-well-view {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #999999;
+  -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
 .sc-theme .sc-view.ace.sc-small-size.sc-button-view .button-left {
   margin-top: -9px;
   height: 18px;
