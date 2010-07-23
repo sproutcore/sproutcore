@@ -226,9 +226,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   init: function() {
     // figure out if we have to do deprecated API
     // Note: We do this before sc_super, because SC.View has to determine whether we are using render() first or not.
-    if (this.renderTitle !== SC.Button.renderTitle) {
+    if (this.renderTitle !== SC.Button.renderTitle || this.render !== SC.View.prototype.render) {
       // @if(debug)
-      if (!SC.ButtonView.hasGivenDeprecationWarning) {
+      if (this.renderTitle !== SC.Button.renderTitle && !SC.ButtonView.hasGivenDeprecationWarning) {
         console.warn("Use of renderTitle by ButtonViews has been deprecated. Use renderers instead.");
         SC.ButtonView.hasGivenDeprecationWarning = YES;
       }
@@ -236,7 +236,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       
       if (this.render === SC.View.prototype.render) {
         this.render = this._DEPRECATED_render;
-      } else {
+      } else if (this.render.base === SC.View.prototype.render) {
         this.render.base = this._DEPRECATED_render;
       }
     }
