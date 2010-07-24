@@ -32,6 +32,14 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
       context.addStyle("left", indent * (level+1));
     }
     
+    this.renderContents(context);
+    
+    context = context.end(); // end outline
+    
+    this.resetChanges();
+  },
+  
+  renderContents: function(context) {
     this.renderDisclosure(context);
     this.renderCheckbox(context);
     this.renderIcon(context);
@@ -39,16 +47,18 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     this.renderRightIcon(context);
     this.renderCount(context);
     this.renderBranch(context);
-    
-    context = context.end(); // end outline
-    
-    this.resetChanges();
   },
   
   update: function() {
     this.updateControlRenderer();
     this.$().setClass(this.calculateClassNames());
     
+    this.updateContents();
+    
+    this.resetChanges();
+  },
+  
+  updateContents: function() {
     this.updateDisclosure();
     this.updateCheckbox();
     this.updateIcon();
@@ -56,8 +66,6 @@ SC.BaseTheme.renderers.ListItem = SC.Renderer.extend({
     this.updateRightIcon();
     this.updateCount();
     this.updateBranch();
-    
-    this.resetChanges();
   },
   
   didAttachLayer: function(layer){
