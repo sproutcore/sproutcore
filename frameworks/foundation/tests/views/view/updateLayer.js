@@ -17,14 +17,13 @@ module("SC.View#updateLayer");
 test("invokes updateViewSettings() and then updates layer element", function() {
   var layer = document.createElement('div');
   var view = SC.View.create({
-    layer: layer, // fake it...
     updateViewSettings: function() {
-      this.$(this.get("layer")).addClass('did-update');
+      this.$().addClass('did-update');
     }
   });
-  
+  view.createLayer();
   view.updateLayer();
-  ok(SC.$(layer).attr('class').indexOf('did-update')>=0, 'has class name added by prepareContext()');
+  ok(view.$().attr('class').indexOf('did-update')>=0, 'has class name added by prepareContext()');
 });
 
 // ..........................................................
@@ -35,14 +34,14 @@ module("SC.View#updateLayerIfNeeded", {
   setup: function() {
     // setup a fake view class so that updateLayerIfNeeded() will call
     // updateLayer() if needed.  updateLayer() is faked to isolate test
-    var layer = document.createElement('div');
     view = SC.View.create({
-      layer: layer, // fake it...
       isVisibleInWindow: YES,
-      layerNeedsUpdate: YES,
       updateLayer: function() { callCount++; }
     });
     callCount = 0 ;
+    
+    view.createLayer();
+    view.set("layerNeedsUpdate", YES);
   }
   
 });
@@ -124,10 +123,10 @@ test("layerNeedsUpdate actually triggers updateLayer", function() {
   var callCount = 0 ;
   var layer = document.createElement('div');
   var view = SC.View.create({
-    layer: layer, // fake it...
     isVisibleInWindow: YES,
     updateLayer: function() { callCount++; }
   });
+  view.createLayer();
   
   SC.RunLoop.begin();
   view.set('layerNeedsUpdate', YES);
