@@ -52,14 +52,8 @@ test("extracts styles from element on first retrieval", function() {
   
   var result = context.styles();
   
-<<<<<<< HEAD
-  if(SC.browser.msie) same(result, { height: '20px', color: 'black', height: '20px', borderTop: 'hotpink 1px solid', WebkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
-  else if(SC.browser.mozilla) same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
-  else same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink', WebkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
-=======
   
-  same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink', webkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
->>>>>>> Better fix for RenderContext styles
+  same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink', WebkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
   
   equals(context.styles(), result, "should reuse same instance thereafter");
 });
