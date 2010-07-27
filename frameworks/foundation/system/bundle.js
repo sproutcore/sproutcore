@@ -59,7 +59,7 @@ SC.mixin(/** @scope SC */ {
           try { 
             lazyInfo[i]();
           }catch(e) {
-            console.log("SC.loadBundle(): Failted to lazily instatiate entry for  '%@'".fmt(bundleName));  
+            console.error("SC.loadBundle(): Failted to lazily instatiate entry for  '%@'".fmt(bundleName));  
           }
         }
         delete SC.LAZY_INSTANTIATION[bundleName];
