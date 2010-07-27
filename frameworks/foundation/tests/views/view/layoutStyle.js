@@ -250,8 +250,11 @@ test("layout {top, left, width: auto, height: auto}", function() {
 module('ACCELERATED LAYOUT VARIATIONS', {
   setup: function(){
     commonSetup.setup();
+    
     // Force support
     child.hasAcceleratedLayer = YES;
+    SC.platform.supportsAcceleratedLayers = YES;
+    SC.platform.supportsCSS3DTransforms = YES;
   },
 
   teardown: commonSetup.teardown
@@ -260,9 +263,9 @@ module('ACCELERATED LAYOUT VARIATIONS', {
 test("layout {top, left, width, height}", function() {
 
   var layout = { top: 10, left: 10, width: 50, height: 50 };
-  var s = { top: 0, left: 0, width: 50, height: 50, webkitTransform: 'translate3d(10px, 10px, 0)' } ;
-  var no_f = { x: 0, y: 0, width: 50, height: 50, webkitTransform: 'translate3d(10px, 10px, 0)' } ;
-  var with_f = { x: 0, y: 0, width: 50, height: 50, webkitTransform: 'translate3d(10px, 10px, 0)' } ;
+  var s = { top: 0, left: 0, width: 50, height: 50, "-webkit-transform": 'translate3d(10px, 10px, 0)' } ;
+  var no_f = { x: 0, y: 0, width: 50, height: 50, "-webkit-transform": 'translate3d(10px, 10px, 0)' } ;
+  var with_f = { x: 0, y: 0, width: 50, height: 50, "-webkit-transform": 'translate3d(10px, 10px, 0)' } ;
 
   performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
@@ -270,9 +273,9 @@ test("layout {top, left, width, height}", function() {
 test("layout {top, left, bottom, right}", function() {
 
   var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-  var no_f = { x: 10, y: 10, width: 0, height: 0, webkitTransform: 'translateZ(0px)' } ;
-  var with_f = { x: 10, y: 10, width: 180, height: 180, webkitTransform: 'translateZ(0px)' } ;
-  var s = { top: 10, left: 10, bottom: 10, right: 10, webkitTransform: 'translateZ(0px)' } ;
+  var no_f = { x: 10, y: 10, width: 0, height: 0, "-webkit-transform": 'translateZ(0px)' } ;
+  var with_f = { x: 10, y: 10, width: 180, height: 180, "-webkit-transform": 'translateZ(0px)' } ;
+  var s = { top: 10, left: 10, bottom: 10, right: 10, "-webkit-transform": 'translateZ(0px)' } ;
 
   performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
@@ -293,9 +296,9 @@ test("layout {top, left, width: auto, height: auto}", function() {
   document.body.appendChild(layer);
   
   var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
-  var no_f = { x: 0, y: 0, width: 0, height: 0, webkitTransform: 'translateZ(0px)' };
-  var with_f = { x: 0, y: 0, width: 20, height: 20, webkitTransform: 'translateZ(0px)' };
-  var s = { top: 0, left: 0, width: 'auto', height: 'auto', webkitTransform: 'translateZ(0px)' };
+  var no_f = { x: 0, y: 0, width: 0, height: 0, "-webkit-transform": 'translateZ(0px)' };
+  var with_f = { x: 0, y: 0, width: 20, height: 20, "-webkit-transform": 'translateZ(0px)' };
+  var s = { top: 0, left: 0, width: 'auto', height: 'auto', "-webkit-transform": 'translateZ(0px)' };
   
   performLayoutTest(layout, no_f, s, with_f, s);
   
@@ -305,9 +308,9 @@ test("layout {top, left, width: auto, height: auto}", function() {
 test("layout w/ percentage {top, left, width, height}", function() {
 
   var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
-  var s = { top: '10%', left: '10%', width: '50%', height: '50%', webkitTransform: 'translateZ(0px)' } ;
-  var no_f = { top: '10%', left: '10%', width: '50%', height: '50%', webkitTransform: 'translateZ(0px)' } ;
-  var with_f = { top: '10%', left: '10%', width: '50%', height: '50%', webkitTransform: 'translateZ(0px)' } ;
+  var s = { top: '10%', left: '10%', width: '50%', height: '50%', "-webkit-transform": 'translateZ(0px)' } ;
+  var no_f = { top: '10%', left: '10%', width: '50%', height: '50%', "-webkit-transform": 'translateZ(0px)' } ;
+  var with_f = { top: '10%', left: '10%', width: '50%', height: '50%', "-webkit-transform": 'translateZ(0px)' } ;
 
   performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
