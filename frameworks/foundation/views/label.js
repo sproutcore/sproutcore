@@ -141,12 +141,9 @@ SC.LabelView = SC.View.extend(SC.Control,
     
     // 4. Localize
     if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = value.loc() ;
-
-    // 5. escapeHTML if needed
-    if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
-    
+        
     return value ;
-  }.property('value', 'localize', 'formatter', 'escapeHTML').cacheable(),
+  }.property('value', 'localize', 'formatter').cacheable(),
   
   
   /**
@@ -158,9 +155,8 @@ SC.LabelView = SC.View.extend(SC.Control,
   */
   hintValue: function() {
     var hintVal = this.get('hint');
-    if (this.get('escapeHTML')) hintVal = SC.RenderContext.escapeHTML(hintVal);
     return hintVal ;
-  }.property('hint', 'escapeHTML').cacheable(),
+  }.property('hint').cacheable(),
   
   /**
     Enables editing using the inline editor.
@@ -289,7 +285,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     this.set('isEditing', NO) ;
   },
 
-  displayProperties: 'displayValue textAlign fontWeight icon'.w(),
+  displayProperties: 'displayValue textAlign fontWeight icon escapeHTML'.w(),
   
   _TEMPORARY_CLASS_HASH: {},
   
