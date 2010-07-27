@@ -1305,13 +1305,30 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.get('theme')) {
       classNames = classNames.concat(this.get("theme").classNames);
     }
+    
+    // for backwards compatibility, make sure we push the theme name if it is not there already. This
+    // is extremely questionable, but necessary at least for buttons. We maybe want to move this just
+    // to such at some point.
+    // TODO: consider
+    // SC2.0: this should go away.
     if (this._themeName && classNames.indexOf(this._themeName) < 0) classNames.push(this._themeName);
+    
+    // get cursor:
+    var cursor = this.get("cursor");
+    if (!cursor && this.get('shouldInheritCursor')) {
+      // If this view has no cursor and should inherit it from the parent, 
+      // then it sets its own cursor view.  This sets the cursor rather than 
+      // simply using the parent's cursor object so that its cursorless 
+      // childViews can also inherit it.
+      cursor = this.getPath('parentView.cursor');
+    }
+    
     
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
       classNames: classNames,
       backgroundColor: this.get('backgroundColor'),
-      cursor: this.get('cursor'),
+      cursor: cursor,
       isTextSelectable: this.get('isTextSelectable'),
       isEnabled: this.get('isEnabled'),
       isVisible: this.get('isVisible'),
