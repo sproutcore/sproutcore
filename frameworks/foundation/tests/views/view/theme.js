@@ -35,7 +35,7 @@ test("adding child to parent propagates theme to child view.", function() {
   });
   
   ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
-  ok(!child.get("theme"), "view's child's theme should be null");
+  equals(child.get("theme"), SC.Theme.find("sc-base"), "view's child's theme should start at base theme");
   view.appendChild(child);
   ok(t1 === child.get("theme"), "view's child's theme should be sc-test-1");
 });
