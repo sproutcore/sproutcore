@@ -2346,7 +2346,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var cv = this.childViews, len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx];
-      view.parentViewDidResize();
+      if(view && view.parentViewDidResize) view.parentViewDidResize();
     }
   },
 
