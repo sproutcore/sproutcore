@@ -39,7 +39,7 @@ test("should emit style in tag if opts.styles is defined", function() {
 
 test("should emit style with custom browser attributes", function() {
   context.styles({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' }).end();
-  ok(context.get(0).match('<div style="-moz-column-count: 3px; -webkit-column-count: 3px; -o-column-count: 3px; -ms-column-count: 3px" >'),
+  ok(context.get(0).match('<div style="-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3" >'),
                             '<div> has style="-moz-column-count: 3; -webkit-column-count: 3, -o-column-count: 3, -ms-column-count: 3"');
 });
 
