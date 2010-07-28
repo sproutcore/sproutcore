@@ -158,7 +158,7 @@ module("SC.View#updateLayerLocationIfNeeded",{
  setup: function() {
    view = SC.View.create({
      updateLayerLocation: function() { runCount++; }
-   })
+   });
    runCount = 0;
  },
  
@@ -184,7 +184,7 @@ test("does NOT invoke updateLayerLocation if layerLocationNeedsUpdate is NO", fu
 });
 
 test("sets layerLocationNeedsUpdate to NO when run", function() {
-  
+  var view = SC.View.create(); // this needs to _not_ override updateLayerLocation.
   view.set('layerLocationNeedsUpdate', YES);
   view.updateLayerLocationIfNeeded();
   equals(view.get('layerLocationNeedsUpdate'), NO, 'did reset');
