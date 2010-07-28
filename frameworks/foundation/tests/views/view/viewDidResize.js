@@ -11,7 +11,7 @@
 // 
 module("SC.View#viewDidResize");
 
-test("invokes parentViewDidResize on all child views - ignoring views that do not implement method", function() {
+test("invokes parentViewDidResize on all child views", function() {
   var callCount = 0 ;
   var ChildView = SC.View.extend({ 
     parentViewDidResize: function() { callCount++; } 
@@ -21,12 +21,9 @@ test("invokes parentViewDidResize on all child views - ignoring views that do no
     childViews: [ChildView, ChildView, ChildView]    
   });
   
-  // one of the childViews should NOT implement method
-  view.childViews[2].parentViewDidResize = null ;
-  
   // now test...
   SC.run(function() { view.viewDidResize(); });
-  equals(callCount, 2, 'should invoke parentViewDidResize() on two methods that support it');
+  equals(callCount, 3, 'should invoke parentViewDidResize() on all children');
 });
 
 test("triggers whenever layout property is changed", function() {
@@ -148,25 +145,6 @@ test("calls viewDidResize on self unless layout is fixed", function() {
     viewDidResize: function() { this.callCount++; }
   });
   testParentViewDidResizeWithAlignments(view);
-});
-
-test("invoked whenever view is added to a new parentView but not when it is removed", function() {
-  var callCount = 0;
-  var view = SC.View.create({
-    parentViewDidResize: function() { callCount++; }
-  });
-  var parent = SC.Pane.create().append(); // must be visible in window...
-  SC.RunLoop.begin().end();
-
-  callCount = 0 ;
-  SC.run(function() { parent.appendChild(view); });
-  equals(callCount, 1, 'should call parentViewDidResize');
-  
-  callCount = 0;
-  SC.run(function() { parent.removeChild(view); });
-  equals(callCount, 0, 'should not call parentViewDidResize()');
-  
-  parent.remove();
 });
 
 // ..........................................................
