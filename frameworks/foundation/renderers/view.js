@@ -17,6 +17,8 @@ sc_require("renderers/renderer");
 SC.BaseTheme.renderers.View = SC.Renderer.extend({
   
   render: function(context) {
+    context.resetClassNames();
+    
     context
       .id(this.layerId)
       .setClass(this.calculateClassNames());
@@ -33,12 +35,7 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
     
     // and to maintain compatibility, we have to blow away the class names
     // SC2.0: consider breaking this compatibility for SC 2.0
-    var names = [], n = this.calculateClassNames();
-    for (var i in n) {
-      if (n[i]) names.push(i);
-    }
-    
-    elem.attr("class", names.join(" "));
+    elem.clearClassNames().setClass(this.calculateClassNames());
     
     if (this.didChange('backgroundColor')) {
       elem.css('backgroundColor', this.backgroundColor);
@@ -50,12 +47,18 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
   calculateClassNames: function() {
     var classNames = this.classNames;
     
-    if (this.didChange('isTextSelectable')) classNames['allow-select'] = this.isTextSelectable;
-    if (this.didChange('isEnabled')) classNames['disabled'] = !this.isEnabled;
-    if (this.didChange('isVisible')) classNames['hidden'] = !this.isVisible;
-    if (this.didChange('isFirstResponder')) classNames['focus'] = this.isFirstResponder;
-    if (this.didChange('hasStaticLayout')) classNames['sc-static-layout'] = this.hasStaticLayout;
-    if (this.didChange('cursor') && this.cursor) classNames[this.cursor.get('className')] = YES;
+    classNames['allow-select'] = this.isTextSelectable;
+    classNames['disabled'] = !this.isEnabled;
+    classNames['hidden'] = !this.isVisible;
+    classNames['focus'] = this.isFirstResponder;
+    classNames['sc-static-layout'] = this.hasStaticLayout;
+    
+    if (this.cursor) {
+      classNames[this.cursor.get('className')] = YES;
+      this._lastCursor = this.cursor.get('className');
+    } else if (this._lastCursor) {
+      classNames[this._lastCursor] = NO;
+    }
     
     this.classNames = classNames;
     return classNames;
