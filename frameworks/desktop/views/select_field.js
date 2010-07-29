@@ -99,7 +99,16 @@ SC.SelectFieldView = SC.FieldView.extend(
   sortObjects: function(objects) {
     if(!this.get('disableSort')){
       var nameKey = this.get('sortKey') || this.get('nameKey') ;
-      objects = objects.sortProperty(nameKey);
+      if(nameKey) objects = objects.sortProperty(nameKey);
+      else{
+        objects = objects.sort(function(a,b) {
+          if (nameKey) {
+            a = a.get ? a.get(nameKey) : a[nameKey] ;
+            b = b.get ? b.get(nameKey) : b[nameKey] ;
+          }
+          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
+        }) ;
+      }
     }
     return objects ;
   },
