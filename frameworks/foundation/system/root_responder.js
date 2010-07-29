@@ -1243,7 +1243,7 @@ SC.RootResponder = SC.Object.extend({
       this._touches[touch.identifier] = touchEntry;
 
       // set the event (so default action, etc. can be stopped)
-      touch.event = evt; // will be unset momentarily
+      touchEntry.event = evt; // will be unset momentarily
 
       // send out event thing: creates a chain, goes up it, then down it,
       // with startTouch and cancelTouch. in this case, only startTouch, as
@@ -1252,16 +1252,17 @@ SC.RootResponder = SC.Object.extend({
       this.captureTouch(touchEntry, this);
 
       // Unset the reference to the original event so we can garbage collect.
-      touch.event = null;
+      touchEntry.event = null;
     }
 
     SC.RunLoop.end();
     
+    // hack for text fields
     if (hidingTouchIntercept) {
-      evt.allowDefault();
       return YES;
     }
-    return NO;
+    
+    return evt.hasCustomEventHandling;
   },
 
   /**
@@ -1351,7 +1352,7 @@ SC.RootResponder = SC.Object.extend({
     
     SC.RunLoop.end();
     
-    return NO;
+    return evt.hasCustomEventHandling;
   },
 
   touchend: function(evt) {
@@ -1376,6 +1377,7 @@ SC.RootResponder = SC.Object.extend({
       touchEntry.pageX = touch.pageX;
       touchEntry.pageY = touch.pageY;
       touchEntry.type = 'touchend';
+      touchEntry.event = evt;
       
       if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('-- Received touch end');
       if (touchEntry.hidesTouchIntercept) {
@@ -1396,11 +1398,12 @@ SC.RootResponder = SC.Object.extend({
 
     SC.RunLoop.end();
     
+    // for text fields
     if (hidesTouchIntercept) {
-      evt.allowDefault();
       return YES;
     }
-    return NO;
+    
+    return evt.hasCustomEventHandling;
   },
 
   /** @private
@@ -1975,7 +1978,7 @@ SC.Touch.prototype = {
     the hasCustomEventHandling property to YES but does not cancel the event.
   */
   allowDefault: function() {
-    this.hasCustomEventHandling = YES ;
+    this.event.hasCustomEventHandling = YES ;
   },
 
   /**
