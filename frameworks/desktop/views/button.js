@@ -405,7 +405,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        this.renderer.focus();
+        if (this.renderer && this.renderer.focus) this.renderer.focus();
       }
     }
 
@@ -619,7 +619,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        if (this.renderer) this.renderer.focus();
+        if (this.renderer && this.renderer.focus) this.renderer.focus();
       }
     }
   },
