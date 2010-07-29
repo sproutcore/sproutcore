@@ -1052,19 +1052,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   updateLayer: function(optionalContext) {
     var mixins, idx, len, renderer = this.renderer, viewRenderer = this._viewRenderer;
-    this.updateViewSettings();
+
     
     // make sure to update any renderers
-    this._updateViewRenderer();
     this._updateRenderer();
     
     // Now, update using renderer if possible; render() otherwise
     if (!this._useRenderFirst && this.createRenderer) {
-      if (viewRenderer) viewRenderer.update();
+      this.updateViewSettings();
       if (renderer) renderer.update();
     } else {
       var context = optionalContext || this.renderContext(this.get('layer')) ;
+      
+      this.renderViewSettings(context);
       this.render(context, NO) ;
+      
       if (mixins = this.renderMixin) {
         len = mixins.length;
         for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, NO) ;
