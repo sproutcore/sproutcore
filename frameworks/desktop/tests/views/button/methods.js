@@ -71,14 +71,14 @@ module("SC.ButtonView#actions - SC.HOLD_BEHAVIOR", {
 
 test('Test triggerAction only happens once', function(){
   b.triggerAction();
-
+  SC.RunLoop.begin().end();
   var assertions = function(){
     equals(counter.get('value'), 1, "should only run action once");
     start();
   };
 
   stop();
-  setTimeout(assertions, 10);
+  setTimeout(assertions, 300);
 });
 
 // This test is not nearly reliable enough

@@ -152,7 +152,14 @@ test("changing value from empty -> value", function() {
   view.set('value', 50);
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
-  equals(view.$('.sc-inner').width(), 125, 'pixel width ');
+  
+  var assertions = function(){
+    equals(view.$('.sc-inner').width(), 125, 'pixel width ');
+    start();
+  };
+
+  stop();
+  setTimeout(assertions, 200);
 });
 
 test("changing value from full -> empty", function() {
@@ -163,7 +170,15 @@ test("changing value from full -> empty", function() {
   view.set('value', 0);
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
-  equals(view.$('.sc-inner').width(), 0, 'pixel width ');
+  var assertions = function(){
+    equals(view.$('.sc-inner').width(), 0, 'pixel width ');
+    start();
+  };
+
+  stop();
+  setTimeout(assertions, 200);
+  
+  
 });
 
 
@@ -174,12 +189,18 @@ test("changing value from full -> negative number", function() {
   view.set('value', 100);
   SC.RunLoop.end();
   
-  equals(view.$('.sc-inner').width(), 250, 'precon - pixel width should be 338');
   SC.RunLoop.begin();
   view.set('value', -10);
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
-  equals(view.$('.sc-inner').width(), 0, 'pixel width ');
+  var assertions = function(){
+    equals(view.$('.sc-inner').width(), 0, 'pixel width ');
+    start();
+  };
+
+  stop();
+  setTimeout(assertions, 200);
+
 });
 
 test("changing value to over maximum", function() {
@@ -192,7 +213,13 @@ test("changing value to over maximum", function() {
   view.set('value', 110);
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
-  equals(view.$('.sc-inner').width(), 250, 'pixel width ');
+  var assertions = function(){
+    equals(view.$('.sc-inner').width(), 250, 'pixel width ');
+    start();
+  };
+
+  stop();
+  setTimeout(assertions, 200);
 });
 
 test("changing value to a string", function() {
@@ -202,13 +229,17 @@ test("changing value to a string", function() {
   view.set('value', 25);
   SC.RunLoop.end();
 
-  var v = (SC.browser.msie || SC.browser.mozilla) ? 63 : 62;
-  equals(view.$('.sc-inner').width(), v, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 'aString');
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
-  equals(view.$('.sc-inner').width(), 0, 'pixel width ');
+  var assertions = function(){
+    equals(view.$('.sc-inner').width(), 0, 'pixel width ');
+    start();
+  };
+
+  stop();
+  setTimeout(assertions, 200);
 });
 
 
