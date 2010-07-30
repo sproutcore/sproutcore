@@ -19,7 +19,9 @@ test("invokes updateViewSettings() and then updates layer element", function() {
   var view = SC.View.create({
     updateViewSettings: function() {
       this.$().addClass('did-update');
-    }
+    },
+    
+    createRenderer: function() {}
   });
   view.createLayer();
   view.updateLayer();
