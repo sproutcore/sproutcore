@@ -8,7 +8,7 @@
 /*global module test htmlbody ok equals same stop start */
 
 var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-var pane, view;
+var pane, view, elem, rect1, rect2, rect3;
 module("SC.SegmentedView", {
   setup: function() {
     SC.RunLoop.begin();
@@ -31,11 +31,18 @@ module("SC.SegmentedView", {
     SC.RunLoop.end();
     
     view = pane.childViews[0];
+    
+    elem = view.get('layer').childNodes[0];
+    rect1 = elem.getBoundingClientRect();
+    elem = view.get('layer').childNodes[1];
+    rect2 = elem.getBoundingClientRect();
+    elem = view.get('layer').childNodes[2];
+    rect3 = elem.getBoundingClientRect();
   }, 
   
   teardown: function() {
     pane.remove();
-    pane = view = null ;
+    pane = view = elem = rect1 = rect2 = rect3 = null ;
   }
 });
 
@@ -46,16 +53,16 @@ test("Check that properties are mapped correctly", function() {
     SC.RunLoop.end();
     equals(view.get('value'), "Item2", "the second item should be selected.");
     var items=view.displayItems();
-    equals(items[0][0], "Item1", 'Computed properties should match');
-    equals(items[0][1], "Item1", 'Computed properties should match');
-    equals(items[0][2], true, 'Computed properties should match');
-    equals(items[0][3], iconURL, 'Computed properties should match');
-    equals(items[0][4], null, 'Computed properties should match');
-    equals(items[0][5], null, 'Computed properties should match');
-    equals(items[0][6], 0, 'Computed properties should match');
-    var elem = view.get('layer').childNodes[0];
-
-    SC.Event.trigger(elem, 'mousedown');
+    equals(items[0].title, "Item1", 'Computed properties should match');
+    equals(items[0].value, "Item1", 'Computed properties should match');
+    equals(items[0].isEnabled, true, 'Computed properties should match');
+    equals(items[0].icon, iconURL, 'Computed properties should match');
+    equals(items[0].width, null, 'Computed properties should match');
+    equals(items[0].toolTip, null, 'Computed properties should match');
+    equals(items[0].index, 0, 'Computed properties should match');
+    
+    var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left + 1, pageY: rect1.top + 1 });
+    view.mouseDown(firstItemEvent);
     equals(view._isMouseDown, YES, 'mousedown');
     equals(view.get('activeIndex'), 0, '');
     
@@ -68,27 +75,44 @@ test("Check that properties are mapped correctly", function() {
    SC.RunLoop.begin();
    view.set('isEnabled', YES);
    SC.RunLoop.end();
-   var elem = view.get('layer').childNodes[0];
-
-   SC.Event.trigger(elem, 'mousedown');
+   
+   // Test Mouse Down
+   // it now gets the item by the position, so we have to pass a position
+   var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left + 1, pageY: rect1.top + 1 });
+   view.mouseDown(firstItemEvent);
+   
    equals(view._isMouseDown, YES, 'Mouse down flag on mousedown should be ');
    equals(view.get('activeIndex'), 0, 'The active item is the first segment.');
    
+   // Test Mouse Up
    elem = view.get('layer').childNodes[1];
-   SC.Event.trigger(elem, 'mouseup');
+      
+   view.mouseUp(firstItemEvent);
    equals(view._isMouseDown, NO, 'Mouse down flag on mouseup should be ');
-   equals(view.get('activeIndex'), -1, 'Ther shouldnt be any active item');
+   equals(view.get('activeIndex'), -1, 'There shouldnt be any active item');
    
+   // Test third item
    elem = view.get('layer').childNodes[2];
-   SC.Event.trigger(elem, 'mousedown');
-    
-   SC.Event.trigger(elem, 'mousemoved');
+   var thirdItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect3.left + 1, pageY: rect3.top + 1 });
+   
+   // mouse down and move
+   view.mouseDown(thirdItemEvent);
+   view.mouseMoved(thirdItemEvent);
    equals(view._isMouseDown, YES, 'Mouse down flag on mousemoved should be ');
    equals(view.get('activeIndex'), 2, 'The active item is the third segment.');
    
-   SC.Event.trigger(elem, 'mouseover');
-   equals(view._isMouseDown, YES, 'Mouse down flag on mouseover should be ');
-   equals(view.get('activeIndex'), 2, 'The active item is the third segment.');
+   // try moving mouse while mouse down
+   var secondItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect2.left + 1, pageY: rect2.top + 1 });
+   view.mouseMoved(secondItemEvent);
+   equals(view._isMouseDown, YES, 'Mouse down flag on mousemoved should be ');
+   equals(view.get('activeIndex'), 1, 'The active item should have changed to the second segment.');
+   
+   // and check that mouse out cancels.
+   var noItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left - 5, pageY: rect1.top - 5 });
+
+   view.mouseExited(noItemEvent);
+   equals(view._isMouseDown, YES, 'Mouse down flag on mouseout should still be ');
+   equals(view.get('activeIndex'), -1, 'The active item is no longer specified.');
    
   });
 
