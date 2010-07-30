@@ -101,6 +101,12 @@ test("rendering to a context, attaching the layer, and then updating, updates th
   renderer.attachLayer(elem);
   renderer.update();
   
+  // check that buffering in jQuery prevented any adjustments
+  equals(elem.innerHTML, initialHTML, "check that it can't update without flushing buffer");  
+  
+  // flush buffer
+  SC.$.Buffer.flush();
+  
   // and check again
   ok(elem.innerHTML != initialHTML, "it should now have updated.");
 });
