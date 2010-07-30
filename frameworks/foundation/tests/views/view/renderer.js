@@ -182,7 +182,7 @@ test("calling createLayer and updateLayer on renderFirst views trigger render an
   ok(view.renderNotFirstTimeWasCalled, "Did not called non-firstTime.");
 });
 
-test("calling createLayer and updateLayer on renderer-based views render and update properly.", function() {
+test("calling createLayer and updateLayer on renderer-based views buffer, render, and update properly.", function() {
   var view = rendererView.create();
   view.createLayer();
   ok(view.$(".test").length > 0, "Created test element");
@@ -190,7 +190,13 @@ test("calling createLayer and updateLayer on renderer-based views render and upd
   
   view.updateLayer();
   ok(view.$(".test").length > 0, "Test element is still present");
+  equals(view.$(".test").text(), "Hello", "Test element text has not changed due to buffering ");
+  equals(view.$().attr("title"), "", "Test element still has no title");
+  
+  SC.$.Buffer.flush();
+  ok(view.$(".test").length > 0, "Test element is still present");
   equals(view.$(".test").text(), "Hi", "Test element text has changed to ");
+  
   equals(view.$().attr("title"), "test", "Test element has a title of ");
 });
 
