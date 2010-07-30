@@ -242,8 +242,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // if we don't have a default responder or no responders in the responder
     // chain handled the event, see if the pane itself implements the event
     else if (!target && !(target = this.get('defaultResponder'))) {
-      if (!target) target = null;
-      else target = target.tryToPerform(action, evt) ? target : null ;
+      target = this.tryToPerform(action, evt) ? this : null ;
     }
 
     return evt.mouseHandler || target ;

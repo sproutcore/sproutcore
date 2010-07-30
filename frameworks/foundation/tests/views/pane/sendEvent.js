@@ -18,6 +18,7 @@ module("SC.Pane#sendEvent", {
     defaultResponder = SC.Object.create({ defaultEvent: handler });
     pane = SC.Pane.create({
       defaultResponder: defaultResponder,
+      paneEvent: handler,
       childViews: [SC.View.extend({
         fooEvent: handler,
         childViews: [SC.View.extend({
@@ -162,4 +163,44 @@ test("when invoked with target = null", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
   
+  // test event handler on pane itself
+  callCount = 0;
+  handler = pane.sendEvent('paneEvent', evt);
+  equals(callCount, 1, 'should invoke handler on pane');
+  equals(handler, pane, 'should return pane as responder that handled event');  
+
 });
+
+test("when invoked with target = null, no default or first responder", function() {
+  var handler ;
+
+  // no first or default responder
+  pane.set('firstResponder', null);
+  pane.set('defaultResponder', null);
+    
+  // test event handler on child view of target
+  callCount = 0;
+  handler = pane.sendEvent('barEvent', evt);
+  equals(callCount, 0, 'should not invoke handler');
+  equals(handler, null, 'should return no responder');
+
+  // test event handler on target 
+  callCount = 0;
+  handler = pane.sendEvent('fooEvent', evt);
+  equals(callCount, 0, 'should not invoke handler');
+  equals(handler, null, 'should return no responder');
+
+  // test unhandled event handler
+  callCount = 0;
+  handler = pane.sendEvent('imaginary', evt);
+  equals(callCount, 0, 'should not invoke handler');
+  equals(handler, null, 'should return no responder');
+  
+  // test event handler on pane itself
+  callCount = 0;
+  handler = pane.sendEvent('paneEvent', evt);
+  equals(callCount, 1, 'should invoke handler on pane');
+  equals(handler, pane, 'should return pane as responder that handled event');  
+
+});
+
