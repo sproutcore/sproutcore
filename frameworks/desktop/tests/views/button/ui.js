@@ -166,8 +166,8 @@ test("Check that the title is set or not and if it is in the appropriate element
 });
 
 test("Check if title,toolTip has the tool tip set", function() {
-  var viewElem=pane.view('title,toolTip').$('div');
-  ok(viewElem.defaultClass[0].title == 'Hello World is my tool tip', 'title,toolTip has the expected tool tip set.');
+  var viewElem=pane.view('title,toolTip').$();
+  ok(viewElem.attr("title") == 'Hello World is my tool tip', 'title,toolTip has the expected tool tip set.');
 });
 
 test("Check if AUTO_CONTROL_SIZE button automatically calculated the correct controlSize", function() {
