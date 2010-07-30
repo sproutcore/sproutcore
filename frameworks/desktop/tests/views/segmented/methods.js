@@ -73,13 +73,13 @@ test("Check that properties are mapped correctly", function() {
     SC.RunLoop.end();
     equals(view.get('value'), "Item2", "the second item should be selected.");
     var items=view.displayItems();
-    equals(items[0][0], "Item1", 'Computed properties should match');
-    equals(items[0][1], "Item1", 'Computed properties should match');
-    equals(items[0][2], true, 'Computed properties should match');
-    equals(items[0][3], iconURL, 'Computed properties should match');
-    equals(items[0][4], null, 'Computed properties should match');
-    equals(items[0][5], null, 'Computed properties should match');
-    equals(items[0][6], 0, 'Computed properties should match');
+    equals(items[0].title, "Item1", 'Computed properties should match');
+    equals(items[0].value, "Item1", 'Computed properties should match');
+    equals(items[0].isEnabled, true, 'Computed properties should match');
+    equals(items[0].icon, iconURL, 'Computed properties should match');
+    equals(items[0].width, null, 'Computed properties should match');
+    equals(items[0].toolTip, null, 'Computed properties should match');
+    equals(items[0].index, 0, 'Computed properties should match');
     
     var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left + 1, pageY: rect1.top + 1 });
     view.mouseDown(firstItemEvent);
