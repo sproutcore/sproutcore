@@ -91,7 +91,7 @@ SC.Renderer = {
     var ret, layer = this.layer();
     // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
     // return an object selecting the document.
-    ret = !layer ? SC.$([]) : (sel === undefined) ? SC.$.buffer(layer) : SC.$.buffer(sel, layer) ;
+    ret = !layer ? SC.$.buffer([]) : (sel === undefined) ? SC.$.buffer(layer) : SC.$.buffer(sel, layer) ;
     layer = null ; // avoid memory leak
     return ret ;
   },
