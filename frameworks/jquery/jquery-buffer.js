@@ -204,7 +204,7 @@ jQuery.Buffer = (function() {
     // check value
     if (typeof value === "object") {
       // this is a hash 
-      if (!context.classNames) context.classNames = this._hashFromClassNames(context);
+      if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
       
       // loop over class names and set it properly.
       for (var key in value) {
