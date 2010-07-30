@@ -1064,7 +1064,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     } else {
       var context = optionalContext || this.renderContext(this.get('layer')) ;
       
-      this.renderViewSettings(context);
+      this.renderViewSettings(context, NO);
       this.render(context, NO) ;
       
       if (mixins = this.renderMixin) {
@@ -1271,7 +1271,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
     
-    this.renderViewSettings(context);
+    this.renderViewSettings(context, YES);
     
     /* Now, the actual rendering, which will use a renderer if possible */
     // the renderer will have been created when the theme was found; if it is around,
@@ -1342,11 +1342,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     @private
     Renders view settings (class names and id, for instance) to the context.
+    
+    firstTime is provided because we have a case in which renderViewSettings may be called when !firstTime,
+    so that we can set things on the context (because other things are going through the context,
+    due to the use of a render() function in the derived class that uses context).
+    
+    If !firstTime, we don't actually have to update layout (updateLayout handles it).
   */
-  renderViewSettings: function(context) {
+  renderViewSettings: function(context, firstTime) {
+    if (SC.none(firstTime)) firstTime = YES;
+    
     this._updateViewRenderer();
     this._viewRenderer.render(context);
-    this.renderLayout(context, YES); // provide backwards compatibility
+    
+    if (firstTime) this.renderLayout(context, YES);
   },
   
   /**
@@ -3246,7 +3255,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var layer = this.get('layer'), context;
     if (layer) {
       context = this.renderContext(layer);
-      this.renderLayout(context);
+      this.renderLayout(context, NO);
       context.update();
 
       // If this view uses static layout, then notify if the frame changed.
