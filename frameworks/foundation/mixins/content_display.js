@@ -78,9 +78,7 @@ SC.ContentDisplay = {
         }
       }
 
-      // notify everyone that everything is different now.
-      this.allPropertiesDidChange() ;
-      this.endPropertyChanges() ;
+      this.displayDidChange();
     }
   }.observes('content', 'contentDisplayProperties'),
   

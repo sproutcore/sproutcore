@@ -15,7 +15,7 @@ sc_require('views/separator') ;
   @extends SC.ButtonView
   @since SproutCore 1.0
 */
-SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
+SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
 
   displayProperties: ['title', 'isEnabled', 'isSeparator'],
