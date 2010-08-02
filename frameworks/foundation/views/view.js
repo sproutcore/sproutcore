@@ -683,15 +683,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.property().cacheable(),
   
   _lastLayerId: null,
+
   /**
     Handles changes in the layer id.
   */
   layerIdDidChange: function() {
-    var layer = this.get("layer"), lid = this.get("layerId");
-    if (this.get("layerId") !== this._lastLayerId) {
+    var layer  = this.get("layer"),
+        lid    = this.get("layerId"),
+        lastId = this._lastLayerId;
+    if (lid !== lastId) {
       // if we had an earlier one, remove from view hash.
-      if (this._lastLayerId && SC.View.views[this._lastLayerId] === this) {
-        delete SC.View.views[this._lastLayerId];
+      if (lastId && SC.View.views[lastId] === this) {
+        delete SC.View.views[lastId];
       }
       
       // set the current one as the new old one
@@ -914,7 +917,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _notifyDidCreateLayer: function() {
     if (this.didCreateLayer) this.didCreateLayer() ;
     var mixins = this.didCreateLayerMixin, len, idx,
-        childViews = this.get('childViews');
+        childViews = this.get('childViews'),
+        childView;
     if (mixins) {
       len = mixins.length ;
       for (idx=0; idx<len; ++idx) mixins[idx].call(this) ;
@@ -922,8 +926,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     len = childViews.length ;
     for (idx=0; idx<len; ++idx) {
-      if (!childViews[idx]) continue;
-      childViews[idx]._notifyDidCreateLayer() ;
+      childView = childViews[idx];
+      if (!childView) continue;
+
+      // A parent view creating a layer might result in the creation of a
+      // child view's DOM node being created via a render context without
+      // createLayer() being invoked on the child.  In such cases, if anyone
+      // had requested 'layer' and it was cached as null, we need to
+      // invalidate it.
+      childView.notifyPropertyChange('layer');
+
+      childView._notifyDidCreateLayer() ;
     }
   },
   
