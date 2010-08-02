@@ -56,7 +56,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
         inverseKey, isMaster, oldRec, attr, ret, nvalue;
     
     // WRITE
-    if (newRec !== undefined) {
+    if (newRec !== undefined && this.get('isEditable')) {
 
       // can only take other records or null
       if (newRec && !SC.kindOf(newRec, SC.Record)) {
