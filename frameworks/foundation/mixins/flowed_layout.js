@@ -17,7 +17,14 @@ SC.ALIGN_JUSTIFY = "justify";
   
   Child views with useAbsoluteLayout===YES will be ignored in the layout process.
   This mixin detects when child views have changed their size, and will adjust accordingly.
-  It also observes child views' isVisible and calculatedWidth/Height properties.
+  It also observes child views' isVisible and calculatedWidth/Height properties, and, as a
+  flowedlayout-specific extension, isHidden.
+  
+  These properties are observed through `#js:observeChildLayout` and `#js:unobserveChildLayout`;
+  you can override the method to add your own properties. To customize isVisible behavior,
+  you will also want to override shouldIncludeChildView.
+  
+  
   If flowSize is implemented but specifies widthPercent and heightPercent, the width and height
   will be calculated based on padding-adjusted size; values not specified in flowSize will always
   be taken from the flowed view's frame (calculatedWidth/Height ignored).
@@ -69,7 +76,7 @@ SC.FlowedLayout = {
   concatenatedProperties: ["childMixins"],
   
   initMixin: function() {
-    this._scfl_tile();
+    this.invokeOnce("_scfl_tile");
   },
   
   /**
@@ -84,50 +91,60 @@ SC.FlowedLayout = {
   },
   
   /**
-    This function is OURs. Also, we are not yet efficient. We could update only
-    views after a certain view, sometime in future.
-  */
-  layoutChildViews: function() {
-    this.invokeOnce("_scfl_tile");
-  },
-  
-  /**
     Overriden to only update if it is a view we do not manage, or the width or height has changed
     since our last record of it.
   */
   layoutDidChangeFor: function(c) {
+    // if it is absolute layout (no flowing) then we need to let SC.View handle it
     if (c.get("useAbsoluteLayout")) return sc_super();
+    
+    // if we have not flowed yet, ignore as well
     if (!this._scfl_itemLayouts) return sc_super();
     
+    // now, check if anything has changed
     var l = this._scfl_itemLayouts[SC.guidFor(c)];
     if (!l) return sc_super();
-    if (c.layout.width !== l.width || c.layout.height !== l.height) return sc_super();
+    if (c.layout.width === l.width && c.layout.height === l.height) return sc_super();
+    
+    // nothing has changed. This is where we do something
+    this.invokeOnce("_scfl_tile");
+    sc_super();
   },
   
   /**
-    @private
-    Sets up observers on child view. We observe three things:
+    Sets up layout observers on child view. We observe three things:
     - isVisible
     - calculatedWidth
     - calculatedHeight
+    
+    Actual layout changes are detected through layoutDidChangeFor.
   */
-  _scfl_observeChild: function(c) {
+  observeChildLayout: function(c) {
     if (c._scfl_isBeingObserved) return;
     c._scfl_isBeingObserved = YES;
     c.addObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('isHidden', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
   },
   
   /**
-    @private
     Removes observers on child view.
   */
-  _scfl_unobserveChild: function(c) {
+  unobserveChildLayout: function(c) {
     c._scfl_isBeingObserved = NO;
     c.removeObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('isHidden', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
+  },
+  
+  /**
+    Determines whether the specified child view should be included in the flow layout.
+    By default, if it has isVisible: NO or isHidden: YES, it will not be included.
+  */
+  shouldIncludeChild: function(c) {
+    return c.get("isVisible") && !c.get("isHidden");
   },
   
   /**
@@ -172,11 +189,19 @@ SC.FlowedLayout = {
     
     // then calculated size
     var cw = view.get("calculatedWidth"), ch = view.get("calculatedHeight");
-    if (!SC.none(cw) && !SC.none(ch)) return { width: cw, height: ch };
+    var calc = {}, f = view.get("frame");
     
-    // finally, use frame
-    var f = view.get("frame");
-    return { width: f.width, height: f.height };
+    // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
+    // it is invalid.
+    if (cw) calc.width = cw;
+    else calc.width = f.width;
+    
+    // same for calculated height
+    if (ch) cal.height = ch;
+    else calc.height = f.height;
+    
+    // return
+    return calc;
   },
   
   /**
@@ -279,16 +304,15 @@ SC.FlowedLayout = {
     ) {
       return;
     }
-
+    
     item.set("layout", l);
-    item.updateLayout();
   },
   
   _scfl_tile: function() {
     if (!this._scfl_itemLayouts) this._scfl_itemLayouts = {};
     
-    var isObserving = this._scfl_isObserving || {},
-        nowObserving = {};
+    var isObserving = this._scfl_isObserving || SC.CoreSet.create(),
+        nowObserving = SC.CoreSet.create();
     
     var children = this.get("childViews"), child, idx, len = children.length,
         rows = [], row = [], rowSize = 0, 
@@ -323,11 +347,11 @@ SC.FlowedLayout = {
       if (child.get("useAbsoluteLayout")) continue;
       
       // update observing lists
-      delete isObserving[SC.guidFor(child)];
-      nowObserving[SC.guidFor(child)] = child;
+      isObserving.remove(SC.guidFor(child));
+      nowObserving.add(child);
       
       // skip positioning of items with isVisible===false
-      if (!child.get("isVisible")) continue;
+      if (!this.shouldIncludeChild(child)) continue;
       
       // get spacing, size, and cache
       childSize = this.flowSizeForView(idx, child);
@@ -385,18 +409,23 @@ SC.FlowedLayout = {
     
     
     // cleanup on aisle 7
-    for (idx in isObserving) {
-      this._scfl_unobserveChild(isObserving[idx]);
+    len = isObserving.length;
+    for (idx = 0; idx < len; idx++) {
+      this.unobserveChildLayout(isObserving[idx]);
     }
 
-    for (idx in nowObserving) {
-      this._scfl_observeChild(nowObserving[idx]);
+    len = nowObserving.length;
+    for (idx = 0; idx < len; idx++) {
+      this.observeChildLayout(nowObserving[idx]);
     }
     
     this._scfl_isObserving = nowObserving;
   },
   
   _scfl_frameDidChange: function() {
+    // if the frame changes but we can't wrap, our results will not update.
+    if (!this.get("canWrap")) return;
+    
     var frame = this.get("frame"), lf = this._scfl_lastFrameSize;
     this._scfl_lastFrameSize = frame;
 
@@ -406,9 +435,12 @@ SC.FlowedLayout = {
   }.observes("frame"),
   
   destroyMixin: function() {
-    var isObserving = this._scfl_isObserving || SC.CoreSet.create();
-    for (var idx in isObserving) {
-      this._scfl_unobserveChild(isObserving[idx]);
+    var isObserving = this._scfl_isObserving;
+    if (!isObserving) return;
+    
+    var len = isObserving.length, idx;
+    for (idx = 0; idx < len; idx++) {
+      this.unobserveChildLayout(isObserving[idx]);
     }
   }
   
