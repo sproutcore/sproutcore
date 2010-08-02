@@ -78,7 +78,7 @@ SC.Event = function(originalEvent) {
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll') {
     var deltaMultiplier = 1,
-        version = SC.browser.version;
+        version = parseFloat(SC.browser.version);
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
     if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
@@ -86,9 +86,15 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
 
-      if (version < 533 || version >= 534) {
+      // Scrolling in Safari 5.0.1, which is huge for some reason
+      if (version === 533.17) {
+        deltaMultiplier = 0.004;
+
+      // Scrolling in Safari 5.0
+      } else if (version < 533 || version >= 534) {
         deltaMultiplier = 40;
       }
+
     // normalize wheelDelta for Firefox
     // note that we multiple the delta on FF to make it's acceleration more 
     // natural.
@@ -107,7 +113,7 @@ SC.Event = function(originalEvent) {
       this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
     }
-    
+
     this.wheelDelta *= deltaMultiplier;
     this.wheelDeltaX *= deltaMultiplier;
     this.wheelDeltaY *= deltaMultiplier;
