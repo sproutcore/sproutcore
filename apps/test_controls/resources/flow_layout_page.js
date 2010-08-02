@@ -32,13 +32,13 @@ TestControls.flowLayoutPage = SC.View.design({
       },
       
       hideOne: function() {
-        if (this._hasHidden) this.b.set("isVisible", YES);
-        else this.b.set("isVisible", NO);
+        if (this._hasHidden) this.b.set("isHidden", NO);
+        else this.b.set("isHidden", YES);
         this._hasHidden = !this._hasHidden;
       },
       
       autoMixins: [SC.Animatable, {
-        transitions: { left: 0.25, top: 0.25, width: 0.25 }
+        transitions: { left: 0.25, top: 0.25, width: 0.25, opacity: 0.25 }
       }],
       
       childViews: "a s b s2 c d".w(),
@@ -50,7 +50,13 @@ TestControls.flowLayoutPage = SC.View.design({
       },
       a: SC.ButtonView.design({ flowSpacing: { top: 5, left: 4, right: 3, bottom: 2 }, layout: {width: 150, height: 24}, title: "a" }),
       s: SC.View.design({ isSpacer: YES, spaceUnits: 2, backgroundColor: "gray", layout: {width: 0, height: 24} }),
-      b: SC.ButtonView.design({ layout: {width: 190, height: 24}, title: "b" }),
+      b: SC.ButtonView.design({ 
+        layout: {width: 190, height: 24}, 
+        title: "b",
+        isHiddenDidChange: function() {
+          this.adjust("opacity", this.get("isHidden") ? 0 : 1);
+        }.observes("isHidden")
+      }),
       s2: SC.View.design({ isSpacer: YES, spaceUnits: 1, backgroundColor: "gray", layout: {width: 0, height: 24} }),
       c: SC.ButtonView.design({ layout: {width: 120, height: 24 }, title: "c" }),
       d: SC.ButtonView.design({ layout: {width: 200, height: 24 }, title: "d" })
