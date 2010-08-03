@@ -1,5 +1,5 @@
 /*global Buffer */
-sc_require("jquery.js");
+sc_require("jquery");
 sc_require("jquery-buffer");
 
 (function() {
