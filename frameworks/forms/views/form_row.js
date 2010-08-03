@@ -170,7 +170,11 @@ SC.FormRowView.mixin({
 	    label = null;
 	  }
 		// now, create a hash (will be used by the parent form's exampleRow)
-		if (!ext) ext = {};
+		if (!ext) {
+		  ext = {};
+	  } else {
+	    ext = SC.clone(ext);
+	  }
 		ext.label = label;
 		ext.childViews = ["_singleField"];
 		ext._singleField = fieldType;
