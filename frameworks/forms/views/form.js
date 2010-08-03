@@ -44,10 +44,10 @@ beginEditing.
 @extends SC.View
 @implements SC.Editable
 */
-require("mixins/auto_hide");
+
 require("mixins/edit_mode");
 require("views/form_row");
-SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
+SC.FormView = SC.View.extend(SC.FlowedLayout, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_HORIZONTAL, canWrap: YES,
   
   formFlowSpacing: SC.FROM_THEME,

@@ -15,71 +15,88 @@
   Note: as a special case, this also checks isEditing to see if hiding is enabled, since if it
   is editing, it can't really be hidden, can it?
 */
-SC.FormsAutoHide = {
+SC.AutoHide = {
   
   /**
   Automatically hides the form, row, or whatever when they are considered "Empty".
   */
-  autoHide: NO,
+  autoHide: YES,
   
   /**
-  YES if the form/row is empty, as calculated by relayoutFields.
+  Tell the parent autohiding view to treat this view as always hidden (for example the labels in a row). Automatically sets self to be not visible when parent becomes hidden.
+   */
+  ignoreVisibility: NO,
+  
+  /**
+  YES if the form/row is empty
   */
   isEmpty: NO,
+  
+  /**
+  If you are not in a flowed layout you need to make an observer to handle this yourself (such as by setting isVisible).
+   */
+  isHidden: NO,
+  
+  initMixin: function() {
+    // if we are a non-value field, base our visibility on our parent so we hide properly
+    if(this.get('ignoreVisibility')) {
+      SC.Binding.from('isHidden', this.parentView)
+      .oneWay()
+      .not()
+      .to('isVisible', this)
+      .connect();
+    }
+  },
   
   /**
   Called by fields when their emptiness changes.
 
   Always triggers (at end of run loop) a relayout of fields.
   */
-  emptinessDidChangeFor: function(child)
+  visibilityDidChangeFor: function(child)
   {
     this.invokeOnce("_calculateEmptiness");
   },
 
   /**
-  Reevaluates emptiness
+  By default, a view will check all of its children to determine if it is empty. It is only empty if all of its children are.
   */
   _calculateEmptiness: function()
   {
-    // in short, we get the display fields, if we come across one that is visible and not empty
+    // in short, we get the value fields, if we come across one that is visible and not empty
     // we cannot be empty.
-    var views = this.get("childViews"),
-    len = views.length;
+    var views = this.get('childViews');
     
-    var empty = YES;
+    var empty = YES,
+    len = views.length,
+    field;
+    
     for (var i = 0; i < len; i++)
     {
-      var field = views[i];
-      if (!field.get("isEmpty") && field.get("isVisible"))
-      {
+      field = views[i];
+      
+      if (!field.get('ignoreVisibility') && !field.get("isEmpty") && field.get("isVisible") && !field.get('isHidden')) {
         empty = NO;
         break;
       }
     }
-
+    
     this.setIfChanged("isEmpty", empty);
-  }.observes("_displayFields"),
+  },
 
-  emptinessDidChange: function()
+  visibilityDidChange: function()
   {
     var parentView = this.get("parentView");
-    if (parentView && parentView.emptinessDidChangeFor) parentView.emptinessDidChangeFor(this);
-  }.observes("isEmpty"),
+    if (parentView && parentView.visibilityDidChangeFor) parentView.visibilityDidChangeFor(this);
+  }.observes('isHidden'),
 
 
   /**
   Called when emptiness changes, to recalculate hiddenness.
   */
-  hiddenCouldChange: function()
-  {
-    var visible = YES;
-    if (!this.get("isEditing") && this.get("autoHide") && this.get("isEmpty")) visible = NO;
-
-    if (visible !== this.get("isVisible"))
-    {
-      this.set("isVisible", visible);
-      this.relayoutFields();
-    }
-  }.observes("autoHide", "isEmpty")
+  shouldDetermineVisibility: function() {
+    // if it's not visible, it's obviously hidden
+    // otherwise, check if it should be hidden
+    this.setIfChanged('isHidden', !this.get('isVisible') || !this.get("isEditing") && this.get("autoHide") && this.get("isEmpty"));
+  }.observes('autoHide', 'isEmpty', 'isVisible')
 };

@@ -11,9 +11,9 @@
 	@extends SC.FormView
 	@author Alex Iskander
 */
-require("mixins/auto_hide");
+
 require("mixins/edit_mode");
-SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditMode,
+SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
   flowSize: { widthPercentage: 1 },
 
@@ -94,6 +94,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.FormsAutoHide, SC.FormsEditM
     var content = this.get("content");
     
     sc_super();
+    
     
     // now, do the actual passing it
     var idx, len = cv.length, key, v;
@@ -181,11 +182,12 @@ SC.FormRowView.mixin({
 		return ext;
 	},
 	
-	LabelView: SC.LabelView.extend(SC.AutoResize, {
+	LabelView: SC.LabelView.extend(SC.AutoResize, SC.AutoHide, {
 	  shouldAutoResize: NO, // only change the measuredSize so we can update.
 	  layout: { left:0, top:0, width: 0, height: 18 },
 	  fillHeight: YES,
-	  classNames: ["sc-form-label"]
+	  classNames: ["sc-form-label"],
+    ignoreVisibility: YES
 	})
 });
 
