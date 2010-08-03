@@ -142,9 +142,9 @@ SC.Record = SC.Object.extend(
     if (this.get('status') & SC.Record.READY) return this._screc_isEditable;
     else return NO ;
   }.property('status').cacheable(),
-  
+
   _screc_isEditable: YES, // default
-  
+
   /**
     YES when the record's contents have been loaded for the first time.  You 
     can use this to quickly determine if the record is ready to display.
@@ -637,6 +637,26 @@ SC.Record = SC.Object.extend(
   // PRIVATE
   //
   
+  /** @private
+    Sets the key equal to value.
+
+    This version will first check to see if the property is an
+    SC.RecordAttribute, and if so, will ensure that its isEditable property
+    is YES before attempting to change the value.
+
+    @param key {String} the property to set
+    @param value {Object} the value to set or null.
+    @returns {SC.Record}
+  */
+  set: function(key, value) {
+    var func = this[key];
+
+    if (func && func.isProperty && func.get && !func.get('isEditable')) {
+      return this;
+    }
+    return sc_super();
+  },
+
   /** @private
     Creates string representation of record, with status.
     
