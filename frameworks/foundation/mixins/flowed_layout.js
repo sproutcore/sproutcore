@@ -197,7 +197,7 @@ SC.FlowedLayout = {
     else calc.width = f.width;
     
     // same for calculated height
-    if (ch) cal.height = ch;
+    if (ch) calc.height = ch;
     else calc.height = f.height;
     
     // return
