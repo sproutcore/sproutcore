@@ -669,13 +669,15 @@ SC.Record = SC.Object.extend(
   },
   
   /**
-   * Registers a child record with this parent record.
-   *
-   * If the parent already knows about the child record, return the cached instance.  If not,
-   * create the child record instance and add it to the child record cache.
-   *
-   * @param {CoreOrion.ChildRecord} recordType The type of the child record to register.
-   * @param {Hash} hash The hash of attributes to apply to the child record.
+    Registers a child record with this parent record.
+
+    If the parent already knows about the child record, return the cached
+    instance. If not, create the child record instance and add it to the child
+    record cache.
+
+    @param {SC.ChildRecord} recordType The type of the child record to
+    register.
+    @param {Hash} hash The hash of attributes to apply to the child record.
    */
   registerChildRecord: function(recordType, hash) {
     var pm = recordType.primaryKey || 'childRecordKey';
@@ -687,15 +689,16 @@ SC.Record = SC.Object.extend(
     }
 
     if (SC.none(childRecord)) childRecord = this.createChildRecord(recordType, hash);
- 
+
     return childRecord;
   },
   
   /**
-   * Creates a new child record instance.
-   *
-   * @param {CoreOrion.ChildRecord} recordType The type of the child record to create.
-   * @param {Hash} hash The hash of attributes to apply to the child record. (may be null)
+    Creates a new child record instance.
+
+    @param {SC.ChildRecord} recordType The type of the child record to create.
+    @param {Hash} hash The hash of attributes to apply to the child record.
+    (may be null)
    */
   createChildRecord: function(childRecordType, hash) {
     SC.RunLoop.begin();
