@@ -225,12 +225,12 @@ SC.Animatable = {
 
 
   transitionEnd: function(evt){
-    SC.RunLoop.begin();
-    var propertyName = evt.originalEvent.propertyName,
-        callback = this._transitionCallbacks[propertyName];
+    SC.run(function() {
+      var propertyName = evt.originalEvent.propertyName,
+          callback = this._transitionCallbacks[propertyName];
 
-    if(callback) SC.Animatable.runCallback(callback);
-    SC.RunLoop.end();
+      if(callback) SC.Animatable.runCallback(callback);
+    }, this);
   },
 
 
@@ -671,9 +671,9 @@ SC.Animatable = {
   },
   
   _animatableApplyNonDisplayStylesFromTimer: function() {
-    SC.RunLoop.begin();
-    this.inLoopAction();
-    SC.RunLoop.end();
+    SC.run(function() {
+      this.inLoopAction();
+    }, this);
   },
 
   _animatableApplyNonDisplayStyles: function(){
@@ -1153,9 +1153,9 @@ SC.mixin(SC.Animatable, {
 
       // get diff
       var time_diff = end - SC.Animatable._timer_start_time;
-      var loop = SC.RunLoop.begin();
-      SC.Animatable.stats.set("lastFPS", SC.Animatable._ticks / (time_diff / 1000));
-      loop.end();
+      SC.run(function() {
+        SC.Animatable.stats.set("lastFPS", SC.Animatable._ticks / (time_diff / 1000));
+      });
     }
   },
 

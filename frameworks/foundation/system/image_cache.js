@@ -344,21 +344,21 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
   
   /** @private invoked by Image().  Note that this is the image instance */
   _imageDidAbort: function() {
-    SC.RunLoop.begin();
-    SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ABORTED);
-    SC.RunLoop.end();
+    SC.run(function() {
+      SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ABORTED);
+    }, this);
   },
   
   _imageDidError: function() {
-    SC.RunLoop.begin();
-    SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ERROR);
-    SC.RunLoop.end();
+    SC.run(function() {
+      SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ERROR);
+    }, this);
   },
   
   _imageDidLoad: function() {
-    SC.RunLoop.begin();
-    SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.LOADED);
-    SC.RunLoop.end();
+    SC.run(function() {
+      SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.LOADED);
+    }, this);
   },
 
   /** @private called whenever the image loading status changes.  Notifies

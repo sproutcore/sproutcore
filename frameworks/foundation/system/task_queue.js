@@ -116,6 +116,9 @@ SC.TaskQueue = SC.Task.extend({
       SC.RunLoop.begin();
       this._setupIdle();
       SC.RunLoop.end();
+      SC.run(function() {
+        this._setupIdle();        
+      }, this);
       SC.RunLoop.lastRunLoopEnd = last; // we were never here
     }
   },

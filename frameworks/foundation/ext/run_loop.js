@@ -154,7 +154,7 @@ SC.RunLoop = SC.RunLoop.extend(
   _timeoutDidFire: function() {
     var rl = SC.RunLoop.currentRunLoop;
     rl._timeout = rl._timeoutAt = null ; // cleanup
-    SC.RunLoop.begin().end();  // begin/end runloop to trigger timers.
+    SC.run();  // begin/end runloop to trigger timers.
   }
   
 });

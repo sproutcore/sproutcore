@@ -234,9 +234,9 @@ SC.routes = SC.Object.create({
     }
     
     if (this.get('location') !== loc) {
-      SC.RunLoop.begin();
-      this.set('location', loc);
-      SC.RunLoop.end();
+      SC.run(function() {
+        this.set('location', loc);        
+      }, this);
     }
   },
   

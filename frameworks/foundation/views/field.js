@@ -102,9 +102,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   },
   
   _field_fieldValueDidChange: function(evt) {
-    SC.RunLoop.begin();
-    this.fieldValueDidChange(NO);
-    SC.RunLoop.end();  
+    SC.run(function() {
+      this.fieldValueDidChange(NO);      
+    }, this);
   },
   
   /**

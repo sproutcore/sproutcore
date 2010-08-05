@@ -701,34 +701,35 @@ SC.Record = SC.Object.extend(
     (may be null)
    */
   createChildRecord: function(childRecordType, hash) {
-    SC.RunLoop.begin();
-    // Generate the key used by the parent's child record manager.
-    var key = SC.Record._generateChildKey();
-    hash = hash || {}; // init if needed
-    var pm = childRecordType.primaryKey || 'childRecordKey';
-    var childKey = hash[pm];
-    hash[pm] = key;
-    
-    var store = this.get('store');
-    if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';
-    
-    var cr = store.createRecord(childRecordType, hash);
-    cr._parentRecord = this;
-    
-    // ID processing if necessary
-    if(this.generateIdForChild) this.generateIdForChild(cr);
-    
-    // Add the child record to the hash.
-    var crManager = this.get('childRecords');
-    if (SC.none(crManager)) {
-      //console.log('Creating Child Record Manager for (%@)'.fmt(SC.guidFor(this)));
-      crManager = SC.Object.create();
-      this.set('childRecords', crManager);
-    }
-    
-    crManager[key] = cr;
-    SC.RunLoop.end();
-    
+    var cr = null;
+    SC.run(function() {
+      // Generate the key used by the parent's child record manager.
+      var key = SC.Record._generateChildKey();
+      hash = hash || {}; // init if needed
+      var pm = childRecordType.primaryKey || 'childRecordKey';
+      var childKey = hash[pm];
+      hash[pm] = key;
+
+      var store = this.get('store');
+      if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';
+
+      cr = store.createRecord(childRecordType, hash);
+      cr._parentRecord = this;
+
+      // ID processing if necessary
+      if(this.generateIdForChild) this.generateIdForChild(cr);
+
+      // Add the child record to the hash.
+      var crManager = this.get('childRecords');
+      if (SC.none(crManager)) {
+        //console.log('Creating Child Record Manager for (%@)'.fmt(SC.guidFor(this)));
+        crManager = SC.Object.create();
+        this.set('childRecords', crManager);
+      }
+
+      crManager[key] = cr;
+    }, this);
+
     return cr;
   },
   

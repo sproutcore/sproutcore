@@ -87,9 +87,13 @@ SC.mixin(/** @scope SC */ {
     args.push(bundleName);
     
     var needsRunLoop = !!SC.RunLoop.currentRunLoop;
-    if (needsRunLoop) SC.RunLoop.begin() ;
-    m.apply(t, args) ;
-    if (needsRunLoop) SC.RunLoop.end() 
+    if (needsRunLoop) {
+      SC.run(function() {
+        m.apply(t, args) ;
+      });
+    } else {
+      m.apply(t, args) ;
+    }    
   },
   
   tryToLoadBundle: function(bundleName, target, method, args) {

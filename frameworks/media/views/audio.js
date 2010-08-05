@@ -268,71 +268,75 @@ SC.AudioView = SC.View.extend({
     audioElem = this.$('audio')[0];
     this.set('audioObject', audioElem);
     SC.Event.add(audioElem, 'durationchange', this, function () {
-      SC.RunLoop.begin();
-      console.log('durationchange');
-      view.set('duration', audioElem.duration);
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('duration', audioElem.duration);
+      });
     }) ;
+
     SC.Event.add(audioElem, 'timeupdate', this, function () {
-      SC.RunLoop.begin();
-      console.log('currenttime');
-      view.set('currentTime', audioElem.currentTime);
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('currentTime', audioElem.currentTime);
+      });
     }) ;
+
     SC.Event.add(audioElem, 'loadstart', this, function () {
-      SC.RunLoop.begin();
-      console.log('volume');
-      view.set('volume', audioElem.volume);
-      SC.RunLoop.end();
-    });     
+      SC.run(function() {
+        view.set('volume', audioElem.volume);        
+      });
+    });
+
     SC.Event.add(audioElem, 'play', this, function () {
-      SC.RunLoop.begin();
-      view.set('paused', NO);
-      SC.RunLoop.end();
-    });     
+      SC.run(function() {
+        view.set('paused', NO);        
+      });
+    });
+
     SC.Event.add(audioElem, 'pause', this, function () {
-      SC.RunLoop.begin();
-      view.set('paused', YES);
-      SC.RunLoop.end();
-    });     
+      SC.run(function() {
+        view.set('paused', YES);        
+      });
+    });
+ 
     SC.Event.add(audioElem, 'loadedmetadata', this, function () {
-      SC.RunLoop.begin();
-      // view.set('audioWidth', audioElem.audioWidth);
-      //       view.set('audioHeight', audioElem.audioHeight);
-      SC.RunLoop.end();
-    });     
+      SC.run(function() {
+        // view.set('audioWidth', audioElem.audioWidth);
+        // view.set('audioHeight', audioElem.audioHeight);
+      });
+    });    
        
     SC.Event.add(audioElem, 'canplay', this, function () {
-      SC.RunLoop.begin();
-      console.log('canplay');
-      view.set('canPlay', YES);
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('canPlay', YES);        
+      });
     });     
-         
+
     SC.Event.add(audioElem, 'ended', this, function () {
-      SC.RunLoop.begin();
-      view.set('ended', YES);
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('ended', YES);        
+      });
     });
+
     SC.Event.add(audioElem, 'progress', this, function (e) {
-      SC.RunLoop.begin();
-      this.loadedTimeRanges=[];
-      for (var j=0, jLen = audioElem.seekable.length; j<jLen; j++){
-        this.loadedTimeRanges.push(audioElem.seekable.start(j));
-        this.loadedTimeRanges.push(audioElem.seekable.end(j));
-      }
-       try{
+      SC.run(function() {
+        this.loadedTimeRanges=[];
+        for (var j=0, jLen = audioElem.seekable.length; j<jLen; j++){
+          this.loadedTimeRanges.push(audioElem.seekable.start(j));
+          this.loadedTimeRanges.push(audioElem.seekable.end(j));
+        }
+
+        try {
           var trackCount=view.GetTrackCount(),i;
-          for(i=1; i<=trackCount;i++){
-            if("Closed Caption"===this.GetTrackType(i)){
+          for (i=1; i<=trackCount;i++){
+            if ("Closed Caption"===this.GetTrackType(i)){
               view._closedCaptionTrackIndex=i;
             }
           }
-        }catch(f){}
+        } catch (f) {}
+      }, this);
+
       //view.set('loadedData', ev.loaded);
       //console.log('progress '+ev.loaded+","+ev.total );
-      SC.RunLoop.end();
-    });     
+    });
          
     // SC.Event.add(audioElem, 'suspend', this, function () {
     //       SC.RunLoop.begin();
@@ -434,43 +438,47 @@ SC.AudioView = SC.View.extend({
     view.set('volume', media.GetVolume()/256);
     
     SC.Event.add(audioElem, 'qt_durationchange', this, function () {
-      SC.RunLoop.begin();
-      console.log('qtdurationchange');
-      view.set('duration', media.GetDuration()/media.GetTimeScale());
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('duration', media.GetDuration()/media.GetTimeScale());
+      });
     });
+    
     SC.Event.add(audioElem, 'qt_begin', this, function () {
-      SC.RunLoop.begin();
-      console.log('qtbegin');
-      view.set('volume', media.GetVolume()/256);
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('volume', media.GetVolume()/256);        
+      });
     });
+    
     SC.Event.add(audioElem, 'qt_loadedmetadata', this, function () {
-      SC.RunLoop.begin();
-      console.log('qtloadedmetadata');
-      view.set('duration', media.GetDuration()/media.GetTimeScale());
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('duration', media.GetDuration()/media.GetTimeScale());        
+      });
     });
+    
     SC.Event.add(audioElem, 'qt_canplay', this, function () {
-      SC.RunLoop.begin();
-      console.log('qtcanplay');
-      view.set('canPlay', YES);
-      SC.RunLoop.end();
+      SC.run(function() {
+        view.set('canPlay', YES);        
+      });
     });
     
     SC.Event.add(audioElem, 'qt_ended', this, function () {
-      console.log('qtended');
-      view.set('ended', YES);
+      SC.run(function() {
+        view.set('ended', YES);        
+      });
     });
+
     SC.Event.add(audioElem, 'qt_pause', this, function () {
-      SC.RunLoop.begin();
-      view.set('currentTime', media.GetTime()/media.GetTimeScale());
-      view.set('paused', YES);
+      SC.run(function() {
+        view.set('currentTime', media.GetTime()/media.GetTimeScale());
+        view.set('paused', YES);
+      });
     });
+
     SC.Event.add(audioElem, 'qt_play', this, function () {
-      SC.RunLoop.begin();
-      view.set('currentTime', media.GetTime()/media.GetTimeScale());
-      view.set('paused', NO);
+      SC.run(function() {
+        view.set('currentTime', media.GetTime()/media.GetTimeScale());
+        view.set('paused', NO);
+      });
     });
     // SC.Event.add(audioElem, 'qt_loadedfirstframe', this, function () {
     //       console.log('qt_loadedfirstframe');
@@ -692,10 +700,9 @@ SC.AudioView.addToAudioFlashViews = function(view) {
 SC.AudioView.updateProperty = function(scid, property, value) {
   var view = SC.AudioView.flashViews[scid];
   if(view){
-    SC.RunLoop.begin();
-    //console.log("setting property from flash"+property+","+value);
-    view.set(property, value);
-    SC.RunLoop.end();
+    SC.run(function() {
+      view.set(property, value);
+    });
   }
 } ;
 

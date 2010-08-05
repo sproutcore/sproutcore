@@ -112,44 +112,41 @@ SC.mixin({
     SC.Benchmark.start('ready') ;
     
     // Begin runloop
-    SC.RunLoop.begin();
-    
-    var handler, ary, idx, len ;
+    SC.run(function() {
+      var handler, ary, idx, len ;
 
-    // correctly handle queueing new SC.ready() calls
-    do {
-      ary = SC._readyQueue ;
-      SC._readyQueue = [] ; // reset
-      for (idx=0, len=ary.length; idx<len; idx++) {
-        handler = ary[idx] ;
-        var target = handler[0] || document ;
-        var method = handler[1] ;
-        if (method) method.call(target) ;
+      // correctly handle queueing new SC.ready() calls
+      do {
+        ary = SC._readyQueue ;
+        SC._readyQueue = [] ; // reset
+        for (idx=0, len=ary.length; idx<len; idx++) {
+          handler = ary[idx] ;
+          var target = handler[0] || document ;
+          var method = handler[1] ;
+          if (method) method.call(target) ;
+        }
+      } while (SC._readyQueue.length > 0) ;
+
+      // okay, now we're ready (any SC.ready() calls will now be called immediately)
+      SC.isReady = YES ;
+
+      // clear the queue
+      SC._readyQueue = null ;
+
+      // trigger any bound ready events
+      SC.Event.trigger(document, "ready", null, NO);
+
+      // Remove any loading div
+      if (SC.removeLoading) SC.$('#loading').remove();
+
+      // Now execute main, if defined and SC.UserDefaults is ready
+      if(SC.userDefaults.get('ready')){
+        if ((SC.mode === SC.APP_MODE) && (typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
+      } 
+      else {
+        SC.userDefaults.readyCallback(window, main);
       }
-    } while (SC._readyQueue.length > 0) ;
-
-    // okay, now we're ready (any SC.ready() calls will now be called immediately)
-    SC.isReady = YES ;
-    
-    // clear the queue
-    SC._readyQueue = null ;
-    
-    // trigger any bound ready events
-    SC.Event.trigger(document, "ready", null, NO);
-    
-    // Remove any loading div
-    if (SC.removeLoading) SC.$('#loading').remove();
-    
-    // Now execute main, if defined and SC.UserDefaults is ready
-    if(SC.userDefaults.get('ready')){
-      if ((SC.mode === SC.APP_MODE) && (typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
-    } 
-    else {
-      SC.userDefaults.readyCallback(window, main);
-    }
-    
-    // end run loop.  This is probably where a lot of bindings will trigger
-    SC.RunLoop.end() ; 
+    }, this);
     
     SC.Benchmark.end('ready') ;
     if (SC.BENCHMARK_LOG_READY) SC.Benchmark.log();
