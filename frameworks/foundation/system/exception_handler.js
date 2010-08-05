@@ -21,7 +21,7 @@
   @since SproutCore 1.5
 */
 
-SC.ErrorCatcher = {
+SC.ExceptionHandler = {
   /**
     Called when an exception is encountered by code executed using SC.run().
 
@@ -63,11 +63,11 @@ SC.ErrorCatcher = {
     var html;
 
     html = [
-'<div id="sc-error-catcher" style="position: absolute; width: 500px; left: 50%; top: 50%; margin-left: -250px; background-color: white; border: 1px solid black; font-family: Monaco, monospace; font-size: 9px; letter-spacing: 1px; padding: 10px">',
+'<div id="sc-error-dialog" style="position: absolute; width: 500px; left: 50%; top: 50%; margin-left: -250px; background-color: white; border: 1px solid black; font-family: Monaco, monospace; font-size: 9px; letter-spacing: 1px; padding: 10px">',
   'An error has occurred which prevents the application from running:',
   '<br><br>',
   exception.message,
-  '<div id="sc-error-catcher-reload-button" onclick="window.location.reload();" style="float: right; font-family: Monaco, monospace; font-size: 9px; letter-spacing: 1px; border: 1px solid black; padding: 3px; clear: both; margin-top: 20px; cursor: pointer;">',
+  '<div id="sc-error-dialog-reload-button" onclick="window.location.reload();" style="float: right; font-family: Monaco, monospace; font-size: 9px; letter-spacing: 1px; border: 1px solid black; padding: 3px; clear: both; margin-top: 20px; cursor: pointer;">',
   'Reload',
   '</div>',
 '</div>'
