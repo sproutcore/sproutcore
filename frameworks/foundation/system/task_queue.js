@@ -47,7 +47,7 @@ SC.TaskQueue = SC.Task.extend({
   */
   hasTasks: function() {
     return this._tasks.length > 0;
-  }.property("taskCount").cacheable(),
+  }.property('taskCount').cacheable(),
   
   /**
     Returns the number of tasks in the queue.
@@ -61,7 +61,7 @@ SC.TaskQueue = SC.Task.extend({
   */
   push: function(task) {
     this._tasks.push(task);
-    this.notifyPropertyChange("taskCount");
+    this.notifyPropertyChange('taskCount');
   },
   
   /**
@@ -73,7 +73,7 @@ SC.TaskQueue = SC.Task.extend({
     
     // otherwise, return the first one in the queue
     var next = this._tasks.shift();
-    this.notifyPropertyChange("taskCount");
+    this.notifyPropertyChange('taskCount');
     return next;
   },
   
@@ -83,20 +83,20 @@ SC.TaskQueue = SC.Task.extend({
   */
   _taskCountDidChange: function() {
     this._setupIdle();
-  }.observes("taskCount"),
+  }.observes('taskCount'),
   
   /**
     Sets up the scheduled idling check if needed and applicable.
     @private
   */
   _setupIdle: function() {
-    if (this.get("runWhenIdle") && !this._idleIsScheduled && this.get("taskCount") > 0) {
+    if (this.get('runWhenIdle') && !this._idleIsScheduled && this.get('taskCount') > 0) {
       var self = this;
       setTimeout(
         function(){
           self._idleEntry();
         }, 
-        this.get("interval")
+        this.get('interval')
       );
       this._idleIsScheduled = YES;
     }
@@ -109,13 +109,10 @@ SC.TaskQueue = SC.Task.extend({
   _idleEntry: function() {
     this._idleIsScheduled = NO;
     var last = SC.RunLoop.lastRunLoopEnd;
-    if (Date.now() - last > this.get("minimumIdleDuration")) {
+    if (Date.now() - last > this.get('minimumIdleDuration')) {
       // if no recent events (within < 1s)
       this.run();
     } else {
-      SC.RunLoop.begin();
-      this._setupIdle();
-      SC.RunLoop.end();
       SC.run(function() {
         this._setupIdle();        
       }, this);
