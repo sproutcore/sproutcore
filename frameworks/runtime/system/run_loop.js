@@ -274,9 +274,15 @@ SC.run = function(callback, target, useExistingRunLoop) {
     callback.call(target);
     if(!alreadyRunning) SC.RunLoop.end();
   } else {
-    SC.RunLoop.begin();
-    callback.call(target);
-    SC.RunLoop.end();
+    try {
+      SC.RunLoop.begin();
+      if (callback) callback.call(target);
+      SC.RunLoop.end();
+    } catch (e) {
+      console.error("Caught an error!");
+      if (window.buildMode === 'debug') {
+        throw e;
+      }
+    }
   }
 };
-
