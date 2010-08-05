@@ -295,9 +295,9 @@ SC.PickerPane = SC.PalettePane.extend({
     // get window rect.
     //if(this._prefPosX && this._prefPosY)
     
-    var wsize = SC.RootResponder.responder.computeWindowSize() ;
-
-    var wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
+    var wsize = SC.RootResponder.responder.computeWindowSize(),
+        wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
+        
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
     if(this.preferType) {
@@ -327,6 +327,7 @@ SC.PickerPane = SC.PalettePane.extend({
       picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
     }
     this.displayDidChange();
+    this._hideOverflow();
     return picker ;
   },
 
@@ -446,7 +447,7 @@ SC.PickerPane = SC.PalettePane.extend({
   fitPositionToScreenPointer: function(w, f, a) {
     var offset = [this.pointerOffset[0], this.pointerOffset[1],
                   this.pointerOffset[2], this.pointerOffset[3]];
-
+                  
     // initiate perfect positions matrix
     // 4 perfect positions: right > left > top > bottom
     // 2 coordinates: x, y
@@ -529,7 +530,7 @@ SC.PickerPane = SC.PalettePane.extend({
     }
     return f ;    
   },
-
+  
   /** @private
     This method will set up pointerOffset and preferMatrix according to type
     and size if not provided explicitly.
@@ -637,8 +638,29 @@ SC.PickerPane = SC.PalettePane.extend({
   */
   windowSizeDidChange: function(oldSize, newSize) {
     this.positionPane();
-  }
+  },
+  
+  
+  remove: function(){
+    this._showOverflow();
+    return sc_super();
+  },
+  
+  _hideOverflow: function(){
+    var body = SC.$(document.body),
+        main = SC.$('.sc-main'),
+        minWidth = parseInt(main.css('minWidth'),0),
+        minHeight = parseInt(main.css('minHeight'),0),
+        windowSize = SC.RootResponder.responder.get('currentWindowSize');
+    if(windowSize.width>=minWidth && windowSize.height>=minHeight){
+      body.css('overflow', 'hidden');           
+    }
+  },
 
+  _showOverflow: function(){
+    var body = SC.$(document.body);
+    body.css('overflow', 'visible');     
+  }
 });
 
 /**
