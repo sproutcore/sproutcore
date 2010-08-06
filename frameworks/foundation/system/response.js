@@ -455,7 +455,7 @@ SC.XHRResponse = SC.Response.extend({
     // configure async callback - differs per browser...
     async = !!this.getPath('request.isAsynchronous') ;
     if (async) {
-      if (!SC.browser.msie) {
+      if (!SC.browser.msie && !SC.browser.opera ) {
         SC.Event.add(rawRequest, 'readystatechange', this, 
                      this.finishRequest, rawRequest) ;
       } else {
