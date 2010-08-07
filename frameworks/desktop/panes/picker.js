@@ -133,6 +133,13 @@ SC.PickerPane = SC.PalettePane.extend({
     @property {Object}
   */
   anchorElement: null,
+
+  /**
+    anchor rect calculated by computeAnchorRect from init popup
+
+    @property {Hash}
+  */
+  anchorCached: null,
   
   /**
     popular customized picker position rule
@@ -192,8 +199,9 @@ SC.PickerPane = SC.PalettePane.extend({
     then call fitPositionToScreen to get final position. If anchor is missing, 
     fallback to center.
   */  
-  positionPane: function() {
-    var anchor       = this.get('anchorElement'),
+  positionPane: function(useAnchorCached) {
+    var useAnchorCached = useAnchorCached && this.get('anchorCached'),
+        anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
@@ -204,7 +212,10 @@ SC.PickerPane = SC.PalettePane.extend({
     // If that is not possible, fitPositionToScreen will take care of that for 
     // other alternative and fallback position.
     if (anchor) {
-      anchor = this.computeAnchorRect(anchor);
+      if(!useAnchorCached) {
+        anchor = this.computeAnchorRect(anchor);
+        this.set('anchorCached', anchor) ;
+      }
       if(anchor.x ===0 && anchor.y ===0) return ;
       origin = SC.cloneRect(anchor);
 
