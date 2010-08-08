@@ -8,4 +8,4 @@ window.ondevicemotion events.
 
 ## Contributors
 
-- Colin Campbell <colin@sproutcore.com>
+- Colin Campbell (<colin@sproutcore.com>)
