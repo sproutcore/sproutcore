@@ -875,7 +875,7 @@ SC.kindOf = function(scObject, scClass) {
   This method is used to allow classes to determine their own name.
 */
 SC._object_className = function(obj) {
-  if (!SC.isReady) return ''; // class names are not available until ready
+  if (SC.isReady === NO) return ''; // class names are not available until ready
   if (!obj._object_className) findClassNames() ;
   if (obj._object_className) return obj._object_className ;
 
