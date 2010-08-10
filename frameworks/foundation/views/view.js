@@ -2243,8 +2243,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
 
-  _activeAnimations: {},
-
   /**
     Animate a given property using CSS animations.
 
@@ -2254,92 +2252,144 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       - callback: Callback method to run when animation completes
       - timing: Animation timing function
 
-    @param {String} key
+    @param {String|Hash} key
     @param {Object} value
     @params {Number|Hash} duration or options
     @returns {SC.View} receiver
   */
-  animate: function(key, value, options) {
-    if (typeof options === SC.T_NUMBER) options = { duration: options };
+  animate: function(keyOrHash, valueOrOptions, optionsOrCallback, callback) {
+    var hash, options;
 
-    if (options.timing) {
-      if (SC.typeOf(options.timing) != SC.T_STRING) {
-        options.timing = "cubic-bezier("+options.timing[0]+", "+options.timing[1]+", "+
-                                         options.timing[2]+", "+options.timing[3]+")";
-      }
+    if (SC.typeOf(keyOrHash) === SC.T_HASH) {
+      hash = keyOrHash;
+      options = valueOrOptions;
+      callback = optionsOrCallback;
     } else {
-      options.timing = 'linear';
+      hash = {};
+      hash[keyOrHash] = valueOrOptions;
+      options = optionsOrCallback;
     }
 
-    if (options.callback) {
-      if (SC.typeOf(options.callback) !== SC.T_HASH) options.callback = { action: options.callback };
-      options.callback.source = this;
-      if (!options.callback.target) options.callback.target = this;
-    }
+    if (SC.typeOf(options) === SC.T_NUMBER) options = { duration: options };
 
-    if (SC.platform.supportsCSSTransitions) {
-      var layer = this.get('layer'),
-          hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
-          layout = this.get('layout'),
-          actualKey, css = [], activeKey;
+    if (callback) options.callback = callback;
 
-      // These rules mirror the ones in layoutStyle
-      if (
-        hasAcceleratedLayer && (
-          (key === 'left' && !SC.empty(layout.width)) ||
-          (key === 'top' && !SC.empty(layout.height))
-        ) && !SC.none(value) && !SC.isPercentage(value)
-      ) {
-        actualKey = "-"+SC.platform.cssPrefix+"-transform";
+
+    var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim;
+    
+    for(key in hash) {
+      if (!hash.hasOwnProperty(key)) continue;
+      value = hash[key];
+      cur = layout[key];
+      curAnim = layout['animate'+key.capitalize()];
+      
+      if (value === null || value === undefined) {
+        throw "Can only animate to an actual value!";
       } else {
-        actualKey = key;
+        if (cur !== value) didChange = YES;
+
+        // FIXME: We should check more than duration
+        // Also, will we allow people to just set a number instead of a hash? If so, we have to account for that.
+        if (curAnim && curAnim.duration !== options.duration) didChange = YES ;
+
+        layout[key] = value ;
+        
+        // I'm pretty sure we want to be cloning this because we may be applying it
+        // to multiple properties which can be edited independently
+        layout['animate'+key.capitalize()] = SC.clone(options);
       }
-
-      if (this._activeAnimations[actualKey]) console.warn("Already animating '"+actualKey+"', will be overridden!");
-
-      this._activeAnimations[actualKey] = {
-        css:      actualKey + " " + options.duration + "s " + options.timing,
-        callback: options.callback
-      };
-
-      for (activeKey in this._activeAnimations) css.push(this._activeAnimations[actualKey].css);
-      layer.style[SC.platform.domCSSPrefix+"Transition"] = css.join(", ");
-
-      this.adjust(key, value);
-    } else {
-      console.warn("Animations not supported by this platform!");
-      this.adjust(key, value);
-      if (options.callback) SC.View.runCallback(options.callback);
     }
 
-    return this;
+    console.log('didChange', didChange);
+    console.log('layout', layout);
+
+    // now set adjusted layout
+    if (didChange) this.set('layout', layout) ;
+    
+    return this ;
+
+//    if (SC.platform.supportsCSSTransitions) {
+//      var layer = this.get('layer'),
+//          hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
+//          layout = this.get('layout'),
+//          actualKey, css = [], activeKey;
+//
+//      // These rules mirror the ones in layoutStyle
+//      if (
+//        hasAcceleratedLayer && (
+//          (key === 'left' && !SC.empty(layout.width)) ||
+//          (key === 'top' && !SC.empty(layout.height))
+//        ) && !SC.none(value) && !SC.isPercentage(value)
+//      ) {
+//        actualKey = "-"+SC.platform.cssPrefix+"-transform";
+//      } else {
+//        actualKey = key;
+//      }
+//
+//      if (this._activeAnimations[actualKey]) console.warn("Already animating '"+actualKey+"', will be overridden!");
+//    } else {
+//      console.warn("Animations not supported by this platform!");
+//      this.adjust(key, value);
+//      if (callback) SC.View.runCallback(callback);
+//    }
   },
 
   /**
   Resets animation, stopping all existing animations.
   */
   resetAnimation: function() {
-    this._activeAnimations = {};
+    var layout = this.get('layout'), didChange = NO, key;
+    for (key in layout) {
+      if (key.substring(0,6) === 'animate') {
+        didChange = YES;
+        delete layout[key];
+      }
+    }
+    if (didChange) this.set('layout', layout);
+    return this;
   },
 
   /**
     Called when animation ends, should not usually be called manually
   */
   animationEnd: function(evt){
+    // FIXME: Why do I have a RunLoop here? Do I need it?
     SC.RunLoop.begin();
     var propertyName = evt.originalEvent.propertyName,
-        animation = this._activeAnimations[propertyName];
+        layout = this.get('layout'),
+        layoutProperty, animation;
+
+    console.log('animationEnd', propertyName);
+
+    // FIXME: Implement this.
+    if (propertyName === SC.platform.domCSSPrefix+'Transform') {
+      throw "Not implemented";
+    } else {
+      layoutProperty = propertyName;
+    }
+
+    animation = layout['animate'+layoutProperty.capitalize()];
+
+    console.log('animation', animation);
 
     if(animation) {
       var layer = this.get('layer'),
           styleKey = SC.platform.domCSSPrefix+"Transition",
           currentCSS = layer.style[styleKey];
       
-      if (animation.callback) SC.View.runCallback(animation.callback);
+      if (animation.callback) {
+        var callback = animation.callback;
+        if (callback) {
+          if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
+          callback.source = this;
+          if (!callback.target) callback.target = this;
+        }
+        SC.View.runCallback(callback);
+      }
 
+      // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
-
-      this._activeAnimations[propertyName] = null;
+      delete layout['animate'+layoutProperty.capitalize()];
     } 
     SC.RunLoop.end();
   },
@@ -3010,8 +3060,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // X DIRECTION
 
-    // NOTE: If rules relating to hasAcceleratedLayer are altered make sure to change animate() as well
-
     // handle left aligned and left/right
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)) {
@@ -3187,6 +3235,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (ret[x]===0) ret[x]=null;
     }
 
+    // FIXME: We'll have to make sure we handle animations right with the transforms
+
     // Handle transforms
     var transformAttribute = SC.platform.domCSSPrefix+'Transform',
         layer = this.get('layer'),
@@ -3229,6 +3279,35 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // Set transform attribute
     if (allTransforms !== '') ret[transformAttribute] = allTransforms;
+
+
+    // Handle animations
+    var transitions = [], animation, propertyKey;
+    for(key in layout) {
+      if (key.substring(0,7) === 'animate') {
+        // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
+        console.log('will animate', key);
+        animation = layout[key];
+
+        if (animation.timing) {
+          if (SC.typeOf(animation.timing) != SC.T_STRING) {
+            animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
+                                               animation.timing[2]+", "+animation.timing[3]+")";
+          }
+        } else {
+          animation.timing = 'linear';
+        }
+
+        propertyKey = key.substring(7).camelize();
+
+        animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
+
+        // FIXME: Handle transforms
+        transitions.push(animation.css);
+      }
+    }
+    console.log('transitions', transitions);
+    if (transitions.length > 0) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
 
 
     // convert any numbers into a number + "px".
@@ -4046,5 +4125,39 @@ SC.View.unload = function() {
   }   
 } ;
 
+SC.View.runCallback = function(callback){
+  console.log('runCallback', callback);
+  var typeOfAction = SC.typeOf(callback.action);
+
+  // if the action is a function, just try to call it.
+  if (typeOfAction == SC.T_FUNCTION) {
+    callback.action.call(callback.target, callback.source);
+
+  // otherwise, action should be a string.  If it has a period, treat it
+  // like a property path.
+  } else if (typeOfAction === SC.T_STRING) {
+    if (callback.action.indexOf('.') >= 0) {
+      var path = callback.action.split('.') ;
+      var property = path.pop() ;
+
+      var target = SC.objectForPropertyPath(path, window) ;
+      var action = target.get ? target.get(property) : target[property];
+      if (action && SC.typeOf(action) == SC.T_FUNCTION) {
+        action.call(target, callback.source);
+      } else {
+        throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
+      }
+
+    // otherwise, try to execute action direction on target or send down
+    // responder chain.
+    } else {
+      SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
+    }
+  }
+};
+
+
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
+
+
