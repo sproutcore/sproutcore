@@ -166,11 +166,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         }
         else {
           // In IE8, input elements don't have hasOwnProperty() defined.
-          if ('selectionStart' in element) {
-            start = element.selectionStart ;
+          try{
+            if ('selectionStart' in element) {
+              start = element.selectionStart ;
+            }
+            if ('selectionEnd' in element) {
+              end = element.selectionEnd ;
+            }
           }
-          if ('selectionEnd' in element) {
-            end = element.selectionEnd ;
+          // In Firefox when you ask the selectionStart or End of a hidden 
+          // input, sometimes it throws a weird error.
+          // Adding this to just ignore it.
+          catch (e){
+            return null;
           }
 
           // Support Internet Explorer.
