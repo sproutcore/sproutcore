@@ -2318,9 +2318,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
 
-    console.log('didChange', didChange);
-    console.log('layout', layout);
-
     // now set adjusted layout
     if (didChange) this.set('layout', layout) ;
     
@@ -2363,11 +2360,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         delete layout[key];
       }
     }
-    console.log('resetAnimation didChange', didChange);
     if (didChange) {
       this.set('layout', layout);
       this.notifyPropertyChange('layout');
-      console.log('set layout', layout);
     }
     return this;
   },
@@ -2380,8 +2375,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         key;
 
     // Handle existing animations
-    console.log('_activeAnimations', this._activeAnimations, '_pendingAnimations', this._pendingAnimations);
-    console.log('newStyle', newStyle, 'currentStyle', currentStyle);
     if (this._activeAnimations) {
       for(key in this._activeAnimations){
         // TODO: Check for more than duration
@@ -2390,7 +2383,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           !this._pendingAnimations || !this._pendingAnimations[key] ||
           this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
         ) {
-          console.log('cancelling', key);
           // TODO: Send a cancelled flag
           var callback = this._activeAnimations[key].callback;
           if (callback) this._scv_runAnimationCallback(callback, null, key, YES);
@@ -2427,8 +2419,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         layout = this.get('layout'),
         layoutProperty, animation;
 
-    console.log('_scv_animationEnd', propertyName, evt);
-
     // FIXME: Implement this.
     if (propertyName === SC.platform.domCSSPrefix+'Transform') {
       throw "Not implemented";
@@ -2437,8 +2427,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
-
-    console.log('animation', animation);
 
     if(animation) {
       var layer = this.get('layer'),
@@ -3349,7 +3337,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     for(key in layout) {
       if (key.substring(0,7) === 'animate') {
         // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
-        console.log('will animate', key);
         animation = layout[key];
 
         if (animation.timing) {
@@ -3371,7 +3358,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         transitions.push(animation.css);
       }
     }
-    console.log('transitions', transitions);
     ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
 
 
@@ -3380,6 +3366,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       value = ret[key];
       if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
     }
+
     return ret ;
   }.property().cacheable(),
   
@@ -3405,7 +3392,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
-    console.log('layoutDidChange');
     // Did our layout change in a way that could cause us to be resized?  If
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
@@ -4193,7 +4179,6 @@ SC.View.unload = function() {
 } ;
 
 SC.View.runCallback = function(callback){
-  console.log('runCallback', callback);
   var additionalArgs = SC.$A(arguments).slice(1),
       typeOfAction = SC.typeOf(callback.action);
 
