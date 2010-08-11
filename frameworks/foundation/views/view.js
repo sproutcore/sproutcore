@@ -2412,7 +2412,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       callback.source = this;
       if (!callback.target) callback.target = this;
     }
-    SC.View.runCallback(callback, evt, propertyName, this, cancelled);
+    SC.View.runCallback(callback, { event: evt, propertyName: propertyName, view: this, isCancelled: cancelled });
   },
 
   /**
