@@ -2358,12 +2358,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   resetAnimation: function() {
     var layout = this.get('layout'), didChange = NO, key;
     for (key in layout) {
-      if (key.substring(0,6) === 'animate') {
+      if (key.substring(0,7) === 'animate') {
         didChange = YES;
         delete layout[key];
       }
     }
-    if (didChange) this.set('layout', layout);
+    console.log('resetAnimation didChange', didChange);
+    if (didChange) {
+      this.set('layout', layout);
+      this.notifyPropertyChange('layout');
+      console.log('set layout', layout);
+    }
     return this;
   },
 
@@ -3367,7 +3372,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
     console.log('transitions', transitions);
-    if (transitions.length > 0) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+    ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
 
 
     // convert any numbers into a number + "px".
@@ -3400,6 +3405,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
+    console.log('layoutDidChange');
     // Did our layout change in a way that could cause us to be resized?  If
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
