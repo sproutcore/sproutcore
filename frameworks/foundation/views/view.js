@@ -2393,7 +2393,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           console.log('cancelling', key);
           // TODO: Send a cancelled flag
           var callback = this._activeAnimations[key].callback;
-          if (callback) this._scv_runAnimationCallback(callback);
+          if (callback) this._scv_runAnimationCallback(callback, null, key, YES);
         }
       }
     }
@@ -2406,13 +2406,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
   },
 
-  _scv_runAnimationCallback: function(callback) {
+  _scv_runAnimationCallback: function(callback, evt, propertyName, cancelled) {
     if (callback) {
       if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
       callback.source = this;
       if (!callback.target) callback.target = this;
     }
-    SC.View.runCallback(callback);
+    SC.View.runCallback(callback, evt, propertyName, this, cancelled);
   },
 
   /**
@@ -2445,7 +2445,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           styleKey = SC.platform.domCSSPrefix+"Transition",
           currentCSS = layer.style[styleKey];
       
-      if (animation.callback) this._scv_runAnimationCallback(animation.callback);
+      if (animation.callback) this._scv_runAnimationCallback(animation.callback, evt, propertyName, NO);
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
@@ -4194,11 +4194,12 @@ SC.View.unload = function() {
 
 SC.View.runCallback = function(callback){
   console.log('runCallback', callback);
-  var typeOfAction = SC.typeOf(callback.action);
+  var additionalArgs = SC.$A(arguments).slice(1),
+      typeOfAction = SC.typeOf(callback.action);
 
   // if the action is a function, just try to call it.
   if (typeOfAction == SC.T_FUNCTION) {
-    callback.action.call(callback.target, callback.source);
+    callback.action.apply(callback.target, additionalArgs);
 
   // otherwise, action should be a string.  If it has a period, treat it
   // like a property path.
@@ -4210,15 +4211,16 @@ SC.View.runCallback = function(callback){
       var target = SC.objectForPropertyPath(path, window) ;
       var action = target.get ? target.get(property) : target[property];
       if (action && SC.typeOf(action) == SC.T_FUNCTION) {
-        action.call(target, callback.source);
+        action.apply(target, additionalArgs);
       } else {
         throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
       }
 
     // otherwise, try to execute action direction on target or send down
     // responder chain.
-    } else {
-      SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
+    // FIXME: Add support for additionalArgs to this
+    // } else {
+    //  SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
     }
   }
 };
