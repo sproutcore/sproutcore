@@ -1212,7 +1212,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (SC.platform.supportsCSSTransitions) {
         SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
         SC.Event.remove(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
-        this._animatable_original_willDestroyLayer();
       }
 
       // Now notify the view and its child views.  It will also set the
