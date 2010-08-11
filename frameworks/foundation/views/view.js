@@ -1339,6 +1339,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     
+
+    this.willRenderAnimations();
+
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
       classNames: classNames,
@@ -2349,17 +2352,62 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     return this;
   },
 
+  willRenderAnimations: function(){
+    var layer = this.get('layer'),
+        currentStyle = layer ? layer.style : null,
+        newStyle = this.get('layoutStyle'),
+        transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
+        key;
+
+    // Handle existing animations
+    console.log('_activeAnimations', this._activeAnimations, '_pendingAnimations', this._pendingAnimations);
+    console.log('newStyle', newStyle, 'currentStyle', currentStyle);
+    if (this._activeAnimations) {
+      for(key in this._activeAnimations){
+        // TODO: Check for more than duration
+        if (
+          newStyle[key] !== currentStyle[key] ||
+          !this._pendingAnimations || !this._pendingAnimations[key] ||
+          this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
+        ) {
+          console.log('cancelling', key);
+          // TODO: Send a cancelled flag
+          var callback = this._activeAnimations[key].callback;
+          if (callback) this.runAnimationCallback(callback);
+        }
+      }
+    }
+
+    if (transitionStyle && transitionStyle !== '') {
+      this._activeAnimations = this._pendingAnimations;
+      this._pendingAnimations = null;
+    } else {
+      this._activeAnimations = this._pendingAnimations = null;
+    }
+  },
+
+  runAnimationCallback: function(callback) {
+    if (callback) {
+      if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
+      callback.source = this;
+      if (!callback.target) callback.target = this;
+    }
+    SC.View.runCallback(callback);
+  },
+
   /**
     Called when animation ends, should not usually be called manually
   */
   animationEnd: function(evt){
+    // WARNING: Sometimes this will get called more than once for a property. Not sure why.
+
     // FIXME: Why do I have a RunLoop here? Do I need it?
     SC.RunLoop.begin();
     var propertyName = evt.originalEvent.propertyName,
         layout = this.get('layout'),
         layoutProperty, animation;
 
-    console.log('animationEnd', propertyName);
+    console.log('animationEnd', propertyName, evt);
 
     // FIXME: Implement this.
     if (propertyName === SC.platform.domCSSPrefix+'Transform') {
@@ -2368,7 +2416,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       layoutProperty = propertyName;
     }
 
-    animation = layout['animate'+layoutProperty.capitalize()];
+    animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
     console.log('animation', animation);
 
@@ -2377,19 +2425,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           styleKey = SC.platform.domCSSPrefix+"Transition",
           currentCSS = layer.style[styleKey];
       
-      if (animation.callback) {
-        var callback = animation.callback;
-        if (callback) {
-          if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
-          callback.source = this;
-          if (!callback.target) callback.target = this;
-        }
-        SC.View.runCallback(callback);
-      }
+      if (animation.callback) this.runAnimationCallback(animation.callback);
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
       delete layout['animate'+layoutProperty.capitalize()];
+
+      delete this._activeAnimations[propertyName];
     } 
     SC.RunLoop.end();
   },
@@ -3283,6 +3325,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // Handle animations
     var transitions = [], animation, propertyKey;
+    this._pendingAnimations = {};
     for(key in layout) {
       if (key.substring(0,7) === 'animate') {
         // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
@@ -3301,6 +3344,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         propertyKey = key.substring(7).camelize();
 
         animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
+
+        this._pendingAnimations[propertyKey] = animation;
 
         // FIXME: Handle transforms
         transitions.push(animation.css);
@@ -3500,6 +3545,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
+    this.willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
   },
   
