@@ -1153,7 +1153,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._viewRenderer.attachLayer(this);
     if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
-    
+
+    // Animation prep
+    if (SC.platform.supportsCSSTransitions) {
+      this.resetAnimation();
+      SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
+      SC.Event.add(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
+    }
+
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
         childViews = this.get('childViews'),
@@ -1200,6 +1207,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   destroyLayer: function() {
     var layer = this.get('layer') ;
     if (layer) {
+
+      // Teardown animations
+      if (SC.platform.supportsCSSTransitions) {
+        SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
+        SC.Event.remove(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
+        this._animatable_original_willDestroyLayer();
+      }
+
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
       this._notifyWillDestroyLayer() ;
@@ -1340,7 +1355,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     
 
-    this.willRenderAnimations();
+    this._scv_willRenderAnimations();
 
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
@@ -2352,7 +2367,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     return this;
   },
 
-  willRenderAnimations: function(){
+  _scv_willRenderAnimations: function(){
     var layer = this.get('layer'),
         currentStyle = layer ? layer.style : null,
         newStyle = this.get('layoutStyle'),
@@ -2373,7 +2388,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           console.log('cancelling', key);
           // TODO: Send a cancelled flag
           var callback = this._activeAnimations[key].callback;
-          if (callback) this.runAnimationCallback(callback);
+          if (callback) this._scv_runAnimationCallback(callback);
         }
       }
     }
@@ -2386,7 +2401,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
   },
 
-  runAnimationCallback: function(callback) {
+  _scv_runAnimationCallback: function(callback) {
     if (callback) {
       if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
       callback.source = this;
@@ -2398,7 +2413,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     Called when animation ends, should not usually be called manually
   */
-  animationEnd: function(evt){
+  _scv_animationEnd: function(evt){
     // WARNING: Sometimes this will get called more than once for a property. Not sure why.
 
     // FIXME: Why do I have a RunLoop here? Do I need it?
@@ -2407,7 +2422,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         layout = this.get('layout'),
         layoutProperty, animation;
 
-    console.log('animationEnd', propertyName, evt);
+    console.log('_scv_animationEnd', propertyName, evt);
 
     // FIXME: Implement this.
     if (propertyName === SC.platform.domCSSPrefix+'Transform') {
@@ -2425,7 +2440,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           styleKey = SC.platform.domCSSPrefix+"Transition",
           currentCSS = layer.style[styleKey];
       
-      if (animation.callback) this.runAnimationCallback(animation.callback);
+      if (animation.callback) this._scv_runAnimationCallback(animation.callback);
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
@@ -3545,7 +3560,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    this.willRenderAnimations();
+    this._scv_willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
   },
   
