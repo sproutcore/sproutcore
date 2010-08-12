@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+require('validators/validator');
+
 /**
   This validates a SC.DateTime, used in SC.DateFieldView.
   

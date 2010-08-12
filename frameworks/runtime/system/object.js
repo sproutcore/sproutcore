@@ -7,6 +7,7 @@
 
 sc_require('core') ;
 sc_require('mixins/observable') ;
+sc_require('private/observer_queue');
 sc_require('mixins/array') ;
 sc_require('system/set');
 

@@ -8,6 +8,7 @@
 sc_require('views/field') ;
 sc_require('system/text_selection') ;
 sc_require('mixins/static_layout') ;
+sc_require('mixins/editable');
 
 /**
   @class
