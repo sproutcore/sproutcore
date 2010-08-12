@@ -67,6 +67,23 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
   });
 
+  test("callbacks should have appropriate data", function(){
+    stop(1000);
+
+    SC.RunLoop.begin();
+    // We shouldn't have to use invokeLater, but it's the only way to get this to work!
+    view.invokeLater('animate', 1, 'left', 100, .5, function(data) {
+      start();
+
+      // TODO: Test this better
+      ok(data.event, "has event");
+      equals(data.propertyName, 'left', "propertyName is 'left'");
+      equals(data.view, view, "view is correct");
+      equals(data.isCancelled, false, "animation is not cancelled");
+    });
+    SC.RunLoop.end();
+  });
+
   test("handles timing function string", function(){
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: 'ease-in' });
@@ -81,7 +98,77 @@ if (SC.platform.supportsCSSTransitions) {
     equals(transitionFor(view), 'left 1s cubic-bezier(0.1, 0.2, 0.3, 0.4)', 'uses cubic-bezier timing');
   });
 
+  test("should allow multiple keys to be set at once", function(){
+    SC.RunLoop.begin();
+    view.animate({ top: 100, left: 100 }, 1);
+    SC.RunLoop.end();
+    equals(transitionFor(view), 'top 1s linear, left 1s linear', 'should add transition');
+    equals(100, view.get('layout').top, 'top is 100');
+    equals(100, view.get('layout').left, 'left is 100');
+  });
 
+  // Pretty sure this does the job
+  test("callbacks should be called for each property", function(){
+    stop(1000);
+    var stopped = true;
+
+    expect(2);
+    var propertyNames = "top left".w();
+
+    SC.RunLoop.begin();
+    // We shouldn't have to use invokeLater, but it's the only way to get this to work!
+    view.invokeLater('animate', 1, { top: 100, left: 100 }, .5, function(data) {
+      if (stopped) {
+        start();
+        stopped = false;
+      }
+
+      var hasProperty = false;
+      if (propertyNames.contains(data.propertyName)) {
+        propertyNames.removeObject(data.propertyName);
+        hasProperty = true;
+      }
+
+      ok(hasProperty, "has property: "+data.propertyName);
+    });
+    SC.RunLoop.end();
+  });
+
+  test("multiple animations should be able to run simultaneously", function(){
+    stop(2000);
+
+    expect(2);
+
+    SC.RunLoop.begin();
+    view.invokeLater('animate', 1, 'top', 100, 1, function(){
+      ok(true, 'top finished');
+    });
+    view.invokeLater('animate', 500, 'left', 100, .5, function(){
+      ok(true, 'left finished');
+      start();
+    });
+    SC.RunLoop.end();
+  });
+
+  test("altering existing animation should call callback as cancelled", function(){
+    stop(2000);
+
+    expect(2);
+
+    SC.RunLoop.begin();
+    view.invokeLater('animate', 1, 'top', 100, 1, function(data){
+      equals(data.isCancelled, true, 'first cancelled');
+    });
+    view.invokeLater('animate', 500, 'top', 0, .5, function(data){
+      equals(data.isCancelled, false, 'second not cancelled');
+      start();
+    });
+    SC.RunLoop.end();
+  });
+
+  test("should handle transform attributes");
+
+  test("should raise error if conflicting transform animations");
 
 //  module("ANIMATION WITH ACCELERATED LAYER", {
 //    setup: function(){
@@ -103,6 +190,8 @@ if (SC.platform.supportsCSSTransitions) {
 //    view.animate('top', 100, 1);
 //    equals(transitionFor(view), 'top 1s linear', 'transition is not on transform');
 //  });
+//
+//  test("should not use accelerated layer if other transforms are being animated");
 
 }
 
@@ -119,7 +208,7 @@ module("ANIMATION WITHOUT TRANSITIONS", {
 });
 
 test("should update layout", function(){
-  view.animate('left', 100, { duration: 1 });
+  view.animate('left', 100, 1);
   equals(100, view.get('layout').left, 'left is 100');
 });
 
