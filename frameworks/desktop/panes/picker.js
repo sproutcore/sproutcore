@@ -190,6 +190,7 @@ SC.PickerPane = SC.PalettePane.extend({
     if (pointerOffset) this.set('pointerOffset',pointerOffset) ;
     this.endPropertyChanges();
     this.positionPane();
+    this._hideOverflow();
     this.append();
   },
 
@@ -200,12 +201,13 @@ SC.PickerPane = SC.PalettePane.extend({
     fallback to center.
   */  
   positionPane: function(useAnchorCached) {
-    var useAnchorCached = useAnchorCached && this.get('anchorCached'),
-        anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
+    var anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
         origin;
+        
+    useAnchorCached = useAnchorCached && this.get('anchorCached');
     
     // usually an anchorElement will be passed.  The ideal position is just 
     // below the anchor + default or custom offset according to preferType.
@@ -338,7 +340,6 @@ SC.PickerPane = SC.PalettePane.extend({
       picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
     }
     this.displayDidChange();
-    this._hideOverflow();
     return picker ;
   },
 
@@ -653,10 +654,14 @@ SC.PickerPane = SC.PalettePane.extend({
   
   
   remove: function(){
-    this._showOverflow();
+    if(this.get('isVisibleInWindow')) this._showOverflow();
     return sc_super();
   },
   
+  /** @private
+    Internal method to hide the overflow on the body to make sure we don't 
+    show scrollbars when the picker has shadows, as it's really anoying.
+  */
   _hideOverflow: function(){
     var body = SC.$(document.body),
         main = SC.$('.sc-main'),
@@ -664,19 +669,34 @@ SC.PickerPane = SC.PalettePane.extend({
         minHeight = parseInt(main.css('minHeight'),0),
         windowSize = SC.RootResponder.responder.get('currentWindowSize');
     if(windowSize.width>=minWidth && windowSize.height>=minHeight){
-      body.css('overflow', 'hidden');           
+      SC.PICKERS_OPEN++;
+      //console.log(this.toString()+" "+SC.PICKERS_OPEN);
+      if(SC.PICKERS_OPEN > 0) body.css('overflow', 'hidden');           
     }
   },
 
+  /** @private
+    Internal method to show the overflow on the body to make sure we don't 
+    show scrollbars when the picker has shadows, as it's really anoying.
+  */
   _showOverflow: function(){
     var body = SC.$(document.body);
-    body.css('overflow', 'visible');     
+    if(SC.PICKERS_OPEN > 0) {
+      SC.PICKERS_OPEN--;
+     // console.log(this.toString()+" "+SC.PICKERS_OPEN);
+    }
+    if(SC.PICKERS_OPEN === 0) body.css('overflow', 'visible');
   }
 });
 
 /**
   Default metrics for the different control sizes.
 */
+
+// Counter to track how many pickers are open. This help us to now when to 
+// show/hide the body overflow.
+SC.PICKERS_OPEN = 0;
+
 SC.PickerPane.PICKER_POINTER_OFFSET = [9, -9, -18, 18];
 SC.PickerPane.PICKER_EXTRA_RIGHT_OFFSET = 20;
 
