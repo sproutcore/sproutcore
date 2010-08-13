@@ -8,8 +8,12 @@
 
 var view, pane, originalSupportsTransitions = SC.platform.supportsCSSTransitions;
 
+function styleFor(view) {
+  return view.get('layer').style;
+}
+
 function transitionFor(view){
-  return view.get('layer').style[SC.platform.domCSSPrefix+"Transition"];
+  return styleFor(view)[SC.platform.domCSSPrefix+"Transition"];
 }
 
 var commonSetup = {
@@ -166,32 +170,86 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
   });
 
-  test("should handle transform attributes");
+  test("should handle transform attributes", function(){
+    SC.RunLoop.begin();
+    view.animate('rotate', 45, { duration: 1 });
+    SC.RunLoop.end();
+    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'add transition');
+    equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotate(45deg)', 'has both transforms');
+    equals(45, view.get('layout').rotate, 'rotate is 45deg'); 
+  });
 
-  test("should raise error if conflicting transform animations");
+  test("should handle conflicting transform animations", function(){
+    expect(5);
 
-//  module("ANIMATION WITH ACCELERATED LAYER", {
-//    setup: function(){
-//      commonSetup.setup();
-//      // Force support
-//      view.hasAcceleratedLayer = YES;
-//    },
-//
-//    teardown: commonSetup.teardown
-//  });
-//
-//  test("handles acceleration when appropriate", function(){
-//    view.animate('top', 100, 1);
-//    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'transition is on transform');
-//  });
-//
-//  test("doesn't use acceleration when not appropriate", function(){
-//    view.adjust({ height: '', bottom: 0 });
-//    view.animate('top', 100, 1);
-//    equals(transitionFor(view), 'top 1s linear', 'transition is not on transform');
-//  });
-//
-//  test("should not use accelerated layer if other transforms are being animated");
+    var originalConsoleWarn = console.warn;
+    console.warn = function(warning){
+      equals(warning, "Can't animate transforms with different durations! Using first duration specified.", "proper warning");
+    };
+
+    SC.RunLoop.begin();
+    view.animate('rotate', 45, 1).animate('scale', 2, 2);
+    SC.RunLoop.end();
+
+    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'use duration of first');
+    equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotate(45deg) scale(2)');
+    equals(45, view.get('layout').rotate, 'rotate is 45deg');
+    equals(2, view.get('layout').scale, 'scale is 2');
+
+    console.warn = originalConsoleWarn;
+  });
+
+  test("should properly handle callbacks from conflicting transforms");
+
+  module("ANIMATION WITH ACCELERATED LAYER", {
+    setup: function(){
+      commonSetup.setup();
+      // Force support
+      view.hasAcceleratedLayer = YES;
+    },
+
+    teardown: commonSetup.teardown
+  });
+
+  test("handles acceleration when appropriate", function(){
+    SC.RunLoop.begin();
+    view.animate('top', 100, 1);
+    SC.RunLoop.end();
+    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'transition is on transform');
+  });
+
+  test("doesn't use acceleration when not appropriate", function(){
+    SC.RunLoop.begin();
+    view.adjust({ height: '', bottom: 0 });
+    view.animate('top', 100, 1);
+    SC.RunLoop.end();
+    equals(transitionFor(view), 'top 1s linear', 'transition is not on transform');
+  });
+
+  test("combines accelerated layer animation with compatible transform animations", function(){
+    SC.RunLoop.begin();
+    view.animate('top', 100, 1).animate('rotate', 45, 1);
+    SC.RunLoop.end();
+
+    var transform = styleFor(view)[SC.platform.domCSSPrefix+'Transform'];
+
+    // We need to check these separately because in some cases we'll also have translateZ, this way we don't have to worry about it
+    ok(transform.match(/translateX\(0px\) translateY\(100px\)/), 'has translate');
+    ok(transform.match(/rotate\(45deg\)/), 'has rotate');
+  });
+
+  test("should not use accelerated layer if other transforms are being animated at different speeds", function(){
+    SC.RunLoop.begin();
+    view.animate('rotate', 45, 2).animate('top', 100, 1);
+    SC.RunLoop.end();
+
+    var style = styleFor(view);
+
+    equals(style[SC.platform.domCSSPrefix+'Transform'], 'rotate(45deg)', 'transform should only have rotate');
+    equals(style['top'], '100px', 'should not accelerate top');
+  });
+
+  test("callbacks should work properly with acceleration");
 
 }
 
@@ -212,10 +270,12 @@ test("should update layout", function(){
   equals(100, view.get('layout').left, 'left is 100');
 });
 
-// test("should still run callback", function(){
-//   var ranCallback = false;
-// 
-//   view.animate('left', 100, 1, function() { ranCallback = true; });
-// 
-//   ok(ranCallback, "should have run callback");
-// });
+test("should still run callback", function(){
+  var ranCallback = false;
+
+  SC.RunLoop.begin();
+  view.animate('left', 100, 1, function() { ranCallback = true; });
+  SC.RunLoop.end();
+
+  ok(ranCallback, "should run callback");
+});

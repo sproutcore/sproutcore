@@ -1354,7 +1354,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     
 
-    this._scv_willRenderAnimations();
+    this._scv_didRenderAnimations();
 
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
@@ -2366,33 +2366,41 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     return this;
   },
 
-  _scv_willRenderAnimations: function(){
-    var layer = this.get('layer'),
-        currentStyle = layer ? layer.style : null,
-        newStyle = this.get('layoutStyle'),
-        transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
-        key;
+  _scv_didRenderAnimations: function(){
+    if (SC.platform.supportsCSSTransitions) {
+      var layer = this.get('layer'),
+          currentStyle = layer ? layer.style : null,
+          newStyle = this.get('layoutStyle'),
+          transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
+          key;
 
-    // Handle existing animations
-    if (this._activeAnimations) {
-      for(key in this._activeAnimations){
-        // TODO: Check for more than duration
-        if (
-          newStyle[key] !== currentStyle[key] ||
-          !this._pendingAnimations || !this._pendingAnimations[key] ||
-          this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
-        ) {
-          // TODO: Send a cancelled flag
-          var callback = this._activeAnimations[key].callback;
-          if (callback) this._scv_runAnimationCallback(callback, null, key, YES);
+      // Handle existing animations
+      if (this._activeAnimations) {
+        for(key in this._activeAnimations){
+          // TODO: Check for more than duration
+          if (
+            newStyle[key] !== currentStyle[key] ||
+            !this._pendingAnimations || !this._pendingAnimations[key] ||
+            this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
+          ) {
+            var callback = this._activeAnimations[key].callback;
+            if (callback) this._scv_runAnimationCallback(callback, null, key, YES);
+          }
         }
       }
-    }
 
-    if (transitionStyle && transitionStyle !== '') {
-      this._activeAnimations = this._pendingAnimations;
-      this._pendingAnimations = null;
+      if (transitionStyle && transitionStyle !== '') {
+        this._activeAnimations = this._pendingAnimations;
+        this._pendingAnimations = null;
+      } else {
+        this._activeAnimations = this._pendingAnimations = null;
+      }
     } else {
+      var key;
+      for (key in this._pendingAnimations) {
+        var callback = this._pendingAnimations[key].callback;
+        if (callback) this._scv_runAnimationCallback(callback, null, key, NO);
+      }
       this._activeAnimations = this._pendingAnimations = null;
     }
   },
@@ -3090,7 +3098,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lMH = layout.maxHeight,
         lcX = layout.centerX, 
         lcY = layout.centerY,
-        hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
+        canUseAcceleratedLayer = this.get('hasAcceleratedLayer'),
         translateTop = 0,
         translateLeft = 0;
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
@@ -3107,13 +3115,47 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       throw error ;
     }
 
+    if (SC.platform.supportsCSSTransforms) {
+      // Check to see if we're using transforms
+      var animatingTransforms = NO, transformAnimationDuration;
+      for(key in layout){
+        if (key.substring(0,7) === 'animate') {
+          if (SC.CSS_TRANSFORM_MAP[key.substring(7).camelize()]) {
+            animatingTransforms = YES;
+
+            if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
+              throw "Animations of transforms must be executed simultaneously!";
+            }
+
+            // TODO: If we want to allow it to be set as just a number for duration we need to add support here
+            if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
+              console.warn("Can't animate transforms with different durations! Using first duration specified.");
+              layout[key].duration = transformAnimationDuration;
+            }
+            transformAnimationDuration = layout[key].duration;
+
+            // FIXME: There will also be problems if we have conflicting timings and callbacks
+          }
+        }
+      }
+
+      // If we're animating other transforms at different speeds, don't use acceleratedLayer
+      if (
+        animatingTransforms &&
+        (layout['animateTop'] && layout['animateTop'].duration !== transformAnimationDuration) ||
+        (layout['animateLeft'] && layout['animateLeft'].duration !== transformAnimationDuration)
+      ) {
+        canUseAcceleratedLayer = NO;
+      }
+    }
+
     // X DIRECTION
 
     // handle left aligned and left/right
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)) {
         ret.left = (lL*100)+"%";  //percentage left
-      } else if (hasAcceleratedLayer && !SC.empty(lW)) {
+      } else if (canUseAcceleratedLayer && !SC.empty(lW)) {
         translateLeft = Math.floor(lL);
         ret.left = 0;
       } else {
@@ -3195,7 +3237,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!SC.none(lT)) {
       if(SC.isPercentage(lT)) {
         ret.top = (lT*100)+"%";
-      } else if (hasAcceleratedLayer && !SC.empty(lH)) {
+      } else if (canUseAcceleratedLayer && !SC.empty(lH)) {
         translateTop = Math.floor(lT);
         ret.top = 0;
       } else {
@@ -3284,51 +3326,50 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (ret[x]===0) ret[x]=null;
     }
 
-    // FIXME: We'll have to make sure we handle animations right with the transforms
+    if (SC.platform.supportsCSSTransforms) {
+      // Handle transforms
+      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
+          layer = this.get('layer'),
+          currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
+          halTransforms, specialTransforms = [], idx;
 
-    // Handle transforms
-    var transformAttribute = SC.platform.domCSSPrefix+'Transform',
-        layer = this.get('layer'),
-        currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
-        halTransforms, specialTransforms = [], idx;
+      if (canUseAcceleratedLayer) {
+        // Remove previous transforms
+        if (this._lastAcceleratedTransforms) currentTransforms.removeObjects(this._lastAcceleratedTransforms);
 
-    if (hasAcceleratedLayer) {
-      // Remove previous transforms
-      if (this._lastAcceleratedTransforms) currentTransforms.removeObjects(this._lastAcceleratedTransforms);
+        halTransforms = ['translateX('+translateLeft+'px)', 'translateY('+translateTop+'px)'];
 
-      halTransforms = ['translateX('+translateLeft+'px)', 'translateY('+translateTop+'px)'];
-
-      // FIXME: This join.match is a bit hackish
-      if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
-        halTransforms.push('translateZ(0px)');
-      }
-
-      // Store for next time
-      this._lastAcceleratedTransforms = halTransforms;
-    }
-
-    // Handle special CSS transform attributes
-    var specialTransforms = [], transformName;
-    for(transformName in SC.CSS_TRANSFORM_MAP) {
-      var cleanedTransforms = [], idx;
-      for(idx=0; idx < currentTransforms.length; idx++) {
-        if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
-          cleanedTransforms.push(currentTransforms[idx]);
+        // FIXME: This join.match is a bit hackish
+        if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
+          halTransforms.push('translateZ(0px)');
         }
+
+        // Store for next time
+        this._lastAcceleratedTransforms = halTransforms;
       }
-      currentTransforms = cleanedTransforms;
 
-      if (layout[transformName]) {
-        specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
-      } 
+      // Handle special CSS transform attributes
+      var specialTransforms = [], transformName;
+      for(transformName in SC.CSS_TRANSFORM_MAP) {
+        var cleanedTransforms = [], idx;
+        for(idx=0; idx < currentTransforms.length; idx++) {
+          if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
+            cleanedTransforms.push(currentTransforms[idx]);
+          }
+        }
+        currentTransforms = cleanedTransforms;
+
+        if (layout[transformName]) {
+          specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
+        } 
+      }
+      specialTransforms = specialTransforms.join(' ');
+
+      var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
+
+      // Set transform attribute
+      if (allTransforms !== '') ret[transformAttribute] = allTransforms;
     }
-    specialTransforms = specialTransforms.join(' ');
-
-    var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
-
-    // Set transform attribute
-    if (allTransforms !== '') ret[transformAttribute] = allTransforms;
-
 
     // Handle animations
     var transitions = [], animation, propertyKey;
@@ -3349,15 +3390,32 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
         propertyKey = key.substring(7).camelize();
 
+        // TODO: This is a weird conditional, we can probably clean it up
+        if (
+          SC.platform.supportsCSSTransforms &&
+          (
+            (
+              canUseAcceleratedLayer && (
+                (propertyKey === 'top' && translateTop) ||
+                (propertyKey === 'left' && translateLeft)
+              )
+            ) ||
+            SC.CSS_TRANSFORM_MAP[propertyKey]
+          )
+        ) {
+          propertyKey = '-'+SC.platform.cssPrefix+'-transform';
+        }
+
         animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
 
-        this._pendingAnimations[propertyKey] = animation;
-
-        // FIXME: Handle transforms
-        transitions.push(animation.css);
+        // If it's a transform this may have already been set
+        if (!this._pendingAnimations[propertyKey]) {
+          this._pendingAnimations[propertyKey] = animation;
+          transitions.push(animation.css);
+        }
       }
     }
-    ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+    if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
 
 
     // convert any numbers into a number + "px".
@@ -3551,8 +3609,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    this._scv_willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
+    this._scv_didRenderAnimations();
   },
   
   /** walk like a duck */
