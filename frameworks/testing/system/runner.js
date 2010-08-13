@@ -34,6 +34,7 @@ CoreTest.Runner = {
         
     for(idx=0;idx<len;idx++) CoreTest.mixin(ret, arguments[len]);
     if (!ret.plan) ret.plan = CoreTest.Plan.create({ delegate: ret });
+    window.resizeTo(1400, 800);
     Q$(window).load(function() { ret.begin(); });      
     return ret ;
   },
