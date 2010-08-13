@@ -201,13 +201,14 @@ SC.PickerPane = SC.PalettePane.extend({
     fallback to center.
   */  
   positionPane: function(useAnchorCached) {
+    useAnchorCached = useAnchorCached && this.get('anchorCached');
+    
     var anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
         origin;
         
-    useAnchorCached = useAnchorCached && this.get('anchorCached');
     
     // usually an anchorElement will be passed.  The ideal position is just 
     // below the anchor + default or custom offset according to preferType.
