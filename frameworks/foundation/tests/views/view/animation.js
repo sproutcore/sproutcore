@@ -249,7 +249,35 @@ if (SC.platform.supportsCSSTransitions) {
     equals(style['top'], '100px', 'should not accelerate top');
   });
 
-  test("callbacks should work properly with acceleration");
+  test("callbacks should work properly with acceleration", function(){
+    stop(1000);
+    var stopped = true;
+
+    expect(3);
+    var propertyNames = "top left scale".w();
+
+    console.log('begin');
+    SC.RunLoop.begin();
+    // We shouldn't have to use invokeLater, but it's the only way to get this to work!
+    view.invokeLater('animate', 1, { top: 100, left: 100, scale: 2 }, .5, function(data) {
+      if (stopped) {
+        start();
+        stopped = false;
+      }
+
+      var hasProperty = false;
+      if (propertyNames.contains(data.propertyName)) {
+        propertyNames.removeObject(data.propertyName);
+        hasProperty = true;
+      }
+
+      ok(hasProperty, "has property: "+data.propertyName);
+    });
+    SC.RunLoop.end();
+    console.log('end');
+  });
+
+  test("should warn if multiple callbacks for transitions");
 
 }
 
