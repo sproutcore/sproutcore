@@ -2384,7 +2384,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
             this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
           ) {
             var callback = this._activeAnimations[key].callback;
-            if (callback) this._scv_runAnimationCallback(callback, null, key, YES);
+            if (callback) {
+              if (this._animatedTransforms && this._animatedTransforms.length > 0) {
+                for (idx=0; idx < this._animatedTransforms.length; idx++) {
+                  this._scv_runAnimationCallback(callback, null, this._animatedTransforms[idx], YES);
+                }
+                this._animatedTransforms = null;
+              } else {
+                this._scv_runAnimationCallback(callback, null, key, YES);
+              }
+            }
           }
         }
       }
@@ -2440,7 +2449,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           styleKey = SC.platform.domCSSPrefix+"Transition",
           currentCSS = layer.style[styleKey];
       
-      if (animation.callback) this._scv_runAnimationCallback(animation.callback, evt, propertyName, NO);
+      if (animation.callback) {
+        if (this._animatedTransforms && this._animatedTransforms.length > 0) {
+          for (idx=0; idx < this._animatedTransforms.length; idx++) {
+            this._scv_runAnimationCallback(animation.callback, evt, this._animatedTransforms[idx], NO);
+          }
+          this._animatedTransforms = null;
+        } else {
+          this._scv_runAnimationCallback(animation.callback, evt, propertyName, NO);
+        }
+      }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
@@ -3374,6 +3392,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // Handle animations
     var transitions = [], animation, propertyKey;
     this._pendingAnimations = {};
+    this._animatedTransforms = [];
+
     for(key in layout) {
       if (key.substring(0,7) === 'animate') {
         // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
@@ -3403,6 +3423,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
             SC.CSS_TRANSFORM_MAP[propertyKey]
           )
         ) {
+          this._animatedTransforms.push(propertyKey);
           propertyKey = '-'+SC.platform.cssPrefix+'-transform';
         }
 
