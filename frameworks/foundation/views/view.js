@@ -101,7 +101,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 */
 SC.CSS_TRANSFORM_MAP = {
   rotate: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
     return 'rotate('+val+')';
   },
   scale: function(val){
@@ -2429,8 +2429,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _scv_animationEnd: function(evt){
     // WARNING: Sometimes this will get called more than once for a property. Not sure why.
 
-    // FIXME: Why do I have a RunLoop here? Do I need it?
-    SC.RunLoop.begin();
     var propertyName = evt.originalEvent.propertyName,
         layout = this.get('layout'),
         layoutProperty, animation;
@@ -2473,7 +2471,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
       delete this._activeAnimations[propertyName];
     } 
-    SC.RunLoop.end();
   },
 
 
