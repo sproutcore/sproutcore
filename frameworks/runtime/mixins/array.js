@@ -421,7 +421,7 @@ SC.Array = {
   updateRangeObserver: function(rangeObserver, indexes) {
     return rangeObserver.update(this, indexes);
   },
-
+  
   /**
     Removes a range observer from the receiver.  The range observer must
     already be active on the array.

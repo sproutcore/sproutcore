@@ -87,7 +87,7 @@ SC._object_extend = function _object_extend(base, ext) {
     if (!ext.hasOwnProperty(key)) continue ;
 
     // get the value.  use concats if defined
-    var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
+    var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
 
     // Possibly add to a bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
