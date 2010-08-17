@@ -2454,7 +2454,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           for (idx=0; idx < this._animatedTransforms.length; idx++) {
             this._scv_runAnimationCallback(animation.callback, evt, this._animatedTransforms[idx], NO);
           }
-          this._animatedTransforms = null;
         } else {
           this._scv_runAnimationCallback(animation.callback, evt, propertyName, NO);
         }
@@ -2462,7 +2461,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
-      delete layout['animate'+layoutProperty.capitalize()];
+
+      if (this._animatedTransforms && this._animatedTransforms.length > 0) {
+        for(idx=0; idx < this._animatedTransforms.length; idx++) {
+          delete layout['animate'+this._animatedTransforms[idx].capitalize()];
+        }
+        this._animatedTransforms = null;
+      } else {
+        delete layout['animate'+layoutProperty.capitalize()];
+      }
 
       delete this._activeAnimations[propertyName];
     } 

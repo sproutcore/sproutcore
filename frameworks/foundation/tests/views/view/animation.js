@@ -201,6 +201,20 @@ if (SC.platform.supportsCSSTransitions) {
 
   test("should properly handle callbacks from conflicting transforms");
 
+  test("removes animation property when done", function(){
+    stop(1500);
+
+    SC.RunLoop.begin();
+    view.invokeLater('animate', 1, { top: 100, scale: 2 }, 0.5);
+    SC.RunLoop.end();
+    
+    setTimeout(function(){
+      start();
+      equals(view.get('layout').animateTop, undefined, "animateTop is undefined");
+      equals(view.get('layout').animateScale, undefined, "animateScale is undefined");
+    }, 1000);
+  });
+
   module("ANIMATION WITH ACCELERATED LAYER", {
     setup: function(){
       commonSetup.setup();
