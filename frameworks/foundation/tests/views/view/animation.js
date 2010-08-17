@@ -270,7 +270,6 @@ if (SC.platform.supportsCSSTransitions) {
     expect(3);
     var propertyNames = "top left scale".w();
 
-    console.log('begin');
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
     view.invokeLater('animate', 1, { top: 100, left: 100, scale: 2 }, .5, function(data) {
@@ -288,7 +287,6 @@ if (SC.platform.supportsCSSTransitions) {
       ok(hasProperty, "has property: "+data.propertyName);
     });
     SC.RunLoop.end();
-    console.log('end');
   });
 
   test("should warn if multiple callbacks for transitions");
