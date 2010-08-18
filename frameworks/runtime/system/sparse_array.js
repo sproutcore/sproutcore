@@ -97,12 +97,21 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   */
   rangeWindowSize: 1,
   
-  /*
+  /**
     This array contains all the start_indexes of ranges requested. This is to 
     avoid calling sparseArrayDidRequestRange to often. Indexes are removed and 
     added as range requests are completed.
   */
-  requestedRangeIndex: [],
+  requestedRangeIndex: null,
+  
+  /**
+    Make sure to create the index array during init so that it is not shared
+    between all instances.
+  */
+  init: function() {
+    sc_super();
+    this.requestedRangeIndex = [];
+  },
   
   /** 
     Returns the object at the specified index.  If the value for the index
