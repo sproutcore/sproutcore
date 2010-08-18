@@ -1354,7 +1354,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     
 
-    this._scv_didRenderAnimations();
+    this._scv_willRenderAnimations();
 
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
@@ -2366,12 +2366,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     return this;
   },
 
-  _scv_didRenderAnimations: function(){
+  _scv_willRenderAnimations: function(){
     if (SC.platform.supportsCSSTransitions) {
       var layer = this.get('layer'),
           currentStyle = layer ? layer.style : null,
           newStyle = this.get('layoutStyle'),
           transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
+          layout = this.get('layout'),
           key;
 
       // Handle existing animations
@@ -2394,24 +2395,51 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
                 this._scv_runAnimationCallback(callback, null, key, YES);
               }
             }
+
+            this._scv_removeAnimationFromLayout(key, YES);
           }
         }
       }
 
-      if (transitionStyle && transitionStyle !== '') {
-        this._activeAnimations = this._pendingAnimations;
-        this._pendingAnimations = null;
-      } else {
-        this._activeAnimations = this._pendingAnimations = null;
-      }
+      this._activeAnimations = this._pendingAnimations;
+      this._pendingAnimations = null;
     } else {
+      // Transitions not supported
       var key;
       for (key in this._pendingAnimations) {
         var callback = this._pendingAnimations[key].callback;
         if (callback) this._scv_runAnimationCallback(callback, null, key, NO);
+        this._scv_removeAnimationFromLayout(key);
       }
       this._activeAnimations = this._pendingAnimations = null;
     }
+  },
+
+  _scv_removeAnimationFromLayout: function(propertyName, updateStyle) {
+
+    if (updateStyle) {
+      var layer = this.get('layer'),
+          updatedCSS = [], key;
+      for(key in this._activeAnimations) {
+        if (key !== propertyName) updatedCSS.push(this._activeAnimations[key].css);
+      }
+
+      // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
+      layer.style[SC.platform.domCSSPrefix+"Transition"] = updatedCSS.join(', ');
+    }
+
+
+    var layout = this.get('layout');
+
+    if (propertyName === '-'+SC.platform.cssPrefix+'-transform' && this._animatedTransforms && this._animatedTransforms.length > 0) {
+      for(idx=0; idx < this._animatedTransforms.length; idx++) {
+        delete layout['animate'+this._animatedTransforms[idx].capitalize()];
+      }
+      this._animatedTransforms = null;
+    }
+    delete layout['animate'+propertyName.capitalize()];
+
+    delete this._activeAnimations[propertyName];
   },
 
   _scv_runAnimationCallback: function(callback, evt, propertyName, cancelled) {
@@ -2431,22 +2459,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     var propertyName = evt.originalEvent.propertyName,
         layout = this.get('layout'),
-        layoutProperty, animation;
-
-    // FIXME: Implement this.
-    if (propertyName === SC.platform.domCSSPrefix+'Transform') {
-      throw "Not implemented";
-    } else {
-      layoutProperty = propertyName;
-    }
+        animation;
 
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
     if(animation) {
-      var layer = this.get('layer'),
-          styleKey = SC.platform.domCSSPrefix+"Transition",
-          currentCSS = layer.style[styleKey];
-      
       if (animation.callback) {
         if (this._animatedTransforms && this._animatedTransforms.length > 0) {
           for (idx=0; idx < this._animatedTransforms.length; idx++) {
@@ -2457,20 +2474,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
       }
 
-      // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
-      layer.style[styleKey] = currentCSS.split(/\s*,\s*/).removeObject(animation.css).join(', ');
-
-      if (this._animatedTransforms && this._animatedTransforms.length > 0) {
-        for(idx=0; idx < this._animatedTransforms.length; idx++) {
-          delete layout['animate'+this._animatedTransforms[idx].capitalize()];
-        }
-        this._animatedTransforms = null;
-      } else {
-        delete layout['animate'+layoutProperty.capitalize()];
-      }
-
-      delete this._activeAnimations[propertyName];
-    } 
+      this._scv_removeAnimationFromLayout(propertyName, YES);
+    }
   },
 
 
@@ -3352,6 +3357,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // Handle transforms
       var transformAttribute = SC.platform.domCSSPrefix+'Transform',
           layer = this.get('layer'),
+          // FIXME: This is not the best way to do it, we should track these locally
           currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
           halTransforms, specialTransforms = [], idx;
 
@@ -3395,7 +3401,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // Handle animations
     var transitions = [], animation, propertyKey;
-    this._pendingAnimations = {};
     this._animatedTransforms = [];
 
     for(key in layout) {
@@ -3434,12 +3439,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
 
         // If it's a transform this may have already been set
+        if (!this._pendingAnimations) this._pendingAnimations = {};
         if (!this._pendingAnimations[propertyKey]) {
           this._pendingAnimations[propertyKey] = animation;
           transitions.push(animation.css);
         }
       }
     }
+
     if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
 
 
@@ -3634,8 +3641,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
+    this._scv_willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
-    this._scv_didRenderAnimations();
   },
   
   /** walk like a duck */
