@@ -2287,7 +2287,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       options = optionsOrCallback;
     }
 
-    if (SC.typeOf(options) === SC.T_NUMBER) options = { duration: options };
+    if (SC.typeOf(options) === SC.T_NUMBER) {
+      options = { duration: options };
+    } else if (SC.typeOf(options) !== SC.T_HASH) {
+      throw "Must provide options hash or duration!";
+    }
 
     if (callback) options.callback = callback;
 
