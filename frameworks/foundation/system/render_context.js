@@ -16,6 +16,11 @@ SC.MODE_APPEND = 'append';
 /** set update mode on context to prepend content */
 SC.MODE_PREPEND = 'prepend';
 
+/** a list of styles that get expanded into multiple properties, add more as you discover them */
+SC.COMBO_STYLES = {
+  WebkitTransition: 'WebkitTransitionProperty WebkitTransitionDuration WebkitTransitionDelay WebkitTransitionTimingFunction'.w()
+};
+
 /**
   @namespace
   
@@ -807,7 +812,23 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       return this ;
     }
   },
-  
+
+  _deleteComboStyles: function(styles, key) {
+    var comboStyles = SC.COMBO_STYLES[key],
+        didChange = NO;
+
+    if (comboStyles) {
+      var idx;
+      for (idx=0; idx < comboStyles.length; idx++) {
+        if (styles[comboStyles[idx]]) {
+          delete styles[comboStyles[idx]];
+          didChange = YES;
+        }
+      }
+    }
+    return didChange;
+  },
+
   /**
     Apply the passed styles to the tag.  You can pass either a single key
     value pair or a hash of styles.  Note that if you set a style on an 
@@ -823,12 +844,13 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // clone them if needed.  This will get the actual styles hash so we can
     // edit it directly.
     var key, didChange = NO, styles = this.styles();
-    
+
     // simple form
     if (typeof nameOrStyles === SC.T_STRING) {
       if (value === undefined) { // reader
         return styles[nameOrStyles];
       } else { // writer
+        this._stylesDidChange = this._deleteComboStyles(styles, nameOrStyles);
         if (styles[nameOrStyles] !== value) {
           styles[nameOrStyles] = value ;
           this._stylesDidChange = YES ;
@@ -839,6 +861,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     } else {
       for(key in nameOrStyles) {
         if (!nameOrStyles.hasOwnProperty(key)) continue ;
+        didChange = this._deleteComboStyles(styles, key);
         value = nameOrStyles[key];
         if (styles[key] !== value) {
           styles[key] = value;
