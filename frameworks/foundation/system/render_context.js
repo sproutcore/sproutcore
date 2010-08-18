@@ -394,7 +394,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         value = styles[key];
         if (value === null) continue; // skip empty styles
 
-        if (!isNaN(value) && !(key === "zIndex" || key === "font-weight")) value += "px";
+        if (!isNaN(value) && !(key === "zIndex" || key === "font-weight" || key === "opacity")) value += "px";
         pair[0] = this._dasherizeStyleName(key);
         pair[1] = value;
         joined.push(pair.join(': '));
