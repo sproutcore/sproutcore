@@ -111,6 +111,9 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   init: function() {
     sc_super();
     this.requestedRangeIndex = [];
+    
+    this._TMP_PROVIDE_ARRAY = [];
+    this._TMP_PROVIDE_RANGE = { length: 1 };
   },
   
   /** 
@@ -251,9 +254,6 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     if (this._requestingIndex <= 0) this.enumerableContentDidChange() ;
     return this ;
   },
-
-  _TMP_PROVIDE_ARRAY: [],
-  _TMP_PROVIDE_RANGE: { length: 1 },
   
   /**
     Convenience method to provide a single object at a specified index.  Under
