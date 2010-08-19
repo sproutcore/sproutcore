@@ -3458,7 +3458,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
 
-    if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+    if (SC.platform.supportsCSSTransitions && transitions.length > 0) {
+      ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+    }
 
 
     // convert any numbers into a number + "px".

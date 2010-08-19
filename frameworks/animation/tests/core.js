@@ -149,10 +149,4 @@ test("animation should not interfere with computed layout properties.", function
   equals(computed.get("layout").left, 21, "layout left after setting _test_left (make sure computed property is undisturbed)");
 });
 
-test("doesn't interfere with built-in animation", function(){
-  view.animate('left', 100, { duration: 1 });
-  if(SC.platform.supportsCSSTransitions){
-    equals(view.get('layer').style[SC.platform.domCSSPrefix+"Transition"], 'left 1s linear', 'add transition');
-  }
-  equals(100, view.get('layout').left, 'left is 100');
-});
+// test("doesn't interfere with built-in animation");
