@@ -32,12 +32,32 @@ module("SC.SegmentedView", {
     
     view = pane.childViews[0];
     
+    var boundingRect = function(segment){
+      var r;
+      if (segment.getBoundingClientRect) {
+        r = segment.getBoundingClientRect();
+      }else{
+        r = {};
+        var ret   = SC.viewportOffset(segment); // get x & y
+        var cq = SC.$(segment);
+        r.top = ret.y;
+        r.left = ret.x;
+        r.bottom = ret.y + cq.outerHeight();
+        r.right = ret.x + cq.outerWidth();
+      }
+      
+      return r;
+    };
+    
+    
     elem = view.get('layer').childNodes[0];
-    rect1 = elem.getBoundingClientRect();
+    rect1 = boundingRect(elem);
     elem = view.get('layer').childNodes[1];
-    rect2 = elem.getBoundingClientRect();
+    rect2 = boundingRect(elem);
     elem = view.get('layer').childNodes[2];
-    rect3 = elem.getBoundingClientRect();
+    rect3 = boundingRect(elem);
+    
+    
   }, 
   
   teardown: function() {
