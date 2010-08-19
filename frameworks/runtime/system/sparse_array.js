@@ -196,7 +196,6 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     this._requestingIndex++;
     if (del.sparseArrayDidRequestRange) {
       var range = this._TMP_RANGE;
-      //if(start===600) debugger;
       if(this.wasRangeRequested(start)===-1){
         range.start = start;
         range.length = len;
