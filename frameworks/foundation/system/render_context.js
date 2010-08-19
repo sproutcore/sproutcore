@@ -851,11 +851,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       if (value === undefined) { // reader
         return styles[nameOrStyles];
       } else { // writer
-        this._stylesDidChange = this._deleteComboStyles(styles, nameOrStyles);
+        didChange = this._deleteComboStyles(styles, nameOrStyles);
         if (styles[nameOrStyles] !== value) {
           styles[nameOrStyles] = value ;
-          this._stylesDidChange = YES ;
+          didChange = YES ;
         }
+        if (didChange) this._stylesDidChange = YES;
       }
       
     // bulk form
