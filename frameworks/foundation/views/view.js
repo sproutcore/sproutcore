@@ -2469,13 +2469,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     if(animation) {
       if (animation.callback) {
+        // Charles says this is a good idea
+        SC.RunLoop.begin();
+        // We're using invokeLater so we don't trigger any layout changes from the callbacks until the animations are done
         if (this._animatedTransforms && this._animatedTransforms.length > 0) {
           for (idx=0; idx < this._animatedTransforms.length; idx++) {
-            this._scv_runAnimationCallback(animation.callback, evt, this._animatedTransforms[idx], NO);
+            this.invokeLater('_scv_runAnimationCallback', 1, animation.callback, evt, this._animatedTransforms[idx], NO);
           }
         } else {
-          this._scv_runAnimationCallback(animation.callback, evt, propertyName, NO);
+          this.invokeLater('_scv_runAnimationCallback', 1, animation.callback, evt, propertyName, NO);
         }
+        SC.RunLoop.end();
       }
 
       this._scv_removeAnimationFromLayout(propertyName, YES);
