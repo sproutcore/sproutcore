@@ -2413,13 +2413,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       for (key in this._pendingAnimations) {
         var callback = this._pendingAnimations[key].callback;
         if (callback) this._scv_runAnimationCallback(callback, null, key, NO);
-        this._scv_removeAnimationFromLayout(key);
+        this._scv_removeAnimationFromLayout(key, NO, YES);
       }
       this._activeAnimations = this._pendingAnimations = null;
     }
   },
 
-  _scv_removeAnimationFromLayout: function(propertyName, updateStyle) {
+  _scv_removeAnimationFromLayout: function(propertyName, updateStyle, isPending) {
 
     if (updateStyle) {
       var layer = this.get('layer'),
@@ -2443,7 +2443,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     delete layout['animate'+propertyName.capitalize()];
 
-    delete this._activeAnimations[propertyName];
+    if (!isPending) delete this._activeAnimations[propertyName];
   },
 
   _scv_runAnimationCallback: function(callback, evt, propertyName, cancelled) {
