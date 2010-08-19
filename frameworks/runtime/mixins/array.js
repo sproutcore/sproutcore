@@ -545,7 +545,7 @@ SC.Array.indexOf = function(object, startAt) {
   if (startAt < 0) startAt += len;
   
   for(idx=startAt;idx<len;idx++) {
-    if (this.objectAt(idx) === object) return idx ;
+    if (this.objectAt(idx, YES) === object) return idx ;
   }
   return -1;
 };

@@ -156,8 +156,12 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     
     This should only be called with an index you know is in the range of item
     or its children based on looking at the length.
+    
+    @param {Number} index
+    @param {Boolean} omitMaterializing
+    @returns {Object}
   */
-  objectAt: function(index) {
+  objectAt: function(index, omitMaterializing) {
     var len   = this.get('length'),
         item  = this.get('item'), 
         cache = this._objectAtCache,
@@ -191,14 +195,14 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
         // otherwise, just remove len from cur.
         len = observer.get('length') ;
         if (i+len > cur) {
-          item = observer.objectAt(cur-i);
+          item = observer.objectAt(cur-i, omitMaterializing);
           cur  = -1;
         } else cur -= len-1 ;
         
       },this);
     }
     
-    if (cur>=0) item = children.objectAt(cur); // get internal if needed
+    if (cur>=0) item = children.objectAt(cur, omitMaterializing); // get internal if needed
     cache[index] = item ; // save in cache 
     
     return item ;

@@ -114,6 +114,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     
     this._TMP_PROVIDE_ARRAY = [];
     this._TMP_PROVIDE_RANGE = { length: 1 };
+    this._TMP_RANGE = {};
   },
   
   /** 
@@ -121,14 +122,21 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     is currently undefined, invokes the didRequestIndex() method to notify
     the delegate.
     
-    @param  {Number} idx the index to get
+    The omitMaterializing flag ensures that the object will not be materialized,
+    but it simply checks for the presence of an object at the specified index
+    and will return YES (or undefined if not found). This is useful in the case
+    of SparseArrays, where you might NOT want to request the index to be loaded, 
+    but simply need a shallow check to see if the position has been filled.
+    
+    @param {Number} idx the index to get
+    @param {Boolean} omitMaterializing
     @return {Object} the object
   */
-  objectAt: function(idx) {
+  objectAt: function(idx, omitMaterializing) {
     var content = this._sa_content, ret ;
     if (!content) content = this._sa_content = [] ;
     if ((ret = content[idx]) === undefined) {
-      this.requestIndex(idx);
+      if(!omitMaterializing) this.requestIndex(idx);
       ret = content[idx]; // just in case the delegate provided immediately
     }
     return ret ;
@@ -165,8 +173,6 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     return ret.freeze();
   },
   
-  _TMP_RANGE: {},
-  
   /**
     Called by objectAt() whenever you request an index that has not yet been
     loaded.  This will possibly expand the index into a range and then invoke
@@ -190,11 +196,12 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     this._requestingIndex++;
     if (del.sparseArrayDidRequestRange) {
       var range = this._TMP_RANGE;
+      //if(start===600) debugger;
       if(this.wasRangeRequested(start)===-1){
         range.start = start;
         range.length = len;
-        del.sparseArrayDidRequestRange(this, range);
         this.requestedRangeIndex.push(start);
+        del.sparseArrayDidRequestRange(this, range);
       }
     } else if (del.sparseArrayDidRequestIndex) {
       while(--len >= 0) del.sparseArrayDidRequestIndex(this, start + len);
@@ -229,7 +236,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   */
   rangeRequestCompleted: function(start) { 
     var i = this.wasRangeRequested(start);
-    if(i>=0) { 
+    if(i>=0) {
       this.requestedRangeIndex.removeAt(i,1);
       return YES;
     }
