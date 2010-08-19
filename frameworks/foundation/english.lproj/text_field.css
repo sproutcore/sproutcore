@@ -84,7 +84,7 @@
 	-webkit-appearance:none;
 }
 
-.msie .sc-text-field-view input {
+.msie .sc-text-field-view input.field {
   padding-bottom: 1px;
 }
 
@@ -109,11 +109,8 @@
 	overflow: auto;
 }
 
-.msie .sc-text-field-view textarea {
-	height: 100%;
-}
-
-.mozilla .sc-text-field-view textarea {
+.msie .sc-text-field-view textarea.field,
+.mozilla .sc-text-field-view textarea.field {
 	height: 100%;
 }
 
