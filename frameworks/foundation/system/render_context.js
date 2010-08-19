@@ -863,7 +863,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     } else {
       for(key in nameOrStyles) {
         if (!nameOrStyles.hasOwnProperty(key)) continue ;
-        didChange = this._deleteComboStyles(styles, key);
+        didChange = didChange || this._deleteComboStyles(styles, key);
         value = nameOrStyles[key];
         if (styles[key] !== value) {
           styles[key] = value;
