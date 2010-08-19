@@ -3410,56 +3410,59 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (allTransforms !== '') ret[transformAttribute] = allTransforms;
     }
 
-    // Handle animations
-    var transitions = [], animation, propertyKey;
-    this._animatedTransforms = [];
+    // Temporary fix to not break SC.Animatable
+    if (!SC.isAnimatable) {
 
-    for(key in layout) {
-      if (key.substring(0,7) === 'animate') {
-        // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
-        animation = layout[key];
+      // Handle animations
+      var transitions = [], animation, propertyKey;
+      this._animatedTransforms = [];
 
-        if (animation.timing) {
-          if (SC.typeOf(animation.timing) != SC.T_STRING) {
-            animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
-                                               animation.timing[2]+", "+animation.timing[3]+")";
+      for(key in layout) {
+        if (key.substring(0,7) === 'animate') {
+          // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
+          animation = layout[key];
+
+          if (animation.timing) {
+            if (SC.typeOf(animation.timing) != SC.T_STRING) {
+              animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
+                                                 animation.timing[2]+", "+animation.timing[3]+")";
+            }
+          } else {
+            animation.timing = 'linear';
           }
-        } else {
-          animation.timing = 'linear';
-        }
 
-        propertyKey = key.substring(7).camelize();
+          propertyKey = key.substring(7).camelize();
 
-        // TODO: This is a weird conditional, we can probably clean it up
-        if (
-          SC.platform.supportsCSSTransforms &&
-          (
+          // TODO: This is a weird conditional, we can probably clean it up
+          if (
+            SC.platform.supportsCSSTransforms &&
             (
-              canUseAcceleratedLayer && (
-                (propertyKey === 'top' && translateTop) ||
-                (propertyKey === 'left' && translateLeft)
-              )
-            ) ||
-            SC.CSS_TRANSFORM_MAP[propertyKey]
-          )
-        ) {
-          this._animatedTransforms.push(propertyKey);
-          propertyKey = '-'+SC.platform.cssPrefix+'-transform';
-        }
+              (
+                canUseAcceleratedLayer && (
+                  (propertyKey === 'top' && translateTop) ||
+                  (propertyKey === 'left' && translateLeft)
+                )
+              ) ||
+              SC.CSS_TRANSFORM_MAP[propertyKey]
+            )
+          ) {
+            this._animatedTransforms.push(propertyKey);
+            propertyKey = '-'+SC.platform.cssPrefix+'-transform';
+          }
 
-        animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
+          animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
 
-        // If it's a transform this may have already been set
-        if (!this._pendingAnimations) this._pendingAnimations = {};
-        if (!this._pendingAnimations[propertyKey]) {
-          this._pendingAnimations[propertyKey] = animation;
-          transitions.push(animation.css);
+          // If it's a transform this may have already been set
+          if (!this._pendingAnimations) this._pendingAnimations = {};
+          if (!this._pendingAnimations[propertyKey]) {
+            this._pendingAnimations[propertyKey] = animation;
+            transitions.push(animation.css);
+          }
         }
       }
-    }
 
-    if (SC.platform.supportsCSSTransitions && transitions.length > 0) {
-      ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+      if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+
     }
 
 
