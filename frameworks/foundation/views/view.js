@@ -3378,7 +3378,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
       }
 
-      if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+      if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : null;
 
     }
 
