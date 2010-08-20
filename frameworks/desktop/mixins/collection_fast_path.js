@@ -127,7 +127,7 @@ SC.CollectionFastPath = {
       this.sendToDOMPool(pendingRemovals.pop());
     }
     
-    // adds will be handled by the incremental renderer
+    // adds ourself to the incremental renderer and stops any background rendering
     this.incrementalRenderer.add(this);
     
     // add ourself to be background rendered; it won't actually start until it's ready
@@ -458,17 +458,17 @@ SC.CollectionFastPath = {
     
     // TODO: loop through invalid indices and allow the first one between top and bottom to re-render
     
-    // pre-increment because even if it can't be background rendered, the next one might
-    
-    while((this.topBackground - this.bottomBackground < this.domPoolSize) && (this.topBackground < content.length || this.bottomBackground >= 0)) {
+    while((this.topBackground - this.bottomBackground < this.domPoolSize) && (this.topBackground < content.length - 1 || this.bottomBackground > 0)) {
       
       // alternates between checking top and bottom
       this._parity = !this._parity;
       
-      if(this._parity && ++this.topBackground < content.length) {
+      if(this._parity && this.topBackground < content.length - 1) {
+        ++this.topBackground;
         if(this.canBackgroundRender(this.topBackground)) return this.topBackground;
         
-      } else if(--this.bottomBackground >= 0){
+      } else if(this.bottomBackground > 0){
+        --this.bottomBackground;
         if(this.canBackgroundRender(this.bottomBackground)) return this.bottomBackground;
       }
     }
