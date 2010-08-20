@@ -3328,7 +3328,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     // Temporary fix to not break SC.Animatable
-    if (!SC.isAnimatable) {
+    if (!this.isAnimatable) {
 
       // Handle animations
       var transitions = [], animation, propertyKey;
