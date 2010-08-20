@@ -135,7 +135,7 @@ SC.CollectionFastPath = {
     }
   },
   
-  domPoolSize: 100,
+  domPoolSize: 200,
 
   /**
   @private
@@ -190,7 +190,7 @@ SC.CollectionFastPath = {
     if(!view) view = pool.dequeue();
     
     if(view) {
-      console.log("view found: ", view.contentIndex, "for: ", index);
+      //console.log("view found: ", view.contentIndex, "for: ", index);
       return this.unmapView(view);
     }
   },
@@ -481,7 +481,6 @@ SC.CollectionFastPath = {
     
     // dont render if the last view rendered is the tail
     if(index === undefined  || (pool.length >= this.domPoolSize && pool._lastRendered && pool._lastRendered === pool.head._prev)  ) {
-      debugger;
       console.log("stopping");
       return;
     }
