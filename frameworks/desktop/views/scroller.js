@@ -240,7 +240,7 @@ SC.ScrollerView = SC.View.extend(
         context.push('<div class="track"></div>',
                       '<div class="cap"></div>',
                       buttons,
-                      '<div class="thumb" style="height: '+thumbLength+'px;">',
+                      '<div class="thumb" style="height: '+thumbLength+'px; top: ' + thumbPosition + 'px;">',
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
@@ -249,7 +249,7 @@ SC.ScrollerView = SC.View.extend(
         context.push('<div class="track"></div>',
                       '<div class="cap"></div>',
                       buttons,
-                      '<div class="thumb" style="width: '+thumbLength+'px;">',
+                      '<div class="thumb" style="width: '+thumbLength+'px; left: ' + thumbPosition + 'px;">',
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
