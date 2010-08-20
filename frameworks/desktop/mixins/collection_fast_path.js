@@ -12,8 +12,11 @@ SC.CollectionFastPath = {
     this._shouldBeShowing = SC.CoreSet.create();
     this._viewsForItem = {};
     this._tempAttrs = {};
-    
   },
+  
+  contentDidChange: function() {
+    // setup range observer
+  }.observes('content'),
   
   /**
     Returns YES if the item at the index is a group.
@@ -61,6 +64,7 @@ SC.CollectionFastPath = {
     return ExampleView;
   },
   
+  // copies nowShowing to a coreset and track the largest and smallest index in it
   processNowShowing: function(index) {
     var shouldBeShowing = this._shouldBeShowing;
     
@@ -76,7 +80,7 @@ SC.CollectionFastPath = {
     curShowing = this._curShowing,
     shouldBeShowing = this._shouldBeShowing,
     i, len, index,
-    thing = this._thing || (this._thing = []),
+    pendingRemovals = this._pendingRemovals || (this._pendingRemovals = []),
     invalid;
     
     if(!content) return;
@@ -99,6 +103,7 @@ SC.CollectionFastPath = {
     this.maxShowing = 0;
     this.minShowing = content.length;
     
+    // we need to be able to iterate nowshowing more easily, so copy it into a coreset
     nowShowing.forEach(this.processNowShowing, this);
     
     this.topBackground = this.maxShowing;
@@ -111,21 +116,21 @@ SC.CollectionFastPath = {
       
       // remove and send to the pool
       if(!shouldBeShowing.contains(index)) {
-        if(this._indexMap[index] === null) {
-        }
-        thing.push(this._indexMap[index]);
+        // need to use a seperate array to remove after iterating due to the way coreset handles removals
+        pendingRemovals.push(this._indexMap[index]);
       }
     }
     
-    len = thing.length;
+    // now actually queue them
+    len = pendingRemovals.length;
     for(i = 0;i < len; i++) {
-      this.sendToDOMPool(thing.pop());
+      this.sendToDOMPool(pendingRemovals.pop());
     }
     
     // adds will be handled by the incremental renderer
     this.incrementalRenderer.add(this);
     
-    // start the background queue (nothing will happen if we are scrolling anyway)
+    // add ourself to be background rendered; it won't actually start until it's ready
     this.backgroundRenderer.add(this);
     
     if(!scrollOnly) {
