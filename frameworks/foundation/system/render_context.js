@@ -16,6 +16,9 @@ SC.MODE_APPEND = 'append';
 /** set update mode on context to prepend content */
 SC.MODE_PREPEND = 'prepend';
 
+/** list of numeric properties that should not have 'px' appended */
+SC.NON_PIXEL_PROPERTIES = 'zIndex font-weight opacity'.w();
+
 /** a list of styles that get expanded into multiple properties, add more as you discover them */
 SC.COMBO_STYLES = {
   WebkitTransition: 'WebkitTransitionProperty WebkitTransitionDuration WebkitTransitionDelay WebkitTransitionTimingFunction'.w()
@@ -394,7 +397,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         value = styles[key];
         if (value === null) continue; // skip empty styles
 
-        if (typeof value === SC.T_NUMBER && !(key === "zIndex" || key === "font-weight" || key === "opacity")) value += "px";
+        if (typeof value === SC.T_NUMBER  && !SC.NON_PIXEL_PROPERTIES.contains(key)) value += "px";
         pair[0] = this._dasherizeStyleName(key);
         pair[1] = value;
         joined.push(pair.join(': '));
@@ -457,7 +460,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           if(!styles.hasOwnProperty(key)) continue ;
           value = styles[key];
           if (value === null) continue; // skip empty styles
-          if (typeof value === SC.T_NUMBER && key !== "zIndex") value += "px";
+          if (!isNaN(value) && !SC.NON_PIXEL_PROPERTIES.contains(key)) value += "px";
 
           pair[0] = this._dasherizeStyleName(key);
           pair[1] = value;
