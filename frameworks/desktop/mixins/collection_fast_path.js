@@ -287,6 +287,7 @@ SC.CollectionFastPath = {
   
   configureItemView: function(itemView, attrs) {
     // set settings. Self explanatory.
+      console.log("configuring");
     itemView.beginPropertyChanges();
     itemView.setIfChanged('content', attrs.content);
     itemView.setIfChanged('contentIndex', attrs.contentIndex);
@@ -350,7 +351,7 @@ SC.CollectionFastPath = {
     }
     
     view = exampleView.create(attrs);
-    view.createdFromExampleView = exampleView;
+    //view.createdFromExampleView = exampleView;
     
     this.appendChild(view);
     
