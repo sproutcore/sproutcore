@@ -16,7 +16,12 @@ SC.CollectionFastPath = {
   
   contentDidChange: function() {
     // setup range observer
+    this.get('content').addRangeObserver(null, this, this.rangeDidChange);
   }.observes('content'),
+  
+  rangeDidChange: function(array, objects, key, indexes, context) {
+    console.log("ROFLCOPTER");
+  },
   
   /**
     Returns YES if the item at the index is a group.
@@ -195,7 +200,6 @@ SC.CollectionFastPath = {
     if(!view) view = pool.dequeue();
     
     if(view) {
-      //console.log("view found: ", view.contentIndex, "for: ", index);
       return this.unmapView(view);
     }
   },
@@ -287,7 +291,6 @@ SC.CollectionFastPath = {
   
   configureItemView: function(itemView, attrs) {
     // set settings. Self explanatory.
-      console.log("configuring");
     itemView.beginPropertyChanges();
     itemView.setIfChanged('content', attrs.content);
     itemView.setIfChanged('contentIndex', attrs.contentIndex);
@@ -444,6 +447,7 @@ SC.CollectionFastPath = {
     var indexMap = this._indexMap;
     
     // if the top background doesn't exist we can background render it
+    // TODO: perhaps make it repool the view here if it finds one
     if((!indexMap[index])) {
       return YES;
     }
@@ -487,11 +491,10 @@ SC.CollectionFastPath = {
     
     // dont render if the last view rendered is the tail
     if(index === undefined  || (pool.length >= this.domPoolSize && pool._lastRendered && pool._lastRendered === pool.head._prev)  ) {
-      console.log("stopping");
       return;
     }
     
-    console.log("background rendering: ", index);
+    //console.log("background rendering: ", index);
     
     return this.renderBackground(index);
   },
@@ -547,7 +550,6 @@ SC.CollectionFastPath = {
     // starts a new background rendering cycle
     start: function() {
       if(!this.rendering) {
-        console.log("starting");
         SC.backgroundTaskQueue.push(this);
         this.rendering = YES;
       }

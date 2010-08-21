@@ -16,7 +16,11 @@ SC.TaskQueue = SC.Task.extend({
   
   init: function() {
     var self = this;
+<<<<<<< HEAD
     this._doIdleEntry = function() {
+=======
+    this._setTimeoutCall = function() {
+>>>>>>> tweaks to rendering and fix background renders being triggered by incremental renderer
       self._idleEntry();
     };
     
