@@ -3163,8 +3163,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // If we're animating other transforms at different speeds, don't use acceleratedLayer
       if (
         animatingTransforms &&
-        (layout['animateTop'] && layout['animateTop'].duration !== transformAnimationDuration) ||
-        (layout['animateLeft'] && layout['animateLeft'].duration !== transformAnimationDuration)
+        (
+          (layout['animateTop'] && layout['animateTop'].duration !== transformAnimationDuration) ||
+          (layout['animateLeft'] && layout['animateLeft'].duration !== transformAnimationDuration)
+        )
       ) {
         canUseAcceleratedLayer = NO;
       }
