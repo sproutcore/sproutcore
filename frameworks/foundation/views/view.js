@@ -110,6 +110,11 @@ SC.CSS_TRANSFORM_MAP = {
   }
 };
 
+/**
+  Properties that can be animated
+*/
+SC.ANIMATABLE_PROPERTIES = ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "scale", "rotate"];
+
 /** 
   @class
   
@@ -2302,22 +2307,28 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (!hash.hasOwnProperty(key)) continue;
       value = hash[key];
       cur = layout[key];
-      curAnim = layout['animate'+key.capitalize()];
-      
-      if (value === null || value === undefined) {
-        throw "Can only animate to an actual value!";
+
+      if (SC.ANIMATABLE_PROPERTIES.contains(key)) {
+        curAnim = layout['animate'+key.capitalize()];
+        
+        if (value === null || value === undefined) {
+          throw "Can only animate to an actual value!";
+        } else {
+          if (cur !== value) didChange = YES;
+
+          // FIXME: We should check more than duration
+          // Also, will we allow people to just set a number instead of a hash? If so, we have to account for that.
+          if (curAnim && curAnim.duration !== options.duration) didChange = YES ;
+
+          layout[key] = value ;
+          
+          // I'm pretty sure we want to be cloning this because we may be applying it
+          // to multiple properties which can be edited independently
+          layout['animate'+key.capitalize()] = SC.clone(options);
+        }
       } else {
         if (cur !== value) didChange = YES;
-
-        // FIXME: We should check more than duration
-        // Also, will we allow people to just set a number instead of a hash? If so, we have to account for that.
-        if (curAnim && curAnim.duration !== options.duration) didChange = YES ;
-
-        layout[key] = value ;
-        
-        // I'm pretty sure we want to be cloning this because we may be applying it
-        // to multiple properties which can be edited independently
-        layout['animate'+key.capitalize()] = SC.clone(options);
+        layout[key] = value;
       }
     }
 
