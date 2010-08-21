@@ -10,6 +10,13 @@
   @since SproutCore 1.1
 */
 SC.BaseTheme.renderers.Well = SC.Renderer.extend({
+
+  // leave it set to this constant for backwards compatibility
+  contentLayout: {
+    top: SC.WELL_CONTAINER_PADDING, bottom: SC.WELL_CONTAINER_PADDING,
+    left: SC.WELL_CONTAINER_PADDING, right: SC.WELL_CONTAINER_PADDING
+  },
+  
   render: function(context) {
     context.push("<div class='top-left-edge'></div>",
       "<div class='top-edge'></div>",
