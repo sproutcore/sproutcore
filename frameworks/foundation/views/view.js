@@ -2336,31 +2336,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (didChange) this.set('layout', layout) ;
     
     return this ;
-
-//    if (SC.platform.supportsCSSTransitions) {
-//      var layer = this.get('layer'),
-//          hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
-//          layout = this.get('layout'),
-//          actualKey, css = [], activeKey;
-//
-//      // These rules mirror the ones in layoutStyle
-//      if (
-//        hasAcceleratedLayer && (
-//          (key === 'left' && !SC.empty(layout.width)) ||
-//          (key === 'top' && !SC.empty(layout.height))
-//        ) && !SC.none(value) && !SC.isPercentage(value)
-//      ) {
-//        actualKey = "-"+SC.platform.cssPrefix+"-transform";
-//      } else {
-//        actualKey = key;
-//      }
-//
-//      if (this._activeAnimations[actualKey]) console.warn("Already animating '"+actualKey+"', will be overridden!");
-//    } else {
-//      console.warn("Animations not supported by this platform!");
-//      this.adjust(key, value);
-//      if (callback) SC.View.runCallback(callback);
-//    }
   },
 
   /**
