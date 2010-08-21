@@ -350,8 +350,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   themed: function(property) {
     var val = this.get(property);
     if (val === SC.FROM_THEME) {
-      if (this.renderer) return this.renderer[property];
-      else return this.get(property + "Default");
+      if (this.renderer) {
+        val = this.renderer[property];
+        if (val !== undefined) return val;
+      }
+      return this.get(property + "Default");
     }
     return val;
   },
