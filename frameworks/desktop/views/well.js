@@ -6,7 +6,7 @@
 // ==========================================================================
 
 // Constants
-SC.WELL_CONTAINER_PADDING=15;
+SC.WELL_CONTAINER_PADDING = 15;
 
 /** @class
 
@@ -28,9 +28,11 @@ SC.WellView = SC.ContainerView.extend(
     Layout for the content of the container view.
     @property {Object}
   */
-  contentLayout: {
-    top:SC.WELL_CONTAINER_PADDING, bottom:SC.WELL_CONTAINER_PADDING,
-    left:SC.WELL_CONTAINER_PADDING, right:SC.WELL_CONTAINER_PADDING},
+  contentLayout: SC.FROM_THEME,
+  contentLayoutDefault: {
+    top: SC.WELL_CONTAINER_PADDING, bottom: SC.WELL_CONTAINER_PADDING,
+    left: SC.WELL_CONTAINER_PADDING, right: SC.WELL_CONTAINER_PADDING
+  },
   
   
   /**
@@ -40,10 +42,12 @@ SC.WellView = SC.ContainerView.extend(
   
   createChildViews: function() {
     // if contentView is defined, then create the content
+    var contentLayout = this.themed('contentLayout');
+    
     var view = this.get('contentView') ;
     if (view) {
       view = this.contentView = this.createChildView(view) ;
-      view.set('layout', this.contentLayout);
+      view.set('layout', contentLayout);
       this.childViews = [view] ;
     } 
   },
