@@ -13,6 +13,16 @@ sc_require("tasks/task");
   bundles while not blocking user interaction.
 */
 SC.TaskQueue = SC.Task.extend({
+  
+  init: function() {
+    var self = this;
+    this._setTimeoutCall = function() {
+      self._idleEntry();
+    };
+    
+    this._tasks = [];
+  },
+  
   /**
     If YES, the queue will automatically run in the background when the browser idles.
   */
@@ -38,9 +48,9 @@ SC.TaskQueue = SC.Task.extend({
     The minimum elapsed time since the last event. As a rule of thumb, perhaps
     something equivalent to the expected duration of a task.
   */
-  minimumIdleDuration: 500,
+  minimumIdleDuration: 100,
   
-  _tasks: [],
+  _tasks: null,
   
   /**
     Returns YES if there are tasks in the queue.

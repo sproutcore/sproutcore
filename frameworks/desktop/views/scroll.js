@@ -1492,7 +1492,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // as well.
     var absXVelocity = Math.abs(touch.decelerationVelocity.x);
     var absYVelocity = Math.abs(touch.decelerationVelocity.y);
-    if (absYVelocity < 0.01 && absXVelocity < 0.01 && Math.abs(sv) < 0.01) {
+    if (absYVelocity < 0.05 && absXVelocity < 0.05 && Math.abs(sv) < 0.05) {
       // we can reset the timeout, as it will no longer be required, and we don't want to re-cancel it later.
       touch.timeout = null;
       this.touch = null;
