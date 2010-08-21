@@ -3120,8 +3120,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lcX = layout.centerX, 
         lcY = layout.centerY,
         canUseAcceleratedLayer = this.get('hasAcceleratedLayer'),
-        translateTop = 0,
-        translateLeft = 0;
+        translateTop = null,
+        translateLeft = null;
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
       error= SC.Error.desc("%@.layout() you cannot use width:auto if ".fmt(this) +
               "staticLayout is disabled","%@".fmt(this),-1);
@@ -3364,7 +3364,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         // Remove previous transforms
         if (this._lastAcceleratedTransforms) currentTransforms.removeObjects(this._lastAcceleratedTransforms);
 
-        halTransforms = ['translateX('+translateLeft+'px)', 'translateY('+translateTop+'px)'];
+        halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
 
         // FIXME: This join.match is a bit hackish
         if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
@@ -3427,8 +3427,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
             (
               (
                 canUseAcceleratedLayer && (
-                  (propertyKey === 'top' && translateTop) ||
-                  (propertyKey === 'left' && translateLeft)
+                  (propertyKey === 'top' && !SC.empty(translateTop)) ||
+                  (propertyKey === 'left' && !SC.empty(translateLeft))
                 )
               ) ||
               SC.CSS_TRANSFORM_MAP[propertyKey]
