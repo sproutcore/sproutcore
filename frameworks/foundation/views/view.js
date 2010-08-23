@@ -2752,8 +2752,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._viewFrameDidChange();
 
     // Also notify our children.
-    var cv = this.childViews, len = cv.length, idx, view ;
-    for (idx=0; idx<len; ++idx) {
+    var cv = this.childViews, len, idx, view ;
+    for (idx=0; idx<(len= cv.length); ++idx) {
       view = cv[idx];
       view.parentViewDidResize();
     }
