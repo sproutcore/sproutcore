@@ -703,6 +703,9 @@ SC.ListItemView = SC.View.extend(
     if (labelKey && content && content.set) {
      content.set(labelKey, finalValue) ;
     }
+
+    this.$label().css("opacity", this._oldOpacity);
+
     this.displayDidChange();
   },
 
