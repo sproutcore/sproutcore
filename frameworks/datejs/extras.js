@@ -84,7 +84,7 @@
      * Converts the value of the current Date object to its equivalent string representation using a PHP/Unix style of date format specifiers.
      *
      * The following descriptions are from http://www.php.net/strftime and http://www.php.net/manual/en/function.date.php. 
-     * Copyright © 2001-2008 The PHP Group
+     * Copyright Â© 2001-2008 The PHP Group
      * 
      * Format Specifiers
      <pre>
