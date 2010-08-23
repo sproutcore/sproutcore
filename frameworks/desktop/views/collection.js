@@ -779,10 +779,11 @@ SC.CollectionView = SC.View.extend(
   */
   reload: function(indexes) {
     var invalid = this._invalidIndexes ;
-    if (indexes && invalid !== YES) {
-      if (invalid) invalid.add(indexes);
-      else invalid = this._invalidIndexes = indexes.clone();
-
+    if (indexes !== undefined && invalid !== YES) {
+      if (!invalid) invalid = this._invalidIndexes = SC.IndexSet.create();
+      
+      invalid.add(indexes);
+      
     }
     else {
       this._invalidIndexes = YES ; // force a total reload

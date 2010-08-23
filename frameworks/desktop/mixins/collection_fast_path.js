@@ -14,15 +14,6 @@ SC.CollectionFastPath = {
     this._tempAttrs = {};
   },
   
-  contentDidChange: function() {
-    // setup range observer
-    this.get('content').addRangeObserver(null, this, this.rangeDidChange);
-  }.observes('content'),
-  
-  rangeDidChange: function(array, objects, key, indexes, context) {
-    console.log("ROFLCOPTER");
-  },
-  
   /**
     Returns YES if the item at the index is a group.
     
@@ -78,6 +69,19 @@ SC.CollectionFastPath = {
     
     shouldBeShowing.add(index);
   },
+  
+  wantsUpdate: function(view) {
+    // make sure the view is currently being rendered
+    if(this._indexMap[view.contentIndex] === view) {
+      
+      console.log(view.contentIndex, " wants update");
+      this.reload(view.contentIndex);
+    
+    // if the view was hidden due to changing type, mark it dirty so if it's used again it will update properly
+    } else {
+      view._cfp_dirty = YES;
+    }
+  },
 
 
   reloadIfNeeded: function(nowShowing, scrollOnly) {
@@ -96,10 +100,7 @@ SC.CollectionFastPath = {
     if (!scrollOnly) {
       invalid = this._invalidIndexes;
       if (!invalid || !this.get('isVisibleInWindow')) return this;
-      this._invalidIndexes = NO; 
       
-      // tell others we will be reloading
-      if (invalid.isIndexSet && invalid.contains(nowShowing)) invalid = YES ;
       if (this.willReload) this.willReload(invalid === YES ? null : invalid);
     }
    
@@ -131,6 +132,9 @@ SC.CollectionFastPath = {
     for(i = 0;i < len; i++) {
       this.sendToDOMPool(pendingRemovals.pop());
     }
+    
+    // just to be sure
+    pendingRemovals.length = 0;
     
     // adds ourself to the incremental renderer and stops any background rendering
     this.incrementalRenderer.add(this);
@@ -176,7 +180,7 @@ SC.CollectionFastPath = {
         pool.enqueue(view);
       }
       
-       pool._lastRendered = view;
+      pool._lastRendered = view;
        
     } else {
       pool.enqueue(view);
@@ -188,16 +192,10 @@ SC.CollectionFastPath = {
   viewFromDOMPoolFor: function(index) {
     var exampleView = this.exampleViewForIndex(index),
     pool = this.domPoolForExampleView(exampleView),
-    curShowing = this._curShowing,
     view;
     
-    // first see if a pooled view for the item already exists
-    if(view = this.pooledViewForItem(index)) {
-      pool.remove(view);
-    }
-    
     // otherwise take one from the pool (null if pool is empty)
-    if(!view) view = pool.dequeue();
+    view = pool.dequeue();
     
     if(view) {
       return this.unmapView(view);
@@ -258,6 +256,17 @@ SC.CollectionFastPath = {
     this._indexMap[index] = view;
   },
   
+  unmapView: function(view) {
+    var viewsForItem = this._viewsForItem,
+    item = this.get('content').objectAt(view.contentIndex),
+    views = viewsForItem[SC.guidFor(item)];
+    
+    views.remove(view);
+    this._indexMap[view.contentIndex] = null;
+    
+    return view;
+  },
+  
   // looks at the views for an item and then determines if any of them are in a pool. if they are, takes them out and returns them
   pooledViewForItem: function(index) {
     var viewsForItem = this._viewsForItem,
@@ -276,17 +285,6 @@ SC.CollectionFastPath = {
       }
     }
     return null;
-  },
-  
-  unmapView: function(view) {
-    var viewsForItem = this._viewsForItem,
-    item = this.get('content').objectAt(view.contentIndex),
-    views = viewsForItem[SC.guidFor(item)];
-    
-    views.remove(view);
-    this._indexMap[view.contentIndex] = null;
-    
-    return view;
   },
   
   configureItemView: function(itemView, attrs) {
@@ -343,47 +341,92 @@ SC.CollectionFastPath = {
     if (!attrs.layout) attrs.layout = ExampleView.prototype.layout;
   },
   
-  // create and configure a view (really slowly)
-  renderItem: function(index, attrs) {
-    var exampleView = this.exampleViewForIndex(index),
-    view;
-    
-    if(!attrs) {
-      attrs = this._tempAttrs;
-      this.setAttributes(index, attrs);
-    }
-    
-    view = exampleView.create(attrs);
-    //view.createdFromExampleView = exampleView;
-    
+  renderItem: function(exampleView, attrs) {
+    var view = exampleView.create(attrs);
+    view.awake();
     this.appendChild(view);
     
     return view;
   },
   
+  // create and configure a view (really slowly)
+  renderNew: function(index) {
+    var exampleView = this.exampleViewForIndex(index), view, attrs;
+    
+    attrs = this._tempAttrs;
+    this.setAttributes(index, attrs);
+    
+    view = this.renderItem(exampleView, attrs);
+    
+    // if it was just rendered it's obviously not invalid anymore
+    this.validate(index);
+    
+    this.mapView(view, index);
+    
+    return view;
+  },
+  
   renderFast: function(index) {
-    var view;
+    var view, exampleView;
     
     // if it already exists in the right place we don't need to do anything
     if(view = this._indexMap[index]) {
+      // maybe move this logic down in case an item can be rendered more than one way
+      exampleView = this.exampleViewForIndex(index);
+      
+      // if we just rendered it, it is no longer in a pool
       var pool = this.domPoolForExampleView(view.createdFromExampleView);
       pool.remove(view);
-      return view;
+      
+      // if the item changed types we have to move the view to an offscreen pool (like the original fastpath) and replace it with a new view for the new type
+      if(exampleView !== view.createdFromExampleView) {
+        // make sure it is no longer treated as a rendered view; this is like unmap but it leaves it mapped to the item in case the item is rendered later
+        this._indexMap[index] = null;
+      
+        // move it off screen
+        var f = view.get("frame");
+        view.adjust({ top: -f.height });
+      
+        // pool it and null so we render it later
+        this.sendToDOMPool(view);
+        view = null;
+        
+      // if we are going to be keeping the view, make sure that it's updated
+      } else if(this.isInvalid(index)) {
+        view.update();
+      }
+    }
     
     // we have to do actual work :(
-    } else {
+    if(!view ) {
       var attrs = this._tempAttrs;
       this.setAttributes(index, attrs);
       
-      // if a hidden view already exists for this item or a pooled view exists take it and use it
-      if(view = this.viewFromDOMPoolFor(index)) {
+      // if a view has been rendered for the same item already, just take it and move it into its new position
+      if(view = this.pooledViewForItem(index)) {
         this.configureItemView(view, attrs);
+        
+        if(view._cfp_dirty) {
+          view.update();
+          view._cfp_dirty = NO;
+        }
+        
+      // if a pooled view exists take it and update it to match its new content
+      } else if(view = this.viewFromDOMPoolFor(index)) {
+        this.configureItemView(view, attrs);
+        
+        view.update();
       
       // otherwise it needs to be rendered from scratch
       } else {
-        view = this.renderItem(index, attrs);
+        view = this.renderItem(this.exampleViewForIndex(index), attrs);
       }
     }
+    
+    // if it was just rendered it's obviously not invalid anymore
+    this.validate(index);
+    
+    this.mapView(view, index);
     
     return view;
   },
@@ -393,7 +436,6 @@ SC.CollectionFastPath = {
     var view = this.renderFast(index);
     
     this._curShowing.add(index);
-    this.mapView(view, index);
     
     return view;
   },
@@ -405,14 +447,12 @@ SC.CollectionFastPath = {
     view;
     
     if(pool.length < this.domPoolSize) {
-      view = this.renderItem(index);
+      view = this.renderNew(index);
     } else {
       view = this.renderFast(index);
     }
     
     this.sendToDOMPool(view, YES);
-    
-    this.mapView(view, index);
     
     return view;
   },
@@ -429,7 +469,7 @@ SC.CollectionFastPath = {
     
     for(i = 0; i < len; i++) {
       index = shouldBeShowing[i];
-      if(!curShowing.contains(index)) return index;
+      if(!curShowing.contains(index) || this.isInvalid(index)) return index;
     }
   },
   
@@ -441,18 +481,40 @@ SC.CollectionFastPath = {
     }
   },
   
-  // checks whether a given index is eligible to be rendered
-  // TODO: also check if it is invalid and needs to be re-rendered
-  canBackgroundRender: function(index) {
-    var indexMap = this._indexMap;
+  isInvalid: function(index) {
+    var invalidIndexes = this._invalidIndexes;
     
+    return (invalidIndexes && invalidIndexes.isIndexSet && invalidIndexes.contains(index));
+  },
+  
+  invalidate: function(index) {
+    var invalidIndexes = this._invalidIndexes;
+
+    if(!invalidIndexes) {
+      this._invalidIndexes = SC.IndexSet.create();
+
+    } else if (invalidIndexes === YES) {
+      return invalidIndexes;
+    }
+
+    invalidIndexes.add(index);
+  },
+  
+  validate: function(index) {
+    var invalidIndexes = this._invalidIndexes;
+
+    if(invalidIndexes.isIndexSet) {
+      invalidIndexes.remove(index);
+    }
+
+    return invalidIndexes;
+  },
+    
+  // checks whether a given index is eligible to be rendered
+  canBackgroundRender: function(index) {
     // if the top background doesn't exist we can background render it
     // TODO: perhaps make it repool the view here if it finds one
-    if((!indexMap[index])) {
-      return YES;
-    }
-    
-    return NO;
+    return !this._indexMap[index] || this.isInvalid(index);
   },
   
   _parity: YES,
