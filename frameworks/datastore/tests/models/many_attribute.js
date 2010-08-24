@@ -230,6 +230,17 @@ test("modifying a toMany array should mark the record as changed", function() {
 
 });
 
+test("Modifying a toMany array using replace", function() {
+  var recs = rec.get('barToOne'),
+      objectForRemoval = recs.objectAt(1);
+  
+  recs.replace(1, 1, null); // the object should be removed
+  
+  ok(objectForRemoval !== recs.objectAt(1), "record should not be present after a replace");
+  equals(bar2.get('fooToOne'), null, "record should have notified attribute of change");
+});
+
+
 test("modifying a toMany array within a nested store", function() {
 
   var child = MyApp.store.chain() ; // get a chained store

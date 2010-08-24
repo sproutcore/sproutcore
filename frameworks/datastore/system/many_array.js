@@ -232,7 +232,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       if (toRemove) SC.ManyArray._toRemove = null; // reuse if possible
       else toRemove = [];
       
-      for(i=0;i<amt;i++) toRemove[i] = this.objectAt(i);
+      for(i=0;i<amt;i++) toRemove[i] = this.objectAt(idx + i);
     }
     
     // pass along - if allowed, this should trigger the content observer 
