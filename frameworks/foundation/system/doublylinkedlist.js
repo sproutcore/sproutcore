@@ -16,6 +16,7 @@ SC.DoublyLinkedList = SC.mixin({},
     },
     
     insertBetween: function(item, prev, next) {
+      if(!next) debugger;
       prev._next = item;
       item._prev = prev;
       
