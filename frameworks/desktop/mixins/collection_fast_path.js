@@ -469,9 +469,12 @@ SC.CollectionFastPath = {
       //console.log("reusing view from ", view.contentIndex, "for", index);
       
       this.configureItemView(view, attrs);
+      
+      // need to fire observers now or else they will trigger an extra run loop later
       this._ignore = YES;
-      SC.Binding.flushPendingChanges(); // need to fire observers now or else they will trigger an extra run loop later
+      SC.Binding.flushPendingChanges();
       this._ignore = NO;
+      
       // replace the view or force-update it since we know the content changed
       view = this.updateView(view, YES);
     }
