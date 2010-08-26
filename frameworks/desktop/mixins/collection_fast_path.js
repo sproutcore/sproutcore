@@ -15,11 +15,26 @@ SC.CollectionFastPath = {
     this._invalidIndexes = SC.CoreSet.create();
   },
   
+  _cfp_contentRangeObserver: null,
+  
+  contentDidChange: function(a, b, c, d,e) {
+    if(this._cfp_contentRangeObserver) this._cfp_contentRangeObserver.destroy();
+    
+    var content = this.get('content');
+    
+    if(content) this._cfp_contentRangeObserver = content.addRangeObserver(null, this, this.contentIndicesDidChange);
+  }.observes('content'),
+  
+  contentIndicesDidChange: function(array, objects, key, indexes, context) {
+    this.reload(indexes);
+  },
+  
   _cv_nowShowingDidChange: function() {
     if (this.get('isVisibleInWindow')) this.invokeOnce(this.reloadIfNeeded);
   },
   
   reload: function(indexes) {
+    console.log("stuff changed", indexes);
     if(indexes) {
       if(indexes.isIndexSet) {
         indexes.forEach(this.invalidate, this);
@@ -289,6 +304,7 @@ SC.CollectionFastPath = {
   },
   
   unmapView: function(view) {
+    // TODO: fix this
     var viewsForItem = this._viewsForItem,
     item = this.get('content').objectAt(view.contentIndex),
     views = viewsForItem[SC.guidFor(item)];
@@ -376,7 +392,8 @@ SC.CollectionFastPath = {
   updateView: function(view, force) {
     // if the item changed types we have to move the view to an offscreen pool (like the original fastpath) and replace it with a new view for the new type
     var exampleView = this.exampleViewForIndex(view.contentIndex),
-    pool = this.domPoolForExampleView(view.createdFromExampleView);
+    pool = this.domPoolForExampleView(view.createdFromExampleView),
+    item = this.get('content').objectAt(view.contentIndex);
     
     if(exampleView !== view.createdFromExampleView) {
       // make sure it is no longer treated as a rendered view; this is like unmap but it leaves it mapped to the item in case the item is rendered later
@@ -394,6 +411,14 @@ SC.CollectionFastPath = {
       
     // if we are going to be keeping the view, make sure that it's updated
     } else if(force || view._cfp_dirty || this.isInvalid(view.contentIndex)) {
+      
+      // check if it went invalid because its backing item was changed, and update if so
+      if(item !== view.content) {
+        view.set('content', item);
+        // flush now so we don't get an extra notification later
+        SC.Binding.flushPendingChanges();
+      }
+      
       view.update();
       
       view._cfp_dirty = NO;
@@ -408,6 +433,7 @@ SC.CollectionFastPath = {
   renderItem: function(exampleView, attrs) {
     var view = exampleView.create(attrs);
     
+    SC.Binding.flushPendingChanges();
     this.appendChild(view);
     
     return view;
