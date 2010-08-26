@@ -293,32 +293,25 @@ SC.CollectionFastPath = {
     this._lastTouchScrollTime = Date.now();
   },
   
+  // the biggest use for this is reusing views that are mapped to undefined
   mapView: function(view, index) {
-    var item = view.content;
-    
-    // if it is a sparse array, the item may not have been filled yet so it shouldn't be mapped to anything
-    if(item) {
-      var views = this._viewsForItem[SC.guidFor(item)] || (this._viewsForItem[SC.guidFor(item)] = SC.CoreSet.create());
-    
-      // add to cache for item
-      views.add(view);
-    }
-    
+    var item = view.content,
+    views = this._viewsForItem[SC.guidFor(item)] || (this._viewsForItem[SC.guidFor(item)] = SC.CoreSet.create());
+  
+    // add to cache for item
+    views.add(view);
+  
     this._indexMap[index] = view;
   },
   
   unmapView: function(view) {
     var viewsForItem = this._viewsForItem,
-    item = view.content;
+    item = view.content,
+    views = viewsForItem[SC.guidFor(item)];
     
-    // again, if our content is a sparse array this item would never have been mapped to anything
-    if(item) {
-      var views = viewsForItem[SC.guidFor(item)];
-      
-      if(!views) debugger;
-    
-      views.remove(view);
-    }
+    if(!views) debugger;
+  
+    views.remove(view);
     
     this._indexMap[view.contentIndex] = null;
     
