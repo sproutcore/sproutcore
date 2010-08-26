@@ -471,7 +471,7 @@ SC.mixin( /** @scope SC */ {
     // available we'll use it for speed.
     if (el.getBoundingClientRect) {
       var boundingRect = el.getBoundingClientRect();
-      return { x:boundingRect.left, y:boundingRect.top };
+      return { x:boundingRect.left+window.scrollLeft, y:boundingRect.top+window.scrollTop };
     }
     
     var valueL = 0, valueT = 0, cqElement, overflow, left, top, offsetParent,
