@@ -48,7 +48,7 @@ SC.TaskQueue = SC.Task.extend({
     The minimum elapsed time since the last event. As a rule of thumb, perhaps
     something equivalent to the expected duration of a task.
   */
-  minimumIdleDuration: 100,
+  minimumIdleDuration: 500,
   
   _tasks: null,
   

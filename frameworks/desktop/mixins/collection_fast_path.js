@@ -294,22 +294,32 @@ SC.CollectionFastPath = {
   },
   
   mapView: function(view, index) {
-    var item = this.get('content').objectAt(index),
-    views = this._viewsForItem[SC.guidFor(item)] || (this._viewsForItem[SC.guidFor(item)] = SC.CoreSet.create());
+    var item = view.content;
     
-    // add to cache for item
-    views.add(view);
+    // if it is a sparse array, the item may not have been filled yet so it shouldn't be mapped to anything
+    if(item) {
+      var views = this._viewsForItem[SC.guidFor(item)] || (this._viewsForItem[SC.guidFor(item)] = SC.CoreSet.create());
+    
+      // add to cache for item
+      views.add(view);
+    }
     
     this._indexMap[index] = view;
   },
   
   unmapView: function(view) {
-    // TODO: fix this
     var viewsForItem = this._viewsForItem,
-    item = this.get('content').objectAt(view.contentIndex),
-    views = viewsForItem[SC.guidFor(item)];
+    item = view.content;
     
-    views.remove(view);
+    // again, if our content is a sparse array this item would never have been mapped to anything
+    if(item) {
+      var views = viewsForItem[SC.guidFor(item)];
+      
+      if(!views) debugger;
+    
+      views.remove(view);
+    }
+    
     this._indexMap[view.contentIndex] = null;
     
     return view;
@@ -414,9 +424,14 @@ SC.CollectionFastPath = {
       
       // check if it went invalid because its backing item was changed, and update if so
       if(item !== view.content) {
+        // the item the view is mapped to could have changed, so it needs to be remapped
+        this.unmapView(view);
+        
         view.set('content', item);
         // flush now so we don't get an extra notification later
         SC.Binding.flushPendingChanges();
+        
+        this.mapView(view);
       }
       
       view.update();
