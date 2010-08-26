@@ -596,8 +596,18 @@ SC.CoreQuery = (function() {
     */
     css: function( key, value ) {
       // ignore negative width and height values
-      if ((key === 'width' || key === 'height') && parseFloat(value,0) < 0 ) {
-        value = undefined;
+      if ((key === 'width' || key === 'height')) {
+        if( parseFloat(value,0) < 0 ) {
+          value = undefined;
+        }
+        // to avoid 'invalid argument' being thrown in IE
+        else if(typeof value === 'string' && !parseInt(value.substr(0,1), 10)) {
+          var e = new Error("CoreQuery:css() width or height cannot be a non-numeric value (has to be 1px, 15pt etc.)");
+          e.key = key;
+          e.value = value;
+          e.coreQueryObject = this.toString();
+          throw e;
+        }
       }
       return this.attr( key, value, "curCSS" );
     },
