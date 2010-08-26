@@ -276,7 +276,8 @@ SC.PopupButtonView = SC.ButtonView.extend(
   {
     if (!this.get('isEnabled')) return NO ;
     var menu = this.get('instantiatedMenu') ;
-    return (!!menu && menu.performKeyEquivalent(charCode, evt)) ;
+
+    return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;
   },
 
   /** @private */

@@ -1001,9 +1001,24 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES;
   },
 
-  performKeyEquivalent: function(keyEquivalent) {
+  /** @private
+    Called by the view hierarchy when the menu should respond to a shortcut
+    key being pressed.
+
+    Normally, the menu will only respond to key presses when it is visible.
+    However, when the menu is part of another control, such as an
+    SC.PopupButtonView, the menu should still respond if it is hidden but its
+    parent control is visible. In those cases, the parameter
+    fromVisibleControl will be set to YES.
+
+    @param keyEquivalent {String} the shortcut key sequence that was pressed
+    @param fromVisibleControl {Boolean} if the shortcut key press was proxied
+    to this menu by a visible parent control
+    @returns {Boolean}
+  */
+  performKeyEquivalent: function(keyEquivalent, evt, fromVisibleControl) {
     //If menu is not visible
-    if (!this.get('isVisibleInWindow')) return NO;
+    if (!fromVisibleControl && !this.get('isVisibleInWindow')) return NO;
     
     // Look for menu item that has this key equivalent
     var menuItem = this._keyEquivalents[keyEquivalent];
