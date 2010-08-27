@@ -1713,7 +1713,6 @@ SC.RootResponder = SC.Object.extend({
 
     var handler = null, view = this._mouseDownView,
         targetView = this.targetViewForEvent(evt);
-    this._lastMouseUpAt = Date.now() ;
 
     // record click count.
     evt.clickCount = this._clickCount ;
@@ -1750,6 +1749,10 @@ SC.RootResponder = SC.Object.extend({
 
     // cleanup
     this._mouseCanDrag = NO; this._mouseDownView = null ;
+
+    // Save timestamp of mouseup at last possible moment.
+    // (This is used to calculate double click events)
+    this._lastMouseUpAt = Date.now() ;
   
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
