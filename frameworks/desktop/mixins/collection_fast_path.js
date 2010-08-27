@@ -37,7 +37,7 @@ SC.CollectionFastPath = {
   },
   
   reload: function(indexes) {
-    console.log("stuff changed", indexes);
+    // console.log("stuff changed", indexes);
     if(indexes) {
       if(indexes.isIndexSet) {
         indexes.forEach(this.invalidate, this);
