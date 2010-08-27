@@ -329,7 +329,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   keyDown: function(evt) {
     // handle tab key
     var i, item, items, len, value, isArray;
-    if (evt.which === 9) {
+    if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if(view) view.becomeFirstResponder();
       else evt.allowDefault();

@@ -1509,9 +1509,10 @@ SC.RootResponder = SC.Object.extend({
   */
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
-
     var keyCode = evt.keyCode;
-
+    if(SC.browser.mozilla && evt.keyCode===9){
+      this.keydownCounter=1;
+    } 
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
     // trigger a keyDown if it is is enter onKeyup.
@@ -1581,6 +1582,10 @@ SC.RootResponder = SC.Object.extend({
         keyCode   = evt.keyCode,
         isFirefox = !!SC.browser.mozilla;
 
+    if(SC.browser.mozilla && evt.keyCode===9){
+      this.keydownCounter++;
+      if(this.keydownCounter==2) return YES;
+    }
     // delete is handled in keydown() for most browsers
     if (isFirefox && (evt.which === 8)) {
       //get the keycode and set it for which.
@@ -1593,7 +1598,7 @@ SC.RootResponder = SC.Object.extend({
     } else {
       var isFirefoxArrowKeys = (keyCode >= 37 && keyCode <= 40 && isFirefox),
           charCode           = evt.charCode;
-      if ((charCode !== undefined && charCode === 0) && !isFirefoxArrowKeys) return YES;
+      if ((charCode !== undefined && charCode === 0 && evt.keyCode!==9) && !isFirefoxArrowKeys) return YES;
       if (isFirefoxArrowKeys) evt.which = keyCode;
       return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
