@@ -487,9 +487,11 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     this.set('isActive', NO); // track independently in case isEnabled has changed
 
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      if (this.touchIsInBoundary(touch)) this._action();
+      if (this.touchIsInBoundary(touch) && this.get('isEnabled')) {
+        this._action();
+      }
     }
-    
+
     touch.preventDefault();
     return YES ;
   },
