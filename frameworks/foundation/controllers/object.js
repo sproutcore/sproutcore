@@ -41,7 +41,7 @@ require('controllers/controller') ;
   setup your bindings so that they will convert the content to a single object 
   like so:
   
-    contentBinding: SC.Binding.Single('MyApp.listController.selection') ;
+    contentBinding: SC.Binding.single('MyApp.listController.selection') ;
 
   This will ensure that your content property is always a single object 
   instead of an array.
