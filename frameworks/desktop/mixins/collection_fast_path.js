@@ -13,6 +13,9 @@ SC.CollectionFastPath = {
     this._viewsForItem = {};
     this._tempAttrs = {};
     this._invalidIndexes = SC.CoreSet.create();
+    
+    // temporarily disabled for debugging purposes; re-enable when background rendering is better tested
+    // SC.backgroundTaskQueue.minimumIdleDuration = 100;
   },
   
   _cfp_contentRangeObserver: null,
@@ -167,6 +170,9 @@ SC.CollectionFastPath = {
       
         // remove and send to the pool
         if(!shouldBeShowing.contains(index)) {
+          // not sure what's causing this... it's either a view being pooled twice, something being put in curshowing without being mapped, or something being unmapped without being removed from curshowing
+          // or if something was (un)mapped with the wrong contentIndex assigned
+          if(!this._indexMap[index]) debugger;
           // need to use a seperate array to remove after iterating due to the way coreset handles removals
           pendingRemovals.push(this._indexMap[index]);
         }
@@ -211,6 +217,7 @@ SC.CollectionFastPath = {
   },
   
   sendToDOMPool: function(view, background) {
+    if(!view) debugger;
     //console.log("sending to pool", view.contentIndex, background);
     var exampleView = view.createdFromExampleView,
     pool = this.domPoolForExampleView(exampleView),
@@ -293,7 +300,7 @@ SC.CollectionFastPath = {
     this._lastTouchScrollTime = Date.now();
   },
   
-  // the biggest use for this is reusing views that are mapped to undefined
+  // the biggest use for this is reusing views that are mapped to undefined; it basically generates blank views on demand. it would be _slightly_ faster to have pre-generated blank views, but this is fine for now
   mapView: function(view, index) {
     var item = view.content,
     views = this._viewsForItem[SC.guidFor(item)] || (this._viewsForItem[SC.guidFor(item)] = SC.CoreSet.create());
@@ -330,8 +337,8 @@ SC.CollectionFastPath = {
       for(i = 0; i < len; i++) {
         view = views[i];
         
-        if(!this._shouldBeShowing.contains(view.contentIndex)) {
-          return view;
+        if(!this._shouldBeShowing.contains(view.contentIndex) && !this._curShowing.contains(view.contentIndex)) {
+          return this.unmapView(view);
         }
       }
     }
@@ -399,17 +406,18 @@ SC.CollectionFastPath = {
     item = this.get('content').objectAt(view.contentIndex);
     
     if(exampleView !== view.createdFromExampleView) {
-      // make sure it is no longer treated as a rendered view; this is like unmap but it leaves it mapped to the item in case the item is rendered later
+      // make sure it is no longer treated as a rendered view; this is like sendToDOMPool but it leaves it mapped to the item in case the item is rendered later
       this._indexMap[view.contentIndex] = null;
+      this._curShowing.remove(view.contentIndex);
     
       // move it off screen
       var f = view.get("frame");
       view.adjust({ top: -f.height });
     
-      // pool it and null so we render it later
+      // push it in front because we want it to get put back somewhere useful asap
       pool.push(view);
-      // this._curShowing.remove(index);
       
+      // null so we render it later
       view = null;
       
     // if we are going to be keeping the view, make sure that it's updated
@@ -468,6 +476,8 @@ SC.CollectionFastPath = {
       view = this.renderItem(exampleView, attrs);
     }
     
+    this.mapView(view, index);
+    
     return view;
   },
   
@@ -491,6 +501,12 @@ SC.CollectionFastPath = {
     // if a view has been rendered for the same item already, just take it and move it into its new position
     if(!view && (view = this.pooledViewForItem(index))) {
       pool = this.domPoolForExampleView(view.createdFromExampleView);
+      
+      // if we are going to steal the front of the background queue we need to fix it after we're done
+      if(view === pool._lastRendered) {
+        // if it's the head we need to null it, otherwise just use the next one back
+        pool._lastRendered = (view._prev === view ? null : view._prev);
+      }
       pool.remove(view);
     
       this.configureItemView(view, attrs);
@@ -518,6 +534,8 @@ SC.CollectionFastPath = {
       view = this.renderItem(this.exampleViewForIndex(index), attrs);
     }
     
+    this.mapView(view, index);
+    
     return view;
   },
   
@@ -528,7 +546,6 @@ SC.CollectionFastPath = {
     // if it was just rendered it's obviously not invalid anymore
     this.validate(index);
     this._curShowing.add(index);
-    this.mapView(view, index);
     
     return view;
   },
@@ -550,7 +567,6 @@ SC.CollectionFastPath = {
     
     // if it was just rendered it's obviously not invalid anymore
     this.validate(index);
-    this.mapView(view, index);
   
     return view;
   },
@@ -644,10 +660,10 @@ SC.CollectionFastPath = {
     pool = this.domPoolForExampleView(exampleView),
     view;
     
-    if(pool._lastRendered && !pool.head) console.log("something is wrong");
+    if(pool._lastRendered && !pool.head) debugger;
 
     // if the last rendered is the tail and is about to be reused, that means we're done
-    if(pool.length >= this.domPoolSize && pool._lastRendered && pool._lastRendered === pool.head._prev) {
+    if(pool.length >= this.domPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._prev)) {
       pool._lastRendered = null;
       return;
     }
@@ -676,7 +692,7 @@ SC.CollectionFastPath = {
     
     runLimit: -1,
     
-    interval: 1,
+    interval: 0,
     
     minimumIdleDuration: -1
   }),

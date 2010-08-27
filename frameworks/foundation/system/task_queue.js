@@ -16,8 +16,12 @@ SC.TaskQueue = SC.Task.extend({
   
   init: function() {
     var self = this;
-    this._setTimeoutCall = function() {
+    this._doIdleEntry = function() {
       self._idleEntry();
+    };
+    
+    this._doSetupIdle = function() {
+      self._setupIdle();
     };
     
     this._tasks = [];
@@ -102,10 +106,7 @@ SC.TaskQueue = SC.Task.extend({
   _setupIdle: function() {
     if (this.get('runWhenIdle') && !this._idleIsScheduled && this.get('taskCount') > 0) {
       var self = this;
-      setTimeout(
-        function(){
-          self._idleEntry();
-        }, 
+      setTimeout(this._doIdleEntry, 
         this.get('interval')
       );
       this._idleIsScheduled = YES;
@@ -123,9 +124,7 @@ SC.TaskQueue = SC.Task.extend({
       // if no recent events (within < 1s)
       this.run();
     } else {
-      SC.run(function() {
-        this._setupIdle();        
-      }, this);
+      SC.run(this._doSetupIdle, this);
       SC.RunLoop.lastRunLoopEnd = last; // we were never here
     }
   },
