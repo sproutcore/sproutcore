@@ -443,7 +443,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // Handle triggering native .onfoo handlers
     onfoo = elem["on" + eventType] ;
-    isClick = SC.CoreQuery.nodeName(elem, 'a') && eventType === 'click';
+    isClick = SC.$.nodeName(elem, 'a') && eventType === 'click';
     if ((!fn || isClick) && onfoo && onfoo.apply(elem, args) === NO) ret = NO;
 
     // Trigger the native events (except for clicks on links)
