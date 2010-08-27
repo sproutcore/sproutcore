@@ -20,6 +20,10 @@ SC.TaskQueue = SC.Task.extend({
       self._idleEntry();
     };
     
+    this._doSetupIdle = function() {
+      self._setupIdle();
+    };
+    
     this._tasks = [];
   },
   

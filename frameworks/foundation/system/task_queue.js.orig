@@ -16,12 +16,12 @@ SC.TaskQueue = SC.Task.extend({
   
   init: function() {
     var self = this;
-<<<<<<< HEAD
     this._doIdleEntry = function() {
-=======
-    this._setTimeoutCall = function() {
->>>>>>> tweaks to rendering and fix background renders being triggered by incremental renderer
       self._idleEntry();
+    };
+    
+    this._doSetupIdle = function() {
+      self._setupIdle();
     };
     
     this._tasks = [];
@@ -52,7 +52,7 @@ SC.TaskQueue = SC.Task.extend({
     The minimum elapsed time since the last event. As a rule of thumb, perhaps
     something equivalent to the expected duration of a task.
   */
-  minimumIdleDuration: 100,
+  minimumIdleDuration: 500,
   
   _tasks: null,
   
@@ -105,6 +105,10 @@ SC.TaskQueue = SC.Task.extend({
   */
   _setupIdle: function() {
     if (this.get('runWhenIdle') && !this._idleIsScheduled && this.get('taskCount') > 0) {
+<<<<<<< HEAD
+=======
+      var self = this;
+>>>>>>> fixed issues with mapping and the queue; got rid of closure spam in tasks
       setTimeout(this._doIdleEntry, 
         this.get('interval')
       );
@@ -122,7 +126,14 @@ SC.TaskQueue = SC.Task.extend({
     
     // if no recent events (within < 1s)
     if (Date.now() - last > this.get('minimumIdleDuration')) {
+<<<<<<< HEAD
       SC.run(this.run, this);
+=======
+      // if no recent events (within < 1s)
+      this.run();
+    } else {
+      SC.run(this._doSetupIdle, this);
+>>>>>>> fixed issues with mapping and the queue; got rid of closure spam in tasks
       SC.RunLoop.lastRunLoopEnd = last; // we were never here
     }
     
