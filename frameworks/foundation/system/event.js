@@ -235,7 +235,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     }
     
     // Build the handler array and add to queue
-    handlers[SC.guidFor(method)] = [target, method, context];
+    handlers[SC.hashFor(target, method)] = [target, method, context];
     SC.Event._global[eventType] = YES ; // optimization for global triggers
 
     // Nullify elem to prevent memory leaks in IE
@@ -313,7 +313,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           method = target[method] ;
         }
         
-        delete handlers[SC.guidFor(method)] ;
+        delete handlers[SC.hashFor(target, method)];
         
         // check to see if there are handlers left on this event/eventType.
         // if not, then cleanup the handlers.

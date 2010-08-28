@@ -147,3 +147,36 @@ test("two instances with different value should have different guid", function()
 test("guid should not parse to a number", function() {
   equals(YES, isNaN(parseInt(SC.guidFor(array1), 0))) ;
 });
+
+var obj1, obj2, str, arr;
+
+module("SC.hashFor", {
+  setup: function() {
+    obj1 = {};
+    obj2 = {
+      hash: function() {
+        return '%1234';
+      }
+    };
+    str = "foo";
+    arr = ['foo', 'bar'];
+  }
+});
+
+test("One argument", function() {
+  equals(SC.guidFor(obj1), SC.hashFor(obj1), "guidFor and hashFor should be equal for an obj1ect");
+  equals(obj2.hash(), SC.hashFor(obj2), "hashFor should call the hash() function if present");
+  equals(SC.guidFor(str), SC.hashFor(str), "guidFor and hashFor should be equal for a string");
+  equals(SC.guidFor(arr), SC.hashFor(arr), "guidFor and hashFor should be equal for an array");
+});
+
+test("Multiple arguments", function() {
+  var h = [
+    SC.guidFor(obj1),
+    obj2.hash(),
+    SC.guidFor(str),
+    SC.guidFor(str)
+  ].join('');
+  
+  equals(h, SC.hashFor(obj1, obj2, str, arr), "hashFor should concatenate the arguments' hashes when there are more than one");
+});

@@ -388,26 +388,37 @@ SC.mixin(/** @scope SC */ {
   },
 
   /**
-    Returns a unique hash code for the object.  If the object implements
-    a hash() method, the value of that method will be returned.  Otherwise,
-    this will return the same value as guidFor().  
+    Returns a unique hash code for the object. If the object implements
+    a hash() method, the value of that method will be returned. Otherwise,
+    this will return the same value as guidFor().
+    
+    If you pass multiple arguments, hashFor returns a string obtained by 
+    concatenating the hash code of each argument.
 
     Unlike guidFor(), this method allows you to implement logic in your 
     code to cause two separate instances of the same object to be treated as
     if they were equal for comparisons and other functions.
 
-    IMPORTANT:  If you implement a hash() method, it MUST NOT return a 
-    number or a string that contains only a number.  Typically hash codes 
+    IMPORTANT: If you implement a hash() method, it MUST NOT return a 
+    number or a string that contains only a number. Typically hash codes 
     are strings that begin with a "%".
 
-    @param obj {Object} the object
+    @param obj {Object} the object(s)
     @returns {String} the hash code for this instance.
   */
-  hashFor: function(obj) {
-    var hashFunc;
-    return (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : this.guidFor(obj) ;
-  },
+  hashFor: function() {
+    var len = arguments.length,
+        h = '',
+        obj, f, i;
     
+    for (i = 0; i < len; ++i) {
+      obj = arguments[i];
+      h += (obj && (f = obj.hash) && (typeof f === SC.T_FUNCTION)) ? f.call(obj) : this.guidFor(obj);
+    }
+    
+    return h === '' ? null : h;
+  },
+  
   /**
     This will compare the two object values using their hash codes.
 
