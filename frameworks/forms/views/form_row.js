@@ -178,7 +178,8 @@ SC.FormRowView.mixin({
 	  layout: { left:0, top:0, width: 0, height: 18 },
 	  fillHeight: YES,
 	  classNames: ["sc-form-label"],
-    isValue: NO
+    isValue: NO,
+    textAlign: 'right'
 	})
 });
 
