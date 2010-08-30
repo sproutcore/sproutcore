@@ -2545,11 +2545,12 @@ SC.CollectionView = SC.View.extend(
   */
   _cv_dragViewFor: function(dragContent) {
     // find only the indexes that are in both dragContent and nowShowing.
-    var indexes = this.get('nowShowing').without(dragContent);
+    var indexes = this.get('nowShowing').without(dragContent),
+        dragLayer = this.get('layer').cloneNode(false),
+        view = SC.View.create({ layer: dragLayer, parentView: this }),
+        height=0, layout;
+
     indexes = this.get('nowShowing').without(indexes);
-    
-    var dragLayer = this.get('layer').cloneNode(false); 
-    var view = SC.View.create({ layer: dragLayer, parentView: this });
 
     // cleanup weird stuff that might make the drag look out of place
     SC.$(dragLayer).css('backgroundColor', 'transparent')
@@ -2573,10 +2574,18 @@ SC.CollectionView = SC.View.extend(
         itemView.updateLayerIfNeeded();
       }
 
-      if (layer) dragLayer.appendChild(layer);
+      if (layer) {
+        dragLayer.appendChild(layer);
+        layout = itemView.get('layout');
+        if(layout.height+layout.top>height){
+          height = layout.height+layout.top;
+        }
+      }
       layer = null;
       
     }, this);
+    // we don't want to show the scrollbars, resize the dragview'
+    view.set('layout', {height:height});
 
     dragLayer = null;
     return view ;
