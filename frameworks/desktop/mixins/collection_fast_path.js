@@ -141,53 +141,60 @@ SC.CollectionFastPath = {
     // we use the nowShowing to determine what should and should not be showing.
     if (!nowShowing || !nowShowing.isIndexSet) nowShowing = this.get('nowShowing');
     
+    shouldBeShowing.clear();
+    this.maxShowing = 0;
+    this.minShowing = content.length;
+  
+    // we need to be able to iterate nowshowing more easily, so copy it into a coreset
+    nowShowing.forEach(this.processNowShowing, this);
+    
+    // find the indices that arent showing any more and pool them
+    len = curShowing.length;
+    for(i = 0; i < len; i++) {
+      index = curShowing[i];
+    
+      // remove and send to the pool
+      if(!shouldBeShowing.contains(index)) {
+        scrollOnly = YES;
+        // not sure what's causing this... it's either a view being pooled twice, something being put in curshowing without being mapped, or something being unmapped without being removed from curshowing
+        // or if something was (un)mapped with the wrong contentIndex assigned
+        if(!this._indexMap[index]) debugger;
+        // need to use a seperate array to remove after iterating due to the way coreset handles removals
+        pendingRemovals.push(this._indexMap[index]);
+      }
+    }
+    
+    // now actually queue them
+    len = pendingRemovals.length;
+    for(i = 0;i < len; i++) {
+      this.sendToDOMPool(pendingRemovals.pop());
+    }
+  
+    // just to be sure
+    pendingRemovals.length = 0;
+    
+    // also check for adds
+    len = shouldBeShowing.length;
+    for(i = 0; i < len; i++) {
+      if(!curShowing.contains(shouldBeShowing[i])) scrollOnly = YES;
+    }
+    
     if (!scrollOnly) {
       invalid = this._invalidIndexes;
       if (!invalid || !this.get('isVisibleInWindow')) return this;
-      
-      if (this.willReload) this.willReload(invalid === YES ? null : invalid);
     }
+    
+    // scrolling updates
     if(scrollOnly) {
-      // scrolling updates
-      shouldBeShowing.clear();
-      this.maxShowing = 0;
-      this.minShowing = content.length;
-    
-      // we need to be able to iterate nowshowing more easily, so copy it into a coreset
-      nowShowing.forEach(this.processNowShowing, this);
-    
       this.topBackground = this.maxShowing;
       this.bottomBackground = this.minShowing;
       
       for(var pool in this._domPools) {
         this._domPools[pool]._lastRendered = null;
       }
-    
-      // find the indices that arent showing any more and pool them
-      len = curShowing.length;
-      for(i = 0; i < len; i++) {
-        index = curShowing[i];
-      
-        // remove and send to the pool
-        if(!shouldBeShowing.contains(index)) {
-          // not sure what's causing this... it's either a view being pooled twice, something being put in curshowing without being mapped, or something being unmapped without being removed from curshowing
-          // or if something was (un)mapped with the wrong contentIndex assigned
-          if(!this._indexMap[index]) debugger;
-          // need to use a seperate array to remove after iterating due to the way coreset handles removals
-          pendingRemovals.push(this._indexMap[index]);
-        }
-      }
-    
-      // now actually queue them
-      len = pendingRemovals.length;
-      for(i = 0;i < len; i++) {
-        this.sendToDOMPool(pendingRemovals.pop());
-      }
-    
-      // just to be sure
-      pendingRemovals.length = 0;
     }
     
+    // do these no matter what
     // adds ourself to the incremental renderer and stops any background rendering
     this.incrementalRenderer.add(this);
     
@@ -197,7 +204,6 @@ SC.CollectionFastPath = {
     if(!scrollOnly) {
       var layout = this.computeLayout();
       if (layout) this.adjust(layout);
-      if (this.didReload) this.didReload(invalid === YES ? null : invalid);
     }
   },
   
@@ -541,11 +547,16 @@ SC.CollectionFastPath = {
   
   // takes the fast path
   renderForeground: function(index) {
+    var reloaded;
+    if (this.willReload) this.willReload(reloaded = SC.IndexSet.create(index));
+    
     var view = this.renderFast(index);
     
     // if it was just rendered it's obviously not invalid anymore
     this.validate(index);
     this._curShowing.add(index);
+    
+    if (this.didReload) this.didReload(reloaded || SC.IndexSet.create(index));
     
     return view;
   },
@@ -553,6 +564,10 @@ SC.CollectionFastPath = {
   // attempts to fill the pool to the desired size before reverting to fast path
   renderBackground: function(index) {
     //console.log("rendering to background", index);
+    
+    var reloaded;
+    if (this.willReload) this.willReload(reloaded = SC.IndexSet.create(index));
+    
     var exampleView = this.exampleViewForIndex(index),
     pool = this.domPoolForExampleView(exampleView),
     view;
@@ -567,7 +582,9 @@ SC.CollectionFastPath = {
     
     // if it was just rendered it's obviously not invalid anymore
     this.validate(index);
-  
+    
+    if (this.didReload) this.didReload(reloaded || SC.IndexSet.create(index));
+    
     return view;
   },
   
