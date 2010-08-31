@@ -206,6 +206,7 @@ SC.FlowedLayout = {
     var calc = {}, f = view.get("frame");
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
     // it is invalid.
+<<<<<<< HEAD
     if (cw) {
       calc.width = cw;
     } else {
@@ -234,6 +235,17 @@ SC.FlowedLayout = {
         calc.height = f.height;
       }
     }
+=======
+    
+    if (!SC.none(cw)) calc.width = cw;
+    else calc.width = f.width;
+    
+    // same for calculated height
+    
+    if (!SC.none(ch)) calc.height = ch;
+    else calc.height = f.height;
+    
+>>>>>>> reverting calculated height changes so list views render properly in flowed layout
     // return
     return calc;
   },
