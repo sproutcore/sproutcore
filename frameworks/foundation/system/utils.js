@@ -470,8 +470,26 @@ SC.mixin( /** @scope SC */ {
     // Some browsers natively implement getBoundingClientRect, so if it's
     // available we'll use it for speed.
     if (el.getBoundingClientRect) {
-      var boundingRect = el.getBoundingClientRect();
-      return { x:boundingRect.left+window.scrollLeft, y:boundingRect.top+window.scrollTop };
+      var boundingRect = el.getBoundingClientRect(),
+          isIOS41 = false;
+      // we need to detect the mobileSafari build number in the userAgent.
+      // The webkit versions are the same but the results returned by getBoundingClientRect
+      // are very different one includes the scrolling from the top of the document , the other
+      // doesnt
+      if (SC.browser.mobileSafari){
+        var userAgent = navigator.userAgent,
+            index = userAgent.indexOf('Mobile/'),
+            mobileBuildNumber = userAgent.substring(index+7, index+9);
+        if (mobileBuildNumber > "8A") isIOS41 = true; 
+      
+      }
+      
+      if (SC.browser.mobileSafari && (parseInt(SC.browser.mobileSafari, 0)>532 || isIOS41)) {
+        return { x:boundingRect.left+(window.pageXOffset || 0), y:boundingRect.top+(window.pageYOffset || 0) };
+      }
+      else{
+        return { x:boundingRect.left, y:boundingRect.top };
+      }
     }
     
     var valueL = 0, valueT = 0, cqElement, overflow, left, top, offsetParent,
