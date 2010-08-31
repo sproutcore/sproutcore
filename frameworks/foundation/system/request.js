@@ -281,7 +281,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**
     Converts the current request to be asynchronous.
 
-    @property {Boolean} flag YES to make asynchronous, NO or undefined
+    @param {Boolean} flag YES to make asynchronous, NO or undefined
     @returns {SC.Request} receiver
   */
   async: function(flag) {
@@ -292,7 +292,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**
     Converts the current request to use JSON.
     
-    @property {Boolean} flag YES to make JSON, NO or undefined
+    @param {Boolean} flag YES to make JSON, NO or undefined
     @returns {SC.Request} receiver
   */
   json: function(flag) {
@@ -304,7 +304,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**
     Converts the current request to use XML.
     
-    @property {Boolean} flag YES to make XML, NO or undefined
+    @param {Boolean} flag YES to make XML, NO or undefined
     @returns {SC.Request} recevier
   */
   xml: function(flag) {
