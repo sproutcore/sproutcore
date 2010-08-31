@@ -707,7 +707,8 @@ SC.CollectionFastPath = {
   incrementalRenderQueue: SC.TaskQueue.create({
     runWhenIdle: YES,
     
-    runLimit: -1,
+    // assume that touch devices have less performance
+    runLimit: SC.platform.touch ? -1 : 10,
     
     interval: 0,
     
