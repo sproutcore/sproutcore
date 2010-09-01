@@ -274,12 +274,14 @@ SC.Observable = {
         ret    = value, 
         cachedep, cache, idx, dfunc ;
     
-    if(SC.typeOf(key) === "hash") {
+    if(value === undefined && SC.typeOf(key) === SC.T_HASH) {
       var hash = key;
+      
       for(key in hash) {
         if (!hash.hasOwnProperty(key)) continue;
         this.set(key, hash[key]);
       }
+      
       return this;
     }
         
@@ -1159,11 +1161,22 @@ SC.Observable = {
     current value.  Depending on how expensive a get() is on this property,
     this may be more efficient.
     
-    @param key {String} the key to change
+    @param key {String|Hash} the key to change
     @param value {Object} the value to change
     @returns {SC.Observable}
   */
   setIfChanged: function(key, value) {
+    if(value === undefined && SC.typeOf(key) === SC.T_HASH) {
+      var hash = key;
+      
+      for(key in hash) {
+        if (!hash.hasOwnProperty(key)) continue;
+        this.setIfChanged(key, hash[key]);
+      }
+      
+      return this;
+    }
+    
     return (this.get(key) !== value) ? this.set(key, value) : this ;
   },
   
