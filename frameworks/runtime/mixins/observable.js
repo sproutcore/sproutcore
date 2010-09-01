@@ -264,7 +264,7 @@ SC.Observable = {
       record.set('firstName', 'Charles').set('lastName', 'Jolley');
     }}}
     
-    @param key {String} the property to set
+    @param key {String|Hash} the property to set
     @param value {Object} the value to set or null.
     @returns {SC.Observable}
   */
@@ -273,7 +273,16 @@ SC.Observable = {
         notify = this.automaticallyNotifiesObserversFor(key),
         ret    = value, 
         cachedep, cache, idx, dfunc ;
-
+    
+    if(SC.typeOf(key) === "hash") {
+      var hash = key;
+      for(key in hash) {
+        if (!hash.hasOwnProperty(key)) continue;
+        this.set(key, hash[key]);
+      }
+      return this;
+    }
+        
     // if there are any dependent keys and they use caching, then clear the
     // cache.  (If we're notifying, then propertyDidChange will do this for
     // us.)
