@@ -116,8 +116,8 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     and not necessarily when SC.Request#send is invoked.  If this timeout is
     reached before a response is received, the equivalent of
     SC.Request.manager#cancel() will be invoked on the SC.Response instance
-    and the didTimeout() callback will be called.
-    
+    and the didReceive() callback will be called.
+
     An exception will be thrown if you try to invoke send() on a request that
     has both a timeout and isAsyncronous set to NO.
     
@@ -186,21 +186,11 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     notified.  You can do any standard processing on the request at this 
     point.  If you don't want to allow notifications to continue, call
     response.cancel()
-    
+
     @param {SC.Response} response reponse
     @returns {void}
   */
   didReceive: function(request, response) {},
-  
-  /**
-    Invoked when a request times out before a response has been received, as
-    determined by the 'timeout' property.  Note that if a request times out,
-    neither willReceive() nor didReceive() will be called.
-
-    @param {SC.Response} response the response
-    @returns {void}
-  */
-  didTimeout: function(request, response) {},
   
   // ..........................................................
   // HELPER METHODS
@@ -288,7 +278,17 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     if (flag === undefined) flag = YES;
     return this.set('isAsynchronous', flag);
   },
-  
+
+  /**
+    Sets the maximum amount of time the request will wait for a response.
+
+    @param {Number} timeout The timeout in milliseconds.
+    @returns {SC.Request} receiver
+  */
+  timeoutAfter: function(timeout) {
+    return this.set('timeout', timeout);
+  },
+
   /**
     Converts the current request to use JSON.
     
@@ -366,7 +366,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     Configures a callback to execute when a request completes.  You must pass
     at least a target and action/method to this and optionally a status code.
     You may also pass additional parameters which will be passed along to your
-    callback.
+    callback. If your callback handled the notification, it should return YES.
     
     h2. Scoping With Status Codes
     
@@ -463,10 +463,7 @@ SC.Request.mixin(/** @scope SC.Request */ {
     if(body) req.set('body', body) ;
     return req ;
   }
-  
 });
-
-
 
 /**
   The request manager coordinates all of the active XHR requests.  It will
