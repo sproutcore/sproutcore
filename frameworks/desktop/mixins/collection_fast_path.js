@@ -354,17 +354,7 @@ SC.CollectionFastPath = {
   configureItemView: function(itemView, attrs) {
     // set settings. Self explanatory.
     itemView.beginPropertyChanges();
-    itemView.setIfChanged('content', attrs.content);
-    itemView.setIfChanged('contentIndex', attrs.contentIndex);
-    itemView.setIfChanged('parentView', attrs.parentView);
-    itemView.setIfChanged('layerId', attrs.layerId);
-    itemView.setIfChanged('isEnabled', attrs.isEnabled);
-    itemView.setIfChanged('isSelected', attrs.isSelected);
-    itemView.setIfChanged('outlineLevel', attrs.outlineLevel);
-    itemView.setIfChanged('layout', attrs.layout);
-    itemView.setIfChanged('disclosureState', attrs.disclosureState);
-    itemView.setIfChanged('isVisibleInWindow', attrs.isVisibleInWindow);
-    itemView.setIfChanged('isGroupView', attrs.isGroupView);
+    itemView.setIfChanged(attrs);
     itemView.setIfChanged('page', this.page);
     itemView.endPropertyChanges();
   },
