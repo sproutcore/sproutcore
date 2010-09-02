@@ -380,6 +380,7 @@ SC.FlowedLayout = {
     // now, loop through all child views and group them into rows.
     // note that we are NOT positioning.
     // when we are done with a row, we call flowRow to finish it.
+    if(this.kindOf(SC.FormRowView)) debugger;
     for (idx = 0; idx < len; idx++) {
       // get a child.
       child = children[idx];
