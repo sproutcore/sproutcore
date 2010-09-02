@@ -379,6 +379,7 @@ SC.FlowedLayout = {
     // now, loop through all child views and group them into rows.
     // note that we are NOT positioning.
     // when we are done with a row, we call flowRow to finish it.
+    if(this.kindOf(SC.FormRowView)) debugger;
     for (idx = 0; idx < len; idx++) {
       // get a child.
       child = children[idx];
@@ -436,6 +437,7 @@ SC.FlowedLayout = {
     if (!canWrap && this.get("autoResize")) {
       this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
       this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
+      this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
     } else if (this.get("autoResize")) {
       this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
       this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
