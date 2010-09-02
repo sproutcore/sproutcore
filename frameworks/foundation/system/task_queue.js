@@ -20,10 +20,6 @@ SC.TaskQueue = SC.Task.extend({
       self._idleEntry();
     };
     
-    this._doSetupIdle = function() {
-      self._setupIdle();
-    };
-    
     this._tasks = [];
   },
   
@@ -120,12 +116,13 @@ SC.TaskQueue = SC.Task.extend({
   _idleEntry: function() {
     this._idleIsScheduled = NO;
     var last = SC.RunLoop.lastRunLoopEnd;
+    
+    // if no recent events (within < 1s)
     if (Date.now() - last > this.get('minimumIdleDuration')) {
-      // if no recent events (within < 1s)
-      this.run();
-    } else {
-      SC.run(this._doSetupIdle, this);
+      SC.run(this.run, this);
       SC.RunLoop.lastRunLoopEnd = last; // we were never here
+    } else {
+      this._setupIdle();
     }
   },
   

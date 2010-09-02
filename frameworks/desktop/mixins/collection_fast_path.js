@@ -127,7 +127,6 @@ SC.CollectionFastPath = {
     }
   },
 
-
   reloadIfNeeded: function(nowShowing, scrollOnly) {
     var content = this.get('content'),
     curShowing = this._curShowing,
@@ -136,7 +135,7 @@ SC.CollectionFastPath = {
     pendingRemovals = this._pendingRemovals || (this._pendingRemovals = []),
     invalid;
     
-    if(!content) return;
+    if(!content || !this.get('isVisibleInWindow')) return;
     
     // we use the nowShowing to determine what should and should not be showing.
     if (!nowShowing || !nowShowing.isIndexSet) nowShowing = this.get('nowShowing');
@@ -179,11 +178,6 @@ SC.CollectionFastPath = {
       if(!curShowing.contains(shouldBeShowing[i])) scrollOnly = YES;
     }
     
-    if (!scrollOnly) {
-      invalid = this._invalidIndexes;
-      if (!invalid || !this.get('isVisibleInWindow')) return this;
-    }
-    
     // scrolling updates
     if(scrollOnly) {
       this.topBackground = this.maxShowing;
@@ -201,7 +195,8 @@ SC.CollectionFastPath = {
     // add ourself to be background rendered; it won't actually start until it's ready
     this.backgroundRenderer.add(this);
     
-    if(!scrollOnly) {
+    // we want to make sure we do this on the first render
+    if(curShowing.length === 0 || !scrollOnly) {
       var layout = this.computeLayout();
       if (layout) this.adjust(layout);
     }
