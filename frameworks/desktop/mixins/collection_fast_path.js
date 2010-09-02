@@ -428,7 +428,7 @@ SC.CollectionFastPath = {
         // flush now so we don't get an extra notification later
         SC.Binding.flushPendingChanges();
         
-        this.mapView(view);
+        this.mapView(view, view.contentIndex);
       }
       
       view.update();
