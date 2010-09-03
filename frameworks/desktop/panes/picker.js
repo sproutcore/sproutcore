@@ -649,7 +649,7 @@ SC.PickerPane = SC.PalettePane.extend({
   
   
   remove: function(){
-    if(this.get('isVisibleInWindow')) this._showOverflow();
+    if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._showOverflow();
     return sc_super();
   },
   
