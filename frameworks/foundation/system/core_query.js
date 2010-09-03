@@ -601,7 +601,7 @@ SC.CoreQuery = (function() {
           value = undefined;
         }
         // to avoid 'invalid argument' being thrown in IE
-        else if(typeof value === 'string' && !parseInt(value.substr(0,1), 10)) {
+        else if(typeof value === 'string' && isNaN(value.substr(0,1))) {
           var e = new Error("CoreQuery:css() width or height cannot be a non-numeric value (has to be 1px, 15pt etc.)");
           e.key = key;
           e.value = value;
