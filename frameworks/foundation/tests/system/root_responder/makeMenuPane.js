@@ -5,7 +5,6 @@
 // ==========================================================================
 
 /*global module test equals context ok same Q$ htmlbody */
-sc_require('panes/menu');
 
 var responder, menu;
 

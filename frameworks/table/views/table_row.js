@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/list');
-
 /** @class
   
   The default example view for a table row. Belongs to a SC.TableView.
