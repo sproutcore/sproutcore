@@ -5,11 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/split_divider');
-
-SC.RESIZE_BOTH = 'resize-both' ;
-SC.RESIZE_TOP_LEFT = 'resize-top-left' ;
-SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
+SC.RESIZE_BOTH = 'resize-both';
+SC.RESIZE_TOP_LEFT = 'resize-top-left';
+SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right';
 
 /**
   @class

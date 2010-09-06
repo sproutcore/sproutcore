@@ -5,9 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/list');
-sc_require('views/table_row');
-sc_require('views/table_head');
 sc_require('mixins/table_delegate');
 
 /** @class

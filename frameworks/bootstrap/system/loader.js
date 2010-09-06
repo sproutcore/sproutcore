@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-//require('system/browser');
+// sc_require("system/browser");
 
 SC.bundleDidLoad = function(bundle) {
   var info = this.BUNDLE_INFO[bundle] ;
