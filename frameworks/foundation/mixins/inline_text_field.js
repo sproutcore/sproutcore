@@ -420,10 +420,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   // editable, begins editing.
   /** @private */
   insertTab: function(evt) {
+    var delegate = this._delegate; // removed by commitEditing()
     this.resignFirstResponder();
     this.commitEditing() ;
-    if(this._delegate){
-      var next = this._delegate.nextValidKeyView();
+    if(delegate){
+      var next = delegate.get('nextValidKeyView');
       if(next && next.beginEditing) next.beginEditing();
     }
     return YES ;
