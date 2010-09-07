@@ -3338,6 +3338,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // if opacity is set, use it. otherwise let default shine through
     ret.opacity = SC.none(layout.opacity) ? null : layout.opacity.toString();
+    ret.mozOpacity = ret.opacity; // older Firefox?
 
     // if backgroundPosition is set, use it.
     // otherwise let default shine through

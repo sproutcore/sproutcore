@@ -61,8 +61,8 @@ SC.Animatable = {
   },
 
   // properties that adjust should relay to style
-  _styleProperties: [ "opacity", "display", "transform" ],
-  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY'.w(),
+  _styleProperties: [ "display", "transform" ],
+  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY opacity'.w(),
 
   // we cache this dictionary so we don't generate a new one each time we make
   // a new animation. It is used so we can start the animations in order—
@@ -637,12 +637,6 @@ SC.Animatable = {
 
   },
 
-  _style_opacity_helper: function(style, key, props)
-  {
-    style["opacity"] = props["opacity"];
-    style["mozOpacity"] = props["opacity"]; // older Firefox?
-  },
-
   /**
   @private
   Adjusts display and queues a change for the other properties.
@@ -702,7 +696,6 @@ SC.Animatable = {
   _animatableApplyNonDisplayStyles: function(){
     var layer = this.layer, styles = this.holder._animatableCurrentStyle; // this == timer
     var styleHelpers = {
-      opacity: this.holder._style_opacity_helper
       // more to be added here...
     };
 
