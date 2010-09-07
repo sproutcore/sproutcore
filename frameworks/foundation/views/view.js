@@ -2301,7 +2301,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (callback) options.callback = callback;
 
 
-    var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim;
+    var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim, key;
     
     for(key in hash) {
       if (!hash.hasOwnProperty(key)) continue;
@@ -2357,13 +2357,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   _scv_willRenderAnimations: function(){
+    var key, callback;
+
     if (SC.platform.supportsCSSTransitions) {
       var layer = this.get('layer'),
           currentStyle = layer ? layer.style : null,
           newStyle = this.get('layoutStyle'),
           transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
-          layout = this.get('layout'),
-          key;
+          layout = this.get('layout');
 
       // Handle existing animations
       if (this._activeAnimations) {
@@ -2374,7 +2375,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
             !this._pendingAnimations || !this._pendingAnimations[key] ||
             this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
           ) {
-            var callback = this._activeAnimations[key].callback;
+            callback = this._activeAnimations[key].callback;
             if (callback) {
               if (this._animatedTransforms && this._animatedTransforms.length > 0) {
                 for (idx=0; idx < this._animatedTransforms.length; idx++) {
@@ -2395,9 +2396,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       this._pendingAnimations = null;
     } else {
       // Transitions not supported
-      var key;
       for (key in this._pendingAnimations) {
-        var callback = this._pendingAnimations[key].callback;
+        callback = this._pendingAnimations[key].callback;
         if (callback) this._scv_runAnimationCallback(callback, null, key, NO);
         this._scv_removeAnimationFromLayout(key, NO, YES);
       }
@@ -3359,7 +3359,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           layer = this.get('layer'),
           // FIXME: This is not the best way to do it, we should track these locally
           currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
-          halTransforms, specialTransforms = [], idx;
+          halTransforms, specialTransforms = [], transformName, idx;
 
       if (canUseAcceleratedLayer) {
         // Remove previous transforms
@@ -3377,9 +3377,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
 
       // Handle special CSS transform attributes
-      var specialTransforms = [], transformName;
       for(transformName in SC.CSS_TRANSFORM_MAP) {
-        var cleanedTransforms = [], idx;
+        var cleanedTransforms = [];
         for(idx=0; idx < currentTransforms.length; idx++) {
           if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
             cleanedTransforms.push(currentTransforms[idx]);
