@@ -23,11 +23,15 @@ Greenhouse.fileController = SC.ObjectController.create(
   _content_statusDidChange: function(){
     var c = this.get('content');
     if(c && c.get('isPage') ) {
-      Greenhouse.sendAction('fileSelectedIsAPage');
-      Greenhouse.sendAction('cancel');
+      this.invokeOnce(function(){
+        Greenhouse.sendAction('fileSelectedIsAPage');
+        Greenhouse.sendAction('cancel');
+      });
     }
     else if (c && !c.get('isPage')){
-      Greenhouse.sendAction('fileSelectedIsNotAPage');
+      this.invokeOnce(function(){
+        Greenhouse.sendAction('fileSelectedIsNotAPage');
+      });
     }
   }.observes('*content.body'),
   
