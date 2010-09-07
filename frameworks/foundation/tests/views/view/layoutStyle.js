@@ -263,14 +263,29 @@ function transformFor(view){
   return view.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
 }
 
-test("layout {rotate}", function() {
-  child.adjust('rotate', 45).updateLayout();
-  equals(transformFor(child), 'rotate(45deg)', 'transform attribute should be "rotate(45deg)"')
+test("layout {rotateX}", function() {
+  child.adjust('rotateX', 45).updateLayout();
+  equals(transformFor(child), 'rotateX(45deg)', 'transform attribute should be "rotateX(45deg)"')
 });
 
-test("layout {rotate} with units", function() {
-  child.adjust('rotate', '1rad').updateLayout();
-  equals(transformFor(child), 'rotate(1rad)', 'transform attribute should be "rotate(1rad)"')
+test("layout {rotateY}", function() {
+  child.adjust('rotateY', 45).updateLayout();
+  equals(transformFor(child), 'rotateY(45deg)', 'transform attribute should be "rotateY(45deg)"')
+});
+
+test("layout {rotateZ}", function() {
+  child.adjust('rotateZ', 45).updateLayout();
+  equals(transformFor(child), 'rotateZ(45deg)', 'transform attribute should be "rotateZ(45deg)"')
+});
+
+test("layout {rotate}", function() {
+  child.adjust('rotate', 45).updateLayout();
+  equals(transformFor(child), 'rotateX(45deg)', 'transform attribute should be "rotateX(45deg)"')
+});
+
+test("layout {rotateX} with units", function() {
+  child.adjust('rotateX', '1rad').updateLayout();
+  equals(transformFor(child), 'rotateX(1rad)', 'transform attribute should be "rotateX(1rad)"')
 });
 
 test("layout {scale}", function() {
@@ -283,15 +298,15 @@ test("layout {scale} with multiple", function() {
   equals(transformFor(child), 'scale(2, 3)', 'transform attribute should be "scale(2, 3)"')
 });
 
-test("layout {rotate, scale}", function() {
-  child.adjust({ rotate: 45, scale: 2 }).updateLayout();
-  equals(transformFor(child), 'rotate(45deg) scale(2)', 'transform attribute should be "rotate(45deg) scale(2)"')
+test("layout {rotateX, scale}", function() {
+  child.adjust({ rotateX: 45, scale: 2 }).updateLayout();
+  equals(transformFor(child), 'rotateX(45deg) scale(2)', 'transform attribute should be "rotateX(45deg) scale(2)"')
 });
 
-test("layout {rotate} update", function() {
-  child.adjust('rotate', 45).updateLayout();
-  child.adjust('rotate', 90).updateLayout();
-  equals(transformFor(child), 'rotate(90deg)', 'transform attribute should be "rotate(90deg)"')
+test("layout {rotateX} update", function() {
+  child.adjust('rotateX', 45).updateLayout();
+  child.adjust('rotateX', 90).updateLayout();
+  equals(transformFor(child), 'rotateX(90deg)', 'transform attribute should be "rotateX(90deg)"')
 });
 
 
