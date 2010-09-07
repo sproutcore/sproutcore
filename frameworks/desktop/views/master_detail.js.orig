@@ -66,7 +66,7 @@ SC.MasterDetailView = SC.View.extend({
   /**
     Whether to automatically hide the master panel in portrait orientation. 
     
-    By default, this property is a computed property based on whether the browser is a touch
+    By default, this property is a computed property based on whether the browser is ')touch
     browser. Your purpose in overriding it is either to disable it from automatically
     disappearing on iPad and other touch devices, or force it to appear when a desktop
     browser changes.
@@ -228,8 +228,13 @@ SC.MasterDetailView = SC.View.extend({
       });
       
       // and child, naturally
+<<<<<<< HEAD
       var extra = this.getThemedProperty('dividerWidth', 'MASTER_DETAIL_DIVIDER_WIDTH');
       detail.set("layout", { left: masterWidth + extra, right: 0, top: 0, bottom: 0 });
+=======
+      var extra = this.renderer ? this.renderer.BORDER : 0;
+      detail.set('layout', { left: masterWidth + extra, right: 0, top: 0, bottom: 0 });
+>>>>>>> changed flowed_layout size calculation to calculate both dimensions, added observation for when labelWidth changes, made quotes idiomatic
     } else {
       // remove master if needed
       if (this._masterIsDrawn) {

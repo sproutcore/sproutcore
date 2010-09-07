@@ -196,7 +196,7 @@ SC.FlowedLayout = {
       }
       if (SC.none(fs.width)) fs.width = view.get("frame").width;
       if (SC.none(fs.height)) fs.height = view.get("frame").height;
-      
+      if(fs.width < 0 || fs.height < 0) throw "error calculating frame for row";
       return fs;
     }
     
@@ -343,7 +343,7 @@ SC.FlowedLayout = {
       return;
     }
     
-    item.adjust(l);
+    item.set('layout', l);
   },
   
   _scfl_tile: function() {
@@ -379,7 +379,6 @@ SC.FlowedLayout = {
     // now, loop through all child views and group them into rows.
     // note that we are NOT positioning.
     // when we are done with a row, we call flowRow to finish it.
-    if(this.kindOf(SC.FormRowView)) debugger;
     for (idx = 0; idx < len; idx++) {
       // get a child.
       child = children[idx];
@@ -434,13 +433,18 @@ SC.FlowedLayout = {
     
     // update calculated width/height
     this._scfl_lastFrameSize = this.get("frame");
-    if (!canWrap && this.get("autoResize")) {
-      this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
-      this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
-      this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
-    } else if (this.get("autoResize")) {
-      this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
-      this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
+    
+    // size is now calculated the same whether canWrap is on or not
+    if (this.get("autoResize")) {
+      if(itemOffset) {
+        this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
+        this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
+      }
+      
+      if(rowOffset + rowSize) {
+        this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
+        this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
+      }
     }
     
     

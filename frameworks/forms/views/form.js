@@ -157,7 +157,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
           }
           
           // set the label size measuring stuff
-          if (this.get("labelWidth") !== null) v.set("shouldMeasureLabel", NO);
+          if (this.get('labelWidth') !== null) v.set("shouldMeasureLabel", NO);
           
           // set label (if possible)
           if (v.get("isFormRow") && SC.none(v.get("label"))) {
@@ -182,6 +182,17 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
     The manually specified label width (null to automatically calculate, which is the default).
   */
   labelWidth: null,
+  
+  labelWidthDidChange: function() {
+    var childViews = this.get('childViews'), i, len = childViews.length,
+    shouldMeasure = SC.none(this.get('labelWidth'));
+    
+    for(i = 0; i < len; i++) {
+      childViews[i].set('shouldMeasureLabel', shouldMeasure);
+    }
+    
+    this.recalculateLabelWidth();
+  }.observes('labelWidth'),
   
   /**
     Calculates the current label width (if labelWidth is not null, it sets using the label width)

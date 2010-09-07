@@ -197,7 +197,7 @@ SC.Animatable = {
       dictionary = SC.clone(dictionary);
     }
 
-    var style = SC.clone(this.get("style")), didChangeStyle = NO, layout = SC.clone(this.get("layout")), didChangeLayout = NO;
+    var style = SC.clone(this.get('style')), didChangeStyle = NO, layout = SC.clone(this.get('layout')), didChangeLayout = NO;
     var sprops = this._styleProperties;
     for (var i in dictionary)
     {
@@ -225,8 +225,8 @@ SC.Animatable = {
       }
     }
 
-    if (didChangeStyle) this.set("style", style);
-    if (didChangeLayout) this.set("layout", layout);
+    if (didChangeStyle) this.set('style', style);
+    if (didChangeLayout) this.set('layout', layout);
 
     // call base with whatever is leftover
     return this;

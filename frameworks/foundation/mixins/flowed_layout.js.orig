@@ -196,7 +196,7 @@ SC.FlowedLayout = {
       }
       if (SC.none(fs.width)) fs.width = view.get("frame").width;
       if (SC.none(fs.height)) fs.height = view.get("frame").height;
-      
+      if(fs.width < 0 || fs.height < 0) throw "error calculating frame for row";
       return fs;
     }
     
@@ -206,7 +206,6 @@ SC.FlowedLayout = {
     var calc = {}, f = view.get("frame");
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
     // it is invalid.
-<<<<<<< HEAD
     if (cw) {
       calc.width = cw;
     } else {
@@ -235,17 +234,6 @@ SC.FlowedLayout = {
         calc.height = f.height;
       }
     }
-=======
-    
-    if (!SC.none(cw)) calc.width = cw;
-    else calc.width = f.width;
-    
-    // same for calculated height
-    
-    if (!SC.none(ch)) calc.height = ch;
-    else calc.height = f.height;
-    
->>>>>>> reverting calculated height changes so list views render properly in flowed layout
     // return
     return calc;
   },
@@ -355,7 +343,11 @@ SC.FlowedLayout = {
       return;
     }
     
+<<<<<<< HEAD
     item.adjust(l);
+=======
+    item.set('layout', l);
+>>>>>>> changed flowed_layout size calculation to calculate both dimensions, added observation for when labelWidth changes, made quotes idiomatic
   },
   
   _scfl_tile: function() {
@@ -445,12 +437,18 @@ SC.FlowedLayout = {
     
     // update calculated width/height
     this._scfl_lastFrameSize = this.get("frame");
-    if (!canWrap && this.get("autoResize")) {
-      this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
-      this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
-    } else if (this.get("autoResize")) {
-      this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
-      this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
+    
+    // size is now calculated the same whether canWrap is on or not
+    if (this.get("autoResize")) {
+      if(itemOffset) {
+        this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
+        this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
+      }
+      
+      if(rowOffset + rowSize) {
+        this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
+        this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
+      }
     }
     
     
