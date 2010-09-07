@@ -125,3 +125,24 @@ test("is invoked on parentView if no layoutView whenever layout property changes
 
 	
 });
+
+test("sets rotateX when rotate is set", function() {
+  var view = SC.View.create({});
+  view.set('layout', { rotate: 45 });
+
+  equals(view.get('layout').rotateX, 45, "should set rotateX");
+});
+
+test("sets rotate when rotateX is set", function(){
+  var view = SC.View.create({});
+  view.set('layout', { rotateX: 45 });
+
+  equals(view.get('layout').rotate, 45, "should set rotate");
+});
+
+test("rotateX overrides rotate", function(){
+  var view = SC.View.create({});
+  view.set('layout', { rotate: 45, rotateX: 90 });
+
+  equals(view.get('layout').rotate, 90, "should set rotate to rotateX");
+});

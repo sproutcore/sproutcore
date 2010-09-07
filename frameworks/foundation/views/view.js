@@ -99,11 +99,27 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 /**
   Map to CSS Transforms
 */
+
 SC.CSS_TRANSFORM_MAP = {
   rotate: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
-    return 'rotate('+val+')';
+    return null;
   },
+
+  rotateX: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    return 'rotateX('+val+')';
+  },
+
+  rotateY: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    return 'rotateY('+val+')';
+  },
+
+  rotateZ: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    return 'rotateZ('+val+')';
+  },
+
   scale: function(val){
     if (SC.typeOf(val) === SC.T_ARRAY) val = val.join(', ');
     return 'scale('+val+')';
@@ -113,7 +129,7 @@ SC.CSS_TRANSFORM_MAP = {
 /**
   Properties that can be animated
 */
-SC.ANIMATABLE_PROPERTIES = ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "scale", "rotate"];
+SC.ANIMATABLE_PROPERTIES = ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "scale", "rotate", "rotateX", "rotateY", "rotateZ"];
 
 /** 
   @class
@@ -3491,6 +3507,33 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         currentLayout  = this.get('layout'),
         didResize      = YES,
         previousWidth, previousHeight, currentWidth, currentHeight;
+
+
+    // Handle old style rotation
+    if (currentLayout.rotate) {
+      if (!currentLayout.rotateX) {
+        currentLayout.rotateX = currentLayout.rotate;
+        console.warn('Please set rotateX instead of rotate');
+      }
+    }
+    if (currentLayout.rotateX) {
+      currentLayout.rotate = currentLayout.rotateX;
+    } else {
+      delete currentLayout.rotate;
+    }
+
+    if (currentLayout.animateRotate) {
+      if (!currentLayout.animateRotateX) {
+        currentLayout.animateRotateX = currentLayout.animateRotate;
+        console.warn('Please set animateRotateX instead of animateRotate');
+      }
+    }
+    if (currentLayout.animateRotateX) {
+      currentLayout.animateRotate = currentLayout.animateRotateX;
+    } else {
+      delete currentLayout.animateRotate;
+    }
+
 
     if (previousLayout  &&  previousLayout !== currentLayout) {
       // This is a simple check to see whether we think the view may have
