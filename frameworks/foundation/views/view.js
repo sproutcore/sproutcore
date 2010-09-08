@@ -2316,7 +2316,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           currentStyle = layer ? layer.style : null,
           newStyle = this.get('layoutStyle'),
           transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
-          layout = this.get('layout');
+          layout = this.get('layout'),
+          idx;
 
       // Handle existing animations
       if (this._activeAnimations) {
@@ -2371,7 +2372,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
 
-    var layout = this.get('layout');
+    var layout = this.get('layout'),
+        idx;
 
     if (propertyName === '-'+SC.platform.cssPrefix+'-transform' && this._animatedTransforms && this._animatedTransforms.length > 0) {
       for(idx=0; idx < this._animatedTransforms.length; idx++) {
@@ -2401,7 +2403,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     var propertyName = evt.originalEvent.propertyName,
         layout = this.get('layout'),
-        animation;
+        animation, idx;
 
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
