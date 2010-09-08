@@ -6,7 +6,7 @@
 // ==========================================================================
 /*globals SC */
 
-sc_require('views/mediaSlider');
+sc_require('views/media_slider');
 /** @class
 
   (Document Your View Here)

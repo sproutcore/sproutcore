@@ -6,7 +6,7 @@
 // ==========================================================================
 /*globals SC */
 
-sc_require('views/mediaSlider');
+sc_require('views/media_slider');
 /** @class
 
   (Document Your View Here)
@@ -43,7 +43,7 @@ SC.SimpleMediaControlsView = SC.View.extend({
     renderStyle: 'renderImage',
     theme: ''
   }),
-  progressView: SC.mediaSlider.design({
+  progressView: SC.MediaSlider.design({
     layout: { top: 0, left: 25, right: 0, height:20 },
     value:0,
     minimum: 0,

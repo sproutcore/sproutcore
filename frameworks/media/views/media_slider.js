@@ -12,7 +12,7 @@
 
   @extends SC.View
 */
-SC.mediaSlider = SC.SliderView.extend({
+SC.MediaSlider = SC.SliderView.extend({
   
   mediaView: null,
 
