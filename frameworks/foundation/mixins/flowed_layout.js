@@ -361,7 +361,8 @@ SC.FlowedLayout = {
         canWrap = this.get("canWrap"),
         layoutDirection = this.get("layoutDirection"),
         padding = this.get("_scfl_validFlowPadding"),
-        childSize, childSpacing, align = this.get("align");
+        childSize, childSpacing, align = this.get("align"),
+        longestRow = 0;
     
     var primary, primary_os, primary_d, secondary, secondary_os, secondary_d, primaryContainerSize;
     if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
@@ -404,10 +405,12 @@ SC.FlowedLayout = {
       child._scfl_cachedFlowSpacing = childSpacing;
       child._scfl_cachedSpacedSize = childSize;
       
+      var newRow = child.get('startsNewRow');
+      
       // determine if the item can fit in the row
-      if (canWrap && row.length > 0) {
+      if (newRow || canWrap && row.length > 0) {
         // test, including the collapsed right margin+padding
-        if (itemOffset + childSize[primary_d] >= primaryContainerSize) {
+        if (newRow || itemOffset + childSize[primary_d] >= primaryContainerSize) {
           // first, flow this row
           this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
 
@@ -423,9 +426,10 @@ SC.FlowedLayout = {
       // add too row and update row size+item offset
       row.push(child);
       rowSize = Math.max(childSize[secondary_d], rowSize);
-
-      itemOffset += childSize[primary_d];
+      itemOffset += childSize[primary_d]; 
+      longestRow = Math.max(longestRow, itemOffset);
     }
+    
     
     // flow last row
     this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
@@ -436,9 +440,9 @@ SC.FlowedLayout = {
     
     // size is now calculated the same whether canWrap is on or not
     if (this.get("autoResize")) {
-      if(itemOffset) {
-        this._scfl_lastFrameSize[primary_d] = itemOffset + padding[primary] + padding[primary_os];
-        this.adjust(primary_d, itemOffset + padding[primary] + padding[primary_os]);
+      if(longestRow) {
+        this._scfl_lastFrameSize[primary_d] = longestRow + padding[primary] + padding[primary_os];
+        this.adjust(primary_d, longestRow + padding[primary] + padding[primary_os]);
       }
       
       if(rowOffset + rowSize) {
