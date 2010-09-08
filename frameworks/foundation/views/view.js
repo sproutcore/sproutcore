@@ -2387,7 +2387,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         for(key in this._activeAnimations){
           // TODO: Check for more than duration
           if (
-            newStyle[key] !== currentStyle[key] ||
+            (currentStyle && newStyle[key] !== currentStyle[key]) ||
             !this._pendingAnimations || !this._pendingAnimations[key] ||
             this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
           ) {
@@ -2431,7 +2431,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
-      layer.style[SC.platform.domCSSPrefix+"Transition"] = updatedCSS.join(', ');
+      if (layer) layer.style[SC.platform.domCSSPrefix+"Transition"] = updatedCSS.join(', ');
     }
 
 
