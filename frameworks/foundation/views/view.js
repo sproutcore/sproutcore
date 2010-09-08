@@ -3512,25 +3512,25 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
 
     // Handle old style rotation
-    if (currentLayout.rotate) {
-      if (!currentLayout.rotateX) {
+    if (!SC.none(currentLayout.rotate)) {
+      if (SC.none(currentLayout.rotateX)) {
         currentLayout.rotateX = currentLayout.rotate;
         console.warn('Please set rotateX instead of rotate');
       }
     }
-    if (currentLayout.rotateX) {
+    if (!SC.none(currentLayout.rotateX)) {
       currentLayout.rotate = currentLayout.rotateX;
     } else {
       delete currentLayout.rotate;
     }
 
-    if (currentLayout.animateRotate) {
-      if (!currentLayout.animateRotateX) {
+    if (!SC.none(currentLayout.animateRotate)) {
+      if (SC.none(currentLayout.animateRotateX)) {
         currentLayout.animateRotateX = currentLayout.animateRotate;
         console.warn('Please set animateRotateX instead of animateRotate');
       }
     }
-    if (currentLayout.animateRotateX) {
+    if (!SC.none(currentLayout.animateRotateX)) {
       currentLayout.animateRotate = currentLayout.animateRotateX;
     } else {
       delete currentLayout.animateRotate;
