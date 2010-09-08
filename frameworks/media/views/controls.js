@@ -6,7 +6,7 @@
 // ==========================================================================
 /*globals SC */
 
-sc_require('views/mediaSlider');
+sc_require('views/media_slider');
 /** @class
 
   (Document Your View Here)
@@ -43,7 +43,7 @@ SC.MediaControlsView = SC.View.extend({
     renderStyle: 'renderImage',
     theme: ''
   }),
-  progressView: SC.mediaSlider.design({
+  progressView: SC.MediaSlider.design({
     layout: { top: 0, left: 20, right: 220, height:20},
     value:0,
     minimum: 0,
@@ -74,7 +74,7 @@ SC.MediaControlsView = SC.View.extend({
     value: '',
     icon: 'minus'
   }),
-  volumeView: SC.mediaSlider.design({
+  volumeView: SC.MediaSlider.design({
     layout: { top: 0, right: 20, width: 100, height:20},
     value:0,
     valueBinding: "*owner.target.volume" ,

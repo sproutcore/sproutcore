@@ -6,7 +6,7 @@
 // ==========================================================================
 
 sc_require('views/controls');
-sc_require('views/miniControls');
+sc_require('views/mini_controls');
 /** 
   @class
   
@@ -178,7 +178,10 @@ SC.AudioView = SC.View.extend({
           return;
         case "flash":
           var flashURL= sc_static('videoCanvas.swf');
+
           var movieURL = this.get('value');
+          if (!movieURL) return;
+
           if(movieURL.indexOf('http:')==-1){
             movieURL=location.protocol+'//'+location.host+movieURL;
           }

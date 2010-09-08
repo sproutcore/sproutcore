@@ -6,19 +6,23 @@
 // ==========================================================================
 /*globals SC */
 
-sc_require('views/mediaSlider');
+sc_require('views/media_slider');
 /** @class
 
   (Document Your View Here)
 
   @extends SC.View
 */
-SC.MiniMediaControlsView = SC.View.extend({
+SC.SimpleMediaControlsView = SC.View.extend({
 
   target: null,
   
-  childViews: 'playButton timeView minusLabelView volumeView'.w(),
+  childViews: 'playButton progressView'.w(),
   classNames: 'sc-media-controls',
+  
+  leftHandleInset:null,   //until a bug in the way bindings are handled is fixed, these have to be defined
+  rightHandleInset:null,  //for the slider to be able to have its notEmpty bindings function and drop in
+  handleWidth:null,       //their placeholder values.
   
   playObserver: function(){
     if(this.getPath('target.paused')){
@@ -28,36 +32,24 @@ SC.MiniMediaControlsView = SC.View.extend({
     }
   }.observes('*target.paused'),
   
-  
   playButton: SC.ButtonView.design({
     title: '',
     titleMinWidth: 35,
     icon: 'play',
     noStyle: YES,
-    layout: { top: 0, left: 0, width: 20, height:20},
+    layout: { top: 0, left: 0, width: 20, height:20 },
     action: "playPause",
     targetBinding: "*owner.target",
     renderStyle: 'renderImage',
     theme: ''
   }),
-  
-  timeView: SC.LabelView.design({
-    layout: { top: 0, left: 20, width: 60, height:20},
-    classNames: 'time',
-    textAlign: SC.ALIGN_CENTER,
-    valueBinding: '*owner.target.time'
-  }),
-  minusLabelView: SC.LabelView.design({
-    layout: { top: 0, left: 80, width: 20, height:20},
-    value: '',
-    icon: 'minus'
-  }),
-  volumeView: SC.SliderView.design({
-    layout: { top: 0, left: 100, width: 100, height:20},
+  progressView: SC.MediaSlider.design({
+    layout: { top: 0, left: 25, right: 0, height:20 },
     value:0,
-    valueBinding: "*owner.target.volume" ,
     minimum: 0,
-    maximum: 1,
-    step: 0.01
+    step:0.1,
+    valueBinding: "*owner.target.currentTime" ,
+    maximumBinding: "*owner.target.duration",
+    mediaViewBinding: "*owner.target"
   })
 });
