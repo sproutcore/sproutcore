@@ -608,7 +608,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     customView = menu.menuItemViewForContentIndex(this.get('itemIdx'));
     menu.set('currentMenuItem', customView) ;
-    customView.becomeFirstResponder();
+    if (customView) customView.becomeFirstResponder();
 
     this.set('isActive', YES);
     return YES ;
