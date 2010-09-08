@@ -529,8 +529,14 @@ SC.XHRResponse = SC.Response.extend({
         this.set('status', status);
       
       }, this);
-      // avoid memory leak in MSIE: clean up
-      rawRequest.onreadystatechange = function() {} ;
+
+      // Avoid memory leaks
+      if (!SC.browser.msie) {
+        SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);	  
+      } else {
+        rawRequest.onreadystatechange = null;
+      }
+
       return YES;
     }
     return NO; 
