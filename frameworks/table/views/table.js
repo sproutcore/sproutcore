@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('mixins/table_delegate');
+sc_require('views/table_head');
 
 /** @class
   
