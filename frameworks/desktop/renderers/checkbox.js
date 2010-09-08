@@ -34,7 +34,6 @@ SC.BaseTheme.renderers.Checkbox = SC.Renderer.extend({
     
     this.renderControlRenderer(context);
     
-    context.attr('role', 'checkbox');
     if (SC.browser.msie) context.attr('for', this.guid);
     context.attr('name', this.name);
     context.attr("aria-checked", this.ariaValue);

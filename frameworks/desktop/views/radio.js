@@ -62,6 +62,8 @@ SC.RadioView = SC.View.extend(SC.Control,
   // HTML design options
   classNames: ['sc-radio-view'],
 
+  ariaRole: 'radiogroup',
+  
   /**
     The value of the currently selected item, and which will be checked in the 
     UI. This can be either a string or an array with strings for checking 

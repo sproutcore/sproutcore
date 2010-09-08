@@ -1330,6 +1330,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
       classNames: classNames,
       backgroundColor: this.get('backgroundColor'),
+      role: this.get('ariaRole'),
       cursor: cursor,
       isTextSelectable: this.get('isTextSelectable'),
       isEnabled: this.get('isEnabled'),
@@ -1529,6 +1530,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {String}
   */
   tagName: 'div',
+  
+  ariaRole: null,
   
   /**
     Standard CSS class names to apply to the view's outer element.  This 

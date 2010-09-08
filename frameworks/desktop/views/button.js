@@ -33,7 +33,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     @property {String}
   */
   tagName: 'div',
-  
+
+  ariaRole: 'button',
   /**
     ButtonView's renderers should be smart enough to...
   */

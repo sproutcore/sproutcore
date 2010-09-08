@@ -66,7 +66,7 @@ SC.BaseTheme.renderers.Button = SC.Renderer.extend({
     classes.def = this.isDefault;
     classes.cancel = this.isCancel;
     classes.icon = !!this.icon;
-    context.attr('role', 'button').setClass(classes);
+    context.setClass(classes);
 
     theme = this.oldButtonTheme;
     if (theme) context.addClass(theme);

@@ -23,6 +23,11 @@ SC.BaseTheme.renderers.View = SC.Renderer.extend({
       .id(this.layerId)
       .setClass(this.calculateClassNames());
     
+    if(this.role){
+      context.attr('role', this.role);
+      if(!this.isEnabled) context.attr('aria-disabled', 'true');
+    }
+    
     if (this.backgroundColor) {
       context.addStyle('backgroundColor', this.backgroundColor);
     }
