@@ -821,53 +821,70 @@ SC.RootResponder = SC.Object.extend({
     This is useful for implementing scaling.
   */
   averagedTouchesForView: function(view, added) {
-    var t = this.touchesForView(view);
-    if ((!t || t.length === 0) && !added) return {x: 0, y: 0, d: 0, touchCount: 0};
+    var t = this.touchesForView(view),
+    
+    // cache per view to avoid gc
+    averaged = view._scrr_averagedTouches || (view._scrr_averagedTouches = {});
+    
+    if ((!t || t.length === 0) && !added) {
+      averaged.x = 0;
+      averaged.y = 0;
+      averaged.d = 0;
+      averaged.touchCount = 0;
+      
+    } else {
+      // make array of touches using cached array
+      var touches = this._averagedTouches_touches || (this._averagedTouches_touches = []);
+      touches.length = 0;
+    
+      // copy touches into array
+      if (t) {
+        var i, len = t.length;
+        for(i = 0; i < len; i++) {
+          touches.push(t[i]);
+        }
+      }
 
-    // make array of touches
-    var touches;
-    if (t) touches = t.toArray();
-    else touches = [];
+      // add added if needed
+      if (added) touches.push(added);
 
-    // add added if needed
-    if (added) touches.push(added);
+      // prepare variables for looping
+      var idx, touch,
+          ax = 0, ay = 0, dx, dy, ad = 0;
+      len = touches.length;
 
-    // prepare variables for looping
-    var idx, len = touches.length, touch,
-        ax = 0, ay = 0, dx, dy, ad = 0;
+      // first, add
+      for (idx = 0; idx < len; idx++) {
+        touch = touches[idx];
+        ax += touch.pageX; ay += touch.pageY;
+      }
 
-    // first, add
-    for (idx = 0; idx < len; idx++) {
-      touch = touches[idx];
-      ax += touch.pageX; ay += touch.pageY;
+      // now, average
+      ax /= len;
+      ay /= len;
+
+      // distance
+      for (idx = 0; idx < len; idx++) {
+        touch = touches[idx];
+
+        // get distance from average
+        dx = Math.abs(touch.pageX - ax);
+        dy = Math.abs(touch.pageY - ay);
+
+        // Pythagoras was clever...
+        ad += Math.pow(dx * dx + dy * dy, 0.5);
+      }
+
+      // average
+      ad /= len;
+    
+      averaged.x = ax;
+      averaged.y = ay;
+      averaged.d = ad;
+      averaged.touchCount = len;
     }
-
-    // now, average
-    ax /= len;
-    ay /= len;
-
-    // distance
-    for (idx = 0; idx < len; idx++) {
-      touch = touches[idx];
-
-      // get distance from average
-      dx = Math.abs(touch.pageX - ax);
-      dy = Math.abs(touch.pageY - ay);
-
-      // Pythagoras was clever...
-      ad += Math.pow(dx * dx + dy * dy, 0.5);
-    }
-
-    // average
-    ad /= len;
-
-    // return
-    return {
-      x: ax,
-      y: ay,
-      d: ad,
-      touchCount: len
-    };
+    
+    return averaged;
   },
 
   assignTouch: function(touch, view) {
