@@ -12,6 +12,8 @@
 */
 SC.CalculatesEmptiness = {
   
+  hasCalculatesEmptiness: YES,
+  
   /**
   Whether this view should be considered a value. If it is not it will be ignored for calculating emptiness.
    */
