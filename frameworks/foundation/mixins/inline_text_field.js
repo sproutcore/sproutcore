@@ -432,9 +432,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
   /** @private */
   insertBacktab: function(evt) {
+    var delegate = this._delegate; // removed by commitEditing()
+    this.resignFirstResponder();
     this.commitEditing() ;
-    if(this._delegate){
-      var prev = this._delegate.previousValidKeyView();
+    if(delegate){
+      var prev = delegate.get('previousValidKeyView');
       if(prev) prev.beginEditing();
     }
     return YES ;
