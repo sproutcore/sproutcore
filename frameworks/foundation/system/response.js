@@ -421,28 +421,12 @@ SC.XHRResponse = SC.Response.extend({
     if (rawRequest) rawRequest.abort();
     this.set('rawRequest', null);
   },
-  
+
   invokeTransport: function() {
-    
     var rawRequest, transport, handleReadyStateChange, async, headers;
     
-    // Get an XHR object
-    function tryThese() {
-      for (var i=0; i < arguments.length; i++) {
-        try {
-          var item = arguments[i]() ;
-          return item ;
-        } catch (e) {}
-      }
-      return NO;
-    }
-    
-    rawRequest = tryThese(
-      function() { return new XMLHttpRequest(); },
-      function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
-      function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
-    );
-    
+    rawRequest = this.createRequest();
+
     // save it 
     this.set('rawRequest', rawRequest);
     
@@ -481,6 +465,33 @@ SC.XHRResponse = SC.Response.extend({
     return rawRequest ;
   },
   
+  /**
+    Creates the correct XMLHttpRequest object for this browser.
+
+    You can override this if you need to, for example, create an XHR on a
+    different domain name from an iframe.
+
+    @returns {XMLHttpRequest|ActiveXObject}
+  */
+  createRequest: function() {
+    // Get an XHR object
+    function tryThese() {
+      for (var i=0; i < arguments.length; i++) {
+        try {
+          var item = arguments[i]() ;
+          return item ;
+        } catch (e) {}
+      }
+      return NO;
+    }
+
+    return tryThese(
+      function() { return new XMLHttpRequest(); },
+      function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
+      function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
+    );
+  },
+
   /**  @private
   
     Called by the XHR when it responds with some final results.
