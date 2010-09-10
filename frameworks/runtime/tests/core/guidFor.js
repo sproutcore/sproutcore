@@ -175,7 +175,7 @@ test("Multiple arguments", function() {
     SC.guidFor(obj1),
     obj2.hash(),
     SC.guidFor(str),
-    SC.guidFor(str)
+    SC.guidFor(arr)
   ].join('');
   
   equals(h, SC.hashFor(obj1, obj2, str, arr), "hashFor should concatenate the arguments' hashes when there are more than one");
