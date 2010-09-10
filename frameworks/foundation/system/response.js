@@ -127,14 +127,6 @@ SC.Response = SC.Object.extend(
   headers: null,
   
   /**
-    The raw body retrieved from the transport.  This may be further parsed
-    by the body property, which is probably what you want.
-    
-    @property {String}
-  */
-  encodedBody: null,
-  
-  /**
     Response body. If isJSON was set, will be parsed automatically.
     
     @response {Hash|String|SC.Error} the response body or the parsed JSON.
