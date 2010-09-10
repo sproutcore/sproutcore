@@ -204,7 +204,7 @@ SC.mixin(/** @scope SC */ {
       // this is safe.
       } else if (SC.Error && (item instanceof SC.Error)) {
         ret = SC.T_ERROR ;        
-      } else if (item.isObject === true) {
+      } else if (item instanceof SC.Object) {
         ret = SC.T_OBJECT ;
       } else ret = SC.T_HASH ;
     } else if (ret === SC.T_FUNCTION) ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION;
