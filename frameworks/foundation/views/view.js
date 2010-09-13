@@ -2388,7 +2388,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         for(key in this._activeAnimations){
           // TODO: Check for more than duration
           if (
-            (currentStyle && newStyle[key] !== currentStyle[key]) ||
+            newStyle[key] !== (currentStyle ? currentStyle[key] : null) ||
             !this._pendingAnimations || !this._pendingAnimations[key] ||
             this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
           ) {
