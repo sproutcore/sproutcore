@@ -38,14 +38,16 @@ SC.SwipeGesture = SC.Gesture.extend({
           cd = this.get('currentDirection'),
           startDistance = this.get('startDistance'),
           deltaX = touch.pageX - touch.startX,
-          deltaY = touch.pageY - touch.startY;
+          deltaY = touch.pageY - touch.startY,
+          absX = Math.abs(deltaX),
+          absY = Math.abs(deltaY);
 
       if (Math.abs(deltaX) > startDistance || Math.abs(deltaY) > startDistance) {
 
         if (!cd) {
           if (d == SC.SWIPE_ANY) {
-            if      (deltaX > deltaY) cd = SC.SWIPE_HORIZONTAL;
-            else if (deltaY > deltaX) cd = SC.SWIPE_VERTICAL;
+            if      (absX > absY) cd = SC.SWIPE_HORIZONTAL;
+            else if (absY > absX) cd = SC.SWIPE_VERTICAL;
             else                      return NO; // We can't determine a direction yet
           } else {
             cd = d;
