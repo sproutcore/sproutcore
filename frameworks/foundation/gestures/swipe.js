@@ -98,7 +98,7 @@ SC.SwipeGesture = SC.Gesture.extend({
       this.release(touch);
 
       var allTouches = touch.touchesForResponder(this);
-      if (!allTouches || allTouches.length == 0) this.end(touch, swipeDirection, delta);
+      if (!allTouches || allTouches.length == 0) this.cancel(touch, swipeDirection, delta);
     } else {
       this.change(touch, swipeDirection, delta);
     }
