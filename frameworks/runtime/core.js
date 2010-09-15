@@ -192,7 +192,7 @@ SC.mixin(/** @scope SC */ {
     if (item === undefined) return SC.T_UNDEFINED ;
     if (item === null) return SC.T_NULL ; 
     var ret = typeof(item) ;
-    if (ret == "object") {
+    if (ret === "object") {
       if (item instanceof Array) {
         ret = SC.T_ARRAY ;
       } else if (item instanceof Function) {
@@ -204,7 +204,9 @@ SC.mixin(/** @scope SC */ {
       // this is safe.
       } else if (SC.Error && (item instanceof SC.Error)) {
         ret = SC.T_ERROR ;        
-      } else if (item instanceof SC.Object) {
+      } else if (!SC.browser.mozilla && item.isObject === true) {
+       ret = SC.T_OBJECT ;
+      } else if (SC.browser.mozilla && SC.Object && (item instanceof SC.Object) && item.isObject === true) {
         ret = SC.T_OBJECT ;
       } else ret = SC.T_HASH ;
     } else if (ret === SC.T_FUNCTION) ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION;
