@@ -210,8 +210,13 @@ test("writing a string to a number attribute should store a number" ,function() 
 
 test("writing a date should generate an ISO date" ,function() {
   var date = new Date(1238650083966);
-  equals(rec.set('date', date), rec, 'returns reciever');
-  equals(rec.readAttribute('date'), '2009-04-01T22:28:03-07:00', 'should have new time (%@)'.fmt(date.toString()));
+
+  // Work with timezones
+  var utcDate = new Date(Number(date) + (date.getTimezoneOffset() * 60000)); // Adjust for timezone offset
+  utcDate.getTimezoneOffset = function(){ return 0; }; // Hack the offset to respond 0
+
+  equals(rec.set('date', utcDate), rec, 'returns reciever');
+  equals(rec.readAttribute('date'), '2009-04-02T05:28:03Z', 'should have time in ISO format');
 });
 
 test("writing an attribute should make relationship aggregate dirty" ,function() {
