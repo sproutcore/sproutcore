@@ -891,8 +891,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     // maxlength for textareas
     if(!SC.browser.safari && this.get('isTextArea')){
-      var val = this.get('value');
-      if(val && evt.which>47 && (val.length >= this.get('maxLength'))) {
+      var val = this.get('value'),
+          code = evt.which;
+    // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
+      if(val && ((!SC.browser.mozilla && code>47) || 
+        (SC.browser.mozilla && ((code>32 && code<43) || code>47) && !(evt.keyCode>36 && evt.keyCode<41))) &&
+        (val.length >= this.get('maxLength'))) {
         maxLengthReached = true;
       }
     }
@@ -979,9 +983,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
   valueObserver: function(){
     // console.log('value observer');
-    var val = this.get('value');
-    if (val && val.length>0) this.set('hintON', NO);
-    else this.set('hintON', YES);
+    var val = this.get('value'), max;
+    if (val && val.length>0) {
+      this.set('hintON', NO);
+      max = this.get('maxLength');
+      if(!SC.browser.safari && val.length>max){
+        this.set('value', val.substr(0, max));
+      }
+    }else this.set('hintON', YES);
   }.observes('value')
   
 });
