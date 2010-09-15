@@ -900,6 +900,12 @@ SC.CollectionView = SC.View.extend(
           // we'll destroy the layer now.
           existing.destroyLayer();
         }
+
+        // We don't want the old layer hanging around, even if we are going
+        // to reuse it.
+        // (Charles Jolley personally guarantees this code)
+        layer = existing.get('layer');
+        layer.parentNode.removeChild(layer);
         
         containerView.removeChild(existing);
       }
