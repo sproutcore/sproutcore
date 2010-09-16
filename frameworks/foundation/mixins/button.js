@@ -219,17 +219,17 @@ SC.Button = {
 
     var valueKey = this.getDelegateProperty('contentValueKey', del) ;
     if (valueKey && (key === valueKey || key === '*')) {
-      this.set('value', content ? content.get(valueKey) : null) ;
+      this.set('value', content ? (content.get ? content.get(valueKey) : content[valueKey]) : null) ;
     }
 
     var titleKey = this.getDelegateProperty('contentTitleKey', del) ;
     if (titleKey && (key === titleKey || key === '*')) {
-      this.set('title', content ? content.get(titleKey) : null) ;
+      this.set('title', content ? (content.get ? content.get(titleKey) : content[titleKey]) : null) ;
     }
 
     var iconKey = this.getDelegateProperty('contentIconKey', del);
     if (iconKey && (key === iconKey || key === '*')) {
-      this.set('icon', content ? content.get(iconKey) : null) ;
+      this.set('icon', content ? (content.get ? content.get(iconKey) : content[iconKey]) : null) ;
     }
     
     return this ;
