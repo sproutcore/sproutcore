@@ -286,10 +286,15 @@ SC.platform = {
   }
 
   // unfortunately, we need a bit more to know FOR SURE that 3D is allowed
-  if (window.media && window.media.matchMedium) {
-    if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
-  } else if(window.styleMedia && window.styleMedia.matchMedium) {
-    if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;    
+  try{
+    if (window.media && window.media.matchMedium) {
+      if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
+    } else if(window.styleMedia && window.styleMedia.matchMedium) {
+      if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;    
+    }
+  }catch(e){
+    //Catch to support IE9 exception
+    SC.platform.supportsCSS3DTransforms = NO;
   }
   
   // Unfortunately, this has to be manual, as I can't think of a good way to test it
