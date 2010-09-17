@@ -298,9 +298,14 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @returns {Boolean}
   */
   performAction: function() {
-    // Disabled menu items and menu items with submenus should not have
-    // actions.
-    if (!this.get('isEnabled')||this.get('hasSubMenu')) return NO;
+    // Clicking on a disabled menu item should close the menu.
+    if (!this.get('isEnabled')) {
+      this.getPath('parentMenu.rootMenu').remove();
+      return YES;
+    }
+
+    // Menus that contain submenus should ignore clicks
+    if (this.get('hasSubMenu')) return NO;
 
     var disableFlash = this.getContentProperty('itemDisableMenuFlashKey'),
         menu;
