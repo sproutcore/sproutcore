@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore Animation
-// Copyright: ©2009 TPSi
-// Copyright: ©2009 Alex Iskander
+// Copyright: ©2010 TPSi
+// Copyright: ©2010 Alex Iskander
 // Portions © Apple Inc under BSD License:
 //	See: http://trac.webkit.org/browser/trunk/WebCore/platform/graphics/UnitBezier.h
 // ==========================================================================

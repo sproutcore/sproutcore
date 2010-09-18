@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Greenhouse.File Fixtures
-// Copyright: ©2009 My Company, Inc.
+// Copyright: ©2010 My Company, Inc.
 // ==========================================================================
 /*globals Greenhouse */
 

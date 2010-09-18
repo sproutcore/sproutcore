@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   TestRunner.sourceController
-// Copyright: ©2009 Apple Inc.
+// Copyright: ©2010 Apple Inc.
 // ==========================================================================
 /*globals TestRunner */
 

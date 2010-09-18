@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Greenhouse - mainPage
-// Copyright: ©2009 Mike Ball
+// Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals Greenhouse */
 sc_require('views/application_list_item');

@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   CoreTools.Target Unit Test
-// Copyright: ©2009 Apple Inc.
+// Copyright: ©2010 Apple Inc.
 // ==========================================================================
 /*globals TestRunner module test ok equals same stop start */
 

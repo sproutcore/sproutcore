@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Welcome.targetsController Unit Test
-// Copyright: ©2009 Apple Inc.
+// Copyright: ©2010 Apple Inc.
 // ==========================================================================
 /*globals Welcome module test ok equals same stop start */
 

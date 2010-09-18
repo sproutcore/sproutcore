@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Redbull.File Unit Test
-// Copyright: ©2009 My Company, Inc.
+// Copyright: ©2010 My Company, Inc.
 // ==========================================================================
 /*globals Redbull module test ok equals same stop start */
 
