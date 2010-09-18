@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Greenhouse.ViewConfig
-// Copyright: ©2010 My Company, Inc.
+// Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals Greenhouse js_beautify*/
 

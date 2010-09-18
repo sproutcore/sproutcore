@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Greenhouse.File
-// Copyright: ©2010 My Company, Inc.
+// Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*jslint evil: true*/
 /*globals Greenhouse*/

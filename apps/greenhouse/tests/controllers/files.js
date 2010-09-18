@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Greenhouse.filesController Unit Test
-// Copyright: ©2010 My Company, Inc.
+// Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals Greenhouse module test ok equals same stop start */
 

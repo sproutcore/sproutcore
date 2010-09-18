@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Greenhouse.EventBlocker
-// Copyright: ©2010 My Company, Inc.
+// Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals Greenhouse */
 /** @class
