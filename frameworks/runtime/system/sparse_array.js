@@ -259,7 +259,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     if (!content) content = this._sa_content = [] ;
     var start = range.start, len = range.length;
     while(--len >= 0) content[start+len] = array[len];
-    if (this._requestingIndex <= 0) this.enumerableContentDidChange(range.start, range.length, 0);
+    if (this._requestingIndex <= 0) this.enumerableContentDidChange(range.start, range.length);
     return this ;
   },
 
