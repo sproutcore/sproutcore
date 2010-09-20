@@ -276,6 +276,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     var array = this._TMP_PROVIDE_ARRAY, range = this._TMP_PROVIDE_RANGE;
     array[0] = object;
     range.start = index;
+    range.length = 0;
     return this.provideObjectsInRange(range, array);
   },
 
@@ -301,8 +302,8 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
         var start = range.start, loc = Math.min(start + range.length, content.length);
         while (--loc>=start) content[loc] = undefined;
       }
-    }
-    this.enumerableContentDidChange(range) ; // notify
+    }    
+    this.enumerableContentDidChange(range.start, range.length) ; // notify
     return this ;
   },
 

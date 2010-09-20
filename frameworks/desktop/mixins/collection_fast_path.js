@@ -657,8 +657,11 @@ SC.CollectionFastPath = {
   bottomBackground: 0,
   
   renderNextBackground: function() {
-    var index = this.getNextBackground(),
-    exampleView = this.exampleViewForIndex(index),
+    var index = this.getNextBackground();
+    
+    if(index === undefined) return;
+    
+    var exampleView = this.exampleViewForIndex(index),
     pool = this.domPoolForExampleView(exampleView),
     view;
     
@@ -667,10 +670,6 @@ SC.CollectionFastPath = {
     // if the last rendered is the tail and is about to be reused, that means we're done
     if(pool.length >= this.domPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._prev)) {
       pool._lastRendered = null;
-      return;
-    }
-    
-    if(index === undefined) {
       return;
     }
     

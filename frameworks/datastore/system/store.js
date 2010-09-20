@@ -2327,7 +2327,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     storeKey.  As opposed to storeKeyFor() however, this method
     will NOT generate a new storeKey but returned undefined.
     
-    @param {String} id a record id
+    @param {SC.Record} recordType the record type
+    @param {String} primaryKey the primary key
     @returns {Number} a storeKey.
   */
   storeKeyExists: function(recordType, primaryKey) {
