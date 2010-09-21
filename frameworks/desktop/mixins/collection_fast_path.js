@@ -141,7 +141,7 @@ SC.CollectionFastPath = {
     
     shouldBeShowing.clear();
     this.maxShowing = 0;
-    this.minShowing = content.length;
+    this.minShowing = content.get('length');
   
     // we need to be able to iterate nowshowing more easily, so copy it into a coreset
     nowShowing.forEach(this.processNowShowing, this);
@@ -627,19 +627,19 @@ SC.CollectionFastPath = {
   getNextBackground: function() {
     var content = this.get('content'),
     invalid = this._invalidIndexes,
-    i, len = invalid.length;
+    i, len = invalid.length, clen = content.get('length');
     
     // loop through invalid indices and allow the first one between top and bottom to re-render
     for(i = 0; i < invalid.length; i++) {
       if(invalid[i] <= this.topBackground && invalid[i] >= this.bottomBackground) return invalid[i];
     }
     
-    while((this.topBackground - this.bottomBackground < this.domPoolSize - 1) && (this.topBackground < content.length - 1 || this.bottomBackground > 0)) {
+    while((this.topBackground - this.bottomBackground < this.domPoolSize - 1) && (this.topBackground < clen - 1 || this.bottomBackground > 0)) {
       
       // alternates between checking top and bottom
       this._parity = !this._parity;
       
-      if(this._parity && this.topBackground < content.length - 1) {
+      if(this._parity && this.topBackground < clen - 1) {
         ++this.topBackground;
         if(this.canBackgroundRender(this.topBackground)) return this.topBackground;
         
@@ -672,7 +672,7 @@ SC.CollectionFastPath = {
       return;
     }
     
-    //console.log("background rendering: ", index);
+    //console.log("background rendering: " + index);
     
     if(this._invalidIndexes.contains(index) && (view = this._indexMap[index])) {
       view = this.updateView(view);
