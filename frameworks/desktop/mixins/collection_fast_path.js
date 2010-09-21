@@ -20,7 +20,7 @@ SC.CollectionFastPath = {
   
   _cfp_contentRangeObserver: null,
   
-  contentDidChange: function(a, b, c, d,e) {
+  contentDidChange: function() {
     if(this._cfp_contentRangeObserver) this._cfp_contentRangeObserver.destroy();
     
     var content = this.get('content');
@@ -37,7 +37,6 @@ SC.CollectionFastPath = {
   },
   
   reload: function(indexes) {
-    // console.log("stuff changed", indexes);
     if(indexes) {
       if(indexes.isIndexSet) {
         indexes.forEach(this.invalidate, this);
