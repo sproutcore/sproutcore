@@ -893,7 +893,7 @@ SC.DateTime.mixin(SC.Comparable,
     @returns {DateTime} the DateTime corresponding to the string parameter
   */
   parse: function(str, fmt) {
-    var re = /(?:\%([aAbBcdHIjmMpSUWwxXyYZ\%])|(.))/g;
+    var re = new RegExp('(?:%([aAbBcdHIjmMpSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
     try {
       while ((parts = re.exec(fmt)) !== null) {
