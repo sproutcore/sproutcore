@@ -91,6 +91,7 @@ SC.platform = {
 
     // Tell the app that we now "speak" touch
     SC.platform.touch = YES;
+    SC.platform.bounceOnScroll = YES;
 
     // CSS selectors may depend on the touch class name being present
     document.body.className = document.body.className + ' touch';
