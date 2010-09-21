@@ -15,7 +15,7 @@ SC.CollectionFastPath = {
     this._invalidIndexes = SC.CoreSet.create();
     
     // temporarily disabled for debugging purposes; re-enable when background rendering is better tested
-    // SC.backgroundTaskQueue.minimumIdleDuration = 100;
+    SC.backgroundTaskQueue.minimumIdleDuration = 100;
   },
   
   _SCCFP_contentRangeObserver: null,
@@ -201,7 +201,8 @@ SC.CollectionFastPath = {
     }
   },
   
-  domPoolSize: 100,
+  // how many elements it will attempt to render at once (including the visible ones)
+  domPoolSize: 200,
 
   /**
   @private
