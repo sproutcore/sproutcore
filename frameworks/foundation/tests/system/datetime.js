@@ -294,6 +294,10 @@ test('parse with time zones',function() {
     "2020-01-07T18:33:22+00:00");
 });
 
+test('parse without a format uses default ISO8601', function() {
+  equals(SC.DateTime.parse("2010-09-17T18:35:08Z").toISO8601(), "2010-09-17T18:35:08+00:00");
+});
+
 test('binding', function() {
   var fromObject = SC.Object.create({value: dt});
   var toObject = SC.Object.create({value: ''});
