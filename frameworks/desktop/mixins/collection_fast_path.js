@@ -18,14 +18,14 @@ SC.CollectionFastPath = {
     // SC.backgroundTaskQueue.minimumIdleDuration = 100;
   },
   
-  _cfp_contentRangeObserver: null,
+  _SCCFP_contentRangeObserver: null,
   
   contentDidChange: function() {
-    if(this._cfp_contentRangeObserver) this._cfp_contentRangeObserver.destroy();
+    if(this._SCCFP_contentRangeObserver) this._SCCFP_contentRangeObserver.destroy();
     
     var content = this.get('content');
     
-    if(content) this._cfp_contentRangeObserver = content.addRangeObserver(null, this, this.contentIndicesDidChange);
+    if(content) this._SCCFP_contentRangeObserver = content.addRangeObserver(null, this, this.contentIndicesDidChange);
   }.observes('content'),
   
   contentIndicesDidChange: function(array, objects, key, indexes, context) {
@@ -122,7 +122,7 @@ SC.CollectionFastPath = {
     
     // if the view was hidden due to changing type, mark it dirty so if it's used again it will update properly
     } else {
-      view._cfp_dirty = YES;
+      view._SCCFP_dirty = YES;
     }
   },
 
@@ -211,7 +211,7 @@ SC.CollectionFastPath = {
     var pools = this._domPools || (this._domPools = {}), guid = SC.guidFor(exampleView),
     pool = pools[guid];
     
-    if (!pool) pool = pools[guid] = SC.DoublyLinkedList.create();
+    if (!pool) pool = pools[guid] = SC._DoublyLinkedList.create();
     
     return pool;
   },
@@ -228,7 +228,7 @@ SC.CollectionFastPath = {
       
       // if it is being background rendered it goes in front of the last one background rendered, or on the back if this is the first time
       if(pool._lastRendered) {
-        pool.insertBetween(view, pool._lastRendered, pool._lastRendered._next);
+        pool.insertBetween(view, pool._lastRendered, pool._lastRendered._SCCFP_next);
         
       } else {
         pool.enqueue(view); 
@@ -411,7 +411,7 @@ SC.CollectionFastPath = {
       view = null;
       
     // if we are going to be keeping the view, make sure that it's updated
-    } else if(force || view._cfp_dirty || this.isInvalid(view.contentIndex)) {
+    } else if(force || view._SCCFP_dirty || this.isInvalid(view.contentIndex)) {
       
       // check if it went invalid because its backing item was changed, and update if so
       if(item !== view.content) {
@@ -427,7 +427,7 @@ SC.CollectionFastPath = {
       
       view.update();
       
-      view._cfp_dirty = NO;
+      view._SCCFP_dirty = NO;
       
       // we just updated so it must be valid
       this.validate(view.contentIndex);
@@ -495,7 +495,7 @@ SC.CollectionFastPath = {
       // if we are going to steal the front of the background queue we need to fix it after we're done
       if(view === pool._lastRendered) {
         // if it's the head we need to null it, otherwise just use the next one back
-        pool._lastRendered = (view._prev === view ? null : view._prev);
+        pool._lastRendered = (view._SCCFP_prev === view ? null : view._SCCFP_prev);
       }
       pool.remove(view);
     
@@ -667,7 +667,7 @@ SC.CollectionFastPath = {
     if(pool._lastRendered && !pool.head) debugger;
 
     // if the last rendered is the tail and is about to be reused, that means we're done
-    if(pool.length >= this.domPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._prev)) {
+    if(pool.length >= this.domPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._SCCFP_prev)) {
       pool._lastRendered = null;
       return;
     }

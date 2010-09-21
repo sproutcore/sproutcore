@@ -1,4 +1,8 @@
-SC.DoublyLinkedList = SC.mixin({},
+/**
+  Circular doubly linked list created for queue in CollectionFastPath. Not suitable for general use.
+  TODO: make generic
+ */
+SC._DoublyLinkedList = SC.mixin({},
   {
     head: null,
     
@@ -16,31 +20,32 @@ SC.DoublyLinkedList = SC.mixin({},
     },
     
     insertBetween: function(item, prev, next) {
-      if(!next) debugger;
-      prev._next = item;
-      item._prev = prev;
+      if(!next || !prev) throw "invalid insertion";
+      prev._SCCFP_next = item;
+      item._SCCFP_prev = prev;
       
-      next._prev = item;
-      item._next = next;
+      next._SCCFP_prev = item;
+      item._SCCFP_next = next;
       
       this.length++;
       return item;
     },
     
     remove: function(item) {
-      var prev = item._prev,
-      next = item._next,
+      var prev = item._SCCFP_prev,
+      next = item._SCCFP_next,
       head = this.head;
       
+      // if the item to be removed isn't actually in the a list, don't remove it
       if(!(next && prev && head)) return;
       
-      next._prev = prev;
-      prev._next = next;
+      next._SCCFP_prev = prev;
+      prev._SCCFP_next = next;
       
       this.length--;
       
       if(item === head) {
-        if(head._next === head) {
+        if(head._SCCFP_next === head) {
           this.head = null;
         } else {
           this.head = next;
@@ -48,16 +53,16 @@ SC.DoublyLinkedList = SC.mixin({},
       }
       
       
-      item._next = null;
-      item._prev = null;
+      item._SCCFP_next = null;
+      item._SCCFP_prev = null;
       
       return item;
     },
     
     init: function(item) {
         this.head = item;
-        item._next = item;
-        item._prev = item;
+        item._SCCFP_next = item;
+        item._SCCFP_prev = item;
         
         this.length++;
         return this;
@@ -67,7 +72,7 @@ SC.DoublyLinkedList = SC.mixin({},
       var head = this.head;
       
       if(head) {
-        this.insertBetween(item, head._prev, head);
+        this.insertBetween(item, head._SCCFP_prev, head);
       } else {
         this.init(item);
       }
@@ -78,14 +83,14 @@ SC.DoublyLinkedList = SC.mixin({},
     pop: function() {
       var head = this.head;
       
-      if(head) return this.remove(head._prev);
+      if(head) return this.remove(head._SCCFP_prev);
     },
     
     unshift: function(item) {
       var head = this.head;
       
       if(head) {
-        this.insertBetween(item, head._prev, head);
+        this.insertBetween(item, head._SCCFP_prev, head);
         this.head = item;
         
       } else {
