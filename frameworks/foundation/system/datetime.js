@@ -895,6 +895,9 @@ SC.DateTime.mixin(SC.Comparable,
   parse: function(str, fmt) {
     var re = new RegExp('(?:%([aAbBcdHIjmMpSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
+    
+    if (SC.none(fmt)) fmt = SC.DATETIME_ISO8601;
+    
     try {
       while ((parts = re.exec(fmt)) !== null) {
         switch(parts[1]) {

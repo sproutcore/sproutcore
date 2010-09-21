@@ -299,6 +299,10 @@ test('bad parsing', function() {
   equals(SC.DateTime.parse("2010-09-17T18:35:08Z", SC.DATETIME_ISO8601).toISO8601(), "2010-09-17T18:35:08+00:00");
 });
 
+test('parse without a format uses default ISO8601', function() {
+  equals(SC.DateTime.parse("2010-09-17T18:35:08Z").toISO8601(), "2010-09-17T18:35:08+00:00");
+});
+
 test('binding', function() {
   var fromObject = SC.Object.create({value: dt});
   var toObject = SC.Object.create({value: ''});
