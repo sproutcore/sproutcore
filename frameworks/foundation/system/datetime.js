@@ -893,7 +893,9 @@ SC.DateTime.mixin(SC.Comparable,
     @returns {DateTime} the DateTime corresponding to the string parameter
   */
   parse: function(str, fmt) {
-    var re = /(?:\%([aAbBcdHIjmMpSUWwxXyYZ\%])|(.))/g;
+    // Declared as an object not a literal since in some browsers the literal
+    // retains state across function calls
+    var re = new RegExp('(?:%([aAbBcdHIjmMpSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
     
     if (SC.none(fmt)) fmt = SC.DATETIME_ISO8601;
