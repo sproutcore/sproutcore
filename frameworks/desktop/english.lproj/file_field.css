@@ -1,0 +1,25 @@
+/* Common SC.FileFieldView styles - needed to work properly */
+
+.sc-view .sc-file-field-view {
+  z-index: 9000;
+  direction: ltr;
+}
+
+.sc-view .sc-file-field-form {
+/*  visibility: hidden;*/
+}
+
+.sc-view .sc-file-field-input {
+  opacity: 0;
+  -moz-opacity: 0;
+  filter: alpha(opacity=0);
+  font-size: 480px;
+}
+
+.sc-view .sc-file-field-iframe {
+  border-style: none;
+}
+
+.sc-view .sc-file-field-label-view {
+  line-height: 24px;
+}
