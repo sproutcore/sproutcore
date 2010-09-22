@@ -109,7 +109,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
     @returns {String} the unique identifier sent as X-Progress-ID with the upload request
    */
   submitForm: function() {
-     console.info("SC.FileFieldView: submitForm()".fmt());
     // Create the results capturing iframe
     this._createIframe();
 
@@ -144,15 +143,12 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
 
   delegate: null,
 
-  /** SC.View Callbacks **/
-
+  /** SC.View **/
   didAppendToDocument: function() {
-    console.info("SC.FileFieldView: didAppendToDocument()".fmt());
     sc_super();
   },
   
   didCreateLayer: function() {
-    console.info("SC.FileFieldView: didCreateLayer()".fmt());
     sc_super();
 
     // Create the form (and iframe and input(s))
@@ -160,7 +156,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   willDestroyLayer: function() {
-    console.info("SC.FileFieldView: willDestroyLayer()".fmt());
     sc_super();
 
     var idx = this.get('numberOfFiles'),
@@ -168,7 +163,7 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
     while (--idx >= 0) {
       input = this._inputs[idx];
       SC.Event.remove(input, 'mousedown', this, this._mouseDownInInput);
-      // // TODO: [tmk] is it necessary to unregister for the following?
+      // // TODO: [publickeating] is it necessary to unregister for the following?
       SC.Event.remove(input, 'mouseup', this, this._mouseUpInInput);
       SC.Event.remove(input, 'mouseout', this, this._mouseOutOfInput);
     }
@@ -178,7 +173,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _inputChange: function(evt) {
-    console.info("SC.FileFieldView: _inputChange()".fmt());
     var input = this._inputs[evt.context],
     button = this._buttons[evt.context],
     label = this._labels[evt.context],
@@ -220,8 +214,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _mouseDownInInput: function(evt) {
-    //debug 
-    console.log("_mouseDownInInput()");
     // Register for mouseup & mouseout events only if we got mousedown.  This prevents unnecessary events, particularly mouseout events
     var input = this._inputs[evt.context];
 
@@ -242,8 +234,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _mouseUpInInput: function(evt) {
-    //debug 
-    console.log("_mouseUpInInput()");
     // Unregister for mouseup & mouseout events
     var input = this._inputs[evt.context];
     SC.Event.remove(input.$()[0], 'mouseup', this, this._mouseUpInInput);
@@ -261,8 +251,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _mouseOutOfInput: function(evt) {
-    //debug 
-    console.log("_mouseOutOfInput()");
     // Unregister for mouseup & mouseout events
     var input = this._inputs[evt.context];
     SC.Event.remove(input.$()[0], 'mouseup', this, this._mouseUpInInput);
@@ -275,16 +263,12 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _iframeLoad: function(evt) {
-    //debug 
-    console.log("_iframeLoad()");
     var result = null;
     try {
       result = this._iframe.$()[0].contentWindow.document.body.firstChild.innerHTML;
     } catch(err) {
       result = this._iframe.$()[0].contentDocument.body.firstChild.innerHTML;
     }
-    //debug 
-    console.log("result = %@, JSON.parse(result) = %@".fmt(result, JSON.parse(result)));
     result = JSON.parse(result);
 
     var del = this.get('delegate') ? this.get('delegate') : this;
@@ -299,8 +283,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _createIframe: function() {
-    //debug 
-    console.log("_createIframe()");
     var iframe;
 
     iframe = SC.View.create({
@@ -334,8 +316,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _createForm: function() {
-    //debug 
-    console.log("_createForm()");
     var form;
 
     form = SC.View.create({
@@ -365,7 +345,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
       },
       
       willDestroyLayer: function() {
-        console.info("SC.FileFieldView: form: willDestroyLayer()".fmt());
         sc_super();
         
         this.removeAllChildren();
@@ -409,8 +388,6 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   },
 
   _createInput: function() {
-    //debug 
-    console.log("_createInput()");
     var button, label, input, form = this._form,
     layout = this.get('layout'),
     inputs = this._inputs,
@@ -432,7 +409,7 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
         height: 24,
         width: 110
       },
-      // TODO: UNUSED: classNames: 'sc-file-field-button-view'.w(),
+      classNames: 'sc-file-field-button-view'.w(),
       title: this.get('buttonTitle'),
       theme: this.get('buttonTheme')
     });
@@ -464,7 +441,7 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
         height: 24
       },
 
-      classNames: 'sc-file-field-input'.w(),
+      classNames: 'sc-file-field-input-view'.w(),
 
       acceptsFirstResponder: function() {
         return YES;
