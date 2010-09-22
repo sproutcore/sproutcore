@@ -19,7 +19,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   /** @scope SC.FixturesDataSource.prototype */ {
 
   /**
-    If YES then the data source will asyncronously respond to data requests
+    If YES then the data source will asynchronously respond to data requests
     from the server.  If you plan to replace the fixture data source with a 
     data source that talks to a real remote server (using Ajax for example),
     you should leave this property set to YES so that Fixtures source will
@@ -34,7 +34,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   simulateRemoteResponse: NO,
   
   /**
-    If you set simulateRemoteResponse to YES, then the fixtures soure will
+    If you set simulateRemoteResponse to YES, then the fixtures source will
     assume a response latency from your server equal to the msec specified
     here.  You should tune this to simulate latency based on the expected 
     performance of your server network.  Here are some good guidelines:
