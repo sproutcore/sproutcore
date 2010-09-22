@@ -40,8 +40,6 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   // set layout
   child.set('layout', layout) ;
 
-  console.log(child.get('layoutStyle'));
-
   var testKey;
 
   // test
@@ -79,7 +77,6 @@ var commonSetup = {
   },
   
   teardown: function() {
-    //parent.destroy(); child.destroy();
     parent = child = null ;
   }
 };
@@ -256,7 +253,10 @@ module('CSS TRANSFORM LAYOUT VARIATIONS', {
     document.body.appendChild(child.get('layer'));
   },
 
-  teardown: commonSetup.teardown
+  teardown: function(){
+    child.destroyLayer();
+    commonSetup.teardown();
+  }
 });
 
 function transformFor(view){
