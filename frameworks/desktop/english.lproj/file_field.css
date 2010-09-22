@@ -9,7 +9,7 @@
 /*  visibility: hidden;*/
 }
 
-.sc-view .sc-file-field-input {
+.sc-view .sc-file-field-input-view {
   opacity: 0;
   -moz-opacity: 0;
   filter: alpha(opacity=0);
