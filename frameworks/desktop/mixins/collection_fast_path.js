@@ -350,7 +350,6 @@ SC.CollectionFastPath = {
     // set settings. Self explanatory.
     itemView.beginPropertyChanges();
     itemView.setIfChanged(attrs);
-    itemView.setIfChanged('page', this.page);
     itemView.endPropertyChanges();
   },
   
