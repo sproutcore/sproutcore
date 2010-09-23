@@ -179,15 +179,17 @@ SC.CollectionFastPath = {
     
     // scrolling updates
     if(scrollOnly) {
-      this.topBackground = this.maxShowing;
-      this.bottomBackground = this.minShowing;
-      
       for(var pool in this._domPools) {
         this._domPools[pool]._lastRendered = null;
       }
     }
     
     // do these no matter what
+    
+    // we reset these even on non-scrolling updates because data might have been loaded from the server and checking if views exist is cheap
+    this.topBackground = this.maxShowing;
+    this.bottomBackground = this.minShowing;
+    
     // adds ourself to the incremental renderer and stops any background rendering
     this.incrementalRenderer.add(this);
     
@@ -411,7 +413,7 @@ SC.CollectionFastPath = {
       view = null;
       
     // if we are going to be keeping the view, make sure that it's updated
-    } else if(force || view._SCCFP_dirty || this.isInvalid(view.contentIndex)) {
+    } else if(force || view._SCCFP_dirty || this._invalidIndexes.contains(view.contentIndex)) {
       
       // check if it went invalid because its backing item was changed, and update if so
       if(item !== view.content) {
@@ -584,7 +586,7 @@ SC.CollectionFastPath = {
     
     for(i = 0; i < len; i++) {
       index = shouldBeShowing[i];
-      if(!curShowing.contains(index) || this.isInvalid(index)) return index;
+      if(!curShowing.contains(index) || this._invalidIndexes.contains(index)) return index;
     }
   },
   
@@ -594,12 +596,6 @@ SC.CollectionFastPath = {
     if(index !== undefined) {
       return this.renderForeground(index);
     }
-  },
-  
-  isInvalid: function(index) {
-    var invalidIndexes = this._invalidIndexes;
-    
-    return invalidIndexes.contains(index);
   },
   
   invalidate: function(index) {
@@ -613,42 +609,42 @@ SC.CollectionFastPath = {
     
     return invalidIndexes.remove(index);
   },
-    
-  // checks whether a given index is eligible to be rendered
-  canBackgroundRender: function(index) {
-    // if the top background doesn't exist we can background render it
-    // TODO: perhaps make it repool the view here if it finds one
-    return !this._indexMap[index] || this.isInvalid(index);
-  },
   
   _parity: YES,
   
   // if you have a collectionview that does something other than show items in order by index, override this
   getNextBackground: function() {
     var content = this.get('content'),
-    invalid = this._invalidIndexes,
-    i, len = invalid.length, clen = content.get('length');
+    invalid = this._invalidIndexes, indexMap = this._indexMap,
+    i, len = invalid.length, clen = content.get('length'),
+    top = this.topBackground, bottom = this.bottomBackground, parity = this._parity, poolSize = this.domPoolSize, ret;
     
-    // loop through invalid indices and allow the first one between top and bottom to re-render
-    for(i = 0; i < invalid.length; i++) {
-      if(invalid[i] <= this.topBackground && invalid[i] >= this.bottomBackground) return invalid[i];
-    }
-    
-    while((this.topBackground - this.bottomBackground < this.domPoolSize - 1) && (this.topBackground < clen - 1 || this.bottomBackground > 0)) {
-      
+    while((top - bottom < poolSize - 1) && (top < clen - 1 || bottom > 0)) {
       // alternates between checking top and bottom
-      this._parity = !this._parity;
+      parity = !parity;
       
-      if(this._parity && this.topBackground < clen - 1) {
-        ++this.topBackground;
-        if(this.canBackgroundRender(this.topBackground)) return this.topBackground;
+      if(parity && top < clen - 1) {
+        top++;
+        if(!indexMap[top] || invalid.contains(top)) {
+          ret = top;
+          break;
+        }
         
-      } else if(this.bottomBackground > 0){
-        --this.bottomBackground;
-        if(this.canBackgroundRender(this.bottomBackground)) return this.bottomBackground;
+      } else if(bottom > 0) {
+        bottom--;
+        if(!indexMap[bottom] || invalid.contains(bottom)) {
+          ret = bottom;
+          break;
+        }
       }
     }
     
+    // save for next time (otherwise we will simply return values that haven't been loaded yet repeatedly until they load)
+    this.topBackground = top;
+    this.bottomBackground = bottom;
+    this._parity = parity;
+    
+    return ret;
   },
   
   topBackground: 0,
