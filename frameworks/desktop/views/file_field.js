@@ -21,7 +21,7 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
 /** @scope SC.FileView.prototype */
 {
   classNames: 'sc-file-field-view'.w(),
-
+  
   /**
     The title of the button.
     
@@ -37,11 +37,20 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
   buttonTheme: 'capsule',
 
   /**
-    The title of the button when the input has a selection.  Setting this to null, will use the buttonTitle property instead.
-    
+    The title of the button after the input has a selection.  Setting this to null, will use the buttonTitle property instead.
+
     @property {String}
     */
-  buttonTitleWithSelection: "Change",
+  fileSelectedButtonTitle: "Change",
+
+  /**
+    Control HTML escaping of the button title and filename labels.
+    
+    WARNING: HTML escaping is turned off by default, to properly display horizontal ellipses &hellip;.  
+    
+    @property {Boolean}
+    */
+  escapeHTML: NO,
 
   /**
     The placeholder text to the right of the button when the input has no selection.
@@ -98,7 +107,7 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
     @property {Boolean}
     */
   isProgressive: YES,
-
+  
   /**
     Submits the form and returns the unique X-Progress-ID that was submitted with the files.  If your backend is configured to track file uploads, such as with mod_upload_progress for lighttpd or NginxHttpUploadProgressModule, this X-Progress-ID can be used to periodically query the server for the progress of the upload.
     
@@ -134,6 +143,9 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
 
     this._form.$()[0].submit();
 
+    // disable ourselves while uploading
+    this.set('isEnabled', NO);
+    
     this.invokeLast(function() {
       this.invokeDelegateMethod(del, 'fileFieldViewDidSubmit', this, uuid);
     });
@@ -192,7 +204,7 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
 
     SC.RunLoop.begin();
     if (this.get('displaysSelectedFilename')) label.set('value', value);
-    if (this.get('buttonTitleWithSelection')) button.set('title', this.get('buttonTitleWithSelection'));
+    if (this.get('fileSelectedButtonTitle')) button.set('title', this.get('fileSelectedButtonTitle'));
     SC.RunLoop.end();
 
     // Determine how many values are actually set
@@ -264,16 +276,29 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
 
   _iframeLoad: function(evt) {
     var result = null;
-    try {
+    if (this._iframe.$()[0].contentWindow) { // Iframe body content for IE
       result = this._iframe.$()[0].contentWindow.document.body.firstChild.innerHTML;
-    } catch(err) {
+    } else if (this._iframe.$()[0].contentDocument) { // Iframe body content for other browsers
       result = this._iframe.$()[0].contentDocument.body.firstChild.innerHTML;
+    } else {
+      throw 'Unable to retrieve file upload return value. Unknown iframe DOM structure.';
     }
-    result = JSON.parse(result);
-
+    
+    try {
+      result = JSON.parse(result);
+    } catch(err) {  
+      // Unable to parse the result
+      console.error('Result:');
+      console.dirxml(this._iframe.$()[0]);
+      throw('Unable to parse file upload return value.\n\n' + err);
+    }
+  
     var del = this.get('delegate') ? this.get('delegate') : this;
     this.invokeDelegateMethod(del, 'fileFieldViewDidComplete', this, result);
 
+    // re-enable ourselves
+    this.set('isEnabled', YES);
+    
     // Throw away the results frame (but pass on something)
     this.invokeLast(function() {
       SC.Event.remove(this._iframe.$()[0], 'load', this, this._iframeLoad);
@@ -411,7 +436,9 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
       },
       classNames: 'sc-file-field-button-view'.w(),
       title: this.get('buttonTitle'),
-      theme: this.get('buttonTheme')
+      theme: this.get('buttonTheme'),
+      escapeHTML: this.get('escapeHTML'),
+      isEnabledBinding: SC.Binding.oneWay('*parentView.isEnabled')
     });
     this.insertBefore(button, form);
     buttons.push(button);
@@ -423,16 +450,15 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
         left: 115
       },
       classNames: 'sc-file-field-label-view'.w(),
-      value: this.get('emptyText')
+      value: this.get('emptyText'),
+      escapeHTML: this.get('escapeHTML')
     });
     this.insertBefore(label, form);
     labels.push(label);
 
-    input = SC.View.create({
+    input = SC.View.create(SC.Control, {
       tagName: 'input',
-
       name: this.get('inputName'),
-
       layout: {
         left: 0,
         // "auto"
@@ -440,17 +466,22 @@ SC.FileFieldView = SC.View.extend(SC.DelegateSupport,
         top: currentNumberOfInputs * (24 + this.BOTTOM_PADDING),
         height: 24
       },
-
       classNames: 'sc-file-field-input-view'.w(),
-
+      isEnabledBinding: SC.Binding.oneWay('*parentView.parentView.isEnabled'),
+      
       acceptsFirstResponder: function() {
         return YES;
       },
 
       render: function(context, firstTime) {
-        context.attr('type', 'file').attr('name', this.get('name')).end();
+        context.attr('type', 'file').attr('name', this.get('name')).attr('multiple', this.get('numberOfFiles') > 1).end();
         sc_super();
-      }
+      },
+      
+      // This helper gets us isEnabled functionality from the SC.Control mixin
+      $input: function() { 
+        return this.$();
+       }
     });
     form.appendChild(input);
     inputs.push(input);
