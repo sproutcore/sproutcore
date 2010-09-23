@@ -37,7 +37,7 @@ SC.CollectionFastPath = {
   },
   
   reload: function(indexes) {
-    if(indexes) {
+    if(!SC.none(indexes)) {
       if(indexes.isIndexSet) {
         indexes.forEach(this.invalidate, this);
       } else {
