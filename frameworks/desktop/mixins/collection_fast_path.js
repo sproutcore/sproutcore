@@ -8,11 +8,15 @@ SC.CollectionFastPath = {
   //
   initMixin: function() {
     this._indexMap = {};
+    
+    // these are coresets because they need to be iterated a lot
     this._curShowing = SC.CoreSet.create();
     this._shouldBeShowing = SC.CoreSet.create();
     this._viewsForItem = {};
     this._tempAttrs = {};
-    this._invalidIndexes = SC.CoreSet.create();
+    
+    // this is an index set because they handle ranges better
+    this._invalidIndexes = SC.IndexSet.create();
     
     // temporarily disabled for debugging purposes; re-enable when background rendering is better tested
     SC.backgroundTaskQueue.minimumIdleDuration = 100;
@@ -26,6 +30,9 @@ SC.CollectionFastPath = {
     var content = this.get('content');
     
     if(content) this._SCCFP_contentRangeObserver = content.addRangeObserver(null, this, this.contentIndicesDidChange);
+    
+    // TODO: email charles about why observers do setIfChanged no matter what and this function never gets called
+    this.reload();
   }.observes('content'),
   
   contentIndicesDidChange: function(array, objects, key, indexes, context) {
@@ -37,15 +44,20 @@ SC.CollectionFastPath = {
   },
   
   reload: function(indexes) {
-    if(!SC.none(indexes)) {
-      if(indexes.isIndexSet) {
-        indexes.forEach(this.invalidate, this);
-      } else {
-        this.invalidate(indexes);
-      }
+    if(!this._invalidIndexes) return this;
     
-      if (this.get('isVisibleInWindow')) this.invokeOnce(this.reloadIfNeeded);
+    // just calling reload with no arg means reload EVERYTHING
+    if(SC.none(indexes)) {
+      // TODO: make this use the old length
+      this.invalidate(0, this.getPath('content.length'));
+      
+    // otherwise only reload what is necessary
+    } else {
+      this.invalidate(indexes);
     }
+      
+    if (this.get('isVisibleInWindow')) this.invokeLast(this.reloadIfNeeded);
+    
     return this ;
   },
 
@@ -132,7 +144,7 @@ SC.CollectionFastPath = {
     shouldBeShowing = this._shouldBeShowing,
     i, len, index,
     pendingRemovals = this._pendingRemovals || (this._pendingRemovals = []),
-    invalid;
+    invalid, view;
     
     if(!content || !this.get('isVisibleInWindow')) return;
     
@@ -165,7 +177,9 @@ SC.CollectionFastPath = {
     // now actually queue them
     len = pendingRemovals.length;
     for(i = 0;i < len; i++) {
-      this.sendToDOMPool(pendingRemovals.pop());
+      view = pendingRemovals.pop();
+      view = this.updateView(view);
+      if(view) this.sendToDOMPool(view);
     }
   
     // just to be sure
@@ -393,14 +407,16 @@ SC.CollectionFastPath = {
   
   updateView: function(view, force) {
     // if the item changed types we have to move the view to an offscreen pool (like the original fastpath) and replace it with a new view for the new type
-    var exampleView = this.exampleViewForIndex(view.contentIndex),
+    var index = view.contentIndex,
+    exampleView = this.exampleViewForIndex(index),
     pool = this.domPoolForExampleView(view.createdFromExampleView),
-    item = this.get('content').objectAt(view.contentIndex);
+    content = this.get('content'),
+    item = content.objectAt(index);
     
-    if(exampleView !== view.createdFromExampleView) {
+    if(exampleView !== view.createdFromExampleView || index >= content.get('length') || index < 0) {
       // make sure it is no longer treated as a rendered view; this is like sendToDOMPool but it leaves it mapped to the item in case the item is rendered later
-      this._indexMap[view.contentIndex] = null;
-      this._curShowing.remove(view.contentIndex);
+      this._indexMap[index] = null;
+      this._curShowing.remove(index);
     
       // move it off screen
       var f = view.get("frame");
@@ -413,7 +429,7 @@ SC.CollectionFastPath = {
       view = null;
       
     // if we are going to be keeping the view, make sure that it's updated
-    } else if(force || view._SCCFP_dirty || this._invalidIndexes.contains(view.contentIndex)) {
+    } else if(force || view._SCCFP_dirty || this._invalidIndexes.contains(index)) {
       
       // check if it went invalid because its backing item was changed, and update if so
       if(item !== view.content) {
@@ -424,7 +440,7 @@ SC.CollectionFastPath = {
         // flush now so we don't get an extra notification later
         SC.Binding.flushPendingChanges();
         
-        this.mapView(view, view.contentIndex);
+        this.mapView(view, index);
       }
       
       view.update();
@@ -432,7 +448,7 @@ SC.CollectionFastPath = {
       view._SCCFP_dirty = NO;
       
       // we just updated so it must be valid
-      this.validate(view.contentIndex);
+      this.validate(index);
     }
     
     return view;
@@ -598,16 +614,12 @@ SC.CollectionFastPath = {
     }
   },
   
-  invalidate: function(index) {
-    var invalidIndexes = this._invalidIndexes;
-    
-    invalidIndexes.add(index);
+  invalidate: function(start, range) {
+    this._invalidIndexes.add(start, range);
   },
   
-  validate: function(index) {
-    var invalidIndexes = this._invalidIndexes;
-    
-    return invalidIndexes.remove(index);
+  validate: function(start, range) {
+    this._invalidIndexes.remove(start, range);
   },
   
   _parity: YES,
