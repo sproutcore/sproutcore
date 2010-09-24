@@ -443,6 +443,9 @@ SC.CollectionFastPath = {
         this.mapView(view, index);
       }
       
+      // make sure it's moved to its new positions
+      view.set('layout', this.layoutForContentIndex(index));
+      
       view.update();
       
       view._SCCFP_dirty = NO;
