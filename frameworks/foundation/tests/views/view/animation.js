@@ -172,11 +172,11 @@ if (SC.platform.supportsCSSTransitions) {
 
   test("should handle transform attributes", function(){
     SC.RunLoop.begin();
-    view.animate('rotate', 45, { duration: 1 });
+    view.animate('rotateX', 45, { duration: 1 });
     SC.RunLoop.end();
     equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'add transition');
-    equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotate(45deg)', 'has both transforms');
-    equals(45, view.get('layout').rotate, 'rotate is 45deg'); 
+    equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'has both transforms');
+    equals(45, view.get('layout').rotateX, 'rotateX is 45deg'); 
   });
 
   test("should handle conflicting transform animations", function(){
@@ -188,12 +188,12 @@ if (SC.platform.supportsCSSTransitions) {
     };
 
     SC.RunLoop.begin();
-    view.animate('rotate', 45, 1).animate('scale', 2, 2);
+    view.animate('rotateX', 45, 1).animate('scale', 2, 2);
     SC.RunLoop.end();
 
     equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'use duration of first');
-    equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotate(45deg) scale(2)');
-    equals(45, view.get('layout').rotate, 'rotate is 45deg');
+    equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg) scale(2)');
+    equals(45, view.get('layout').rotateX, 'rotateX is 45deg');
     equals(2, view.get('layout').scale, 'scale is 2');
 
     console.warn = originalConsoleWarn;
@@ -242,24 +242,24 @@ if (SC.platform.supportsCSSTransitions) {
 
   test("combines accelerated layer animation with compatible transform animations", function(){
     SC.RunLoop.begin();
-    view.animate('top', 100, 1).animate('rotate', 45, 1);
+    view.animate('top', 100, 1).animate('rotateX', 45, 1);
     SC.RunLoop.end();
 
     var transform = styleFor(view)[SC.platform.domCSSPrefix+'Transform'];
 
     // We need to check these separately because in some cases we'll also have translateZ, this way we don't have to worry about it
     ok(transform.match(/translateX\(0px\) translateY\(100px\)/), 'has translate');
-    ok(transform.match(/rotate\(45deg\)/), 'has rotate');
+    ok(transform.match(/rotateX\(45deg\)/), 'has rotateX');
   });
 
   test("should not use accelerated layer if other transforms are being animated at different speeds", function(){
     SC.RunLoop.begin();
-    view.animate('rotate', 45, 2).animate('top', 100, 1);
+    view.animate('rotateX', 45, 2).animate('top', 100, 1);
     SC.RunLoop.end();
 
     var style = styleFor(view);
 
-    equals(style[SC.platform.domCSSPrefix+'Transform'], 'rotate(45deg)', 'transform should only have rotate');
+    equals(style[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'transform should only have rotateX');
     equals(style['top'], '100px', 'should not accelerate top');
   });
 
