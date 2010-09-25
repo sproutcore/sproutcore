@@ -7,6 +7,4 @@
 
 // sc_resource('setup_body_class_names'); // publish into inline format
 
-// sc_require("system/loader");
-
 if (SC.setupBodyClassNames) SC.setupBodyClassNames() ;
