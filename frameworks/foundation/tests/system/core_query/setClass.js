@@ -42,8 +42,10 @@ test("setClass(mixed, YES) should work across multiple", function() {
     <div class="match"></div>\
   </div>').find('.match');
   equals(cq.length, 2, 'should have two items');
-  equals(cq.hasClass("mixed"), NO, "should not all have mixed class");
+  
+  equals(cq.hasClass("mixed"), YES, "at least one should have mixed class");
+  equals(cq.hasClass("mixed", YES), NO, "should not all have mixed class");
   
   cq.setClass("mixed", YES);
-  equals(cq.hasClass("mixed"), YES, "now all should have mixed class") ;
+  equals(cq.hasClass("mixed", YES), YES, "now all should have mixed class") ;
 }) ;

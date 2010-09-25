@@ -130,7 +130,25 @@ SC.mixin(SC.$.fn, /** @scope SC.$.prototype */ {
     }
     myCur = elCur = null ; // clear memory
     return ret ;
-  }
+  },
+
+  /**
+    Same as jQuery version except that there's an optional parameter to require that all items have the class
+  */
+  hasClass: function(selector, requireAll) {
+		var className = " " + selector + " ";
+		for ( var i = 0, l = this.length; i < l; i++ ) {
+			if ( (" " + this[i].className + " ").replace(/[\n\t]/g, " ").indexOf( className ) > -1 ) {
+        if (!requireAll) return true;
+			} else {
+        if (requireAll) return false;
+      }
+		}
+
+    // If requireAll, no rejection means we have the class for all
+    // If not requireAll, no acceptance means we don't have the class for any
+		return requireAll ? true : false;
+	}
   
 });
 
