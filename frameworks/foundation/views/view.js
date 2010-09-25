@@ -854,9 +854,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {DOMElement} the layer
   */
   layer: function(key, value) {
+    var isNewLayer = NO;
+
     if (value !== undefined) {
+      if (this._view_layer) this._scv_removeTransitionCallbacks(this._view_layer);
+
       this._view_layer = value ;
-      
+      isNewLayer = YES;
+
     // no layer...attempt to discover it...  
     } else {
       value = this._view_layer;
@@ -865,10 +870,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         if (parent) parent = parent.get('layer');
         if (parent) {
           this._view_layer = value = this.findLayerInParentLayer(parent);
+          isNewLayer = YES;
         }
         parent = null ; // avoid memory leak
       }
     }
+
+    if (isNewLayer) this._scv_addTransitionCallbacks(value);
+
     return value ;
   }.property('isVisibleInWindow').cacheable(),
   
@@ -1175,13 +1184,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
 
-    // Animation prep
-    if (SC.platform.supportsCSSTransitions) {
-      this.resetAnimation();
-      SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
-      SC.Event.add(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
-    }
-
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
         childViews = this.get('childViews'),
@@ -1229,11 +1231,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var layer = this.get('layer') ;
     if (layer) {
 
-      // Teardown animations
-      if (SC.platform.supportsCSSTransitions) {
-        SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
-        SC.Event.remove(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
-      }
+      this._scv_removeTransitionCallbacks(layer);
 
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
@@ -2459,6 +2457,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (!callback.target) callback.target = this;
     }
     SC.View.runCallback(callback, { event: evt, propertyName: propertyName, view: this, isCancelled: cancelled });
+  },
+
+  _scv_addTransitionCallbacks: function(layer){
+    if (SC.platform.supportsCSSTransitions) {
+      this.resetAnimation();
+      SC.Event.add(layer, SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
+      SC.Event.add(layer, "transitionEnd", this, this._scv_animationEnd);
+    }
+  },
+
+  _scv_removeTransitionCallbacks: function(layer){
+    if (SC.platform.supportsCSSTransitions) {
+      SC.Event.remove(layer, SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
+      SC.Event.remove(layer, "transitionEnd", this, this._scv_animationEnd);
+    }
   },
 
   /**
