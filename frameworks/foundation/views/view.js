@@ -857,7 +857,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var isNewLayer = NO;
 
     if (value !== undefined) {
-      if (this._view_layer) this._scv_removeTransitionCallbacks(this._view_layer);
+      if (this._view_layer) this._scv_removeAnimationCallbacks(this._view_layer);
 
       this._view_layer = value ;
       isNewLayer = YES;
@@ -876,7 +876,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
 
-    if (isNewLayer) this._scv_addTransitionCallbacks(value);
+    if (isNewLayer) this._scv_addAnimationCallbacks(value);
 
     return value ;
   }.property('isVisibleInWindow').cacheable(),
@@ -1231,7 +1231,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var layer = this.get('layer') ;
     if (layer) {
 
-      this._scv_removeTransitionCallbacks(layer);
+      this._scv_removeAnimationCallbacks(layer);
 
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
@@ -2459,7 +2459,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     SC.View.runCallback(callback, { event: evt, propertyName: propertyName, view: this, isCancelled: cancelled });
   },
 
-  _scv_addTransitionCallbacks: function(layer){
+  _scv_addAnimationCallbacks: function(layer){
     if (SC.platform.supportsCSSTransitions) {
       this.resetAnimation();
       SC.Event.add(layer, SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
@@ -2467,7 +2467,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
   },
 
-  _scv_removeTransitionCallbacks: function(layer){
+  _scv_removeAnimationCallbacks: function(layer){
     if (SC.platform.supportsCSSTransitions) {
       SC.Event.remove(layer, SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
       SC.Event.remove(layer, "transitionEnd", this, this._scv_animationEnd);
