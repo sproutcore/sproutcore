@@ -2037,6 +2037,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // register scroll views for autoscroll during drags
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
+
+    this._previousLayout = this.get('layout');
   },
   
   /**
@@ -3572,6 +3574,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
     
+    this._previousLayout = currentLayout;
+
     return this ;
   },
   
