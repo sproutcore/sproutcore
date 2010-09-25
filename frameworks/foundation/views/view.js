@@ -1370,11 +1370,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // childViews can also inherit it.
       cursor = this.getPath('parentView.cursor');
     }
-    
-    
-
-    this._scv_willRenderAnimations();
-
+     
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
       classNames: classNames,
@@ -2373,15 +2369,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   _scv_willRenderAnimations: function(){
-    var key, callback;
-
     if (SC.platform.supportsCSSTransitions) {
       var layer = this.get('layer'),
           currentStyle = layer ? layer.style : null,
           newStyle = this.get('layoutStyle'),
           transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
           layout = this.get('layout'),
-          idx;
+          key, callback, idx;
 
       // Handle existing animations
       if (this._activeAnimations) {
@@ -2411,7 +2405,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
       this._activeAnimations = this._pendingAnimations;
       this._pendingAnimations = null;
-    } else {
+    }
+  },
+
+  _scv_didRenderAnimations: function(){
+    if (!SC.platform.supportsCSSTransitions) {
+      var key, callback;
       // Transitions not supported
       for (key in this._pendingAnimations) {
         callback = this._pendingAnimations[key].callback;
@@ -3709,6 +3708,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   renderLayout: function(context, firstTime) {
     this._scv_willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
+    this._scv_didRenderAnimations();
   },
   
   /** walk like a duck */
