@@ -23,7 +23,7 @@ Greenhouse.Dir = SC.ChildRecord.extend(
   
   name: SC.Record.attr(String),
   dir: SC.Record.attr(String),  
-  contents: SC.Record.toMany('SC.Record', {nested: YES}),
+  contents: SC.Record.toMany('Greenhouse.File', {nested: YES}),
   
   primaryKey: 'id',
   
@@ -42,7 +42,8 @@ Greenhouse.Dir = SC.ChildRecord.extend(
       body = eval(bodyText || "");
       body.set('needsDesigner', YES);
       body.set('isContainerView',YES);
-      this.set('currentDesign', body);
+      this.writeAttribute('currentDesign', body, YES);
+      this.notifyPropertyChange('currentDesign');
       for(var v in body){
         if(body.hasOwnProperty(v)){
           if(body[v] && body[v].kindOf){
@@ -58,11 +59,11 @@ Greenhouse.Dir = SC.ChildRecord.extend(
           }
         }
       }
-      this.set('designs', designs);
+      this.writeAttribute('designs', designs, YES);
+      this.notifyPropertyChange('designs');
       
     } catch (exception) {
       console.log("Couldn't eval body...");
-      this.set('designs', null);
     }
     
   },
