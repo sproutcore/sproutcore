@@ -596,7 +596,7 @@ SC.DateTime.mixin(SC.Comparable,
       prefix = key.slice(0, 4);
       suffix = key.slice(4);
       if (prefix === 'last' || prefix === 'next') {
-        currentWeekday = this._get('dayOfWeek');
+        currentWeekday = this._get('dayOfWeek', start, timezone);
         targetWeekday = this._englishDayNames.indexOf(suffix);    
         if (targetWeekday >= 0) {
           var delta = targetWeekday - currentWeekday;
