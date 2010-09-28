@@ -50,8 +50,11 @@ module("Animatable", {
     });
     
     SC.RunLoop.end();
+  },
+
+  teardown: function(){
+    pane.remove();
   }
-  
 });
 
 test("animatable should have init-ed correctly", function(){
@@ -145,3 +148,5 @@ test("animation should not interfere with computed layout properties.", function
   computed.set("_test_left", 21);
   equals(computed.get("layout").left, 21, "layout left after setting _test_left (make sure computed property is undisturbed)");
 });
+
+// test("doesn't interfere with built-in animation");

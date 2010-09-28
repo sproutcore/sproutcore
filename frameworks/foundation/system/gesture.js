@@ -158,7 +158,7 @@ SC.Gesture = SC.Object.extend({
   */
   release: function(touch) {
     touch.isTaken = NO;
-    touch.makeTouchResponder(touch.nextTouchResponder);
+    if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
   },
   
   /**

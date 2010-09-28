@@ -98,3 +98,12 @@ test("css() should be an alias for addStyle()", function() {
   equals(SC.RenderContext.fn.css, SC.RenderContext.fn.addStyle, 'methods');
 });
 
+test("addStyle should remove properties that are part of combo properties", function(){
+  SC.COMBO_STYLES = { foo: 'fooSub'.w() };
+  context.styles({ foo: 'foo', fooSub: 'bar' });
+  equals(context.styles().fooSub, 'bar', 'proper starting values');
+  context.addStyle('foo', 'bar');
+  equals(context.styles().foo, 'bar', 'foo has new value');
+  equals(context.styles().fooSub, undefined, 'fooSub has no value');
+});
+

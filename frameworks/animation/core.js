@@ -61,8 +61,8 @@ SC.Animatable = {
   },
 
   // properties that adjust should relay to style
-  _styleProperties: [ "opacity", "display", "transform" ],
-  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY'.w(),
+  _styleProperties: [ "display", "transform" ],
+  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY opacity'.w(),
 
   // we cache this dictionary so we don't generate a new one each time we make
   // a new animation. It is used so we can start the animations in order—
@@ -86,6 +86,9 @@ SC.Animatable = {
 
     this._animatable_original_hasAcceleratedLayer = this.hasAcceleratedLayer || function(){};
     this.hasAcceleratedLayer = this._animatable_hasAcceleratedLayer;
+
+    this._animatable_original_animate = this.animate || function(){};
+    this.animate = this._animatable_animate;
 
     // auto observers do not work when mixed in live, so make sure we do a manual observer
     this.addObserver("style", this, "styleDidChange");
@@ -229,6 +232,15 @@ SC.Animatable = {
     return this;
   },
 
+  /**
+    Don't interfere with the built-in animate method.
+  */
+  _animatable_animate: function(){
+    this.disableAnimation();
+    var ret = this._animatable_original_animate.apply(this, arguments);
+    this.enableAnimation();
+    return ret;
+  },
 
   transitionEnd: function(evt){
     SC.run(function() {
@@ -625,12 +637,6 @@ SC.Animatable = {
 
   },
 
-  _style_opacity_helper: function(style, key, props)
-  {
-    style["opacity"] = props["opacity"];
-    style["mozOpacity"] = props["opacity"]; // older Firefox?
-  },
-
   /**
   @private
   Adjusts display and queues a change for the other properties.
@@ -690,7 +696,6 @@ SC.Animatable = {
   _animatableApplyNonDisplayStyles: function(){
     var layer = this.layer, styles = this.holder._animatableCurrentStyle; // this == timer
     var styleHelpers = {
-      opacity: this.holder._style_opacity_helper
       // more to be added here...
     };
 

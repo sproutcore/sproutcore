@@ -96,6 +96,41 @@ SC.FROM_THEME = "__FROM_THEME__"; // doesn't really matter what it is, so long a
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
 SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 
+/**
+  Map to CSS Transforms
+*/
+
+SC.CSS_TRANSFORM_MAP = {
+  rotate: function(val){
+    return null;
+  },
+
+  rotateX: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    return 'rotateX('+val+')';
+  },
+
+  rotateY: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    return 'rotateY('+val+')';
+  },
+
+  rotateZ: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    return 'rotateZ('+val+')';
+  },
+
+  scale: function(val){
+    if (SC.typeOf(val) === SC.T_ARRAY) val = val.join(', ');
+    return 'scale('+val+')';
+  }
+};
+
+/**
+  Properties that can be animated
+*/
+SC.ANIMATABLE_PROPERTIES = ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "scale", "rotate", "rotateX", "rotateY", "rotateZ"];
+
 /** 
   @class
   
@@ -198,8 +233,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   backgroundColor: null,
   
   /**
-    Activates use of brower's static layout.  You can apply this mixin and
-    still use absolute positioning.  To activate static positioning, set this
+    Activates use of brower's static layout. To activate, set this
     property to YES.
 
     @property {Boolean}
@@ -1140,7 +1174,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this._viewRenderer.attachLayer(this);
     if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
-    
+
+    // Animation prep
+    if (SC.platform.supportsCSSTransitions) {
+      this.resetAnimation();
+      SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
+      SC.Event.add(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
+    }
+
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
         childViews = this.get('childViews'),
@@ -1187,6 +1228,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   destroyLayer: function() {
     var layer = this.get('layer') ;
     if (layer) {
+
+      // Teardown animations
+      if (SC.platform.supportsCSSTransitions) {
+        SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
+        SC.Event.remove(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
+      }
+
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
       this._notifyWillDestroyLayer() ;
@@ -1326,6 +1374,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     
+
+    this._scv_willRenderAnimations();
+
     this._viewRenderer.attr({
       layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
       classNames: classNames,
@@ -1336,7 +1387,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       isEnabled: this.get('isEnabled'),
       isVisible: this.get('isVisible'),
       isFirstResponder: this.get('isFirstResponder'),
-      hasStaticLayout: this.get('hasStaticLayout') && this.get('useStaticLayout')
+      hasStaticLayout: this.get('useStaticLayout')
     });
   },
   
@@ -2228,7 +2279,218 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     return this ;
   },
-  
+
+
+  /**
+    Animate a given property using CSS animations.
+
+    Takes a key, value and either a duration, or a hash of options.
+    The options hash has the following parameters
+      - duration: Duration of animation in seconds
+      - callback: Callback method to run when animation completes
+      - timing: Animation timing function
+
+    @param {String|Hash} key
+    @param {Object} value
+    @params {Number|Hash} duration or options
+    @returns {SC.View} receiver
+  */
+  animate: function(keyOrHash, valueOrOptions, optionsOrCallback, callback) {
+    var hash, options;
+
+    if (SC.typeOf(keyOrHash) === SC.T_HASH) {
+      hash = keyOrHash;
+      options = valueOrOptions;
+      callback = optionsOrCallback;
+    } else {
+      hash = {};
+      hash[keyOrHash] = valueOrOptions;
+      options = optionsOrCallback;
+    }
+
+    if (SC.typeOf(options) === SC.T_NUMBER) {
+      options = { duration: options };
+    } else if (SC.typeOf(options) !== SC.T_HASH) {
+      throw "Must provide options hash or duration!";
+    }
+
+    if (callback) options.callback = callback;
+
+
+    var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim, key;
+    
+    for(key in hash) {
+      if (!hash.hasOwnProperty(key)) continue;
+      value = hash[key];
+      cur = layout[key];
+
+      if (SC.ANIMATABLE_PROPERTIES.contains(key)) {
+        curAnim = layout['animate'+key.capitalize()];
+        
+        if (value === null || value === undefined) {
+          throw "Can only animate to an actual value!";
+        } else {
+          if (cur !== value) didChange = YES;
+
+          // FIXME: We should check more than duration
+          // Also, will we allow people to just set a number instead of a hash? If so, we have to account for that.
+          if (curAnim && curAnim.duration !== options.duration) didChange = YES ;
+
+          layout[key] = value ;
+          
+          // I'm pretty sure we want to be cloning this because we may be applying it
+          // to multiple properties which can be edited independently
+          layout['animate'+key.capitalize()] = SC.clone(options);
+        }
+      } else {
+        if (cur !== value) didChange = YES;
+        layout[key] = value;
+      }
+    }
+
+    // now set adjusted layout
+    if (didChange) this.set('layout', layout) ;
+    
+    return this ;
+  },
+
+  /**
+  Resets animation, stopping all existing animations.
+  */
+  resetAnimation: function() {
+    var layout = this.get('layout'), didChange = NO, key;
+    for (key in layout) {
+      if (key.substring(0,7) === 'animate') {
+        didChange = YES;
+        delete layout[key];
+      }
+    }
+    if (didChange) {
+      this.set('layout', layout);
+      this.notifyPropertyChange('layout');
+    }
+    return this;
+  },
+
+  _scv_willRenderAnimations: function(){
+    var key, callback;
+
+    if (SC.platform.supportsCSSTransitions) {
+      var layer = this.get('layer'),
+          currentStyle = layer ? layer.style : null,
+          newStyle = this.get('layoutStyle'),
+          transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
+          layout = this.get('layout'),
+          idx;
+
+      // Handle existing animations
+      if (this._activeAnimations) {
+        for(key in this._activeAnimations){
+          // TODO: Check for more than duration
+          if (
+            newStyle[key] !== (currentStyle ? currentStyle[key] : null) ||
+            !this._pendingAnimations || !this._pendingAnimations[key] ||
+            this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
+          ) {
+            callback = this._activeAnimations[key].callback;
+            if (callback) {
+              if (this._animatedTransforms && this._animatedTransforms.length > 0) {
+                for (idx=0; idx < this._animatedTransforms.length; idx++) {
+                  this._scv_runAnimationCallback(callback, null, this._animatedTransforms[idx], YES);
+                }
+                this._animatedTransforms = null;
+              } else {
+                this._scv_runAnimationCallback(callback, null, key, YES);
+              }
+            }
+
+            this._scv_removeAnimationFromLayout(key, YES);
+          }
+        }
+      }
+
+      this._activeAnimations = this._pendingAnimations;
+      this._pendingAnimations = null;
+    } else {
+      // Transitions not supported
+      for (key in this._pendingAnimations) {
+        callback = this._pendingAnimations[key].callback;
+        if (callback) this._scv_runAnimationCallback(callback, null, key, NO);
+        this._scv_removeAnimationFromLayout(key, NO, YES);
+      }
+      this._activeAnimations = this._pendingAnimations = null;
+    }
+  },
+
+  _scv_removeAnimationFromLayout: function(propertyName, updateStyle, isPending) {
+
+    if (updateStyle) {
+      var layer = this.get('layer'),
+          updatedCSS = [], key;
+      for(key in this._activeAnimations) {
+        if (key !== propertyName) updatedCSS.push(this._activeAnimations[key].css);
+      }
+
+      // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
+      if (layer) layer.style[SC.platform.domCSSPrefix+"Transition"] = updatedCSS.join(', ');
+    }
+
+
+    var layout = this.get('layout'),
+        idx;
+
+    if (propertyName === '-'+SC.platform.cssPrefix+'-transform' && this._animatedTransforms && this._animatedTransforms.length > 0) {
+      for(idx=0; idx < this._animatedTransforms.length; idx++) {
+        delete layout['animate'+this._animatedTransforms[idx].capitalize()];
+      }
+      this._animatedTransforms = null;
+    }
+    delete layout['animate'+propertyName.capitalize()];
+
+    if (!isPending) delete this._activeAnimations[propertyName];
+  },
+
+  _scv_runAnimationCallback: function(callback, evt, propertyName, cancelled) {
+    if (callback) {
+      if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
+      callback.source = this;
+      if (!callback.target) callback.target = this;
+    }
+    SC.View.runCallback(callback, { event: evt, propertyName: propertyName, view: this, isCancelled: cancelled });
+  },
+
+  /**
+    Called when animation ends, should not usually be called manually
+  */
+  _scv_animationEnd: function(evt){
+    // WARNING: Sometimes this will get called more than once for a property. Not sure why.
+
+    var propertyName = evt.originalEvent.propertyName,
+        layout = this.get('layout'),
+        animation, idx;
+
+    animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
+
+    if(animation) {
+      if (animation.callback) {
+        // Charles says this is a good idea
+        SC.RunLoop.begin();
+        // We're using invokeLater so we don't trigger any layout changes from the callbacks until the animations are done
+        if (this._animatedTransforms && this._animatedTransforms.length > 0) {
+          for (idx=0; idx < this._animatedTransforms.length; idx++) {
+            this.invokeLater('_scv_runAnimationCallback', 1, animation.callback, evt, this._animatedTransforms[idx], NO);
+          }
+        } else {
+          this.invokeLater('_scv_runAnimationCallback', 1, animation.callback, evt, propertyName, NO);
+        }
+        SC.RunLoop.end();
+      }
+
+      this._scv_removeAnimationFromLayout(propertyName, YES);
+    }
+  },
+
+
   /** 
     The layout describes how you want your view to be positions on the 
     screen.  You can define the following properties:
@@ -2676,7 +2938,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // frame changes should be sent all the time unless this property is 
       // present to indicate that we want the old 1.0 API behavior instead.
       // 
-      if (!cv.hasStaticLayout) {
+      if (!cv.useStaticLayout) {
         cv.notifyPropertyChange('clippingFrame') ;
         cv._sc_view_clippingFrameDidChange();
       }
@@ -2875,9 +3137,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lMH = layout.maxHeight,
         lcX = layout.centerX, 
         lcY = layout.centerY,
-        hasAcceleratedLayer = this.get('hasAcceleratedLayer'),
-        translateTop = 0,
-        translateLeft = 0;
+        canUseAcceleratedLayer = this.get('hasAcceleratedLayer'),
+        translateTop = null,
+        translateLeft = null;
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
       error= SC.Error.desc("%@.layout() you cannot use width:auto if ".fmt(this) +
               "staticLayout is disabled","%@".fmt(this),-1);
@@ -2892,13 +3154,49 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       throw error ;
     }
 
+    if (SC.platform.supportsCSSTransforms) {
+      // Check to see if we're using transforms
+      var animatingTransforms = NO, transformAnimationDuration;
+      for(key in layout){
+        if (key.substring(0,7) === 'animate') {
+          if (SC.CSS_TRANSFORM_MAP[key.substring(7).camelize()]) {
+            animatingTransforms = YES;
+
+            if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
+              throw "Animations of transforms must be executed simultaneously!";
+            }
+
+            // TODO: If we want to allow it to be set as just a number for duration we need to add support here
+            if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
+              console.warn("Can't animate transforms with different durations! Using first duration specified.");
+              layout[key].duration = transformAnimationDuration;
+            }
+            transformAnimationDuration = layout[key].duration;
+
+            // FIXME: There will also be problems if we have conflicting timings and callbacks
+          }
+        }
+      }
+
+      // If we're animating other transforms at different speeds, don't use acceleratedLayer
+      if (
+        animatingTransforms &&
+        (
+          (layout['animateTop'] && layout['animateTop'].duration !== transformAnimationDuration) ||
+          (layout['animateLeft'] && layout['animateLeft'].duration !== transformAnimationDuration)
+        )
+      ) {
+        canUseAcceleratedLayer = NO;
+      }
+    }
+
     // X DIRECTION
-    
+
     // handle left aligned and left/right
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)) {
         ret.left = (lL*100)+"%";  //percentage left
-      } else if (hasAcceleratedLayer && !SC.empty(lW)) {
+      } else if (canUseAcceleratedLayer && !SC.empty(lW)) {
         translateLeft = Math.floor(lL);
         ret.left = 0;
       } else {
@@ -2980,7 +3278,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!SC.none(lT)) {
       if(SC.isPercentage(lT)) {
         ret.top = (lT*100)+"%";
-      } else if (hasAcceleratedLayer && !SC.empty(lH)) {
+      } else if (canUseAcceleratedLayer && !SC.empty(lH)) {
         translateTop = Math.floor(lT);
         ret.top = 0;
       } else {
@@ -3055,7 +3353,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // if zIndex is set, use it.  otherwise let default shine through
     ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
-    
+
+    // if opacity is set, use it. otherwise let default shine through
+    ret.opacity = SC.none(layout.opacity) ? null : layout.opacity.toString();
+    ret.mozOpacity = ret.opacity; // older Firefox?
+
     // if backgroundPosition is set, use it.
     // otherwise let default shine through
     ret.backgroundPosition = SC.none(layout.backgroundPosition) ?
@@ -3069,32 +3371,113 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (ret[x]===0) ret[x]=null;
     }
 
-    if (hasAcceleratedLayer) {
+    if (SC.platform.supportsCSSTransforms) {
+      // Handle transforms
       var transformAttribute = SC.platform.domCSSPrefix+'Transform',
           layer = this.get('layer'),
-          currentTransforms = layer ? layer.style[transformAttribute] : '';
+          // FIXME: This is not the best way to do it, we should track these locally
+          currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
+          halTransforms, specialTransforms = [], transformName, idx;
 
-      // Remove previous transforms
-      if (this._lastAcceleratedTransform) currentTransforms = currentTransforms.replace(this._lastAcceleratedTransform, '');
+      if (canUseAcceleratedLayer) {
+        // Remove previous transforms
+        if (this._lastAcceleratedTransforms) currentTransforms.removeObjects(this._lastAcceleratedTransforms);
 
-      var transform = 'translateX('+translateLeft+'px) translateY('+translateTop+'px)';
-      if (SC.platform.supportsCSS3DTransforms && !currentTransforms.match('translateZ')) transform += ' translateZ(0px)';
+        halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
 
-      // Add a separating space if necessary
-      if (!SC.empty(currentTransforms)) transform = ' '+transform;
+        // FIXME: This join.match is a bit hackish
+        if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
+          halTransforms.push('translateZ(0px)');
+        }
 
-      // Store for next time
-      this._lastAcceleratedTransform = transform;
+        // Store for next time
+        this._lastAcceleratedTransforms = halTransforms;
+      }
 
-      // Update
-      ret[transformAttribute] = currentTransforms + transform;
+      // Handle special CSS transform attributes
+      for(transformName in SC.CSS_TRANSFORM_MAP) {
+        var cleanedTransforms = [];
+        for(idx=0; idx < currentTransforms.length; idx++) {
+          if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
+            cleanedTransforms.push(currentTransforms[idx]);
+          }
+        }
+        currentTransforms = cleanedTransforms;
+
+        if (layout[transformName]) {
+          specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
+        } 
+      }
+      specialTransforms = specialTransforms.join(' ');
+
+      var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
+
+      // Set transform attribute
+      if (allTransforms !== '') ret[transformAttribute] = allTransforms;
     }
+
+    // Temporary fix to not break SC.Animatable
+    if (!this.isAnimatable) {
+
+      // Handle animations
+      var transitions = [], animation, propertyKey;
+      this._animatedTransforms = [];
+
+      for(key in layout) {
+        if (key.substring(0,7) === 'animate') {
+          // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
+          animation = layout[key];
+
+          if (animation.timing) {
+            if (SC.typeOf(animation.timing) != SC.T_STRING) {
+              animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
+                                                 animation.timing[2]+", "+animation.timing[3]+")";
+            }
+          } else {
+            animation.timing = 'linear';
+          }
+
+          propertyKey = key.substring(7).camelize();
+
+          // TODO: This is a weird conditional, we can probably clean it up
+          if (
+            SC.platform.supportsCSSTransforms &&
+            (
+              (
+                canUseAcceleratedLayer && (
+                  (propertyKey === 'top' && !SC.empty(translateTop)) ||
+                  (propertyKey === 'left' && !SC.empty(translateLeft))
+                )
+              ) ||
+              SC.CSS_TRANSFORM_MAP[propertyKey]
+            )
+          ) {
+            this._animatedTransforms.push(propertyKey);
+            propertyKey = '-'+SC.platform.cssPrefix+'-transform';
+          }
+
+          animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
+
+          // If it's a transform this may have already been set
+          if (!this._pendingAnimations) this._pendingAnimations = {};
+          if (!this._pendingAnimations[propertyKey]) {
+            this._pendingAnimations[propertyKey] = animation;
+            transitions.push(animation.css);
+          }
+        }
+      }
+
+      if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : null;
+
+    }
+
 
     // convert any numbers into a number + "px".
     for(key in ret) {
       value = ret[key];
       if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
     }
+
     return ret ;
   }.property().cacheable(),
   
@@ -3126,6 +3509,33 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         currentLayout  = this.get('layout'),
         didResize      = YES,
         previousWidth, previousHeight, currentWidth, currentHeight;
+
+
+    // Handle old style rotation
+    if (!SC.none(currentLayout.rotate)) {
+      if (SC.none(currentLayout.rotateX)) {
+        currentLayout.rotateX = currentLayout.rotate;
+        console.warn('Please set rotateX instead of rotate');
+      }
+    }
+    if (!SC.none(currentLayout.rotateX)) {
+      currentLayout.rotate = currentLayout.rotateX;
+    } else {
+      delete currentLayout.rotate;
+    }
+
+    if (!SC.none(currentLayout.animateRotate)) {
+      if (SC.none(currentLayout.animateRotateX)) {
+        currentLayout.animateRotateX = currentLayout.animateRotate;
+        console.warn('Please set animateRotateX instead of animateRotate');
+      }
+    }
+    if (!SC.none(currentLayout.animateRotateX)) {
+      currentLayout.animateRotate = currentLayout.animateRotateX;
+    } else {
+      delete currentLayout.animateRotate;
+    }
+
 
     if (previousLayout  &&  previousLayout !== currentLayout) {
       // This is a simple check to see whether we think the view may have
@@ -3280,6 +3690,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
+    this._scv_willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
   },
   
@@ -3905,5 +4316,40 @@ SC.View.unload = function() {
   }   
 } ;
 
+SC.View.runCallback = function(callback){
+  var additionalArgs = SC.$A(arguments).slice(1),
+      typeOfAction = SC.typeOf(callback.action);
+
+  // if the action is a function, just try to call it.
+  if (typeOfAction == SC.T_FUNCTION) {
+    callback.action.apply(callback.target, additionalArgs);
+
+  // otherwise, action should be a string.  If it has a period, treat it
+  // like a property path.
+  } else if (typeOfAction === SC.T_STRING) {
+    if (callback.action.indexOf('.') >= 0) {
+      var path = callback.action.split('.') ;
+      var property = path.pop() ;
+
+      var target = SC.objectForPropertyPath(path, window) ;
+      var action = target.get ? target.get(property) : target[property];
+      if (action && SC.typeOf(action) == SC.T_FUNCTION) {
+        action.apply(target, additionalArgs);
+      } else {
+        throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
+      }
+
+    // otherwise, try to execute action direction on target or send down
+    // responder chain.
+    // FIXME: Add support for additionalArgs to this
+    // } else {
+    //  SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
+    }
+  }
+};
+
+
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
+
+
