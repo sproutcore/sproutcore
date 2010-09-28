@@ -259,6 +259,10 @@ test('fancy getters', function() {
   equals(dt.get('lastMonday'), dt.advance({ day: -5 }), 'dt.advance(day: -5)');
   equals(dt.get('nextFriday'), dt.advance({ day: 6 }), 'dt.advance(day: 6)');
   equals(dt.get('lastWednesday'), dt.advance({ day: -3 }), 'dt.advance(day: -3)');
+  
+  equals(
+    SC.DateTime.create({ year: 2010, month: 9, day: 29, hour: 0, minute: 30, timezone: -120 }).adjust({ day: 1 }).get('lastMonday').toISO8601(),
+    "2010-08-30T00:30:00+02:00");
 });
  
 test('parse', function() {
