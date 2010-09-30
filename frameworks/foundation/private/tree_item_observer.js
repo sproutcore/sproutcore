@@ -396,7 +396,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     // if this is not the root item, never do grouping
     if (this.get('parentObserver')) return null;
     
-    var item = this.get('item'), group, indexes, len, cur, loc, children;
+    var item = this.get('item'), group, indexes, cur, padding;
     
     if (item && item.isTreeItemContent) group = item.get('treeItemIsGrouped');
     else group = !!this.delegate.get('treeItemIsGrouped');
@@ -406,22 +406,24 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (group) {
       ret      = SC.IndexSet.create();
       indexes  = this.get('branchIndexes');
-      children = this.get('children');
-      len      = children ? children.get('length') : 0;
-      cur = loc = 0;
       
       if (indexes) {
-        indexes.forEach(function(i) {
-          ret.add(cur, (i+1)-loc); // add loc -> i to set
-          cur += (i+1)-loc;
-          loc = i+1 ;
+        
+      // Start at the minimum index, which is equal for the tree and flat array
+      cur = indexes.min();
+      // Padding is the difference between the tree index and array index for the current tree index
+      padding = 0;
+      indexes.forEach(function(i) {
+        ret.add(i + padding, 1); 
           
           var observer = this.branchObserverAt(i);
-          if (observer) cur += observer.get('length')-1;
+          if (observer) {
+            padding += observer.get('length') - 1;
+            cur += padding;
+          }
         }, this);
       }
 
-      if (loc<len) ret.add(cur, len-loc);
     } else ret = null;
     
     this._contentGroupIndexes = ret ;
