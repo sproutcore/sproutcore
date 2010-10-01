@@ -92,7 +92,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var ret = this.get('dataSource');
     if (typeof ret === SC.T_STRING) {
       ret = SC.objectForPropertyPath(ret);
-      if (ret) ret = ret.create();
+      if (ret && ret.isClass) ret = ret.create();
       if (ret) this.set('dataSource', ret);
     }
     return ret;
