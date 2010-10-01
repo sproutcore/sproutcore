@@ -148,7 +148,7 @@ SC.CollectionFastPath = {
     pendingRemovals = this._pendingRemovals || (this._pendingRemovals = []),
     invalid, view;
     
-    if(!content || !this.get('isVisibleInWindow')) return;
+    if(!this.get('isVisibleInWindow')) return;
     
     // we use the nowShowing to determine what should and should not be showing.
     if (!nowShowing || !nowShowing.isIndexSet) nowShowing = this.get('nowShowing');
