@@ -543,25 +543,20 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
 /**
   Parses a coreset represented as an array.
  */
-<<<<<<< HEAD
 SC.RecordAttribute.registerTransform(SC.Set, {
   to: function(value, attr, type, record, key) {
+<<<<<<< HEAD
     if(value) return value.toSet();
     else return SC.Set.create();
 =======
-SC.RecordAttribute.registerTransform(SC.CoreSet, {
-  to: function(value, attr, type, record, key) {
-    return value.toCoreSeto();
->>>>>>> add coreset-array transform
+    if(value) return value.toCoreSet();
+    else return SC.CoreSet.create();
+>>>>>>> fixed null handling for coreset transform and fixed treecontroller firstSelectableObject behavior
   },
   
   from: function(value, attr, type, record, key) {
     return value.toArray();
-<<<<<<< HEAD
   },
   
   observesChildren: ['[]']
-=======
-  }
->>>>>>> add coreset-array transform
 });
