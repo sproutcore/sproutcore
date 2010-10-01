@@ -1,3 +1,10 @@
+*SproutCore 1.4.2 (October, 1 2010)*
+
+* Fixes a DateTime .get('lastMonday') bug
+* default to using ISO 8601 format for time parsing if none is specified
+* Allow SelectFieldView to obtain focus if the user presses TAB key from previous field.
+* Fixed typo
+
 *SproutCore 1.4.1 (September, 21 2010)*
 
 * Update the X-SproutCore-Version header to 1.4 [MO]
