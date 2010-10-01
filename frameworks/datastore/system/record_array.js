@@ -21,7 +21,7 @@ sc_require('models/record');
   array.
   
   The information below about RecordArray internals is only intended for those
-  who need to override this class for some reason to do some special.
+  who need to override this class for some reason to do something special.
   
   h2. Internal Notes
   
@@ -30,14 +30,20 @@ sc_require('models/record');
   storeKeys.  The underlying array can be a real array or it may be a 
   SparseArray, which is how you implement incremental loading.
   
-  If the RecordArray is created with an SC.Query objects as well (and it 
+  If the RecordArray is created with an SC.Query object as well (and it 
   almost always will have a Query object), then the RecordArray will also 
   consult the query for various delegate operations such as determining if 
   the record array should update automatically whenever records in the store
-  changes.
+  changes. It will also ask the Query to refresh the storeKeys whenever records 
+  change in the store.
   
-  It will also ask the Query to refresh the storeKeys whenever records change
-  in the store.
+  If the SC.Query object has complex matching rules, it might be 
+  computationally heavy to match a large dataset to a query. To avoid the 
+  browser from ever showing a slow script timer in this scenario, the query
+  matching is by default paced at 100ms. If query matching takes longer than 
+  100ms, it will chunk the work with setTimeout to avoid too much computation
+  to happen in one runloop.
+  
   
   @extends SC.Object
   @extends SC.Enumerable
@@ -470,13 +476,20 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         changed   = this._scq_changedStoreKeys,
         didChange = NO,
         K         = SC.Record,
+        storeKeysToPace = [],
+        startDate = new Date(),
         rec, status, recordType, sourceKeys, scope, included;
-
+    
     // if we have storeKeys already, just look at the changed keys
     var oldStoreKeys = storeKeys;
     if (storeKeys && !_flush) {
+      
       if (changed) {
         changed.forEach(function(storeKey) {
+          if(storeKeysToPace.length>0 || new Date()-startDate>SC.RecordArray.QUERY_MATCHING_THRESHOLD) {
+            storeKeysToPace.push(storeKey);
+            return;
+          }
           // get record - do not include EMPTY or DESTROYED records
           status = store.peekStatus(storeKey);
           if (!(status & K.EMPTY) && !((status & K.DESTROYED) || (status === K.BUSY_DESTROYING))) {
@@ -497,10 +510,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
               storeKeys.removeObject(storeKey);
             } // if (storeKeys.indexOf)
           } // if (included)
+          
         }, this);
         // make sure resort happens
         didChange = YES ;
+        
       } // if (changed)
+      
+      //console.log(this.toString() + ' partial flush took ' + (new Date()-startDate) + ' ms');
     
     // if no storeKeys, then we have to go through all of the storeKeys 
     // and decide if they belong or not.  ick.
@@ -509,7 +526,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       // collect the base set of keys.  if query has a parent scope, use that
       if (scope = query.get('scope')) {
         sourceKeys = scope.flush().get('storeKeys');
-
       // otherwise, lookup all storeKeys for the named recordType...
       } else if (recordType = query.get('expandedRecordTypes')) {
         sourceKeys = SC.IndexSet.create();
@@ -517,11 +533,16 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
           sourceKeys.addEach(store.storeKeysFor(recordType));
         });
       }
-
+      
       // loop through storeKeys to determine if it belongs in this query or 
       // not.
       storeKeys = [];
       sourceKeys.forEach(function(storeKey) {
+        if(storeKeysToPace.length>0 || new Date()-startDate>SC.RecordArray.QUERY_MATCHING_THRESHOLD) {
+          storeKeysToPace.push(storeKey);
+          return;
+        }
+        
         status = store.peekStatus(storeKey);
         if (!(status & K.EMPTY) && !((status & K.DESTROYED) || (status === K.BUSY_DESTROYING))) {
           rec = store.materializeRecord(storeKey);
@@ -529,9 +550,25 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         }
       });
       
+      //console.log(this.toString() + ' full flush took ' + (new Date()-startDate) + ' ms');
+      
       didChange = YES ;
     }
-
+    
+    // if we reach our threshold of pacing we need to schedule the rest of the
+    // storeKeys to also be updated
+    if(storeKeysToPace.length>0) {
+      var self = this;
+      // use setTimeout here to guarantee that we hit the next runloop, 
+      // and not the same runloop which the invoke* methods do not guarantee
+      window.setTimeout(function() {
+        SC.run();
+        self.set('needsFlush', YES);
+        self._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
+        self.flush();
+      }, 1);
+    }
+    
     // clear set of changed store keys
     if (changed) changed.clear();
     
@@ -653,5 +690,14 @@ SC.RecordArray.mixin({
     
     @property {SC.Error}
   */
-  NOT_EDITABLE: SC.Error.desc("SC.RecordArray is not editable")
+  NOT_EDITABLE: SC.Error.desc("SC.RecordArray is not editable"),
+  
+  /**
+    Number of milliseconds to allow a query matching to run for. If this number
+    is exceeded, the query matching will be paced so as to not lock up the 
+    browser (by essentially splitting the work with a setTimeout)
+    
+    @property {Number}
+  */
+  QUERY_MATCHING_THRESHOLD: 100
 });
