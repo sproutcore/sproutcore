@@ -393,8 +393,7 @@ SC.RecordAttribute.registerTransform(Date, {
 
   /** @private - convert a string to a Date */
   to: function(str, attr) {
-    if (str === null)
-      return null;
+    if (str === null) return null;
 
     var ret ;
     str = str.toString() || '';
@@ -492,3 +491,16 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
   });
   
 }
+
+/**
+  Parses a coreset represented as an array.
+ */
+SC.RecordAttribute.registerTransform(SC.CoreSet, {
+  to: function(value, attr, type, record, key) {
+    return value.toCoreSeto();
+  },
+  
+  from: function(value, attr, type, record, key) {
+    return value.toArray();
+  }
+});
