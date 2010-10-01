@@ -497,7 +497,8 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
  */
 SC.RecordAttribute.registerTransform(SC.CoreSet, {
   to: function(value, attr, type, record, key) {
-    return value.toCoreSeto();
+    if(value) return value.toCoreSet();
+    else return SC.CoreSet.create();
   },
   
   from: function(value, attr, type, record, key) {
