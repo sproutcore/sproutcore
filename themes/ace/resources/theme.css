@@ -395,7 +395,7 @@
   background: transparent;
 }
 .sc-menu-item.disabled a:hover {
-  color: white;
+  text-shadow: none;
   background: transparent;
 }
 .sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-item .checkbox {
