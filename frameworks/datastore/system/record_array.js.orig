@@ -558,17 +558,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       window.setTimeout(function() {
 <<<<<<< HEAD
         SC.RunLoop.begin();
+=======
+        SC.run();
+>>>>>>> Stop pacing if RecordArray has been destroyed
         if(!self || self.get('isDestroyed')) return;
         self.set('needsFlush', YES);
         self._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
         self.flush();
         SC.RunLoop.end();
-=======
-        SC.run();
-        self.set('needsFlush', YES);
-        self._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
-        self.flush();
->>>>>>> Added pacing to the query matching in flush() of SC.RecordArray
       }, 1);
     }
     
