@@ -1980,6 +1980,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     statusOnly = dataHash || newId ? NO : YES;
     this.dataHashDidChange(storeKey, null, statusOnly);
+
+    // Force record to refresh its cached properties based on store key
+    var record = this.materializeRecord(storeKey);
+    record.notifyPropertyChange('storeKey', storeKey)
     
     return this ;
   },
@@ -2005,6 +2009,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } 
     this.removeDataHash(storeKey, status) ;
     this.dataHashDidChange(storeKey);
+
+    // Force record to refresh its cached properties based on store key
+    var record = this.materializeRecord(storeKey);
+    record.notifyPropertyChange('storeKey', storeKey)
 
     return this ;
   },
@@ -2034,6 +2042,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
+
+    // Force record to refresh its cached properties based on store key
+    var record = this.materializeRecord(storeKey);
+    record.notifyPropertyChange('storeKey', storeKey)
 
     return this ;
   },
