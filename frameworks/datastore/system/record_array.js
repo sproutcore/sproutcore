@@ -563,6 +563,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       // and not the same runloop which the invoke* methods do not guarantee
       window.setTimeout(function() {
         SC.run();
+        if(!self || self.get('isDestroyed')) return;
         self.set('needsFlush', YES);
         self._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
         self.flush();
