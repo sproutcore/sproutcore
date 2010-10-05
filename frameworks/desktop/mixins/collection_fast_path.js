@@ -7,7 +7,7 @@ SC.CollectionFastPath = {
   // ITEM VIEW CLASS/INSTANCE MANAGEMENT
   //
   initMixin: function() {
-    this._indexMap = {};
+    this._indexMap = [];
     
     // these are coresets because they need to be iterated a lot
     this._curShowing = SC.CoreSet.create();
@@ -433,8 +433,9 @@ SC.CollectionFastPath = {
       // move it off screen
       var f = view.get("frame");
       view.adjust({ top: -f.height - this.get('rowSpacing')});
-    
+      
       // push it in front because we want it to get put back somewhere useful asap
+      this.unpool(view);
       pool.push(view);
       
       // null so we render it later
@@ -487,10 +488,7 @@ SC.CollectionFastPath = {
     
     // if it already exists in the right place we might be able to use the existing view
     if(view = this._indexMap[index]) {
-      // if we just rendered it, it is no longer in a pool
-      var pool = this.domPoolForExampleView(view.createdFromExampleView);
-      if(pool._lastRendered == view) debugger;
-      pool.remove(view);
+      this.unpool(view);
       
       view = this.updateView(view);
     }
@@ -506,16 +504,27 @@ SC.CollectionFastPath = {
     return view;
   },
   
+  // removes the view from its pool if it was in one
+  // TODO: give this a pool argument for caching
+  unpool: function(view) {
+    var pool = this.domPoolForExampleView(view.createdFromExampleView);
+    
+    // if we are going to steal the front of the background queue we need to fix it after we're done
+    if(view === pool._lastRendered) {
+      // if it's the head we need to null it, otherwise just use the next one back
+      pool._lastRendered = (view._SCCFP_prev === view ? null : view._SCCFP_prev);
+    }
+    
+    pool.remove(view);
+  },
+  
   // TODO: try changing the ifs into whiles
   renderFast: function(index) {
-    var view, exampleView, pool;
+    var view, exampleView;
     
     // if it already exists in the right place we might be able to use the existing view
     if(view = this._indexMap[index]) {
-      // if we just rendered it, it is no longer in a pool
-      pool = this.domPoolForExampleView(view.createdFromExampleView);
-      if(pool._lastRendered == view) debugger;
-      pool.remove(view);
+      this.unpool(view);
       
       view = this.updateView(view);
     }
@@ -523,21 +532,14 @@ SC.CollectionFastPath = {
     var attrs = this.setAttributes(index, this._tempAttrs);
     
     // if a view has been rendered for the same item already, just take it and move it into its new position
-    if(!view && (view = this.pooledViewForItem(index))) {
-      pool = this.domPoolForExampleView(view.createdFromExampleView);
-      
-      // if we are going to steal the front of the background queue we need to fix it after we're done
-      if(view === pool._lastRendered) {
-        // if it's the head we need to null it, otherwise just use the next one back
-        pool._lastRendered = (view._SCCFP_prev === view ? null : view._SCCFP_prev);
-      }
-      pool.remove(view);
+    while(!view && (view = this.pooledViewForItem(index))) {
+      this.unpool(view);
       
       view = this.updateView(view, attrs, YES);
     }
 
     // if a pooled view exists take it and update it to match its new content    
-    if(!view && (view = this.viewFromDOMPoolFor(index))) {
+    while(!view && (view = this.viewFromDOMPoolFor(index))) {
       // replace the view or force-update it since we know the content changed
       view = this.updateView(view, attrs, YES);
     }
