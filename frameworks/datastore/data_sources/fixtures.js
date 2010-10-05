@@ -358,7 +358,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
       if (ret !== SC.MIXED_STATE) {
         var recordType = SC.Store.recordTypeFor(storeKey),
             fixtures   = recordType ? recordType.FIXTURES : null ;
-        if (fixtures && fixtures.length && fixtures.length>0) {
+        if (fixtures && typeof fixtures.length !== 'undefined') {
           if (ret === NO) ret = YES ;
         } else if (ret === YES) ret = SC.MIXED_STATE ;
       }
