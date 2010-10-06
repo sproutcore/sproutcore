@@ -18,8 +18,10 @@ SC.CollectionFastPath = {
     // this is an index set because they handle ranges better
     this._invalidIndexes = SC.IndexSet.create();
     
-    // temporarily disabled for debugging purposes; re-enable when background rendering is better tested
+    // make the background task queue run more aggressively
     SC.backgroundTaskQueue.minimumIdleDuration = 100;
+    
+    // make sure the background task queue only runs once  before setting another timer no matter what
     SC.backgroundTaskQueue.runLimit = -1;
   },
   
@@ -112,12 +114,10 @@ SC.CollectionFastPath = {
   
   // copies nowShowing to a coreset and track the largest and smallest index in it
   processNowShowing: function(index) {
-    var shouldBeShowing = this._shouldBeShowing;
-    
     if(index < this.minShowing) this.minShowing = index;
     if(index > this.maxShowing) this.maxShowing = index;
     
-    shouldBeShowing.add(index);
+    this._shouldBeShowing.add(index);
   },
   
   wantsUpdate: function(view) {
@@ -142,7 +142,7 @@ SC.CollectionFastPath = {
   },
 
   reloadIfNeeded: function(nowShowing, scrollOnly) {
-    var content = this.get('content'),
+    var content = this.get('content'), clen = content ? content.get('length') : 0,
     curShowing = this._curShowing,
     shouldBeShowing = this._shouldBeShowing,
     i, len, index,
@@ -156,7 +156,7 @@ SC.CollectionFastPath = {
     
     shouldBeShowing.clear();
     this.maxShowing = 0;
-    this.minShowing = content.get('length');
+    this.minShowing = clen;
   
     // we need to be able to iterate nowshowing more easily, so copy it into a coreset
     nowShowing.forEach(this.processNowShowing, this);
@@ -178,15 +178,10 @@ SC.CollectionFastPath = {
     }
     
     // now actually queue them
-    len = pendingRemovals.length;
-    for(i = 0;i < len; i++) {
-      view = pendingRemovals.pop();
+    while(view = pendingRemovals.pop()) {
       view = this.updateView(view);
       if(view) this.sendToDOMPool(view);
     }
-  
-    // just to be sure
-    pendingRemovals.length = 0;
     
     // also check for adds
     len = shouldBeShowing.length;
@@ -195,6 +190,8 @@ SC.CollectionFastPath = {
     }
     
     // scrolling updates
+    
+    // reset the pointer into the list so background insertions go to the back correctly
     if(scrollOnly) {
       for(var pool in this._domPools) {
         this._domPools[pool]._lastRendered = null;
@@ -204,6 +201,7 @@ SC.CollectionFastPath = {
     // do these no matter what
     
     // we reset these even on non-scrolling updates because data might have been loaded from the server and checking if views exist is cheap
+    // TODO: determine if we actually need to keep these values seperately
     this.topBackground = this.maxShowing;
     this.bottomBackground = this.minShowing;
     
@@ -213,12 +211,12 @@ SC.CollectionFastPath = {
     // add ourself to be background rendered; it won't actually start until it's ready
     this.backgroundRenderer.add(this);
     
-    // we want to make sure we do this on the first render
-    len = content.get('length');
-    if(this._SCCFP_oldLength !== len) {
+    // if the content length changed we need to relayout
+    // TODO: hook this into collectionview's _cv_contentDidChange
+    if(this._SCCFP_oldLength !== clen) {
       var layout = this.computeLayout();
       if (layout) this.adjust(layout);
-      this._SCCFP_oldLength = len;
+      this._SCCFP_oldLength = clen;
     }
   },
   
@@ -249,12 +247,8 @@ SC.CollectionFastPath = {
     if(background) {
       
       // if it is being background rendered it goes in front of the last one background rendered, or on the back if this is the first time
-      if(pool._lastRendered) {
-        pool.insertBetween(view, pool._lastRendered, pool._lastRendered._SCCFP_next);
-        
-      } else {
-        pool.enqueue(view); 
-      }
+      if(pool._lastRendered) pool.insertBetween(view, pool._lastRendered, pool._lastRendered._SCCFP_next);
+      else pool.enqueue(view);
       
       pool._lastRendered = view;
        
@@ -273,9 +267,7 @@ SC.CollectionFastPath = {
     // otherwise take one from the pool (null if pool is empty)
     view = pool.dequeue();
     
-    if(view) {
-      return this.unmapView(view);
-    }
+    if(view) return this.unmapView(view);
   },
   
   /**
@@ -325,7 +317,8 @@ SC.CollectionFastPath = {
   // the biggest use for this is reusing views that are mapped to undefined; it basically generates blank views on demand. it would be _slightly_ faster to have pre-generated blank views, but this is fine for now
   mapView: function(view, index) {
     var item = view.content,
-    views = this._viewsForItem[SC.guidFor(item)] || (this._viewsForItem[SC.guidFor(item)] = SC.CoreSet.create());
+    guid = SC.guidFor(item),
+    views = this._viewsForItem[guid] || (this._viewsForItem[guid] = SC.CoreSet.create());
   
     // add to cache for item
     views.add(view);
@@ -388,7 +381,7 @@ SC.CollectionFastPath = {
   */
   setAttributes: function(index, attrs) {
     var del = this.get('contentDelegate'),
-        content = this.get("content"), item = content.objectAt(index),
+        content = this.get('content'), item = content.objectAt(index),
         isGroupView = this.contentIndexIsGroup(index),
         ExampleView = this.exampleViewForIndex(index);
     
@@ -414,9 +407,10 @@ SC.CollectionFastPath = {
     return attrs;
   },
   
+  /*  inlining this; keeping original around in case i need to change it
   flushBindings: function() {
-    do {} while(SC.Binding.flushPendingChanges());
-  },
+    while(SC.Binding.flushPendingChanges());
+  },*/
   
   // TODO: make sure the first part of the if never triggers outside of the indexMap check in renderFast
   updateView: function(view, attrs, force) {
@@ -461,7 +455,7 @@ SC.CollectionFastPath = {
       this.configureItemView(view, attrs);
       
       // need to fire observers now or else they will trigger an extra run loop later
-      this.flushBindings();
+      while(SC.Binding.flushPendingChanges());
       this._ignore = NO;
       
       // remap it now that we have updated it
@@ -483,7 +477,7 @@ SC.CollectionFastPath = {
     
     this.appendChild(view);
     
-    this.flushBindings();
+    while(SC.Binding.flushPendingChanges());
     this._ignore = NO;
     
     return view;
@@ -527,7 +521,7 @@ SC.CollectionFastPath = {
   
   // TODO: try changing the ifs into whiles
   renderFast: function(index) {
-    var view, exampleView;
+    var view, exampleView, attrs;
     
     // if it already exists in the right place we might be able to use the existing view
     if(view = this._indexMap[index]) {
@@ -536,7 +530,7 @@ SC.CollectionFastPath = {
       view = this.updateView(view);
     }
     
-    var attrs = this.setAttributes(index, this._tempAttrs);
+    attrs = this.setAttributes(index, this._tempAttrs);
     
     // if a view has been rendered for the same item already, just take it and move it into its new position
     while(!view && (view = this.pooledViewForItem(index))) {
@@ -578,19 +572,15 @@ SC.CollectionFastPath = {
   // attempts to fill the pool to the desired size before reverting to fast path
   renderBackground: function(index) {
     //console.log("rendering to background", index);
-    
-    var reloaded;
-    if (this.willReload) this.willReload(reloaded = SC.IndexSet.create(index));
-    
-    var exampleView = this.exampleViewForIndex(index),
+    var reloaded,
+    exampleView = this.exampleViewForIndex(index),
     pool = this.domPoolForExampleView(exampleView),
     view;
+    if (this.willReload) this.willReload(reloaded = SC.IndexSet.create(index));
     
-    if(pool.length < this.domPoolSize) {
-      view = this.renderNew(index);
-    } else {
-      view = this.renderFast(index);
-    }
+    // create a new view if the pool has room, otherwise just take the fast path
+    if(pool.length < this.domPoolSize) view = this.renderNew(index);
+    else view = this.renderFast(index);
     
     this.sendToDOMPool(view, YES);
     
@@ -627,6 +617,7 @@ SC.CollectionFastPath = {
   },
   
   invalidate: function(start, range) {
+    //console.log("invalidate: " + start + " " + range);
     this._invalidIndexes.add(start, range);
   },
   
