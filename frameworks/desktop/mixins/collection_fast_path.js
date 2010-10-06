@@ -25,6 +25,8 @@ SC.CollectionFastPath = {
   
   _SCCFP_contentRangeObserver: null,
   
+  _SCCFP_oldLength: 0,
+  
   contentDidChange: function() {
     if(this._SCCFP_contentRangeObserver) this._SCCFP_contentRangeObserver.destroy();
     
@@ -50,8 +52,7 @@ SC.CollectionFastPath = {
     
     // just calling reload with no arg means reload EVERYTHING
     if(SC.none(indexes)) {
-      // TODO: make this use the old length
-      this.invalidate(0, this.getPath('content.length'));
+      this.invalidate(0, this._SCCFP_oldLength);
       
     // otherwise only reload what is necessary
     } else {
@@ -213,9 +214,11 @@ SC.CollectionFastPath = {
     this.backgroundRenderer.add(this);
     
     // we want to make sure we do this on the first render
-    if(curShowing.length === 0 || !scrollOnly) {
+    len = content.get('length');
+    if(this._SCCFP_oldLength !== len) {
       var layout = this.computeLayout();
       if (layout) this.adjust(layout);
+      this._SCCFP_oldLength = len;
     }
   },
   
@@ -418,17 +421,18 @@ SC.CollectionFastPath = {
   // TODO: make sure the first part of the if never triggers outside of the indexMap check in renderFast
   updateView: function(view, attrs, force) {
     // if an attribute hash is provided to update to, use that as the target index
-    var index = attrs ? attrs.contentIndex : view.contentIndex,
-    exampleView = this.exampleViewForIndex(index),
+    var oldIndex = view.contentIndex,
+    newIndex = attrs ? attrs.contentIndex : view.contentIndex,
+    exampleView = this.exampleViewForIndex(newIndex),
     pool = this.domPoolForExampleView(view.createdFromExampleView),
     content = this.get('content'),
-    item = content.objectAt(index);
+    item = content.objectAt(newIndex);
     
     // if the item changed types we have to move the view to an offscreen pool (like the original fastpath) and replace it with a new view for the new type    
-    if(exampleView !== view.createdFromExampleView || index >= content.get('length') || index < 0) {
+    if(exampleView !== view.createdFromExampleView || newIndex >= content.get('length') || newIndex < 0) {
       // make sure it is no longer treated as a rendered view; this is like sendToDOMPool but it leaves it mapped to the item in case the item is rendered later
-      this._indexMap[index] = null;
-      this._curShowing.remove(index);
+      this._indexMap[oldIndex] = null;
+      this._curShowing.remove(oldIndex);
     
       // move it off screen
       var f = view.get("frame");
@@ -442,12 +446,15 @@ SC.CollectionFastPath = {
       view = null;
       
     // if we are going to be keeping the view, make sure that it's updated
-    } else if(force || view._SCCFP_dirty || this._invalidIndexes.contains(index)) {
+    } else if(force || view._SCCFP_dirty || oldIndex != newIndex || this._invalidIndexes.contains(newIndex)) {
       // remapping is cheap so just do it no matter what
       this.unmapView(view);
       
+      // if we are mapping it to a new index it needs to be removed from curShowing. even if we arent, its just going to get added again anyway
+      this._curShowing.remove(oldIndex);
+      
       // TODO: make sure this isn't too slow
-      if(!attrs) attrs = this.setAttributes(index, this._tempAttrs);
+      if(!attrs) attrs = this.setAttributes(newIndex, this._tempAttrs);
       
       // update whatever changed
       this._ignore = YES;
@@ -458,13 +465,13 @@ SC.CollectionFastPath = {
       this._ignore = NO;
       
       // remap it now that we have updated it
-      this.mapView(view, index);
+      this.mapView(view, newIndex);
       
       view.update();
       
       // we just updated so it must be valid
       view._SCCFP_dirty = NO;
-      this.validate(index);
+      this.validate(newIndex);
     }
     
     return view;
