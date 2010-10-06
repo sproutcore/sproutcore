@@ -1804,8 +1804,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     ret = storeKey = recordType.storeKeyFor(id); // needed to cache
       
     if (this.readStatus(storeKey) & K.BUSY) {
-        this.dataSourceDidComplete(storeKey, dataHash, id);
-      } else this.pushRetrieve(recordType, id, dataHash, storeKey);
+      this.dataSourceDidComplete(storeKey, dataHash, id);
+    } else this.pushRetrieve(recordType, id, dataHash, storeKey);
     
     // return storeKey
     return ret ;
