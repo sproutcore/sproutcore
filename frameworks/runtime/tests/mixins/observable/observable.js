@@ -550,6 +550,19 @@ test("should register an observer for a property - Special case of chained prope
   equals('chainedPropertyObserved',ObjectC.normal2);  
 });
 
+test("passing a context", function() {
+  var target = {
+    callback: function(target, key, nullVariable, context, revision) {
+      target.context = context;
+    }
+  };
+  
+  ObjectC.context = null;
+  ObjectC.addObserver('normal', target, 'callback', 'context');
+  ObjectC.set('normal','newValue');
+  
+  equals(ObjectC.context, 'context');
+});
 
 module("object.removeObserver()", {  
   setup: function() {
