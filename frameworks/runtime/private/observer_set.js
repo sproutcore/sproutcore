@@ -51,7 +51,7 @@ SC.ObserverSet = {
     // context is really useful sometimes but not used that often so this
     // implementation is intentionally lazy.
     if (context !== undefined) {
-      if (!methods.contexts) context = methods.contexts = {} ;
+      if (!methods.contexts) methods.contexts = {} ;
       methods.contexts[SC.guidFor(method)] = context ;
     }
 
