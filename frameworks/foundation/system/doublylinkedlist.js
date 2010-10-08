@@ -102,5 +102,11 @@ SC._DoublyLinkedList = SC.mixin({},
     
     shift: function() {
       return this.remove(this.head);
+    },
+    
+    tail: function() {
+      var head = this.head;
+      
+      if(head) return head._SCCFP_prev;
     }
   });

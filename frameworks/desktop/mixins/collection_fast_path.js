@@ -29,16 +29,44 @@ SC.CollectionFastPath = {
   
   _SCCFP_oldLength: 0,
   
-  contentDidChange: function() {
+  _cv_contentDidChange: function() {
     if(this._SCCFP_contentRangeObserver) this._SCCFP_contentRangeObserver.destroy();
     
     var content = this.get('content');
     
     if(content) this._SCCFP_contentRangeObserver = content.addRangeObserver(null, this, this.contentIndicesDidChange);
     
+    var indexMap = this._indexMap, i, len = indexMap.length, view;
+    
+    for(i = 0; i < len; i++) {
+      view = indexMap[i];
+      if(view) this.sendToOffscreenDOMPool(view);
+    }
+    
     // TODO: email charles about why observers do setIfChanged no matter what and this function never gets called
     this.reload();
+    
+    // this is at the end so contentLengthDidChange runs after our iteration
+    sc_super();
   }.observes('content'),
+  
+  contentLengthDidChange: function() {
+    var content = this.get('content'), length = content ? content.get('length') : 0,
+    oldLength = this.get('length'), indexMap = this._indexMap;
+    
+    if(length < oldLength) {
+      var i, view;
+      
+      for(i = length; i < oldLength; i++) {
+        view = indexMap[i];
+        if(view) this.sendToOffscreenDOMPool(view);
+      }
+    }
+    
+    indexMap.length = length;
+    
+    sc_super();
+  },
   
   contentIndicesDidChange: function(array, objects, key, indexes, context) {
     this.reload(indexes);
@@ -125,9 +153,8 @@ SC.CollectionFastPath = {
     
     //console.log("wantsUpdate", view.contentIndex);
     
-    // if we can't handle it just update it now
     if(view.contentIndex === undefined) {
-      view.update();
+      view._SCCFP_dirty = YES;
       
     // make sure the view is currently being rendered
     } else if(this._indexMap[view.contentIndex] === view) {
@@ -241,7 +268,6 @@ SC.CollectionFastPath = {
     //console.log("sending to pool", view.contentIndex, background);
     var exampleView = view.createdFromExampleView,
     pool = this.domPoolForExampleView(exampleView),
-    last,
     curShowing = this._curShowing;
     
     if(background) {
@@ -259,15 +285,33 @@ SC.CollectionFastPath = {
     curShowing.remove(view.contentIndex);
   },
   
+  // like the regular version except it also removes it from its index mapping, moves it offscreen, and pushes it to the front of the pull instead of the back
+  sendToOffscreenDOMPool: function(view) {
+    var index = view.contentIndex, frame,
+    pool = this.domPoolForExampleView(view.createdFromExampleView);
+    
+    //console.log("sending offscreen " + view.content.get('fullName'));
+    
+    // it is no longer rendering an index, only an item, so remove it from the index map but leave it in the item map
+    this.unmapFromIndex(view);
+    
+    // pooled items cant be in nowShowing
+    this._curShowing.remove(index);
+  
+    // move it off screen
+    frame = view.get("frame");
+    view.adjust({ top: -frame.height - this.get('rowSpacing')});
+    
+    // push it in front because we want it to get put back somewhere useful asap
+    this.unpool(view);
+    pool.push(view);
+  },
+  
   viewFromDOMPoolFor: function(index) {
     var exampleView = this.exampleViewForIndex(index),
-    pool = this.domPoolForExampleView(exampleView),
-    view;
+    pool = this.domPoolForExampleView(exampleView);
     
-    // otherwise take one from the pool (null if pool is empty)
-    view = pool.dequeue();
-    
-    if(view) return this.unmapView(view);
+    return pool.tail();
   },
   
   /**
@@ -315,45 +359,64 @@ SC.CollectionFastPath = {
   },
   
   // the biggest use for this is reusing views that are mapped to undefined; it basically generates blank views on demand. it would be _slightly_ faster to have pre-generated blank views, but this is fine for now
-  mapView: function(view, index) {
-    var item = view.content,
-    guid = SC.guidFor(item),
-    views = this._viewsForItem[guid] || (this._viewsForItem[guid] = SC.CoreSet.create());
-  
-    // add to cache for item
-    views.add(view);
-  
+  mapToIndex: function(view) {
+    var index = view.contentIndex;
+    
+    // a view should never get mapped ontop of another view, you should always unmap then remap
+    if(this._indexMap[index] && this._indexMap[index] != view) debugger;
+    
     this._indexMap[index] = view;
-  },
-  
-  unmapView: function(view) {
-    var viewsForItem = this._viewsForItem,
-    item = view.content,
-    views = viewsForItem[SC.guidFor(item)];
-    
-    if(!views) debugger;
-  
-    views.remove(view);
-    
-    this._indexMap[view.contentIndex] = null;
     
     return view;
   },
   
-  // looks at the views for an item and then determines if any of them are in a pool. if they are, takes them out and returns them
+  unmapFromIndex: function(view) {
+    this._indexMap[view.contentIndex] = null;
+    // if it is no longer mapped to an index, it shouldn't remember its old index
+    view.contentIndex = null;
+    
+    return view;
+  },
+  
+  mapToItem: function(view) {
+    var item = view.content,
+    guid = SC.guidFor(item),
+    views = this._viewsForItem[guid] || (this._viewsForItem[guid] = SC.CoreSet.create());
+
+    // add to cache for item
+    views.add(view);
+    
+    return view;
+  },
+  
+  unmapFromItem: function(view) {
+    var item = view.content,
+    views = this._viewsForItem[SC.guidFor(item)];
+
+    if(!views) debugger;
+
+    views.remove(view);
+
+    return view;
+  },
+  
+  // returns a view that already exists for an item if it can find one that is not showing
   pooledViewForItem: function(index) {
     var viewsForItem = this._viewsForItem,
     item = this.get('content').objectAt(index),
-    views = viewsForItem[SC.guidFor(item)], view;
+    views = viewsForItem[SC.guidFor(item)], view,
+    oldIndex;
     
     if(views) {
       // look for one that isn't in now showing
-      var i, len = views.length, exampleView;
+      var i, len = views.length;
       for(i = 0; i < len; i++) {
         view = views[i];
+        oldIndex = view.contentIndex;
         
-        if(!this._shouldBeShowing.contains(view.contentIndex) && !this._curShowing.contains(view.contentIndex)) {
-          return this.unmapView(view);
+        // even if it should be showing, we can steal it if it's currently invalid
+        if(!this._shouldBeShowing.contains(oldIndex) || this._invalidIndexes.contains(oldIndex) || view._SCCFP_dirty) {
+          return view;
         }
       }
     }
@@ -361,6 +424,7 @@ SC.CollectionFastPath = {
   },
   
   // aplies a hash to a view
+  // TODO: consider combining this and setAttributes (i don't think we actually need an intermediate object)
   configureItemView: function(itemView, attrs) {
     itemView.beginPropertyChanges();
     itemView.setIfChanged(attrs);
@@ -418,38 +482,35 @@ SC.CollectionFastPath = {
     var oldIndex = view.contentIndex,
     newIndex = attrs ? attrs.contentIndex : view.contentIndex,
     exampleView = this.exampleViewForIndex(newIndex),
-    pool = this.domPoolForExampleView(view.createdFromExampleView),
     content = this.get('content'),
     item = content.objectAt(newIndex);
     
     // if the item changed types we have to move the view to an offscreen pool (like the original fastpath) and replace it with a new view for the new type    
     if(exampleView !== view.createdFromExampleView || newIndex >= content.get('length') || newIndex < 0) {
-      // make sure it is no longer treated as a rendered view; this is like sendToDOMPool but it leaves it mapped to the item in case the item is rendered later
-      this._indexMap[oldIndex] = null;
-      this._curShowing.remove(oldIndex);
-    
-      // move it off screen
-      var f = view.get("frame");
-      view.adjust({ top: -f.height - this.get('rowSpacing')});
-      
-      // push it in front because we want it to get put back somewhere useful asap
-      this.unpool(view);
-      pool.push(view);
+      this.sendToOffscreenDOMPool(view);
       
       // null so we render it later
       view = null;
       
     // if we are going to be keeping the view, make sure that it's updated
-    } else if(force || view._SCCFP_dirty || oldIndex != newIndex || this._invalidIndexes.contains(newIndex)) {
+    // TODO: make sure these conditions are accurate
+    } else if(force || view._SCCFP_dirty || item !== view.content || oldIndex !== newIndex || this._invalidIndexes.contains(newIndex)) {
       // remapping is cheap so just do it no matter what
-      this.unmapView(view);
+      this.unmapFromItem(view);
       
-      // if we are mapping it to a new index it needs to be removed from curShowing. even if we arent, its just going to get added again anyway
-      this._curShowing.remove(oldIndex);
+      if(!SC.none(oldIndex)) {
+        this.unmapFromIndex(view);
+        // if we are mapping it to a new index it needs to be removed from curShowing. even if we arent, its just going to get added again anyway
+        this._curShowing.remove(oldIndex);
+      }
       
       // TODO: make sure this isn't too slow
       if(!attrs) attrs = this.setAttributes(newIndex, this._tempAttrs);
-      
+      /*
+      var cname = view.content ? view.content.get('fullName') : "undefined",
+      aname = attrs.content ? attrs.content.get('fullName') : "undefined";
+      console.log("updating view " + cname + " to " + aname);
+      */
       // update whatever changed
       this._ignore = YES;
       this.configureItemView(view, attrs);
@@ -458,10 +519,11 @@ SC.CollectionFastPath = {
       while(SC.Binding.flushPendingChanges());
       this._ignore = NO;
       
-      // remap it now that we have updated it
-      this.mapView(view, newIndex);
-      
       view.update();
+      
+      // remap it now that we have updated it
+      this.mapToIndex(view);
+      this.mapToItem(view);
       
       // we just updated so it must be valid
       view._SCCFP_dirty = NO;
@@ -485,10 +547,13 @@ SC.CollectionFastPath = {
   
   // create and configure a view (really slowly)
   renderNew: function(index) {
-    var exampleView = this.exampleViewForIndex(index), view, attrs;
+    var view, attrs;
+    //var cname, aname;
     
     // if it already exists in the right place we might be able to use the existing view
     if(view = this._indexMap[index]) {
+      /*cname = view.content ? view.content.get('fullName') : "undefined";
+      console.log("found view already at index " + index + " (" + cname + ")");*/
       this.unpool(view);
       
       view = this.updateView(view);
@@ -496,11 +561,15 @@ SC.CollectionFastPath = {
     
     if(!view) {
       attrs = this.setAttributes(index, this._tempAttrs);
+      
+      /*aname = attrs.content ? attrs.content.get('fullName') : "undefined";
+      console.log("rendering new view for " + aname);*/
     
-      view = this.renderItem(exampleView, attrs);
+      view = this.renderItem(this.exampleViewForIndex(index), attrs);
     }
     
-    this.mapView(view, index);
+    this.mapToItem(view);
+    this.mapToIndex(view);
     
     return view;
   },
@@ -519,21 +588,28 @@ SC.CollectionFastPath = {
     pool.remove(view);
   },
   
-  // TODO: try changing the ifs into whiles
   renderFast: function(index) {
+    //console.log("rendering index " + index);
     var view, exampleView, attrs;
+    //var cname, aname;
     
     // if it already exists in the right place we might be able to use the existing view
     if(view = this._indexMap[index]) {
+      /*cname = view.content ? view.content.get('fullName') : "undefined";
+      console.log("found view already at index " + index + " (" + cname + ")");*/
       this.unpool(view);
+      
+      // TODO: consider if the item backing this index has changed, skip to the next step
       
       view = this.updateView(view);
     }
     
-    attrs = this.setAttributes(index, this._tempAttrs);
+    if(!view) attrs = this.setAttributes(index, this._tempAttrs);
     
     // if a view has been rendered for the same item already, just take it and move it into its new position
     while(!view && (view = this.pooledViewForItem(index))) {
+      /*cname = view.content ? view.content.get('fullName') : "undefined";
+      console.log("attempting to reuse view for " + cname);*/
       this.unpool(view);
       
       view = this.updateView(view, attrs, YES);
@@ -541,14 +617,24 @@ SC.CollectionFastPath = {
 
     // if a pooled view exists take it and update it to match its new content    
     while(!view && (view = this.viewFromDOMPoolFor(index))) {
+      /*cname = view.content ? view.content.get('fullName') : "undefined";
+      aname = attrs.content ? attrs.content.get('fullName') : "undefined";
+      console.log("using pooled view " + cname + " for " + aname);*/
+      this.unpool(view);
       // replace the view or force-update it since we know the content changed
       view = this.updateView(view, attrs, YES);
     }
     
     // otherwise it needs to be rendered from scratch
-    if(!view) view = this.renderItem(this.exampleViewForIndex(index), attrs);
+    if(!view) {
+      /*aname = attrs.content ? attrs.content.get('fullName') : "undefined";
+      console.log("rendering new view for " + aname);*/
+      
+      view = this.renderItem(this.exampleViewForIndex(index), attrs);
+    }
     
-    this.mapView(view, index);
+    this.mapToItem(view);
+    this.mapToIndex(view);
     
     return view;
   },
