@@ -907,6 +907,7 @@ SC.CollectionFastPath = {
   }),
   
   // these are probably dangerous to override, but generally your children don't actually need to know and notifying all <domPoolSize> of them is expensive
+  // TODO: make these cheaper on the children instead of just not notifying them
   _viewFrameDidChange: function() {
     this.notifyPropertyChange('frame');
   },
