@@ -1,6 +1,8 @@
 /** 
   An experimental CollectionView mixin that makes it extremely fast under
   certain circumstances, including for mobile devices.
+  
+  Note: if you use this, override layoutForContentIndex to have fixed sizes for elements, otherwise resizing will be incredibly slow.
 */
 SC.CollectionFastPath = {
   //
@@ -902,5 +904,14 @@ SC.CollectionFastPath = {
       }
     }
     
-  })
+  }),
+  
+  // these are probably dangerous to override, but generally your children don't actually need to know and notifying all <domPoolSize> of them is expensive
+  _viewFrameDidChange: function() {
+    this.notifyPropertyChange('frame');
+  },
+  
+  viewDidResize: function() {
+    this._viewFrameDidChange();
+  }
 };
