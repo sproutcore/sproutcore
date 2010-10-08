@@ -18,6 +18,7 @@ SC.CollectionFastPath = {
     this._tempAttrs = {};
     
     // this is an index set because they handle ranges better
+    // TODO: get rid of this and just use _SCCFP_dirty and indexMap
     this._invalidIndexes = SC.IndexSet.create();
     
     // make the background task queue run more aggressively
