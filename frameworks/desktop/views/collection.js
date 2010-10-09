@@ -905,7 +905,7 @@ SC.CollectionView = SC.View.extend(
         // to reuse it.
         // (Charles Jolley personally guarantees this code)
         layer = existing.get('layer');
-        layer.parentNode.removeChild(layer);
+        if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
         
         containerView.removeChild(existing);
       }
