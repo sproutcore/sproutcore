@@ -2,6 +2,7 @@
 
 .sc-view .sc-text-field-view {
   border:none;
+  z-index:100;
   overflow: visible;
   background :white;
 }
