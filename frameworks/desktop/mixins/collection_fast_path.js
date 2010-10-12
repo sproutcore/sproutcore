@@ -17,10 +17,6 @@ SC.CollectionFastPath = {
     this._viewsForItem = {};
     this._tempAttrs = {};
     
-    // this is an index set because they handle ranges better
-    // TODO: get rid of this and just use _SCCFP_dirty and indexMap
-    this._invalidIndexes = SC.IndexSet.create();
-    
     // make the background task queue run more aggressively
     SC.backgroundTaskQueue.minimumIdleDuration = 100;
     
@@ -80,14 +76,16 @@ SC.CollectionFastPath = {
   },
   
   reload: function(indexes) {
-    // for some reason this can be called before init... which doesn't work
-    if(!this._invalidIndexes) return this;
-    
     // just calling reload with no arg means reload EVERYTHING
     if(SC.none(indexes)) {
-      this.invalidate(0, this._SCCFP_oldLength);
+      var i, len = this._indexMap.length;
+      
+      for(i = 0; i < len; i++) this.invalidate(i);
       
     // otherwise only reload what is necessary
+    } else if(indexes.isIndexSet) {
+      indexes.forEach(this.invalidate, this);
+      
     } else {
       this.invalidate(indexes);
     }
@@ -156,16 +154,10 @@ SC.CollectionFastPath = {
     
     //console.log("wantsUpdate", view.contentIndex);
     
-    if(view.contentIndex === undefined) {
-      view._SCCFP_dirty = YES;
-      
-    // make sure the view is currently being rendered
-    } else if(this._indexMap[view.contentIndex] === view) {
-      
-      //console.log("wants update", view.contentIndex);
+    if(this._indexMap[view.contentIndex] === view) {
       this.reload(view.contentIndex);
     
-    // if the view was hidden due to changing type, mark it dirty so if it's used again it will update properly
+    // if the view was hidden, mark it dirty so if it's used again it will update properly
     } else {
       view._SCCFP_dirty = YES;
     }
@@ -177,7 +169,7 @@ SC.CollectionFastPath = {
     shouldBeShowing = this._shouldBeShowing,
     i, len, index,
     pendingRemovals = this._pendingRemovals || (this._pendingRemovals = []),
-    invalid, view;
+    view;
     
     if(!this.get('isVisibleInWindow')) return;
     
@@ -418,7 +410,7 @@ SC.CollectionFastPath = {
         oldIndex = view.contentIndex;
         
         // even if it should be showing, we can steal it if it's currently invalid
-        if(!this._shouldBeShowing.contains(oldIndex) || this._invalidIndexes.contains(oldIndex) || view._SCCFP_dirty) {
+        if(!this._shouldBeShowing.contains(oldIndex) || view._SCCFP_dirty || SC.none(view.contentIndex)) {
           return view;
         }
       }
@@ -497,7 +489,7 @@ SC.CollectionFastPath = {
       
     // if we are going to be keeping the view, make sure that it's updated
     // TODO: make sure these conditions are accurate
-    } else if(force || view._SCCFP_dirty || item !== view.content || oldIndex !== newIndex || this._invalidIndexes.contains(newIndex)) {
+    } else if(force || view._SCCFP_dirty || item !== view.content || oldIndex !== newIndex || SC.none(oldIndex)) {
       // remapping is cheap so just do it no matter what
       this.unmapFromItem(view);
       
@@ -689,11 +681,13 @@ SC.CollectionFastPath = {
   getNextNowShowing: function() {
     var curShowing = this._curShowing,
     shouldBeShowing = this._shouldBeShowing,
-    i, len = shouldBeShowing.length, index;
+    i, len = shouldBeShowing.length, index,
+    indexMap = this._indexMap, view;
     
     for(i = 0; i < len; i++) {
       index = shouldBeShowing[i];
-      if(!curShowing.contains(index) || this._invalidIndexes.contains(index)) return index;
+      view = indexMap[index];
+      if(!curShowing.contains(index) || !view || view._SCCFP_dirty) return index;
     }
   },
   
@@ -705,22 +699,24 @@ SC.CollectionFastPath = {
     }
   },
   
-  invalidate: function(start, range) {
-    //console.log("invalidate: " + start + " " + range);
-    this._invalidIndexes.add(start, range);
+  invalidate: function(index) {
+    var view = this._indexMap[index];
+    
+    if(view) view._SCCFP_dirty = YES;
   },
   
-  validate: function(start, range) {
-    this._invalidIndexes.remove(start, range);
+  validate: function(index) {
+    var view = this._indexMap[index];
+    
+    if(view) view._SCCFP_dirty = NO;
   },
   
   _parity: YES,
   
   // if you have a collectionview that does something other than show items in order by index, override this
   getNextBackground: function() {
-    var content = this.get('content'),
-    invalid = this._invalidIndexes, indexMap = this._indexMap,
-    i, len = invalid.length, clen = content.get('length'),
+    var content = this.get('content'), clen = content.get('length'),
+    indexMap = this._indexMap, view,
     top = this.topBackground, bottom = this.bottomBackground, parity = this._parity, poolSize = this.domPoolSize, ret;
     
     while((top - bottom < poolSize - 1) && (top < clen - 1 || bottom > 0)) {
@@ -729,14 +725,16 @@ SC.CollectionFastPath = {
       
       if(parity && top < clen - 1) {
         top++;
-        if(!indexMap[top] || invalid.contains(top)) {
+        view = indexMap[top];
+        if(!view || view._SCCFP_dirty) {
           ret = top;
           break;
         }
         
       } else if(bottom > 0) {
         bottom--;
-        if(!indexMap[bottom] || invalid.contains(bottom)) {
+        view = indexMap[bottom];
+        if(!view || view._SCCFP_dirty) {
           ret = bottom;
           break;
         }
@@ -774,7 +772,9 @@ SC.CollectionFastPath = {
     
     //console.log("background rendering: " + index);
     
-    if(this._invalidIndexes.contains(index) && (view = this._indexMap[index])) {
+    view = this._indexMap[index];
+    
+    if(view && view._SCCFP_dirty) {
       view = this.updateView(view);
     }
     
