@@ -252,7 +252,7 @@ SC.CollectionFastPath = {
   domPoolForExampleView: function(exampleView) {
     var pools = this._domPools || (this._domPools = {}), guid = SC.guidFor(exampleView),
     pool = pools[guid];
-    
+    if(!exampleView) debugger;
     if (!pool) pool = pools[guid] = SC._DoublyLinkedList.create();
     
     return pool;
@@ -430,6 +430,13 @@ SC.CollectionFastPath = {
     return itemView;
   },
   
+  contentIndexForLayerId: function(id) {
+    var view = SC.View.views[id];
+    
+    if(view && !SC.none(view.contentIndex)) return view.contentIndex;
+    else return null;
+  },
+  
   /**
     This may seem somewhat awkward, but it is for memory performance: this fills in a hash
     YOU provide with the properties for the given content index.
@@ -455,7 +462,7 @@ SC.CollectionFastPath = {
     attrs.owner = attrs.displayDelegate = this;
     attrs.content = item;
     attrs.page = this.page;
-    attrs.layerId = this.layerIdFor(index);
+    //attrs.layerId = this.layerIdFor(index);
     attrs.isEnabled = del.contentIndexIsEnabled(this, content, index);
     attrs.isSelected = del.contentIndexIsSelected(this, content, index);
     attrs.outlineLevel = del.contentIndexOutlineLevel(this, content, index);
@@ -833,6 +840,7 @@ SC.CollectionFastPath = {
         i, len = views.length,
         pool;
 
+// TODO: see if i actually need to do this
         for(i = 0;i < len;i++) {
           view = views[i];
           for(pool in view._domPools) {
