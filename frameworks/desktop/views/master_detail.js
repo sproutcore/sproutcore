@@ -92,14 +92,17 @@ SC.MasterDetailView = SC.View.extend({
   }.property("autoHideMaster", "orientation"),
   
   /**
-    Tracks the orientation of the view. Is a computed property. Property, people, not a method.
+    Tracks the orientation of the view.
   */
-  orientation: function() {
-    var f = this.get("frame");
-    if (f.width > f.height) return SC.HORIZONTAL_ORIENTATION;
-    else return SC.VERTICAL_ORIENTATION;
-  }.property("frame").cacheable(),
+  orientation: SC.VERTICAL_ORIENTATION,
   
+  _scmd_frameDidChange: function() {
+    var f = this.get("frame"), ret;
+    if (f.width > f.height) ret = SC.HORIZONTAL_ORIENTATION;
+    else ret = SC.VERTICAL_ORIENTATION;
+    
+    this.setIfChanged('orientation', ret);
+  }.observes('frame'),
   
   /**
     If the master is hidden, this toggles the master picker pane.
