@@ -282,7 +282,7 @@ SC.CollectionFastPath = {
   
   // like the regular version except it also removes it from its index mapping, moves it offscreen, and pushes it to the front of the pull instead of the back
   sendToOffscreenDOMPool: function(view) {
-    var index = view.contentIndex, frame,
+    var index = view.contentIndex, height, rowSpacing, rowPadding,
     pool = this.domPoolForExampleView(view.createdFromExampleView);
     
     //console.log("sending offscreen " + view.content.get('fullName'));
@@ -294,8 +294,10 @@ SC.CollectionFastPath = {
     this._curShowing.remove(index);
   
     // move it off screen
-    frame = view.get("frame");
-    view.adjust({ top: -frame.height - this.get('rowSpacing')});
+    height = view.get("frame").height;
+    if(rowSpacing = this.get('rowSpacing')) height += rowSpacing;
+    if(rowPadding = this.get('rowPadding')) height += rowPadding * 2;
+    view.adjust({ top: -height});
     
     // push it in front because we want it to get put back somewhere useful asap
     this.unpool(view);
