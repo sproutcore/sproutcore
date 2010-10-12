@@ -23,13 +23,41 @@ SC.CollectionRowDelegate = {
   isCollectionRowDelegate: YES,
   
   /**
-    Default row height.  Unless you implement some custom row height 
+    Default item height. Size of an item without spacing or padding. 
+    Unless you implement some custom row height 
     support, this row height will be used for all items.
     
     @property
     @type Number
   */
-  rowHeight: 18,
+  itemHeight: 18,
+  
+  /**
+    Default row spacing. This inserts empty space between rows that you can use for borders.
+    
+    @property
+    @type Number
+  */
+  rowSpacing: 0,
+  
+  /**
+    Default row padding. This is useful if you are using a custom item view that needs to be padded.
+    This value is added to the top and bottom of the itemHeight.
+    
+    @property
+    @type Number
+  */
+  rowPadding: 0,
+  
+  /**
+    Total row height used for calculation. Equal to itemHeight + twice rowPadding.
+    
+    @property
+    @type Number
+  */
+  rowHeight: function() {
+    return this.get('itemHeight') + this.get('rowPadding') * 2;
+  }.property('itemHeight', 'rowPadding'),
 
   /**
     Index set of rows that should have a custom row height.  If you need 
@@ -56,6 +84,4 @@ SC.CollectionRowDelegate = {
   contentIndexRowHeight: function(view, content, contentIndex) {
     return this.get('rowHeight');    
   }
-  
-  
 };

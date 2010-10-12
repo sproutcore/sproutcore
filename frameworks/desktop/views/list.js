@@ -324,9 +324,11 @@ SC.ListView = SC.CollectionView.extend(
   
   */
   layoutForContentIndex: function(contentIndex) {
+    var del = this.get('rowDelegate');
+    
     return {
       top:    this.rowOffsetForContentIndex(contentIndex),
-      height: this.rowHeightForContentIndex(contentIndex),
+      height: this.rowHeightForContentIndex(contentIndex) - del.get('rowPadding') * 2,
       left:   0, 
       right:  0
     };
