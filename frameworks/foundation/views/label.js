@@ -200,7 +200,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     if (!this.get('isEditable')) return NO ;
 
     var el = this.$(),
-        value = this.get('value') || '',
+        value = this.get('value'),
         f = SC.viewportOffset(el[0]),
         frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
     f.width=frameTemp.width;
