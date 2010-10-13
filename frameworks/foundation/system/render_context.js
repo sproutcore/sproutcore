@@ -311,7 +311,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       el = null;
     }
   },
-  
+
   /**
     If an element was set on this context when it was created, this method 
     will actually apply any changes to the element itself.  If you have not
@@ -337,7 +337,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       return ;
     }
 
-    cq = SC.$(elem);
+    cq = this.$();
     
     // console.log('%@#update() called'.fmt(this));
     // if (this.length>0) console.log(this.join());
@@ -591,7 +591,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   classNames: function(classNames, cloneOnModify) {
     if (classNames === undefined) {
       if (!this._classNames && this._elem) {
-        this._classNames = (SC.$(this._elem).attr('class')||'').split(' ');
+        this._classNames = (this.$().attr('class')||'').split(' ');
       }
       
       if (this._cloneClassNames) {
@@ -665,7 +665,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     var classNames = this._classNames, idx;
     if (!classNames && this._elem) {
       classNames = this._classNames = 
-        (SC.$(this._elem).attr('class')||'').split(' ');
+        (this.$().attr('class')||'').split(' ');
     }
 
     if (classNames && (idx=classNames.indexOf(className))>=0) {
@@ -720,7 +720,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       classNames = this._classNames ;
       if (!classNames && this._elem) {
         classNames = this._classNames = 
-          (SC.$(this._elem).attr('class')||'').split(' ');
+          (this.$().attr('class')||'').split(' ');
       }
       if (!classNames) classNames = this._classNames = [];
     
@@ -773,7 +773,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       // extract styles from element.
       if (!this._styles && this._elem) {
         // parse style...
-        attr = SC.$(this._elem).attr('style');
+        attr = this.$().attr('style');
         
         if (attr && (attr = attr.toString()).length>0) {
           if(SC.browser.msie){ 
@@ -943,6 +943,24 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     
     return this ;
   },
+
+  //
+  // COREQUERY SUPPORT
+  //
+  /**
+    Returns a CoreQuery instance for the element this context wraps (if
+    it wraps any). If a selector is passed, the CoreQuery instance will
+    be for nodes matching that selector.
+
+    Renderers may use this to modify DOM.
+   */
+  $: function(sel) {
+    var ret, elem = this._elem;
+    ret = !elem ? SC.$([]) : (sel === undefined) ? SC.$(elem) : SC.$(sel, elem);
+    elem = null;
+    return ret;
+  },
+
 
   /** @private
   */
