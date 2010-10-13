@@ -216,3 +216,22 @@ function() {
 
   ok(view1.get('notifiedDidBegin'), "the delegate should have been notified of begin editing at this point");
 });
+
+test("inline editor does not display the defaultValue if the label's value is the number 0",
+function() {
+  var view1 = pane.view('label1');;
+  view1.set('value', 0);
+  optionsForLabel1 = optionsForLabelFromView(view1);
+
+  SC.RunLoop.begin();
+  SC.InlineTextFieldView.beginEditing(optionsForLabel1);
+  SC.RunLoop.end();
+
+  // The inline editor is the last view appended to the pane
+  var length = pane._pane.childViews.length,
+  editor = pane._pane.childViews[length - 1];
+  same(editor.get('value'), 0, "editor should have number 0 as value");
+  editor.blurEditor();
+
+  same(view1.get('value'), 0, "view should still have number 0 as value");
+});
