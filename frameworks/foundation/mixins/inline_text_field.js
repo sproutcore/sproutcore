@@ -54,7 +54,7 @@ sc_require('views/text_field') ;
   editor expects your source view to implement the InlineTextFieldViewDelegate
   protocol.
 
-  h2. Commiting or Discarding Changes
+  h2. Committing or Discarding Changes
   
   Normally the editor will automatically commit or discard its changes 
   whenever the user exits the edit mode.  If you need to force the editor to
@@ -66,13 +66,13 @@ sc_require('views/text_field') ;
   }}}
   
   Both methods will try to end the editing context and will call the 
-  relevent delegate methods on the delegate you passed to beginEditing().
+  relevant delegate methods on the delegate you passed to beginEditing().
   
   Note that it is possible an editor may not be able to commit editing 
   changes because either the delegate disallowed it or because its validator
   failed.  In this case commitEditing() will return NO.  If you want to
   end editing anyway, you can discard the editing changes instead by calling
-  discardEditing().  This method will generally suceed unless your delegate
+  discardEditing().  This method will generally succeed unless your delegate
   refuses it as well.
   
   @extends SC.TextFieldView
