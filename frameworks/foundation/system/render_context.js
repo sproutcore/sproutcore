@@ -619,12 +619,18 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {Boolean}
   */
   hasClass: function(className) {
+    if (this._elem) {
+      return this.$().hasClass(className);
+    }
     return this.classNames().indexOf(className) >= 0;  
   },
   
   /**
     Adds the specified className to the current tag, if it does not already
     exist.  This method has no effect if there is no open tag.
+
+    If there is an element backing this RenderContext, buffered jQuery is
+    used to perform the update.
     
     @param {String|Array} nameOrClasses the class name or an array of classes
     @returns {SC.RenderContext} receiver
@@ -634,7 +640,17 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       console.warn('You are adding an undefined or empty class'+ this.toString());
       return this;
     }
-    
+
+    if (this._elem) {
+      if (SC.typeOf(nameOrClasses) === SC.T_STRING) {
+        this.$().addClass(nameOrClasses);
+      } else {
+        var idx, len = nameOrClasses.length;
+        for (idx = 0; idx < len; idx++) this.$().addClass(nameOrClasses[idx]);
+      }
+      return this;
+    }
+
     var classNames = this.classNames() ; // handles cloning ,etc.
     if(SC.typeOf(nameOrClasses) === SC.T_STRING){
       if (classNames.indexOf(nameOrClasses)<0) {
@@ -657,17 +673,20 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   /**
     Removes the specified className from the current tag.  This method has 
     no effect if there is not an open tag.
+
+    If there is an actual DOM element backing this render context,
+    the modification will be written immediately to a buffered jQuery instance.
     
     @param {String} className the class to add
     @returns {SC.RenderContext} receiver
   */
   removeClass: function(className) {
-    var classNames = this._classNames, idx;
-    if (!classNames && this._elem) {
-      classNames = this._classNames = 
-        (this.$().attr('class')||'').split(' ');
+    if (this._elem) {
+      this.$().removeClass(className);
+      return this;
     }
 
+    var classNames = this._classNames, idx;
     if (classNames && (idx=classNames.indexOf(className))>=0) {
       if (this._cloneClassNames) {
         classNames = this._classNames = classNames.slice();
@@ -685,11 +704,17 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   },
   
   /**
-    Removes all classnames from the currentContext.  
-    
+    Removes all classnames from the context. If the context represents an
+    element, this will be handled in CoreQuery.
+
     @returns {SC.RenderContext} receiver
   */
   resetClassNames: function() {
+    if (this._elem) {
+      this.$().clearClassNames();
+      return this;
+    }
+
     this._classNames = [];
     this._classNamesDidChange = YES ;
     return this;
@@ -702,28 +727,30 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     whether they should be there or not.
     
     This is far more efficient than using addClass/removeClass.
+
+    If this context represents an element, this uses the buffered jQuery to
+    ensure all planned DOM operations stay in-sync.
     
     @param {String|Hash} className class name or hash of classNames + bools
     @param {Boolean} shouldAdd for class name if a string was passed
     @returns {SC.RenderContext} receiver
   */
   setClass: function(className, shouldAdd) {
+    if (this._elem) {
+      this.$().setClass(className, shouldAdd);
+      return this;
+    }
+
     var classNames, idx, key, didChange;
-    
+
     // simple form
     if (shouldAdd !== undefined) {
       return shouldAdd ? this.addClass(className) : this.removeClass(className);
-      
     // bulk form
     } else {
-      
       classNames = this._classNames ;
-      if (!classNames && this._elem) {
-        classNames = this._classNames = 
-          (this.$().attr('class')||'').split(' ');
-      }
       if (!classNames) classNames = this._classNames = [];
-    
+
       if (this._cloneClassNames) {
         classNames = this._classNames = classNames.slice();
         this._cloneClassNames = NO ;
