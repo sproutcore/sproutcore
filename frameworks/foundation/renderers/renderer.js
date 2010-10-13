@@ -23,8 +23,8 @@ sc_require("system/theme");
 
   However, SC.Renderer also supports 'automatic' sizing. If the renderer
   is supplied with a frame (containing width and height properties), and
-  the renderer also has a "sizes" property (see docs for "sizes"), the smallest
-  size that will fit the frame will be used.
+  the renderer also has a "sizes" property (see docs for "sizes"), the largest
+  size that will fit in the frame will be used.
 
   Finally, SC.Renderer keeps track of what properties have changed. Whenever
   a property is changed through .attr(), it will be marked; if you then call
@@ -112,7 +112,7 @@ SC.Renderer = {
 
     If supplied with a size property that is a frame (a hash containing 
     a width and height), SC.Renderer will loop through these hashes until
-    it finds one that the supplied frame may fit inside of.
+    it finds the last one that fits inside the frame.
 
     'sizes' may be left null; in this case, no automatic size processing
     will occur.
@@ -157,16 +157,18 @@ SC.Renderer = {
     if (!sizes) return null;
 
     // we just return the first one that fits.
-    var idx, len = sizes.length, s;
+    var idx, len = sizes.length, s, last = undefined;
     for (idx = 0; idx < len; idx++) {
       s = sizes[idx];
 
-      if (s.width && size.width > s.width) continue;
-      if (s.height && size.height > s.height) continue;
+      if (s.width && s.width > size.width) break;
+      if (s.height && s.height > size.height) break;
 
-      this.size = s.name;
-      return s.name;
+      last = s;
     }
+
+    this.size = last.name;
+    return last.name;
   },
 
   /**
@@ -210,6 +212,7 @@ SC.Renderer = {
     }
 
     cn[this.name] = YES;
+
     context.setClass(cn);
     return cn;
   },
@@ -218,40 +221,9 @@ SC.Renderer = {
     Like renderClassNames, but for use from update() method.
    */
   updateClassNames: function(query) {
-    var cn = {}, size = this.calculateSize();
+    // THIS WORKS BECAUSE RenderContext has the same setClass API as CoreQuery:
+    this.renderClassNames(query);
 
-    // do diffing by setting all of last to NO, then
-    // setting all of this time to YES
-    var last = this._LAST_CLASS_NAMES, current = this.classNames,
-        len, idx;
-
-    if (last) {
-      len = last.length;
-      for (idx = 0; idx < len; idx++) cn[last[idx]] = NO;
-    } else {
-      // we don't need one for diffing, but we'll need _LAST_CLASS_NAMES
-      // to store the current class names for later.
-      last = this._LAST_CLASS_NAMES = SC.CoreSet.create();
-    }
-
-    // we don't need any of the old entries anymore.
-    last.clear();
-
-    // NOTE: we don't need to diff name, because it should stay the same.
-    len = current.length;
-    for (idx = 0; idx < len; idx++) {
-      cn[current[idx]] = YES;
-      last.add(cn[current[idx]]);
-    }
-
-
-    if (size) {
-      cn[size] = YES;
-      last.add(size);
-    }
-
-    query.setClass(cn);
-    return cn;
   },
 
   //
