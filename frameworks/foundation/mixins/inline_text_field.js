@@ -437,7 +437,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.commitEditing() ;
     if(delegate){
       var prev = delegate.get('previousValidKeyView');
-      if(prev) prev.beginEditing();
+      if(prev && prev.beginEditing) prev.beginEditing();
     }
     return YES ;
   },
