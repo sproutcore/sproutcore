@@ -6,7 +6,7 @@
 // ==========================================================================
 /*global module test htmlbody ok equals same stop start Q$ */
 
-var pane, optionsForLabel1, optionsForLabel2, delegate;
+var pane, optionsForLabel1, optionsForLabel2, delegate, optionsForLabelFromView;
 
 pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
   value: 'Some Text',
@@ -50,6 +50,30 @@ pane.resetView = function(view) {
   view.set('notifiedDidBegin', NO);
 };
 
+
+optionsForLabelFromView = function(view) {
+  var el = view.$(),
+  f = SC.viewportOffset(el[0]),
+  frameTemp = view.convertFrameFromView(view.get('frame'), null);
+
+  f.width = frameTemp.width;
+  f.height = frameTemp.height;
+
+  var optionsForLabel = {
+    frame: f,
+    delegate: view,
+    exampleElement: view.$(),
+    value: view.get('value'),
+    multiline: view.get('isInlineEditorMultiline'),
+    isCollection: NO,
+    validator: view.get('validator'),
+    exampleInlineTextFieldView: view.get('exampleInlineTextFieldView')
+  };
+
+  return optionsForLabel;
+};
+
+
 /**
   
 */
@@ -64,41 +88,8 @@ module("Test the beginEditing() function of SC.InlineTextFieldView", {
     // Reset view1 delegate functions
     pane.resetView(view1);
 
-    var el = view1.$(),
-    f = SC.viewportOffset(el[0]),
-    frameTemp = view1.convertFrameFromView(view1.get('frame'), null);
-
-    f.width = frameTemp.width;
-    f.height = frameTemp.height;
-
-    optionsForLabel1 = {
-      frame: f,
-      delegate: view1,
-      exampleElement: view1.$(),
-      value: view1.get('value'),
-      multiline: view1.get('isInlineEditorMultiline'),
-      isCollection: NO,
-      validator: view1.get('validator'),
-      exampleInlineTextFieldView: view1.get('exampleInlineTextFieldView')
-    };
-
-    el = view2.$();
-    f = SC.viewportOffset(el[0]);
-    frameTemp = view2.convertFrameFromView(view2.get('frame'), null);
-
-    f.width = frameTemp.width;
-    f.height = frameTemp.height;
-
-    optionsForLabel2 = {
-      frame: f,
-      delegate: view2,
-      exampleElement: view2.$(),
-      value: view2.get('value'),
-      multiline: view2.get('isInlineEditorMultiline'),
-      isCollection: NO,
-      validator: view2.get('validator'),
-      exampleInlineTextFieldView: view2.get('exampleInlineTextFieldView')
-    };
+    optionsForLabel1 = optionsForLabelFromView(view1);
+    optionsForLabel2 = optionsForLabelFromView(view2);
   },
 
   teardown: function() {
