@@ -956,7 +956,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
    */
   $: function(sel) {
     var ret, elem = this._elem;
-    ret = !elem ? SC.$([]) : (sel === undefined) ? SC.$(elem) : SC.$(sel, elem);
+    ret = !elem ? SC.$.buffer([]) : (sel === undefined) ? SC.$.buffer(elem) : SC.$.buffer(sel, elem);
     elem = null;
     return ret;
   },
