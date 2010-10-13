@@ -118,6 +118,10 @@ SC.Theme = {
     // would conflict.
     result.themes = SC.beget(this.themes);
 
+    // the theme also specializes all renderers it creates so that they
+    // have the theme's classNames and have their 'theme' property set.
+    this._specializedRenderers = {};
+
     // we could put this in _extend_self, but we don't want to clone
     // it for each and every argument passed to create().
     result.classNames = SC.CoreSet.create(this.classNames);
@@ -192,26 +196,24 @@ SC.Theme = {
 
    /**
      Finds the named renderer and instantiates it, returning the result.
-     While instantiating, it sets the theme property and adds the theme's
-     class names. If this is ever a point for slowness in the future,
-     we will call .extend on the renderer and cache the class as a property
-     of the theme object; however, this process should be quite fast; it
-     would likely not even be the slow point if every list item in a list
-     were creating and destroying renderers as you scrolled.
+     It also ensures it is using a version of the renderer specialized for
+     this theme. It keeps a cache of specialized versions of the renderer.
 
      Any arguments after the name are passed on to the instantiated
      renderer.
    */
   renderer: function(name) {
-    var renderer = this[name];
+    var renderer = this._specializedRenderers[name], base = this[name];
+    if (!renderer || renderer._specializedFrom !== base) {
+      if (!base) return null;
+
+      renderer = base.extend({ classNames: this.classNames, theme: this });
+    }
+
     var args = SC.$A(arguments);
     args.shift();
-    if (renderer) {
-      renderer.create.apply(renderer, args);
-      renderer.theme = this;
-      renderer.classNames.addEach(this.classNames);
-    }
-    return null;
+    renderer = renderer.create.apply(renderer, args);
+    return renderer;
   }
 };
 

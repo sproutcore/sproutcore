@@ -146,7 +146,7 @@ SC.Renderer = {
     the size for this renderer.
   */
   calculateSize: function() {
-    var size = this.get(size);
+    var size = this.size;
     if (!size) return null;
     if (typeof size === "string") return size;
 
