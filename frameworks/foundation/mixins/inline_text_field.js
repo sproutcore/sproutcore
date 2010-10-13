@@ -133,7 +133,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
       throw "At least frame and delegate options are required for inline editor";
     }
     
-    this._originalValue = options.value || '' ;
+    this._originalValue = options.value;
+    if (SC.none(this._originalValue))
+      this._originalValue = "";
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
     if (this._multiline) {
       this.set('isTextArea', YES);
