@@ -10,260 +10,410 @@
 sc_require("system/theme");
 
 /** @class
-  Handles rendering for a view.
-  
-  Renderers have two primary functions: rendering and updating. Rendering is done
-  to a context, to produce one giant string of rendered output. Updating is done
-  to layers, usually using CoreQuery.
-  
-  You should implement at _least_ two functions in a renderer: render and update. You
-  may also want to implement init, didAttachLayer, and willDetachLayer if you are using
-  sub-renderers.
+  Renderers handle rendering to a RenderContext and using jQuery to update
+  what they rendered.
+
+  SC.Renderer has a few built-in helpers. It has built-in classNames support;
+  to integrate those classNames, just call renderClassNames(context) from
+  your render() method, and updateClassNames(query) from your update() method.
+
+  SC.Renderer also has some built-in ability to handle sizes. First, if the
+  'size' parameter is set on the renderer (by the view), and it is a string,
+  that string will be added as a class name.
+
+  However, SC.Renderer also supports 'automatic' sizing. If the renderer
+  is supplied with a frame (containing width and height properties), and
+  the renderer also has a "sizes" property (see docs for "sizes"), the smallest
+  size that will fit the frame will be used.
+
+  Finally, SC.Renderer keeps track of what properties have changed. Whenever
+  a property is changed through .attr(), it will be marked; if you then call
+  hasChanged(property), it will return YES. To reset all of the flags, just
+  call this.resetChanges().
+
+  Using a Renderer
+  --------------------------------------------
+  You may use a renderer from inside a view, or even from inside another
+  renderer:
+
+      // using inside an SC.View
+      render: function(context, firstTime) {
+
+        // first, prepare some settings for the renderer. Here are some
+        // typical settings you might prepare:
+        var size = this.get('controlSize');
+        var settings = {
+          title: this.get('title'),
+          icon: this.get('icon'),
+          classNames: {
+            selected: this.get('isSelected')
+          },
+          size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
+        };
+
+        // now, instantiate and render the renderer, or just update it.
+        if (firstTime) {
+          this._buttonRenderer = this.get('theme').renderer(SC.BUTTON_RENDERER);
+          this._buttonRenderer.attr(settings);
+          this._buttonRenderer.render(context);
+        } else {
+          // note that update() takes a jQuery/CoreQuery object, NOT
+          // a RenderContext, as it updates DOM more directly.
+          this._buttonRenderer.attr(settings);
+          this._buttonRenderer.update(context.$());
+        }
+      },
+
+      // using from an SC.Renderer
+      render: function(context) {
+        sc_super(); // gets class names, size, etc.
+
+        context.push('<span class = "title">');
+        this._titleRenderer = this.theme.renderer(SC.TITLE_RENDERER);
+        this._titleRenderer.attr({ title: this.title, icon: this.icon });
+        this._titleRenderer.render(context);
+        context.push('</span>');
+      },
+
+      update: function(query) {
+        this.updateClassNames(query);
+        this._titleRenderer.update(query.find('.title'));
+      }
+
 */
 SC.Renderer = {
-  
-  classNames: {},
-  
+  /**
+    All Renderers must have a name. This name will be used to reference them
+    in their parent theme (theme.getRenderer(rendererName)), and will also
+    be added as a class name. For performance reasons, it will NOT be
+    present in the classNames CoreSet. Instead, it will be added as a
+    class name by the base render() method.
+  */
+  name: '(unnamed)',
+
+  /**
+    This describes what style this element is in. It consists of the theme
+    class names plus the renderer name plus any class names you add.
+
+    The theme class names are added when you register the renderer with the
+    theme.
+
+    You can add class names during renderer definition by setting the
+    classNames property to a string (which may be a single class name
+    or multiple separated by spaces), an array, an SC.CoreSet, or a
+    hash (which also allows you to remove class names in case you need
+    some wacky hack-- not recommended).
+  */
+  classNames: SC.CoreSet.create(),
+
+  /**
+    Sizes, if present, should be an array of hashes. Each hash should
+    have a name, and either a width, a height, or both a width and height.
+
+    If supplied with a size property that is a frame (a hash containing 
+    a width and height), SC.Renderer will loop through these hashes until
+    it finds one that the supplied frame may fit inside of.
+
+    'sizes' may be left null; in this case, no automatic size processing
+    will occur.
+
+    Example Code:
+    
+        #js
+        sizes: [
+          { name: SC.REGULAR_CONTROL_SIZE, height: 24 },
+          { name: SC.HUGE_CONTROL_SIZE, height: 32 }
+        ]
+
+        // if 'size' is set to SC.SMALL_CONTROL_SIZE, SC.SMALL_CONTROL_SIZE
+        // will be used.
+        //
+        // if 'size' is set to { width: 30, height: 20 },
+        // SC.REGULAR_CONTROL_SIZE will be used.
+        //
+        // if 'size' is set to { width: 30, height: 32 },
+        // SC.HUGE_CONTROL_SIZE will be used.
+   */
+  sizes: null,
+
+  /**
+    The size, if any, in which to render this control.
+   */
+  size: null,
+
+  /**
+    Based on the 'size' and 'sizes' property, returns the name of
+    the size for this renderer.
+  */
+  calculateSize: function() {
+    var size = this.get(size);
+    if (!size) return null;
+    if (typeof size === "string") return size;
+
+    // note that the calculation won't change unless size changes,
+    // and as such, we can replace size with the calculated string
+    // for caching.
+    var sizes = this.sizes;
+    if (!sizes) return null;
+
+    // we just return the first one that fits.
+    var idx, len = sizes.length, s;
+    for (idx = 0; idx < len; idx++) {
+      s = sizes[idx];
+
+      if (s.width && size.width > s.width) continue;
+      if (s.height && size.height > s.height) continue;
+
+      this.size = s.name;
+      return s.name;
+    }
+  },
+
+  /**
+    Sets the renderer's class names to the context. This is a helper
+    you may call from render.
+
+    This does diffing to ensure that all class names in the previously
+    rendered classNames set are included or excluded, in case the render
+    did or did not clear the class names.
+   */
+  renderClassNames: function(context) {
+    var cn = {}, size = this.calculateSize();
+
+    // do diffing by setting all of last to NO, then
+    // setting all of this time to YES
+    var last = this._LAST_CLASS_NAMES, current = this.classNames,
+        len, idx;
+
+    if (last) {
+      len = last.length;
+      for (idx = 0; idx < len; idx++) cn[last[idx]] = NO;
+    } else {
+      // we don't need one for diffing, but we'll need _LAST_CLASS_NAMES
+      // to store the current class names for later.
+      last = this._LAST_CLASS_NAMES = SC.CoreSet.create();
+    }
+
+    // we don't need any of the old entries anymore.
+    last.clear();
+
+    // NOTE: we don't need to diff name, because it should stay the same.
+    len = current.length;
+    for (idx = 0; idx < len; idx++) {
+      cn[current[idx]] = YES;
+      last.add(cn[current[idx]]);
+    }
+
+    if (size) {
+      cn[size] = YES;
+      last.add(size);
+    }
+
+    cn[this.name] = YES;
+    context.setClass(cn);
+    return cn;
+  },
+
+  /**
+    Like renderClassNames, but for use from update() method.
+   */
+  updateClassNames: function(query) {
+    var cn = {}, size = this.calculateSize();
+
+    // do diffing by setting all of last to NO, then
+    // setting all of this time to YES
+    var last = this._LAST_CLASS_NAMES, current = this.classNames,
+        len, idx;
+
+    if (last) {
+      len = last.length;
+      for (idx = 0; idx < len; idx++) cn[last[idx]] = NO;
+    } else {
+      // we don't need one for diffing, but we'll need _LAST_CLASS_NAMES
+      // to store the current class names for later.
+      last = this._LAST_CLASS_NAMES = SC.CoreSet.create();
+    }
+
+    // we don't need any of the old entries anymore.
+    last.clear();
+
+    // NOTE: we don't need to diff name, because it should stay the same.
+    len = current.length;
+    for (idx = 0; idx < len; idx++) {
+      cn[current[idx]] = YES;
+      last.add(cn[current[idx]]);
+    }
+
+
+    if (size) {
+      cn[size] = YES;
+      last.add(size);
+    }
+
+    query.setClass(cn);
+    return cn;
+  },
+
   //
   // FUNCTIONS SUBCLASSES SHOULD/MAY IMPLEMENT
   //
-  
+
   /**
-    Renders the classNames property to the context. Should render into the supplied context in subclasses.
-    
-    You should implement this by using the RenderContext API. You can use this.propertyName to
-    fetch the value of properties.
+    You should implement this to render to a RenderContext. You can use 
+    this.propertyName to fetch the value of any renderer properties.
+
+    The default implementation calls renderClassNames; you can call this
+    yourself, or use sc_super();
   */
   render: function(context) {
-    context.setClass(this.classNames);
+    this.renderClassNames(context);
   },
   
   /**
-    Sets the classNames property on the layer. Should update the attached layer, if there is one.
-    
-    You should implement primarily by using CoreQuery functions. If you use CoreQuery, the renderer itself will
-    detect whether the layer exists, and do nothing if it does not. If you do _not_ use CoreQuery, you will need
-    to call layer() to get the layer, and manually do nothing if there is none.
+    You should implement update() to update DOM directly. update() will
+    be supplied with a CoreQuery object with which to update DOM.
+
+    If you do not override update(), the default behavior is to create
+    a render context and use it to call render().
+
+    As SC.View will clear out class names, make sure that you
+    always call query.setClass with ALL class names you could possibly
+    set, as there is no guarantee as to whether the caller cleared
+    the class names or not.
   */
-  update: function() {
-    this.$().setClass(this.classNames);
+  update: function(query) {
+    var context = SC.RenderContext(query[0]);
+    this.render(context);
+    context.update();
   },
   
   /**
-    You usually should not implement this. It is more proper to implement willDetachLayer instead.
+    @private May be used for pooling.
   */
   destroy: function() {
     
   },
-  
-  /**
-    Called when a layer is attached. 
-    
-    The "layer" parameter is not necessarily the layer itself; it may be a layer provider.
-    To get the real layer, use the renderer's "layer" method.
-    If you have sub-renderers, you may want to relay this to them by calling their attachLayer methods.
-    
-    If event handling is necessary, this is the place to do it.
-    
-    Note: usually, you do not do event handling; instead, the view does, with its mouse and touch
-    event handling. Instead, to handle events, you should make sure the causedEvent function works properly.
-    
-    @param {layer} layer The layer or layer provider being attached.
-  */
-  didAttachLayer: function(layer) {
-    
-  },
-  
-  /**
-    Called when a layer is being detached.
-  */
-  willDetachLayer: function() {
-    
-  },
-  
-  //
-  // Functions that may be called by subclasses
-  //
-  /**
-    CoreQuery. Need I say more?
-  */
-  $: function(sel) {
-    var ret, layer = this.layer();
-    // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
-    // return an object selecting the document.
-    ret = !layer ? SC.$.buffer([]) : (sel === undefined) ? SC.$.buffer(layer) : SC.$.buffer(sel, layer) ;
-    layer = null ; // avoid memory leak
-    return ret ;
-  },
-  
-  /**
-    Applies a context object's attributes and structure to a layer via (j/Core)Query
-  */
-  applyContextToLayer: function(context, cq) {
-    var contextCQ = SC.$(context.join()), attrs, key;
-    
-    // get classes across to our layer
-    cq.addClass(context.classNames().join(" "));
-    
-    // get attributes across as well
-    attrs = contextCQ.attr();
-    for (key in attrs) {
-      if (!attrs.hasOwnProperty(key)) continue;
-      cq.attr(key, attrs[key]);
-    }
-    
-    // finally, append the children on contextCQ to our layer
-    // might be better to accomplish this via innerHTML
-    cq.append(contextCQ.children());
-  },
-  
-  /**
-    Returns YES if the event took place within this view.
-  */
-  causedEvent: function(evt) {
-    return this.$().within(evt.target); // return YES if evt.target is or is inside the layer.
-  },
-  
-  //
-  // Functions that should be called by view
-  //
 
   /**
-    Call this to attach the renderer to a layer.
-    If the layer is a layer provider (views, for instance, are layer providers), then
-    the layer provider will be saved, allowing lazy-access.
-    
-    Views will call this on their own. However, if you use sub-renderers, you may call this
-    from didAttachLayer to inform them that their layers have been attached.
-  */
-  attachLayer: function(layer) {
-    // if there is any layer or layer provider, we must detach (because we would attach if it were the other way around)
-    if (this._layer || this._layerProvider) this.detachLayer();
-    
-    if (layer.isLayerProvider) {
-      // layer provider case: we just set the layer provider and move on
-      this._layerProvider = layer;
-    } else {
-      // otherwise, set layer
-      this._layer = layer;
+    Extends the set of class names on this renderer with the class
+    names supplied (which may be a set, a string, a hash, etc.)
+   */
+  extendClassNames: function(classNames) {
+    // class names may be a CoreSet, array, string, or hash
+    if (classNames) {
+      if (SC.typeOf(classNames) === SC.T_HASH && !classNames.isSet) {
+        for (className in classNames) {
+          if (classNames[className]) this.classNames.add(className);
+          else this.classNames.remove(className);
+        }
+      } else if (typeof classNames === "string") {
+        this.classNames.addEach(classNames.split(' '));
+      } else {
+        // it must be an array or another CoreSet... same difference.
+        this.classNames.addEach(classNames);
+      }
     }
-    
-    // and, as we said, even though we did not necessarily set the real layer, we will act as if we did.
-    // we're lazy. that doesn't mean we don't do anything. we just don't do it 'til the last minute.
-    this.didAttachLayer(layer);
   },
-  
+
   /**
-    Called to detach the renderer from a layer.
-    
-    Views will call this on their own. However, if you have sub-renderers, you'll need to inform them
-    that their layer is being detached by calling this method on them from willDetachLayer.
-  */
-  detachLayer: function() {
-    this.willDetachLayer();
-    this._layer = null;
-    this._layerProvider = null;
-  },
-  
-  /**
-    Gets the layer, either from the layer set on the renderer itself, or from the renderer's layer
-    provider (if any).
-  */
-  layer: function(layer) {
-    if (this._layer) return this._layer;
-    if (this._layerProvider) {
-      this._layer = this._layerProvider.getLayer();
-      return this._layer;
-    }
-    return null;
-  },
-  
-  /**
-    Extends this renderer.
-  */
-  extend: function(ext) {
-    var ret = SC.mixin(SC.beget(this), ext),
-        key, value, cur;
-    
-    ret.classNames = SC.mixin({}, this.classNames, ext.classNames);
-    
-    ret.superclass = this;
-    for(key in ret) {
-      value = ret[key];
+    Extends the renderer with the supplied hash. You would usually
+    call this from inside your init() method if you want to handle
+    a hash of properties; this allows the hash passed to init to have
+    functions that will work with sc_super, and that classNames will work.
+   */
+  extendSelf: function(ext) {
+    this.classNames = SC.clone(this.classNames);
+    if (ext.classNames) this.extendClassNames(ext.classNames);
+
+    // mixin while enabling sc_super();
+    var key, value, cur;
+    for (key in ext) {
+      if (key === 'classNames') continue; // already handled.
+      if (!ext.hasOwnProperty(key)) continue;
+
+      value = ext[key];
       if (value instanceof Function && !value.base && (value !== (cur=this[key]))) {
         value.base = cur;
       }
+
+      this[key] = value;
     }
-    
+  },
+
+
+  /**
+    You know SC.Object.extend? This is like that, but for renderers.
+   */
+  extend: function(ext) {
+    var ret = SC.beget(this);
+    ret.extendSelf(ext);
+
+    ret.superclass = this;
+
     return ret;
   },
  
   /**
-    Creates a constructor function for the renderer; you use this when you add the renderer
-    to a theme.
+   Creates an instance of the renderer.
+
+   It calls the  init function with all arguments provided to create().
+   This is slightly different .
   */
-  create: function(ext) {
-    ext = ext ? SC.mixin(SC.beget(this), ext) : this;
-    return function(attrs) {
-      var ret = SC.beget(ext);
-      ret.theme = this;
-      if (ret.init) {
-        ret.init(attrs) ;
-      } else {
-        ret.attr(attrs);
-      }
- 
-      return ret ;
-    };
+  create: function(attrs) {
+    var ret = SC.beget(this);
+
+    ret.init.apply(ret, arguments);
+
+    return ret;
   },
-  
+
+  /**
+    @private for now. At some point we'll encourage the constructor
+    to be more powerful, but until we have a template, keeping it private.
+  */
   init: function(attrs) {
-    this.classNames = SC.mixin({}, this.classNames);
     if (attrs) {
-      this.attr(attrs);
+      this.extendSelf(attrs);
     }
   },
  
   /**
-    Sets one or more attributes. Also modifies a "changes" set (allowing, but not requiring you,
-    to perform some optimizations).
+    Sets one or more attributes. Also marks the properties that have been
+    changed so that you can update only what has changed in the update() method.
   */
   attr: function(key, value) {
     var changes = this.changes, didChange, opts, l, i;
 
     if (typeof key === SC.T_STRING) {
-       if (value === undefined) return this[key];
-       if (key !== 'classNames' || !value.isEnumerable) {
-         if (this[key] === value) return this; // nothing to do
-         this[key] = value;
-       } else {
-         // need to put classNames array elements from view into our classNames hash
-         l = value.length;
-         for (i=0; i<l; i++) {
-           this.classNames[value[i]] = YES;
-         }
-       }
-       if (!changes) changes = this.changes = SC.CoreSet.create(); 
-       changes.add(key);
-       return this;
+      if (value === undefined) return this[key];
+      if (key === 'classNames') {
+        this.extendClassNames(value);
+        didChange = YES;
+      } else if (this[key] !== value) {
+        didChange = YES;
+        this[key] = value;
+      }
+
+      if (!didChange) return this;
+
+      if (!changes) changes = this.changes = SC.CoreSet.create();
+      changes.add(key);
+      return this;
     } else {
       opts = key;
       for(key in opts) {
         if (!opts.hasOwnProperty(key)) continue;
         value = opts[key];
-        if (key !== 'classNames' || !value.isEnumerable) {
-          if (this[key] !== value) {
-            this[key] = value;
-            didChange = YES;
-          }
-        } else {
-          l = value.length;
-          for (i=0; i<l; i++) {
-            this.classNames[value[i]] = YES;
-          }
+
+        didChange = NO;
+        if (key === 'classNames') {
+          this.extendClassNames(value);
+          didChange = YES;
+        } else if (this[key] !== value) {
+          this[key] = value;
           didChange = YES;
         }
-        
+
         if (didChange) {
           if (!changes) changes = this.changes = SC.CoreSet.create();
           changes.add(key);
@@ -272,45 +422,32 @@ SC.Renderer = {
       return this;
     }
   },
-  
+
+  /**
+    You may call this to see if _anything_ has changed.
+   */
   hasChanges: function() {
     if (!this.changes || this.changes.length === 0) return NO;
     return YES;
   },
-  
+
+  /**
+    You may call this to see if a specific property did change.
+   */
   didChange: function(key){
     if (!this.changes) return NO;
     return this.changes.contains(key);
   },
-  
+
+  /**
+    Resets the change tracking. You may do this, for instance, after
+    you have processed all of the changes.
+   */
   resetChanges: function() {
-    this.changes = null;
+    if (this.changes) this.changes.clear();
   },
-  
-  /**
-    @private
-    Added to other layer providers.
-  */
-  _layerFinder: function() {
-    var cq = this.renderer.$(this.selector);
-    return cq[0];
-  },
-  
-  /**
-    Generates a layer provider that will provide the layer determined by the result
-    of the provided CoreQuery selector (the first item, if any).
-  */
-  provide: function(sel) {
-    return {
-      isLayerProvider: YES,
-      renderer: this,
-      getLayer: this._layerFinder,
-      selector: sel
-    };
-  },
- 
-  // other methods
+
   toString: function() {
-    return "SC.Renderer#" + SC.guidFor(this);
+    return "SC.Renderer(" + this.name + ")#" + SC.guidFor(this);
   }
 };

@@ -1,108 +1,229 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
-//            Portions ©2008-2009 Apple Inc. All rights reserved.
+//            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
 /** @class
-  Represents a theme. Also is the singleton theme manager.
-  
+  Represents a theme, and is also the core theme in which SC looks for
+  other themes.
+
+  If an SC.View has a theme of "ace", it will look in its parent's theme
+  for the theme "ace". If there is no parent--that is, if the view is a
+  frame--it will look in SC.Theme for the named theme. To find a theme,
+  it calls find(themeName) on the theme.
+
+  To be located, themes must be registered either as a root theme (by
+  calling SC.Theme.addTheme) or as a child theme of another theme (by
+  calling theTheme.addTheme).
+
+  All themes are instances. However, new instances based on the current
+  instance can always be created: just call .create(). This method is used
+  by SC.View when you name a theme that doesn't actually exist: it creates
+  a theme based on the parent theme.
+
+  Renderers
+  ---------------------------
+  Themes are used to keep track of theme class names and, more important,
+  to keep track of renderers.
+
+  Renderers are added to a theme using theme.addRenderer(theRenderer). After
+  this has been done, they may be instantiated using theme.renderer(rendererName).
+
+  Instantiating with renderer() instantiates a version of that renderer
+  specialized for this specific theme-- not any parent themes. The renderer
+  will include all class names for _this_ theme. This means that you can
+  theme controls differently without overriding any renderers: just subclass
+  the original theme that _has_ the renderers, give it its own name, and
+  all renderers will render with that name as a class name.
+
   @extends SC.Object
   @since SproutCore 1.1
+  @author Alex Iskander
 */
-SC.Theme = SC.Object.extend({
-  /**@scope SC.Theme.prototype */
-  concatenatedProperties: "classNames".w(),
-  
+SC.Theme = {
   /**
     Walks like a duck.
   */
   isTheme: YES,
-  
-  /**
-    Class names for the theme. All controls using this theme will have these class names
-    in their class names; for instance, if the value is ["ace", "light"], all views
-    using this theme (including child views of views using this theme) will have class
-    names like "sc-view sc-type-view sc-blah-blah ace light".
-  */
-  classNames: [],
-  
-  /**
-    Finds a theme within this theme or any parent theme.
-  */
-  find: function(name) {
-    var p = this.themeClass, theme = null;
 
-    // call find on our class and each parent.
-    while (p && !theme) {
-      theme = p.find(name); // this is on the class, mind, not the instance
-      p = p.baseTheme;
+  /**
+    Class names for the theme.
+
+    These class names include the name of the theme and the names
+    of all parent themes. You can also add your own.
+   */
+  classNames: SC.CoreSet.create(),
+
+  /**
+    @private
+    A helper to extend class names with another set of classnames. The
+    other set of class names can be a hash, an array, a Set, or a space-
+    delimited string.
+  */
+  _extend_class_names: function(classNames) {
+    // class names may be a CoreSet, array, string, or hash
+    if (classNames) {
+      if (SC.typeOf(classNames) === SC.T_HASH && !classNames.isSet) {
+        for (className in classNames) {
+          if (classNames[className]) this.classNames.add(className);
+          else this.classNames.remove(className);
+        }
+      } else if (typeof classNames === "string") {
+        this.classNames.addEach(classNames.split(' '));
+      } else {
+        // it must be an array or another CoreSet... same difference.
+        this.classNames.addEach(classNames);
+      }
     }
-    
-    return theme;
-  }
-  
-});
+  },
 
-SC.mixin(SC.Theme, {
-  /**@scope SC.Theme */
   /**
-    Extends the theme, and makes sure theme.renderers points to the theme's prototype.
+    @private
+    Helper method that extends this theme with some extra properties.
+
+    Used during Theme.create();
+   */
+  _extend_self: function(ext) {
+    if (ext.classNames) this._extend_class_names(ext.classNames);
+
+    // mixin while enabling sc_super();
+    var key, value, cur;
+    for (key in ext) {
+      if (key === 'classNames') continue; // already handled.
+      if (!ext.hasOwnProperty(key)) continue;
+
+      value = ext[key];
+      if (value instanceof Function && !value.base && (value !== (cur=this[key]))) {
+        value.base = cur;
+      }
+
+      this[key] = value;
+    }
+  },
+
+  /**
+    Creates a new theme based on this one. The name of the new theme will
+    be added to the classNames set.
   */
-  extend: function() {
-    var result = SC.Object.extend.apply(this, arguments);
-    result.themes = {}; // make sure each has their own theme set
+  create: function() {
+    var result = SC.beget(this);
     result.baseTheme = this;
-    result.prototype.themeClass = result; // a convenience.
-    result.renderers = result.prototype; // make a renderers object so you don't keep typing .prototype.whatever
+
+    // if we don't beget themes, the same instance would be shared between
+    // all themes. this would be bad: imagine that we have two themes:
+    // "Ace" and "Other." Each one has a "capsule" child theme. If they
+    // didn't have their own child themes hash, the two capsule themes
+    // would conflict.
+    result.themes = SC.beget(this.themes);
+
+    // we could put this in _extend_self, but we don't want to clone
+    // it for each and every argument passed to create().
+    result.classNames = SC.CoreSet.create(this.classNames);
+
+    var args = arguments, len = args.length, idx, mixin;
+    for (idx = 0; idx < len; idx++) {
+      this._extend_self(args[idx]);
+    }
+
+    if (result.name) result.classNames.add(result.name);
+
     return result;
   },
-  
+
   /**
-    Creates a light subtheme based on this theme with the specified class names. 
-    This basically is a shortcut for extending in certain simple cases.
-    
-    It automatically adds it to the parent theme (this).
+    Creates a subtheme based on this theme, with the given name,
+    and automatically registers it as a child theme.
   */
-  subtheme: function(name, classNames) {
+  subtheme: function(name) {
     // extend the theme
-    var t = this.extend({
-      classNames: SC.$A(classNames)
-    });
-    
+    var t = this.create({ name: name });
+
     // add to our set of themes
-    this.register(name, t);
-    
+    this.addTheme(t);
+
     // and return the theme class
     return t;
   },
-  
-  /* Theme management */
+
+  //
+  // THEME MANAGEMENT
+  //
+
   themes: {},
-  
+
   /**
-    Finds a theme by name.
+    Finds a theme by name within this theme (the theme must have
+    previously been added to this theme or a parent theme by using addTheme).
   */
   find: function(themeName) {
     var theme = this.themes[themeName];
     if (SC.none(theme)) return null;
     return theme;
   },
-  
+
   /**
-    Registers a theme with SproutCore, creating an instance of it.
+    Adds a child theme to the theme. This allows the theme to be located
+    by SproutCore views and such later.
+
+    Each theme is registered in the "themes" property by name. Calling
+    find(name) will return the theme with the given name.
+
+    Because the themes property is an object begetted from (based on) any
+    parent theme's "themes" property, if the theme cannot be found in this
+    theme, it will be found in any parent themes.
   */
-  register: function(themeName, theme) {
-    var t = theme.create();
-    this.themes[themeName] = t;
-    return t;
+  addTheme: function(theme) {
+    this.themes[theme.name] = theme;
+  },
+
+  /**
+    Adds a renderer to the theme. The renderer's name will be used to
+    keep track of it and identify it later.
+
+    The biggest responsibility of addRenderer is to ensure that renderer()
+    can be used to instantiate that renderer. If a renderer is not instantiated
+    through renderer(), it will not know its theme's classNames.
+  */
+  addRenderer: function(renderer) {
+    this[renderer.name] = renderer;
+  },
+
+   /**
+     Finds the named renderer and instantiates it, returning the result.
+     While instantiating, it sets the theme property and adds the theme's
+     class names. If this is ever a point for slowness in the future,
+     we will call .extend on the renderer and cache the class as a property
+     of the theme object; however, this process should be quite fast; it
+     would likely not even be the slow point if every list item in a list
+     were creating and destroying renderers as you scrolled.
+
+     Any arguments after the name are passed on to the instantiated
+     renderer.
+   */
+  renderer: function(name) {
+    var renderer = this[name];
+    var args = SC.$A(arguments);
+    args.shift();
+    if (renderer) {
+      renderer.create.apply(renderer, args);
+      renderer.theme = this;
+      renderer.classNames.addEach(this.classNames);
+    }
+    return null;
   }
+};
+
+// SproutCore _always_ has its base theme. This is not quite
+// optimal, but the reasoning is because of test running: the
+// test runner, when running foundation unit tests, cannot load
+// the theme. As such, foundation must include default versions of
+// all of its renderers, and it does so in BaseTheme. All SproutCore
+// controls have renderers in BaseTheme.
+SC.BaseTheme = SC.Theme.create({
+  name: "sc-base"
 });
 
-// SproutCore _always_ has its base theme (worst case scenario, eh?)
-SC.BaseTheme = SC.Theme.extend({
-  classNames: []
-});
+SC.Theme.addTheme(SC.BaseTheme);
 
-SC.Theme.register("sc-base", SC.BaseTheme);
