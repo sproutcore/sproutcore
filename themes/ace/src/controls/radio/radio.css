@@ -7,13 +7,17 @@
   position: relative;
   display:block;
   height:18px;
-  padding-left: 18px;
+  padding-left: 20px;
   margin-bottom:3px;
 }
 
+@view(sc-radio-view).sc-layout-horizontal .sc-radio-button {
+  display: inline-block;
+  -moz-display: inline-block;
+  margin-right: 14px;
+}
+
 @view(sc-radio-view) .sc-button-label {
-  position: absolute;
-  left: 20px;
   line-height: 18px;
 }
 
