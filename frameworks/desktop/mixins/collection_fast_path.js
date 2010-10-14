@@ -193,7 +193,7 @@ SC.CollectionFastPath = {
         scrollOnly = YES;
         // not sure what's causing this... it's either a view being pooled twice, something being put in curshowing without being mapped, or something being unmapped without being removed from curshowing
         // or if something was (un)mapped with the wrong contentIndex assigned
-        if(!this._indexMap[index]) debugger;
+        if(!this._indexMap[index]) throw "cannot pull null view";
         // need to use a seperate array to remove after iterating due to the way coreset handles removals
         pendingRemovals.push(this._indexMap[index]);
       }
@@ -252,14 +252,14 @@ SC.CollectionFastPath = {
   domPoolForExampleView: function(exampleView) {
     var pools = this._domPools || (this._domPools = {}), guid = SC.guidFor(exampleView),
     pool = pools[guid];
-    if(!exampleView) debugger;
+    if(!exampleView) "no exampleView to create from";
     if (!pool) pool = pools[guid] = SC._DoublyLinkedList.create();
     
     return pool;
   },
   
   sendToDOMPool: function(view, background) {
-    if(!view) debugger;
+    if(!view) "cannot pool null view";
     //console.log("sending to pool", view.contentIndex, background);
     var exampleView = view.createdFromExampleView,
     pool = this.domPoolForExampleView(exampleView),
@@ -360,7 +360,7 @@ SC.CollectionFastPath = {
     var index = view.contentIndex;
     
     // a view should never get mapped ontop of another view, you should always unmap then remap
-    if(this._indexMap[index] && this._indexMap[index] != view) debugger;
+    if(this._indexMap[index] && this._indexMap[index] != view) throw "index already mapped";
     
     this._indexMap[index] = view;
     
@@ -390,7 +390,7 @@ SC.CollectionFastPath = {
     var item = view.content,
     views = this._viewsForItem[SC.guidFor(item)];
 
-    if(!views) debugger;
+    if(!views) "no view to unmap";
 
     views.remove(view);
 
@@ -771,7 +771,7 @@ SC.CollectionFastPath = {
     pool = this.domPoolForExampleView(exampleView),
     view;
     
-    if(pool._lastRendered && !pool.head) debugger;
+    if(pool._lastRendered && !pool.head) throw "pool.lastRendered not cleared";
 
     // if the last rendered is the tail and is about to be reused, that means we're done
     if(pool.length >= this.domPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._SCCFP_prev)) {
