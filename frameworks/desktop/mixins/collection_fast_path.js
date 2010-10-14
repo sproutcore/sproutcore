@@ -475,11 +475,6 @@ SC.CollectionFastPath = {
     return attrs;
   },
   
-  /*  inlining this; keeping original around in case i need to change it
-  flushBindings: function() {
-    while(SC.Binding.flushPendingChanges());
-  },*/
-  
   // TODO: make sure the first part of the if never triggers outside of the indexMap check in renderFast
   updateView: function(view, attrs, force) {
     // if an attribute hash is provided to update to, use that as the target index
@@ -520,7 +515,7 @@ SC.CollectionFastPath = {
       this.configureItemView(view, attrs);
       
       // need to fire observers now or else they will trigger an extra run loop later
-      while(SC.Binding.flushPendingChanges());
+      SC.RunLoop.currentRunLoop.flushAllPending();
       this._ignore = NO;
       
       view.update();
@@ -543,7 +538,7 @@ SC.CollectionFastPath = {
     
     this.appendChild(view);
     
-    while(SC.Binding.flushPendingChanges());
+    SC.RunLoop.currentRunLoop.flushAllPending();
     this._ignore = NO;
     
     return view;
