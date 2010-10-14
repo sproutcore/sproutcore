@@ -30,7 +30,7 @@ SC.BaseTheme.renderers.Title = SC.Renderer.extend({
       if (icon.indexOf('/') >= 0) {
         image = '<img src="'+icon+'" alt="" class="icon" />';
       } else {
-        image = '<img src="'+blank+'" alt="" class="'+icon+'" />';
+        image = '<img src="'+blank+'" alt="" class="icon '+icon+'" />';
       }
       needsTitle = YES ;
     }
