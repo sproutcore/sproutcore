@@ -84,10 +84,19 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       console.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
+<<<<<<< HEAD
+    }
+
+    do {
+      didChange = this.flushApplicationQueues() ;
+      if (!didChange) didChange = this._flushinvokeLastQueue() ;
+    } while(didChange) ;
+=======
     } 
     
     this.flushAllPending();
     
+>>>>>>> seperated flush everything function out of endRunLoop so fastPath can use it to flush bindings correctly
     this._start = null ;
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
