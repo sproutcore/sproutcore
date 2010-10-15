@@ -1,12 +1,11 @@
-SC.AceTheme = SC.EmptyTheme.extend({
-  name: "Ace",
-  description: "Coolness.",
-  classNames: ["ace"]
+SC.AceTheme = SC.BaseTheme.create({
+  name: "ace",
+  description: "Coolness."
 });
 
-SC.Theme.register("sc-ace", SC.AceTheme);
+SC.Theme.addTheme(SC.AceTheme);
 
-SC.AceTheme.Dark = SC.AceTheme.subtheme("dark", "dark");
+SC.AceTheme.Dark = SC.AceTheme.subtheme("dark");
 
 // until SC build tools automatically do this:
-SC.Pane.prototype.baseTheme = "sc-ace";
+SC.Pane.prototype.baseTheme = "ace";
