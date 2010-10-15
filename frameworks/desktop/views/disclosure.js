@@ -38,29 +38,10 @@ SC.DisclosureView = SC.ButtonView.extend(
   
   /** @private */
   valueBindingDefault: SC.Binding.bool() ,
-  
-  createRenderer: function(theme) {
-    var ret = theme.disclosureControl();
-    this.updateRenderer(ret);
-    return ret;
-  },
-  
-  updateRenderer: function(renderer) {
-    renderer.attr({
-      icon: this.get('icon'),
-      isActive: this.get('isActive'),
-      isEnabled: this.get('isEnabled'),
-      isSelected: this.get('isSelected'),
-      needsEllipsis: this.get('needsEllipsis'),
-      state: this.value === this.get('toggleOnValue') ? YES : NO,
-      title: this.get('displayTitle')
-    });
-  },
-    
+
   /**
     Allows toggling of the value with the right and left arrow keys. 
     Extends the behavior inherted from SC.ButtonView.
-    
     @param evt
   */
   keyDown: function(evt) {

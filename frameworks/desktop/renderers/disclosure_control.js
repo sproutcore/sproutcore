@@ -5,99 +5,93 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+SC.BaseTheme.Disclosure = SC.BaseTheme.subtheme('disclosure');
+
 /** @class
+  While we could have disclosure control get its own renderer, this is pointless,
+  as all it really amounts to is a different way of rendering a button.
+
+  As such, while this will use 'disclosure' renderer to render the actual disclosure
+  triangle, the disclosure control renderer will be named "button" and be in a 
+  "disclosure" subtheme.
+
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-SC.BaseTheme.renderers.DisclosureControl = SC.Renderer.extend({
-  
-  classNames: {
-    'sc-disclosure-control': YES
-  },
-  
-  init: function(settings) {
-    this._disclosureRenderer = this.theme.disclosure();
-    this._titleRenderer = this.theme.title();
-    this.attr(settings);
-  },
-  
+SC.BaseTheme.Disclosure.Button = SC.Renderer.extend({
+  name: 'button',
+  classNames: 'sc-disclosure-control',
+
   render: function(context) {
     sc_super();
-    
+
     this.renderDisclosureRenderer(context);
     this.renderTitleRenderer(context);
   },
-  
-  update: function(context) {
-    sc_super();
-    
-    this.updateDisclosureRenderer();
-    this.updateTitleRenderer();
+
+  update: function(cq) {
+    this.updateClassNames(cq);
+    this.updateDisclosureRenderer(cq);
+    this.updateTitleRenderer(cq);
   },
-  
+
   renderTitleRenderer: function(context) {
+    this._titleRenderer = this.theme.renderer('title');
     this._titleRenderer.attr({
       title: this.title,
       icon: this.icon,
       needsEllipsis: this.needsEllipsis,
-      escapeHTML: this.escapeHTML
+      escapeHTML: this.escapeHTML,
+
+      size: this.size
     });
 
     context = context.begin("span").addClass("sc-button-label");
     this._titleRenderer.render(context);
     context = context.end();
   },
-  
-  updateTitleRenderer: function() {
+
+  updateTitleRenderer: function(cq) {
     this._titleRenderer.attr({
       title: this.title,
       icon: this.icon,
       needsEllipsis: this.needsEllipsis,
-      escapeHTML: this.escapeHTML
+      escapeHTML: this.escapeHTML,
+
+      size: this.size
     });
 
-    this._titleRenderer.update();
+    this._titleRenderer.update(cq.find('span.sc-button-label'));
   },
-  
+
   renderDisclosureRenderer: function(context) {
+    this._disclosureRenderer = this.theme.renderer('disclosure');
     this._disclosureRenderer.attr({
-      controlSize: this.controlSize,
-      isActive: this.isActive,
-      isEnabled: this.isEnabled,
-      isSelected: this.isSelected,
-      state: this.state
+      classNames: {
+        sel: this.classNames.contains('sel'),
+        active: this.classNames.contains('active')
+      },
+
+      size: this.size
     });
-    
+
     this._disclosureRenderer.render(context);
   },
-  
-  updateDisclosureRenderer: function() {
+
+  updateDisclosureRenderer: function(cq) {
     this._disclosureRenderer.attr({
-      controlSize: this.controlSize,
-      isActive: this.isActive,
-      isEnabled: this.isEnabled,
-      isSelected: this.isSelected,
-      state: this.state
+      classNames: {
+        sel: this.classNames.contains('sel'),
+        active: this.classNames.contains('active')
+      },
+
+      size: this.size
     });
-    
-    this._disclosureRenderer.update();
-  },
-  
-  focus: function() {
-    var elem = this.$()[0];
-    elem.focus();
-  },
-  
-  didAttachLayer: function(layer){
-    this._disclosureRenderer.attachLayer(layer);
-    this._titleRenderer.attachLayer(this.provide("span.sc-button-label"));
-  },
-  
-  willDetachLayer: function() {
-    this._disclosureRenderer.detachLayer();
-    this._titleRenderer.detachLayer();
+
+    this._disclosureRenderer.update(cq);
   }
-  
+
 });
 
-SC.BaseTheme.renderers.disclosureControl = SC.BaseTheme.renderers.DisclosureControl.create();
+SC.BaseTheme.Disclosure.addRenderer(SC.BaseTheme.Disclosure.Button);
+

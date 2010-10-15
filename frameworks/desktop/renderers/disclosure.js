@@ -9,74 +9,36 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-SC.BaseTheme.renderers.Disclosure = SC.Renderer.extend({
-  
+SC.BaseTheme.Disclosure = SC.Renderer.extend({
+  name: 'disclosure',
+
   classNames: {
     'sc-disclosure': YES
   },
-  
-  init: function(settings) {
-    this._controlRenderer = this.theme.control();
-    this.attr(settings);
-  },
-  
+
+  sizes: [
+    { name: SC.SMALL_CONTROL_SIZE, height: 14 },
+    { name: SC.REGULAR_CONTROL_SIZE, height: 16 }
+  ],
+
+
   render: function(context) {
     sc_super();
-    
-    this.renderControlRenderer(context);
-    
-    var state = this.state ? "open" : "closed";
-    context.push('<img src="' + SC.BLANK_IMAGE_URL + '" class="disclosure button ' + state + '" />');    
+
+    var state = this.classNames.contains('sel') ? "open" : "closed";
+    context.push('<img src="' + SC.BLANK_IMAGE_URL + '" class="disclosure button ' + state + '" />');
   },
-  
-  update: function(context) {
-    sc_super();
-    
-    this.updateControlRenderer();
-    
-    var state = this.state,
-        elem = this.$("img");
-    
+
+  update: function(query) {
+    this.updateClassNames(query);
+
+    var state = this.classNames.contains('sel') ? "open" : "closed",
+        elem = query.find("img");
+
     elem.setClass("open", state);
     elem.setClass("closed", !state);
     elem.setClass("active", this.isActive);
-  },
-  
-  renderControlRenderer: function(context) {
-    this._controlRenderer.attr({
-      controlSize: this.controlSize,
-      isActive: this.isActive,
-      isEnabled: this.isEnabled,
-      isSelected: this.isSelected
-    });
-    
-    this._controlRenderer.render(context);
-  },
-  
-  updateControlRenderer: function() {
-    this._controlRenderer.attr({
-      controlSize: this.controlSize,
-      isActive: this.isActive,
-      isEnabled: this.isEnabled,
-      isSelected: this.isSelected
-    });
-    
-    this._controlRenderer.update();
-  },
-  
-  focus: function() {
-    var elem = this.$()[0];
-    elem.focus();
-  },
-  
-  didAttachLayer: function(layer){
-    this._controlRenderer.attachLayer(layer);
-  },
-  
-  willDetachLayer: function() {
-    this._controlRenderer.detachLayer();
   }
-  
 });
 
-SC.BaseTheme.renderers.disclosure = SC.BaseTheme.renderers.Disclosure.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Disclosure);
