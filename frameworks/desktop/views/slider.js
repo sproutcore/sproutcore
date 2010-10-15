@@ -74,13 +74,14 @@ SC.SliderView = SC.View.extend(SC.Control,
   // INTERNAL PROPERTIES
   // 
   
-  displayProperties: 'value minimum maximum'.w(),
-  
-  createRenderer: function(t) {
-    return t.slider();
-  },
-  
-  updateRenderer: function(r) {
+  displayProperties: 'value minimum maximum step'.w(),
+
+  render: function(context, firstTime) {
+    var r = this._sliderRenderer;
+    if (firstTime) {
+      r = this._sliderRenderer = this.get('theme').renderer('slider');
+    }
+
     var min = this.get('minimum'),
         max = this.get('maximum'),
         value = this.get('value'),
@@ -101,6 +102,9 @@ SC.SliderView = SC.View.extend(SC.Control,
     r.attr({
       "value": value
     });
+
+    if (firstTime) r.render(context);
+    else r.update(context.$());
   },
   
   _isMouseDown: NO,
