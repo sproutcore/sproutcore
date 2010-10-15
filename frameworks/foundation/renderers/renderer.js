@@ -203,7 +203,7 @@ SC.Renderer = {
     len = current.length;
     for (idx = 0; idx < len; idx++) {
       cn[current[idx]] = YES;
-      last.add(cn[current[idx]]);
+      last.add(current[idx]);
     }
 
     if (size) {
