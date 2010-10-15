@@ -121,9 +121,10 @@ SC.TaskQueue = SC.Task.extend({
     if (Date.now() - last > this.get('minimumIdleDuration')) {
       SC.run(this.run, this);
       SC.RunLoop.lastRunLoopEnd = last; // we were never here
-    } else {
-      this._setupIdle();
     }
+    
+    // set up idle timer if needed
+    this._setupIdle();
   },
   
   /**
@@ -141,9 +142,6 @@ SC.TaskQueue = SC.Task.extend({
       // check if the limit has been exceeded
       if (Date.now() - start > limit) break;
     }
-    
-    // set up idle timer if needed
-    this._setupIdle();
     
     this.set("isRunning", NO);
   }

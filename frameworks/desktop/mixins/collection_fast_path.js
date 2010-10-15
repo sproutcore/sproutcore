@@ -1,20 +1,40 @@
 /** 
-  An experimental CollectionView mixin that makes it extremely fast under
-  certain circumstances, including for mobile devices.
+  A mixin for CollectionView that increases scrolling speed by implementing
+  several improvements to rendering speed:
   
-  Note: if you use this, override layoutForContentIndex to have fixed sizes for elements, otherwise resizing will be incredibly slow.
+  Most importantly, it leaves views in DOM after they have left the visible area so that if they are scrolled back to no work has to be donw. The number of views it leaves in DOM are customizable by changing DOMPoolSize. For simply itemViews this can be set to a fairly large value and the browser will take care of scrolling on its own.
+  
+  CollectionFastPath aggressively fills its DOM pool by using the backgroundTaskQueue to render extra views when the user is inactive, so that short scrolls are extremely responsive as long as they remain with the background rendered area.
+  
+  It also keeps track of which what item each view is currently representing, so that if items are duplicated views can be re-used without any rendering. This is most useful when the collection is connected to a sparse array and many items are still waiting to be filled in by the server. Instead of rendering a new view for each item, it simply re-uses views that have been mapped to undefined. It is also useful if the view can be changed between different subsets of data within the dataset.
+  
+  It keeps any view that has gone offscreen in a queue and attempts to re-use views from that pool because simple views can be updated much faster than they can be re-rendered.
+  
+  To compensate for the larger number of views onscreen, CollectionFastPath handles view updates so that only its chidren that are actually visible are allowed to re-render. Offscreen children must wait for time in the background queue.
+  
+  Despite all this work to increase rendering speed, if it is still unable to render fast enough it uses setTimeout to break up rendering passes so that the browser will remain responsive.
+  
+  For these features to work correctly on non ListViews, you must override getNextBackground and should also override getNextNowShowing or else views will be rendered in the wrong order.
+  
+  For maximum speed, there are a few other things you can do:
+  * inline css for item views
+  * override layoutForContentIndex to give all item views a fixed width (otherwise resizing will be slow)
 */
+// TODO: investigate having layoutForContentIndex return a cached object
 SC.CollectionFastPath = {
   //
   // ITEM VIEW CLASS/INSTANCE MANAGEMENT
   //
   initMixin: function() {
-    this._indexMap = [];
-    
-    // these are coresets because they need to be iterated a lot
+    // these are coresets because they are very easy to iterate
     this._curShowing = SC.CoreSet.create();
     this._shouldBeShowing = SC.CoreSet.create();
+    
+    this._indexMap = [];
+    // used for view to item map
     this._viewsForItem = {};
+    
+    // cached object for initializing views without creating a new object
     this._tempAttrs = {};
     
     // make the background task queue run more aggressively
@@ -22,6 +42,56 @@ SC.CollectionFastPath = {
     
     // make sure the background task queue only runs once  before setting another timer no matter what
     SC.backgroundTaskQueue.runLimit = -1;
+  },
+  
+  /**
+    @private
+    
+    Attemps to render a view for the given index as quickly as possible. It does the by being as lazy as possible.
+    
+    First, it checks if there is already a view for the given index. If there is it uses that view.
+    Then it checks if there is already a view rendered for that item that it can take. It is allowed to be taken if it is dirty and needs to be re-rendered anyway or if it is not visible.
+    It then checks if there is a pooled view of the same type as the desired view that it can re-use by just updating it.
+    Finally, if it couldn't do any of them it just renders a new view.
+    
+    After each check it attempts to update the view which may invalidate the view and cause it to fallback to the next step if, for example, the view type changed. 
+  */
+  renderFast: function(index) {
+    //console.log("rendering index " + index);
+    var view, exampleView, attrs;
+    
+    // if it already exists in the right place we might be able to use the existing view
+    if(view = this._indexMap[index]) {
+      this.unpool(view);
+      
+      // TODO: consider if the item backing this index has changed, skip to the next step
+      
+      view = this.updateView(view);
+    }
+    
+    if(!view) attrs = this.setAttributes(index, this._tempAttrs);
+    
+    // if a view has been rendered for the same item already, just take it and move it into its new position
+    while(!view && (view = this.pooledViewForItem(index))) {
+      this.unpool(view);
+      
+      view = this.updateView(view, attrs, YES);
+    }
+
+    // if a pooled view exists take it and update it to match its new content    
+    while(!view && (view = this.viewFromDOMPoolFor(index))) {
+      this.unpool(view);
+      // replace the view or force-update it since we know the content changed
+      view = this.updateView(view, attrs, YES);
+    }
+    
+    // otherwise it needs to be rendered from scratch
+    if(!view) view = this.renderItem(this.exampleViewForIndex(index), attrs);
+    
+    this.mapToItem(view);
+    this.mapToIndex(view);
+    
+    return view;
   },
   
   _SCCFP_contentRangeObserver: null,
@@ -53,6 +123,7 @@ SC.CollectionFastPath = {
     var content = this.get('content'), length = content ? content.get('length') : 0,
     oldLength = this.get('length'), indexMap = this._indexMap;
     
+    // if the content became shorter, send the extra views offscreen so they don't show up in bouncybounce
     if(length < oldLength) {
       var i, view;
       
@@ -63,6 +134,11 @@ SC.CollectionFastPath = {
     }
     
     indexMap.length = length;
+    
+    // update the layout of the collection view itself
+    var layout = this.computeLayout();
+    if (layout) this.adjust(layout);
+    this._SCCFP_oldLength = length;
     
     sc_super();
   },
@@ -75,6 +151,11 @@ SC.CollectionFastPath = {
     if (this.get('isVisibleInWindow')) this.invokeOnce(this.reloadIfNeeded);
   },
   
+  /**
+    Gives the passed indices a chance to update.
+    
+    @param {SC.IndexSet|Number} the index or indices to reload
+  */
   reload: function(indexes) {
     // just calling reload with no arg means reload EVERYTHING
     if(SC.none(indexes)) {
@@ -95,10 +176,10 @@ SC.CollectionFastPath = {
     return this ;
   },
 
-/**
-    Returns YES if the item at the index is a group.
-    
+  /**
     @private
+    
+    Returns YES if the item at the index is a group.
   */
   contentIndexIsGroup: function(index, contentObject) {
     var contentDelegate = this.get("contentDelegate");
@@ -116,8 +197,8 @@ SC.CollectionFastPath = {
   
   /**
     @private
-    Determines the example view for a content index. There are two optional parameters that will
-    speed things up: contentObject and isGroupView. If you don't supply them, they must be computed.
+    
+    Determines the example view for a content index. It simply uses the groupExampleView if the item is a group, or the exampleView otherwise.
   */
   exampleViewForIndex: function(index) {
     var del = this.get('contentDelegate'),
@@ -141,15 +222,25 @@ SC.CollectionFastPath = {
     return ExampleView;
   },
   
-  // copies nowShowing to a coreset and track the largest and smallest index in it
+  /**
+    @private
+    
+    Copies nowShowing to a CoreSet and tracks the largest and smallest index in it so the background renderer knows where to start.
+  */
   processNowShowing: function(index) {
-    if(index < this.minShowing) this.minShowing = index;
-    if(index > this.maxShowing) this.maxShowing = index;
+    if(index < this._minShowing) this._minShowing = index;
+    if(index > this._maxShowing) this._maxShowing = index;
     
     this._shouldBeShowing.add(index);
   },
   
+  /**
+    Item views should call this and pass a reference to themselves when they have detected that they need to re-render. This dirties the view and triggers a new rendering cycle.
+    
+    @param {SC.View} the view that wants an update
+  */
   wantsUpdate: function(view) {
+    // when we re-use a view we just ignore the update because we don't want to wait for the next runloop
     if(this._ignore) return;
     
     //console.log("wantsUpdate", view.contentIndex);
@@ -177,11 +268,16 @@ SC.CollectionFastPath = {
     if (!nowShowing || !nowShowing.isIndexSet) nowShowing = this.get('nowShowing');
     
     shouldBeShowing.clear();
-    this.maxShowing = 0;
-    this.minShowing = clen;
+    this._maxShowing = 0;
+    this._minShowing = clen;
   
     // we need to be able to iterate nowshowing more easily, so copy it into a coreset
     nowShowing.forEach(this.processNowShowing, this);
+    
+    // we reset these even on non-scrolling updates because data might have been loaded from the server and checking if views exist is cheap
+    // TODO: determine if we actually need to keep these values seperately
+    this._topBackground = this._maxShowing;
+    this._bottomBackground = this._minShowing;
     
     // find the indices that arent showing any more and pool them
     len = curShowing.length;
@@ -191,8 +287,6 @@ SC.CollectionFastPath = {
       // remove and send to the pool
       if(!shouldBeShowing.contains(index)) {
         scrollOnly = YES;
-        // not sure what's causing this... it's either a view being pooled twice, something being put in curshowing without being mapped, or something being unmapped without being removed from curshowing
-        // or if something was (un)mapped with the wrong contentIndex assigned
         if(!this._indexMap[index]) throw "cannot pull null view";
         // need to use a seperate array to remove after iterating due to the way coreset handles removals
         pendingRemovals.push(this._indexMap[index]);
@@ -213,19 +307,13 @@ SC.CollectionFastPath = {
     
     // scrolling updates
     
-    // reset the pointer into the list so background insertions go to the back correctly
-    if(scrollOnly) {
-      for(var pool in this._domPools) {
-        this._domPools[pool]._lastRendered = null;
-      }
-    }
     
     // do these no matter what
     
-    // we reset these even on non-scrolling updates because data might have been loaded from the server and checking if views exist is cheap
-    // TODO: determine if we actually need to keep these values seperately
-    this.topBackground = this.maxShowing;
-    this.bottomBackground = this.minShowing;
+    // reset the pointer into the list so background insertions go to the back correctly
+    for(var pool in this._domPools) {
+      this._domPools[pool]._lastRendered = null;
+    }
     
     // adds ourself to the incremental renderer and stops any background rendering
     this.incrementalRenderer.add(this);
@@ -233,27 +321,25 @@ SC.CollectionFastPath = {
     // add ourself to be background rendered; it won't actually start until it's ready
     this.backgroundRenderer.add(this);
     
-    // if the content length changed we need to relayout
-    // TODO: hook this into collectionview's _cv_contentDidChange
-    if(this._SCCFP_oldLength !== clen) {
-      var layout = this.computeLayout();
-      if (layout) this.adjust(layout);
-      this._SCCFP_oldLength = clen;
+    // if we aren't scrolling, just update the layout to make sure
+    if(!scrollOnly) {
+      this.contentLengthDidChange();
     }
   },
   
   // how many elements it will attempt to render at once (including the visible ones)
-  domPoolSize: 200,
+  DOMPoolSize: 200,
 
   /**
-  @private
+    @private
+    
     Returns the DOM pool for the given exampleView.
   */
   domPoolForExampleView: function(exampleView) {
     var pools = this._domPools || (this._domPools = {}), guid = SC.guidFor(exampleView),
     pool = pools[guid];
     if(!exampleView) "no exampleView to create from";
-    if (!pool) pool = pools[guid] = SC._DoublyLinkedList.create();
+    if (!pool) pool = pools[guid] = SC.CollectionFastPath._DoublyLinkedList.create();
     
     return pool;
   },
@@ -310,14 +396,6 @@ SC.CollectionFastPath = {
     
     return pool.tail();
   },
-  
-  /**
-    Tells ScrollView that this should receive live updates during touch scrolling.
-    We are so fast, aren't we?
-  */
-  _lastTopUpdate: 0,
-  _lastLeftUpdate: 0,
-  _tolerance: 100,
   
   /**
     The fast-path that computes a special 
@@ -411,7 +489,7 @@ SC.CollectionFastPath = {
         view = views[i];
         oldIndex = view.contentIndex;
         
-        // even if it should be showing, we can steal it if it's currently invalid
+        // even if it should be showing, we can steal it if it's currently dirty or offscreen
         if(!this._shouldBeShowing.contains(oldIndex) || view._SCCFP_dirty || SC.none(view.contentIndex)) {
           return view;
         }
@@ -420,16 +498,32 @@ SC.CollectionFastPath = {
     return null;
   },
   
-  // aplies a hash to a view
-  // TODO: consider combining this and setAttributes (i don't think we actually need an intermediate object)
+  /**
+    @private
+    
+    SetsIfChanged all the properties in attrs on to itemView.
+    Note: adjust creates an object no matter what, so there's not point in using it. It still may be worth checking if the layout actually changed.
+    
+    @param {SC.View} the view to configure
+    @param {Hash} the hash of properties to apply
+    @returns {SC.View}
+  */
   configureItemView: function(itemView, attrs) {
     itemView.beginPropertyChanges();
+    
     itemView.setIfChanged(attrs);
+    
     itemView.endPropertyChanges();
     
     return itemView;
   },
   
+  /**
+    Since we don't mess with our children's layerIds like CollectionView does, this simply looks up the view and returns its contentIndex propoerty.
+    
+    @param {String} the layerId to find the index for
+    @returns {Number}
+  */
   contentIndexForLayerId: function(id) {
     var view = SC.View.views[id];
     
@@ -438,14 +532,13 @@ SC.CollectionFastPath = {
   },
   
   /**
+    @private
+    
     This may seem somewhat awkward, but it is for memory performance: this fills in a hash
     YOU provide with the properties for the given content index.
     
     Properties include both the attributes given to the view and some CollectionView tracking
     properties, most importantly the exampleView.
-    
-    
-    @private
   */
   setAttributes: function(index, attrs) {
     var del = this.get('contentDelegate'),
@@ -493,7 +586,7 @@ SC.CollectionFastPath = {
       
     // if we are going to be keeping the view, make sure that it's updated
     // TODO: make sure these conditions are accurate
-    } else if(force || view._SCCFP_dirty || item !== view.content || oldIndex !== newIndex || SC.none(oldIndex)) {
+    } else if(force || view._SCCFP_dirty || item !== view.content || oldIndex !== newIndex) {
       // remapping is cheap so just do it no matter what
       this.unmapFromItem(view);
       
@@ -531,7 +624,15 @@ SC.CollectionFastPath = {
     
     return view;
   },
+  /**
+    @private
   
+    Creates a view with the given attributes.
+    
+    @param {Class} the class to instantiate the new view from
+    @param {Hash} property hash to create the view with
+    @returns {SC.View}
+  */
   renderItem: function(exampleView, attrs) {
     this._ignore = YES;
     var view = exampleView.create(attrs);
@@ -544,15 +645,20 @@ SC.CollectionFastPath = {
     return view;
   },
   
-  // create and configure a view (really slowly)
+  /**
+    @private
+    
+    Creates and configures a view. This function is much slower than renderFast, and as such is only used for background rendering.
+    It checks it a view is already rendered for the index but does none of the other checks that renderFast does.
+    
+    @param {Number} the view to render
+    @returns {SC.View}
+  */
   renderNew: function(index) {
     var view, attrs;
-    //var cname, aname;
     
     // if it already exists in the right place we might be able to use the existing view
     if(view = this._indexMap[index]) {
-      /*cname = view.content ? view.content.get('fullName') : "undefined";
-      console.log("found view already at index " + index + " (" + cname + ")");*/
       this.unpool(view);
       
       view = this.updateView(view);
@@ -560,9 +666,6 @@ SC.CollectionFastPath = {
     
     if(!view) {
       attrs = this.setAttributes(index, this._tempAttrs);
-      
-      /*aname = attrs.content ? attrs.content.get('fullName') : "undefined";
-      console.log("rendering new view for " + aname);*/
     
       view = this.renderItem(this.exampleViewForIndex(index), attrs);
     }
@@ -573,7 +676,14 @@ SC.CollectionFastPath = {
     return view;
   },
   
-  // removes the view from its pool if it was in one
+  /**
+    @private
+    
+    Removes the given view from any pools it is in. If it wasn't in a pool this does nothing.
+    
+    @param {SC.View} the view to remove from its pool
+    @returns {SC.View}
+  */
   // TODO: give this a pool argument for caching
   unpool: function(view) {
     var pool = this.domPoolForExampleView(view.createdFromExampleView);
@@ -585,60 +695,15 @@ SC.CollectionFastPath = {
     }
     
     pool.remove(view);
-  },
-  
-  renderFast: function(index) {
-    //console.log("rendering index " + index);
-    var view, exampleView, attrs;
-    //var cname, aname;
-    
-    // if it already exists in the right place we might be able to use the existing view
-    if(view = this._indexMap[index]) {
-      /*cname = view.content ? view.content.get('fullName') : "undefined";
-      console.log("found view already at index " + index + " (" + cname + ")");*/
-      this.unpool(view);
-      
-      // TODO: consider if the item backing this index has changed, skip to the next step
-      
-      view = this.updateView(view);
-    }
-    
-    if(!view) attrs = this.setAttributes(index, this._tempAttrs);
-    
-    // if a view has been rendered for the same item already, just take it and move it into its new position
-    while(!view && (view = this.pooledViewForItem(index))) {
-      /*cname = view.content ? view.content.get('fullName') : "undefined";
-      console.log("attempting to reuse view for " + cname);*/
-      this.unpool(view);
-      
-      view = this.updateView(view, attrs, YES);
-    }
-
-    // if a pooled view exists take it and update it to match its new content    
-    while(!view && (view = this.viewFromDOMPoolFor(index))) {
-      /*cname = view.content ? view.content.get('fullName') : "undefined";
-      aname = attrs.content ? attrs.content.get('fullName') : "undefined";
-      console.log("using pooled view " + cname + " for " + aname);*/
-      this.unpool(view);
-      // replace the view or force-update it since we know the content changed
-      view = this.updateView(view, attrs, YES);
-    }
-    
-    // otherwise it needs to be rendered from scratch
-    if(!view) {
-      /*aname = attrs.content ? attrs.content.get('fullName') : "undefined";
-      console.log("rendering new view for " + aname);*/
-      
-      view = this.renderItem(this.exampleViewForIndex(index), attrs);
-    }
-    
-    this.mapToItem(view);
-    this.mapToIndex(view);
     
     return view;
   },
   
-  // takes the fast path
+  /**
+    @private
+    
+    Renders a view that is visible to the user using the fastest method available.
+  */
   renderForeground: function(index) {
     var reloaded;
     if (this.willReload) this.willReload(reloaded = SC.IndexSet.create(index));
@@ -654,7 +719,12 @@ SC.CollectionFastPath = {
     return view;
   },
   
-  // attempts to fill the pool to the desired size before reverting to fast path
+  /**
+    @private
+    
+    Renders a view that the user cannot see. If the pool still has room, it creates a new view. Otherwise it also uses the fast path.
+    Regardless of how the view is rendered, it gets put into the pool for later re-use.
+  */
   renderBackground: function(index) {
     //console.log("rendering to background", index);
     var reloaded,
@@ -664,7 +734,7 @@ SC.CollectionFastPath = {
     if (this.willReload) this.willReload(reloaded = SC.IndexSet.create(index));
     
     // create a new view if the pool has room, otherwise just take the fast path
-    if(pool.length < this.domPoolSize) view = this.renderNew(index);
+    if(pool.length < this.DOMPoolSize) view = this.renderNew(index);
     else view = this.renderFast(index);
     
     this.sendToDOMPool(view, YES);
@@ -677,11 +747,22 @@ SC.CollectionFastPath = {
     return view;
   },
   
+  /**
+    Attempts to locate a view for the index as quickly as possible. Treats the view as a foreground view because even if it isn't in nowShowing, it will just get pooled next render cycle anyway.
+    
+    @param {Number} the index to get a view for
+    @returns {SC.View}
+  */
   itemViewForContentIndex: function(index) {
     return this.renderForeground(index);
   },
   
-  // returns the first index that should be now showing but isnt (yet)
+  /**
+    @private
+    
+    Returns the next index that is visible to the user that needs to be re-rendered.
+    This does not need to be overriden to work with a custom CollectionView, but if you override it to return items in the order they came on screen it will look better.
+  */
   getNextNowShowing: function() {
     var curShowing = this._curShowing,
     shouldBeShowing = this._shouldBeShowing,
@@ -695,6 +776,11 @@ SC.CollectionFastPath = {
     }
   },
   
+  /**
+    @private
+    
+    Renders the next view that is visible to the user, if there is one.
+  */
   renderNextNowShowing: function() {
     var index = this.getNextNowShowing();
     
@@ -703,25 +789,42 @@ SC.CollectionFastPath = {
     }
   },
   
+  /**
+    @private
+    
+    Marks the view at the given index as dirty.
+  */
   invalidate: function(index) {
     var view = this._indexMap[index];
     
     if(view) view._SCCFP_dirty = YES;
   },
   
+  /**
+    @private
+    
+    Marks the view at the given index as clean.
+  */
   validate: function(index) {
     var view = this._indexMap[index];
     
     if(view) view._SCCFP_dirty = NO;
   },
   
+  _topBackground: 0,
+  _bottomBackground: 0,
   _parity: YES,
-  
-  // if you have a collectionview that does something other than show items in order by index, override this
+  /**
+    @private
+    
+    Returns the next index that should be background rendered. By default it chooses indices in order of distance from nowShowing, alternating between going up and down.
+    Returns undefined when distance between top and bottom is DOMPoolSize.
+    Unlike getNextNowShowing, this should be overriden if your view lays out its children in a different order from SC.ListView (i.e. in order by index) or else views will not be background rendered in a useful way.
+  */
   getNextBackground: function() {
     var content = this.get('content'), clen = content.get('length'),
     indexMap = this._indexMap, view,
-    top = this.topBackground, bottom = this.bottomBackground, parity = this._parity, poolSize = this.domPoolSize, ret;
+    top = this._topBackground, bottom = this._bottomBackground, parity = this._parity, poolSize = this.DOMPoolSize, ret;
     
     while((top - bottom < poolSize - 1) && (top < clen - 1 || bottom > 0)) {
       // alternates between checking top and bottom
@@ -745,18 +848,19 @@ SC.CollectionFastPath = {
       }
     }
     
-    // save for next time (otherwise we will simply return values that haven't been loaded yet repeatedly until they load)
-    this.topBackground = top;
-    this.bottomBackground = bottom;
+    // save for next time (otherwise we will simply return values that haven't been loaded yet repeatedly until they load, which is inefficient)
+    this._topBackground = top;
+    this._bottomBackground = bottom;
     this._parity = parity;
     
     return ret;
   },
   
-  topBackground: 0,
-  
-  bottomBackground: 0,
-  
+  /**
+    @private
+    
+    Calls getNextBackground to get the next index to background render. If it is undefined or the dom pool is full, it returns undefined so the background renderer stops being called.
+  */
   renderNextBackground: function() {
     var index = this.getNextBackground();
     
@@ -766,10 +870,10 @@ SC.CollectionFastPath = {
     pool = this.domPoolForExampleView(exampleView),
     view;
     
-    if(pool._lastRendered && !pool.head) throw "pool.lastRendered not cleared";
+    if(pool._lastRendered && !pool.head) throw "New background render cycle started but last rendered view was not cleared";
 
     // if the last rendered is the tail and is about to be reused, that means we're done
-    if(pool.length >= this.domPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._SCCFP_prev)) {
+    if(pool.length >= this.DOMPoolSize && pool._lastRendered && (pool._lastRendered === pool.head._SCCFP_prev)) {
       pool._lastRendered = null;
       return;
     }
@@ -789,7 +893,6 @@ SC.CollectionFastPath = {
     return view;
   },
   
-  // need to increase runlimit on desktop
   // runs queued tasks as fast as possible, but gives up control between to let the browser do stuff
   incrementalRenderQueue: SC.TaskQueue.create({
     runWhenIdle: YES,
@@ -797,7 +900,7 @@ SC.CollectionFastPath = {
     // assume that touch devices have less performance and can only render one at a time no matter what
     runLimit: SC.platform.touch ? -1 : 10,
     
-    interval: 1,
+    interval: SC.platform.touch ? 50 : 1,
     
     // doesn't care when the last runloop was
     minimumIdleDuration: -1
@@ -912,7 +1015,7 @@ SC.CollectionFastPath = {
     
   }),
   
-  // these are probably dangerous to override, but generally your children don't actually need to know and notifying all <domPoolSize> of them is expensive
+  // these are probably dangerous to override, but generally your children don't actually need to know and notifying all <DOMPoolSize> of them is expensive
   // TODO: make these cheaper on the children instead of just not notifying them
   _viewFrameDidChange: function() {
     this.notifyPropertyChange('frame');
@@ -922,3 +1025,115 @@ SC.CollectionFastPath = {
     this._viewFrameDidChange();
   }
 };
+
+/**
+  Circular doubly linked list created for queue in CollectionFastPath. Not suitable for general use.
+  TODO: make generic
+ */
+SC.CollectionFastPath._DoublyLinkedList = SC.mixin({}, {
+  head: null,
+
+  length: 0,
+
+  create: function(item) {
+    var ret = SC.beget(this);
+  
+    if(item) ret.init(item);
+  
+    ret.enqueue = ret.unshift;
+    ret.dequeue = ret.pop;
+  
+    return ret;
+  },
+
+  insertBetween: function(item, prev, next) {
+    if(!next || !prev) throw "invalid insertion";
+    prev._SCCFP_next = item;
+    item._SCCFP_prev = prev;
+  
+    next._SCCFP_prev = item;
+    item._SCCFP_next = next;
+  
+    this.length++;
+    return item;
+  },
+
+  remove: function(item) {
+    var prev = item._SCCFP_prev,
+    next = item._SCCFP_next,
+    head = this.head;
+  
+    // if the item to be removed isn't actually in the a list, don't remove it
+    if(!(next && prev && head)) return;
+  
+    next._SCCFP_prev = prev;
+    prev._SCCFP_next = next;
+  
+    this.length--;
+  
+    if(item === head) {
+      if(head._SCCFP_next === head) {
+        this.head = null;
+      } else {
+        this.head = next;
+      }
+    }
+  
+  
+    item._SCCFP_next = null;
+    item._SCCFP_prev = null;
+  
+    return item;
+  },
+
+  init: function(item) {
+      this.head = item;
+      item._SCCFP_next = item;
+      item._SCCFP_prev = item;
+    
+      this.length++;
+      return this;
+  },
+
+  push: function(item) {
+    var head = this.head;
+  
+    if(head) {
+      this.insertBetween(item, head._SCCFP_prev, head);
+    } else {
+      this.init(item);
+    }
+  
+    return this;
+  },
+
+  pop: function() {
+    var head = this.head;
+  
+    if(head) return this.remove(head._SCCFP_prev);
+  },
+
+  unshift: function(item) {
+    var head = this.head;
+  
+    if(head) {
+      this.insertBetween(item, head._SCCFP_prev, head);
+      this.head = item;
+    
+    } else {
+      this.init(item);
+    }
+  
+    return this;
+  },
+
+  shift: function() {
+    return this.remove(this.head);
+  },
+
+  tail: function() {
+    var head = this.head;
+  
+    if(head) return head._SCCFP_prev;
+  }
+});
