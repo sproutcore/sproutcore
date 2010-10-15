@@ -288,20 +288,35 @@ SC.LabelView = SC.View.extend(SC.Control,
   displayProperties: 'displayValue textAlign fontWeight icon escapeHTML'.w(),
   
   _TEMPORARY_CLASS_HASH: {},
-  
-  createRenderer: function(t) {
-    return t.label();
-  },
-  
-  updateRenderer: function(r) {
-    r.attr({
-      "value": this.get("displayValue"),
-      "icon": this.get("icon"),
-      "hint": this.get("hint"),
-      "escapeHTML": this.get("escapeHTML"),
-      "isEditing": this.get("isEditing"),
-      "textAlign": this.get("textAlign"),
-      "fontWeight": this.get("fontWeight")
-    });
-  }  
+
+  render: function(context, firstTime) {
+    var size = this.get('size');
+
+    var settings = {
+      value: this.get('displayValue'),
+      icon: this.get('icon'),
+      hint: this.get('hint'),
+      escapeHTML: this.get('escapeHTML'),
+      textAlign: this.get('textAlign'),
+      fontWeight: this.get('fontWeight'),
+
+      classNames: {
+        active: this.get('isActive'),
+        disabled: !this.get('isEnabled'),
+        selected: !this.get('isSelected')
+      },
+
+      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
+    };
+
+    if (firstTime) {
+      this.labelRenderer = this.get('theme').renderer('label');
+      this.labelRenderer.attr(settings);
+      this.labelRenderer.render(context);
+    } else {
+      this.labelRenderer.attr(settings);
+      this.labelRenderer.update(context.$());
+    }
+
+  }
 });
