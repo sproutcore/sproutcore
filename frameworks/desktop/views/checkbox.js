@@ -34,24 +34,33 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     tags.
   */
   routeTouch: NO,
-  
-  createRenderer: function(t) {
-    return t.checkboxControl();
-  },
-  
-  updateRenderer: function(r) {
-    // get value; we're gonna need it.
-    var value = this.get('value');
-    
-    // set settings
-    r.attr({
-      title: this.get("displayTitle"),
-      name: SC.guidFor(this),
-      ariaValue: value === SC.MIXED_MODE ? 'mixed' : (value === this.get('toggleOnValue') ? 'true' : 'false'),
-      needsEllipsis: this.get('needsEllipsis'),
+
+  render: function(context, firstTime) {
+    if (firstTime) {
+      this._checkboxRenderer = this.get('theme').renderer('checkbox-control');
+    }
+
+    var size = this.get('controlSize');
+    this._checkboxRenderer.attr({
+      icon: this.get('icon'),
+      formFieldName: SC.guidFor(this),
+      title: this.get('displayTitle'),
       escapeHTML: this.get('escapeHTML'),
-      icon: this.get('icon')
+      needsEllipsis: this.get('needsEllipsis'),
+
+      classNames: {
+        'active': this.get('isActive'),
+        'sel': this.get('isSelected')
+      },
+
+      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
     });
+
+    if (firstTime) {
+      this._checkboxRenderer.render(context);
+    } else {
+      this._checkboxRenderer.update(context.$());
+    }
   },
   
   acceptsFirstResponder: function() {
@@ -77,13 +86,10 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     }
     var val = this.get('value');
     if (val === this.get('toggleOnValue')) {
-      this.renderer.attr('ariaValue', 'false');
-      this.renderer.update();
+
       this.set('value', this.get('toggleOffValue'));
     }
     else {
-      this.renderer.attr('ariaValue', 'true');
-      this.renderer.update();
       this.set('value', this.get('toggleOnValue'));
     }
     this.set('isActive', NO);
