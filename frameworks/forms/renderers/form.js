@@ -10,15 +10,20 @@
   @since Quilmes
 */
 
-SC.BaseTheme.renderers.Form = SC.Renderer.extend({
+SC.BaseTheme.Form = SC.Renderer.extend({
+  name: 'form',
+
   formFlowSpacing: { left: 5, top: 5, bottom: 5, right: 5 },
-  
+
   render: function(context) {
     if (this.contentProvider) this.contentProvider.renderContent(context);
   },
-  
+
   update: function() {
-    
+
   }
 });
-SC.BaseTheme.renderers.form = SC.BaseTheme.renderers.Form.create();
+
+SC.BaseTheme.FORM_FLOW_SPACING = { left: 5, top: 5, bottom: 5, right: 5 };
+SC.BaseTheme.addRenderer(SC.BaseTheme.Form);
+

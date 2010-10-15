@@ -17,18 +17,18 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 /** @scope Forms.FormRowView.prototype */ {
   flowSize: { widthPercentage: 1 },
 
-  rowFlowSpacing: SC.FROM_THEME,
+  rowFlowSpacing: undefined,
   rowFlowSpacingDefault: { right: 15, left: 0, top: 0, bottom: 0 },
   
-  rowFlowPadding: SC.FROM_THEME,
+  rowFlowPadding: undefined,
   rowFlowPaddingDefault: { right: 0, left: 0, top: 0, bottom: 0 },
   
   defaultFlowSpacing: function() {
-    return this.themed("rowFlowSpacing");
+    return this.getThemedProperty("rowFlowSpacing", 'FORM_ROW_FLOW_SPACING');
   }.property("rowFlowSpacing", "theme"),
   
   flowPadding: function() {
-    return this.themed("rowFlowPadding");
+    return this.getThemedProperty("rowFlowPadding", 'FORM_ROW_FLOW_PADDING');
   }.property("rowFlowPadding", "theme"),
   
   classNames: ["sc-form-row-view"],
@@ -156,9 +156,13 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   //
   // RENDERING
   //
-  createRenderer: function(t) { return t.formRow(); },
-  updateRenderer: function(r) {}
-  
+  render: function(context, firstTime) {
+    if (firstTime) {
+      this._formRowRenderer = this.get('theme').renderer('form-row');
+      this._formRowRenderer.attr('contentProvider', this);
+      this._formRowRenderer.render(context);
+    }
+  }
 });
 
 SC.FormRowView.mixin({

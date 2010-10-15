@@ -10,7 +10,8 @@
   @since Quilmes
 */
 
-SC.BaseTheme.renderers.FormRow = SC.Renderer.extend({
+SC.BaseTheme.FormRow = SC.Renderer.extend({
+  name: 'form-row',
   rowFlowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
   rowFlowPadding: { left: 0, right: 0 , bottom: 0, top: 0 },
   render: function(context) {
@@ -21,4 +22,8 @@ SC.BaseTheme.renderers.FormRow = SC.Renderer.extend({
     
   }
 });
-SC.BaseTheme.renderers.formRow = SC.BaseTheme.renderers.FormRow.create();
+
+SC.BaseTheme.FORM_ROW_FLOW_SPACING = { right: 15, left: 0, top: 0, bottom: 0 };
+SC.BaseTheme.FORM_ROW_FLOW_PADDING = { left: 0, right: 0, bottom: 0, top: 0 };
+
+SC.BaseTheme.addTheme(SC.BaseTheme.FormRow);

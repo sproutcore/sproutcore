@@ -51,12 +51,12 @@ require("views/form_row");
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_HORIZONTAL, canWrap: YES,
   
-  formFlowSpacing: SC.FROM_THEME,
+  formFlowSpacing: undefined,
   formFlowSpacingDefault: { left: 5, top: 5, bottom: 5, right: 5 },
   
   defaultFlowSpacing: function() {
-    return this.themed("formFlowSpacing");
-  }.property("formFlowSpacing", "theme"),
+    return this.getThemedProperty('formFlowSpacing', 'FORM_FLOW_SPACING');
+  }.property('formFlowSpacing', 'theme'),
   
   classNames: ["sc-form-view"],
 
@@ -231,8 +231,13 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   //
   // RENDERING
   //
-  createRenderer: function(t) { return t.form(); },
-  updateRenderer: function(r) {}
+  render: function(context, firstTime) {
+    if (firstTime) {
+      this._formRenderer = this.get('theme').renderer('form');
+      this._formRenderer.attr('contentProvider', this);
+      this._formRenderer.render(context);
+    }
+  }
 });
 
 SC.mixin(SC.FormView, {
