@@ -120,8 +120,6 @@ SC.TaskQueue = SC.Task.extend({
     if (Date.now() - last > this.get('minimumIdleDuration')) {
       SC.run(this.run, this);
       SC.RunLoop.lastRunLoopEnd = last; // we were never here
-    } else {
-      this._setupIdle();
     }
     
     // set up idle timer if needed
