@@ -21,7 +21,7 @@ var pane = SC.ControlTestPane.design()
   .add("image_loaded", SC.ImageView, {
     layout: {width: 200, height: 300}, 
     status: SC.IMAGE_STATE_LOADED,
-    useImageCache: NO,
+    useImageQueue: NO,
     value: appleURL
   })
   

@@ -131,12 +131,12 @@ SC.ImageView = SC.View.extend(SC.Control,
   useCanvas: NO,
   
   /**
-    If YES, image view will use the imageCache to control loading.  This 
+    If YES, image view will use the SC.imageQueue to control loading.  This 
     setting is generally preferred.
     
     @property {String}
   */
-  useImageCache: YES,
+  useImageQueue: YES,
   
   /**
     A url or CSS class name.
@@ -169,6 +169,10 @@ SC.ImageView = SC.View.extend(SC.Control,
     
     if (this.render !== SC.View.prototype.render) {
       this.render.base = this.__DEPRECATED__render;
+    }
+    
+    if (this.get('useImageCache') !== undefined) {
+      console.warn("%@ has useImageCache set, please set useImageQueue instead".fmt(this));
     }
   },
   
@@ -227,11 +231,11 @@ SC.ImageView = SC.View.extend(SC.Control,
         type = this.get('type');
     
     // now update local state as needed....
-    if (type === SC.IMAGE_TYPE_URL && this.get('useImageCache')) {
+    if (type === SC.IMAGE_TYPE_URL && this.get('useImageQueue')) {
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
       
       this._loadingUrl = value ; // note that we're loading...
-      SC.imageCache.loadImage(value, this, this.imageDidLoad, isBackground);
+      SC.imageQueue.loadImage(value, this, this.imageDidLoad, isBackground);
       
       // only mark us as loading if we are still loading...
       if (this._loadingUrl) this.set('status', SC.IMAGE_STATE_LOADING);
@@ -246,7 +250,7 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.observes('value'),
   
   /** 
-    Called when the imageCache indicates that the image has loaded. 
+    Called when the imageQueue indicates that the image has loaded. 
     Changing the image state will update the display.
   */
   imageDidLoad: function(url, imageOrError) {
