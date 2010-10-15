@@ -101,7 +101,6 @@ SC.TaskQueue = SC.Task.extend({
   */
   _setupIdle: function() {
     if (this.get('runWhenIdle') && !this._idleIsScheduled && this.get('taskCount') > 0) {
-      var self = this;
       setTimeout(this._doIdleEntry, 
         this.get('interval')
       );

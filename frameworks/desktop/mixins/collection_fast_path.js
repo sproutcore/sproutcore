@@ -94,8 +94,6 @@ SC.CollectionFastPath = {
   
   _SCCFP_contentRangeObserver: null,
   
-  _SCCFP_oldLength: 0,
-  
   _cv_contentDidChange: function() {
     if(this._SCCFP_contentRangeObserver) this._SCCFP_contentRangeObserver.destroy();
     
@@ -133,12 +131,11 @@ SC.CollectionFastPath = {
     
     indexMap.length = length;
     
+    this.set('length', length);
+    
     // update the layout of the collection view itself
     var layout = this.computeLayout();
     if (layout) this.adjust(layout);
-    this._SCCFP_oldLength = length;
-    
-    sc_super();
   },
   
   contentIndicesDidChange: function(array, objects, key, indexes, context) {
@@ -333,7 +330,7 @@ SC.CollectionFastPath = {
     // add ourself to be background rendered; it won't actually start until it's ready
     this.backgroundRenderTask.add(this);
     
-    // if we aren't scrolling, just update the layout to make sure
+    // if we aren't scrolling, update the layout just to make sure
     if(!scrollOnly) {
       this.contentLengthDidChange();
     }
