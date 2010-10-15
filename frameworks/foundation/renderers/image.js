@@ -5,47 +5,56 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require("renderers/renderer");
+
 /** @class
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-sc_require("renderers/renderer");
 SC.BaseTheme.renderers.Image = SC.Renderer.extend({
+
   render: function(context) {
-    var src = this.src, toolTip = this.toolTip || '', image = '';
+    var src = this.src,
+        sprite = this.sprite,
+        toolTip = this.toolTip || "";
     
-    if ((this.isSprite !== YES && src.indexOf('/') >= 0) || this.isSprite === NO) {
-      context.attr('src', src);
-      this._last_sprite_class = NO;
-    } else {
-      context.attr('src', SC.BLANK_IMAGE_URL);
-      context.addClass(src);
-      this._last_sprite_class = src;
+    context.attr('src', src);
+    
+    if (sprite) {
+      context.addClass(sprite);
+      this._last_class = sprite;
     }
     
     context.attr('title', toolTip);
     context.attr('alt', toolTip);
+    
+    this.resetChanges();
   },
   
   update: function() {
-    var cq = this.$();
+    var cq = this.$(),
+        src = this.src,
+        sprite = this.sprite,
+        toolTip = this.toolTip;
     
-    var src = this.src, toolTip = this.toolTip || '', image = '';
-    
-    if ((this.isSprite !== YES && src.indexOf('/') >= 0) || this.isSprite === NO) {
+    if (this.didChange('src')) {
       cq.attr('src', src);
-      this._last_sprite_class = NO;
-    } else {
-      if (this._last_sprite_class) cq.setClass(this._last_sprite_class, NO);
-      cq.attr('src', SC.BLANK_IMAGE_URL);
-      cq.setClass(src, YES);
-      this._last_sprite_class = src;
     }
     
-    cq.attr('title', toolTip);
-    cq.attr('alt', toolTip);
-
+    if (this.didChange('sprite')) {
+      if (this._last_class) cq.setClass(this._last_class, NO);
+      cq.addClass(sprite);
+      this._last_class = sprite;
+    }
+    
+    if (this.didChange('toolTip')) {
+      cq.attr('title', toolTip);
+      cq.attr('alt', toolTip);
+    }
+    
+    this.resetChanges();
   }
+
 });
 
 SC.BaseTheme.renderers.image = SC.BaseTheme.renderers.Image.create();
