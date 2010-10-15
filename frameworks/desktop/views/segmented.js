@@ -284,36 +284,39 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   // 
   
   displayProperties: ['displayItems', 'value', 'activeIndex'],
-  
-  createRenderer: function(theme) {
-    return theme.segmented();
-  },
-  
+
   updateRenderer: function(r) {
     var items = this.get('displayItems'), value = this.get('value'), isArray = SC.isArray(value),
         activeIndex = this.get("activeIndex"), item;
     for (var idx = 0, len = items.length; idx < len; idx++) {
       item = items[idx];
-      
-      // change active
-      if (activeIndex == idx) item.isActive = YES;
-      else item.isActive = NO;
-      
-      // chance selection
-      if (isArray ? value.indexOf(item.value) : value === item.value) {
-        item.isSelected = YES;
-      }
-      else item.isSelected = NO;
+      item.classNames = {
+        active: activeIndex === idx,
+        sel: isArray ? value.indexOf(item.value) : value === item.value
+      };
     }
-    
+
     // set the attributes
+    var size = this.get('controlSize');
     r.attr({
       segments: items,
       align: this.get('align'),
-      layoutDirection: this.get('layoutDirection')
+      layoutDirection: this.get('layoutDirection'),
+      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
     });
   },
-  
+
+  render: function(context, firstTime) {
+    var renderer = this._segmentedRenderer;
+    if (firstTime) {
+      renderer = this._segmentedRenderer = this.get('theme').renderer('segmented');
+    }
+
+    this.updateRenderer(renderer);
+    if (firstTime) renderer.render(context);
+    else renderer.update(context.$());
+  },
+
   // ..........................................................
   // EVENT HANDLING
   // 
@@ -323,7 +326,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
-    if (this.renderer) return this.renderer.indexForEvent(evt);
+    if (this._segmentedRenderer) {
+      return this._segmentedRenderer.indexForClientPosition(this.$(), evt.clientX, evt.clientY);
+    }
   },
   
   keyDown: function(evt) {
