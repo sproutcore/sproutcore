@@ -5,19 +5,12 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/** @class
-  @extends SC.Renderer
-  @since SproutCore 1.1
-*/
+/**
+  Border between the two panes of the MasterDetail.
 
-SC.BaseTheme.renderers.MasterDetail = SC.Renderer.extend({
-  BORDER: 1,
-  render: function(context) {
-    if (this.contentProvider) this.contentProvider.renderContent(context);
-  },
-  
-  update: function() {
-  }
-});
+  Note that the border does NOT include any space on the sides. Space
+  on left or right sides of MasterDetail, if any, should be handled by
+  its layout.
+ */
+SC.BaseTheme.MASTER_DETAIL_DIVIDER_WIDTH = 1;
 
-SC.BaseTheme.renderers.masterDetail = SC.BaseTheme.renderers.MasterDetail.create();
