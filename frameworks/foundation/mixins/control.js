@@ -15,20 +15,10 @@ sc_require('mixins/string');
 SC.MIXED_STATE = '__MIXED__' ;
 
 /**
-  Option for controls to automatically calculate their size (default on controls
-  converted to the newerer, betterer, renderer method).
-  
-  Note: if your control does not have a 'height' set, this will give a warning
-  that it impacts performance. If you want to damn the performance, full speed
-  ahead, use SC.CALCULATED_CONTROL_SIZE.
+  Option for controls to automatically calculate their size (should be default 
+  on controls that use renderers).
 */
 SC.AUTO_CONTROL_SIZE = '__AUTO__';
-
-/**
-  Option for controls to automatically calculate their size, even if the control
-  has no height specified.
-*/
-SC.CALCULATED_CONTROL_SIZE = '__CALCULATED__';
 
 /** 
   Option for HUGE control size.
