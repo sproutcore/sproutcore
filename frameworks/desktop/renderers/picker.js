@@ -10,41 +10,31 @@
   @since SproutCore 1.1
 */
 
-SC.BaseTheme.renderers.Picker = SC.Renderer.extend({
-  init: function(attr) {
-    this.attr(attr);
-    
-    this.panelRenderer = this.theme.panel();
-  },
+SC.BaseTheme.Picker = SC.Renderer.extend({
+  name: 'picker',
   render: function(context) {
+    this.panelRenderer = this.theme.renderer('panel');
     this.panelRenderer.attr("contentProvider", this.contentProvider);
     this.panelRenderer.render(context);
-    
+
     if (this.preferType == SC.PICKER_POINTER || this.preferType == SC.PICKER_MENU_POINTER) {
-      context.push('<div class="sc-pointer '+this.pointerPos+'" style="margin-top: '+this.pointerPosY+'px"></div>');
+      context.push('<div class="sc-pointer ' + this.pointerPos + '" style="margin-top: ' + this.pointerPosY + 'px"></div>');
       context.addClass(this.pointerPos);
     }
   },
-  
-  update: function() {
+
+  update: function(cq) {
     this.panelRenderer.attr("contentProvider", this.contentProvider);
-    this.panelRenderer.update();
-    
+    this.panelRenderer.update(cq);
+
     if (this.preferType == SC.PICKER_POINTER || this.preferType == SC.PICKER_MENU_POINTER) {
-      var el = this.$('.sc-pointer');
+      var el = cq.find('.sc-pointer');
       el.attr('class', "sc-pointer "+this.pointerPos);
       el.attr('style', "margin-top: "+this.pointerPosY+"px");
-      this.$().addClass(this.pointerPos);
+      cq.addClass(this.pointerPos);
     }
-  },
-  
-  didAttachLayer: function(l) {
-    this.panelRenderer.attachLayer(l);
-  },
-  
-  willDetachLayer: function() {
-    this.panelRenderer.detachLayer();
   }
 });
 
-SC.BaseTheme.renderers.picker = SC.BaseTheme.renderers.Picker.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Picker);
+

@@ -608,16 +608,22 @@ SC.PickerPane = SC.PalettePane.extend({
   
   displayProperties: ["pointerPosY"],
 
-  createRenderer: function(t) {
-    return t.picker();
-  },
-  
-  updateRenderer: function(r) {
-    r.attr({
-      preferType: this.preferType,
+  render: function(context, firstTime) {
+    var settings = { 
+      preferType: this.preferType, 
       pointerPos: this.pointerPos,
-      pointerPosY: this.pointerPosY
-    });
+      pointerPosY: this.pointerPosY,
+      contentProvider: this
+    };
+
+    if (firstTime) {
+      this._pickerRenderer = this.get('theme').renderer('picker');
+      this._pickerRenderer.attr(settings);
+      this._pickerRenderer.render(context);
+    } else {
+      this._pickerRenderer.attr(settings);
+      this._pickerRenderer.update(context.$());
+    }
   },
   
   /** @private - click away picker. */
