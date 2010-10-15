@@ -186,7 +186,7 @@ SC.ANIMATABLE_PROPERTIES = ["top", "left", "bottom", "right", "width", "height",
 SC.View = SC.Responder.extend(SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
   
-  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin createRendererMixin updateRendererMixin'.w(),
+  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
   
   /** 
     The current pane. 
@@ -339,78 +339,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // notify child views
     if (this._hasCreatedChildViews) this._notifyThemeDidChange();
     
-    // and now, regenerate renderer
-    this._generateRenderer();
   }.observes("theme"),
   
   /**
-    Like "get", but if the value is SC.FROM_THEME, it will find the value from the view's
-    renderer, if any; if none, then it will look for <property>Default and return that.
+    Like "get", but if the value is undefined, gets the value named by
+    themePropertyName from the theme.
   */
-  themed: function(property) {
+  getThemedProperty: function(property, themePropertyName) {
     var val = this.get(property);
-    if (val === SC.FROM_THEME) {
-      if (this.renderer) return this.renderer[property];
-      else return this.get(property + "Default");
+    if (val === undefined && this.get('theme')) {
+      val = this.get('theme')[themePropertyName];
     }
     return val;
   },
-  
-  /**
-    @private
-    Generates the view's renderer (calling _destroyRenderer on any old ones if needed).
-  */
-  _generateRenderer: function() {
-    var theme = this.get("theme"); // renderers need a theme
-    
-    // reset the renderer (the theme changed, hello!)
-    this._destroyRenderer();
-    
-    // now, if we do have a theme, we can try to create the renderer.
-    if (theme && theme.isTheme) {
-      this._viewRenderer = theme.view();
-      
-      if (this.createRenderer) {
-        this.renderer = this.createRenderer(theme);
 
-        // the renderer was not necessarily successfully created.
-        if (this.renderer) {
-          var mixins, idx, len;
-          this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
-          if (mixins = this.createRendererMixin) {
-            len = mixins.length;
-            for (idx = 0; idx < len; idx++) mixins[idx].call(this, theme);
-          }
-        }
-      }
-    }
-    
-    // update!
-    this._updateViewRenderer();
-    this._updateRenderer();
-  },
-  
-  /**
-    @private
-    Updates the view's renderer, if one exists, calling all mixins to renderer as well.
-  */
-  _updateRenderer: function() {
-    var mixins, idx, len;
-    if (this.renderer){
-      this.updateRenderer(this.renderer);
-      if (mixins = this.updateRendererMixin) {
-        len = mixins.length;
-        for (idx = 0; idx < len; idx++) mixins[idx].call(this, this.renderer);
-      }
-    }
-  },
-  
-  _destroyRenderer: function() {
-    if (!this.renderer) return;
-    this.renderer.destroy();
-    this.renderer = null;    
-  },
-  
   // ..........................................................
   // IS ENABLED SUPPORT
   // 
@@ -1085,33 +1027,22 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   updateLayer: function(optionalContext) {
-    var mixins, idx, len, renderer = this.renderer, viewRenderer = this._viewRenderer;
+    var mixins, idx, len;
 
-    
-    // make sure to update any renderers
-    this._updateRenderer();
-    
-    // Now, update using renderer if possible; render() otherwise
-    if (!this._useRenderFirst && this.createRenderer) {
-      this.updateViewSettings();
-      if (renderer) renderer.update();
-    } else {
-      var context = optionalContext || this.renderContext(this.get('layer')) ;
-      
-      this.renderViewSettings(context, NO);
-      this.render(context, NO) ;
-      
-      if (mixins = this.renderMixin) {
-        len = mixins.length;
-        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, NO) ;
-      }
-      
-      context.update() ;
-      if (context._innerHTMLReplaced) {
-        var pane = this.get('pane');
-        if(pane && pane.get('isPaneAttached')) {
-          this._notifyDidAppendToDocument();
-        }
+    var context = optionalContext || this.renderContext(this.get('layer')) ;
+    this._renderLayerSettings(context, NO);
+    this.render(context, NO) ;
+
+    if (mixins = this.renderMixin) {
+      len = mixins.length;
+      for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, NO) ;
+    }
+
+    context.update() ;
+    if (context._innerHTMLReplaced) {
+      var pane = this.get('pane');
+      if(pane && pane.get('isPaneAttached')) {
+        this._notifyDidAppendToDocument();
       }
     }
 
@@ -1169,10 +1100,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     invokes the same on all child views.
   */
   _notifyDidCreateLayer: function() {
-    // notify, not just the view, but also the view renderers
     this.notifyPropertyChange("layer");
-    this._viewRenderer.attachLayer(this);
-    if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
 
     // Animation prep
@@ -1238,16 +1166,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
       this._notifyWillDestroyLayer() ;
-      
-      if (this._viewRenderer) {
-        this._viewRenderer.detachLayer();
-      }
-      
-      // tell the renderer the layer has gone away
-      if (this.renderer) {
-        this.renderer.detachLayer();
-      }
-      
+
       // do final cleanup
       if (layer.parentNode) layer.parentNode.removeChild(layer) ;
       layer = null ;
@@ -1285,27 +1204,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     this.set('layer', null) ;
   },
-  
-  
-  isLayerProvider: YES,
-  /**
-    @private (semi)
-    Returns the layer. Meant only for use from renderers and such—this is a layer provider function.
-  */
-  getLayer: function() {
-    return this.get("layer");
-  },
-  
+
+
+
   /**
     @private
     
     Renders to a context.
     Rendering only happens for the initial rendering. Further updates happen in updateLayer,
     and are not done to contexts, but to layers.
-    
-    Both renderToContext and updateLayer will call render(context, firstTime) as needed
-    to maintain backwards compatibility, but prefer calling createRenderer.
-    
+
     Note: You should not generally override nor directly call this method. This method is only
     called by createLayer to set up the layer initially, and by renderChildViews, to write to
     a context.
@@ -1315,110 +1223,56 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   renderToContext: function(context, firstTime) {
     var mixins, idx, len;
-    
+
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
-    
-    this.renderViewSettings(context, YES);
-    
-    /* Now, the actual rendering, which will use a renderer if possible */
-    // the renderer will have been created when the theme was found; if it is around,
-    // we just need to ensure it is up-to-date
-    if (this.createRenderer) {
-      // our private version does mixins too! Yay!
-      this._updateRenderer();
+
+    this._renderLayerSettings(context, firstTime);
+
+    if (SC.none(firstTime)) firstTime = YES;
+
+    this.render(context, firstTime);
+    if (mixins = this.renderMixin) {
+      len = mixins.length;
+      for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
     }
-    
-    if (!this._useRenderFirst && this.createRenderer) {
-      if (this.renderer) this.renderer.render(context);
-    } else {
-      if (SC.none(firstTime)) firstTime = YES;
-      
-      this.render(context, firstTime);
-      if (mixins = this.renderMixin) {
-        len = mixins.length;
-        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
-      }
-    }
-    
+
     this.endPropertyChanges() ;
   },
-  
-  /**
-    @private
-    Updates the properties of the renderer used for the view
-  */
-  _updateViewRenderer: function() {
-    if (!this._viewRenderer) return;
-    
-    var classNames = this.get('classNames');
-    if (this.get('theme')) {
-      classNames = classNames.concat(this.get("theme").classNames);
-    }
-    
-    // for backwards compatibility, make sure we push the theme name if it is not there already. This
-    // is extremely questionable, but necessary at least for buttons. We maybe want to move this just
-    // to such at some point.
-    // TODO: consider
-    // SC2.0: this should go away.
-    if (this._themeName && classNames.indexOf(this._themeName) < 0) classNames.push(this._themeName);
-    
-    // get cursor:
-    var cursor = this.get("cursor");
-    if (!cursor && this.get('shouldInheritCursor')) {
-      // If this view has no cursor and should inherit it from the parent, 
-      // then it sets its own cursor view.  This sets the cursor rather than 
-      // simply using the parent's cursor object so that its cursorless 
-      // childViews can also inherit it.
-      cursor = this.getPath('parentView.cursor');
-    }
-    
-    
 
-    this._scv_willRenderAnimations();
+  _renderLayerSettings: function(context, firstTime) {
+    context.resetClassNames();
 
-    this._viewRenderer.attr({
-      layerId: this.layerId ? this.get('layerId') : SC.guidFor(this),
-      classNames: classNames,
-      backgroundColor: this.get('backgroundColor'),
-      role: this.get('ariaRole'),
-      cursor: cursor,
-      isTextSelectable: this.get('isTextSelectable'),
-      isEnabled: this.get('isEnabled'),
-      isVisible: this.get('isVisible'),
-      isFirstResponder: this.get('isFirstResponder'),
-      hasStaticLayout: this.get('useStaticLayout')
-    });
+    var theme = this.get('theme');
+    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
+
+    for (idx = 0; idx < len; idx++) {
+      context.addClass(themeClassNames[idx]);
+    }
+
+    context.addClass(this.get('classNames'));
+
+    var cursor = this.get('cursor');
+    if (cursor) context.addClass(cursor.get('className'));
+
+    if (this.get('isTextSelectable')) context.addClass('allow-select');
+    if (!this.get('isEnabled')) context.addClass('disabled');
+    if (!this.get('isVisible')) context.addClass('hidden');
+    if (this.get('isFirstResponder')) context.addClass('focus');
+    if (this.get('hasStaticLayout')) context.addClass('sc-static-layout');
+
+    context.id(this.get('layerId'));
+    context.attr('role', this.get('ariaRole'));
+
+    if (!this.get('isEnabled')) context.attr('aria-disabled', 'true');
+    if (this.get('backgroundColor')) {
+      context.css('backgroundColor', this.get('backgroundColor'));
+    }
+
+    this.renderLayout(context, firstTime);
   },
-  
-  /**
-    @private
-    Renders view settings (class names and id, for instance) to the context.
-    
-    firstTime is provided because we have a case in which renderViewSettings may be called when !firstTime,
-    so that we can set things on the context (because other things are going through the context,
-    due to the use of a render() function in the derived class that uses context).
-    
-    If !firstTime, we don't actually have to update layout (updateLayout handles it).
-  */
-  renderViewSettings: function(context, firstTime) {
-    if (SC.none(firstTime)) firstTime = YES;
-    
-    this._updateViewRenderer();
-    this._viewRenderer.render(context);
-    
-    if (firstTime) this.renderLayout(context, YES);
-  },
-  
-  /**
-    @private
-    Updates view settings on the context (including class names).
-  */
-  updateViewSettings: function() {
-    this._updateViewRenderer();
-    this._viewRenderer.update();
-  },
-  
+
+ 
   /**
   @private
   
@@ -1449,32 +1303,27 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     especially if this is the first time the view will be rendered.  This will
     walk down the childView chain, rendering all of the children in a nested
     way.
-    
-    If a context is provided, it is always assumed to be firstTime.
-    
-    @deprecated In SproutCore 1.1. Use renderContent and updateContent explicitly instead.
+
     @param {SC.RenderContext} context the context
     @param {Boolean} firstName true if the layer is being created
     @returns {SC.RenderContext} the render context
     @test in render and renderer
   */
   renderChildViews: function(context, firstTime) {
-    if (firstTime || context) {
-      // we pass along firstTime for compatibility. Some older (less wise) views may
-      // think it will work. Well, it wouldn't, but we'll make it work.
-      this.renderContent(context, firstTime);
-    } else {
-      this.updateContent(context);
-    }
+    this.renderContent(context, firstTime);
     return context;
   },
   
   /**
     @private
-    Views are content suppliers for renderers. That is, views pass themselves to renderers
-    for renderers' "content" properties. Content providers have two functions: renderContent and updateContent.
-    This is the first of those.
-    
+    Views that draw themselves using renderers still may have childViews. These
+    childViews—the view's "content"—need to get rendered, but this process needs
+    to be controlled by the renderer.
+
+    To handle this, SC.View is a "content provider", which means that it supplies
+    a "renderContent" method. The view then only needs to pass itself to its
+    renderer, and the renderer will call 'renderContent' to draw the child views.
+
     @param {SC.RenderContext} context
     @param {Boolean} firstTime For compatibility (do not use; if not first time, call updateContent).
   */
@@ -1488,26 +1337,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       context = context.end() ;
     }
   },
-  
-  /**
-    @private
-    Views are content suppliers for renderers. That is, views pass themselves to renderers
-    for renderers' "content" properties. Content providers have two functions: renderContent and updateContent.
-    This is the first of those.
-    
-    For old-style rendering, the render context created by the parent renderer is passed along
-    as well.
-  */
-  updateContent: function(optionalContext) {
-    var cv = this.get('childViews'), len = cv.length, idx, view ;
-    for (idx=0; idx<len; ++idx) {
-      view = cv[idx] ;
-      if (!view) continue;
-      
-      view.updateLayer(optionalContext);
-    }
-  },
-  
+
   /**
     Invoked whenever your view needs to be rendered, including when the view's
     layer is first created and any time in the future when it needs to be 
@@ -1519,7 +1349,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     You can use the passed firstTime property to determine whether or not 
     you need to completely re-render the view or only update the surrounding
-    HTML.  
+    HTML.
     
     The default implementation of this method simply calls renderChildViews()
     if this is the first time you are rendering, or null otherwise.
@@ -1529,16 +1359,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */   
   render: function(context, firstTime) {
-    var renderer = this.renderer;
-    if (this.createRenderer && renderer) {
-      if (firstTime) { 
-        renderer.render(context);
-      } else {
-        renderer.update();
-      }
-    } else {
-      if (firstTime) this.renderChildViews(context, firstTime);
-    }
+    if (firstTime) this.renderChildViews(context, firstTime);
   },
   
   
@@ -2003,24 +1824,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var theme = this.theme;
     this.theme = this._themeProperty;
     this.set("theme", theme);
-    
-    // find render path (to be removed in SC 2.0?)
-    var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
-    while (c && c.prototype.render) {
-      if (renderAge < 0 && c.prototype.render !== this.render) renderAge = currentAge;
-      if (rendererAge < 0 && c.prototype.createRenderer !== this.createRenderer) rendererAge = currentAge;
-      if (rendererAge >= 0 && renderAge >= 0) break;
-      currentAge = currentAge + 1;
-      c = c.superclass;
-    }
-    
-    // which one?
-    if (renderAge < rendererAge && renderAge >= 0) {
-      this._useRenderFirst = YES;
-    } else {
-      this._useRenderFirst = NO;
-    }
-    
+
     // register for event handling
     SC.View.views[this.get('layerId')] = this;
     
