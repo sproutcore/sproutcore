@@ -9,8 +9,8 @@
   @extends SC.Theme
   @since SproutCore 1.1
 */
-SC.EmptyTheme = SC.BaseTheme.extend({
-  classNames: ["sc-empty"]
+SC.EmptyTheme = SC.BaseTheme.create({
+  name: 'sc-empty'
 });
 
-SC.Theme.register("sc-empty", SC.EmptyTheme);
+SC.Theme.addTheme(SC.EmptyTheme);
