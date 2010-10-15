@@ -38,6 +38,23 @@
   the original theme that _has_ the renderers, give it its own name, and
   all renderers will render with that name as a class name.
 
+  Locating Child Themes
+  ----------------------------
+  Locating child themes is relatively simple for the most part: it looks in
+  its own "themes" property, which is an object inheriting from its parent's
+  "themes" set, so it includes all parent themes.
+
+  However, it does _not_ include global themes. This is because, when find()
+  is called, it wants to ensure any child theme is specialized. That is, the
+  child theme should include all class names of the base class theme. This only
+  makes sense if the theme really is a child theme of the theme or one of its
+  base classes; if the theme is a global theme, those class names should not
+  be included.
+
+  This makes sense logically as well, because when searching for a renderer,
+  it will locate it in any base theme that has it, but that doesn't mean
+  class names from the derived theme shouldn't be included.
+
   @extends SC.Object
   @since SproutCore 1.1
   @author Alex Iskander
@@ -116,19 +133,27 @@ SC.Theme = {
     // "Ace" and "Other." Each one has a "capsule" child theme. If they
     // didn't have their own child themes hash, the two capsule themes
     // would conflict.
-    result.themes = SC.beget(this.themes);
+    if (this.themes === SC.Theme.themes) {
+      result.themes = {};
+    } else {
+      result.themes = SC.beget(this.themes);
+    }
 
     // the theme also specializes all renderers it creates so that they
     // have the theme's classNames and have their 'theme' property set.
     this._specializedRenderers = {};
 
+    // also, the theme specializes all child themes as they are created
+    // to ensure that all of the class names on this theme are included.
+    this._specializedThemes = {};
+
     // we could put this in _extend_self, but we don't want to clone
     // it for each and every argument passed to create().
-    result.classNames = SC.CoreSet.create(this.classNames);
+    result.classNames = SC.clone(this.classNames);
 
     var args = arguments, len = args.length, idx, mixin;
     for (idx = 0; idx < len; idx++) {
-      this._extend_self(args[idx]);
+      result._extend_self(args[idx]);
     }
 
     if (result.name) result.classNames.add(result.name);
@@ -159,12 +184,31 @@ SC.Theme = {
 
   /**
     Finds a theme by name within this theme (the theme must have
-    previously been added to this theme or a parent theme by using addTheme).
+    previously been added to this theme or a base theme by using addTheme, or
+    been registered as a root theme).
+
+    If the theme found is not a root theme, this will specialize the theme so
+    that it includes all class names for this theme.
   */
   find: function(themeName) {
-    var theme = this.themes[themeName];
-    if (SC.none(theme)) return null;
-    return theme;
+    var theme;
+
+    // if there is a specialized version (the theme extended with our class names)
+    // return that one
+    theme = this._specializedThemes[themeName];
+    if (theme) return theme;
+
+    // otherwise, we may need to specialize one.
+    theme = this.themes[themeName];
+    if (theme && !this._specializedThemes[themeName]) {
+      return this._specializedThemes[themeName] = theme.create({ classNames: this.classNames });
+    }
+
+    // and finally, if it is a root theme, we do nothing to it.
+    theme = SC.Theme.themes[themeName];
+    if (theme) return theme;
+
+    return null;
   },
 
   /**
