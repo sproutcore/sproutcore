@@ -213,7 +213,12 @@ SC.SelectFieldView = SC.FieldView.extend(
   _objectsObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('objects'),
-   
+
+  _objectArrayObserver: function() {
+    this.set('cpDidChange', YES);
+    this.propertyDidChange('objects');
+  }.observes('*objects.[]'),
+    
   _nameKeyObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('nameKey'),
