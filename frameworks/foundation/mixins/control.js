@@ -368,17 +368,21 @@ SC.Control = {
     var sel = this.get('isSelected'), disabled = !this.get('isEnabled'),
     // update the CSS classes for the control.  note we reuse the same hash
     // to avoid consuming more memory
-        names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
+    names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
     names.mixed = sel === SC.MIXED_STATE;
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
     names.active = this.get('isActive') ;
-    
+
     var controlSize = this.get("controlSize");
-    if (controlSize === SC.AUTO_CONTROL_SIZE || controlSize === SC.CALCULATED_CONTROL_SIZE) {
-      controlSize = SC.REGULAR_CONTROL_SIZE;
+
+    if (firstTime) {
+      context.setClass(names);
+      if (controlSize !== SC.AUTO_CONTROL_SIZE) context.addClass(controlSize);
+    } else {
+      context.$().setClass(names);
+      if (controlSize !== SC.AUTO_CONTROL_SIZE) context.$().addClass(controlSize);
     }
-    context.setClass(names).addClass(controlSize);
-    
+
     // if the control implements the $input() helper, then fixup the input
     // tags
     if (!firstTime && this.$input) {
@@ -387,45 +391,6 @@ SC.Control = {
         this.$input().attr('disabled', disabled);
       }
     }
-  },
-  
-  updateRendererMixin: function(r) {
-    r.attr({
-      isSelected: this.get('isSelected'),
-      isEnabled: this.get('isEnabled'),
-      isActive: this.get('isActive')
-    });
-    
-    // we have to figure out if we are passing control size through, or our layout.
-    var controlSize = this.get('controlSize');
-    if (controlSize === SC.AUTO_CONTROL_SIZE || controlSize === SC.CALCULATED_CONTROL_SIZE) {
-      // get the layout
-      controlSize = this.get("layout");
-      
-      // determine if we have height
-      if (SC.none(controlSize.height)) {
-        // throw a performance warning
-        if (this.get("controlSize") !== SC.CALCULATED_CONTROL_SIZE) {
-          SC.Logger.warn(
-            "PERFORMANCE WARNING!!! When your control lacks a height, but is set to automatically " + 
-            "calculate what theme control size to use, it can impact performance. To hide this warning, " +
-            "set controlSize on this control to SC.CALCULATED_CONTROL_SIZE, or if you know the control size, " +
-            "set controlSize to the numeric or string control size."
-          );
-        }
-        
-        var frame = SC.clone(this.get("frame"));
-        if (frame) {
-          controlSize.width = frame.width;
-          controlSize.height = frame.height;
-        }
-      }
-      
-      // okay, we've preprocessed all we need.
-    }
-    
-    // set control size
-    r.attr('controlSize', controlSize);
   },
   
   /** @private
