@@ -10,7 +10,9 @@
   @since SproutCore 1.1
 */
 
-SC.BaseTheme.renderers.Panel = SC.Renderer.extend({
+SC.BaseTheme.Panel = SC.Renderer.extend({
+  name: 'panel',
+
   render: function(context) {
     if (this.contentProvider) this.contentProvider.renderContent(context);
     context.push(
@@ -31,4 +33,4 @@ SC.BaseTheme.renderers.Panel = SC.Renderer.extend({
   }
 });
 
-SC.BaseTheme.renderers.panel = SC.BaseTheme.renderers.Panel.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Panel);

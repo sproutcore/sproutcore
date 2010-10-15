@@ -65,13 +65,17 @@ SC.PanelPane = SC.Pane.extend({
   */
   contentView: null,
   contentViewBindingDefault: SC.Binding.single(),
-    
-  createRenderer: function() {
-    return this.get("theme").panel();
-  },
-  
-  updateRenderer: function() {
-    
+
+  render: function(context, firstTime) {
+    if (firstTime) {
+      this._panelRenderer = this.get('theme').renderer('panel');
+
+      // panel renders our own content inside of it somewhere, so
+      // we have to pass ourselves so it can do so.
+      this._panelRenderer.attr({ contentProvider: this });
+
+      this._panelRenderer.render(context);
+    }
   },
   
   replaceContent: function(newContent) {
