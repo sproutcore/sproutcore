@@ -4,7 +4,7 @@ SC.AceTheme.PointLeft = SC.AceTheme.subtheme("point-left", "point-left");
 SC.AceTheme.PointRight = SC.AceTheme.subtheme("point-right", "point-right");
 SC.AceTheme.PointRight = SC.AceTheme.subtheme("capsule", "capsule");
 
-SC.AceTheme.renderers.Button = SC.EmptyTheme.renderers.Button.extend({
+SC.AceTheme.Button = SC.BaseTheme.Button.extend({
   renderContents: function(context) {
     // render background slices
     context.push("<span class='button-left'></span>");
@@ -20,4 +20,4 @@ SC.AceTheme.renderers.Button = SC.EmptyTheme.renderers.Button.extend({
   }
 });
 
-SC.AceTheme.renderers.button = SC.AceTheme.renderers.Button.create();
+SC.AceTheme.addRenderer(SC.AceTheme.Button);

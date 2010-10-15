@@ -10,8 +10,11 @@
   @since SproutCore 1.1
 */
 
-SC.AceTheme.renderers.Slider = SC.BaseTheme.renderers.Slider.extend({
-  renderSlider: function(context) {
+SC.AceTheme.Slider = SC.BaseTheme.Slider.extend({
+  name: 'slider',
+
+  render: function(context) {
+    this.renderClassNames(context);
     var blankImage = SC.BLANK_IMAGE_URL;
     context.push(
       '<span class="sc-track">',
@@ -24,4 +27,4 @@ SC.AceTheme.renderers.Slider = SC.BaseTheme.renderers.Slider.extend({
   }
 });
 
-SC.AceTheme.renderers.slider = SC.AceTheme.renderers.Slider.create();
+SC.AceTheme.addRenderer(SC.AceTheme.Slider);
