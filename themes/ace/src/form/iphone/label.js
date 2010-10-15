@@ -9,24 +9,21 @@ require("src/form/iphone/iphone");
 
 if (SC.AceTheme.IphoneForm) {
 
-  SC.AceTheme.IphoneForm.renderers.Label = SC.EmptyTheme.renderers.Label.extend({
+  SC.AceTheme.IphoneForm.Label = SC.BaseTheme.Label.extend({
+    name: 'label',
+
     renderTitle: function(context) {
       context.push("<div class='inner'>");
       this.titleRenderer.render(context);
       context.push("</div>");
       context.css("font-weight", "");
     },
-  
-    updateTitle: function() {
-      this.titleRenderer.update();
-      this.$().css("font-weight", "");
-    },
-  
-    didAttachLayer: function(l) {
-      this.titleRenderer.attachLayer(this.provide(".inner"));
+
+    updateTitle: function(cq) {
+      this.titleRenderer.update(cq);
+      cq.css("font-weight", "");
     }
   });
 
-  SC.AceTheme.IphoneForm.renderers.label = SC.AceTheme.IphoneForm.renderers.Label.create();
-
+  SC.AceTheme.IphoneForm.addRenderer(SC.AceTheme.IphoneForm.Label);
 }

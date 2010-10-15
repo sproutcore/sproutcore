@@ -8,14 +8,4 @@
 require("src/form/iphone/iphone");
 
 if (SC.AceTheme.IphoneForm) {
-
-  /** @class
-    @extends SC.Renderer
-    @since Quilmes
-  */
-  SC.AceTheme.IphoneForm.renderers.Form = SC.EmptyTheme.renderers.Form.extend({
-    formFlowSpacing: { left: 10, right: 10, top: 0, bottom: 0 }
-  });
-  SC.AceTheme.IphoneForm.renderers.form = SC.AceTheme.IphoneForm.renderers.Form.create();
-
 }
