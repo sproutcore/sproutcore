@@ -247,24 +247,22 @@ SC.WorkspaceView = SC.View.extend({
   
   displayProperties: "hasTopToolbar hasBottomToolbar".w(),
   
-  /**
-    Wow, there is actually a reason to occasionally render the WorkspaceView itself!
-    How about that?
-    @private
-  */
-  createRenderer: function(t) {
-    return t.workspace();
-  },
-  
-  /**
-    We must update as well.
-    @private
-  */
-  updateRenderer: function(r) {
-    r.attr({
-      hasTopToolbar: !!this.get("topToolbar"),
-      hasBottomToolbar: !!this.get("bottomToolbar")
-    });
+  render: function(context, firstTime) {
+    var settings = {
+      classNames: {
+        'top-toolbar': this.get('hasTopToolbar'),
+        'bottom-toolbar': this.get('hasBottomToolbar')
+      },
+      contentProvider: this
+    };
+
+    if (firstTime) {
+      this._workspaceRenderer = this.get('theme').renderer('workspace');
+      this._workspaceRenderer.attr(settings);
+      this._workspaceRenderer.render(context);
+    } else {
+      this._workspaceRenderer.attr(settings);
+      this._workspaceRenderer.update(context.$());
+    }
   }
-  
 });

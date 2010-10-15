@@ -10,13 +10,17 @@
   @since SproutCore 1.1
 */
 
-SC.BaseTheme.renderers.Workspace = SC.Renderer.extend({
+SC.BaseTheme.Workspace = SC.Renderer.extend({
+  name: 'workspace',
   render: function(context) {
+    this.renderClassNames(context);
     if (this.contentProvider) this.contentProvider.renderContent(context);
   },
   
-  update: function() {
+  update: function(cq) {
+    this.updateClassNames(cq);
   }
 });
 
-SC.BaseTheme.renderers.workspace = SC.BaseTheme.renderers.Workspace.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Workspace);
+
