@@ -1,5 +1,7 @@
-SC.AceTheme.Popover = SC.AceTheme.Dark.subtheme("popover", "popover");
-SC.AceTheme.register("popover", SC.AceTheme.Popover);
+SC.AceTheme.Popover = SC.AceTheme.Dark.subtheme("popover");
+SC.AceTheme.addTheme(SC.AceTheme.Popover);
 
-SC.AceTheme.SolidPopover = SC.AceTheme.Popover.subtheme("solid", "solid");
-SC.AceTheme.register("solid-popover", SC.AceTheme.SolidPopover);
+SC.AceTheme.SolidPopover = SC.AceTheme.Popover.subtheme('solid');
+
+// give popover/solid an alias of solid-popover
+SC.AceTheme.addTheme(SC.AceTheme.SolidPopover.create({ name: 'solid-popover' }));

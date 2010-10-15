@@ -15,18 +15,10 @@ require("src/panels/picker/popover/popover");
 
 var theme = SC.AceTheme.Popover;
 
-SC.AceTheme.Popover.renderers.Workspace = SC.EmptyTheme.renderers.Workspace.extend({
-  computeClassNames: function() {
-    var cn = this._TMP_CLASS_NAMES || {};
-    cn["top-toolbar"] = this.hasTopToolbar;
-    cn["bottom-toolbar"] = this.hasBottomToolbar;
-    this._TMP_CLASS_NAMES = cn;
-    return cn;
-  },
-  
+SC.AceTheme.Popover.Workspace = SC.BaseTheme.Workspace.extend({
+  name: 'workspace',
+
   render: function(context) {
-    context.setClass(this.computeClassNames());
-    
     context.push("<div class='sc-workspace-overlay'>",
       "<div class='middle'></div>",
       "<div class='top-left-edge'></div>",
@@ -39,13 +31,13 @@ SC.AceTheme.Popover.renderers.Workspace = SC.EmptyTheme.renderers.Workspace.exte
       "<div class='left-edge'></div>",
       "<div class='sc-pointer'></div>",
     "</div>");
-    
+
     if (this.contentProvider) this.contentProvider.renderContent(context);
   },
-  
-  update: function() {
-    this.$().setClass(this.computeClassNames());
+
+  update: function(cq) {
+    this.updateClassNames();
   }
 });
 
-SC.AceTheme.Popover.renderers.workspace = SC.AceTheme.Popover.renderers.Workspace.create();
+SC.AceTheme.Popover.addRenderer(SC.AceTheme.Popover.Workspace);
