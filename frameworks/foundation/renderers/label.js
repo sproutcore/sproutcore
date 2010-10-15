@@ -10,22 +10,15 @@
   @since Quilmes
 */
 sc_require("renderers/renderer");
-SC.BaseTheme.renderers.Label = SC.Renderer.extend({
+SC.BaseTheme.Label = SC.Renderer.extend({
+  name: 'label',
+
   init: function(attrs) {
-    this.titleRenderer = this.theme.title();
-    this.controlRenderer = this.theme.control();
+    this.titleRenderer = this.theme.Title.create();
     this.attr(attrs);
   },
-  
-  updateControlRenderer: function() {
-    this.controlRenderer.attr({
-      isEnabled: this.isEnabled,
-      isActive: this.isActive,
-      isSelected: this.isSelected,
-      controlSize: this.controlSize
-    });
-  },
-  
+
+
   updateTitleRenderer: function() {
     var text = this.value,
         hint = this.hint,
@@ -42,25 +35,24 @@ SC.BaseTheme.renderers.Label = SC.Renderer.extend({
   },
   
   render: function(context) {
+    sc_super();
     this.updateTitleRenderer();
-    this.updateControlRenderer();
+    // this.updateControlRenderer();
+
     context.addStyle({
       'textAlign': this.textAlign,
       'fontWeight': this.fontWeight,
-      'opacity': this.isEditing ? 0 : 1
+      'opacity': this.classNames.contains('editing') ? 0 : 1
     });
     context.setClass("icon", !!this.icon);
-    this.renderTitle(context);
-    this.controlRenderer.render(context);
-  },
-  
-  renderTitle: function(context) {
+
     this.titleRenderer.render(context);
   },
   
-  update: function() {
-    var cq = this.$();
-    this.updateTitleRenderer();
+  update: function(cq) {
+    this.updateClassNames(cq);
+
+    this.updateTitleRenderer(cq);
     if (this.didChange('text-align')) {
       cq.css('text-align', this.textAlign);
     }
@@ -74,23 +66,12 @@ SC.BaseTheme.renderers.Label = SC.Renderer.extend({
       cq.setClass("icon", !!this.icon);
     }
     this.resetChanges();
-    this.updateTitle();
-    this.controlRenderer.update();
   },
   
-  updateTitle: function() {
-    this.titleRenderer.update();
-  },
-  
-  didAttachLayer: function(l) {
-    this.titleRenderer.attachLayer(l);
-    this.controlRenderer.attachLayer(l);
-  },
-  
-  didDetachLayer: function() {
-    this.titleRenderer.detachLayer();
-    this.controlRenderer.detachLayer();
+  updateTitle: function(cq) {
+    this.titleRenderer.update(cq);
   }
 });
 
-SC.BaseTheme.renderers.label = SC.BaseTheme.renderers.Label.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Label);
+

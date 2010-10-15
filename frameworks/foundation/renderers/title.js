@@ -11,19 +11,22 @@
 */
 
 sc_require("renderers/renderer");
-SC.BaseTheme.renderers.Title = SC.Renderer.extend({
+SC.BaseTheme.Title = SC.Renderer.extend({
+  name: 'title',
+
   render: function(context) {
     var icon = this.icon,
         image = '',
         title = this.title,
         hint = this.hint,
         needsTitle = (!SC.none(title) && title.length>0), imgTitle;
+
     if(this.escapeHTML) title = SC.RenderContext.escapeHTML(title) ;
-        
+
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
-    
+
     if (icon) {
       var blank = SC.BLANK_IMAGE_URL;
 
@@ -34,26 +37,26 @@ SC.BaseTheme.renderers.Title = SC.Renderer.extend({
       }
       needsTitle = YES ;
     }
-    
+
     if (hint && (!title || title === '')) {
       if (this.escapeHTML) hint = SC.RenderContext.escapeHTML(hint);
       title = "<span class='sc-hint'>" + hint + "</span>";
     }
-    
+
     imgTitle = image + title;
-    
+
     // handle ellipsis
     if(this.needsEllipsis){
       context.addClass('ellipsis');
     }
-    
+
     // push title.
     context.push(imgTitle);
-    
+
     this._ImageTitleCached = imgTitle;
   },
-  
-  update: function() {
+
+  update: function(elem) {
     var icon = this.icon,
         image = '' ,
         title = this.title ,
@@ -61,7 +64,7 @@ SC.BaseTheme.renderers.Title = SC.Renderer.extend({
         needsTitle = (!SC.none(title) && title.length>0), imgTitle,
         elem, htmlNode;
     if(this.escapeHTML) title = SC.RenderContext.escapeHTML(title);
-    
+
     if (icon) {
       var blank = SC.BLANK_IMAGE_URL;
 
@@ -80,7 +83,6 @@ SC.BaseTheme.renderers.Title = SC.Renderer.extend({
     
     imgTitle = image + title;
     
-    elem = this.$();  
     if ( (htmlNode = elem[0])){
       if(needsTitle) { 
         if(this.needsEllipsis){
@@ -105,4 +107,5 @@ SC.BaseTheme.renderers.Title = SC.Renderer.extend({
   }
 });
 
-SC.BaseTheme.renderers.title = SC.BaseTheme.renderers.Title.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Title);
+
