@@ -225,25 +225,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   /** @private - save keyEquivalent for later use */
   init: function() {
-    // figure out if we have to do deprecated API
-    // Note: We do this before sc_super, because SC.View has to determine whether we are using render() first or not.
-    if (this.renderTitle !== SC.Button.renderTitle || this.render !== SC.View.prototype.render) {
-      // @if(debug)
-      if (this.renderTitle !== SC.Button.renderTitle && !SC.ButtonView.hasGivenDeprecationWarning) {
-        console.warn("Use of renderTitle by ButtonViews has been deprecated. Use renderers instead.");
-        SC.ButtonView.hasGivenDeprecationWarning = YES;
-      }
-      // @end
-      
-      if (this.render === SC.View.prototype.render) {
-        this.render = this._DEPRECATED_render;
-      } else if (this.render.base === SC.View.prototype.render) {
-        this.render.base = this._DEPRECATED_render;
-      }
-    }
-
     sc_super();
-  
     
     //cache the key equivalent
     if(this.get("keyEquivalent")) this._defaultKeyEquivalent = this.get("keyEquivalent"); 
@@ -262,108 +244,41 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     * This might be a future way to start implementing the render method
     as part of the theme
   */ 
-  
-  renderStyle: 'renderDefault', //SUPPORTED DEFAULT, IMAGE
-  
-  /**
-    Creates the button view's renderer.
-  */
-  createRenderer: function(theme) {
-    var ret, style = this.get('renderStyle');
-    if (style==="renderDefault") ret = theme.button();
-    if (style==="renderImage") ret = theme.imageButton();
-    this.updateRenderer(ret); // updating looks _exactly_ like normal stuff for us.
-    return ret;
-  },
-  
-  updateRenderer: function(r) {
+  render: function(context, firstTime) {
     var toolTip = this.get("toolTip");
     if (toolTip && this.get("localize")) toolTip = toolTip.loc();
-    
-    r.attr({
-      toolTip: toolTip,
-      isAnchor: this.get("tagName") === 'a',
-      href: this.get("href"),
-      isDefault: this.get('isDefault'),
-      isCancel: this.get('isCancel'),
-      icon: this.get('icon'),
-      supportFocusRing: this.get("supportFocusRing"),
-      titleMinWidth: this.get('titleMinWidth'),
-      
-      title: this.get("displayTitle"),
-      escapeHTML: this.get("escapeHTML"),
-      needsEllipsis: this.get("needsEllipsis")
-    });
-  },
-  
-  _DEPRECATED_render: function(context, firstTime) {
-    // add href attr if tagName is anchor...
-    var href, toolTip, classes, theme;
-    if (this.get('tagName') === 'a') {
-      href = this.get('href');
-      if (!href || (href.length === 0)) href = "javascript:;";
-      context.attr('href', href);
+
+    if (firstTime) {
+      this.buttonRenderer = this.get('theme').renderer('button');
     }
 
-    // If there is a toolTip set, grab it and localize if necessary.
-    toolTip = this.get('toolTip') ;
-    if (SC.typeOf(toolTip) === SC.T_STRING) {
-      if (this.get('localize')) toolTip = toolTip.loc() ;
-      context.attr('title', toolTip) ;
-      context.attr('alt', toolTip) ;
-    }
-    
-    // add some standard attributes & classes.
-    classes = this._TEMPORARY_CLASS_HASH;
-    classes.def = this.get('isDefault');
-    classes.cancel = this.get('isCancel');
-    classes.icon = !!this.get('icon');
-    context.attr('role', 'button').setClass(classes);
-    theme = this.get('theme');
-    if (theme && !context.hasClass(theme)) context.addClass(theme);
-    
-    // render inner html 
-    this[this.get('renderStyle')](context, firstTime);
+    var size = this.get('controlSize');
+    this.buttonRenderer.attr({
+      toolTip: toolTip,
+      isAnchor: this.get('tagName') === 'a',
+      href: this.get('href'),
+      icon: this.get('icon'),
+      supportFocusRing: this.get('supportFocusRing'),
+      titleMinWidth: this.get('titleMinWidth'),
+
+      title: this.get('displayTitle'),
+      escapeHTML: this.get('escapeHTML'),
+      needsEllipsis: this.get('needsEllipsis'),
+
+      classNames: {
+        'active': this.get('isActive'),
+        'def': this.get('isDefault'),
+        'cancel': this.get('isCancel'),
+        'sel': this.get('isSelected')
+      },
+
+      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
+    });
+
+    if (firstTime) this.buttonRenderer.render(context);
+    else this.buttonRenderer.update(context.$());
   },
-   
-   
-  /**
-    Render the button with the default render style.
-  */
-  renderDefault: function(context, firstTime){
-    if(firstTime) {
-      context = context.push("<span class='sc-button-inner' style = 'min-width:"
-        ,this.get('titleMinWidth'),
-        "px'>");
-    
-      this.renderTitle(context, firstTime) ; // from button mixin
-      context.push("</span>") ;
-    
-      if(this.get('supportFocusRing')) {
-        context.push('<div class="focus-ring">',
-                      '<div class="focus-left"></div>',
-                      '<div class="focus-middle"></div>',
-                      '<div class="focus-right"></div></div>');
-      }
-    }
-    else {
-      this.renderTitle(context, firstTime) ;
-    }
-  },
-  
-  /**
-    Render the button with the image render style. To set image 
-    set the icon property with the classname that has the style with the image
-  */
-  renderImage: function(context, firstTime){
-    var icon = this.get('icon');
-    context.addClass('no-min-width');
-    if(icon) context.push("<div class='img "+icon+"'></div>");
-    else context.push("<div class='img'></div>");
-  },
-  
-  
-  
+
   /** @private {String} used to store a previously defined key equiv */
   _defaultKeyEquivalent: null,
   
@@ -406,7 +321,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        if (this.renderer && this.renderer.focus) this.renderer.focus();
+        this.get('layer').focus();
       }
     }
 
@@ -441,7 +356,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     this._isMouseDown = false;
 
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      var inside = this.renderer.causedEvent(evt) ;
+      var inside = this.$().within(evt.target);
       if (inside && this.get('isEnabled')) this._action(evt) ;
     }
 
@@ -622,7 +537,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        if (this.renderer && this.renderer.focus) this.renderer.focus();
+        this.$().focus();
       }
     }
   },

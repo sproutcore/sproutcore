@@ -9,42 +9,29 @@
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-SC.BaseTheme.renderers.Button = SC.Renderer.extend({
-  controlSizeArray: [18, 24, 30, 44], // pre-create for performance (purely optional optimization)
-  controlSizes: {
-    18: SC.SMALL_CONTROL_SIZE,
-    24: SC.REGULAR_CONTROL_SIZE,
-    30: SC.HUGE_CONTROL_SIZE,
-    44: SC.JUMBO_CONTROL_SIZE
-  },
-  
-  init: function(settings) {
-    this._controlRenderer = this.theme.control({
-      controlSizes: this.controlSizes,
-      controlSizeArray: this.controlSizeArray // purely optional optimization
-    });
-    
-    this._titleRenderer = this.theme.title();
-    this.attr(settings);
-  },
+SC.BaseTheme.Button = SC.Renderer.extend({
+  name: 'button',
+
+  sizes: [
+    { 'height': 18, 'name': SC.SMALL_CONTROL_SIZE },
+    { 'height': 24, 'name': SC.REGULAR_CONTROL_SIZE },
+    { 'height': 30, 'name': SC.HUGE_CONTROL_SIZE },
+    { 'height': 44, 'name': SC.JUMBO_CONTROL_SIZE }
+  ],
+
   render: function(context) {
+    sc_super();
+
+    this._titleRenderer = this.theme.renderer('title');
+
     // configure sub renderers
-    this._controlRenderer.attr({
-      isEnabled: this.isEnabled,
-      isActive: this.isActive,
-      isSelected: this.isSelected,
-      controlSize: this.controlSize
-    });
     this._titleRenderer.attr({
       title: this.title,
       icon: this.icon,
       needsEllipsis: this.needsEllipsis,
       escapeHTML: this.escapeHTML
     });
-    
-    // render control renderer
-    this._controlRenderer.render(context);
-    
+
     /* Render OUR stuff */
     // add href attr if tagName is anchor...
     var href, toolTip, classes, theme;
@@ -62,11 +49,7 @@ SC.BaseTheme.renderers.Button = SC.Renderer.extend({
     }
     
     // add some standard attributes & classes.
-    classes = this._TEMPORARY_CLASS_HASH ? this._TEMPORARY_CLASS_HASH : this._TEMPORARY_CLASS_HASH = {};
-    classes.def = this.isDefault;
-    classes.cancel = this.isCancel;
-    classes.icon = !!this.icon;
-    context.setClass(classes);
+    context.setClass('icon', !!this.icon);
 
     theme = this.oldButtonTheme;
     if (theme) context.addClass(theme);
@@ -94,54 +77,28 @@ SC.BaseTheme.renderers.Button = SC.Renderer.extend({
     }
   },
   
-  update: function() {
-    this._controlRenderer.attr({
-      isEnabled: this.isEnabled,
-      isActive: this.isActive,
-      isSelected: this.isSelected,
-      controlSize: this.controlSize
-    });
+  update: function(query) {
+    this.updateClassNames(query);
+
     this._titleRenderer.attr({
       title: this.title,
       icon: this.icon,
       needsEllipsis: this.needsEllipsis,
       escapeHTML: this.escapeHTML
     });
-    
+
     // do actual updating
-    this._controlRenderer.update();    
-    var classes, theme, q = this.$();
-    
-    classes = this._TEMPORARY_CLASS_HASH ? this._TEMPORARY_CLASS_HASH : this._TEMPORARY_CLASS_HASH = {};
-    classes.def = this.isDefault;
-    classes.cancel = this.isCancel;
-    classes.icon = !!this.icon;
-    
-    q.setClass(classes);
-    
-    
+    //this._controlRenderer.update();    
+    query.setClass('icon', !!this.icon);
+
     // update title
-    this.updateContents();
+    this.updateContents(query);
   },
   
-  updateContents: function() {
-    this._titleRenderer.update();
-  },
-  
-  focus: function() {
-    var elem = this.$()[0];
-    elem.focus();
-  },
-  
-  didAttachLayer: function(layer){
-    this._titleRenderer.attachLayer(this.provide("label"));
-    this._controlRenderer.attachLayer(layer);
-  },
-  
-  willDetachLayer: function() {
-    this._titleRenderer.detachLayer();
-    this._controlRenderer.detachLayer();
+  updateContents: function(query) {
+    this._titleRenderer.update(query.find('.sc-button-label'));
   }
+
 });
 
-SC.BaseTheme.renderers.button = SC.BaseTheme.renderers.Button.create();
+SC.BaseTheme.addRenderer(SC.BaseTheme.Button);
