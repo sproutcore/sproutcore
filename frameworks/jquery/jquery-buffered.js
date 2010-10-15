@@ -21,6 +21,7 @@ jQuery._isBuffering = 0;
 jQuery.bufferedJQuery.prototype.init = function(selector, context) {
   jQuery._isBuffering++;
   var ret = jQuery.fn.init.call(this, selector, context);
+  ret.isBuffered = true;
   jQuery._isBuffering--;
   return ret;
 };
@@ -55,7 +56,7 @@ jQuery.fn.extend({
 jQuery.fn._jqb_originalFind = jQuery.fn.find;
 jQuery.fn.find = function(selector) {
   // if we are not currently buffering, don't bother with this crap.
-  if (jQuery._isBuffering <= 0) return jQuery.fn._jqb_originalFind.call(this, selector);
+  if (jQuery._isBuffering <= 0 && !this.isBuffered) return jQuery.fn._jqb_originalFind.call(this, selector);
   
 	var ret = jQuery.buffer(), length = 0;
 
@@ -83,7 +84,10 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
   
   html: function(value) {
     // if there is no value, we don't handle it.
-    if (value === undefined) return jQuery.fn.html.apply(this, arguments);
+    if (value === undefined) {
+      if (this.length < 1) return undefined;
+      return jQuery.Buffer.bufferForElement(this[i]).html();
+    }
     
     // there is a vlaue. We are going to do it like jquery, but different.
     // in this, we inline "buffers" above
@@ -96,8 +100,11 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
   },
   
   text: function(value) {
-    if (value === undefined) return jQuery.fn.text.apply(this, arguments);
-    
+    if (value === undefined) {
+      if (this.length < 1) return undefined;
+      return jQuery.Buffer.bufferForElement(this[i]).text();
+    }
+
     // there is a vlaue. We are going to do it like jquery, but different.
     // in this, we inline "buffers" above
     var len = this.length, i;
@@ -110,7 +117,11 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
   
   attr: function(key, value) {
     // first, handle the get-case
-    if (typeof value === "undefined" && typeof key === "string") return jQuery.fn.html.apply(this, arguments);
+    if (typeof value === "undefined" && typeof key === "string") {
+      if (this.length < 1) return false;
+      var buffer = jQuery.Buffer.bufferForElement(this[0]);
+      return buffer.attr(key);
+    }
     
     // now, buffer the command.
     var len = this.length, i;
@@ -119,6 +130,11 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
       buffer.attr(key, value);
     }
     return this;
+  },
+
+  hasClass: function(className) {
+    if (this.length < 1) return false;
+    return jQuery.Buffer.bufferForElement(this[0]).hasClass(className);
   },
   
   setClass: function(value, on) {

@@ -127,19 +127,23 @@ jQuery.Buffer = (function() {
   */
   Buffer.prototype.html = function(value) {
     var context = this.bufferedCommand("flushContent");
+    if (value === undefined) return context.text || context.html || this.$().html();
+
     context.text = undefined;
     context.html = value;
   };
   
   Buffer.prototype.text = function(value) {
     var context = this.bufferedCommand("flushContent");
+    if (value === undefined) return context.text || context.html || this.$().text();
+
     context.text = value;
     context.html = undefined;
   };
   
   Buffer.prototype.flushContent = function(context) {
     if (context.text !== undefined) this.$().text(context.text);
-    else this.$().html(context.html);
+    else if (context.html !== undefined) this.$().html(context.html);
   };
   
   
@@ -156,7 +160,8 @@ jQuery.Buffer = (function() {
     
     // now, if it is a special key, handle it specially.
     if (key === "class") {
-      return this.setClass(value);
+      // note: setClass will return the value if "value" is undefined.
+      return this.setClass(value).join(' ');
     } else if (key === "html") {
       return this.html(value);
     } else if (key === "text") {
@@ -186,7 +191,16 @@ jQuery.Buffer = (function() {
   
   Buffer.prototype.setClass = function(value, on) {
     var context = this.bufferedCommand("flushClassNames");
-    
+
+    // if there is no value, that means we are trying to actually _get_ the class names.
+    if (value === undefined) {
+      if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
+
+      var classNames = context.classNames, v = [];
+      for (var key in classNames) if (classNames[key]) v.push(key);
+      return v;
+    }
+
     // if on is defined
     if (on !== undefined) {
       if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
@@ -211,6 +225,12 @@ jQuery.Buffer = (function() {
         context.classNames[key] = value[key];
       }
     }
+  };
+
+  Buffer.prototype.hasClass = function(className) {
+    var context = this.bufferedCommand("flushClassNames");
+    if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
+    return !!context.classNames[className];
   };
   
   Buffer.prototype.addClass = function(value) {
