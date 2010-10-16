@@ -18,10 +18,8 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   flowSize: { widthPercentage: 1 },
 
   rowFlowSpacing: undefined,
-  rowFlowSpacingDefault: { right: 15, left: 0, top: 0, bottom: 0 },
   
   rowFlowPadding: undefined,
-  rowFlowPaddingDefault: { right: 0, left: 0, top: 0, bottom: 0 },
   
   defaultFlowSpacing: function() {
     return this.getThemedProperty("rowFlowSpacing", 'FORM_ROW_FLOW_SPACING');
@@ -151,18 +149,8 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
     this.get("labelView").adjust({
       "width": this.get("rowLabelSize")
     });
-  }.observes("rowLabelSize"),
-  
-  //
-  // RENDERING
-  //
-  render: function(context, firstTime) {
-    if (firstTime) {
-      this._formRowRenderer = this.get('theme').renderer('form-row');
-      this._formRowRenderer.attr('contentProvider', this);
-      this._formRowRenderer.render(context);
-    }
-  }
+  }.observes("rowLabelSize")
+
 });
 
 SC.FormRowView.mixin({

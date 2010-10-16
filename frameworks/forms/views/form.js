@@ -49,7 +49,8 @@ require("mixins/emptiness");
 require("mixins/edit_mode");
 require("views/form_row");
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
-  layoutDirection: SC.LAYOUT_HORIZONTAL, canWrap: YES,
+  layoutDirection: SC.LAYOUT_HORIZONTAL,
+  canWrap: YES,
   
   formFlowSpacing: undefined,
   formFlowSpacingDefault: { left: 5, top: 5, bottom: 5, right: 5 },
@@ -225,19 +226,9 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   */
   rowLabelMeasuredSizeDidChange: function(row, labelSize) {
     this.invokeOnce("recalculateLabelWidth");
-  },
-  
-  
-  //
-  // RENDERING
-  //
-  render: function(context, firstTime) {
-    if (firstTime) {
-      this._formRenderer = this.get('theme').renderer('form');
-      this._formRenderer.attr('contentProvider', this);
-      this._formRenderer.render(context);
-    }
   }
+
+
 });
 
 SC.mixin(SC.FormView, {
