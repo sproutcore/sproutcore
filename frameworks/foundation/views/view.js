@@ -1227,10 +1227,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
 
-    this._renderLayerSettings(context, firstTime);
-
     if (SC.none(firstTime)) firstTime = YES;
-
+    this._renderLayerSettings(context, firstTime);
     this.render(context, firstTime);
     if (mixins = this.renderMixin) {
       len = mixins.length;
@@ -1259,7 +1257,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!this.get('isEnabled')) context.addClass('disabled');
     if (!this.get('isVisible')) context.addClass('hidden');
     if (this.get('isFirstResponder')) context.addClass('focus');
-    if (this.get('hasStaticLayout')) context.addClass('sc-static-layout');
+    if (this.get('useStaticLayout')) context.addClass('sc-static-layout');
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
