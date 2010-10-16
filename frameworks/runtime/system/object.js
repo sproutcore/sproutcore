@@ -782,6 +782,7 @@ function findClassNames() {
   SC._object_foundObjectClassNames = true ;
 
   var seen = [] ;
+  var detectedSC = false;
   var searchObject = function(root, object, levels) {
     levels-- ;
 
@@ -792,7 +793,12 @@ function findClassNames() {
     for(var key in object) {
       if (key == '__scope__') continue ;
       if (key == 'superclass') continue ;
+      if (key == '__SC__') key = 'SC' ;
       if (!key.match(/^[A-Z0-9]/)) continue ;
+      if (key == 'SC') {
+        if (detectedSC) continue;
+        detectedSC = true;
+      }
 
       var path = (root) ? [root,key].join('.') : key ;
       var value = object[key] ;
@@ -818,29 +824,18 @@ function findClassNames() {
     }
   } ;
 
+  // Fix for IE 7 and 8 in order to detect the SC global variable. When you create
+  // a global variable in IE, it is not added to the window object like in other
+  // browsers. Therefore the searchObject method will not pick it up. So we have to
+  // update the window object to have a reference to the global variable. And
+  // doing window['SC'] does not work since the global variable already exists. For
+  // any object that you create that is used act as a namespace, be sure to create it
+  // like so:
+  //
+  //   window.MyApp = window.MyApp || SC.Object.create({ ... })
+  //
+  window['__SC__'] = SC;
   searchObject(null, window, 2) ;
-
-  // Internet Explorer doesn't loop over global variables...
-  /*if ( SC.browser.isIE ) {
-    searchObject('SC', SC, 2) ; // get names for the SC classes
-
-    // get names for the model classes, including nested namespaces (untested)
-    for ( var i = 0; i < SC.Server.servers.length; i++ ) {
-      var server = SC.Server.servers[i];
-      if (server.prefix) {
-        for (var prefixLoc = 0; prefixLoc < server.prefix.length; prefixLoc++) {
-          var prefixParts = server.prefix[prefixLoc].split('.');
-          var namespace = window;
-          var namespaceName;
-          for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
-            namespace = namespace[prefixParts[prefixPartsLoc]] ;
-            namespaceName = prefixParts[prefixPartsLoc];
-          }
-          searchObject(namespaceName, namespace, 2) ;
-        }
-      }
-    }
-  }*/
 }
 
 /**  
@@ -875,7 +870,7 @@ SC.kindOf = function(scObject, scClass) {
   This method is used to allow classes to determine their own name.
 */
 SC._object_className = function(obj) {
-  if (!SC.isReady) return ''; // class names are not available until ready
+  if (SC.isReady === NO) return ''; // class names are not available until ready
   if (!obj._object_className) findClassNames() ;
   if (obj._object_className) return obj._object_className ;
 

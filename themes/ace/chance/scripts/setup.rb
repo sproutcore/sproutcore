@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------------
 # Setup Script for Chance theme generator
 # Copyright: ©2009-2010 Joshua Holt.
-# License:   Licened under MIT license
+# License:   Licensed under MIT license
 #----------------------------------------------------------------------------
 
 require 'optparse'

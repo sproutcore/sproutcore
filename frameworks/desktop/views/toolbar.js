@@ -43,7 +43,13 @@ SC.ToolbarView = SC.View.extend(
       this.layout = SC.merge(this.layout, this.anchorLocation);
     }
     sc_super(); 
-  }
+  },
+  
+  createRenderer: function(theme) {
+    return theme.toolbar();
+  },
+  
+  updateRenderer: function(renderer) {}
 
 });
 

@@ -122,7 +122,9 @@ SC.SelectFieldView = SC.FieldView.extend(
       var objects = this.get('objects') ;
       var fieldValue = this.get('value') ;
       var el, selectElement;
-    
+
+      if ( !this.get('isEnabled') ) context.attr('disabled','disabled');
+        
       // get the localization flag.
       var shouldLocalize = this.get('localize'); 
    
@@ -208,12 +210,17 @@ SC.SelectFieldView = SC.FieldView.extend(
     }
   },
   
-  displayProperties: ['objects','nameKey','valueKey'],
+  displayProperties: ['objects','nameKey','valueKey','isEnabled'],
 
   _objectsObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('objects'),
-   
+
+  _objectArrayObserver: function() {
+    this.set('cpDidChange', YES);
+    this.propertyDidChange('objects');
+  }.observes('*objects.[]'),
+    
   _nameKeyObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('nameKey'),
