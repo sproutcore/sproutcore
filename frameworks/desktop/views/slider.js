@@ -211,7 +211,7 @@ SC.SliderView = SC.View.extend(SC.Control,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        if (this.renderer) this.renderer.focus();
+        this.$().focus();
       }
     }
   },
