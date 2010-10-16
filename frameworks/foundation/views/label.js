@@ -303,7 +303,7 @@ SC.LabelView = SC.View.extend(SC.Control,
       classNames: {
         active: this.get('isActive'),
         disabled: !this.get('isEnabled'),
-        selected: !this.get('isSelected')
+        selected: this.get('isSelected')
       },
 
       size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
