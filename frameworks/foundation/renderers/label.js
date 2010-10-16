@@ -35,9 +35,8 @@ SC.BaseTheme.Label = SC.Renderer.extend({
   },
   
   render: function(context) {
-    sc_super();
+    this.renderClassNames(context);
     this.updateTitleRenderer();
-    // this.updateControlRenderer();
 
     context.addStyle({
       'textAlign': this.textAlign,
