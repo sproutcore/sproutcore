@@ -71,7 +71,19 @@ SC.FlowedLayout = {
     Padding around the edges of this flow layout view.
   */
   flowPadding: { left: 0, bottom: 0, right: 0, top: 0 },
-  
+
+  /**
+    If the flowPadding somehow misses a property (one of the sides),
+    we need to make sure a default value of 0 is still there.
+   */
+  _scfl_validFlowPadding: function() {
+    var padding = this.get('flowPadding') || {}, ret = {};
+    ret.left = padding.left || 0;
+    ret.top = padding.top || 0;
+    ret.bottom = padding.bottom || 0;
+    ret.right = padding.right || 0;
+    return ret;
+  }.property('flowPadding').cacheable(),
   
   concatenatedProperties: ["childMixins"],
   
@@ -169,7 +181,8 @@ SC.FlowedLayout = {
     var fs = SC.clone(view.get("flowSize"));
     if (!SC.none(fs)) {
       // if we have a flow size, adjust for a) width/heightPercentage and b) missing params.
-      var frame = this.get("frame"), padding = this.get("flowPadding"), spacing = this.flowSpacingForView(idx, view);
+      var frame = this.get("frame"), padding = this.get('_scfl_validFlowPadding'), 
+          spacing = this.flowSpacingForView(idx, view);
       
       // you can't set it w/percentage for the expand direction
       var expandsHorizontal = (this.get("layoutDirection") === SC.LAYOUT_HORIZONTAL && !this.get("canWrap")) ||
@@ -193,13 +206,34 @@ SC.FlowedLayout = {
     
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
     // it is invalid.
-    if (cw) calc.width = cw;
-    else calc.width = f.width;
+    if (cw) {
+      calc.width = cw;
+    } else {
+      // if the width is not calculated, we can't just use the frame because
+      // we may have altered the frame. _scfl_cachedFlowSize is valid, however,
+      // if the frame width is equal to _scfl_cachedCalculatedFlowSize.width, as 
+      // that means the width has not been recomputed.
+      //
+      // Keep in mind that if we are the ones who recomputed it, we can use our
+      // original value. If it was recomputed by the view itself, then its value
+      // should be ok and unmanipulated by us, in theory.
+      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.width == f.width) {
+        calc.width = view._scfl_cachedFlowSize.width
+      } else {
+        calc.width = f.width;
+      }
+    }
     
     // same for calculated height
-    if (ch) calc.height = ch;
-    else calc.height = f.height;
-    
+    if (ch) {
+      calc.height = ch;
+    } else {
+      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.height == f.height) {
+        calc.height = view._scfl_cachedFlowSize.height
+      } else {
+        calc.height = f.height;
+      }
+    }
     // return
     return calc;
   },
@@ -218,7 +252,7 @@ SC.FlowedLayout = {
     for (idx = 0; idx < len; idx++) {
       item = row[idx];
       if (item.get("isSpacer")) totalSpaceUnits += item.get("spaceUnits") || 1;
-      rowLength += item._scfl_cachedSpacedSize[primary === "left" ? "width" : "height"];
+      else rowLength += item._scfl_cachedSpacedSize[primary === "left" ? "width" : "height"];
     }
     
     // add space units for justification
@@ -269,10 +303,12 @@ SC.FlowedLayout = {
         
         // and finally, set back the cached flow size value--
         // not including spacing (this is the view size for rendering)
-        item._scfl_cachedFlowSize[primary === "left" ? "width" : "height"] = spacerSize;
-        item._scfl_cachedFlowSize[secondary === "left" ? "width" : "height"] = rowSize;
+        item._scfl_cachedCalculatedFlowSize = {};
+        item._scfl_cachedCalculatedFlowSize[primary === "left" ? "width" : "height"] = spacerSize;
+        item._scfl_cachedCalculatedFlowSize[secondary === "left" ? "width" : "height"] = rowSize;
       } else {
         itemOffset += item._scfl_cachedSpacedSize[primary === "left" ? "width" : "height"];
+        item._scfl_cachedCalculatedFlowSize = item._scfl_cachedFlowSize;
       }
       
       this.flowPositionView(idx, item, x, y);
@@ -283,7 +319,9 @@ SC.FlowedLayout = {
   },
   
   flowPositionView: function(idx, item, x, y) {
-    var spacing = item._scfl_cachedFlowSpacing, size = item._scfl_cachedFlowSize;
+    var spacing = item._scfl_cachedFlowSpacing,
+        size = item._scfl_cachedCalculatedFlowSize;
+
     var last = this._scfl_itemLayouts[SC.guidFor(item)];
     
     var l = {
@@ -292,7 +330,7 @@ SC.FlowedLayout = {
       width: size.width,
       height: size.height
     };
-    
+
     // we must set this first, or it will think it has to update layout again, and again, and again
     // and we get a crash.
     this._scfl_itemLayouts[SC.guidFor(item)] = l;
@@ -305,7 +343,7 @@ SC.FlowedLayout = {
       return;
     }
     
-    item.set("layout", l);
+    item.adjust(l);
   },
   
   _scfl_tile: function() {
@@ -322,7 +360,7 @@ SC.FlowedLayout = {
         height = this.get('frame').height,
         canWrap = this.get("canWrap"),
         layoutDirection = this.get("layoutDirection"),
-        padding = this.get("flowPadding"),
+        padding = this.get("_scfl_validFlowPadding"),
         childSize, childSpacing, align = this.get("align");
     
     var primary, primary_os, primary_d, secondary, secondary_os, secondary_d, primaryContainerSize;
@@ -356,11 +394,6 @@ SC.FlowedLayout = {
       // get spacing, size, and cache
       childSize = this.flowSizeForView(idx, child);
       
-      // adjust for spacer
-      if (child.get("isSpacer")) {
-        childSize[primary_d] = 0;
-      }
-      
       child._scfl_cachedFlowSize = { width: childSize.width, height: childSize.height }; // supply a clone, since we are about to modify
       
       childSpacing = this.flowSpacingForView(idx, child);
@@ -377,7 +410,7 @@ SC.FlowedLayout = {
         if (itemOffset + childSize[primary_d] >= primaryContainerSize) {
           // first, flow this row
           this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
-          
+
           // We need another row.
           row = [];
           rows.push(row);
@@ -386,11 +419,12 @@ SC.FlowedLayout = {
           itemOffset = 0;
         }
       }
-      
+
       // add too row and update row size+item offset
       row.push(child);
       rowSize = Math.max(childSize[secondary_d], rowSize);
-      itemOffset += childSize[primary_d]; 
+
+      itemOffset += childSize[primary_d];
     }
     
     // flow last row
