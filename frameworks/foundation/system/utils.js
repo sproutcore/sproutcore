@@ -333,50 +333,36 @@ SC.mixin( /** @scope SC */ {
       if (document.defaultView && document.defaultView.getComputedStyle) {
         computed = document.defaultView.getComputedStyle(exampleElement, null);
       } else {
-        computed = exampleElement.currentStyle;
+      computed = exampleElement.currentStyle;
       }
-      
-      // set (lovely cssText property here helps a lot—if it works. Unfortunately, only Safari supplies it.)
-      style = computed.cssText;
-      
 
-      // if that didn't work (Safari-only?) go alternate route. This is SLOW code...
-      if (!style || style.trim() === "") {
-        // there is only one way to do it...
-        var props = this._copy_computed_props;
-        
-        // firefox ONLY allows this method
-        for (var i = 0; i < props.length; i++) {
-          var prop = props[i], val = computed[prop];
-          element.style[prop] = val;
-        }
-        
-        // and why does firefox specifically need "font" set?
-        var cs = element.style; // cached style
-        if (cs.font === "") {
-          var font = "";
-          if (cs.fontStyle) font += cs.fontStyle + " ";
-          if (cs.fontVariant) font += cs.fontVariant + " ";
-          if (cs.fontWeight) font += cs.fontWeight + " ";
-          if (cs.fontSize) font += cs.fontSize; else font += "10px"; //force a default
-          if (cs.lineHeight) font += "/" + cs.lineHeight;
-          font += " ";
-          if (cs.fontFamily) font += cs.fontFamily; else cs += "sans-serif";
-          
-          element.style.font = font;
-        }
-        
-        SC.mixin(element.style, {
-          left: "0px", top: "0px", position: "absolute", bottom: "auto", right: "auto", width: "auto", height: "auto"
-        });
+      var props = this._copy_computed_props;
+
+      // firefox ONLY allows this method
+      for (var i = 0; i < props.length; i++) {
+        var prop = props[i], val = computed[prop];
+        element.style[prop] = val;
       }
-      else
-      {
-        // set style
-        cqElem.attr("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
+
+      // and why does firefox specifically need "font" set?
+      var cs = element.style; // cached style
+      if (cs.font === "") {
+        var font = "";
+        if (cs.fontStyle) font += cs.fontStyle + " ";
+        if (cs.fontVariant) font += cs.fontVariant + " ";
+        if (cs.fontWeight) font += cs.fontWeight + " ";
+        if (cs.fontSize) font += cs.fontSize; else font += "10px"; //force a default
+        if (cs.lineHeight) font += "/" + cs.lineHeight;
+        font += " ";
+        if (cs.fontFamily) font += cs.fontFamily; else cs += "sans-serif";
+
+        element.style.font = font;
       }
-      
-      // clean up
+
+      SC.mixin(element.style, {
+        left: "0px", top: "0px", position: "absolute", bottom: "auto", right: "auto", width: "auto", height: "auto"
+      });
+     // clean up
       computed = null;
     } else {
       // it is a style string already
@@ -451,10 +437,8 @@ SC.mixin( /** @scope SC */ {
     @param ignoreEscape {Boolean} To NOT html escape the string.
   */
   metricsForString: function(string, exampleElement, classNames, ignoreEscape) {
-    if(!ignoreEscape) string = SC.RenderContext.escapeHTML(string);
-    
     SC.prepareStringMeasurement(exampleElement, classNames);
-    var result = SC.measureString(string);
+    var result = SC.measureString(string, ignoreEscape);
     SC.teardownStringMeasurement();
     return result;
   },
