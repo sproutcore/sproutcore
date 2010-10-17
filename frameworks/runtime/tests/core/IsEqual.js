@@ -3,58 +3,28 @@
 // ========================================================================
 /*globals module test */
 
-var StringA, StringB, StringC;
+module("isEqual");
 
-module("String's - isEqual", {
-	
-	setup: function(){
-	StringA = "Hello";
-	StringB = "Hi";
-	StringC = "Hello";
-    }
+test("undefined and null", function() {
+  ok(  SC.isEqual(undefined, undefined), "undefined is equal to undefined" );
+  ok( !SC.isEqual(undefined, null),      "undefined is not equal to null" );
+  ok(  SC.isEqual(null, null),           "null is equal to null" );
+  ok( !SC.isEqual(null, undefined),      "null is not equal to undefined" );
+})
 
+test("strings should be equal",function(){
+	ok( !SC.isEqual("Hello", "Hi"),    "different Strings are unequal" );
+	ok(  SC.isEqual("Hello", "Hello"), "same Strings are equal" );
 });
 
-test("strings should be equal ",function(){
-	equals(SC.isEqual(StringA,StringB),false);
-	equals(SC.isEqual(StringA,StringC),true);
+test("numericals should be equal",function(){
+  ok(  SC.isEqual(24, 24), "same numbers are equal" );
+	ok( !SC.isEqual(24, 21), "different numbers are inequal" );
 });
 
-var num1, num2, num3;
-
-module("Number's - isEqual",{
- 
-     setup: function(){
-	 num1 = 24;
-	 num2 = 24;
-	 num3 = 21;
-     }
-
-});
- 
-test("numericals should be equal ",function(){
-    equals(SC.isEqual(num1,num2),true);
-	equals(SC.isEqual(num1,num3),false);
-}); 
-
-var objectA,objectB, objectC; //global variables
-
-module("Array's - isEqual",{
-	
-	setup: function(){
-	objectA = [1,2];
-	objectB = [1,2];
-	objectC = [1];	
-	}
-	
-});
-	
-test("array should be equal  ",function(){
+test("array should be equal",function(){
 	// NOTE: We don't test for array contents -- that would be too expensive.
-	equals(SC.isEqual(objectA,objectB),false, 'two array instances with the same values should not be equal');
-	equals(SC.isEqual(objectA,objectC),false, 'two array instances with different values should not be equal');
-});	
+	ok( !SC.isEqual( [1,2], [1,2] ), 'two array instances with the same values should not be equal' );
+	ok( !SC.isEqual( [1,2], [1] ),   'two array instances with different values should not be equal' );
+});
 
-
-
-	
