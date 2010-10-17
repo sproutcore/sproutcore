@@ -267,7 +267,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // now setup superclass, guid
     ret.superclass = this ;
-    SC.generateGuid(ret); // setup guid
+    SC.generateGuid(ret, "sc"); // setup guid
 
     ret.subclasses = SC.Set.create();
     this.subclasses.add(ret); // now we can walk a class hierarchy
@@ -433,7 +433,7 @@ SC.Object.prototype = {
     // apply any new properties
     var idx, len = (extensions) ? extensions.length : 0;
     for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx]) ;
-    SC.generateGuid(this) ; // add guid
+    SC.generateGuid(this, "sc") ; // add guid
     this.init() ; // call real init
     
     // Call 'initMixin' methods to automatically setup modules.

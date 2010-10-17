@@ -489,6 +489,7 @@ test("should invoke custom reducer", function() {
 test("should trigger observer of reduced prop when array changes once property retrieved once", function() {
   var src, ary2 = enumerables ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
+    console.log(ary2)
     src = ary2[idx2] ;
     // get the property...this will install the reducer property...
     src.get("@max(balance)") ;
@@ -499,8 +500,8 @@ test("should trigger observer of reduced prop when array changes once property r
       observedValue = src.get("@max(balance)");
     }) ;
     
-    src.addProbe('[]') ;
-    src.addProbe('@max(balance)');
+    //src.addProbe('[]') ;
+    //src.addProbe('@max(balance)');
     
     // add record to array
     src.pushObject({ 
@@ -519,6 +520,41 @@ test("should trigger observer of reduced prop when array changes once property r
     equals(5, observedValue, "observedValue") ;
   }
 });
+
+test("should trigger observer of reduced prop when array changes once property retrieved once", function() {
+  var src, ary2 = enumerables ;
+  for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
+    src = ary2[idx2] ;
+    // get the property...this will install the reducer property...
+    src.get("@max(balance)") ;
+    
+    // install observer
+    var observedValue = null ;
+    src.addObserver("@max(balance)", function() { 
+      observedValue = src.get("@max(balance)");
+    }) ;
+    
+    //src.addProbe('[]') ;
+    //src.addProbe('@max(balance)');
+    
+    // add record to array
+    src.pushObject({ 
+      first: "John", 
+      gender: "male", 
+      californian: NO, 
+      ready: YES, 
+      visited: "Paris", 
+      balance: 5
+    }) ;
+    
+    //SC.NotificationQueue.flush() ; // force observers to trigger
+    
+    // observed value should now be set because the reduced property observer
+    // was triggered when we changed the array contents.
+    equals(5, observedValue, "observedValue") ;
+  }
+});
+
 
 test("should trigger observer of reduced prop when array changes - even if you never retrieved the property before", function() {
   var src, ary2 = enumerables ;
@@ -601,8 +637,8 @@ test("should notify observers even if reduced property is cached on prototype", 
     observedValue = source.get("@max(balance)");
   }) ;
   
-  source.addProbe('[]') ;
-  source.addProbe('@max(balance)');
+  //source.addProbe('[]') ;
+  //source.addProbe('@max(balance)');
   
   // add record to array
   source.pushObject({ 
@@ -615,7 +651,7 @@ test("should notify observers even if reduced property is cached on prototype", 
   }) ;
   
   //SC.NotificationQueue.flush() ; // force observers to trigger
-  
+
   // observed value should now be set because the reduced property observer
   // was triggered when we changed the array contents.
   equals(5, observedValue, "observedValue") ;

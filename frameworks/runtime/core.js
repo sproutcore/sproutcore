@@ -15,11 +15,11 @@ sc_require('license') ;
 
 // ........................................
 // GLOBAL CONSTANTS
-// 
-// Most global constants should be defined inside of the SC namespace.  
+//
+// Most global constants should be defined inside of the SC namespace.
 // However the following two are useful enough and generally benign enough
 // to put into the global object.
-var YES = true ; 
+var YES = true ;
 var NO = false ;
 
 // prevent a console.log from blowing things up if we are on a browser that
@@ -31,29 +31,29 @@ if (typeof console === 'undefined') {
 
 // ........................................
 // BOOTSTRAP
-// 
+//
 // The root namespace and some common utility methods are defined here. The
 // rest of the methods go into the mixin defined below.
 
 /**
   @namespace
-  
+
   The SproutCore namespace.  All SproutCore methods and functions are defined
   inside of this namespace.  You generally should not add new properties to
   this namespace as it may be overwritten by future versions of SproutCore.
-  
+
   You can also use the shorthand "SC" instead of "SproutCore".
-  
+
   SproutCore-Base is a framework that provides core functions for SproutCore
   including cross-platform functions, support for property observing and
-  objects.  It's focus is on small size and performance.  You can use this 
+  objects.  It's focus is on small size and performance.  You can use this
   in place of or along-side other cross-platform libraries such as jQuery or
   Prototype.
-  
-  The core Base framework is based on the jQuery API with a number of 
+
+  The core Base framework is based on the jQuery API with a number of
   performance optimizations.
 */
-var SC = SC || {} ; 
+var SC = SC || {} ;
 var SproutCore = SproutCore || SC ;
 
 /**
@@ -65,7 +65,7 @@ var SproutCore = SproutCore || SC ;
   Used as a base function for the wrapper functions SC.mixin and SC.supplement.
 
   @param overwrite {Boolean} if a target has a value for a property, this specifies
-                  whether or not to overwrite that value with the copyied object's 
+                  whether or not to overwrite that value with the copyied object's
                   property value.
   @param target {Object} the target object to extend
   @param properties {Object} one or more objects with properties to copy.
@@ -95,14 +95,14 @@ SC._baseMixin = function (override) {
       if (copy !== undefined && ( override || (target[key] === undefined) )) target[key] = copy ;
     }
   }
-  
+
   return target;
 } ;
 
 /**
   Adds properties to a target object.
-  
-  Takes the root object and adds the attributes for any additional 
+
+  Takes the root object and adds the attributes for any additional
   arguments passed.
 
   @param target {Object} the target object to extend
@@ -119,8 +119,8 @@ SC.mixin = function() {
 /**
   Adds properties to a target object.  Unlike SC.mixin, however, if the target
   already has a value for a property, it will not be overwritten.
-  
-  Takes the root object and adds the attributes for any additional 
+
+  Takes the root object and adds the attributes for any additional
   arguments passed.
 
   @param target {Object} the target object to extend
@@ -134,22 +134,22 @@ SC.supplement = function() {
   return SC._baseMixin.apply(this, args);
 } ;
 
-/** 
+/**
   Alternative to mixin.  Provided for compatibility with jQuery.
-  @function 
+  @function
 */
 SC.extend = SC.mixin ;
 
 // ..........................................................
 // CORE FUNCTIONS
-// 
+//
 // Enough with the bootstrap code.  Let's define some core functions
 
 SC.mixin(/** @scope SC */ {
-  
+
   // ........................................
   // GLOBAL CONSTANTS
-  // 
+  //
   T_ERROR:     'error',
   T_OBJECT:    'object',
   T_NULL:      'null',
@@ -161,16 +161,16 @@ SC.mixin(/** @scope SC */ {
   T_BOOL:      'boolean',
   T_ARRAY:     'array',
   T_STRING:    'string',
-  
+
   // ........................................
   // TYPING & ARRAY MESSAGING
-  //   
+  //
 
   /**
     Returns a consistant type for the passed item.
 
-    Use this instead of the built-in typeOf() to get the type of an item. 
-    It will return the same result across all browsers and includes a bit 
+    Use this instead of the built-in typeOf() to get the type of an item.
+    It will return the same result across all browsers and includes a bit
     more detail.  Here is what will be returned:
 
     | Return Value Constant | Meaning |
@@ -187,126 +187,135 @@ SC.mixin(/** @scope SC */ {
 
     @param item {Object} the item to check
     @returns {String} the type
-  */  
+  */
   typeOf: function(item) {
     if (item === undefined) return SC.T_UNDEFINED ;
-    if (item === null) return SC.T_NULL ; 
-    var ret = typeof(item) ;
-    if (ret === "object") {
-      if (item instanceof Array) {
-        ret = SC.T_ARRAY ;
-      } else if (item instanceof Function) {
-        ret = item.isClass ? SC.T_CLASS : SC.T_FUNCTION ;
+    if (item === null) return SC.T_NULL ;
 
-      // NB: typeOf() may be called before SC.Error has had a chance to load
-      // so this code checks for the presence of SC.Error first just to make
-      // sure.  No error instance can exist before the class loads anyway so
-      // this is safe.
-      } else if (SC.Error && (item instanceof SC.Error)) {
-        ret = SC.T_ERROR ;        
-      } else if (!SC.browser.mozilla && item.isObject === true) {
-       ret = SC.T_OBJECT ;
-      } else if (SC.browser.mozilla && SC.Object && (item instanceof SC.Object) && item.isObject === true) {
-        ret = SC.T_OBJECT ;
-      } else ret = SC.T_HASH ;
-    } else if (ret === SC.T_FUNCTION) ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION;
-    return ret ;
+    var nativeType = jQuery.type(item);
+
+    if (nativeType === "function") {
+      return item.isClass ? SC.T_CLASS : SC.T_FUNCTION
+    } else if (nativeType === "object") {
+      if (item.isError) {
+        return SC.T_ERROR ;
+      } else if (item.isObject) {
+        return SC.T_OBJECT ;
+      } else {
+        return SC.T_HASH ;
+      }
+    }
+
+    return nativeType ;
   },
 
   /**
     Returns YES if the passed value is null or undefined.  This avoids errors
-    from JSLint complaining about use of ==, which can be technically 
+    from JSLint complaining about use of ==, which can be technically
     confusing.
-    
+
     @param {Object} obj value to test
     @returns {Boolean}
   */
   none: function(obj) {
-    return obj===null || obj===undefined;  
+    return obj === null || obj === undefined;
   },
 
   /**
-    Verifies that a value is either null or an empty string.  Return false if
+    Verifies that a value is either null or an empty string. Return false if
     the object is not a string.
-    
+
     @param {Object} obj value to test
     @returns {Boolean}
   */
   empty: function(obj) {
-    return obj===null || obj===undefined || obj==='';
+    return obj === null || obj === undefined || obj === '';
   },
-  
-  /**
-    Returns YES if the passed object is an array or array-like. Instances
-    of the NodeList class return NO.
 
-    Unlike SC.typeOf this method returns true even if the passed object is 
-    not formally array but appears to be array-like (i.e. has a length 
+  /**
+    Returns YES if the passed object is an array or Array-like.
+
+    SproutCore Array Protocol:
+    * the object has an objectAt property; or
+    * the object is a native Array; or
+    * the object is an Object, and has a length property
+
+    Unlike SC.typeOf this method returns true even if the passed object is
+    not formally array but appears to be array-like (i.e. has a length
     property, responds to .objectAt, etc.)
 
     @param obj {Object} the object to test
-    @returns {Boolean} 
+    @returns {Boolean}
   */
   isArray: function(obj) {
-    if (obj && obj.objectAt) return YES ; // fast path
-    
-    var len = (obj ? obj.length : null), type = typeof obj;
-    return !((len === undefined) || (len === null) || (obj instanceof Function) || (type === "string") || obj.setInterval);
+    var type;
+
+    if ( !obj || obj.setInterval ) {
+      return false;
+    } else if ( obj.objectAt ) {
+      return true ;
+    } else if ( obj.length && jQuery.type(obj) === "object" ) {
+      return true
+    }
+
+    return false;
   },
 
   /**
     Makes an object into an Array if it is not array or array-like already.
     Unlike SC.A(), this method will not clone the object if it is already
     an array.
-    
+
     @param {Object} obj object to convert
     @returns {Array} Actual array
   */
   makeArray: function(obj) {
     return SC.isArray(obj) ? obj : SC.A(obj);
   },
-  
+
   /**
-    Converts the passed object to an Array.  If the object appears to be 
+    Converts the passed object to an Array.  If the object appears to be
     array-like, a new array will be cloned from it.  Otherwise, a new array
     will be created with the item itself as the only item in the array.
-    
+
     @param object {Object} any enumerable or array-like object.
     @returns {Array} Array of items
   */
   A: function(obj) {
     // null or undefined -- fast path
-    if (obj === null || obj === undefined) return [] ;
-    
+    if ( obj === null || obj === undefined ) return [] ;
+
     // primitive -- fast path
-    if (obj.slice instanceof Function) {
+    if ( obj.slice instanceof Function ) {
       // do we have a string?
-      if (typeof(obj) === 'string') return [obj] ;
+      if ( typeof(obj) === 'string' ) return [obj] ;
       else return obj.slice() ;
     }
-    
+
     // enumerable -- fast path
     if (obj.toArray) return obj.toArray() ;
-    
+
     // if not array-like, then just wrap in array.
     if (!SC.isArray(obj)) return [obj];
-    
+
     // when all else fails, do a manual convert...
     var ret = [], len = obj.length;
     while(--len >= 0) ret[len] = obj[len];
     return ret ;
   },
-  
-  // ..........................................................
+
+  //
   // GUIDS & HASHES
-  // 
-  
-  guidKey: "_sc_guid_" + new Date().getTime(),
+  //
+
+  guidKey: jQuery.expando,
 
   // Used for guid generation...
-  _nextGUID: 0, _numberGuids: [], _stringGuids: {}, _keyCache: {},
+  _guidPrefixes: {"number": "nu", "string": "st"},
+  _guidCaches:   {"number": {},   "string": {}},
+  _numberGuids: [], _stringGuids: {}, _keyCache: {},
 
-  /**
+  /**"
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
     SC.Object-based or not, but be aware that it will add a _guid property.
@@ -317,7 +326,7 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the unique guid for this instance.
   */
   guidFor: function(obj) {
-    
+
     // special cases where we don't want to add a key to object
     if (obj === undefined) return "(undefined)";
     if (obj === null) return '(null)';
@@ -331,22 +340,15 @@ SC.mixin(/** @scope SC */ {
     if (obj === Array) return '(Array)';
 
     var cache, ret;
+    var type = typeof obj;
 
-    switch(typeof obj) {
+    switch(type) {
       case SC.T_NUMBER:
-        cache = this._numberGuids;
-        ret   = cache[obj];
-        if (!ret) {
-          ret = "nu" + obj;
-          cache[obj] = ret;
-        }
-        return ret;
-
       case SC.T_STRING:
-        cache = this._stringGuids;
+        cache = this._guidCaches[type];
         ret   = cache[obj];
-        if (!ret) {
-          ret = "st" + obj;
+        if(!ret) {
+          ret        = this.generateGuid(null, this._guidPrefixes[type]);
           cache[obj] = ret;
         }
         return ret;
@@ -354,18 +356,18 @@ SC.mixin(/** @scope SC */ {
       case SC.T_BOOL:
         return (obj) ? "(true)" : "(false)" ;
       default:
-        return SC.generateGuid(obj);
+        return SC.generateGuid(obj, "sc");
     }
   },
 
   /**
-    Returns a key name that combines the named key + prefix.  This is more 
-    efficient than simply combining strings because it uses a cache  
+    Returns a key name that combines the named key + prefix.  This is more
+    efficient than simply combining strings because it uses a cache
     internally for performance.
-    
+
     @param {String} prefix the prefix to attach to the key
     @param {String} key key
-    @returns {String} result 
+    @returns {String} result
   */
   keyFor: function(prefix, key) {
     var ret, pcache = this._keyCache[prefix];
@@ -383,8 +385,8 @@ SC.mixin(/** @scope SC */ {
     @param {Object} obj the object to assign the guid to
     @returns {String} the guid
   */
-  generateGuid: function(obj) { 
-    var ret = ("sc" + (this._nextGUID++)); 
+  generateGuid: function(obj, prefix) {
+    var ret = (prefix + (jQuery.uuid++));
     if (obj) obj[this.guidKey] = ret ;
     return ret ;
   },
@@ -393,34 +395,34 @@ SC.mixin(/** @scope SC */ {
     Returns a unique hash code for the object. If the object implements
     a hash() method, the value of that method will be returned. Otherwise,
     this will return the same value as guidFor().
-    
-    If you pass multiple arguments, hashFor returns a string obtained by 
+
+    If you pass multiple arguments, hashFor returns a string obtained by
     concatenating the hash code of each argument.
 
-    Unlike guidFor(), this method allows you to implement logic in your 
+    Unlike guidFor(), this method allows you to implement logic in your
     code to cause two separate instances of the same object to be treated as
     if they were equal for comparisons and other functions.
 
-    IMPORTANT: If you implement a hash() method, it MUST NOT return a 
-    number or a string that contains only a number. Typically hash codes 
+    IMPORTANT: If you implement a hash() method, it MUST NOT return a
+    number or a string that contains only a number. Typically hash codes
     are strings that begin with a "%".
 
     @param obj {Object} the object(s)
     @returns {String} the hash code for this instance.
   */
   hashFor: function() {
-    var len = arguments.length,
+    var l = arguments.length,
         h = '',
         obj, f, i;
-    
-    for (i = 0; i < len; ++i) {
+
+    for (i=0 ; i<l; ++i) {
       obj = arguments[i];
       h += (obj && (f = obj.hash) && (typeof f === SC.T_FUNCTION)) ? f.call(obj) : this.guidFor(obj);
     }
-    
+
     return h === '' ? null : h;
   },
-  
+
   /**
     This will compare the two object values using their hash codes.
 
@@ -430,24 +432,18 @@ SC.mixin(/** @scope SC */ {
 
   */
   isEqual: function(a,b) {
-    // shortcut a few places.
-    if (a === null) {
-      return b === null ;
-    } else if (a === undefined) {
-      return b === undefined ;
-
-    // finally, check their hash-codes
-    } else return this.hashFor(a) === this.hashFor(b) ;
+    // QUESTION: is there a compelling performance reason to special-case
+    // undefined here?
+    return this.hashFor(a) === this.hashFor(b) ;
   },
-  
-  
+
   /**
    This will compare two javascript values of possibly different types.
    It will tell you which one is greater than the other by returning
    -1 if the first is smaller than the second,
     0 if both are equal,
     1 if the first is greater than the second.
-  
+
    The order is calculated based on SC.ORDER_DEFINITION , if types are different.
    In case they have the same type an appropriate comparison for this type is made.
 
@@ -460,10 +456,10 @@ SC.mixin(/** @scope SC */ {
     // Doing a '===' check is very cheap, so in the case of equality, checking
     // this up-front is a big win.
     if (v === w) return 0;
-    
+
     var type1 = SC.typeOf(v);
     var type2 = SC.typeOf(w);
-    
+
     // If we haven't yet generated a reverse-mapping of SC.ORDER_DEFINITION,
     // do so now.
     var mapping = SC.ORDER_DEFINITION_MAPPING;
@@ -474,17 +470,17 @@ SC.mixin(/** @scope SC */ {
       for (idx = 0, len = order.length;  idx < len;  ++idx) {
         mapping[order[idx]] = idx;
       }
-      
+
       // We no longer need SC.ORDER_DEFINITION.
       delete SC.ORDER_DEFINITION;
     }
-    
+
     var type1Index = mapping[type1];
     var type2Index = mapping[type2];
-    
+
     if (type1Index < type2Index) return -1;
     if (type1Index > type2Index) return 1;
-    
+
     // ok - types are equal - so we have to check values now
     switch (type1) {
       case SC.T_BOOL:
@@ -511,14 +507,14 @@ SC.mixin(/** @scope SC */ {
           i++;
         }
         if (r !== 0) return r;
-      
+
         // all elements are equal now
         // shorter array should be ordered first
         if (vLen < wLen) return -1;
         if (vLen > wLen) return 1;
         // arrays are equal now
         return 0;
-        
+
       case SC.T_OBJECT:
         if (v.constructor.isComparable === YES) return v.constructor.compare(v, w);
         return 0;
@@ -527,43 +523,44 @@ SC.mixin(/** @scope SC */ {
         return 0;
     }
   },
-  
+
   // ..........................................................
   // OBJECT MANAGEMENT
-  
-  /** 
-    Empty function.  Useful for some operations. 
-    
+  //
+
+  /**
+    Empty function.  Useful for some operations.
+
     @returns {Object}
   */
   K: function() { return this; },
 
-  /** 
+  /**
     Empty array.  Useful for some optimizations.
-  
+
     @property {Array}
   */
   EMPTY_ARRAY: [],
 
   /**
     Empty hash.  Useful for some optimizations.
-  
+
     @property {Hash}
   */
   EMPTY_HASH: {},
 
   /**
     Empty range. Useful for some optimizations.
-    
+
     @property {Range}
   */
   EMPTY_RANGE: {start: 0, length: 0},
-  
+
   /**
     Creates a new object with the passed object as its prototype.
 
-    This method uses JavaScript's native inheritence method to create a new 
-    object.    
+    This method uses JavaScript's native inheritence method to create a new
+    object.
 
     You cannot use beget() to create new SC.Object-based objects, but you
     can use it to beget Arrays, Hashes, Sets and objects you build yourself.
@@ -571,10 +568,10 @@ SC.mixin(/** @scope SC */ {
     didBeget() method on the object you passed in if it is defined.  You can
     use this method to perform any other setup needed.
 
-    In general, you will not use beget() often as SC.Object is much more 
+    In general, you will not use beget() often as SC.Object is much more
     useful, but for certain rare algorithms, this method can be very useful.
 
-    For more information on using beget(), see the section on beget() in 
+    For more information on using beget(), see the section on beget() in
     Crockford's JavaScript: The Good Parts.
 
     @param obj {Object} the object to beget
@@ -585,7 +582,7 @@ SC.mixin(/** @scope SC */ {
     var K = SC.K; K.prototype = obj ;
     var ret = new K();
     K.prototype = null ; // avoid leaks
-    if (typeof obj.didBeget === "function") ret = obj.didBeget(ret); 
+    if (typeof obj.didBeget === "function") ret = obj.didBeget(ret);
     return ret ;
   },
 
@@ -604,26 +601,25 @@ SC.mixin(/** @scope SC */ {
   copy: function(object, deep) {
     var ret = object, idx ;
 
-    // fast path
-    if (object) {
-      if (object.isCopyable) return object.copy(deep);
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) return object.clone();
+    // fast paths
+    if ( object ) {
+      if ( object.isCopyable ) return object.copy( deep );
+      if ( object.clone )      return object.clone();
     }
 
-    switch (SC.typeOf(object)) {
-    case SC.T_ARRAY:
-      ret = object.slice() ;
-      if (deep) {
-        idx = ret.length;
-        while (idx--) ret[idx] = SC.copy(ret[idx], true);
-      }
-      break ;
+    switch ( jQuery.type(object) ) {
+    case "array":
+      ret = object.slice();
 
-    case SC.T_HASH:
-    case SC.T_OBJECT:
-      ret = {};
-      for (var key in object) ret[key] = deep ? SC.copy(object[key], true) : object[key];
-      break ;
+      if ( deep ) {
+        idx = ret.length;
+        while ( idx-- ) { ret[idx] = SC.copy( ret[idx], true ); }
+        break ;
+      }
+
+    case "object":
+      ret = {} ;
+      for(var key in object) { ret[key] = deep ? SC.copy(object[key], true) : object[key] ; }
     }
 
     return ret ;
@@ -637,7 +633,7 @@ SC.mixin(/** @scope SC */ {
   */
   merge: function() {
     var ret = {}, len = arguments.length, idx;
-    for(idx=0;idx<len;idx++) SC.mixin(ret, arguments[idx]);
+    for(idx=0; idx<len; idx++) SC.mixin(ret, arguments[idx]);
     return ret ;
   },
 
@@ -655,7 +651,7 @@ SC.mixin(/** @scope SC */ {
   },
 
   /**
-    Convenience method to inspect an object.  This method will attempt to 
+    Convenience method to inspect an object.  This method will attempt to
     convert the object into a useful string description.
   */
   inspect: function(obj) {
@@ -670,8 +666,8 @@ SC.mixin(/** @scope SC */ {
   },
 
   /**
-    Returns a tuple containing the object and key for the specified property 
-    path.  If no object could be found to match the property path, then 
+    Returns a tuple containing the object and key for the specified property
+    path.  If no object could be found to match the property path, then
     returns null.
 
     This is the standard method used throughout SproutCore to resolve property
@@ -697,8 +693,8 @@ SC.mixin(/** @scope SC */ {
     return (obj && key) ? [obj,key] : null ;
   },
 
-  /** 
-    Finds the object for the passed path or array of path components.  This is 
+  /**
+    Finds the object for the passed path or array of path components.  This is
     the standard method used in SproutCore to traverse object paths.
 
     @param path {String} the path
@@ -721,7 +717,7 @@ SC.mixin(/** @scope SC */ {
         if ((nextDotAt < 0) || (nextDotAt > stopAt)) nextDotAt = stopAt;
         key = path.slice(loc, nextDotAt);
         root = root.get ? root.get(key) : root[key] ;
-        loc = nextDotAt+1; 
+        loc = nextDotAt+1;
       }
       if (loc < stopAt) root = undefined; // hit a dead end. :(
 
@@ -738,23 +734,23 @@ SC.mixin(/** @scope SC */ {
 
     return root ;
   },
-  
-  
+
+
   // ..........................................................
   // LOCALIZATION SUPPORT
-  // 
-  
+  //
+
   /**
     Known loc strings
-    
+
     @property {Hash}
   */
   STRINGS: {},
-  
+
   /**
     This is a simplified handler for installing a bunch of strings.  This
     ignores the language name and simply applies the passed strings hash.
-    
+
     @param {String} lang the language the strings are for
     @param {Hash} strings hash of strings
     @returns {SC} receiver
@@ -763,8 +759,8 @@ SC.mixin(/** @scope SC */ {
     SC.mixin(SC.STRINGS, strings);
     return this ;
   }
-  
-  
+
+
 }); // end mixin
 
 /** @private Aliasn for SC.clone() */
@@ -794,31 +790,31 @@ SC.ORDER_DEFINITION = [ SC.T_ERROR,
 // FUNCTION ENHANCEMENTS
 //
 
-SC.mixin(Function.prototype, 
+SC.mixin(Function.prototype,
 /** @lends Function.prototype */ {
-  
+
   /**
     Indicates that the function should be treated as a computed property.
-    
+
     Computed properties are methods that you want to treat as if they were
     static properties.  When you use get() or set() on a computed property,
-    the object will call the property method and return its value instead of 
-    returning the method itself.  This makes it easy to create "virtual 
+    the object will call the property method and return its value instead of
+    returning the method itself.  This makes it easy to create "virtual
     properties" that are computed dynamically from other properties.
-    
+
     Consider the following example:
-    
+
     {{{
       contact = SC.Object.create({
 
         firstName: "Charles",
         lastName: "Jolley",
-        
+
         // This is a computed property!
         fullName: function() {
           return this.getEach('firstName','lastName').compact().join(' ') ;
         }.property('firstName', 'lastName'),
-        
+
         // this is not
         getFullName: function() {
           return this.getEach('firstName','lastName').compact().join(' ') ;
@@ -827,57 +823,57 @@ SC.mixin(Function.prototype,
 
       contact.get('firstName') ;
       --> "Charles"
-      
+
       contact.get('fullName') ;
       --> "Charles Jolley"
-      
+
       contact.get('getFullName') ;
       --> function()
     }}}
-    
+
     Note that when you get the fullName property, SproutCore will call the
     fullName() function and return its value whereas when you get() a property
-    that contains a regular method (such as getFullName above), then the 
+    that contains a regular method (such as getFullName above), then the
     function itself will be returned instead.
-    
+
     h2. Using Dependent Keys
 
-    Computed properties are often computed dynamically from other member 
+    Computed properties are often computed dynamically from other member
     properties.  Whenever those properties change, you need to notify any
     object that is observing the computed property that the computed property
     has changed also.  We call these properties the computed property is based
     upon "dependent keys".
-    
+
     For example, in the contact object above, the fullName property depends on
     the firstName and lastName property.  If either property value changes,
-    any observer watching the fullName property will need to be notified as 
+    any observer watching the fullName property will need to be notified as
     well.
-    
+
     You inform SproutCore of these dependent keys by passing the key names
     as parameters to the property() function.  Whenever the value of any key
     you name here changes, the computed property will be marked as changed
     also.
-    
-    You should always register dependent keys for computed properties to 
+
+    You should always register dependent keys for computed properties to
     ensure they update.
-    
+
     h2. Using Computed Properties as Setters
-    
+
     Computed properties can be used to modify the state of an object as well
-    as to return a value.  Unlike many other key-value system, you use the 
-    same method to both get and set values on a computed property.  To 
+    as to return a value.  Unlike many other key-value system, you use the
+    same method to both get and set values on a computed property.  To
     write a setter, simply declare two extra parameters: key and value.
-    
-    Whenever your property function is called as a setter, the value 
+
+    Whenever your property function is called as a setter, the value
     parameter will be set.  Whenever your property is called as a getter the
     value parameter will be undefined.
-    
+
     For example, the following object will split any full name that you set
     into a first name and last name components and save them.
-    
+
     {{{
       contact = SC.Object.create({
-        
+
         fullName: function(key, value) {
           if (value !== undefined) {
             var parts = value.split(' ') ;
@@ -888,20 +884,20 @@ SC.mixin(Function.prototype,
           }
           return this.getEach('firstName', 'lastName').compact().join(' ');
         }.property('firstName','lastName')
-        
+
       }) ;
-      
+
     }}}
-    
+
     h2. Why Use The Same Method for Getters and Setters?
-    
+
     Most property-based frameworks expect you to write two methods for each
     property but SproutCore only uses one. We do this because most of the time
     when you write a setter is is basically a getter plus some extra work.
     There is little added benefit in writing both methods when you can
     conditionally exclude part of it. This helps to keep your code more
     compact and easier to maintain.
-    
+
     @param dependentKeys {String...} optional set of dependent keys
     @returns {Function} the declared function instance
   */
@@ -913,18 +909,18 @@ SC.mixin(Function.prototype,
     this.isProperty = YES ;
     return this ;
   },
-  
+
   /**
-    You can call this method on a computed property to indicate that the 
-    property is cacheable (or not cacheable).  By default all computed 
+    You can call this method on a computed property to indicate that the
+    property is cacheable (or not cacheable).  By default all computed
     properties are not cached.  Enabling this feature will allow SproutCore
     to cache the return value of your computed property and to use that
-    value until one of your dependent properties changes or until you 
+    value until one of your dependent properties changes or until you
     invoke propertyDidChange() and name the computed property itself.
-    
+
     If you do not specify this option, computed properties are assumed to be
     not cacheable.
-    
+
     @param {Boolean} aFlag optionally indicate cacheable or no, default YES
     @returns {Function} reciever
   */
@@ -934,21 +930,21 @@ SC.mixin(Function.prototype,
     this.isCacheable = (aFlag === undefined) ? YES : aFlag ;
     return this ;
   },
-  
+
   /**
-    Indicates that the computed property is volatile.  Normally SproutCore 
-    assumes that your computed property is idempotent.  That is, calling 
+    Indicates that the computed property is volatile.  Normally SproutCore
+    assumes that your computed property is idempotent.  That is, calling
     set() on your property more than once with the same value has the same
-    effect as calling it only once.  
-    
+    effect as calling it only once.
+
     All non-computed properties are idempotent and normally you should make
     your computed properties behave the same way.  However, if you need to
     make your property change its return value everytime your method is
     called, you may chain this to your property to make it volatile.
-    
-    If you do not specify this option, properties are assumed to be 
-    non-volatile. 
-    
+
+    If you do not specify this option, properties are assumed to be
+    non-volatile.
+
     @param {Boolean} aFlag optionally indicate state, default to YES
     @returns {Function} receiver
   */
@@ -958,14 +954,14 @@ SC.mixin(Function.prototype,
     this.isVolatile = (aFlag === undefined) ? YES : aFlag ;
     return this ;
   },
-  
+
   /**
     Declare that a function should observe an object at the named path.  Note
     that the path is used only to construct the observation one time.
-    
+
     @returns {Function} receiver
   */
-  observes: function(propertyPaths) { 
+  observes: function(propertyPaths) {
     // sort property paths into local paths (i.e just a property name) and
     // full paths (i.e. those with a . or * in them)
     var loc = arguments.length, local = null, paths = null ;
@@ -975,7 +971,7 @@ SC.mixin(Function.prototype,
       if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
         if (!local) local = this.localPropertyPaths = [] ;
         local.push(path);
-        
+
       // regular
       } else {
         if (!paths) paths = this.propertyPaths = [] ;
@@ -984,31 +980,31 @@ SC.mixin(Function.prototype,
     }
     return this ;
   }
-  
+
 });
 
 // ..........................................................
 // STRING ENHANCEMENT
-// 
+//
 
 // Interpolate string. looks for %@ or %@1; to control the order of params.
 /**
   Apply formatting options to the string.  This will look for occurrences
   of %@ in your string and substitute them with the arguments you pass into
-  this method.  If you want to control the specific order of replacement, 
-  you can add a number after the key as well to indicate which argument 
-  you want to insert.  
+  this method.  If you want to control the specific order of replacement,
+  you can add a number after the key as well to indicate which argument
+  you want to insert.
 
   Ordered insertions are most useful when building loc strings where values
   you need to insert may appear in different orders.
 
   h3. Examples
-  
+
   {{{
     "Hello %@ %@".fmt('John', 'Doe') => "Hello John Doe"
     "Hello %@2, %@1".fmt('John', 'Doe') => "Hello Doe, John"
   }}}
-  
+
   @param args {Object...} optional arguments
   @returns {String} formatted string
 */
@@ -1017,18 +1013,18 @@ String.prototype.fmt = function() {
   var args = arguments,
       idx  = 0; // the current index for non-numerical replacements
   return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
-    argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
-    s =args[argIndex];
-    return ((s===null) ? '(null)' : (s===undefined) ? '' : s).toString(); 
+    argIndex = (argIndex) ? parseInt(argIndex,0) - 1 : idx++ ;
+    s = args[argIndex];
+    return ((s === null) ? '(null)' : (s === undefined) ? '' : s).toString();
   }) ;
 };
 
 /**
-  Localizes the string.  This will look up the reciever string as a key 
+  Localizes the string.  This will look up the reciever string as a key
   in the current Strings hash.  If the key matches, the loc'd value will be
   used.  The resulting string will also be passed through fmt() to insert
   any variables.
-  
+
   @param args {Object...} optional arguments to interpolate also
   @returns {String} the localized and formatted string.
 */
@@ -1038,14 +1034,14 @@ String.prototype.loc = function() {
 };
 
 
-  
+
 /**
   Splits the string into words, separated by spaces. Empty strings are
   removed from the results.
-  
+
   @returns {Array} an array of non-empty strings
 */
-String.prototype.w = function() { 
+String.prototype.w = function() {
   var ary = [], ary2 = this.split(' '), len = ary2.length, str, idx=0;
   for (idx=0; idx<len; ++idx) {
     str = ary2[idx] ;
@@ -1062,4 +1058,4 @@ if (!Date.now) {
     return new Date().getTime() ;
   };
 }
-  
+
