@@ -15,8 +15,10 @@ SC.BaseTheme.CheckboxControl = SC.Renderer.extend({
 
   render: function(context) {
     sc_super();
-    
+
     this.renderCheckboxRenderer(context);
+    if (SC.browser.msie) context.attr('for', SC.guidFor(this._checkboxRenderer));
+    
     this.renderTitleRenderer(context);
     
     this.resetChanges();
