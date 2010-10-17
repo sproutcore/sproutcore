@@ -40,7 +40,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
       this._checkboxRenderer = this.get('theme').renderer('checkbox-control');
     }
 
-    var size = this.get('controlSize');
+    var size = this.get('controlSize'), sel = this.get('isSelected');
     this._checkboxRenderer.attr({
       icon: this.get('icon'),
       formFieldName: SC.guidFor(this),
@@ -50,7 +50,8 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
       classNames: {
         'active': this.get('isActive'),
-        'sel': this.get('isSelected')
+        'sel': sel && (sel !== SC.MIXED_STATE),
+        'mixed': sel === SC.MIXED_STATE
       },
 
       size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
