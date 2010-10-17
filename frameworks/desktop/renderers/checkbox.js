@@ -12,7 +12,12 @@
 SC.BaseTheme.Checkbox = SC.Renderer.extend({
 
   name: 'checkbox',
-  classNames: "sc-checkbox",
+  classNames: {
+    'sc-checkbox': YES, // for compatibility; themes should change to target 'checkbox'
+    'sel': NO,
+    'active': NO,
+    'disabled': NO
+  },
 
   sizes: [
     { name: SC.SMALL_CONTROL_SIZE, height: 14 },
@@ -22,7 +27,6 @@ SC.BaseTheme.Checkbox = SC.Renderer.extend({
   render: function(context) {
     sc_super();
 
-    if (SC.browser.msie) context.attr('for', SC.guidFor(this));
     context.attr('role', 'checkbox');
     context.attr('name', SC.guidFor(this));
     context.attr("aria-checked", this.classNames.contains('sel').toString());
