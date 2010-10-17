@@ -594,3 +594,11 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   }
   
 });
+
+/**
+  Defines a 201 HTTP status code for successful requests.
+
+  @constant
+  @type Number
+*/
+SC.Request.CREATED = 201;
