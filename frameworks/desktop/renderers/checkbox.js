@@ -23,6 +23,7 @@ SC.BaseTheme.Checkbox = SC.Renderer.extend({
     sc_super();
 
     if (SC.browser.msie) context.attr('for', SC.guidFor(this));
+    context.attr('role', 'checkbox');
     context.attr('name', SC.guidFor(this));
     context.attr("aria-checked", this.classNames.contains('sel').toString());
     context.push('<span class="button"></span>');
