@@ -37,12 +37,6 @@ SC.ListItemView = SC.View.extend(
   
   init: function() {
     sc_super();
-    
-    // add support for deprecated render method
-    if (this.render !== SC.View.prototype.render) {
-      // we have a custom render method, freak out!
-      this.render.base = this.__DEPRECATED__render;
-    }
   },
   
   // ..........................................................
@@ -200,90 +194,6 @@ SC.ListItemView = SC.View.extend(
   }.property('content').cacheable(),
   
   
-  createRenderer: function(theme) {
-    var ret = theme.listItem();
-    this.updateRenderer(ret);
-    return ret;
-  },
-  
-  updateRenderer: function(renderer) {
-    var content = this.get('content'),
-        del = this.displayDelegate,
-        key, value;
-    
-    var attrs = {
-      contentIndex: this.get('contentIndex'),
-      contentIsEditable: this.get('contentIsEditable'),
-      escapeHTML: this.get('escapeHTML'),
-      isEnabled: this.get('isEnabled'),
-      outlineIndent: this.get('outlineIndent'),
-      outlineLevel: this.get('outlineLevel')
-    };
-    
-    // disclosure
-    value = this.get('disclosureState');
-    if (value !== SC.LEAF_NODE) {
-      attrs.disclosureState = value === SC.BRANCH_OPEN ? YES : NO;
-    } else {
-      // nullify as renderer may have been true/false before
-      attrs.disclosureState = null;
-    }
-    
-    // checkbox
-    if (key = this.getDelegateProperty('contentCheckboxKey', del)) {
-      value = content ? (content.get ? content.get(key) : content[key]) : NO;
-      attrs.checkbox = value;
-    }
-    
-    // icon
-    if (this.getDelegateProperty('hasContentIcon', del)) {
-      key = this.getDelegateProperty('contentIconKey', del);
-      value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
-      attrs.icon = value;
-    } else if (!SC.none(this.icon)) {
-      attrs.icon = this.get('icon');
-    }
-    
-    // label, always on
-    key = this.getDelegateProperty('contentValueKey', del) ;
-    value = (key && content) ? (content.get ? content.get(key) : content[key]) : content;
-    if (value && SC.typeOf(value) !== SC.T_STRING) {
-      value = value.toString();
-    }
-    attrs.label = value;
-    
-    // right icon
-    if (this.getDelegateProperty('hasContentRightIcon', del)) {
-      key = this.getDelegateProperty('contentRightIconKey', del);
-      value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
-      attrs.rightIcon = value;
-    } else if (!SC.none(this.rightIcon)) {
-      attrs.rightIcon = this.get('rightIcon');
-    }
-    
-    // unread count
-    key = this.getDelegateProperty('contentUnreadCountKey', del) ;
-    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
-    attrs.count = value;
-    
-    // WTF does the listItemActionProperty do?
-    // its render function does essentially nothing?
-    // key = this.getDelegateProperty('listItemActionProperty', del) ;
-    // value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-    // if (value) {
-    //   this.renderAction(working, value);
-    //   classArray.push('has-action');
-    // }
-    
-    if (this.getDelegateProperty('hasContentBranch', del)) {
-      key = this.getDelegateProperty('contentIsBranchKey', del);
-      value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO;
-      attrs.branch = value;
-    }
-        
-    renderer.attr(attrs);
-  },
-    
   /**
     Finds and retrieves the element containing the label.  This is used
     for inline editing.  The default implementation returns a CoreQuery
@@ -342,7 +252,7 @@ SC.ListItemView = SC.View.extend(
   */
   _isInsideDisclosure: function(evt) {
     if (this.get('disclosureState')===SC.LEAF_NODE) return NO;
-    return this._isInsideElementWithClassName('disclosure', evt);
+    return this._isInsideElementWithClassName('sc-list-item-disclosure', evt);
   },
   
   /** @private 
@@ -489,34 +399,26 @@ SC.ListItemView = SC.View.extend(
   
   _addCheckboxActiveState: function() {
     if (this.get('isEnabled')) {
-      this.renderer.attr({
-        checkboxActive: YES
-      });
-      this.displayDidChange();
+      this._checkboxRenderer.attr('classNames', { 'active': YES });
+      this._checkboxRenderer.update(this.$('.sc-checkbox-view'));
     }
   },
   
   _removeCheckboxActiveState: function() {
-   this.renderer.attr({
-     checkboxActive: NO
-   });
-   this.displayDidChange();
+      this._checkboxRenderer.attr('classNames', { 'active': NO });
+      this._checkboxRenderer.update(this.$('.sc-checkbox-view'));
   },
 
   _addDisclosureActiveState: function() {
     if (this.get('isEnabled')) {
-      this.renderer.attr({
-        disclosureActive: YES
-      });
-      this.displayDidChange();
+      this._disclosureRenderer.attr('classNames', { "active": YES });
+      this._disclosureRenderer.update(this.$('.sc-list-item-disclosure'));
     }
   },
   
   _removeDisclosureActiveState: function() {
-    this.renderer.attr({
-      disclosureActive: NO
-    });
-    this.displayDidChange();
+    this._disclosureRenderer.attr('classNames', { 'active': NO });
+    this._disclosureRenderer.update(this.$('.sc-list-item-disclosure'));
   },
 
   _addRightIconActiveState: function() {
@@ -672,20 +574,6 @@ SC.ListItemView = SC.View.extend(
    this._oldOpacity = el.css('opacity');
    el.css('opacity', 0.0) ;
   },
-  
-  /** @private
-   Could check with a validator someday...
-  */
-  inlineEditorShouldBeginEditing: function(inlineEditor) {
-   return YES ;
-  },
-
-  /** @private
-   Could check with a validator someday...
-  */
-  inlineEditorShouldBeginEditing: function(inlineEditor, finalValue) {
-    return YES ;
-  },
 
   inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
    return YES ;
@@ -709,18 +597,6 @@ SC.ListItemView = SC.View.extend(
     this.displayDidChange();
   },
 
-  // ..........................................................
-  // DEPRECATED RENDER SUPPORT
-  //
-
-  deprecatedRenderWarning: function() {
-    if (!SC.ListItemView._deprecatedRenderWarningHasBeenIssued) {
-      SC.ListItemView._deprecatedRenderWarningHasBeenIssued = true;
-      SC.Logger.warn("!!!DEPRECATED LIST ITEM RENDER METHODS BEING USED!!!\n" +
-        "Quilmes comes with a new Renderer system, please consider using it in your custom views to future-proof your application!");
-    }
-  },
-
   /** @private
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
@@ -730,9 +606,7 @@ SC.ListItemView = SC.View.extend(
     @param {Boolean} firstTime
     @returns {void}
   */
-  __DEPRECATED__render: function(context, firstTime) {
-    this.deprecatedRenderWarning();
-
+  render: function(context, firstTime) {
     var content = this.get('content'),
         del     = this.displayDelegate,
         level   = this.get('outlineLevel'),
@@ -829,21 +703,20 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderDisclosure: function(context, state) {
-    this.deprecatedRenderWarning();
+    var renderer = this.get('theme').renderer('disclosure');
+    renderer.attr({
+      classNames: {
+        'sel': state === SC.BRANCH_OPEN
+      },
+      size: SC.REGULAR_CONTROL_SIZE
+    });
 
-    var key = (state === SC.BRANCH_OPEN) ? "open" : "closed",
-        cache = this._scli_disclosureHtml,
-        html, tmp;
+    context = context.begin('div').addClass('sc-list-item-disclosure');
+    renderer.render(context);
+    context.end();
 
-    if (!cache) cache = this.constructor.prototype._scli_disclosureHtml = {};
-    html = cache[key];
-
-    if (!html) {
-      html = cache[key] = '<img src="'+SC.BLANK_IMAGE_URL+'" class="disclosure button '+key+'" />';
-    }
-
-    context.push(html);
-  },
+    this._disclosureRenderer = renderer;
+ },
 
   /** @private
     Adds a checkbox with the appropriate state to the content.  This method
@@ -855,40 +728,26 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderCheckbox: function(context, state) {
-    this.deprecatedRenderWarning();
+    var renderer = this.get('theme').renderer('checkbox');
 
-    var key = (state === SC.MIXED_STATE) ? "mixed" : state ? "sel" : "nosel",
-        cache = this._scli_checkboxHtml,
-        isEnabled = this.get('contentIsEditable') && this.get('isEnabled'),
-        html, tmp, classArray=[];
+    // note: checkbox-view is really not the best thing to do here; we should do
+    // sc-list-item-checkbox; however, themes expect something different, unfortunately.
+    context = context.begin('div').addClass('sc-checkbox-view');
+    renderer.attr({
+      classNames: {
+        sel: state && (state !== SC.MIXED_STATE),
+        mixed: state === SC.MIXED_STATE,
+        disabled: !(this.get('isEnabled') && this.get('contentIsEditable')),
+        active: this._checkboxIsActive
+      },
 
-    if (!isEnabled) key = SC.keyFor('disabled', key);
-    if (!cache) cache = this.constructor.prototype._scli_checkboxHtml = {};
-    html = cache[key];
+      size: SC.REGULAR_CONTROL_SIZE
+    });
+    renderer.render(context);
+    context = context.end();
 
-    if (!html) {
-      tmp = SC.RenderContext('div').attr('role', 'button')
-        .classNames(SC.clone(SC.CheckboxView.prototype.classNames));
-
-      // set state on html
-      if (state === SC.MIXED_STATE) classArray.push('mixed');
-      else if(state) classArray.push('sel');
-
-      // disabled
-      if(!isEnabled) classArray.push('disabled');
-
-      tmp.addClass(classArray);
-
-      // now add inner content.  note we do not add a real checkbox because
-      // we don't want to have to setup a change observer on it.
-      tmp.push('<span class="button"></span>');
-
-      // apply edit
-      html = cache[key] = tmp.join();
-    }
-
-    context.push(html);
-  },
+    this._checkboxRenderer = renderer;
+ },
 
   /** @private
     Generates an icon for the label based on the content.  This method will
@@ -900,8 +759,6 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderIcon: function(context, icon) {
-    this.deprecatedRenderWarning();
-
     // get a class name and url to include if relevant
     var url = null, className = null , classArray=[];
     if (icon && SC.ImageView.valueIsUrl(icon)) {
@@ -927,8 +784,6 @@ SC.ListItemView = SC.View.extend(
    @returns {void}
   */
   renderLabel: function(context, label) {
-    this.deprecatedRenderWarning();
-
     context.push('<label>', label || '', '</label>') ;
   },
 
@@ -942,8 +797,6 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderRightIcon: function(context, icon) {
-    this.deprecatedRenderWarning();
-
     // get a class name and url to include if relevant
     var url = null, className = null, classArray=[];
     if (icon && SC.ImageView.valueIsUrl(icon)) {
@@ -970,8 +823,6 @@ SC.ListItemView = SC.View.extend(
    @returns {void}
   */
   renderCount: function(context, count) {
-    this.deprecatedRenderWarning();
-
     context.push('<span class="count"><span class="inner">',
                   count.toString(),'</span></span>') ;
   },
@@ -985,8 +836,6 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderAction: function(context, actionClassName) {
-    this.deprecatedRenderWarning();
-
     context.push('<img src="',SC.BLANK_IMAGE_URL,'" class="action" />');
   },
 
@@ -999,8 +848,6 @@ SC.ListItemView = SC.View.extend(
    @returns {void}
   */
   renderBranch: function(context, hasBranch) {
-    this.deprecatedRenderWarning();
-
     var classArray=[];
     classArray.push('branch',hasBranch ? 'branch-visible' : 'branch-hidden');
     context.begin('span')
