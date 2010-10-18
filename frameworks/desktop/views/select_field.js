@@ -232,6 +232,10 @@ SC.SelectFieldView = SC.FieldView.extend(
     this.set('cpDidChange', YES);
   }.observes('valueKey'),
     
+  _isEnabledObserver: function() {
+    this.set('cpDidChange', YES);
+  }.observes('isEnabled'),
+
   acceptsFirstResponder: function() {
     return this.get('isEnabled');
   }.property('isEnabled'),
