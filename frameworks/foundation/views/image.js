@@ -201,16 +201,18 @@ SC.ImageView = SC.View.extend(SC.Control,
   },
   
   updateRenderer: function(renderer) {
-    var value = this.get('image'),
+    var value = this.get('value'),
         toolTip = this.get('toolTip'),
         attrs;
     
     attrs = {
       toolTip: this.get('localize') && toolTip ? toolTip.loc() : toolTip,
-      value: value
+      value: this.get('image')
     };
     
-    if (this.get('type') === SC.IMAGE_TYPE_CSS_CLASS) attrs.sprite = value;
+    if (this.get('type') === SC.IMAGE_TYPE_CSS_CLASS) {
+      attrs.sprite = value;
+    }
     
     renderer.attr(attrs);
   },
