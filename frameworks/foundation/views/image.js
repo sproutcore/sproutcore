@@ -292,9 +292,7 @@ SC.ImageView = SC.View.extend(SC.Control,
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
       
       this.set('status', SC.IMAGE_STATE_LOADING);
-      SC.RunLoop.begin();
       SC.imageQueue.loadImage(value, this, this._loadImageDidComplete, isBackground);
-      SC.RunLoop.end();
     }
   },
   
@@ -318,9 +316,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     this.set('status', SC.IMAGE_STATE_LOADED);
     if (image) this.set('image', image);
     
-    SC.RunLoop.begin();
     this.displayDidChange();
-    SC.RunLoop.end();
   },
   
   didError: function(error) {

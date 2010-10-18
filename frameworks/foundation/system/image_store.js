@@ -82,7 +82,11 @@ SC.imageStore = SC.Object.create(
               image.width = result.width;
               image.height = result.height;
             }
-            if (typeof callback === SC.T_FUNCTION) callback.call(target, url, image);
+            if (typeof callback === SC.T_FUNCTION) {
+              SC.RunLoop.begin();
+              callback.call(target, url, image);
+              SC.RunLoop.end();
+            }
           },
           that._errorHandler
         );

@@ -383,10 +383,12 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
         value = SC.IMAGE_FAILED_ERROR ;
         break;
     }
+    SC.RunLoop.begin();
     entry.callbacks.forEach(function(x){
       var target = x[0], method = x[1];
       method.call(target, url, value);
     },this);
+    SC.RunLoop.end();
     
     // now clear callbacks so they aren't called again.
     entry.callbacks = [];
