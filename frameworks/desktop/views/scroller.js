@@ -198,7 +198,7 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   render: function(context, firstTime) {
-    var classNames = [],
+    var classNames = {},
         buttons = '',
         thumbPosition, thumbLength, thumbCenterLength, thumbElement,
         value, max, scrollerLength, length, pct;
@@ -207,21 +207,21 @@ SC.ScrollerView = SC.View.extend(
     // style them differently using CSS.
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        classNames.push('sc-vertical');
+        classNames['sc-vertical'] = YES;
         break;
       case SC.LAYOUT_HORIZONTAL:
-        classNames.push('sc-horizontal');
+        classNames['sc-horizontal'] = YES;
         break;
     }
 
     // The appearance of the scroller changes if disabled
-    if (!this.get('isEnabled')) classNames.push('disabled');
+    classNames['disabled'] = !this.get('isEnabled');
     // Whether to hide the thumb and buttons
-    if (this.get('controlsHidden')) classNames.push('controls-hidden');
+    classNames['controls-hidden'] = this.get('controlsHidden');
 
     // Change the class names of the DOM element all at once to improve
     // performance
-    context.addClass(classNames);
+    context.setClass(classNames);
 
     // Calculate the position and size of the thumb
     thumbLength = this.get('thumbLength');
@@ -240,7 +240,7 @@ SC.ScrollerView = SC.View.extend(
         context.push('<div class="track"></div>',
                       '<div class="cap"></div>',
                       buttons,
-                      '<div class="thumb" style="height: '+thumbLength+'px;">',
+                      '<div class="thumb" style="height: '+thumbLength+'px; top: ' + thumbPosition + 'px;">',
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
@@ -249,7 +249,7 @@ SC.ScrollerView = SC.View.extend(
         context.push('<div class="track"></div>',
                       '<div class="cap"></div>',
                       buttons,
-                      '<div class="thumb" style="width: '+thumbLength+'px;">',
+                      '<div class="thumb" style="width: '+thumbLength+'px; left: ' + thumbPosition + 'px;">',
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
