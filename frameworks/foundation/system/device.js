@@ -2,12 +2,20 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2010 Strobe Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 require('system/ready');
 require('system/root_responder');
 require('system/platform');
+
+SC.LANDSCAPE_ORIENTATION = 'landscape';
+SC.PORTRAIT_ORIENTATION = 'portrait';
+/*
+  TODO Crappy name...
+*/
+SC.DESKTOP_ORIENTATION = 'desktop';
 
 /**
   The device object allows you to check device specific properties such as 
@@ -39,9 +47,9 @@ SC.device = SC.Object.create({
     Will be 'desktop' in the case of non-touch devices.
   
     @property {String}
-    @default 'desktop'
+    @default SC.DESKTOP_ORIENTATION
   */
-  orientation: 'desktop',
+  orientation: SC.DESKTOP_ORIENTATION,
   
   /**
     Indicates whether the device is currently online or offline. For browsers
@@ -104,24 +112,21 @@ SC.device = SC.Object.create({
   
   orientationchange: function(evt) {
     if(window.orientation===0 || window.orientation===180) {
-      this.set('orientation', 'portrait');
+      this.set('orientation', SC.PORTRAIT_ORIENTATION);
     }
     else {
-      this.set('orientation', 'landscape');
+      this.set('orientation', SC.LANDSCAPE_ORIENTATION);
     }
   },
   
   orientationObserver: function(){
     var body = SC.$(document.body),
         or = this.get('orientation');
-    if(or === "portrait") {
-      body.setClass('portrait', YES);
-      body.setClass('landscape', NO);
-    }
-    if( or === "landscape" ) {
-      body.setClass('portrait', NO);
-      body.setClass('landscape', YES);
-    }
+    
+    body.setClass({
+      'portrait': or === SC.PORTRAIT_ORIENTATION,
+      'landscape': or === SC.LANDSCAPE_ORIENTATION
+    });
   }.observes('orientation'),
   
   online: function(evt) {

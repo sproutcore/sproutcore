@@ -312,12 +312,12 @@ SC.RootResponder = SC.Object.extend({
       //Notify orientation change. This is faster than waiting for the orientation
       //change event.
       if(SC.platform.touch){
-        var body = SC.$(document.body);    
+        var body = SC.$(document.body);
         if(newSize.height>= newSize.width) {
-          SC.device.set('orientation', 'portrait');
+          SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
         }
         else {
-          SC.device.set('orientation', 'landscape');
+          SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
         }
       }
       // notify panes
@@ -774,10 +774,10 @@ SC.RootResponder = SC.Object.extend({
           body = SC.$(document.body);
     
       if(newSize.height>= newSize.width) {
-        SC.device.set('orientation', 'portrait');
+        SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
       }
       else {
-        SC.device.set('orientation', 'landscape');
+        SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
       }
     }
   },
