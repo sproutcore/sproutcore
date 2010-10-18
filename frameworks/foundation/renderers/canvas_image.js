@@ -29,7 +29,7 @@ SC.BaseTheme.renderers.CanvasImage = SC.Renderer.extend({
       context = elem.getContext('2d');
       
       if (value) {
-        context.drawImage(value, 0, 0, this.width, this.height);
+        context.drawImage(value, 0, 0, value.width, value.height, 0, 0, this.width, this.height);
       }
     }
   }

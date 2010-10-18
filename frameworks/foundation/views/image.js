@@ -2,6 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2010 Strobe Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -23,6 +24,10 @@ SC.IMAGE_TYPE_CSS_CLASS = 'CSS_CLASS';
 SC.BLANK_IMAGE_DATAURL = "data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==";
 
 SC.BLANK_IMAGE_URL = SC.browser.msie && SC.browser.msie<8 ? sc_static('blank.gif') : SC.BLANK_IMAGE_DATAURL;
+
+SC.BLANK_IMAGE = new Image();
+SC.BLANK_IMAGE.src = SC.BLANK_IMAGE_URL;
+SC.BLANK_IMAGE.width = SC.BLANK_IMAGE.height = 1;
 
 /**
   @class
@@ -46,7 +51,7 @@ SC.ImageView = SC.View.extend(SC.Control,
 
   classNames: 'sc-image-view',
   
-  displayProperties: 'status toolTip'.w(),
+  displayProperties: 'image status toolTip'.w(),
   
   tagName: function() {
     var useCanvas = this.get('useCanvas');
@@ -65,7 +70,11 @@ SC.ImageView = SC.View.extend(SC.Control,
   */
   canLoadInBackground: NO,
   
-  imageObject: null,
+  /**
+    @property {Image}
+    @default SC.BLANK_IMAGE
+  */
+  image: SC.BLANK_IMAGE,
   
   /**
     @property {String}
@@ -83,19 +92,6 @@ SC.ImageView = SC.View.extend(SC.Control,
     @default YES
   */
   localize: YES,
-  
-  /**
-    @property {String}
-    @default null
-    @observes value
-  */
-  src: function() {
-    var value = this.get('imageValue'),
-        status = this.get('status'),
-        type = this.get('type');
-    
-    return status === SC.IMAGE_STATE_LOADED && type === SC.IMAGE_TYPE_URL ? value : SC.BLANK_IMAGE_URL;
-  }.property('imageValue', 'status', 'type').cacheable(),
   
   /**
     Current load status of the image.
@@ -134,9 +130,21 @@ SC.ImageView = SC.View.extend(SC.Control,
     If YES, image view will use the SC.imageQueue to control loading.  This 
     setting is generally preferred.
     
-    @property {String}
+    @property {Boolean}
+    @default YES
   */
   useImageQueue: YES,
+  
+  /**
+    If YES, the image will be stored using the SC.imageStore mechanism. This
+    will store the image locally and make it available offline. Note that this
+    only works when using a URL as the value.
+    
+    @property {Boolean}
+    @default NO
+    @since SproutCore 1.5
+  */
+  useImageStore: NO,
   
   /**
     A url or CSS class name.
@@ -176,6 +184,11 @@ SC.ImageView = SC.View.extend(SC.Control,
     }
   },
   
+  
+  // ..........................................................
+  // Rendering
+  // 
+  
   createRenderer: function(theme) {
     var useCanvas = this.get('useCanvas');
     
@@ -188,13 +201,13 @@ SC.ImageView = SC.View.extend(SC.Control,
   },
   
   updateRenderer: function(renderer) {
-    var value = this.get('imageValue'),
+    var value = this.get('image'),
         toolTip = this.get('toolTip'),
         attrs;
     
     attrs = {
       toolTip: this.get('localize') && toolTip ? toolTip.loc() : toolTip,
-      src: this.get('src')
+      value: value
     };
     
     if (this.get('type') === SC.IMAGE_TYPE_CSS_CLASS) attrs.sprite = value;
@@ -207,7 +220,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     
     renderer.attr({
       height: frame.height,
-      value: this.get('imageObject'),
+      value: this.get('image'),
       width: frame.width
     });
   },
@@ -222,52 +235,98 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (this.get('useCanvas')) this.set('layerNeedsUpdate', YES);
   }.observes('layer'),
   
+  
+  // ..........................................................
+  // Value handling
+  // 
+  
   /** @private
     Whenever the value changes, update the image state and possibly schedule
     an image to load.
   */
   _image_valueDidChange: function() {
-    var value = this.get('value'),
+    var value = this.get('imageValue'),
+        type = this.get('type'),
+        image;
+    
+    // check to see if our value has changed
+    if (value !== this._iv_value) {
+      this._iv_value = value;
+      
+      if (type === SC.IMAGE_TYPE_URL) {
+        if (this.get('useImageStore')) {
+          SC.imageStore.load(value, this, this._storedImageDidLoad);
+        } else if (this.get('useImageQueue')) {
+          this._loadImage();
+        } else {
+          image = new Image();
+          image.src = value;
+          this.didLoad(image);
+        }
+      } else {
+        this.didLoad(image);
+      }
+    }
+  }.observes('imageValue'),
+  
+  _storedImageDidLoad: function(url, image) {
+    // check to see if we actually got the image
+    // we can't rely on image.src as it will be a datauri
+    if (image && this.get('imageValue') === url) {
+      this.didLoad(image);
+    } else if (this.get('useImageQueue')) {
+      this._loadImage();
+    } else {
+      
+    }
+  },
+  
+  _loadImage: function() {
+    var value = this.get('imageValue'),
         type = this.get('type');
     
     // now update local state as needed....
     if (type === SC.IMAGE_TYPE_URL && this.get('useImageQueue')) {
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
       
-      this._loadingUrl = value ; // note that we're loading...
-      SC.imageQueue.loadImage(value, this, this.imageDidLoad, isBackground);
-      
-      // only mark us as loading if we are still loading...
-      if (this._loadingUrl) this.set('status', SC.IMAGE_STATE_LOADING);
-      
-    // otherwise, just set state immediately
-    } else {
-      this._loadingUrl = null; // not loading...
-      this.set('status', SC.IMAGE_STATE_LOADED);
-      this.displayDidChange(); // call manually in case status did not change
-      // (e.g value changes from one sprite to another)
+      this.set('status', SC.IMAGE_STATE_LOADING);
+      SC.RunLoop.begin();
+      SC.imageQueue.loadImage(value, this, this._loadImageDidComplete, isBackground);
+      SC.RunLoop.end();
     }
-  }.observes('value'),
+  },
   
-  /** 
-    Called when the imageQueue indicates that the image has loaded. 
-    Changing the image state will update the display.
-  */
-  imageDidLoad: function(url, imageOrError) {
-    if (url === this._loadingUrl) this._loadingUrl = null;
+  _loadImageDidComplete: function(url, image) {
+    var value = this.get('imageValue');
     
-    // do nothing if we get this notification by the value of the image has 
-    // since changed.
-    if (this.get('value') === url) {
-      if (SC.ok(imageOrError)) {
-        this.set('status', SC.IMAGE_STATE_LOADED);
-        this.set('imageObject', imageOrError);
+    if (value === url) {
+      if (SC.ok(image)) {
+        if (this.get('useImageStore')) {
+          SC.imageStore.save(value, image);
+        }
+        
+        this.didLoad(image);
       } else {
-        this.set('status', SC.IMAGE_STATE_FAILED);
+        this.didError(image);
       }
-      
-      this.displayDidChange();
     }
+  },
+  
+  didLoad: function(image) {
+    this.set('status', SC.IMAGE_STATE_LOADED);
+    if (image) this.set('image', image);
+    
+    SC.RunLoop.begin();
+    this.displayDidChange();
+    SC.RunLoop.end();
+  },
+  
+  didError: function(error) {
+    this.set('status', SC.IMAGE_STATE_FAILED);
+    this.displayDidChange();
+    /*
+      TODO Do something with error?
+    */
   },
   
   

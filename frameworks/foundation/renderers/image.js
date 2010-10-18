@@ -14,31 +14,33 @@ sc_require("renderers/renderer");
 SC.BaseTheme.renderers.Image = SC.Renderer.extend({
 
   render: function(context) {
-    var src = this.src,
+    var value = this.value,
         sprite = this.sprite,
         toolTip = this.toolTip || "";
     
-    context.attr('src', src);
+    context.attr('src', value.src);
     
     if (sprite) {
       context.addClass(sprite);
       this._last_class = sprite;
     }
     
-    context.attr('title', toolTip);
-    context.attr('alt', toolTip);
+    if (toolTip) {
+      context.attr('title', toolTip);
+      context.attr('alt', toolTip);
+    }
     
     this.resetChanges();
   },
   
   update: function() {
     var cq = this.$(),
-        src = this.src,
+        value = this.value,
         sprite = this.sprite,
-        toolTip = this.toolTip;
+        toolTip = this.toolTip || "";
     
-    if (this.didChange('src')) {
-      cq.attr('src', src);
+    if (this.didChange('value')) {
+      cq.attr('src', value.src);
     }
     
     if (this.didChange('sprite')) {
