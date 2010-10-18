@@ -231,7 +231,11 @@ SC.platform = {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
-  }()
+  }(),
+  
+  supportsWebSQLDatabase: function() {
+    return ('openDatabase' in window);
+  }
 };
 
 /* Calculate CSS Prefixes */
