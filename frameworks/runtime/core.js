@@ -790,6 +790,52 @@ SC.ORDER_DEFINITION = [ SC.T_ERROR,
 // FUNCTION ENHANCEMENTS
 //
 
+SC.Function = {
+  property: function(fn, keys) {
+    fn.dependentKeys = SC.$A(keys) ;
+    var guid = SC.guidFor(fn) ;
+    fn.cacheKey = "__cache__" + guid ;
+    fn.lastSetValueKey = "__lastValue__" + guid ;
+    fn.isProperty = true ;
+    return fn ;
+  },
+
+  cacheable: function(fn, aFlag) {
+    fn.isProperty = true ;  // also make a property just in case
+    if (!fn.dependentKeys) fn.dependentKeys = [] ;
+    fn.isCacheable = (aFlag === undefined) ? true : aFlag ;
+    return fn ;
+  },
+
+  idempotent: function(fn, aFlag) {
+    fn.isProperty = true;  // also make a property just in case
+    if (!fn.dependentKeys) this.dependentKeys = [] ;
+    fn.isVolatile = (aFlag === undefined) ? true : aFlag ;
+    return fn ;
+  },
+
+  observes: function(fn, propertyPaths) {
+    // sort property paths into local paths (i.e just a property name) and
+    // full paths (i.e. those with a . or * in them)
+    var loc = propertyPaths.length, local = null, paths = null ;
+    while(--loc >= 0) {
+      var path = propertyPaths[loc] ;
+      // local
+      if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
+        if (!local) local = fn.localPropertyPaths = [] ;
+        local.push(path);
+
+      // regular
+      } else {
+        if (!paths) paths = fn.propertyPaths = [] ;
+        paths.push(path) ;
+      }
+    }
+    return fn ;
+  }
+
+}
+
 SC.mixin(Function.prototype,
 /** @lends Function.prototype */ {
 
@@ -902,12 +948,7 @@ SC.mixin(Function.prototype,
     @returns {Function} the declared function instance
   */
   property: function() {
-    this.dependentKeys = SC.$A(arguments) ;
-    var guid = SC.guidFor(this) ;
-    this.cacheKey = "__cache__" + guid ;
-    this.lastSetValueKey = "__lastValue__" + guid ;
-    this.isProperty = YES ;
-    return this ;
+    return SC.Function.property(this, arguments)
   },
 
   /**
@@ -925,10 +966,7 @@ SC.mixin(Function.prototype,
     @returns {Function} reciever
   */
   cacheable: function(aFlag) {
-    this.isProperty = YES ;  // also make a property just in case
-    if (!this.dependentKeys) this.dependentKeys = [] ;
-    this.isCacheable = (aFlag === undefined) ? YES : aFlag ;
-    return this ;
+    return SC.Function.cacheable(this, aFlag);
   },
 
   /**
@@ -949,10 +987,7 @@ SC.mixin(Function.prototype,
     @returns {Function} receiver
   */
   idempotent: function(aFlag) {
-    this.isProperty = YES;  // also make a property just in case
-    if (!this.dependentKeys) this.dependentKeys = [] ;
-    this.isVolatile = (aFlag === undefined) ? YES : aFlag ;
-    return this ;
+    return SC.Function.idempotent(this, aFlag)
   },
 
   /**
@@ -962,23 +997,7 @@ SC.mixin(Function.prototype,
     @returns {Function} receiver
   */
   observes: function(propertyPaths) {
-    // sort property paths into local paths (i.e just a property name) and
-    // full paths (i.e. those with a . or * in them)
-    var loc = arguments.length, local = null, paths = null ;
-    while(--loc >= 0) {
-      var path = arguments[loc] ;
-      // local
-      if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
-        if (!local) local = this.localPropertyPaths = [] ;
-        local.push(path);
-
-      // regular
-      } else {
-        if (!paths) paths = this.propertyPaths = [] ;
-        paths.push(path) ;
-      }
-    }
-    return this ;
+    return SC.Function.observes(this, arguments);
   }
 
 });
