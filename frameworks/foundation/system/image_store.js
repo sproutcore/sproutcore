@@ -116,10 +116,6 @@ SC.imageStore = SC.Object.create(
     @returns YES if transaction is executed, NO otherwise
   */
   save: function(url, image, target, callback) {
-    /*
-      TODO We really need to check whether the image already exists in the DB already
-            via the URL, and do an UPDATE or INSERT based off of that information
-    */
     var db = this._retrieveDatabase(),
         debug = this.get('debug'),
         that = this,
@@ -154,7 +150,7 @@ SC.imageStore = SC.Object.create(
     this._setupTable(this, function() {
       db.transaction(function(t) {
         t.executeSql(
-          'INSERT INTO images (url, width, height, value) VALUES (?, ?, ?, ?);',
+          'REPLACE INTO images (url, width, height, value) VALUES (?, ?, ?, ?);',
           [url, image.width, image.height, data],
           function(transaction, results) {
             if (debug) SC.Logger.log("[SC.imageStore#save] saved %@".fmt(url));
