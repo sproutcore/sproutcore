@@ -64,6 +64,14 @@ test("should return a cloned array ", function() {
 		
 });
 
+test("should return a cloned hash", function() {
+  var original = { foo: 'bar', nested: { key: 'value'}} ;
+  var cloned = SC.clone(original) ;
+  same(original, cloned);
+  cloned.nested.key = 'another value' ;
+  equals(original.nested.key, 'value') ;
+});
+
 test("should use copy() if isCopyable", function() {
   var obj = SC.Object.create(SC.Copyable, {
     isCopy: NO,
