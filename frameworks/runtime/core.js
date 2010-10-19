@@ -218,7 +218,7 @@ SC.mixin(/** @scope SC */ {
     @returns {Boolean}
   */
   none: function(obj) {
-    return obj === null || obj === undefined;
+    return obj == null;
   },
 
   /**
@@ -1002,72 +1002,87 @@ SC.mixin(Function.prototype,
 
 });
 
-// ..........................................................
-// STRING ENHANCEMENT
-//
-
-// Interpolate string. looks for %@ or %@1; to control the order of params.
-/**
-  Apply formatting options to the string.  This will look for occurrences
-  of %@ in your string and substitute them with the arguments you pass into
-  this method.  If you want to control the specific order of replacement,
-  you can add a number after the key as well to indicate which argument
-  you want to insert.
-
-  Ordered insertions are most useful when building loc strings where values
-  you need to insert may appear in different orders.
-
-  h3. Examples
-
-  {{{
-    "Hello %@ %@".fmt('John', 'Doe') => "Hello John Doe"
-    "Hello %@2, %@1".fmt('John', 'Doe') => "Hello Doe, John"
-  }}}
-
-  @param args {Object...} optional arguments
-  @returns {String} formatted string
-*/
-String.prototype.fmt = function() {
-  // first, replace any ORDERED replacements.
-  var args = arguments,
-      idx  = 0; // the current index for non-numerical replacements
-  return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
-    argIndex = (argIndex) ? parseInt(argIndex,0) - 1 : idx++ ;
-    s = args[argIndex];
-    return ((s === null) ? '(null)' : (s === undefined) ? '' : s).toString();
-  }) ;
-};
-
-/**
-  Localizes the string.  This will look up the reciever string as a key
-  in the current Strings hash.  If the key matches, the loc'd value will be
-  used.  The resulting string will also be passed through fmt() to insert
-  any variables.
-
-  @param args {Object...} optional arguments to interpolate also
-  @returns {String} the localized and formatted string.
-*/
-String.prototype.loc = function() {
-  var str = SC.STRINGS[this] || this;
-  return str.fmt.apply(str,arguments) ;
-};
-
-
-
-/**
-  Splits the string into words, separated by spaces. Empty strings are
-  removed from the results.
-
-  @returns {Array} an array of non-empty strings
-*/
-String.prototype.w = function() {
-  var ary = [], ary2 = this.split(' '), len = ary2.length, str, idx=0;
-  for (idx=0; idx<len; ++idx) {
-    str = ary2[idx] ;
-    if (str.length !== 0) ary.push(str) ; // skip empty strings
+SC.String = {
+  fmt: function(str, formats) {
+    // first, replace any ORDERED replacements.
+    var idx  = 0; // the current index for non-numerical replacements
+    return str.replace(/%@([0-9]+)?/g, function(s, argIndex) {
+      argIndex = (argIndex) ? parseInt(argIndex,0) - 1 : idx++ ;
+      s = formats[argIndex];
+      return ((s === null) ? '(null)' : (s === undefined) ? '' : s).toString();
+    }) ;
+  },
+  loc: function(str, formats) {
+    var str = SC.STRINGS[str] || str;
+    return SC.String.fmt(str, arguments) ;
+  },
+  w: function(str) {
+    var ary = [], ary2 = str.split(' '), len = ary2.length, string, idx=0;
+    for (idx=0; idx<len; ++idx) {
+      string = ary2[idx] ;
+      if (string.length !== 0) ary.push(string) ; // skip empty strings
+    }
+    return ary ;
   }
-  return ary ;
-};
+}
+
+SC.mixin(String.prototype,
+/** @lends Function.prototype */ {
+
+  // ..........................................................
+  // STRING ENHANCEMENT
+  //
+
+  // Interpolate string. looks for %@ or %@1; to control the order of params.
+  /**
+    Apply formatting options to the string.  This will look for occurrences
+    of %@ in your string and substitute them with the arguments you pass into
+    this method.  If you want to control the specific order of replacement,
+    you can add a number after the key as well to indicate which argument
+    you want to insert.
+
+    Ordered insertions are most useful when building loc strings where values
+    you need to insert may appear in different orders.
+
+    h3. Examples
+
+    {{{
+      "Hello %@ %@".fmt('John', 'Doe') => "Hello John Doe"
+      "Hello %@2, %@1".fmt('John', 'Doe') => "Hello Doe, John"
+    }}}
+
+    @param args {Object...} optional arguments
+    @returns {String} formatted string
+  */
+  fmt: function() {
+    return SC.String.fmt(this, arguments);
+  },
+
+  /**
+    Localizes the string.  This will look up the reciever string as a key
+    in the current Strings hash.  If the key matches, the loc'd value will be
+    used.  The resulting string will also be passed through fmt() to insert
+    any variables.
+
+    @param args {Object...} optional arguments to interpolate also
+    @returns {String} the localized and formatted string.
+  */
+  loc: function() {
+    return SC.String.loc(this, arguments);
+  },
+
+
+
+  /**
+    Splits the string into words, separated by spaces. Empty strings are
+    removed from the results.
+
+    @returns {Array} an array of non-empty strings
+  */
+  w: function() {
+    return SC.String.w(this);
+  }
+});
 
 //
 // DATE ENHANCEMENT
