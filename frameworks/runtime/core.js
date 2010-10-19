@@ -613,6 +613,14 @@ SC.mixin(/** @scope SC */ {
       break ;
 
     case SC.T_HASH:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else {
+        ret = {} ;
+        for(var key in object) ret[key] = SC.copy(object[key]) ;
+      }
+      break ;
+
     case SC.T_OBJECT:
       if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
         ret = object.clone() ;
