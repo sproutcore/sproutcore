@@ -13,26 +13,26 @@ sc_require('mixins/delegate_support') ;
 /**
   @class
 
-  A dynamically filled array.  A SparseArray makes it easy for you to create 
+  A dynamically filled array.  A SparseArray makes it easy for you to create
   very large arrays of data but then to defer actually populating that array
   until it is actually needed.  This is often much faster than generating an
   array up front and paying the cost to load your data then.
-  
-  Although technically all arrays in JavaScript are "sparse" (in the sense 
+
+  Although technically all arrays in JavaScript are "sparse" (in the sense
   that you can read and write properties at arbitrary indexes), this array
-  keeps track of which elements in the array have been populated already 
-  and which ones have not.  If you try to get a value at an index that has 
+  keeps track of which elements in the array have been populated already
+  and which ones have not.  If you try to get a value at an index that has
   not yet been populated, the SparseArray will notify a delegate object first,
   giving the delegate a chance to populate the component.
-  
-  Most of the time, you will use a SparseArray to incrementally load data 
+
+  Most of the time, you will use a SparseArray to incrementally load data
   from the server.  For example, if you have a contact list with 3,000
   contacts in it, you may create a SparseArray with a length of 3,000 and set
   that as the content for a ListView.  As the ListView tries to display the
   visible contacts, it will request them from the SparseArray, which will in
   turn notify your delegate, giving you a chance to load the contact data from
   the server.
-  
+
   @extends SC.Enumerable
   @extends SC.Array
   @extends SC.Observable
@@ -40,20 +40,20 @@ sc_require('mixins/delegate_support') ;
   @since SproutCore 1.0
 */
 
-SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array, 
-  SC.DelegateSupport, /** @scope SC.SparseArray.prototype */ {  
+SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
+  SC.DelegateSupport, /** @scope SC.SparseArray.prototype */ {
 
   // ..........................................................
   // LENGTH SUPPORT
-  // 
+  //
 
-  _requestingLength: 0,  
+  _requestingLength: 0,
   _requestingIndex: 0,
-   
+
   /**
-    The length of the sparse array.  The delegate for the array should set 
+    The length of the sparse array.  The delegate for the array should set
     this length.
-    
+
     @property {Number}
   */
   length: function() {
@@ -69,9 +69,9 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   /**
     Call this method from a delegate to provide a length for the sparse array.
     If you pass null for this property, it will essentially "reset" the array
-    causing your delegate to be called again the next time another object 
+    causing your delegate to be called again the next time another object
     requests the array length.
-  
+
     @param {Number} length the length or null
     @returns {SC.SparseArray} receiver
   */
@@ -85,30 +85,30 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   },
 
   // ..........................................................
-  // READING CONTENT 
-  // 
+  // READING CONTENT
+  //
 
-  /** 
+  /**
     The minimum range of elements that should be requested from the delegate.
     If this value is set to larger than 1, then the sparse array will always
     fit a requested index into a range of this size and request it.
-    
+
     @property {Number}
   */
   rangeWindowSize: 1,
-  
+
   /*
-    This array contains all the start_indexes of ranges requested. This is to 
-    avoid calling sparseArrayDidRequestRange to often. Indexes are removed and 
+    This array contains all the start_indexes of ranges requested. This is to
+    avoid calling sparseArrayDidRequestRange to often. Indexes are removed and
     added as range requests are completed.
   */
   requestedRangeIndex: [],
-  
-  /** 
+
+  /**
     Returns the object at the specified index.  If the value for the index
     is currently undefined, invokes the didRequestIndex() method to notify
     the delegate.
-    
+
     @param  {Number} idx the index to get
     @return {Object} the object
   */
@@ -124,11 +124,11 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
 
   /**
     Returns the set of indexes that are currently defined on the sparse array.
-    If you pass an optional index set, the search will be limited to only 
+    If you pass an optional index set, the search will be limited to only
     those indexes.  Otherwise this method will return an index set containing
-    all of the defined indexes.  Currently this can be quite expensive if 
+    all of the defined indexes.  Currently this can be quite expensive if
     you have a lot of indexes defined.
-    
+
     @param {SC.IndexSet} indexes optional from indexes
     @returns {SC.IndexSet} defined indexes
   */
@@ -136,44 +136,44 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     var ret = SC.IndexSet.create(),
         content = this._sa_content,
         idx, len;
-        
+
     if (!content) return ret.freeze(); // nothing to do
-    
+
     if (indexes) {
-      indexes.forEach(function(idx) { 
+      indexes.forEach(function(idx) {
         if (content[idx] !== undefined) ret.add(idx);
       });
-    } else {      
+    } else {
       len = content.length;
       for(idx=0;idx<len;idx++) {
         if (content[idx] !== undefined) ret.add(idx);
       }
     }
-    
+
     return ret.freeze();
   },
-  
+
   _TMP_RANGE: {},
-  
+
   /**
     Called by objectAt() whenever you request an index that has not yet been
     loaded.  This will possibly expand the index into a range and then invoke
     an appropriate method on the delegate to request the data.
-    
+
     It will check if the range has been already requested.
-    
+
     @param {Number} idx the index to retrieve
     @returns {SC.SparseArray} receiver
   */
   requestIndex: function(idx) {
     var del = this.delegate;
     if (!del) return this; // nothing to do
-    
+
     // adjust window
     var len = this.get('rangeWindowSize'), start = idx;
     if (len > 1) start = start - Math.floor(start % len);
     if (len < 1) len = 1 ;
-    
+
     // invoke appropriate callback
     this._requestingIndex++;
     if (del.sparseArrayDidRequestRange) {
@@ -191,11 +191,11 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
 
     return this ;
   },
-  
+
   /*
-    This method is called by requestIndex to check if the range has already 
+    This method is called by requestIndex to check if the range has already
     been requested. We assume that rangeWindowSize is not changed often.
-    
+
      @param {Number} startIndex
      @return {Number} index in requestRangeIndex
   */
@@ -206,30 +206,30 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     }
     return -1;
   },
-  
+
   /*
     This method has to be called after a request for a range has completed.
-    To remove the index from the sparseArray to allow future updates on the 
+    To remove the index from the sparseArray to allow future updates on the
     range.
-    
+
      @param {Number} startIndex
      @return {Number} index in requestRangeIndex
   */
-  rangeRequestCompleted: function(start) { 
+  rangeRequestCompleted: function(start) {
     var i = this.wasRangeRequested(start);
-    if(i>=0) { 
+    if(i>=0) {
       this.requestedRangeIndex.removeAt(i,1);
       return YES;
     }
     return NO;
   },
-  
+
   /**
-    This method sets the content for the specified to the objects in the 
+    This method sets the content for the specified to the objects in the
     passed array.  If you change the way SparseArray implements its internal
-    tracking of objects, you should override this method along with 
+    tracking of objects, you should override this method along with
     objectAt().
-    
+
     @param {Range} range the range to apply to
     @param {Array} array the array of objects to insert
     @returns {SC.SparseArray} reciever
@@ -245,12 +245,12 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
 
   _TMP_PROVIDE_ARRAY: [],
   _TMP_PROVIDE_RANGE: { length: 1 },
-  
+
   /**
     Convenience method to provide a single object at a specified index.  Under
-    the covers this calls provideObjectsInRange() so you can override only 
+    the covers this calls provideObjectsInRange() so you can override only
     that method and this one will still work.
-    
+
     @param {Number} index the index to insert
     @param {Object} the object to insert
     @return {SC.SparseArray} receiver
@@ -263,10 +263,10 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   },
 
   /**
-    Invalidates the array content in the specified range.  This is not the 
+    Invalidates the array content in the specified range.  This is not the
     same as editing an array.  Rather it will cause the array to reload the
     content from the delegate again when it is requested.
-    
+
     @param {Range} the range
     @returns {SC.SparseArray} receiver
   */
@@ -278,22 +278,22 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
       // if range covers entire length of cached content, just reset array
       if (range.start === 0 && SC.maxRange(range)>=content.length) {
         this._sa_content = null ;
-        
+
       // otherwise, step through the changed parts and delete them.
       } else {
         var start = range.start, loc = Math.min(start + range.length, content.length);
         while (--loc>=start) content[loc] = undefined;
       }
-    }    
+    }
     this.enumerableContentDidChange(range) ; // notify
     return this ;
   },
-  
+
   /**
-    Optimized version of indexOf().  Asks the delegate to provide the index 
+    Optimized version of indexOf().  Asks the delegate to provide the index
     of the specified object.  If the delegate does not implement this method
     then it will search the internal array directly.
-    
+
     @param {Object} obj the object to search for
     @returns {Number} the discovered index or -1 if not found
   */
@@ -306,16 +306,16 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
       if (!content) content = this._sa_content = [] ;
       return content.indexOf(obj) ;
     }
-  },  
-  
+  },
+
   // ..........................................................
   // EDITING
-  // 
+  //
 
   /**
-    Array primitive edits the objects at the specified index unless the 
+    Array primitive edits the objects at the specified index unless the
     delegate rejects the change.
-    
+
     @param {Number} idx the index to begin to replace
     @param {Number} amt the number of items to replace
     @param {Array} objects the new objects to set instead
@@ -327,7 +327,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     // if we have a delegate, get permission to make the replacement.
     var del = this.delegate ;
     if (del) {
-      if (!del.sparseArrayShouldReplace || 
+      if (!del.sparseArrayShouldReplace ||
           !del.sparseArrayShouldReplace(this, idx, amt, objects)) {
             return this;
       }
@@ -337,7 +337,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     var content = this._sa_content ;
     if (!content) content = this._sa_content = [] ;
     content.replace(idx, amt, objects) ;
-    
+
     // update length
     var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
     var delta = len - amt ;
@@ -351,10 +351,10 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** 
-    Resets the SparseArray, causing it to reload its content from the 
+  /**
+    Resets the SparseArray, causing it to reload its content from the
     delegate again.
-    
+
     @returns {SC.SparseArray} receiver
   */
   reset: function() {
@@ -364,13 +364,13 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReset', this);
     return this ;
   }
-      
+
 }) ;
 
-/** 
-  Convenience metohd returns a new sparse array with a default length already 
+/**
+  Convenience metohd returns a new sparse array with a default length already
   provided.
-  
+
   @param {Number} len the length of the array
   @returns {SC.SparseArray}
 */

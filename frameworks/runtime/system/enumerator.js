@@ -7,16 +7,16 @@
 
 /**
   @class
-  
-  An object that iterates over all of the values in an object.  
-  
-  An instance of this object is returned everytime you call the 
+
+  An object that iterates over all of the values in an object.
+
+  An instance of this object is returned everytime you call the
   enumerator() method on an object that implements the SC.Enumerable mixin.
-  
+
   Once you create an enumerator instance, you can call nextObject() on it
   until you can iterated through the entire collection.  Once you have
   exhausted the enumerator, you can reuse it if you want by calling reset().
-  
+
   @since SproutCore 1.0
 */
 SC.Enumerator = function(enumerableObject) {
@@ -26,33 +26,33 @@ SC.Enumerator = function(enumerableObject) {
 } ;
 
 SC.Enumerator.prototype = {
-  
-  /** 
+
+  /**
     Returns the next object in the enumeration or undefined when complete.
-    
+
     @returns {Object} the next object or undefined
   */
   nextObject: function() {
     var index = this._index ;
     var len = this._length;
     if (index >= len) return undefined ; // nothing to do
-    
+
     // get the value
     var ret = this.enumerable.nextObject(index, this._previousObject, this._context) ;
     this._previousObject = ret ;
     this._index = index + 1 ;
-    
+
     if (index >= len) {
-      this._context = SC.Enumerator._pushContext(this._context); 
+      this._context = SC.Enumerator._pushContext(this._context);
     }
-    
+
     return ret ;
   },
-  
+
   /**
     Resets the enumerator to the beginning.  This is a nice way to reuse
-    an existing enumerator. 
-    
+    an existing enumerator.
+
     @returns {Object} this
   */
   reset: function() {
@@ -64,18 +64,18 @@ SC.Enumerator.prototype = {
     this._previousObject = null ;
     this._context = (len > 0) ? SC.Enumerator._popContext() : null;
   },
-  
+
   /**
     Releases the enumerators enumerable object.  You cannot use this object
-    anymore.  This is not often needed but it is useful when you need to 
+    anymore.  This is not often needed but it is useful when you need to
     make sure memory gets cleared.
-    
-    @returns {Object} null 
+
+    @returns {Object} null
   */
   destroy: function() {
     this.enumerable = this._length = this._index = this._previousObject = this._context = null;
   }
-  
+
 } ;
 
 /**
@@ -103,5 +103,5 @@ SC.Enumerator._pushContext = function(context) {
   var cache = this._contextCache;
   cache.push(context);
   return null ;
-}; 
+};
 
