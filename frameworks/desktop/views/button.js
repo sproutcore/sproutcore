@@ -225,8 +225,16 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   /** @private - save keyEquivalent for later use */
   init: function() {
+    // deprecated behavior if you are using renderStyle
+    if (this.get('renderStyle')) {
+      console.warn("renderStyle: image is deprecated. Please use theme: 'icon' instead.");
+
+      // theme should still be string form
+      this.theme = 'icon';
+    }
+
     sc_super();
-    
+
     //cache the key equivalent
     if(this.get("keyEquivalent")) this._defaultKeyEquivalent = this.get("keyEquivalent"); 
   },
