@@ -17,7 +17,7 @@ SC.MODE_APPEND = 'append';
 SC.MODE_PREPEND = 'prepend';
 
 /** list of numeric properties that should not have 'px' appended */
-SC.NON_PIXEL_PROPERTIES = 'zIndex font-weight opacity'.w();
+SC.NON_PIXEL_PROPERTIES = 'zIndex fontWeight opacity'.w();
 
 /** a list of styles that get expanded into multiple properties, add more as you discover them */
 SC.COMBO_STYLES = {
