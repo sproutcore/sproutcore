@@ -781,7 +781,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   // 
     
   _STYLE_REGEX: /-?\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g,
-  
+
   /**
     Retrieves or sets the current styles for the outer tag.  If you retrieve
     the styles hash to edit it, you must set the hash again in order for it 
@@ -947,7 +947,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     }
 
     // avoid case where no styles have been defined
-    if (!this._styles && !this._elem) return this;
+    if (!this._styles) return this;
     
     // get styles hash.  this will clone if needed.
     var styles = this.styles();
