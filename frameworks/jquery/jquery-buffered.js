@@ -175,6 +175,27 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
       buffer.clearClassNames();
     }
     return this;
+  },
+
+  css: function(key, value) {
+    // now, buffer the command.
+    var len = this.length, i;
+    for (i = 0; i < len; i++) {
+      var buffer = jQuery.Buffer.bufferForElement(this[i]);
+      buffer.css(key, value);
+    }
+    return this;
+  },
+
+  styles: function() {
+    if (this.length < 1) return null;
+    return jQuery.Buffer.bufferForElement(this[0]).styles();
+  },
+
+  resetStyles: function() {
+    if (this.length < 1) return null;
+    jQuery.Buffer.bufferForElement(this[0]).resetStyles();
+    return this;
   }
   
 });

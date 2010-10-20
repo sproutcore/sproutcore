@@ -167,6 +167,8 @@ jQuery.Buffer = (function() {
       return this.html(value);
     } else if (key === "text") {
       return this.text(value);
+    } else if (key === 'style') {
+      return this.resetStyles(value);
     }
     
     var context = this.bufferedCommand("flushAttributes");
@@ -175,9 +177,103 @@ jQuery.Buffer = (function() {
   };
   
   Buffer.prototype.flushAttributes = function(context) {
-    this.$().attr(context.attr);
+    var attr = context.attr, cq = this.$(), v;
+    for (var key in attr) {
+      if (!attr.hasOwnProperty(key)) continue;
+      v = attr[key];
+      if (v !== null) cq.attr(key, v);
+      else cq.removeAttr(key);
+    }
   };
-  
+
+
+  // 
+  // SUPPORT FOR CSS STYLES
+  //
+  Buffer.prototype._STYLE_REGEX = /-?\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g;
+
+  Buffer.prototype._camelizeStyleName = function(name) {
+    // IE wants the first letter lowercase so we can allow normal behavior
+    var needsCap = name.match(/^-(webkit|moz|o)-/),
+        camelized = name.camelize();
+
+    if (needsCap) {
+      return camelized.substr(0,1).toUpperCase() + camelized.substr(1);
+    } else {
+      return camelized;
+    }
+  };
+
+  Buffer.prototype._dasherizeStyleName = function(name) {
+    var dasherized = name.dasherize();
+    if (dasherized.match(/^(webkit|moz|ms|o)-/)) dasherized = '-'+dasherized;
+    return dasherized;
+  };
+
+  Buffer.prototype._loadStyles = function(attr) {
+    // parse style...
+    if (!attr) attr = this.$().attr('style');
+    
+    if (attr && (attr = attr.toString()).length>0) {
+      if(SC.browser.msie){ 
+        attr = attr.toLowerCase();
+      }
+      styles = {};
+      
+      regex = this._STYLE_REGEX ;
+      regex.lastIndex = 0;
+      
+      while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
+      
+      return styles;
+    } else {
+      return { };
+    }
+  };
+
+  Buffer.prototype.resetStyles = function(styles) {
+    var context = this.bufferedCommand("flushStyles");
+    context._styles = this._loadStyles(styles || " ");
+  };
+
+  Buffer.prototype.styles = function() {
+    var context = this.bufferedCommand("flushStyles");
+    if (!context._styles) context._styles = this._loadStyles();
+    return context._styles;
+  };
+
+  Buffer.prototype.css = function(key, value) {
+    if (typeof key === "object") {
+      for (var k in key) this.css(k, key[k]);
+      return;
+    }
+
+    var context = this.bufferedCommand("flushStyles");
+    if (!context._styles) context._styles = this._loadStyles;
+
+    context._styles[key] = value;
+  };
+
+  Buffer.prototype.flushStyles = function(context) {
+    var styles = context._styles;
+    var str = "";
+
+    var key, value, props = [], idx = 0;
+    for (key in styles) {
+      if (!styles.hasOwnProperty(key)) continue;
+      value = styles[key];
+      if (value === null) continue;
+      if (typeof value === "number" && key !== 'zIndex' && key !== "fontWeight" && key !== "opacity") value += "px";
+
+      props[idx++] = this._dasherizeStyleName(key) + ": " + value;
+    }
+
+    this.$().attr("style", props.join("; "));
+  };
+
+  // 
+  // SUPPORT FOR CLASS NAMES
+  //
   Buffer.prototype._hashFromClassNames = function(classNames) {
     // split if needed
     if (typeof classNames === "string") classNames = classNames.split(" ");
