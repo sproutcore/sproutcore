@@ -82,6 +82,6 @@ SC.stringsFor('English', {
   "_Reload App": "Reload App",
   "_Target:": "Target:",
   "_Design Type:": "Design Type:",
-  "_Add Design": "Add Design"
+  "_Remove": "Remove"
   
 }) ;

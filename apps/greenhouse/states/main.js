@@ -102,52 +102,70 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     _setupRunLoops: function(){
       var iframe = Greenhouse.get('iframe'), innerBegin, outerBegin, innerEnd, outerEnd, outerSC = SC;
 
-
-      outerBegin = outerSC.RunLoop.begin = function() { 
-        //console.log('outer begin');
-        var runLoop = this.currentRunLoop;
-        if (!runLoop) runLoop = this.currentRunLoop = outerSC.RunLoop.runLoopClass.create();
+      // ..........................................................
+      // run loop patches...
+      // 
+      outerBegin = function() {    
+        var runLoop = outerSC.RunLoop.currentRunLoop;
+        if (!runLoop) runLoop = outerSC.RunLoop.currentRunLoop = outerSC.RunLoop.runLoopClass.create();
         runLoop.beginRunLoop();
-
-        //begin the iframe's run loop...
-        var runLoopIframe = iframe.SC.RunLoop.currentRunLoop;
-        if (!runLoopIframe) runLoopIframe = iframe.SC.RunLoop.currentRunLoop = iframe.SC.RunLoop.runLoopClass.create();
-        runLoopIframe.beginRunLoop();
-
-        return this ;
+        return outerSC.RunLoop ;
       };
-      innerBegin = iframe.SC.RunLoop.begin = function() {
+      outerEnd = function() {
+        var runLoop = outerSC.RunLoop.currentRunLoop;
+        if (!runLoop) {
+          throw "SC.RunLoop.end() called outside of a runloop!";
+        }
+        runLoop.endRunLoop();
+        return outerSC.RunLoop ;
+      };
+
+      innerBegin = function() {    
+        var runLoop = iframe.SC.RunLoop.currentRunLoop;
+        if (!runLoop) runLoop = iframe.SC.RunLoop.currentRunLoop = iframe.SC.RunLoop.runLoopClass.create();
+        runLoop.beginRunLoop();
+        return iframe.SC.RunLoop ;
+      };
+
+      innerEnd = function() {
+        var runLoop = iframe.SC.RunLoop.currentRunLoop;
+        if (!runLoop) {
+          throw "SC.RunLoop.end() called outside of a runloop!";
+        }
+        runLoop.endRunLoop();
+        return iframe.SC.RunLoop ;
+      };
+
+      //outer begin
+      outerSC.RunLoop.begin = function() { 
+        //console.log('outer begin');
+        var outer = outerBegin();
+        innerBegin();
+        return outer;
+      };
+
+      //inner begin
+      iframe.SC.RunLoop.begin = function() {
         //console.log('inner begin');
-        outerBegin(); //inner run loop always triggers both loops
-        return this ;
+        var inner = innerBegin();
+        outerBegin();
+        return inner;
       };
 
-      outerEnd = outerSC.RunLoop.end = function() {
-        //end any inner run loops if they exist.
-        var innerLoop = iframe.SC.RunLoop.currentRunLoop;
-        if(innerLoop) innerLoop.endRunLoop();
-
-
-        //console.log('outer end');
-        var runLoop = this.currentRunLoop;
-        if (!runLoop) {
-          throw "SC.RunLoop.end() called outside of a runloop!";
-        }
-        runLoop.endRunLoop();
-        return this ;
-      };
-
-      innerEnd = iframe.SC.RunLoop.end = function() {
+      //inner end
+      iframe.SC.RunLoop.end = function() {
         //console.log('inner end');
-        var runLoop = this.currentRunLoop;
-        if (!runLoop) {
-          throw "SC.RunLoop.end() called outside of a runloop!";
-        }
-        runLoop.endRunLoop();
         outerEnd();
-        return this ;
+        return innerEnd();
       };
-    },
+
+      //Outer End
+      outerSC.RunLoop.end = function() {
+        //console.log('outer end');
+        innerEnd();
+        return outerEnd();
+      };
+     },
 
     _grabDropTargets: function(){
       var iframe = Greenhouse.get('iframe'), 

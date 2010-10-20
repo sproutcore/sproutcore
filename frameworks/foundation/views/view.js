@@ -1179,11 +1179,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.didCreateLayer) this.didCreateLayer() ;
 
     // Animation prep
-    if (SC.platform.supportsCSSTransitions) {
-      this.resetAnimation();
-      SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
-      SC.Event.add(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
-    }
+    if (SC.platform.supportsCSSTransitions) this.resetAnimation();
 
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
@@ -1231,12 +1227,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   destroyLayer: function() {
     var layer = this.get('layer') ;
     if (layer) {
-
-      // Teardown animations
-      if (SC.platform.supportsCSSTransitions) {
-        SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this._scv_animationEnd);
-        SC.Event.remove(this.get('layer'), "transitionEnd", this, this._scv_animationEnd);
-      }
 
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
@@ -2465,7 +2455,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     Called when animation ends, should not usually be called manually
   */
-  _scv_animationEnd: function(evt){
+  transitionDidEnd: function(evt){
     // WARNING: Sometimes this will get called more than once for a property. Not sure why.
 
     var propertyName = evt.originalEvent.propertyName,
