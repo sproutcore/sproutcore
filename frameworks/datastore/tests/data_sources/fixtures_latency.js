@@ -43,42 +43,37 @@ module("SC.FixturesDataSource latency", {
 });
 
 test("Verify find() loads all fixture data", function() {
+  SC.RunLoop.begin();
+  
   var result = store.find(Sample.File),
       rec, storeKey, dataHash;
   
-  var timer = setTimeout(function() {
-    ok(false, 'FixturesDataSource did not return response within 2s');
-    window.start();
-  }, 2000);
-  
   result.addObserver('status', function() {
     if (result.get('status') & SC.Record.READY) {
-      clearTimeout(timer);
-    
       equals(result.get('length'), Sample.File.FIXTURES.get('length'), 'should return records for each item in FIXTURES');
-
+      
       // verify storeKeys actually return Records
       var idx, len = result.get('length'), expected = [];
       for(idx=0;idx<len;idx++) {
         rec = result.objectAt(idx);
         storeKey = rec ? rec.get('storeKey') : null;
         dataHash = storeKey ? store.readDataHash(storeKey) : null;
-
+        
         ok(!!dataHash, 'storeKey at result[%@] (%@) should return dataHash'.fmt(idx, storeKey));
-
+        
         expected.push(rec); // save record for later test
       }
-
+      
       // verify multiple calls to findAll() returns SAME data
       result = store.find(Sample.File);
-
+      
       equals(result.get('length'), expected.length, 'second result should have same length as first');
       len = result.get('length');
       for(idx=0;idx<len;idx++) {
         rec = result.objectAt(idx);
         equals(rec, expected[idx], 'record returned at index %@ should be same as previous'.fmt(idx));
       }
-    
+      
       window.start();
     }
   });
@@ -88,57 +83,55 @@ test("Verify find() loads all fixture data", function() {
   ok(!(result.get('status') & SC.Record.READY), 'RecordArray should not be ready');
   equals(result.get('length'), 0, "RecordArray should not have any records");
   
+  result.notifyPropertyChange('status');
+  
+  SC.RunLoop.end();
+  
   stop();
 });
 
 test("Verify find() loads data from store", function() {
-  var record = store.find(Sample.File, "150");
-  
-  ok(record, 'should return a record');
-  ok(record.get('status') & SC.Record.BUSY, 'record should be busy');
-  ok(!(record.get('status') & SC.Record.READY), 'record should not be ready');
-
-  stop();
-  
-  var timer = setTimeout(function() {
-    ok(false, 'FixturesDataSource did not return response within 2s');
-    window.start();
-  }, 2000);
-  
   SC.RunLoop.begin();
+  var record = store.find(Sample.File, "150");
+
   record.addObserver('status', function() {
     if (record.get('status') & SC.Record.READY) {
-      clearTimeout(timer);
       equals(record.get('name'), 'Birthday Invitation.pdf', 'returns record should have name from fixture');
       window.start();
     }
   });
+  
+  ok(record, 'should return a record');
+  ok(record.get('status') & SC.Record.BUSY, 'record should be busy');
+  ok(!(record.get('status') & SC.Record.READY), 'record should not be ready');
+  
+  record.notifyPropertyChange('status');
+  
   SC.RunLoop.end();
+  
+  stop();
 });
 
 
 test("Destroy a record and commit", function() {
+  SC.RunLoop.begin();
+  
   var record   = store.find(Sample.File, "136"),
       storeKey = record.get('storeKey'),
       fixtures = store.get('dataSource');
 
   var found = function() {
-    console.log(record.get('status') & SC.Record.READY);
     if (record.get('status') & SC.Record.READY) {
       record.removeObserver('status', this, found);
       
       // test the deletion
       ok(fixtures.fixtureForStoreKey(store, storeKey), 'precond - fixtures should have data for record');
       
-      var timer = setTimeout(function() {
-        ok(false, 'FixturesDataSource did not return response within 2s');
-        window.start();
-      }, 2000);
-      
       record.addObserver('status', function() {
-        if (record.get('status') & SC.Record.DESTROYED_CLEAN) clearTimeout(timer);
-        ok(!fixtures.fixtureForStoreKey(store, storeKey), 'fixtures should no longer have data for record');
-        window.start();
+        if (record.get('status') & SC.Record.DESTROYED_CLEAN) {
+          ok(!fixtures.fixtureForStoreKey(store, storeKey), 'fixtures should no longer have data for record');
+          window.start();
+        }
       });
       
       store.destroyRecord(Sample.File, "136");
@@ -149,10 +142,16 @@ test("Destroy a record and commit", function() {
   
   ok(record, 'precond - must have record in store');
   
+  record.notifyPropertyChange('status');
+  
+  SC.RunLoop.end();
+  
   window.stop();
 });
 
 test("Create a record and commit it", function() {
+  SC.RunLoop.begin();
+  
   var fixtures = store.get('dataSource'),
       dataHash = { guid: '200', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true },
       record = store.createRecord(Sample.File, dataHash),
@@ -161,26 +160,26 @@ test("Create a record and commit it", function() {
   ok(record, "record was created");
   ok(record.get('status') & SC.Record.READY_NEW, "record created in memory but not committed to server yet");
   
-  var timer = setTimeout(function() {
-    ok(false, 'FixturesDataSource did not return response within 2s');
-    window.start();
-  }, 2000);
-  
   record.addObserver("status", function() {
-    if (record.get("status") & SC.Record.READY_CLEAN) clearTimeout(timer);
-    storeKey = Sample.File.storeKeyFor(dataHash.guid);
-    ok(fixtures.fixtureForStoreKey(store, storeKey), 'should have data hash in fixtures');
-    
-    window.start();
+    if (record.get("status") & SC.Record.READY_CLEAN) {
+      storeKey = Sample.File.storeKeyFor(dataHash.guid);
+      ok(fixtures.fixtureForStoreKey(store, storeKey), 'should have data hash in fixtures');
+      
+      window.start();
+    }
   });
   
   store.commitRecords();
+  
+  SC.RunLoop.end();
+  
   stop();
 });
 
 
 test("Update and commit a record", function() {
-
+  SC.RunLoop.begin();
+  
   var record   = store.find(Sample.File, "10"),
       storeKey = Sample.File.storeKeyFor("10"),
       fixtures = store.get('dataSource'), 
@@ -189,26 +188,26 @@ test("Update and commit a record", function() {
   var found = function() {
     if (record.get("status") & SC.Record.READY) {
       record.removeObserver("status", found);
-            
+      
       equals(fixture.name, record.get('name'), 'precond - fixture state should match name');
-  
-      var timer = setTimeout(function() {
-        ok(false, 'FixturesDataSource did not return response within 2s');
-        window.start();
-      }, 2000);
       
       record.addObserver("status", function() {
-        fixture = fixtures.fixtureForStoreKey(store, storeKey);
-        equals(fixture.name, record.get('name'), 'fixture state should update to match new name');
-        window.start();
+        if (record.get('status') & SC.Record.READY) {
+          fixture = fixtures.fixtureForStoreKey(store, storeKey);
+          equals(fixture.name, record.get('name'), 'fixture state should update to match new name');
+          window.start();
+        }
       });
-
+      
       record.set('name', 'foo');
       store.commitRecords();
     }
   };
 
   record.addObserver("status", found);
+  record.notifyPropertyChange('status');
+  
+  SC.RunLoop.end();
   
   stop();  
 });
