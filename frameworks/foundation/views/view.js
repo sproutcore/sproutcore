@@ -301,6 +301,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         theme = base.find(this.get("_themeName"));
         if (theme) return theme;
         theme = base.subtheme(this.get('_themeName'));
+        return theme;
       }
     }
     
