@@ -300,10 +300,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (base) {
         theme = base.find(this.get("_themeName"));
         if (theme) return theme;
+        theme = base.subtheme(this.get('_themeName'));
       }
-      
-      theme = SC.Theme.find(this.get("_themeName"));
-      if (theme) return theme;
     }
     
     // can't find anything, return base.
