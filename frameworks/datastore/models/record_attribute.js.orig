@@ -183,11 +183,19 @@ SC.RecordAttribute = SC.Object.extend(
       value = transform.to(value, this, type, record, key) ;
       
       // if the transform needs to do something when its children change, we need to set up an observer for it
+<<<<<<< HEAD
       if(!SC.none(value) && (children = transform.observesChildren)) {
+=======
+      if(children = transform.observesChildren) {
+>>>>>>> changed CoreSet transform to Set and added the ability for a transform when a property on its transformed value changes
         var i, len = children.length,
         // store the record, transform, and key so the observer knows where it was called from
         context = {
           record: record,
+<<<<<<< HEAD
+=======
+          transform: transform,
+>>>>>>> changed CoreSet transform to Set and added the ability for a transform when a property on its transformed value changes
           key: key
         };
         
@@ -206,11 +214,15 @@ SC.RecordAttribute = SC.Object.extend(
     When one of them triggers it will call childDidChange on your transform with the same arguments as to and from.
   */
   _SCRA_childObserver: function(obj, key, deprecated, context, rev) {
+<<<<<<< HEAD
     // write the new value back to the record
     this.call(context.record, context.key, obj);
     
     // mark the attribute as dirty
     context.record.notifyPropertyChange(context.key);
+=======
+    this.call(context.record, context.key, obj);
+>>>>>>> changed CoreSet transform to Set and added the ability for a transform when a property on its transformed value changes
   },
 
   /** 
@@ -545,13 +557,8 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
  */
 SC.RecordAttribute.registerTransform(SC.Set, {
   to: function(value, attr, type, record, key) {
-<<<<<<< HEAD
     if(value) return value.toSet();
     else return SC.Set.create();
-=======
-    if(value) return value.toCoreSet();
-    else return SC.CoreSet.create();
->>>>>>> fixed null handling for coreset transform and fixed treecontroller firstSelectableObject behavior
   },
   
   from: function(value, attr, type, record, key) {
