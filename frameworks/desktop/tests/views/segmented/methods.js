@@ -81,7 +81,7 @@ test("Check that properties are mapped correctly", function() {
     equals(items[0].toolTip, null, 'Computed properties should match');
     equals(items[0].index, 0, 'Computed properties should match');
     
-    var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left + 1, pageY: rect1.top + 1 });
+    var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
     view.mouseDown(firstItemEvent);
     equals(view._isMouseDown, YES, 'mousedown');
     equals(view.get('activeIndex'), 0, '');
@@ -98,7 +98,7 @@ test("Check that properties are mapped correctly", function() {
    
    // Test Mouse Down
    // it now gets the item by the position, so we have to pass a position
-   var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left + 1, pageY: rect1.top + 1 });
+   var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
    view.mouseDown(firstItemEvent);
    
    equals(view._isMouseDown, YES, 'Mouse down flag on mousedown should be ');
@@ -113,7 +113,7 @@ test("Check that properties are mapped correctly", function() {
    
    // Test third item
    elem = view.get('layer').childNodes[2];
-   var thirdItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect3.left + 1, pageY: rect3.top + 1 });
+   var thirdItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { clientX: rect3.left + 1, client: rect3.top + 1 });
    
    // mouse down and move
    view.mouseDown(thirdItemEvent);
@@ -122,13 +122,13 @@ test("Check that properties are mapped correctly", function() {
    equals(view.get('activeIndex'), 2, 'The active item is the third segment.');
    
    // try moving mouse while mouse down
-   var secondItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect2.left + 1, pageY: rect2.top + 1 });
+   var secondItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { clientX: rect2.left + 1, clientY: rect2.top + 1 });
    view.mouseMoved(secondItemEvent);
    equals(view._isMouseDown, YES, 'Mouse down flag on mousemoved should be ');
    equals(view.get('activeIndex'), 1, 'The active item should have changed to the second segment.');
    
    // and check that mouse out cancels.
-   var noItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { pageX: rect1.left - 5, pageY: rect1.top - 5 });
+   var noItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { clientX: rect1.left - 5, clientY: rect1.top - 5 });
 
    view.mouseExited(noItemEvent);
    equals(view._isMouseDown, YES, 'Mouse down flag on mouseout should still be ');
