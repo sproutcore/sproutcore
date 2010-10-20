@@ -46,13 +46,8 @@ var pane = SC.ControlTestPane.design({height:24})
   .add("autocontrolsize", SC.ButtonView, { 
     controlSize: SC.AUTO_CONTROL_SIZE,
     title: "Hello Cheese", layout: { left: 0, top: 0, right: 0, height: 37 }
-  })
-  
-  .add("calculatedcontrolsize", SC.ButtonView, {
-    // control size should end up small
-    title: "Smelly Severus", layout: { left: 0, top: 2, right: 0, bottom: 2 },
-    controlSize: SC.CALCULATED_CONTROL_SIZE
   });
+
 
 pane.show(); // add a test to show the test pane
 
@@ -175,9 +170,5 @@ test("Check if AUTO_CONTROL_SIZE button automatically calculated the correct con
   ok(viewElem.hasClass('sc-huge-size'), 'HUGE button has sc-huge-size class.');
 });
 
-test("Check if CALCULATED_CONTROL_SIZE automatically found the correct controlSize", function() {
-  var viewElem=pane.view('calculatedcontrolsize').$();
-  ok(viewElem.hasClass('sc-small-size'), 'CALCULATED_CONTROL_SIZE button has sc-small-size class.');
-});
 
 })();
