@@ -136,8 +136,8 @@ Greenhouse.DataSource = SC.DataSource.extend({
     var file = params.file, results = response.get('body'), store = params.store;
     if(SC.ok(response)){
       //HACK: for some reason the records are always 514 ready dirty not refreshing dirty...
-      // status = store.readStatus(params.storeKey);
-      // store.writeStatus(params.storeKey, SC.Record.BUSY_COMMITTING);
+      status = store.readStatus(params.storeKey);
+      store.writeStatus(params.storeKey, SC.Record.BUSY_COMMITTING);
       //end HACK
       params.store.dataSourceDidComplete(params.storeKey);
     }
@@ -169,6 +169,10 @@ Greenhouse.DataSource = SC.DataSource.extend({
     if(SC.ok(response)){
       attributes = file.get('attributes');//SC.clone(file.get('attributes'));
       attributes.body = response.get('body');
+      //HACK: for some reason the records are always 514 ready dirty not refreshing dirty...
+      status = store.readStatus(params.storeKey);
+      store.writeStatus(params.storeKey, SC.Record.BUSY_REFRESH | (status & 0x03)) ;
+      //end HACK
       store.dataSourceDidComplete(params.storeKey, attributes);
     }
     else{
@@ -199,6 +203,10 @@ Greenhouse.DataSource = SC.DataSource.extend({
   createRecordDidComplete: function(response, params){
     var file = params.file, results = response.get('body'), store = params.store;
     if(SC.ok(response)){
+      //HACK: for some reason the records are always 514 ready dirty not refreshing dirty...
+      status = store.readStatus(params.storeKey);
+      store.writeStatus(params.storeKey, SC.Record.BUSY_COMMITTING);
+      //end HACK
       params.store.dataSourceDidComplete(params.storeKey);
     }
     else{
@@ -231,6 +239,10 @@ Greenhouse.DataSource = SC.DataSource.extend({
   
   destroyRecordDidComplete: function(response, params){
     var status, store = params.store;
+    //HACK: for some reason the records are always 514 ready dirty not refreshing dirty...
+    status = store.readStatus(params.storeKey);
+    store.writeStatus(params.storeKey, SC.Record.BUSY_DESTROYING);
+    //end HACK
     params.store.dataSourceDidDestroy(params.storeKey);
   }
   

@@ -18,7 +18,7 @@ Greenhouse.appPage = SC.Page.design({
     
     mainContainer: SC.ContainerView.design({
       layout: { left: 0, top: 46, right: 0, bottom: 0 },
-      nowShowingBinding: 'Greenhouse.fileController.editorMode' 
+      nowShowing: 'pageDesigner' //Hardcoded till we add another mode like bespin
     }),
     
     toolBar: SC.ToolbarView.design({
