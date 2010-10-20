@@ -63,8 +63,8 @@ SC.Array = {
 
 =======
   
-  toCoreSet: function() {
-    var ret = SC.CoreSet.create(),
+  toSet: function() {
+    var ret = SC.Set.create(),
     i, len = this.get('length');
     
     for(i = 0; i < len; i++) {
@@ -74,7 +74,7 @@ SC.Array = {
     return ret;
   },
   
->>>>>>> add coreset-array transform
+>>>>>>> changed CoreSet transform to Set and added the ability for a transform when a property on its transformed value changes
   /**
     This is one of the primitves you must implement to support SC.Array.  You
     should replace amt objects started at idx with the objects in the passed
