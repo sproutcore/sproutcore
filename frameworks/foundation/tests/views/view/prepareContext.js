@@ -21,7 +21,7 @@ test("populates context with layerId & classNames from view if firstTime", funct
   ok(context.hasClass('bar'), 'did set class names');
 });
 
-test("check that testing without first time does not render to a context (no render needed)", function() {
+test("check that testing without first time still renders to a context", function() {
   var view = SC.View.create({
     layerId: "foo", 
     classNames: ["bar"],
@@ -29,14 +29,13 @@ test("check that testing without first time does not render to a context (no ren
   });
   var context = view.renderContext();
   view.prepareContext(context, NO);
-  
-  // updating of view settings are now handled through CoreQuery, never
-  // touching rendercontext, in the function updateViewSettings.
-  ok(context.id() !== 'foo', 'did not set id');
-  ok(!context.hasClass('bar'), 'did not set class name');
+
+
+  ok(context.id() === 'foo', 'set id');
+  ok(context.hasClass('bar'), 'set class name');
 });
 
-test("invokes renderLayout if first time", function() {
+test("invokes renderLayout each time", function() {
   var runCount = 0;
   var context, isFirstTime ;
   var view = SC.View.create({
@@ -58,7 +57,7 @@ test("invokes renderLayout if first time", function() {
   context = view.renderContext();
   isFirstTime = NO ;
 	view.prepareContext(context, NO);
-	equals(runCount, 0, 'should not call renderLayout');
+	equals(runCount, 1, 'should call renderLayout');
 
 });
 

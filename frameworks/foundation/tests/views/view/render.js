@@ -85,7 +85,7 @@ test("creates a context and then invokes renderToContext or updateLayer on each 
 
 });
 
-test("creates a context and then invokes renderContent and updateContent to call renderToContext or updateLayer on each childView", function() {
+test("creates a context and then invokes renderContent to call renderToContext on each childView", function() {
 
 	var runCount = 0, curContext ;
 	
@@ -96,12 +96,8 @@ test("creates a context and then invokes renderContent and updateContent to call
 	  	equals(context.tagName(), this.get('tagName'), 'context setup with current tag name');
 	  	
 	  	runCount++; // record run
-	  },
-	  
-	  updateLayer: function() {
-	    runCount++;
 	  }
-	});
+  });
 	
 	var view = SC.View.create({
 		childViews: [
@@ -115,12 +111,5 @@ test("creates a context and then invokes renderContent and updateContent to call
 	curContext = view.renderContext('div');
 	equals(view.renderContent(curContext), undefined, 'returns nothing');
 	equals(runCount, 3, 'renderToContext() invoked for each child view');
-	
-
-	// VERIFY: firstTime= NO 	
-	runCount = 0 ; //reset
-	curContext = view.renderContext('div');
-	equals(view.updateContent(curContext), undefined, 'returns nothing');
-	equals(runCount, 3, 'updateLayer() invoked for each child view');
 
 });

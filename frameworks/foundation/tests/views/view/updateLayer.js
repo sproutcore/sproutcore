@@ -14,18 +14,19 @@
 // 
 module("SC.View#updateLayer");
 
-test("invokes updateViewSettings() and then updates layer element", function() {
+test("invokes renderLayerSettings() and then updates layer element", function() {
   var layer = document.createElement('div');
+
+  var times = 0;
   var view = SC.View.create({
-    updateViewSettings: function() {
-      this.$().addClass('did-update');
-    },
-    
-    createRenderer: function() {}
+    _renderLayerSettings: function() {
+      times++;
+      this.$().addClass('did-update-' + times);
+    }
   });
   view.createLayer();
   view.updateLayer();
-  ok(view.$().attr('class').indexOf('did-update')>=0, 'has class name added by prepareContext()');
+  ok(view.$().attr('class').indexOf('did-update-2')>=0, 'has class name added by prepareContext()');
 });
 
 // ..........................................................
