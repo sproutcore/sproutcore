@@ -1238,6 +1238,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
   _renderLayerSettings: function(context, firstTime) {
     context.resetClassNames();
+    context.resetStyles();
 
     var theme = this.get('theme');
     var themeClassNames = theme.classNames, idx, len = themeClassNames.length;

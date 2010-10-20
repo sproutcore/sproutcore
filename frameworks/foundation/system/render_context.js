@@ -872,6 +872,16 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   },
 
   /**
+    Clears all of the tag's styles.
+    @returns {SC.RenderContext} receiver
+   */
+  resetStyles: function() {
+    this.styles({});
+    return this;
+  },
+
+
+  /**
     Apply the passed styles to the tag.  You can pass either a single key
     value pair or a hash of styles.  Note that if you set a style on an 
     existing element, it will replace any existing styles on the element.
