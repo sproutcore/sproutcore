@@ -56,7 +56,7 @@ SC.BaseTheme.Title = SC.Renderer.extend({
     this._ImageTitleCached = imgTitle;
   },
 
-  update: function(elem) {
+  update: function(cq) {
     var icon = this.icon,
         image = '' ,
         title = this.title ,
@@ -83,16 +83,16 @@ SC.BaseTheme.Title = SC.Renderer.extend({
     
     imgTitle = image + title;
     
-    if ( (htmlNode = elem[0])){
+    if ( (htmlNode = cq[0])){
       if(needsTitle) { 
         if(this.needsEllipsis){
-          elem.addClass('ellipsis');
+          cq.addClass('ellipsis');
           if(this._ImageTitleCached !== imgTitle) {
             this._ImageTitleCached = imgTitle; // Update the cache
             htmlNode.innerHTML = imgTitle;
           }
         }else{
-          elem.removeClass('ellipsis');
+          cq.removeClass('ellipsis');
           if(this._ImageTitleCached !== imgTitle) {
             this._ImageTitleCached = imgTitle; // Update the cache
             htmlNode.innerHTML = imgTitle;

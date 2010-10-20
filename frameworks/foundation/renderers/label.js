@@ -52,6 +52,7 @@ SC.BaseTheme.Label = SC.Renderer.extend({
     this.updateClassNames(cq);
 
     this.updateTitleRenderer(cq);
+    this.updateTitle(cq);
     if (this.didChange('text-align')) {
       cq.css('text-align', this.textAlign);
     }
