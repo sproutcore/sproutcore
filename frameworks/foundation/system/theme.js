@@ -191,6 +191,7 @@ SC.Theme = {
     that it includes all class names for this theme.
   */
   find: function(themeName) {
+    if (this === SC.Theme) return this.themes[themeName];
     var theme;
 
     // if there is a specialized version (the theme extended with our class names)
