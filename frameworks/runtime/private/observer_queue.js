@@ -123,7 +123,7 @@ SC.Observers = {
           out = this._TMP_OUT,
           ro;
 
-      for ( i=0; i<l; i++ ) {
+      for ( var i=0; i<len; i++ ) {
         ro = set[i]; // get the range observer
         if ( ro.setupPending(object) ) {
           out.push(ro); // save to remove later

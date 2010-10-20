@@ -36,10 +36,10 @@ SC._ChainObserver.createChain = function(rootObject, path, target, method, conte
   // First we create the chain.
   var parts = path.split('.'),
       root  = new SC._ChainObserver(parts[0]),
-      tail  = root,
+      tail  = root;
 
   for(var i=1, l=parts.length; i<l; i++) {
-    tail = tail.next = new SC._ChainObserver(parts[idx]) ;
+    tail = tail.next = new SC._ChainObserver(parts[i]) ;
   }
 
   // Now root has the first observer and tail has the last one.
