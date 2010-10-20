@@ -4,15 +4,17 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
- 
-/** @class
 
-  This renderer is initially intended for image button
+SC.BaseTheme.Icon = SC.BaseTheme.subtheme('icon');
+
+/** @class
+  Button "icon" theme, which renders the button without any chrome.
+
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-
-SC.BaseTheme.renderers.ImageButton = SC.Renderer.extend({
+SC.BaseTheme.Icon.Button = SC.Renderer.extend({
+  name: 'icon',
   render: function(context) {
     var icon = this.icon;
     context.addClass('no-min-width');
@@ -20,8 +22,8 @@ SC.BaseTheme.renderers.ImageButton = SC.Renderer.extend({
     else context.push("<div class='img'></div>");
   },
   
-  update: function() {
-    var img = this.$('img'), src = this.icon;
+  update: function(cq) {
+    var img = cq.find('.img'), src = this.icon;
     if (src) {
       img.attr('class', "img "+src);
     } else {
@@ -29,5 +31,5 @@ SC.BaseTheme.renderers.ImageButton = SC.Renderer.extend({
     }  
   }
 });
- 
-SC.BaseTheme.renderers.imageButton = SC.BaseTheme.renderers.ImageButton.create();
+
+SC.BaseTheme.Icon.addRenderer(SC.BaseTheme.Icon.Button);
