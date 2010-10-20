@@ -12,22 +12,17 @@ var Ace, Dark, Capsule, DarkCapsule, AceOnly;
 module("SC.Theme", {
   setup: function() {
     // make and register Ace
-    Ace = SC.Theme.extend({
+    Ace = SC.Theme.create({
+      name: 'ace',
       "classNames": ["ace"]
     });
-    SC.Theme.register("ace", Ace);
+    SC.Theme.addTheme(Ace);
     
     // Dark
-    Dark = Ace.subtheme("dark", "dark");
+    Dark = Ace.subtheme("dark");
     
     // Capsule
-    Capsule = Ace.subtheme("capsule", "capsule");
-    
-    // Dark Capsule
-    DarkCapsule = Dark.subtheme("capsule", "dark-capsule");
-    
-    // Ace Only
-    AceOnly = Ace.subtheme("aceOnly", "ace-only");
+    Capsule = Ace.subtheme("capsule");
   },
   
   teardown: function() {
@@ -35,21 +30,12 @@ module("SC.Theme", {
   }
 });
 
-// use this utility to check themes. We put baseClass and classNames
-// separate just in case the baseClass itself is wrong (a worst-case scenario test)
-function themeIs(themeInstance, baseClass, classNames) {
-  ok(themeInstance, "theme exists");
+// use this utility to check themes
+function themeIs(themeInstance, shouldBe, classNames) {
+  ok(themeInstance === shouldBe, "Correct theme");
   if (!themeInstance) return;
-  
-  ok(themeInstance.themeClass === baseClass, "check that themeClass is correct");
-  
-  var isOk = themeInstance.classNames.length == classNames.length;
-  if (isOk) {
-    for (var idx = 0; idx < themeInstance.classNames.length; idx++) {
-      if (!themeInstance.classNames[idx] == classNames[idx]) isOk = NO;
-    }
-  }
-  ok(isOk, "Class names should match: expected: " + classNames + "; result: " + themeInstance.classNames);
+
+  var isOk = same(themeInstance.classNames, SC.Set.create(classNames), "Correct class names.");
 }
 
 test("Calling SC.Theme.find finds proper theme.", function(){
@@ -64,23 +50,28 @@ test("There is no proliferation of theme registration (that is, subthemes are no
 
 test("Calling find on a subtheme class finds proper theme.", function(){
   var dark = Ace.find("dark");
-  themeIs(dark, Dark, ["ace", "dark"]);
+
+  // child themes are specialized
+  themeIs(dark.baseTheme, Dark, ["ace", "dark"]);
 });
 
 test("Calling find on a theme instance finds proper theme.", function(){
   var ace = SC.Theme.find("ace");
   var dark = ace.find("dark");
-  themeIs(dark, Dark, ["ace", "dark"]);
+
+  // child themes are specialized (that means derived by the parent theme)
+  themeIs(dark.baseTheme, Dark, ["ace", "dark"]);
 });
 
 test("Calling find on a subtheme instance finds the proper theme.", function(){
   var dark = Ace.find("dark");
   var capsule = dark.find("capsule");
-  themeIs(capsule, DarkCapsule, ["ace", "dark", "dark-capsule"]);
+
+  // child themes are specialized (that is, derived by the parent)
+  themeIs(capsule.baseTheme, Capsule, ["ace", "capsule"]);
+
+  // and now we are testing said specialization
+  themeIs(capsule, capsule, ["ace", "dark", "capsule"]);
 });
 
-test("Calling find on a subtheme instance will find themes in base themes.", function() {
-  var dark = Ace.find("dark");
-  var aceOnly = dark.find("aceOnly");
-  themeIs(aceOnly, AceOnly, ["ace", "ace-only"]);
-});
+

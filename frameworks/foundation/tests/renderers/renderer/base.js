@@ -14,17 +14,21 @@ module("SC.Renderer", {
     elem = document.createElement('div');
     context = SC.RenderContext(elem) ;
     testRenderer = SC.Renderer.extend({
+      name: 'test',
+      sizes: [
+        { 'name': 'small', height: 16 },
+        { 'name': 'regular', height: 24 },
+        { 'name': 'large', height: 32 }
+      ],
       render: function(context) {
+        this.renderClassNames(context);
         context.push("<a class='test'>Hello</a>");
       },
-      update: function() {
-        this.$(".test").text("Hi");
-      },
-      didAttachLayer: function(layer) {
-        this.layerWasAttached = YES;
-        this.layerAttached = layer;
+      update: function(cq) {
+        this.updateClassNames(cq);
+        cq.find(".test").text("Hi");
       }
-    }).create();
+    });
   },
   
   teardown: function() {
@@ -32,112 +36,8 @@ module("SC.Renderer", {
   }
 });
 
-test("calling layer() with no layer attached should return null.", function(){
-  var renderer = testRenderer();
-  equals(renderer.layer(), null, "there should be no layer yet");
-});
-
-test("calling layer() with an attached layer should return the layer.", function(){
-  var renderer = testRenderer();
-  renderer.attachLayer(elem);
-  equals(renderer.layer(), elem, "layer should be the layer we attached.");
-});
-
-test("calling layer() with an attached layer provider should return the layer.", function(){
-  var renderer = testRenderer();
-  var layerProvider = {
-    isLayerProvider: YES,
-    getLayer: function() { return elem; }
-  };
-  
-  renderer.attachLayer(layerProvider);
-  equals(renderer.layerAttached, layerProvider, "make sure that we did indeed send the provider.");
-  equals(renderer.layer(), elem, "layer should be the layer we attached via provider");
-});
-
-test("attaching a layer to a renderer causes didAttachLayer to be called with a layer.", function() {
-  var renderer = testRenderer();
-  ok(!renderer.renderWasCalled, "render should not be called");
-  ok(!renderer.updateWasCalled, "update should not be called");
-  ok(!renderer.layerWasAttached, "there should be no layer yet");
-  renderer.attachLayer(elem);
-  ok(!renderer.renderWasCalled, "render still should not be called");
-  ok(!renderer.updateWasCalled, "update still should not be called");
-  ok(renderer.layerWasAttached, "there should be now be a layer");
-  equals(renderer.layerAttached, elem, "the attached layer ought to be our element");
-});
-
-test("attaching a layer provider to a renderer causes didAttachLayer to be called with the layer provider.", function() {
-  var renderer = testRenderer();
-  var layerProvider = {
-    isLayerProvider: YES,
-    getLayer: function() { return elem; }
-  };
-  
-  ok(!renderer.renderWasCalled, "render should not be called");
-  ok(!renderer.updateWasCalled, "update should not be called");
-  ok(!renderer.layerWasAttached, "there should be no layer yet");
-  renderer.attachLayer(layerProvider);
-  ok(!renderer.renderWasCalled, "render still should not be called");
-  ok(!renderer.updateWasCalled, "update still should not be called");
-  ok(renderer.layerWasAttached, "there should be now be a layer");
-  equals(renderer.layerAttached, layerProvider, "the attached layer ought to be our layer provider");
-});
-
-test("rendering to a context, attaching the layer, and then updating, updates the layer.", function() {
-  // first, render
-  var renderer = testRenderer();
-  renderer.render(context);
-  context.update();
-  
-  // now, get the render output
-  var initialHTML = elem.innerHTML;
-  
-  // check that it cannot update without attaching layer (definitely should not be possible)
-  renderer.update();
-  equals(elem.innerHTML, initialHTML, "check that it can't update without attaching layer (should be impossible)");  
-  
-  // update
-  renderer.attachLayer(elem);
-  renderer.update();
-  
-  // check that buffering in jQuery prevented any adjustments
-  equals(elem.innerHTML, initialHTML, "check that it can't update without flushing buffer");  
-  
-  // flush buffer
-  SC.$.Buffer.flush();
-  
-  // and check again
-  ok(elem.innerHTML != initialHTML, "it should now have updated.");
-});
-
-test("provide() provides a good layer provider.", function() {
-  var renderer = testRenderer();
-  
-  // make sure that trying to get the layer before rendering returns null
-  var provider = renderer.provide(".test");
-  equals(provider.getLayer(), null, "Check that trying to get layer before rendering returns null.");
-  
-  // okay, render
-  renderer.render(context);
-  context.update();
-  
-  // the layer provider should NOT work yet, as we have not attached anything
-  equals(provider.getLayer(), null, "provider still should not work--nothing attached.");
-  
-  // attach
-  renderer.attachLayer(elem);
-  
-  // oddly, the same provider should work
-  equals(provider.getLayer(), elem.childNodes[0], "previously non-functional provider should now work.");
-  
-  // now get new provider
-  provider = renderer.provide(".test");
-  equals(provider.getLayer(), elem.childNodes[0], "new provider should also work.");
-});
-
 test("setting properties in general works", function(){
-  var renderer = testRenderer();
+  var renderer = testRenderer.create();
   renderer.attr("foo", "bar");
   equals(renderer.foo, "bar", "foo=bar now that we've set it.");
   
@@ -151,7 +51,7 @@ test("setting properties in general works", function(){
 });
 
 test("didChange and resetChanges work as expected", function() {
-  var renderer = testRenderer();
+  var renderer = testRenderer.create();
   
   // foo should not have changed yet
   ok(!renderer.didChange("foo"), "foo can't have changed yet--it has never been set.");
@@ -173,4 +73,101 @@ test("didChange and resetChanges work as expected", function() {
   // change again, and test again (just in case reset did something weird)
   renderer.attr("foo", "test2");
   ok(renderer.didChange("foo"), "we now really did change it.");
+});
+
+test("Basic Rendering and Updating", function() {
+  var renderer = testRenderer.create();
+
+  // test normal rendering to context
+  renderer.render(context);
+  context.update();
+  equals(SC.$(elem).text(), "Hello", "Initial render worked.");
+
+  // test updating with CoreQuery.
+  renderer.update(SC.$(elem));
+  equals(SC.$(elem).text(), "Hi", "Secondary render worked.");
+});
+
+test("Class names setting", function() {
+  var renderer = testRenderer.create();
+
+  // we are going to test each way of setting class names.
+
+  renderer.attr({
+    classNames: "a b c"
+  });
+
+  same(renderer.classNames, SC.Set.create(["a", "c", "b"]), "Class names match (set with space delimited string).");
+
+  renderer.attr('classNames', ["albert", "einstein"]);
+  same(renderer.classNames, SC.Set.create(["a", "b", "c", "albert", "einstein"]), "Class names match (modified with an array)");
+
+  renderer.attr('classNames', { 'a': NO, 'b': NO, 'c': NO });
+  same(renderer.classNames, SC.Set.create(["albert", "einstein"]), "class='albert einstein'");
+});
+
+test("Class name updating", function() {
+  SC.RunLoop.begin();
+
+  // configure
+  var renderer = testRenderer.create();
+  renderer.attr('classNames', "luna lovegood");
+
+  // render (note that some buffers won't flush until end of run loop)
+  renderer.render(context);
+  context.update();
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["luna", "lovegood", "test"]), "class='luna lovegood test'");
+
+  renderer.attr('classNames', { 'luna': NO, 'xenophilius': YES });
+
+  SC.RunLoop.begin();
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["xenophilius", "lovegood", "test"]), "class='xenophilius lovegood test'");
+  
+});
+
+test("Sizes", function() {
+  var renderer = testRenderer.create();
+
+  SC.RunLoop.begin();
+  renderer.attr('size', 'SET_TO_STRING');
+  renderer.render(context);
+  context.update();
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["test", "SET_TO_STRING"]), "class='test SET_TO_STRING");
+
+  SC.RunLoop.begin();
+  renderer.attr('size', 'another_string');
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["test", "another_string"]), "class='test another_string");
+
+  SC.RunLoop.begin();
+  renderer.attr('size', { height: 16 });
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["test", "small"]), "class='test small'");
+
+  SC.RunLoop.begin();
+  renderer.attr('size', { height: 18 });
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["test", "small"]), "class='test small'");
+
+
+  SC.RunLoop.begin();
+  renderer.attr('size', { height: 24 });
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+
+  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["test", "regular"]), "class='test regular'");
+
 });
