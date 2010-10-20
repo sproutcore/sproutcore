@@ -218,9 +218,9 @@ jQuery.Buffer = (function() {
       if(SC.browser.msie){ 
         attr = attr.toLowerCase();
       }
-      styles = {};
+      var styles = {};
       
-      regex = this._STYLE_REGEX ;
+      var regex = this._STYLE_REGEX, match;
       regex.lastIndex = 0;
       
       while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
@@ -249,7 +249,7 @@ jQuery.Buffer = (function() {
     }
 
     var context = this.bufferedCommand("flushStyles");
-    if (!context._styles) context._styles = this._loadStyles;
+    if (!context._styles) context._styles = this._loadStyles();
 
     context._styles[key] = value;
   };
