@@ -161,7 +161,8 @@ jQuery.Buffer = (function() {
     // now, if it is a special key, handle it specially.
     if (key === "class") {
       // note: setClass will return the value if "value" is undefined.
-      return this.setClass(value).join(' ');
+      if (value === undefined) return this.setClass(value).join(' ');
+      else return this.setClass(value);
     } else if (key === "html") {
       return this.html(value);
     } else if (key === "text") {
@@ -197,7 +198,7 @@ jQuery.Buffer = (function() {
       if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
 
       var classNames = context.classNames, v = [];
-      for (var key in classNames) if (classNames[key]) v.push(key);
+      for (var key in classNames) if (key && classNames[key]) v.push(key);
       return v;
     }
 
