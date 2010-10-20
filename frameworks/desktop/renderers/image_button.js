@@ -14,7 +14,7 @@ SC.BaseTheme.Icon = SC.BaseTheme.subtheme('icon');
   @since SproutCore 1.1
 */
 SC.BaseTheme.Icon.Button = SC.Renderer.extend({
-  name: 'icon',
+  name: 'button',
   render: function(context) {
     var icon = this.icon;
     context.addClass('no-min-width');
