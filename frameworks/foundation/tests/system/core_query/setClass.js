@@ -38,7 +38,7 @@ test("setClass(new, NO) should do nothing", function() {
 
 test("setClass(mixed, YES) should work across multiple", function() {
   var cq = SC.$('<div class="root">\
-    <div class="mixed match"></div>\
+    <div class="match"></div>\
     <div class="match"></div>\
   </div>').find('.match');
   equals(cq.length, 2, 'should have two items');
