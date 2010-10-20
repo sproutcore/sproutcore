@@ -1185,40 +1185,42 @@ Array.prototype.isEnumerable = YES ;
   // the browser is probably getting it.
   var mixinIfMissing = {
 
+    // QUESTION: The lack of DRY is burning my eyes [YK]
     forEach: function(callback, target) {
       if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+
+      // QUESTION: Is this necessary?
       if (target === undefined) target = null;
 
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        callback.call(target, next, idx, this);
+      for(var i=0, l=this.length; i<l; i++) {
+        var next = this[i] ;
+        callback.call(target, next, i, this);
       }
       return this ;
     },
 
     map: function(callback, target) {
       if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+
       if (target === undefined) target = null;
 
       var ret  = [];
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        ret[idx] = callback.call(target, next, idx, this) ;
+      for(var i=0, l=this.length; i<l; i++) {
+        var next = this[i] ;
+        ret[i] = callback.call(target, next, i, this) ;
       }
       return ret ;
     },
 
     filter: function(callback, target) {
       if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+
       if (target === undefined) target = null;
 
       var ret  = [];
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        if(callback.call(target, next, idx, this)) ret.push(next) ;
+      for(var i=0, l=this.length; i<l; i++) {
+        var next = this[i] ;
+        if(callback.call(target, next, i, this)) ret.push(next) ;
       }
       return ret ;
     },
