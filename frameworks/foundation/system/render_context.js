@@ -961,6 +961,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} receiver
   */
   attr: function(nameOrAttrs, value) {
+    if (this._elem) {
+      this.$().attr(nameOrAttrs, value);
+      return this;
+    }
+
+
     var key, attrs = this._attrs, didChange = NO ;
     if (!attrs) this._attrs = attrs = {} ;
     
