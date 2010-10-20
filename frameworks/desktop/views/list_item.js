@@ -399,26 +399,47 @@ SC.ListItemView = SC.View.extend(
   
   _addCheckboxActiveState: function() {
     if (this.get('isEnabled')) {
-      this._checkboxRenderer.attr('classNames', { 'active': YES });
-      this._checkboxRenderer.update(this.$('.sc-checkbox-view'));
+      if (this._checkboxRenderer) {
+        this._checkboxRenderer.attr('classNames', { 'active': YES });
+        this._checkboxRenderer.update(this.$('.sc-checkbox-view'));        
+      } else {
+        // for backwards-compatibility.
+        this.$('.sc-checkbox-view').addClass('active');
+      }
     }
   },
   
   _removeCheckboxActiveState: function() {
+    if (this._checkboxRenderer) {
       this._checkboxRenderer.attr('classNames', { 'active': NO });
-      this._checkboxRenderer.update(this.$('.sc-checkbox-view'));
+      this._checkboxRenderer.update(this.$('.sc-checkbox-view'));      
+    } else {
+      // for backwards-compatibility.
+      this.$('.sc-checkbox-view').removeClass('active');
+    }
   },
 
   _addDisclosureActiveState: function() {
     if (this.get('isEnabled')) {
-      this._disclosureRenderer.attr('classNames', { "active": YES });
-      this._disclosureRenderer.update(this.$('.sc-disclosure-view'));
+      if (this._disclosureRenderer) {
+        this._disclosureRenderer.attr('classNames', { "active": YES });
+        this._disclosureRenderer.update(this.$('.sc-disclosure-view'));        
+      } else {
+        // for backwards-compatibility.
+        this.$('.sc-disclosure-view').addClass('active');
+      }
+
     }
   },
   
   _removeDisclosureActiveState: function() {
-    this._disclosureRenderer.attr('classNames', { 'active': NO });
-    this._disclosureRenderer.update(this.$('.sc-disclosure-view'));
+    if (this._disclosureRenderer) {
+      this._disclosureRenderer.attr('classNames', { 'active': NO });
+      this._disclosureRenderer.update(this.$('.sc-disclosure-view'));
+    } else {
+      // for backwards-compatibility.
+      this.$('.sc-disclosure-view').addClass('active');
+    }
   },
 
   _addRightIconActiveState: function() {
