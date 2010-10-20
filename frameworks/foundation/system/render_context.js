@@ -797,6 +797,13 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {Hash|SC.RenderContext} styles hash or receiver
   */
   styles: function(styles, cloneOnModify) {
+    if (this._elem) {
+      if (styles) {
+        this.$().resetStyles().css(styles);
+      }
+      return this.$().styles();
+    }
+
     var attr, regex, match;
     if (styles === undefined) {
       
@@ -874,7 +881,11 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} receiver
   */
   addStyle: function(nameOrStyles, value) {
-    
+    if (this._elem) {
+      this.$().css(nameOrStyles, value);
+      return this;
+    }
+
     // get the current hash of styles.  This will extract the styles and 
     // clone them if needed.  This will get the actual styles hash so we can
     // edit it directly.
@@ -920,6 +931,11 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} receiver
   */
   removeStyle: function(styleName) {
+    if (this._elem) {
+      this.$().css(styleName, null);
+      return this;
+    }
+
     // avoid case where no styles have been defined
     if (!this._styles && !this._elem) return this;
     
