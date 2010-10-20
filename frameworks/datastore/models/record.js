@@ -341,7 +341,6 @@ SC.Record = SC.Object.extend(
   writeAttribute: function(key, value, ignoreDidChange) {
     var store    = this.get('store'), 
         storeKey = this.storeKey,
-        status   = store.peekStatus(storeKey),
         attrs;
     
     attrs = store.readEditableDataHash(storeKey);
