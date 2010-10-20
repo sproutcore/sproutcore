@@ -407,6 +407,10 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       joined.length = 0; // reset temporary object
     }
     
+    // flush jQuery buffers
+    jQuery.Buffer.flush();
+
+
     // now cleanup element...
     elem = this._elem = null ;
     return this.prevObject || this ; 
