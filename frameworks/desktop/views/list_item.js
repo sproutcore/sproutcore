@@ -252,7 +252,7 @@ SC.ListItemView = SC.View.extend(
   */
   _isInsideDisclosure: function(evt) {
     if (this.get('disclosureState')===SC.LEAF_NODE) return NO;
-    return this._isInsideElementWithClassName('sc-list-item-disclosure', evt);
+    return this._isInsideElementWithClassName('sc-disclosure-view', evt);
   },
   
   /** @private 
@@ -412,13 +412,13 @@ SC.ListItemView = SC.View.extend(
   _addDisclosureActiveState: function() {
     if (this.get('isEnabled')) {
       this._disclosureRenderer.attr('classNames', { "active": YES });
-      this._disclosureRenderer.update(this.$('.sc-list-item-disclosure'));
+      this._disclosureRenderer.update(this.$('.sc-disclosure-view'));
     }
   },
   
   _removeDisclosureActiveState: function() {
     this._disclosureRenderer.attr('classNames', { 'active': NO });
-    this._disclosureRenderer.update(this.$('.sc-list-item-disclosure'));
+    this._disclosureRenderer.update(this.$('.sc-disclosure-view'));
   },
 
   _addRightIconActiveState: function() {
@@ -633,8 +633,10 @@ SC.ListItemView = SC.View.extend(
     key = this.getDelegateProperty('contentCheckboxKey', del) ;
     if (key) {
       value = content ? (content.get ? content.get(key) : content[key]) : NO ;
-      this.renderCheckbox(working, value);
-      classArray.push('has-checkbox');
+      if (value !== null) {
+        this.renderCheckbox(working, value);
+        classArray.push('has-checkbox');
+      }
     }
 
     // handle icon
@@ -642,6 +644,10 @@ SC.ListItemView = SC.View.extend(
       key = this.getDelegateProperty('contentIconKey', del) ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
 
+      this.renderIcon(working, value);
+      classArray.push('has-icon');
+    } else if (this.get('icon')) {
+      value = this.get('icon');
       this.renderIcon(working, value);
       classArray.push('has-icon');
     }
@@ -711,7 +717,7 @@ SC.ListItemView = SC.View.extend(
       size: SC.REGULAR_CONTROL_SIZE
     });
 
-    context = context.begin('div').addClass('sc-list-item-disclosure');
+    context = context.begin('div').addClass('sc-disclosure-view');
     renderer.render(context);
     context.end();
 
