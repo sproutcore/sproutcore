@@ -290,9 +290,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         activeIndex = this.get("activeIndex"), item;
     for (var idx = 0, len = items.length; idx < len; idx++) {
       item = items[idx];
+      
       item.classNames = {
         active: activeIndex === idx,
-        sel: isArray ? value.indexOf(item.value) : value === item.value
+        sel: isArray ? value.indexOf(item.value) > -1 : value === item.value
       };
     }
 
