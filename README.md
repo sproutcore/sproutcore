@@ -1,21 +1,68 @@
-!!!WARNING!!! This Repository has been DEPRECATED!
-==================================================
+SproutCore HTML5 Application Framework
+======================================
+ 
+SproutCore is a framework for building blazing-fast, desktop-like applications
+in the web browser using only native HTML5 features. With SproutCore, you can
+build rich, interactive applications in the web in less code than most simple
+web pages require today.
 
-The SproutCore account has moved from the **sproutit** account to the [**sproutcore** account](http://github.com/sproutcore) on github.  
-This repository is now available at <http://github.com/sproutcore/sproutcore>.
+The easiest way to get started with SproutCore is using the Abbot build tools
+included with the SproutCore package when you install it from the Ruby gem.
+Please see the Get Started documentation on the SproutCore website for more
+information.
 
-While we will leave this repository around for a bit longer, it will no longer be the canonical SproutCore
-repository and we will eventually remove it!
+    http://www.sproutcore.com/
 
-For Cloned Copies
------------------
+If you would like to contact the authors, you can reach the current maintainer
+at <charles@sproutit.com>
 
-    git remote rm origin
-    git remote add origin git://github.com/sproutcore/sproutcore.git
+## Contributors
 
-For Submodules
---------------
+SproutCore has been built thanks to the tireless efforts of many talented
+developers. Special thanks to the following developers who contributed lots of
+code and ideas:
 
-Open the `.gitmodules` file in your repo's base directory.
-Replace all occurrences of `github.com/sproutit` with `github.com/sproutcore`.
+- Alex Iskander
+- Billy Kakes
+- Brian Cully
+- Charles Jolley
+- Chris Hyle
+- Colin Campbell
+- Cortland Klein
+- Devin Torres
+- Erich Ocean
+- Evin Grano
+- Geoffrey Donaldson
+- James Austin
+- Jason Ketterman
+- Jonathan Lewis
+- Joshua Dickens
+- Juan Pinzon
+- Majd Taby
+- Matthias Loitsch
+- Martin Ottenwaelter 
+- Maurits Lamers
+- Mike Ball
+- Mike Subelsky
+- Mohammed Ashik
+- Onar Vikingstad
+- Peter Bergstrom
+- Peter Wagenet
+- Ray Bodenhorn 
+- Santosh Shanboque
+- Sudarshan Bhat
+- Tanner Donovan
+- Teresa Tsui
+- Thomas Langemann
+- Tom Dale
+- Trek Glowacki
 
+## Acknowledgements
+
+SproutCore includes code from a number of different open source projects
+including:
+
+* [jQuery](http://www.jquery.com/)
+* [Prototype](http://www.prototypejs.org/)
+* [Datejs](http://www.datejs.com/)
+* [JSON2](http://www.json.org/)
