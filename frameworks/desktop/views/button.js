@@ -232,6 +232,20 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       // theme should still be string form
       this.theme = 'icon';
     }
+    
+    if (
+      this.render === SC.ButtonView.prototype.render &&
+      this.renderTitle !== SC.ButtonView.prototype.renderTitle
+    ) {
+      // @if debug
+      console.warn(
+        "renderTitle is deprecated. Please either implement the entire " + 
+        "either implement your own render() method, or create a renderer " +
+        "for this button."
+      );
+      // @endif
+      this.render = this._DEPRECATED_render;
+    }
 
     sc_super();
 
@@ -286,6 +300,83 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     if (firstTime) this.buttonRenderer.render(context);
     else this.buttonRenderer.update(context.$());
   },
+  
+  //
+  // DEPRECATED RENDERING PATH TO BE USED IF renderTitle IS OVERRIDDEN
+  //
+  _DEPRECATED_render: function(context, firstTime) {
+    // add href attr if tagName is anchor...
+    var href, toolTip, classes, theme;
+    if (this.get('tagName') === 'a') {
+      href = this.get('href');
+      if (!href || (href.length === 0)) href = "javascript:;";
+      context.attr('href', href);
+    }
+
+    // If there is a toolTip set, grab it and localize if necessary.
+    toolTip = this.get('toolTip') ;
+    if (SC.typeOf(toolTip) === SC.T_STRING) {
+      if (this.get('localize')) toolTip = toolTip.loc() ;
+      context.attr('title', toolTip) ;
+      context.attr('alt', toolTip) ;
+    }
+    
+    // add some standard attributes & classes.
+    classes = this._TEMPORARY_CLASS_HASH;
+    classes.def = this.get('isDefault');
+    classes.cancel = this.get('isCancel');
+    classes.icon = !!this.get('icon');
+    context.attr('role', 'button').setClass(classes);
+    theme = this.get('theme');
+    if (theme && !context.hasClass(theme)) context.addClass(theme);
+    
+    // render inner html 
+    this[this.get('renderStyle')](context, firstTime);
+  },
+   
+   
+  /**
+    @deprecated
+    This is supplied because the deprecated version of render needs.
+    
+    The deprecated render path will be used if renderTitle is overriden
+    but render is not.
+  */
+  renderDefault: function(context, firstTime){
+    if(firstTime) {
+      context = context.push("<span class='sc-button-inner' style = 'min-width:"
+        ,this.get('titleMinWidth'),
+        "px'>");
+    
+      this.renderTitle(context, firstTime) ; // from button mixin
+      context.push("</span>") ;
+    
+      if(this.get('supportFocusRing')) {
+        context.push('<div class="focus-ring">',
+                      '<div class="focus-left"></div>',
+                      '<div class="focus-middle"></div>',
+                      '<div class="focus-right"></div></div>');
+      }
+    }
+    else {
+      this.renderTitle(context, firstTime) ;
+    }
+  },
+  
+  /**
+    @deprecated
+    This is supplied because the deprecated version of render needs.
+  
+    The deprecated render path will be used if renderTitle is overriden
+    but render is not.
+  */
+  renderImage: function(context, firstTime){
+    var icon = this.get('icon');
+    context.addClass('no-min-width');
+    if(icon) context.push("<div class='img "+icon+"'></div>");
+    else context.push("<div class='img'></div>");
+  },
+
 
   /** @private {String} used to store a previously defined key equiv */
   _defaultKeyEquivalent: null,
