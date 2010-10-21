@@ -272,6 +272,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       record.recordDidChange(pname);
     } 
     
+    this.enumerableContentDidChange(idx, amt, len - amt);
+    
     return this;
   },
   
