@@ -89,6 +89,17 @@ SC.RadioView = SC.View.extend(SC.Control,
     the title with this itemTitleKey property.
   */
   itemTitleKey: null,
+  
+  /**
+    If items property is a hash, specify which property will function as
+    the item width with this itemWidthKey property. This is only used when
+    layoutDirection is set to SC.LAYOUT_HORIONZTAL and can be used to override
+    the default value provided by the framework or theme CSS.
+    
+    @property {String}
+    @default null
+  */
+  itemWidthKey: null,
 
   /** 
     If items property is a hash, specify which property will function as
@@ -142,9 +153,12 @@ SC.RadioView = SC.View.extend(SC.Control,
   displayProperties: ['value', '_displayItems'],
 
   render: function(context, firstTime) {
-    var item, idx, icon, name, itemsLength, url, className, disabled, sel, labelText, selectionState, selectionStateClassNames, items = this.get('_displayItems'),
-    value = this.get('value'),
-    isArray = SC.isArray(value);
+    var items = this.get('_displayItems'),
+        value = this.get('value'),
+        isArray = SC.isArray(value),
+        item, idx, icon, name, width, itemsLength, url,
+        className, disabled, sel, labelText,
+        selectionState, selectionStateClassNames;
 
     context.addClass(this.get('layoutDirection'));
 
@@ -186,8 +200,11 @@ SC.RadioView = SC.View.extend(SC.Control,
 
         labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
         
-        context.push('<div class="sc-radio-button ', 
-                    selectionStateClassNames, '" ', 
+        width = item[4];
+        
+        context.push('<div class="sc-radio-button ',
+                    selectionStateClassNames, '" ',
+                    width ? 'style="width: ' + width + 'px;" ' : '',
                     'aria-checked="', sel ? 'true':'false','" ',
                     'role="radio"' , ' index="', idx,'">',
                     '<span class="button"></span>',
@@ -209,6 +226,10 @@ SC.RadioView = SC.View.extend(SC.Control,
         } else {
           sel = NO;
         }
+        
+        width = item[4];
+        if (width) button.width(width);
+        
         selectionState = this._getSelectionStateClassNames(item, sel, value, isArray, true);
         button.attr('aria-checked', sel ? 'true': 'false');
         // set class of label
@@ -232,11 +253,14 @@ SC.RadioView = SC.View.extend(SC.Control,
   _displayItems: function() {
     var items = this.get('items'), 
         loc = this.get('localize'),
-        titleKey = this.get('itemTitleKey'), valueKey = this.get('itemValueKey'),
+        titleKey = this.get('itemTitleKey'),
+        valueKey = this.get('itemValueKey'),
+        widthKey = this.get('itemWidthKey'),
+        isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
         isEnabledKey = this.get('itemIsEnabledKey'), 
         iconKey = this.get('itemIconKey'),
         ret = [], max = (items)? items.get('length') : 0,
-        item, title, value, idx, isArray, isEnabled, icon;
+        item, title, width, value, idx, isArray, isEnabled, icon;
     
     for(idx=0;idx<max;idx++) {
       item = items.objectAt(idx); 
@@ -253,7 +277,11 @@ SC.RadioView = SC.View.extend(SC.Control,
         if (titleKey) {
           title = item.get ? item.get(titleKey) : item[titleKey];
         } else title = (item.toString) ? item.toString() : null;
-
+        
+        if (widthKey && isHorizontal) {
+          width = item.get ? item.get(widthKey) : item[widthKey];
+        }
+        
         if (valueKey) {
           value = item.get ? item.get(valueKey) : item[valueKey];
         } else value = item;
@@ -274,11 +302,11 @@ SC.RadioView = SC.View.extend(SC.Control,
 
       // localize title if needed
       if (loc) title = title.loc();
-      ret.push([title, value, isEnabled, icon]);
+      ret.push([title, value, isEnabled, icon, width]);
     }
 
     return ret; // done!
-  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey').cacheable(),
+  }.property('items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey').cacheable(),
 
   /** @private - 
     Will figure out what class names to assign each radio button.
