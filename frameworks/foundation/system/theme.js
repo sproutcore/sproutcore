@@ -138,14 +138,18 @@ SC.Theme = {
     } else {
       result.themes = SC.beget(this.themes);
     }
+    
+    // we also have private ("invisible") child themes; look at invisibleSubtheme
+    // method.
+    result._privateThemes = {};
 
     // the theme also specializes all renderers it creates so that they
     // have the theme's classNames and have their 'theme' property set.
-    this._specializedRenderers = {};
+    result._specializedRenderers = {};
 
     // also, the theme specializes all child themes as they are created
     // to ensure that all of the class names on this theme are included.
-    this._specializedThemes = {};
+    result._specializedThemes = {};
 
     // we could put this in _extend_self, but we don't want to clone
     // it for each and every argument passed to create().
@@ -162,7 +166,7 @@ SC.Theme = {
   },
 
   /**
-    Creates a subtheme based on this theme, with the given name,
+    Creates a child theme based on this theme, with the given name,
     and automatically registers it as a child theme.
   */
   subtheme: function(name) {
@@ -175,7 +179,37 @@ SC.Theme = {
     // and return the theme class
     return t;
   },
+  
+  /**
+    Semi-private, only used by SC.View to create "invisible" subthemes. You
+    should never need to call this directly, nor even worry about.
+    
+    Invisible subthemes are only available when find is called _on this theme_;
+    if find() is called on a child theme, it will _not_ locate this theme.
+    
+    The reason for "invisible" subthemes is that SC.View will create a subtheme
+    when it finds a theme name that doesn't exist. For example, imagine that you 
+    have a parent view with theme "base", and a child view with theme "popup".
+    If no "popup" theme can be found inside "base", SC.View will call
+    base.subtheme. This will create a new theme with the name "popup",
+    derived from "base". Everyone is happy.
+    
+    But what happens if you then change the parent theme to "ace"? The view
+    will try again to find "popup", and it will find it-- but it will still be
+    a child theme of "base"; SC.View _needs_ to re-subtheme it, but it won't
+    know it needs to, because it has been found.
+  */
+  invisibleSubtheme: function(name) {
+    // extend the theme
+    var t = this.create({ name: name });
 
+    // add to our set of themes
+    this._privateThemes[name] = t;
+    
+    // and return the theme class
+    return t;
+  },
+  
   //
   // THEME MANAGEMENT
   //
@@ -193,6 +227,10 @@ SC.Theme = {
   find: function(themeName) {
     if (this === SC.Theme) return this.themes[themeName];
     var theme;
+
+    // if there is a private theme (invisible subtheme) by that name, use it
+    theme = this._privateThemes[themeName];
+    if (theme) return theme;
 
     // if there is a specialized version (the theme extended with our class names)
     // return that one

@@ -294,13 +294,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // find theme, if possible
     if (this.get("_themeName")) {
-      // Note: theme instance "find" function will search every parent
-      // _except_ global (which is not a parent)
       var theme;
       if (base) {
         theme = base.find(this.get("_themeName"));
         if (theme) return theme;
-        theme = base.subtheme(this.get('_themeName'));
+        
+        if (base === SC.Theme) return base;
+        
+        theme = base.invisibleSubtheme(this.get('_themeName'));
         return theme;
       }
     }
