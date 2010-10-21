@@ -234,17 +234,16 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     }
     
     if (
-      this.render === SC.ButtonView.prototype.render &&
       this.renderTitle !== SC.ButtonView.prototype.renderTitle
     ) {
       // @if debug
       console.warn(
         "renderTitle is deprecated. Please either implement the entire " + 
-        "either implement your own render() method, or create a renderer " +
+        "rendering process in render() method, or create a renderer " +
         "for this button."
       );
       // @endif
-      this.render = this._DEPRECATED_render;
+      this._use_deprecated_render = YES;
     }
 
     sc_super();
@@ -267,6 +266,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     as part of the theme
   */ 
   render: function(context, firstTime) {
+    if (this._use_deprecated_render) return this._DEPRECATED_render(context, firstTime);
     var toolTip = this.get("toolTip");
     if (toolTip && this.get("localize")) toolTip = toolTip.loc();
 
@@ -331,7 +331,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     if (theme && !context.hasClass(theme)) context.addClass(theme);
     
     // render inner html 
-    this[this.get('renderStyle')](context, firstTime);
+    this[this.get('renderStyle') || 'renderDefault'](context, firstTime);
   },
    
    
