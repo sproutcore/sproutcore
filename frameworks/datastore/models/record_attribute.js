@@ -183,12 +183,11 @@ SC.RecordAttribute = SC.Object.extend(
       value = transform.to(value, this, type, record, key) ;
       
       // if the transform needs to do something when its children change, we need to set up an observer for it
-      if(children = transform.observesChildren) {
+      if(!SC.none(value) && (children = transform.observesChildren)) {
         var i, len = children.length,
         // store the record, transform, and key so the observer knows where it was called from
         context = {
           record: record,
-          transform: transform,
           key: key
         };
         
@@ -207,7 +206,11 @@ SC.RecordAttribute = SC.Object.extend(
     When one of them triggers it will call childDidChange on your transform with the same arguments as to and from.
   */
   _SCRA_childObserver: function(obj, key, deprecated, context, rev) {
+    // write the new value back to the record
     this.call(context.record, context.key, obj);
+    
+    // mark the attribute as dirty
+    context.record.notifyPropertyChange(context.key);
   },
 
   /** 
@@ -389,7 +392,9 @@ SC.RecordAttribute.registerTransform(Array, {
       obj = [];
     }
     return obj;
-  }
+  },
+  
+  observesChildren: ['[]']
 });
 
 /** @private - generic converter for Object */
