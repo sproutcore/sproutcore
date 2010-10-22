@@ -408,6 +408,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
       //Check if the item is currentSelectedItem or not
       if(value === this.get('value')) {
 
+        // increase index by 1 if item falls below the separator in menu list
+        if(separatorPostion > 0 && separatorPostion<len &&
+          idx >= len-separatorPostion) {
+          idx++ ;
+        }
+
         //set the itemIdx - To change the prefMatrix accordingly.
         this.set('itemIdx', idx) ;
         isChecked = !checkboxEnabled ? NO : YES ;
@@ -637,27 +643,34 @@ SC.SelectButtonView = SC.ButtonView.extend(
      place aligned to the item on the button when menu is opened.
   */
   changeSelectButtonPreferMatrix: function() {
-    var controlSizeTuning = 0, customMenuItemHeight = 0 ;
+    var controlSizeTuning = 0, customMenuItemHeight = 0,
+        customSeparatorHeight = 0, separatorHeightTuning = 0,
+        pos, len;
     switch (this.get('controlSize')) {
       case SC.TINY_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.TINY_OFFSET_Y;
         customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.SMALL_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.SMALL_OFFSET_Y;
         customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.REGULAR_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.REGULAR_OFFSET_Y;
         customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.LARGE_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.LARGE_OFFSET_Y;
         customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.HUGE_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.HUGE_OFFSET_Y;
         customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
     }
 
@@ -673,6 +686,18 @@ SC.SelectButtonView = SC.ButtonView.extend(
       if(itemIdx) {
         preferMatrixAttributeTop = itemIdx * customMenuItemHeight +
           controlSizeTuning ;
+
+        // if current selected item falls below the separator, adjust the
+        // top of menu pane
+        pos = this.get('separatorPostion');
+        len = this.get('objects').length;
+        if(pos > 0 && pos < len && itemIdx >= len-pos) {
+          separatorHeightTuning =
+          customMenuItemHeight - customSeparatorHeight;
+          // reduce the top to adjust the extra height calculated because
+          // of considering separator as a menu item
+          preferMatrixAttributeTop -= separatorHeightTuning;
+        }
       }
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
       this.set('preferMatrix', tempPreferMatrix) ;
