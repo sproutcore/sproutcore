@@ -1,0 +1,37 @@
+author: Alex Percsi
+document status: draft
+
+This is a quick draft of what should be release notes for SC.TableView
+
+SC.TableView is a composite view that displays a table with a header, columns and rows of data.
+
+An SC.TableView contains a ScrollView which renders an SC.DataView to display data. SC.DataView extends SC.ListView.
+
+Currently working features are:
+- incremental rendering,
+- dynamic columns,
+- dynamic datasource,
+- click a header to sort,
+- drag a header to reoder columns
+- drag a headers handle to resize a column
+- drag to reorder content
+- inline editing
+- foldered tableview
+- custom scrollview
+- custom exampleview - NOTE: an exampleView in SC.TableView is for cells, not rows!!!
+- optional headers
+- custom header heights
+- custom (but uniform, for now) row heights
+
+Still to be done:
+- structural stabilization (I assume)
+- cell based selection
+
+Known issues:
+- Currently rowViews are not pooled, only cell views are. This should be improved.
+
+A sample app can be found at http://github.com/alexpercsi/sproutcore-samples
+
+Please feel free to send any comments or feedback via github private message to http://github.com/alexpercsi, or on irc.freenode.net, #Sproutcore, nicknames alexpercsi or poolshark.
+
+Special thanks to endash, who started this project and built out most of the infrastructure.

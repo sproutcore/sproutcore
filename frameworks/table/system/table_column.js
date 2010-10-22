@@ -5,6 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('views/table_cell.js');
 
 SC.SORT_ASCENDING  = 'ascending';
 SC.SORT_DESCENDING = 'descending';
@@ -70,6 +71,8 @@ SC.TableColumn = SC.Object.extend({
   
   isVisible: YES,
   
+  isResizable: YES,
+  
   /**
     Whether the column gets wider or narrower based on the size of the
     table. Only one column in a TableView is allowed to be flexible.
@@ -94,7 +97,16 @@ SC.TableColumn = SC.Object.extend({
     @type Boolean
   */
   isSortable: YES,
+  
+  /**
+    Example view for cells pertaining to this column instance
 
+    @property
+    @type SC.View
+  */
+  
+  exampleView: SC.TableCellView,
+  
   /**
     Reference to the URL for this column's icon. If `null`, there is no
     icon associated with the column.
@@ -120,6 +132,11 @@ SC.TableColumn = SC.Object.extend({
     because the SC.TableHeader views use this class to find out how to
     render table content (when necessary).
   */
-  tableContent: null
+  tableContent: null,
+
+  toggleSortState: function() {
+    var sortState = this.get('sortState');
+    this.set('sortState', (sortState !== "ASC" ? "ASC" : "DESC"));
+  }
   
 });
