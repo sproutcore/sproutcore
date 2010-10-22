@@ -1314,6 +1314,10 @@ SC.RootResponder = SC.Object.extend({
         // update touch
         touchEntry.pageX = touch.pageX;
         touchEntry.pageY = touch.pageY;
+        touchEntry.clientX = touch.clientX;
+        touchEntry.clientY = touch.clientY;
+        touchEntry.screenX = touch.screenX;
+        touchEntry.screenY = touch.screenY;
         touchEntry.timeStamp = evt.timeStamp;
         touchEntry.event = evt;
 
@@ -1350,6 +1354,10 @@ SC.RootResponder = SC.Object.extend({
         firstTouch = viewTouches.firstObject();
         evt.pageX = firstTouch.pageX;
         evt.pageY = firstTouch.pageY;
+        evt.clientX = firstTouch.clientX;
+        evt.clientY = firstTouch.clientY;
+        evt.screenX = firstTouch.screenX;
+        evt.screenY = firstTouch.screenY;
         evt.touchContext = this; // so it can call touchesForView
 
         // and go
@@ -1392,6 +1400,10 @@ SC.RootResponder = SC.Object.extend({
         touchEntry.timeStamp = evt.timeStamp;
         touchEntry.pageX = touch.pageX;
         touchEntry.pageY = touch.pageY;
+        touchEntry.clientX = touch.clientX;
+        touchEntry.clientY = touch.clientY;
+        touchEntry.screenX = touch.screenX;
+        touchEntry.screenY = touch.screenY;
         touchEntry.type = 'touchend';
         touchEntry.event = evt;
 
@@ -1982,6 +1994,10 @@ SC.Touch = function(touch, touchContext) {
 
   this.startX = this.pageX = touch.pageX;
   this.startY = this.pageY = touch.pageY;
+  this.clientX = touch.clientX;
+  this.clientY = touch.clientY;
+  this.screenX = touch.screenX;
+  this.screenY = touch.screenY;
 };
 
 SC.Touch.prototype = {
