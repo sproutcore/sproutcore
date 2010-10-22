@@ -442,9 +442,11 @@ SC.RecordAttribute.registerTransform(Date, {
     // figure timezone
     var zp = this._zeropad,
         tz = 0-date.getTimezoneOffset()/60;
-        
-    tz = (tz === 0) ? 'Z' : '%@:00'.fmt(zp(tz));
-    
+
+    tz = (tz === 0) ?
+      'Z' :
+      (tz > 0 ? '+%@:00' : '%@:00').fmt(zp(tz));
+
     this._dates[date.getTime()] = ret = "%@-%@-%@T%@:%@:%@%@".fmt(
       zp(date.getFullYear()),
       zp(date.getMonth()+1),
