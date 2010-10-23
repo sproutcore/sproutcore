@@ -549,7 +549,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // if an action/target is defined on self use that also
     action =this.get('action');
     if (action && resp) {
-      resp.sendAction(action, this.get('target'), this, this.get('pane'));
+      // Invoke after value is setted.
+      this.invokeLast(function() {
+        resp.sendAction(action, this.get('target'), this, this.get('pane'));
+      }, this);
     }
   },
   
