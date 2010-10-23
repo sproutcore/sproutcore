@@ -311,4 +311,4 @@ SC.BaseTheme = SC.Theme.create({
 });
 
 SC.Theme.addTheme(SC.BaseTheme);
-
+SC.defaultTheme = "sc-base";

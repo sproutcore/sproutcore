@@ -247,13 +247,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _baseThemeName: false,
   
   /**
-    The base theme to start from; the "theme" property looks in this theme.
-    baseTheme is inherited from parent's theme property.
+    The baseTheme property is usually the parent view's theme;
+    it is the theme in which this view should look for its own theme.
+    
+    For example, if the parent view's theme is "ace", and this view's
+    theme is "toolbar", it will look for the "toolbar" theme inside
+    "ace"; if it doesn't find it, it will look for the theme globally.
   */
   baseTheme: null,
-  
+
   /**
-    This sets the base theme 
+    The actual computed property for baseTheme.
   */
   _baseThemeProperty: function(key, value) {
     if (SC.typeOf(value) === SC.T_STRING) {
@@ -270,7 +274,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var parent = this.get("parentView");
     if (parent) return parent.get("theme");
     
-    return SC.Theme.find("sc-base");
+    return SC.Theme.find(SC.defaultTheme);
   }.property().cacheable(),
   
   
