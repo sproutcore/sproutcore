@@ -7,7 +7,7 @@
 /*global module test equals context ok */
 var png = sc_static('images/sproutcore.png'), pngImage;
 
-SC.imageStore.debug = true;
+var store = SC.WebSQLImageStore.create();
 
 module("SC.imageStore", {
   setup: function() {
@@ -16,16 +16,16 @@ module("SC.imageStore", {
   },
   
   teardown: function() {
-    SC.imageStore.nuke();
+    SC.ImageView.store.nuke();
   }
 });
 
 test("Saving and loading a PNG", function() {
-  SC.imageStore.save(png, pngImage, this, function(storedImage) {
+  store.save(png, pngImage, this, function(storedImage) {
     ok(storedImage, "the stored image is not null");
     
     if (storedImage) {
-      SC.imageStore.load(png, this, function(url, image) {
+      store.load(png, this, function(url, image) {
         equals(url, png, "loaded image should have same URL as the one we saved");
         ok(SC.ok(image), "loaded image is not an error");
         

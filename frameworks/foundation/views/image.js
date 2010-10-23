@@ -8,6 +8,7 @@
 
 sc_require('views/view');
 sc_require('mixins/control');
+sc_require('system/image_stores/web_sql');
 
 SC.IMAGE_STATE_NONE = 'none';
 SC.IMAGE_STATE_LOADING = 'loading';
@@ -136,15 +137,15 @@ SC.ImageView = SC.View.extend(SC.Control,
   useImageQueue: YES,
   
   /**
-    If YES, the image will be stored using the SC.imageStore mechanism. This
-    will store the image locally and make it available offline. Note that this
-    only works when using a URL as the value.
+    If YES, the image will be stored using a SC.ImageStore object. It will use the
+    store defined at SC.ImageView.store. This will store the image locally and make
+    it available offline. Note that this only works when using a URL as the value.
     
     @property {Boolean}
     @default NO
     @since SproutCore 1.5
   */
-  useImageStore: NO,
+  wantsImageStored: NO,
   
   /**
     A url or CSS class name.
@@ -256,8 +257,8 @@ SC.ImageView = SC.View.extend(SC.Control,
       this._iv_value = value;
       
       if (type === SC.IMAGE_TYPE_URL) {
-        if (this.get('useImageStore')) {
-          SC.imageStore.load(value, this, this._storedImageDidLoad);
+        if (this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
+          SC.ImageView.store.load(value, this, this._storedImageDidLoad);
         } else if (this.get('useImageQueue')) {
           this._loadImage();
         } else {
@@ -378,3 +379,4 @@ SC.ImageView.valueIsUrl = function(value) {
   return value ? value.indexOf('/') >= 0 : NO ;
 } ;
 
+SC.ImageView.store = SC.WebSQLImageStore.create();
