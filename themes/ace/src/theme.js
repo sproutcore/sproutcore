@@ -7,5 +7,6 @@ SC.Theme.addTheme(SC.AceTheme);
 
 SC.AceTheme.Dark = SC.AceTheme.subtheme("dark");
 
-// until SC build tools automatically do this:
-SC.Pane.prototype.baseTheme = "ace";
+// for backwards-compatibility with apps that do not set their
+// own default theme:
+SC.defaultTheme = 'ace';
