@@ -5,12 +5,21 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+SC.BaseTheme.Checkbox = SC.BaseTheme.subtheme('checkbox');
+
 /** @class
+  The Checkbox-themed Button is a full button, complete with
+  title. You can use this renderer to render the whole control,
+  which will include the checkbox itself and the title.
+  
+  If you just want the checkbox, use the checkbox renderer (which
+  this renderer actually uses).
+  
   @extends SC.Renderer
   @since SproutCore 1.1
 */
-SC.BaseTheme.CheckboxControl = SC.Renderer.extend({
-  name: 'checkbox-control',
+SC.BaseTheme.Checkbox.Button = SC.Renderer.extend({
+  name: 'button',
   classNames: 'sc-checkbox-control',
 
   render: function(context) {
@@ -82,4 +91,4 @@ SC.BaseTheme.CheckboxControl = SC.Renderer.extend({
   }
 });
 
-SC.BaseTheme.addRenderer(SC.BaseTheme.CheckboxControl);
+SC.BaseTheme.Checkbox.addRenderer(SC.BaseTheme.Checkbox.Button);
