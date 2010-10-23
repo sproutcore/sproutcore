@@ -259,23 +259,75 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   // a separate observer (see below)
   displayProperties: ['href', 'icon', 'title', 'value', 'toolTip'],
   
+
+  /**
+    SC's ButtonView delegates out rendering to the theme. The rendering
+    process itself is handled by renderers which belong to the theme, and
+    to simplify the code, we extract creating this renderer into its own
+    computed property.
+  */
+  buttonRenderer: function() {
+    return this.get('theme').renderer('button');
+  }.property('theme').cacheable(),
   
   /**
-    This property is used to call the right render style for the button.
-    * This might be a future way to start implementing the render method
-    as part of the theme
+    Renders the button, delegating out the actual rendering task to the theme.
+    You do not, however, have to change the theme to change how the button
+    renders: youcan override this method directly. This is especially suited 
+    for one-off tweaks to the button:
+    
+        render: function(context, firstTime) {
+          if (firstTime) {
+            context.begin("span")
+              .addClass("title")
+              .text(this.get('displayTitle'))
+            .end();
+          } else {
+            this.$('title').text(this.get('displayTitle'));
+          }
+        }
+    
+    If you'll want to use the same altered appearance multiple places, however,
+    you may want to make a custom theme for that appearance, and set up
+    a new button "renderer" for that theme. For example:
+    
+        // this assumes that your app has a theme
+        MyApp.Theme.SpecialButton = MyApp.Theme.subtheme('special-button');
+        MyApp.Theme.SpecialButton.Button = SC.Renderer.extend({
+          name: 'button',
+          render: function(context) {
+            context.begin("span")
+              .addClass("title")
+              
+              // NOTE: this.title is passed to the renderer by ButtonView's 
+              // render() method:
+              .text(this.title)
+            .end();
+            
+            this.resetChanges();
+          },
+          
+          update: function(cq) {
+            if (this.didChange('title')) cq.find('title').text(this.title);
+            this.resetChanges();
+          }
+        })
+    
+    Then, you'd tell the buttons to use that theme:
+    
+        SC.ButtonView.design({ theme: 'special-button' });
   */ 
   render: function(context, firstTime) {
     if (this._use_deprecated_render) return this._DEPRECATED_render(context, firstTime);
+    
+    var renderer = this.get('buttonRenderer');
+    
     var toolTip = this.get("toolTip");
     if (toolTip && this.get("localize")) toolTip = toolTip.loc();
 
-    if (firstTime) {
-      this.buttonRenderer = this.get('theme').renderer('button');
-    }
-
     var size = this.get('controlSize');
-    this.buttonRenderer.attr({
+    
+    renderer.attr({
       toolTip: toolTip,
       isAnchor: this.get('tagName') === 'a',
       href: this.get('href'),
@@ -291,14 +343,15 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
         'active': this.get('isActive'),
         'def': this.get('isDefault'),
         'cancel': this.get('isCancel'),
-        'sel': this.get('isSelected')
+        'sel': this.get('isSelected') && this.get('isSelected') !== SC.MIXED_STATE,
+        'mixed': this.get('isSelected') === SC.MIXED_STATE
       },
 
       size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
     });
 
-    if (firstTime) this.buttonRenderer.render(context);
-    else this.buttonRenderer.update(context.$());
+    if (firstTime) renderer.render(context);
+    else renderer.update(context.$());
   },
   
   //
