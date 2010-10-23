@@ -7,13 +7,16 @@
 
 /** @class
 
-  Renders a checkbox button view specifically.
+  Represents a Checkbox Button.
   
-  This view is basically a button view preconfigured to generate the correct
-  HTML and to set to use a TOGGLE_BEHAVIOR for its buttons.
+  The view is an SC.ButtonView put into toggle mode and with the 'theme' property
+  set to "checkbox".
   
-  This view renders a simulated checkbox that can display a mixed state and 
-  has other features not found in platform-native controls.  
+  Rendering
+  ----------------------------
+  SC.ButtonView delegates its rendering to its theme. As the theme is set
+  to "checkbox", the way the checkbox renders (including DOM) will actually
+  be different than SC.ButtonView's.
   
   @extends SC.FieldView
   @since SproutCore 1.0
@@ -24,39 +27,14 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
   tagName: 'label',
   ariaRole: 'checkbox',
-  theme: '', 
+  
+  /**
+    A CheckboxView actually just renders a button in the theme "checkbox".
+  */
+  theme: 'checkbox',
 
   /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,
-
-  render: function(context, firstTime) {
-    if (firstTime) {
-      this._checkboxRenderer = this.get('theme').renderer('checkbox-control');
-    }
-
-    var size = this.get('controlSize'), sel = this.get('isSelected');
-    this._checkboxRenderer.attr({
-      icon: this.get('icon'),
-      formFieldName: SC.guidFor(this),
-      title: this.get('displayTitle'),
-      escapeHTML: this.get('escapeHTML'),
-      needsEllipsis: this.get('needsEllipsis'),
-
-      classNames: {
-        'active': this.get('isActive'),
-        'sel': sel && (sel !== SC.MIXED_STATE),
-        'mixed': sel === SC.MIXED_STATE
-      },
-
-      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
-    });
-
-    if (firstTime) {
-      this._checkboxRenderer.render(context);
-    } else {
-      this._checkboxRenderer.update(context.$());
-    }
-  },
   
   acceptsFirstResponder: function() {
     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
