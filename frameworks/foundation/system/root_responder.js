@@ -2011,7 +2011,7 @@ SC.Touch.prototype = {
     the hasCustomEventHandling property to YES but does not cancel the event.
   */
   allowDefault: function() {
-    this.event.hasCustomEventHandling = YES ;
+    if (this.event) this.event.hasCustomEventHandling = YES ;
   },
 
   /**
