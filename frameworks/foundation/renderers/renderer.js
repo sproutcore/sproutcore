@@ -226,6 +226,78 @@ SC.Renderer = {
 
   },
 
+  /**
+    Adds one or more class names to the renderer. You may pass
+    one or more strings (optionally space delimited) or arrays
+    of class names.
+  */
+  addClass: function(classNames) {
+    var idx, len;
+    if (arguments.length > 1) {
+      len = arguments.length;
+      for (idx = 0; idx < len; idx++) {
+        this.addClass(arguments[idx]);
+      }
+      return;
+    }
+    
+    if (typeof classNames === "string") classNames = classNames.split(' ');
+    
+    len = classNames.length;
+    for (idx = 0; idx < len; idx++) {
+      this.classNames[classNames[idx]] = YES;
+    }
+  },
+  
+  /**
+    Removes one or more class names from the renderer. You may pass
+    one or more strings (optionally space delimited) or arrays of
+    class names.
+  */
+  removeClass: function(classNames) {
+    var idx, len;
+    if (arguments.length > 1) {
+      len = arguments.length;
+      for (idx = 0; idx < len; idx++) {
+        this.addClass(arguments[idx]);
+      }
+      return;
+    }
+    
+    if (typeof classNames === "string") classNames = classNames.split(' ');
+    
+    len = classNames.length;
+    for (idx = 0; idx < len; idx++) {
+      this.classNames[classNames[idx]] = YES;
+    }
+  },
+
+  /**
+    Updates the existing class names hash with the class names
+    supplied. You may supply an array-like structure (including
+    a set), a string (optionally space-delimited), and finally,
+    you may supply a hash of class names mapped to YES if they
+    should be added and NO if they should be removed (if present).
+    
+    Finally, you may supply a name and a 
+   */
+  setClass: function(classNames, classNameIsOn) {
+    // class names may be a CoreSet, array, string, or hash
+    if (classNames) {
+      if (SC.typeOf(classNames) === SC.T_HASH && !classNames.isSet) {
+        for (className in classNames) {
+          if (classNames[className]) this.classNames.add(className);
+          else this.classNames.remove(className);
+        }
+      } else if (typeof classNames === "string") {
+        this.classNames.addEach(classNames.split(' '));
+      } else {
+        // it must be an array or another CoreSet... same difference.
+        this.classNames.addEach(classNames);
+      }
+    }
+  },
+
   //
   // FUNCTIONS SUBCLASSES SHOULD/MAY IMPLEMENT
   //
@@ -267,27 +339,6 @@ SC.Renderer = {
   },
 
   /**
-    Extends the set of class names on this renderer with the class
-    names supplied (which may be a set, a string, a hash, etc.)
-   */
-  extendClassNames: function(classNames) {
-    // class names may be a CoreSet, array, string, or hash
-    if (classNames) {
-      if (SC.typeOf(classNames) === SC.T_HASH && !classNames.isSet) {
-        for (className in classNames) {
-          if (classNames[className]) this.classNames.add(className);
-          else this.classNames.remove(className);
-        }
-      } else if (typeof classNames === "string") {
-        this.classNames.addEach(classNames.split(' '));
-      } else {
-        // it must be an array or another CoreSet... same difference.
-        this.classNames.addEach(classNames);
-      }
-    }
-  },
-
-  /**
     Extends the renderer with the supplied hash. You would usually
     call this from inside your init() method if you want to handle
     a hash of properties; this allows the hash passed to init to have
@@ -295,7 +346,7 @@ SC.Renderer = {
    */
   extendSelf: function(ext) {
     this.classNames = SC.clone(this.classNames);
-    if (ext.classNames) this.extendClassNames(ext.classNames);
+    if (ext.classNames) this.setClass(ext.classNames);
 
     // mixin while enabling sc_super();
     var key, value, cur;
@@ -359,7 +410,7 @@ SC.Renderer = {
     if (typeof key === SC.T_STRING) {
       if (value === undefined) return this[key];
       if (key === 'classNames') {
-        this.extendClassNames(value);
+        this.setClass(value);
         didChange = YES;
       } else if (this[key] !== value) {
         didChange = YES;
@@ -379,7 +430,7 @@ SC.Renderer = {
 
         didChange = NO;
         if (key === 'classNames') {
-          this.extendClassNames(value);
+          this.setClass(value);
           didChange = YES;
         } else if (this[key] !== value) {
           this[key] = value;
