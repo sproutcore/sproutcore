@@ -36,6 +36,21 @@ module("SC.Renderer", {
   }
 });
 
+// makes sure two collections of class names match
+// collections may be space-delimited string, array, or set
+var sameClassNames = function(a, b, message) {
+  if (typeof a === "string") a = a.trim().split(' ');
+  if (typeof b === "string") b = b.trim().split(' ');
+  
+  same(SC.Set.create(a), SC.Set.create(b), message);
+};
+
+// validates a collection of class names matches with
+// the collection on elem.
+var validateClassNames = function(classNames, message) {
+  sameClassNames(classNames, $(elem).attr('class'), message);
+};
+
 test("setting properties in general works", function(){
   var renderer = testRenderer.create();
   renderer.attr("foo", "bar");
@@ -97,13 +112,13 @@ test("Class names setting", function() {
     classNames: "a b c"
   });
 
-  same(renderer.classNames, SC.Set.create(["a", "c", "b"]), "Class names match (set with space delimited string).");
+  sameClassNames(renderer.classNames, "a b c", "Class names match (set with space delimited string).");
 
   renderer.attr('classNames', ["albert", "einstein"]);
-  same(renderer.classNames, SC.Set.create(["a", "b", "c", "albert", "einstein"]), "Class names match (modified with an array)");
+  sameClassNames(renderer.classNames, ["a", "b", "c", "albert", "einstein"], "Class names match (modified with an array)");
 
   renderer.attr('classNames', { 'a': NO, 'b': NO, 'c': NO });
-  same(renderer.classNames, SC.Set.create(["albert", "einstein"]), "class='albert einstein'");
+  sameClassNames(renderer.classNames, ["albert", "einstein"], "class='albert einstein'");
 });
 
 test("Class name updating", function() {
@@ -118,7 +133,7 @@ test("Class name updating", function() {
   context.update();
   SC.RunLoop.end();
 
-  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["luna", "lovegood", "test"]), "class='luna lovegood test'");
+  validateClassNames(["luna", "lovegood", "test"], "class='luna lovegood test'");
 
   renderer.attr('classNames', { 'luna': NO, 'xenophilius': YES });
 
@@ -126,8 +141,48 @@ test("Class name updating", function() {
   renderer.update($.buffer(elem));
   SC.RunLoop.end();
 
-  same(SC.Set.create($.buffer(elem).attr('class').split(' ')), SC.Set.create(["xenophilius", "lovegood", "test"]), "class='xenophilius lovegood test'");
+  validateClassNames(["xenophilius", "lovegood", "test"], "class='xenophilius lovegood test'");
   
+});
+
+test("add/remove/setClass", function() {
+  SC.RunLoop.begin();
+  
+  var renderer = testRenderer.create();
+  renderer.attr('classNames', "luna lovegood");
+  renderer.render(context);
+  context.update();
+  SC.RunLoop.end();
+  
+  validateClassNames(["luna", "lovegood", "test"], "correct initial classes: class='luna lovegood test'");
+  
+  SC.RunLoop.begin();
+  renderer.addClass("xenophilius mcgonnagal");
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+  
+  validateClassNames("luna lovegood xenophilius mcgonnagal test", "correct adjusted classes: class='luna lovegood test xenophilius mcgonnagal'");
+
+  SC.RunLoop.begin();  
+  renderer.removeClass("mcgonnagal");
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+  
+  validateClassNames("luna lovegood xenophilius test", "correctly removed class: class='luna lovegood test xenophilius'");
+  
+  SC.RunLoop.begin();  
+  renderer.setClass("xenophilius", NO);
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+  
+  validateClassNames("luna lovegood test", "correctly removed class: class='luna lovegood test'");
+  
+  SC.RunLoop.begin();  
+  renderer.setClass({ 'luna': NO, 'lovegood': NO });
+  renderer.update($.buffer(elem));
+  SC.RunLoop.end();
+  
+  validateClassNames("test", "correctly removed class: class='test'");
 });
 
 test("Sizes", function() {
