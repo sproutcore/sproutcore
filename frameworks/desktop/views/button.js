@@ -273,7 +273,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   /**
     Renders the button, delegating out the actual rendering task to the theme.
     You do not, however, have to change the theme to change how the button
-    renders: youcan override this method directly. This is especially suited 
+    renders: you can override this method directly. This is especially suited 
     for one-off tweaks to the button:
     
         render: function(context, firstTime) {
