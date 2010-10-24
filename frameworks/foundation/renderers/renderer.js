@@ -238,15 +238,14 @@ SC.Renderer = {
       for (idx = 0; idx < len; idx++) {
         this.addClass(arguments[idx]);
       }
-      return;
+      return this;
     }
     
     if (typeof classNames === "string") classNames = classNames.split(' ');
     
-    len = classNames.length;
-    for (idx = 0; idx < len; idx++) {
-      this.classNames[classNames[idx]] = YES;
-    }
+    this.classNames.addEach(classNames);
+    
+    return this;
   },
   
   /**
@@ -261,15 +260,15 @@ SC.Renderer = {
       for (idx = 0; idx < len; idx++) {
         this.addClass(arguments[idx]);
       }
-      return;
+      return this;
     }
     
     if (typeof classNames === "string") classNames = classNames.split(' ');
     
     len = classNames.length;
-    for (idx = 0; idx < len; idx++) {
-      this.classNames[classNames[idx]] = YES;
-    }
+    this.classNames.removeEach(classNames);
+    
+    return this;
   },
 
   /**
@@ -279,9 +278,16 @@ SC.Renderer = {
     you may supply a hash of class names mapped to YES if they
     should be added and NO if they should be removed (if present).
     
-    Finally, you may supply a name and a 
+    Finally, you may supply a name and a boolean specifying whether
+    that class should or should not be present.
    */
-  setClass: function(classNames, classNameIsOn) {
+  setClass: function(classNames, shouldBePresent) {
+    if (shouldBePresent !== undefined) {
+      if (shouldBePresent) this.addClass(classNames);
+      else this.removeClass(classNames);
+      return;
+    }
+    
     // class names may be a CoreSet, array, string, or hash
     if (classNames) {
       if (SC.typeOf(classNames) === SC.T_HASH && !classNames.isSet) {
@@ -296,6 +302,8 @@ SC.Renderer = {
         this.classNames.addEach(classNames);
       }
     }
+    
+    return this;
   },
 
   //
