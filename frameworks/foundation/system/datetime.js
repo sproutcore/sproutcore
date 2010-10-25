@@ -103,16 +103,20 @@ SC.Scanner = SC.Object.extend(
   
   /**
     Reads some characters from the string and interprets it as an integer.
-    
-    @param {integer} len the amount of characters to read
+
+    @param {integer} len the maximum amount of characters to read
     @throws {SC.SCANNER_INT_ERROR} if asked to read non numeric characters
     @returns {integer} the scanned integer
   */
   scanInt: function(len) {
     var str = this.scan(len);
-    var re = new RegExp("\\d{"+len+"}");
-    if (!str.match(re)) throw SC.SCANNER_INT_ERROR;
-    return parseInt(str, 10);
+    var re = new RegExp("^\\d{1,"+len+"}");
+    var match = str.match(re);
+    if (!match){ throw SC.SCANNER_INT_ERROR; }
+    if(match[0].length<str.length){
+      this.scanLocation -= (str.length-match[0].length);
+    }
+    return parseInt(match[0], 10);
   },
   
   /**

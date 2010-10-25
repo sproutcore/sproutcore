@@ -295,6 +295,10 @@ test('parse', function() {
     SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null
     , 'Should be able to fail to parse multiple times');
   timeShouldBeEqualToHash(
+    SC.DateTime.parse('1/1/01 00:00:00', '%m/%d/%y %H:%M:%S'),
+    { year: 2001, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 },
+    'Should be able to have single digit month and day');
+  timeShouldBeEqualToHash(
     SC.DateTime.parse('70-01-01 00:00:00', '%y-%m-%d %H:%M:%S'),
     { year: 2070, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }); 
   timeShouldBeEqualToHash(
