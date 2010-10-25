@@ -410,7 +410,7 @@ SC.Animatable = {
       if (
         (SC.empty(nT) || (!SC.isPercentage(nT) && !SC.empty(nH))) &&
         (SC.empty(nL) || (!SC.isPercentage(nL) && !SC.empty(nW))) &&
-        (this.transition && (this.transition['top'] || this.transition['left']))
+        (this.transitions && (this.transitions['top'] || this.transitions['left']))
       ) {
         specialTransform = YES;
         this._useSpecialCaseTransform = YES;
