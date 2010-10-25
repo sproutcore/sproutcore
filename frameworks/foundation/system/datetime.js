@@ -939,6 +939,7 @@ SC.DateTime.mixin(SC.Comparable,
         }
       }
     } catch (e) {
+      re.lastIndex=0;
       console.log('SC.DateTime.createFromString ' + e.toString());
       return null;
     }
