@@ -61,6 +61,7 @@ SC.BaseTheme.renderers.Label = SC.Renderer.extend({
   update: function() {
     var cq = this.$();
     this.updateTitleRenderer();
+    this.updateControlRenderer();
     if (this.didChange('textAlign')) {
       cq.css('text-align', this.textAlign);
     }
