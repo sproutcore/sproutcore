@@ -428,7 +428,7 @@ SC.RootResponder = SC.Object.extend({
   */
   sendAction: function( action, target, sender, pane, context, firstResponder) {
     target = this.targetForAction(action, target, sender, pane, firstResponder) ;
-
+    
     // HACK: If the target is a ResponderContext, forward the action.
     if (target && target.isResponderContext) {
       return !!target.sendAction(action, sender, context, firstResponder);
@@ -437,7 +437,7 @@ SC.RootResponder = SC.Object.extend({
 
   _responderFor: function(target, methodName, firstResponder) {
     var defaultResponder = target ? target.get('defaultResponder') : null;
-
+    
     if (target) {
       target = firstResponder || target.get('firstResponder') || target;
       do {

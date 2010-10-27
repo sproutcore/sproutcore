@@ -753,6 +753,14 @@ SC.Enumerable = {
         ret = [],
         last = null,
         context = SC.Enumerator._popContext(),
+<<<<<<< HEAD
+        grouped = [],
+        keyValues = [];
+    for(var idx=0;idx<len;idx++) {
+      var next = this.nextObject(idx, last, context) ;
+      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
+      if(SC.none(grouped[cur])){ grouped[cur] = []; keyValues.push(cur); }
+=======
         grouped = [], 
         keyValues = [],
         idx, next, cur;
@@ -763,14 +771,21 @@ SC.Enumerable = {
       if(SC.none(grouped[cur])) { 
         grouped[cur] = []; keyValues.push(cur);
       }
+>>>>>>> Cleanup and jslint SC.Enumerable
       grouped[cur].push(next);
       last = next;
     }
     last = null;
     context = SC.Enumerator._pushContext(context);
+<<<<<<< HEAD
+
+    for(var idx=0,len2=keyValues.length; idx < len2; idx++){
+      ret.push(grouped[keyValues[idx]]);
+=======
     
     for(idx=0,len=keyValues.length; idx < len; idx++){
       ret.push(grouped[keyValues[idx]]);        
+>>>>>>> Cleanup and jslint SC.Enumerable
     }
     return ret ;
   }
@@ -1038,6 +1053,23 @@ Array.prototype.isEnumerable = YES ;
     groupBy: function(key) {
       var len = this.length,
           ret = [],
+<<<<<<< HEAD
+          grouped = [],
+          keyValues = [];
+      for(var idx=0;idx<len;idx++) {
+        var next = this[idx] ;
+        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
+        if(SC.none(grouped[cur])){ grouped[cur] = []; keyValues.push(cur); }
+        grouped[cur].push(next);
+      }
+      for(var idx=0,len2=keyValues.length; idx < len2; idx++){
+        ret.push(grouped[keyValues[idx]]);
+      }
+      return ret ;
+    },
+
+
+=======
           grouped = [], 
           keyValues = [],
           idx, next, cur;
@@ -1055,6 +1087,7 @@ Array.prototype.isEnumerable = YES ;
       return ret ;
     },
     
+>>>>>>> Cleanup and jslint SC.Enumerable
     find: function(callback, target) {
       if (typeof callback !== "function") throw new TypeError() ;
       var len = this.length ;

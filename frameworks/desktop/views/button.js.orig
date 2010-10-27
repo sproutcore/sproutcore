@@ -395,7 +395,11 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   */
   _action: function(evt, skipHoldRepeat) {
     switch(this.get('buttonBehavior')) {
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> Cleanup and jslint SC.Enumerable
     // When toggling, try to invert like values. i.e. 1 => 0, etc.
     case SC.TOGGLE_BEHAVIOR:
       var sel = this.get('isSelected') ;
