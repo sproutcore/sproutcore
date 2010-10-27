@@ -76,10 +76,9 @@ sc_require('views/text_field') ;
   refuses it as well.
   
   @extends SC.TextFieldView
-  @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
-SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
+SC.InlineTextFieldView = SC.TextFieldView.extend(
 /** @scope SC.InlineTextFieldView.prototype */ {
 
   /**
@@ -108,18 +107,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     // can't begin editing again if already editing
     if (this.get('isEditing')) return NO ;
     
-    var layout={}, pane, delLayout, paneElem, del;
+    var layout={}, pane, tarLayout, paneElem, tar;
 
-    del = this._delegate = options.delegate ;
-    this.set('delegate', del);
+    tar = this._target = options.target ;
+    this.set('target', tar);
     
-    // continue only if the delegate allows it
-    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldBeginEditing', this)) {
-      //@if(debug)
-      SC.Logger.warn('InlineTextField.beginEditing() cannot begin without inlineEditorShouldBeginEditing() on the delegate.');
-      //@end
-      return NO;
-    }
     this.beginPropertyChanges();
     
     this.set('isEditing', YES) ;
@@ -129,8 +121,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this._optIsCollection = options.isCollection;
     this._exampleElement = options.exampleElement ;
 
-    if (!this._optframe || !del) {
-      throw "At least frame and delegate options are required for inline editor";
+    if (!this._optframe || !tar) {
+      throw "At least frame and target options are required for inline editor";
     }
     
     this._originalValue = options.value;
@@ -151,22 +143,22 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     // add to window.
     
-    pane = del.get('pane');
+    pane = options.pane;
 
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
-    delLayout = this._delegate.get('layout');
+    tarLayout = options.layout;
     paneElem = pane.$()[0];
-    if (this._optIsCollection && delLayout.left) {
-      layout.left=this._optframe.x-delLayout.left-paneElem.offsetLeft-1;
+    if (this._optIsCollection && tarLayout.left) {
+      layout.left=this._optframe.x-tarLayout.left-paneElem.offsetLeft-1;
       if(SC.browser.msie==7) layout.left--;
     } else {
       layout.left=this._optframe.x-paneElem.offsetLeft-1;
       if(SC.browser.msie==7) layout.left--;
     }
     
-    if (this._optIsCollection && delLayout.top) {
-      layout.top=this._optframe.y-delLayout.top-paneElem.offsetTop;
+    if (this._optIsCollection && tarLayout.top) {
+      layout.top=this._optframe.y-tarLayout.top-paneElem.offsetTop;
       if(SC.browser.msie==7) layout.top=layout.top-2;
     } else {
       layout.top=this._optframe.y-paneElem.offsetTop;
@@ -180,12 +172,12 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
    
     pane.appendChild(this);
     
-    this._className = this.getDelegateProperty(del,"inlineEditorClassName");
+    this._className = options.inlineEditorClassName;
     if(this._className && !this.hasClassName(this._className)) {
       this.setClassName(this._className,true);
     }
     
-    this.invokeDelegateMethod(del, 'inlineEditorWillBeginEditing', this) ;
+    tar.inlineEditorWillBeginEditing();
     // this.resizeToFit(this.getFieldValue()) ;
 
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
@@ -196,10 +188,10 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
       
     // Become first responder and notify the delegate after run loop completes
     this.invokeLast(function() {
-      this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this);
+      tar.inlineEditorDidBeginEditing();
     });
     
-    return this;
+    return YES;
   },
   
   
@@ -225,7 +217,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     @returns {Boolean}
   */
   discardEditing: function() {
-    return this._endEditing(this._originalValue, null, YES) ;
+    return this._endEditing(this._originalValue) ;
   },
   
   /**
@@ -251,8 +243,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     if (!this.get('isEditing')) return YES ;
     
     // get permission from the delegate.
-    var del = this._delegate ;
-    if (!this.invokeDelegateMethod(del, 'inlineEditorShouldEndEditing', this, finalValue, evt, didDiscard)) {
+    var tar = this._target ;
+    if (!tar.inlineEditorShouldEndEditing(finalValue)) {
       //@if(debug)
       SC.Logger.warn('InlineTextField._endEditing() cannot end without inlineEditorShouldEndEditing() on the delegate.');
       //@end
@@ -260,7 +252,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     }
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
-    this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue, evt, didDiscard) ;
+    tar.inlineEditorDidEndEditing(finalValue);
 
     // If the delegate set a class name, let's clean it up:
     if(this._className) this.setClassName(this._className, false);
@@ -483,7 +475,7 @@ SC.InlineTextFieldView.mixin(
     // the default, this.
     var klass = options.exampleInlineTextFieldView 
               ? options.exampleInlineTextFieldView : this,
-        layout = options.delegate.get('layout'),
+        layout = options.layout,
         s = this.updateViewStyle(),
         p = this.updateViewPaddingStyle();
     

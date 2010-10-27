@@ -39,8 +39,8 @@
   @since SproutCore 1.0
   
 */
-SC.Editable = {  
-
+SC.Editable = {
+  
   /**
     Indicates whether a view is editable or not.  You can optionally 
     implement the methods in this mixin to disallow editing is isEditable is

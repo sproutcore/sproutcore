@@ -31,10 +31,13 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
 /** @scope SC.LabelView.prototype */ {
 
   classNames: ['sc-label-view'],
+<<<<<<< HEAD
 
   displayProperties: 'value textAlign fontWeight icon escapeHTML'.w(),
 
 
+=======
+  
   /**
     The exampleInlineTextFieldView property is by default a 
     SC.InlineTextFieldView but it can be set to a customized inline text field
@@ -51,6 +54,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
   */
   editorDelegate: null,
   
+>>>>>>> modified LabelView and InlineTextFieldView to use the new delegate
   /**
     Specify the font weight for this.  You may pass SC.REGULAR_WEIGHT, or SC.BOLD_WEIGHT.
   */
@@ -108,6 +112,12 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     Set the alignment of the label view.
   */
   textAlign: SC.ALIGN_LEFT,
+  
+  /**
+<<<<<<< HEAD
+    If you want the inline editor to be multiline set this property to YES.
+  */
+  isInlineEditorMultiline: NO,
 
   /**
     The name of the theme's SC.LabelView render delegate.
@@ -117,6 +127,8 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
   renderDelegateName: 'labelRenderDelegate',
 
   /**
+=======
+>>>>>>> modified LabelView and InlineTextFieldView to use the new delegate
     [RO] The value that will actually be displayed.
     
     This property is dynamically computed by applying localization, 
@@ -179,6 +191,71 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     
   */
   doubleClick: function( evt ) { return this.beginEditing(); },
+  
+<<<<<<< HEAD
+  
+  /**
+    Opens the inline text editor (closing it if it was already open for 
+    another view).
+    
+    @return {Boolean} YES if did begin editing
+  */
+  beginEditing: function() {
+    if (this.get('isEditing')) return YES ;
+    if (!this.get('isEditable')) return NO ;
+
+    var el = this.$(),
+        value = this.get('value') || '',
+        f = SC.viewportOffset(el[0]),
+        frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
+    f.width=frameTemp.width;
+    f.height=frameTemp.height;
+    
+    SC.InlineTextFieldView.beginEditing({
+      frame: f,
+      delegate: this,
+      exampleElement: el,
+      value: value, 
+      multiline: this.get('isInlineEditorMultiline'), 
+      isCollection: NO,
+      validator: this.get('validator'),
+      exampleInlineTextFieldView: this.get('exampleInlineTextFieldView')
+    });
+  },
+  
+  /**
+    Cancels the current inline editor and then exits editor. 
+    
+    @return {Boolean} NO if the editor could not exit.
+  */
+  discardEditing: function() {
+    if (!this.get('isEditing')) return YES ;
+    return SC.InlineTextFieldView.discardEditing() ;
+  },
+  
+  /**
+    Commits current inline editor and then exits editor.
+    
+    @return {Boolean} NO if the editor could not exit
+  */
+  commitEditing: function() {
+    if (!this.get('isEditing')) return YES ;
+    return SC.InlineTextFieldView.commitEditing() ;
+  },
+
+  /** @private
+    Allow editing.
+  */
+  inlineEditorShouldBeginEditing: function(inlineEditor) {
+    return YES ;
+  },
+  
+  /** @private
+    Set editing to true so edits will no longer be allowed.
+  */
+  inlineEditorWillBeginEditing: function(inlineEditor) {
+    this.set('isEditing', YES);
+  },
 
   /** @private 
     Hide the label view while the inline editor covers it.
@@ -189,17 +266,20 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     layer.css('opacity', 0.0);
   },
   
-  
-  /** @private 
-    Hide the label view while the inline editor covers it.
+  /** @private
+    Delegate method defaults to the isEditable property
   */
-  inlineEditorDidBeginEditing: function(inlineEditor) {
-    var layer = this.$();
-    this._oldOpacity = layer.css('opacity') ;
-    layer.css('opacity', 0.0);
+  inlineEditorShouldBeginEditing: function(){
+    return this.get('isEditable');
   },
   
-  
+  /** @private
+    Could check with a validator someday...
+  */
+  inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
+    return YES ;
+  },
+
   /** @private
     Update the field value and make it visible again.
   */
@@ -209,4 +289,25 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     this._oldOpacity = null ;
     this.set('isEditing', NO) ;
   }
+=======
+  displayProperties: 'displayValue textAlign fontWeight icon escapeHTML'.w(),
+  
+  _TEMPORARY_CLASS_HASH: {},
+  
+  createRenderer: function(t) {
+    return t.label();
+  },
+  
+  updateRenderer: function(r) {
+    r.attr({
+      "value": this.get("displayValue"),
+      "icon": this.get("icon"),
+      "hint": this.get("hint"),
+      "escapeHTML": this.get("escapeHTML"),
+      "isEditing": this.get("isEditing"),
+      "textAlign": this.get("textAlign"),
+      "fontWeight": this.get("fontWeight")
+    });
+  }  
+>>>>>>> modified LabelView and InlineTextFieldView to use the new delegate
 });
