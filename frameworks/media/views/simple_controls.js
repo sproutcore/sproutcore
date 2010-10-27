@@ -40,7 +40,7 @@ SC.SimpleMediaControlsView = SC.View.extend({
     layout: { top: 0, left: 0, width: 20, height:20 },
     action: "playPause",
     targetBinding: "*owner.target",
-    renderStyle: 'renderImage',
+    renderStyle: 'renderImage'
   }),
   progressView: SC.MediaSlider.design({
     layout: { top: 0, left: 25, right: 0, height:20 },
