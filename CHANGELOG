@@ -1,10 +1,40 @@
-*SproutCore 1.4.2 (October, 1 2010)*
+*SproutCore 1.4.3 (October 19, 2010)*
+
+* Send a warning to the console when using SC.RecordArray#indexOf or SC.RecordArray#lastIndexOf and providing an object that is
+* Applied fix to the findClassNames function so that class names can be detected when using SproutCore in IE 7 and 8.
+* SC.ObserverSet.add was being overloaded in debug mode by a version that mucked up passing along a context with addObserver. T
+* rendering of select field will now honor isEnabled, ensuring that the control is disabled in the markup if not enabled in cod
+* adding an observer that monitors the objects content (and not just the reference) so that any changes to the content will upd
+* NotEmpty validator would not validate 0 as a non-empty number
+* Spelling fixes in api doc
+* Fix spelling in license header
+* LabelView: allow inline editing of numbers like 0
+* Refactor duplicated code into a function
+* Made errors with not correctly initialized caches obvious to find.
+* Add same guard clause as in insertTab
+* Fix tabbing in the previous direction as well
+* Make tabbing between inline text fields work
+* Make SC.Animatable not crash when it lacks a parent view.
+* Changed SC.Button mixin to support content objects that do not have get
+* Fixed issue with SC.ScrollerView not properly updating its element's class names, e.g., if controlsHidden changed to false, t
+* SC.ScrollerView's thumbs now default to their position -- solves an issue where going back to a view that had already been sc
+* Explicitly check falsity of isReady in SC._object_className so searching for class names in tests work
+* SC.ListItemView checks rightIcon property when determining if click occurred within it
+* For radio buttons with horizontal layoutDirection, added itemWidthKey for custom widths -- fixes Github Issue #27
+* These tests fail because the store status for the child record is only updated when you 'get' the status of the child record.
+* return null instead of undefined from select field view getFieldValue when empty item selected.
+* Sanity check in CollectionView item removal
+* Fixed SC root responder's mousemove function so that last hovered views are exited first before other views are entered
+* Fixes passing contexts with addObserver.
+* Make sure a bad DateTime.parse() doesn't mess up future parses
+
+*SproutCore 1.4.2 (October 1, 2010)*
 
 * Fixes a DateTime .get('lastMonday') bug
 * default to using ISO 8601 format for time parsing if none is specified
 * Allow SelectFieldView to obtain focus if the user presses TAB key from previous field.
 * Fixed typo
 
-*SproutCore 1.4.1 (September, 21 2010)*
+*SproutCore 1.4.1 (September 21, 2010)*
 
 * Update the X-SproutCore-Version header to 1.4 [MO]

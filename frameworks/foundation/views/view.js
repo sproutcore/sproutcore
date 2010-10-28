@@ -2499,7 +2499,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!SC.none(lL)) {
       if(SC.isPercentage(lL)) {
         ret.left = (lL*100)+"%";  //percentage left
-      } else if (hasAcceleratedLayer && SC.empty(lR)) {
+      } else if (hasAcceleratedLayer && !SC.empty(lW)) {
         translateLeft = Math.floor(lL);
         ret.left = 0;
       } else {
@@ -2581,7 +2581,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!SC.none(lT)) {
       if(SC.isPercentage(lT)) {
         ret.top = (lT*100)+"%";
-      } else if (hasAcceleratedLayer && SC.empty(lB)) {
+      } else if (hasAcceleratedLayer && !SC.empty(lH)) {
         translateTop = Math.floor(lT);
         ret.top = 0;
       } else {
