@@ -27,7 +27,7 @@ sc_require('system/core_query') ;
   
   @since SproutCore 1.0
 */
-SC.Event = function(originalEvent) { 
+SC.Event = function(originalEvent) {
   var idx, len;
   // copy properties from original event, if passed in.
   if (originalEvent) {
@@ -62,6 +62,12 @@ SC.Event = function(originalEvent) {
     this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
     this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);
   }
+
+  // On Safari/Webkit/Chrome a normal key has a charCode and keyCode at the same time with same value
+  // but if it's a special key charCode is 0, so we need to clean keyCode if has the same value as charCode
+  // This prevent a BUG in commandCodes function in ret = SC.FUNCTION_KEYS[code];
+  // For example the key of character comma (,) is number 44 and printscreen has a keyCode of 44.
+  if (this.charCode === this.keyCode) this.keyCode = 0;
 
   // Add which for key events
   if (!this.which && ((this.charCode || originalEvent.charCode === 0) ? this.charCode : this.keyCode)) {
