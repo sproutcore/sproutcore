@@ -196,7 +196,7 @@ SC.Record = SC.Object.extend(
         storeKey = this.storeKey,
         ret      = store.readDataHash(storeKey);
     
-    if (ret) ret = SC.clone(ret);
+    if (ret) ret = SC.clone(ret, true);
 
     return ret;
   }.property(),
