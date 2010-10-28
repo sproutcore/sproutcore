@@ -61,12 +61,28 @@ test("should return a cloned array ", function() {
 	var resultArray = object.clone(arrayA);
     equals(resultArray[0], arrayA[0], 'check first array item');
     equals(resultArray[1], arrayA[1], 'check first array item');
-		
 });
 
-test("should return a cloned hash", function() {
+test("should return a deeply cloned arrays", function() {
+  var original  = [{value: 'value1'}, SC.Object.create({value: 'value2'})] ;
+  var cloned = SC.clone(original, true);
+  original[0].value = 'bogus';
+  equals(cloned[0].value, 'value1');
+  original[1].set('value', 'bogus');
+  equals(cloned[1].get('value'), 'value2');
+});
+
+test("should return shallow clones of hashes", function() {
   var original = { foo: 'bar', nested: { key: 'value'}} ;
   var cloned = SC.clone(original) ;
+  same(original, cloned);
+  cloned.nested.key = 'another value' ;
+  equals(original.nested.key, 'another value') ;
+});
+
+test("should return deep clones of hashes", function() {
+  var original = { foo: 'bar', nested: { key: 'value'}} ;
+  var cloned = SC.clone(original, true) ;
   same(original, cloned);
   cloned.nested.key = 'another value' ;
   equals(original.nested.key, 'value') ;
