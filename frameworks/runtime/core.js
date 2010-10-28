@@ -528,7 +528,6 @@ SC.mixin(/** @scope SC */ {
   
   // ..........................................................
   // OBJECT MANAGEMENT
-  // 
   
   /** 
     Empty function.  Useful for some operations. 
@@ -597,37 +596,32 @@ SC.mixin(/** @scope SC */ {
     will simply call that method and return the result.
 
     @param object {Object} the object to clone
+    @param deep {Boolean} if true, a deep copy of the object is made
     @returns {Object} the cloned object
   */
-  copy: function(object) {
-    var ret = object ;
-    
+  copy: function(object, deep) {
+    var ret = object, idx ;
+
     // fast path
-    if (object && object.isCopyable) return object.copy();
-    
+    if (object) {
+      if (object.isCopyable) return object.copy(deep);
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) return object.clone(deep);
+    }
+
     switch (SC.typeOf(object)) {
     case SC.T_ARRAY:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else ret = object.slice() ;
+      ret = object.slice() ;
+      if (deep) {
+        idx = ret.length;
+        while (idx--) ret[idx] = SC.copy(ret[idx], true);
+      }
       break ;
 
     case SC.T_HASH:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else {
-        ret = {} ;
-        for(var key in object) ret[key] = SC.copy(object[key]) ;
-      }
-      break ;
-
     case SC.T_OBJECT:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else {
-        ret = {} ;
-        for(var key in object) ret[key] = object[key] ;
-      }
+      ret = {};
+      for (var key in object) ret[key] = deep ? SC.copy(object[key], true) : object[key];
+      break ;
     }
 
     return ret ;
