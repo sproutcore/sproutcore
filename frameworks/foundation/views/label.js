@@ -35,6 +35,9 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
   displayProperties: 'value textAlign fontWeight icon escapeHTML'.w(),
 
 
+  
+  isEditable: NO,
+  
   /**
     The exampleInlineTextFieldView property is by default a 
     SC.InlineTextFieldView but it can be set to a customized inline text field
@@ -179,15 +182,6 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     
   */
   doubleClick: function( evt ) { return this.beginEditing(); },
-
-  /** @private 
-    Hide the label view while the inline editor covers it.
-  */
-  inlineEditorDidBeginEditing: function(inlineEditor) {
-    var layer = this.$();
-    this._oldOpacity = layer.css('opacity') ;
-    layer.css('opacity', 0.0);
-  },
   
   
   /** @private 
