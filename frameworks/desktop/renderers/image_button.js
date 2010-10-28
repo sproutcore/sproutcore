@@ -21,7 +21,7 @@ SC.BaseTheme.renderers.ImageButton = SC.Renderer.extend({
   },
   
   update: function() {
-    var img = this.$('img'), src = this.icon;
+    var img = this.$('.img'), src = this.icon;
     if (src) {
       img.attr('class', "img "+src);
     } else {
