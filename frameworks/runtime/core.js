@@ -605,7 +605,7 @@ SC.mixin(/** @scope SC */ {
     // fast path
     if (object) {
       if (object.isCopyable) return object.copy(deep);
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) return object.clone(deep);
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) return object.clone();
     }
 
     switch (SC.typeOf(object)) {
