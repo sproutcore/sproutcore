@@ -1204,13 +1204,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   unloadRecords: function(recordTypes, ids, storeKeys, newStatus) {
     var len, isArray, idx, id, recordType, storeKey;
     if(storeKeys===undefined){
-      len = ids.length;
       isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
       if (!isArray) recordType = recordTypes;
-      for(idx=0;idx<len;idx++) {
-        if (isArray) recordType = recordTypes[idx] || SC.Record;
-        id = ids ? ids[idx] : undefined ;
-        this.unloadRecord(recordType, id, undefined, newStatus);
+      if (ids === undefined) {
+        len = isArray ? recordTypes.length : 1;
+        for (idx = 0; idx < len; idx++) {
+          if (isArray) recordType = recordTypes[idx];
+          storeKeys = this.storeKeysFor(recordType);
+          this.unloadRecords(undefined, undefined, storeKeys, newStatus);
+        }
+      } else {
+        len = ids.length;
+        for(idx=0;idx<len;idx++) {
+          if (isArray) recordType = recordTypes[idx] || SC.Record;
+          id = ids ? ids[idx] : undefined ;
+          this.unloadRecord(recordType, id, undefined, newStatus);
+        }
       }
     }else{
       len = storeKeys.length;
