@@ -408,12 +408,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   removeDataHash: function(storeKey, status) {
-    var rev ;
-    
      // don't use delete -- that will allow parent dataHash to come through
     this.dataHashes[storeKey] = null;  
     this.statuses[storeKey] = status || SC.Record.EMPTY;
-    rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
     
     // hash is gone and therefore no longer editable
     var editables = this.editables;
