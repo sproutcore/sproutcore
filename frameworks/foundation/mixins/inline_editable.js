@@ -31,11 +31,16 @@ SC.InlineEditable = {
     @return {Boolean} YES if did begin editing
   */
   beginEditing: function() {
-    var del = this.delegateFor('isInlineEditorDelegate', this.get('editorDelegate'));
+    var childViews = this.childViews, i, len = childViews.length, view;
+    
+    for(i = 0; i < len; i++) {
+      view = childViews[i];
+      if(view.get('isEditable')) view.beginEditing();
+    }
     
     if(this.get('isEditing')) return YES;
     
-    return del.inlineEditorShouldBeginEditing(this, this.get('value'));
+    return this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldBeginEditing', this, this.get('value'));
   },
   
   /**
@@ -44,11 +49,16 @@ SC.InlineEditable = {
     @return {Boolean} NO if the editor could not exit.
   */
   discardEditing: function() {
-    var del = this.delegateFor('isInlineEditorDelegate', this.get('editorDelegate'));
+    var childViews = this.childViews, i, len = childViews.length, view;
+    
+    for(i = 0; i < len; i++) {
+      view = childViews[i];
+      if(view.get('isEditable')) view.discardEditing();
+    }
     
     if (!this.get('isEditing')) return YES;
     
-    return del.inlineEditorShouldDiscardEditing(this);
+    return this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldDiscardEditing', this);
   },
   
   /**
@@ -57,11 +67,16 @@ SC.InlineEditable = {
     @return {Boolean} NO if the editor could not exit
   */
   commitEditing: function() {
-    var del = this.delegateFor('isInlineEditorDelegate', this.get('editorDelegate'));
+    var childViews = this.childViews, i, len = childViews.length, view;
+    
+    for(i = 0; i < len; i++) {
+      view = childViews[i];
+      if(view.get('isEditable')) view.commitEditing();
+    }
     
     if (!this.get('isEditing')) return YES;
     
-    return del.shouldEndEditing(this);
+    return this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldCommitEditing', this);
   },
   
   /** @private
