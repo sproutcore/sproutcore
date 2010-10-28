@@ -288,7 +288,7 @@ SC.NestedStore = SC.Store.extend(
     }
     
     if (pstore && editState === SC.Store.EDITABLE) {
-      this.dataHashes[storeKey] = SC.clone(pstore.dataHashes[storeKey]);
+      this.dataHashes[storeKey] = SC.clone(pstore.dataHashes[storeKey], YES);
       if (!editables) editables = this.editables = [];
       editables[storeKey] = 1 ; // mark as editable
       

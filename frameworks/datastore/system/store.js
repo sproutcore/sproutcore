@@ -326,7 +326,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     if (!editables[storeKey]) {
       editables[storeKey] = 1 ; // use number to store as dense array
-      ret = this.dataHashes[storeKey] = SC.clone(ret);
+      ret = this.dataHashes[storeKey] = SC.clone(ret, YES);
     }
     return ret;
   },
