@@ -7,6 +7,23 @@
 
 SC.ALIGN_JUSTIFY = "justify";
 /**
+  Indicates that the content should be aligned to the top.
+*/
+SC.ALIGN_TOP = 'top';
+
+/**
+  Indicates that the content should be aligned to the middle.
+*/
+SC.ALIGN_MIDDLE = 'middle';
+
+/**
+  Indicates that the content should be aligned to the bottom.
+*/
+SC.ALIGN_BOTTOM = 'bottom';
+
+
+
+/**
   @namespace 
 
   Normal SproutCore views are absolutely positioned--parent views have relatively
