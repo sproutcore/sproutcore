@@ -20,18 +20,24 @@ module("SC.DateTime", {
   }
 });
 
-function timeShouldBeEqualToHash(t, h) {
+function timeShouldBeEqualToHash(t, h, message) {
   if (h === undefined) h = options;
   if (h.timezone === undefined) h.timezone = SC.DateTime.timezone;
+  if (message === undefined) message = "%@ of time should be equal to hash";
   
-  equals(t.get('year'), h.year , 'year');
-  equals(t.get('month'), h.month, 'month');
-  equals(t.get('day'), h.day, 'day');
-  equals(t.get('hour'), h.hour, 'hour');
-  equals(t.get('minute'), h.minute, 'minute');
-  equals(t.get('second'), h.second, 'second');
-  equals(t.get('millisecond'), h.millisecond, 'millisecond');
-  equals(t.get('timezone'), h.timezone, 'timezone');
+  if (t === null) {
+    ok(false, 'Time should not be null');
+    return;
+  }
+    
+  equals(t.get('year'), h.year , message.fmt('year'));
+  equals(t.get('month'), h.month, message.fmt('month'));
+  equals(t.get('day'), h.day, message.fmt('day'));
+  equals(t.get('hour'), h.hour, message.fmt('hour'));
+  equals(t.get('minute'), h.minute, message.fmt('minute'));
+  equals(t.get('second'), h.second, message.fmt('second'));
+  equals(t.get('millisecond'), h.millisecond, message.fmt('millisecond'));
+  equals(t.get('timezone'), h.timezone, message.fmt('timezone'));
 }
 
 function formatTimezone(offset) {
@@ -278,6 +284,21 @@ test('parse', function() {
   ok(
     SC.DateTime.parse('Tue 08 May 1985 01:00:22 AM', '%a %d %b %Y %H:%M:%S %p')
     === null, '1985-05-08 is not a tuesday');
+  ok(
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null &&
+    SC.DateTime.parse('07/01/20201 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z') === null
+    , 'Should be able to fail to parse multiple times');
+  timeShouldBeEqualToHash(
+    SC.DateTime.parse('1/1/01 0:0:0', '%m/%d/%y %H:%M:%S'),
+    { year: 2001, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 },
+    'Should be able to have single digit for month, day, hour, minute, second');
   timeShouldBeEqualToHash(
     SC.DateTime.parse('70-01-01 00:00:00', '%y-%m-%d %H:%M:%S'),
     { year: 2070, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }); 
