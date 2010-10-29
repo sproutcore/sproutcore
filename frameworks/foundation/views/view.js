@@ -2109,6 +2109,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   createChildView: function(view, attrs) {
     // attrs should always exist...
     if (!attrs) attrs = {} ;
+    // clone the hash that was given so we dont pollute it if it's being reused
+    else attrs = SC.clone(attrs);
+    
     attrs.owner = attrs.parentView = this ;
     attrs.isVisibleInWindow = this.get('isVisibleInWindow');
     if (!attrs.page) attrs.page = this.page ;
