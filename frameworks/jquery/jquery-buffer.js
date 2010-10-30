@@ -331,9 +331,15 @@ jQuery.Buffer = (function() {
   };
   
   Buffer.prototype.addClass = function(value) {
+    if (!value) return;
+    
     var context = this.bufferedCommand("flushClassNames");
     if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
-    context.classNames[value] = true;
+    
+    if (typeof value === "string") value = value.split(' ');
+    
+    var idx, len = value.length;
+    for (idx = 0; idx < len; idx++) context.classNames[value[idx].trim()] = true;
   };
   
   Buffer.prototype.removeClass = function(value) {
