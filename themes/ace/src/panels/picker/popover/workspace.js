@@ -19,6 +19,7 @@ SC.AceTheme.Popover.Workspace = SC.BaseTheme.Workspace.extend({
   name: 'workspace',
 
   render: function(context) {
+    this.renderClassNames(context);
     context.push("<div class='sc-workspace-overlay'>",
       "<div class='middle'></div>",
       "<div class='top-left-edge'></div>",
@@ -36,7 +37,7 @@ SC.AceTheme.Popover.Workspace = SC.BaseTheme.Workspace.extend({
   },
 
   update: function(cq) {
-    this.updateClassNames();
+    this.updateClassNames(cq);
   }
 });
 
