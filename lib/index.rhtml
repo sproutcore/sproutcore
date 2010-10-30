@@ -96,16 +96,10 @@
    # to include other javascripts, add them to the :requires option of
    # your client in routes.rb instead of changing it here.
 -%>
-<script>
-SC._performanceEvents['body/scriptLoadStart'] = new Date().getTime();
-</script>
 <%= javascripts_for_client %>
 <% unless @content_for_page_javascript.blank? %>
 <%= @content_for_page_javascript %>
 <% end -%>
-<script>
-SC._performanceEvents['body/scriptLoadEnd'] = new Date().getTime();
-</script>
 <% #
    # If you use old-style view helpers in your page, this method must be 
    # called to actually add the page views to your HTML.  Normally this will
