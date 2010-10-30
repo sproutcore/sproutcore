@@ -342,7 +342,7 @@ jQuery.Buffer = (function() {
     context.classNames[value] = false;
   };
   
-  Buffer.prototype.clearClassNames = function(value) {
+  Buffer.prototype.resetClassNames = function(value) {
     var context = this.bufferedCommand("flushClassNames");
     context.classNames = {};
   };

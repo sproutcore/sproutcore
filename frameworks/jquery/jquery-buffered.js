@@ -167,12 +167,12 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     return this;
   },
   
-  clearClassNames: function() {
+  resetClassNames: function() {
     // now, buffer the command.
     var len = this.length, i;
     for (i = 0; i < len; i++) {
       var buffer = jQuery.Buffer.bufferForElement(this[i]);
-      buffer.clearClassNames();
+      buffer.resetClassNames();
     }
     return this;
   },
