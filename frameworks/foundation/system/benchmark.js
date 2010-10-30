@@ -414,6 +414,8 @@ SC.Benchmark = {
       }
     }
     
+    this.javascriptStartTime = SC._performanceEvents['headStart'];
+    
     // it is unfortunate, but because SC.Benchmark catalogues data in start/end blocks,
     // and does not have a facility for cataloguing just plain events, we can only understand
     // blocks that have both a start and an end.
