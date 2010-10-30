@@ -50,9 +50,11 @@ SC.BaseTheme.Segment = SC.Renderer.extend({
     if (!this.hasChanges()) return;
 
     this.updateButtonRenderer();
-    //this._buttonRenderer.update(cq);
+    this._buttonRenderer.update(cq);
 
     // update OUR stuff
+    // NOTE: we are counting on not being called from an SC.View here;
+    // if we were, we should reset these every time because it blows styles away.
     if (this.didChange("width")) cq.css('width', this.width ? this.width+'px' : '');
     if (this.didChange('layoutDirection')) cq.css('display', this.layoutDirection == SC.LAYOUT_HORIZONTAL ? 'inline-block' : '');
     this.resetChanges();
