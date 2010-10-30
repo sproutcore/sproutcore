@@ -347,7 +347,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (this.length>0) {
       this._innerHTMLReplaced = YES;
       if (mode === SC.MODE_REPLACE) {
-        elem.innerHTML = this.join();
+        cq.html(this.join());
       } else {
         factory = elem.cloneNode(false);
         factory.innerHTML = this.join() ;
@@ -362,49 +362,11 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       }
     }
     
-    // note: each of the items below only apply if the private variable has
-    // been set to something other than null (indicating they were used at
-    // some point during the build)
-    
-    // if we have attrs, apply them
-    if (this._attrsDidChange && (value = this._attrs)) {
-      for(key in value) {
-        if (!value.hasOwnProperty(key)) continue;
-        attr = value[key];
-        if (attr === null) { // remove empty attrs
-          elem.removeAttribute(key);
-        } else {
-          cq.attr(key, attr);
-        }
-      }
-    }
-    
-    // class="foo bar"
-    if (this._classNamesDidChange && (value = this._classNames)) {
-      cq.attr('class', value.join(' '));
-    }
+    // attributes, styles, and class naems will already have been set.
     
     // id="foo"
     if (this._idDidChange && (value = this._id)) {
       cq.attr('id', value);
-    }
-    
-    // style="a:b; c:d;"
-    if (this._stylesDidChange && (styles = this._styles)) {
-      var pair = this._STYLE_PAIR_ARRAY, joined = this._JOIN_ARRAY;
-      for(key in styles) {
-        if (!styles.hasOwnProperty(key)) continue ;
-        value = styles[key];
-        if (value === null) continue; // skip empty styles
-
-        if (typeof value === SC.T_NUMBER  && !SC.NON_PIXEL_PROPERTIES.contains(key)) value += "px";
-        pair[0] = this._dasherizeStyleName(key);
-        pair[1] = value;
-        joined.push(pair.join(': '));
-      }
-      
-      cq.attr('style', joined.join('; '));
-      joined.length = 0; // reset temporary object
     }
     
     // flush jQuery buffers
@@ -501,7 +463,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     tag.push(selfClosing ? ' />' : '>') ;
     
     // console.log('selfClosing == %@'.fmt(selfClosing));
-    
     strings[this.offset] = tag.join('');
     tag.length = 0 ; // reset temporary object
     
@@ -593,11 +554,16 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {Array|SC.RenderContext} classNames array or receiver
   */
   classNames: function(classNames, cloneOnModify) {
-    if (classNames === undefined) {
-      if (!this._classNames && this._elem) {
-        this._classNames = (this.$().attr('class')||'').split(' ');
+    if (this._elem) {
+      if (classNames) {
+        this.$().resetClassNames().addClass(classNames);
+        return this;
+      } else {
+        return this.$().attr('class');
       }
-      
+    }
+    
+    if (classNames === undefined) {
       if (this._cloneClassNames) {
         this._classNames = (this._classNames || []).slice();
         this._cloneClassNames = NO ;
@@ -715,7 +681,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   resetClassNames: function() {
     if (this._elem) {
-      this.$().clearClassNames();
+      this.$().resetClassNames();
       return this;
     }
 
