@@ -6,9 +6,9 @@
 // ==========================================================================
 
 // sc_require("system/browser")
-if (_SC_performanceEvents) {
+if (typeof _SC_performanceEvents !== "undefined") {
   SC._performanceEvents = _SC_performanceEvents;
   _SC_performanceEvents = undefined;
 } else {
-  SC._performanceEvents = { };
+  SC._performanceEvents = { headStart: new Date().getTime() };
 }
