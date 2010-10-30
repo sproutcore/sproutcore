@@ -37,7 +37,7 @@ SC.BaseTheme.Label = SC.Renderer.extend({
   render: function(context) {
     this.renderClassNames(context);
     this.updateTitleRenderer();
-
+    
     context.addStyle({
       'textAlign': this.textAlign,
       'fontWeight': this.fontWeight,
@@ -53,19 +53,16 @@ SC.BaseTheme.Label = SC.Renderer.extend({
 
     this.updateTitleRenderer(cq);
     this.updateTitle(cq);
-    if (this.didChange('text-align')) {
-      cq.css('text-align', this.textAlign);
-    }
-    if (this.didChange('font-weight')) {
-      cq.css('font-weight', this.fontWeight);
-    }
-    if (this.didChange('opacity')) {
-      cq.css('opacity', this.isEditing ? 0 : 1);
-    }
-    if (this.didChange('icon')) {
-      cq.setClass("icon", !!this.icon);
-    }
-    this.resetChanges();
+    
+    // NOTE: we have to update ALL of these properties every time
+    // because SC.Views like to blow away styles and class names.
+    // Unfortunate, but true.
+    cq.css({
+      'text-align': this.textAlign,
+      'font-weight': this.fontWeight,
+      'opacity': this.isEditing ? 0 : 1
+    })
+    .setClass('icon', !!this.icon);
   },
   
   updateTitle: function(cq) {
