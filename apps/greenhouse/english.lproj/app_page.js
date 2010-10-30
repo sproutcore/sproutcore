@@ -110,6 +110,18 @@ Greenhouse.appPage = SC.Page.design({
             {title: "_Reload App".loc(), action: 'reloadIframe', isEnabled: YES},
             {title: "_Dock Library".loc(), action: 'toggleDockedLibrary', isEnabled: YES},
             {title: "_Dock Inspector".loc(), action: 'toggleDockedInspector', isEnabled: YES},
+            { isSeparator: YES },
+            {title: "_Page Size".loc(),
+              subMenu:[
+              {title: "_iPhone Hrz".loc(), action: 'resizePage', isEnabled: YES, size: {width: 480, height: 320}},
+              {title: "_iPhone Vrt".loc(), action: 'resizePage', isEnabled: YES, size: {width: 320, height: 480}},
+              {title: "_iPad Hrz".loc(), action: 'resizePage', isEnabled: YES, size: {width: 1024, height: 768}},
+              {title: "_iPad Vrt".loc(), action: 'resizePage', isEnabled: YES, size: {height: 1024, width: 768}},
+              {title: "_Full".loc(), action: 'resizePage', isEnabled: YES}
+              
+              ]
+            },
+            { isSeparator: YES },
             {title: "_Save".loc(), action: 'save', isEnabled: YES }
           ]
         })

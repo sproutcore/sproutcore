@@ -52,7 +52,29 @@ Greenhouse.mixin( /** @scope Greenhouse */{
 
       Greenhouse.iframe.location.reload();
       this.goState('iframeLoading');
+    },
+    
+    resizePage: function(sender){
+      var s = sender.getPath('content.size'),
+          def = {top: 20, left: 20, right: 20, bottom: 83},
+          iframe = Greenhouse.get('iframe'),
+          view;
+      
+      
+      view = iframe.SC.designPage.getPath('designMainPane.container');
+
+      if(!s){
+        view.set('classNames', ['design']);
+        view.set('layout', def);
+      }
+      else{
+        view.set('classNames', []);
+        view.set('layout', SC.merge({centerX:0, centerY: 0}, s));
+      }
+      
     }
+    
+    
   }),
   
   readyWaiting: SC.State.create({
