@@ -193,11 +193,31 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     layer.css('opacity', 0.0);
   },
   
+  updateRenderer: function(r) {
+    r.attr({
+      "value": this.get("displayValue"),
+      "icon": this.get("icon"),
+      "hint": this.get("hint"),
+      "escapeHTML": this.get("escapeHTML"),
+      "isEditing": this.get("isEditing"),
+      "textAlign": this.get("textAlign"),
+      "fontWeight": this.get("fontWeight")
+    });
+  },
+  
+  /** @private 
+    Hide the label view while the inline editor covers it.
+  */
+  inlineEditorDidBeginEditing: function(editor) {
+    var layer = this.$();
+    this._oldOpacity = layer.css('opacity') ;
+    layer.css('opacity', 0.0);
+  },
   
   /** @private
     Update the field value and make it visible again.
   */
-  inlineEditorDidEndEditing: function(inlineEditor, finalValue) {
+  inlineEditorDidEndEditing: function(editor, finalValue) {
     this.setIfChanged('value', finalValue) ;
     this.$().css('opacity', this._oldOpacity);
     this._oldOpacity = null ;

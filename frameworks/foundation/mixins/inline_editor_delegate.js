@@ -44,7 +44,7 @@ SC.InlineEditorDelegate = {
     @param {Object} the current value of the view
     @returns {Boolean} YES if the view began editing
   */
-  inlineEditorShouldBeginEditing: function(view, startingValue) {
+  beginEditingFor: function(view, startingValue) {
     if(!view.get('isEditable')) return NO;
     if(view.get('isEditing')) return YES;
     
@@ -55,19 +55,23 @@ SC.InlineEditorDelegate = {
         exampleEditor = this.get('exampleInlineTextFieldView');
         f.width=frameTemp.width;
         f.height=frameTemp.height;
-
-    return exampleEditor.beginEditing({
+    
+    view.inlineEditorWillBeginEditing();
+    
+    exampleEditor.beginEditing({
       pane: view.get('pane'),
       frame: f,
       layout: view.get('layout'),
       exampleInlineTextFieldView: exampleEditor,
-      target: view,
+      delegate: this,
       inlineEditorClassName: this.get('inlineEditorClassName'),
       exampleElement: el,
       value: startingValue,
       multiline: this.get('isInlineEditorMultiline'),
       isCollection: NO
     });
+    
+    exampleEditor.editor._target = view;
   },
 
   /**
@@ -87,8 +91,9 @@ SC.InlineEditorDelegate = {
     @param {Object} the current value of the view
     @returns {Boolean} YES if the editor was able to end and commit
   */
-  inlineEditorShouldCommitEditing: function(view) {
+  commitEditingFor: function(view) {
     if(!view.get('isEditing')) return NO;
+    
     // TODO: figure out how a validator works without a form
     return SC.InlineTextFieldView.commitEditing();
   },
@@ -100,9 +105,33 @@ SC.InlineEditorDelegate = {
     @param {Object} the current value of the view
     @returns {Boolean} YES if the editor was able to end
   */
-  inlineEditorShouldDiscardEditing: function(view) {
+  discardEditingFor: function(view) {
     if(!view.get('isEditing')) return NO;
     
     return SC.InlineTextFieldView.discardEditing();
+  },
+  
+  /*************
+    Calls from the editor to the view
+    These only have did, not will, because the delegate decides what to do with them.
+  *************/
+  // notify the view that its editor began editing
+  inlineEditorDidBeginEditing: function(editor) {
+    console.log("SFASDF");
+  },
+  
+  // returns true if the finalvalue is valid, false otherwise
+  // this is seperate function from inlineEditorDidCommitEditing because it could just be validiting without actually commiting, for example if a field validates as you type
+  inlineEditorShouldCommitEditing: function(editor, finalValue) {
+    var view = editor._target;
+    
+    return view.inlineEditorShouldCommitEditing(finalValue);
+  },
+  
+  // ask the view if finalvalue is valid, and then commit it and cleanup the editor
+  inlineEditorDidEndEditing: function(editor, finalValue) {
+    var view = editor._target;
+    
+    return view.inlineEditorDidEndEditing(finalValue);
   }
 };

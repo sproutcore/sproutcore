@@ -40,7 +40,7 @@ SC.InlineEditable = {
     
     if(this.get('isEditing')) return YES;
     
-    return this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldBeginEditing', this, this.get('value'));
+    return this.invokeDelegateMethod(this.get('editorDelegate'), 'beginEditingFor', this, this.get('value'));
   },
   
   /**
@@ -58,7 +58,7 @@ SC.InlineEditable = {
     
     if (!this.get('isEditing')) return YES;
     
-    return this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldDiscardEditing', this);
+    return this.invokeDelegateMethod(this.get('editorDelegate'), 'discardEditingFor', this);
   },
   
   /**
@@ -76,37 +76,33 @@ SC.InlineEditable = {
     
     if (!this.get('isEditing')) return YES;
     
-    return this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldCommitEditing', this);
+    return this.invokeDelegateMethod(this.get('editorDelegate'), 'commitEditingFor', this);
   },
   
   /** @private
     Set editing to true so edits will no longer be allowed.
   */
-  inlineEditorWillBeginEditing: function() {
+  inlineEditorWillBeginEditing: function(editor) {
     this.set('isEditing', YES);
   },
 
   /** @private 
     Hide the label view while the inline editor covers it.
   */
-  inlineEditorDidBeginEditing: function() {
-    var layer = this.$();
-    this._oldOpacity = layer.css('opacity') ;
-    layer.css('opacity', 0.0);
+  inlineEditorDidBeginEditing: function(editor) {
+    return YES;
   },
   
   // TODO: use validator
-  inlineEditorShouldEndEditing: function(finalValue) {
+  inlineEditorShouldCommitEditing: function(editor, finalValue) {
     return YES;
   },
   
   /** @private
     Update the field value and make it visible again.
   */
-  inlineEditorDidEndEditing: function(finalValue) {
+  inlineEditorDidEndEditing: function(editor, finalValue) {
     this.setIfChanged('value', finalValue) ;
-    this.$().css('opacity', this._oldOpacity);
-    this._oldOpacity = null ;
     this.set('isEditing', NO) ;
   }
 };

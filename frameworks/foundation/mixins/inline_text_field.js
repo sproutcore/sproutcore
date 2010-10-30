@@ -107,10 +107,10 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     // can't begin editing again if already editing
     if (this.get('isEditing')) return NO ;
     
-    var layout={}, pane, tarLayout, paneElem, tar;
+    var layout={}, pane, tarLayout, paneElem, del;
 
-    tar = this._target = options.target ;
-    this.set('target', tar);
+    del = options.delegate ;
+    this.set('editorDelegate', del) ;
     
     this.beginPropertyChanges();
     
@@ -121,7 +121,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     this._optIsCollection = options.isCollection;
     this._exampleElement = options.exampleElement ;
 
-    if (!this._optframe || !tar) {
+    if (!this._optframe || !del) {
       throw "At least frame and target options are required for inline editor";
     }
     
@@ -177,7 +177,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
       this.setClassName(this._className,true);
     }
     
-    tar.inlineEditorWillBeginEditing();
     // this.resizeToFit(this.getFieldValue()) ;
 
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
@@ -188,7 +187,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
       
     // Become first responder and notify the delegate after run loop completes
     this.invokeLast(function() {
-      tar.inlineEditorDidBeginEditing();
+      del.inlineEditorDidBeginEditing(this);
     });
     
     return YES;
@@ -228,7 +227,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
   */
   blurEditor: function(evt) {
     if (!this.get('isEditing')) return YES ;
-    return this._commitOnBlur ? this.commitEditing(evt) : this.discardEditing(evt);  
+    return this._commitOnBlur ? this.commitEditing(evt) : this.discardEditing(evt);
   },
   
   /** @private
@@ -243,16 +242,16 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     if (!this.get('isEditing')) return YES ;
     
     // get permission from the delegate.
-    var tar = this._target ;
-    if (!tar.inlineEditorShouldEndEditing(finalValue)) {
+    var del = this.get('editorDelegate') ;
+    if (!del.inlineEditorShouldCommitEditing(this, finalValue)) {
       //@if(debug)
-      SC.Logger.warn('InlineTextField._endEditing() cannot end without inlineEditorShouldEndEditing() on the delegate.');
+      SC.Logger.warn('InlineTextField._endEditing() cannot end without inlineEditorShouldCommitEditing() on the delegate.');
       //@end
       return NO;
     }
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
-    tar.inlineEditorDidEndEditing(finalValue);
+    del.inlineEditorDidEndEditing(this, finalValue);
 
     // If the delegate set a class name, let's clean it up:
     if(this._className) this.setClassName(this._className, false);
@@ -403,7 +402,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
       if (this.get('value') != this.$input().val()) {
         this.set('value', this.$input().val());
       }
-      
       
       this.commitEditing() ;
       return YES ;
