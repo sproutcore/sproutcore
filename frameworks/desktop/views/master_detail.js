@@ -120,9 +120,11 @@ SC.MasterDetailView = SC.View.extend({
     if (!this._picker) {
       var pp = this.get("pickerPane");
       this._picker = pp.create({ });
-      this._picker.set("contentView", this.get("masterView"));
-      this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge"));
     }
+    
+    this._picker.set("contentView", this.get("masterView"));
+    this._picker.set("extraRightOffset", this.get("pointerDistanceFromEdge"));
+    
     this.showPicker(this._picker, view);
   },
   
@@ -215,6 +217,7 @@ SC.MasterDetailView = SC.View.extend({
       
       // draw master if needed
       if (!this._masterIsDrawn) {
+        if (this._picker) this._picker.set('contentView', null);
         this.appendChild(master);
         this._masterIsDrawn = YES;
       }
