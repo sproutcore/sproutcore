@@ -11,6 +11,10 @@
 <!DOCTYPE html>
 <html<% unless @content_for_html5_manifest.blank? %> manifest="app.manifest"<% end %>>
   <head>
+    <script>
+    var _SC_performanceEvents = { headStart: new Date().getTime() };
+    </script>
+    
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=8" />
     <meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -39,13 +43,18 @@
 -%>
    <%= stylesheets_for_client %>
    <%= @content_for_page_styles %>
-    
+    <script>
+    SC._performanceEvents['headEnd'] = new Date().getTime();
+    </script>
   </head>
     
 <% # The theme CSS class is added automatically based on your chosen theme.
    # If you need to specify a custom theme name, use CONFIG.theme_name 
 -%>
   <body class="<%= [theme_name(:default => 'sc-theme'), 'focus'].compact.join(' ') %>">  
+    <script>
+    SC._performanceEvents['bodyStart'] = new Date().getTime();
+    </script>
 <% # This section is used to setup additional optional class names on the 
    # body content based on JS-selected conditions.  Use this to make sure you
    # show the proper CSS as soon as the page appears. 
@@ -87,10 +96,16 @@
    # to include other javascripts, add them to the :requires option of
    # your client in routes.rb instead of changing it here.
 -%>
+<script>
+SC._performanceEvents['body/scriptLoadStart'] = new Date().getTime();
+</script>
 <%= javascripts_for_client %>
 <% unless @content_for_page_javascript.blank? %>
 <%= @content_for_page_javascript %>
 <% end -%>
+<script>
+SC._performanceEvents['body/scriptLoadEnd'] = new Date().getTime();
+</script>
 <% #
    # If you use old-style view helpers in your page, this method must be 
    # called to actually add the page views to your HTML.  Normally this will
@@ -115,5 +130,9 @@
   #disable main if the application is loaded in design mode
 %>
 <%= @content_for_designer -%>
+
+  <script>
+  SC._performanceEvents['bodyEnd'] = new Date().getTime();
+  </script>
 	</body>
 </html>
