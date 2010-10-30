@@ -73,6 +73,9 @@ SC.Benchmark = {
 
   /**
     If set, one can tell when the benchmark is started relatively to the global start time.
+    
+    This property is set to a default automatically (from HTML5 NavigationTiming if possible,
+    otherwise the SC bootstrap).
   
     @property {Number}
   */
@@ -331,7 +334,12 @@ SC.Benchmark = {
       var end = chart[i][2];
       var duration = chart[i][3];
       
-      div.innerHTML = '&nbsp;' + (chart[i][0] + " <span class='sc-benchmark-emphasis'>" + duration + 'ms</span>');
+      var html = '&nbsp;' + chart[i][0] + " <span class='sc-benchmark-emphasis'>";
+      html += duration + "ms (start: " + (start - gStart) + "ms)";
+      html += "</span>";
+      
+      div.innerHTML = html;
+
       
       div.className = 'sc-benchmark-bar';
       div.style.cssText = 'left:'+ (((start-gStart)/4))+'px; width: '+((duration/4))+
@@ -387,6 +395,56 @@ SC.Benchmark = {
 
   // @private
   
+  
+  // Loads data from both the browser's own event hash and SC's pre-load event hash.
+  _loadSCPerfData: function() {
+    var sc_perf = SC._performanceEvents, events = [], idx, len, evt;
+    
+    if (typeof webkitPerformance !== "undefined") SC.mixin(sc_perf, webkitPerformance.timing);
+    
+    // figure out globalStartTime
+    if (!this.globalStartTime) {
+      var globalStartEvents = "navigation navigationStart headStart".w();
+      len = globalStartEvents.length;
+      for (idx = 0; idx < len; idx++) {
+        if (sc_perf[globalStartEvents[idx]]) {
+          this.globalStartTime = sc_perf[globalStartEvents[idx]];
+          break;
+        }
+      }
+    }
+    
+    // it is unfortunate, but because SC.Benchmark catalogues data in start/end blocks,
+    // and does not have a facility for cataloguing just plain events, we can only understand
+    // blocks that have both a start and an end.
+    
+    // automatically handle any that have Start/End
+    for (var eventName in sc_perf) {
+      if (eventName.substr(-3) === "End") {
+        var st = sc_perf[eventName.substr(0, eventName.length - 3) + "Start"];
+        if (!st) continue;
+        
+        events.push({ 
+          name: eventName.substr(0, eventName.length - 3), 
+          start: st, 
+          end: sc_perf[eventName] 
+        });
+      }
+    }
+    
+    events = events.sort(function(a, b) {
+      return a.time - b.time;
+    });
+    
+    // add all of the events to the benchmarks so they'll show up on graphs.
+    len = events.length;
+    for (idx = 0; idx < len; idx++) {
+      evt = events[idx];
+      SC.Benchmark.start(evt.name, undefined, evt.start);
+      SC.Benchmark.end(evt.name, undefined, evt.end);
+    }
+  },
+  
   // Generates, sorts, and returns the array of all the data that has been captured.
   _compileChartData: function(showSub)
   {
@@ -440,8 +498,9 @@ SC.Benchmark = {
   _genReport: function(key) {
     var stat = this._statFor(key) ;
     var avg = (stat.runs > 0) ? (Math.floor(stat.amt * 1000 / stat.runs) / 1000) : 0 ;
-     
-    return 'BENCH %@ msec: %@ (%@x)'.fmt(avg, (stat.name || key), stat.runs) ;  
+    var last = stat._times[stat._times.length - 1];
+    
+    return 'BENCH %@ msec: %@ (%@x); latest: %@'.fmt(avg, (stat.name || key), stat.runs, last.end - last.start);        
   },
 
   // Generate the report in the form of at time line. This returns the parent.
