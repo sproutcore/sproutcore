@@ -14,68 +14,6 @@ Greenhouse.mixin( /** @scope Greenhouse */{
   // ..........................................................
   // Ready States
   // 
-  ready: SC.State.create({
-
-    enterState: function(){
-      console.log('greenhouse has landed');
-      var c = Greenhouse.getPath('mainPage.mainPane.container');
-      c.set('nowShowing', Greenhouse.getPath('appPage.mainView'));
-    },
-    exitState: function(){
-
-    },
-    
-    // ..........................................................
-    //  Events
-    // 
-    run: function(){
-      var target = Greenhouse.targetController.get('name');
-      window.open(target, "","");
-    },
-    
-    selectFile: function(){
-      var c = Greenhouse.fileController.get('content');
-      if(c) {
-        c.refresh();
-        this.goState('gettingFile');
-      }
-    },
-    
-    unselectFile: function(){
-     // TODO: [EG, MB] add the action for unselecting 
-     this.goState('readyWaiting');
-    },
-     
-    reloadIframe: function(){
-      Greenhouse.filesController.set('selection', null);
-      Greenhouse.gettingFile._firstTime = YES;
-
-      Greenhouse.iframe.location.reload();
-      this.goState('iframeLoading');
-    },
-    
-    resizePage: function(sender){
-      var s = sender.getPath('content.size'),
-          def = {top: 20, left: 20, right: 20, bottom: 83},
-          iframe = Greenhouse.get('iframe'),
-          view;
-      
-      
-      view = iframe.SC.designPage.getPath('designMainPane.container');
-
-      if(!s){
-        view.set('classNames', ['design']);
-        view.set('layout', def);
-      }
-      else{
-        view.set('classNames', []);
-        view.set('layout', SC.merge({centerX:0, centerY: 0}, s));
-      }
-      
-    }
-    
-    
-  }),
   
   readyWaiting: SC.State.create({
     
