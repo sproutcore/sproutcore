@@ -95,6 +95,7 @@ SC.InlineEditable = {
   
   // TODO: use validator
   inlineEditorShouldCommitEditing: function(editor, finalValue) {
+    this.setIfChanged('value', finalValue) ;
     return YES;
   },
   
@@ -102,7 +103,8 @@ SC.InlineEditable = {
     Update the field value and make it visible again.
   */
   inlineEditorDidEndEditing: function(editor, finalValue) {
-    this.setIfChanged('value', finalValue) ;
+    this.inlineEditorShouldCommitEditing(editor, finalValue);
     this.set('isEditing', NO) ;
+    return YES;
   }
 };

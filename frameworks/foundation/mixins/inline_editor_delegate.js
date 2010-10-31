@@ -117,7 +117,9 @@ SC.InlineEditorDelegate = {
   *************/
   // notify the view that its editor began editing
   inlineEditorDidBeginEditing: function(editor) {
-    console.log("SFASDF");
+    var view = editor._target;
+
+    return view.inlineEditorDidBeginEditing(editor);
   },
   
   // returns true if the finalvalue is valid, false otherwise
@@ -125,13 +127,13 @@ SC.InlineEditorDelegate = {
   inlineEditorShouldCommitEditing: function(editor, finalValue) {
     var view = editor._target;
     
-    return view.inlineEditorShouldCommitEditing(finalValue);
+    return view.inlineEditorShouldCommitEditing(editor, finalValue);
   },
   
   // ask the view if finalvalue is valid, and then commit it and cleanup the editor
   inlineEditorDidEndEditing: function(editor, finalValue) {
     var view = editor._target;
     
-    return view.inlineEditorDidEndEditing(finalValue);
+    return view.inlineEditorDidEndEditing(editor, finalValue);
   }
 };

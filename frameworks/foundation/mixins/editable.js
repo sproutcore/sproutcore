@@ -88,8 +88,6 @@ SC.Editable = {
     this.becomeFirstResponder() ;
     this.endPropertyChanges();
     
-    this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorDidBeginEditing', this);
-    
     return YES ;
   },
   
@@ -116,8 +114,6 @@ SC.Editable = {
   */
   discardEditing: function() {
     // if we are not editing, return YES, otherwise NO.
-    
-    this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorDidEndEditing', this);
     
     return !this.get('isEditing') ;
   },
@@ -154,7 +150,7 @@ SC.Editable = {
     this.set('isEditing', NO) ;
     this.resignFirstResponder() ;
     
-    this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorDidCommitEditing', this);
+    this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldCommitEditing', this, this.get('value'));
     
     return YES ;
   }
