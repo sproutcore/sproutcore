@@ -482,7 +482,7 @@ SC.Record = SC.Object.extend(
         store      = this.get('store'), 
         storeKey   = this.get('storeKey'), 
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
-        isChild, defaultVal, keyForDataHash;
+        isChild, defaultVal, keyForDataHash, attr;
       
     var dataHash = store.readEditableDataHash(storeKey) || {};
     dataHash[primaryKey] = recordId;
@@ -499,8 +499,12 @@ SC.Record = SC.Object.extend(
           isChild  = valueForKey.isChildRecordTransform;
           if (!isRecord && !isChild) {
             attrValue = this.get(key);
-
             if(attrValue!==undefined || (attrValue===null && includeNull)) {
+              attr = this[key];
+              // if record attribute, make sure we transform with the fromType
+              if(SC.instanceOf(attr, SC.RecordAttribute)) {
+                attrValue = attr.fromType(this, key, attrValue);
+              }
               dataHash[keyForDataHash] = attrValue;
             }
           
