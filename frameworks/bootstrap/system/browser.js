@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-var SC = SC || { BUNDLE_INFO: {}, LAZY_INSTANTIATION: {} };
+var SC = SC || { MODULE_INFO: {}, LAZY_INSTANTIATION: {} };
 
 SC._detectBrowser = function(rawUserAgent, language) {
   if (rawUserAgent === undefined) rawUserAgent = navigator.userAgent;

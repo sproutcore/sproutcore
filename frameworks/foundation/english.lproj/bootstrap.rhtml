@@ -11,7 +11,7 @@
 #
 -%>
 <% content_for('bootstrap') do %>
-var SC = SC || { BUNDLE_INFO: {}, LAZY_INSTANTIATION: {} };
+var SC = SC || { MODULE_INFO: {}, LAZY_INSTANTIATION: {} };
 SC.browser = (function() {
   // THIS CODE IS DEPRECATED AND IS NO LONGER MAINTAINED
   var userAgent = navigator.userAgent.toLowerCase();
@@ -34,13 +34,13 @@ SC.browser = (function() {
 })();
 
 SC.bundleDidLoad = function(bundle) {
-  var info = this.BUNDLE_INFO[bundle] ;
-  if (!info) info = this.BUNDLE_INFO[bundle] = {} ;
+  var info = this.MODULE_INFO[bundle] ;
+  if (!info) info = this.MODULE_INFO[bundle] = {} ;
   info.loaded = true ;
 };
 
 SC.bundleIsLoaded = function(bundle) {
-  var info = this.BUNDLE_INFO[bundle] ;
+  var info = this.MODULE_INFO[bundle] ;
   return info ? !!info.loaded : false ;
 };
 

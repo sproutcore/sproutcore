@@ -8,13 +8,13 @@
 // sc_require("system/browser");
 
 SC.bundleDidLoad = function(bundle) {
-  var info = this.BUNDLE_INFO[bundle] ;
-  if (!info) info = this.BUNDLE_INFO[bundle] = {} ;
+  var info = this.MODULE_INFO[bundle] ;
+  if (!info) info = this.MODULE_INFO[bundle] = {} ;
   info.loaded = true ;
 };
 
 SC.bundleIsLoaded = function(bundle) {
-  var info = this.BUNDLE_INFO[bundle] ;
+  var info = this.MODULE_INFO[bundle] ;
   return info ? !!info.loaded : false ;
 };
 
