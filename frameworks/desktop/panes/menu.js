@@ -41,7 +41,7 @@ require('views/menu_item');
       { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
       { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
       { title: 'Selected Menu Item', keyEquivalent: 'backspace' },
-      { isSeparator: YES },
+      { separator: YES },
       { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
       { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: 'ctrl_p' }
     ];
