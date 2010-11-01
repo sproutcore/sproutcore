@@ -50,7 +50,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
           try { 
             lazyInfo[i]();
           }catch(e) {
-            console.error("SC.loadModule(): Failted to lazily instatiate entry for  '%@'".fmt(moduleName));  
+            console.error("SC.loadModule(): Failed to lazily instatiate entry for  '%@'".fmt(moduleName));
           }
         }
         delete SC.LAZY_INSTANTIATION[moduleName];
