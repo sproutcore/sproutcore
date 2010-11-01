@@ -1,5 +1,5 @@
-/*!
- * jQuery JavaScript Library v1.4.2
+/** 
+ * @license jQuery JavaScript Library v1.4.2
  * http://jquery.com/
  *
  * Copyright 2010, John Resig
@@ -2621,8 +2621,8 @@ if ( window.attachEvent && !window.addEventListener ) {
 		}
 	});
 }
-/*!
- * Sizzle CSS Selector Engine - v1.0
+/** 
+ * @license Sizzle CSS Selector Engine - v1.0
  *  Copyright 2009, The Dojo Foundation
  *  Released under the MIT, BSD, and GPL Licenses.
  *  More information: http://sizzlejs.com/
