@@ -440,9 +440,6 @@ SC.FlowedLayout = {
   },
   
   _scfl_frameDidChange: function() {
-    // if the frame changes but we can't wrap, our results will not update.
-    if (!this.get("canWrap")) return;
-    
     var frame = this.get("frame"), lf = this._scfl_lastFrameSize;
     this._scfl_lastFrameSize = frame;
 
