@@ -58,7 +58,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
-  allowedValues: '0 1 2 3 4 5 6 7 8 9 0 - +'.w(),
+  allowedValues: '0 1 2 3 4 5 6 7 8 9 0'.w(),
 
   insertText: function(text) {
     var av = this.get('allowedValues');
@@ -68,6 +68,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var cs = this.get('selection');
     var sc = this.get('allowSignChange');
     var pcs = cs.start;
+    var pce = cs.end;
     var fv = this.getFieldValue();
     var ct;
     var prefix = this.get('prefix') || '';
@@ -76,61 +77,111 @@ SC.NumberFieldView = SC.TextFieldView.extend(
       ct = this.cleanThousands(fv);
       if (!ct.match('^-')) {
         this.setFieldValue(this.formatNumber('-%@'.fmt(ct)));
-        this._needsFieldUpdate = YES;
-        cs.start = pcs + 1;
-        cs.end = pcs + 1;
+        cs.end = cs.start = pcs + 1;
+      } else {
+        this.setFieldValue(this.formatNumber(ct.replace('-','')));
+        cs.end = cs.start = pcs - 1;
       }
+      this._needsFieldUpdate = YES;
     } else if (text === '+' && sc) {
       ct = this.cleanThousands(fv);
       if (ct.match('^-')) {
         this.setFieldValue(this.formatNumber(ct.replace('-','')));
         this._needsFieldUpdate = YES;
-        cs.start = pcs - 1;
-        cs.end = pcs - 1;
+        cs.end = cs.start = pcs - 1;
       }
     } else if (text === ds && this.get('allowDecimal')) {
-      ct = this.cleanThousands(fv);
+      var cpp = this.cleanPrePostFix(fv);
       if (SC.empty(fv)) {
         this.setFieldValue(this.formatNumber('0'));
         this._needsFieldUpdate = YES;
-        cs.start = (sp ? prefix.length : 0) + 2;
-        cs.end = cs.start;
+        cs.end = cs.start = (sp ? prefix.length : 0) + 2;
       } else {
-        var dsp = ct.indexOf(ds);
-        cs.start = (sp ? prefix.length + dsp : dsp - 1) + 2;
-        cs.end = cs.start;
+        var dsp = cpp.indexOf(ds);
+        cs.end = cs.start = (sp ? prefix.length + dsp : dsp) + 1;
       }
     } else if (text === '0' && SC.empty(fv) && this.get('allowDecimal')) {
       this.setFieldValue(this.formatNumber('0'));
       this._needsFieldUpdate = YES;
       cs.start = (sp ? prefix.length : 0) + 2;
       cs.end = cs.start;
-    } else if (av.indexOf(text) >= 0 && text !== ts) {
-      var s1 = fv.substring(0, pcs);
-      var s2 = fv.substring(cs.end);
-
-      var nv = s1 + text + s2;
-
-      ct = this.cleanThousands(nv);
-      var fn = this.formatNumber(ct);
-
+    } else if (av.indexOf(text) >= 0) {
+      var fn;
+      
+      // Check if is ALL selection
+      if (pce - pcs > 1 && pcs === 0 && pce === fv.length) {
+        fn = this.formatNumber(text);
+        cs.end = cs.start = (sp ? prefix.length : 0) + 1;
+      //} else if (pce - pcs > 1) {
+      } else {
+        var s1 = fv.substring(0, pcs);
+        var s2 = fv.substring(cs.end);
+        var nv = s1 + text + s2;
+        ct = this.cleanThousands(nv);
+        fn = this.formatNumber(ct);
+        
+        // Calculates caret position
+        var posFix = fn.substring(pce).length - s2.length;
+        if (SC.empty(fv)) posFix = sp ? prefix.length + 1 : 1;
+        cs.end = cs.start = pcs + posFix;
+      }
+        
       this.setFieldValue(fn);
-
-      // Calculates caret position
-      var posFix = fn.substring(cs.end).length - s2.length;
-
-      if (SC.empty(fv)) posFix = sp ? prefix.length + 1 : 1;
-
-      cs.start = pcs + posFix;
-      cs.end = pcs + posFix;
-
       this._needsFieldUpdate = YES;
     }
     this.set('selection', cs);
 
     return YES;
   },
+  
+  moveLeft: function(evt) {
+    var cs = this.get('selection');
+    var fv = this.getFieldValue();
+    var sp = this.get('showPrefix');
+    var sf = this.get('showPostfix');
+    var ad = this.get('allowDecimal');
+    var dp = this.get('decimalPlaces');
+    var prefix = this.get('prefix');
+    var postfix = this.get('prefix');
+    var pcs = cs.start;
+    var pce = cs.end;
 
+    // Check if all is selected
+    if (pce - pcs > 1 && pcs === 0 && pce === fv.length) {
+      cs.end = cs.start = fv.length - ( (sf ? postfix.length : 0) + (ad ? dp + 1 : 0) + 0);
+    } else if (!sp || pcs > prefix.length) {
+      cs.end = cs.start = pcs - 1;
+    }
+
+    this.set('selection', cs);
+
+    return YES;
+  },
+
+  moveRight: function(evt) {
+    var cs = this.get('selection');
+    var fv = this.getFieldValue();
+    var sp = this.get('showPrefix');
+    var sf = this.get('showPostfix');
+    var ad = this.get('allowDecimal');
+    var dp = this.get('decimalPlaces');
+    var prefix = this.get('prefix');
+    var postfix = this.get('prefix');
+    var pcs = cs.start;
+    var pce = cs.end;
+
+    // Check if all is selected
+    if (pce - pcs > 1 && pcs === 0 && pce === fv.length) {
+      cs.end = cs.start = fv.length - ( (sf ? postfix.length : 0) + (ad ? dp + 1 : 0) + 0);
+    } else if (!sf || pcs < (fv.length - postfix.length)) {
+      cs.end = cs.start = pcs + 1;
+    }
+
+    this.set('selection', cs);
+
+    return YES;
+  },
+  
   deleteBackward: function(evt) {
     var cs = this.get('selection');
     var fv = this.getFieldValue();
@@ -141,8 +192,23 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var prefix = this.get('prefix');
     var postfix = this.get('prefix');
     var pcs = cs.start;
+    var pce = cs.end;
     var inside = true;
 
+    // Check if all is selected
+    if (pce - pcs > 1) {
+      // Check if is ALL selection
+      if (pcs === 0 && pce === fv.length) {
+        this.setFieldValue(this.formatNumber(null));
+        this._needsFieldUpdate = YES;
+        cs.end = cs.start = (sp ? prefix.length : 0) + 1;
+        this.set('selection', cs);
+        return YES;
+      } else {
+        console.log('no, is a default selection');
+      }
+    }
+    
     // Check if can delete
     // We only delete if caret are poistioned inside the 'number'
     if (sp || sf) {
@@ -194,7 +260,18 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var prefix = this.get('prefix');
     var postfix = this.get('prefix');    
     var pcs = cs.start;
+    var pce = cs.end;
     var inside = true;
+    
+    // Check if is a selection
+    if (pce - pcs > 1) {
+      // Check if is ALL selection
+      if (pcs === 0 && pce === fv.length) {
+        console.log('is ALL selection');
+      } else {
+        console.log('no, is a default selection');
+      }
+    }
     
     // Check if can delete
     // We only delete if caret are positioned inside the 'number'
@@ -237,14 +314,18 @@ SC.NumberFieldView = SC.TextFieldView.extend(
   // ****************
   //  FORMAT STRING
   // ****************
-  cleanThousands: function(number) {
+  cleanPrePostFix: function(number) {
     var sp = this.get('showPrefix');
     var sf = this.get('showPostfix');
-    var ts = this.get('thousandSymbol');
 
     if (sp) number = number.replace(this.get('prefix'), '');
     if (sf) number = number.replace(this.get('postfix'), '');
-    return number.split(ts).join('');
+    return number;    
+  },
+  
+  cleanThousands: function(number) {
+    var ts = this.get('thousandSymbol');
+    return this.cleanPrePostFix(number).split(ts).join('');
   },
 
   checkDecimal: function(number) {
@@ -321,7 +402,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
 
     // Show Postfix?
     if (sf) n = n + this.get('postfix');
-SC.Logger.log("END: " + n);
+    
     return n;
   },
 
