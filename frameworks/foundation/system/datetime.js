@@ -104,15 +104,21 @@ SC.Scanner = SC.Object.extend(
   /**
     Reads some characters from the string and interprets it as an integer.
     
-    @param {integer} len the amount of characters to read
+    @param {integer} min_len the minimum amount of characters to read
+    @param {integer} max_len optionally the maximum amount of characters to read (defaults to the minimum)
     @throws {SC.SCANNER_INT_ERROR} if asked to read non numeric characters
     @returns {integer} the scanned integer
   */
-  scanInt: function(len) {
-    var str = this.scan(len);
-    var re = new RegExp("\\d{"+len+"}");
-    if (!str.match(re)) throw SC.SCANNER_INT_ERROR;
-    return parseInt(str, 10);
+  scanInt: function(min_len, max_len) {
+    if (max_len === undefined) max_len = min_len;
+    var str = this.scan(max_len);
+    var re = new RegExp("^\\d{" + min_len + "," + max_len + "}");
+    var match = str.match(re);
+    if (!match) throw SC.SCANNER_INT_ERROR;
+    if (match[0].length < max_len) {
+      this.scanLocation += match[0].length - max_len;
+    }
+    return parseInt(match[0], 10);
   },
   
   /**
@@ -908,14 +914,14 @@ SC.DateTime.mixin(SC.Comparable,
           case 'b': opts.month = scanner.scanArray(this.abbreviatedMonthNames) + 1; break;
           case 'B': opts.month = scanner.scanArray(this.monthNames) + 1; break;
           case 'c': throw "%c is not implemented";
-          case 'd': opts.day = scanner.scanInt(2); break;
-          case 'H': opts.hour = scanner.scanInt(2); break;
-          case 'I': opts.hour = scanner.scanInt(2); break;
+          case 'd': opts.day = scanner.scanInt(1, 2); break;
+          case 'H': opts.hour = scanner.scanInt(1, 2); break;
+          case 'I': opts.hour = scanner.scanInt(1, 2); break;
           case 'j': throw "%j is not implemented";
-          case 'm': opts.month = scanner.scanInt(2); break;
-          case 'M': opts.minute = scanner.scanInt(2); break;
+          case 'm': opts.month = scanner.scanInt(1, 2); break;
+          case 'M': opts.minute = scanner.scanInt(1, 2); break;
           case 'p': opts.meridian = scanner.scanArray(['AM', 'PM']); break;
-          case 'S': opts.second = scanner.scanInt(2); break;
+          case 'S': opts.second = scanner.scanInt(1, 2); break;
           case 'U': throw "%U is not implemented";
           case 'W': throw "%W is not implemented";
           case 'w': throw "%w is not implemented";

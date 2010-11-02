@@ -52,6 +52,12 @@ var pane = SC.ControlTestPane.design({height:24})
     // control size should end up small
     title: "Smelly Severus", layout: { left: 0, top: 2, right: 0, bottom: 2 },
     controlSize: SC.CALCULATED_CONTROL_SIZE
+  })
+  
+  .add("iconchange", SC.ButtonView, {
+    layout: { left: 0, top: 2, right: 0, bottom: 2 },
+    renderStyle: 'renderImage',
+    icon: 'start'
   });
 
 pane.show(); // add a test to show the test pane
@@ -178,6 +184,20 @@ test("Check if AUTO_CONTROL_SIZE button automatically calculated the correct con
 test("Check if CALCULATED_CONTROL_SIZE automatically found the correct controlSize", function() {
   var viewElem=pane.view('calculatedcontrolsize').$();
   ok(viewElem.hasClass('sc-small-size'), 'CALCULATED_CONTROL_SIZE button has sc-small-size class.');
+});
+
+test("Check if icon class is set properly on ImageButton",function(){
+  var viewElem=pane.view('iconchange').$('div');
+  ok(viewElem.hasClass('start'), 'Icon class set initially to "start"');
+});
+
+test("Check if icon class is set properly on ImageButton if changed", function(){
+  SC.RunLoop.begin();
+  var viewElem = pane.view('iconchange');
+  viewElem.set('icon','stop');
+  SC.RunLoop.end(); // force redraw...
+  var newViewElem = pane.view('iconchange').$('div');
+  ok(newViewElem.hasClass('stop'), 'Icon class has correctly changed to "stop"')
 });
 
 })();
