@@ -398,6 +398,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     this.set('_forceRenderFirstTime', YES);
   }.observes('isTextArea'),
   
+  hasBorder: YES,
+  
   _renderField: function(context, firstTime, value, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
@@ -421,7 +423,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
       name = this.get('layerId');
       
-      context.push('<span class="border"></span>');
+      if(this.get('hasBorder')) context.push('<span class="border"></span>');
 
       // Render the padding element, with any necessary positioning
       // adjustments to accommodate accessory views.
