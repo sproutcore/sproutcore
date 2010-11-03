@@ -129,7 +129,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
       }
     }
     
-
+    this.rowLabelSizeDidChange();
   },
   
   labelDidChange: function() {
