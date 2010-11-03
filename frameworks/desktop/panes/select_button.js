@@ -399,14 +399,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
         object.get(valueKey) : object[valueKey]) : object ;
 
       if (!SC.none(currentSelectedVal) && !SC.none(value)){
-        if(this.equals(currentSelectedVal, value) ) {
+        if(this._equals(currentSelectedVal, value) ) {
           this.set('title', name) ;
           this.set('icon', icon) ;
         }
       }
 
       //Check if the item is currentSelectedItem or not
-      if(this.equals(value, this.get('value'))) {
+      if(this._equals(value, this.get('value'))) {
 
         // increase index by 1 if item falls below the separator in menu list
         if(separatorPostion > 0 && separatorPostion<len &&
@@ -484,8 +484,16 @@ SC.SelectButtonView = SC.ButtonView.extend(
     This function can be overridden if the value of the Select Button field 
     is an object.
   */
-  equals: function (value1, value2) {
-    return value1 === value2;
+  _equals: function (value1, value2) {
+    var ret = YES;
+    if (value1 && SC.typeOf(value1) === SC.T_HASH && 
+        value2 && SC.typeOf(value2) === SC.T_HASH) {
+      for(var key in value1) {
+        if(value1[key] !== value2[key]) ret = NO;
+      }
+    }
+    else ret = (value1 === value2);
+    return ret;
   }, 
 
   /**
