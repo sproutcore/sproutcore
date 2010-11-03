@@ -96,6 +96,7 @@ SC.TableView = SC.View.extend({
     columns=null;
   },
   
+  isSelectable: YES,
   isEditable: YES,
   canEditContent: YES,
   
@@ -173,14 +174,15 @@ SC.TableView = SC.View.extend({
           contentIconKey: 'icon',
           newTargetBinding: SC.Binding.from('.delegate',this),
           newActionBinding: SC.Binding.from('.newAction',this),
-          canReorderContent: YES,
+          canReorderContent: this.get('canReorderContent'),
           canEditContent: this.get('canEditContent'),
           canDeleteContent: this.get('canDeleteContent'),
           allowDeselectAll: this.get('allowDeselectAll'),
           delegate: this.get('delegate'),
           beginEditingSelectionBinding: this.get('beginEditingSelectionPath') || SC.binding('.beginEditingSelection',this.get('delegate')),
           folderedListViewDelegate: this.get('delegate'),
-          isDropTarget: YES,
+          isDropTarget: this.get('isDropTarget'),
+          isSelectable: this.get('isSelectable'),
           allowActionOnFolder: this.get('allowActionOnFolder'),
           needsContextMenuBinding: SC.Binding.from('.needsContextMenu',this)
         })
@@ -220,7 +222,10 @@ SC.TableView = SC.View.extend({
           sortDescriptorBinding: SC.Binding.from('.sortDescriptor',this),
           columnsBinding: SC.Binding.from('.columns',this).oneWay(),
           contentBinding: SC.Binding.from('.content',this),
-
+          delegate: this.get('delegate'),
+          isDropTarget: this.get('isDropTarget'),
+          isSelectable: this.get('isSelectable'),
+          
           exampleView: this.get('exampleView')
         }),
 

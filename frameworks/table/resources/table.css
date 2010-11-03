@@ -144,11 +144,11 @@ div.sc-dataview-row {
 }
 
 	div.sc-dataview-row.even {
-		background-color: #f3f7fb;
+		//background-color: #f3f7fb;
 	}
 	
 	div.sc-dataview-row.odd {
-		background-color: white;
+		//background-color: white;
 	}
 
 	.sc-table-data-view div.sc-dataview-row.sel {
