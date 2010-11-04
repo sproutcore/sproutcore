@@ -75,6 +75,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   allowsMultipleSelection: NO,
 
   /**
+    If YES, it will set the segment value even if an action is defined.
+  */
+  selectSegmentWhenTriggeringAction: NO,
+
+  /**
     If YES, titles will be localized before display.
   */
   localize: YES,
@@ -541,8 +546,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (resp) resp.sendAction(action, target, this, this.get('pane'));
     }
 
-    // Only set value if there is no action and a value is defined.
-    if(!action && val !== undefined) {
+    if(val !== undefined && (!action || this.get('selectSegmentWhenTriggeringAction'))) {
       this.set('value', value);
     }
     
