@@ -94,7 +94,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     
     for(idx=0; (ret !== YES) && idx<len; idx++) {
       source = sources.objectAt(idx);
-      cur = source.fetch ? source.fetch.call(source, store, query) : NO;
+      cur = source.fetch ? source.fetch.apply(source, arguments) : NO;
       ret = this._handleResponse(ret, cur);
     }
     
@@ -103,7 +103,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   
   
   /** @private - just cascades */
-  retrieveRecords: function(store, storeKeys) {
+  retrieveRecords: function(store, storeKeys, ids) {
     var sources = this.get('dataSources'), 
         len     = sources ? sources.length : 0,
         ret     = NO,
@@ -111,7 +111,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     
     for(idx=0; (ret !== YES) && idx<len; idx++) {
       source = sources.objectAt(idx);
-      cur = source.retrieveRecords.call(source, store, storeKeys);
+      cur = source.retrieveRecords.apply(source, arguments);
       ret = this._handleResponse(ret, cur);
     }
     
@@ -127,7 +127,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     
     for(idx=0; (ret !== YES) && idx<len; idx++) {
       source = sources.objectAt(idx);
-      cur = source.commitRecords.call(source, store, createStoreKeys, updateStoreKeys, destroyStoreKeys);
+      cur = source.commitRecords.apply(source, arguments);
       ret = this._handleResponse(ret, cur);
     }
     
@@ -143,7 +143,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     
     for(idx=0; (ret !== YES) && idx<len; idx++) {
       source = sources.objectAt(idx);
-      cur = source.cancel.call(source, store, storeKeys);
+      cur = source.cancel.apply(source, arguments);
       ret = this._handleResponse(ret, cur);
     }
     
