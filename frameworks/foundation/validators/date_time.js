@@ -21,6 +21,11 @@ SC.Validator.DateTime = SC.Validator.extend({
     The standard format you want the validator to convert dates to.
   */
   format: '%d/%m/%Y',
+  
+  /**
+    Additional valid formats we will accept.
+  */
+  validFormats: ['%d/%m/%y'],
 
   /**
     if we have a number, then convert to a date object.
@@ -39,10 +44,17 @@ SC.Validator.DateTime = SC.Validator.extend({
     it could not be parsed.
   */
   objectForFieldValue: function(value, form, field) {
+    var retValue = value;
     if (value) {
-      value = SC.DateTime.parse(value, this.get('format'));
+      retValue = SC.DateTime.parse(value, this.get('format'));
+      if (!retValue) {
+        for (var i=0;i<this.getPath('validFormats.length');i++) {
+          retValue = SC.DateTime.parse(value, this.get('validFormats').objectAt(i));
+          if (retValue) break;
+        }
+      }
     }
-    return value;
+    return retValue;
   }
 
 });
