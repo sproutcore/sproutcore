@@ -532,7 +532,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
       Convert a DateTime to a String
     */
     from: function(dt, attr) {
-      if (SC.none(dt)) return dt;
+      if (SC.none(dt) || !SC.instanceOf(dt, SC.DateTime)) return dt;
       var format = attr.get('format');
       return dt.toFormattedString(format ? format : SC.DateTime.recordFormat);
     }
