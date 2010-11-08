@@ -1868,6 +1868,7 @@ SC.CollectionView = SC.View.extend(
   selectAll: function(evt) {
     var content = this.get('content'),
         sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
+    if (!content.get('allowsMultipleSelection')) return NO;
     this.select(sel, NO) ;
     return YES ;
   },
