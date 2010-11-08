@@ -7,11 +7,11 @@
 sc_require('validators/validator');
 
 /**
-  Handles parsing and validating of numbers.
+  Handles parsing and validating of numbers with decimals anf thousands.
   
   @extends SC.Validator
-  @author Charles Jolley
-  @version 1.0
+  @author Juan Pablo Goldfinger
+  @version 1.5
   @class
 */
 SC.Validator.FormattedNumber = SC.Validator.extend(
@@ -19,7 +19,6 @@ SC.Validator.FormattedNumber = SC.Validator.extend(
 {
 
   fieldValueForObject: function(object, form, field) {
-    SC.Logger.log("OBJ: " + object);
     if (!isNaN(object)) {
       return field.formatNumber(object);
     }
@@ -27,19 +26,8 @@ SC.Validator.FormattedNumber = SC.Validator.extend(
   },
 
   objectForFieldValue: function(value, form, field) {
-    SC.Logger.log("VALUE: " + value);
     if (SC.empty(value)) return null;
     return parseFloat(field.systemDecimal(field.cleanThousands(value)));
-  }/*,
-
-  validate: function(form, field) {
-    var value = field.get('fieldValue');
-    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value)));
-  },
-
-  validateError: function(form, field) {
-    var label = field.get('errorLabel') || 'Field';
-    return SC.$error("Invalid.Number(%@)".loc(label), label);
-  }*/
+  }
 
 });
