@@ -85,7 +85,7 @@ SC.BaseTheme.renderers.Control = SC.Renderer.extend({
     Calculate appropriate hashes.
   */
   calculateClasses: function() {
-    var sel = this.isSelected, disabled = !this.isEnabled,
+    var sel = this.isSelected,
         names = this._TMP_CLASSNAMES ? this._TMP_CLASSNAMES : this._TMP_CLASSNAMES = {};
     names.mixed = sel === SC.MIXED_STATE;
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
