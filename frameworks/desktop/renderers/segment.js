@@ -35,6 +35,7 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
     classes["sc-middle-segment"] = this.isMiddleSegment;
     classes["sc-last-segment"] = this.isLastSegment;
     classes["sc-segment"] = YES;
+    classes['disabled'] = !this.isEnabled;
     
     this._class_hash = classes;
     return classes;
