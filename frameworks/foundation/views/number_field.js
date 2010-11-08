@@ -31,7 +31,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
   textAlign: SC.ALIGN_RIGHT,
 
   allowThousand: YES,
-  allowDecimal: YES,
+  allowDecimal: NO,
   allowSignChange: NO,
   showPrefix: NO,
   showPostfix: NO,
