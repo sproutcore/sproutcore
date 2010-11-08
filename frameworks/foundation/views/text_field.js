@@ -46,6 +46,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isTextArea: NO,
 
   /**
+    Text align for text field
+  */
+  textAlign: SC.ALIGN_LEFT,
+  
+  /**
     The hint to display while the field is not active.  Can be a loc key.
   */
   hint: '',
@@ -406,7 +411,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var hint = this.get('hint'), disabled, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
-        maxLength = this.get('maxLength'), isOldSafari;
+        maxLength = this.get('maxLength'), isOldSafari, textAlign=this.get('textAlign');
         
     context.setClass('text-area', this.get('isTextArea'));
     
@@ -456,10 +461,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
       else {
         type = this.get('isPassword') ? 'password' : 'text' ;
+        textAlign = (textAlign === SC.LEFT_ALIGM) ? '': 'style="text-align:%@"'.fmt(textAlign);
         context.push('<input class="',fieldClassNames,'" type="', type,
                       '" name="', name, '" ', disabled, ' value="', value,
                       '" placeholder="',hint,'"', spellCheckString, 
-                      ' maxlength="', maxLength, '" /></span>') ;
+                      ' maxlength="', maxLength, '" ',textAlign,'/></span>') ;
       }
 
     }
@@ -884,7 +890,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     // handle tab key
     if ((which === 9 || evt.keyCode===9) && this.get('defaultTabbingEnabled')) {
-      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if (view) view.becomeFirstResponder();
       else evt.allowDefault();
       return YES ; // handled
