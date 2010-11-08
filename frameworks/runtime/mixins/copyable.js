@@ -31,10 +31,11 @@ SC.Copyable = {
   /**
     Override to return a copy of the receiver.  Default implementation raises
     an exception.
-    
+
+    @param deep {Boolean} if true, a deep copy of the object should be made
     @returns {Object} copy of receiver
   */
-  copy: function() {
+  copy: function(deep) {
     throw "%@.copy() is not implemented";
   },
   
@@ -61,4 +62,11 @@ SC.Copyable = {
 
 // Make Array copyable
 SC.mixin(Array.prototype, SC.Copyable);
-Array.prototype.copy = Array.prototype.slice;
+Array.prototype.copy = function(deep) {
+	var ret = this.slice(), idx;
+	if (deep) {
+      idx = ret.length;
+	  while (idx--) ret[idx] = SC.copy(ret[idx], true);
+	}
+	return ret;
+}

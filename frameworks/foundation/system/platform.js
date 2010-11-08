@@ -58,7 +58,8 @@ SC.platform = {
     screen on an iPhone OS-based device, this property will be true.
     @property {Boolean}
   */
-  standalone: navigator.standalone,
+  standalone: !!navigator.standalone,
+
 
   /**
     Prefix for browser specific CSS attributes. Calculated later.

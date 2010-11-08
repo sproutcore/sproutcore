@@ -326,7 +326,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     if (!editables[storeKey]) {
       editables[storeKey] = 1 ; // use number to store as dense array
-      ret = this.dataHashes[storeKey] = SC.clone(ret);
+      ret = this.dataHashes[storeKey] = SC.clone(ret, YES);
     }
     return ret;
   },
@@ -408,12 +408,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   removeDataHash: function(storeKey, status) {
-    var rev ;
-    
      // don't use delete -- that will allow parent dataHash to come through
     this.dataHashes[storeKey] = null;  
     this.statuses[storeKey] = status || SC.Record.EMPTY;
-    rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
     
     // hash is gone and therefore no longer editable
     var editables = this.editables;

@@ -196,7 +196,7 @@ SC.Record = SC.Object.extend(
         storeKey = this.storeKey,
         ret      = store.readDataHash(storeKey);
     
-    if (ret) ret = SC.clone(ret);
+    if (ret) ret = SC.clone(ret, YES);
 
     return ret;
   }.property(),
@@ -341,7 +341,6 @@ SC.Record = SC.Object.extend(
   writeAttribute: function(key, value, ignoreDidChange) {
     var store    = this.get('store'), 
         storeKey = this.storeKey,
-        status   = store.peekStatus(storeKey),
         attrs;
     
     attrs = store.readEditableDataHash(storeKey);
