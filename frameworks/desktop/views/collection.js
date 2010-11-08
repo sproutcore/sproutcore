@@ -1521,7 +1521,7 @@ SC.CollectionView = SC.View.extend(
   /** 
     Primtive to remove the indexes from the selection.  
     
-    @param {Number|SC.IndexSet} indexes index or indexes to select
+    @param {Number|SC.IndexSet} indexes index or indexes to deselect
     @returns {SC.CollectionView} receiver
   */
   deselect: function(indexes) {
