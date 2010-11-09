@@ -10,7 +10,7 @@ sc_require('system/response');
 /**
   @class
   
-  Implements support for Ajax requests using XHR, JSON-P and other prototcols.
+  Implements support for Ajax requests using XHR and other prototcols.
   
   SC.Request is much like an inverted version of the request/response objects
   you receive when implementing HTTP servers.  
