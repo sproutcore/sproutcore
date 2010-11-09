@@ -93,7 +93,7 @@ test('Basic UI', function(){
   setTimeout(function() {
     selectedItem = menu.get('selectedItem');
     ok(selectedItem, 'menu should have selectedItem property set after clicking on menu item');
-    equals(selectedItem.title, menuItem.get('content').title, 'selectedItem should be set to the content item that was clicked');
+    equals(selectedItem ? selectedItem.title : null, menuItem.get('content').title, 'selectedItem should be set to the content item that was clicked');
     equals(1, menu._selectedItemCount, 'selectedItem should only change once when a menu item is clicked');
     equals(1, menu._actionCount, 'action is fired once when menu item is clicked');
     menu.remove();

@@ -7,9 +7,14 @@
 
 /*global module test equals context ok same htmlbody */
 
-module("A dialog with some basic controls and buttons");
-
 var pane ;
+
+module("A dialog with some basic controls and buttons", {
+  teardown: function(){
+    if (pane) pane.remove();
+  }
+});
+
 test("adding dialog to screen", function() {
 
   
