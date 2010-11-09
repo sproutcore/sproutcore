@@ -250,3 +250,27 @@ test("writing an attribute should make many relationship aggregate dirty and add
   ok(store.changelog.contains(rec.get('storeKey')), "foo1 should be in the store's changelog");
   ok(store.changelog.contains(rec2.get('storeKey')), "foo2 should be in the store's changelog");
 });
+
+// ..........................................................
+// CREATING
+//
+
+test("creating a record sets default values on the data hash", function() {
+  var foo = MyApp.store.createRecord(MyApp.Foo, {
+    guid: 'foo5', 
+    firstName: "John", 
+    lastName: "Doe", 
+    date: "2009-03-01T20:30-08:00",
+    anArray: ['one', 'two', 'three'],
+    anObject: { 'key1': 'value1', 'key2': 'value2' },
+    aNumber: '123',
+    readOnly: 'foo1'
+  }), validValues = [1,2,3,4], hash;
+  MyApp.store.commitRecords();
+
+  hash = MyApp.store.readDataHash(foo.storeKey);
+  ok(hash.defaultComputedValue, 'should be defined (and not 0)');
+  ok(validValues.indexOf(hash.defaultComputedValue)!==-1, 'should have a value from 1 through 4');
+
+  equals(hash.defaultValue, 'default', 'should be defined');
+});
