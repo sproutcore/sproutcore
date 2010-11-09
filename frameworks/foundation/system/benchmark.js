@@ -4,7 +4,7 @@
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals $A*/
+/*globals $A */
 
 sc_require('core') ;
  
