@@ -274,3 +274,15 @@ test("creating a record sets default values on the data hash", function() {
 
   equals(hash.defaultValue, 'default', 'should be defined');
 });
+
+test("createRecords marshals and unmarshals recordKeys to dataHash keys", function () {
+  var foo = MyApp.store.createRecord(MyApp.Foo, {
+    guid: 'foo5', 
+    otherName: "John"
+  }), hash;
+  MyApp.store.commitRecords();
+
+  hash = MyApp.store.readDataHash(foo.storeKey);
+  equals(hash.firstName, "John", 'should have the value of the related key on foo');
+  ok(!hash.otherName, 'should be undefined');
+});
