@@ -4335,7 +4335,7 @@ SC.View.runCallback = function(callback){
       if (action && SC.typeOf(action) == SC.T_FUNCTION) {
         action.apply(target, additionalArgs);
       } else {
-        throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
+        throw 'SC.runCallback could not find a function at %@'.fmt(callback.action) ;
       }
 
     // otherwise, try to execute action direction on target or send down
