@@ -1460,9 +1460,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     this._applyCSSTransforms(touch.layer); // <- Does what it sounds like.
 
-    SC.RunLoop.begin();
     this._touchScrollDidChange();
-    SC.RunLoop.end();
     
     // Now we have to adjust the velocities. The velocities are simple x and y numbers that
     // get added to the scroll X/Y positions each frame.
@@ -1497,10 +1495,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       touch.timeout = null;
       this.touch = null;
       
-      // we aren't in a run loop right now (see below, where we trigger the timer)
-      // so, we must start one.
-      SC.RunLoop.begin();
-      
       // trigger scroll end
       this._touchScrollDidEnd();
       
@@ -1512,8 +1506,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
       this.endPropertyChanges();
       
-      // and now we're done, so just end the run loop and return.
-      SC.RunLoop.end();
       return;
     }
     
@@ -1525,9 +1517,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var self = this;
     touch.lastEventTime = Date.now();
     this.touch.timeout = setTimeout(function(){
-      SC.RunLoop.begin();
-      self.decelerateAnimation();
-      SC.RunLoop.end();
+      SC.run(self.decelerateAnimation(), self);
     }, 10);
   },
   
@@ -1776,9 +1766,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // This gives views that use incremental rendering a chance to render
     // newly-appearing elements before they come into view.
     if (content) {
-      SC.RunLoop.begin();
       content._viewFrameDidChange();
-      SC.RunLoop.end();
 
       // Use accelerated drawing if the browser supports it
       if (SC.platform.touch) {
