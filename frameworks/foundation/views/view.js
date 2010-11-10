@@ -232,7 +232,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // THEME SUPPORT
   //
 
-  _baseThemeName: false,
+  baseThemeName: false,
 
   /**
     The base theme to start from; the "theme" property looks in this theme.
@@ -243,14 +243,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     This sets the base theme
   */
-  _baseThemeProperty: function(key, value) {
+  baseTheme: function(key, value) {
     if (SC.typeOf(value) === SC.T_STRING) {
-      this.set("_baseThemeName", value);
+      this.set("baseThemeName", value);
     }
 
     // find the base theme by name if we have a name.
-    if (this.get("_baseThemeName")) {
-      var theme = SC.Theme.find(this.get("_baseThemeName"));
+    if (this.get("baseThemeName")) {
+      var theme = SC.Theme.find(this.get("baseThemeName"));
       if (theme) return theme;
     }
 
@@ -1973,10 +1973,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     sc_super() ;
 
     // set up theme
-    var baseTheme = this.baseTheme;
-    this.baseTheme = this._baseThemeProperty;
-    this.set("baseTheme", baseTheme);
-
     var theme = this.theme;
     this.theme = this._themeProperty;
     this.set("theme", theme);
