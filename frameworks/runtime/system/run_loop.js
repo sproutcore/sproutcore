@@ -269,41 +269,32 @@ SC.RunLoop.isRunLoopInProgress = function() {
 };
 
 /**
-  Executes a passed function in the context of a run loop.
+  Executes a passed function in the context of a run loop. If called outside a runloop, starts and ends one. If called inside an existing runloop, is simply executes the function unless you force it to create a nested runloop.
 
   If an exception is thrown during execution, we give an error catcher the
   opportunity to handle it before allowing the exception to bubble again.
 
   @param {Function} callback callback to execute
   @param {Object} target context for callback
-  @param {Boolean} if YES, does not start/end a new runloop if one is already running
+  @param {Boolean} if YES, starts/ends a new runloop even if one is already running
 */
-SC.run = function(callback, target, useExistingRunLoop) {
-  if(useExistingRunLoop) {
-    var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
-    if(!alreadyRunning) SC.RunLoop.begin();
-    callback.call(target);
-    if(!alreadyRunning) SC.RunLoop.end();
-  } else {
-    if (SC.ExceptionHandler && SC.ExceptionHandler.enabled) {
-      try {
-        SC.RunLoop.begin();
-        if (callback) callback.call(target);
-        SC.RunLoop.end();
-      } catch (e) {
-        SC.ExceptionHandler.handleException(e);
+SC.run = function(callback, target, forceNested) {
+  var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
+  
+  try {
+    if(forceNested || !alreadyRunning) SC.RunLoop.begin();
+    if (callback) callback.call(target);
+    if(forceNested || !alreadyRunning) SC.RunLoop.end();
+  } catch (e) {
+    if (SC.ExceptionHandler) {
+      SC.ExceptionHandler.handleException(e);
+    }
 
-        // Now that we've handled the exception, throw it again so the browser
-        // can deal with it (and potentially use it for debugging).
-        // (We don't throw it in IE because the user will see two errors)
-        if (!SC.browser.msie) {
-          throw e;
-        }
-      }
-    } else {
-      SC.RunLoop.begin();
-      if (callback) callback.call(target);
-      SC.RunLoop.end();
+    // Now that we've handled the exception, throw it again so the browser
+    // can deal with it (and potentially use it for debugging).
+    // (We don't throw it in IE because the user will see two errors)
+    if (!SC.browser.msie) {
+      throw e;
     }
   }
 };

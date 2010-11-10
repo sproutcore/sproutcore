@@ -84,19 +84,10 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       console.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
-<<<<<<< HEAD
-    }
-
-    do {
-      didChange = this.flushApplicationQueues() ;
-      if (!didChange) didChange = this._flushinvokeLastQueue() ;
-    } while(didChange) ;
-=======
     } 
     
     this.flushAllPending();
     
->>>>>>> seperated flush everything function out of endRunLoop so fastPath can use it to flush bindings correctly
     this._start = null ;
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
@@ -278,15 +269,16 @@ SC.RunLoop.isRunLoopInProgress = function() {
 };
 
 /**
-  Executes a passed function in the context of a run loop.
+  Executes a passed function in the context of a run loop. If called outside a runloop, starts and ends one. If called inside an existing runloop, is simply executes the function unless you force it to create a nested runloop.
 
   If an exception is thrown during execution, we give an error catcher the
   opportunity to handle it before allowing the exception to bubble again.
 
   @param {Function} callback callback to execute
   @param {Object} target context for callback
-  @param {Boolean} if YES, does not start/end a new runloop if one is already running
+  @param {Boolean} if YES, starts/ends a new runloop even if one is already running
 */
+<<<<<<< HEAD
 SC.run = function(callback, target, useExistingRunLoop) {
   if(useExistingRunLoop) {
     var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
@@ -313,6 +305,25 @@ SC.run = function(callback, target, useExistingRunLoop) {
       SC.RunLoop.begin();
       if (callback) callback.call(target);
       SC.RunLoop.end();
+=======
+SC.run = function(callback, target, forceNested) {
+  var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
+  
+  try {
+    if(forceNested || !alreadyRunning) SC.RunLoop.begin();
+    if (callback) callback.call(target);
+    if(forceNested || !alreadyRunning) SC.RunLoop.end();
+  } catch (e) {
+    if (SC.ExceptionHandler) {
+      SC.ExceptionHandler.handleException(e);
+    }
+
+    // Now that we've handled the exception, throw it again so the browser
+    // can deal with it (and potentially use it for debugging).
+    // (We don't throw it in IE because the user will see two errors)
+    if (!SC.browser.msie) {
+      throw e;
+>>>>>>> changed SC.run to check for an existing runloop by default
     }
   }
 };
