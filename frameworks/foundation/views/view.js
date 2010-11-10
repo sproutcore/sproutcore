@@ -13,8 +13,6 @@ sc_require('system/theme');
 
 sc_require('mixins/string') ;
 
-SC.viewKey = SC.guidKey + "_view" ;
-
 /** Select a horizontal layout for various views.*/
 SC.LAYOUT_HORIZONTAL = 'sc-layout-horizontal';
 
@@ -205,16 +203,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {SC.Page}
   */
   page: null,
-
-  /**
-    The current split view this view is embedded in (may be null).
-    @property {SC.SplitView}
-  */
-  splitView: function() {
-    var view = this ;
-    while (view && !view.isSplitView) view = view.get('parentView') ;
-    return view ;
-  }.property('parentView').cacheable(),
 
   /**
     If the view is currently inserted into the DOM of a parent view, this
