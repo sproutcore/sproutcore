@@ -232,80 +232,65 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // THEME SUPPORT
   //
 
-  baseThemeName: false,
-
   /**
     The base theme to start from; the "theme" property looks in this theme.
     baseTheme is inherited from parent's theme property.
   */
-  baseTheme: null,
+  baseThemeName: false,
 
-  /**
-    This sets the base theme
-  */
-  baseTheme: function(key, value) {
-    if (SC.typeOf(value) === SC.T_STRING) {
-      this.set("baseThemeName", value);
+  updateBaseTheme: function(baseThemeName) {
+    this.set('baseThemeName', baseThemeName);
+
+    var childViews = this.get('childViews');
+    for (var i=0, l=childViews.length; i<l; i++) {
+      childViews[i].updateBaseTheme(null);
     }
+  },
 
-    // find the base theme by name if we have a name.
-    if (this.get("baseThemeName")) {
-      var theme = SC.Theme.find(this.get("baseThemeName"));
-      if (theme) return theme;
+  updateTheme: function(themeName) {
+    this.set('themeName', themeName);
+
+    var childViews = this.get('childViews')
+    for (var i=0, l=childViews.length; i<l; i++) {
+      childViews[i].updateBaseTheme(null);
     }
+  },
 
-    // otherwise, return parent's theme.
-    var parent = this.get("parentView");
-    if (parent) return parent.get("theme");
+  baseTheme: function() {
+    var baseThemeName = this.get('baseThemeName'), parent, theme;
 
-    return SC.Theme.find("sc-base");
-  }.property().cacheable(),
+    if(baseThemeName) {
+      return SC.Theme.find(baseThemeName);
+    } else {
+      parent = this.get('parentView');
+      theme  = parent && parent.get('theme');
+      return theme || SC.Theme.find('sc-base')
+    }
+  }.property('parentView', 'baseThemeName').cacheable(),
 
-
-  _last_theme: null, // used to determine if theme has changed since last time the property was evaluated.
-  _themeName: false,
-
-  // baseTheme is a "property"; since it gets set after extension of the view,
-  // we need an observer in addition to it to actually do notifications.
-  _baseThemeDidChange: function() {
-    this.notifyPropertyChange("theme");
-  }.observes("baseTheme"),
+  lastTheme: null, // used to determine if theme has changed since last time the property was evaluated.
+  themeName: false,
 
   _themeProperty: function(key, value) {
-    // if it is a string, set theme name
-    if (SC.typeOf(value) === SC.T_STRING) {
-      this.set("_themeName", value);
-    }
-
-    // get the base theme
-    var base = this.get("baseTheme");
+    var base = this.get('baseTheme'), themeName = this.get('themeName');
 
     // find theme, if possible
-    if (this.get("_themeName")) {
+    if (themeName) {
       // Note: theme instance "find" function will search every parent
       // _except_ global (which is not a parent)
       var theme;
       if (base) {
-        theme = base.find(this.get("_themeName"));
+        theme = base.find(themeName);
         if (theme) return theme;
       }
 
-      theme = SC.Theme.find(this.get("_themeName"));
+      theme = SC.Theme.find(themeName);
       if (theme) return theme;
     }
 
     // can't find anything, return base.
     return base;
-  }.property().cacheable(),
-
-  _notifyThemeDidChange: function() {
-    var len, idx, childViews = this.get("childViews");
-    len = childViews.length;
-    for (idx = 0; idx < len; idx++){
-      childViews[idx].notifyPropertyChange("baseTheme");
-      childViews[idx].notifyPropertyChange("theme");
-    }
-  },
+  }.property('baseTheme', 'themeName').cacheable(),
 
   /**
     The current theme. You may only set this to a string, and during runtime, the value
@@ -317,15 +302,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Detects when the theme changes. Replaces the layer if necessary.
   */
   _themeDidChange: function() {
-    var theme = this.get("theme");
-    if (theme === this._last_theme) return;
-    this._last_theme = theme;
-
     // replace the layer
     if (this.get("layer")) this.replaceLayer();
-
-    // notify child views
-    if (this._hasCreatedChildViews) this._notifyThemeDidChange();
 
     // and now, regenerate renderer
     this._generateRenderer();
@@ -790,7 +768,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.recomputeIsVisibleInWindow() ;
 
     this.resetBuildState();
-    this.notifyPropertyChange("baseTheme");
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
 
@@ -1244,8 +1221,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   replaceLayer: function() {
     this.destroyLayer();
-    this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocationIfNeeded) ;
+    //this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocation) ;
   },
 
   /** @private -
@@ -1975,7 +1952,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // set up theme
     var theme = this.theme;
     this.theme = this._themeProperty;
-    this.set("theme", theme);
+    this.set("themeName", theme);
+
+    this._generateRenderer();
 
     // find render path (to be removed in SC 2.0?)
     var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
