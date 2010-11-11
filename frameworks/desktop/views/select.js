@@ -98,6 +98,11 @@ SC.SelectView = SC.ButtonView.extend(
     @default YES
   */
   localize: YES,
+  
+  /**
+    set this to non-null to place an empty option at the top of the menu.   
+  */
+  emptyTitle: null,
 
   /**
     if true, it means that no sorting will occur, items will appear
@@ -351,7 +356,7 @@ SC.SelectView = SC.ButtonView.extend(
     sc_super();
     var layoutWidth, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
       currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
-      idx, name, icon, value, item, itemEnabled, isEnabledKey;
+      idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyTitle;
 
     items = this.get('items') ;
     items = this.sortObjects(items) ;
@@ -364,7 +369,8 @@ SC.SelectView = SC.ButtonView.extend(
     separatorKey = this.get('itemSeparatorKey');
     showCheckbox = this.get('showCheckbox') ;
     isEnabledKey = this.get('isEnabledKey');
-
+    emptyTitle = this.get('emptyTitle');
+    
     //get the current selected value
     currentSelectedVal = this.get('value') ;
 
@@ -375,10 +381,39 @@ SC.SelectView = SC.ButtonView.extend(
     itemList = [] ;
 
     //to set the 'checkbox' property of menu items
-    isChecked = YES ;
+    isChecked = NO ;
 
     //index for finding the first item in the list
     idx = 0 ;
+    
+    // Check if need to add empty selection item
+    if (!SC.none(emptyTitle)) {
+      
+      if (SC.none(currentSelectedVal)) {
+        this.set('_itemIdx', idx);
+        this.set('title', emptyTitle);
+        isChecked = !showCheckbox ? NO : YES ;
+      }
+      
+      // Empty Item
+      itemList.push(SC.Object.create({
+        title: emptyTitle,
+        value: null,
+        checkbox: isChecked,
+        target: this,
+        action: this.displaySelectedItem
+      }));
+      
+      idx++;
+      
+      // Separator
+      itemList.push(SC.Object.create({
+        separator: YES,
+        title: '',
+        value: ''
+      }));
+  
+    }
 
     items.forEach(function(object) {
     if (object) {
@@ -453,7 +488,7 @@ SC.SelectView = SC.ButtonView.extend(
     this.set('_itemList', itemList) ;
     }, this ) ;
 
-    if(firstTime) {
+    /*if(firstTime) {
       this.invokeLast(function() {
         var value = this.get('value') ;
         if(SC.none(value)) {
@@ -462,7 +497,7 @@ SC.SelectView = SC.ButtonView.extend(
           this.set('icon', this._defaultIcon) ;
         }
       });
-    }
+    }*/
 
     //Set the preference matrix for the menu pane
     this.changeSelectPreferMatrix(this.get("_itemIdx")) ;
