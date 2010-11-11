@@ -450,7 +450,7 @@ SC.SplitView = SC.View.extend(
   
   /** @private */
   renderLayout: function(context, firstTime) {
-    if (firstTime || this._recalculateDivider) {
+    //if (firstTime || this._recalculateDivider) {
       
       var layoutDirection = this.get('layoutDirection'),
           frame = this.get('frame'),
@@ -509,7 +509,7 @@ SC.SplitView = SC.View.extend(
       
       // actually set layout for our child views
       this.updateChildLayout();
-    }
+    //}
     
     sc_super();
   },
