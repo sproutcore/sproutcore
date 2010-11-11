@@ -898,7 +898,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
     // otherwise, lookup the storeKey for the passed id.  look in subclasses 
     // as well.
-    } else storeKey = id ? recordType.storeKeyFor(id) : null;
+    } else if (recordType) storeKey = id ? recordType.storeKeyFor(id) : null;
     
     if (storeKey && (this.readStatus(storeKey) === SC.Record.EMPTY)) {
       storeKey = this.retrieveRecord(recordType, id);
