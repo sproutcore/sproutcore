@@ -19,7 +19,16 @@
   pane.add("disabled", SC.ContainerView, {
       isEnabled: NO
     });
-    
+
+  pane.add("nowShowingDefault", SC.ContainerView, {
+      nowShowing: 'start',
+
+      start: SC.LabelView.design({
+        value: 'Start'
+      })
+
+    });
+
     // .add("disabled - single selection", SC.ListView, {
     //   isEnabled: NO,
     //   content: content,
@@ -84,21 +93,25 @@
   test("changing nowShowing", function() {
     var view = pane.view('basic');
     // Set nowShowing to an instantiated object.
-    var viewToAdd = SC.LabelView.create({value: 'Test view.'});
+    var viewToAdd = SC.LabelView.create({value: 'View1'});
     view.set('nowShowing', viewToAdd);
-    ok(view.get('contentView') instanceof SC.View, 'contentView changes as intended when an instantiated view is passed to nowShowing');
+    equals(view.get('contentView').get('value'), 'View1', 'contentView changes as intended when an instantiated view is passed to nowShowing');
     
     // Set nowShowing to an uninstantiated object.
-    viewToAdd = SC.LabelView.design({value: 'Test view.'});
+    viewToAdd = SC.LabelView.design({value: 'View2'});
     view.set('nowShowing', viewToAdd);
-    ok(view.get('contentView') instanceof SC.View, 'contentView changes as intended when an uninstantiated view (class) is passed to nowShowing');
+    equals(view.get('contentView').get('value'), 'View2', 'contentView changes as intended when an uninstantiated view (class) is passed to nowShowing');
     
     // Set nowShowing to a non-view object.
     viewToAdd = SC.Object;
     view.set('nowShowing', viewToAdd);
     equals(view.get('contentView'), null, 'contentView changes to null when nowShowing is set to a non-view');
     
-    // Set nowShowing to a string.  (How, here?) (No idea.)
+    // Set nowShowing to a string.
+    var viewForString = SC.LabelView.create({value: 'View3'});
+    view.set('label', viewForString);
+    view.set('nowShowing', 'label');
+    equals(view.get('contentView').get('value'), 'View3', 'contentView changes as intended when an instantiated view is passed to nowShowing');
     
     // Set nowShowing to a nonexistent string.
     viewToAdd = 'NonexistentNamespace.NonexistentViewClass';
@@ -110,6 +123,18 @@
     view.set('nowShowing', viewToAdd);
     equals(view.get('contentView'), null, 'contentView changes to null when nowShowing is set to null');
     
+  });
+
+  test("default nowShowing", function(){
+    var view = pane.view("nowShowingDefault");
+    view.awake();
+
+    var contentView = view.get('contentView');
+
+    // contentView should reflect nowShowing
+    ok(contentView, "should have contentView");
+    equals(contentView.get('value'), 'Start', 'contentView value should be "Start"');
+
   });
 
 })();
