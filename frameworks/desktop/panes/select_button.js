@@ -152,12 +152,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
-    Set this property to required display positon of separtor from bottom
+    Set this property to required display positon of separator from bottom
 
     @private
     @default null
   */
-  separatorPostion: null,
+  separatorPosition: null,
 
   /**
     Default value of the select button.
@@ -342,7 +342,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   render: function(context,firstTime) {
     sc_super();
     var layoutWidth, objects, len, nameKey, iconKey, valueKey, checkboxEnabled,
-      currentSelectedVal, shouldLocalize, separatorPostion, itemList, isChecked,
+      currentSelectedVal, shouldLocalize, separatorPosition, itemList, isChecked,
       idx, name, icon, value, item, itemEnabled, isEnabledKey ;
     layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
@@ -366,8 +366,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
     // get the localization flag.
     shouldLocalize = this.get('localize') ;
 
-    //get the separatorPostion
-    separatorPostion = this.get('separatorPostion') ;
+    //get the separatorPosition
+    separatorPosition = this.get('separatorPosition') ;
 
     //itemList array to set the menu items
     itemList = [] ;
@@ -409,8 +409,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
       if(this._equals(value, this.get('value'))) {
 
         // increase index by 1 if item falls below the separator in menu list
-        if(separatorPostion > 0 && separatorPostion<len &&
-          idx >= len-separatorPostion) {
+        if(separatorPosition > 0 && separatorPosition<len &&
+          idx >= len-separatorPosition) {
           idx++ ;
         }
 
@@ -452,7 +452,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     idx += 1 ;
 
     // display the separator if specified by the user
-    if (separatorPostion && idx === (len-separatorPostion)) {
+    if (separatorPosition && idx === (len-separatorPosition)) {
       var separator = SC.Object.create({
         separator: YES
       }) ;
@@ -707,7 +707,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
         // if current selected item falls below the separator, adjust the
         // top of menu pane
-        pos = this.get('separatorPostion');
+        pos = this.get('separatorPosition');
         len = this.get('objects').length;
         if(pos > 0 && pos < len && itemIdx >= len-pos) {
           separatorHeightTuning =
