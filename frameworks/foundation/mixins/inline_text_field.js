@@ -122,7 +122,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     this._exampleElement = options.exampleElement ;
 
     if (!this._optframe || !del) {
-      throw "At least frame and target options are required for inline editor";
+      throw "At least frame and delegate options are required for inline editor";
     }
     
     this._originalValue = options.value;
@@ -239,10 +239,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     @returns {Boolean} NO if editing did not exit
   */
   _endEditing: function(finalValue, evt, didDiscard) {
-    if (!this.get('isEditing')) return YES ;
-    
     // get permission from the delegate.
     var del = this.get('editorDelegate') ;
+    
+    if (!this.get('isEditing') || !del) return YES ;
+    
     if (!del.inlineEditorShouldCommitEditing(this, finalValue)) {
       //@if(debug)
       SC.Logger.warn('InlineTextField._endEditing() cannot end without inlineEditorShouldCommitEditing() on the delegate.');
