@@ -130,7 +130,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
       key = cv[idx];
       if (SC.typeOf(key) === SC.T_STRING) {
         v = this.get(key);
-        if (!v.prototype.contentValueKey) {
+        if (v.prototype.get('isControl') && !v.prototype.contentValueKey) {
           v.prototype.contentValueKey = key ;
         }
       }
@@ -153,7 +153,11 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         if (v && !v.isClass) {
           // set content
           if (!v.get("content")) {
-            v.bind('content', '.owner.content') ;
+            
+            // controls can calculate their own value based on the contentValueKey we set earlier
+            if (v.get('isControl')) v.bind('content', '.owner.content');
+            // if it isn't a control then we can't use contentValueKey, so bind the content manually
+            else v.bind('content', '.owner.content.' + key);
           }
           
           // set the label size measuring stuff
