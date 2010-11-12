@@ -299,8 +299,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (activeIndex == idx) item.isActive = YES;
       else item.isActive = NO;
       
-      // chance selection
-      if (isArray ? value.indexOf(item.value) : value === item.value) {
+      // change selection
+      if (isArray ? value.indexOf(item.value) >= 0 : value === item.value) {
         item.isSelected = YES;
       }
       else item.isSelected = NO;
