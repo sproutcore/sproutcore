@@ -109,10 +109,9 @@ SC.NumberFieldView = SC.TextFieldView.extend(
       var fn;
       
       // Check if is ALL selection
-      if (pce - pcs > 1 && pcs === 0 && pce === fv.length) {
+      if (pce - pcs > 0 && pcs === 0 && pce === fv.length) {
         fn = this.formatNumber(text);
         cs.end = cs.start = (sp ? prefix.length : 0) + 1;
-      //} else if (pce - pcs > 1) {
       } else {
         var s1 = fv.substring(0, pcs);
         var s2 = fv.substring(cs.end);
@@ -147,7 +146,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var pce = cs.end;
 
     // Check if all is selected
-    if (pce - pcs > 1 && pcs === 0 && pce === fv.length) {
+    if (pce - pcs > 0 && pcs === 0 && pce === fv.length) {
       cs.end = cs.start = fv.length - ( (sf ? postfix.length : 0) + (ad ? dp + 1 : 0) + 0);
     } else if (!sp || pcs > prefix.length) {
       cs.end = cs.start = pcs - 1;
@@ -171,7 +170,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var pce = cs.end;
 
     // Check if all is selected
-    if (pce - pcs > 1 && pcs === 0 && pce === fv.length) {
+    if (pce - pcs > 0 && pcs === 0 && pce === fv.length) {
       cs.end = cs.start = fv.length - ( (sf ? postfix.length : 0) + (ad ? dp + 1 : 0) + 0);
     } else if (!sf || pcs < (fv.length - postfix.length)) {
       cs.end = cs.start = pcs + 1;
@@ -195,8 +194,8 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var pce = cs.end;
     var inside = true;
 
-    // Check if all is selected
-    if (pce - pcs > 1) {
+    // Check if is a selection
+    if (pce - pcs > 0) {
       // Check if is ALL selection
       if (pcs === 0 && pce === fv.length) {
         this.setFieldValue(this.formatNumber(null));
@@ -264,7 +263,7 @@ SC.NumberFieldView = SC.TextFieldView.extend(
     var inside = true;
     
     // Check if is a selection
-    if (pce - pcs > 1) {
+    if (pce - pcs > 0) {
       // Check if is ALL selection
       if (pcs === 0 && pce === fv.length) {
         console.log('is ALL selection');
