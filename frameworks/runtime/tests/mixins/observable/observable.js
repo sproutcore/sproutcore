@@ -7,31 +7,31 @@ var object, ObjectC, ObjectD, objectA, objectB ;
 
 // ..........................................................
 // GET()
-// 
+//
 
 module("object.get()", {
-  
+
   setup: function() {
     object = SC.Object.create({
-      
+
       normal: 'value',
       numberVal: 24,
       toggleVal: true,
 
       computed: function() { return 'value'; }.property(),
-      
+
       method: function() { return "value"; },
-      
+
       nullProperty: null,
-      
+
       unknownProperty: function(key, value) {
         this.lastUnknownProperty = key ;
         return "unknown" ;
       }
-      
+
     });
   }
-  
+
 });
 
 test("should get normal properties", function() {
@@ -134,16 +134,16 @@ test("should work when object is SC (used in SC.objectForPropertyPath)", functio
 
 // ..........................................................
 // SET()
-// 
+//
 
 module("object.set()", {
-  
+
   setup: function() {
     object = SC.Object.create({
-      
+
       // normal property
       normal: 'value',
-      
+
       // computed property
       _computed: "computed",
       computed: function(key, value) {
@@ -152,7 +152,7 @@ module("object.set()", {
         }
         return this._computed ;
       }.property(),
-      
+
       // method, but not a property
       _method: "method",
       method: function(key, value) {
@@ -161,10 +161,10 @@ module("object.set()", {
         }
         return this._method ;
       },
-      
+
       // null property
       nullProperty: null,
-      
+
       // unknown property
       _unknown: 'unknown',
       unknownProperty: function(key, value) {
@@ -173,7 +173,7 @@ module("object.set()", {
         }
         return this._unknown ;
       }
-      
+
     });
   }
 
@@ -214,43 +214,43 @@ test("should call unknownProperty with value when property is undefined", functi
 
 // ..........................................................
 // COMPUTED PROPERTIES
-// 
+//
 
 module("Computed properties", {
   setup: function() {
     object = SC.Object.create({
-      
+
       // REGULAR
-      
+
       computedCalls: [],
       computed: function(key, value) {
         this.computedCalls.push(value);
         return 'computed';
       }.property(),
-      
+
       computedCachedCalls: [],
       computedCached: function(key, value) {
         this.computedCachedCalls.push(value);
         return 'computedCached';
       }.property().cacheable(),
-      
-      
+
+
       // DEPENDENT KEYS
-      
+
       changer: 'foo',
-      
+
       dependentCalls: [],
       dependent: function(key, value) {
         this.dependentCalls.push(value);
         return 'dependent';
       }.property('changer'),
-      
+
       dependentCachedCalls: [],
       dependentCached: function(key, value) {
         this.dependentCachedCalls.push(value);
         return 'dependentCached';
       }.property('changer').cacheable(),
-      
+
       // everytime it is recomputed, increments call
       incCallCount: 0,
       inc: function() {
@@ -262,33 +262,33 @@ module("Computed properties", {
       nestedInc: function(key, value) {
         return this.nestedIncCallCount++;
       }.property('inc').cacheable(),
-      
+
       // two computed properties that depend on a third property
       state: 'on',
       isOn: function(key, value) {
         if (value !== undefined) this.set('state', 'on');
         return this.get('state') === 'on';
       }.property('state'),
-      
+
       isOff: function(key, value) {
         if (value !== undefined) this.set('state', 'off');
         return this.get('state') === 'off';
       }.property('state')
-      
+
     }) ;
   }
 });
 
 test("getting values should call function return value", function() {
-  
+
   // get each property twice. Verify return.
   var keys = 'computed computedCached dependent dependentCached'.w();
-  
+
   keys.forEach(function(key) {
     equals(object.get(key), key, 'Try #1: object.get(%@) should run function'.fmt(key));
     equals(object.get(key), key, 'Try #2: object.get(%@) should run function'.fmt(key));
   });
-  
+
   // verify each call count.  cached should only be called once
   'computedCalls dependentCalls'.w().forEach(function(key) {
     equals(object[key].length, 2, 'non-cached property %@ should be called 2x'.fmt(key));
@@ -297,25 +297,25 @@ test("getting values should call function return value", function() {
   'computedCachedCalls dependentCachedCalls'.w().forEach(function(key) {
     equals(object[key].length, 1, 'non-cached property %@ should be called 1x'.fmt(key));
   });
-  
+
 });
 
 test("setting values should call function return value", function() {
-  
+
   // get each property twice. Verify return.
   var keys = 'computed dependent computedCached dependentCached'.w();
   var values = 'value1 value2'.w();
-  
+
   keys.forEach(function(key) {
-    
+
     equals(object.set(key, values[0]), object, 'Try #1: object.set(%@, %@) should run function'.fmt(key, values[0]));
 
     equals(object.set(key, values[1]), object, 'Try #2: object.set(%@, %@) should run function'.fmt(key, values[1]));
     equals(object.set(key, values[1]), object, 'Try #3: object.set(%@, %@) should not run function since it is setting same value as before'.fmt(key, values[1]));
-    
+
   });
-  
-  
+
+
   // verify each call count.  cached should only be called once
   keys.forEach(function(key) {
     var calls = object[key + 'Calls'], idx;
@@ -324,7 +324,7 @@ test("setting values should call function return value", function() {
       equals(calls[idx], values[idx], 'call #%@ to set(%@) should have passed value %@'.fmt(idx+1, key, values[idx]));
     }
   });
-  
+
 });
 
 test("notify change should clear cache", function() {
@@ -335,7 +335,7 @@ test("notify change should clear cache", function() {
 
   object.propertyWillChange('computedCached')
     .propertyDidChange('computedCached');
-    
+
   object.get('computedCached'); // should run again
   equals(object.computedCachedCalls.length, 2, 'should have invoked method 2x');
 });
@@ -347,7 +347,7 @@ test("change dependent should clear cache", function() {
   equals(object.get('inc'), ret1, 'multiple calls should not run cached prop');
 
   object.set('changer', 'bar');
-    
+
   equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
 });
 
@@ -358,7 +358,7 @@ test("just notifying change of dependent should clear cache", function() {
   equals(object.get('inc'), ret1, 'multiple calls should not run cached prop');
 
   object.notifyPropertyChange('changer');
-    
+
   equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
 });
 
@@ -369,9 +369,9 @@ test("changing dependent should clear nested cache", function() {
   equals(object.get('nestedInc'), ret1, 'multiple calls should not run cached prop');
 
   object.set('changer', 'bar');
-    
+
   equals(object.get('nestedInc'), ret1+1, 'should increment after dependent key changes'); // should run again
-  
+
 });
 
 test("just notifying change of dependent should clear nested cache", function() {
@@ -381,13 +381,13 @@ test("just notifying change of dependent should clear nested cache", function() 
   equals(object.get('nestedInc'), ret1, 'multiple calls should not run cached prop');
 
   object.notifyPropertyChange('changer');
-    
+
   equals(object.get('nestedInc'), ret1+1, 'should increment after dependent key changes'); // should run again
-  
+
 });
 
 
-// This verifies a specific bug encountered where observers for computed 
+// This verifies a specific bug encountered where observers for computed
 // properties would fire before their prop caches were cleared.
 test("change dependent should clear cache when observers of dependent are called", function() {
 
@@ -402,7 +402,7 @@ test("change dependent should clear cache when observers of dependent are called
 
   // now run
   object.set('changer', 'bar');
-    
+
 });
 
 test("allPropertiesDidChange should clear cache", function() {
@@ -410,7 +410,7 @@ test("allPropertiesDidChange should clear cache", function() {
   // each time to ensure clean function.
   var ret1 = object.get('inc');
   equals(object.get('inc'), ret1, 'should not change after first call');
-  
+
   // flush all props
   object.allPropertiesDidChange();
   equals(object.get('inc'), ret1+1, 'should increment after change');
@@ -420,7 +420,7 @@ test('setting one of two computed properties that depend on a third property sho
   // we have to call set twice to fill up the cache
   object.set('isOff', YES);
   object.set('isOn', YES);
-  
+
   // setting isOff to YES should clear the kvo cache
   object.set('isOff', YES);
   equals(object.get('isOff'), YES, 'object.isOff should be YES');
@@ -429,25 +429,25 @@ test('setting one of two computed properties that depend on a third property sho
 
 // ..........................................................
 // OBSERVABLE OBJECTS
-// 
+//
 
 module("Observable objects & object properties ", {
-  
+
   setup: function() {
     object = SC.Object.create({
-      
+
       normal: 'value',
       abnormal: 'zeroValue',
       numberVal: 24,
       toggleVal: true,
       observedProperty: 'beingWatched',
-      testRemove: 'observerToBeRemoved',  
+      testRemove: 'observerToBeRemoved',
       normalArray: [1,2,3,4,5],
-    
-      automaticallyNotifiesObserversFor : function(key) { 
-        return NO;    
-      },  
-    
+
+      automaticallyNotifiesObserversFor : function(key) {
+        return NO;
+      },
+
       getEach: function() {
         var keys = ['normal','abnormal'];
         var ret = [];
@@ -456,22 +456,22 @@ module("Observable objects & object properties ", {
         }
         return ret ;
       },
-    
+
       newObserver:function(){
         this.abnormal = 'changedValueObserved';
       },
-    
+
       testObserver:function(){
         this.abnormal = 'removedObserver';
       }.observes('normal'),
-    
+
       testArrayObserver:function(){
         this.abnormal = 'notifiedObserver';
       }.observes('*normalArray.[]')
-    
+
     });
-  }   
-  
+  }
+
 });
 
 test('incrementProperty and decrementProperty',function(){
@@ -489,13 +489,13 @@ test('incrementProperty and decrementProperty',function(){
 });
 
 test('toggle function, should be boolean',function(){
-  equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal')); 
+  equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
   equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
   equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));
 });
 
 test('should not notify the observers of a property automatically',function(){
-  object.set('normal', 'doNotNotifyObserver'); 
+  object.set('normal', 'doNotNotifyObserver');
   equals(object.abnormal,'zeroValue')  ;
 });
 
@@ -505,32 +505,32 @@ test('should notify array observer when array changes',function(){
 });
 
 
-module("object.addObserver()", {  
+module("object.addObserver()", {
   setup: function() {
-        
+
     ObjectC = SC.Object.create({
-      
+
       ObjectE:SC.Object.create({
         propertyVal:"chainedProperty"
       }),
-      
+
       normal: 'value',
       normal1: 'zeroValue',
       normal2: 'dependentValue',
       incrementor: 10,
-      
+
       action: function() {
         this.normal1= 'newZeroValue';
       },
-            
+
       observeOnceAction: function() {
         this.incrementor= this.incrementor+1;
       },
-              
+
       chainedObserver:function(){
         this.normal2 = 'chainedPropertyObserved' ;
       }
-      
+
     });
   }
 });
@@ -547,7 +547,7 @@ test("should register an observer for a property - Special case of chained prope
   equals('chainedPropertyObserved',ObjectC.normal2);
   ObjectC.normal2 = 'dependentValue';
   ObjectC.set('ObjectE','');
-  equals('chainedPropertyObserved',ObjectC.normal2);  
+  equals('chainedPropertyObserved',ObjectC.normal2);
 });
 
 test("passing a context", function() {
@@ -556,27 +556,27 @@ test("passing a context", function() {
       target.context = context;
     }
   };
-  
+
   ObjectC.context = null;
   ObjectC.addObserver('normal', target, 'callback', 'context');
   ObjectC.set('normal','newValue');
-  
+
   equals(ObjectC.context, 'context');
 });
 
-module("object.removeObserver()", {  
+module("object.removeObserver()", {
   setup: function() {
     ObjectD = SC.Object.create({
-      
+
       ObjectF:SC.Object.create({
         propertyVal:"chainedProperty"
       }),
-      
+
       normal: 'value',
       normal1: 'zeroValue',
       normal2: 'dependentValue',
       ArrayKeys: ['normal','normal1'],
-      
+
       addAction: function() {
         this.normal1 = 'newZeroValue';
       },
@@ -587,7 +587,7 @@ module("object.removeObserver()", {
         this.normal2 = 'chainedPropertyObserved' ;
       }
     });
-    
+
   }
 });
 
@@ -595,12 +595,12 @@ test("should unregister an observer for a property", function() {
   ObjectD.addObserver('normal', ObjectD, 'addAction');
   ObjectD.set('normal','newValue');
   equals(ObjectD.normal1, 'newZeroValue');
-  
+
   ObjectD.set('normal1','zeroValue');
-  
+
   ObjectD.removeObserver('normal', ObjectD, 'addAction');
   ObjectD.set('normal','newValue');
-  equals(ObjectD.normal1, 'zeroValue');  
+  equals(ObjectD.normal1, 'zeroValue');
 });
 
 
@@ -612,13 +612,13 @@ test("should unregister an observer for a property - special case when key has a
   ObjectD.ObjectF.set('propertyVal',"removedPropertyValue");
   equals('dependentValue',ObjectD.normal2);
   ObjectD.set('ObjectF','');
-  equals('dependentValue',ObjectD.normal2);  
+  equals('dependentValue',ObjectD.normal2);
 });
 
 
 
 module("Bind function ", {
-  
+
   setup: function() {
     objectA = SC.Object.create({
       name: "Sproutcore",
@@ -631,10 +631,10 @@ module("Bind function ", {
         this.normal = 'newValue';
       }
     }) ;
-         
+
     Namespace = {
       objectA: objectA,
-      objectB: objectB  
+      objectB: objectB
     } ;
   }
 });
@@ -643,10 +643,10 @@ test("should bind property with method parameter as undefined", function() {
   // creating binding
   objectA.bind("name", "Namespace.objectB.normal",undefined) ;
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
-  
+
   // now make a change to see if the binding triggers.
   objectB.set("normal", "changedValue") ;
-  
+
   // support new-style bindings if available
   SC.Binding.flushPendingChanges();
   equals("changedValue", objectA.get("name"), "objectA.name is binded");
@@ -654,7 +654,7 @@ test("should bind property with method parameter as undefined", function() {
 
 // ..........................................................
 // SPECIAL CASES
-// 
+//
 
 test("changing chained observer object to null should not raise exception", function() {
 
@@ -663,14 +663,14 @@ test("changing chained observer object to null should not raise exception", func
       bar: SC.Object.create({ bat: "BAT" })
     })
   });
-  
+
   var callCount = 0;
-  obj.foo.addObserver('bar.bat', obj, function(target, key, value) { 
+  obj.foo.addObserver('bar.bat', obj, function(target, key, value) {
     equals(target, null, 'new target value should be null');
     equals(key, 'bat', 'key should be bat');
-    callCount++; 
+    callCount++;
   });
-  
+
   SC.run(function() {
     obj.foo.set('bar', null);
   });

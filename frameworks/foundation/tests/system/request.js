@@ -189,14 +189,15 @@ test("Timeouts - SC.Request didReceive callback", function() {
 
 
   // Make sure timeouts actually fire, and fire when expected.
-  var timeoutRequest = SC.Request.getUrl("http://www.sproutcore.com"),
+  // Point to the server itself so that the tests will work even when offline
+  var timeoutRequest = SC.Request.getUrl("/"),
       checkstop;
 
   var now = Date.now();
 
   // Set timeout as short as possible so that it will always timeout before
   // the request returns.
-  // This test will fail should the response time from sproutcore.com drop to
+  // This test will fail should the response time drop to
   // below 10ms.
   timeoutRequest.set('timeout', 10);
 
@@ -219,7 +220,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
       // the test runner if no timeout is ever received.
       clearTimeout(checkstop);
     } else {
-      // We received a response from sproutcore.com, which should never happen
+      // We received a response from thes server, which should never happen
       ok(false, 'timeout did not fire before response was received.  should have fired after 10msec.  response time: %@msec'.fmt(Date.now() - now));
     }
   });
@@ -241,7 +242,8 @@ test("Timeouts - SC.Request didReceive callback", function() {
 
 test("Timeouts - Status listener callback", function() {
   // Make sure timeouts actually fire, and fire when expected.
-  var timeoutRequest = SC.Request.getUrl("http://www.sproutcore.com"),
+  // Point to local server so test works offline
+  var timeoutRequest = SC.Request.getUrl("/"),
       checkstop;
 
   // make the timeout as short as possible so that it will always happen

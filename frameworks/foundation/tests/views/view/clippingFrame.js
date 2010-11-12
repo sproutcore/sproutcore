@@ -116,14 +116,15 @@ test("notifies receiver and each child if parent clipping frame changes", functi
 });
 
 
-test("does not notify child views of clippingFrame changes if child view hasStaticLayout", function() {
+test("does not notify child views of clippingFrame changes if child view has useStaticLayout: YES", function() {
   var callCount = 0;
   
+  aa.set('useStaticLayout', YES);
+
   // setup observers
   function observer() { callCount++; }
   a.addObserver('clippingFrame', observer);
   aa.addObserver('clippingFrame', observer);
-  aa.hasStaticLayout = YES ; // fake it till u make it
   
   // now, adjust layout of child so that clipping frame will change...
   a.adjust('top', -50);

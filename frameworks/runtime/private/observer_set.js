@@ -21,13 +21,6 @@
 SC.ObserverSet = {
 
   /**
-    the number of targets in the set.
-  */
-  targets: 0,
-
-  _membersCacheIsValid: NO,
-
-  /**
     Adds the named target/method observer to the set.  The method must be
     a function, not a string.
 
@@ -36,26 +29,17 @@ SC.ObserverSet = {
     being added.
   */
   add: function(target, method, context) {
-    var targetGuid = (target) ? SC.guidFor(target) : "__this__";
+    var targetGuid = SC.guidFor(target), methodGuid = SC.guidFor(method);
+    var targets = this._members, members = this.members;
 
     // get the set of methods
-    var methods = this[targetGuid] ;
-    if (!methods) {
-      methods = this[targetGuid] = SC.CoreSet.create() ;
-      methods.target = target ;
-      methods.isTargetSet = YES ; // used for getMembers().
-      this.targets++ ;
-    }
-    methods.add(method) ;
+    var indexes = targets[targetGuid];
+    if ( !indexes ) indexes = targets[targetGuid] = {};
 
-    // context is really useful sometimes but not used that often so this
-    // implementation is intentionally lazy.
-    if (context !== undefined) {
-      if (!methods.contexts) methods.contexts = {} ;
-      methods.contexts[SC.guidFor(method)] = context ;
-    }
+    if (indexes[methodGuid] === undefined) indexes[methodGuid] = members.length;
+    else return;
 
-    this._membersCacheIsValid = NO ;
+    members.push([target, method, context]);
   },
 
   /**
@@ -66,27 +50,23 @@ SC.ObserverSet = {
     returns YES if the items was removed, NO if it was not found.
   */
   remove: function(target, method) {
-    var targetGuid = (target) ? SC.guidFor(target) : "__this__";
+    var targetGuid = SC.guidFor(target), methodGuid = SC.guidFor(method);
+    var indexes = this._members[targetGuid], members = this.members;
 
-    // get the set of methods
-    var methods = this[targetGuid] ;
-    if (!methods) return NO ;
+    if( !indexes ) return false;
 
-    methods.remove(method) ;
-    if (methods.length <= 0) {
-      methods.target = null;
-      methods.isTargetSet = NO ;
-      methods.contexts = null ;
-      delete this[targetGuid] ;
-      this.targets-- ;
+    var index = indexes[methodGuid];
+    if ( index === undefined) return false;
 
-    } else if (methods.contexts) {
-      delete methods.contexts[SC.guidFor(method)];
+    if (index !== members.length - 1) {
+      var entry = (members[index] = members[members.length - 1]);
+      this._members[SC.guidFor(entry[0])][SC.guidFor(entry[1])] = index;
     }
 
-    this._membersCacheIsValid = NO;
+    members.pop();
+    delete this._members[targetGuid][methodGuid];
 
-    return YES ;
+    return true;
   },
 
   /**
@@ -94,87 +74,46 @@ SC.ObserverSet = {
     Note: does not support context
   */
   invokeMethods: function() {
-    var key, value, idx, target, val;
+    var members = this.members, member;
 
-    // iterate through the set, look for sets.
-    for(key in this) {
-      if (!this.hasOwnProperty(key)) continue ;
-      value = this[key] ;
-      if (value && value.isTargetSet) {
-        idx = value.length;
-        target = value.target ;
-        while(--idx>=0) {
-          val = value[idx];
-          if(val) val.call(target);
-        }
-      }
+    for( var i=0, l=members.length; i<l; i++ ) {
+      member = members[i];
+
+      // method.call(target);
+      member[1].call(member[0]);
     }
-  },
-
-  /**
-    Returns an array of target/method pairs.  This is cached.
-  */
-  getMembers: function() {
-    if (this._membersCacheIsValid) return this._members ;
-
-    // need to recache, reset the array...
-    if (!this._members) {
-      this._members = [] ;
-    } else this._members.length = 0 ; // reset
-    var ret = this._members ;
-
-    // iterate through the set, look for sets.
-    for(var key in this) {
-      if (!this.hasOwnProperty(key)) continue ;
-      var value = this[key] ;
-      if (value && value.isTargetSet) {
-        var idx = value.length;
-        var target = value.target ;
-
-        // slightly slower - only do if we have contexts
-        var contexts = value.contexts ;
-        if (contexts) {
-          while(--idx>=0) {
-            var method = value[idx] ;
-            ret.push([target, method, contexts[SC.guidFor(method)]]) ;
-          }
-        } else {
-          while(--idx>=0) ret.push([target, value[idx]]);
-        }
-      }
-    }
-
-    this._membersCacheIsValid = YES ;
-    return ret ;
   },
 
   /**
     Returns a new instance of the set with the contents cloned.
   */
   clone: function() {
-    var oldSet, newSet, key, ret = SC.ObserverSet.create() ;
-    for(key in this) {
-      if (!this.hasOwnProperty(key)) continue ;
-      oldSet = this[key];
-      if (oldSet && oldSet.isTargetSet) {
-        newSet = oldSet.clone();
-        newSet.target = oldSet.target ;
-        if (oldSet.contexts) newSet.contexts = SC.clone(oldSet.contexts);
-        ret[key] = newSet ;
-      }
+    var newSet = SC.ObserverSet.create(), memberArray = this.members;
+
+    newSet._members = SC.clone(this._members);
+    var newMembers = newSet.members;
+
+    for( var i=0, l=memberArray.length; i<l; i++ ) {
+      newMembers[i] = SC.clone(memberArray[i]);
+      newMembers[i].length = 3;
     }
-    ret.targets = this.targets ;
-    ret._membersCacheIsValid = NO ;
-    return ret ;
+
+    return newSet;
   },
 
   /**
     Creates a new instance of the observer set.
   */
-  create: function() { return SC.beget(this); }
+  create: function() {
+    return new SC.ObserverSet.constructor();
+  },
+
+  constructor: function() {
+    this._members = {};
+    this.members = [];
+  }
 
 } ;
-
+SC.ObserverSet.constructor.prototype = SC.ObserverSet;
 SC.ObserverSet.slice = SC.ObserverSet.clone ;
-
 

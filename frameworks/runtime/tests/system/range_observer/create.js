@@ -9,26 +9,26 @@
 var source, indexes, observer, obj ; // base array to work with
 module("SC.RangeObserver#create", {
   setup: function() {
-    
+
     // create array with 5 SC.Object's in them
     source = [1,2,3,4,5].map(function(x) {
       return SC.Object.create({ item: x, foo: "bar" }) ;
-    }, this); 
+    }, this);
 
     indexes = SC.IndexSet.create(2,2); // select 2..3
-    
+
     observer = SC.Object.create({
-      
-      callCount: 0, 
-      
-      rangeDidChange: function() { 
+
+      callCount: 0,
+
+      rangeDidChange: function() {
         this.callCount++;
       }
-      
+
     });
 
     obj = SC.RangeObserver.create(source, indexes, observer, observer.rangeDidChange, "context", YES);
-    
+
   }
 });
 
@@ -47,10 +47,10 @@ test("sets up observing on properties for each object in range in index if isDee
 test("does not observe object properties if isDeep is NO", function() {
   // remove unneeded observer
   obj.destroy();
-  
+
   // use new observer
   obj = SC.RangeObserver.create(source, indexes, observer, observer.rangeDidChange, "context", NO);
-  
+
   var len = source.length, idx;
   for(idx=0;idx<len;idx++) {
     source[idx].set('foo', 'baz');

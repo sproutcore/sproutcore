@@ -864,3 +864,17 @@ SC.SplitView = SC.View.extend(
    }.observes('layout')
 
 });
+
+// TODO: This should be a mixin to the few classes that need it
+SC.View = SC.View.extend({
+  /**
+    The current split view this view is embedded in (may be null).
+    @property {SC.SplitView}
+  */
+  splitView: function() {
+    var view = this ;
+    while (view && !view.isSplitView) view = view.get('parentView') ;
+    return view ;
+  }.property('parentView').cacheable()
+})
+
