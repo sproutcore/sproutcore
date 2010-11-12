@@ -275,21 +275,25 @@ SC.run = function(callback, target, useExistingRunLoop) {
     callback.call(target);
     if(!alreadyRunning) SC.RunLoop.end();
   } else {
-    try {
+    if (SC.ExceptionHandler && SC.ExceptionHandler.enabled) {
+      try {
+        SC.RunLoop.begin();
+        if (callback) callback.call(target);
+        SC.RunLoop.end();
+      } catch (e) {
+        SC.ExceptionHandler.handleException(e);
+
+        // Now that we've handled the exception, throw it again so the browser
+        // can deal with it (and potentially use it for debugging).
+        // (We don't throw it in IE because the user will see two errors)
+        if (!SC.browser.msie) {
+          throw e;
+        }
+      }
+    } else {
       SC.RunLoop.begin();
       if (callback) callback.call(target);
       SC.RunLoop.end();
-    } catch (e) {
-      if (SC.ExceptionHandler) {
-        SC.ExceptionHandler.handleException(e);
-      }
-
-      // Now that we've handled the exception, throw it again so the browser
-      // can deal with it (and potentially use it for debugging).
-      // (We don't throw it in IE because the user will see two errors)
-      if (!SC.browser.msie) {
-        throw e;
-      }
     }
   }
 };
