@@ -116,6 +116,8 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 */
 SC.Control = {
   
+  isControl: YES,
+  
   /** @private */
   initMixin: function() {
     this._control_contentDidChange() ; // setup content observing if needed.
