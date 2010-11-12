@@ -18,6 +18,7 @@ if (!SC.LOG_RUNLOOP_INVOCATIONS) SC.LOG_RUNLOOP_INVOCATIONS = false;
 
 
 SC.addInvokeOnceLastDebuggingInfo = function() {
+  return;
   
   SC.ObserverSet.add = function(target, method, context, originatingTarget, originatingMethod, originatingStack) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
