@@ -244,107 +244,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // THEME SUPPORT
   // 
   
-  _baseThemeName: false,
-  
-  /**
-    The baseTheme property is usually the parent view's theme;
-    it is the theme in which this view should look for its own theme.
-    
-    For example, if the parent view's theme is "ace", and this view's
-    theme is "toolbar", it will look for the "toolbar" theme inside
-    "ace"; if it doesn't find it, it will look for the theme globally.
-  */
-  baseTheme: null,
-
-  /**
-    The actual computed property for baseTheme.
-  */
-  _baseThemeProperty: function(key, value) {
-    if (SC.typeOf(value) === SC.T_STRING) {
-      this.set("_baseThemeName", value);
-    }
-    
-    // find the base theme by name if we have a name.
-    if (this.get("_baseThemeName")) {
-      var theme = SC.Theme.find(this.get("_baseThemeName"));
-      if (theme) return theme;
-    }
-    
-    // otherwise, return parent's theme.
-    var parent = this.get("parentView");
-    if (parent) return parent.get("theme");
-    
-    return SC.Theme.find(SC.defaultTheme);
-  }.property().cacheable(),
-  
-  
-  _last_theme: null, // used to determine if theme has changed since last time the property was evaluated.
-  _themeName: false,
-  
-  // baseTheme is a "property"; since it gets set after extension of the view,
-  // we need an observer in addition to it to actually do notifications.
-  _baseThemeDidChange: function() {
-    this.notifyPropertyChange("theme");
-  }.observes("baseTheme"),
-  
-  _themeProperty: function(key, value) {
-    // if it is a string, set theme name
-    if (SC.typeOf(value) === SC.T_STRING) {
-      this.set("_themeName", value);
-    }
-    
-    // get the base theme
-    var base = this.get("baseTheme");
-    
-    // find theme, if possible
-    if (this.get("_themeName")) {
-      var theme;
-      if (base) {
-        theme = base.find(this.get("_themeName"));
-        if (theme) return theme;
-        
-        if (base === SC.Theme) return base;
-        
-        theme = base.invisibleSubtheme(this.get('_themeName'));
-        return theme;
-      }
-    }
-    
-    // can't find anything, return base.
-    return base;
-  }.property().cacheable(),
-  
-  _notifyThemeDidChange: function() {
-    var len, idx, childViews = this.get("childViews");
-    len = childViews.length;
-    for (idx = 0; idx < len; idx++){
-      childViews[idx].notifyPropertyChange("baseTheme");
-      childViews[idx].notifyPropertyChange("theme");
-    }
-  },
-  
   /**
     The current theme. You may only set this to a string, and during runtime, the value
     (from get()) will always be a theme object or null.
   */
   theme: null,
-  
-  /**
-    Detects when the theme changes. Replaces the layer if necessary.
-  */
-  _themeDidChange: function() {
-    var theme = this.get("theme");
-    if (theme === this._last_theme) return;
-    this._last_theme = theme;
-    
-    // replace the layer
-    if (this.get("layer")) this.replaceLayer();
-    
-    // notify child views
-    if (this._hasCreatedChildViews) this._notifyThemeDidChange();
-    
-  }.observes("theme"),
-  
+
   /**
     Like "get", but if the value is undefined, gets the value named by
     themePropertyName from the theme.
