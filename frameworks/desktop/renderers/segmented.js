@@ -42,7 +42,10 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
       isSelected: this.isSelected,
       controlSize: this.controlSize
     });
-    this._controlRenderer.render(context);
+    
+    // do an update if we have a layer already
+    if (this.layer()) this._controlRenderer.update(context);
+    else this._controlRenderer.render(context);
     
     context.addStyle({
       'textAlign': this.align
@@ -72,6 +75,7 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
       ren.attr('isFirstSegment', idx === 0);
       ren.attr('isLastSegment', idx === len - 1);
       ren.attr('isMiddleSegment', idx < len - 1 && idx > 0);
+      ren.attr('isOverflowSegment', !!segment.isOverflowSegment);
       ren.attr('controlSize', this.controlSize);
       
       // render to context
@@ -127,6 +131,7 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
       renderer.attr(segment);
       renderer.attr('layoutDirection', this.layoutDirection);
       renderer.attr('controlSize', this.controlSize);
+      renderer.attr('isOverflowSegment', !!segment.isOverflowSegment);
       renderer.update();
     }
   },

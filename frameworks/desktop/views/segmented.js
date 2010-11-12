@@ -97,6 +97,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     various itemKey properties to tell the SegmentedView how to extract the
     information it needs.
     
+    Note: if you pass hashes, they will be converted into SC.Objects so that
+    they may be observed for title & width changes.  Therefore, if you retrieve
+    the items back, be sure to access their properties using KVC (ie. get() &
+    set()).
+    
     @property {Array}
   */
   items: [],
@@ -172,7 +177,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     @property {Array}
   */
-  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey'.w(),
+  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey'.w(),
   
   /**
     This computed property is generated from the items array based on the 
@@ -186,8 +191,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   displayItems: function() {
     var items = this.get('items'), loc = this.get('localize'),
       keys=null, itemType, cur, ret = [], max = items.get('length'), idx, 
-      item, fetchKeys = SC._segmented_fetchKeys, fetchItem = SC._segmented_fetchItem;
+      item, fetchKeys = SC._segmented_fetchKeys, fetchItem = SC._segmented_fetchItem,
+      overflowItems;
     
+    overflowItems = this.overflowItems = [];
+      
     // loop through items and collect data
     for(idx=0;idx<max;idx++) {
       item = items.objectAt(idx) ;
@@ -203,6 +211,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           icon: null,
           width: null,
           toolTip: null,
+          keyEquivalent: null,
           index: idx
         };
         // cur = [item.humanize().titleize(), item, YES, null, null,  null, idx] ;
@@ -225,6 +234,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           icon: cur[3],
           width: cur[4],
           toolTip: cur[5],
+          keyEquivalent: cur[6],
           index: idx
         };
         
@@ -244,40 +254,162 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // finally, be sure to loc the toolTip if needed
       if (loc && cur.toolTip && SC.typeOf(cur.toolTip) === SC.T_STRING) cur.toolTip = cur.toolTip.loc();
       
-      // add to return array
-      ret[ret.length] = cur;
+      if (this.overflowIndex <= idx) {
+        
+        // return an overflow segment the first time
+        if (overflowItems.length === 0) {
+          ret[ret.length] = {width: null, isOverflowSegment: YES};
+        }
+        
+        // store the overflowed items in overflowItems (to be used in popup menu)
+        overflowItems[overflowItems.length] = cur;
+      } else {
+        // add to return array
+        ret[ret.length] = cur;
+      }
     }
     
-    // all done, return!
+    // return an overflow segment the first time so that it can be measured
+    if (!this.overflowSegmentWidth) {
+      ret[ret.length] = {width: null, isOverflowSegment: YES};
+    }
+    
     return ret ;
-  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey'),
+  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey').cacheable(),
+  
+  /** @private
+    Measures the visible segments after they've been rendered to see if we need to overflow.  This method will
+    be called automatically whenever the frame or items array changes.
+  */
+  measureForOverflow: function() {
+    var layer = this.get('layer');                       // <div> ...
+    
+    if (!layer) return;
+    
+    if (!this.elementWidths) {
+      this.elementWidths = [];
+      
+      // The last segment will be an overflow segment (so measure it but don't add it to elementWidths)
+      var len = layer.childNodes.length;
+      if (!this.overflowSegmentWidth) {
+        var el = layer.childNodes[len - 1];
+        
+        len = len - 1;
+        this.overflowSegmentWidth = el.getBoundingClientRect().width;
+      }
+      
+      // Measure the segments and cache it
+      for (var i=0; i < len; i++) {
+        el = layer.childNodes[i];
+  
+        this.elementWidths[i] = el.getBoundingClientRect().width;
+      }
+    }
+  
+    var visibleWidth = SC.$(layer).width();             // The inner width of the div
+    var curElementsWidth = 0;
+    
+    len = this.elementWidths.length;
+    for (i=0; i < len; i++) {
+      curElementsWidth += this.elementWidths[i];
+    
+      // check for an overflow (leave room for the overflow segment except for the last segment)
+      var widthToFit = (i === len - 1) ? curElementsWidth : curElementsWidth + this.overflowSegmentWidth;
+      if (widthToFit >= visibleWidth) {
+        if (this.overflowIndex === i) return;          // overflow hasn't changed, no need to redraw
+      
+        // Else, mark the index that went over the visible width and redraw
+        this.overflowIndex = i;
+        this.notifyPropertyChange('displayItems');
+        return;
+      }
+    }
+  
+    if (this.overflowIndex === Infinity) return;        // overflow hasn't changed, no need to redraw
+   
+    this.overflowIndex = Infinity;
+    this.notifyPropertyChange('displayItems');
+  },
+  
+  /** @private
+    If our frame changes, then we may need to add or remove an overflow segment
+  */
+  frameDidChange: function() {
+    this.measureForOverflow();
+  }.observes('frame'),
   
   /** If the items array itself changes, add/remove observer on item... */
   itemsDidChange: function() { 
     if (this._items) {
-      this._items.removeObserver('[]',this,this.itemContentDidChange) ;
+      for (var i = this._items.length - 1; i >= 0; i--){
+        if (this._items[i] instanceof SC.Object) {
+          var item = this._items[i];
+          
+          if (this.get('itemTitleKey')) item.removeObserver(this.get('itemTitleKey'), this, this.itemContentDidChange);
+          if (this.get('itemWidthKey')) item.removeObserver(this.get('itemWidthKey'), this, this.itemContentDidChange);
+        }
+      }
     } 
-    this._items = this.get('items') ;
-    if (this._items) {
-      this._items.addObserver('[]', this, this.itemContentDidChange) ;
-    }
     
+    this._items = this.get('items');
+    
+    if (this._items) {
+      var value = this.get('value');
+      var isArray = SC.isArray(value);
+      var newValue = [];
+      var itemType, itemValue;
+      
+      for (i = this._items.length - 1; i >= 0; i--) {
+        item = this._items[i];
+        itemType = SC.typeOf(item);
+        if (itemType !== SC.T_STRING) {
+      
+          // Convert objects to SC.Objects
+          if (!(item instanceof SC.Object)) item = this._items[i] = SC.Object.create(item);
+          if (this.get('itemTitleKey')) item.addObserver(this.get('itemTitleKey'), this, this.itemContentDidChange);
+          if (this.get('itemWidthKey')) item.addObserver(this.get('itemWidthKey'), this, this.itemContentDidChange);
+          
+          itemValue = item.get(this.get('itemValueKey'));
+        } else {
+          itemValue = item;
+        }
+        
+        // If the selected item has been removed then make sure the current value still exists
+        if (!SC.empty(value)) {
+          if (isArray ? value.indexOf(itemValue) >= 0 : value === itemValue) {
+            newValue[newValue.length] = itemValue; 
+          }
+        }
+      }
+      
+      // Update the value
+      if (newValue.length === 0) newValue = null;
+      this.set('value', newValue);
+    }
+      
     this.itemContentDidChange();
-  }.observes('items'),
+  }.observes('*items.[]'),
   
   /** 
-    Invoked whenever the item array or an item in the array is changed.  This method will reginerate the list of items.
+    Invoked whenever the item array or an item in the array is changed.  This method will regenerate the list of items.
   */
   itemContentDidChange: function() {
     this.set('renderLikeFirstTime', YES);
     this.notifyPropertyChange('displayItems');
+    
+    if (this.overflowIndex) this.overflowIndex = Infinity;      // Don't overflow items so that they can be measured one time
+    
+    // Re-measure after drawing is complete
+    this.invokeLast(function() {
+      this.elementWidths = null;
+      this.measureForOverflow();
+    }, this);
   },
   
   init: function() {
     sc_super();
     this.itemsDidChange() ;
   },
-
   
   // ..........................................................
   // RENDERING/DISPLAY SUPPORT
@@ -290,8 +422,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   },
   
   updateRenderer: function(r) {
-    var items = this.get('displayItems'), value = this.get('value'), isArray = SC.isArray(value),
+    var items = this.get('displayItems'), overflowItems = this.overflowItems, value = this.get('value'), isArray = SC.isArray(value),
         activeIndex = this.get("activeIndex"), item;
+    
+    // Check displayed items
     for (var idx = 0, len = items.length; idx < len; idx++) {
       item = items[idx];
       
@@ -304,6 +438,16 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         item.isSelected = YES;
       }
       else item.isSelected = NO;
+    }
+    
+    // Check overflowed items
+    for (idx = 0, len = overflowItems.length; idx < len; idx++) {
+      item = overflowItems[idx];
+      
+      // change selection
+      if (isArray ? value.indexOf(item.value) >= 0 : value === item.value) {
+        items[items.length - 1].isSelected = YES;
+      }
     }
     
     // set the attributes
@@ -326,9 +470,55 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this.renderer) return this.renderer.indexForEvent(evt);
   },
   
+  /** @private
+    Invoked whenever an item is selected in the overflow menu.
+  */
+  selectOverflowSegment: function(menu) {
+    var item = menu.get('selectedItem');
+    this.triggerItemAtIndex(item.index);
+    
+    // Cleanup
+    menu.removeObserver('selectedItem', this, 'selectOverflowSegment');
+  },
+  
+  /** @private
+    Presents the popup menu containing overflowed segments.
+  */
+  showOverflowItems: function(idx) {
+    this.set('activeIndex', this.overflowIndex);
+      
+    // Select the currently selected item if it is in overflowItems
+    var overflowItems = this.overflowItems;
+    var value = this.get('value');
+    var isArray = SC.isArray(value);
+    for (var i = overflowItems.length - 1; i >= 0; i--) {
+      var item = overflowItems[i];
+      if (isArray ? value.indexOf(item.value) >= 0 : value === item.value) {
+        item.isChecked = YES;
+      } else item.isChecked = NO;
+    }
+    
+    // TODO: we can't pass a shortcut key to the menu, because it isn't a property of this (yet?)
+    var menu = SC.MenuPane.create({
+      layout: { width: 200 },
+      items: this.overflowItems,
+      itemTitleKey: 'title',
+      itemIconKey: 'icon',
+      itemIsEnabledKey: 'isEnabled',
+      itemKeyEquivalentKey: 'keyEquivalent',
+      itemCheckboxKey: 'isChecked'
+    });
+    
+    var layer = this.get('layer');
+    var overflowElement = layer.childNodes[layer.childNodes.length - 1];
+    menu.popup(overflowElement);
+    
+    menu.addObserver("selectedItem", this, 'selectOverflowSegment');
+  },
+  
   keyDown: function(evt) {
     // handle tab key
-    var i, item, items, len, value, isArray;
+    var i, item, items, overflowItems, len, value, isArray;
     if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if(view) view.becomeFirstResponder();
@@ -336,7 +526,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       return YES ; // handled
     }    
     if (!this.get('allowsMultipleSelection') && !this.get('allowsEmptySelection')){
-      items = this.get('displayItems');
+      items = this.get('displayItems').slice(0);
+      
+      // If we've overflowed, discard the overflow segment and re-append the overflowed items
+      if (this.overflowItems.length > 0) items.removeAt(items.length - 1).pushObjects(this.overflowItems);
+      
       len = items.length;
       value = this.get('value');
       isArray = SC.isArray(value);
@@ -366,8 +560,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (!this.get('isEnabled')) return YES; // nothing to do
     var idx = this.displayItemIndexForEvent(evt);
     
-    // if mouse was pressed on a button, then start detecting pressed events
-    if (idx>=0) {
+    // if mouse was pressed on an overflow segment popup the menu
+    if (idx === this.overflowIndex) {
+      this.showOverflowItems();
+    } else if (idx>=0) {                          
+      // if mouse was pressed on a button, then start detecting pressed events
       this._isMouseDown = YES ;
       this.set('activeIndex', idx);
     }
@@ -413,14 +610,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES ;
   },
   
-  
-  
   touchStart: function(touch) {
     if (!this.get('isEnabled')) return YES; // nothing to do
     var idx = this.displayItemIndexForEvent(touch);
     
-    // if mouse was pressed on a button, then start detecting pressed events
-    if (idx>=0) {
+    // if touch was on an overflow segment popup the menu
+    if (idx === this.overflowIndex) {
+      this.showOverflowItems();
+    } else if (idx>=0) {   
       this._isTouching = YES ;
       this.set('activeIndex', idx);
     }
@@ -479,8 +676,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   triggerItemAtIndex: function(idx) {
     var items = this.get('displayItems'),
-        item  = items.objectAt(idx),
-        sel, value, val, empty, mult;
+        overflowItems = this.get('overflowItems'),
+        item, sel, value, val, empty, mult;
+    
+    if (overflowItems.length > 0 && idx >= items.length - 1) item = overflowItems.objectAt(idx - (items.length - 1)); // subtract 1 for the overflow segment
+    else item = items.objectAt(idx);
         
     if (!item.isEnabled) return this; // nothing to do!
 
@@ -491,7 +691,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // get new value... bail if not enabled. Also save original for later.
     sel = item.value;
     value = val = this.get('value') ;
-    if (!SC.isArray(value)) value = [value]; // force to array
+    
+    if (SC.empty(value)) value = [];
+    else if (!SC.isArray(value)) value = [value]; // force to array
     
     // if we do not allow multiple selection, either replace the current
     // selection or deselect it
