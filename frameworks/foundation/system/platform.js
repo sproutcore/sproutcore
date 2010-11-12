@@ -22,7 +22,7 @@ SC.platform = {
 
     @property {Boolean}
   */
-  touch: ('createTouch' in document) && !navigator.userAgent.match('Chrome/9'), // Ugly hack for Chrome 9 issue
+  touch: ('createTouch' in document) && SC.browser.chrome < 9, // Ugly hack for Chrome 9 issue
   
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
