@@ -44,6 +44,10 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
     });
     this._controlRenderer.render(context);
     
+    context.addStyle({
+      'textAlign': this.align
+    });
+    
     // clean up; get rid of layers on our existing segments
     for (idx = 0, len = reusables.length; idx < len; idx++) reusables[idx].detachLayer();
     
