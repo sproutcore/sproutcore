@@ -110,6 +110,51 @@ var pane;
       allowsEmptySelection: YES,
       allowsMultipleSelection: YES,
       layout: { height: 25 }
+    })
+    .add("3_items,leftAligned", SC.SegmentedView, { 
+      items: "Item1 Item2 Item3".w(),
+      align: SC.ALIGN_LEFT,
+      layout: { height: 25 }
+    })
+    .add("3_items,rightAligned", SC.SegmentedView, { 
+      items: "Item1 Item2 Item3".w(),
+      align: SC.ALIGN_RIGHT,
+      layout: { height: 25 }
+    })
+    .add("3_items,widths", SC.SegmentedView, { 
+      items: [
+      { value: "A", width: 70 },
+      { value: "B", width: 70 },
+      { value: "C", width: 70 }],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemWidthKey: 'width',
+      layout: { height: 25 }
+    })
+    .add("5_items,widths,overflow", SC.SegmentedView, { 
+      items: [
+      { value: "A", width: 70 },
+      { value: "B", width: 70 },
+      { value: "C", width: 70 },
+      { value: "D", width: 70 },
+      { value: "E", width: 70 }],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemWidthKey: 'width',
+      layout: { height: 25 }
+    })
+    .add("5_items,1_sel,widths,overflow", SC.SegmentedView, { 
+      items: [
+      { value: "A", width: 70 },
+      { value: "B", width: 70 },
+      { value: "C", width: 70 },
+      { value: "D", width: 70 },
+      { value: "E", width: 70 }],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemWidthKey: 'width',
+      value: "D",
+      layout: { height: 25 }
     });
     
   pane.show(); // add a test to show the test pane
@@ -133,6 +178,8 @@ var pane;
     ok(pane.view('3_items,2_sel,multipleSel').get('isVisibleInWindow'), '3_items,2_sel,multipleSel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel,emptySel,multiSel').get('isVisibleInWindow'), '3_items,1_sel,emptySel,multiSel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,2_sel,emptySel,multiSel').get('isVisibleInWindow'), '3_items,2_sel,emptySel,multiSel.isVisibleInWindow should be YES');
+    ok(pane.view('3_items,leftAligned').get('isVisibleInWindow'), '3_items,leftAligned.isVisibleInWindow should be YES');
+    ok(pane.view('3_items,rightAligned').get('isVisibleInWindow'), '3_items,rightAligned.isVisibleInWindow should be YES');
   });
   
   
@@ -223,4 +270,119 @@ var pane;
     ok((segments[1].title=="this is title2's tip"), 'second segment has expected tool tip assigned.');
   });
   
+  test("Check the alignment styles for align property.", function() {
+    equals(pane.view("3_empty").$().css('text-align'), 'center', 'default align property should text-align the segmented-view to the center');
+    equals(pane.view("3_items,leftAligned").$().css('text-align'), 'left', 'setting align: SC.ALIGN_LEFT should text-align the segmented-view to the left');
+    equals(pane.view("3_items,rightAligned").$().css('text-align'), 'right', 'setting align: SC.ALIGN_LEFT should text-align the segmented-view to the left');
+  });
+  
+  test("Check that changing title re-renders the segments (for hash or object items only).", function() {
+    var sv = pane.view("3_items,widths");
+    var segments=sv.$('a');
+    var defaults = ['A', 'B', 'C'];
+    for (var i=0, len=segments.length; i < len; i++){
+      var segEl=segments[i];
+      var label=$(segEl).find('label')[0];
+      equals(label.innerHTML, defaults[i], 'there should be "' + defaults[i] + '" in the segment\'s label');
+    }
+    
+    // change the title of the second item
+    var items = sv.get('items');
+    items[1].set('value', 'Item 2');
+    
+    // allow for a render to happen
+    SC.RunLoop.begin().end();
+    
+    segEl=segments[1];
+    label=$(segEl).find('label')[0];
+    equals(label.innerHTML, "Item 2", 'there should be "Item 2" text in the second segment');
+  });
+  
+  test("Check that changing width re-renders the segments (for hash or object items only).", function() {
+    var sv = pane.view("3_items,widths");
+    var segments=sv.$('a');
+    for (var i=0, len=segments.length; i < len; i++){
+      var segEl=segments[i];
+      var width=$(segEl).css('width');
+      equals(width, "70px", 'the segment style width should be "70px"');
+    }
+    
+    // change the width of the second item
+    var items = sv.get('items');
+    items[1].set('width', 100);
+    
+    // allow for a render to happen
+    SC.RunLoop.begin().end();
+    
+    segEl=segments[1];
+    width=$(segEl).css('width');
+    equals(width, "100px", 'the second segment style width should be "100px"');
+  });
+  
+  test("Check that overflow adds an overflow segment on view.", function() {
+    var sv = pane.view("5_items,widths,overflow");
+    var lastIsOverflow = function(sv) {
+      SC.RunLoop.begin().end(); // allow for a render to happen
+    
+      var segments=sv.$('a');
+      var overflowEl = segments[segments.length - 1];
+      ok($(overflowEl).hasClass('sc-overflow-segment'), 'overflow segment should have .sc-overflow-segment class');
+      var overflowLabelEl = $(overflowEl).find('label')[0];
+      equals(overflowLabelEl.innerHTML, "»", 'there should be "»" text in the overflow segment');
+    };
+    
+    var lastIsSegment = function(sv, text) {
+      SC.RunLoop.begin().end(); // allow for a render to happen
+    
+      var segments=sv.$('a');
+      var lastEl = segments[segments.length - 1];
+      ok(!$(lastEl).hasClass('sc-overflow-segment'), 'last segment should not have .sc-overflow-segment class');
+      var lastLabelEl = $(lastEl).find('label')[0];
+      equals(lastLabelEl.innerHTML, text, 'there should be "' + text + '" text in the last segment');
+    };
+    
+    // the last item should be an overflow segment (ie. has .sc-overflow-segment class and text "»")
+    lastIsOverflow(sv);
+    
+    // check that the overflowed items are stored
+    var overflowItems = sv.overflowItems;
+    equals(overflowItems.length, 2, "there should be 2 overflowed items");
+    
+    // 1. remove the last two items (the last item should no longer be an overflow segment)
+    var items = sv.get('items');
+    items.removeAt(items.length - 1);
+    items.removeAt(items.length - 1);
+    lastIsSegment(sv, "C");
+    
+    // 2. add an item (the last item should be an overflow segment again)
+    items.pushObject({value: 'X', width: 100});
+    lastIsOverflow(sv);
+    
+    // 3. shrink the items (the last item should no longer be an overflow segment)
+    items.invoke('set', 'width', 50);
+    lastIsSegment(sv, "X");
+    
+    // 4. grow the items (the last item should be an overflow segment again)
+    items.invoke('set', 'width', 100);
+    lastIsOverflow(sv);
+    
+    // 5. shrink the items, but then shrink the segmented view 
+    items.invoke('set', 'width', 50);
+    lastIsSegment(sv, "X");
+    sv.set('layout', {left: 75, right: 75, top: 0, height: 25});
+    sv.updateLayer();
+    SC.RunLoop.begin().end(); // allow for a render to happen (update layout)
+    sv.notifyPropertyChange('frame');
+    SC.RunLoop.begin().end(); // allow for a render to happen (measure the segments)
+    lastIsOverflow(sv);
+  });
+  
+  test("Check that the overflow segment is selected when overflowed items are selected.", function() {
+    var sv = pane.view("5_items,1_sel,widths,overflow");
+    var segments=sv.$('a');
+    
+    // the overflow item should be selected (because an overflowed item is selected)
+    var overflowEl = segments[segments.length - 1];
+    ok($(overflowEl).hasClass('sel'), 'overflow segment should have .sel class');
+  });
 })();
