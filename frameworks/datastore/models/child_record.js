@@ -12,6 +12,7 @@ sc_require('system/query'); // FIXME: [EG] some wonky build order crap here...
  * @extends SC.Record
  * @author Evin Grano
  * @author Sean Eidemiller
+ * @author Juan Pablo Goldfinger
  *
  * @version Sproutcore 1.0
  * @since Sproutcore 1.0
@@ -33,9 +34,14 @@ SC.ChildRecord = SC.Record.extend(
   type: null,
   
   /**
-   *
+   * Primary Key of the Child Record
    */
   primaryKey: 'childRecordKey',
+  
+  /**
+   * Create Id for this child automatically
+   */
+  generatePrimaryKey: YES,
   
   /**
    * The immediate parent of the child record.
@@ -69,7 +75,6 @@ SC.ChildRecord = SC.Record.extend(
     }
     return pStatus;
   }.property('storeKey').cacheable(),
-  
   
   /**
    * Marks the record as dirty.
