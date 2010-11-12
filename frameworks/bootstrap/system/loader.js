@@ -41,6 +41,7 @@ SC.setupBodyClassNames = function() {
   if(shadows) classNames.push('box-shadow');
   if(borderRad) classNames.push('border-rad');
   classNames.push(browser) ;
+  if (browser === 'chrome') classNames.push('safari');
   classNames.push(platform) ;
   if (parseInt(SC.browser.msie,0)==7) classNames.push('ie7') ;
   if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
