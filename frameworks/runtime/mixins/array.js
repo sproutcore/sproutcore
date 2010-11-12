@@ -374,6 +374,25 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   },
 
   /**
+    Returns a new array that is a one-dimensional flattening of this array,
+    i.e. for every element of this array extract that and it's elements into
+    a new array.
+
+    @returns {Array}
+   */
+  flatten: function() {
+    var ret = [];
+    this.forEach(function(k) {
+      if (k && k.isEnumerable) {
+        ret = ret.pushObjects(k.flatten());
+      } else {
+        ret.pushObject(k);
+      }
+    });
+    return ret;
+  },
+
+  /**
     Returns the largest Number in an array of Numbers. Make sure the array
     only contains values of type Number to get expected result.
 

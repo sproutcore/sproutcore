@@ -2587,6 +2587,138 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return rec.statusString();
   }
 
+},
+
+{
+  _inverseDidRelinquishRelationships: function(ids, recordType, attr, inverseId) {
+    ids.forEach(function(id) {
+      this._inverseDidRelinquishRelationship(recordType, id, attr, inverseId);
+    },this);
+  },
+
+  _inverseDidRelinquishRelationship: function(recordType, id, toAttr, relativeID) {
+    var storeKey = recordType.storeKeyFor(id),
+      dataHash = this.readDataHash(storeKey),
+      key = toAttr.inverse,
+      proto = recordType.prototype;
+
+    if (!dataHash || !key) return;
+
+    if (SC.instanceOf(proto[key], SC.SingleAttribute)) {
+      delete dataHash[key];
+    } else if (SC.instanceOf(proto[key], SC.ManyAttribute)
+               && SC.typeOf(dataHash[key]) === SC.T_ARRAY) {
+      dataHash[key].removeObject(relativeID);
+    }
+
+    this.pushRetrieve(recordType, id, dataHash, undefined, true);
+  },
+
+  _inverseDidAddRelationships: function(ids, recordType, attr, inverseId) {
+    ids.forEach(function(id) {
+      this._inverseDidAddRelationship(recordType, id, attr, inverseId);
+    },this);
+  },
+
+  _inverseDidAddRelationship: function(recordType, id, toAttr, relativeID) {
+    var storeKey = recordType.storeKeyFor(id),
+      dataHash = this.readDataHash(storeKey),
+      status = this.peekStatus(storeKey),
+      key = toAttr.inverse,
+      proto = recordType.prototype;
+
+    // TODO: should createIfEmpty apply to DESTROYED_* states?
+    if ((status === SC.Record.EMPTY) &&
+        (toAttr.get && toAttr.get('createIfEmpty') || toAttr.createIfEmpty)) {
+      dataHash = {};
+      dataHash[proto.primaryKey] = id;
+    }
+
+    if (!dataHash || !key) return;
+
+    if (SC.instanceOf(proto[key], SC.SingleAttribute)) {
+      dataHash[key] = relativeID;
+    } else if (SC.instanceOf(proto[key], SC.ManyAttribute)) {
+      dataHash[key] = dataHash[key] || [];
+
+      if (dataHash[key].indexOf(relativeID) < 0) {
+        dataHash[key].push(relativeID);
+      }
+    }
+
+    this.pushRetrieve(recordType, id, dataHash, undefined, true);
+  },
+
+  pushDestroy: function(recordType, id, storeKey) {
+    var proto = recordType.prototype,
+    attr, currentHash, existingIDs,
+    key, keyValue, inverseIDs, inverseType;
+
+    if (typeof storeKey === "undefined") {
+      storeKey = recordType.storeKeyFor(id);
+    }
+
+    currentHash = this.readDataHash(storeKey) || {};
+
+    for (key in proto) {
+      attr = proto[key];
+      if (attr && attr.typeClass && attr.inverse && attr.isMaster) {
+        inverseType = attr.typeClass();
+
+        if (SC.typeOf(inverseType) !== SC.T_CLASS) continue;
+
+        keyValue = attr.get && attr.get('key') || key;
+
+        // update old relationships
+        existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
+
+        this._inverseDidRelinquishRelationships(existingIDs,
+                                                inverseType,
+                                                attr,
+                                                id);
+      }
+    }
+
+    return sc_super();
+  },
+
+  pushRetrieve: function (recordType, id, dataHash, storeKey, ignore) {
+    if (!ignore) {
+      var proto = recordType.prototype,
+      attr, currentHash, existingIDs,
+      key, keyValue, inverseIDs, inverseType;
+
+      if (typeof storeKey === "undefined") {
+        storeKey = recordType.storeKeyFor(id);
+      }
+
+      currentHash = this.readDataHash(storeKey) || {};
+
+      for (key in proto) {
+        attr = proto[key];
+        if (attr && attr.typeClass && attr.inverse && attr.isMaster) {
+          inverseType = attr.typeClass();
+
+          if (SC.typeOf(inverseType) !== SC.T_CLASS) continue;
+
+          keyValue = attr.get && attr.get('key') || key;
+
+          // update old relationships
+          existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
+
+          // update new relationships
+          inverseIDs = [dataHash[keyValue] || null].flatten().compact().uniq();
+
+          this._inverseDidRelinquishRelationships(existingIDs.filter(function(el) {
+            return inverseIDs.indexOf(el) === -1;
+          }), inverseType, attr, id);
+
+          this._inverseDidAddRelationships(inverseIDs, inverseType, attr, id);
+        }
+      }
+    }
+
+    return sc_super();
 }) ;
 
 SC.Store.mixin(/** @scope SC.Store.prototype */{
