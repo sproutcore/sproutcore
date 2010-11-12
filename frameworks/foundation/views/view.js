@@ -1954,6 +1954,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.theme = this._themeProperty;
     this.set("themeName", theme);
 
+    this._generateRenderer();
+
     // find render path (to be removed in SC 2.0?)
     var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
     while (c && c.prototype.render) {
@@ -1980,8 +1982,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.childViews = childViews ? childViews.slice() : [] ;
     this.createChildViews() ; // setup child Views
     this._hasCreatedChildViews = YES;
-
-    this._generateRenderer();
 
     // register display property observers ..
     // TODO: Optimize into class setup
