@@ -17,6 +17,17 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
   },
   
   updateButtonRenderer: function() {
+    if (this.isOverflowSegment) {
+      this._buttonRenderer.attr({
+        title: "&raquo;",
+        icon: null,
+        toolTip: "More&hellip;".loc(),
+        isEnabled: YES,
+        isSelected: this.isSelected,
+        isActive: this.isActive,
+        controlSize: this.controlSize
+      });
+    } else {
     this._buttonRenderer.attr({
       title: this.title,
       icon: this.icon,
@@ -26,6 +37,7 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
       isActive: this.isActive,
       controlSize: this.controlSize
     });
+    }
   },
   
   computeClasses: function() {
@@ -34,6 +46,7 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
     classes["sc-first-segment"] = this.isFirstSegment;
     classes["sc-middle-segment"] = this.isMiddleSegment;
     classes["sc-last-segment"] = this.isLastSegment;
+    classes["sc-overflow-segment"] = this.isOverflowSegment;
     classes["sc-segment"] = YES;
     classes["fixed"] = this.width;
     
