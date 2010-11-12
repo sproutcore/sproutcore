@@ -513,7 +513,7 @@ SC.Record = SC.Object.extend(
               attrValue.normalize();
             }
           } else if (isRecord) {
-            attrValue = recHash[key];
+            attrValue = recHash[keyForDataHash];
             if (attrValue !== undefined) {
               // write value already there
               dataHash[keyForDataHash] = attrValue;
