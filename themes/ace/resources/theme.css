@@ -975,6 +975,7 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   display: inline-block;
   zoom: 1;
   overflow: hidden;
+  position: relative;
 }
 .sc-theme .sc-view.ace.sc-segmented-view .sc-segment .button-left {
   display: inline-block;
@@ -993,6 +994,19 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
   zoom: 1;
 }
 .sc-theme .sc-view.ace.sc-segmented-view .sc-segment .sc-button-label { display: block; }
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.fixed .button-left {
+  position: absolute;
+  left: 0px;
+}
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.fixed .button-right {
+  position: absolute;
+  right: 0px;
+}
+.sc-theme .sc-view.ace.sc-segmented-view .sc-segment.fixed .button-middle {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+}
 .sc-theme .sc-view.ace.sc-segmented-view .sc-segment.active {
   color: #333333;
   text-shadow: 0px 1px 1px white;
