@@ -329,7 +329,22 @@ SC.mixin(/** @scope SC */ {
 
     // special cases where we don't want to add a key to object
     if (obj === undefined) return "(undefined)";
-    if (obj === null) return '(null)';
+    if (obj === null) return "(null)";
+
+    var type = typeof obj;
+
+    // Don't allow prototype changes to String etc. to change the guidFor
+    if (type === SC.T_NUMBER || type === SC.T_STRING) {
+      cache = this._guidCaches[type];
+      ret   = cache[obj];
+      if(!ret) {
+        ret        = "st" + (jQuery.uuid++);
+        cache[obj] = ret;
+      }
+      return ret;
+    } else if (type === SC.T_BOOL) {
+      return (obj) ? "(true)" : "(false)"
+    }
 
     var guidKey = this.guidKey;
     if (obj[guidKey]) return obj[guidKey];
@@ -342,22 +357,7 @@ SC.mixin(/** @scope SC */ {
     var cache, ret;
     var type = typeof obj;
 
-    switch(type) {
-      case SC.T_NUMBER:
-      case SC.T_STRING:
-        cache = this._guidCaches[type];
-        ret   = cache[obj];
-        if(!ret) {
-          ret        = this.generateGuid(null, this._guidPrefixes[type]);
-          cache[obj] = ret;
-        }
-        return ret;
-
-      case SC.T_BOOL:
-        return (obj) ? "(true)" : "(false)" ;
-      default:
-        return SC.generateGuid(obj, "sc");
-    }
+    return SC.generateGuid(obj, "sc");
   },
 
   /**
