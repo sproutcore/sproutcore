@@ -29,6 +29,9 @@ SC.LabelView = SC.View.extend(SC.Control,
 
   classNames: ['sc-label-view'],
 
+  displayProperties: 'value textAlign fontWeight icon escapeHTML'.w(),
+
+
   /**
     Specify the font weight for this.  You may pass SC.REGULAR_WEIGHT, or SC.BOLD_WEIGHT.
   */
@@ -102,7 +105,14 @@ SC.LabelView = SC.View.extend(SC.Control,
     If you want the inline editor to be multiline set this property to YES.
   */
   isInlineEditorMultiline: NO,
-  
+
+  /**
+    The name of the theme's SC.LabelView render delegate.
+
+    @property {String}
+  */
+  renderDelegateName: 'labelRenderDelegate',
+
   /**
     [RO] The value that will actually be displayed.
     
@@ -283,40 +293,5 @@ SC.LabelView = SC.View.extend(SC.Control,
     this.$().css('opacity', this._oldOpacity);
     this._oldOpacity = null ;
     this.set('isEditing', NO) ;
-  },
-
-  displayProperties: 'displayValue textAlign fontWeight icon escapeHTML'.w(),
-  
-  _TEMPORARY_CLASS_HASH: {},
-
-  render: function(context, firstTime) {
-    var size = this.get('size');
-
-    var settings = {
-      value: this.get('displayValue'),
-      icon: this.get('icon'),
-      hint: this.get('hint'),
-      escapeHTML: this.get('escapeHTML'),
-      textAlign: this.get('textAlign'),
-      fontWeight: this.get('fontWeight'),
-
-      classNames: {
-        active: this.get('isActive'),
-        disabled: !this.get('isEnabled'),
-        selected: this.get('isSelected')
-      },
-
-      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
-    };
-
-    if (firstTime) {
-      this.labelRenderer = this.get('theme').renderer('label');
-      this.labelRenderer.attr(settings);
-      this.labelRenderer.render(context);
-    } else {
-      this.labelRenderer.attr(settings);
-      this.labelRenderer.update(context.$());
-    }
-
   }
 });
