@@ -1,3 +1,24 @@
+*SproutCore 1.4.4 (November 12, 2010)*
+
+* Fix SC.platform.touch for Chrome 9
+* Better docs for setIfChanged
+* Minor documentation fix
+* Minor cleanup to SC.platform
+* Added support for Chrome Frame with :chrome_frame flag in Buildfile
+* Can now parse '1/1/01 1:1:1'-formatted date times. Thanks timgaleckas.
+* Remove unused code in SC.Store#removeDataHash
+* Removed deep flag for clone method
+* Replaced some instances of true with YES
+* Datastore makes deep copies of data hashes instead of shallow copies
+* Added support for making deep copies of an object into SC.copy and into SC.Copyable.copy
+* SC.clone makes deep copies of objects of type SC.T_HASH
+* Removed unnecessary variable declaration and method invokation in writeAttribute
+* Fixed an incorrect statement in the SC.CollectionContent inline documentation.
+* Fixed typo in SC.Animatable fixes
+* Added safety check for SC.Touch.allowDefault
+* Animatable should check that transitions exist before using special case
+* Typos prevent accelerating anything with a right or bottom even if it also has a top/height or left/width
+
 *SproutCore 1.4.3 (October 19, 2010)*
 
 * Send a warning to the console when using SC.RecordArray#indexOf or SC.RecordArray#lastIndexOf and providing an object that is
