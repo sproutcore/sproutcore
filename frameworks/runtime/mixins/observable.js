@@ -1105,17 +1105,33 @@ SC.Observable = {
     
     return binding ;
   },
-  
-  /**  
-    didChangeFor makes it easy for you to verify that you haven't seen any
-    changed values.  You need to use this if your method observes multiple
-    properties.  To use this, call it like this:
-  
+
+  /**
+    didChangeFor allows you to determine if a property has changed since the
+    last time the method was called. You must pass a unique context as the
+    first parameter (so didChangeFor can identify which method is calling it),
+    followed by a list of keys that should be checked for changes.
+
+    For example, in your render method you might pass the following context:
     if (this.didChangeFor('render','height','width')) {
-       // DO SOMETHING HERE IF CHANGED.
+       // Only render if changed
     }
-  */  
-  didChangeFor: function(context) { 
+
+    In your view's update method, you might instead pass 'update':
+
+    if (this.didChangeFor('update', 'height', 'width')) {
+      // Only update height and width properties
+    }
+
+    This method works by comparing property revision counts. Every time a
+    property changes, an internal counter is incremented. When didChangeFor is
+    invoked, the current revision count of the property is compared to the
+    revision count from the last time this method was called.
+
+    @param {String|Object} context a unique identifier
+    @param {String…} propertyNames one or more property names
+  */
+ didChangeFor: function(context) {
     var valueCache, revisionCache, seenValues, seenRevisions, ret,
         currentRevision, idx, key, value;
     context = SC.hashFor(context) ; // get a hash key we can use in caches.
@@ -1153,8 +1169,6 @@ SC.Observable = {
     revisionCache[context] = seenRevisions ;
     return ret ;
   },
-
-
 
   /**
     Sets the property only if the passed value is different from the
