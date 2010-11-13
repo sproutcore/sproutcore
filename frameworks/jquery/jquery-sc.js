@@ -1,4 +1,4 @@
-sc_require("jquery-buffer");
+// sc_require("jquery-buffer");
 jQuery.Buffer.scheduleFlushing = function() {
   SC.RunLoop.currentRunLoop.invokeOnce(function() {
     jQuery.Buffer.flush()
