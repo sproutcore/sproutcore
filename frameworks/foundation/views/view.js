@@ -1950,7 +1950,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     sc_super() ;
 
     // set up theme
-    var theme = this.theme;
+    var theme = this.themeName || this.theme;
     this.theme = this._themeProperty;
     this.set("themeName", theme);
 
