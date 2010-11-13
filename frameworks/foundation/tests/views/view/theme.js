@@ -23,7 +23,7 @@ test("changing themes propagates to child view.", function() {
   
   ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
   ok(t1 === view.child.get("theme"), "view's child's theme should be sc-test-1");
-  view.updateTheme('sc-test-2');
+  view.set('themeName', 'sc-test-2');
   ok(t2 === view.get("theme"), "view's theme should be sc-test-2");
   ok(t2 === view.child.get("theme"), "view's child's theme should be sc-test-2");
 });

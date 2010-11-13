@@ -147,7 +147,7 @@ SC.MasterDetailView = SC.View.extend({
   */
   pickerPane: SC.PickerPane.extend({
     layout: { width: 250, height: 480 },
-    theme: "popover"
+    themeName: 'popover'
   }),
   
   /// INTERNAL CODE. HERE, THERE BE MONSTERS!
