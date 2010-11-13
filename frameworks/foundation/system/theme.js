@@ -106,3 +106,4 @@ SC.BaseTheme = SC.Theme.extend({
 });
 
 SC.Theme.register("sc-base", SC.BaseTheme);
+SC.defaultTheme = 'sc-base';

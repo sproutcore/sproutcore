@@ -233,45 +233,44 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   //
 
   /**
-    The base theme to start from; the "theme" property looks in this theme.
-    baseTheme is inherited from parent's theme property.
+    Names which theme this view should use; the theme named by this property
+    will be set to the view's 'theme' property.
+
+    Themes are identified by their name. In addition to looking for the
+    theme globally, SproutCore will look for the theme inside 'baseTheme',
+    which is almost always the parent view's theme.
+
+    If null (the default), the view will set its 'theme' property to
+    be equal to 'baseTheme'.
+
+    Example: themeName: 'ace'
+
+    @property {String}
   */
-  baseThemeName: false,
+  themeName: null,
 
-  updateBaseTheme: function(baseThemeName) {
-    this.set('baseThemeName', baseThemeName);
+  /**
+    Selects which theme to use as a 'base theme'. If null, the 'baseTheme'
+    property will be set to the parent's theme. If there is no parent, the theme
+    named by SC.defaultTheme is used.
 
-    var childViews = this.get('childViews');
-    for (var i=0, l=childViews.length; i<l; i++) {
-      childViews[i].updateBaseTheme(null);
-    }
-  },
+    This property is private for the time being.
 
-  updateTheme: function(themeName) {
-    this.set('themeName', themeName);
+    @private
+    @property {String}
+  */
+  baseThemeName: null,
 
-    var childViews = this.get('childViews')
-    for (var i=0, l=childViews.length; i<l; i++) {
-      childViews[i].updateBaseTheme(null);
-    }
-  },
+  /**
+    The SC.Theme instance which this view should use to render.
 
-  baseTheme: function() {
-    var baseThemeName = this.get('baseThemeName'), parent, theme;
+    Note: the actual code for this function is in _themeProperty for backwards-compatibility:
+    some older views specify a string value for 'theme', which would override this property,
+    breaking it.
 
-    if(baseThemeName) {
-      return SC.Theme.find(baseThemeName);
-    } else {
-      parent = this.get('parentView');
-      theme  = parent && parent.get('theme');
-      return theme || SC.Theme.find('sc-base')
-    }
-  }.property('parentView', 'baseThemeName').cacheable(),
-
-  lastTheme: null, // used to determine if theme has changed since last time the property was evaluated.
-  themeName: false,
-
-  _themeProperty: function(key, value) {
+    @property {SC.Theme}
+  */
+  theme: function() {
     var base = this.get('baseTheme'), themeName = this.get('themeName');
 
     // find theme, if possible
@@ -293,21 +292,49 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.property('baseTheme', 'themeName').cacheable(),
 
   /**
-    The current theme. You may only set this to a string, and during runtime, the value
-    (from get()) will always be a theme object or null.
-  */
-  theme: null,
-
-  /**
     Detects when the theme changes. Replaces the layer if necessary.
+
+    Also, because
   */
   _themeDidChange: function() {
+    if (this._lastTheme === this.get('theme')) return;
+    this._lastTheme = this.get('theme');
+
+    // invalidate child view base themes, if present
+    var childViews = this.childViews, len = childViews.length, idx;
+    for (idx = 0; idx < len; idx++) {
+      childViews[idx].notifyPropertyChange('baseTheme');
+    }
+
     // replace the layer
     if (this.get("layer")) this.replaceLayer();
 
     // and now, regenerate renderer
     this._generateRenderer();
-  }.observes("theme"),
+
+  }.observes('theme'),
+
+  /**
+    The SC.Theme instance in which the 'theme' property should look for the theme
+    named by 'themeName'.
+
+    For example, if 'baseTheme' is SC.AceTheme, and 'themeName' is 'popover',
+    it will look to see if SC.AceTheme has a child theme named 'popover',
+    and _then_, if it is not found, look globally.
+
+    @private
+    @property {SC.Theme}
+  */
+  baseTheme: function() {
+    var baseThemeName = this.get('baseThemeName');
+    if (baseThemeName) {
+      return SC.Theme.find(baseThemeName);
+    } else {
+      parent = this.get('parentView');
+      theme  = parent && parent.get('theme');
+      return   theme || SC.Theme.find(SC.defaultTheme);
+    }
+  }.property('baseThemeName', 'parentView').cacheable(),
 
   /**
     Like "get", but if the value is SC.FROM_THEME, it will find the value from the view's
@@ -1947,12 +1974,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   init: function() {
     var parentView, path, root, idx, len, lp, dp ;
 
-    sc_super() ;
+    sc_super();
 
-    // set up theme
-    var theme = this.themeName || this.theme;
-    this.theme = this._themeProperty;
-    this.set("themeName", theme);
+    this._lastTheme = this.get('theme');
 
     this._generateRenderer();
 
@@ -3946,6 +3970,17 @@ SC.View.mixin(/** @scope SC.View */ {
     return ret ;
   },
 
+  extend: function() {
+    var last = arguments[arguments.length - 1];
+
+    if (last && last.theme) {
+      last.themeName = last.theme;
+      delete last.theme;
+    }
+
+    return SC.Object.extend.apply(this, arguments);
+  },
+
   /**
     Helper applies the layout to the prototype.
   */
@@ -4198,6 +4233,13 @@ SC.View.mixin(/** @scope SC.View */ {
     Designer module loaded, this will also create a peer designer if needed.
   */
   create: function() {
+    var last = arguments[arguments.length - 1];
+
+    if (last && last.theme) {
+      last.themeName = last.theme;
+      delete last.theme;
+    }
+
     var C=this, ret = new C(arguments);
     if (SC.ViewDesigner) {
       SC.ViewDesigner.didCreateView(ret, SC.$A(arguments));
