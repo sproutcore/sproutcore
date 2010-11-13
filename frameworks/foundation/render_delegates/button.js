@@ -62,19 +62,17 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
         titleMinWidth = dataSource.get('titleMinWidth'),
         hint = dataSource.getDisplayProperty('hint'),
         escapeHTML = dataSource.get('escapeHTML'),
-        minWidth = dataSource.get('titleMinWidth');
+        minWidth = dataSource.get('titleMinWidth'),
+        didChangeForKey = 'buttonRenderDelegate';
 
     query.addClass(dataSource._themeClassName);
-    // if (dataSource.didChangeFor('isActive')) {
-    if (dataSource.get('isActive')) {
-      query.addClass('active');
+    if (dataSource.didChangeFor(didChangeForKey, 'isActive')) {
+      if (dataSource.get('isActive')) {
+        query.addClass('active');
+      }
     }
 
-    // if (dataSource.) {
-    //   query.find('label').html(this._htmlForTitleAndIcon(dataSource));      
-    // }
-
-    if (dataSource.didChangeFor('buttonRenderDelegate','displayTitle','icon')) {
+    if (dataSource.didChangeFor(didChangeForKey,'displayTitle','icon')) {
       query.find('label').html(this._htmlForTitleAndIcon(dataSource));
     }
   },
