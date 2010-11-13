@@ -5,16 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/** @class
-  @extends SC.Renderer
-  @since SproutCore 1.1
-*/
-
-SC.BaseTheme.Panel = SC.Renderer.extend({
+SC.BaseTheme.panelRenderDelegate = SC.Object.create({
   name: 'panel',
 
-  render: function(context) {
-    if (this.contentProvider) this.contentProvider.renderContent(context);
+  render: function(dataSource, context) {
     context.push(
       "<div class='middle'></div>",
       "<div class='top-left-edge'></div>",
@@ -29,8 +23,6 @@ SC.BaseTheme.Panel = SC.Renderer.extend({
   },
   
   update: function() {
-    // we NEVER update child views. They get to do that on their own.
+    // We never update child views. They get to do that on their own.
   }
 });
-
-SC.BaseTheme.addRenderer(SC.BaseTheme.Panel);

@@ -65,18 +65,6 @@ SC.PanelPane = SC.Pane.extend({
   */
   contentView: null,
   contentViewBindingDefault: SC.Binding.single(),
-
-  render: function(context, firstTime) {
-    if (firstTime) {
-      this._panelRenderer = this.get('theme').renderer('panel');
-
-      // panel renders our own content inside of it somewhere, so
-      // we have to pass ourselves so it can do so.
-      this._panelRenderer.attr({ contentProvider: this });
-
-      this._panelRenderer.render(context);
-    }
-  },
   
   replaceContent: function(newContent) {
     this.removeAllChildren() ;
@@ -106,7 +94,14 @@ SC.PanelPane = SC.Pane.extend({
   // ..........................................................
   // INTERNAL SUPPORT
   //
-  
+
+  /**
+    The name of the theme's SC.PanelPane render delegate.
+
+    @property {String}
+  */
+  renderDelegateName: 'panelRenderDelegate',
+
   // get the modal pane. 
   _modalPane: function() {
     var pane = this.get('modalPane');
