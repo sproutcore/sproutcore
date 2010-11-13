@@ -234,9 +234,6 @@ SC.Control = {
     var del, v;
     
     if (contentKey === undefined) contentKey = "content"+prop.capitalize()+"Key";
-    if (content === undefined) content = this.get('content');
-    
-    // get actual content key
     
     // prefer our own definition of contentKey
     if(this[contentKey]) contentKey = this.get(contentKey);
@@ -247,6 +244,8 @@ SC.Control = {
     
     // only bother setting value if the observer triggered for the correct key
     if (key === '*' || key === contentKey) {
+      if (content === undefined) content = this.get('content');
+      
       if(content) v = content.get ? content.get(contentKey) : content[contentKey];
       else v = null;
       
