@@ -13,10 +13,9 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.Object.create({
   },
 
   update: function(dataSource, $) {
-    console.log('update!');
     if (dataSource.didChangeFor('imageButtonRenderDelegate', 'image')) {
       var image = dataSource.get('image');
-      
+
       $.children()[0].className = 'img '+image;
     }
   }
