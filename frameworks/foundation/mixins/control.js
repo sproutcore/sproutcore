@@ -213,7 +213,7 @@ SC.Control = {
     @test in content
   */
   contentPropertyDidChange: function(target, key) {
-    return this.updatePropertyFromContent('value', key, 'contentValueKey');
+    return this.updatePropertyFromContent('value', key, 'contentValueKey', target);
   },
   
   /**
@@ -231,23 +231,28 @@ SC.Control = {
     @returns {SC.Control} receiver
   */
   updatePropertyFromContent: function(prop, key, contentKey, content) {
-    var all = key === '*';
-    if (contentKey === undefined) {
-      contentKey = "content"+prop.capitalize()+"Key";
-    }
+    var del, v;
+    
+    if (contentKey === undefined) contentKey = "content"+prop.capitalize()+"Key";
     if (content === undefined) content = this.get('content');
     
     // get actual content key
-    contentKey = this[contentKey] ?
-      this.get(contentKey) :
-      this.getDelegateProperty(contentKey, this.displayDelegate) ;
     
-    if (contentKey && (all || key === contentKey)) {
-      var v = (content) ?
-        (content.get ? content.get(contentKey) : content[contentKey]) :
-        null ;
+    // prefer our own definition of contentKey
+    if(this[contentKey]) contentKey = this.get(contentKey);
+    // if we don't have one defined check the delegate
+    else if((del = this.displayDelegate) && (v = del[contentKey])) contentKey = del.get ? del.get(contentKey) : v;
+    // if we have no key we can't do anything so just short circuit out
+    else return this;
+    
+    // only bother setting value if the observer triggered for the correct key
+    if (key === '*' || key === contentKey) {
+      if(content) v = content.get ? content.get(contentKey) : content[contentKey];
+      else v = null;
+      
       this.set(prop, v) ;
     }
+    
     return this ;
   },
   
