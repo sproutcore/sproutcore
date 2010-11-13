@@ -931,11 +931,28 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   updateLayer: function(optionalContext) {
-    var mixins, idx, len;
+    var mixins, idx, len, renderDelegate, hasLegacyRenderMethod;
 
     var context = optionalContext || this.renderContext(this.get('layer')) ;
     this._renderLayerSettings(context, NO);
-    this.render(context, NO) ;
+
+    renderDelegate = this.get('renderDelegate');
+
+    // If the render method takes two parameters, we assume that it is a
+    // legacy implementation that takes context and firstTime. If it has only
+    // one parameter, we assume it is the render delegates style that requires
+    // only context. Note that, for backwards compatibility, the default
+    // SC.View implementation of render uses the old style.
+    hasLegacyRenderMethod = (this.render.length === 2);
+
+    // Call render with firstTime set to NO to indicate an update, rather than
+    // full re-render, should be performed.
+    if (hasLegacyRenderMethod) {
+      this.render(context, NO);
+    }
+    else {
+      this.update(context.$());
+    }
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
@@ -1126,14 +1143,37 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @param {Boolean} firstTime Provided for compatibility when rendering legacy views only.
   */
   renderToContext: function(context, firstTime) {
-    var mixins, idx, len;
+    var renderDelegate = this.get('renderDelegate'),
+        hasLegacyRenderMethod, mixins, idx, len;
 
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
 
     if (SC.none(firstTime)) firstTime = YES;
+
     this._renderLayerSettings(context, firstTime);
-    this.render(context, firstTime);
+
+    // If the render method takes two parameters, we assume that it is a
+    // legacy implementation that takes context and firstTime. If it has only
+    // one parameter, we assume it is the render delegates style that requires
+    // only context. Note that, for backwards compatibility, the default
+    // SC.View implementation of render uses the old style.
+    hasLegacyRenderMethod = (this.render.length === 2);
+
+    // Let the render method handle rendering. If we have a render delegate
+    // object set, it will be used there.
+    if (hasLegacyRenderMethod) {
+      this.render(context, firstTime);
+    }
+    // This view implements the render delegate protocol.
+    else {
+      if (firstTime) {
+        this.render(context);
+      } else {
+        this.update(context.$());
+      }
+    }
+
     if (mixins = this.renderMixin) {
       len = mixins.length;
       for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
@@ -1202,6 +1242,27 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
+    Returns the display representation of a property if it exists, otherwise
+    returns the value of that property.
+
+    To create a display version of a property, prefix it with 'display'. For
+    example, in SC.ButtonView, you may set the title property to a string, but
+    the value displayed in the browser may have any HTML escaped. In that
+    case, the displayTitle property is used to store the value of title after
+    it has been converted for display.
+
+    This method is used by render delegates to ensure that they receive the
+    version of a property that is appropriate to output to the DOM.
+  */
+  getDisplayProperty: function(key) {
+    var val = this.get('display'+key.capitalize());
+
+    if (val) return val;
+
+    return this.get(key);
+  },
+
+  /**
     Your render method should invoke this method to render any child views,
     especially if this is the first time the view will be rendered.  This will
     walk down the childView chain, rendering all of the children in a nested
@@ -1210,27 +1271,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @param {SC.RenderContext} context the context
     @param {Boolean} firstName true if the layer is being created
     @returns {SC.RenderContext} the render context
-    @test in render and renderer
+    @test in render
   */
   renderChildViews: function(context, firstTime) {
-    this.renderContent(context, firstTime);
-    return context;
-  },
-  
-  /**
-    @private
-    Views that draw themselves using renderers still may have childViews. These
-    childViews—the view's "content"—need to get rendered, but this process needs
-    to be controlled by the renderer.
-
-    To handle this, SC.View is a "content provider", which means that it supplies
-    a "renderContent" method. The view then only needs to pass itself to its
-    renderer, and the renderer will call 'renderContent' to draw the child views.
-
-    @param {SC.RenderContext} context
-    @param {Boolean} firstTime For compatibility (do not use; if not first time, call updateContent).
-  */
-  renderContent: function(context, firstTime) {
     var cv = this.get('childViews'), len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
@@ -1239,33 +1282,76 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       view.renderToContext(context, firstTime);
       context = context.end() ;
     }
+    return context;
   },
 
   /**
-    Invoked whenever your view needs to be rendered, including when the view's
-    layer is first created and any time in the future when it needs to be 
-    updated.
-    
-    You will normally override this method in your subclassed views to 
-    provide whatever drawing functionality you will need in order to 
+    The object to which rendering and updating the HTML representation of this
+    view should be delegated.
+
+    By default, views are responsible for creating their own HTML
+    representation. In some cases, however, you may want to create an object
+    that is responsible for rendering all views of a certain type. For example,
+    you may want rendering of SC.ButtonView to be controlled by an object that
+    is specific to the current theme.
+
+    By setting a render delegate, the render and update methods will be called
+    on that object instead of the view itself.
+
+    @property {Object}
+  */
+  renderDelegate: null,
+
+  /**
+    The name of the property of the current theme that contains the render
+    delegate to use for this view.
+
+    By default, views are responsible for creating their own HTML
+    representation. You can tell the view to instead delegate rendering to the
+    theme by setting this property to the name of the corresponding property
+    of the theme.
+
+    For example, to tell the view that it should render using the
+    SC.ButtonView render delegate, set this property to
+    'buttonRenderDelegate'. When the view is created, it will retrieve the
+    buttonRenderDelegate property from its theme and set the renderDelegate
+    property to that object.
+  */
+  renderDelegateName: null,
+
+  /**
+    Invoked whenever your view needs to create its HTML representation.
+
+    You will normally override this method in your subclassed views to
+    provide whatever drawing functionality you will need in order to
     render your content.
-    
-    You can use the passed firstTime property to determine whether or not 
-    you need to completely re-render the view or only update the surrounding
-    HTML.
-    
-    The default implementation of this method simply calls renderChildViews()
-    if this is the first time you are rendering, or null otherwise.
-    
+
+    This method is usually only called once per view. After that, the update
+    method will be called to allow you to update the existing HTML
+    representation.
+
+    The default implementation of this method calls renderChildViews().
+
+    For backwards compatibility, this method will also call the appropriate
+    method on a render delegate object, if your view has one.
+
     @param {SC.RenderContext} context the render context
-    @param {Boolean} firstTime YES if this is creating a layer
     @returns {void}
-  */   
+  */
   render: function(context, firstTime) {
+    var renderDelegate = this.get('renderDelegate');
+
+    if (renderDelegate) {
+      if (firstTime) {
+        renderDelegate.render(this, context);
+      } else {
+        renderDelegate.update(this, context.$());
+      }
+    }
+
     if (firstTime) this.renderChildViews(context, firstTime);
   },
-  
-  
+
   /** @private - 
     Invokes the receivers didAppendLayerToDocument() method if it exists and
     then invokes the same on all child views. 
@@ -1718,52 +1804,109 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   // .......................................................
   // CORE DISPLAY METHODS
   //
-  
-  /** @private 
-    Setup a view, but do not finish waking it up. 
+
+  /** @private
+    Setup a view, but do not finish waking it up.
     - configure childViews
-    - generate DOM + plug in outlets/childViews unless rootElement is defined
-    - register the view with the global views hash, which is used for mgmt
+    - Determine the view's theme
+    - Fetch a render delegate from the theme, if necessary
+    - register the view with the global views hash, which is used for event
+      dispatch
   */
   init: function() {
-    var parentView, path, root, idx, len, lp, dp ;
-    
-    sc_super() ;
-    
-    // set up theme
-    var baseTheme = this.baseTheme;
-    this.baseTheme = this._baseThemeProperty;
-    this.set("baseTheme", baseTheme);
-    
-    var theme = this.theme;
-    this.theme = this._themeProperty;
-    this.set("theme", theme);
+    var parentView = this.get('parentView'),
+        theme = this.get('theme'), themeName,
+        renderDelegate = this.get('renderDelegate'), renderDelegateName,
+        path, root, idx, len, lp, dp ;
 
-    // register for event handling
+    sc_super() ;
+
+    // Determine which SC.Theme instance to use for this view.
+
+    // If no theme has been set, it will be inherited from the parent view.
+    if (SC.empty(theme)) {
+      theme = this.get('themeFromParentView');
+
+    // If the theme is a string, attempt to convert it into an SC.Theme
+    // instance.
+    } else if (SC.typeOf(theme) === SC.T_STRING) {
+      themeName = theme;
+      theme = SC.Theme.find(themeName);
+
+      // If no theme could be found with that name, fall back to the parent's
+      // theme.
+      if (!theme) {
+        theme = this.get('themeFromParentView');
+
+        // For backwards compatibility, the theme name should be added to the
+        // class names if no theme is found that corresponds to the string.
+        //
+        // For example, in older versions of SproutCore, SC.ButtonView may
+        // have had its theme property set to 'capsule' to designate that a
+        // different visual style should be applied.
+        this._themeClassName = themeName;
+      }
+    }
+    this.set('theme', theme);
+
+    // If this view does not have a render delegate but has
+    // renderDelegateName set, try to retrieve the render delegate from the
+    // theme.
+    if (!renderDelegate) {
+      renderDelegateName = this.get('renderDelegateName');
+
+      if (renderDelegateName) {
+        renderDelegate = theme[renderDelegateName];
+        if (!renderDelegate) {
+          throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
+        }
+
+        this.set('renderDelegate', renderDelegate);
+      }
+    }
+
+    // Register the view for event handling. This hash is used by
+    // SC.RootResponder to dispatch incoming events.
     SC.View.views[this.get('layerId')] = this;
-    
+
     var childViews = this.get('childViews');
-    
+
     // setup child views.  be sure to clone the child views array first
     this.childViews = childViews ? childViews.slice() : [] ;
     this.createChildViews() ; // setup child Views
     this._hasCreatedChildViews = YES;
-    
+
     // register display property observers ..
-    // TODO: Optimize into class setup 
-    dp = this.get('displayProperties') ; 
+    // TODO: Optimize into class setup
+    dp = this.get('displayProperties') ;
     idx = dp.length ;
     while (--idx >= 0) {
       this.addObserver(dp[idx], this, this.displayDidChange) ;
     }
-    
+
     // register for drags
     if (this.get('isDropTarget')) SC.Drag.addDropTarget(this) ;
-    
+
     // register scroll views for autoscroll during drags
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
   },
-  
+
+  /**
+    Returns the theme from the parent view, or the default theme if this
+    view does not have a parent.
+
+    @property {SC.Theme}
+  */
+  themeFromParentView: function() {
+    var parentView = this.get('parentView');
+
+    if (!parentView) {
+      return SC.Theme.find(SC.defaultTheme);
+    }
+
+    return parentView.get('theme');
+  }.property('parentView').cacheable(),
+
   /**
     Wakes up the view. The default implementation immediately syncs any 
     bindings, which may cause the view to need its display updated. You 
