@@ -5,15 +5,15 @@ SC.RendererRenderDelegate = SC.Object.extend({
 
     this._updateRendererProperties(view, renderer);
     renderer.render(context);
-    
+
     view._scrrd_renderer = renderer;
   },
-  
+
   update: function(view, elem) {
     var renderer = view._scrrd_renderer;
-    
+
     this._updateRendererProperties(view, renderer);
-    
+
     renderer.update(elem);
   },
 
@@ -22,11 +22,11 @@ SC.RendererRenderDelegate = SC.Object.extend({
         attrHash = {};
     var idx, len = displayProperties.length, key;
 
-    for (idx = 0; idx < len; idx++) {      
+    for (idx = 0; idx < len; idx++) {
       key = displayProperties[idx];
       attrHash[key] = view.getDisplayProperty(key);
     }
-    
+
     attrHash['themeName'] = view.themeName;
 
     renderer.attr(attrHash);
