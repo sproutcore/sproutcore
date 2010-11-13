@@ -303,7 +303,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       segments: items,
       align: this.get('align'),
       layoutDirection: this.get('layoutDirection'),
-      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size
+      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size,
+      themeName: this._themeClassName
     });
   },
 

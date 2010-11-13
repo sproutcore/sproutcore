@@ -27,6 +27,8 @@ SC.BaseTheme.Segmented = SC.Renderer.extend({
         reusables = this._segments,
         segment, ren;
 
+    context.addClass(this.themeName);
+
     if (!reusables) reusables = this._segments = [];
 
     // now, create new stuff
@@ -68,6 +70,7 @@ SC.BaseTheme.Segmented = SC.Renderer.extend({
 
   update: function(cq) {
     this.updateClassNames(cq);
+    cq.addClass(this.themeName);
 
     // this is actually performance-oriented. If we are completely changing the list of segments...
     // it may be faster to just re-render them all in one go. Plus it's simple.
