@@ -1194,6 +1194,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     context.addClass(this.get('classNames'));
+    if (this.get('themeName')) {
+      context.addClass(this.get('themeName'));
+    }
 
     var cursor = this.get('cursor');
     if (cursor) context.addClass(cursor.get('className'));
