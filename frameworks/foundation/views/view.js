@@ -1346,7 +1346,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // to such at some point.
     // TODO: consider
     // SC2.0: this should go away.
-    if (this._themeName && classNames.indexOf(this._themeName) < 0) classNames.push(this._themeName);
+    var themeName = this.get('themeName');
+    if (themeName && classNames.indexOf(themeName) < 0) classNames.push(themeName);
 
     // get cursor:
     var cursor = this.get("cursor");
