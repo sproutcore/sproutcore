@@ -39,13 +39,13 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       var c = Greenhouse.fileController.get('content');
       if(c) {
         c.refresh();
-        this.goState('gettingFile');
+        this.gotoState('gettingFile');
       }
     },
 
     unselectFile: function(){
      // TODO: [EG, MB] add the action for unselecting 
-     this.goState('readyWaiting');
+     this.gotoState('readyWaiting');
     },
 
     reloadIframe: function(){
@@ -53,7 +53,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       Greenhouse.gettingFile._firstTime = YES;
 
       Greenhouse.iframe.location.reload();
-      this.goState('iframeLoading');
+      this.gotoState('iframeLoading');
     },
 
     resizePage: function(sender){
@@ -79,23 +79,12 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     // Ready substates
     // 
     readyWaiting: SC.State.design({
-
-      parentState: 'ready',
-
-      enterState: function(){
-
-      },
-      exitState: function(){
-
-      }
-
     }),
 
     gettingFile: SC.State.design({
 
-      parentState: 'ready',
-
-      initState: function(){
+      init: function(){
+        sc_super();
         this._firstTime = YES;
       },
 
@@ -118,8 +107,6 @@ Greenhouse.mixin( /** @scope Greenhouse */{
 
     fileSelected: SC.State.design({
 
-      parentState: 'ready',
-
       enterState: function(){
         //TODO: draw message saing we can't do anythign with this right now...
       },
@@ -129,7 +116,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     pageSelected: SC.State.design({
 
       parentState: 'ready',
-      initialSubState: 'noDock',
+      initialSubstate: 'noDock',
 
       enterState: function(){},
       exitState: function(){},

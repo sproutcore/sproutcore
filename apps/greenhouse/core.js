@@ -28,9 +28,9 @@ Greenhouse = SC.Object.create( SC.StatechartManager,
   store: SC.Store.create().from('Greenhouse.DataSource'),
   
   //statechart options
-  log: YES,
+  monitorIsActive: YES,
   
-  startOnInit: NO,
+  
     
   loadIframeWithPage: function(firstTime){
     var c = Greenhouse.fileController.get('content'), iframe = Greenhouse.get('iframe'), namespace, page;

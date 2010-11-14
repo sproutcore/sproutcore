@@ -112,7 +112,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         this._grabDropTargets();
         this._setupGreenhouse();
         this._setupEventBlocker();
-        this.invokeLater(function(){this.gotoState('readyWaiting');}); //totally cheating!!
+        this.gotoState('readyWaiting');
+        //this.invokeLater(function(){this.gotoState('readyWaiting');}); //totally cheating!!
       },
       exitState: function(){
 
