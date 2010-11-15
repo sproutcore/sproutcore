@@ -18,6 +18,11 @@
   some action depending on the new value.  (of course, you can always bind to
   the value as well, which is generally the preferred approach.)
   
+  SegmentedView makes use of an overflow segment that appears automatically
+  when the total width of its individual segments exceeds the width of itself.
+  The toolTip and title of the overflow segment may be modified using 
+  overflowToolTip and overflowTitle respectively.
+  
   h1. Defining Your Segments
   
   You define your segments by providing a items array, much like you provide
@@ -171,6 +176,20 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   itemKeyEquivalentKey: null,
 
   /**
+    The title to use for the overflow segment if it appears.
+    
+    @property {String}
+  */
+  overflowTitle: '&raquo;',
+  
+  /**
+    The toolTip to use for the overflow segment if it appears.
+    
+    @property {String}
+  */
+  overflowToolTip: 'More&hellip;',
+  
+  /**
     The array of itemKeys that will be searched to build the displayItems
     array.  This is used internally by the class.  You will not generally
     need to access or edit this array.
@@ -255,10 +274,23 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (loc && cur.toolTip && SC.typeOf(cur.toolTip) === SC.T_STRING) cur.toolTip = cur.toolTip.loc();
       
       if (this.overflowIndex <= idx) {
+        var title = this.get('overflowTitle');
+        var toolTip = this.get('overflowToolTip');
         
-        // return an overflow segment the first time
+        if (loc && title) title = title.loc();
+        if (loc && toolTip && SC.typeOf(toolTip) === SC.T_STRING) toolTip = toolTip.loc();
+      
+        // return an overflow segment the first time we overflow an item
         if (overflowItems.length === 0) {
-          ret[ret.length] = {width: null, isOverflowSegment: YES};
+          ret[ret.length] = {
+            title: title,
+            isEnabled: YES,
+            icon: null,
+            width: null,
+            toolTip: toolTip,
+            keyEquivalent: null,
+            isOverflowSegment: YES
+          };
         }
         
         // store the overflowed items in overflowItems (to be used in popup menu)
