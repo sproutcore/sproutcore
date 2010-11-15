@@ -2,19 +2,17 @@
 
 module("Propogating relationships with Store#pushRetrieve and Store#pushDestroy", {
   setup: function () {
-
     var MyApp = window.MyApp = SC.Object.create({
       store: SC.Store.create()
     });
   }
 });
 
-/**
- * pushRetrieve behaviors
- */
+// ..........................................................
+// pushRetrieve BEHAVIOR
+//
 
 /**
-
  [master] --> [slave]
 
   precond - master has a slave
@@ -46,22 +44,21 @@ test("Master updates a slave [one(master) to one(slave)].", function () {
   SC.RunLoop.end();
 
   var s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    m1 = MyApp.store.find(MyApp.Master, 'm1');
+      m1 = MyApp.store.find(MyApp.Master, 'm1');
 
   equals(m1.get('slave'), s1, 'precond - m1 should have a slave');
   equals(s1.get('master'), m1, 's1 should have a master');
 });
 
 /**
-
  [master]
   v
   |
-  |--> [slave1]
+  +--> [slave1]
   |
  ...
   |
-  |--> [slaveN]
+  +--> [slaveN]
 
   precond - master has slaves
   test - slaves have a master
@@ -88,13 +85,13 @@ test("A master updates many slave [one(master) to many(slave)].", function () {
   ]);
 
   MyApp.store.loadRecords(MyApp.Master, [
-    { guid: 'm1', slaves: ['s1','s2'] }
+    { guid: 'm1', slaves: ['s1', 's2'] }
   ]);
   SC.RunLoop.end();
 
-  var s1 = MyApp.store.find(MyApp.Slave, 's1');
-  var s2 = MyApp.store.find(MyApp.Slave, 's2');
-  var m1 = MyApp.store.find(MyApp.Master, 'm1');
+  var s1 = MyApp.store.find(MyApp.Slave, 's1'),
+      s2 = MyApp.store.find(MyApp.Slave, 's2'),
+      m1 = MyApp.store.find(MyApp.Master, 'm1');
 
   equals(m1.get('slaves').length(), 2, 'precond - m1 has 2 slaves');
   equals(s1.get('master'), m1, 's1 should have master m1');
@@ -102,20 +99,19 @@ test("A master updates many slave [one(master) to many(slave)].", function () {
 });
 
 /**
-
  [slave]
   ^
   |
-  |--< [master1]
+  +--< [master1]
   |
  ...
   |
-  |--< [masterN]
+  +--< [masterN]
 
   precond - master has a slave
   test - slave has many masters
  */
-test("Many parent master updates a slave [many(master) to one(slave)]", function() {
+test("Many parent master updates a slave [many(master) to one(slave)]", function () {
   MyApp.Slave = SC.Record.extend({
     masters: SC.Record.toMany('MyApp.Master', {
       inverse: 'slave',
@@ -142,8 +138,8 @@ test("Many parent master updates a slave [many(master) to one(slave)]", function
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    m2 = MyApp.store.find(MyApp.Master, 'm2');
-    s1 = MyApp.store.find(MyApp.Slave, 's1');
+      m2 = MyApp.store.find(MyApp.Master, 'm2'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1');
 
   equals(m1.get('slave'), s1, 'precond - m1 should have slave s1');
   equals(m2.get('slave'), s1, 'precond - m2 should have slave s1');
@@ -154,7 +150,6 @@ test("Many parent master updates a slave [many(master) to one(slave)]", function
 });
 
 /**
-
  [master1] ... [masterN]
   v             v
   |             |
@@ -166,9 +161,8 @@ test("Many parent master updates a slave [many(master) to one(slave)]", function
 
   precond - masters have many slaves
   test - slaves have many masters
-
  */
-test("Many masters update many slaves [many(master) to many(slave)]", function() {
+test("Many masters update many slaves [many(master) to many(slave)]", function () {
   MyApp.Master = SC.Record.extend({
     slaves: SC.Record.toMany('MyApp.Slave', {
       inverse: 'masters',
@@ -190,15 +184,15 @@ test("Many masters update many slaves [many(master) to many(slave)]", function()
   ]);
 
   MyApp.store.loadRecords(MyApp.Master, [
-    { guid: 'm1', slaves: ['s1','s2'] },
-    { guid: 'm2', slaves: ['s1','s2'] }
+    { guid: 'm1', slaves: ['s1', 's2'] },
+    { guid: 'm2', slaves: ['s1', 's2'] }
   ]);
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    m2 = MyApp.store.find(MyApp.Master, 'm2'),
-    s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    s2 = MyApp.store.find(MyApp.Slave, 's2');
+      m2 = MyApp.store.find(MyApp.Master, 'm2'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1'),
+      s2 = MyApp.store.find(MyApp.Slave, 's2');
 
   equals(m1.get('slaves').length(), 2, 'precond - m1 should have 2 slaves');
   equals(m2.get('slaves').length(), 2, 'precond - m2 should have 2 slaves');
@@ -213,11 +207,10 @@ test("Many masters update many slaves [many(master) to many(slave)]", function()
 });
 
 /**
-
  [slave] >--- X ---> [*]
 
- precond - * is related to slave
- test - after update to slave, * is related to slave
+  precond - * is related to slave
+  test - after update to slave, * is related to slave
  */
 test("A slave does NOT update a relationship [one(slave) to *]", function () {
   MyApp.Slave = SC.Record.extend({
@@ -246,7 +239,7 @@ test("A slave does NOT update a relationship [one(slave) to *]", function () {
   SC.RunLoop.end();
 
   var s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    r1 = MyApp.store.find(MyApp.Relative, 'r1');
+      r1 = MyApp.store.find(MyApp.Relative, 'r1');
 
   equals(s1.get('relative'), r1, 'precond1 - s1 has relative r1');
 
@@ -271,14 +264,13 @@ test("A slave does NOT update a relationship [one(slave) to *]", function () {
   SC.RunLoop.end();
 
   var s2 = MyApp.store.find(MyApp.Slave, 's2'),
-    r2 = MyApp.store.find(MyApp.Relative, 'r2');
+      r2 = MyApp.store.find(MyApp.Relative, 'r2');
 
   equals(s2.get('relative'), r2, 'precond3 - s2 is related to r2');
   ok(SC.none(r2.get('slave')), 'test2 - r2 should NOT have a slave');
 });
 
 /**
-
  [master1] <----> [master2]
 
   precond - master1 has master2
@@ -302,36 +294,35 @@ test("A master will mutually update a master [one(master) to one(master)].", fun
   ]);
   SC.RunLoop.end();
 
-  var m1 = MyApp.store.find(MyApp.Master, 'm1');
-  var m2 = MyApp.store.find(MyApp.Master, 'm2');
+  var m1 = MyApp.store.find(MyApp.Master, 'm1'),
+      m2 = MyApp.store.find(MyApp.Master, 'm2');
 
   equals(m1.get('relative'), m2, 'precond - m1 should have a relative "m2"');
   equals(m2.get('relative'), m1, 'm2 should have a relative "m1"');
 });
 
-/**
- * REPLACING
- */
+// ..........................................................
+// REPLACING RELATIONSHIPS
+//
 
 /**
-
  [master1] <--> [slave]
 
- precond - master1 has slave
- precond - slave has master1
+  precond - master1 has slave
+  precond - slave has master1
 
  ...relate master2 to slave...
 
  [master1] --> [slave]
                 ^
- [master2] <----|
+                |
+ [master2] <----+
 
- precond - master2 has slave
- precond - slave has master2
- test - master1 has slave
-
+  precond - master2 has slave
+  precond - slave has master2
+  test - master1 has slave
  */
-test("Stealing relationship does NOT propagate to other masters [one(master) to one(slave)]", function() {
+test("Stealing relationship does NOT propagate to other masters [one(master) to one(slave)]", function () {
   MyApp.Slave = SC.Record.extend({
     master: SC.Record.toOne('MyApp.Master', {
       inverse: 'slave',
@@ -357,7 +348,7 @@ test("Stealing relationship does NOT propagate to other masters [one(master) to 
   SC.RunLoop.end();
 
   var s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    m1 = MyApp.store.find(MyApp.Master, 'm1');
+      m1 = MyApp.store.find(MyApp.Master, 'm1');
 
   equals(m1.get('slave'), s1, 'precond - m1 should have s1');
   equals(s1.get('master'), m1, 'precond - s1 should relate to m1');
@@ -377,26 +368,26 @@ test("Stealing relationship does NOT propagate to other masters [one(master) to 
 });
 
 
-/**
- * RELINQUISHING
- */
+// ..........................................................
+// RELINQUISHING RELATIONSHIPS
+//
 
 /**
  [master] <----> [slave1]
 
- precond - master has slave1
- precond - slave1 has master
+  precond - master has slave1
+  precond - slave1 has master
 
  [master] <----> [slave2]
 
             X--- [slave1]
 
- precond - master has slave2
- precond - slave2 has master
+  precond - master has slave2
+  precond - slave2 has master
 
- test - slave1 does NOT have master
+  test - slave1 does NOT have master
  */
-test("Relinquishing relationship on master<->* does propagate [one(master) to one(*)]", function() {
+test("Relinquishing relationship on master<->* does propagate [one(master) to one(*)]", function () {
   MyApp.Slave = SC.Record.extend({
     master: SC.Record.toOne('MyApp.Master', {
       inverse: 'slave',
@@ -423,8 +414,8 @@ test("Relinquishing relationship on master<->* does propagate [one(master) to on
   SC.RunLoop.end();
 
   var s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    s2 = MyApp.store.find(MyApp.Slave, 's2'),
-    m1 = MyApp.store.find(MyApp.Master, 'm1');
+      s2 = MyApp.store.find(MyApp.Slave, 's2'),
+      m1 = MyApp.store.find(MyApp.Master, 'm1');
 
   equals(m1.get('slave'), s1, 'precond - m1 should have s1');
   equals(s1.get('master'), m1, 'precond - s1 should relate to m1');
@@ -445,15 +436,15 @@ test("Relinquishing relationship on master<->* does propagate [one(master) to on
 /**
  [master] <----> [slave1, ..., slaveN]
 
- precond - master has slaves
- precond - slaves have master
+  precond - master has slaves
+  precond - slaves have master
 
  [master] ---X [slave1]
 
- precond - master does NOT have slave1
- test - slave1 does NOT have master
+  precond - master does NOT have slave1
+  test - slave1 does NOT have master
  */
-test("Relinquishing a toMany relationship does propagate from master [one(master) to many(*)]", function() {
+test("Relinquishing a toMany relationship does propagate from master [one(master) to many(*)]", function () {
   MyApp.Slave = SC.Record.extend({
     master: SC.Record.toOne('MyApp.Master', {
       inverse: 'slaves',
@@ -475,13 +466,13 @@ test("Relinquishing a toMany relationship does propagate from master [one(master
   ]);
 
   MyApp.store.loadRecords(MyApp.Master, [
-    { guid: 'm1', slaves: ['s1','s2'] }
+    { guid: 'm1', slaves: ['s1', 's2'] }
   ]);
   SC.RunLoop.end();
 
   var s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    s2 = MyApp.store.find(MyApp.Slave, 's2'),
-    m1 = MyApp.store.find(MyApp.Master, 'm1');
+      s2 = MyApp.store.find(MyApp.Slave, 's2'),
+      m1 = MyApp.store.find(MyApp.Master, 'm1');
 
   equals(m1.get('slaves').length(), 2, 'precond1 - m1 should have 2 slaves');
   equals(s1.get('master'), m1, 'precond2 - s1 should relate to m1');
@@ -501,19 +492,18 @@ test("Relinquishing a toMany relationship does propagate from master [one(master
 });
 
 /**
-
  [slave]
   ^
   |
-  |--< [master1]
+  +--< [master1]
   |
  ...
   |
-  |--< [masterN]
+  +--< [masterN]
 
-  precond - master1 has relationship to slave
-  precond - slave has relationship many masters
-  precond - slave has relationship to master1
+   precond - master1 has relationship to slave
+   precond - slave has relationship many masters
+   precond - slave has relationship to master1
 
   ...master1 relinquishes relationship to slave...
 
@@ -522,13 +512,13 @@ test("Relinquishing a toMany relationship does propagate from master [one(master
   |
  ...
   |
-  |--< [masterN]
+  +--< [masterN]
 
-  precond - master1 has no slave
-  test - slave has many masters, none of which is master1
+   precond - master1 has no slave
+   test - slave has many masters, none of which is master1
 
  */
-test("Relinquish propagates from many master to one slave [many(master) to one(slave)]", function() {
+test("Relinquish propagates from many master to one slave [many(master) to one(slave)]", function () {
   MyApp.Master = SC.Record.extend({
     slave: SC.Record.toOne('MyApp.Slave', {
       inverse: 'masters',
@@ -555,8 +545,8 @@ test("Relinquish propagates from many master to one slave [many(master) to one(s
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    m2 = MyApp.store.find(MyApp.Master, 'm2');
-    s1 = MyApp.store.find(MyApp.Slave, 's1');
+      m2 = MyApp.store.find(MyApp.Master, 'm2'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1');
 
   equals(s1.get('masters').length(), 2, 'precond - s1 should have 2 masters');
   equals(m1.get('slave'), s1, 'precond - m1 should have slave s1');
@@ -601,9 +591,8 @@ test("Relinquish propagates from many master to one slave [many(master) to one(s
 
   test - slave1 has N-1 masters
   test - slave does NOT have relationship to master1
-
  */
-test("Removing a relationship propagates from many master to many slave [many(master) to many(slave)]", function() {
+test("Removing a relationship propagates from many master to many slave [many(master) to many(slave)]", function () {
   MyApp.Master = SC.Record.extend({
     slaves: SC.Record.toMany('MyApp.Slave', {
       inverse: 'masters',
@@ -625,15 +614,15 @@ test("Removing a relationship propagates from many master to many slave [many(ma
   ]);
 
   MyApp.store.loadRecords(MyApp.Master, [
-    { guid: 'm1', slaves: ['s1','s2'] },
-    { guid: 'm2', slaves: ['s1','s2'] }
+    { guid: 'm1', slaves: ['s1', 's2'] },
+    { guid: 'm2', slaves: ['s1', 's2'] }
   ]);
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    m2 = MyApp.store.find(MyApp.Master, 'm2'),
-    s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    s2 = MyApp.store.find(MyApp.Slave, 's2');
+      m2 = MyApp.store.find(MyApp.Master, 'm2'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1'),
+      s2 = MyApp.store.find(MyApp.Slave, 's2');
 
   equals(m1.get('slaves').length(), 2, 'precond - m1 should have 2 slaves');
   equals(m2.get('slaves').length(), 2, 'precond - m2 should have 2 slaves');
@@ -655,23 +644,21 @@ test("Removing a relationship propagates from many master to many slave [many(ma
   ok(s1.get('masters').indexOf(m2) !== -1, 's1 should have m2 as a master');
 });
 
-/**
- * pushDestroy
- */
+// ..........................................................
+// pushDestroy BEHAVIOR
+//
 
 /**
-
  [master] --> [slave]
 
- precond - master has slave
- precond - slave has master
+  precond - master has slave
+  precond - slave has master
 
  ... pushDestroy master ...
 
- test - slave has NO master
-
+  test - slave has NO master
  */
-test("pushDestroy record propagates from master to slave [*(master) to one(slave)]", function() {
+test("pushDestroy record propagates from master to slave [*(master) to one(slave)]", function () {
   MyApp.Master = SC.Record.extend({
     slave: SC.Record.toOne('MyApp.Slave', {
       inverse: 'master',
@@ -697,7 +684,7 @@ test("pushDestroy record propagates from master to slave [*(master) to one(slave
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    s1 = MyApp.store.find(MyApp.Slave, 's1');
+      s1 = MyApp.store.find(MyApp.Slave, 's1');
 
   equals(m1.get('slave'), s1, 'precond - m1 should have s1 as slave');
   equals(s1.get('master'), m1, 'precond - s1 should have m1 as slave');
@@ -711,18 +698,16 @@ test("pushDestroy record propagates from master to slave [*(master) to one(slave
 });
 
 /**
-
  [master] --> [slave]
 
- precond - master has slave
- precond - slave has master
+  precond - master has slave
+  precond - slave has master
 
  ... pushDestroy master ...
 
- test - slave has NO master
-
+  test - slave has NO master
  */
-test("pushDestroy record propagates from master to many slaves [*(master) to many(slave)]", function() {
+test("pushDestroy record propagates from master to many slaves [*(master) to many(slave)]", function () {
   MyApp.Master = SC.Record.extend({
     slaves: SC.Record.toMany('MyApp.Slave', {
       inverse: 'masters',
@@ -744,13 +729,13 @@ test("pushDestroy record propagates from master to many slaves [*(master) to man
   ]);
 
   MyApp.store.loadRecords(MyApp.Master, [
-    { guid: 'm1', slaves: ['s1','s2'] }
+    { guid: 'm1', slaves: ['s1', 's2'] }
   ]);
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    s2 = MyApp.store.find(MyApp.Slave, 's2');
+      s1 = MyApp.store.find(MyApp.Slave, 's1'),
+      s2 = MyApp.store.find(MyApp.Slave, 's2');
 
   equals(m1.get('slaves').length(), 2, 'precond - m1 should have 2 slaves');
   ok(s1.get('masters').indexOf(m1) !== -1, 'precond - s1 should have m1 as a master');
@@ -766,10 +751,10 @@ test("pushDestroy record propagates from master to many slaves [*(master) to man
 });
 
 /**
- * Standard Sproutcore Behaviors
- *
- * this is data showing up from the server, after pushin in changes
- * all records should have status READY_CLEAN
+  Standard Sproutcore Behaviors
+ 
+  This is data showing up from the server- after pushing in changes,
+  all records should have status READY_CLEAN.
  */
 test("Record status for master and slave should be READY_CLEAN", function () {
   MyApp.Master = SC.Record.extend({
@@ -818,7 +803,7 @@ test("Record status for master and slave should be READY_CLEAN", function () {
   ok(s1.get('status') & SC.Record.READY_CLEAN, 's1 should be ready clean after unlink');
 });
 
-test("Record relationships are NOT propagated if related store item does NOT exist at load time", function() {
+test("Record relationships are NOT propagated if related store item does NOT exist at load time", function () {
   MyApp.Generic = SC.Record.extend({
     relative: SC.Record.toOne('MyApp.Generic', {
       inverse: 'relative',
@@ -834,13 +819,13 @@ test("Record relationships are NOT propagated if related store item does NOT exi
   SC.RunLoop.end();
 
   var g1 = MyApp.store.find(MyApp.Generic, 'g1'),
-    g2 = MyApp.store.find(MyApp.Generic, 'g2');
+      g2 = MyApp.store.find(MyApp.Generic, 'g2');
 
-  equals(g2.get('relative'),g1, 'precond - g2 should be relative of g1');
+  equals(g2.get('relative'), g1, 'precond - g2 should be relative of g1');
   ok(SC.none(g1.get('relative')), 'g1 should not be related to g2');
 });
 
-test("Record Attribute can define attribute key", function() {
+test("Record Attribute can define attribute key", function () {
   MyApp.Generic = SC.Record.extend({
     aunty: SC.Record.toOne('MyApp.Generic', {
       inverse: 'relative',
@@ -857,12 +842,12 @@ test("Record Attribute can define attribute key", function() {
   SC.RunLoop.end();
 
   var g1 = MyApp.store.find(MyApp.Generic, 'g1'),
-    g2 = MyApp.store.find(MyApp.Generic, 'g2');
+      g2 = MyApp.store.find(MyApp.Generic, 'g2');
 
-  equals(g2.get('aunty'),g1, 'g2 should be relative of g1');
+  equals(g2.get('aunty'), g1, 'g2 should be relative of g1');
 });
 
-test("Record property does change on linkage", function() {
+test("Record property does change on linkage", function () {
   MyApp.Generic = SC.Record.extend({
     relative: SC.Record.toOne('MyApp.Generic', {
       inverse: 'relative',
@@ -871,12 +856,10 @@ test("Record property does change on linkage", function() {
 
     callCount: 0,
 
-    _relativeObserver: function() {
+    _relativeObserver: function () {
       this.incrementProperty('callCount');
     }.observes('relative')
   });
-
-  r = MyApp.store.find(MyApp.Generic);
 
   SC.RunLoop.begin();
   MyApp.store.loadRecords(MyApp.Generic, [
@@ -886,7 +869,7 @@ test("Record property does change on linkage", function() {
   SC.RunLoop.end();
 
   var g1 = MyApp.store.find(MyApp.Generic, 'g1'),
-    g2 = MyApp.store.find(MyApp.Generic, 'g2');
+      g2 = MyApp.store.find(MyApp.Generic, 'g2');
 
   equals(g1.get('callCount'), 0, 'precond - g1._relativeObserver should NOT have fired yet');
   equals(g2.get('callCount'), 0, 'precond - g2._relativeObserver should NOT have fired yet');
@@ -897,17 +880,21 @@ test("Record property does change on linkage", function() {
   ]);
   SC.RunLoop.end();
 
-  equals(g1.get('relative'),g2, 'precond - g1 should be relative of g2');
-  equals(g2.get('relative'),g1, 'precond - g2 should be relative of g1');
+  equals(g1.get('relative'), g2, 'precond - g1 should be relative of g2');
+  equals(g2.get('relative'), g1, 'precond - g2 should be relative of g1');
 
   equals(g1.get('callCount'), 1, 'g1._relativeObserver should fire once');
   equals(g2.get('callCount'), 1, 'g2._relativeObserver should fire once');
 });
 
+// ..........................................................
+// RECORD ATTRIBUTE
+//
+
 /**
- * define new RecordAttribute property createIfEmpty
+  createIfEmpty RecordAttribute flag tests.
  */
-test("RecordAttribute 'createIfEmpty' tests", function() {
+test("RecordAttribute flag 'createIfEmpty' tests", function () {
   MyApp.Master = SC.Record.extend({
     slave: SC.Record.toOne('MyApp.Slave', {
       inverse: 'master',
@@ -935,16 +922,16 @@ test("RecordAttribute 'createIfEmpty' tests", function() {
   SC.RunLoop.end();
 
   var m1 = MyApp.store.find(MyApp.Master, 'm1'),
-    m2 = MyApp.store.find(MyApp.Master, 'm2'),
-    s1 = MyApp.store.find(MyApp.Slave, 's1'),
-    s2 = MyApp.store.find(MyApp.Slave, 's2');
+      m2 = MyApp.store.find(MyApp.Master, 'm2'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1'),
+      s2 = MyApp.store.find(MyApp.Slave, 's2');
 
   // test lazy creation on isMaster => YES
   ok(s1, 's1 should be created lazily');
-  equals(m1.get('slave'),s1, 'm1 should be master of s1');
+  equals(m1.get('slave'), s1, 'm1 should be master of s1');
 
   // test lazy creation fails on isMaster => NO
   ok(SC.none(m2), 'm2 should NOT have been creaetd');
-  ok(!s2.get('master')
-     ||s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
+  ok(!s2.get('master') ||
+      s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
 });

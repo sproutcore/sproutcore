@@ -2590,12 +2590,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 },
 
 {
-  _inverseDidRelinquishRelationships: function(ids, recordType, attr, inverseId) {
+
+  // ..........................................................
+  // ASYNCHRONOUS RECORD RELATIONSHIPS
+  //
+
+  /** @private
+    Relinquish many records.
+
+    This happens when a master record (isMaster => YES) removes a reference
+    to related records, either through pushRetrieve or pushDestroy.
+   */
+  _inverseDidRelinquishRelationships: function(recordType, ids, attr, inverseId) {
     ids.forEach(function(id) {
       this._inverseDidRelinquishRelationship(recordType, id, attr, inverseId);
     },this);
   },
 
+  /** @private
+    Relinquish the record, updating the slave record to not have a reference
+    to the one being updated.
+   */
   _inverseDidRelinquishRelationship: function(recordType, id, toAttr, relativeID) {
     var storeKey = recordType.storeKeyFor(id),
       dataHash = this.readDataHash(storeKey),
@@ -2614,18 +2629,31 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.pushRetrieve(recordType, id, dataHash, undefined, true);
   },
 
-  _inverseDidAddRelationships: function(ids, recordType, attr, inverseId) {
+  /** @private
+    Add a relationship to many inverse records.
+
+    This happens when a master record (isMaster => YES) adds a reference
+    to another record on a pushRetrieve.
+   */
+  _inverseDidAddRelationships: function(recordType, ids, attr, inverseId) {
     ids.forEach(function(id) {
       this._inverseDidAddRelationship(recordType, id, attr, inverseId);
     },this);
   },
 
+
+  /** @private
+    Add a relationship to an inverse record.
+
+    If the flag createIfEmpty is set to YES, then the inverse record will be
+    created lazily.
+   */
   _inverseDidAddRelationship: function(recordType, id, toAttr, relativeID) {
     var storeKey = recordType.storeKeyFor(id),
-      dataHash = this.readDataHash(storeKey),
-      status = this.peekStatus(storeKey),
-      key = toAttr.inverse,
-      proto = recordType.prototype;
+        dataHash = this.readDataHash(storeKey),
+        status = this.peekStatus(storeKey),
+        key = toAttr.inverse,
+        proto = recordType.prototype;
 
     // TODO: should createIfEmpty apply to DESTROYED_* states?
     if ((status === SC.Record.EMPTY) &&
@@ -2649,10 +2677,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.pushRetrieve(recordType, id, dataHash, undefined, true);
   },
 
-  pushDestroy: function(recordType, id, storeKey) {
+
+  /** @private
+    Iterates over keys on the recordType prototype, looking for RecordAttributes
+    that have relationships (toOne or toMany).
+   */
+  _pushIterator: function (recordType, id, storeKey, lambda, self) {
     var proto = recordType.prototype,
-    attr, currentHash, existingIDs,
-    key, keyValue, inverseIDs, inverseType;
+        attr, currentHash, key, inverseType;
 
     if (typeof storeKey === "undefined") {
       storeKey = recordType.storeKeyFor(id);
@@ -2667,55 +2699,55 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
         if (SC.typeOf(inverseType) !== SC.T_CLASS) continue;
 
-        keyValue = attr.get && attr.get('key') || key;
-
-        // update old relationships
-        existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
-
-        this._inverseDidRelinquishRelationships(existingIDs,
-                                                inverseType,
-                                                attr,
-                                                id);
+        lambda.apply(self, [inverseType, currentHash, attr,
+                            attr.get && attr.get('key') || key]);
       }
     }
+  },
+
+
+  /**
+    Disassociate records that are related to the one being destroyed iff this
+    record is the master (isMaster === YES).
+   */
+  pushDestroy: function(recordType, id, storeKey) {
+    var existingIDs;
+
+    this._pushIterator(recordType, id, storeKey,
+      function (inverseType, currentHash, toAttr, keyValue) {
+        // update old relationships
+        existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
+        this._inverseDidRelinquishRelationships(inverseType, existingIDs, toAttr, id);
+    }, this);
 
     return sc_super();
   },
 
+  /**
+    Associate records that are added via a pushRetrieve, and update subsequent
+    relationships to ensure that the master-slave relationship is kept intact.
+
+    For use cases, see the test for pushRelationships.
+   */
   pushRetrieve: function (recordType, id, dataHash, storeKey, ignore) {
     if (!ignore) {
-      var proto = recordType.prototype,
-      attr, currentHash, existingIDs,
-      key, keyValue, inverseIDs, inverseType;
+      var existingIDs, inverseIDs;
 
-      if (typeof storeKey === "undefined") {
-        storeKey = recordType.storeKeyFor(id);
-      }
-
-      currentHash = this.readDataHash(storeKey) || {};
-
-      for (key in proto) {
-        attr = proto[key];
-        if (attr && attr.typeClass && attr.inverse && attr.isMaster) {
-          inverseType = attr.typeClass();
-
-          if (SC.typeOf(inverseType) !== SC.T_CLASS) continue;
-
-          keyValue = attr.get && attr.get('key') || key;
-
+      this._pushIterator(recordType, id, storeKey,
+        function (inverseType, currentHash, toAttr, keyValue) {
           // update old relationships
           existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
 
           // update new relationships
           inverseIDs = [dataHash[keyValue] || null].flatten().compact().uniq();
 
-          this._inverseDidRelinquishRelationships(existingIDs.filter(function(el) {
-            return inverseIDs.indexOf(el) === -1;
-          }), inverseType, attr, id);
+          this._inverseDidRelinquishRelationships(inverseType, existingIDs.filter(
+            function(el) {
+              return inverseIDs.indexOf(el) === -1;
+            }), toAttr, id);
 
-          this._inverseDidAddRelationships(inverseIDs, inverseType, attr, id);
-        }
-      }
+          this._inverseDidAddRelationships(inverseType, inverseIDs, toAttr, id);
+      }, this);
     }
 
     return sc_super();
