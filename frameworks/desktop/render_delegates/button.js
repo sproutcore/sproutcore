@@ -10,19 +10,19 @@
 */
 SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
   render: function(dataSource, context) {
-    // Fetch the properties needed to render the view.
-    var themeClassName = dataSource._themeClassName,
-        minWidth = dataSource.get('titleMinWidth');
+    var displayProperties = dataSource.getDisplayProperties();
+    var themeClassName    = dataSource._themeClassName;
+    var minWidth          = displayProperties.titleMinWidth;
+    var labelContent;
 
     // Add an icon class name to the button if it contains an icon in its
     // title.
-    context.setClass('icon', !!dataSource.getDisplayProperty('icon'));
+    context.setClass('icon', !!displayProperties.icon);
 
     // For backwards compatibility with SC.ButtonView's old use of the theme
     // property, add the view's _themeClassName to the context if it
     // exists. In these cases, the view's theme property is moved to
     // _themeClassName during SC.View's init method.
-    console.log('themeClassName is '+themeClassName);
     if (themeClassName) {
       context.addClass(themeClassName);
     }
@@ -34,20 +34,19 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     // Create the inner label element that contains the text and, optionally,
     // an icon.
     context = context.begin('label').addClass('sc-button-label');
-    var labelContent = this._htmlForTitleAndIcon(dataSource);
+    labelContent = this._htmlForTitleAndIcon(displayProperties);
     context.push(labelContent);
-    
+
     // By adding the 'ellipsis' class, the text-overflow: ellipsis CSS
     // rule will be applied.
-    if(dataSource.getDisplayProperty('needsEllipsis')){
+    if (displayProperties.needsEllipsis){
       context.addClass('ellipsis');
     }
 
     context = context.end();
+    context.push("</span>");
 
-    context.push("</span>") ;
-
-    if (dataSource.get('supportFocusRing')) {
+    if (displayProperties.supportFocusRing) {
       context.push('<div class="focus-ring">',
                     '<div class="focus-left"></div>',
                     '<div class="focus-middle"></div>',
@@ -56,33 +55,34 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
   },
 
   update: function(dataSource, query) {
-    var icon = dataSource.getDisplayProperty('icon') || '',
-        themeClassName = dataSource._themeClassName,
-        title = dataSource.getDisplayProperty('title'),
-        titleMinWidth = dataSource.get('titleMinWidth'),
-        hint = dataSource.getDisplayProperty('hint'),
-        escapeHTML = dataSource.get('escapeHTML'),
-        minWidth = dataSource.get('titleMinWidth'),
-        didChangeForKey = 'buttonRenderDelegate';
+    var displayProperties = dataSource.getDisplayProperties();
+    var icon              = displayProperties.icon || '';
+    var themeClassName    = dataSource._themeClassName;
+    var title             = displayProperties.title;
+    var titleMinWidth     = displayProperties.titleMinWidth;
+    var hint              = displayProperties.hint;
+    var escapeHTML        = displayProperties.escapeHTML;
+    var minWidth          = displayProperties.titleMinWidth;
+    var didChangeForKey   = 'buttonRenderDelegate';
 
     query.addClass(dataSource._themeClassName);
     if (dataSource.didChangeFor(didChangeForKey, 'isActive')) {
-      if (dataSource.get('isActive')) {
+      if (displayProperties.isActive) {
         query.addClass('active');
       }
     }
 
     if (dataSource.didChangeFor(didChangeForKey,'displayTitle','icon')) {
-      query.find('label').html(this._htmlForTitleAndIcon(dataSource));
+      query.find('label').html(this._htmlForTitleAndIcon(displayProperties));
     }
   },
-  
-  _htmlForTitleAndIcon: function(dataSource) {
-    var title = dataSource.getDisplayProperty('title'),
-        titleMinWidth = dataSource.get('titleMinWidth'),
-        hint = dataSource.getDisplayProperty('hint'),
-        escapeHTML = dataSource.get('escapeHTML'),
-        icon = dataSource.getDisplayProperty('icon') || '';
+
+  _htmlForTitleAndIcon: function(displayProperties) {
+    var title = displayProperties.title,
+        titleMinWidth = displayProperties.titleMinWidth,
+        hint = displayProperties.hint,
+        escapeHTML = displayProperties.escapeHTML,
+        icon = displayProperties.icon || '';
 
     // Escape the title of the button if needed. This prevents potential
     // XSS attacks.
@@ -110,7 +110,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
         icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="'+icon+'" />';
       }
     }
-    
+
     return icon+title;
   }
 });
