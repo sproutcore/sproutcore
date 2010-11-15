@@ -27,16 +27,39 @@ SC.BaseTheme.Checkbox = SC.Renderer.extend({
   render: function(context) {
     sc_super();
 
+    this._titleRenderer = this.theme.renderer('title');
+
+    // configure sub renderers
+    this._titleRenderer.attr({
+      title: this.title,
+      icon: this.icon,
+      needsEllipsis: this.needsEllipsis,
+      escapeHTML: this.escapeHTML
+    });
+
     context.attr('role', 'checkbox');
     context.attr('name', SC.guidFor(this));
     context.attr("aria-checked", this.classNames.contains('sel').toString());
     context.push('<span class="button"></span>');
+    
+    /* Render title */
+    context = context.begin("span").addClass("label");
+    this._titleRenderer.render(context);
+    context = context.end();
 
     this.resetChanges();
   },
 
   update: function(cq) {
     this.updateClassNames(cq);
+
+    this._titleRenderer.attr({
+      title: this.title,
+      icon: this.icon,
+      needsEllipsis: this.needsEllipsis,
+      escapeHTML: this.escapeHTML
+    });
+
     cq.attr("aria-checked", this.classNames.contains('sel').toString());
   }
 });
