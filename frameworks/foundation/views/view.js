@@ -1231,24 +1231,43 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   /**
-    Returns the display representation of a property if it exists, otherwise
-    returns the value of that property.
+    Returns a hash containing property names and their values from the
+    view's display properties.
 
-    To create a display version of a property, prefix it with 'display'. For
-    example, in SC.ButtonView, you may set the title property to a string, but
-    the value displayed in the browser may have any HTML escaped. In that
-    case, the displayTitle property is used to store the value of title after
-    it has been converted for display.
+    This behaves similar to get(), but will first check for the existence of
+    the display version of a property. For example, if title is a display
+    property, it will return the value for the displayTitle property.
 
-    This method is used by render delegates to ensure that they receive the
-    version of a property that is appropriate to output to the DOM.
+    @returns {Object}
   */
+  getDisplayProperties: function() {
+    var idx, len, displayProperties, key, val, displayPropertiesHash = {};
+
+    displayProperties = this.get('displayProperties');
+    len = displayProperties.length;
+
+    for (idx = 0; idx < len; idx++) {
+      key = displayProperties[idx];
+
+      val = this.get('display'+key.capitalize());
+
+      if (val) {
+        displayPropertiesHash[key] = val;
+      } else {
+        displayPropertiesHash[key] = this.get(key);
+      }
+    }
+
+    return displayPropertiesHash;
+  },
+  
+  // TODO delete this
   getDisplayProperty: function(key) {
     var val = this.get('display'+key.capitalize());
-
+    
     if (val) return val;
-
-    return this.get(key);
+    
+    return this.get('key');
   },
 
   /**
