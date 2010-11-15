@@ -301,7 +301,7 @@ SC.Animatable = {
     this.layout = start;
 
     // get our frame and parent's frame
-    var p = this.computeParentDimensions();
+    var p = this.computeParentDimensions(this.get("frame"));
     var f = this.computeFrameWithParentFrame(p);
 
     // set back to target
@@ -409,7 +409,8 @@ SC.Animatable = {
       // NOTE: This needs to match exactly the conditions in layoutStyles
       if (
         (SC.empty(nT) || (!SC.isPercentage(nT) && !SC.empty(nH))) &&
-        (SC.empty(nL) || (!SC.isPercentage(nL) && !SC.empty(nW)))
+        (SC.empty(nL) || (!SC.isPercentage(nL) && !SC.empty(nW))) &&
+        (this.transitions && (this.transitions['top'] || this.transitions['left']))
       ) {
         specialTransform = YES;
         this._useSpecialCaseTransform = YES;

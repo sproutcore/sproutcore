@@ -13,7 +13,7 @@ SC.DEFAULT_TREE = 'main';
   
   @extends SC.Object
 */
-Greenhouse = SC.Object.create( SC.Statechart,
+Greenhouse = SC.Object.create( SC.StatechartManager,
   /** @scope Greenhouse.prototype */ {
 
   NAMESPACE: 'Greenhouse',
@@ -28,12 +28,10 @@ Greenhouse = SC.Object.create( SC.Statechart,
   store: SC.Store.create().from('Greenhouse.DataSource'),
   
   //statechart options
-  log: YES,
+  monitorIsActive: YES,
   
-  startOnInit: NO,
   
-  startStates: {'main': 'loading', 'modals': 'modalReady', 'projectPicker': 'projectPickerClosed', 'library': 'libraryClosed', 'inspector': 'inspectorClosed'},
-  
+    
   loadIframeWithPage: function(firstTime){
     var c = Greenhouse.fileController.get('content'), iframe = Greenhouse.get('iframe'), namespace, page;
     var r = c.get('pageRegex'), mainPane;

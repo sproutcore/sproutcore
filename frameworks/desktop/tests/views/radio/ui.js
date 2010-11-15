@@ -10,7 +10,8 @@
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 var itemList = [{ title: "Red", value: "red", enabled: YES }, { title: "Green", value: "green" }, { title: "Blue", value: "blue" }],
-itemList2 = [{ title: "Cyan", value: "cyan", enabled: YES }, { title: "Magenta", value: "magenta" }, { title: "Yellow", value: "yellow" },{ title: "blacK", value: "black"}];
+itemList2 = [{ title: "Cyan", value: "cyan", enabled: YES }, { title: "Magenta", value: "magenta" }, { title: "Yellow", value: "yellow" },{ title: "blacK", value: "black"}],
+itemList3 = [{ title: "Red", value: "red", enabled: YES, width: 30 }, { title: "Green", value: "green", width: 50 }, { title: "Blue", value: "blue", width: 40 }];
 
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.RadioView, {
@@ -56,6 +57,16 @@ var pane = SC.ControlTestPane.design()
     items: 'Yes No'.w(),
     // LAYOUT_VERTICAL is default
     layoutDirection: SC.LAYOUT_HORIZONTAL
+  })
+  
+  .add("horizontal widths", SC.RadioView, {
+    value: "",
+    isEnabled: YES,
+    items: itemList3,
+    layoutDirection: SC.LAYOUT_HORIZONTAL,
+    itemTitleKey: 'title',
+    itemValueKey: 'value',
+    itemWidthKey: 'width'
   });
 
 pane.show(); // add a test to show the test pane
@@ -230,3 +241,13 @@ test("enabled first", function() {
   });
 });
 
+test("item widths", function() {
+  var radioButtons = pane.view('horizontal widths').$('.sc-radio-button'),
+      widths = [30, 50, 40],
+      idx = 0, radio;
+  
+  radioButtons.forEach(function(elem) {
+    equals(SC.$(elem).width(), widths[idx], 'radio button %@ should width specified by itemWidthKey'.fmt(idx, widths[idx]));
+    idx++;
+  });
+});

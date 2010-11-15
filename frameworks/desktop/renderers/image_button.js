@@ -2,7 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
  
 /** @class
@@ -21,7 +21,7 @@ SC.BaseTheme.renderers.ImageButton = SC.Renderer.extend({
   },
   
   update: function() {
-    var img = this.$('img'), src = this.icon;
+    var img = this.$('.img'), src = this.icon;
     if (src) {
       img.attr('class', "img "+src);
     } else {

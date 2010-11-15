@@ -10,28 +10,28 @@ sc_require('mixins/observable') ;
 sc_require('mixins/freezable');
 sc_require('mixins/copyable');
 
-// IMPORTANT NOTE:  This file actually defines two classes: 
-// SC.Set is a fully observable set class documented below. 
+// IMPORTANT NOTE:  This file actually defines two classes:
+// SC.Set is a fully observable set class documented below.
 // SC._CoreSet is just like SC.Set but is not observable.  This is required
-// because SC.Observable is built on using sets and requires sets without 
+// because SC.Observable is built on using sets and requires sets without
 // observability.
 //
-// We use pointer swizzling below to swap around the actual definitions so 
-// that the documentation will turn out right.  (The docs should only 
+// We use pointer swizzling below to swap around the actual definitions so
+// that the documentation will turn out right.  (The docs should only
 // define SC.Set - not SC._CoreSet)
 
 /**
-  @class 
+  @class
 
   An unordered collection of objects.
 
-  A Set works a bit like an array except that its items are not ordered.  
-  You can create a set to efficiently test for membership for an object. You 
+  A Set works a bit like an array except that its items are not ordered.
+  You can create a set to efficiently test for membership for an object. You
   can also iterate through a set just like an array, even accessing objects
   by index, however there is no gaurantee as to their order.
-  
+
   Whether or not property observing is enabled, sets offer very powerful
-  notifications of items being added and removed, through the 
+  notifications of items being added and removed, through the
   `#js:addSetObserver` and `#js:removeSetObserver` methods; this can be
   very useful, for instance, for filtering or mapping sets.
 
@@ -41,9 +41,9 @@ sc_require('mixins/copyable');
 
   Creating a Set
   --------------
-  You can create a set like you would most objects using SC.Set.create().  
-  Most new sets you create will be empty, but you can also initialize the set 
-  with some content by passing an array or other enumerable of objects to the 
+  You can create a set like you would most objects using SC.Set.create().
+  Most new sets you create will be empty, but you can also initialize the set
+  with some content by passing an array or other enumerable of objects to the
   constructor.
 
   Finally, you can pass in an existing set and the set will be copied.  You
@@ -69,13 +69,13 @@ sc_require('mixins/copyable');
   strings, and booleans.
 
   Note that objects can only exist one time in a set.  If you call add() on
-  a set with the same object multiple times, the object will only be added 
+  a set with the same object multiple times, the object will only be added
   once.  Likewise, calling remove() with the same object multiple times will
-  remove the object the first time and have no effect on future calls until 
+  remove the object the first time and have no effect on future calls until
   you add the object to the set again.
 
   Note that you cannot add/remove null or undefined to a set.  Any attempt to
-  do so will be ignored.  
+  do so will be ignored.
 
   In addition to add/remove you can also call push()/pop().  Push behaves just
   like add() but pop(), unlike remove() will pick an arbitrary object, remove
@@ -88,48 +88,48 @@ sc_require('mixins/copyable');
   This method tests for the object's hash, which is generally the same as the
   object's guid; however, if you implement the hash() method on the object, it will
   use the return value from that method instead.
-  
+
   Observing changes
   -----------------
   When using `#js:SC.Set` (rather than `#js:SC.CoreSet`), you can observe the
   `#js:"[]"` property to be alerted whenever the content changes.
-  
+
   This is often unhelpful. If you are filtering sets of objects, for instance,
   it is very inefficient to re-filter all of the items each time the set changes.
   It would be better if you could just adjust the filtered set based on what
   was changed on the original set. The same issue applies to merging sets,
   as well.
-  
+
   `#js:SC.Set` and `#js:SC.CoreSet` both offer another method of being observed:
   `#js:addSetObserver` and `#js:removeSetObserver`. These take a single parameter:
-  an object which implements `#js:didAddItem(set, item)` and 
+  an object which implements `#js:didAddItem(set, item)` and
   `#js:didRemoveItem(set, item)`.
-  
+
   Whenever an item is added or removed from the set, all objects in the set
   (a SC.CoreSet, actually) of observing objects will be alerted appropriately.
-  
+
   BIG WARNING
   ===========
-  SetObservers are not intended to be used "_creatively_"; for instance, do 
+  SetObservers are not intended to be used "_creatively_"; for instance, do
   not expect to be alerted immediately to any changes. **While the notifications
   are currently sent out immediately, if we find a fast way to send them at end
   of run loop, we most likely will do so.**
 
-  @extends SC.Enumerable 
+  @extends SC.Enumerable
   @extends SC.Observable
   @extends SC.Copyable
   @extends SC.Freezable
 
   @since SproutCore 1.0
 */
-SC.Set = SC.mixin({}, 
-  SC.Enumerable, 
-  SC.Observable, 
-  SC.Freezable, 
+SC.Set = SC.mixin({},
+  SC.Enumerable,
+  SC.Observable,
+  SC.Freezable,
 /** @scope SC.Set.prototype */ {
 
-  /** 
-    Creates a new set, with the optional array of items included in the 
+  /**
+    Creates a new set, with the optional array of items included in the
     return set.
 
     @param {SC.Enumerable} items items to add
@@ -137,40 +137,43 @@ SC.Set = SC.mixin({},
   */
   create: function(items) {
     var ret, idx, pool = SC.Set._pool, isObservable = this.isObservable;
-    if (!isObservable && items===undefined && pool.length>0) ret = pool.pop();
-    else {
+    if (!isObservable && items===undefined && pool.length>0) {
+      return pool.pop();
+    } else {
       ret = SC.beget(this);
       if (isObservable) ret.initObservable();
-      
-      if (items && items.isEnumerable && items.get('length')>0) {
+
+      if (items && items.isEnumerable && items.get('length') > 0) {
 
         ret.isObservable = NO; // suspend change notifications
-        
+
         // arrays and sets get special treatment to make them a bit faster
         if (items.isSCArray) {
-          idx = items.get ? items.get('length') : items.length;
+          idx = items.get('length');
           while(--idx>=0) ret.add(items.objectAt(idx));
-        
+
         } else if (items.isSet) {
           idx = items.length;
           while(--idx>=0) ret.add(items[idx]);
-          
+
         // otherwise use standard SC.Enumerable API
-        } else items.forEach(function(i) { ret.add(i); }, this);
-        
+        } else {
+          items.forEach(function(i) { ret.add(i); }, this);
+        }
+
         ret.isObservable = isObservable;
       }
     }
     return ret ;
   },
-  
+
   /**
     Walk like a duck
-    
+
     @property {Boolean}
   */
   isSet: YES,
-  
+
   /**
     This property will change as the number of objects in the set changes.
 
@@ -180,19 +183,19 @@ SC.Set = SC.mixin({},
 
   /**
     Returns the first object in the set or null if the set is empty
-    
+
     @property {Object}
   */
   firstObject: function() {
-    return (this.length>0) ? this[0] : undefined ;
+    return (this.length > 0) ? this[0] : undefined ;
   }.property(),
-  
+
   /**
-    Clears the set 
-    
+    Clears the set
+
     @returns {SC.Set}
   */
-  clear: function() { 
+  clear: function() {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     this.length = 0;
     return this ;
@@ -200,12 +203,12 @@ SC.Set = SC.mixin({},
 
   /**
     Call this method to test for membership.
-    
+
     @returns {Boolean}
   */
   contains: function(obj) {
 
-    // because of the way a set is "reset", the guid for an object may 
+    // because of the way a set is "reset", the guid for an object may
     // still be stored as a key, but points to an index that is beyond the
     // length.  Therefore the found idx must both be defined and less than
     // the current length.
@@ -213,11 +216,11 @@ SC.Set = SC.mixin({},
     var idx = this[SC.hashFor(obj)] ;
     return (!SC.none(idx) && (idx < this.length) && (this[idx]===obj)) ;
   },
-  
+
   /**
-    Returns YES if the passed object is also a set that contains the same 
+    Returns YES if the passed object is also a set that contains the same
     objects as the receiver.
-  
+
     @param {SC.Set} obj the other object
     @returns {Boolean}
   */
@@ -226,21 +229,21 @@ SC.Set = SC.mixin({},
     if (!obj || !obj.isSet || (obj.get('length') !== this.get('length'))) {
       return NO ;
     }
-    
+
     var loc = this.get('length');
     while(--loc>=0) {
       if (!obj.contains(this[loc])) return NO ;
     }
-    
+
     return YES;
   },
-  
+
   /**
     Adds a set observers. Set observers must implement two methods:
-    
+
     - didAddItem(set, item)
     - didRemoveItem(set, item)
-    
+
     Set observers are, in fact, stored in another set (a CoreSet).
   */
   addSetObserver: function(setObserver) {
@@ -248,18 +251,18 @@ SC.Set = SC.mixin({},
     if (!this.setObservers) {
       this.setObservers = SC.CoreSet.create();
     }
-    
+
     // add
     this.setObservers.add(setObserver);
   },
-  
+
   /**
     Removes a set observer.
   */
   removeSetObserver: function(setObserver) {
     // if there is no set, there can be no currently observing set observers
     if (!this.setObservers) return;
-    
+
     // remove the set observer. Pretty simple, if you think about it. I mean,
     // honestly.
     this.setObservers.remove(setObserver);
@@ -275,26 +278,26 @@ SC.Set = SC.mixin({},
   */
   add: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
-    
+
     // cannot add null to a set.
-    if (obj===null || obj===undefined) return this; 
+    if (obj == null) return this;
 
     // Implementation note:  SC.hashFor() is inlined because sets are
     // fundamental in SproutCore, and the inlined code is ~ 25% faster than
     // calling SC.hashFor() in IE8.
     var hashFunc,
-        guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
+        guid = ((hashFunc = obj.hash) && (typeof hashFunc === "function")) ? hashFunc.call(obj) : SC.guidFor(obj),
         idx  = this[guid],
         len  = this.length;
-    if ((idx===null || idx===undefined) || (idx >= len) || (this[idx]!==obj)) {
+    if ((idx >= len) || (this[idx] !== obj)) {
       this[len] = obj;
       this[guid] = len;
-      this.length = len+1;
+      this.length = len + 1;
       if (this.setObservers) this.didAddItem(obj);
     }
-    
+
     if (this.isObservable) this.enumerableContentDidChange();
-    
+
     return this ;
   },
 
@@ -310,7 +313,7 @@ SC.Set = SC.mixin({},
     }
 
     var idx, isObservable = this.isObservable ;
-    
+
     if (isObservable) this.beginPropertyChanges();
     if (objects.isSCArray) {
       idx = objects.get('length');
@@ -318,12 +321,12 @@ SC.Set = SC.mixin({},
     } else if (objects.isSet) {
       idx = objects.length;
       while(--idx>=0) this.add(objects[idx]);
-      
+
     } else objects.forEach(function(i) { this.add(i); }, this);
     if (isObservable) this.endPropertyChanges();
-    
+
     return this ;
-  },  
+  },
 
   /**
     Removes the object from the set if it is found.
@@ -332,7 +335,7 @@ SC.Set = SC.mixin({},
 
     @param obj {Object} the object to remove
     @returns {SC.Set} receiver
-  */  
+  */
   remove: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
@@ -348,7 +351,7 @@ SC.Set = SC.mixin({},
 
     // not in set.
     // (SC.none is inlined for the reasons given above)
-    if ((idx === null || idx === undefined) || (idx >= len) || (this[idx] !== obj)) return this; 
+    if ((idx === null || idx === undefined) || (idx >= len) || (this[idx] !== obj)) return this;
 
     // clear the guid key
     delete this[guid];
@@ -394,7 +397,7 @@ SC.Set = SC.mixin({},
     }
 
     var idx, isObservable = this.isObservable ;
-    
+
     if (isObservable) this.beginPropertyChanges();
     if (objects.isSCArray) {
       idx = objects.get('length');
@@ -404,17 +407,17 @@ SC.Set = SC.mixin({},
       while(--idx>=0) this.remove(objects[idx]);
     } else objects.forEach(function(i) { this.remove(i); }, this);
     if (isObservable) this.endPropertyChanges();
-    
+
     return this ;
-  },  
+  },
 
   /**
-   Clones the set into a new set.  
+   Clones the set into a new set.
 
     @returns {SC.Set} new copy
   */
   copy: function() {
-    return this.constructor.create(this);    
+    return this.constructor.create(this);
   },
 
   /**
@@ -427,9 +430,9 @@ SC.Set = SC.mixin({},
     if (!this.isObservable) SC.Set._pool.push(this.clear());
     return this;
   },
-  
+
   // .......................................
-  // PRIVATE 
+  // PRIVATE
   //
 
   /** @private - optimized */
@@ -446,7 +449,7 @@ SC.Set = SC.mixin({},
     for(idx=0;idx<len;idx++) ary[idx] = this[idx];
     return "SC.Set<%@>".fmt(ary.join(',')) ;
   },
-  
+
   /**
     @private
     Alerts set observers that an item has been added.
@@ -454,15 +457,15 @@ SC.Set = SC.mixin({},
   didAddItem: function(item) {
     // get the set observers
     var o = this.setObservers;
-    
+
     // return if there aren't any
     if (!o) return;
-    
+
     // loop through and call didAddItem.
     var len = o.length, idx;
     for (idx = 0; idx < len; idx++) o[idx].didAddItem(this, item);
   },
-  
+
   /**
     @private
     Alerts set observers that an item has been removed.
@@ -470,15 +473,15 @@ SC.Set = SC.mixin({},
   didRemoveItem: function(item) {
     // get the set observers
     var o = this.setObservers;
-    
+
     // return if there aren't any
     if (!o) return;
-    
+
     // loop through and call didAddItem.
     var len = o.length, idx;
     for (idx = 0; idx < len; idx++) o[idx].didRemoveItem(this, item);
   },
-  
+
   // the pool used for non-observable sets
   _pool: [],
 
@@ -512,14 +515,14 @@ SC.Set._pool = [];
 
 // ..........................................................
 // CORE SET
-// 
+//
 
 /** @class
 
-  CoreSet is just like set but not observable.  If you want to use the set 
+  CoreSet is just like set but not observable.  If you want to use the set
   as a simple data structure with no observing, CoreSet is slightly faster
   and more memory efficient.
-  
+
   @extends SC.Set
   @since SproutCore 1.0
 */

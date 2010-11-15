@@ -25,7 +25,7 @@
 
 @view(sc-panel.sc-picker.sc-menu) .sc-button-view.disabled.focus a,
 .sc-menu-item.disabled a:hover {
-  color: white;
+  text-shadow: none;
   background: transparent;
 }
 

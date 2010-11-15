@@ -2,7 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /** @class
@@ -61,10 +61,11 @@ SC.BaseTheme.renderers.Label = SC.Renderer.extend({
   update: function() {
     var cq = this.$();
     this.updateTitleRenderer();
-    if (this.didChange('text-align')) {
+    this.updateControlRenderer();
+    if (this.didChange('textAlign')) {
       cq.css('text-align', this.textAlign);
     }
-    if (this.didChange('font-weight')) {
+    if (this.didChange('fontWeight')) {
       cq.css('font-weight', this.fontWeight);
     }
     if (this.didChange('opacity')) {

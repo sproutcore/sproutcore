@@ -60,7 +60,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     
     @property {String}
   */
-  theme: 'square',
+  themeName: 'square',
   
   /**
     Optionally set the behavioral mode of this button.  
@@ -319,7 +319,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     classes.cancel = this.get('isCancel');
     classes.icon = !!this.get('icon');
     context.attr('role', 'button').setClass(classes);
-    theme = this.get('theme');
+    theme = this.get('themeName');
     if (theme && !context.hasClass(theme)) context.addClass(theme);
     
     // render inner html 

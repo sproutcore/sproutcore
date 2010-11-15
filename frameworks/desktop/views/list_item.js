@@ -351,7 +351,7 @@ SC.ListItemView = SC.View.extend(
   */
   _isInsideRightIcon: function(evt) {
     var del = this.displayDelegate ;
-    var rightIconKey = this.getDelegateProperty('hasContentRightIcon', del) ;
+    var rightIconKey = this.getDelegateProperty('hasContentRightIcon', del) || !SC.none(this.rightIcon);
     return rightIconKey && this._isInsideElementWithClassName('right-icon', evt);
   },
   

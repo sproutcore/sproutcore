@@ -27,8 +27,8 @@ end
 # CORE FRAMEWORKS
 config :bootstrap,  :required => [], :use_modules => false
 
-config :runtime,    :required => []
-config :jquery,     :required => [:runtime]
+config :jquery,     :required => []
+config :runtime,    :required => [:jquery]
 config :foundation, :required => [:jquery, :runtime]
 config :datastore,  :required => [:foundation]
 config :statechart, :required => [:runtime]

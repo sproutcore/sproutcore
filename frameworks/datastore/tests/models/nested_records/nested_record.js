@@ -222,9 +222,9 @@ test("Child Status Changed", function() {
   equals(cr.get('status'), testParent.get('status'), 'after initializing the parent to READY_NEW, check that the child record matches');
   
   SC.RunLoop.begin();
-  store.writeStatus(testParent.storeKey, SC.Record.DIRTY_NEW);
+  store.writeStatus(testParent.storeKey, SC.Record.READY_DIRTY);
   store.dataHashDidChange(testParent.storeKey);
-  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to DIRTY_NEW, check that the child record matches');
+  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to READY_DIRTY, check that the child record matches');
   SC.RunLoop.end();
   
   SC.RunLoop.begin();
@@ -232,4 +232,44 @@ test("Child Status Changed", function() {
   store.dataHashDidChange(testParent.storeKey);
   equals(cr.get('status'), testParent.get('status'), 'after setting the parent to BUSY_REFRESH, check that the child record matches');
   SC.RunLoop.end();
+});
+
+test("Child Status Matches Store Status", function() {
+  var cr;
+  var storeStatus;
+  cr = testParent.get('info');
+  
+  storeStatus = store.readStatus(cr.storeKey);
+  equals(storeStatus, cr.get('status'), 'after initializing the parent to READY_NEW, check that the store status matches for the child');
+  equals(cr.get('status'), testParent.get('status'), 'after initializing the parent to READY_NEW, check that the child record matches');
+  
+  SC.RunLoop.begin();
+  store.writeStatus(testParent.storeKey, SC.Record.READY_CLEAN);
+  store.dataHashDidChange(testParent.storeKey);
+  SC.RunLoop.end();
+  
+  storeStatus = store.readStatus(cr.storeKey);
+  equals(testParent.get('status'), SC.Record.READY_CLEAN, 'parent status should be READY_CLEAN');
+  equals(storeStatus, cr.get('status'), 'after setting the parent to READY_CLEAN, the child\'s status and store status should be READY_CLEAN before calling get(\'status\') on the child');
+  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to READY_CLEAN, check that the child record matches');
+  
+  SC.RunLoop.begin();
+  store.writeStatus(testParent.storeKey, SC.Record.READY_DIRTY);
+  store.dataHashDidChange(testParent.storeKey);
+  SC.RunLoop.end();
+  
+  storeStatus = store.readStatus(cr.storeKey);
+  equals(testParent.get('status'), SC.Record.READY_DIRTY, 'parent status should be READY_DIRTY');
+  equals(storeStatus, cr.get('status'), 'after setting the parent to READY_DIRTY, the child\'s status and store status should be READY_DIRTY before calling get(\'status\') on the child');
+  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to READY_DIRTY, check that the child record matches');
+  
+  SC.RunLoop.begin();
+  store.writeStatus(testParent.storeKey, SC.Record.BUSY_REFRESH);
+  store.dataHashDidChange(testParent.storeKey);
+  storeStatus = store.readStatus(cr.storeKey);
+  SC.RunLoop.end();
+  
+  equals(testParent.get('status'), SC.Record.BUSY_REFRESH, 'parent status should be BUSY_REFRESH');
+  equals(storeStatus, cr.get('status'), 'after setting the parent to BUSY_REFRESH, the child\'s status and store status should be BUSY_REFRESH before calling get(\'status\') on the child');
+  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to BUSY_REFRESH, check that the child record matches');
 });

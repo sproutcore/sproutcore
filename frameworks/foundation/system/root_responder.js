@@ -56,6 +56,10 @@ SC.RootResponder = SC.Object.extend({
   init: function() {
     sc_super();
     this.panes = SC.Set.create();
+
+    if (SC.platform.supportsCSSTransitions) {
+      this[SC.platform.cssPrefix+'TransitionEnd'] = this.transitionEnd;
+    }
   },
 
   // .......................................................
@@ -615,13 +619,18 @@ SC.RootResponder = SC.Object.extend({
     // handle basic events
     this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mouseout mouseover mousemove selectstart contextmenu'.w(), document)
         .listenFor('resize'.w(), window);
-        
+
     if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
     else this.listenFor('focus blur'.w(), window);
 
     // handle animation events
     this.listenFor('webkitAnimationStart webkitAnimationIteration webkitAnimationEnd'.w(), document);
-    
+
+    // CSS Transitions
+    if (SC.platform.supportsCSSTransitions) {
+      this.listenFor(['transitionEnd', SC.platform.cssPrefix+'TransitionEnd'], document);
+    }
+
     // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
     if (this.keypress) {
       if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.mozilla) {
@@ -1834,29 +1843,37 @@ SC.RootResponder = SC.Object.extend({
        } else {
          var lh = this._lastHovered || [] , nh = [] , exited, loc, len,
              view = this.targetViewForEvent(evt) ;
-
-         // work up the view chain.  Notify of mouse entered and
-         // mouseMoved if implemented.
-         while(view && (view !== this)) {
-           if (lh.indexOf(view) !== -1) {
-             view.tryToPerform('mouseMoved', evt);
-             nh.push(view) ;
-           } else {
-             view.tryToPerform('mouseEntered', evt);
-             nh.push(view) ;
-           }
-
+         
+         // first collect all the responding view starting with the 
+         // target view from the given mouse move event
+         while (view && (view !== this)) {
+           nh.push(view);
            view = view.get('nextResponder');
          }
-         // now find those views last hovered over that were no longer found
-         // in this chain and notify of mouseExited.
-         for(loc=0, len=lh.length; loc < len; loc++) {
+        
+         // next exit views that are no longer part of the 
+         // responding chain
+         for (loc=0, len=lh.length; loc < len; loc++) {
            view = lh[loc] ;
-           exited = view.respondsTo('mouseExited') ;
-           if (exited && !(nh.indexOf(view) !== -1)) {
-             view.tryToPerform('mouseExited',evt);
+           exited = view.respondsTo('mouseExited');
+           if (exited && nh.indexOf(view) === -1) {
+             view.tryToPerform('mouseExited', evt);
            }
          }
+         
+         // finally, either perform mouse moved or mouse entered depending on
+         // whether a responding view was or was not part of the last
+         // hovered views
+         for (loc=0, len=nh.length; loc < len; loc++) {
+           view = nh[loc];
+           if (lh.indexOf(view) !== -1) {
+             view.tryToPerform('mouseMoved', evt);
+           } else {
+             view.tryToPerform('mouseEntered', evt);
+           }
+         }
+
+         // Keep track of the view that were last hovered
          this._lastHovered = nh;
 
          // also, if a mouseDownView exists, call the mouseDragged action, if
@@ -1940,6 +1957,18 @@ SC.RootResponder = SC.Object.extend({
     }
 
     return view ? evt.hasCustomEventHandling : YES;
+  },
+
+  transitionEnd: function(evt){
+    try {
+      var view = this.targetViewForEvent(evt) ;
+      this.sendEvent('transitionDidEnd', evt, view) ;
+    } catch (e) {
+      console.warn('Exception during transitionDidEnd: %@'.fmt(e)) ;
+      throw e;
+    }
+
+    return view ? evt.hasCustomEventHandling : YES;
   }
 
 });
@@ -1999,7 +2028,7 @@ SC.Touch.prototype = {
     the hasCustomEventHandling property to YES but does not cancel the event.
   */
   allowDefault: function() {
-    this.event.hasCustomEventHandling = YES ;
+    if (this.event) this.event.hasCustomEventHandling = YES ;
   },
 
   /**

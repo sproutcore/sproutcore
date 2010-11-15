@@ -1,11 +1,5 @@
 // ==========================================================================
-// SC Statechart - Buildfile
-// copyright (c) 2009 - Evin Grano, and contributors
+// Project:   SC.Statechart - A Statechart Framework for SproutCore
+// Copyright: ©2010 Michael Cohen, and contributors.
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-// ..........................................................
-// State Constants
-// 
-
-SC.DEFAULT_TREE = 'default';
-

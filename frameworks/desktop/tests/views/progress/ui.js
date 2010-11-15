@@ -88,7 +88,7 @@ test("basic", function() {
   ok(view.$('.sc-outer-tail'), 'should have sc-outer-tail class');
   ok(view.$('.sc-inner-head'), 'should have sc-inner-head class');
   ok(view.$('.sc-inner-tail'), 'should have sc-inner-tail class');
-  equals(view.$('.sc-inner').css("width"), "25%", 'width should be 25%');
+  equals(view.$('.sc-inner')[0].style.width, "25%", 'width should be 25%');
   
   // browsers compute the width after % adjustment differently.  just be close
   var v = (SC.browser.msie || SC.browser.mozilla) ? 63 : 62;
@@ -102,7 +102,7 @@ test("disabled", function() {
   
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
-  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
+  equals(view.$('.sc-inner')[0].style.width, "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width ');
   
 });
@@ -113,7 +113,7 @@ test("basic value 0", function() {
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
-  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
+  equals(view.$('.sc-inner')[0].style.width, "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width ');
   
 });
@@ -124,7 +124,7 @@ test("basic value 100", function() {
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
-  equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
+  equals(view.$('.sc-inner')[0].style.width, "100%", 'width should be 100%');
   equals(view.$('.sc-inner').width(), 250, 'pixel width ');
   
 });
@@ -135,7 +135,7 @@ test("basic max 50", function() {
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
-  equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
+  equals(view.$('.sc-inner')[0].style.width, "50%", 'width should be 50%');
   equals(view.$('.sc-inner').width(), 125, 'pixel width ');
   
 });
@@ -151,7 +151,7 @@ test("changing value from empty -> value", function() {
   SC.RunLoop.begin();
   view.set('value', 50);
   SC.RunLoop.end();
-  equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
+  equals(view.$('.sc-inner')[0].style.width, "50%", 'width should be 50%');
   
   var assertions = function(){
     equals(view.$('.sc-inner').width(), 125, 'pixel width ');
@@ -169,7 +169,7 @@ test("changing value from full -> empty", function() {
   SC.RunLoop.begin();
   view.set('value', 0);
   SC.RunLoop.end();
-  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
+  equals(view.$('.sc-inner')[0].style.width, "0%", 'width should be 0%');
   var assertions = function(){
     equals(view.$('.sc-inner').width(), 0, 'pixel width ');
     start();
@@ -192,7 +192,7 @@ test("changing value from full -> negative number", function() {
   SC.RunLoop.begin();
   view.set('value', -10);
   SC.RunLoop.end();
-  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
+  equals(view.$('.sc-inner')[0].style.width, "0%", 'width should be 0%');
   var assertions = function(){
     equals(view.$('.sc-inner').width(), 0, 'pixel width ');
     start();
@@ -212,7 +212,7 @@ test("changing value to over maximum", function() {
   SC.RunLoop.begin();
   view.set('value', 110);
   SC.RunLoop.end();
-  equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
+  equals(view.$('.sc-inner')[0].style.width, "100%", 'width should be 100%');
   var assertions = function(){
     equals(view.$('.sc-inner').width(), 250, 'pixel width ');
     start();
@@ -232,7 +232,7 @@ test("changing value to a string", function() {
   SC.RunLoop.begin();
   view.set('value', 'aString');
   SC.RunLoop.end();
-  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
+  equals(view.$('.sc-inner')[0].style.width, "0%", 'width should be 0%');
   var assertions = function(){
     equals(view.$('.sc-inner').width(), 0, 'pixel width ');
     start();

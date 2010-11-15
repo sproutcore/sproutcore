@@ -217,7 +217,7 @@ SC.ListView = SC.CollectionView.extend(
       // prefill the cache with custom rows.
       cache = this._sclv_offsetCache;
       if (!cache) {
-        cache = this._sclv_offsetCache = [];
+        cache = [];
         delta = max = 0 ;
         custom.forEach(function(idx) {
           delta += this.rowHeightForContentIndex(idx)-rowHeight;
@@ -225,6 +225,8 @@ SC.ListView = SC.CollectionView.extend(
           max = idx ;
         }, this);
         this._sclv_max = max+1;
+        // moved down so that the cache is not marked as initialized until it actually is
+        this._sclv_offsetCache = cache;
       }
       
       // now just get the delta for the last custom row before the current 
@@ -259,11 +261,13 @@ SC.ListView = SC.CollectionView.extend(
     if (del.customRowHeightIndexes && (indexes=del.get('customRowHeightIndexes'))) {
       cache = this._sclv_heightCache ;
       if (!cache) {
-        cache = this._sclv_heightCache = [];
+        cache = [];
         content = this.get('content');
         indexes.forEach(function(idx) {
           cache[idx] = del.contentIndexRowHeight(this, content, idx);
         }, this);
+        // moved down so that the cache is not marked as initialized until it actually is
+        this._sclv_heightCache = cache;
       }
       
       ret = cache[idx];

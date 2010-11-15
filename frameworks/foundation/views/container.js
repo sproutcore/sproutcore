@@ -28,12 +28,12 @@ SC.ContainerView = SC.View.extend(
   classNames: ['sc-container-view'],
   
   /**
-    Optional path name for the content view.  Set this to a property path 
+    Optional path name for the content view.  Set this to a property path
     pointing to the view you want to display.  This will automatically change
-    the content view for you.  If you pass a single property name (e.g.
-    "myView") then the container view will look up the property on its own 
-    page object.  If you pass a full property name 
-    (e.g. "MyApp.anotherPage.anotherView"), then the path will be followed 
+    the content view for you. If you pass a relative property path or a single
+    property name, then the container view will look for it first on its page
+    object then relative to itself. If you pass a full property name
+    (e.g. "MyApp.anotherPage.anotherView"), then the path will be followed
     from the top-level.
     
     @property {String, SC.View}
@@ -108,7 +108,8 @@ SC.ContainerView = SC.View.extend(
       if (content.indexOf('.') > 0) {
         content = SC.objectForPropertyPath(content);
       } else {
-        content = SC.objectForPropertyPath(content, this.get('page'));
+        var tempContent = this.getPath(content);
+        content = SC.kindOf(tempContent, SC.View) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
       }
     }
     
