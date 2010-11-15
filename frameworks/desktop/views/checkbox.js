@@ -32,6 +32,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     A CheckboxView actually just renders a button in the theme "checkbox".
   */
   theme: 'checkbox',
+  renderDelegateName: 'checkboxRenderDelegate',
 
   /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,
