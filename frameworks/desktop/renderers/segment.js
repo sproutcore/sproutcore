@@ -16,18 +16,7 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
     this.attr(settings);
   },
   
-  updateButtonRenderer: function() {
-    if (this.isOverflowSegment) {
-      this._buttonRenderer.attr({
-        title: "&raquo;",
-        icon: null,
-        toolTip: "More&hellip;".loc(),
-        isEnabled: YES,
-        isSelected: this.isSelected,
-        isActive: this.isActive,
-        controlSize: this.controlSize
-      });
-    } else {
+  configureButtonRenderer: function() {
     this._buttonRenderer.attr({
       title: this.title,
       icon: this.icon,
@@ -37,7 +26,6 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
       isActive: this.isActive,
       controlSize: this.controlSize
     });
-    }
   },
   
   computeClasses: function() {
@@ -56,7 +44,7 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
   
   render: function(context) {
     // configure sub renderers
-    this.updateButtonRenderer();
+    this.configureButtonRenderer();
     this._buttonRenderer.render(context);
     
     /* Render OUR stuff */
@@ -71,7 +59,7 @@ SC.BaseTheme.renderers.Segment = SC.Renderer.extend({
     // well, if we haven't changed, why not be a bit lazy
     if (!this.hasChanges()) return;
     
-    this.updateButtonRenderer();
+    this.configureButtonRenderer();
     this._buttonRenderer.update();
     
     // update OUR stuff
