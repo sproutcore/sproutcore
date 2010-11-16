@@ -180,7 +180,7 @@ function() {
 
   ok(editor.$("textarea").length > 0, "should be using a textarea element");
 });
-
+/* TODO: move these to inlineEditorDelegate tests
 test("inline editor aborts if delegate returns NO to inlineEditorShouldBeginEditing()",
 function() {
   SC.InlineTextFieldView.beginEditing(optionsForLabel2);
@@ -202,7 +202,7 @@ function() {
   ok(view1.get('notifiedWillBegin'), "the delegate should have been notified of begin editing at this point");
   SC.RunLoop.end();
 });
-
+*/
 test("inline editor notifies delegate with inlineEditorDidBeginEditing() after becoming responder",
 function() {
   var view1 = pane.view('label1');
