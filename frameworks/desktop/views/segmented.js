@@ -284,40 +284,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   // 
   
   displayProperties: ['displayItems', 'value', 'activeIndex'],
-
-  updateRenderer: function(r) {
-    var items = this.get('displayItems'), value = this.get('value'), isArray = SC.isArray(value),
-        activeIndex = this.get("activeIndex"), item;
-    for (var idx = 0, len = items.length; idx < len; idx++) {
-      item = items[idx];
-      
-      item.classNames = {
-        active: activeIndex === idx,
-        sel: isArray ? value.indexOf(item.value) > -1 : value === item.value
-      };
-    }
-
-    // set the attributes
-    var size = this.get('controlSize');
-    r.attr({
-      segments: items,
-      align: this.get('align'),
-      layoutDirection: this.get('layoutDirection'),
-      size: size === SC.AUTO_CONTROL_SIZE ? this.get('frame') : size,
-      themeName: this._themeClassName
-    });
-  },
-
-  render: function(context, firstTime) {
-    var renderer = this._segmentedRenderer;
-    if (firstTime) {
-      renderer = this._segmentedRenderer = this.get('theme').renderer('segmented');
-    }
-
-    this.updateRenderer(renderer);
-    if (firstTime) renderer.render(context);
-    else renderer.update(context.$());
-  },
+  
+  renderDelegateName: 'segmentedRenderDelegate',
 
   // ..........................................................
   // EVENT HANDLING
@@ -328,8 +296,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
-    if (this._segmentedRenderer) {
-      return this._segmentedRenderer.indexForClientPosition(this.$(), evt.clientX, evt.clientY);
+    var renderDelegate = this.get('renderDelegate');
+
+    if (renderDelegate && renderDelegate.indexForClientPosition) {
+      return renderDelegate.indexForClientPosition(this, this.$(), evt.clientX, evt.clientY);
     }
   },
   
