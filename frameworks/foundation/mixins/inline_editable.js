@@ -35,7 +35,8 @@ SC.InlineEditable = {
     
     for(i = 0; i < len; i++) {
       view = childViews[i];
-      if(view.get('isEditable')) view.beginEditing();
+      // textfields are weird
+      if(view.get('isEditable') && !view.isTextField) view.beginEditing();
     }
     
     if(this.get('isEditing')) return YES;
