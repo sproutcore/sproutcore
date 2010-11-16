@@ -21,7 +21,8 @@ TestControls.segmentedPage = SC.View.design({
     
     small: SC.FormView.row(SC.SegmentedView.design({
       allowsEmptySelection: YES,
-      layout: { left: 0, width: 200, height: 18, centerY: 0},
+      layout: { left: 0, width: 350, height: 18, centerY: 0},
+      align: SC.ALIGN_LEFT,
       controlSize: SC.SMALL_CONTROL_SIZE,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
@@ -30,7 +31,8 @@ TestControls.segmentedPage = SC.View.design({
     
     normal: SC.FormView.row(SC.SegmentedView.design({
       allowsEmptySelection: YES,
-      layout: { left: 0, width: 200, height: 24, centerY: 0},
+      layout: { left: 0, width: 350, height: 24, centerY: 0},
+      align: SC.ALIGN_LEFT,
       controlSize: SC.REGULAR_CONTROL_SIZE,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
@@ -39,7 +41,8 @@ TestControls.segmentedPage = SC.View.design({
 
     large: SC.FormView.row(SC.SegmentedView.design({
       allowsEmptySelection: YES,
-      layout: { left: 0, width: 200, height: 30, centerY: 0},
+      layout: { left: 0, width: 350, height: 30, centerY: 0},
+      align: SC.ALIGN_LEFT,
       controlSize: SC.LARGE_CONTROL_SIZE,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
@@ -48,7 +51,8 @@ TestControls.segmentedPage = SC.View.design({
 
     jumbo: SC.FormView.row(SC.SegmentedView.design({
       allowsEmptySelection: YES,
-      layout: { left: 0, width: 200, height: 44, centerY: 0},
+      layout: { left: 0, width: 350, height: 44, centerY: 0},
+      align: SC.ALIGN_LEFT,
       controlSize: SC.JUMBO_CONTROL_SIZE,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
@@ -56,7 +60,8 @@ TestControls.segmentedPage = SC.View.design({
     })),
     
     disabled: SC.FormView.row(SC.SegmentedView.design({
-      layout: { left: 0, width: 200, height: 24, centerY: 0},
+      layout: { left: 0, width: 350, height: 24, centerY: 0},
+      align: SC.ALIGN_LEFT,
       isEnabled: NO,
       items: [ { icon: "sc-icon-info-16", title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value", itemIconKey: "icon",
@@ -65,7 +70,8 @@ TestControls.segmentedPage = SC.View.design({
     multiple: SC.FormView.row(SC.SegmentedView.design({
       allowsEmptySelection: YES,
       allowsMultipleSelection: YES,
-      layout: { left: 0, width: 200, height: 24, centerY: 0},
+      layout: { left: 0, width: 350, height: 24, centerY: 0},
+      align: SC.ALIGN_LEFT,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "three"]
@@ -74,17 +80,18 @@ TestControls.segmentedPage = SC.View.design({
     multiple_side_by_side: SC.FormView.row(SC.SegmentedView.design({
       allowsEmptySelection: YES,
       allowsMultipleSelection: YES,
-      layout: { left: 0, width: 200, height: 24, centerY: 0},
+      layout: { left: 0, width: 350, height: 24, centerY: 0},
+      align: SC.ALIGN_LEFT,
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "two"]
     })),
     
     overflow: SC.FormView.row(SC.SegmentedView.design({
-      flowSize: { height: 24, width: 0.5},
-      controlSize: SC.REGULAR_CONTROL_SIZE,
-      items: [ { title: "One", value: "one", width: 80 },{ title: "Two", value: "two", width: 80 },{ title: "Three", value: "three", width: 80 },{ title: "Four", value: "four", width: 80 },{ title: "Five", value: "five", width: 80 },{ title: "Six", value: "six", width: 80 },{ title: "Seven", value: "seven", width: 80 },{ title: "Eight", value: "eight", width: 80 } ],
-      itemTitleKey: "title", itemValueKey: "value", itemWidthKey: "width",
+      layout: { left: 0, width: 350, height: 24, centerY: 0},
+      align: SC.ALIGN_LEFT,
+      items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three"},{ title: "Four", value: "four" },{ title: "Five", value: "five" },{ title: "Six", value: "six" },{ title: "Seven", value: "seven" },{ title: "Eight", value: "eight" } ],
+      itemTitleKey: "title", itemValueKey: "value",
       value: null
     }))
   })
