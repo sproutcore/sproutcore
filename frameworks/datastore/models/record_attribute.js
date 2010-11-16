@@ -545,8 +545,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
  */
 SC.RecordAttribute.registerTransform(SC.Set, {
   to: function(value, attr, type, record, key) {
-    if(value) return value.toSet();
-    else return SC.Set.create();
+    return SC.Set.create(value);
   },
   
   from: function(value, attr, type, record, key) {
