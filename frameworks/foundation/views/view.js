@@ -1167,12 +1167,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       context.addClass(themeClassNames[idx]);
     }
 
-    var themeName = this.get('themeName');
-    if (themeName && classNames.indexOf(themeName) < 0) classNames.push(themeName);
+    // var themeName = this.get('themeName');
+    // if (themeName && classNames.indexOf(themeName) < 0) classNames.push(themeName);
 
-      // If this view has no cursor and should inherit it from the parent,
-      // then it sets its own cursor view.  This sets the cursor rather than
-      // simply using the parent's cursor object so that its cursorless
+    // If this view has no cursor and should inherit it from the parent,
+    // then it sets its own cursor view.  This sets the cursor rather than
+    // simply using the parent's cursor object so that its cursorless
 
     context.addClass(this.get('classNames'));
     if (this.get('themeName')) {
@@ -1351,6 +1351,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var renderDelegate = this.get('renderDelegate');
 
     if (renderDelegate) {
+      if (firstTime) {
         renderDelegate.render(this, context);
       } else {
         renderDelegate.update(this, context.$());
