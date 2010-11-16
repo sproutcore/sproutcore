@@ -1014,13 +1014,11 @@ img.disclosure.button.closed.active { background: static_url("images/1.png") no-
 .sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel {
   background: none;
   color: #ffffff;
-  font-weight: 200;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
 .sc-theme .sc-view.ace.sc-segmented-view .sc-segment.sel.active {
   background: none;
   color: #ffffff;
-  font-weight: 200;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.5);
 }
 .sc-theme .sc-view.ace.sc-segmented-view img {
