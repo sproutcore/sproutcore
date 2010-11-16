@@ -158,9 +158,9 @@ SC.SliderView = SC.View.extend(SC.Control,
       else this._offset = 0;
     }
     
-    // add offset
-    loc = loc + this._offset;
-    
+    // add offset and constrain
+    loc = Math.max(0, Math.min(loc + this._offset, 1));
+
     // convert to value using minimum/maximum then constrain to steps
     loc = min + ((max-min)*loc);
     if (step !== 0) loc = Math.round(loc / step) * step ;

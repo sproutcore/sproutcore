@@ -223,7 +223,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {Number} index
   */
   indexOf: function(record, startAt) {
-    if (!SC.kindOf(record, SC.Record)) return NO ; // only takes records
+    if (!SC.kindOf(record, SC.Record)) {
+      SC.Logger.warn("Using indexOf on %@ with an object that is not an SC.Record".fmt(record));
+      return -1; // only takes records
+    }
     
     this.flush();
     
@@ -241,7 +244,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {Number} index
   */
   lastIndexOf: function(record, startAt) {
-    if (!SC.kindOf(record, SC.Record)) return NO ; // only takes records
+    if (!SC.kindOf(record, SC.Record)) {
+      SC.Logger.warn("Using lastIndexOf on %@ with an object that is not an SC.Record".fmt(record));
+      return -1; // only takes records
+    }
 
     this.flush();
     

@@ -2,7 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 sc_require('views/controls');
@@ -430,7 +430,8 @@ SC.AudioView = SC.View.extend({
         view=this,
         dimensions;
     try{
-      media.GetVolume();
+      media.GetVolume(); 
+      // add media.GetTimeScale(); ?
     }catch(e){
       console.log('loaded fail trying later');
       this.invokeLater(this.didAppendToDocument, 100);
@@ -540,7 +541,8 @@ SC.AudioView = SC.View.extend({
   seek:function(){
     var timeInSecs, totaltimeInSecs, formattedTime, media=this._getAudioObject();
     if(this.loaded==='html5'){
-      if(this.get('paused')) media.currentTime=this.get('currentTime');
+      // also check for media && media.currentTime, because media.currentTime doesn't exist on value change
+      if(this.get('paused') && media && media.currentTime) media.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
       if(this.get('paused')) media.SetTime(this.get('currentTime')*media.GetTimeScale());

@@ -4,7 +4,7 @@
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals $A*/
+/*globals $A */
 
 sc_require('core') ;
  
@@ -284,25 +284,44 @@ SC.Benchmark = {
     // Get the global start of the graph.
     var gStart = this.globalStartTime ? this.globalStartTime : chart[0][1];
     var maxDur = chart[chartLen-1][2]-gStart;
-    var maxHeight = 50+chartLen*30;
+    var maxHeight = 25+chartLen*30;
     var incr = Math.ceil(maxDur/200)+1;
     var maxWidth = incr*50;
     
+    this._benchmarkChart = SC.Pane.create({
+      classNames: "sc-benchmark-pane".w(),
+      layout: { left: 20, right: 20, bottom: 20, top: 20 },
+      childViews: "title scroll exit".w(),
+      exit: SC.ButtonView.extend({
+        layout: { right: 20, top: 20, width: 100, height: 30 },
+        title: "Hide Chart",
+        target: this,
+        action: "hideChart"
+      }),
+      
+      title: SC.LabelView.extend({
+        classNames: 'sc-benchmark-title'.w(),
+        layout: { left: 20, top: 23, right: 200, height: 30 },
+        value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + maxDur +' ms - Points Captured: ' + chartLen),
+        fontWeight: 'bold'
+      }),
+      
+      scroll: SC.ScrollView.extend({
+        layout: { left: 20, top: 60, bottom: 20, right: 20 },
+        contentView: SC.StaticContentView.extend({
+          
+        })
+      })
+    }).append();
+
     // Create the basic graph element.
-    var graph = document.createElement('div');
-    graph.className = 'sc-benchmark-graph';
-    document.body.appendChild(graph);
-
-    // Set the title.
-    var title = document.createElement('div');
-    title.innerHTML = ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + maxDur +' ms - Points Captured: ' + chartLen) + ' [<a href="javascript:SC.Benchmark.hideChart();">Hide Chart</a>]';
-    title.className = 'sc-benchmark-title'; 
-    graph.appendChild(title);
-
+    var graph = this._benchmarkChart.scroll.contentView.get('layer');
+    graph.className += ' sc-benchmark-graph';
+    graph.style.height = maxHeight + 'px';
+    graph.style.width = maxWidth + 'px';
 
     var topBox = document.createElement('div');
     topBox.className = 'sc-benchmark-top'; 
-    topBox.style.width = maxWidth + 'px';
     graph.appendChild(topBox);
 
     // Draw the tick marks.
@@ -324,8 +343,7 @@ SC.Benchmark = {
     for(i=0;i<chartLen; i++)
     {
     	var row = document.createElement('div');
-    	row.style.top = (75+(i*30))+'px';
-    	row.style.width = maxWidth+'px';
+    	row.style.top = (50+(i*30))+'px';
     	row.className = (i%2===0) ? 'sc-benchmark-row even' : 'sc-benchmark-row';
     	graph.appendChild(row);
 
@@ -343,13 +361,19 @@ SC.Benchmark = {
       
       div.className = 'sc-benchmark-bar';
       div.style.cssText = 'left:'+ (((start-gStart)/4))+'px; width: '+((duration/4))+
-                          'px; top: '+(53+(i*30))+'px;';
+                          'px; top: '+(28+(i*30))+'px;';
       div.title = "start: " + (start-gStart) + " ms, end: " + (end-gStart) + ' ms, duration: ' + duration + ' ms';
       graph.appendChild(div);
     }
 
     // Save the graph.
     this._graph = graph;
+    
+    
+    SC.RunLoop.invokeLater(SC.Benchmark, function() {
+      graph.notifyPropertyChange('frame');      
+    });
+    
   },
   
   /*
@@ -358,13 +382,21 @@ SC.Benchmark = {
   */
   hideChart: function()
   {
-    if(this._graph) {
-      try{ 
-        document.body.removeChild(this._graph);
-      }catch(e){}
+    if(this._benchmarkChart) {
+      this._benchmarkChart.remove();
+      this._benchmarkChart = null;
     }
+    
+    return YES;
   },
   
+  /**
+    Because we show a pane to display the chart...
+  */
+  tryToPerform: function(action, sender) {
+    if (this[action]) return this[action](sender);
+    return NO;
+  },
 
   /**
     This method is just like report() except that it will log the results to

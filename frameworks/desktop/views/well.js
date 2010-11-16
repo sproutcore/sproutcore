@@ -6,7 +6,7 @@
 // ==========================================================================
 
 // Constants
-SC.WELL_CONTAINER_PADDING=15;
+SC.WELL_CONTAINER_PADDING = 15;
 
 /** @class
 
@@ -28,9 +28,11 @@ SC.WellView = SC.ContainerView.extend(
     Layout for the content of the container view.
     @property {Object}
   */
-  contentLayout: {
-    top:SC.WELL_CONTAINER_PADDING, bottom:SC.WELL_CONTAINER_PADDING,
-    left:SC.WELL_CONTAINER_PADDING, right:SC.WELL_CONTAINER_PADDING},
+  contentLayout: SC.FROM_THEME,
+  contentLayoutDefault: {
+    top: SC.WELL_CONTAINER_PADDING, bottom: SC.WELL_CONTAINER_PADDING,
+    left: SC.WELL_CONTAINER_PADDING, right: SC.WELL_CONTAINER_PADDING
+  },
   
   
   /**
@@ -40,33 +42,22 @@ SC.WellView = SC.ContainerView.extend(
   
   createChildViews: function() {
     // if contentView is defined, then create the content
+    var contentLayout = this.themed('contentLayout');
+    
     var view = this.get('contentView') ;
     if (view) {
       view = this.contentView = this.createChildView(view) ;
-      view.set('layout', this.contentLayout);
+      view.set('layout', contentLayout);
       this.childViews = [view] ;
     } 
   },
   
-  /**
-     The render method for the WellView simply add the html necessary for
-     the border.
-     
-   */
+  createRenderer: function(theme) {
+    return theme.well();
+  },
   
-  render: function(context, firstTime) {
-    if(firstTime){
-     context.push("<div class='top-left-edge'></div>",
-       "<div class='top-edge'></div>",
-       "<div class='top-right-edge'></div>",
-       "<div class='right-edge'></div>",
-       "<div class='bottom-right-edge'></div>",
-       "<div class='bottom-edge'></div>",
-       "<div class='bottom-left-edge'></div>",
-       "<div class='left-edge'></div>",
-       "<div class='content-background'></div>");
-     }    
-     sc_super();
+  updateRenderer: function() {
+    
   },
   
   /**

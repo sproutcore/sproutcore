@@ -82,6 +82,12 @@ SC.stringsFor('English', {
   "_Reload App": "Reload App",
   "_Target:": "Target:",
   "_Design Type:": "Design Type:",
-  "_Add Design": "Add Design"
+  "_Remove": "Remove",
+  "_iPhone Hrz": "iPhone Hrz",
+  "_iPhone Vrt": "iPhone Vrt",
+  "_iPad Hrz": "iPad Hrz",
+  "_iPad Vrt": "iPad Vrt",
+  "_Page Size": "Page Size",
+  "_Full": "Full"
   
 }) ;

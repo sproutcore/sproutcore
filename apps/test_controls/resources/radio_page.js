@@ -11,7 +11,7 @@ TestControls.radioPage = SC.View.design({
   form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    childViews: "header normal disabled multiple".w(),
+    childViews: "header normal disabled multiple horizontal".w(),
     // Plain Views
     header: SC.LabelView.design({
       layout: { width: 250, height: 18 },
@@ -36,6 +36,13 @@ TestControls.radioPage = SC.View.design({
       items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
       itemTitleKey: "title", itemValueKey: "value",
       value: ["one", "three"]
+    })),
+    horizontal: SC.FormView.row(SC.RadioView.design({
+      layout: {width: 450, height: 20},
+      layoutDirection: SC.LAYOUT_HORIZONTAL,
+      items: [ { title: "One", value: "one" },{ title: "Two", value: "two" },{ title: "Three", value: "three" } ],
+      itemTitleKey: "title", itemValueKey: "value",
+      value: null
     }))
   })
 });

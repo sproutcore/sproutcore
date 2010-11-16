@@ -18,7 +18,7 @@ Greenhouse.appPage = SC.Page.design({
     
     mainContainer: SC.ContainerView.design({
       layout: { left: 0, top: 46, right: 0, bottom: 0 },
-      nowShowingBinding: 'Greenhouse.fileController.editorMode' 
+      nowShowing: 'pageDesigner' //Hardcoded till we add another mode like bespin
     }),
     
     toolBar: SC.ToolbarView.design({
@@ -110,6 +110,18 @@ Greenhouse.appPage = SC.Page.design({
             {title: "_Reload App".loc(), action: 'reloadIframe', isEnabled: YES},
             {title: "_Dock Library".loc(), action: 'toggleDockedLibrary', isEnabled: YES},
             {title: "_Dock Inspector".loc(), action: 'toggleDockedInspector', isEnabled: YES},
+            { isSeparator: YES },
+            {title: "_Page Size".loc(),
+              subMenu:[
+              {title: "_iPhone Hrz".loc(), action: 'resizePage', isEnabled: YES, size: {width: 480, height: 320}},
+              {title: "_iPhone Vrt".loc(), action: 'resizePage', isEnabled: YES, size: {width: 320, height: 480}},
+              {title: "_iPad Hrz".loc(), action: 'resizePage', isEnabled: YES, size: {width: 1024, height: 768}},
+              {title: "_iPad Vrt".loc(), action: 'resizePage', isEnabled: YES, size: {height: 1024, width: 768}},
+              {title: "_Full".loc(), action: 'resizePage', isEnabled: YES}
+              
+              ]
+            },
+            { isSeparator: YES },
             {title: "_Save".loc(), action: 'save', isEnabled: YES }
           ]
         })
@@ -247,7 +259,7 @@ Greenhouse.appPage = SC.Page.design({
     content: SC.View.design({
       classNames: ['content'],
       layout: { top: 49, bottom: 11, left: 8, right: 8 },
-      childViews: 'library addCustomView'.w(),
+      childViews: 'library addCustomView removeCustomView'.w(),
     
       library: SC.ScrollView.design({
         classNames: ['library-list'],
@@ -266,13 +278,23 @@ Greenhouse.appPage = SC.Page.design({
           }
         })
       }),
+      
+      removeCustomView: SC.ButtonView.design({
+        classNames: ['dark'],
+        layout: { bottom: 1, right: 70, height: 24, width: 70 },
+        titleMinWidth: 0,
+        hasIcon: NO,
+        isEnabledBinding: 'Greenhouse.libraryController*selection.firstObject.canEdit',
+        title: "_Remove".loc(),
+        action: 'removeCustomView'
+      }),
     
       addCustomView: SC.ButtonView.design({
         classNames: ['dark'],
-        layout: { bottom: 1, right: 0, height: 24, width: 90 },
+        layout: { bottom: 1, right: 0, height: 24, width: 50 },
         titleMinWidth: 0,
         hasIcon: NO,
-        title: "_Add Design".loc(),
+        title: "_Add".loc(),
         action: 'newCustomView'
       })
     })

@@ -111,6 +111,7 @@ test("Test that auto as a value for width height is set correctly when"
 test("Test that an exception is thrown when calling adjust and setting to auto", 
   function(){
   var error=null;
+  console.log('NOTE: The following error concerning width:auto is expected.');
   parent.adjust('width', 'auto').adjust('height', 'auto');
   try{
     parent.get('layoutStyle');

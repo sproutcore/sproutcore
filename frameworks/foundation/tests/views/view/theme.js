@@ -23,7 +23,7 @@ test("changing themes propagates to child view.", function() {
   
   ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
   ok(t1 === view.child.get("theme"), "view's child's theme should be sc-test-1");
-  view.set("theme", "sc-test-2");
+  view.set('themeName', 'sc-test-2');
   ok(t2 === view.get("theme"), "view's theme should be sc-test-2");
   ok(t2 === view.child.get("theme"), "view's child's theme should be sc-test-2");
 });
@@ -37,5 +37,5 @@ test("adding child to parent propagates theme to child view.", function() {
   ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
   equals(child.get("theme"), SC.Theme.find("sc-base"), "view's child's theme should start at base theme");
   view.appendChild(child);
-  ok(t1 === child.get("theme"), "view's child's theme should be sc-test-1");
+  equals(t1, child.get("theme"), "view's child's theme should be sc-test-1");
 });

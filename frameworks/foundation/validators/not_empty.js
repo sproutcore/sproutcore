@@ -20,9 +20,13 @@ SC.Validator.NotEmpty = SC.Validator.extend(
   
   validate: function(form, field) {
     var value = field.get('fieldValue'); 
-    var ret = !!value ;
-    if (ret && value.length) ret = value.length > 0 ;
-    return ret ;
+    if (SC.none(value))
+      return NO;
+
+    if (! SC.none(value.length))
+      return value.length > 0;
+
+    return YES;
   },
   
   validateError: function(form, field) {

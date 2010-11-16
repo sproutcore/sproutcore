@@ -22,13 +22,13 @@ SC.platform = {
 
     @property {Boolean}
   */
-  touch: ('createTouch' in document),
+  touch: ('createTouch' in document) && SC.browser.chrome < 9, // Ugly hack for Chrome 9 issue
   
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
 
   input: {
-    placeholder: (function() { return 'placeholder' in document.createElement('input'); })()
+    placeholder: ('placeholder' in document.createElement('input'))
   },
 
   /**
@@ -61,7 +61,8 @@ SC.platform = {
     screen on an iPhone OS-based device, this property will be true.
     @property {Boolean}
   */
-  standalone: navigator.standalone,
+  standalone: !!navigator.standalone,
+
 
   /**
     Prefix for browser specific CSS attributes. Calculated later.
@@ -286,10 +287,15 @@ SC.platform = {
   }
 
   // unfortunately, we need a bit more to know FOR SURE that 3D is allowed
-  if (window.media && window.media.matchMedium) {
-    if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
-  } else if(window.styleMedia && window.styleMedia.matchMedium) {
-    if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;    
+  try{
+    if (window.media && window.media.matchMedium) {
+      if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
+    } else if(window.styleMedia && window.styleMedia.matchMedium) {
+      if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;    
+    }
+  }catch(e){
+    //Catch to support IE9 exception
+    SC.platform.supportsCSS3DTransforms = NO;
   }
   
   // Unfortunately, this has to be manual, as I can't think of a good way to test it

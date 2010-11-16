@@ -54,7 +54,7 @@ sc_require('views/text_field') ;
   editor expects your source view to implement the InlineTextFieldViewDelegate
   protocol.
 
-  h2. Commiting or Discarding Changes
+  h2. Committing or Discarding Changes
   
   Normally the editor will automatically commit or discard its changes 
   whenever the user exits the edit mode.  If you need to force the editor to
@@ -66,13 +66,13 @@ sc_require('views/text_field') ;
   }}}
   
   Both methods will try to end the editing context and will call the 
-  relevent delegate methods on the delegate you passed to beginEditing().
+  relevant delegate methods on the delegate you passed to beginEditing().
   
   Note that it is possible an editor may not be able to commit editing 
   changes because either the delegate disallowed it or because its validator
   failed.  In this case commitEditing() will return NO.  If you want to
   end editing anyway, you can discard the editing changes instead by calling
-  discardEditing().  This method will generally suceed unless your delegate
+  discardEditing().  This method will generally succeed unless your delegate
   refuses it as well.
   
   @extends SC.TextFieldView
@@ -133,7 +133,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
       throw "At least frame and delegate options are required for inline editor";
     }
     
-    this._originalValue = options.value || '' ;
+    this._originalValue = options.value;
+    if (SC.none(this._originalValue))
+      this._originalValue = "";
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
     if (this._multiline) {
       this.set('isTextArea', YES);
@@ -420,10 +422,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   // editable, begins editing.
   /** @private */
   insertTab: function(evt) {
+    var delegate = this._delegate; // removed by commitEditing()
     this.resignFirstResponder();
     this.commitEditing() ;
-    if(this._delegate){
-      var next = this._delegate.nextValidKeyView();
+    if(delegate){
+      var next = delegate.get('nextValidKeyView');
       if(next && next.beginEditing) next.beginEditing();
     }
     return YES ;
@@ -431,10 +434,12 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
   /** @private */
   insertBacktab: function(evt) {
+    var delegate = this._delegate; // removed by commitEditing()
+    this.resignFirstResponder();
     this.commitEditing() ;
-    if(this._delegate){
-      var prev = this._delegate.previousValidKeyView();
-      if(prev) prev.beginEditing();
+    if(delegate){
+      var prev = delegate.get('previousValidKeyView');
+      if(prev && prev.beginEditing) prev.beginEditing();
     }
     return YES ;
   },

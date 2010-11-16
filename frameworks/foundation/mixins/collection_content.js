@@ -35,8 +35,7 @@ SC.LEAF_NODE = 0x0020;
   or enabled state.
   
   You can apply this mixin to a class that you set as a delegate or to the
-  object you set as content.  SC.ArrayControllers automatically implement
-  this mixin.
+  object you set as content.
   
   @since SproutCore 1.0
 */

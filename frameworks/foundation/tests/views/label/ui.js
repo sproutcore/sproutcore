@@ -26,6 +26,11 @@ var pane = SC.ControlTestPane.design()
     isTextSelectable: YES
   })
   
+  .add("iconclass", SC.LabelView, {
+    icon: 'icon-class',
+    value: "hello"
+  })
+  
   .add("centered", SC.LabelView, { 
      value: "hello",
      textAlign: SC.ALIGN_CENTER 
@@ -109,7 +114,11 @@ test("Check that all labels have the right classes set", function() {
   ok(!viewElem.hasClass('icon'), 'icon.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('sel'), 'icon.hasClass(sel) should be NO');
   ok(!viewElem.hasClass('disabled'), 'icon.hasClass(disabled) should be NO');
- 
+  
+  viewElem = pane.view('iconclass').$();
+  ok(viewElem.hasClass('icon'), 'view element should have "icon" class');
+  ok(viewElem.find('img').hasClass('icon'), 'img element inside view should have "icon" class');
+  
   viewElem=pane.view('centered').$();
   ok(viewElem.hasClass('sc-view'), 'title,icon.hasClass(sc-view) should be YES');
   ok(viewElem.hasClass('sc-label-view'), 'title,icon.hasClass(sc-label-view) should be YES');

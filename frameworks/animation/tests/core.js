@@ -14,12 +14,12 @@ module("Animatable", {
     
     view = SC.View.create(SC.Animatable, { 
       layout: { left: 100, top: 100, height: 100, width: 100 },
-      style: { opacity: 0.5 },
+      style: { transform: 'scale(1)' },
       transitions: {
         left: 0.25,
         top: { duration: 0.35 },
         width: { duration: 0.2, timing: SC.Animatable.TRANSITION_EASE_IN_OUT },
-        style: { opacity: 1 }
+        style: { transform: 1 }
       }
     });
     pane.appendChild(view);
@@ -95,7 +95,7 @@ test("animatable handler for layer update should ensure both layout and styles a
   ok(!SC.none(current), "There now SHOULD be a current JS style.");
   
   // and now, make sure we have both style AND layout set properly.
-  equals(current["opacity"], 0.5, "opacity should be .5");
+  equals(current["transform"], 'scale(1)', "transform should be scale(1)");
   equals(current["left"], 100, "left should be 100");
   
   // go back to the beginning

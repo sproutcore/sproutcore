@@ -2,7 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*globals SC */
 
@@ -40,7 +40,7 @@ SC.SimpleMediaControlsView = SC.View.extend({
     layout: { top: 0, left: 0, width: 20, height:20 },
     action: "playPause",
     targetBinding: "*owner.target",
-    renderStyle: 'renderImage',
+    renderStyle: 'renderImage'
   }),
   progressView: SC.MediaSlider.design({
     layout: { top: 0, left: 25, right: 0, height:20 },

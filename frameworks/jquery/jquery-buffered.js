@@ -1,6 +1,6 @@
 /*global Buffer */
-sc_require("jquery");
-sc_require("jquery-buffer");
+// sc_require("jquery");
+// sc_require("jquery-buffer");
 
 (function() {
 
@@ -35,7 +35,7 @@ jQuery.bufferedJQuery.prototype.init.prototype = jQuery.bufferedJQuery.prototype
 var base = jQuery.fn;
 
 jQuery.fn.extend({
-  
+
   /**
     Returns an array of buffers for the elements. This is mostly here for illustration; the
     built-in buffered commands inline the logic for performance.
@@ -47,7 +47,7 @@ jQuery.fn.extend({
     }
     return r;
   }
-  
+
 });
 
 /*
@@ -57,7 +57,7 @@ jQuery.fn._jqb_originalFind = jQuery.fn.find;
 jQuery.fn.find = function(selector) {
   // if we are not currently buffering, don't bother with this crap.
   if (jQuery._isBuffering <= 0 && !this.isBuffered) return jQuery.fn._jqb_originalFind.call(this, selector);
-  
+
 	var ret = jQuery.buffer(), length = 0;
 
 	for ( var i = 0, l = this.length; i < l; i++ ) {
@@ -77,18 +77,18 @@ jQuery.fn.find = function(selector) {
 		}
 	}
 
-	return ret;  
+	return ret;
 };
 
 jQuery.extend(jQuery.bufferedJQuery.prototype, {
-  
+
   html: function(value) {
     // if there is no value, we don't handle it.
     if (value === undefined) {
       if (this.length < 1) return undefined;
       return jQuery.Buffer.bufferForElement(this[i]).html();
     }
-    
+
     // there is a vlaue. We are going to do it like jquery, but different.
     // in this, we inline "buffers" above
     var len = this.length, i;
@@ -98,7 +98,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     }
     return this;
   },
-  
+
   text: function(value) {
     if (value === undefined) {
       if (this.length < 1) return undefined;
@@ -114,7 +114,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     }
     return this;
   },
-  
+
   attr: function(key, value) {
     // first, handle the get-case
     if (typeof value === "undefined" && typeof key === "string") {
@@ -122,7 +122,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
       var buffer = jQuery.Buffer.bufferForElement(this[0]);
       return buffer.attr(key);
     }
-    
+
     // now, buffer the command.
     var len = this.length, i;
     for (i = 0; i < len; i++) {
@@ -146,7 +146,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     }
     return this;
   },
-  
+
   addClass: function(value) {
     // now, buffer the command.
     var len = this.length, i;
@@ -156,7 +156,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     }
     return this;
   },
-  
+
   removeClass: function(value) {
     // now, buffer the command.
     var len = this.length, i;
@@ -166,7 +166,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     }
     return this;
   },
-  
+
   resetClassNames: function() {
     // now, buffer the command.
     var len = this.length, i;
@@ -197,7 +197,7 @@ jQuery.extend(jQuery.bufferedJQuery.prototype, {
     jQuery.Buffer.bufferForElement(this[0]).resetStyles();
     return this;
   }
-  
+
 });
 
 
