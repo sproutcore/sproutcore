@@ -606,26 +606,10 @@ SC.PickerPane = SC.PalettePane.extend({
     }
   },
   
-  displayProperties: ["pointerPosY"],
+  displayProperties: ['preferType','pointerPos','pointerPosY'],
 
-  render: function(context, firstTime) {
-    var settings = { 
-      preferType: this.preferType, 
-      pointerPos: this.pointerPos,
-      pointerPosY: this.pointerPosY,
-      contentProvider: this
-    };
+  renderDelegateName: 'pickerRenderDelegate',
 
-    if (firstTime) {
-      this._pickerRenderer = this.get('theme').renderer('picker');
-      this._pickerRenderer.attr(settings);
-      this._pickerRenderer.render(context);
-    } else {
-      this._pickerRenderer.attr(settings);
-      this._pickerRenderer.update(context.$());
-    }
-  },
-  
   /** @private - click away picker. */
   modalPaneDidClick: function(evt) {
     var f = this.get("frame");
