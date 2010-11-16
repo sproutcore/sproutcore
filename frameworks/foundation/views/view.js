@@ -3974,7 +3974,7 @@ SC.View.mixin(/** @scope SC.View */ {
   extend: function() {
     var last = arguments[arguments.length - 1];
 
-    if (last && last.theme) {
+    if (last && !SC.none(last.theme)) {
       last.themeName = last.theme;
       delete last.theme;
     }
