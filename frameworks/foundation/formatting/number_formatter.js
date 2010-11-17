@@ -2,7 +2,6 @@ SC.FORMAT_INTEGER = "[-+]?\\d+";
 
 SC.NumberFormatter = SC.Object.extend({
     
-    // TODO: localize and provide different defaults
     numberFormat: SC.FORMAT_INTEGER,
     
     // no suffix by default
@@ -13,6 +12,9 @@ SC.NumberFormatter = SC.Object.extend({
     maximum: Infinity,
     
     stringFromNumber: function(aNumber){
+        if (undefined === aNumber || null === aNumber)
+            return '';
+        
         var suffix = (this.hasSuffix()) ? ' ' + this.get('suffix') : '';
         return String(aNumber) + suffix;
     },

@@ -49,6 +49,16 @@ test("accepts spaces before and after number", function() {
     same(8, formatter.numberFromString('     8       '));
 });
 
+test("serializes null and undefined to empty string", function() {
+    same("", formatter.stringFromNumber(undefined));
+    same("", formatter.stringFromNumber(null));
+});
+
+test("serializes 0 correctly", function() {
+    same("0", formatter.stringFromNumber(0));
+});
+
+
 
 module("SC.NumberFormatter with suffix", {
     setup: function() {
