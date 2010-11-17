@@ -331,7 +331,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       return SC.Theme.find(baseThemeName);
     } else {
       parent = this.get('parentView');
-      theme  = parent && parent.get('theme');
+      var theme  = parent && parent.get('theme');
       return   theme || SC.Theme.find(SC.defaultTheme);
     }
   }.property('baseThemeName', 'parentView').cacheable(),
@@ -3974,7 +3974,7 @@ SC.View.mixin(/** @scope SC.View */ {
   extend: function() {
     var last = arguments[arguments.length - 1];
 
-    if (last && last.theme) {
+    if (last && !SC.none(last.theme)) {
       last.themeName = last.theme;
       delete last.theme;
     }
@@ -4236,7 +4236,7 @@ SC.View.mixin(/** @scope SC.View */ {
   create: function() {
     var last = arguments[arguments.length - 1];
 
-    if (last && last.theme) {
+    if (last && !SC.none(last.theme)) {
       last.themeName = last.theme;
       delete last.theme;
     }
