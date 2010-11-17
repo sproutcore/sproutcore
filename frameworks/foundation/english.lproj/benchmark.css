@@ -13,8 +13,8 @@
 
 .sc-benchmark-graph
 { 
-  min-width: 100%;
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .sc-label-view.sc-regular-size.sc-benchmark-title
@@ -56,7 +56,7 @@
 {
   width: 40px; 
   position: absolute; 
-  top: 27px; 
+  top: 3px; 
   font-size: 10px;
   margin-left: 2px;
   white-space: nowrap; 
@@ -77,6 +77,8 @@
   -webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.5);
   text-shadow: rgba(255,255,255,.5) 0px 1px 0px;
   color: #4F3800;
+  
+  z-index: 2;
 }
 
 .sc-benchmark-row
@@ -100,3 +102,45 @@
 .no-min-width {
   min-width: 20px !important;
 }
+
+.sc-benchmark-event {
+  position: absolute;
+  z-index: 1;
+  width: 2px;
+}
+
+.sc-benchmark-event:hover {
+  -webkit-border-radius: 5px;
+  border: 2px solid white;
+  -webkit-box-shadow: 0px 0px 5px black;
+  background-color: red;
+}
+
+.sc-benchmark-event.idx0 {
+  background: blue;
+}
+
+.sc-benchmark-event.idx1 {
+  background: red;
+}
+
+.sc-benchmark-event.idx2 {
+  background: green;
+}
+
+.sc-benchmark-event.idx3 {
+  background: orange;
+}
+
+.sc-benchmark-event.idx4 {
+  background: purple;
+}
+
+.sc-benchmark-event.idx5 {
+  background: #ee82ee;
+}
+
+.sc-benchmark-event.idx6 {
+  background: #800000;
+}
+

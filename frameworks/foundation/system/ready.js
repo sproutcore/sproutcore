@@ -109,7 +109,8 @@ SC.mixin({
       }
     }
 
-    SC.Benchmark.start('readyEvent') ;
+    SC.Benchmark.addEvent('ready');
+    SC.Benchmark.start('main') ;
     
     // Begin runloop
     SC.run(function() {
@@ -147,19 +148,20 @@ SC.mixin({
       }
     }, this);
     
-    SC.Benchmark.end('readyEvent') ;
+    SC.Benchmark.end('main') ;
     if (SC.BENCHMARK_LOG_READY) {
-      SC.Benchmark._loadSCPerfData();
-      SC.Benchmark.start('total', undefined, SC.Benchmark.globalStartTime);
+      SC.Benchmark.loadPreloadEvents();
+      
       SC.Benchmark.start('boot-and-display', undefined, SC.Benchmark.javascriptStartTime);
+      
       SC.Benchmark.start('boot', undefined, SC.Benchmark.javascriptStartTime);
       SC.Benchmark.end('boot');
       
-      SC.Benchmark.start('post-boot-draw');
+      SC.Benchmark.start('display');
       setTimeout(function() {
-        SC.Benchmark.end('total');
+        SC.Benchmark.addEvent('load complete');
         SC.Benchmark.end('boot-and-display');
-        SC.Benchmark.end('post-boot-draw');
+        SC.Benchmark.end('display');
         SC.Benchmark.log();
       }, 0);
     }

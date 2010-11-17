@@ -12,7 +12,7 @@
 <html<% unless @content_for_html5_manifest.blank? %> manifest="app.manifest"<% end %>>
   <head>
     <script>
-    var _SC_performanceEvents = { headStart: new Date().getTime() };
+    var SC_benchmarkPreloadEvents = { headStart: new Date().getTime() };
     </script>
     
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
@@ -44,7 +44,7 @@
    <%= stylesheets_for_client %>
    <%= @content_for_page_styles %>
     <script>
-    SC._performanceEvents['headEnd'] = new Date().getTime();
+      SC.benchmarkPreloadEvents['headEnd'] = new Date().getTime();
     </script>
   </head>
     
@@ -53,7 +53,7 @@
 -%>
   <body class="<%= [theme_name(:default => 'sc-theme'), 'focus'].compact.join(' ') %>">  
     <script>
-    SC._performanceEvents['bodyStart'] = new Date().getTime();
+    SC.benchmarkPreloadEvents['bodyStart'] = new Date().getTime();
     </script>
 <% # This section is used to setup additional optional class names on the 
    # body content based on JS-selected conditions.  Use this to make sure you
@@ -126,7 +126,7 @@
 <%= @content_for_designer -%>
 
   <script>
-  SC._performanceEvents['bodyEnd'] = new Date().getTime();
+  SC.benchmarkPreloadEvents['bodyEnd'] = new Date().getTime();
   </script>
 	</body>
 </html>
