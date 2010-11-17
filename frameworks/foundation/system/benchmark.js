@@ -432,9 +432,10 @@ SC.Benchmark = {
 
   /**
     Generate a human readable benchmark chart. Pass in appName if you desire.
-
   */
   timelineChart: function(appName) {
+    SC.RunLoop.begin();
+    
     var i=0;
     // Hide the chart if there is an existing one.
     this.hideChart();
@@ -468,7 +469,8 @@ SC.Benchmark = {
     
     chartView.set('layout', { left: 20, top: 60, bottom: 20, right: 20 });
     this._benchmarkChart.appendChild(chartView);
-
+    
+    SC.RunLoop.end();
   },
   
   /*
