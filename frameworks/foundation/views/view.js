@@ -1273,13 +1273,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.renderLayout(context, firstTime);
   },
 
-
-
-
-
-
-
- 
   /**
   @private
 
