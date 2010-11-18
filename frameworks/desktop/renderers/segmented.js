@@ -160,6 +160,14 @@ SC.BaseTheme.renderers.Segmented = SC.Renderer.extend({
     }
   },
   
+  /**
+    Return the DOM elements of the segments.  This will be measured by the view to 
+    determine which segments should be overflowed.
+  */
+  segmentElements: function() {
+    return this.layer().childNodes;
+  },
+  
   indexForEvent: function(evt) {
     var pageX = evt.pageX, pageY = evt.pageY;
     

@@ -322,9 +322,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       this.elementWidths = [];
       
       // The last segment will be an overflow segment (so measure it but don't add it to elementWidths)
-      var len = layer.childNodes.length;
+      var segmentElements = this.renderer.segmentElements();
+      var len = segmentElements.length;
       if (!this.overflowSegmentWidth) {
-        var el = layer.childNodes[len - 1];
+        var el = segmentElements[len - 1];
         
         len = len - 1;
         this.overflowSegmentWidth = el.getBoundingClientRect().width;
@@ -332,7 +333,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       
       // Measure the segments and cache it
       for (var i=0; i < len; i++) {
-        el = layer.childNodes[i];
+        el = segmentElements[i];
   
         this.elementWidths[i] = el.getBoundingClientRect().width;
       }
