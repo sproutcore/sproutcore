@@ -56,3 +56,5 @@ SC.NumberFormatter = SC.Object.extend({
     }
     
 });
+
+// TODO: find out if we can work sensibly with suffixes if we controll the carret in relation to it if it is appended
