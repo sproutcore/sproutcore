@@ -1,5 +1,5 @@
 // ==========================================================================
-// Project:   SC - A Statechart Framework for SproutCore
+// Project:   SC.State - A Statechart Framework for SproutCore
 // Copyright: ©2010 Michael Cohen, and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -331,9 +331,10 @@ SC.StatechartManager = {
     
     @param state {SC.State|String} the state to go to (may not be the final state in the transition process)
     @param fromCurrentState {SC.State|String} Optional. The current state to start the transition process from.
+    @param context Any value that you want to be supplied to states that will be entered. Can be null.
     @param useHistory {Boolean} Optional. Indicates whether to include using history states in the transition process
   */
-  gotoState: function(state, fromCurrentState, useHistory) {
+  gotoState: function(state, fromCurrentState, context, useHistory) {
     
     if (!this.get('statechartIsInitialized')) {
       SC.Logger.error('can not go to state %@. statechart has not yet been initialized'.fmt(state));
@@ -362,6 +363,7 @@ SC.StatechartManager = {
       this._pendingStateTransitions.push({
         state: state,
         fromCurrentState: fromCurrentState,
+        context: context,
         useHistory: useHistory
       });
       
@@ -430,7 +432,7 @@ SC.StatechartManager = {
     }
     
     // Collected all the state transition actions to be performed. Now execute them.
-    this._executeGotoStateActions(state, gotoStateActions);
+    this._executeGotoStateActions(state, gotoStateActions, context);
   },
   
   /**
@@ -458,11 +460,11 @@ SC.StatechartManager = {
     }
     
     var point = this._gotoStateSuspendedPoint;
-    this._executeGotoStateActions(point.gotoState, point.actions, point.marker);
+    this._executeGotoStateActions(point.gotoState, point.actions, point.context, point.marker);
   },
   
   /** @private */
-  _executeGotoStateActions: function(gotoState, actions, marker) {
+  _executeGotoStateActions: function(gotoState, actions, context, marker) {
     var action = null,
         len = actions.length,
         actionResult = null;
@@ -477,7 +479,7 @@ SC.StatechartManager = {
           break;
           
         case SC.ENTER_STATE:
-          actionResult = this._enterState(action.state, action.currentState);
+          actionResult = this._enterState(action.state, action.currentState, context);
           break;
       }
       
@@ -493,6 +495,7 @@ SC.StatechartManager = {
         this._gotoStateSuspendedPoint = {
           gotoState: gotoState,
           actions: actions,
+          context: context,
           marker: marker + 1
         }; 
         
@@ -543,7 +546,7 @@ SC.StatechartManager = {
   },
   
   /** @private */
-  _enterState: function(state, current) {
+  _enterState: function(state, current, context) {
     var parentState = state.get('parentState');
     if (parentState && !state.get('isConcurrentState')) parentState.set('historyState', state);
     
@@ -558,15 +561,15 @@ SC.StatechartManager = {
     if (this.get('trace')) SC.Logger.info('entering state: ' + state);
     
     state.notifyPropertyChange('isCurrentState');
-    var result = this.enterState(state);
+    var result = this.enterState(state, context);
     
     if (this.get('monitorIsActive')) this.get('monitor').pushEnteredState(state);
     
     return result;
   },
   
-  enterState: function(state) {
-    return state.enterState();
+  enterState: function(state, context) {
+    return state.enterState(context);
   },
   
   /**
@@ -587,9 +590,10 @@ SC.StatechartManager = {
     
     @param state {SC.State|String} the state to go to and follow it's history state
     @param fromCurrentState {SC.State|String} Optional. the current state to start the state transition process from
+    @param context any value to pass along to states that will be entered. can be null
     @param recursive {Boolean} Optional. whether to follow history states recursively.
   */
-  gotoHistoryState: function(state, fromCurrentState, recursive) {
+  gotoHistoryState: function(state, fromCurrentState, context, recursive) {
     if (!this.get('statechartIsInitialized')) {
       SC.Logger.error("can not go to state %@'s history state. Statechart has not yet been initialized".fmt(state));
       return;
@@ -606,12 +610,12 @@ SC.StatechartManager = {
     
     if (!recursive) { 
       if (historyState) {
-        this.gotoState(historyState, fromCurrentState);
+        this.gotoState(historyState, fromCurrentState, context);
       } else {
-        this.gotoState(state, fromCurrentState);
+        this.gotoState(state, fromCurrentState, context);
       }
     } else {
-      this.gotoState(state, fromCurrentState, YES);
+      this.gotoState(state, fromCurrentState, context, YES);
     }
   },
   
@@ -655,9 +659,7 @@ SC.StatechartManager = {
       if (!responder.get('isCurrentState')) continue;
       while (!eventHandled && responder) {
         if (responder.tryToPerform) {
-          try {
-            eventHandled = responder.tryToHandleEvent(event, sender, context);
-          } catch (ex) { /** Gobal the exception and move on */ }
+          eventHandled = responder.tryToHandleEvent(event, sender, context);
         }
         if (!eventHandled) responder = responder.get('parentState');
       }
@@ -836,7 +838,7 @@ SC.StatechartManager = {
   _flushPendingStateTransition: function() {
     var pending = this._pendingStateTransitions.shift();
     if (!pending) return;
-    this.gotoState(pending.state, pending.fromCurrentState, pending.useHistory);
+    this.gotoState(pending.state, pending.fromCurrentState, pending.context, pending.useHistory);
   },
   
   /** @private

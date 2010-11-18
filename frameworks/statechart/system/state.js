@@ -1,5 +1,5 @@
 // ==========================================================================
-// Project:   SC - A Statechart Framework for SproutCore
+// Project:   SC.State - A Statechart Framework for SproutCore
 // Copyright: ©2010 Michael Cohen, and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -348,8 +348,9 @@ SC.State = SC.Object.extend({
     will be relative to the statechart's root state; not relative to this state.
     
     @param state {SC.State|String} the state to go to
+    @param context Option. Any value that you want to pass along to states that will be entered
   */
-  gotoState: function(state) {
+  gotoState: function(state, context) {
     var fromState = null;
     
     if (this.get('isCurrentState')) {
@@ -358,7 +359,7 @@ SC.State = SC.Object.extend({
       fromState = this.get('currentSubstates')[0];
     }
     
-    this.get('statechart').gotoState(state, fromState);
+    this.get('statechart').gotoState(state, fromState, context);
   },
   
   /**
@@ -369,10 +370,11 @@ SC.State = SC.Object.extend({
     will be relative to the statechart's root state; not relative to this state.
     
     @param state {SC.State|String} the state whose history state to go to
+    @param context any value that you want to pass along to states that will be entered. can be null.
     @param recusive {Boolean} Optional. Indicates whether to follow history states recusively starting
                               from the given state
   */
-  gotoHistoryState: function(state, recursive) {
+  gotoHistoryState: function(state, context, recursive) {
     var fromState = null;
     
     if (this.get('isCurrentState')) {
@@ -381,7 +383,7 @@ SC.State = SC.Object.extend({
       fromState = this.get('currentSubstates')[0];
     }
     
-    this.get('statechart').gotoHistoryState(state, fromState, recursive);
+    this.get('statechart').gotoHistoryState(state, fromState, context, recursive);
   },
   
   /**
@@ -571,8 +573,10 @@ SC.State = SC.Object.extend({
     the active state transition process. In order to resume the process, you must call
     this state's resumeGotoState method or the statechart's resumeGotoState. If no asynchronous 
     action is to be perform, then nothing needs to be returned.
+    
+    @param context A value passed along to states that are being entered. May be null.
   */
-  enterState: function() { },
+  enterState: function(context) { },
   
   /**
     Called whenever this state is to be exited during a state transition process. This is 
