@@ -4,11 +4,11 @@
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
+/*global SC_benchmarkPreloadEvents*/
 // sc_require("system/browser")
-if (typeof _SC_performanceEvents !== "undefined") {
-  SC._performanceEvents = _SC_performanceEvents;
-  _SC_performanceEvents = undefined;
+if (typeof SC_benchmarkPreloadEvents !== "undefined") {
+  SC.benchmarkPreloadEvents = SC_benchmarkPreloadEvents;
+  SC_benchmarkPreloadEvents = undefined;
 } else {
-  SC._performanceEvents = { headStart: new Date().getTime() };
+  SC.benchmarkPreloadEvents = { headStart: new Date().getTime() };
 }

@@ -1,10 +1,42 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+
+
 /**
-  Implements some automatic resizing utilities.
+  @namespace
+  Use this mixin to make your view automatically resize based upon its value,
+  title, or other string property.
+  
+  The view uses SproutCore's text measuring API 
 */
 SC.AutoResize = {
+  /**
+    Determines the property containing the string to measure.
+    
+    Currently, this may only be set _before_ initialization.
+    
+    @property {String}
+  */
   autoResizeField: "value",
   
-  shouldAutoResize: YES, // if NO, only measuredSize is changed.
+  /**
+    If YES, automatically resizes the view (default). If NO, only measures,
+    setting 'measuredSize' to the measured value (you can bind to measuredSize
+    and update size manually).
+    
+    @property {Boolean}
+  */
+  shouldAutoResize: YES,
+  
+  /**
+    If NO, prevents SC.AutoResize from doing anything at all.
+    
+    @property {Boolean}
+  */
   shouldMeasureSize: YES, // if NO, nothing happens.
   
   /**
@@ -24,10 +56,29 @@ SC.AutoResize = {
   */
   shouldResizeHeight: NO,
   
+  /**
+    The measured size of the view's content (the value of the autoResizeField). 
+    This property is observable, and, if used in conjunction with setting
+    shouldAutoResize to NO, allows you to customize the 'sizing' part, using
+    SC.AutoResize purely for its measuring code.
+    
+    @property {Rect}
+  */
   measuredSize: { width: 0, height: 0 },
   
-  autoSizePadding: 10, // just to add some nice space.
+  /**
+    An amount to add to the calculated width and height to ensure that any parts
+    not included in the measurement by the browser are covered (otherwise artifacts
+    can occur).
+    
+    @private
+  */
+  autoSizePadding: 10,
   
+  /**
+    @private
+    Begins observing the auto resize field.
+  */
   initMixin: function() {
     this.addObserver(this.get("autoResizeField"), this, "_scar_valueDidChange");
   },
@@ -58,15 +109,20 @@ SC.AutoResize = {
     this.measureSize();
   },
   
-  // also, need to update when the layer is created
-  // note: not so much need to update when the layer is updated; 
-  // we could then end up changing the size due to the layer being updated, causing another layer update;
-  // which would not be great for performance.
+  /**
+    @private
+    When the view is appended to the document, various factors (such as class names)
+    could have changed, so it will need to be remeasured.
+  */
   didAppendToDocument: function(){
     sc_super(); // just in case
     this.invokeLast("measureSize");
   },
   
+  /**
+    @private
+    When the layer is first created, measurement will need to take place.
+  */
   didCreateLayer: function() {
     sc_super();
     this.invokeLast("measureSize");

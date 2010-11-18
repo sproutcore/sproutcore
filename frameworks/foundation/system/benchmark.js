@@ -57,6 +57,33 @@ SC.Benchmark = {
   */
   enabled: YES,
   
+  /**
+    Events are a way of assigning specific, individual times to names, rather than
+    durations of time. A benchmark event can only occur once—if it occurs again, it
+    will overwrite the old event.
+    
+    The purpose of events is different than the purpose for normal benchmarks. Normal
+    benchmarks may be used to benchmark a specific process, and may do so repeatedly;
+    events, conversely, are usually used to benchmark things like startup time, and
+    occur only once. For instance, an 'event' is registered when the document is ready.
+    
+    Events are kept as a hash of names to timestamps. To add an event, just set it:
+    
+        SC.Benchmark.events['myEventName'] = new Date().getTime();
+        
+        // Or, more conveniently:
+        SC.Benchmark.addEvent('myEventName', [optional time]);
+    
+    On a timeline chart, events are usually represented as lines rather than bars. However,
+    if you add eventNameStart and eventNameEnd, they will be automatically added as standard
+    benchmarks.
+    
+    This is useful when adding preload events to SC.benchmarkPreloadEvents; as SC.Benchmark
+    does not yet exist, you cannot call .start() and .end(), but adding the items to
+    SC.benchmarkPreloadEvents will ensure they are included.
+  */
+  events: {},
+  
   /** 
      This hash stores collected stats.  It contains key value pairs.  The value
      will be a hash with the following properties:
@@ -80,8 +107,28 @@ SC.Benchmark = {
     @property {Number}
   */
   globalStartTime: null,
+  
+  /**
+    Adds an 'event' to the events hash.
+    
+    Unlike normal benchmarks, recorded with start/end and that represent a block of time, 
+    events represent a single instance in time. Further, unlike normal benchmarks, which
+    may be run more than once for the same benchmark name, only one instance in time
+    will be recorded for any event name.
+    
+    @param {String} name
+      A name that identifies the event. If addEvent is called again with the same name,
+      the previous call's timestamp will be overwritten.
+    
+    @param {Timestamp} time
+      Optional. The timestamp to record for the event.
+  */
+  addEvent: function(name, time) {
+    if (!time) time = new Date().getTime();
+    this.events[name] = time;
+  },
 
-   /**
+  /**
     Call this method at the start of whatever you want to collect.
     If a parentKey is passed, then you will attach the stat to the parent, 
     otherwise it will be on the top level. If topLevelOnly is passed, then 
@@ -264,34 +311,146 @@ SC.Benchmark = {
     }
     return ret.join("\n") ;
   },
-
+  
   /**
-    Generate a human readable benchmark chart. Pass in appName if you desire.
-
-  */
-  timelineChart: function(appName) {
-    var i=0;
-    // Hide the chart if there is an existing one.
-    this.hideChart();
+    Returns a hash containing the HTML representing the timeline chart, and
+    various metrics and information about the chart:
     
+        html, totalWidth, totalHeight, totalCapturedTime, pointsCaptured
+    
+  */
+  getTimelineChartContent: function() {
     // Compile the data.
     var chart = this._compileChartData(false);
     var chartLen = chart.length;
-    
+
     // Return if there is nothing to draw.
     if(chartLen === 0) return;
-    
+
     // Get the global start of the graph.
     var gStart = this.globalStartTime ? this.globalStartTime : chart[0][1];
     var maxDur = chart[chartLen-1][2]-gStart;
     var maxHeight = 25+chartLen*30;
     var incr = Math.ceil(maxDur/200)+1;
     var maxWidth = incr*50;
+    var leftPadding = 10, rightPadding = 300;
     
+    
+    var str = "<div class = 'sc-benchmark-timeline-chart' style = 'position:relative;'>";    
+    str += "<div class = 'sc-benchmark-top'></div>";
+      
+    // add tick marks
+    for (var i = 0; i < incr; i++) {
+      str += "<div class = 'sc-benchmark-tick' style = '";
+      str += "left: " + (leftPadding + i * 50) + "px; ";
+      str += "height: " + maxHeight + "px;";
+      str += "'></div>";
+      
+      str += "<div class = 'sc-benchmark-tick-label' style = '";
+      str += "left: " + (leftPadding + i * 50) + "px; ";
+      str += "'>" + (i * 200) + "ms</div>";
+    }
+    
+    // print each chart item
+    for (i = 0; i < chartLen; i++) {
+      str += "<div class = 'sc-benchmark-row ";
+      str += (i % 2 === 0) ? 'even' : 'odd';
+      str += "' style = '";
+      str += "top: " + (50 + (i * 30)) + "px; ";
+      str += "'></div>";
+      
+      var div = document.createElement('div');
+      var start = chart[i][1];
+      var end = chart[i][2];
+      var duration = chart[i][3];
+      
+      
+      str += "<div class = 'sc-benchmark-bar' style = '";
+      str += 'left:'+ (leftPadding + ((start-gStart)/4))+'px; width: '+((duration/4)) + 'px;';
+      str += 'top: '+(28+(i*30))+'px;';
+      
+      str += "' title = 'start: " + (start-gStart) + " ms, end: " + (end-gStart) + ' ms, duration: ' + duration + " ms'";
+      str += ">";
+      str += '&nbsp;' + chart[i][0] + " <span class='sc-benchmark-emphasis'>";
+      str += duration + "ms (start: " + (start - gStart) + "ms)";
+      str += "</span>";
+      
+      str += "</div>";
+    }
+    
+    // add the events
+    var events = this.events, idx = 0;
+    for (i in events) {
+      var t = events[i] - gStart;
+      str += "<div class = 'sc-benchmark-event idx" + (idx % 10) + "' style = '";
+      str += "left: " + (leftPadding + t / 4) + "px; height: " + maxHeight + "px; top: 20px;";
+      str += "' title = '" + i + ": " + t + "'></div>";
+      idx++;
+    }
+
+    str += "</div>";
+
+    return {
+      html: str,
+      totalCapturedTime: maxDur,
+      pointsCaptured: chartLen,
+      width: maxWidth + leftPadding + rightPadding,
+      height: maxHeight
+    };
+  },
+  
+  /**
+    Returns a view with the timeline chart. The view has a 'reload' method to
+    refresh its data.
+  */
+  getTimelineChartView: function() {
+    var view = SC.ScrollView.create({
+      contentView: SC.StaticContentView.extend({
+
+      }),
+      
+      reload: function() {
+        var content = SC.Benchmark.getTimelineChartContent();
+        this.contentView.set('content', content.html);
+        this.contentView.adjust({
+          width: content.width,
+          height: content.height
+        });
+        
+        this.chartContent = content;
+
+        SC.RunLoop.invokeLater(SC.Benchmark, function() {
+          this.contentView.notifyPropertyChange('frame');      
+        });
+      }
+    });
+    
+    view.reload();
+    
+    return view;
+  },
+
+  /**
+    Generate a human readable benchmark chart. Pass in appName if you desire.
+  */
+  timelineChart: function(appName) {
+    SC.RunLoop.begin();
+    
+    var i=0;
+    // Hide the chart if there is an existing one.
+    this.hideChart();
+    
+    // Compile the data.
+    var chartView = this.getTimelineChartView();
+    var chartLen = chartView.chartContent.pointsCaptured,
+        chartCapturedTime = chartView.chartContent.totalCapturedTime;
+    
+    // Get the global start of the graph.
+
     this._benchmarkChart = SC.Pane.create({
       classNames: "sc-benchmark-pane".w(),
       layout: { left: 20, right: 20, bottom: 20, top: 20 },
-      childViews: "title scroll exit".w(),
+      childViews: "title exit".w(),
       exit: SC.ButtonView.extend({
         layout: { right: 20, top: 20, width: 100, height: 30 },
         title: "Hide Chart",
@@ -302,78 +461,16 @@ SC.Benchmark = {
       title: SC.LabelView.extend({
         classNames: 'sc-benchmark-title'.w(),
         layout: { left: 20, top: 23, right: 200, height: 30 },
-        value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + maxDur +' ms - Points Captured: ' + chartLen),
+        value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + chartCapturedTime +' ms - Points Captured: ' + chartLen),
         fontWeight: 'bold'
-      }),
-      
-      scroll: SC.ScrollView.extend({
-        layout: { left: 20, top: 60, bottom: 20, right: 20 },
-        contentView: SC.StaticContentView.extend({
-          
-        })
       })
+      
     }).append();
-
-    // Create the basic graph element.
-    var graph = this._benchmarkChart.scroll.contentView.get('layer');
-    graph.className += ' sc-benchmark-graph';
-    graph.style.height = maxHeight + 'px';
-    graph.style.width = maxWidth + 'px';
-
-    var topBox = document.createElement('div');
-    topBox.className = 'sc-benchmark-top'; 
-    graph.appendChild(topBox);
-
-    // Draw the tick marks.
-    for(i=0;i<incr; i++)
-    {
-      var tick = document.createElement('div');
-      tick.className = 'sc-benchmark-tick';
-      tick.style.left = (i*50)+'px';
-      tick.style.height = maxHeight+'px';
-      var tickLabel = document.createElement('div');
-      tickLabel.className = 'sc-benchmark-tick-label';
-      tickLabel.style.left = (i*50)+'px';
-      tickLabel.innerHTML = i*200+" ms";
-      graph.appendChild(tick);
-      graph.appendChild(tickLabel);
-    }
     
-    // For each item in the chart, print it out on the screen.
-    for(i=0;i<chartLen; i++)
-    {
-    	var row = document.createElement('div');
-    	row.style.top = (50+(i*30))+'px';
-    	row.className = (i%2===0) ? 'sc-benchmark-row even' : 'sc-benchmark-row';
-    	graph.appendChild(row);
-
-      var div = document.createElement('div');
-      var start = chart[i][1];
-      var end = chart[i][2];
-      var duration = chart[i][3];
-      
-      var html = '&nbsp;' + chart[i][0] + " <span class='sc-benchmark-emphasis'>";
-      html += duration + "ms (start: " + (start - gStart) + "ms)";
-      html += "</span>";
-      
-      div.innerHTML = html;
-
-      
-      div.className = 'sc-benchmark-bar';
-      div.style.cssText = 'left:'+ (((start-gStart)/4))+'px; width: '+((duration/4))+
-                          'px; top: '+(28+(i*30))+'px;';
-      div.title = "start: " + (start-gStart) + " ms, end: " + (end-gStart) + ' ms, duration: ' + duration + ' ms';
-      graph.appendChild(div);
-    }
-
-    // Save the graph.
-    this._graph = graph;
+    chartView.set('layout', { left: 20, top: 60, bottom: 20, right: 20 });
+    this._benchmarkChart.appendChild(chartView);
     
-    
-    SC.RunLoop.invokeLater(SC.Benchmark, function() {
-      graph.notifyPropertyChange('frame');      
-    });
-    
+    SC.RunLoop.end();
   },
   
   /*
@@ -428,60 +525,74 @@ SC.Benchmark = {
   // @private
   
   
-  // Loads data from both the browser's own event hash and SC's pre-load event hash.
-  _loadSCPerfData: function() {
-    var sc_perf = SC._performanceEvents, events = [], idx, len, evt;
+  /**
+    Loads data from both the browser's own event hash and SC's pre-load event hash.
+  */
+  loadPreloadEvents: function() {
+    var preloadEvents = SC.benchmarkPreloadEvents, events = [], idx, len, evt;
     
-    if (typeof webkitPerformance !== "undefined") SC.mixin(sc_perf, webkitPerformance.timing);
+    // the browsers may have their own event hash. Ours uses the same format, so
+    // all that we need to do is mixin the browser's to our own.
+    if (typeof webkitPerformnce !== 'undefined') SC.mixin(preloadEvents, webkitPerformane.timing);
     
-    // figure out globalStartTime
+    // we will attempt to find when the loading started and use that as our
+    // global start time, but only do so if the global start time is not already set.
     if (!this.globalStartTime) {
-      var globalStartEvents = "navigation navigationStart headStart".w();
+      // the potential events representing start time can be either from the browser
+      // or our own recordings. We prefer the browser.
+      var globalStartEvents = 'navigation navigationStart headStart'.w();
       len = globalStartEvents.length;
+      
       for (idx = 0; idx < len; idx++) {
-        if (sc_perf[globalStartEvents[idx]]) {
-          this.globalStartTime = sc_perf[globalStartEvents[idx]];
+        if (preloadEvents[globalStartEvents[idx]]) {
+          this.globalStartTime = preloadEvents[globalStartEvents[idx]];
           break;
         }
       }
     }
     
-    this.javascriptStartTime = SC._performanceEvents['headStart'];
+    // the JavaScript start time will be one recorded by us
+    // we record headStart in bootstrap.
+    this.javascriptStartTime = preloadEvents['headStart'];
     
-    // it is unfortunate, but because SC.Benchmark catalogues data in start/end blocks,
-    // and does not have a facility for cataloguing just plain events, we can only understand
-    // blocks that have both a start and an end.
+    // finally, mix in the events to our own events hash
+    SC.mixin(this.events, preloadEvents);
     
-    // automatically handle any that have Start/End
-    for (var eventName in sc_perf) {
-      if (eventName.substr(-3) === "End") {
-        var st = sc_perf[eventName.substr(0, eventName.length - 3) + "Start"];
-        if (!st) continue;
-        
-        events.push({ 
-          name: eventName.substr(0, eventName.length - 3), 
-          start: st, 
-          end: sc_perf[eventName] 
-        });
-      }
-    }
+    this._hasLoadedPreloadEvents = true;
+  },
+  
+  /**
+    Some events represent a beginning and end. While this is not common for events
+    that take place after the app loads (as they can just use SC.Benchmark.start/end),
+    SC.Benchmark.start/end is not available before load—as such, code will add
+    *Start and *End events to the event hash. 
     
-    events = events.sort(function(a, b) {
-      return a.time - b.time;
-    });
+    This method iterates over the event hash and removes those items that represent
+    starts and ends, calling .start/.end for them.
+  */
+  _loadBenchmarksFromEvents: function() {
+    if (!this._hasLoadedPreloadEvents) this.loadPreloadEvents();
     
-    // add all of the events to the benchmarks so they'll show up on graphs.
-    len = events.length;
-    for (idx = 0; idx < len; idx++) {
-      evt = events[idx];
-      SC.Benchmark.start(evt.name, undefined, evt.start);
-      SC.Benchmark.end(evt.name, undefined, evt.end);
+    var events = this.events;
+    for (var i in events) {
+      if (i.substr(-3) !== 'End') continue;
+      
+      var stem = i.substr(0, i.length - 3);
+      if (!events[stem + 'Start']) continue;
+      
+      SC.Benchmark.start(stem, undefined, events[stem + 'Start']);
+      SC.Benchmark.end(stem, undefined, events[stem + 'End']);
+      
+      delete events[stem + 'Start'];
+      delete events[stem + 'End'];
     }
   },
   
   // Generates, sorts, and returns the array of all the data that has been captured.
   _compileChartData: function(showSub)
   {
+    this._loadBenchmarksFromEvents();
+    
     var chart = [], dispKey;
     for(var key in this.stats) 
     {
