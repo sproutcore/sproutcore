@@ -1912,34 +1912,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     sc_super() ;
 
-    // Determine which SC.Theme instance to use for this view.
-
-    // If no theme has been set, it will be inherited from the parent view.
-    if (SC.empty(theme)) {
-      theme = this.get('themeFromParentView');
-
-    // If the theme is a string, attempt to convert it into an SC.Theme
-    // instance.
-    } else if (SC.typeOf(theme) === SC.T_STRING) {
-      themeName = theme;
-      theme = SC.Theme.find(themeName);
-
-      // If no theme could be found with that name, fall back to the parent's
-      // theme.
-      if (!theme) {
-        theme = this.get('themeFromParentView');
-
-        // For backwards compatibility, the theme name should be added to the
-        // class names if no theme is found that corresponds to the string.
-        //
-        // For example, in older versions of SproutCore, SC.ButtonView may
-        // have had its theme property set to 'capsule' to designate that a
-        // different visual style should be applied.
-        this._themeClassName = themeName;
-      }
-    }
-    this.set('theme', theme);
-
     // If this view does not have a render delegate but has
     // renderDelegateName set, try to retrieve the render delegate from the
     // theme.
