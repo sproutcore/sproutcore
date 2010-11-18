@@ -269,11 +269,13 @@ SC.RunLoop.isRunLoopInProgress = function() {
 };
 
 /**
-  Executes a passed function in the context of a run loop. If called outside a runloop, starts and ends one. If called inside an existing runloop, is simply executes the function unless you force it to create a nested runloop.
-
+  Executes a passed function in the context of a run loop. If called outside a 
+  runloop, starts and ends one. If called inside an existing runloop, is 
+  simply executes the function unless you force it to create a nested runloop.
+  
   If an exception is thrown during execution, we give an error catcher the
   opportunity to handle it before allowing the exception to bubble again.
-
+  
   @param {Function} callback callback to execute
   @param {Object} target context for callback
   @param {Boolean} if YES, starts/ends a new runloop even if one is already running
