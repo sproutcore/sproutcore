@@ -825,32 +825,7 @@ SC.Observable = {
         propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
         for(ploc=0;ploc<propertyPathsLength;ploc++) {
           path = propertyPaths[ploc] ;
-          dotIndex = path.indexOf('.') ;
-          // handle most common case, observing a local property
-          if (dotIndex < 0) {
-            this.addObserver(path, this, observer) ;
-
-          // next most common case, use a chained observer
-          } else if (path.indexOf('*') === 0) {
-            this.addObserver(path.slice(1), this, observer) ;
-            
-          // otherwise register the observer in the observers queue.  This 
-          // will add the observer now or later when the named path becomes
-          // available.
-          } else {
-            root = null ;
-            
-            // handle special cases for observers that look to the local root
-            if (dotIndex === 0) {
-              root = this; path = path.slice(1) ;
-            } else if (dotIndex===4 && path.slice(0,5) === 'this.') {
-              root = this; path = path.slice(5) ;
-            } else if (dotIndex<0 && path.length===4 && path === 'this') {
-              root = this; path = '';
-            }
-            
-            SC.Observers.addObserver(path, this, observer, root); 
-          }
+          this._kvo_addLocalOrAbsoluteObserver(path, observer);
         }
       }
     }
@@ -883,6 +858,36 @@ SC.Observable = {
       }
     }
     
+  },
+  
+
+  _kvo_addLocalOrAbsoluteObserver: function(path, observer) {
+    var dotIndex = path.indexOf('.') ;
+    // handle most common case, observing a local property
+    if (dotIndex < 0) {
+      this.addObserver(path, this, observer) ;
+      
+      // next most common case, use a chained observer
+    } else if (path.indexOf('*') === 0) {
+      this.addObserver(path.slice(1), this, observer) ;
+      
+      // otherwise register the observer in the observers queue.  This 
+      // will add the observer now or later when the named path becomes
+      // available.
+    } else {
+      var root = null ;
+      
+      // handle special cases for observers that look to the local root
+      if (dotIndex === 0) {
+        root = this; path = path.slice(1) ;
+      } else if (dotIndex===4 && path.slice(0,5) === 'this.') {
+        root = this; path = path.slice(5) ;
+      } else if (dotIndex<0 && path.length===4 && path === 'this') {
+        root = this; path = '';
+      }
+      
+      SC.Observers.addObserver(path, this, observer, root); 
+    }
   },
   
   // ..........................................
