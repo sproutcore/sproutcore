@@ -276,7 +276,6 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     var array = this._TMP_PROVIDE_ARRAY, range = this._TMP_PROVIDE_RANGE;
     array[0] = object;
     range.start = index;
-    range.length = 0;
     return this.provideObjectsInRange(range, array);
   },
 
