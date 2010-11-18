@@ -7,3 +7,6 @@
 *.swo
 themes/sc_ace/resources/slices/
 tmp/
+bin
+.bundle
+Gemfile*
