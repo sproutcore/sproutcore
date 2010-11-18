@@ -307,7 +307,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     // replace the layer
-    if (this.get("layer")) this.replaceLayer();
+    if (this.get('layer')) this.replaceLayer();
   }.observes('theme'),
 
   /**
