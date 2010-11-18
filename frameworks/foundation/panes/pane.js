@@ -94,20 +94,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   page: null,
   
-  /**
-    Base theme represents the theme coming from the parent view, that
-    the view should look inside for its own theme. As Panes have no
-    parent view, base theme should be the SC default theme.
-    
-    There is a catch, though: SC.Pane may be defined before the default
-    theme is set. To ensure the proper theme is used, baseTheme is a computed
-    property.
-  */
-  baseTheme: function() {
-    return SC.defaultTheme;
-  }.property(),
-  
-  
   // .......................................................
   // ROOT RESPONDER SUPPORT
   //
