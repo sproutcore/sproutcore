@@ -83,17 +83,31 @@ SC.AutoResize = {
     this.addObserver(this.get("autoResizeField"), this, "_scar_valueDidChange");
   },
   
-  measureSize: function() {
+  /**
+    If this property is provided, all views that share the same value for this property will be resized as a batch for increased performance.
+    
+    @property {String}
+  */
+  batchResizeId: null,
+  
+  measureSizeLater: function() {
+    var batchResizeId = this.get('batchResizeId');
+    
+    if(batchResizeId) SC.AutoResize.requestResize(this, batchResizeId);
+    else this.invokeOnce(this.measureSize);
+  },
+  
+  measureSize: function(batch) {
     if (!this.get("shouldMeasureSize")) return;
     
-    // get the layer
-    var layer = this.get("layer");
+    var metrics, layer = this.get("layer");
     
     // return if there wasn't one (no font sizes, etc. to use with measuring)
     if (!layer) return;
      
     // get metrics, using layer as example element
-    var metrics = SC.metricsForString(this.get(this.get("autoResizeField")), layer);
+    if(batch) metrics = SC.measureString(this.get(this.get("autoResizeField")));
+    else metrics = SC.metricsForString(this.get(this.get("autoResizeField")), layer);
     
     // set it
     this.set("measuredSize", metrics);
@@ -106,7 +120,7 @@ SC.AutoResize = {
   // we need to update the measurement when the value changes
   _scar_valueDidChange: function(){ 
     sc_super(); // just in case
-    this.measureSize();
+    this.measureSizeLater();
   },
   
   /**
@@ -116,7 +130,7 @@ SC.AutoResize = {
   */
   didAppendToDocument: function(){
     sc_super(); // just in case
-    this.invokeLast("measureSize");
+    this.measureSizeLater();
   },
   
   /**
@@ -125,6 +139,42 @@ SC.AutoResize = {
   */
   didCreateLayer: function() {
     sc_super();
-    this.invokeLast("measureSize");
+    this.measureSizeLater();
   }
 };
+
+SC.mixin(SC.AutoResize, {
+  needResize: {},
+  
+  requestResize: function(view, id) {
+    var views = SC.AutoResize.needResize[id] || (SC.AutoResize.needResize[id] = SC.CoreSet.create());
+    
+    views.add(view);
+    
+    SC.RunLoop.currentRunLoop.invokeLast(SC.AutoResize.doBatchResize);
+  },
+  
+  doBatchResize: function() {
+    var tag, views, view, layer;
+    
+    for(tag in SC.AutoResize.needResize) {
+      views = SC.AutoResize.needResize[tag];
+      
+      while(view = views.pop()) {
+        layer = view.get('layer');
+        
+        if(layer) {
+          SC.prepareStringMeasurement(layer);
+          view.measureSize(YES);
+          break;
+        }
+      }
+      
+      while(view = views.pop()) {
+        view.measureSize(YES);
+      }
+      
+      SC.teardownStringMeasurement();
+    }
+  }
+});
