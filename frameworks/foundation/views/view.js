@@ -1893,7 +1893,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   init: function() {
     var parentView = this.get('parentView'),
-        theme = this.get('theme'), themeName,
+        theme = this.get('theme'),
         renderDelegate = this.get('renderDelegate'), renderDelegateName,
         path, root, idx, len, lp, dp ;
 
