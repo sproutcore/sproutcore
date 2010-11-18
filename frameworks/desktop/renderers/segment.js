@@ -58,7 +58,7 @@ SC.BaseTheme.Segment = SC.Renderer.extend({
     if (this.didChange("width")) cq.css('width', this.width ? this.width+'px' : '');
     if (this.didChange('layoutDirection')) cq.css('display', this.layoutDirection == SC.LAYOUT_HORIZONTAL ? 'inline-block' : '');
     this.resetChanges();
-  },
+  }
 });
 
 SC.BaseTheme.addRenderer(SC.BaseTheme.Segment);
