@@ -1944,22 +1944,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   /**
-    Returns the theme from the parent view, or the default theme if this
-    view does not have a parent.
-
-    @property {SC.Theme}
-  */
-  themeFromParentView: function() {
-    var parentView = this.get('parentView');
-
-    if (!parentView) {
-      return SC.Theme.find(SC.defaultTheme);
-    }
-
-    return parentView.get('theme');
-  }.property('parentView').cacheable(),
-
-  /**
     Wakes up the view. The default implementation immediately syncs any 
     bindings, which may cause the view to need its display updated. You 
     can override this method to perform any additional setup. Be sure to 
