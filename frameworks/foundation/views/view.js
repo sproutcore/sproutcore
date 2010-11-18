@@ -1248,17 +1248,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       context.addClass(themeClassNames[idx]);
     }
 
-    // var themeName = this.get('themeName');
-    // if (themeName && classNames.indexOf(themeName) < 0) classNames.push(themeName);
-
     // If this view has no cursor and should inherit it from the parent,
     // then it sets its own cursor view.  This sets the cursor rather than
     // simply using the parent's cursor object so that its cursorless
 
     context.addClass(this.get('classNames'));
-    if (this.get('themeName')) {
-      context.addClass(this.get('themeName'));
-    }
 
     var cursor = this.get('cursor');
     if (cursor) context.addClass(cursor.get('className'));
