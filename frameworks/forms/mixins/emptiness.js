@@ -47,6 +47,10 @@ SC.CalculatesEmptiness = {
     if (parentView && parentView.emptinessDidChangeFor) parentView.emptinessDidChangeFor(this);
   }.observes('isEmpty'),
   
+  initMixin: function() {
+    this.emptinessDidChangeFor();
+  },
+  
   /**
   Called by fields when their emptiness changes.
 
