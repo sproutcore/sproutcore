@@ -360,7 +360,7 @@ SC.Record = SC.Object.extend(
       
       if(!ignoreDidChange) this.endEditing(key);
     }
-    return this ;  
+    return this ;
   },
   
   /**

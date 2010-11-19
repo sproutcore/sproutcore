@@ -1,4 +1,4 @@
-sc_require("jquery");
+// sc_require("jquery");
 jQuery.Buffer = (function() {
 
   var Buffer = function(elem) {

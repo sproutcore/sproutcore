@@ -866,7 +866,7 @@ SC.SplitView = SC.View.extend(
 });
 
 // TODO: This should be a mixin to the few classes that need it
-SC.View = SC.View.extend({
+SC.mixin(SC.View.protoype, {
   /**
     The current split view this view is embedded in (may be null).
     @property {SC.SplitView}
@@ -876,5 +876,5 @@ SC.View = SC.View.extend({
     while (view && !view.isSplitView) view = view.get('parentView') ;
     return view ;
   }.property('parentView').cacheable()
-})
+});
 

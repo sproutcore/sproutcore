@@ -21,7 +21,7 @@ Greenhouse.main = function main() {
   
   //start the state machine
   Greenhouse.targetsController.reload();
-  Greenhouse.startupStatechart();
+  Greenhouse.initStatechart();
   
 } ;
 
