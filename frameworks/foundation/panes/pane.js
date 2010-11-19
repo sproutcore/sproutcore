@@ -817,10 +817,18 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   isPaneAttached: NO,
   
   /**
-    If YES, a touch itnercept pane will be added above this pane.
+    If YES, a touch intercept pane will be added above this pane when on
+    touch platforms.
   */
-  hasTouchIntercept: NO,
-  
+  wantsTouchIntercept: NO,
+
+  /**
+    Returns YES if wantsTouchIntercept and this is a touch platform.
+  */
+  hasTouchIntercept: function(){
+    return this.get('wantsTouchIntercept') && SC.platform.touch;
+  }.property('wantsTouchIntercept').cacheable(),
+
   /**
     The Z-Index of the pane. Currently, you have to match this in CSS.
     TODO: ALLOW THIS TO AUTOMATICALLY SET THE Z-INDEX OF THE PANE (as an option).
@@ -833,8 +841,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   touchZ: 99,
 
   _addIntercept: function() {
-    if (this.get("hasTouchIntercept") && SC.platform.touch) {
-      this.set("usingTouchIntercept", YES);
+    if (this.get('hasTouchIntercept')) {
       var div = document.createElement("div");
       var divStyle = div.style;
       divStyle.position = "absolute";
@@ -928,6 +935,12 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
   /** @private */
   init: function() {
+    // Backwards compatibility
+    if (this.hasTouchIntercept === YES) {
+      console.warn("Do not set hasTouchIntercept directly. Use wantsTouchIntercept instead.");
+      this.hasTouchIntercept = SC.platform.touch;
+    }
+
     // if a layer was set manually then we will just attach to existing 
     // HTML.
     var hasLayer = !!this.get('layer') ;
