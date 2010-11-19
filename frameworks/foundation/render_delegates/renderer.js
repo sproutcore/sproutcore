@@ -3,7 +3,7 @@ SC.RendererRenderDelegate = SC.Object.extend({
     var rendererName = this.get('rendererName');
     var renderer = view.get('theme').renderer(rendererName);
 
-    renderer.attr(view.getDisplayProperties());
+    renderer.attr(view.getChangedDisplayProperties());
     renderer.render(context);
 
     view._scrrd_renderer = renderer;
@@ -12,7 +12,7 @@ SC.RendererRenderDelegate = SC.Object.extend({
   update: function(view, elem) {
     var renderer = view._scrrd_renderer;
 
-    renderer.attr(view.getDisplayProperties());
+    renderer.attr(view.getChangedDisplayProperties());
     renderer.update(elem);
   }
 });

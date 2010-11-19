@@ -10,7 +10,7 @@ SC.BaseTheme.pickerRenderDelegate = SC.Object.create({
 
   render: function(dataSource, context) {
     var panelRenderDelegate = dataSource.getPath('theme').panelRenderDelegate;
-    var displayProperties = dataSource.getDisplayProperties();
+    var displayProperties = dataSource.getChangedDisplayProperties();
 
     panelRenderDelegate.render(dataSource, context);
 
@@ -28,7 +28,7 @@ SC.BaseTheme.pickerRenderDelegate = SC.Object.create({
     var panelRenderDelegate = dataSource.getPath('theme').panelRenderDelegate;
     panelRenderDelegate.update(dataSource, $);
     
-    var displayProperties = dataSource.getDisplayProperties();
+    var displayProperties = dataSource.getChangedDisplayProperties();
 
     var preferType = displayProperties.preferType;
     var pointerPosition = displayProperties.pointerPos;

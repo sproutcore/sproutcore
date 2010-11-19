@@ -2,13 +2,19 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /**
-  Renders an HTML representation of SC.ButtonView.
+  Renders and updates the HTML representation of SC.ButtonView.
 */
 SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
+  /**
+    Called when we need to create the HTML that represents the button.
+
+    @param {SC.Object} dataSource the object containing the information on how to render the button
+    @param {SC.RenderContext} context the render context instance
+  */
   render: function(dataSource, context) {
     var displayProperties = dataSource.getDisplayProperties();
     var minWidth          = displayProperties.titleMinWidth;
@@ -45,27 +51,34 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     }
   },
 
-  update: function(dataSource, query) {
-    var displayProperties = dataSource.getDisplayProperties();
-    var icon              = displayProperties.icon || '';
-    var title             = displayProperties.title;
-    var titleMinWidth     = displayProperties.titleMinWidth;
-    var hint              = displayProperties.hint;
-    var escapeHTML        = displayProperties.escapeHTML;
-    var minWidth          = displayProperties.titleMinWidth;
-    var didChangeForKey   = 'buttonRenderDelegate';
+  /**
+    Called when one or more display properties have changed and we need to
+    update the HTML representation with the new values.
 
-    if (dataSource.didChangeFor(didChangeForKey, 'isActive')) {
+    @param {SC.Object} dataSource the object containing the information on how to render the button
+    @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
+  */
+  update: function(dataSource, jquery) {
+    var displayProperties = dataSource.getChangedDisplayProperties();
+
+    if (displayProperties.contains('isActive')) {
       if (displayProperties.isActive) {
-        query.addClass('active');
+        jquery.addClass('active');
       }
     }
 
-    if (dataSource.didChangeFor(didChangeForKey,'displayTitle','icon')) {
-      query.find('label').html(this._htmlForTitleAndIcon(displayProperties));
+    if (displayProperties.contains('displayTitle', 'isActive')) {
+      jquery.find('label').html(this._htmlForTitleAndIcon(dataSource.getDisplayProperties()));
     }
   },
 
+  /**
+    Returns the HTML for the button's label, which can include a title and
+    an icon.
+
+    @param {Object} displayProperties the object containing the properties needed to generate the label
+    @returns {String} a string of HTML
+  */
   _htmlForTitleAndIcon: function(displayProperties) {
     var title = displayProperties.title,
         titleMinWidth = displayProperties.titleMinWidth,
