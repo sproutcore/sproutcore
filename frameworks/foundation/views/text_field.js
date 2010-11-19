@@ -673,7 +673,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     // now, hide the intercept on this pane if it has one
     var pane = this.get('pane');
-    if (pane && pane.get("usingTouchIntercept")) {
+    if (pane && pane.get('hasTouchIntercept')) {
       // hide
       pane.hideTouchIntercept();
       
