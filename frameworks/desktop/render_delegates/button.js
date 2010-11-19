@@ -67,7 +67,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
       }
     }
 
-    if (displayProperties.contains('displayTitle', 'isActive')) {
+    if (displayProperties.contains('title', 'isActive')) {
       jquery.find('label').html(this._htmlForTitleAndIcon(dataSource.getDisplayProperties()));
     }
   },
