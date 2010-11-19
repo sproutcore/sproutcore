@@ -326,6 +326,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {SC.Theme}
   */
   baseTheme: function() {
+    var parent;
     var baseThemeName = this.get('baseThemeName');
     if (baseThemeName) {
       return SC.Theme.find(baseThemeName);
