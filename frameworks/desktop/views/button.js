@@ -34,6 +34,14 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   classNames: ['sc-button-view'],
 
   /**
+    The theme to apply to the button. By default, a subtheme with the name of
+    'square' is created for backwards-compatibility.
+
+    @property {String}
+  */
+  themeName: 'square',
+
+  /**
     The behavioral mode of this button.
 
     Possible values are:
