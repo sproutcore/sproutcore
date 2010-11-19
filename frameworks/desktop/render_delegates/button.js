@@ -11,21 +11,12 @@
 SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
   render: function(dataSource, context) {
     var displayProperties = dataSource.getDisplayProperties();
-    var themeClassName    = dataSource._themeClassName;
     var minWidth          = displayProperties.titleMinWidth;
     var labelContent;
 
     // Add an icon class name to the button if it contains an icon in its
     // title.
     context.setClass('icon', !!displayProperties.icon);
-
-    // For backwards compatibility with SC.ButtonView's old use of the theme
-    // property, add the view's _themeClassName to the context if it
-    // exists. In these cases, the view's theme property is moved to
-    // _themeClassName during SC.View's init method.
-    if (themeClassName) {
-      context.addClass(themeClassName);
-    }
 
     // Specify a minimum width for the inner part of the button.
     minWidth = (minWidth ? "style='min-width: " + minWidth + "px'" : '');
@@ -57,7 +48,6 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
   update: function(dataSource, query) {
     var displayProperties = dataSource.getDisplayProperties();
     var icon              = displayProperties.icon || '';
-    var themeClassName    = dataSource._themeClassName;
     var title             = displayProperties.title;
     var titleMinWidth     = displayProperties.titleMinWidth;
     var hint              = displayProperties.hint;
@@ -65,7 +55,6 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     var minWidth          = displayProperties.titleMinWidth;
     var didChangeForKey   = 'buttonRenderDelegate';
 
-    query.addClass(dataSource._themeClassName);
     if (dataSource.didChangeFor(didChangeForKey, 'isActive')) {
       if (displayProperties.isActive) {
         query.addClass('active');
