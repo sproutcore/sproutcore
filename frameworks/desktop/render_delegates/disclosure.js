@@ -5,8 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('render_delegates/renderer');
-
 SC.BaseTheme.disclosureRenderDelegate = SC.RendererRenderDelegate.create({
   rendererName: 'disclosure'
 });

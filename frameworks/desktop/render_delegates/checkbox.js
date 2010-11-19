@@ -5,8 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('render_delegates/renderer');
-
 SC.BaseTheme.checkboxRenderDelegate = SC.RendererRenderDelegate.create({
   rendererName: 'checkbox'
 });
