@@ -31,14 +31,6 @@ SC.InlineEditable = {
     @return {Boolean} YES if did begin editing
   */
   beginEditing: function() {
-    var childViews = this.childViews, i, len = childViews.length, view;
-    
-    for(i = 0; i < len; i++) {
-      view = childViews[i];
-      // textfields are weird
-      if(view.get('isEditable') && !view.isTextField) view.beginEditing();
-    }
-    
     if(this.get('isEditing')) return YES;
     
     return this.invokeDelegateMethod(this.get('editorDelegate'), 'beginEditingFor', this, this.get('value'));
@@ -50,13 +42,6 @@ SC.InlineEditable = {
     @return {Boolean} NO if the editor could not exit.
   */
   discardEditing: function() {
-    var childViews = this.childViews, i, len = childViews.length, view;
-    
-    for(i = 0; i < len; i++) {
-      view = childViews[i];
-      if(view.get('isEditable')) view.discardEditing();
-    }
-    
     if (!this.get('isEditing')) return YES;
     
     return this.invokeDelegateMethod(this.get('editorDelegate'), 'discardEditingFor', this);
@@ -68,13 +53,6 @@ SC.InlineEditable = {
     @return {Boolean} NO if the editor could not exit
   */
   commitEditing: function() {
-    var childViews = this.childViews, i, len = childViews.length, view;
-    
-    for(i = 0; i < len; i++) {
-      view = childViews[i];
-      if(view.get('isEditable')) view.commitEditing();
-    }
-    
     if (!this.get('isEditing')) return YES;
     
     return this.invokeDelegateMethod(this.get('editorDelegate'), 'commitEditingFor', this);
