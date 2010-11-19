@@ -1303,17 +1303,44 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   /**
-    Returns a hash containing property names and their values from the
-    view's display properties.
+    Returns a hash containing property names and their values for the display
+    properties that have changed since the last time this method was called.
+    Every display property is returned the first time it is called.
 
-    This behaves similar to get(), but will first check for the existence of
-    the display version of a property. For example, if title is a display
-    property, it will return the value for the displayTitle property.
+    For example, if this view had two display properties, isActive and items,
+    you might receive a hash like this:
+
+    {
+      isActive: YES,
+      items: ['item1', 'item2']
+    }
+
+    Note that this method will look for display representations of properties
+    before the actual property name. For example, if title was a display
+    property, and the view contained both title and displayTitle properties,
+    the value of displayTitle would be returned.
 
     @returns {Object}
   */
-  getDisplayProperties: function() {
-    var idx, len, displayProperties, key, val, displayPropertiesHash = {};
+  getChangedDisplayProperties: function() {
+    var idx, len, displayProperties, key, val,
+        displayKey, displayPropertiesHash;
+
+    displayPropertiesHash = {
+      contains: function() {
+        var idx, len = arguments.length, key;
+
+        for (idx = 0; idx < len; idx++) {
+          key = arguments[idx];
+
+          if (this.hasOwnProperty(key)) {
+            return YES;
+          }
+        }
+
+        return NO;
+      }
+    };
 
     displayProperties = this.get('displayProperties');
     len = displayProperties.length;
@@ -1321,7 +1348,72 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     for (idx = 0; idx < len; idx++) {
       key = displayProperties[idx];
 
-      val = this.get('display'+key.capitalize());
+      // Convert to display version of key name
+      // E.g., title -> displayTitle
+      displayKey = 'display'+key.capitalize();
+
+      val = this.get(displayKey);
+
+      if (val && this.didChangeFor('getChangedDisplayProperties', displayKey)) {
+        displayPropertiesHash[key] = val;
+      } else if (this.didChangeFor('getChangedDisplayProperties', key)) {
+        displayPropertiesHash[key] = this.get(key);
+      }
+    }
+
+    return displayPropertiesHash;
+  },
+
+  /**
+    Returns a hash containing property names and their values for the display
+    properties.
+
+    For example, if this view had two display properties, isActive and items,
+    you would receive a hash like this:
+
+    {
+      isActive: YES,
+      items: ['item1', 'item2']
+    }
+
+    Note that this method will look for display representations of properties
+    before the actual property name. For example, if title was a display
+    property, and the view contained both title and displayTitle properties,
+    the value of displayTitle would be returned.
+
+    @returns {Object}
+  */
+  getDisplayProperties: function() {
+    var idx, len, displayProperties, key, val,
+        displayKey, displayPropertiesHash;
+
+    displayPropertiesHash = {
+      contains: function() {
+        var idx, len = arguments.length, key;
+
+        for (idx = 0; idx < len; idx++) {
+          key = arguments[idx];
+
+          if (this.hasOwnProperty(key)) {
+            return YES;
+          }
+        }
+
+        return NO;
+      }
+    };
+
+    displayProperties = this.get('displayProperties');
+    len = displayProperties.length;
+
+    for (idx = 0; idx < len; idx++) {
+      key = displayProperties[idx];
+
+      // Convert to display version of key name
+      // E.g., title -> displayTitle
+      displayKey = 'display'+key.capitalize();
+
+      val = this.get(displayKey);
 
       if (val) {
         displayPropertiesHash[key] = val;
@@ -1331,15 +1423,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     return displayPropertiesHash;
-  },
-  
-  // TODO delete this
-  getDisplayProperty: function(key) {
-    var val = this.get('display'+key.capitalize());
-    
-    if (val) return val;
-    
-    return this.get('key');
   },
 
   /**
