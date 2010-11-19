@@ -285,6 +285,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
       theme = SC.Theme.find(themeName);
       if (theme) return theme;
+
+      // Create a new invisible subtheme. This will cause the themeName to
+      // be applied as a class name.
+      return base.invisibleSubtheme(themeName);
     }
 
     // can't find anything, return base.
