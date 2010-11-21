@@ -866,7 +866,7 @@ SC.SplitView = SC.View.extend(
 });
 
 // TODO: This should be a mixin to the few classes that need it
-SC.mixin(SC.View.protoype, {
+SC.mixin(SC.View.prototype, {
   /**
     The current split view this view is embedded in (may be null).
     @property {SC.SplitView}
