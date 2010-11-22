@@ -345,7 +345,7 @@ SC.SelectFieldView = SC.FieldView.extend(
       
         // get value using valueKey if there is one or use object
         // map to _guid or toString.
-        if (valueKey) object = (object.get) ? object.get(valueKey) : object[valueKey] ;
+        if (object && valueKey) object = (object.get) ? object.get(valueKey) : object[valueKey] ;
         var ov = (object !== null && object !== undefined) ? (SC.guidFor(object) ? SC.guidFor(object) : object.toString()) : null ;
       
         // use this object value if it matches.
