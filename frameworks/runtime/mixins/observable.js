@@ -754,7 +754,7 @@ SC.Observable = {
         // if observers have not been cloned yet, do so now
         observers = this._kvo_for(kvoKey) ;
         observers.remove(target, method) ;
-        if (observers.members.length == 0) {
+        if (observers.getMembers().length == 0) {
           this._kvo_for('_kvo_observed_keys', SC.CoreSet).remove(key);
         }
       }
@@ -781,7 +781,7 @@ SC.Observable = {
         members ;
 
     if (locals && locals.length>0) return YES ;
-    if (observers && observers.members.length > 0) return YES ;
+    if (observers && observers.getMembers().length > 0) return YES ;
     return NO ;
   },
 
@@ -897,7 +897,7 @@ SC.Observable = {
   */
   observersForKey: function(key) {
     var observers = this._kvo_for('_kvo_observers', key) ;
-    return observers.members ;
+    return observers.getMembers() ;
   },
 
   // this private method actually notifies the observers for any keys in the
@@ -979,7 +979,7 @@ SC.Observable = {
         observers = this[SC.keyFor('_kvo_observers', key)];
 
         if (observers) {
-          members = observers.members ;
+          members = observers.getMembers() ;
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
@@ -1020,7 +1020,7 @@ SC.Observable = {
 
         // if there are starObservers, do the same thing for them
         if (starObservers && key !== '*') {
-          members = starObservers.members ;
+          members = starObservers.getMembers() ;
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
