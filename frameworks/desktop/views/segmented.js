@@ -205,6 +205,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     You will not generally need to access or edit this property.
     
+    Note: this property returns all the items plus an overflow segment item
+    on the first call before the view is fully initialized.  After segment
+    measuring is complete, this will return only the visible segment items,
+    placing the overflowed items into this.overflowItems.
+    
     @property {Array}
   */
   displayItems: function() {
@@ -273,24 +278,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // finally, be sure to loc the toolTip if needed
       if (loc && cur.toolTip && SC.typeOf(cur.toolTip) === SC.T_STRING) cur.toolTip = cur.toolTip.loc();
       
-      if (this.overflowIndex <= idx) {
-        var title = this.get('overflowTitle');
-        var toolTip = this.get('overflowToolTip');
-        
-        if (loc && title) title = title.loc();
-        if (loc && toolTip && SC.typeOf(toolTip) === SC.T_STRING) toolTip = toolTip.loc();
-      
-        // return an overflow segment the first time we overflow an item
+      if (this.overflowIndex <= idx) {      
+        // return an overflow segment the first time that we overflow an item
         if (overflowItems.length === 0) {
-          ret[ret.length] = {
-            title: title,
-            isEnabled: YES,
-            icon: null,
-            width: null,
-            toolTip: toolTip,
-            keyEquivalent: null,
-            isOverflowSegment: YES
-          };
+          ret[ret.length] = this.overflowItem(loc);
         }
         
         // store the overflowed items in overflowItems (to be used in popup menu)
@@ -301,20 +292,20 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
     }
     
-    // return an overflow segment the first time so that it can be measured
+    // return an overflow segment one time so that it can be measured
     if (!this.overflowSegmentWidth) {
-      ret[ret.length] = {width: null, isOverflowSegment: YES};
+      ret[ret.length] = this.overflowItem(loc);
     }
     
     return ret ;
-  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey').cacheable(),
+  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey', 'overflowTitle').cacheable(),
   
   /** @private
     Measures the visible segments after they've been rendered to see if we need to overflow.  This method will
     be called automatically whenever the frame or items array changes.
   */
   measureForOverflow: function() {
-    var layer = this.get('layer');                       // <div> ...
+    var layer = this.get('layer');
     
     if (!layer) return;
     
@@ -346,7 +337,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     for (i=0; i < len; i++) {
       curElementsWidth += this.elementWidths[i];
     
-      // check for an overflow (leave room for the overflow segment except for the last segment)
+      // check for an overflow (leave room for the overflow segment except for with the last segment)
       var widthToFit = (i === len - 1) ? curElementsWidth : curElementsWidth + this.overflowSegmentWidth;
       if (widthToFit >= visibleWidth) {
         if (this.overflowIndex === i) return;          // overflow hasn't changed, no need to redraw
@@ -362,6 +353,27 @@ SC.SegmentedView = SC.View.extend(SC.Control,
    
     this.overflowIndex = Infinity;
     this.notifyPropertyChange('displayItems');
+  },
+  
+  /** @private
+    Returns an overflow segment item.
+    */
+  overflowItem: function(loc) {
+    var title = this.get('overflowTitle');
+    var toolTip = this.get('overflowToolTip');
+      
+    if (loc && title) title = title.loc();
+    if (loc && toolTip && SC.typeOf(toolTip) === SC.T_STRING) toolTip = toolTip.loc();
+    
+    return {
+      title: title,
+      isEnabled: YES,
+      icon: null,
+      width: null,
+      toolTip: toolTip,
+      keyEquivalent: null,
+      isOverflowSegment: YES
+    };
   },
   
   /** @private
@@ -430,7 +442,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.set('renderLikeFirstTime', YES);
     this.notifyPropertyChange('displayItems');
     
-    if (this.overflowIndex) this.overflowIndex = Infinity;      // Don't overflow items so that they can be measured one time
+    // The first time that content changes don't attempt to set overflowIndex,
+    // but on subsequent changes, move it to Infinity so that we can redraw all segments
+    // and then re-measure
+    if (!SC.empty(this.overflowIndex)) this.overflowIndex = Infinity;
     
     // Re-measure after drawing is complete
     this.invokeLast(function() {
