@@ -119,6 +119,15 @@ SC.BaseTheme.renderers.Button = SC.Renderer.extend({
     
     q.setClass(classes);
     
+    // If there is a toolTip set, grab it and localize if necessary.
+    if (this.didChange('toolTip')) {
+      if (SC.empty(this.toolTip) || (SC.typeOf(this.toolTip) !== SC.T_STRING)) {
+        this.$().removeAttr('title');
+        this.$().removeAttr('alt');
+      } else {
+        this.$().attr({'title': this.toolTip, 'alt': this.toolTip});
+      }
+    }
     
     // update title
     this.updateContents();
