@@ -187,7 +187,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     @property {String}
   */
-  overflowToolTip: 'More&hellip;',
+  overflowToolTip: 'More...',
   
   /**
     The array of itemKeys that will be searched to build the displayItems
