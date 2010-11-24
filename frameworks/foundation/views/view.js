@@ -3388,7 +3388,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
         currentTransforms = cleanedTransforms;
 
-        if (layout[transformName]) {
+        if (!SC.empty(layout[transformName])) {
           specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
         }
       }
