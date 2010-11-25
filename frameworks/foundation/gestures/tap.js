@@ -18,18 +18,17 @@ SC.TapGesture = SC.Gesture.extend({
   tapDelay: 200,
 
   touchIsInGesture: function(touch, status) {
-    console.log('tap touchIsInGesture');
     return !status.tapFlunked
   },
 
   touchStart: function(touch) {
-    console.log('tap touchStart');
     // We don't want events triggering during a touch, will be reset when touch is over if it's a candidate
     if (this._eventTimer) this._eventTimer.invalidate();
 
     // We have an activeTap but another touch has been started
     if (this._candidateTouch && this._candidateTouch.touch.identifier !== touch.identifier) {
       this._cancelTap(touch);
+      return NO;
     }
 
     // This touch is a candidate
@@ -39,6 +38,8 @@ SC.TapGesture = SC.Gesture.extend({
     };
 
     this.start(touch);
+
+    return YES;
   },
 
   touchesDragged: function(evt, touches) {
@@ -58,7 +59,6 @@ SC.TapGesture = SC.Gesture.extend({
   },
 
   touchEnd: function(touch){
-    console.log('touchEnd', this._calculateDragDistance(touch));
     if (this._calculateDragDistance(touch) > this.get('tapWiggle') || Date.now() - this._candidateTouch.startTime > this.get('tapDelay') ) {
       // Touch moved too much or took too long
       this._cancelTap(touch);
