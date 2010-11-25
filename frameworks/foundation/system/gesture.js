@@ -144,10 +144,6 @@ SC.Gesture = SC.Object.extend({
     the run loop finishes to prevent it from being called during another makeTouchResponder.
   */
   take: function(touch) {
-    this.invokeLater("_take", 0, touch);
-  },
-  
-  _take: function(touch) {
     touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
     if (touch.touchResponder && touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
   },
