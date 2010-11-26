@@ -385,6 +385,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
           rootMenu = this.getPath('parentMenu.rootMenu'),
           responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
     target = (target === undefined) ? rootMenu.get('target') : target;
+    if (SC.none(responder)) return NO;
     var targetForAction = responder.targetForAction(action, target, this);
 
     return ! SC.none(targetForAction);
