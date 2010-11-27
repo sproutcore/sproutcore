@@ -71,6 +71,9 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   },
   
   mouseUp: function(evt) {
+	this.set('isActive', NO);
+    this._isMouseDown = NO;
+
     if(!this.get('isEnabled') || 
       (evt && evt.target && !this.$().within(evt.target))) {
       return YES;
@@ -86,8 +89,6 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
       this.renderer.update();
       this.set('value', this.get('toggleOnValue'));
     }
-    this.set('isActive', NO);
-    this._isMouseDown = NO;
     return YES;
   },
   
