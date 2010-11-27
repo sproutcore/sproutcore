@@ -71,7 +71,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   },
   
   mouseUp: function(evt) {
-	this.set('isActive', NO);
+    this.set('isActive', NO);
     this._isMouseDown = NO;
 
     if(!this.get('isEnabled') || 
