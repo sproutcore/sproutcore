@@ -136,7 +136,7 @@ SC.Set = SC.mixin({},
     @return {SC.Set}
   */
   create: function(items) {
-    var ret, idx, pool = SC.Set._pool, isObservable = this.isObservable;
+    var ret, idx, pool = SC.Set._pool, isObservable = this.isObservable, len;
     if (!isObservable && items===undefined && pool.length>0) {
       return pool.pop();
     } else {
@@ -149,12 +149,12 @@ SC.Set = SC.mixin({},
 
         // arrays and sets get special treatment to make them a bit faster
         if (items.isSCArray) {
-          idx = items.get('length');
-          while(--idx>=0) ret.add(items.objectAt(idx));
+          len = items.get('length');
+          for(idx = 0; idx < len; idx++) ret.add(items.objectAt(idx));
 
         } else if (items.isSet) {
-          idx = items.length;
-          while(--idx>=0) ret.add(items[idx]);
+          len = items.length;
+          for(idx = 0; idx < len; idx++) ret.add(items[idx]);
 
         // otherwise use standard SC.Enumerable API
         } else {
@@ -280,7 +280,7 @@ SC.Set = SC.mixin({},
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
     // cannot add null to a set.
-    if (obj == null) return this;
+    if (SC.none(obj)) return this;
 
     // Implementation note:  SC.hashFor() is inlined because sets are
     // fundamental in SproutCore, and the inlined code is ~ 25% faster than
@@ -347,7 +347,8 @@ SC.Set = SC.mixin({},
     var hashFunc,
         guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
         idx  = this[guid],
-        len  = this.length;
+        len  = this.length,
+        tmp;
 
     // not in set.
     // (SC.none is inlined for the reasons given above)
