@@ -157,7 +157,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     // Invoke the actual action method after a small delay to give the user a
     // chance to see the highlight. This is especially important if the button
     // closes a pane, for example.
-    this.invokeLater('_triggerAction', 200, evt);
+    this.invokeLater('triggerAction', 200, evt);
     return YES;
   },
 
@@ -167,7 +167,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
 
     @param {Event} evt
   */
-  _triggerAction: function(evt) {
+  triggerAction: function(evt) {
     this._action(evt, YES);
     this.didTriggerAction();
     this.set('isActive', NO);
