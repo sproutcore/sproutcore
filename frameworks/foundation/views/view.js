@@ -1306,7 +1306,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     Returns a hash containing property names and their values for the display
     properties that have changed since the last time this method was called.
-    Every display property is returned the first time it is called.
+    If this is the first time the method has been called on this view, every
+    display property is returned.
 
     For example, if this view had two display properties, isActive and items,
     you might receive a hash like this:
