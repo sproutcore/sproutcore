@@ -1016,7 +1016,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // one parameter, we assume it is the render delegates style that requires
     // only context. Note that, for backwards compatibility, the default
     // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = (this.render.length === 2);
+    hasLegacyRenderMethod = !this.update;
     // Call render with firstTime set to NO to indicate an update, rather than
     // full re-render, should be performed.
     if (hasLegacyRenderMethod) {
@@ -1218,7 +1218,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // one parameter, we assume it is the render delegates style that requires
     // only context. Note that, for backwards compatibility, the default
     // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = (this.render.length === 2);
+    hasLegacyRenderMethod = !this.update;
 
     // Let the render method handle rendering. If we have a render delegate
     // object set, it will be used there.
