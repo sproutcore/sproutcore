@@ -331,3 +331,34 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   }
   
 });
+
+/**
+  Inspect the list of modules and, for every prefetched module, create a
+  background task to load the module when the user remains idle.
+*/
+SC.ready(function() {
+  var moduleInfo = SC.MODULE_INFO;
+  var moduleName;
+  var module;
+  var task;
+
+  // Iterate through all known modules and look for those that are marked
+  // as prefetched.
+  for (moduleName in moduleInfo) {
+    module = moduleInfo[moduleName];
+
+    if (module.isPrefetched) {
+      var prefetchedModuleName = moduleName;
+
+      // Create a task that will load the module, and then register it with
+      // the global background task queue.
+      task = SC.Task.create({
+        run: function() {
+          SC.Module.loadModule(prefetchedModuleName);
+        }
+      });
+
+      SC.backgroundTaskQueue.push(task);
+    }
+  }
+});
