@@ -2753,13 +2753,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     var K = SC.Record,
       validStates = [K.EMPTY, K.READY_CLEAN, K.DESTROYED_CLEAN, K.ERROR],
-      _status = this.readStatus(storeKey), // someone made 'status' a global
-      changeStatus = !!(validStates.indexOf(_status) < 0),//find(function(i) { return i === _status; }),
+      status = this.readStatus(storeKey), // wtf!? someone made 'status' a global
+      changeStatus = !!(validStates.indexOf(status) < 0),
       ret;
 
     if (changeStatus) this.writeStatus(storeKey, K.READY_CLEAN);
     ret = sc_super();
-    if (changeStatus) this.writeStatus(storeKey, _status);
+    if (changeStatus) this.writeStatus(storeKey, status);
 
     return ret;
   }
