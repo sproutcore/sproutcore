@@ -2672,7 +2672,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
+    if (!(status & SC.Record.EMPTY)) {
+      this.writeStatus(storeKey, SC.READY_CLEAN);
+    }
+
     this.pushRetrieve(recordType, id, dataHash, undefined, true);
+
+    if (!(status & SC.Record.ERROR) && !(status & SC.Record.EMPTY)) {
+      this.writeStatus(storeKey, status);
+    }
   },
 
 

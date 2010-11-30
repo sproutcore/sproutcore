@@ -751,6 +751,68 @@ test("pushDestroy record propagates from master to many slaves [*(master) to man
 });
 
 /**
+  [master] --> [slave]
+
+  precond - slave has a master
+  precond - master has a slave
+
+  slave.destroy();
+
+  precond - slave is destroyed
+
+  ... pushDestroy master ...
+
+  test - slave does NOT exist
+  test - master does NOT exist
+ */
+test("pushDestroy record doesn't create a slave when it's been destroyed [*(master) to one(slave)]", function () {
+  MyApp.Master = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'master',
+      isMaster: YES
+    })
+  });
+
+  MyApp.Slave = SC.Record.extend({
+    master: SC.Record.toOne('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO
+    })
+  });
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Slave, [
+    { guid: 's1' }
+  ]);
+
+  MyApp.store.loadRecords(MyApp.Master, [
+    { guid: 'm1', slave: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var m1 = MyApp.store.find(MyApp.Master, 'm1'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1');
+
+  equals(m1.get('slave'), s1, 'precond - m1 should have 2 slaves');
+  equals(s1.get('master'), m1, 'precond - s1 should have m1 as a master');
+
+  SC.RunLoop.begin();
+  s1.destroy();
+  MyApp.store.commitRecords();
+  MyApp.store.dataSourceDidDestroy(s1.storeKey);
+  SC.RunLoop.end();
+
+  ok(s1.isDestroyed(), 'precond - s1 should be destroyed');
+
+  SC.RunLoop.begin();
+  MyApp.store.pushDestroy(MyApp.Master, 'm1');
+  SC.RunLoop.end();
+
+  ok(s1.isDestroyed(), 'test - s1 should be destroyed');
+  ok(m1.isDestroyed(), 'test - m1 should be destroyed');
+});
+
+/**
   Standard Sproutcore Behaviors
  
   This is data showing up from the server- after pushing in changes,
