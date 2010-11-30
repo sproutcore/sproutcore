@@ -2654,7 +2654,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         key = toAttr.inverse,
         proto = recordType.prototype;
 
-    if ((status & SC.Record.EMPTY) &&
+    // TODO: should createIfEmpty apply to DESTROYED_* states?
+    if ((status === SC.Record.EMPTY) &&
         (toAttr.get && toAttr.get('createIfEmpty') || toAttr.createIfEmpty)) {
       dataHash = {};
       dataHash[proto.primaryKey] = id;
@@ -2672,15 +2673,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
-    if (!(status & SC.Record.EMPTY)) {
-      this.writeStatus(storeKey, SC.READY_CLEAN);
-    }
-
     this.pushRetrieve(recordType, id, dataHash, undefined, true);
-
-    if (!(status & SC.Record.ERROR) && !(status & SC.Record.EMPTY)) {
-      this.writeStatus(storeKey, status);
-    }
   },
 
 
@@ -2756,7 +2749,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }, this);
     }
 
-    return sc_super();
+    storeKey = storeKey || recordType.storeKeyFor(id);
+
+    var K = SC.Record,
+      validStates = [K.EMPTY, K.READY_CLEAN, K.DESTROYED_CLEAN, K.ERROR],
+      _status = this.readStatus(storeKey), // someone made 'status' a global
+      changeStatus = !!(validStates.indexOf(_status) < 0),//find(function(i) { return i === _status; }),
+      ret;
+
+    if (changeStatus) this.writeStatus(storeKey, K.READY_CLEAN);
+    ret = sc_super();
+    if (changeStatus) this.writeStatus(storeKey, _status);
+
+    return ret;
   }
 }) ;
 
