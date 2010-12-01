@@ -398,7 +398,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     this.set('_forceRenderFirstTime', YES);
   }.observes('isTextArea'),
   
-  hasBorder: YES,
+  shouldRenderBorder: YES,
   
   _renderField: function(context, firstTime, value, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
@@ -423,7 +423,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
       name = this.get('layerId');
       
-      if(this.get('hasBorder')) context.push('<span class="border"></span>');
+      if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
 
       // Render the padding element, with any necessary positioning
       // adjustments to accommodate accessory views.
@@ -860,7 +860,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   keyDown: function(evt) {
     var value, view;
-
     // Handle return and escape.  this way they can be passed on to the
     // responder chain.
     // If the event is triggered by a return while entering IME input,
