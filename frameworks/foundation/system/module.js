@@ -130,6 +130,13 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 		if (module.loaded) {
 			if (log) console.log("SC.loadModule(): Module '%@' already loaded, skipping.".fmt(moduleName));
 
+      if (module.isPrefetched && module.source) {
+        console.log('evaluating code for '+module);
+        eval(module.source);
+        console.log('foo');
+        delete module.source;
+      }
+
 			if (method) {
 				if (SC.isReady) {
 					SC.Module._invokeCallback(moduleName, target, method, args);
