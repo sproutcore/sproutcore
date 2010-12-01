@@ -218,8 +218,7 @@ if (SC.platform.supportsCSSTransitions) {
   module("ANIMATION WITH ACCELERATED LAYER", {
     setup: function(){
       commonSetup.setup();
-      // Force support
-      view.hasAcceleratedLayer = YES;
+      view.wantsAcceleratedLayer = YES;
     },
 
     teardown: commonSetup.teardown

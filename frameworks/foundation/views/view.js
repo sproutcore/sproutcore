@@ -124,6 +124,12 @@ SC.CSS_TRANSFORM_MAP = {
   }
 };
 
+SC._TRANSFORM_ANIMATIONS = (function(){
+  var res = {}, key;
+  for (key in SC.CSS_TRANSFORM_MAP) res['animate'+key.capitalize()] = YES;
+  return res;
+})();
+
 /**
   Properties that can be animated
 */
@@ -3097,9 +3103,77 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     Specifies whether transforms can be used to move the layer.
   */
   hasAcceleratedLayer: function(){
-    return this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers;
-  }.property('wantsAcceleratedLayer').cacheable(),
+    if (this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers) {
+      var layout = this.get('layout'), key;
 
+      if (layout['animateTop'] || layout['animateLeft']) {
+        for (key in layout) {
+          // If we're animating other transforms at different speeds, don't use acceleratedLayer
+          if (
+            SC._TRANSFORM_ANIMATIONS[key] &&
+            ((layout['animateTop'] && layout['animateTop'].duration !== layout[key].duration) ||
+             (layout['animateLeft'] && layout['animateLeft'].duration !== layout[key].duration))
+          ) {
+            return NO;
+          }
+        }
+      }
+
+      if (
+        layout.left != null && !SC.isPercentage(layout.left) && layout.left != SC.LAYOUT_AUTO &&
+        layout.top != null && !SC.isPercentage(layout.top) && layout.top != SC.LAYOUT_AUTO &&
+        layout.width != null && !SC.isPercentage(layout.width) && layout.width != SC.LAYOUT_AUTO &&
+        layout.height != null && !SC.isPercentage(layout.height) && layout.height != SC.LAYOUT_AUTO
+      ) {
+       return YES;
+      }
+    }
+    return NO;
+  }.property('wantsAcceleratedLayer', 'layout').cacheable(),
+
+
+  _invalidAutoValue: function(property){
+    var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(this, property),
+                               "%@".fmt(this),-1);
+    console.error(error.toString());
+    throw error ;
+  },
+
+  _handleTransformMistakes: function(layout) {
+    if (SC.platform.supportsCSSTransforms) {
+      // Check to see if we're using transforms
+      var transformAnimationDuration;
+      for(key in layout){
+        if (SC._TRANSFORM_ANIMATIONS[key]) {
+            // To prevent:
+            //   this.animate('scale', ...);
+            //   this.animate('rotate', ...);
+            // Use this instead
+            //   this.animate({ scale: ..., rotate: ... }, ...);
+          if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
+            throw "Animations of transforms must be executed simultaneously!";
+          }
+
+          // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
+          // at different speeds. So, to handle that case, we just force them to all have the same length.
+
+          // First time around this will never be true, but we're concerned with subsequent runs.
+          if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
+            console.warn("Can't animate transforms with different durations! Using first duration specified.");
+            layout[key].duration = transformAnimationDuration;
+          }
+
+          transformAnimationDuration = layout[key].duration;
+        }
+      }
+    }
+  },
+
+  _cssNumber: function(val){
+    if (val === SC.LAYOUT_AUTO) { return "auto"; }
+    else if (SC.isPercentage(val)) { return (val*100)+"%"; }
+    else { return Math.floor(val || 0); }
+  },
 
   /**
     layoutStyle describes the current styles to be written to your element
@@ -3114,127 +3188,86 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
 
   layoutStyle: function() {
-    var layout = this.get('layout'), ret = {}, pdim = null, error,
+    var layout = this.get('layout'), ret = {}, pdim = null,
+        // AUTO = "auto"
         AUTO = SC.LAYOUT_AUTO,
+
+        // dims = ["marginTop", "marginLeft"]
+        // This is the only place where SC._VIEW_DEFAULT_DIMS is used
         dims = SC._VIEW_DEFAULT_DIMS, loc = dims.length, x, value, key,
-        stLayout = this.get('useStaticLayout'),
-        lR = layout.right,
-        lL = layout.left,
-        lT = layout.top,
-        lB = layout.bottom,
-        lW = layout.width,
-        lH = layout.height,
-        lMW = layout.maxWidth,
-        lMH = layout.maxHeight,
-        lcX = layout.centerX,
-        lcY = layout.centerY,
-        canUseAcceleratedLayer = this.get('hasAcceleratedLayer'),
+        staticLayout = this.get('useStaticLayout'),
+        right = layout.right,
+        left = layout.left,
+        top = layout.top,
+        bottom = layout.bottom,
+        width = layout.width,
+        height = layout.height,
+        maxWidth = layout.maxWidth,
+        maxHeight = layout.maxHeight,
+        centerX = layout.centerX,
+        centerY = layout.centerY,
         translateTop = null,
-        translateLeft = null;
-    if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
-      error= SC.Error.desc("%@.layout() you cannot use width:auto if ".fmt(this) +
-              "staticLayout is disabled","%@".fmt(this),-1);
-      console.error(error.toString()) ;
-      throw error ;
-    }
+        translateLeft = null,
+        turbo = this.get('hasAcceleratedLayer');
 
-    if (lH !== undefined && lH === SC.LAYOUT_AUTO && !stLayout) {
-      error = SC.Error.desc("%@.layout() you cannot use height:auto if ".fmt(this) +
-                "staticLayout is disabled","%@".fmt(this),-1);
-      console.error(error.toString()) ;
-      throw error ;
-    }
+    // handle invalid use of auto in absolute layouts
+    if (width === AUTO && !staticLayout) { this._invalidAutoValue("width"); }
+    if (height === AUTO && !staticLayout) { this._invalidAutoValue("height"); }
 
-    if (SC.platform.supportsCSSTransforms) {
-      // Check to see if we're using transforms
-      var animatingTransforms = NO, transformAnimationDuration;
-      for(key in layout){
-        if (key.substring(0,7) === 'animate') {
-          if (SC.CSS_TRANSFORM_MAP[key.substring(7).camelize()]) {
-            animatingTransforms = YES;
-
-            if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
-              throw "Animations of transforms must be executed simultaneously!";
-            }
-
-            // TODO: If we want to allow it to be set as just a number for duration we need to add support here
-            if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
-              console.warn("Can't animate transforms with different durations! Using first duration specified.");
-              layout[key].duration = transformAnimationDuration;
-            }
-            transformAnimationDuration = layout[key].duration;
-
-            // FIXME: There will also be problems if we have conflicting timings and callbacks
-          }
-        }
-      }
-
-      // If we're animating other transforms at different speeds, don't use acceleratedLayer
-      if (
-        animatingTransforms &&
-        (
-          (layout['animateTop'] && layout['animateTop'].duration !== transformAnimationDuration) ||
-          (layout['animateLeft'] && layout['animateLeft'].duration !== transformAnimationDuration)
-        )
-      ) {
-        canUseAcceleratedLayer = NO;
-      }
-    }
+    this._handleTransformMistakes(layout);
 
     // X DIRECTION
 
     // handle left aligned and left/right
-    if (!SC.none(lL)) {
-      if(SC.isPercentage(lL)) {
-        ret.left = (lL*100)+"%";  //percentage left
-      } else if (canUseAcceleratedLayer && !SC.empty(lW)) {
-        translateLeft = Math.floor(lL);
-        ret.left = 0;
-      } else {
-        ret.left = Math.floor(lL); //px left
-      }
+    if (left != null) {
+      var translateLeft = this._cssNumber(left);
+      ret.left = (turbo) ? 0 : translateLeft;
+
+      // TODO: Isn't this the default?
       ret.marginLeft = 0 ;
 
-      if (lW !== undefined) {
-        if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else if(SC.isPercentage(lW)) ret.width = (lW*100)+"%"; //percentage width
-        else ret.width = Math.floor(lW) ; //px width
+      if (width !== undefined) {
+        ret.width = this._cssNumber(width);
         ret.right = null ;
       } else {
         ret.width = null ;
-        if(lR && SC.isPercentage(lR)) ret.right = (lR*100)+"%"; //percentage right
-        else ret.right = Math.floor(lR || 0) ; //px right
+
+        // TODO: it seems it should be relevant whether a right was specified
+        ret.right = this._cssNumber(right);
       }
 
     // handle right aligned
-    } else if (!SC.none(lR)) {
-      if(SC.isPercentage(lR)) {
-        ret.right = Math.floor(lR*100)+"%";  //percentage left
-      }else{
-        ret.right = Math.floor(lR) ;
-      }
+    } else if (right != null) {
+      // We have a right, but we have no left
+
+      ret.right = this._cssNumber(right);
+
+      // TODO: Isn't this the default?
       ret.marginLeft = 0 ;
 
-      if (SC.none(lW)) {
-        if (SC.none(lMW)) ret.left = 0;
-        ret.width = null;
-      } else {
+      if (width !== undefined) {
+        ret.width = this._cssNumber(width);
         ret.left = null ;
-        if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else if(lW && SC.isPercentage(lW)) ret.width = (lW*100)+"%" ; //percentage width
-        else ret.width = Math.floor(lW || 0) ; //px width
+      } else {
+        // if you don't specify a width, it fills the entire available area
+        ret.width = null;
+        // In this case we do not have a left set
+        if (maxWidth == null) { ret.left = 0; }
+
       }
 
     // handle centered
-    } else if (!SC.none(lcX)) {
+    } else if (centerX != null) {
       ret.left = "50%";
-      if(lW && SC.isPercentage(lW)) ret.width = (lW*100)+"%" ; //percentage width
-      else ret.width = Math.floor(lW || 0) ;
-      if(lW && SC.isPercentage(lW) && (SC.isPercentage(lcX) || SC.isPercentage(lcX*-1))){
-        ret.marginLeft = Math.floor((lcX - lW/2)*100)+"%" ;
-      }else if(lW && lW >= 1 && !SC.isPercentage(lcX)){
-        ret.marginLeft = Math.floor(lcX - ret.width/2) ;
-      }else {
+
+      ret.width = this._cssNumber(width);
+
+      var widthIsPercent = SC.isPercentage(width), centerXIsPercent = SC.isPercentage(centerX, YES);
+
+      if((widthIsPercent && centerXIsPercent) || (!widthIsPercent && !centerXIsPercent)) {
+        var value = centerX - width/2;
+        ret.marginLeft = (widthIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
+      } else {
         // This error message happens whenever width is not set.
         console.warn("You have to set width and centerX using both percentages or pixels");
         ret.marginLeft = "50%";
@@ -3242,12 +3275,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.right = null ;
 
     // if width defined, assume top/left of zero
-    } else if (!SC.none(lW)) {
+    } else if (!SC.none(width)) {
       ret.left =  0;
       ret.right = null;
-      if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-      else if(SC.isPercentage(lW)) ret.width = (lW*100)+"%";
-      else ret.width = Math.floor(lW);
+      if(width === AUTO) ret.width = AUTO ;
+      else if(SC.isPercentage(width)) ret.width = (width*100)+"%";
+      else ret.width = Math.floor(width);
       ret.marginLeft = 0;
 
     // fallback, full width.
@@ -3266,64 +3299,64 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // Y DIRECTION
 
     // handle top aligned and left/right
-    if (!SC.none(lT)) {
-      if(SC.isPercentage(lT)) {
-        ret.top = (lT*100)+"%";
-      } else if (canUseAcceleratedLayer && !SC.empty(lH)) {
-        translateTop = Math.floor(lT);
+    if (!SC.none(top)) {
+      if(SC.isPercentage(top)) {
+        ret.top = (top*100)+"%";
+      } else if (turbo && !SC.empty(height)) {
+        translateTop = Math.floor(top);
         ret.top = 0;
       } else {
-        ret.top = Math.floor(lT);
+        ret.top = Math.floor(top);
       }
-      if (lH !== undefined) {
-        if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-        else if(SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
-        else ret.height = Math.floor(lH) ;
+      if (height !== undefined) {
+        if(height === AUTO) ret.height = AUTO ;
+        else if(SC.isPercentage(height)) ret.height = (height*100)+"%" ;
+        else ret.height = Math.floor(height) ;
         ret.bottom = null ;
       } else {
         ret.height = null ;
-        if(lB && SC.isPercentage(lB)) ret.bottom = (lB*100)+"%" ;
-        else ret.bottom = Math.floor(lB || 0) ;
+        if(bottom && SC.isPercentage(bottom)) ret.bottom = (bottom*100)+"%" ;
+        else ret.bottom = Math.floor(bottom || 0) ;
       }
       ret.marginTop = 0 ;
 
     // handle bottom aligned
-    } else if (!SC.none(lB)) {
+    } else if (!SC.none(bottom)) {
       ret.marginTop = 0 ;
-      if(SC.isPercentage(lB)) ret.bottom = (lB*100)+"%";
-      else ret.bottom = Math.floor(lB) ;
-      if (SC.none(lH)) {
-        if (SC.none(lMH)) ret.top = 0;
+      if(SC.isPercentage(bottom)) ret.bottom = (bottom*100)+"%";
+      else ret.bottom = Math.floor(bottom) ;
+      if (SC.none(height)) {
+        if (SC.none(maxHeight)) ret.top = 0;
         ret.height = null ;
       } else {
         ret.top = null ;
-        if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-        else if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
-        else ret.height = Math.floor(lH || 0) ;
+        if(height === AUTO) ret.height = AUTO ;
+        else if(height && SC.isPercentage(height)) ret.height = (height*100)+"%" ;
+        else ret.height = Math.floor(height || 0) ;
       }
 
     // handle centered
-    } else if (!SC.none(lcY)) {
+    } else if (!SC.none(centerY)) {
       ret.top = "50%";
       ret.bottom = null ;
 
-      if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+ "%" ;
-      else ret.height = Math.floor(lH || 0) ;
+      if(height && SC.isPercentage(height)) ret.height = (height*100)+ "%" ;
+      else ret.height = Math.floor(height || 0) ;
 
-      if(lH && SC.isPercentage(lH) && (SC.isPercentage(lcY) || SC.isPercentage(lcY*-1))){ //height is percentage and lcy too
-        ret.marginTop = Math.floor((lcY - lH/2)*100)+"%" ;
-      }else if(lH && lH >= 1 && !SC.isPercentage(lcY)){
-        ret.marginTop = Math.floor(lcY - ret.height/2) ;
+      if(height && SC.isPercentage(height) && (SC.isPercentage(centerY) || SC.isPercentage(centerY*-1))){ //height is percentage and centerY too
+        ret.marginTop = Math.floor((centerY - height/2)*100)+"%" ;
+      }else if(height && height >= 1 && !SC.isPercentage(centerY)){
+        ret.marginTop = Math.floor(centerY - ret.height/2) ;
       }else {
         console.warn("You have to set height and centerY to use both percentages or pixels");
         ret.marginTop = "50%";
       }
-    } else if (!SC.none(lH)) {
+    } else if (!SC.none(height)) {
       ret.top = 0;
       ret.bottom = null;
-      if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-      else if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
-      else ret.height = Math.floor(lH || 0) ;
+      if(height === AUTO) ret.height = AUTO ;
+      else if(height && SC.isPercentage(height)) ret.height = (height*100)+"%" ;
+      else ret.height = Math.floor(height || 0) ;
       ret.marginTop = 0;
 
     // fallback, full width.
@@ -3378,7 +3411,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
       currentTransforms = cleanedTransforms;
 
-      if (canUseAcceleratedLayer) {
+      if (turbo) {
         halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
 
         // FIXME: This join.match is a bit hackish
@@ -3437,7 +3470,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
             SC.platform.supportsCSSTransforms &&
             (
               (
-                canUseAcceleratedLayer && (
+                turbo && (
                   (propertyKey === 'top' && !SC.empty(translateTop)) ||
                   (propertyKey === 'left' && !SC.empty(translateLeft))
                 )
@@ -3473,6 +3506,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     return ret ;
   }.property().cacheable(),
+
 
   /**
     The view responsible for laying out this view.  The default version
