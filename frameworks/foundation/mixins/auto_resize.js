@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
 /**
   @namespace
   Use this mixin to make your view automatically resize based upon its value,
@@ -140,41 +139,39 @@ SC.AutoResize = {
   didCreateLayer: function() {
     sc_super();
     this.measureSizeLater();
-  }
-};
-
-SC.mixin(SC.AutoResize, {
-  needResize: {},
-  
-  requestResize: function(view, id) {
-    var views = SC.AutoResize.needResize[id] || (SC.AutoResize.needResize[id] = SC.CoreSet.create());
-    
-    views.add(view);
-    
-    SC.RunLoop.currentRunLoop.invokeLast(SC.AutoResize.doBatchResize);
   },
   
+  needResize: {},
+
+  requestResize: function(view, id) {
+    var views = SC.AutoResize.needResize[id] || (SC.AutoResize.needResize[id] = SC.CoreSet.create());
+
+    views.add(view);
+
+    SC.RunLoop.currentRunLoop.invokeLast(SC.AutoResize.doBatchResize);
+  },
+
   doBatchResize: function() {
     var tag, views, view, layer;
-    
+
     for(tag in SC.AutoResize.needResize) {
       views = SC.AutoResize.needResize[tag];
-      
+
       while(view = views.pop()) {
         layer = view.get('layer');
-        
+
         if(layer) {
           SC.prepareStringMeasurement(layer);
           view.measureSize(YES);
           break;
         }
       }
-      
+
       while(view = views.pop()) {
         view.measureSize(YES);
       }
-      
+
       SC.teardownStringMeasurement();
     }
   }
-});
+};
