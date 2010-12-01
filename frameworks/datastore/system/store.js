@@ -244,15 +244,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   changelog: null,
   
   /**
-    A set of SC.RecordArray that have been returned from findAll with an 
-    SC.Query. These will all be notified with _notifyRecordArraysWithQuery() 
-    whenever the store changes.
-  
-    @property {Array}
-  */
-  recordArraysWithQuery: null,
-  
-  /**
     An array of SC.Error objects associated with individual records in the
     store (indexed by store keys).
     
@@ -1588,7 +1579,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Boolean} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys, params) {
-    
     var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
