@@ -593,13 +593,14 @@ SC.RootResponder = SC.Object.extend({
     @param {Array} keyNames
     @param {Element} target
     @param {Object} receiver - optional if you don't want 'this'
+    @param {Boolean} useCapture
     @returns {SC.RootResponder} receiver
   */
-  listenFor: function(keyNames, target, receiver) {
+  listenFor: function(keyNames, target, receiver, useCapture) {
     receiver = receiver ? receiver : this;
     keyNames.forEach( function(keyName) {
       var method = receiver[keyName] ;
-      if (method) SC.Event.add(target, keyName, receiver, method) ;
+      if (method) SC.Event.add(target, keyName, receiver, method, null, useCapture) ;
     },this) ;
     target = null ;
     return receiver ;
@@ -619,7 +620,7 @@ SC.RootResponder = SC.Object.extend({
     // handle basic events
     this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mouseout mouseover mousemove selectstart contextmenu'.w(), document)
         .listenFor('resize'.w(), window);
-
+        
     if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
     else this.listenFor('focus blur'.w(), window);
 
@@ -1477,7 +1478,7 @@ SC.RootResponder = SC.Object.extend({
     evt.isCancel = YES;
     this.touchend(evt);
   },
-
+	
   // ..........................................................
   // KEYBOARD HANDLING
   //
