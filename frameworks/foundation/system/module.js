@@ -131,9 +131,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 			if (log) console.log("SC.loadModule(): Module '%@' already loaded, skipping.".fmt(moduleName));
 
       if (module.isPrefetched && module.source) {
-        console.log('evaluating code for '+module);
         eval(module.source);
-        console.log('foo');
         delete module.source;
       }
 
@@ -160,7 +158,6 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 			callbacks = module.callbacks || [] ;
 
 			if (method) {
-			  console.log("\n\n\nAdding callback");
 				callbacks.push(function() {
 					SC.Module._invokeCallback(moduleName, target, method, args);
 				});
@@ -337,9 +334,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 			if (SC.LOG_MODULE_LOADING) console.log("SC.loadModule(): Module '%@' has completed loading, invoking callbacks.".fmt(moduleName));
 
 			callbacks = moduleInfo.callbacks || [] ;
-      console.log("callbacks = "+callbacks);
-      console.log("moduleInfo = ");
-      console.log(moduleInfo);
+
 			for (var idx=0, len=callbacks.length; idx<len; ++idx) {
 				callbacks[idx]() ;
 			}
