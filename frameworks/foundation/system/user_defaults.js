@@ -240,7 +240,13 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
         );
         delete this.dataHash[key];
       }else{
-        delete localStorage[key];
+        // In case error occurs while deleting local storage in any browser,
+        // do not allow it to propagate further
+        try{
+          delete localStorage[key];
+        } catch(e) {
+          console.warn('Deleting local storage encountered a problem. '+e);
+        }
       }
     }
     
