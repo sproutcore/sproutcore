@@ -428,7 +428,12 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
       
       // Update the value
-      if (newValue.length === 0) newValue = null;
+      if (newValue.length === 0) { 
+        newValue = null;    // Nothing remains selected
+      } else if (newValue.length === 1) {
+        newValue = newValue[0];   // Some observers may be expecting the value to remain a single object
+      }
+
       this.set('value', newValue);
     }
       
