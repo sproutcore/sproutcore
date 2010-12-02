@@ -99,7 +99,7 @@ SC.AutoResize = {
   measureSize: function(batch) {
     if (!this.get("shouldMeasureSize")) return;
     
-    var metrics, layer = this.get("layer");
+    var metrics, layer = this.kindOf(SC.TextFieldView) ? this.$input()[0] : this.get("layer");
     
     // return if there wasn't one (no font sizes, etc. to use with measuring)
     if (!layer) return;
@@ -117,8 +117,7 @@ SC.AutoResize = {
   },
   
   // we need to update the measurement when the value changes
-  _scar_valueDidChange: function(){ 
-    sc_super(); // just in case
+  _scar_valueDidChange: function() {
     this.measureSizeLater();
   },
   
