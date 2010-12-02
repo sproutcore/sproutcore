@@ -3370,15 +3370,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
           currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
           cleanedTransforms = [], halTransforms, specialTransforms = [], transformName, idx;
 
-      if (canUseAcceleratedLayer) {
-        // Remove old translates
-        for(idx=0; idx < currentTransforms.length; idx++) {
-          if (currentTransforms[idx].substring(0,9) !== 'translate') {
-            cleanedTransforms.push(currentTransforms[idx]);
-          }
+      // Remove old translates
+      for(idx=0; idx < currentTransforms.length; idx++) {
+        if (currentTransforms[idx].substring(0,9) !== 'translate') {
+          cleanedTransforms.push(currentTransforms[idx]);
         }
-        currentTransforms = cleanedTransforms;
+      }
+      currentTransforms = cleanedTransforms;
 
+      if (canUseAcceleratedLayer) {
         halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
 
         // FIXME: This join.match is a bit hackish
@@ -3397,7 +3397,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
         currentTransforms = cleanedTransforms;
 
-        if (layout[transformName]) {
+        if (!SC.empty(layout[transformName])) {
           specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
         }
       }
@@ -3406,7 +3406,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
 
       // Set transform attribute
-      if (allTransforms !== '') ret[transformAttribute] = allTransforms;
+      ret[transformAttribute] = SC.empty(allTransforms) ? null : allTransforms;
     }
 
     // Temporary fix to not break SC.Animatable
@@ -3983,7 +3983,7 @@ SC.View.mixin(/** @scope SC.View */ {
   extend: function() {
     var last = arguments[arguments.length - 1];
 
-    if (last && last.theme) {
+    if (last && !SC.none(last.theme)) {
       last.themeName = last.theme;
       delete last.theme;
     }

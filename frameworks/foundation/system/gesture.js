@@ -269,10 +269,6 @@ SC.Gesture = SC.Object.extend({
     This is called automatically when you return YES from touchIsInGesture.
   */
   take: function(touch) {
-    this.invokeLater("_take", 0, touch);
-  },
-  
-  _take: function(touch) {
     touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
     if (touch.touchResponder && touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
   },

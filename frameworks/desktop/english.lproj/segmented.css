@@ -1,6 +1,6 @@
 .sc-segmented-view {
   display: block;
-  text-align: center;
+  white-space: nowrap;
 }
 
 .sc-segmented-view .sc-segment {

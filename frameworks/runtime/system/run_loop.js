@@ -191,7 +191,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     var hadContent = NO,
         // execute any methods in the invokeQueue.
         queue = this._invokeQueue;
-    if ( queue && queue.members.length ) {
+    if ( queue && queue.getMembers().length ) {
       this._invokeQueue = null; // reset so that a new queue will be created
       hadContent = YES ; // needs to execute again
       queue.invokeMethods();
@@ -204,7 +204,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
   _flushinvokeLastQueue: function() {
     var queue = this._invokeLastQueue, hadContent = NO ;
-    if (queue && queue.members.length ) {
+    if (queue && queue.getMembers().length ) {
       this._invokeLastQueue = null; // reset queue.
       hadContent = YES; // has targets!
       if (hadContent) queue.invokeMethods();

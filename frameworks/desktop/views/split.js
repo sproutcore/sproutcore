@@ -876,5 +876,5 @@ SC.mixin(SC.View.prototype, {
     while (view && !view.isSplitView) view = view.get('parentView') ;
     return view ;
   }.property('parentView').cacheable()
-})
+});
 

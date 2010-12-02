@@ -946,6 +946,14 @@ SC.RootResponder = SC.Object.extend({
     touch.view = undefined;
   },
 
+  _flushQueuedTouchResponder: function(){
+    if (this._queuedTouchResponder) {
+      var queued = this._queuedTouchResponder;
+      this._queuedTouchResponder = null;
+      this.makeTouchResponder.apply(this, queued);
+    }
+  },
+
   /**
     The touch responder for any given touch is the view which will receive touch events
     for that touch. Quite simple.
@@ -985,13 +993,27 @@ SC.RootResponder = SC.Object.extend({
     events on the views. The event object is passed so that functions such as stopPropagation may be called.
   */
   makeTouchResponder: function(touch, responder, shouldStack, upViewChain) {
+
+    // In certain cases (SC.Gesture being one), we have to call makeTouchResponder 
+    // from inside makeTouchResponder so we queue it up here.
+    if (this._isMakingTouchResponder) {
+      this._queuedTouchResponder = [touch, responder, shouldStack, upViewChain];
+      return;
+    }
+    this._isMakingTouchResponder = YES;
+
+
     var stack = touch.touchResponders, touchesForView;
 
     // find the actual responder (if any, I suppose)
     // note that the pane's sendEvent function is slightly clever:
     // if the target is already touch responder, it will just return it without calling touchStart
     // we must do the same.
-    if (touch.touchResponder === responder) return;
+    if (touch.touchResponder === responder) {
+      this._isMakingTouchResponder = NO;
+      this._flushQueuedTouchResponder();
+      return;
+    }
 
     // send touchStart
     // get the target pane
@@ -1068,6 +1090,11 @@ SC.RootResponder = SC.Object.extend({
         touch.nextTouchResponder = stack[stack.length - 2];
       }
     }
+
+
+    this._isMakingTouchResponder = NO;
+    this._flushQueuedTouchResponder();
+
   },
 
   /**

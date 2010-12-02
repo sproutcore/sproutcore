@@ -108,6 +108,10 @@ SC.ObserverSet = {
     return new SC.ObserverSet.constructor();
   },
 
+  getMembers: function() {
+    return this.members.slice(0);
+  },
+
   constructor: function() {
     this._members = {};
     this.members = [];
