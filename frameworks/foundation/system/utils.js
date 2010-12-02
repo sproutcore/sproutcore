@@ -322,8 +322,22 @@ SC.mixin( /** @scope SC */ {
     
     // get the calculation element
     if (!element) {
+      var parentElement = document.createElement("div");
+      
+      // to make sure the measurement element is never visible, put it inside a 0x0 element with overflow: hidden
+      SC.mixin(parentElement.style, {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        height: '0px',
+        right: '0px',
+        overflow: 'hidden'
+      });
+      
       element = this._metricsCalculationElement = document.createElement("div");
-      document.body.insertBefore(element, null);
+      
+      parentElement.appendChild(element);
+      document.body.insertBefore(parentElement, null);
     }
 
     cqElem = SC.$(element);    
