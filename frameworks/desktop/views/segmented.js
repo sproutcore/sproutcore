@@ -493,13 +493,21 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       else item.isSelected = NO;
     }
     
-    // Check overflowed items
-    for (idx = 0, len = overflowItems.length; idx < len; idx++) {
-      item = overflowItems[idx];
-      
-      // change selection
-      if (isArray ? value.indexOf(item.value) >= 0 : value === item.value) {
-        items[items.length - 1].isSelected = YES;
+    // This is actually our first render so we'll need to do a measurement (within a pane?)
+    if (SC.empty(this.overflowIndex)) {
+      this.invokeLast(function() {
+        this.elementWidths = null;
+        this.measureForOverflow();
+      }, this);
+    } else {
+      // Check overflowed items
+      for (idx = 0, len = overflowItems.length; idx < len; idx++) {
+        item = overflowItems[idx];
+    
+        // change selection
+        if (isArray ? value.indexOf(item.value) >= 0 : value === item.value) {
+          items[items.length - 1].isSelected = YES;
+        }
       }
     }
     
