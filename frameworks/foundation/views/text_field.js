@@ -960,8 +960,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     Adds mouse wheel support for textareas.
   */
   mouseWheel: function(evt) {
-    evt.allowDefault();
-    return YES;
+    if(this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    } else return NO;
   },
 
   /*
