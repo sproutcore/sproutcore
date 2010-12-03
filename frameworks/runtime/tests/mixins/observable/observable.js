@@ -585,6 +585,24 @@ module("object.removeObserver()", {
       },
       removeChainedObserver:function(){
         this.normal2 = 'chainedPropertyObserved' ;
+      },
+
+      observableValue: "hello world",
+
+      observer1: function() {
+        // Just an observer
+        console.log("observer!");
+      },
+      observer2: function() { 
+        console.log("observer2!");
+        this.removeObserver('observableValue', null, 'observer1');
+        this.removeObserver('observableValue', null, 'observer2');
+        this.hasObserverFor('observableValue');   // Tickle 'getMembers()'
+        this.removeObserver('observableValue', null, 'observer3');
+      },
+      observer3: function() {
+        // Just an observer
+        console.log("observer3!");        
       }
     });
 
@@ -613,6 +631,23 @@ test("should unregister an observer for a property - special case when key has a
   equals('dependentValue',ObjectD.normal2);
   ObjectD.set('ObjectF','');
   equals('dependentValue',ObjectD.normal2);
+});
+
+
+test("removing an observer inside of an observer shouldn’t cause any problems", function() {
+  // The observable system should be protected against clients removing
+  // observers in the middle of observer notification.
+  var encounteredError = NO;
+  try {
+    ObjectD.addObserver('observableValue', null, 'observer1');
+    ObjectD.addObserver('observableValue', null, 'observer2');
+    ObjectD.addObserver('observableValue', null, 'observer3');
+    SC.run(function() { ObjectD.set('observableValue', "hi world"); });
+  }
+  catch(e) {
+    encounteredError = YES;
+  }
+  equals(encounteredError, NO);  
 });
 
 

@@ -765,7 +765,7 @@ SC.Observable = {
         // if observers have not been cloned yet, do so now
         observers = this._kvo_for(kvoKey) ;
         observers.remove(target, method) ;
-        if (observers.getMembers().length == 0) {
+        if (observers.getMembers().length === 0) {
           this._kvo_for('_kvo_observed_keys', SC.CoreSet).remove(key);
         }
       }
@@ -990,7 +990,16 @@ SC.Observable = {
         observers = this[SC.keyFor('_kvo_observers', key)];
 
         if (observers) {
-          members = observers.getMembers() ;
+          // We need to clone the 'members' structure here in case any of the
+          // observers we're about to notify happen to remove observers for
+          // this key, which would mutate the structure underneath us.
+          // (Cloning it rather than mutating gives us a clear policy:  if you
+          // were registered as an observer at the time notification begins,
+          // you will be notified, regardless of whether you're removed as an
+          // observer during that round of notification.  Similarly, if you're
+          // added as an observer during the notification round by another
+          // observer, you will not be notified until the next time.)
+          members = SC.clone(observers.getMembers()) ;
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
@@ -1018,6 +1027,8 @@ SC.Observable = {
         // instance when you are just observing your local object.
         members = this[SC.keyFor('_kvo_local', key)];
         if (members) {
+          // Note:  Since, unlike above, we don't expect local observers to be
+          //        removed in general, we will not clone 'members'.
           membersLength = members.length ;
           for(memberLoc=0;memberLoc<membersLength;memberLoc++) {
             member = members[memberLoc];
@@ -1031,7 +1042,9 @@ SC.Observable = {
 
         // if there are starObservers, do the same thing for them
         if (starObservers && key !== '*') {
-          members = starObservers.getMembers() ;
+          // We clone the structure per the justification, above, for regular
+          // observers.
+          members = SC.clone(starObservers.getMembers()) ;
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
