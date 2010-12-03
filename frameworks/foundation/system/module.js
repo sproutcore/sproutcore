@@ -20,7 +20,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 	*/
 	isModuleLoaded: function(moduleName) {
 		var moduleInfo = SC.MODULE_INFO[moduleName] ;
-		return moduleInfo ? !!moduleInfo.loaded : NO ;
+		return moduleInfo ? !!moduleInfo.isLoaded : NO ;
 	},
 
 	/**
@@ -127,7 +127,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
 		// If the module is already loaded, execute the callback immediately if SproutCore is loaded,
 		// or else as soon as SC has finished loading.
-		if (module.loaded) {
+		if (module.isLoaded) {
 			if (log) console.log("SC.loadModule(): Module '%@' already loaded, skipping.".fmt(moduleName));
 
       if (module.isPrefetched && module.source) {
@@ -206,28 +206,73 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
 	_loadJavaScriptForModule: function(moduleName) {
 	  var module = SC.MODULE_INFO[moduleName];
-	  var scripts = module.scripts || [];
-    var len = scripts.length, idx;
     var el;
     var url;
+    var dependencies = module.dependencies;
+    var dependenciesAreLoaded = YES;
 
-		for (idx = 0; idx < len; idx++) {
-			url = scripts[idx] ;
+    // If this module has dependencies, determine if they are loaded.
+    if (dependencies.length > 0) {
+      dependenciesAreLoaded = this._dependenciesAreLoaded(moduleName);
+    }
 
-			if (url.length > 0) {
-  			if (SC.LOG_MODULE_LOADING) console.log("SC.loadModule(): Loading JavaScript file in '%@' -> '%@'".fmt(moduleName, url));
+    // If the module is prefetched, always load the string representation.
+    if (module.isPrefetched) {
+      url = module.stringURL;
+    } else {
+      if (dependenciesAreLoaded) {
+        // Either we have no dependencies or they've all loaded already,
+        // so just execute the code immediately once it loads.
+        url = module.scriptURL;
+      } else {
+        // Because the dependencies might load after this module, load the
+        // string representation so we can execute it once all dependencies
+        // are in place.
+        url = module.stringURL;
+      }
+    }
 
-  			el = document.createElement('script') ;
-  			el.setAttribute('type', "text/javascript") ;
-  			el.setAttribute('src', url) ;
+		if (url.length > 0) {
+			if (SC.LOG_MODULE_LOADING) console.log("SC.loadModule(): Loading JavaScript file in '%@' -> '%@'".fmt(moduleName, url));
 
-  			el.onload = function() {
-  				SC.Module.moduleDidLoad(moduleName);
-  			};
+			el = document.createElement('script') ;
+			el.setAttribute('type', "text/javascript") ;
+			el.setAttribute('src', url) ;
 
-  			document.body.appendChild(el) ;
-  		}
+			el.onload = function() {
+				SC.Module.moduleDidLoad(moduleName);
+			};
+
+			document.body.appendChild(el) ;
 		}
+	},
+
+	/**
+	  @private
+
+	  Returns YES if all of the dependencies for a module are loaded.
+
+	  @param {String} moduleName the name of the module being checked
+	  @returns {Boolean} whether the dependencies are loaded
+	*/
+	_dependenciesAreLoaded: function(moduleName) {
+	  var dependencies = SC.MODULE_INFO[moduleName].dependencies;
+	  var idx, len = dependencies.length;
+	  var dependencyName;
+	  var module;
+
+	  for (idx = 0; idx < len; idx++) {
+	    dependencyName = dependencies[idx];
+	    module = SC.MODULE_INFO[dependencyName];
+
+	    if (!module) throw "SC.loadModule: Unable to find dependency %@ for module %@.".fmt(dependencyName, moduleName);
+
+	    if (!module.isLoaded) {
+	      return NO;
+	    }
+	  }
+
+	  return YES;
 	},
 
 	/**
@@ -238,16 +283,16 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 			// Load module's dependencies first.
 			var moduleInfo      = SC.MODULE_INFO[moduleName];
 			var log             = SC.LOG_MODULE_LOADING;
-			var requires        = moduleInfo.requires || [];
+			var dependencies        = moduleInfo.dependencies || [];
 			var dependenciesMet = YES;
-			var len             = requires.length;
+			var len             = dependencies.length;
 			var idx;
 			var requiredModuleName;
 			var requiredModule;
 			var dependents;
 
 			for (idx = 0; idx < len; idx++) {
-				requiredModuleName = requires[idx];
+				requiredModuleName = dependencies[idx];
 				requiredModule = SC.MODULE_INFO[requiredModuleName];
 
 				// Try to find dependent module in MODULE_INFO
@@ -261,7 +306,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 						break ;
 					}
 					// Required module has already been loaded, no need to worry about it.
-					else if (requiredModule.loaded) {
+					else if (requiredModule.isLoaded) {
 						continue ;
 					}
 					// Required module has not been loaded nor requested yet.
@@ -358,21 +403,23 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 			return;
 		}
 
-		if (moduleInfo.loaded && log) {
+		if (moduleInfo.isLoaded && log) {
 			console.log("SC.moduleDidLoad() called more than once for module '%@'. Skipping.".fmt(moduleName));
 			return ;
 		}
 
 		// remember that we're loaded
 		delete moduleInfo.loading ;
-		moduleInfo.loaded = YES ;
+		moduleInfo.isLoaded = YES ;
 
 		// call our callbacks (if SC.isReady), otherwise queue them for later
 		if (SC.isReady) {
 			SC.Module._invokeCallbacksForModule(moduleName) ;
+		  delete moduleInfo.callbacks;
 		} else {
 			SC.ready(SC, function() {
 				SC.Module._invokeCallbacksForModule(moduleName) ;
+				delete moduleInfo.callbacks;
 			});
 		}
 
