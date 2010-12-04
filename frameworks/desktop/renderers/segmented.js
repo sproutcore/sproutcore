@@ -73,7 +73,8 @@ SC.BaseTheme.Segmented = SC.Renderer.extend({
   update: function(cq) {
     this.updateClassNames(cq);
     cq.addClass(this.themeName);
-
+    cq.css({'text-align': this.align})
+    
     // this is actually performance-oriented. If we are completely changing the list of segments...
     // it may be faster to just re-render them all in one go. Plus it's simple.
     // Otherwise, we'd have to try to append or something like that,
