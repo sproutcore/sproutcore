@@ -535,7 +535,7 @@ SC.XHRResponse = SC.Response.extend({
       }, this);
 
       // Avoid memory leaks
-      if (!SC.browser.msie) {
+      if (!SC.browser.msie && !SC.browser.opera) {
         SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);	  
       } else {
         rawRequest.onreadystatechange = null;
