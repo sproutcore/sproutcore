@@ -2,7 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /**
@@ -285,35 +285,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   displayProperties: ['displayItems', 'value', 'activeIndex'],
   
-  createRenderer: function(theme) {
-    return theme.segmented();
-  },
-  
-  updateRenderer: function(r) {
-    var items = this.get('displayItems'), value = this.get('value'), isArray = SC.isArray(value),
-        activeIndex = this.get("activeIndex"), item;
-    for (var idx = 0, len = items.length; idx < len; idx++) {
-      item = items[idx];
-      
-      // change active
-      if (activeIndex == idx) item.isActive = YES;
-      else item.isActive = NO;
-      
-      // chance selection
-      if (isArray ? value.indexOf(item.value) : value === item.value) {
-        item.isSelected = YES;
-      }
-      else item.isSelected = NO;
-    }
-    
-    // set the attributes
-    r.attr({
-      segments: items,
-      align: this.get('align'),
-      layoutDirection: this.get('layoutDirection')
-    });
-  },
-  
+  renderDelegateName: 'segmentedRenderDelegate',
+
   // ..........................................................
   // EVENT HANDLING
   // 
@@ -323,7 +296,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
-    if (this.renderer) return this.renderer.indexForEvent(evt);
+    var renderDelegate = this.get('renderDelegate');
+
+    if (renderDelegate && renderDelegate.indexForClientPosition) {
+      return renderDelegate.indexForClientPosition(this, this.$(), evt.clientX, evt.clientY);
+    }
   },
   
   keyDown: function(evt) {
