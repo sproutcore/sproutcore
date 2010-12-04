@@ -28,6 +28,8 @@ SC.BaseTheme.Segmented = SC.Renderer.extend({
         segment, ren;
 
     context.addClass(this.themeName);
+    
+    context.addStyle('text-align', this.align);
 
     if (!reusables) reusables = this._segments = [];
 
