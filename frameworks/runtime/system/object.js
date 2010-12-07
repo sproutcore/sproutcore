@@ -803,8 +803,14 @@ function findClassNames() {
       var path = (root) ? [root,key].join('.') : key ;
       var value = object[key] ;
 
+      try {
+        var type = SC.typeOf(value);
+      } catch (e) {
+        // Firefox gives security errors when trying to run typeOf on certain objects
+        break;
+      }
 
-      switch(SC.typeOf(value)) {
+      switch(type) {
       case SC.T_CLASS:
         if (!value._object_className) value._object_className = path;
         if (levels>=0) searchObject(path, value, levels) ;
