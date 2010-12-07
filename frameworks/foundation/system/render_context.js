@@ -559,7 +559,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         this.$().resetClassNames().addClass(classNames);
         return this;
       } else {
-        return this.$().attr('class');
+        return this.$().attr('class').split(' ');
       }
     }
     
