@@ -95,7 +95,7 @@ SC.GridView = SC.ListView.extend(
     
     // set minHeight
     ret.minHeight = rows * rowHeight ;
-    this.calculatedHeight = ret.minHeight;
+    this.set('calculatedHeight', ret.minHeight);
     return ret; 
   },
   
