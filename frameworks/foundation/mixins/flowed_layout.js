@@ -100,7 +100,7 @@ SC.FlowedLayout = {
   */
   _scfl_childViewsDidChange: function(c) {
     this.invokeOnce("_scfl_tile");
-  }.observes("childViews"),
+  }.observes("*childViews.[]"),
   
   _scfl_layoutPropertyDidChange: function(){
     this.invokeOnce("_scfl_tile");
@@ -213,14 +213,30 @@ SC.FlowedLayout = {
     if (cw) {
       calc.width = cw;
     } else {
-      calc.width = f.width;
+      // if the width is not calculated, we can't just use the frame because
+      // we may have altered the frame. _scfl_cachedFlowSize is valid, however,
+      // if the frame width is equal to _scfl_cachedCalculatedFlowSize.width, as 
+      // that means the width has not been recomputed.
+      //
+      // Keep in mind that if we are the ones who recomputed it, we can use our
+      // original value. If it was recomputed by the view itself, then its value
+      // should be ok and unmanipulated by us, in theory.
+      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.width == f.width) {
+        calc.width = view._scfl_cachedFlowSize.width;
+      } else {
+        calc.width = f.width;
+      }
     }
     
     // same for calculated height
     if (ch) {
       calc.height = ch;
     } else {
-      calc.height = f.height;
+      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.height == f.height) {
+        calc.height = view._scfl_cachedFlowSize.height;
+      } else {
+        calc.height = f.height;
+      }
     }
     
     // if it is a spacer, we must set the dimension that it
