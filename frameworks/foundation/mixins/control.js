@@ -205,7 +205,7 @@ SC.Control = {
     
     The key will typically contain the name of the property that changed or 
     '*' if the content object itself has changed.  You should generally do
-    a total reset of '*' is changed.
+    a total reset if '*' is changed.
     
     @param {Object} target the content object
     @param {String} key the property that changes
@@ -399,22 +399,31 @@ SC.Control = {
     Observes when a content object has changed and handles notifying 
     changes to the value of the content object.
   */
+  // TODO: observing * is unnecessary and inefficient, but a bunch of stuff in sproutcore depends on it (like button)
   _control_contentDidChange: function() {
-    var content = this.get('content') ;
+    var content = this.get('content');
+    
     if (this._control_content === content) return; // nothing changed
     
     var f = this.contentPropertyDidChange,
     // remove an observer from the old content if necessary
         old = this._control_content ;
     if (old && old.removeObserver) old.removeObserver('*', this, f) ;
-    
-    // add observer to new content if necessary.
+  
+    // update previous values
     this._control_content = content ;
+  
+    // add observer to new content if necessary.
     if (content && content.addObserver) content.addObserver('*', this, f) ;
     
     // notify that value did change.
     this.contentPropertyDidChange(content, '*') ;
     
-  }.observes('content')
+  }.observes('content'),
   
+  // since we always observe *, just call the update function
+  _control_contentValueKeyDidChange: function() {
+    // notify that value did change.
+    this.contentPropertyDidChange(this.get('content'), '*') ;
+  }.observes('contentValueKey')
 };
