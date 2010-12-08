@@ -113,6 +113,14 @@ test("should add bools", function() {
   equals(set.length, oldLength+2, "new set length");
 });
 
+test("should add 0", function() {
+  var oldLength = set.length ;
+
+  set.add(0) ;
+  equals(set.contains(0), YES, "contains(0)");
+  equals(set.length, oldLength+1, "new set length");
+});
+
 test("should add a function", function() {
   var obj = function() { return "Test function"; } ;
   
