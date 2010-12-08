@@ -36,7 +36,7 @@ SC.BaseTheme.slicesRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
-    var slices = dataSource.length ? dataSource : dataSource.getDisplayProperties().slices;
+    var slices = dataSource.length ? dataSource : dataSource.get('slices');
     
     for (var idx = 0, len = slices.length; idx < len; idx++) {
       context.push('<div class="' + slices[idx] + '"></div>');

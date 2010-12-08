@@ -8,7 +8,8 @@
 SC.BaseTheme.segmentedRenderDelegate = SC.RendererRenderDelegate.create({
   rendererName: 'segmented',
   
-  render: function(view, context) {    
+  render: function(dataSource, context) {    
+    var view = dataSource.view;
     var rendererName = this.get('rendererName');
     var renderer = view.get('theme').renderer(rendererName);
 
@@ -20,7 +21,8 @@ SC.BaseTheme.segmentedRenderDelegate = SC.RendererRenderDelegate.create({
     view._scrrd_renderer = renderer;
   },
   
-  update: function(view, $) {
+  update: function(dataSource, $) {
+    var view = dataSource.view;
     var renderer = view._scrrd_renderer;
 
     renderer.attr(view.getChangedDisplayProperties());

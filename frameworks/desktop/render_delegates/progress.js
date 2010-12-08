@@ -41,19 +41,18 @@ SC.BaseTheme.PROGRESS_OFFSET_RANGE = 24;
 */
 SC.BaseTheme.progressRenderDelegate = {
   render: function(dataSource, context) {
-    var displayProperties = dataSource.getDisplayProperties(),
-        theme = dataSource.get('theme');
+    var theme = dataSource.get('theme');
     
     var inner, animatedBackground, value, cssString, backPosition,
-        isIndeterminate = displayProperties.isIndeterminate,
-        isRunning = displayProperties.isRunning,
-        isEnabled = displayProperties.isEnabled,
+        isIndeterminate = dataSource.get('isIndeterminate'),
+        isRunning = dataSource.get('isRunning'),
+        isEnabled = dataSource.get('isEnabled'),
         offsetRange = theme.PROGRESS_OFFSET_RANGE,
         offset = (isIndeterminate && isRunning) ? 
                 (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
       
     // offsetRange from dataSource only supported for backwards-compatibility
-    if (displayProperties.offsetRange) {
+    if (dataSource.get('offsetRange')) {
       if (!this._hasGivenOffsetRangeDeprecationWarning) {
         console.warn(
           "The 'offsetRange' property for progressRenderDelegate is deprecated. " +
@@ -63,7 +62,7 @@ SC.BaseTheme.progressRenderDelegate = {
       }
       this._hasGivenOffsetRangeDeprecationWarning = YES;
       
-      offsetRange = displayProperties.offsetRange;
+      offsetRange = dataSource.get('offsetRange');
     }
   
     // compute value for setting the width of the inner progress
@@ -72,7 +71,7 @@ SC.BaseTheme.progressRenderDelegate = {
     } else if (isIndeterminate) {
       value = "120%";
     } else {
-      value = (displayProperties.value * 100) + "%";
+      value = (dataSource.get('value') * 100) + "%";
     }
 
     var classNames = {
@@ -92,15 +91,14 @@ SC.BaseTheme.progressRenderDelegate = {
   
   update: function(dataSource, $) {
     
-    var displayProperties = dataSource.getDisplayProperties(),
-        theme = dataSource.get('theme');
+    var theme = dataSource.get('theme');
     
     var inner, value, cssString, backPosition,
         animatedBackground = theme.PROGRESS_ANIMATED_BACKGROUND_MATRIX,
-        isIndeterminate = displayProperties.isIndeterminate,
-        isRunning = displayProperties.isRunning,
-        isEnabled = displayProperties.isEnabled,
-        offsetRange = displayProperties.offsetRange,
+        isIndeterminate = dataSource.get('isIndeterminate'),
+        isRunning = dataSource.get('isRunning'),
+        isEnabled = dataSource.get('isEnabled'),
+        offsetRange = dataSource.get('offsetRange'),
         offset = (isIndeterminate && isRunning) ? 
                 (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
   
@@ -110,7 +108,7 @@ SC.BaseTheme.progressRenderDelegate = {
     } else if (isIndeterminate) {
       value = "120%";
     } else {
-      value = (displayProperties.value * 100) + "%";
+      value = (dataSource.get('value') * 100) + "%";
     }
 
     var classNames = {
@@ -125,7 +123,7 @@ SC.BaseTheme.progressRenderDelegate = {
     inner = $.find('.sc-inner');
     
     // animatedBackground from dataSource only supported for backwards-compatibility
-    if (displayProperties.animatedBackgroundMatrix) {
+    if (dataSource.get('animatedBackgroundMatrix')) {
       if (!this._hasGivenAnimatedBackgroundDeprecationWarning) {
         console.warn(
           "The 'animatedBackgroundMatrix' property for progressRenderDelegate " +
@@ -136,11 +134,11 @@ SC.BaseTheme.progressRenderDelegate = {
       
       this._hasGivenAnimatedBackgroundDeprecationWarning = YES;
       
-      animatedBackground = displayProperties.animatedBackgroundMatrix;
+      animatedBackground = dataSource.get('animatedBackgroundMatrix');
     }
     
     if (!animatedBackground) {
-      animatedBackground = dataSource.get('theme').PROGRESS_ANIMATED_BACKGROUND_MATRIX;
+      animatedBackground = theme.PROGRESS_ANIMATED_BACKGROUND_MATRIX;
     }
     
     cssString = "width: "+value+"; ";

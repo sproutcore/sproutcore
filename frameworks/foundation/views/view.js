@@ -309,9 +309,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     for (idx = 0; idx < len; idx++) {
       childViews[idx].notifyPropertyChange('baseTheme');
     }
-
-    // replace the layer
-    if (this.get('layer')) this.replaceLayer();
   }.observes('theme'),
 
   /**
@@ -1022,11 +1019,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateLayer: function(optionalContext) {
-    var mixins, idx, len, renderDelegate, hasLegacyRenderMethod;
+    var mixins, idx, len, hasLegacyRenderMethod;
 
     var context = optionalContext || this.renderContext(this.get('layer')) ;
     this._renderLayerSettings(context, NO);
-    renderDelegate = this.get('renderDelegate');
 
     // If the render method takes two parameters, we assume that it is a
     // legacy implementation that takes context and firstTime. If it has only
@@ -1220,8 +1216,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @param {Boolean} firstTime Provided for compatibility when rendering legacy views only.
   */
   renderToContext: function(context, firstTime) {
-    var renderDelegate = this.get('renderDelegate'),
-        hasLegacyRenderMethod, mixins, idx, len;
+    var hasLegacyRenderMethod, mixins, idx, len;
 
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
@@ -1320,6 +1315,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       this.updateLayer(context);
     }
   },
+  
+  /**
+    @private
+    The proxy that forwards RenderDelegate requests for properties to the view,
+    handling display*, keeps track of the delegate's state, etc.
+    
+    Dependent on the render delegate because, when the render delegate changes,
+    any the state hash must be invalidated as well.
+  */
+  _renderDelegateProxy: function() {
+    return SC.View._RenderDelegateProxy.createForView(this);
+  }.property('renderDelegate').cacheable(),
 
   /**
     Returns a hash containing property names and their values for the display
@@ -1483,7 +1490,26 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     @property {Object}
   */
-  renderDelegate: null,
+  renderDelegate: function(key, value) {
+    if (value) this._setRenderDelegate = value;
+    if (this._setRenderDelegate) return this._setRenderDelegate;
+    
+    // If this view does not have a render delegate but has
+    // renderDelegateName set, try to retrieve the render delegate from the
+    // theme.
+    var renderDelegateName = this.get('renderDelegateName'), renderDelegate;
+
+    if (renderDelegateName) {
+      renderDelegate = this.get('theme')[renderDelegateName];
+      if (!renderDelegate) {
+        throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
+      }
+
+      return renderDelegate;
+    }
+    
+    return null;
+  }.property('renderDelegateName', 'theme'),
 
   /**
     The name of the property of the current theme that contains the render
@@ -1527,9 +1553,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     if (renderDelegate) {
       if (firstTime) {
-        renderDelegate.render(this, context);
+        renderDelegate.render(this.get('_renderDelegateProxy'), context);
       } else {
-        renderDelegate.update(this, context.$());
+        renderDelegate.update(this.get('_renderDelegateProxy'), context.$());
       }
     }
 
@@ -2001,27 +2027,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   init: function() {
     var parentView = this.get('parentView'),
         theme = this.get('theme'),
-        renderDelegate = this.get('renderDelegate'), renderDelegateName,
         path, root, idx, len, lp, dp ;
 
-    sc_super() ;
-
-    // If this view does not have a render delegate but has
-    // renderDelegateName set, try to retrieve the render delegate from the
-    // theme.
-    if (!renderDelegate) {
-      renderDelegateName = this.get('renderDelegateName');
-
-      if (renderDelegateName) {
-        renderDelegate = theme[renderDelegateName];
-        if (!renderDelegate) {
-          throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
-        }
-
-        this.set('renderDelegate', renderDelegate);
-      }
-    }
-
+    sc_super();
+    
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
     SC.View.views[this.get('layerId')] = this;
@@ -2039,6 +2048,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     idx = dp.length ;
     while (--idx >= 0) {
       this.addObserver(dp[idx], this, this.displayDidChange) ;
+      this.addObserver('display' + dp[idx].capitalize(), this, this.displayDidChange);
     }
 
     // register for drags
@@ -4381,6 +4391,57 @@ SC.View.runCallback = function(callback){
   }
 };
 
+SC.View._RenderDelegateProxy = {
+  createForView: function(view) {
+    var ret = SC.beget(this);
+    
+    // set up displayProperty lookup for performance
+    var dp = view.get('displayProperties'), lookup = {};
+    for (var idx = 0, len = dp.length; idx < len; idx++) {
+      lookup[dp[idx]] = YES;
+    }
+    
+    // also allow the few special properties through
+    lookup['theme'] = YES;
+    
+    ret._displayPropertiesLookup = lookup;
+    ret.renderState = {};
+    
+    ret.view = view;
+    return ret;
+  },
+  
+  get: function(property) {
+    if (this[property] !== undefined) return this[property];
+    
+    if (!this._displayPropertiesLookup[property]) {
+      throw "RenderDelegate expected property '" + property + "', but the view " +
+      "does not have this property as a displayProperty.";
+    }
+     
+    var ret = this.view.get('display' + property.capitalize());
+    if (ret === undefined) ret = this.view.get(property);
+     
+    return ret;
+  },
+  
+  didChangeFor: function(context) {
+    var len = arguments.len, idx;
+    for (idx = 1; idx < len; idx++) {
+      var property = arguments[idx];
+    
+      if (!this._displayPropertiesLookup[property]) {
+        throw "RenderDelegate expected property '" + property + "', but the view " +
+        "does not have this property as a displayProperty.";
+      }
+      
+      if (this.view.didChangeFor(context, 'display' + property.capitalize())) return YES;
+      if (this.view.didChangeFor(context, property)) return YES;
+    }
+    
+    return NO;
+  }
+};
 
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
