@@ -110,7 +110,7 @@ SC.TableHeadView = SC.View.extend({
   
   _scthv_layoutForHeaderAtColumnIndex: function(index) {
     var columns = this.get('columns'),
-        rowHeight = this.get('parentView').get('rowHeight'),
+        rowHeight = this.get('parentView').get('tableHeadHeight'),
         layout = {},
         left = 0, idx;
         
