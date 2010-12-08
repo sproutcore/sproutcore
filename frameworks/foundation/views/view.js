@@ -3170,7 +3170,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   _cssNumber: function(val){
-    if (val === SC.LAYOUT_AUTO) { return "auto"; }
+    if (val == null) { return null; }
+    else if (val === SC.LAYOUT_AUTO) { return "auto"; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val || 0); }
   },
@@ -3196,16 +3197,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         // This is the only place where SC._VIEW_DEFAULT_DIMS is used
         dims = SC._VIEW_DEFAULT_DIMS, loc = dims.length, x, value, key,
         staticLayout = this.get('useStaticLayout'),
-        right = layout.right,
-        left = layout.left,
-        top = layout.top,
-        bottom = layout.bottom,
-        width = layout.width,
-        height = layout.height,
-        maxWidth = layout.maxWidth,
-        maxHeight = layout.maxHeight,
-        centerX = layout.centerX,
-        centerY = layout.centerY,
+        right = layout.right,         hasRight = (right != null),
+        left = layout.left,           hasLeft = (left != null),
+        top = layout.top,             hasTop = (top != null),
+        bottom = layout.bottom,       hasBottom = (bottom != null),
+        width = layout.width,         hasWidth = (width != null),
+        height = layout.height,       hasHeight = (height != null),
+        maxWidth = layout.maxWidth,   hasMaxWidth = (maxWidth != null),
+        maxHeight = layout.maxHeight, hasMaxHeight = (maxHeight != null),
+        centerX = layout.centerX,     hasCenterX = (centerX != null),
+        centerY = layout.centerY,     hasCenterY = (centerY != null),
         translateTop = null,
         translateLeft = null,
         turbo = this.get('hasAcceleratedLayer');
@@ -3220,6 +3221,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // handle left aligned and left/right
     if (left != null) {
+      // TODO: do we need this intermediate variable?
       var translateLeft = this._cssNumber(left);
       ret.left = (turbo) ? 0 : translateLeft;
 
@@ -3233,7 +3235,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         ret.width = null ;
 
         // TODO: it seems it should be relevant whether a right was specified
-        ret.right = this._cssNumber(right);
+        ret.right = this._cssNumber(right || 0);
       }
 
     // handle right aligned
@@ -3260,7 +3262,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     } else if (centerX != null) {
       ret.left = "50%";
 
-      ret.width = this._cssNumber(width);
+      ret.width = this._cssNumber(width || 0);
 
       var widthIsPercent = SC.isPercentage(width), centerXIsPercent = SC.isPercentage(centerX, YES);
 
@@ -3275,105 +3277,74 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.right = null ;
 
     // if width defined, assume top/left of zero
-    } else if (!SC.none(width)) {
-      ret.left =  0;
-      ret.right = null;
-      if(width === AUTO) ret.width = AUTO ;
-      else if(SC.isPercentage(width)) ret.width = (width*100)+"%";
-      else ret.width = Math.floor(width);
-      ret.marginLeft = 0;
+    } else if (width != null) {
+      ret.marginLeft = ret.left =  0;
+      ret.right = null; // TODO: is null different than undefined?
+      ret.width = this._cssNumber(width);
 
     // fallback, full width.
     } else {
-      ret.left = 0;
-      ret.right = 0;
+      ret.left = ret.right = ret.marginLeft = 0;
       ret.width = null ;
-      ret.marginLeft= 0;
     }
 
 
     // handle min/max
+    // TODO: is null different than undefined?
     ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth ;
     ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth ;
 
     // Y DIRECTION
 
-    // handle top aligned and left/right
-    if (!SC.none(top)) {
-      if(SC.isPercentage(top)) {
-        ret.top = (top*100)+"%";
-      } else if (turbo && !SC.empty(height)) {
-        translateTop = Math.floor(top);
-        ret.top = 0;
-      } else {
-        ret.top = Math.floor(top);
-      }
-      if (height !== undefined) {
-        if(height === AUTO) ret.height = AUTO ;
-        else if(SC.isPercentage(height)) ret.height = (height*100)+"%" ;
-        else ret.height = Math.floor(height) ;
-        ret.bottom = null ;
-      } else {
-        ret.height = null ;
-        if(bottom && SC.isPercentage(bottom)) ret.bottom = (bottom*100)+"%" ;
-        else ret.bottom = Math.floor(bottom || 0) ;
-      }
-      ret.marginTop = 0 ;
+    ret.height = this._cssNumber(height);
 
-    // handle bottom aligned
-    } else if (!SC.none(bottom)) {
-      ret.marginTop = 0 ;
-      if(SC.isPercentage(bottom)) ret.bottom = (bottom*100)+"%";
-      else ret.bottom = Math.floor(bottom) ;
-      if (SC.none(height)) {
-        if (SC.none(maxHeight)) ret.top = 0;
-        ret.height = null ;
-      } else {
-        ret.top = null ;
-        if(height === AUTO) ret.height = AUTO ;
-        else if(height && SC.isPercentage(height)) ret.height = (height*100)+"%" ;
-        else ret.height = Math.floor(height || 0) ;
-      }
-
-    // handle centered
-    } else if (!SC.none(centerY)) {
-      ret.top = "50%";
-      ret.bottom = null ;
-
-      if(height && SC.isPercentage(height)) ret.height = (height*100)+ "%" ;
-      else ret.height = Math.floor(height || 0) ;
-
-      if(height && SC.isPercentage(height) && (SC.isPercentage(centerY) || SC.isPercentage(centerY*-1))){ //height is percentage and centerY too
-        ret.marginTop = Math.floor((centerY - height/2)*100)+"%" ;
-      }else if(height && height >= 1 && !SC.isPercentage(centerY)){
-        ret.marginTop = Math.floor(centerY - ret.height/2) ;
-      }else {
-        console.warn("You have to set height and centerY to use both percentages or pixels");
-        ret.marginTop = "50%";
-      }
-    } else if (!SC.none(height)) {
-      ret.top = 0;
-      ret.bottom = null;
-      if(height === AUTO) ret.height = AUTO ;
-      else if(height && SC.isPercentage(height)) ret.height = (height*100)+"%" ;
-      else ret.height = Math.floor(height || 0) ;
+    if(hasTop || hasBottom || !hasCenterY) {
       ret.marginTop = 0;
 
-    // fallback, full width.
+      ret.top    = this._cssNumber(top);
+      ret.bottom = this._cssNumber(bottom);
+
+      if(hasTop) {
+        var translateTop = ret.top;
+        if (turbo) { ret.top = 0; }
+
+        // top, bottom, height -> top, height
+        if (hasBottom && hasHeight)  { ret.bottom = null; }
+      } else {
+        // bottom aligned
+        if(!hasBottom || (hasBottom && !hasHeight && !hasMaxHeight)) {
+          // no top, no bottom
+          ret.top = 0;
+        }
+      }
+      
+      if (!hasHeight && !hasBottom) { ret.bottom = 0 };
+
+    // handle centered
     } else {
-      ret.top = 0;
-      ret.bottom = 0;
-      ret.height = null ;
-      ret.marginTop= 0;
+      ret.top = "50%";
+
+      if (!ret.height) ret.height = 0;
+
+      var heightIsPercent = SC.isPercentage(height), centerYIsPercent = SC.isPercentage(centerY, YES);
+
+      if((heightIsPercent && centerYIsPercent) || (! heightIsPercent && !centerYIsPercent)) {
+        var value = centerY - height/2;
+        ret.marginTop = (heightIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
+      } else {
+        // This error message happens whenever height is not set.
+        console.warn("You have to set height and centerY using both percentages or pixels");
+        ret.marginTop = "50%";
+      }
+      ret.bottom = null ;
     }
 
     // handle min/max
-    ret.minHeight = (layout.minHeight === undefined) ?
-      null :
-      layout.minHeight ;
-    ret.maxHeight = (layout.maxHeight === undefined) ?
-      null :
-      layout.maxHeight ;
+    ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight ;
+    ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight ;
+
+
+    // OTHER STUFF
 
     // if zIndex is set, use it.  otherwise let default shine through
     ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
@@ -3384,12 +3355,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // if backgroundPosition is set, use it.
     // otherwise let default shine through
-    ret.backgroundPosition = SC.none(layout.backgroundPosition) ?
-      null :
-      layout.backgroundPosition.toString() ;
+    ret.backgroundPosition = SC.none(layout.backgroundPosition) ? null : layout.backgroundPosition.toString() ;
 
     // set default values to null to allow built-in CSS to shine through
     // currently applies only to marginLeft & marginTop
+    // This is the only place dims is used
     while(--loc >=0) {
       x = dims[loc];
       if (ret[x]===0) ret[x]=null;
@@ -3493,7 +3463,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
       }
 
-      if (SC.platform.supportsCSSTransitions) ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : null;
+      if (SC.platform.supportsCSSTransitions) {
+          // Explicitly clear transitions if we don't have any
+          ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : '';
+      }
 
     }
 
@@ -3506,6 +3479,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     return ret ;
   }.property().cacheable(),
+
 
 
   /**
