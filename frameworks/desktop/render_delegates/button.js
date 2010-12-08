@@ -19,6 +19,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     var displayProperties = dataSource.getDisplayProperties();
     var minWidth          = displayProperties.titleMinWidth;
     var labelContent;
+    
+    context.setClass('def', displayProperties.isDefault);
+    context.setClass('cancel', displayProperties.isCancel);
 
     // Add an icon class name to the button if it contains an icon in its
     // title.
@@ -59,16 +62,18 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
-    var displayProperties = dataSource.getChangedDisplayProperties();
+    var displayProperties = dataSource.getChangedDisplayProperties(),
+        allDisplayProperties = dataSource.getDisplayProperties();
 
-    if (displayProperties.contains('isActive')) {
-      if (displayProperties.isActive) {
-        jquery.addClass('active');
-      }
+    if (allDisplayProperties.isActive) {
+      jquery.addClass('active');
     }
+    
+    jquery.setClass('def', allDisplayProperties.isDefault);
+    jquery.setClass('cancel', allDisplayProperties.isCancel);
 
     if (displayProperties.contains('title', 'isActive')) {
-      jquery.find('label').html(this._htmlForTitleAndIcon(dataSource.getDisplayProperties()));
+      jquery.find('label').html(this._htmlForTitleAndIcon(allDisplayProperties));
     }
   },
 
