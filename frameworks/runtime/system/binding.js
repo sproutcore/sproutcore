@@ -562,7 +562,7 @@ SC.Binding = {
 
     // loop through the changed queue...
     while ((queue = this._changeQueue).length > 0) {
-      if (log) console.log("Begin: Trigger changed bindings") ;
+      if (log) SC.Logger.log("Begin: Trigger changed bindings") ;
 
       didFlush = YES ;
 
@@ -579,7 +579,7 @@ SC.Binding = {
       // now loop back and see if there are additional changes pending in the
       // active queue.  Repeat this until all bindings that need to trigger
       // have triggered.
-      if (log) console.log("End: Trigger changed bindings") ;
+      if (log) SC.Logger.log("End: Trigger changed bindings") ;
     }
 
     // clean up
@@ -608,7 +608,7 @@ SC.Binding = {
     // the from property value will always be the binding value, update if
     // needed.
     if (!this._oneWay && this._fromTarget) {
-      if (log) console.log("%@: %@ -> %@".fmt(this, v, tv)) ;
+      if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "->") ;
       this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
       if (bench) SC.Benchmark.end(this.toString() + "->") ;
@@ -616,7 +616,7 @@ SC.Binding = {
 
     // update the to value with the transformed value if needed.
     if (this._toTarget) {
-      if (log) console.log("%@: %@ <- %@".fmt(this, v, tv)) ;
+      if (log) SC.Logger.log("%@: %@ <- %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
       this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;

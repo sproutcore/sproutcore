@@ -10,7 +10,7 @@ require('private/observer_set') ;
 /*globals logChange */
 
 /**
-  Set to YES to have all observing activity logged to the console.  This
+  Set to YES to have all observing activity logged to the SC.Logger.  This
   should be used for debugging only.
 
   @property {Boolean}
@@ -470,7 +470,7 @@ SC.Observable = {
       changes.add(key) ;
 
       if (suspended) {
-        if (log) console.log("%@%@: will not notify observers because observing is suspended".fmt(SC.KVO_SPACES,this));
+        if (log) SC.Logger.log("%@%@: will not notify observers because observing is suspended".fmt(SC.KVO_SPACES,this));
         SC.Observers.objectHasPendingChanges(this) ;
       }
 
@@ -925,7 +925,7 @@ SC.Observable = {
 
     if (log) {
       spaces = SC.KVO_SPACES = (SC.KVO_SPACES || '') + '  ';
-      console.log('%@%@: notifying observers after change to key "%@"'.fmt(spaces, this, key));
+      SC.Logger.log('%@%@: notifying observers after change to key "%@"'.fmt(spaces, this, key));
     }
 
     // Get any starObservers -- they will be notified of all changes.
@@ -967,7 +967,7 @@ SC.Observable = {
           // value is a cacheable property, clear the cached value...
           if (keys && (loc = keys.length)) {
             if (log) {
-              console.log("%@...including dependent keys for %@: %@".fmt(spaces, key, keys));
+              SC.Logger.log("%@...including dependent keys for %@: %@".fmt(spaces, key, keys));
             }
             cache = this._kvo_cache;
             if (!cache) cache = this._kvo_cache = {};
@@ -1006,14 +1006,14 @@ SC.Observable = {
 
             if (member[3] === rev) continue ; // skip notified items.
 
-            if(!member[1]) console.log(member);
+            if(!member[1]) SC.Logger.log(member);
 
             target = member[0] || this;
             method = member[1] ;
             context = member[2];
             member[3] = rev;
 
-            if (log) console.log('%@...firing observer on %@ for key "%@"'.fmt(spaces, target, key));
+            if (log) SC.Logger.log('%@...firing observer on %@ for key "%@"'.fmt(spaces, target, key));
             if (context !== undefined) {
               method.call(target, this, key, null, context, rev);
             } else {
@@ -1034,7 +1034,7 @@ SC.Observable = {
             member = members[memberLoc];
             method = this[member] ; // try to find observer function
             if (method) {
-              if (log) console.log('%@...firing local observer %@.%@ for key "%@"'.fmt(spaces, this, member, key));
+              if (log) SC.Logger.log('%@...firing local observer %@.%@ for key "%@"'.fmt(spaces, this, member, key));
               method.call(this, this, key, null, rev);
             }
           }
@@ -1052,7 +1052,7 @@ SC.Observable = {
             method = member[1] ;
             context = member[2] ;
 
-            if (log) console.log('%@...firing * observer on %@ for key "%@"'.fmt(spaces, target, key));
+            if (log) SC.Logger.log('%@...firing * observer on %@ for key "%@"'.fmt(spaces, target, key));
             if (context !== undefined) {
               method.call(target, this, key, null, context, rev);
             } else {
@@ -1063,7 +1063,7 @@ SC.Observable = {
 
         // if there is a default property observer, call that also
         if (this.propertyObserver) {
-          if (log) console.log('%@...firing %@.propertyObserver for key "%@"'.fmt(spaces, this, key));
+          if (log) SC.Logger.log('%@...firing %@.propertyObserver for key "%@"'.fmt(spaces, this, key));
           this.propertyObserver(this, key, null, rev);
         }
       } // while(changes.length>0)
@@ -1359,7 +1359,7 @@ SC.Observable = {
   removeProbe: function(key) { this.removeObserver(key,SC.logChange); },
 
   /**
-    Logs the named properties to the console.
+    Logs the named properties to the SC.Logger.
 
     @param {String...} propertyNames one or more property names
   */
@@ -1368,7 +1368,7 @@ SC.Observable = {
         prop, propsLen, idx;
     for(idx=0, propsLen = props.length; idx<propsLen; idx++) {
       prop = props[idx] ;
-      console.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop)) ;
+      SC.Logger.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop)) ;
     }
   },
 
@@ -1378,7 +1378,7 @@ SC.Observable = {
 
 /** @private used by addProbe/removeProbe */
 SC.logChange = function logChange(target, key, value) {
-  console.log("CHANGE: %@[%@] =>".fmt(target, key), target.get(key));
+  SC.Logger.log("CHANGE: %@[%@] =>".fmt(target, key), target.get(key));
 };
 
 /**

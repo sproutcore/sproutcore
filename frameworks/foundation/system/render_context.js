@@ -607,7 +607,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   addClass: function(nameOrClasses) {
     if(nameOrClasses === undefined || nameOrClasses === null) {
-      console.warn('You are adding an undefined or empty class'+ this.toString());
+      SC.Logger.warn('You are adding an undefined or empty class'+ this.toString());
       return this;
     }
 

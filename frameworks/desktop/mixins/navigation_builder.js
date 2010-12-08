@@ -34,7 +34,7 @@ SC.NavigationBuilder = {
       this.mixin(animatable);
     } else if (!animatable) { 
       // check that we actually have SC.Animatable
-      console.error(
+      SC.Logger.error(
         "SC.NavigationView and SC.NavigationBuilder require SC.Animatable " + 
         "to perform animations, but it is not present. Please ensure your app or framework " +
         "references it."

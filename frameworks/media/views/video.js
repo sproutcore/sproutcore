@@ -476,7 +476,7 @@ SC.VideoView = SC.View.extend({
     try{
       vid.GetVolume();
     }catch(e){
-      console.log('loaded fail trying later');
+      SC.Logger.log('loaded fail trying later');
       this.invokeLater(this.didAppendToDocument, 100);
       return;
     }
@@ -629,7 +629,7 @@ SC.VideoView = SC.View.extend({
   */
   startSeek: function(){
     if(!this.get('paused')) {
-      console.log('startseetk');
+      SC.Logger.log('startseetk');
       this.stop();
       this._wasPlaying = true;
     }
@@ -643,7 +643,7 @@ SC.VideoView = SC.View.extend({
   */
   endSeek: function(){
     if(this._wasPlaying) {
-      console.log('startseetk');
+      SC.Logger.log('startseetk');
       this.play();
       this._wasPlaying = false;
     }
@@ -674,7 +674,7 @@ SC.VideoView = SC.View.extend({
       if(this.loaded==="flash") vid.playVideo();
       this.set('paused', NO);
     }catch(e){
-      console.warn('The video cannot play!!!! It might still be loading the plugging');
+      SC.Logger.warn('The video cannot play!!!! It might still be loading the plugging');
     }
   },
   
@@ -800,7 +800,7 @@ SC.VideoView.updateProperty = function(scid, property, value) {
   Function to log events coming from flash.
 */
 SC.VideoView.logFlash = function(message) {
-  console.log("FLASHLOG: "+message);
+  SC.Logger.log("FLASHLOG: "+message);
 } ;
 
 

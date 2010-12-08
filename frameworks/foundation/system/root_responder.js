@@ -1198,7 +1198,7 @@ SC.RootResponder = SC.Object.extend({
         try { // keep in mind that it might only _be_ here because it crashed...
           if (responder[action]) responder[action](touchEntry, evt);
         } catch(e) {
-          console.error('crashed on endTouch');
+          SC.Logger.error('crashed on endTouch');
         }
         
         // check to see if the responder changed, and stop immediately if so.
@@ -1967,7 +1967,7 @@ SC.RootResponder = SC.Object.extend({
       var view = this.targetViewForEvent(evt) ;
       this.sendEvent('animationDidStart', evt, view) ;
     } catch (e) {
-      console.warn('Exception during animationDidStart: %@'.fmt(e)) ;
+      SC.Logger.warn('Exception during animationDidStart: %@'.fmt(e)) ;
       throw e;
     }
 
@@ -1979,7 +1979,7 @@ SC.RootResponder = SC.Object.extend({
       var view = this.targetViewForEvent(evt) ;
       this.sendEvent('animationDidIterate', evt, view) ;
     } catch (e) {
-      console.warn('Exception during animationDidIterate: %@'.fmt(e)) ;
+      SC.Logger.warn('Exception during animationDidIterate: %@'.fmt(e)) ;
       throw e;
     }
 
@@ -1991,7 +1991,7 @@ SC.RootResponder = SC.Object.extend({
       var view = this.targetViewForEvent(evt) ;
       this.sendEvent('animationDidEnd', evt, view) ;
     } catch (e) {
-      console.warn('Exception during animationDidEnd: %@'.fmt(e)) ;
+      SC.Logger.warn('Exception during animationDidEnd: %@'.fmt(e)) ;
       throw e;
     }
 
@@ -2003,7 +2003,7 @@ SC.RootResponder = SC.Object.extend({
       var view = this.targetViewForEvent(evt) ;
       this.sendEvent('transitionDidEnd', evt, view) ;
     } catch (e) {
-      console.warn('Exception during transitionDidEnd: %@'.fmt(e)) ;
+      SC.Logger.warn('Exception during transitionDidEnd: %@'.fmt(e)) ;
       throw e;
     }
 

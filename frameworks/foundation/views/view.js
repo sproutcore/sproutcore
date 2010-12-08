@@ -2136,7 +2136,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         } else key = null ;
 
         if (!view) {
-          console.error ("No view with name "+key+" has been found in "+this.toString());
+          SC.Logger.error ("No view with name "+key+" has been found in "+this.toString());
           // skip this one.
           continue;
         }
@@ -2667,7 +2667,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         stLayout !== undefined && !stLayout) {
       error = SC.Error.desc(("%@.layout() cannot use width:auto if "+
                 "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
-      console.error(error.toString()) ;
+      SC.Logger.error(error.toString()) ;
       throw error ;
     }
 
@@ -2676,7 +2676,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         stLayout !== undefined && !stLayout) {
        error = SC.Error.desc(("%@.layout() cannot use height:auto if "+
                 "staticLayout is disabled").fmt(this),"%@".fmt(this), -1);
-       console.error(error.toString())  ;
+       SC.Logger.error(error.toString())  ;
       throw error ;
     }
 
@@ -3134,14 +3134,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
       error= SC.Error.desc("%@.layout() you cannot use width:auto if ".fmt(this) +
               "staticLayout is disabled","%@".fmt(this),-1);
-      console.error(error.toString()) ;
+      SC.Logger.error(error.toString()) ;
       throw error ;
     }
 
     if (lH !== undefined && lH === SC.LAYOUT_AUTO && !stLayout) {
       error = SC.Error.desc("%@.layout() you cannot use height:auto if ".fmt(this) +
                 "staticLayout is disabled","%@".fmt(this),-1);
-      console.error(error.toString()) ;
+      SC.Logger.error(error.toString()) ;
       throw error ;
     }
 
@@ -3159,7 +3159,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
             // TODO: If we want to allow it to be set as just a number for duration we need to add support here
             if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
-              console.warn("Can't animate transforms with different durations! Using first duration specified.");
+              SC.Logger.warn("Can't animate transforms with different durations! Using first duration specified.");
               layout[key].duration = transformAnimationDuration;
             }
             transformAnimationDuration = layout[key].duration;
@@ -3236,7 +3236,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         ret.marginLeft = Math.floor(lcX - ret.width/2) ;
       }else {
         // This error message happens whenever width is not set.
-        console.warn("You have to set width and centerX using both percentages or pixels");
+        SC.Logger.warn("You have to set width and centerX using both percentages or pixels");
         ret.marginLeft = "50%";
       }
       ret.right = null ;
@@ -3315,7 +3315,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }else if(lH && lH >= 1 && !SC.isPercentage(lcY)){
         ret.marginTop = Math.floor(lcY - ret.height/2) ;
       }else {
-        console.warn("You have to set height and centerY to use both percentages or pixels");
+        SC.Logger.warn("You have to set height and centerY to use both percentages or pixels");
         ret.marginTop = "50%";
       }
     } else if (!SC.none(lH)) {
@@ -3508,7 +3508,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!SC.none(currentLayout.rotate)) {
       if (SC.none(currentLayout.rotateX)) {
         currentLayout.rotateX = currentLayout.rotate;
-        console.warn('Please set rotateX instead of rotate');
+        SC.Logger.warn('Please set rotateX instead of rotate');
       }
     }
     if (!SC.none(currentLayout.rotateX)) {
@@ -3520,7 +3520,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!SC.none(currentLayout.animateRotate)) {
       if (SC.none(currentLayout.animateRotateX)) {
         currentLayout.animateRotateX = currentLayout.animateRotate;
-        console.warn('Please set animateRotateX instead of animateRotate');
+        SC.Logger.warn('Please set animateRotateX instead of animateRotate');
       }
     }
     if (!SC.none(currentLayout.animateRotateX)) {

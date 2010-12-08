@@ -44,13 +44,13 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if(SC.LAZY_INSTANTIATION[moduleName]) {
         var lazyInfo = SC.LAZY_INSTANTIATION[moduleName];
 
-      if (SC.LOG_MODULE_LOADING) console.log("SC.loadModule(): Module '%@' is marked for lazy instantiation, instantiating it now…".fmt(moduleName));            
+      if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.loadModule(): Module '%@' is marked for lazy instantiation, instantiating it now…".fmt(moduleName));            
         
         for(var i=0, iLen = lazyInfo.length; i<iLen; i++) {
           try { 
             lazyInfo[i]();
           }catch(e) {
-            console.error("SC.loadModule(): Failted to lazily instatiate entry for  '%@'".fmt(moduleName));  
+            SC.Logger.error("SC.loadModule(): Failted to lazily instatiate entry for  '%@'".fmt(moduleName));  
           }
         }
         delete SC.LAZY_INSTANTIATION[moduleName];
@@ -101,7 +101,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // If the method exists, try to call it. It could have been loaded 
     // through other means but the SC.MODULE_INFO entry doesn't exist.
     if(m || SC.LAZY_INSTANTIATION[moduleName]) {
-      if(SC.LOG_MODULE_LOADING) console.log("SC.loadModule(): Module '%@' found through other means, will attempt to load…".fmt(moduleName));
+      if(SC.LOG_MODULE_LOADING) SC.Logger.log("SC.loadModule(): Module '%@' found through other means, will attempt to load…".fmt(moduleName));
       SC.MODULE_INFO[moduleName] = {loaded: YES};
       return SC.MODULE_INFO[moduleName]; 
     }
@@ -128,11 +128,11 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         log        = SC.LOG_MODULE_LOADING;
 
     if (log) {
-      console.log("SC.loadModule(): Attempting to load '%@'".fmt(moduleName));
+      SC.Logger.log("SC.loSC.Logger.adModule(): Attempting to load '%@'".fmt(moduleName));
     }
     
     if (!moduleInfo) {
-      if (log) console.log("SC.loadModule(): Attemping to load %@ without SC.MODULE_INFO entry… could be loaded through other means.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.loadModule(): Attemping to load %@ without SC.MODULE_INFO entry… could be loaded through other means.".fmt(moduleName));
       moduleInfo = this.tryToLoadModule(moduleName, target, method, args);
     }
     
@@ -141,7 +141,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       throw "SC.loadModule(): could not find module '%@'".fmt(moduleName) ;
     } else if (moduleInfo.loaded) {
 
-      if (log) console.log("SC.loadModule(): Module '%@' already loaded, skipping.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.loadModule(): Module '%@' already loaded, skipping.".fmt(moduleName));
 
       if(method) {
         // call callback immediately if we're already loaded and SC.isReady
@@ -156,7 +156,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       }
     } else {
 
-      if (log) console.log("SC.loadModule(): Module '%@' is not loaded, loading now.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.loadModule(): Module '%@' is not loaded, loading now.".fmt(moduleName));
 
       // queue callback for later
       callbacks = moduleInfo.callbacks || [] ;
@@ -193,7 +193,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
               dependents.push(moduleName) ;
 
-              if (log) console.log("SC.loadModule(): '%@' depends on '%@', loading dependency…".fmt(moduleName, targetName));
+              if (log) SC.Logger.log("SC.loadModule(): '%@' depends on '%@', loading dependency…".fmt(moduleName, targetName));
               
               // recursively load targetName so it's own dependencies are
               // loaded first.
@@ -258,7 +258,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         var url = q.shift();
         
         if (url) {
-          if (SC.LOG_MODULE_LOADING) console.log("SC.scriptDidLoad(): Loading next file in '%@' -> '%@'".fmt(moduleName, url));
+          if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.scriptDidLoad(): Loading next file in '%@' -> '%@'".fmt(moduleName, url));
 
           var el = document.createElement('script') ;
           el.setAttribute('type', "text/javascript") ;
@@ -289,7 +289,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       return;
     }
     if (moduleInfo.loaded && log) {
-      console.log("SC.moduleDidLoad() called more than once for module '%@'. Skipping.".fmt(moduleName));
+      SC.Logger.log("SC.moduleDidLoad() called more than once for module '%@'. Skipping.".fmt(moduleName));
       return ;
     }
     
@@ -309,7 +309,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // for each dependent module, try and load them again...
     var dependents = moduleInfo.dependents || [] ;
     for (var idx=0, len=dependents.length; idx<len; ++idx) {
-      if (log) console.log("SC.loadModule(): Module '%@' has completed loading, loading '%@' that depended on it.".fmt(moduleName, dependents[idx]));
+      if (log) SC.Logger.log("SC.loadModule(): Module '%@' has completed loading, loading '%@' that depended on it.".fmt(moduleName, dependents[idx]));
       SC.Module.loadModule(dependents[idx]) ;
     }
   },
@@ -319,7 +319,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var moduleInfo = SC.MODULE_INFO[moduleName], callbacks ;
     if (!moduleInfo) return ; // shouldn't happen, but recover anyway
     
-    if (SC.LOG_MODULE_LOADING) console.log("SC.loadModule(): Module '%@' has completed loading, invoking callbacks.".fmt(moduleName));
+    if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.loadModule(): Module '%@' has completed loading, invoking callbacks.".fmt(moduleName));
 
     callbacks = moduleInfo.callbacks || [] ;
     

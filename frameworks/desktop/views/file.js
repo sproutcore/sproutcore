@@ -97,7 +97,7 @@ SC.FileView = SC.FieldView.extend(
     
   */
   setFieldValue: function(newValue) {
-    console.log("SC.FileView: setFieldValue: %@ does nothing".fmt(newValue));
+    SC.Logger.log("SC.FileView: setFieldValue: %@ does nothing".fmt(newValue));
     //if (newValue) throw SC.$error('SC.FileView can not set the value of the file field');
   },
   

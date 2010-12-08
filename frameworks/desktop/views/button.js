@@ -521,7 +521,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
             paddingLeft = parseInt(label.css('paddingLeft'),0),
             marginRight = parseInt(label.css('marginRight'),0),
             marginLeft = parseInt(label.css('marginLeft'),0);
-        if(marginRight=='auto') console.log(marginRight+","+marginLeft+","+paddingRight+","+paddingLeft);
+        if(marginRight=='auto') SC.Logger.log(marginRight+","+marginLeft+","+paddingRight+","+paddingLeft);
         if(!paddingRight && isNaN(paddingRight)) paddingRight = 0;
         if(!paddingLeft && isNaN(paddingLeft)) paddingLeft = 0;
         if(!marginRight && isNaN(marginRight)) marginRight = 0;

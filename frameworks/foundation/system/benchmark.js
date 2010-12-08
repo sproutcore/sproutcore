@@ -195,7 +195,7 @@ SC.Benchmark = {
     }
     var start = stat._starts.pop() ;
     if (!start) {
-      console.log('SC.Benchmark "%@" ended without a matching start.  No information was saved.'.fmt(key));
+      SC.Logger.log('SC.Benchmark "%@" ended without a matching start.  No information was saved.'.fmt(key));
       return ;
     }
 
@@ -503,7 +503,7 @@ SC.Benchmark = {
     // log each line to make this easier to read on an iPad
     var lines = this.report(key).split('\n'),
         len   = lines.length, idx;
-    for(idx=0;idx<len;idx++) console.log(lines[idx]);
+    for(idx=0;idx<len;idx++) SC.Logger.log(lines[idx]);
   },
   
   /**
@@ -512,12 +512,12 @@ SC.Benchmark = {
   */
   startProfile: function(key) {
     if (!this.enabled) return ;
-    if (console && console.profile) console.profile(key) ;
+    SC.Logger.profile(key) ;
   },
   
   endProfile: function(key) {
     if (!this.enabled) return ;
-    if (console && console.profileEnd) console.profileEnd(key) ;
+    SC.Logger.profileEnd(key) ;
   },
   
   // PRIVATE METHODS
