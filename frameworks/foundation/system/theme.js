@@ -83,7 +83,7 @@ SC.Theme = {
     // class names may be a CoreSet, array, string, or hash
     if (classNames) {
       if (SC.typeOf(classNames) === SC.T_HASH && !classNames.isSet) {
-        for (className in classNames) {
+        for (var className in classNames) {
           if (classNames[className]) this.classNames.add(className);
           else this.classNames.remove(className);
         }
@@ -240,7 +240,7 @@ SC.Theme = {
     // otherwise, we may need to specialize one.
     theme = this.themes[themeName];
     if (theme && !this._specializedThemes[themeName]) {
-      return this._specializedThemes[themeName] = theme.create({ classNames: this.classNames });
+      return (this._specializedThemes[themeName] = theme.create({ classNames: this.classNames }));
     }
 
     // and finally, if it is a root theme, we do nothing to it.
@@ -307,8 +307,10 @@ SC.Theme = {
 // all of its renderers, and it does so in BaseTheme. All SproutCore
 // controls have renderers in BaseTheme.
 SC.BaseTheme = SC.Theme.create({
-  name: "sc-base"
+  name: '' // it is a base class, and doesn't need a class name or such
 });
 
-SC.Theme.addTheme(SC.BaseTheme);
-SC.defaultTheme = "sc-base";
+// however, SproutCore does need a default theme, even if no
+// actual theme is loaded.
+SC.Theme.themes['sc-base'] = SC.BaseTheme;
+SC.defaultTheme = 'sc-base';
