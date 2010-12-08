@@ -26,35 +26,35 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
-    var displayProperties = dataSource.getDisplayProperties();
-    var minWidth          = displayProperties.titleMinWidth;
+    var minWidth          = dataSource.get('titleMinWidth');
     var labelContent;
     
-    
-    context.setClass('def', displayProperties.isDefault);
-    context.setClass('cancel', displayProperties.isCancel);
+    context.setClass('def', dataSource.get('isDefault'));
+    context.setClass('cancel', dataSource.get('isCancel'));
     
     dataSource.get('theme').slicesRenderDelegate.render(SC.THREE_SLICE, context);
 
     // Add an icon class name to the button if it contains an icon in its
     // title.
-    context.setClass('icon', !!displayProperties.icon);
+    context.setClass('icon', !!dataSource.get('icon'));
+
 
     // Create the inner label element that contains the text and, optionally,
     // an icon.
     context = context.begin('label').addClass('sc-button-label');
-    labelContent = this._htmlForTitleAndIcon(displayProperties);
+    labelContent = this._htmlForTitleAndIcon(dataSource);
     context.push(labelContent);
 
     // By adding the 'ellipsis' class, the text-overflow: ellipsis CSS
     // rule will be applied.
-    if (displayProperties.needsEllipsis){
+    if (dataSource.get('needsEllipsis')){
       context.addClass('ellipsis');
     }
 
     context = context.end();
+    context.push("</span>");
 
-    if (displayProperties.supportFocusRing) {
+    if (dataSource.get('supportFocusRing')) {
       context.push('<div class="focus-ring">',
                     '<div class="focus-left"></div>',
                     '<div class="focus-middle"></div>',
@@ -70,18 +70,15 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
-    var displayProperties = dataSource.getChangedDisplayProperties(),
-        allDisplayProperties = dataSource.getDisplayProperties();
-
-    if (allDisplayProperties.isActive) {
+    if (dataSource.get('isActive')) {
       jquery.addClass('active');
     }
     
-    jquery.setClass('def', allDisplayProperties.isDefault);
-    jquery.setClass('cancel', allDisplayProperties.isCancel);
+    jquery.setClass('def', dataSource.get('isDefault'));
+    jquery.setClass('cancel', dataSource.get('isCancel'));
 
-    if (displayProperties.contains('title', 'isActive')) {
-      jquery.find('label').html(this._htmlForTitleAndIcon(allDisplayProperties));
+    if (dataSource.didChangeFor('buttonRenderDelegate', 'title', 'isActive')) {
+      jquery.find('label').html(this._htmlForTitleAndIcon(dataSource));
     }
   },
 
@@ -92,12 +89,12 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     @param {Object} displayProperties the object containing the properties needed to generate the label
     @returns {String} a string of HTML
   */
-  _htmlForTitleAndIcon: function(displayProperties) {
-    var title = displayProperties.title,
-        titleMinWidth = displayProperties.titleMinWidth,
-        hint = displayProperties.hint,
-        escapeHTML = displayProperties.escapeHTML,
-        icon = displayProperties.icon || '';
+  _htmlForTitleAndIcon: function(dataSource) {
+    var title = dataSource.get('title'),
+        titleMinWidth = dataSource.get('titleMinWidth'),
+        hint = dataSource.get('hint'),
+        escapeHTML = dataSource.get('escapeHTML'),
+        icon = dataSource.get('icon') || '';
 
     // Escape the title of the button if needed. This prevents potential
     // XSS attacks.
