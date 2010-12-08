@@ -1,7 +1,7 @@
 // ==========================================================================
-// Ki.Statechart Unit Test
+// SC.Statechart Unit Test
 // ==========================================================================
-/*globals Ki */
+/*globals SC */
 
 var statechart = null;
 
@@ -9,49 +9,49 @@ var statechart = null;
 // CONTENT CHANGING
 // 
 
-module("Ki.Statechart: No Concurrent States - Goto State Tests", {
+module("SC.Statechart: No Concurrent States - Goto State Tests", {
   setup: function() {
 
-    statechart = Ki.Statechart.create({
+    statechart = SC.Statechart.create({
       
       monitorIsActive: YES,
       
-      rootState: Ki.State.design({
+      rootState: SC.State.design({
         
         initialSubstate: 'a',
         
-        a: Ki.State.design({
+        a: SC.State.design({
         
           initialSubstate: 'c',
           
-          c: Ki.State.design({
+          c: SC.State.design({
             initialSubstate: 'g',
-            g: Ki.State.design(),
-            h: Ki.State.design()
+            g: SC.State.design(),
+            h: SC.State.design()
           }),
           
-          d: Ki.State.design({
+          d: SC.State.design({
             initialSubstate: 'i',
-            i: Ki.State.design(),
-            j: Ki.State.design()
+            i: SC.State.design(),
+            j: SC.State.design()
           })
           
         }),
         
-        b: Ki.State.design({
+        b: SC.State.design({
           
           initialSubstate: 'e',
           
-          e: Ki.State.design({
+          e: SC.State.design({
             initialSubstate: 'k',
-            k: Ki.State.design(),
-            l: Ki.State.design()
+            k: SC.State.design(),
+            l: SC.State.design()
           }),
           
-          f: Ki.State.design({
+          f: SC.State.design({
             initialSubstate: 'm',
-            m: Ki.State.design(),
-            n: Ki.State.design()
+            m: SC.State.design(),
+            n: SC.State.design()
           })
           
         })

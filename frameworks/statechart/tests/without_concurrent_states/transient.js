@@ -1,7 +1,7 @@
 // ==========================================================================
-// Ki.Statechart Unit Test
+// SC.Statechart Unit Test
 // ==========================================================================
-/*globals Ki */
+/*globals SC */
 
 var statechart;
 
@@ -9,43 +9,43 @@ var statechart;
 // CONTENT CHANGING
 // 
 
-module("Ki.Statechart: No Concurrent States - Transient State Transition Tests", {
+module("SC.Statechart: No Concurrent States - Transient State Transition Tests", {
   setup: function() {
 
-    statechart = Ki.Statechart.create({
+    statechart = SC.Statechart.create({
       
       monitorIsActive: YES,
       
-      rootState: Ki.State.design({
+      rootState: SC.State.design({
         
         initialSubstate: 'a',
         
-        a: Ki.State.design({
+        a: SC.State.design({
         
           initialSubstate: 'b',
                     
-          b: Ki.State.design({
+          b: SC.State.design({
             eventC: function() { this.gotoState('c'); },
             eventD: function() { this.gotoState('d'); },
             eventE: function() { this.gotoState('e'); },
             eventX: function() { this.gotoState('x'); }
           }),
           
-          c: Ki.State.design({
+          c: SC.State.design({
             enterState: function() { this.gotoState('z'); }
           }),
           
-          d: Ki.State.design({
+          d: SC.State.design({
             enterState: function() { this.gotoState('c'); }
           }),
           
-          e: Ki.State.design({
+          e: SC.State.design({
             enterState: function() { this.gotoState('f'); }
           }),
           
-          f: Ki.State.design(),
+          f: SC.State.design(),
           
-          g: Ki.State.design({
+          g: SC.State.design({
             
             initialSubstate: 'x',
             
@@ -55,17 +55,17 @@ module("Ki.Statechart: No Concurrent States - Transient State Transition Tests",
               return this.performAsync('foo');
             },
             
-            x: Ki.State.design({
+            x: SC.State.design({
               enterState: function() { this.gotoState('h'); }
             })
   
           }),
           
-          h: Ki.State.design()
+          h: SC.State.design()
           
         }),
         
-        z: Ki.State.design()
+        z: SC.State.design()
         
       })
       
