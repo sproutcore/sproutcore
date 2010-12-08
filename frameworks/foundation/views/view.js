@@ -1270,9 +1270,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       context.addClass(themeClassNames[idx]);
     }
 
-    // If this view has no cursor and should inherit it from the parent,
-    // then it sets its own cursor view.  This sets the cursor rather than
-    // simply using the parent's cursor object so that its cursorless
+    var renderDelegate = this.get('renderDelegate');
+    if (renderDelegate && renderDelegate.name) {
+      context.addClass(renderDelegate.name);
+    }
 
     context.addClass(this.get('classNames'));
 
