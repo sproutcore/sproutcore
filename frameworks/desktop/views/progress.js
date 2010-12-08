@@ -68,12 +68,14 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   maximumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    The value of the progress inner offset range. Should be the same as width 
-    of image. Default it to 24
-
+    Deprecated. This is a render setting, and as such, should be adjusted in
+    the theme. Investigate your theme's progressRenderDelegate.
+    
+    @deprecated This should now be changed in themes.
     @type Integer
+    @deprecated
   */
-  offsetRange: 24,
+  offsetRange: undefined,
 
   /**
     Optionally specify the key used to extract the maximum progress value 
@@ -104,7 +106,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     [1st image y-location, offset, total number of images]
     @property {Array}
   */
-  animatedBackgroundMatrix: [],
+  animatedBackgroundMatrix: undefined,
   
   /**
     Optionally specify the key used to extract the isIndeterminate value 
@@ -152,66 +154,9 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     }
   },
   
-  displayProperties: 'value minimum maximum isIndeterminate'.w(),
+  displayProperties: 'value minimum maximum isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
   
-  render: function(context, firstTime) {
-    var inner, animatedBackground, value, cssString, backPosition,
-        isIndeterminate = this.get('isIndeterminate'),
-        isRunning = this.get('isRunning'),
-        isEnabled = this.get('isEnabled'),
-        offsetRange = this.get('offsetRange'),
-        offset = (isIndeterminate && isRunning) ? 
-                (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
-  
-    // compute value for setting the width of the inner progress
-    if (!isEnabled) {
-      value = "0%" ;
-    } else if (isIndeterminate) {
-      value = "120%";
-    } else {
-      value = (this.get("_percentageNumeric") * 100) + "%";
-    }
-
-    var classNames = {
-      'sc-indeterminate': isIndeterminate,
-      'sc-empty': (value <= 0),
-      'sc-complete': (value >= 100)
-    };
-    
-    if(firstTime) {
-      var classString = this._createClassNameString(classNames);
-      context.push('<div class="sc-inner ', classString, '" style="width: ', 
-                    value, ';left: ', offset, 'px;">',
-                    '<div class="sc-inner-head">','</div>',
-                    '<div class="sc-inner-tail"></div></div>',
-                    '<div class="sc-outer-head"></div>',
-                    '<div class="sc-outer-tail"></div>');
-    }
-    else {
-      context.setClass(classNames);
-      inner = this.$('.sc-inner');
-      animatedBackground = this.get('animatedBackgroundMatrix');
-      cssString = "width: "+value+"; ";
-      cssString = cssString + "left: "+offset+"px; ";
-      if (animatedBackground.length === 3 ) {
-        inner.css('backgroundPosition', '0px -'+ 
-                (animatedBackground[0] + 
-                animatedBackground[1]*this._currentBackground)+'px');
-        if(this._currentBackground===animatedBackground[2]-1
-           || this._currentBackground===0){
-          this._nextBackground *= -1;
-        }
-        this._currentBackground += this._nextBackground;
-        
-        cssString = cssString + "backgroundPosition: "+backPosition+"px; ";
-        //Instead of using css() set attr for faster perf.
-        inner.attr('style', cssString);
-      }else{
-        inner.attr('style', cssString);
-      }
-    }
-    
-  },
+  renderDelegateName: 'progressRenderDelegate',
   
   contentPropertyDidChange: function(target, key) {
     var content = this.get('content');
@@ -223,7 +168,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     .endPropertyChanges();
   },
   
-  _percentageNumeric: function(){
+  displayValue: function(){
     var minimum = this.get('minimum') || 0.0,
         maximum = this.get('maximum') || 1.0,
         value = this.get('value') || 0.0;
@@ -236,15 +181,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     // cannot be larger then maximum
     if(value>maximum) value = 1.0;
     return value;
-  }.property('value').cacheable(),
-  
-  _createClassNameString: function(classNames) {
-    var classNameArray = [], key;
-    for(key in classNames) {
-      if(!classNames.hasOwnProperty(key)) continue;
-      if(classNames[key]) classNameArray.push(key);
-    }
-    return classNameArray.join(" ");
-  }
+  }.property('value').cacheable()
+
   
 }) ;
