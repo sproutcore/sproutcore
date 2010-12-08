@@ -104,6 +104,13 @@ SC.MasterDetailView = SC.View.extend({
     this.setIfChanged('orientation', ret);
   }.observes('frame'),
   
+  // have to calculate the initial orientation when added to parent at
+  // startup (frame doesn't invalidate in this case)
+  init: function() {
+    sc_super();
+    this._scmd_frameDidChange();
+  },
+  
   /**
     If the master is hidden, this toggles the master picker pane.
     
