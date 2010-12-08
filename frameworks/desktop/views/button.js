@@ -227,7 +227,10 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     
     @property {Array}
   */
-  displayProperties: ['icon', 'title', 'value', 'toolTip', 'isDefault', 'isCancel'],
+  displayProperties: [
+  'icon', 'title', 'value', 'toolTip', 'isDefault', 'isCancel', 'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth',
+  'supportFocusRing'
+  ],
 
   /**
     The name of the render delegate in the theme that should be used to

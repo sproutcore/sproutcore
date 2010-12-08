@@ -154,7 +154,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     }
   },
   
-  displayProperties: 'value minimum maximum isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
+  displayProperties: 'value minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
   
   renderDelegateName: 'progressRenderDelegate',
   
