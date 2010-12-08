@@ -1564,14 +1564,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   displayProperties: ['isFirstResponder'],
 
   /**
-    You can set this to an SC.Cursor instance; its class name will
-    automatically be added to the layer's classNames, allowing you
-    to efficiently change the cursor for a large group of views with
-    just one change to the SC.Cursor object.  The cursor property
-    is only used when the layer is created, so if you need to change
-    it to a different cursor object, you will have to destroy and
-    recreate the view layer.  (In this case you might investigate
-    setting cursors using CSS directly instead of SC.Cursor.)
+    You can set this to an SC.Cursor instance; whenever that SC.Cursor's
+    'cursorStyle' changes, the cursor for this view will automatically
+    be updated to match. This allows you to coordinate the cursors of
+    many views by making them all share the same cursor instance.
+    
+    For example, SC.SplitView uses this ensure that it and all of its
+    children have the same cursor while dragging, so that whether you are
+    hovering over the divider or another child of the split view, the
+    proper cursor is visible.
 
     @property {SC.Cursor String}
   */
