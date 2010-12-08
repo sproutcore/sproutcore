@@ -12,7 +12,7 @@ module("SC.ButtonView#actions", {
 });
 
 test("Emulate mouse click to verify if the button activates", function() {
-  b.triggerAction();
+  b.triggerActionAfterDelay();
   equals(b.get('isActive'), YES, "the should be active for 200ms");
   
 });
@@ -112,7 +112,7 @@ module("SC.ButtonView#actions - SC.HOLD_BEHAVIOR", {
 });
 
 test('Test triggerAction only happens once', function(){
-  b.triggerAction();
+  b.triggerActionAfterDelay();
   SC.RunLoop.begin().end();
   var assertions = function(){
     equals(counter.get('value'), 1, "should only run action once");
@@ -120,7 +120,7 @@ test('Test triggerAction only happens once', function(){
   };
 
   stop();
-  setTimeout(assertions, 300);
+  setTimeout(assertions, 500);
 });
 
 // This test is not nearly reliable enough
