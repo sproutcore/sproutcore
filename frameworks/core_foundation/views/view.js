@@ -967,7 +967,7 @@ SC.CoreView.reopen(
         }
 
         if (!view) {
-          console.error ("No view with name "+key+" has been found in "+this.toString());
+          SC.Logger.error ("No view with name "+key+" has been found in "+this.toString());
           // skip this one.
           continue;
         }

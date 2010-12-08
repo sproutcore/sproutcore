@@ -121,7 +121,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   _invalidAutoValue: function(property){
     var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(
       this.get('view'), property), "%@".fmt(this.get('view')),-1);
-    console.error(error.toString());
+    SC.Logger.error(error.toString());
     throw error ;
   },
 
@@ -157,7 +157,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
             // First time around this will never be true, but we're concerned with subsequent runs.
             if (transformAnimationDuration && animations[key].duration !== transformAnimationDuration) {
-              console.warn("Can't animate transforms with different durations! Using first duration specified.");
+              SC.Logger.warn("Can't animate transforms with different durations! Using first duration specified.");
               animations[key].duration = transformAnimationDuration;
             }
 
@@ -253,7 +253,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       ret[margin] = (sizeIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
     } else {
       // This error message happens whenever height is not set.
-      console.warn("You have to set "+size+" and "+center+" using both percentages or pixels");
+      SC.Logger.warn("You have to set "+size+" and "+center+" using both percentages or pixels");
       ret[margin] = "50%";
     }
     ret[finish] = null ;

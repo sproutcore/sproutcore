@@ -654,7 +654,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   init: function() {
     // Backwards compatibility
     if (this.hasTouchIntercept === YES) {
-      console.warn("Do not set hasTouchIntercept directly. Use wantsTouchIntercept instead.");
+      SC.Logger.warn("Do not set hasTouchIntercept directly. Use wantsTouchIntercept instead.");
       this.hasTouchIntercept = SC.platform.touch;
     }
 
