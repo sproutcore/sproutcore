@@ -382,7 +382,7 @@ SC.Set = SC.mixin({},
   pop: function() {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     var obj = (this.length > 0) ? this[this.length-1] : null ;
-    if (obj) this.remove(obj) ;
+    this.remove(obj) ;
     return obj ;
   },
 
