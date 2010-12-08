@@ -1575,7 +1575,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     @property {SC.Cursor String}
   */
-  cursor: null,
+  cursor: function(key, value) {
+    var parent;
+    
+    if (value) this._setCursor = value;
+    if (this._setCursor !== undefined) return this._setCursor;
+    
+    parent = this.get('parentView');
+    if (this.get('shouldInheritCursor') && parent) {
+      return parent.get('cursor');
+    }
+    
+    return null;
+  }.property('parentView', 'shouldInheritCursor').cacheable(),
 
   /**
     A child view without a cursor of its own inherits its parent's cursor by
