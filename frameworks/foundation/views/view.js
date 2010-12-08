@@ -300,7 +300,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     Also, because
   */
-  _themeDidChange: function() {
+  _sc_view_themeDidChange: function() {
     if (this._lastTheme === this.get('theme')) return;
     this._lastTheme = this.get('theme');
 
@@ -309,6 +309,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     for (idx = 0; idx < len; idx++) {
       childViews[idx].notifyPropertyChange('baseTheme');
     }
+    
+    if (this.get('layer')) this.replaceLayer();
   }.observes('theme'),
 
   /**
