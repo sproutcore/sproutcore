@@ -3189,295 +3189,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
 
   layoutStyle: function() {
-    var layout = this.get('layout'), ret = {}, pdim = null,
-        // AUTO = "auto"
-        AUTO = SC.LAYOUT_AUTO,
-
-        // dims = ["marginTop", "marginLeft"]
-        // This is the only place where SC._VIEW_DEFAULT_DIMS is used
-        dims = SC._VIEW_DEFAULT_DIMS, loc = dims.length, x, value, key,
-        staticLayout = this.get('useStaticLayout'),
-        right = layout.right,         hasRight = (right != null),
-        left = layout.left,           hasLeft = (left != null),
-        top = layout.top,             hasTop = (top != null),
-        bottom = layout.bottom,       hasBottom = (bottom != null),
-        width = layout.width,         hasWidth = (width != null),
-        height = layout.height,       hasHeight = (height != null),
-        maxWidth = layout.maxWidth,   hasMaxWidth = (maxWidth != null),
-        maxHeight = layout.maxHeight, hasMaxHeight = (maxHeight != null),
-        centerX = layout.centerX,     hasCenterX = (centerX != null),
-        centerY = layout.centerY,     hasCenterY = (centerY != null),
-        translateTop = null,
-        translateLeft = null,
-        turbo = this.get('hasAcceleratedLayer');
-
-    // handle invalid use of auto in absolute layouts
-    if (width === AUTO && !staticLayout) { this._invalidAutoValue("width"); }
-    if (height === AUTO && !staticLayout) { this._invalidAutoValue("height"); }
-
-    this._handleTransformMistakes(layout);
-
-    // X DIRECTION
-
-    // handle left aligned and left/right
-    if (left != null) {
-      // TODO: do we need this intermediate variable?
-      var translateLeft = this._cssNumber(left);
-      ret.left = (turbo) ? 0 : translateLeft;
-
-      // TODO: Isn't this the default?
-      ret.marginLeft = 0 ;
-
-      if (width !== undefined) {
-        ret.width = this._cssNumber(width);
-        ret.right = null ;
-      } else {
-        ret.width = null ;
-
-        // TODO: it seems it should be relevant whether a right was specified
-        ret.right = this._cssNumber(right || 0);
-      }
-
-    // handle right aligned
-    } else if (right != null) {
-      // We have a right, but we have no left
-
-      ret.right = this._cssNumber(right);
-
-      // TODO: Isn't this the default?
-      ret.marginLeft = 0 ;
-
-      if (width !== undefined) {
-        ret.width = this._cssNumber(width);
-        ret.left = null ;
-      } else {
-        // if you don't specify a width, it fills the entire available area
-        ret.width = null;
-        // In this case we do not have a left set
-        if (maxWidth == null) { ret.left = 0; }
-
-      }
-
-    // handle centered
-    } else if (centerX != null) {
-      ret.left = "50%";
-
-      ret.width = this._cssNumber(width || 0);
-
-      var widthIsPercent = SC.isPercentage(width), centerXIsPercent = SC.isPercentage(centerX, YES);
-
-      if((widthIsPercent && centerXIsPercent) || (!widthIsPercent && !centerXIsPercent)) {
-        var value = centerX - width/2;
-        ret.marginLeft = (widthIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
-      } else {
-        // This error message happens whenever width is not set.
-        console.warn("You have to set width and centerX using both percentages or pixels");
-        ret.marginLeft = "50%";
-      }
-      ret.right = null ;
-
-    // if width defined, assume top/left of zero
-    } else if (width != null) {
-      ret.marginLeft = ret.left =  0;
-      ret.right = null; // TODO: is null different than undefined?
-      ret.width = this._cssNumber(width);
-
-    // fallback, full width.
-    } else {
-      ret.left = ret.right = ret.marginLeft = 0;
-      ret.width = null ;
+    var props = {
+      view: this,
+      layout: this.get('layout'),
+      turbo: this.get('hasAcceleratedLayer'),
+      static: this.get('useStaticLayout')
     }
 
+    var calculator = this._layoutStyleCalculator ?
+                        this._layoutStyleCalculator.set(props) :
+                        SC.View.LayoutStyleCalculator.create(props);
 
-    // handle min/max
-    // TODO: is null different than undefined?
-    ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth ;
-    ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth ;
-
-    // Y DIRECTION
-
-    ret.height = this._cssNumber(height);
-
-    if(hasTop || hasBottom || !hasCenterY) {
-      ret.marginTop = 0;
-
-      ret.top    = this._cssNumber(top);
-      ret.bottom = this._cssNumber(bottom);
-
-      if(hasTop) {
-        var translateTop = ret.top;
-        if (turbo) { ret.top = 0; }
-
-        // top, bottom, height -> top, height
-        if (hasBottom && hasHeight)  { ret.bottom = null; }
-      } else {
-        // bottom aligned
-        if(!hasBottom || (hasBottom && !hasHeight && !hasMaxHeight)) {
-          // no top, no bottom
-          ret.top = 0;
-        }
-      }
-      
-      if (!hasHeight && !hasBottom) { ret.bottom = 0 };
-
-    // handle centered
-    } else {
-      ret.top = "50%";
-
-      if (!ret.height) ret.height = 0;
-
-      var heightIsPercent = SC.isPercentage(height), centerYIsPercent = SC.isPercentage(centerY, YES);
-
-      if((heightIsPercent && centerYIsPercent) || (! heightIsPercent && !centerYIsPercent)) {
-        var value = centerY - height/2;
-        ret.marginTop = (heightIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
-      } else {
-        // This error message happens whenever height is not set.
-        console.warn("You have to set height and centerY using both percentages or pixels");
-        ret.marginTop = "50%";
-      }
-      ret.bottom = null ;
-    }
-
-    // handle min/max
-    ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight ;
-    ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight ;
-
-
-    // OTHER STUFF
-
-    // if zIndex is set, use it.  otherwise let default shine through
-    ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
-
-    // if opacity is set, use it. otherwise let default shine through
-    ret.opacity = SC.none(layout.opacity) ? null : layout.opacity.toString();
-    ret.mozOpacity = ret.opacity; // older Firefox?
-
-    // if backgroundPosition is set, use it.
-    // otherwise let default shine through
-    ret.backgroundPosition = SC.none(layout.backgroundPosition) ? null : layout.backgroundPosition.toString() ;
-
-    // set default values to null to allow built-in CSS to shine through
-    // currently applies only to marginLeft & marginTop
-    // This is the only place dims is used
-    while(--loc >=0) {
-      x = dims[loc];
-      if (ret[x]===0) ret[x]=null;
-    }
-
-    if (SC.platform.supportsCSSTransforms) {
-      // Handle transforms
-      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
-          layer = this.get('layer'),
-          // FIXME: This is not the best way to do it, we should track these locally
-          currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
-          cleanedTransforms = [], halTransforms, specialTransforms = [], transformName, idx;
-
-      // Remove old translates
-      for(idx=0; idx < currentTransforms.length; idx++) {
-        if (currentTransforms[idx].substring(0,9) !== 'translate') {
-          cleanedTransforms.push(currentTransforms[idx]);
-        }
-      }
-      currentTransforms = cleanedTransforms;
-
-      if (turbo) {
-        halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
-
-        // FIXME: This join.match is a bit hackish
-        if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
-          halTransforms.push('translateZ(0px)');
-        }
-      }
-
-      // Handle special CSS transform attributes
-      for(transformName in SC.CSS_TRANSFORM_MAP) {
-        cleanedTransforms = [];
-        for(idx=0; idx < currentTransforms.length; idx++) {
-          if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
-            cleanedTransforms.push(currentTransforms[idx]);
-          }
-        }
-        currentTransforms = cleanedTransforms;
-
-        if (!SC.empty(layout[transformName])) {
-          specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
-        }
-      }
-      specialTransforms = specialTransforms.join(' ');
-
-      var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
-
-      // Set transform attribute
-      ret[transformAttribute] = SC.empty(allTransforms) ? null : allTransforms;
-    }
-
-    // Temporary fix to not break SC.Animatable
-    if (!this.isAnimatable) {
-
-      // Handle animations
-      var transitions = [], animation, propertyKey;
-      this._animatedTransforms = [];
-
-      for(key in layout) {
-        if (key.substring(0,7) === 'animate') {
-          // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
-          animation = layout[key];
-
-          if (animation.timing) {
-            if (SC.typeOf(animation.timing) != SC.T_STRING) {
-              animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
-                                                 animation.timing[2]+", "+animation.timing[3]+")";
-            }
-          } else {
-            animation.timing = 'linear';
-          }
-
-          propertyKey = key.substring(7).camelize();
-
-          // TODO: This is a weird conditional, we can probably clean it up
-          if (
-            SC.platform.supportsCSSTransforms &&
-            (
-              (
-                turbo && (
-                  (propertyKey === 'top' && !SC.empty(translateTop)) ||
-                  (propertyKey === 'left' && !SC.empty(translateLeft))
-                )
-              ) ||
-              SC.CSS_TRANSFORM_MAP[propertyKey]
-            )
-          ) {
-            this._animatedTransforms.push(propertyKey);
-            propertyKey = '-'+SC.platform.cssPrefix+'-transform';
-          }
-
-          animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
-
-          // If it's a transform this may have already been set
-          if (!this._pendingAnimations) this._pendingAnimations = {};
-          if (!this._pendingAnimations[propertyKey]) {
-            this._pendingAnimations[propertyKey] = animation;
-            transitions.push(animation.css);
-          }
-        }
-      }
-
-      if (SC.platform.supportsCSSTransitions) {
-          // Explicitly clear transitions if we don't have any
-          ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : '';
-      }
-
-    }
-
-
-    // convert any numbers into a number + "px".
-    for(key in ret) {
-      value = ret[key];
-      if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
-    }
-
-    return ret ;
+    return calculator.calculate();
   }.property().cacheable(),
 
 
@@ -4369,6 +4092,375 @@ SC.View.runCallback = function(callback){
     }
   }
 };
+
+
+SC.View.LayoutStyleCalculator = SC.Object.extend({
+  // layout, turbo, static
+  // temp: view
+  init: function() {
+    sc_super();
+    this._layoutDidUpdate();
+  },
+
+  _layoutDidUpdate: function(){
+    var layout = this.get('layout');
+
+    this.dims = SC._VIEW_DEFAULT_DIMS;
+    this.loc = this.dims.length;
+
+    var right = this.right = layout.right;
+    this.hasRight = (right != null);
+
+    var left = this.left = layout.left;
+    this.hasLeft = (left != null);
+
+    var top = this.top = layout.top;
+    this.hasTop = (top != null);
+
+    var bottom = this.bottom = layout.bottom;
+    this.hasBottom = (bottom != null);
+
+    var width = this.width = layout.width;
+    this.hasWidth = (width != null);
+
+    var height = this. height = layout.height;
+    this.hasHeight = (height != null);
+
+    var maxWidth = this.maxWidth = layout.maxWidth;
+    this.hasMaxWidth = (maxWidth != null);
+
+    var maxHeight = this.maxHeight = layout.maxHeight;
+    this.hasMaxHeight = (maxHeight != null);
+
+    var centerX = this.centerX = layout.centerX;
+    this.hasCenterX = (centerX != null);
+
+    var centerY = this.centerY = layout.centerY;
+    this.hasCenterY = (centerY != null);
+
+    this.ret = {};
+  }.observes('layout'),
+
+  // handles the case where you do width:auto or height:auto and are not using "staticLayout"
+  _invalidAutoValue: function(property){
+    var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(
+      this.get('view'), property), "%@".fmt(this.get('view')),-1);
+    console.error(error.toString());
+    throw error ;
+  },
+
+  _handleMistakes: function() {
+    var layout = this.get('layout');
+
+    // handle invalid use of auto in absolute layouts
+    if(!this.static) {
+      if (this.width === SC.LAYOUT_AUTO) { this._invalidAutoValue("width"); }
+      if (this.height === SC.LAYOUT_AUTO) { this._invalidAutoValue("height"); }
+    }
+
+    if (SC.platform.supportsCSSTransforms) {
+      // Check to see if we're using transforms
+      var transformAnimationDuration;
+      for(key in layout){
+        if (SC._TRANSFORM_ANIMATIONS[key]) {
+            // To prevent:
+            //   this.animate('scale', ...);
+            //   this.animate('rotate', ...);
+            // Use this instead
+            //   this.animate({ scale: ..., rotate: ... }, ...);
+          if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
+            throw "Animations of transforms must be executed simultaneously!";
+          }
+
+          // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
+          // at different speeds. So, to handle that case, we just force them to all have the same length.
+
+          // First time around this will never be true, but we're concerned with subsequent runs.
+          if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
+            console.warn("Can't animate transforms with different durations! Using first duration specified.");
+            layout[key].duration = transformAnimationDuration;
+          }
+
+          transformAnimationDuration = layout[key].duration;
+        }
+      }
+    }
+  },
+
+  _calculatePosition: function(direction) {
+    var translate, turbo = this.get('turbo'), layout = this.layout, ret = this.ret;
+
+    var start, finish, size, maxSize, margin,
+        hasStart, hasFinish, hasSize, hasMaxSize;
+
+    if (direction === 'x') {
+      start      = 'left';
+      finish     = 'right';
+      size       = 'width';
+      maxSize    = 'maxWidth';
+      margin     = 'marginLeft';
+      hasStart   = this.hasLeft;
+      hasFinish  = this.hasRight;
+      hasSize    = this.hasWidth;
+      hasMaxSize = this.hasMaxWidth;
+    } else {
+      start      = 'top';
+      finish     = 'bottom';
+      size       = 'height';
+      maxSize    = 'maxHeight';
+      margin     = 'marginTop';
+      hasStart   = this.hasTop;
+      hasFinish  = this.hasBottom;
+      hasSize    = this.hasHeight;
+      hasMaxSize = this.hasMaxHeight;
+    }
+
+    ret[margin] = 0;
+
+    ret[size]   = this._cssNumber(layout[size]);
+    ret[start]  = this._cssNumber(layout[start]);
+    ret[finish] = this._cssNumber(layout[finish]);
+
+    if(hasStart) {
+      translate = ret[start];
+      if (turbo) { ret[start] = 0; }
+
+      // top, bottom, height -> top, bottom
+      if (hasFinish && hasSize)  { ret[finish] = null; }
+    } else {
+      // bottom aligned
+      if(!hasFinish || (hasFinish && !hasSize && !hasMaxSize)) {
+        // no top, no bottom
+        ret[start] = 0;
+      }
+    }
+
+    if (!hasSize && !hasFinish) { ret[finish] = 0 };
+
+    return translate;
+  },
+
+  _calculateCenter: function(direction) {
+    var layout = this.layout, ret = this.ret,
+        size, center, start, margin;
+
+    if (direction === 'x') {
+        size   = 'width';
+        center = 'centerX';
+        start  = 'left';
+        finish = 'right';
+        margin = 'marginLeft';
+    } else {
+        size   = 'height';
+        center = 'centerY';
+        start  = 'top';
+        finish = 'bottom';
+        margin = 'marginTop';
+    }
+
+    ret[start] = "50%";
+    ret[size]  = this._cssNumber(layout[size]) || 0;
+
+    var sizeValue   = layout[size],
+        centerValue = layout[center],
+        startValue  = layout[start];
+
+    var sizeIsPercent = SC.isPercentage(sizeValue), centerIsPercent = SC.isPercentage(centerValue, YES);
+
+    if((sizeIsPercent && centerIsPercent) || (!sizeIsPercent && !centerIsPercent)) {
+      var value = centerValue - sizeValue/2;
+      ret[margin] = (sizeIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
+    } else {
+      // This error message happens whenever height is not set.
+      console.warn("You have to set "+size+" and "+center+" using both percentages or pixels");
+      ret[margin] = "50%";
+    }
+    ret[finish] = null ;
+  },
+
+  // return "auto" for "auto", null for null, converts 0.XY into "XY%".
+  // otherwise returns the original number, rounded down
+  _cssNumber: function(val){
+    if (val == null) { return null; }
+    else if (val === SC.LAYOUT_AUTO) { return SC.LAYOUT_AUTO; }
+    else if (SC.isPercentage(val)) { return (val*100)+"%"; }
+    else { return Math.floor(val); }
+  },
+
+  calculate: function() {
+    var layout = this.get('layout'), ret = {}, pdim = null,
+        translateTop = null,
+        translateLeft = null,
+        turbo = this.get('turbo'),
+        ret = this.ret
+        dims = this.dims,
+        loc = this.loc;
+
+    this._handleMistakes(layout);
+
+    // X DIRECTION
+
+    if (this.hasLeft || this.hasRight || !this.hasCenterX) {
+      translateLeft = this._calculatePosition("x");
+    } else {
+      this._calculateCenter("x");
+    }
+
+    // handle min/max
+    // TODO: is null different than undefined?
+    ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth ;
+    ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth ;
+
+
+    // Y DIRECTION
+
+    if (this.hasTop || this.hasBottom || !this.hasCenterY) {
+      translateTop = this._calculatePosition("y");
+    } else {
+      this._calculateCenter("y");
+    }
+
+    // handle min/max
+    ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight ;
+    ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight ;
+
+
+    // OTHER STUFF
+
+    // if zIndex is set, use it.  otherwise let default shine through
+    ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
+
+    // if opacity is set, use it. otherwise let default shine through
+    ret.opacity = SC.none(layout.opacity) ? null : layout.opacity.toString();
+    ret.mozOpacity = ret.opacity; // older Firefox?
+
+    // if backgroundPosition is set, use it.
+    // otherwise let default shine through
+    ret.backgroundPosition = SC.none(layout.backgroundPosition) ? null : layout.backgroundPosition.toString() ;
+
+    // set default values to null to allow built-in CSS to shine through
+    // currently applies only to marginLeft & marginTop
+    // This is the only place dims is used
+    while(--loc >=0) {
+      x = dims[loc];
+      if (ret[x]===0) ret[x]=null;
+    }
+
+    if (SC.platform.supportsCSSTransforms) {
+      // Handle transforms
+      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
+          layer = this.get('layer'),
+          // FIXME: This is not the best way to do it, we should track these locally
+          currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
+          cleanedTransforms = [], halTransforms, specialTransforms = [], transformName, idx;
+
+      // Remove old translates
+      for(idx=0; idx < currentTransforms.length; idx++) {
+        if (currentTransforms[idx].substring(0,9) !== 'translate') {
+          cleanedTransforms.push(currentTransforms[idx]);
+        }
+      }
+      currentTransforms = cleanedTransforms;
+
+      if (turbo) {
+        halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
+
+        // FIXME: This join.match is a bit hackish
+        if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
+          halTransforms.push('translateZ(0px)');
+        }
+      }
+
+      // Handle special CSS transform attributes
+      for(transformName in SC.CSS_TRANSFORM_MAP) {
+        cleanedTransforms = [];
+        for(idx=0; idx < currentTransforms.length; idx++) {
+          if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
+            cleanedTransforms.push(currentTransforms[idx]);
+          }
+        }
+        currentTransforms = cleanedTransforms;
+
+        if (!SC.empty(layout[transformName])) {
+          specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
+        }
+      }
+      specialTransforms = specialTransforms.join(' ');
+
+      var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
+
+      // Set transform attribute
+      ret[transformAttribute] = SC.empty(allTransforms) ? null : allTransforms;
+    }
+
+    // Temporary fix to not break SC.Animatable
+    if (!this.isAnimatable) {
+
+      // Handle animations
+      var transitions = [], animation, propertyKey;
+      this._animatedTransforms = [];
+
+      for(key in layout) {
+        if (key.substring(0,7) === 'animate') {
+          // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
+          animation = layout[key];
+
+          if (animation.timing) {
+            if (SC.typeOf(animation.timing) != SC.T_STRING) {
+              animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
+                                                 animation.timing[2]+", "+animation.timing[3]+")";
+            }
+          } else {
+            animation.timing = 'linear';
+          }
+
+          propertyKey = key.substring(7).camelize();
+
+          // TODO: This is a weird conditional, we can probably clean it up
+          if (
+            SC.platform.supportsCSSTransforms &&
+            (
+              (
+                turbo && (
+                  (propertyKey === 'top' && !SC.empty(translateTop)) ||
+                  (propertyKey === 'left' && !SC.empty(translateLeft))
+                )
+              ) ||
+              SC.CSS_TRANSFORM_MAP[propertyKey]
+            )
+          ) {
+            this._animatedTransforms.push(propertyKey);
+            propertyKey = '-'+SC.platform.cssPrefix+'-transform';
+          }
+
+          animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
+
+          // If it's a transform this may have already been set
+          if (!this._pendingAnimations) this._pendingAnimations = {};
+          if (!this._pendingAnimations[propertyKey]) {
+            this._pendingAnimations[propertyKey] = animation;
+            transitions.push(animation.css);
+          }
+        }
+      }
+
+      if (SC.platform.supportsCSSTransitions) {
+          // Explicitly clear transitions if we don't have any
+          ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : '';
+      }
+
+    }
+
+
+    // convert any numbers into a number + "px".
+    for(key in ret) {
+      value = ret[key];
+      if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
+    }
+
+    return ret ;
+  }
+});
 
 
 //unload views for IE, trying to collect memory.
