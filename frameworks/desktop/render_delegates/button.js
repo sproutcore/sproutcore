@@ -16,6 +16,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
+    var theme             = dataSource.get('theme');
     var minWidth          = dataSource.get('titleMinWidth');
     var labelContent;
     
@@ -33,7 +34,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     // Create the inner label element that contains the text and, optionally,
     // an icon.
     context = context.begin('label').addClass('sc-button-label');
-    dataSource.get('theme').labelRenderDelegate.render(dataSource, context);
+    
+    // NOTE: we don't add the label class names because button styles its own label.
+    theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
     
     context.push("</span>");
@@ -54,6 +57,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
+    var theme = dataSource.get('theme');
+    
     if (dataSource.get('isActive')) {
       jquery.addClass('active');
     }
@@ -61,7 +66,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     jquery.setClass('def', dataSource.get('isDefault'));
     jquery.setClass('cancel', dataSource.get('isCancel'));
 
-    dataSource.get('theme').labelRenderDelegate.update(dataSource, jquery.find('label'));
+    theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
   
 });
