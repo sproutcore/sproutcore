@@ -1,0 +1,3 @@
+$theme.slider {
+  &.disabled { opacity: .5; }
+}
