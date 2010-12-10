@@ -100,7 +100,7 @@ SC.FlowedLayout = {
   */
   _scfl_childViewsDidChange: function(c) {
     this.invokeOnce("_scfl_tile");
-  }.observes("*childViews.[]"),
+  }.observes("childViews"),
   
   _scfl_layoutPropertyDidChange: function(){
     this.invokeOnce("_scfl_tile");
@@ -573,6 +573,30 @@ SC.FlowedLayout = {
     for (idx = 0; idx < len; idx++) {
       this.unobserveChildLayout(isObserving[idx]);
     }
-  }
+  },
   
+  /*
+    Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are layed out in the order they appear in childViews.
+  */
+  reorder: function(views) {
+    if(SC.typeOf(views) === SC.T_ARRAY) views = arguments;
+    
+    var i = views.length, childViews = this.childViews, view;
+    
+    // childViews.[] should be observed
+    this.beginPropertyChanges();
+    
+    while(i-- > 0) {
+      view = views[i];
+      
+      childViews.removeObject(view);
+      childViews.unshiftObject(view);
+    }
+    
+    this.endPropertyChanges();
+    
+    this._scfl_childViewsDidChange();
+    
+    return this;
+  }
 };
