@@ -4447,7 +4447,7 @@ SC.View._RenderDelegateProxy = {
   },
   
   didChangeFor: function(context) {
-    var len = arguments.len, idx;
+    var len = arguments.length, idx;
     for (idx = 1; idx < len; idx++) {
       var property = arguments[idx], 
           displayProperty = 'display' + property.capitalize();
