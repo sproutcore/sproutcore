@@ -6,6 +6,7 @@
 // ==========================================================================
 
 // sc_require("system/browser");
+SC.Module = {};
 
 SC.bundleDidLoad = function(bundle) {
   var info = this.MODULE_INFO[bundle] ;
@@ -18,7 +19,7 @@ SC.bundleIsLoaded = function(bundle) {
   return info ? !!info.loaded : false ;
 };
 
-SC.loadBundle = function() { throw "SC.loadBundle(): SproutCore is not loaded."; };
+SC.Module.loadModule = function() { throw "SC.Module.loadModule(): SproutCore is not loaded."; };
 
 SC.setupBodyClassNames = function() {
   var el = document.body ;

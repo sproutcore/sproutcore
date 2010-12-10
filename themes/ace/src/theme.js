@@ -1,6 +1,6 @@
 SC.AceTheme = SC.BaseTheme.create({
   name: "ace",
-  description: "Coolness."
+  description: "A SproutCore built-in theme by Alex Iskander and contributors. Only supports browsers that implement CSS3."
 });
 
 SC.Theme.addTheme(SC.AceTheme);

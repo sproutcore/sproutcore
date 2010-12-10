@@ -336,6 +336,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       return   theme || SC.Theme.find(SC.defaultTheme);
     }
   }.property('baseThemeName', 'parentView').cacheable(),
+  
+  /**
+   * Returns the named property if it is specified on the view, and
+   * otherwise returns the named constant from the view's theme.
+   *
+   * @param {String} property The property on the view.
+   * @param {String} constantName The name of the constant on the theme.
+  */
+  getThemedProperty: function(property, constantName){
+    var value = this.get(property);
+    if (value !== undefined) return value;
+    
+    var theme = this.get('theme');
+    if (!theme) return undefined;
+    
+    return theme[constantName];
+  },
 
   // ..........................................................
   // IS ENABLED SUPPORT
@@ -1016,7 +1033,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // one parameter, we assume it is the render delegates style that requires
     // only context. Note that, for backwards compatibility, the default
     // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = (this.render.length === 2);
+    hasLegacyRenderMethod = !this.update;
     // Call render with firstTime set to NO to indicate an update, rather than
     // full re-render, should be performed.
     if (hasLegacyRenderMethod) {
@@ -1218,7 +1235,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // one parameter, we assume it is the render delegates style that requires
     // only context. Note that, for backwards compatibility, the default
     // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = (this.render.length === 2);
+    hasLegacyRenderMethod = !this.update;
 
     // Let the render method handle rendering. If we have a render delegate
     // object set, it will be used there.
@@ -1306,7 +1323,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   /**
     Returns a hash containing property names and their values for the display
     properties that have changed since the last time this method was called.
-    Every display property is returned the first time it is called.
+    If this is the first time the method has been called on this view, every
+    display property is returned.
 
     For example, if this view had two display properties, isActive and items,
     you might receive a hash like this:
