@@ -3109,9 +3109,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   layoutStyle: function() {
     var props = {
-      layout: this.get('layout'),
-      turbo: this.get('hasAcceleratedLayer'),
-      static: this.get('useStaticLayout')
+      layout:       this.get('layout'),
+      turbo:        this.get('hasAcceleratedLayer'),
+      staticLayout: this.get('useStaticLayout')
     }
 
     var calculator = this.get('layoutStyleCalculator');
@@ -4082,7 +4082,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var layout = this.get('layout');
 
     // handle invalid use of auto in absolute layouts
-    if(!this.static) {
+    if(!this.staticLayout) {
       if (this.width === SC.LAYOUT_AUTO) { this._invalidAutoValue("width"); }
       if (this.height === SC.LAYOUT_AUTO) { this._invalidAutoValue("height"); }
     }
