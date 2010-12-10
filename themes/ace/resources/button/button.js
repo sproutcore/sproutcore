@@ -45,15 +45,6 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     dataSource.get('theme').labelRenderDelegate.render(dataSource, context);
     context = context.end();
 
-    // By adding the 'ellipsis' class, the text-overflow: ellipsis CSS
-    // rule will be applied.
-    if (dataSource.get('needsEllipsis')){
-      context.addClass('ellipsis');
-    }
-
-    context = context.end();
-    context.push("</span>");
-
     if (dataSource.get('supportFocusRing')) {
       context.push('<div class="focus-ring">',
                     '<div class="focus-left"></div>',
