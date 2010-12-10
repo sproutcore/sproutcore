@@ -399,9 +399,13 @@ SC.ListItemView = SC.View.extend(
   
   _addCheckboxActiveState: function() {
     if (this.get('isEnabled')) {
-      if (this._checkboxRenderer) {
-        this._checkboxRenderer.attr('classNames', { 'active': YES });
-        this._checkboxRenderer.update(this.$('.sc-checkbox-view'));        
+      if (this._checkboxRenderDelegate) {
+        var source = this._checkboxRenderSource;
+        if (!source) source = this._checkboxRenderSource = SC.Object.create();
+
+        source.set('isActive', YES);
+        
+        this._checkboxRenderDelegate.update(source, this.$('.sc-checkbox-view'));
       } else {
         // for backwards-compatibility.
         this.$('.sc-checkbox-view').addClass('active');
@@ -411,8 +415,12 @@ SC.ListItemView = SC.View.extend(
   
   _removeCheckboxActiveState: function() {
     if (this._checkboxRenderer) {
-      this._checkboxRenderer.attr('classNames', { 'active': NO });
-      this._checkboxRenderer.update(this.$('.sc-checkbox-view'));      
+      var source = this._checkboxRenderSource;
+      if (!source) source = this._checkboxRenderSource = SC.Object.create();
+
+      source.set('isActive', NO);
+      
+      this._checkboxRenderDelegate.update(source, this.$('.sc-checkbox-view'));
     } else {
       // for backwards-compatibility.
       this.$('.sc-checkbox-view').removeClass('active');
@@ -755,25 +763,32 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderCheckbox: function(context, state) {
-    var renderer = this.get('theme').renderer('checkbox');
+    var renderer = this.get('theme').checkboxRenderDelegate;
 
     // note: checkbox-view is really not the best thing to do here; we should do
     // sc-list-item-checkbox; however, themes expect something different, unfortunately.
-    context = context.begin('div').addClass('sc-checkbox-view');
-    renderer.attr({
-      classNames: {
-        sel: state && (state !== SC.MIXED_STATE),
-        mixed: state === SC.MIXED_STATE,
-        disabled: !(this.get('isEnabled') && this.get('contentIsEditable')),
-        active: this._checkboxIsActive
-      },
-
-      size: SC.REGULAR_CONTROL_SIZE
-    });
-    renderer.render(context);
+    context = context.begin('div')
+      .addClass('sc-checkbox-view')
+      .addClass('sc-regular-size')
+      .addClass(this.get('theme').classNames)
+      .addClass(renderer.get('name'));
+    
+    var source = this._checkboxRenderSource;
+    if (!source) {
+      source = this._checkboxRenderSource = 
+      SC.Object.create({ renderState: {}, theme: this.get('theme') });
+    }
+    
+    source
+      .set('isSelected', state && (state !== SC.MIXED_STATE))
+      .set('isEnabled', this.get('isEnabled') && this.get('contentIsEditable'))
+      .set('isActive', this._checkboxIsActive)
+      .set('title', '');
+    
+    renderer.render(source, context);
     context = context.end();
-
-    this._checkboxRenderer = renderer;
+    
+    this._checkboxRenderDelegate = renderer;
  },
 
   /** @private
