@@ -10,11 +10,7 @@
   color: white;
   background: #608ab9;
 }
-.sc-view.sc-list-item-view .sc-checkbox-view {
-  background-color: transparent;
-  border: 0 none;
-  margin-top: -9px;
-}
+
 .sc-source-list-background { background: #d0dae3; }
 .sc-theme .sc-view.ace.sc-scroll-view.sc-source-list-background .sc-container-view { background: #d0dae3; }
 .sc-theme .sc-view.ace.sc-collection-view.sc-source-list { background: #d0dae3; }
@@ -36,11 +32,6 @@
   color: #4a4a4a;
   text-shadow: 0px 1px 1px white;
   font-size: 12px;
-}
-.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .disclosure {
-  position: absolute;
-  left: -12px;
-  top: 9px;
 }
 .sc-theme .sc-view.ace.sc-master-detail-view { background: #333333; }
 .sc-theme .sc-view.ace.sc-master-detail-view.round-toolbars .sc-toolbar-view {

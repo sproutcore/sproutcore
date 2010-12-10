@@ -1,4 +1,25 @@
 /* Main */
+$theme.disclosure {
+  border: 0px none;
+  color: black;
+  text-shadow: white 0px 1px 1px;
+  
+  .sc-button-label {
+    left: 18px;
+  }
+  
+  img.disclosure.button {
+    &.open    { @include slice("disclosure_open.png"); }
+    &.closed  { @include slice("disclosure_closed.png"); }
+    
+    &.active {
+      &.open    { @include slice("disclosure_open_active.png"); }
+      &.closed  { @include slice("disclosure_closed_active.png"); }
+    }
+  }
+}
+
+/*
 @view(sc-button-view.sc-disclosure-view) {
   color: black;
   text-shadow: white 0px 1px 1px;
@@ -41,7 +62,7 @@
   background:sprite("disclosure_open_active.png");
 }
 
-/* As a generic sprite */
+/* As a generic sprite 
 img.disclosure.button {
   width: 14px;
   height: 14px;
@@ -61,4 +82,4 @@ img.disclosure.button.closed {
 
 img.disclosure.button.closed.active {
   background:sprite("disclosure_closed_active.png");
-}
+}*/
