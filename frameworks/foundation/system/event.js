@@ -89,7 +89,7 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
 
       // Scrolling in Safari 5.0.1, which is huge for some reason
-      if (version === 533.17) {
+      if (version === 533.19) {
         deltaMultiplier = 0.004;
 
       // Scrolling in Safari 5.0
