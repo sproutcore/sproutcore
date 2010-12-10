@@ -32,7 +32,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
 
   classNames: ['sc-label-view'],
 
-  displayProperties: 'value textAlign fontWeight icon escapeHTML'.w(),
+  displayProperties: 'displayTitle textAlign fontWeight icon escapeHTML needsEllipsis hint'.w(),
 
 
   
@@ -127,7 +127,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     
     @field
   */
-  displayValue: function() {
+  displayTitle: function() {
     var value, formatter;
     
     value = this.get('value') ;
