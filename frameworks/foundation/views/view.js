@@ -4441,9 +4441,6 @@ SC.View._RenderDelegateProxy = {
       return this.view.get(displayProperty);
     } else if (this._displayPropertiesLookup[property]) {
       return this.view.get(property);
-    } else {
-      throw "RenderDelegate expected property '" + property + "', but the view " +
-      "does not have this property as a displayProperty.";        
     }
          
     return undefined;
@@ -4459,9 +4456,6 @@ SC.View._RenderDelegateProxy = {
         if (this.view.didChangeFor(context, displayProperty)) return YES;
       } else if (this._displayPropertiesLookup[property]) {
         if (this.view.didChangeFor(context, property)) return YES;        
-      } else {
-        throw "RenderDelegate expected property '" + property + "', but the view " +
-        "does not have this property as a displayProperty.";        
       }
     }
     
