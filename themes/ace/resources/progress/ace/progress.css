@@ -1,15 +1,5 @@
-/* 
-Syntax Notes: 
-@view(view-name) is replaced with .sc-view.view-name.theme-name
-
-theme-name is specified as an argument when building.
-
-[8] means a rectangle starting at x=8, the whole height, to the right edge.
-[8, 1] means rectangle starting at x=8, width 1px, whole height
-[8, 2, 1, 1] means a 1x1 rectangle at 8, 2.
-*/
-
 $theme.progress {
+  border: 0px none;
   .track {
     position: absolute;
     left: 0px;
