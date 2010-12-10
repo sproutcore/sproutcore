@@ -1489,6 +1489,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     By setting a render delegate, the render and update methods will be called
     on that object instead of the view itself.
+    
+    For your convenience, the view will provide its displayProperties to the
+    RenderDelegate. In some cases, you may have a conflict between the RenderDelegate's
+    API and your view's. For instance, you may have a 'value' property that is
+    any number, but the render delegate expects a percentage. Make a 'displayValue'
+    property, add _it_ to displayProperties instead of 'value', and the Render Delegate
+    will automatically use that when it wants to find 'value.'
+    
+    You can also set the render delegate by using the 'renderDelegateName' property.
 
     @property {Object}
   */
@@ -1651,6 +1660,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     You can set this array to include any properties that should immediately
     invalidate the display.  The display will be automatically invalidated
     when one of these properties change.
+    
+    These are the properties that will be visible to any Render Delegate.
+    When the RenderDelegate asks for a property it needs, the view checks the
+    displayProperties array. It first looks for the property name prefixed
+    by 'display'; for instance, if the render delegate needs a 'title',
+    the view will attempt to find 'displayTitle'. If there is no 'displayTitle'
+    in displayProperties, the view will then try 'title'. If 'title' is not
+    in displayProperties either, an error will be thrown.
+    
+    This allows you to avoid collisions between your view's API and the Render 
+    Delegate's API.
 
     Implementation note:  'isVisible' is also effectively a display property,
     but it is not declared as such because the same effect is implemented
@@ -2049,8 +2069,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     dp = this.get('displayProperties') ;
     idx = dp.length ;
     while (--idx >= 0) {
-      this.addObserver(dp[idx], this, this.displayDidChange) ;
-      this.addObserver('display' + dp[idx].capitalize(), this, this.displayDidChange);
+      this.addObserver(dp[idx], this, this.displayDidChange);
     }
 
     // register for drags
@@ -4416,29 +4435,34 @@ SC.View._RenderDelegateProxy = {
   get: function(property) {
     if (this[property] !== undefined) return this[property];
     
-    if (!this._displayPropertiesLookup[property]) {
+    var displayProperty = 'display' + property.capitalize();
+    
+    if (this._displayPropertiesLookup[displayProperty]) {
+      return this.view.get(displayProperty);
+    } else if (this._displayPropertiesLookup[property]) {
+      return this.view.get(property);
+    } else {
       throw "RenderDelegate expected property '" + property + "', but the view " +
-      "does not have this property as a displayProperty.";
+      "does not have this property as a displayProperty.";        
     }
-     
-    var ret = this.view.get('display' + property.capitalize());
-    if (ret === undefined) ret = this.view.get(property);
-     
-    return ret;
+         
+    return undefined;
   },
   
   didChangeFor: function(context) {
     var len = arguments.len, idx;
     for (idx = 1; idx < len; idx++) {
-      var property = arguments[idx];
+      var property = arguments[idx], 
+          displayProperty = 'display' + property.capitalize();
     
-      if (!this._displayPropertiesLookup[property]) {
+      if (this._displayPropertiesLookup[displayProperty]) {
+        if (this.view.didChangeFor(context, displayProperty)) return YES;
+      } else if (this._displayPropertiesLookup[property]) {
+        if (this.view.didChangeFor(context, property)) return YES;        
+      } else {
         throw "RenderDelegate expected property '" + property + "', but the view " +
-        "does not have this property as a displayProperty.";
+        "does not have this property as a displayProperty.";        
       }
-      
-      if (this.view.didChangeFor(context, 'display' + property.capitalize())) return YES;
-      if (this.view.didChangeFor(context, property)) return YES;
     }
     
     return NO;
