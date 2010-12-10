@@ -190,7 +190,7 @@ SC.PickerPane = SC.PalettePane.extend({
     if (pointerOffset) this.set('pointerOffset',pointerOffset) ;
     this.endPropertyChanges();
     this.positionPane();
-    this.append();
+    return this.append();
   },
 
   /** @private
