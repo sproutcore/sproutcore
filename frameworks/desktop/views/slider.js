@@ -74,11 +74,31 @@ SC.SliderView = SC.View.extend(SC.Control,
   // INTERNAL PROPERTIES
   // 
   
-  displayProperties: 'value minimum maximum step'.w(),
+  displayProperties: 'displayValue minimum maximum step frame'.w(),
 
   // The name of the render delegate which is creating and maintaining
   // the DOM associated with instances of this view
   renderDelegateName: 'sliderRenderDelegate',
+  
+  displayValue: function() {
+    var min = this.get('minimum'),
+        max = this.get('maximum'),
+        value = this.get('value'),
+        step = this.get('step');
+
+    // determine the constrained value.  Must fit within min & max
+    value = Math.min(Math.max(value, min), max);
+
+    // limit to step value
+    if (!SC.none(step) && step !== 0) {
+      value = Math.round(value / step) * step;
+    }
+    
+    // determine the percent across
+    if(value!==0) value = Math.floor((value - min) / (max - min) * 100);
+    
+    return value;
+  }.property('value', 'minimum', 'maximum', 'step').cacheable(),
   
   _isMouseDown: NO,
   
@@ -169,6 +189,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (Math.abs(v-loc)>=0.01) {
       this.set('value', loc); // adjust 
     }
+    
     return YES ;
   },
   
