@@ -5,7 +5,70 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.checkboxRenderDelegate = SC.RendererRenderDelegate.create({
-  rendererName: 'checkbox'
+/**
+  Renders and updates DOM representations of a checkbox (just the box,
+  not the title).
+  
+  Note: most of the actual rendering is done in CSS. The DOM element provided
+  to the checkboxRenderDelegate must have the theme class names and the
+  class name 'checkbox' (the name of the render delegate).
+  
+  Parameters
+  --------------------------
+  Expects these properties on the data source:
+  
+  - isSelected
+  - isActive
+  - isEnabled
+  - title
+  
+  Optional parameters include all parameters for the labelRenderDelegate.
+  
+*/
+SC.BaseTheme.checkboxRenderDelegate = SC.Object.create({
+  name: 'checkbox',
+  
+  render: function(dataSource, context) {
+    var theme = dataSource.get('theme');
+    
+    var isSelected = dataSource.get('isSelected');
+    var isActive = dataSource.get('isActive');
+    var isDisabled = !dataSource.get('isEnabled');
+
+    context.attr('role', 'checkbox');
+    context.attr('aria-checked', isSelected.toString());
+    
+    context.setClass({
+      'sel': isSelected,
+      'active': isActive,
+      'disabled': isDisabled
+    });
+    
+    context.push('<span class = "button"></span>');
+    
+    context = context.begin('span').addClass('label');
+    theme.labelRenderDelegate.render(dataSource, context);
+    context = context.end();
+  },
+  
+  update: function(dataSource, jquery) {
+    var theme = dataSource.get('theme');
+    
+    var isSelected = dataSource.get('isSelected');
+    var isActive = dataSource.get('isActive');
+    var isDisabled = !dataSource.get('isEnabled');
+
+    // address accessibility
+    jquery.attr('aria-checked', isSelected.toString());
+    
+    theme.labelRenderDelegate.update(dataSource, jquery.find('span.label'));
+    
+    // add class names
+    jquery.setClass({
+      'sel': isSelected,
+      'active': isActive,
+      'disabled': isDisabled
+    });
+  }
 });
 
