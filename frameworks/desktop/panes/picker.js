@@ -191,7 +191,7 @@ SC.PickerPane = SC.PalettePane.extend({
     this.endPropertyChanges();
     this.positionPane();
     this._hideOverflow();
-    this.append();
+    return this.append();
   },
 
   /** @private
