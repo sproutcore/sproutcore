@@ -42,8 +42,8 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     // Create the inner label element that contains the text and, optionally,
     // an icon.
     context = context.begin('label').addClass('sc-button-label');
-    labelContent = this._htmlForTitleAndIcon(dataSource);
-    context.push(labelContent);
+    dataSource.get('theme').labelRenderDelegate.render(dataSource, context);
+    context = context.end();
 
     // By adding the 'ellipsis' class, the text-overflow: ellipsis CSS
     // rule will be applied.
@@ -77,52 +77,6 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     jquery.setClass('def', dataSource.get('isDefault'));
     jquery.setClass('cancel', dataSource.get('isCancel'));
 
-    if (dataSource.didChangeFor('buttonRenderDelegate', 'title', 'isActive')) {
-      jquery.find('label').html(this._htmlForTitleAndIcon(dataSource));
-    }
-  },
-
-  /**
-    Returns the HTML for the button's label, which can include a title and
-    an icon.
-
-    @param {Object} displayProperties the object containing the properties needed to generate the label
-    @returns {String} a string of HTML
-  */
-  _htmlForTitleAndIcon: function(dataSource) {
-    var title = dataSource.get('title'),
-        titleMinWidth = dataSource.get('titleMinWidth'),
-        hint = dataSource.get('hint'),
-        escapeHTML = dataSource.get('escapeHTML'),
-        icon = dataSource.get('icon') || '';
-
-    // Escape the title of the button if needed. This prevents potential
-    // XSS attacks.
-    if (title && escapeHTML) {
-      title = SC.RenderContext.escapeHTML(title) ;
-    }
-
-    if (hint && !title) {
-      if (escapeHTML) {
-        hint = SC.RenderContext.escapeHTML(hint);
-      }
-      title = "<span class='sc-hint'>" + hint + "</span>";
-    }
-
-    if (icon) {
-      // If the icon property is the path to an image, create an image tag
-      // that points to that URL.
-      if (icon.indexOf('/') >= 0) {
-        icon = '<img src="'+icon+'" alt="" class="icon" />';
-
-      // Otherwise, the icon property is a class name that should be added
-      // to the image tag. Display a blank image so that the user can add
-      // background image using CSS.
-      } else {
-        icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="'+icon+'" />';
-      }
-    }
-
-    return icon+title;
+    dataSource.get('theme').labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
 });
