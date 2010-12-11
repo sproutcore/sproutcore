@@ -4215,7 +4215,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     if (SC.platform.supportsCSSTransforms) {
       // Handle transforms
       var layout = this.get('layout');
-      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
+      var transformAttribute = SC.platform.domCSSPrefix+'Transform';
       var transforms = [];
 
       if (this.turbo) {
