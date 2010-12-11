@@ -1,0 +1,111 @@
+@theme(popover) {
+  $theme.picker {
+    background: none;
+  }
+  
+  $theme.toolbar, $theme.sc-view.sc-toolbar-view, .sc-theme $theme.sc-view.sc-toolbar-view {
+    background: none;
+    color: white;
+    text-shadow: none;
+    border-bottom: 0px none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+  }
+  
+  $theme.workspace {
+    overflow: visible;
+    background: none;
+    
+    .popover-background {
+      
+      position: absolute;
+      top: -25px;
+      bottom: -25px;
+      left: -25px;
+      right: -25px;
+      
+      @include slices("popover_notoolbar.png", $left: 40, $top: 40, $bottom: 40, $right: 40, $fill: 1 1, skip-middle);
+      
+      div { z-index: 5; }
+    }
+    
+    &.top-toolbar .popover-background {
+      top: -20px;
+      @include slices(
+        "popover.png", $left: 40, $top: 75, $bottom: 40, $right: 40, 
+        skip-left, skip-middle, skip-right, skip-bottom-left, skip-bottom, skip-bottom-right
+      );
+      
+      .left { top: 75px; }
+      .right { top: 75px; }
+    }
+    
+    
+    &.bottom-toolbar .popover-background {
+      bottom: -20px;
+      @include slices(
+        "popover.png", $left: 40, $bottom: 75, $top: 40, $right: 40, 
+        skip-left, skip-middle, skip-right, skip-top-left, skip-top, skip-top-right
+      );
+      
+      .left { bottom: 75px; }
+      .right { bottom: 75px; }
+    }
+    
+  }
+  
+  @theme(solid) {
+    $theme.picker .popover-background, 
+    $theme.picker.top-toolbar    .popover-background, 
+    $theme.picker.bottom-toolbar .popover-background {
+      top: -25px;
+      bottom: -25px;
+    
+      @include slices("popover_empty.png", $left: 40, $top: 75, $bottom: 40, $right: 40, $fill: 1 1);
+    }
+  }
+  
+  $theme.picker.perfectBottom {
+    .sc-pointer {
+      z-index: 6;
+      position: absolute; width: 50px; height: 25px; margin-left: -25px; left: 50%; top: 0px;
+      @include slice("popover_pointers_notoolbar.png", $left: 155, $top: 0, $width: 50, $height: 25);
+    }
+    
+    &.solid .sc-pointer, .solid .sc-pointer {
+      top: 0px;
+      @include slice("popover_pointers.png", $left: 155, $top: 0, $width: 50, $height: 25);
+    }
+    
+    .top-toolbar .sc-pointer { 
+      top: 0px;
+      @include slice("popover_pointers.png", $left: 155, $top: 0, $width: 50, $height: 25);
+    }
+    
+    &.extra-left {
+      .sc-pointer { left: 70px; }
+    }
+  }
+  
+  $theme.picker.perfectTop {
+    .sc-pointer {
+      z-index: 6;
+      position: absolute; width: 50px; height: 25px; margin-left: -25px; left: 50%; bottom: 0px;
+      @include slice("popover_pointers.png", $left: 155, $bottom: 0, $width: 50, $height: 25);
+    }
+    
+    &.solid .sc-pointer, .solid .sc-pointer {
+      bottom: 0px;
+      @include slice("popover_pointers.png", $left: 155, $bottom: 0, $width: 50, $height: 25);
+    }
+    
+    .top-toolbar .sc-pointer { 
+      bottom: 0px;
+      @include slice("popover_pointers.png", $left: 155, $bottom: 0, $width: 50, $height: 25);
+    }
+    
+    &.extra-left {
+      .sc-pointer { left: 70px; }
+    }
+  }
+}

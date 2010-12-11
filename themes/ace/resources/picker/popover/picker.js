@@ -9,11 +9,24 @@ sc_require("resources/picker/popover/popover");
 SC.AceTheme.Popover.pickerRenderDelegate = SC.Object.create({
   name: 'picker',
   
-  render: function() {
-    
+  render: function(dataSource, context) {
+    var preferType = dataSource.get('preferType');
+    var pointerPosition = dataSource.get('pointerPos');
+    var pointerPositionY = dataSource.get('pointerPosY');
+
+    if (preferType == SC.PICKER_POINTER || preferType == SC.PICKER_MENU_POINTER) {
+      context.addClass(pointerPosition);
+    }
   },
   
-  update: function() {
+  update: function(dataSource, $) {
+    var preferType = dataSource.get('preferType');
+    var pointerPosition = dataSource.get('pointerPos');
+    var pointerPositionY = dataSource.get('pointerPosY');
+    
+    if (preferType == SC.PICKER_POINTER || preferType == SC.PICKER_MENU_POINTER) {
+      $.addClass(pointerPosition);
+    }
     
   }
 });

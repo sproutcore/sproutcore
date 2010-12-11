@@ -1,5 +1,0 @@
-@theme(popover)
-@view(sc-collection-view.sc-list-view.sc-source-list) {
-  background-color: white;
-}
-@end
