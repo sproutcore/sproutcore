@@ -7,7 +7,7 @@
 
 SC.THREE_SLICE = ['left', 'middle', 'right'];
 
-SC.NICE_SLICE = [
+SC.NINE_SLICE = [
   'top-left', 'top', 'top-right', 
   'left', 'middle', 'right', 
   'bottom-left', 'bottom', 'bottom-right'
