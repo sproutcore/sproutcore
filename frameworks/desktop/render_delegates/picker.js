@@ -7,7 +7,8 @@
 sc_require('render_delegates/panel');
 
 SC.BaseTheme.pickerRenderDelegate = SC.Object.create({
-
+  name: 'picker',
+  
   render: function(dataSource, context) {
     var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
 
