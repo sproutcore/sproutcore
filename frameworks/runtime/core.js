@@ -248,8 +248,6 @@ SC.mixin(/** @scope SC */ {
     @returns {Boolean}
   */
   isArray: function(obj) {
-    var type;
-
     if ( !obj || obj.setInterval ) {
       return false;
     } else if ( obj.objectAt ) {
