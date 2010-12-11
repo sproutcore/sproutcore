@@ -1,5 +1,6 @@
 /* Main */
 $theme.disclosure {
+  
   border: 0px none;
   color: black;
   text-shadow: white 0px 1px 1px;
@@ -9,6 +10,8 @@ $theme.disclosure {
   }
   
   img.disclosure.button {
+    width: 16px;
+    height: 16px;
     &.open    { @include slice("disclosure_open.png"); }
     &.closed  { @include slice("disclosure_closed.png"); }
     
@@ -19,67 +22,12 @@ $theme.disclosure {
   }
 }
 
-/*
-@view(sc-button-view.sc-disclosure-view) {
-  color: black;
-  text-shadow: white 0px 1px 1px;
+.sc-list-item-view $theme.disclosure {
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  margin-top: -6px;
+  
+  width: 18px;
+  height: 18px;
 }
-
-@view(sc-button-view.sc-disclosure-view) .sc-button-label {
-  left: 18px;
-}
-
-@view(sc-button-view.sc-disclosure-view).sel {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-
-@view(sc-button-view.sc-disclosure-view).sel.active {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-
-@view(sc-button-view.sc-disclosure-view).active {
-  color: black;
-  text-shadow: white 0px 1px 1px;
-}
-
-@view(sc-button-view.sc-disclosure-view) img {
-  position: absolute; top: 3px;
-  background:sprite("disclosure_closed.png");  
-  width: 14px; height: 14px;
-}
-
-@view(sc-button-view.sc-disclosure-view).sel img {
-  background:sprite("disclosure_open.png");
-}
-
-@view(sc-button-view.sc-disclosure-view).active img {
-  background:sprite("disclosure_closed_active.png");
-}
-
-@view(sc-button-view.sc-disclosure-view).sel.active img {
-  background:sprite("disclosure_open_active.png");
-}
-
-/* As a generic sprite 
-img.disclosure.button {
-  width: 14px;
-  height: 14px;
-}
-
-img.disclosure.button.open {
-  background:sprite("disclosure_open.png");
-}
-
-img.disclosure.button.open.active {
-  background:sprite("disclosure_open_active.png");
-}
-
-img.disclosure.button.closed {
-  background:sprite("disclosure_closed.png");
-}
-
-img.disclosure.button.closed.active {
-  background:sprite("disclosure_closed_active.png");
-}*/
