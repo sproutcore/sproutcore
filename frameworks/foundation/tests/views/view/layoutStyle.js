@@ -578,8 +578,8 @@ test("frame loc shifts with centerX/centerY", function(){
   verifyFrameResize(layout, before, after);
 });
 
-
-
+test("for proper null variables");
+// nothing should get passed through as undefined, instead we want null in certain cases
 
 
 
