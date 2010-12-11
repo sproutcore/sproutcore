@@ -4041,14 +4041,14 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var height = this.height = layout.height;
     this.hasHeight = (height != null);
 
-    this.minWidth = (this.minWidth === undefined) ? null : this.minWidth;
+    this.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
 
-    var maxWidth = this.maxWidth = layout.maxWidth;
+    var maxWidth = this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
     this.hasMaxWidth = (maxWidth != null);
 
-    this.minHeight = (this.minHeight === undefined) ? null : this.minHeight;
+    this.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
 
-    var maxHeight = this.maxHeight = layout.maxHeight;
+    var maxHeight = this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
     this.hasMaxHeight = (maxHeight != null);
 
     var centerX = this.centerX = layout.centerX;
