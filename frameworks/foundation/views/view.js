@@ -4412,7 +4412,33 @@ SC.View.runCallback = function(callback){
   }
 };
 
+/**
+  @class
+  @private
+  View Render Delegate Proxies are tool SC.Views use to:
+  
+  a) limit properties the render delegate can access to the displayProperties
+  b) look up 'display*' ('displayTitle' instead of 'title') to help deal with
+     differences between the render delegate's API and the view's.
+  
+  RenderDelegateProxies are fully valid data sources for render delegates. They
+  act as proxies to the view, interpreting the .get and .didChangeFor commands
+  based on the view's displayProperties.
+  
+  This tool is not useful outside of SC.View itself, and as such, is private.
+*/
 SC.View._RenderDelegateProxy = {
+  /**
+   * Creates a View Render Delegate Proxy for the specified view.
+   * 
+   * Implementation note: this creates a hash of the view's displayProperties
+   * array so that the proxy may quickly determine whether a property is a
+   * displayProperty or not. This could cause issues if the view's displayProperties
+   * array is modified after instantiation.
+   *
+   * @param {SC.View} view The view this proxy should proxy to. 
+   * @returns SC.View._RenderDelegateProxy
+  */
   createForView: function(view) {
     var ret = SC.beget(this);
     
@@ -4432,6 +4458,18 @@ SC.View._RenderDelegateProxy = {
     return ret;
   },
   
+  
+  /**
+   * Provides the render delegate with any property it needs.
+   *
+   * This first looks up whether the property exists in the view's
+   * displayProperties, and whether it exists prefixed with 'display';
+   * for instance, if the render delegate asks for 'title', this will
+   * look for 'displayTitle' in the view's displayProperties array.
+   *
+   * @param {String} property The name of the property the render delegate needs. 
+   * @returns The value.
+  */
   get: function(property) {
     if (this[property] !== undefined) return this[property];
     
@@ -4446,6 +4484,14 @@ SC.View._RenderDelegateProxy = {
     return undefined;
   },
   
+  /**
+   * Checks if any of the specified properties have changed.
+   *
+   * For each property passed, this first determines whether to use the
+   * 'display' prefix. Then, it calls view.didChangeFor with context and that
+   * property name.
+   *
+  */
   didChangeFor: function(context) {
     var len = arguments.length, idx;
     for (idx = 1; idx < len; idx++) {
