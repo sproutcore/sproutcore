@@ -9,6 +9,7 @@ SC.BaseTheme.PROGRESS_ANIMATED_BACKGROUND_MATRIX = [];
 SC.BaseTheme.PROGRESS_OFFSET_RANGE = 24;
 
 /**
+  @class
   Renders and updates DOM representations of progress bars.
   
   Parameters
