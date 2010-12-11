@@ -902,64 +902,7 @@
 }
 .sc-theme .sc-view.ace.iphone-form.sc-text-field-view .border { display: none; }
 .sc-theme .sc-view.ace.iphone-form.sc-text-field-view input { color: #005082; }
-.sc-pane { -webkit-transform: translate3d(0px, 0px, 0px); }
-.sc-theme .sc-view.ace.sc-pane.sc-panel { background: rgba(251, 251, 251, 0.92); }
-.sc-theme .sc-view.ace.sc-pane.sc-panel .top-left-edge {
-  left: -16px;
-  top: -16px;
-  width: 16px;
-  height: 16px;
-  background: static_url("images/1.png") no-repeat -80px -474px;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .top-edge {
-  top: -16px;
-  left: 0px;
-  right: 0px;
-  height: 16px;
-  background: static_url("images/2.png") repeat-x 0 -1690px;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .top-right-edge {
-  right: -16px;
-  top: -16px;
-  width: 16px;
-  height: 16px;
-  background: static_url("images/1.png") no-repeat -64px -474px;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .bottom-left-edge {
-  left: -16px;
-  bottom: -16px;
-  width: 16px;
-  height: 16px;
-  background: static_url("images/1.png") no-repeat -16px -474px;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .bottom-edge {
-  bottom: -16px;
-  left: 0px;
-  right: 0px;
-  height: 16px;
-  background: static_url("images/2.png") repeat-x 0 -1706px;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .bottom-right-edge {
-  right: -16px;
-  bottom: -16px;
-  width: 16px;
-  height: 16px;
-  background: static_url("images/1.png") no-repeat -48px -490px;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .left-edge {
-  top: 0px;
-  left: -16px;
-  bottom: 0px;
-  width: 16px;
-  background: static_url("images/3.png") repeat-y -60px 0;
-}
-.sc-theme .sc-view.ace.sc-pane.sc-panel .right-edge {
-  top: 0px;
-  right: -16px;
-  bottom: 0px;
-  width: 16px;
-  background: static_url("images/3.png") repeat-y -76px 0;
-}
+
 .sc-theme .sc-view.ace.sc-panel.sc-picker.sc-menu .sc-menu-scroll-view {
   background: rgba(251, 251, 251, 0.92);
   border: 0px none;
