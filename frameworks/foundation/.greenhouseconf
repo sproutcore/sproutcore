@@ -1,0 +1,29 @@
+{
+  "name": "/foundation",
+  "views": [
+    {
+      "name": "View",
+      "scClass": "SC.View"
+    },
+    
+    {
+      "name": "Container View",
+      "scClass": "SC.ContainerView"
+    },
+    
+    {
+      "name": "Image",
+      "scClass": "SC.ImageView"
+    },
+    
+    {
+      "name": "Label",
+      "scClass": "SC.LabelView"
+    },
+    
+    {
+      "name": "Text Field",
+      "scClass": "SC.TextFieldView"
+    }
+  ]
+}
