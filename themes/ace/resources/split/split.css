@@ -1,0 +1,5 @@
+/* TODO: when new SplitView lands, do this proper ($theme.split-divider) */
+$theme.sc-split-divider-view {
+  background: #555;
+  border: 0px none;
+}
