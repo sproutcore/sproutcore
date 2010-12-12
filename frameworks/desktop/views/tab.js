@@ -175,7 +175,7 @@ SC.TabView = SC.View.extend(
     custom container view.  You can access this view but you cannot change 
     it.
   */
-  containerView: SC.ContainerView,
+  containerView: SC.ContainerView.extend({ theme: 'well' }),
   
   segmentedView: SC.SegmentedView
   
