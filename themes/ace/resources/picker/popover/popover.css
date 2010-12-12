@@ -3,7 +3,7 @@
     background: none;
   }
   
-  $theme.toolbar, $theme.sc-view.sc-toolbar-view, .sc-theme $theme.sc-view.sc-toolbar-view {
+  $theme.toolbar {
     background: none;
     color: white;
     text-shadow: none;
