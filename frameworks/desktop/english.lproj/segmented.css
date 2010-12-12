@@ -3,12 +3,6 @@
   white-space: nowrap;
 }
 
-.sc-segmented-view .sc-segment {
-	text-decoration: none ;
-	color: black ;
-	text-align: center;
-}
-
 .sc-segment:active, .sc-segment:focus {
 	outline: none;
 }
@@ -25,12 +19,15 @@
 /* @group Layout */
 
 .sc-segmented-view .sc-segment {
-	display: block;
+	display: inline-block;
 	top: 0;
 	height: 22px;
 	line-height: 22px;
 	border-right: 1px #555 solid;
 	text-shadow: #b0b0b0 0px 1px 0px;
+	text-decoration: none ;
+	color: black ;
+	text-align: center;
 }
 
 .sc-segmented-view .sc-button-inner {
