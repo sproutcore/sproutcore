@@ -167,6 +167,8 @@ SC.MasterDetailView = SC.View.extend({
   pointerDistanceFromEdge: 46,
   
   
+  renderDelegateName: 'masterDetailRenderDelegate',
+  
   /**
     @private
     Updates masterIsHidden in child views.
