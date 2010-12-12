@@ -6,6 +6,8 @@
 // ==========================================================================
 
 SC.BaseTheme.workspaceRenderDelegate = SC.Object.create({
+  name: 'workspace',
+  
   render: function() {
     // No DOM to generate -- uses CSS3 to style.
   },
