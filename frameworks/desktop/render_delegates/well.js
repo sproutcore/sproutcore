@@ -9,6 +9,8 @@ SC.BaseTheme.Well = SC.BaseTheme.subtheme('well');
 
 // the 'well'-styled container
 SC.BaseTheme.Well.containerRenderDelegate = SC.Object.create({
+  name: 'container',
+  
   render: function(dataSource, context) {
     context.push("<div class='top-left-edge'></div>",
       "<div class='top-edge'></div>",
