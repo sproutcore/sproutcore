@@ -33,44 +33,9 @@
   text-shadow: 0px 1px 1px white;
   font-size: 12px;
 }
-.sc-theme .sc-view.ace.sc-master-detail-view { background: #333333; }
-.sc-theme .sc-view.ace.sc-master-detail-view.round-toolbars .sc-toolbar-view {
-  -webkit-border-top-left-radius: 10px;
-  -webkit-border-top-right-radius: 10px;
-  -moz-border-radius-topleft: 10px;
-  -moz-border-raidus-topright: 10px;
-}
-.sc-theme .sc-view.ace.sc-master-detail-view > .sc-view { background: #cccccc; }
-.sc-theme .sc-view.ace.sc-master-detail-view > .sc-view {
-  background: -moz-linear-gradient(top, #dddddd, #bbbbbb);
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dddddd), to(#bbbbbb));
-}
-.sc-theme .sc-view.ace.sc-master-detail-view.round-toolbars > .sc-view {
-  -webkit-border-top-left-radius: 10px;
-  -webkit-border-top-right-radius: 10px;
-  -moz-border-radius-topleft: 10px;
-  -moz-border-raidus-topright: 10px;
-}
 .sc-theme .sc-view.ace.sc-split-divider-view {
   background: #555555;
   border: 0px none;
-}
-.sc-theme .sc-view.ace.sc-tab-view { overflow: visible; }
-.sc-theme .sc-view.ace.sc-tab-view > .sc-container-view {
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  border: 1px solid #999999;
-  -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
-  overflow: hidden;
-}
-.sc-theme .sc-view.ace.sc-well-view {
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  border: 1px solid #999999;
-  -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
-  overflow: hidden;
 }
 
 .sc-theme .sc-view.ace.sc-radio-view {
