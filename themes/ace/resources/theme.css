@@ -6,33 +6,6 @@
   font-family: Helvetica, sans-serif;
 }
 .sc-view { font-family: Helvetica, sans-serif; }
-.sc-theme .sc-view.ace.sc-collection-view .sc-collection-item.sel {
-  color: white;
-  background: #608ab9;
-}
-
-.sc-source-list-background { background: #d0dae3; }
-.sc-theme .sc-view.ace.sc-scroll-view.sc-source-list-background .sc-container-view { background: #d0dae3; }
-.sc-theme .sc-view.ace.sc-collection-view.sc-source-list { background: #d0dae3; }
-.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .sc-list-item-view label {
-  top: 50%;
-  margin-top: -9px;
-  font-size: 14px;
-}
-.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .sc-collection-item.sel {
-  background: static_url("images/2.png") repeat-x 0 -616px;
-  border-top: 1px solid #43638d;
-  border-bottom: 1px solid #43638d;
-  color: white;
-  font-weight: bold;
-  text-shadow: 0px 1px 1px black;
-}
-.sc-theme .sc-view.ace.sc-collection-view.sc-source-list .sc-collection-item.sc-group-item {
-  font-weight: bold;
-  color: #4a4a4a;
-  text-shadow: 0px 1px 1px white;
-  font-size: 12px;
-}
 
 .sc-theme .sc-view.ace.sc-radio-view {
   line-height: 18px;

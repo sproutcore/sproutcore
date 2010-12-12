@@ -1,7 +1,0 @@
-/* Overriding some of the styles on checkbox */
-
-.sc-view.sc-list-item-view .sc-checkbox-view {
-  background-color: transparent;
-  border: 0 none;
-  margin-top: -9px;
-}

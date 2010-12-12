@@ -22,12 +22,3 @@ $theme.disclosure {
   }
 }
 
-.sc-list-item-view $theme.disclosure {
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  margin-top: -6px;
-  
-  width: 18px;
-  height: 18px;
-}
