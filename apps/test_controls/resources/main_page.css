@@ -50,5 +50,11 @@
  font-size: 14px;
 }
 
+@theme(dark) {
+  $theme.workspace {
+    background: black;
+  }
+}
+
 /* @end */
 

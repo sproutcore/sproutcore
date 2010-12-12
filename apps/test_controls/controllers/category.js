@@ -27,5 +27,10 @@ TestControls.categoryController = SC.ObjectController.create(
   
   hideMasterPicker: function() {
     TestControls.mainPage.mainPane.split.hideMasterPicker();
-  }
+  },
+  
+  useDarkTheme: NO,
+  themeName: function() {
+    return this.get('useDarkTheme') ? 'dark' : 'ace';
+  }.property('useDarkTheme').cacheable()
 }) ;

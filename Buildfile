@@ -103,6 +103,8 @@ config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
   
 end
 
+config :test_controls, :css_theme => 'ace.test-controls'
+
 config :greenhouse, 
   :required => [:sproutcore, :'sproutcore/designer', :statechart],
   :theme    => :standard_theme
