@@ -1001,19 +1001,7 @@ SC.CollectionView = SC.View.extend(
   },
   
   displayProperties: 'isFirstResponder isEnabled isActive'.w(),
-  
-  /** @private
-    If we're asked to render the receiver view for the first time but the 
-    child views still need to be added, go ahead and add them.
-  */
-  render: function(context, firstTime) {
-    // add classes for other state.
-    context.setClass('focus', this.get('isFirstResponder'));
-    context.setClass('disabled', !this.get('isEnabled'));
-    context.setClass('active', this.get('isActive'));
-
-    return sc_super();
-  },
+  renderDelegateName: 'collectionRenderDelegate',
     
 
   _TMP_ATTRS: {},

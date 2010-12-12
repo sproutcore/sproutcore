@@ -21,6 +21,8 @@ SC.BENCHMARK_SOURCE_LIST_VIEW = YES ;
 */
 SC.SourceListView = SC.ListView.extend(
 /** @scope SC.SourceListView.prototype */ {
+  
+  theme: 'source-list',
 
   /**
     Add class name to HTML for styling.
