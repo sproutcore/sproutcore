@@ -109,6 +109,7 @@ SC.MasterDetailView = SC.View.extend({
   init: function() {
     sc_super();
     this._scmd_frameDidChange();
+    this._scmd_masterIsHiddenDidChange();
   },
   
   /**
