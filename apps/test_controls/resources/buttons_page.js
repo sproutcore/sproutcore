@@ -13,7 +13,7 @@ TestControls.buttonsPage = SC.View.design({
     
     contentView: SC.FormView.design({
       labelWidth: 100,
-      flowPadding: { left: 20, top: 10, bottom: 40, right: 20 },
+      flowPadding: { left: 20, top: 30, bottom: 40, right: 20 },
       classNames: ["sample_controls"],
       childViews: "header style shouldToggle shouldDisable shouldBeDefault shouldBeCancel small normal huge jumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
       header: SC.LabelView.design({
@@ -112,7 +112,8 @@ TestControls.buttonsPage = SC.View.design({
       })),
       
       space: SC.View.design({
-        flowSize: { widthPercentage: 1, height: 24 }
+        isSpacer: YES,
+        fillWidth: YES
       }),
       disclosureHeader: SC.LabelView.design({
         layout: { width: 400, height: 24 },
