@@ -50,6 +50,16 @@ SC.ContentDisplay = {
     this._display_contentDidChange();
   },
 
+  /**
+   * Remove observer on existing content object, if present
+   * @private
+   */
+  destroyMixin: function () {
+    if (!this._display_content) return;
+    this._display_stopObservingContent(this._display_content);
+    this._display_content = null;
+  },
+
   /** @private */
   _display_beginObservingContent: function(content) {
     var f = this._display_contentPropertyDidChange;

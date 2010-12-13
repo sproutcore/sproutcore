@@ -44,4 +44,8 @@ test('should begin observing new content when content changes', function () {
   ok(view.get('layerNeedsUpdate'));
 });
 
-test('should stop observing content when destroyed');
+test('should stop observing content when destroyed', function () {
+  ok(contentA.hasObserverFor('*'));
+  view.destroy();
+  ok(!contentA.hasObserverFor('*'));
+});
