@@ -17,7 +17,9 @@ jQuery.Buffer = (function() {
     If there is already a buffer for the element, returns that. Otherwise, creates a new one.
   */
   Buffer.bufferForElement = function(elem) {
-    if (elem._jquery_buffer) return elem._jquery_buffer;
+    if (elem._jquery_buffer) {
+      return elem._jquery_buffer;
+    }
     return this.bufferFromPool().assign(elem);
   };
 
@@ -36,6 +38,7 @@ jQuery.Buffer = (function() {
   };
 
   Buffer.returnToPool = function(buffer) {
+    buffer.unassign();
     this._pool.push(buffer);
   };
 
@@ -61,7 +64,7 @@ jQuery.Buffer = (function() {
     Assigns an element to a buffer.
   */
   Buffer.prototype.assign = function(elem) {
-    if (!this._el) this.unassign();
+    if (this._el) this.unassign();
 
     this._el = elem;
     this._el._jquery_buffer = this;
@@ -287,21 +290,21 @@ jQuery.Buffer = (function() {
   };
 
   Buffer.prototype.setClass = function(value, on) {
-    var context = this.bufferedCommand("flushClassNames");
+    var context = this.bufferedCommand("flushClassNames"), key;
 
     // if there is no value, that means we are trying to actually _get_ the class names.
     if (value === undefined) {
       if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
 
       var classNames = context.classNames, v = [];
-      for (var key in classNames) if (key && classNames[key]) v.push(key);
+      for (key in classNames) if (key && classNames[key]) v.push(key);
       return v;
     }
 
     // if on is defined
     if (on !== undefined) {
       if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
-      context.classNames[value] = on;
+      context.classNames[value] = on || NO;
       return;
     }
 
@@ -318,7 +321,7 @@ jQuery.Buffer = (function() {
       if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
 
       // loop over class names and set it properly.
-      for (var key in value) {
+      for (key in value) {
         context.classNames[key] = value[key];
       }
     }
