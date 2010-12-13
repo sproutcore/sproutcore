@@ -55,6 +55,7 @@ TestControls.flowLayoutPage = SC.View.design({
         title: "b",
         isHiddenDidChange: function() {
           this.adjust("opacity", this.get("isHidden") ? 0 : 1);
+          this.set('useAbsoluteLayout', this.get('isHidden'));
         }.observes("isHidden")
       }),
       s2: SC.View.design({ isSpacer: YES, spaceUnits: 1, backgroundColor: "gray", layout: {width: 0, height: 24} }),
@@ -73,9 +74,9 @@ TestControls.flowLayoutPage = SC.View.design({
         left: 10, top: 10, right: 10, bottom: 0
       },
       a: SC.ButtonView.design({ flowSpacing: { top: 5, left: 4, right: 3, bottom: 2 }, layout: {width: 150, height: 24}, title: "a" }),
-      s: SC.View.design({ layout: { }, isSpacer: YES, spaceUnits: 2 }),
+      s: SC.View.design({ fillWidth: YES, isSpacer: YES, spaceUnits: 2 }),
       b: SC.ButtonView.design({ layout: {width: 190, height: 24}, title: "b" }),
-      s2: SC.View.design({ layout: { }, isSpacer: YES, spaceUnits: 1 }),
+      s2: SC.View.design({ fillWidth: YES, isSpacer: YES, spaceUnits: 1 }),
       c: SC.ButtonView.design({ layout: {width: 120, height: 24 }, title: "c" }),
       d: SC.ButtonView.design({ layout: {width: 200, height: 24 }, title: "d" })
     }))
