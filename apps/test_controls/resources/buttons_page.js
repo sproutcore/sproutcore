@@ -15,7 +15,7 @@ TestControls.buttonsPage = SC.View.design({
       labelWidth: 100,
       flowPadding: { left: 20, top: 30, bottom: 40, right: 20 },
       classNames: ["sample_controls"],
-      childViews: "header style shouldToggle shouldDisable shouldBeDefault shouldBeCancel small normal huge jumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
+      childViews: "header style flags small normal huge jumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
       header: SC.LabelView.design({
         flowSize: { widthPercentage: 1 },
         layout: {width: 200, height: 24 },
@@ -39,29 +39,35 @@ TestControls.buttonsPage = SC.View.design({
         valueBinding: 'TestControls.buttonsController.theme'
       }),
       
-      shouldToggle: SC.CheckboxView.design({
-        layout: { width: 100, height: 24 },
-        title: "Toggleable",
-        valueBinding: 'TestControls.buttonsController.toggleable'
-      }),
-      
-      shouldDisable: SC.CheckboxView.design({
-        layout: { width: 100, height: 24 },
-        title: "Disable",
-        valueBinding: 'TestControls.buttonsController.disabled'
-      }),
-      
-      shouldBeDefault: SC.CheckboxView.design({
-        layout: { width: 100, height: 24 },
-        title: "Default",
-        valueBinding: 'TestControls.buttonsController.default'
-      }),
-      
-      shouldBeCancel: SC.CheckboxView.design({
-        layout: { width: 100, height: 24 },
-        title: "Cancel",
-        valueBinding: 'TestControls.buttonsController.cancel'
-      }),
+      flags: SC.FormView.row(SC.View.design(SC.FlowedLayout, {
+        childViews: 'shouldToggle shouldDisable shouldBeDefault shouldBeCancel'.w(),
+        
+        isSpacer: YES,
+        
+        shouldToggle: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Toggleable",
+          valueBinding: 'TestControls.buttonsController.toggleable'
+        }),
+
+        shouldDisable: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Disable",
+          valueBinding: 'TestControls.buttonsController.disabled'
+        }),
+
+        shouldBeDefault: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Default",
+          valueBinding: 'TestControls.buttonsController.default'
+        }),
+
+        shouldBeCancel: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Cancel",
+          valueBinding: 'TestControls.buttonsController.cancel'
+        })
+      })),
       
       normal: SC.FormView.row(SC.ButtonView.design({
         controlSize: SC.REGULAR_CONTROL_SIZE,
