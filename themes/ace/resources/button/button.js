@@ -26,11 +26,10 @@ SC.AceTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
-    var minWidth          = dataSource.get('titleMinWidth');
     var labelContent;
     
-    context.setClass('def', dataSource.get('isDefault'));
-    context.setClass('cancel', dataSource.get('isCancel'));
+    context.setClass('def', dataSource.get('isDefault') || 0);
+    context.setClass('cancel', dataSource.get('isCancel') || 0);
     
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
 
@@ -65,8 +64,8 @@ SC.AceTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       jquery.addClass('active');
     }
     
-    jquery.setClass('def', dataSource.get('isDefault'));
-    jquery.setClass('cancel', dataSource.get('isCancel'));
+    jquery.setClass('def', dataSource.get('isDefault') || NO);
+    jquery.setClass('cancel', dataSource.get('isCancel') || NO);
 
     dataSource.get('theme').labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
