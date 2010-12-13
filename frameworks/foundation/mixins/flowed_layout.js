@@ -391,6 +391,10 @@ SC.FlowedLayout = {
     context.css('minHeight', this.get('calculatedHeight'));
   },
   
+  clippingFrame: function() {
+    return { left: 0, top: 0, width: this.get('calculatedWidth'), height: this.get('calculatedHeight') };
+  }.property('calculatedWidth', 'calculatedHeight'),
+  
   _scfl_calculatedSizeDidChange: function() {
     this.$().css('minWidth', this.get('calculatedWidth'));
     this.$().css('minHeight', this.get('calculatedHeight'));
