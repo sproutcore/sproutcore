@@ -209,6 +209,20 @@ test("fooBinding: *extraObject.foo should create locally chained binding", funct
   equals("extraObjectValue", testObject.get("foo"), "testObject.foo") ;
 });
 
+test('fooBinding: should disconnect bindings when destroyed', function () {
+
+  testObject = TestObject.create({
+    fooBinding: "TestNamespace.fromObject.bar"
+  }) ;
+  SC.Binding.flushPendingChanges() ; // actually sets up up the binding
+
+  var binding = testObject.get('fooBinding');
+  
+  ok(binding.isConnected);
+  SC.run(testObject.destroy, testObject);
+  ok(!binding.isConnected);
+});
+
 module("fooBindingDefault: SC.Binding.Bool (old style)", {
   
   setup: function() {
