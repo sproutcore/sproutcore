@@ -2862,11 +2862,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // views with SC.Border mixin applied applied
     if (this.get('hasBorder')) {
-      borderTop = this.get('borderTop');
-      borderLeft = this.get('borderLeft');
-      f.height -= borderTop+this.get('borderBottom');
+      borderTop = this.get('borderTop') || 0;
+      borderLeft = this.get('borderLeft') || 0;
+      f.height -= borderTop+ (this.get('borderBottom') || 0);
       f.y += borderTop;
-      f.width -= borderLeft+this.get('borderRight');
+      f.width -= borderLeft + (this.get('borderRight') || 0);
       f.x += borderLeft;
     }
 
