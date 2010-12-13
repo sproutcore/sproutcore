@@ -203,9 +203,9 @@ SC.FlowedLayout = {
     This should return a structure like: { width: whatever, height: whatever }
   */
   flowSizeForView: function(idx, view) {
-    var cw = view.get("calculatedWidth"), ch = view.get("calculatedHeight");
+    var cw = view.get('calculatedWidth'), ch = view.get('calculatedHeight');
     
-    var calc = {}, f = view.get("frame");
+    var calc = {}, f = view.get('frame');
     view._scfl_lastFrame = f;
     
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
@@ -232,12 +232,10 @@ SC.FlowedLayout = {
     
     // if it has a fillWidth/Height, clear it for later
     if (
-      !this.get('canWrap') && 
       this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')
     ) {
       calc.height = 0;
     } else if (
-      !this.get('canWrap') &&
       this.get('layoutDirection') === SC.LAYOUT_VERTICAL && view.get('fillWidth')
     ) {
       calc.width = 0;
@@ -291,8 +289,13 @@ SC.FlowedLayout = {
     else x = rowOffset;
     
     // handle align
-    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) x = (availableRowLength - rowLength);
-    else if (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE) x = (availableRowLength - rowLength) / 2;
+    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) {
+      if (primary === 'left') x = (availableRowLength - rowLength - padding.right);
+      else y = (availableRowLength - rowLength - padding.bottom);
+    } else if (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE) {
+      if (primary === 'left') x = (availableRowLength - padding.top - padding.bottom) / 2 - rowLength / 2;
+      else y = (availableRowLength - padding.top - padding.bottom) / 2 - rowLength / 2;
+    }
     
     // position
     for (idx = 0; idx < len; idx++) {
@@ -307,10 +310,10 @@ SC.FlowedLayout = {
       // Since we still position with spacing, we have to set the width to the total row
       // size minus the spacing. The spaced size holds only the spacing because the
       // flow size method returns 0.
-      if (!this.get('canWrap') && item.get("fillHeight") && primary === "left") {
+      if (item.get("fillHeight") && primary === "left") {
         height = rowSize - item._scfl_cachedSpacedSize.height;
       }
-      if (!this.get('canWrap') && item.get("fillWidth") && primary === "top") {
+      if (item.get("fillWidth") && primary === "top") {
         width = rowSize - item._scfl_cachedSpacedSize.width;
       }
       
@@ -344,7 +347,10 @@ SC.FlowedLayout = {
       else y += itemSize;
       
       // update justification
-      if (align === SC.ALIGN_JUSTIFY) x += spacePerUnit;
+      if (align === SC.ALIGN_JUSTIFY) {
+        if (primary === 'left') x += spacePerUnit;
+        else y += spacePerUnit;
+      }
     }
     
     if (primary === 'left') return x;
