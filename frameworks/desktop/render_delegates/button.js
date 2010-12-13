@@ -9,6 +9,8 @@
   Renders and updates the HTML representation of SC.ButtonView.
 */
 SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
+  name: 'button',
+  
   /**
     Called when we need to create the HTML that represents the button.
 
@@ -20,8 +22,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     var minWidth          = dataSource.get('titleMinWidth');
     var labelContent;
     
-    context.setClass('def', dataSource.get('isDefault'));
-    context.setClass('cancel', dataSource.get('isCancel'));
+    context.setClass('def', dataSource.get('isDefault') || 0);
+    context.setClass('cancel', dataSource.get('isCancel') || 0);
 
     // Add an icon class name to the button if it contains an icon in its
     // title.
@@ -59,12 +61,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     var theme = dataSource.get('theme');
     
-    if (dataSource.get('isActive')) {
-      jquery.addClass('active');
-    }
-    
-    jquery.setClass('def', dataSource.get('isDefault'));
-    jquery.setClass('cancel', dataSource.get('isCancel'));
+    if (dataSource.get('isActive')) jquery.addClass('active');
+    if (dataSource.get('isDefault')) jquery.addClass('default');
+    if (dataSource.get('isCancel')) jquery.addClass('cancel');
 
     theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
