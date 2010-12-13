@@ -1319,14 +1319,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
-    @private
+    [RO] Pass this object as the data source for render delegates. This proxy object
+    for the view relays requests for properties like 'title' to 'displayTitle'
+    as necessary. 
+    
+    If you ever communicate with your view's render delegate, you should pass this 
+    object as the data source.
+    
     The proxy that forwards RenderDelegate requests for properties to the view,
     handling display*, keeps track of the delegate's state, etc.
-    
-    Dependent on the render delegate because, when the render delegate changes,
-    any the state hash must be invalidated as well.
   */
-  _renderDelegateProxy: function() {
+  renderDelegateProxy: function() {
     return SC.View._RenderDelegateProxy.createForView(this);
   }.property('renderDelegate').cacheable(),
 
@@ -1564,9 +1567,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     if (renderDelegate) {
       if (firstTime) {
-        renderDelegate.render(this.get('_renderDelegateProxy'), context);
+        renderDelegate.render(this.get('renderDelegateProxy'), context);
       } else {
-        renderDelegate.update(this.get('_renderDelegateProxy'), context.$());
+        renderDelegate.update(this.get('renderDelegateProxy'), context.$());
       }
     }
 
