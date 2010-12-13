@@ -10,33 +10,31 @@
   SC.SegmentedView.
 */
 SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
-
+  name: 'segment',
+  
   render: function(dataSource, context) {
-    var displayProperties = dataSource.getDisplayProperties(), // Properties of the data source that affect the rendered output
-    theme = dataSource.get('theme'),
-    buttonDelegate,
-    classes;
+    var theme = dataSource.get('theme'),
+        buttonDelegate,
+        classes;
 
     // Segment specific additions
     classes = {
       'sc-segment': YES,
-      'sc-first-segment': displayProperties.isFirstSegment,
-      'sc-middle-segment': displayProperties.isMiddleSegment,
-      'sc-last-segment': displayProperties.isLastSegment,
-      'sc-overflow-segment': displayProperties.isOverflowSegment
+      'sc-first-segment': dataSource.get('isFirstSegment'),
+      'sc-middle-segment': dataSource.get('isMiddleSegment'),
+      'sc-last-segment': dataSource.get('isLastSegment'),
+      'sc-overflow-segment': dataSource.get('isOverflowSegment')
     };
-    classes['sc-segment-' + displayProperties.index] = YES;
+    classes['sc-segment-' + dataSource.get('index')] = YES;
     context.setClass(classes);
 
     // Use the SC.ButtonView render delegate for the current theme to render the segment as a button
-    buttonDelegate = theme['buttonRenderDelegate'];
+    buttonDelegate = theme.buttonRenderDelegate;
     buttonDelegate.render(dataSource, context);
   },
 
   update: function(dataSource, jquery) {
-    var displayProperties = dataSource.getDisplayProperties(),
-        changedDisplayProperties = dataSource.getChangedDisplayProperties(),
-        theme = dataSource.get('theme'),
+    var theme = dataSource.get('theme'),
         buttonDelegate,
         titleMinWidth,
         classes = {};
@@ -56,27 +54,17 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     // 2. So just re-assign them (even if unchanged)
     classes = {
       'sc-segment': YES,
-      'sc-first-segment': displayProperties.isFirstSegment,
-      'sc-middle-segment': displayProperties.isMiddleSegment,
-      'sc-last-segment': displayProperties.isLastSegment,
-      'sc-overflow-segment': displayProperties.isOverflowSegment
+      'sc-first-segment': dataSource.get('isFirstSegment'),
+      'sc-middle-segment': dataSource.get('isMiddleSegment'),
+      'sc-last-segment': dataSource.get('isLastSegment'),
+      'sc-overflow-segment': dataSource.get('isOverflowSegment') || NO
     };
-    classes['sc-segment-' + displayProperties.index] = YES;
+    classes['sc-segment-' + dataSource.get('index')] = YES;
     jquery.setClass(classes);
     
     // Use the SC.ButtonView render delegate for the current theme to update the segment as a button
     buttonDelegate = theme['buttonRenderDelegate'];
-    
-    // 1. This should be the proper way to do it, but getChangedDisplayProperties() when called in the button delegate will show no changes
-    // buttonDelegate.update(originalDataSource, jquery);
-    // 2. So do it ourselves
-    if (changedDisplayProperties.contains('titleMinWidth')) {
-      titleMinWidth = (displayProperties.titleMinWidth ? displayProperties.titleMinWidth + "px" : null);
-      jquery.find('.sc-button-inner').css('min-width', titleMinWidth);
-    }
-    if (changedDisplayProperties.contains('title', 'isActive')) {
-      jquery.find('label').html(buttonDelegate._htmlForTitleAndIcon(displayProperties));
-    }
+    buttonDelegate.update(dataSource, jquery);
   }
 
 });

@@ -9,6 +9,7 @@
   Renders and updates the HTML representation of SC.SegmentedView.
 */
 SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
+  name: 'segmented',
   
   /*
     We render everything external to the segments and let each segment use it's own render
@@ -16,18 +17,12 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
     
     */
   render: function(dataSource, context) {  
-    var displayProperties = dataSource.getDisplayProperties();
-    
     // Use text-align to align the segments
-    context.addStyle('text-align', displayProperties.align);
+    context.addStyle('text-align', dataSource.get('align'));
   },
   
   update: function(dataSource, jquery) {
-    var changedDisplayProperties = dataSource.getChangedDisplayProperties();
-    
-    if (changedDisplayProperties.contains('align')) {
-      jquery.css('text-align', changedDisplayProperties.align);
-    }
+    jquery.css('text-align', dataSource.get('align'));
   },
   
   /**

@@ -198,7 +198,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     */
   itemsDidChange: function() {
-    var items = this.get('items'),
+    var items = this.get('items') || [],
         item,
         localItem,                        // Used to avoid altering the original items
         childViews = this.get('childViews'),
@@ -529,7 +529,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // if mouse was down, hide active index
     if (this._isMouseDown) {
       activeChildView = this.activeChildView;
-      activeChildView.set('isActive', NO);
+      if (activeChildView) activeChildView.set('isActive', NO);
         
       this.activeChildView = null;
     }
