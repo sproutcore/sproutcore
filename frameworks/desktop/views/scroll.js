@@ -134,15 +134,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     @property {Number}
   */
   maximumHorizontalScrollOffset: function() {
-    var view = this.get('contentView'),
-        contentWidth = 0, calculatedWidth = 0;
-        
-    if (view && view.get('frame')) contentWidth = view.get('frame').width;
-    if (view) calculatedWidth = view.calculatedWidth || 0;
+    var view = this.get('contentView') ;
+    var contentWidth = view ? view.get('frame').width : 0,
+        calculatedWidth = view ? view.get('calculatedWidth') : 0;
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view && view.calculatedWidth && view.calculatedWidth!==0){
+    if (calculatedWidth) {
       contentWidth = view.calculatedWidth; 
     }
     contentWidth *= this._scale;
@@ -164,15 +162,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   maximumVerticalScrollOffset: function() {
     var view = this.get('contentView'),
-        contentHeight = 0, calculatedHeight = 0;
-        
-    if (view && view.get('frame')) contentHeight = view.get('frame').height;
-    if (view) calculatedHeight = view.calculatedHeight || 0;
+        contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
+        calculatedHeight = view ? view.get('calculatedHeight') : 0;
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view && view.calculatedHeight && view.calculatedHeight!==0){
-      contentHeight = view.calculatedHeight; 
+    if(calculatedHeight){
+      contentHeight = calculatedHeight; 
     }
     contentHeight *= this._scale;
     
@@ -194,12 +190,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   minimumHorizontalScrollOffset: function() {
     var view = this.get('contentView') ;
-    var contentWidth = view ? view.get('frame').width : 0 ;
-    
+    var contentWidth = view ? view.get('frame').width : 0,
+        calculatedWidth = view ? view.get('calculatedWidth') : 0;
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view && view.calculatedWidth && view.calculatedWidth!==0){
-      contentWidth = view.calculatedWidth; 
+    if(calculatedWidth){
+      contentWidth = calculatedWidth; 
     }
     contentWidth *= this._scale;
     
@@ -220,11 +216,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   minimumVerticalScrollOffset: function() {
     var view = this.get('contentView') ;
-    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0 ;
+    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
+        calculatedHeight = view ? view.get('calculatedHeight') : 0;
     
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(view && view.calculatedHeight && view.calculatedHeight!==0){
+    if(calculatedHeight){
       contentHeight = view.calculatedHeight; 
     }
     contentHeight *= this._scale;
@@ -1585,7 +1582,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var contentView = this._scroll_contentView ;
 
     if (contentView) {
-      contentView.addObserver('frame', this, this.contentViewFrameDidChange) ;
+      contentView.addObserver('frame', this, this.contentViewFrameDidChange);
+      contentView.addObserver('calculatedWidth', this, this.contentViewFrameDidChange);
+      contentView.addObserver('calculatedHeight', this, this.contentViewFrameDidChange);
     }
 
     if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll() ;
@@ -1611,6 +1610,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       
       // stop observing old content view
       if (oldView) {
+        oldView.removeObserver('calculatedWidth', this, this.contentViewFrameDidChange);
+        oldView.removeObserver('calculatedHeight', this, this.contentViewFrameDidChange);
         oldView.removeObserver('frame', this, frameObserver);
         oldView.removeObserver('layer', this, layerObserver);
       }
@@ -1619,6 +1620,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_contentView = newView;
       if (newView) {
         newView.addObserver('frame', this, frameObserver);
+        newView.addObserver('calculatedWidth', this, this.contentViewFrameDidChange);
+        newView.addObserver('calculatedHeight', this, this.contentViewFrameDidChange);
         newView.addObserver('layer', this, layerObserver);
       }
       
@@ -1662,6 +1665,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         width  = (f) ? f.width  * scale : 0,
         height = (f) ? f.height * scale : 0,
         dim, dimWidth, dimHeight;
+    
+    width = view.get('calculatedWidth') || f.width || 0;
+    height = view.get('calculatedHeight') || f.height || 0;
+    
+    width *= scale;
+    height *= scale;
     
     // cache out scroll settings...
     if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
