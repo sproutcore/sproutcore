@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('render_delegates/render_delegate');
-
 SC.THREE_SLICE = ['left', 'middle', 'right'];
 
 SC.NINE_SLICE = [
