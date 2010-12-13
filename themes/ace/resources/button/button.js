@@ -16,7 +16,7 @@ SC.AceTheme.Capsule = SC.AceTheme.subtheme("capsule", "capsule");
 /**
   Renders and updates the HTML representation of SC.ButtonView.
 */
-SC.AceTheme.buttonRenderDelegate = SC.Object.create({
+SC.AceTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   name: 'button',
   
   /**
@@ -32,7 +32,7 @@ SC.AceTheme.buttonRenderDelegate = SC.Object.create({
     context.setClass('def', dataSource.get('isDefault'));
     context.setClass('cancel', dataSource.get('isCancel'));
     
-    dataSource.get('theme').slicesRenderDelegate.render(SC.THREE_SLICE, context);
+    this.includeSlices(dataSource, context, SC.THREE_SLICE);
 
     // Add an icon class name to the button if it contains an icon in its
     // title.

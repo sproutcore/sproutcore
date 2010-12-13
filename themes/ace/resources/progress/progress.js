@@ -24,7 +24,7 @@ sc_require("theme");
   Ace's progressRenderDelegate's rendering process is not affected by 
   any theme constants.
 */
-SC.AceTheme.progressRenderDelegate = {
+SC.AceTheme.progressRenderDelegate = SC.RenderDelegate.create({
   name: 'progress',
   
   render: function(dataSource, context) {
@@ -46,12 +46,12 @@ SC.AceTheme.progressRenderDelegate = {
     });
     
     context = context.begin('div').addClass('track');
-    theme.slicesRenderDelegate.render(SC.THREE_SLICE, context);
+    this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
     
     context = context.begin('div').addClass('content');
     context.css('width', (value * 100) + "%");
-    theme.slicesRenderDelegate.render(SC.THREE_SLICE, context);
+    this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
   },
   
@@ -75,4 +75,4 @@ SC.AceTheme.progressRenderDelegate = {
     
     $.find('.content').css('width', (value * 100) + "%");
   }
-};
+});

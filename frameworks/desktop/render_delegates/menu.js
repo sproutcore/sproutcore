@@ -4,12 +4,13 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
+
 sc_require('render_delegates/panel');
 
 // because render delegates are instances and therefore not, currently,
 // subclassable, this is line-for-line the same render delegate as pickerRenderDelegate.
 // this is obviously not optimal.
-SC.BaseTheme.menuRenderDelegate = SC.Object.create({
+SC.BaseTheme.menuRenderDelegate = SC.RenderDelegate.create({
   name: 'menu',
   
   render: function(dataSource, context) {

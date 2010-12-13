@@ -16,7 +16,7 @@
   - frame: containing the frame in which the slider is being drawn.
 */
 
-SC.BaseTheme.sliderRenderDelegate = SC.Object.create({
+SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   
   name: 'slider',
   

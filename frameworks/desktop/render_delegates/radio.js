@@ -25,7 +25,7 @@
   - labelRenderDelegate properties
   
 */
-SC.BaseTheme.radioRenderDelegate = SC.Object.create({
+SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
   name: 'radio',
   
   render: function(dataSource, context) {

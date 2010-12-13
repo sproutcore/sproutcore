@@ -25,7 +25,7 @@
   Optional parameters include all parameters for the labelRenderDelegate.
   
 */
-SC.BaseTheme.checkboxRenderDelegate = SC.Object.create({
+SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
   name: 'checkbox',
   
   render: function(dataSource, context) {

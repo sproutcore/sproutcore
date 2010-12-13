@@ -5,14 +5,13 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.toolbarRenderDelegate = SC.RenderDelegate.create({
-  name: 'toolbar',
-
-  render: function(dataSource, context) {
-    // toolbar has nothing in it
-  },
+/**
+  @class
+  Base class for all render delegates.
   
-  update: function() {
-    // toolbar has nothing to update
-  }
+  You can mix helpers into this base class; they will be available to all
+  render delegates.
+*/
+SC.RenderDelegate = SC.Object.extend({
+  
 });

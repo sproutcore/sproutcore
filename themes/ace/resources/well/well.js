@@ -7,7 +7,7 @@
 
 SC.AceTheme.Well = SC.AceTheme.subtheme('well');
 
-SC.AceTheme.Well.containerRenderDelegate = SC.Object.create({
+SC.AceTheme.Well.containerRenderDelegate = SC.RenderDelegate.create({
   name: 'container',
   render: function(dataSource, context) {
     

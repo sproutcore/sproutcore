@@ -16,7 +16,7 @@
   - frame: containing the frame in which the slider is being drawn.
 */
 
-SC.AceTheme.sliderRenderDelegate = SC.Object.create({
+SC.AceTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   
   name: 'slider',
   
@@ -24,7 +24,7 @@ SC.AceTheme.sliderRenderDelegate = SC.Object.create({
     var blankImage = SC.BLANK_IMAGE_URL;
     
     context = context.begin('span').addClass('track');
-    dataSource.get('theme').slicesRenderDelegate.render(SC.THREE_SLICE, context);
+    this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
     
     context.push(

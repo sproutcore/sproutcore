@@ -14,7 +14,7 @@
  */
 SC.BaseTheme.MASTER_DETAIL_DIVIDER_WIDTH = 1;
 
-SC.BaseTheme.masterDetailRenderDelegate = SC.Object.create({
+SC.BaseTheme.masterDetailRenderDelegate = SC.RenderDelegate.create({
   name: 'master-detail',
   
   render: function(dataSource, context) {

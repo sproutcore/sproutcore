@@ -5,12 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.AceTheme.panelRenderDelegate = SC.Object.create({
+SC.AceTheme.panelRenderDelegate = SC.RenderDelegate.create({
   name: 'panel',
   
   render: function(dataSource, context) {
     context = context.begin('div').addClass('panel-background');
-    dataSource.get('theme').slicesRenderDelegate.render(SC.NINE_SLICE, context);
+    this.includeSlices(dataSource, context, SC.NINE_SLICE);
     context = context.end();
   },
   

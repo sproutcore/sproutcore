@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.disclosureRenderDelegate = SC.Object.create({
+SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   name: 'disclosure',
   
   render: function(dataSource, context) {

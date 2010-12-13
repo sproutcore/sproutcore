@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.AceTheme.Popover.workspaceRenderDelegate = SC.Object.create({
+SC.AceTheme.Popover.workspaceRenderDelegate = SC.RenderDelegate.create({
   name: 'workspace',
   render: function(dataSource, context) {
     context.setClass({
@@ -14,7 +14,7 @@ SC.AceTheme.Popover.workspaceRenderDelegate = SC.Object.create({
     });
     
     context = context.begin('div').addClass('popover-background');
-    dataSource.get('theme').slicesRenderDelegate.render(SC.NINE_SLICE, context);
+    this.includeSlices(dataSource, context, SC.NINE_SLICE);
     context.push("<div class = 'sc-pointer'></div>");
     context = context.end();
   },

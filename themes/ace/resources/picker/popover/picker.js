@@ -6,7 +6,7 @@
 // ==========================================================================
 sc_require("resources/picker/popover/popover");
 
-SC.AceTheme.Popover.pickerRenderDelegate = SC.Object.create({
+SC.AceTheme.Popover.pickerRenderDelegate = SC.RenderDelegate.create({
   name: 'picker',
   
   render: function(dataSource, context) {

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.panelRenderDelegate = SC.Object.create({
+SC.BaseTheme.panelRenderDelegate = SC.RenderDelegate.create({
   name: 'panel',
 
   render: function(dataSource, context) {

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.containerRenderDelegate = SC.Object.create({
+SC.BaseTheme.containerRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
 
   },

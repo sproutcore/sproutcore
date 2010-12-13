@@ -8,7 +8,7 @@
 /**
   Renders and updates the HTML representation of SC.ButtonView.
 */
-SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
+SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   /**
     Called when we need to create the HTML that represents the button.
 

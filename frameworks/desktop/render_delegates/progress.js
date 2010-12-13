@@ -40,7 +40,7 @@ SC.BaseTheme.PROGRESS_OFFSET_RANGE = 24;
     Should be the same as width of image. Default it to 24.
   
 */
-SC.BaseTheme.progressRenderDelegate = {
+SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var theme = dataSource.get('theme');
     
@@ -171,4 +171,4 @@ SC.BaseTheme.progressRenderDelegate = {
     }
     return classNameArray.join(" ");
   }
-};
+});

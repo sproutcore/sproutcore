@@ -25,7 +25,7 @@
   Also, as it would be low-performance to update any but the changed radio
   button, there is a method to update a specific index.
 */
-SC.BaseTheme.radioGroupRenderDelegate = SC.Object.create({
+SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
   name: 'radio-group',
   
   render: function(dataSource, context) {

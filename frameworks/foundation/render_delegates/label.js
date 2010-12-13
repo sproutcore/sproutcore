@@ -1,5 +1,7 @@
 sc_require('render_delegates/renderer');
 
+sc_require('render_delegates/render_delegate');
+
 /**
   @class
   Renders and updates DOM representations of a label.
@@ -27,7 +29,7 @@ sc_require('render_delegates/renderer');
     if the title is too long.
 */
 
-SC.BaseTheme.labelRenderDelegate = SC.Object.create({
+SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   name: 'label',
   
   render: function(dataSource, context) {
