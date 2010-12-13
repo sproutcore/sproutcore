@@ -1,38 +1,3 @@
-.sc-theme .sc-view.ace.sc-radio-view {
-  line-height: 18px;
-  vertical-align: middle;
-}
-.sc-theme .sc-view.ace.sc-radio-view .sc-radio-button {
-  position: relative;
-  display: block;
-  height: 18px;
-  padding-left: 20px;
-  margin-bottom: 3px;
-}
-.sc-theme .sc-view.ace.sc-radio-view.sc-layout-horizontal .sc-radio-button {
-  display: inline-block;
-  -moz-display: inline-block;
-  margin-right: 14px;
-}
-.sc-theme .sc-view.ace.sc-radio-view .sc-button-label { line-height: 18px; }
-.sc-theme .sc-view.ace.sc-radio-view span.button {
-  background: static_url("images/1.png") no-repeat 0 -490px;
-  width: 16px;
-  height: 16px;
-  vertical-align: middle;
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  margin: 0px;
-}
-.sc-theme .sc-view.ace.sc-radio-view input { visibility: hidden; }
-.sc-theme .sc-view.ace.sc-radio-view .sel span.button { background: static_url("images/1.png") no-repeat -16px -490px; }
-.sc-theme .sc-view.ace.sc-radio-view .mixed span.button { background: static_url("images/1.png") no-repeat 0 -506px; }
-.sc-theme .sc-view.ace.sc-radio-view .active span.button { background: static_url("images/1.png") no-repeat -32px -490px; }
-.sc-theme .sc-view.ace.sc-radio-view .sel.active span.button { background: static_url("images/1.png") no-repeat -80px -490px; }
-.sc-theme .sc-view.ace.sc-radio-view .mixed.active span.button { background: static_url("images/1.png") no-repeat -64px -490px; }
-.sc-theme .sc-view.ace.sc-radio-view.disabled { opacity: 0.5; }
-
 .sc-theme .sc-view.ace.sc-small-size.sc-segmented-view .sc-segment { height: 18px; }
 .sc-theme .sc-view.ace.sc-small-size.sc-segmented-view .sc-segment .button-left {
   width: 8px;
