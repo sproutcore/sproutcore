@@ -22,12 +22,10 @@ SC.ALIGN_JUSTIFY = "justify";
   
   These properties are observed through `#js:observeChildLayout` and `#js:unobserveChildLayout`;
   you can override the method to add your own properties. To customize isVisible behavior,
-  you will also want to override shouldIncludeChildView.
+  you will also want to override shouldIncludeChildInFlow.
   
-  
-  If flowSize is implemented but specifies widthPercent and heightPercent, the width and height
-  will be calculated based on padding-adjusted size; values not specified in flowSize will always
-  be taken from the flowed view's frame (calculatedWidth/Height ignored).
+  This relies on the children's frames or, if specified, calculatedWidth and calculatedHeight
+  properties.
   
   This view mixes very well with animation. Further, it is able to automatically mix
   in to child views it manages, created or not yet created, allowing you to specify
@@ -68,11 +66,17 @@ SC.FlowedLayout = {
   defaultFlowSpacing: { left: 0, bottom: 0, top: 0, right: 0 },
   
   /**
-    Padding around the edges of this flow layout view.
+    @property {Hash}
+    
+    Padding around the edges of this flow layout view. This is useful for
+    situations where you don't control the layout of the FlowedLayout view;
+    for instance, when the view is the contentView for a SC.ScrollView.
   */
   flowPadding: { left: 0, bottom: 0, right: 0, top: 0 },
 
   /**
+    @private
+    
     If the flowPadding somehow misses a property (one of the sides),
     we need to make sure a default value of 0 is still there.
    */
@@ -107,16 +111,27 @@ SC.FlowedLayout = {
     since our last record of it.
   */
   layoutDidChangeFor: function(c) {
-    // if it is absolute layout (no flowing) then we need to let SC.View handle it
-    if (c.get("useAbsoluteLayout")) return sc_super();
-    
     // if we have not flowed yet, ignore as well
     if (!this._scfl_itemLayouts) return sc_super();
     
     // now, check if anything has changed
-    var l = this._scfl_itemLayouts[SC.guidFor(c)];
+    var l = this._scfl_itemLayouts[SC.guidFor(c)], cl = c.get('layout'), f = c.get('frame');
     if (!l) return sc_super();
-    if (c.layout.width === l.width && c.layout.height === l.height) return sc_super();
+    
+    var same = YES;
+    
+    // in short, if anything interfered with the layout, we need to
+    // do something about it.
+    if (l.left && l.left !== cl.left) same = NO;
+    else if (l.top && l.top !== cl.top) same = NO;
+    else if (!c.get('fillWidth') && l.width && l.width !== cl.width) same = NO;
+    else if (!l.width && !c.get('fillWidth') && f.width !== c._scfl_lastFrame.width) same = NO;
+    else if (!c.get('fillHeight') && l.height && l.height !== cl.height) same = NO;
+    else if (!l.height && !c.get('fillHeight') && f.height !== c._scfl_lastFrame.height) same = NO;
+    
+    if (same) {
+      return sc_super();
+    }
     
     // nothing has changed. This is where we do something
     this.invokeOnce("_scfl_tile");
@@ -135,7 +150,7 @@ SC.FlowedLayout = {
     if (c._scfl_isBeingObserved) return;
     c._scfl_isBeingObserved = YES;
     c.addObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('isHidden', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
   },
@@ -146,17 +161,17 @@ SC.FlowedLayout = {
   unobserveChildLayout: function(c) {
     c._scfl_isBeingObserved = NO;
     c.removeObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('isHidden', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
   },
   
   /**
     Determines whether the specified child view should be included in the flow layout.
-    By default, if it has isVisible: NO or isHidden: YES, it will not be included.
+    By default, if it has isVisible: NO or useAbsoluteLayout: YES, it will not be included.
   */
-  shouldIncludeChild: function(c) {
-    return c.get("isVisible") && !c.get("isHidden");
+  shouldIncludeChildInFlow: function(c) {
+    return c.get('isVisible') && !c.get('useAbsoluteLayout');
   },
   
   /**
@@ -164,76 +179,70 @@ SC.FlowedLayout = {
     and if they don't exist, the defaultFlowSpacing for this view.
   */
   flowSpacingForView: function(idx, view) {
-    if (view.get("isSpacer")) return {left:0,top:0,right:0,bottom:0};
-    var fm = view.get("flowSpacing");
-    if (!SC.none(fm)) return fm;
-    return this.get("defaultFlowSpacing");
+    var spacing = view.get("flowSpacing");
+    if (SC.none(spacing)) spacing = this.get("defaultFlowSpacing");
+    
+    if (SC.typeOf(spacing) === SC.T_NUMBER) {
+      spacing = { left: spacing, right: spacing, bottom: spacing, top: spacing };
+    } else {
+      spacing['left'] = spacing['left'] || 0;
+      spacing['right'] = spacing['right'] || 0;
+      spacing['top'] = spacing['top'] || 0;
+      spacing['bottom'] = spacing['bottom'] || 0;
+    }
+    
+    return spacing;
   },
   
   /**
-    Returns the flow size for a given view. The default version checks the view's flowSize,
-    then calculatedWidth/Height, then frame.
+    Returns the flow size for a given view. The default version checks the view's
+    calculatedWidth/Height, then its frame.
+    
+    For spacers, this returns an empty size.
     
     This should return a structure like: { width: whatever, height: whatever }
   */
   flowSizeForView: function(idx, view) {
-    // first try flowSize
-    var fs = SC.clone(view.get("flowSize"));
-    if (!SC.none(fs)) {
-      // if we have a flow size, adjust for a) width/heightPercentage and b) missing params.
-      var frame = this.get("frame"), padding = this.get('_scfl_validFlowPadding'), 
-          spacing = this.flowSpacingForView(idx, view);
-      
-      // you can't set it w/percentage for the expand direction
-      var expandsHorizontal = (this.get("layoutDirection") === SC.LAYOUT_HORIZONTAL && !this.get("canWrap")) ||
-        (this.get("layoutDirection") === SC.LAYOUT_VERTICAL && this.get("canWrap"));
-      
-      if (!SC.none(fs.widthPercentage) && !expandsHorizontal) {
-        fs.width = (frame.width - padding.left - padding.right) * fs.widthPercentage - spacing.left - spacing.right;
-      }
-      if (!SC.none(fs.heightPercentage) && expandsHorizontal) {
-        fs.height = (frame.height - padding.top - padding.bottom) * fs.heightPercentage - spacing.top - spacing.bottom;
-      }
-      if (SC.none(fs.width)) fs.width = view.get("frame").width;
-      if (SC.none(fs.height)) fs.height = view.get("frame").height;
-      if(fs.width < 0 || fs.height < 0) throw "error calculating frame for row";
-      return fs;
-    }
-    
-    // then calculated size
     var cw = view.get("calculatedWidth"), ch = view.get("calculatedHeight");
     
     var calc = {}, f = view.get("frame");
+    view._scfl_lastFrame = f;
+    
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
-    // it is invalid.
+    // it is invalid. This is the practice in other views.
     if (cw) {
       calc.width = cw;
     } else {
-      // if the width is not calculated, we can't just use the frame because
-      // we may have altered the frame. _scfl_cachedFlowSize is valid, however,
-      // if the frame width is equal to _scfl_cachedCalculatedFlowSize.width, as 
-      // that means the width has not been recomputed.
-      //
-      // Keep in mind that if we are the ones who recomputed it, we can use our
-      // original value. If it was recomputed by the view itself, then its value
-      // should be ok and unmanipulated by us, in theory.
-      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.width == f.width) {
-        calc.width = view._scfl_cachedFlowSize.width
-      } else {
-        calc.width = f.width;
-      }
+      calc.width = f.width;
     }
     
     // same for calculated height
     if (ch) {
       calc.height = ch;
     } else {
-      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.height == f.height) {
-        calc.height = view._scfl_cachedFlowSize.height
-      } else {
-        calc.height = f.height;
-      }
+      calc.height = f.height;
     }
+    
+    // if it is a spacer, we must set the dimension that it
+    // expands in to 0.
+    if (view.get('isSpacer')) {
+      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) calc.width = 0;
+      else calc.height = 0;
+    }
+    
+    // if it has a fillWidth/Height, clear it for later
+    if (
+      !this.get('canWrap') && 
+      this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')
+    ) {
+      calc.height = 0;
+    } else if (
+      !this.get('canWrap') &&
+      this.get('layoutDirection') === SC.LAYOUT_VERTICAL && view.get('fillWidth')
+    ) {
+      calc.width = 0;
+    }
+    
     // return
     return calc;
   },
@@ -242,13 +251,18 @@ SC.FlowedLayout = {
     Takes a row and positions everything within the row, calling updateLayout.
     It should return the row height.
   */
-  flowRow: function(row, rowSpace, padding, rowOffset, rowSize, primary, secondary, align) {
-    rowOffset += padding[secondary];
+  flowRow: function(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align) {
     
-    // if it is justified, we'll add padding between ALL views.
+    // we deal with values already offset for padding
+    // therefore, we must adjust availableRowLength
+    if (primary === 'left') availableRowLength -= padding['left'] + padding['right'];
+    else availableRowLength -= padding['top'] + padding['bottom'];
+    
+    // if it is justified, we'll add spacing between ALL views.
     var item, len = row.length, idx, layout, rowLength = 0, totalSpaceUnits = 0, spacePerUnit = 0;
     
     // first, determine the width of all items, and find out how many virtual spacers there are
+    // this width includes spacing
     for (idx = 0; idx < len; idx++) {
       item = row[idx];
       if (item.get("isSpacer")) totalSpaceUnits += item.get("spaceUnits") || 1;
@@ -256,95 +270,125 @@ SC.FlowedLayout = {
     }
     
     // add space units for justification
+    // when justifying, we give one space unit between each item
     if (len > 1 && align === SC.ALIGN_JUSTIFY) {
       totalSpaceUnits += len - 1;
     }
     
     // calculate space per unit if needed
     if (totalSpaceUnits > 0) {
-      spacePerUnit = (rowSpace - rowLength) / totalSpaceUnits;
-      rowLength = rowSpace;
+      spacePerUnit = (availableRowLength - rowLength) / totalSpaceUnits;
+      rowLength = availableRowLength;
     }
     
-    // prepare
-    var x, y, itemOffset = 0;
+    // prepare.
+    // we will setup x, y
+    // we _may_ set up width and/or height, if the view is a spacer or has
+    // fillHeight/fillWidth.
+    var x = padding['left'], y = padding['top'], width, height, itemSize = 0;
+    
+    if (primary === 'left') y = rowOffset;
+    else x = rowOffset;
     
     // handle align
-    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) itemOffset = (rowSpace - rowLength);
-    else if (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE) itemOffset = (rowSpace - rowLength) / 2;
+    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) x = (availableRowLength - rowLength);
+    else if (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE) x = (availableRowLength - rowLength) / 2;
     
     // position
     for (idx = 0; idx < len; idx++) {
       item = row[idx];
       
-      // now update flow position
-      if (primary == "left") {
-        x = itemOffset + padding.left;
-        y = rowOffset + padding.top;
-      } else {
-        x = rowOffset + padding.left;
-        y = itemOffset + padding.top;
+      width = undefined; height = undefined;
+      
+      // sometimes a view wants to fill the row; that is, if we flow horizontally,
+      // be the full height, and vertically, fill the width. This only applies if
+      // we are not wrapping...
+      //
+      // Since we still position with spacing, we have to set the width to the total row
+      // size minus the spacing. The spaced size holds only the spacing because the
+      // flow size method returns 0.
+      if (!this.get('canWrap') && item.get("fillHeight") && primary === "left") {
+        height = rowSize - item._scfl_cachedSpacedSize.height;
+      }
+      if (!this.get('canWrap') && item.get("fillWidth") && primary === "top") {
+        width = rowSize - item._scfl_cachedSpacedSize.width;
       }
       
-      // handle auto size
-      if (item.get("fillHeight") && secondary === "top") item._scfl_cachedFlowSize["height"] = rowSize;
-      if (item.get("fillWidth") && secondary === "left") item._scfl_cachedFlowSize["width"] = rowSize;
-      
       // update offset
-      if (item.get("isSpacer")) {
+      if (item.get('isSpacer')) {
         // the cached size is the minimum size for the spacer
-        var spacerSize = item._scfl_cachedSpacedSize[primary === "left" ? "width" : "height"];
+        itemSize = item._scfl_cachedSpacedSize[primary === 'left' ? 'width' : 'height'];
         
         // get the spacer size
-        spacerSize = Math.max(spacerSize, spacePerUnit * (item.get("spaceUnits") || 1));
-        
-        // add to item offset
-        itemOffset += spacerSize;
+        itemSize = Math.max(itemSize, spacePerUnit * (item.get('spaceUnits') || 1));
         
         // and finally, set back the cached flow size value--
         // not including spacing (this is the view size for rendering)
-        item._scfl_cachedCalculatedFlowSize = {};
-        item._scfl_cachedCalculatedFlowSize[primary === "left" ? "width" : "height"] = spacerSize;
-        item._scfl_cachedCalculatedFlowSize[secondary === "left" ? "width" : "height"] = rowSize;
+        // spacers include 
+        if (primary === "left") {
+          width = itemSize;
+        } else {
+          height = itemSize;
+        }
       } else {
-        itemOffset += item._scfl_cachedSpacedSize[primary === "left" ? "width" : "height"];
-        item._scfl_cachedCalculatedFlowSize = item._scfl_cachedFlowSize;
+        if (primary === "left") {
+          itemSize = item._scfl_cachedSpacedSize.width;
+        } else {
+          itemSize = item._scfl_cachedSpacedSize.height;
+        }
       }
       
-      this.flowPositionView(idx, item, x, y);
+      this.flowPositionView(idx, item, x, y, width, height);
+      
+      if (primary === 'left') x += itemSize;
+      else y += itemSize;
       
       // update justification
-      if (align === SC.ALIGN_JUSTIFY) itemOffset += spacePerUnit;
+      if (align === SC.ALIGN_JUSTIFY) x += spacePerUnit;
     }
+    
+    if (primary === 'left') return x;
+    return y;
   },
   
-  flowPositionView: function(idx, item, x, y) {
-    var spacing = item._scfl_cachedFlowSpacing,
-        size = item._scfl_cachedCalculatedFlowSize;
-
-    var last = this._scfl_itemLayouts[SC.guidFor(item)];
-    
+  flowPositionView: function(idx, item, x, y, width, height) {
+    var last = this._scfl_itemLayouts[SC.guidFor(item)],
+        spacing = item._scfl_cachedSpacing;
     var l = {
       left: x + spacing.left,
-      top: y + spacing.top,
-      width: size.width,
-      height: size.height
+      top: y + spacing.top
     };
+    
+    if (width !== undefined) l.width = width;
+    if (height !== undefined) l.height = height;
 
     // we must set this first, or it will think it has to update layout again, and again, and again
     // and we get a crash.
     this._scfl_itemLayouts[SC.guidFor(item)] = l;
-    
+
     // Also, never set if the same. We only want to compare layout properties, though
     if (last && 
       last.left == l.left && last.top == l.top && 
-      last.width == l.width && last.height == l.height
+      last.width == l.width && l.width !== undefined && 
+      last.height == l.height && l.height !== undefined
     ) {
       return;
     }
     
-    item.set('layout', l);
+    item.adjust(l);
   },
+  
+  // hacky, but only way to allow us to use calculatedWidth/Height and avoid clobbering
+  // our own layout (interfering with our tiling) while still allowing scrolling.
+  renderMixin: function(context) {
+    context.css('minWidth', this.get('calculatedWidth'));
+    context.css('minHeight', this.get('calculatedHeight'));
+  },
+  
+  _scfl_calculatedSizeDidChange: function() {
+    this.$().css('minWidth', this.get('calculatedWidth'));
+    this.$().css('minHeight', this.get('calculatedHeight'));
+  }.observes('calculatedWidth', 'calculatedHeight'),
   
   _scfl_tile: function() {
     if (!this._scfl_itemLayouts) this._scfl_itemLayouts = {};
@@ -353,101 +397,121 @@ SC.FlowedLayout = {
         nowObserving = SC.CoreSet.create();
     
     var children = this.get("childViews"), child, idx, len = children.length,
-        rows = [], row = [], rowSize = 0, 
-        rowOffset = 0, 
-        itemOffset = 0, 
-        width = this.get('frame').width,
-        height = this.get('frame').height,
-        canWrap = this.get("canWrap"),
-        layoutDirection = this.get("layoutDirection"),
-        padding = this.get("_scfl_validFlowPadding"),
-        childSize, childSpacing, align = this.get("align"),
-        longestRow = 0;
+        rows = [], row = [], startRowSize = 0, rowSize = 0, longestRow = 0,
+        rowOffset, itemOffset, 
+        width = this.get('frame').width, height = this.get('frame').height,
+        canWrap = this.get('canWrap'),
+        layoutDirection = this.get('layoutDirection'),
+        padding = this.get('_scfl_validFlowPadding'),
+        childSize, childSpacing, childSpacedSize, align = this.get('align');
     
-    var primary, primary_os, primary_d, secondary, secondary_os, secondary_d, primaryContainerSize;
+    
+    var primary, primary_os, primary_d, secondary, secondary_os, secondary_d, flowLimit, availableRowLength;
     if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-      primaryContainerSize = width - padding["right"] - padding["left"];
+      availableRowLength = width;
+      flowLimit = width - padding["right"];
+      
       primary = "left"; secondary = "top";
       primary_os = "right"; secondary_os = "bottom";
       primary_d = "width"; secondary_d = "height";
     } else {
-      primaryContainerSize = height - padding["bottom"] - padding["top"];
+      availableRowLength = height;
+      flowLimit = height - padding["bottom"];
+      
       primary = "top"; secondary = "left";
       primary_os = "bottom"; secondary_os = "right";
       primary_d = "height"; secondary_d = "width";
     }
     
+    rowOffset = padding[secondary];
+    itemOffset = padding[primary];
+    
+    // if we cannot wrap, the row size is our frame (minus padding)
+    if (!canWrap) {
+      if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+        rowSize = startRowSize = height - padding.top - padding.bottom;
+      } else {
+        rowSize = startRowSize = width - padding.right - padding.left;
+      }
+    }
+        
     // now, loop through all child views and group them into rows.
     // note that we are NOT positioning.
     // when we are done with a row, we call flowRow to finish it.
     for (idx = 0; idx < len; idx++) {
       // get a child.
       child = children[idx];
-      if (child.get("useAbsoluteLayout")) continue;
       
       // update observing lists
       isObserving.remove(SC.guidFor(child));
       nowObserving.add(child);
       
-      // skip positioning of items with isVisible===false
-      if (!this.shouldIncludeChild(child)) continue;
+      if (!this.shouldIncludeChildInFlow(child)) continue;
       
       // get spacing, size, and cache
       childSize = this.flowSizeForView(idx, child);
-      
-      child._scfl_cachedFlowSize = { width: childSize.width, height: childSize.height }; // supply a clone, since we are about to modify
-      
+            
       childSpacing = this.flowSpacingForView(idx, child);
-      childSize.width += childSpacing.left + childSpacing.right;
-      childSize.height += childSpacing.top + childSpacing.bottom;
+      childSpacedSize = {
+        width: childSize.width + childSpacing.left + childSpacing.right,
+        height: childSize.height + childSpacing.top + childSpacing.bottom
+      };
       
-      // flowRow will use this
-      child._scfl_cachedFlowSpacing = childSpacing;
-      child._scfl_cachedSpacedSize = childSize;
+      // flowRow will use this; it's purely here for performance
+      child._scfl_cachedFlowSize = childSize;
+      child._scfl_cachedSpacedSize = childSpacedSize;
+      child._scfl_cachedSpacing = childSpacing;
       
       var newRow = child.get('startsNewRow');
       
       // determine if the item can fit in the row
-      if (newRow || canWrap && row.length > 0) {
-        // test, including the collapsed right margin+padding
-        if (newRow || itemOffset + childSize[primary_d] >= primaryContainerSize) {
+      if ((newRow || canWrap) && row.length > 0) {
+        if (newRow || itemOffset + childSize[primary_d] >= flowLimit) {
           // first, flow this row
-          this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
+          itemOffset = this.flowRow(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align);
+          longestRow = Math.max(longestRow, itemOffset);
 
           // We need another row.
           row = [];
           rows.push(row);
           rowOffset += rowSize;
-          rowSize = 0;
-          itemOffset = 0;
+          rowSize = startRowSize;
+          itemOffset = padding[primary];
         }
       }
 
       // add too row and update row size+item offset
       row.push(child);
-      rowSize = Math.max(childSize[secondary_d], rowSize);
-      itemOffset += childSize[primary_d]; 
+      rowSize = Math.max(childSpacedSize[secondary_d], rowSize);
+      itemOffset += childSpacedSize[primary_d];
       longestRow = Math.max(longestRow, itemOffset);
     }
     
     
     // flow last row
-    this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
+    itemOffset = this.flowRow(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align);
+    longestRow = Math.max(longestRow, itemOffset);
 
     
     // update calculated width/height
-    this._scfl_lastFrameSize = this.get("frame");
+    this._scfl_lastFrameSize = this.get('frame');
     
     // size is now calculated the same whether canWrap is on or not
-    if (this.get("autoResize")) {
+    if (this.get('autoResize')) {
       if(longestRow) {
-        this._scfl_lastFrameSize[primary_d] = longestRow + padding[primary] + padding[primary_os];
-        this.adjust(primary_d, longestRow + padding[primary] + padding[primary_os]);
+        if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+          this.set('calculatedWidth', longestRow + padding[primary_os]);
+        } else {
+          this.set('calculatedHeight', longestRow + padding[primary_os]);
+        }
       }
       
       if(rowOffset + rowSize) {
-        this._scfl_lastFrameSize[secondary_d] = rowOffset + rowSize + padding[secondary] + padding[secondary_os];
-        this.adjust(secondary_d, rowOffset + rowSize + padding[secondary] + padding[secondary_os]);
+        if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+          this.set('calculatedHeight', rowOffset + rowSize + padding[secondary_os]);
+        } else {
+          this.set('calculatedWidth', rowOffset + rowSize + padding[secondary_os]);
+        }
       }
     }
     
@@ -467,9 +531,6 @@ SC.FlowedLayout = {
   },
   
   _scfl_frameDidChange: function() {
-    // if the frame changes but we can't wrap, our results will not update.
-    if (!this.get("canWrap")) return;
-    
     var frame = this.get("frame"), lf = this._scfl_lastFrameSize;
     this._scfl_lastFrameSize = frame;
 

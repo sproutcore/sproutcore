@@ -15,11 +15,12 @@ require("mixins/emptiness");
 require("mixins/edit_mode");
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
-  flowSize: { widthPercentage: 1 },
+  layout: {left: 0, width: 0},
 
   rowFlowSpacing: undefined,
-  
   rowFlowPadding: undefined,
+  
+  fillWidth: YES,
   
   defaultFlowSpacing: function() {
     return this.getThemedProperty("rowFlowSpacing", 'FORM_ROW_FLOW_SPACING');
