@@ -1334,130 +1334,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.property('renderDelegate').cacheable(),
 
   /**
-    Returns a hash containing property names and their values for the display
-    properties that have changed since the last time this method was called.
-    If this is the first time the method has been called on this view, every
-    display property is returned.
-
-    For example, if this view had two display properties, isActive and items,
-    you might receive a hash like this:
-
-    {
-      isActive: YES,
-      items: ['item1', 'item2']
-    }
-
-    Note that this method will look for display representations of properties
-    before the actual property name. For example, if title was a display
-    property, and the view contained both title and displayTitle properties,
-    the value of displayTitle would be returned.
-
-    @returns {Object}
-  */
-  getChangedDisplayProperties: function() {
-    var idx, len, displayProperties, key, val,
-        displayKey, displayPropertiesHash;
-
-    displayPropertiesHash = {
-      contains: function() {
-        var idx, len = arguments.length, key;
-
-        for (idx = 0; idx < len; idx++) {
-          key = arguments[idx];
-
-          if (this.hasOwnProperty(key)) {
-            return YES;
-          }
-        }
-
-        return NO;
-      }
-    };
-
-    displayProperties = this.get('displayProperties');
-    len = displayProperties.length;
-
-    for (idx = 0; idx < len; idx++) {
-      key = displayProperties[idx];
-
-      // Convert to display version of key name
-      // E.g., title -> displayTitle
-      displayKey = 'display'+key.capitalize();
-
-      val = this.get(displayKey);
-
-      if (val && this.didChangeFor('getChangedDisplayProperties', displayKey)) {
-        displayPropertiesHash[key] = val;
-      } else if (this.didChangeFor('getChangedDisplayProperties', key)) {
-        displayPropertiesHash[key] = this.get(key);
-      }
-    }
-
-    return displayPropertiesHash;
-  },
-
-  /**
-    Returns a hash containing property names and their values for the display
-    properties.
-
-    For example, if this view had two display properties, isActive and items,
-    you would receive a hash like this:
-
-    {
-      isActive: YES,
-      items: ['item1', 'item2']
-    }
-
-    Note that this method will look for display representations of properties
-    before the actual property name. For example, if title was a display
-    property, and the view contained both title and displayTitle properties,
-    the value of displayTitle would be returned.
-
-    @returns {Object}
-  */
-  getDisplayProperties: function() {
-    var idx, len, displayProperties, key, val,
-        displayKey, displayPropertiesHash;
-
-    displayPropertiesHash = {
-      contains: function() {
-        var idx, len = arguments.length, key;
-
-        for (idx = 0; idx < len; idx++) {
-          key = arguments[idx];
-
-          if (this.hasOwnProperty(key)) {
-            return YES;
-          }
-        }
-
-        return NO;
-      }
-    };
-
-    displayProperties = this.get('displayProperties');
-    len = displayProperties.length;
-
-    for (idx = 0; idx < len; idx++) {
-      key = displayProperties[idx];
-
-      // Convert to display version of key name
-      // E.g., title -> displayTitle
-      displayKey = 'display'+key.capitalize();
-
-      val = this.get(displayKey);
-
-      if (val) {
-        displayPropertiesHash[key] = val;
-      } else {
-        displayPropertiesHash[key] = this.get(key);
-      }
-    }
-
-    return displayPropertiesHash;
-  },
-
-  /**
     Your render method should invoke this method to render any child views,
     especially if this is the first time the view will be rendered.  This will
     walk down the childView chain, rendering all of the children in a nested
@@ -4431,6 +4307,10 @@ SC.View.runCallback = function(callback){
   This tool is not useful outside of SC.View itself, and as such, is private.
 */
 SC.View._RenderDelegateProxy = {
+  
+  // for testing:
+  isViewRenderDelegateProxy: YES,
+  
   /**
    * Creates a View Render Delegate Proxy for the specified view.
    * 
