@@ -104,17 +104,17 @@ SC.CSS_TRANSFORM_MAP = {
   },
 
   rotateX: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
     return 'rotateX('+val+')';
   },
 
   rotateY: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
     return 'rotateY('+val+')';
   },
 
   rotateZ: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER || val === 0) val += 'deg';
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
     return 'rotateZ('+val+')';
   },
 
@@ -124,16 +124,30 @@ SC.CSS_TRANSFORM_MAP = {
   }
 };
 
-SC._TRANSFORM_ANIMATIONS = (function(){
-  var res = {}, key;
-  for (key in SC.CSS_TRANSFORM_MAP) res['animate'+key.capitalize()] = YES;
-  return res;
-})();
+
 
 /**
   Properties that can be animated
+  (Hash for faster lookup)
 */
-SC.ANIMATABLE_PROPERTIES = ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "scale", "rotate", "rotateX", "rotateY", "rotateZ"];
+SC.ANIMATABLE_PROPERTIES = {
+  top:     YES,
+  left:    YES,
+  bottom:  YES,
+  right:   YES,
+  width:   YES,
+  height:  YES,
+  centerX: YES,
+  centerY: YES,
+  opacity: YES,
+  scale:   YES,
+  rotate:  YES,
+  rotateX: YES,
+  rotateY: YES,
+  rotateZ: YES
+};
+
+
 
 /**
   @class
@@ -2294,54 +2308,60 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   animate: function(keyOrHash, valueOrOptions, optionsOrCallback, callback) {
     var hash, options;
 
-    if (SC.typeOf(keyOrHash) === SC.T_HASH) {
-      hash = keyOrHash;
-      options = valueOrOptions;
-      callback = optionsOrCallback;
-    } else {
+    if (typeof keyOrHash === SC.T_STRING) {
       hash = {};
       hash[keyOrHash] = valueOrOptions;
       options = optionsOrCallback;
+    } else {
+      hash = keyOrHash;
+      options = valueOrOptions;
+      callback = optionsOrCallback;
     }
 
-    if (SC.typeOf(options) === SC.T_NUMBER) {
+    var optionsType = SC.typeOf(options);
+    if (optionsType === SC.T_NUMBER) {
       options = { duration: options };
-    } else if (SC.typeOf(options) !== SC.T_HASH) {
+    } else if (optionsType !== SC.T_HASH) {
       throw "Must provide options hash or duration!";
     }
 
     if (callback) options.callback = callback;
 
+    var timing = options.timing;
+    if (timing) {
+      if (typeof timing !== SC.T_STRING) {
+        options.timing = "cubic-bezier("+timing[0]+", "+timing[1]+", "+
+                                         timing[2]+", "+timing[3]+")";
+      }
+    } else {
+      options.timing = 'linear';
+    }
 
     var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim, key;
 
+    if (!layout.animate) layout.animate = {};
+
+    // Very similar to #adjust
     for(key in hash) {
       if (!hash.hasOwnProperty(key)) continue;
       value = hash[key];
       cur = layout[key];
 
-      if (SC.ANIMATABLE_PROPERTIES.contains(key)) {
-        curAnim = layout['animate'+key.capitalize()];
+      if (cur !== value) { didChange = YES; }
 
-        if (value === null || value === undefined) {
-          throw "Can only animate to an actual value!";
-        } else {
-          if (cur !== value) didChange = YES;
+      if (SC.ANIMATABLE_PROPERTIES[key]) {
+        curAnim = layout.animate[key];
 
-          // FIXME: We should check more than duration
-          // Also, will we allow people to just set a number instead of a hash? If so, we have to account for that.
-          if (curAnim && curAnim.duration !== options.duration) didChange = YES ;
+        if (value == null) { throw "Can only animate to an actual value!"; }
 
-          layout[key] = value ;
+        // FIXME: We should check more than duration
+        if (curAnim && curAnim.duration !== options.duration) { didChange = YES; }
 
-          // I'm pretty sure we want to be cloning this because we may be applying it
-          // to multiple properties which can be edited independently
-          layout['animate'+key.capitalize()] = SC.clone(options);
-        }
-      } else {
-        if (cur !== value) didChange = YES;
-        layout[key] = value;
+        layout.animate[key] = options;
       }
+
+      layout[key] = value;
+
     }
 
     // now set adjusted layout
@@ -2354,17 +2374,24 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   Resets animation, stopping all existing animations.
   */
   resetAnimation: function() {
-    var layout = this.get('layout'), didChange = NO, key;
-    for (key in layout) {
-      if (key.substring(0,7) === 'animate') {
-        didChange = YES;
-        delete layout[key];
-      }
+    var layout = this.get('layout'),
+        animations = layout.animate,
+        didChange = NO, key;
+
+    if (!animations) return;
+
+    var hasAnimations;
+
+    for (key in animations) {
+      didChange = YES;
+      delete animations[key];
     }
+
     if (didChange) {
       this.set('layout', layout);
       this.notifyPropertyChange('layout');
     }
+
     return this;
   },
 
@@ -2993,15 +3020,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   hasAcceleratedLayer: function(){
     if (this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers) {
-      var layout = this.get('layout'), key;
+      var layout = this.get('layout'),
+          animations = layout.animate,
+          key;
 
-      if (layout['animateTop'] || layout['animateLeft']) {
-        for (key in layout) {
+      if (animations && (animations['top'] || animations['left'])) {
+        for (key in animations) {
           // If we're animating other transforms at different speeds, don't use acceleratedLayer
           if (
-            SC._TRANSFORM_ANIMATIONS[key] &&
-            ((layout['animateTop'] && layout['animateTop'].duration !== layout[key].duration) ||
-             (layout['animateLeft'] && layout['animateLeft'].duration !== layout[key].duration))
+            SC.CSS_TRANSFORM_MAP[key] &&
+            ((animations['top'] && animations['top'].duration !== animations[key].duration) ||
+             (animations['left'] && animations['left'].duration !== animations[key].duration))
           ) {
             return NO;
           }
@@ -3033,7 +3062,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // Check to see if we're using transforms
       var transformAnimationDuration;
       for(key in layout){
-        if (SC._TRANSFORM_ANIMATIONS[key]) {
+        if (SC.CSS_TRANSFORM_MAP[key]) {
             // To prevent:
             //   this.animate('scale', ...);
             //   this.animate('rotate', ...);
@@ -3080,9 +3109,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   layoutStyle: function() {
     var props = {
-      layout: this.get('layout'),
-      turbo: this.get('hasAcceleratedLayer'),
-      static: this.get('useStaticLayout')
+      layout:       this.get('layout'),
+      turbo:        this.get('hasAcceleratedLayer'),
+      staticLayout: this.get('useStaticLayout')
     }
 
     var calculator = this.get('layoutStyleCalculator');
@@ -3136,18 +3165,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       delete currentLayout.rotate;
     }
 
-    if (!SC.none(currentLayout.animateRotate)) {
-      if (SC.none(currentLayout.animateRotateX)) {
-        currentLayout.animateRotateX = currentLayout.animateRotate;
-        console.warn('Please set animateRotateX instead of animateRotate');
+    var animations = currentLayout.animations;
+    if (animations) {
+      if (!SC.none(animations.rotate)) {
+        if (SC.none(animations.rotateX)) {
+          animations.rotateX = animations.rotate;
+          console.warn('Please animate rotateX instead of rotate');
+        }
+      }
+      if (!SC.none(animations.rotateX)) {
+        animations.rotate = animations.rotateX;
+      } else {
+        delete animations.rotate;
       }
     }
-    if (!SC.none(currentLayout.animateRotateX)) {
-      currentLayout.animateRotate = currentLayout.animateRotateX;
-    } else {
-      delete currentLayout.animateRotate;
-    }
-
 
     if (previousLayout  &&  previousLayout !== currentLayout) {
       // This is a simple check to see whether we think the view may have
@@ -3984,12 +4015,6 @@ SC.View.runCallback = function(callback){
 
 
 SC.View.LayoutStyleCalculator = SC.Object.extend({
-  // layout, turbo, static
-  // temp: view
-  init: function() {
-    sc_super();
-    this._layoutDidUpdate();
-  },
 
   _layoutDidUpdate: function(){
     var layout = this.get('layout');
@@ -4013,13 +4038,17 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var width = this.width = layout.width;
     this.hasWidth = (width != null);
 
-    var height = this. height = layout.height;
+    var height = this.height = layout.height;
     this.hasHeight = (height != null);
 
-    var maxWidth = this.maxWidth = layout.maxWidth;
+    this.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
+
+    var maxWidth = this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
     this.hasMaxWidth = (maxWidth != null);
 
-    var maxHeight = this.maxHeight = layout.maxHeight;
+    this.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
+
+    var maxHeight = this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
     this.hasMaxHeight = (maxHeight != null);
 
     var centerX = this.centerX = layout.centerX;
@@ -4028,7 +4057,17 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var centerY = this.centerY = layout.centerY;
     this.hasCenterY = (centerY != null);
 
-    this.ret = {};
+    // the toString here is to ensure that it doesn't get px added to it
+    this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
+    this.opacity = (layout.opacity != null) ? layout.zIndex.toString() : null;
+
+    this.backgroundPosition = (layout.backgroundPosition != null) ? layout.backgroundPosition : null;
+
+    this.ret = {
+      marginTop: null,
+      marginLeft: null
+    };
+
   }.observes('layout'),
 
   // handles the case where you do width:auto or height:auto and are not using "staticLayout"
@@ -4043,42 +4082,46 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var layout = this.get('layout');
 
     // handle invalid use of auto in absolute layouts
-    if(!this.static) {
+    if(!this.staticLayout) {
       if (this.width === SC.LAYOUT_AUTO) { this._invalidAutoValue("width"); }
       if (this.height === SC.LAYOUT_AUTO) { this._invalidAutoValue("height"); }
     }
 
     if (SC.platform.supportsCSSTransforms) {
       // Check to see if we're using transforms
-      var transformAnimationDuration;
-      for(key in layout){
-        if (SC._TRANSFORM_ANIMATIONS[key]) {
+      var animations = layout.animate,
+          transformAnimationDuration;
+
+      if (animations) {
+        for(key in animations){
+          if (SC.CSS_TRANSFORM_MAP[key]) {
             // To prevent:
             //   this.animate('scale', ...);
             //   this.animate('rotate', ...);
             // Use this instead
             //   this.animate({ scale: ..., rotate: ... }, ...);
-          if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
-            throw "Animations of transforms must be executed simultaneously!";
+            if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
+              throw "Animations of transforms must be executed simultaneously!";
+            }
+
+            // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
+            // at different speeds. So, to handle that case, we just force them to all have the same length.
+
+            // First time around this will never be true, but we're concerned with subsequent runs.
+            if (transformAnimationDuration && animations[key].duration !== transformAnimationDuration) {
+              console.warn("Can't animate transforms with different durations! Using first duration specified.");
+              animations[key].duration = transformAnimationDuration;
+            }
+
+            transformAnimationDuration = animations[key].duration;
           }
-
-          // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
-          // at different speeds. So, to handle that case, we just force them to all have the same length.
-
-          // First time around this will never be true, but we're concerned with subsequent runs.
-          if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
-            console.warn("Can't animate transforms with different durations! Using first duration specified.");
-            layout[key].duration = transformAnimationDuration;
-          }
-
-          transformAnimationDuration = layout[key].duration;
         }
       }
     }
   },
 
   _calculatePosition: function(direction) {
-    var translate, turbo = this.get('turbo'), layout = this.layout, ret = this.ret;
+    var translate = null, turbo = this.get('turbo'), layout = this.layout, ret = this.ret;
 
     var start, finish, size, maxSize, margin,
         hasStart, hasFinish, hasSize, hasMaxSize;
@@ -4105,15 +4148,15 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       hasMaxSize = this.hasMaxHeight;
     }
 
-    ret[margin] = 0;
-
     ret[size]   = this._cssNumber(layout[size]);
     ret[start]  = this._cssNumber(layout[start]);
     ret[finish] = this._cssNumber(layout[finish]);
 
     if(hasStart) {
-      translate = ret[start];
-      if (turbo) { ret[start] = 0; }
+      if (turbo) {
+        translate = ret[start];
+        ret[start] = 0;
+      }
 
       // top, bottom, height -> top, bottom
       if (hasFinish && hasSize)  { ret[finish] = null; }
@@ -4168,6 +4211,97 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     ret[finish] = null ;
   },
 
+  _calculateTransforms: function(translateLeft, translateTop){
+    if (SC.platform.supportsCSSTransforms) {
+      // Handle transforms
+      var layout = this.get('layout');
+      var transformAttribute = SC.platform.domCSSPrefix+'Transform';
+      var transforms = [];
+
+      if (this.turbo) {
+        // FIXME: Can we just set translateLeft / translateTop to 0 earlier?
+        transforms.push('translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)');
+
+        // double check to make sure this is needed
+        if (SC.platform.supportsCSS3DTransforms) { transforms.push('translateZ(0px)'); }
+      }
+
+      // normalizing transforms like rotateX: 5 to rotateX(5deg)
+      var transformMap = SC.CSS_TRANSFORM_MAP;
+      for(var transformName in transformMap) {
+        var layoutTransform = layout[transformName];
+
+        if(layoutTransform != null) {
+          transforms.push(transformMap[transformName](layoutTransform));
+        }
+      }
+
+      this.ret[transformAttribute] = transforms.length > 0 ? transforms.join(' ') : null;
+    }
+  },
+
+  _calculateAnimations: function(translateLeft, translateTop){
+    var layout = this.layout,
+        animations = layout.animate,
+        key;
+
+    // we're checking to see if the layout update was triggered by a call to .animate
+    if (!animations) { return; }
+
+    // TODO: Deprecate SC.Animatable
+    if(this.getPath('view.isAnimatable')) { return; }
+
+    // Handle animations
+    var transitions = [], animation;
+    this._animatedTransforms = [];
+
+    if (!this._pendingAnimations) this._pendingAnimations = {};
+
+    var platformTransform = "-" + SC.platform.cssPrefix + "-transform";
+
+
+    // animate({ scale: 2, rotateX: 90 })
+    // both scale and rotateX are transformProperties
+    // so they both actually are animating the same CSS key, i.e. -webkit-transform
+
+    if (SC.platform.supportsCSSTransitions) {
+      for(key in animations) {
+        // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
+        animation = animations[key];
+
+        var isTransformProperty = SC.CSS_TRANSFORM_MAP[key];
+        var isTurboProperty = (key === 'top' && translateTop) || (key === 'left' && translateLeft);
+
+        if (SC.platform.supportsCSSTransforms && (isTurboProperty || isTransformProperty)) {
+          this._animatedTransforms.push(key);
+          key = platformTransform;
+        }
+
+        // We're actually storing the css for the animation on layout.animate[key].css
+        animation.css = key + " " + animation.duration + "s " + animation.timing;
+
+        // If there are multiple transform properties, we only need to set this key once.
+        // We already checked before to make sure they have the same duration.
+        if (!this._pendingAnimations[key]) {
+          this._pendingAnimations[key] = animation;
+          transitions.push(animation.css);
+        }
+      }
+
+      this.ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+
+    } else {
+      // TODO: Do it the JS way
+
+      // For now we're just sticking them in so the callbacks can be run
+      for(key in animations) {
+        this._pendingAnimations[key] = animations[key];
+      }
+    }
+
+    delete layout.animate;
+  },
+
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
   _cssNumber: function(val){
@@ -4189,6 +4323,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     this._handleMistakes(layout);
 
+
     // X DIRECTION
 
     if (this.hasLeft || this.hasRight || !this.hasCenterX) {
@@ -4196,11 +4331,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     } else {
       this._calculateCenter("x");
     }
-
-    // handle min/max
-    // TODO: is null different than undefined?
-    ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth ;
-    ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth ;
 
 
     // Y DIRECTION
@@ -4211,136 +4341,21 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       this._calculateCenter("y");
     }
 
-    // handle min/max
-    ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight ;
-    ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight ;
 
+    // these properties pass through unaltered (after prior normalization)
+    ret.minWidth   = this.minWidth;
+    ret.maxWidth   = this.maxWidth;
+    ret.minHeight  = this.minHeight;
+    ret.maxHeight  = this.maxHeight;
 
-    // OTHER STUFF
+    ret.zIndex     = this.zIndex;
+    ret.opacity    = this.opacity;
+    ret.mozOpacity = this.opacity;
 
-    // if zIndex is set, use it.  otherwise let default shine through
-    ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
+    ret.backgroundPosition = this.backgroundPosition;
 
-    // if opacity is set, use it. otherwise let default shine through
-    ret.opacity = SC.none(layout.opacity) ? null : layout.opacity.toString();
-    ret.mozOpacity = ret.opacity; // older Firefox?
-
-    // if backgroundPosition is set, use it.
-    // otherwise let default shine through
-    ret.backgroundPosition = SC.none(layout.backgroundPosition) ? null : layout.backgroundPosition.toString() ;
-
-    // set default values to null to allow built-in CSS to shine through
-    // currently applies only to marginLeft & marginTop
-    // This is the only place dims is used
-    while(--loc >=0) {
-      x = dims[loc];
-      if (ret[x]===0) ret[x]=null;
-    }
-
-    if (SC.platform.supportsCSSTransforms) {
-      // Handle transforms
-      var transformAttribute = SC.platform.domCSSPrefix+'Transform',
-          layer = view.get('layer'),
-          // FIXME: This is not the best way to do it, we should track these locally
-          currentTransforms = (layer ? layer.style[transformAttribute] : '').split(' '),
-          cleanedTransforms = [], halTransforms, specialTransforms = [], transformName, idx;
-
-      // Remove old translates
-      for(idx=0; idx < currentTransforms.length; idx++) {
-        if (currentTransforms[idx].substring(0,9) !== 'translate') {
-          cleanedTransforms.push(currentTransforms[idx]);
-        }
-      }
-      currentTransforms = cleanedTransforms;
-
-      if (turbo) {
-        halTransforms = ['translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)'];
-
-        // FIXME: This join.match is a bit hackish
-        if (SC.platform.supportsCSS3DTransforms && !currentTransforms.join(' ').match('translateZ')) {
-          halTransforms.push('translateZ(0px)');
-        }
-      }
-
-      // Handle special CSS transform attributes
-      for(transformName in SC.CSS_TRANSFORM_MAP) {
-        cleanedTransforms = [];
-        for(idx=0; idx < currentTransforms.length; idx++) {
-          if (!currentTransforms[idx].match(new RegExp('^'+transformName+'\\\('))) {
-            cleanedTransforms.push(currentTransforms[idx]);
-          }
-        }
-        currentTransforms = cleanedTransforms;
-
-        if (!SC.empty(layout[transformName])) {
-          specialTransforms.push(SC.CSS_TRANSFORM_MAP[transformName](layout[transformName]));
-        }
-      }
-      specialTransforms = specialTransforms.join(' ');
-
-      var allTransforms = currentTransforms.concat(halTransforms, specialTransforms).without(undefined).without('').join(' ');
-
-      // Set transform attribute
-      ret[transformAttribute] = SC.empty(allTransforms) ? null : allTransforms;
-    }
-
-    // Temporary fix to not break SC.Animatable
-    if (!view.isAnimatable) {
-
-      // Handle animations
-      var transitions = [], animation, propertyKey;
-      this._animatedTransforms = [];
-
-      for(key in layout) {
-        if (key.substring(0,7) === 'animate') {
-          // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
-          animation = layout[key];
-
-          if (animation.timing) {
-            if (SC.typeOf(animation.timing) != SC.T_STRING) {
-              animation.timing = "cubic-bezier("+animation.timing[0]+", "+animation.timing[1]+", "+
-                                                 animation.timing[2]+", "+animation.timing[3]+")";
-            }
-          } else {
-            animation.timing = 'linear';
-          }
-
-          propertyKey = key.substring(7).camelize();
-
-          // TODO: This is a weird conditional, we can probably clean it up
-          if (
-            SC.platform.supportsCSSTransforms &&
-            (
-              (
-                turbo && (
-                  (propertyKey === 'top' && !SC.empty(translateTop)) ||
-                  (propertyKey === 'left' && !SC.empty(translateLeft))
-                )
-              ) ||
-              SC.CSS_TRANSFORM_MAP[propertyKey]
-            )
-          ) {
-            this._animatedTransforms.push(propertyKey);
-            propertyKey = '-'+SC.platform.cssPrefix+'-transform';
-          }
-
-          animation.css = propertyKey + " " + animation.duration + "s " + animation.timing;
-
-          // If it's a transform this may have already been set
-          if (!this._pendingAnimations) this._pendingAnimations = {};
-          if (!this._pendingAnimations[propertyKey]) {
-            this._pendingAnimations[propertyKey] = animation;
-            transitions.push(animation.css);
-          }
-        }
-      }
-
-      if (SC.platform.supportsCSSTransitions) {
-          // Explicitly clear transitions if we don't have any
-          ret[SC.platform.domCSSPrefix+"Transition"] = transitions.length > 0 ? transitions.join(", ") : '';
-      }
-
-    }
+    this._calculateTransforms(translateLeft, translateTop);
+    this._calculateAnimations(translateLeft, translateTop);
 
 
     // convert any numbers into a number + "px".
