@@ -24,7 +24,8 @@ TestControls.buttonsPage = SC.View.design({
         value: "Buttons"
       }),
       
-      style: SC.SegmentedView.design({
+      style: SC.FormView.row("Theme", SC.SegmentedView.design({
+        align: 'left',
         layout: { width: 300, height: 30 },
         items: [
           {name: 'Normal', 'value': 'square'},
@@ -37,7 +38,7 @@ TestControls.buttonsPage = SC.View.design({
         itemValueKey: 'value',
         
         valueBinding: 'TestControls.buttonsController.theme'
-      }),
+      })),
       
       flags: SC.FormView.row(SC.View.design(SC.FlowedLayout, {
         childViews: 'shouldToggle shouldDisable shouldBeDefault shouldBeCancel'.w(),
