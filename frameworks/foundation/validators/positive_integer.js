@@ -57,6 +57,7 @@ SC.Validator.PositiveInteger = SC.Validator.extend(
         value = this.get('defaultValue') ;
         break ;
     }
+    if(isNaN(value)) return this.get('defaultValue');
     return value ;
   },
 
