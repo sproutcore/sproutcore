@@ -85,7 +85,7 @@ test("creates a context and then invokes renderToContext or updateLayer on each 
 
 });
 
-test("creates a context and then invokes renderContent to call renderToContext on each childView", function() {
+test("creates a context and then invokes renderChildViews to call renderToContext on each childView", function() {
 
 	var runCount = 0, curContext ;
 	
@@ -109,7 +109,7 @@ test("creates a context and then invokes renderContent to call renderToContext o
 
 	// VERIFY: firstTime= YES 	
 	curContext = view.renderContext('div');
-	equals(view.renderContent(curContext), undefined, 'returns nothing');
+	view.renderChildViews(curContext);
 	equals(runCount, 3, 'renderToContext() invoked for each child view');
 
 });

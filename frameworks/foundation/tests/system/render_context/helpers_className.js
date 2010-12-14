@@ -51,8 +51,6 @@ test("extracts class names from element on first retrieval", function() {
   
   var result = context.classNames();
   same(result, ['foo', 'bar'], 'extracted class names');
-  
-  equals(context.classNames(), result, "should reuse same instance thereafter");
 });
 
 // ..........................................................
