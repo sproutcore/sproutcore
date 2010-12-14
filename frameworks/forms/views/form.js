@@ -52,6 +52,8 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   layoutDirection: SC.LAYOUT_VERTICAL,
   canWrap: NO,
   
+  renderDelegateName: 'formRenderDelegate',
+  
   formFlowSpacing: undefined,
   formFlowSpacingDefault: { left: 5, top: 5, bottom: 5, right: 5 },
   

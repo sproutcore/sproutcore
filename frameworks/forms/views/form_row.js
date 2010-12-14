@@ -15,6 +15,8 @@ require("mixins/emptiness");
 require("mixins/edit_mode");
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
+  renderDelegateName: 'formRowRenderDelegate',
+  
   layout: {left: 0, width: 0},
 
   rowFlowSpacing: undefined,
