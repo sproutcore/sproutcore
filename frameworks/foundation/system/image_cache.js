@@ -216,11 +216,12 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     if (entry) {
       // var img = (entry.image = new Image()) ;
       var img = entry.image ;
+      if(!img) return;
       img.onabort = this._imageDidAbort ;
       img.onerror = this._imageDidError ;
       img.onload = this._imageDidLoad ;
       img.src = entry.url ;
-
+      
       // add to loading queue.
       this._loading.push(entry) ;
     
