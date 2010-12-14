@@ -5,25 +5,17 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @class
-  @extends SC.Renderer
-  @since Quilmes
-*/
-
-SC.BaseTheme.Form = SC.Renderer.extend({
-  name: 'form',
-
-  formFlowSpacing: { left: 5, top: 5, bottom: 5, right: 5 },
+SC.BaseTheme.formRowRenderDelegate = SC.RenderDelegate.create({
+  name: 'form-row',
 
   render: function(context) {
-    if (this.contentProvider) this.contentProvider.renderContent(context);
+    
   },
-
+  
   update: function() {
-
+    
   }
 });
 
-SC.BaseTheme.FORM_FLOW_SPACING = { left: 5, top: 5, bottom: 5, right: 5 };
-SC.BaseTheme.addRenderer(SC.BaseTheme.Form);
-
+SC.BaseTheme.FORM_ROW_FLOW_SPACING = { right: 15, left: 0, top: 0, bottom: 0 };
+SC.BaseTheme.FORM_ROW_FLOW_PADDING = { left: 0, right: 0, bottom: 0, top: 0 };
