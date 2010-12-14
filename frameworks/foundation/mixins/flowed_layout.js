@@ -423,13 +423,16 @@ SC.FlowedLayout = {
         nowObserving = SC.CoreSet.create();
     
     var children = this.get("childViews"), child, idx, len = children.length,
-        rows = [], row = [], startRowSize = 0, rowSize = 0, longestRow = 0,
-        rowOffset, itemOffset, 
-        width = this.get('frame').width, height = this.get('frame').height,
-        canWrap = this.get('canWrap'),
-        layoutDirection = this.get('layoutDirection'),
-        padding = this.get('_scfl_validFlowPadding'),
-        childSize, childSpacing, childSpacedSize, align = this.get('align');
+        rows = [], row = [], rowSize = 0, 
+        startsNewRow, newRowPending = NO,
+        rowOffset = 0, itemOffset = 0, 
+        width = this.get('frame').width,
+        height = this.get('frame').height,
+        canWrap = this.get("canWrap"),
+        layoutDirection = this.get("layoutDirection"),
+        padding = this.get("_scfl_validFlowPadding"),
+        childSize, childSpacing, align = this.get("align"),
+        longestRow = 0;
     
     
     var primary, primary_os, primary_d, secondary, secondary_os, secondary_d, flowLimit, availableRowLength;
@@ -472,7 +475,15 @@ SC.FlowedLayout = {
       isObserving.remove(SC.guidFor(child));
       nowObserving.add(child);
       
-      if (!this.shouldIncludeChildInFlow(child)) continue;
+      // we need to check if it manually starts a new row, because if it does this is remembered even if the child isn't visible
+      startsNewRow = child.get('startsNewRow');
+      
+      // skip positioning of items with isVisible === NO or isHidden === YES
+      if (!this.shouldIncludeChildInFlow(child)) {
+        // if the hidden view started a new row, remember it for later
+        newRowPending = startsNewRow || newRowPending;
+        continue;
+      }
       
       // get spacing, size, and cache
       childSize = this.flowSizeForView(idx, child);
@@ -488,22 +499,21 @@ SC.FlowedLayout = {
       child._scfl_cachedSpacedSize = childSpacedSize;
       child._scfl_cachedSpacing = childSpacing;
       
-      var newRow = child.get('startsNewRow');
-      
-      // determine if the item can fit in the row
-      if ((newRow || canWrap) && row.length > 0) {
-        if (newRow || itemOffset + childSize[primary_d] >= flowLimit) {
-          // first, flow this row
-          itemOffset = this.flowRow(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align);
-          longestRow = Math.max(longestRow, itemOffset);
+      // determine if the item can fit in the row including the collapsed right margin+padding or if it explicitly starts a new row
+      if (startsNewRow || newRowPending || (canWrap && row.length > 0 && itemOffset + childSize[primary_d] >= flowLimit)) {
+        // regardless of why we just created a new row, so the flag needs to be reset
+        newRowPending = NO;
+        
+        // first, flow this row
+        this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
 
-          // We need another row.
-          row = [];
-          rows.push(row);
-          rowOffset += rowSize;
-          rowSize = startRowSize;
-          itemOffset = padding[primary];
-        }
+        // We need another row.
+        row = [];
+        rows.push(row);
+        rowOffset += rowSize;
+        rowSize = startRowSize;
+        itemOffset = padding[primary];
+      
       }
 
       // add too row and update row size+item offset
