@@ -142,7 +142,7 @@ SC.State = SC.Object.extend({
     }
     
     if (!SC.none(initialSubstate) && !matchedInitialSubstate) {
-      SC.Logger.error('Unable to set initial substate %@ since it did not match any of state\'s %@ substates'.fmt(initialSubstate, this));
+      SC.Logger.error("Unable to set initial substate %@ since it did not match any of state\'s %@ substates", initialSubstate, this);
     }
     
     this.set('substates', substates);
@@ -150,18 +150,18 @@ SC.State = SC.Object.extend({
     
     if (substates.length === 0) {
       if (!SC.none(initialSubstate)) {
-        SC.Logger.warn('Unable to make %@ an initial substate since state %@ has no substates'.fmt(initialSubstate, this));
+        SC.Logger.warn("Unable to make %@ an initial substate since state %@ has no substates", initialSubstate, this);
       }
     } 
     else if (substates.length > 0) {
       if (SC.none(initialSubstate) && !substatesAreConcurrent) {
         state = substates[0];
         this.set('initialSubstate', state);
-        SC.Logger.warn('state %@ has no initial substate defined. Will default to using %@ as initial substate'.fmt(this, state));
+        SC.Logger.warn("state %@ has no initial substate defined. Will default to using %@ as initial substate", this, state);
       } 
       else if (!SC.none(initialSubstate) && substatesAreConcurrent) {
         this.set('initialSubstate', null);
-        SC.Logger.warn('Can not use %@ as initial substate since substates are all concurrent for state %@'.fmt(initialSubstate, this));
+        SC.Logger.warn("Cannot use %@ as initial substate since substates are all concurrent for state %@", initialSubstate, this);
       }
     }
     
@@ -212,7 +212,7 @@ SC.State = SC.Object.extend({
         continue;
       }
       
-      SC.Logger.error("Invalid event %@ for event handler %@ in state %@".fmt(event, name, this));
+      SC.Logger.error("Invalid event %@ for event handler %@ in state %@", event, name, this);
     }
   },
   
@@ -275,7 +275,7 @@ SC.State = SC.Object.extend({
     }
     
     if (parent !== state && state !== this) {
-      SC.Logger.error('Can not generate relative path from %@ since it not a parent state of %@'.fmt(state, this));
+      SC.Logger.error("Cannot generate relative path from %@ since it not a parent state of %@", state, this);
       return null;
     }
     
@@ -306,7 +306,7 @@ SC.State = SC.Object.extend({
     }
     
     if (valueType !== SC.T_STRING) {
-      SC.Logger.error("Can not find matching subtype. value must be an object or string: %@".fmt(value));
+      SC.Logger.error("Cannot find matching subtype. value must be an object or string: %@", value);
       return null;
     }
     
@@ -332,8 +332,8 @@ SC.State = SC.Object.extend({
     if (matches[1] === "") {
       if (paths.__ki_paths__.length === 1) return paths[paths.__ki_paths__[0]];
       if (paths.__ki_paths__.length > 1) {
-        var msg = 'Can not find substate matching %@ in state %@. Ambiguous with the following: %@';
-        SC.Logger.error(msg.fmt(value, this, paths.__ki_paths__));
+        var msg = 'Cannot find substate matching %@ in state %@. Ambiguous with the following: %@';
+        SC.Logger.error(msg, value, this, paths.__ki_paths__);
       }
     } 
     
@@ -458,7 +458,7 @@ SC.State = SC.Object.extend({
     if (this.get('isCurrentState')) {
       statechart.gotoState(this);
     } else {
-       SC.Logger.error('Can not re-enter state %@ since it is not a current state in the statechart'.fmt(this));
+       SC.Logger.error("Cannot re-enter state %@ since it is not a current state in the statechart", this);
     }
   },
   
@@ -515,7 +515,7 @@ SC.State = SC.Object.extend({
     // First check if the name of the event is the same as a registered event handler. If so,
     // then do not handle the event.
     if (this._registeredEventHandlers[event]) {
-      SC.Logger.warn("state %@ can not handle event %@ since it is a registered event handler".fmt(this, event));
+      SC.Logger.warn("state %@ can not handle event %@ since it is a registered event handler", this, event);
       return NO;
     }    
     
