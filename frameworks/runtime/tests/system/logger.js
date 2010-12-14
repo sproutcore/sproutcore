@@ -206,3 +206,55 @@ test("Ensure that log levels function properly:  error", function() {
   // That message should be equal to the error message.
   equals(SC.Logger.getPath('recordedLogMessages.1').message, errorMessage, "recordedLogMessages[1] should be the error message");
 });
+
+
+test("Ensure that log messages via the “will format” methods actually format", function() {
+  SC.Logger.set('recordedLogMessages', null);
+  SC.Logger.set('logRecordingLevel', SC.LOGGER_LEVEL_DEBUG);
+
+  var format   = "This message should be formatted:  %@:%@",
+      expected = format.fmt(null, 1);
+
+  SC.Logger.debug(format, null, 1);
+  SC.Logger.info(format, null, 1);
+  SC.Logger.warn(format, null, 1);
+  SC.Logger.error(format, null, 1);
+
+  equals(SC.Logger.getPath('recordedLogMessages.0').message, expected, "debug() should call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.1').message, expected, "info() should call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.2').message, expected, "warn() should call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.3').message, expected, "error() should call String.fmt");
+});
+
+test("Ensure that log messages via the “will not format” methods don’t format, but are still recorded", function() {
+  SC.Logger.set('recordedLogMessages', null);
+  SC.Logger.set('logRecordingLevel', SC.LOGGER_LEVEL_DEBUG);
+
+  var message = "This message should not be formatted:  %@:%@";
+  SC.Logger.debugWithoutFmt(message, null, 1);
+  SC.Logger.infoWithoutFmt(message, null, 1);
+  SC.Logger.warnWithoutFmt(message, null, 1);
+  SC.Logger.errorWithoutFmt(message, null, 1);
+
+  // They should still be recorded and identified as a message.
+  equals(SC.Logger.getPath('recordedLogMessages.0').message, true, "debugWithoutFmt() should still record");
+  equals(SC.Logger.getPath('recordedLogMessages.1').message, true, "infoWithoutFmt() should still record");
+  equals(SC.Logger.getPath('recordedLogMessages.2').message, true, "warnWithoutFmt() should still record");
+  equals(SC.Logger.getPath('recordedLogMessages.3').message, true, "errorWithoutFmt() should still record");
+
+  equals(SC.Logger.getPath('recordedLogMessages.0').originalArguments[0], message, "debugWithoutFmt() should not call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.0').originalArguments[1], null, "debugWithoutFmt() should record all the arguments (1)");
+  equals(SC.Logger.getPath('recordedLogMessages.0').originalArguments[2], 1, "debugWithoutFmt() should record all the arguments (2)");
+
+  equals(SC.Logger.getPath('recordedLogMessages.1').originalArguments[0], message, "infoWithoutFmt() should not call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.1').originalArguments[1], null, "infoWithoutFmt() should record all the arguments (1)");
+  equals(SC.Logger.getPath('recordedLogMessages.2').originalArguments[2], 1, "infoWithoutFmt() should record all the arguments (2)");
+
+  equals(SC.Logger.getPath('recordedLogMessages.2').originalArguments[0], message, "warnWithoutFmt() should not call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.2').originalArguments[1], null, "warnWithoutFmt() should record all the arguments (1)");
+  equals(SC.Logger.getPath('recordedLogMessages.2').originalArguments[2], 1, "warnWithoutFmt() should record all the arguments (2)");
+
+  equals(SC.Logger.getPath('recordedLogMessages.3').originalArguments[0], message, "errorWithoutFmt() should not call String.fmt");
+  equals(SC.Logger.getPath('recordedLogMessages.3').originalArguments[1], null, "errorWithoutFmt() should record all the arguments (1)");
+  equals(SC.Logger.getPath('recordedLogMessages.3').originalArguments[2], 1, "errorWithoutFmt() should record all the arguments (2)");
+});

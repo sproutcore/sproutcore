@@ -200,7 +200,7 @@ SC.Logger = SC.Object.create({
     Log entry:
     {
       type:               {Constant}     (SC.LOGGER_LEVEL_DEBUG, etc.)
-      message:            {String}
+      message:            {String | Boolean}
       originalArguments:  {Arguments}    // optional
       timestamp:          {Date}
     }
@@ -1139,7 +1139,7 @@ SC.Logger = SC.Object.create({
     if (shouldRecord) {
       entry = {
         type:      type,
-        message:   message,
+        message:   message ? message : YES,
         timestamp: new Date()
       };
 
