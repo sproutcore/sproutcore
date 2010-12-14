@@ -1,4 +1,9 @@
-sc_require('render_delegates/renderer');
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 
 sc_require('render_delegates/render_delegate');
 
@@ -41,6 +46,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     });
     
     context.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
+    context.setClass('icon', dataSource.get('icon') || NO);
     
     var html = this._htmlForTitleAndIcon(dataSource);
     context.push(html);
@@ -95,7 +101,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       // to the image tag. Display a blank image so that the user can add
       // background image using CSS.
       } else {
-        icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="'+icon+'" />';
+        icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="icon '+icon+'" />';
       }
     }
     
