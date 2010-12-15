@@ -574,11 +574,11 @@ CoreTest.Plan = {
       }
       
       if (expected===false) {
-        ok(actual===false, CoreTest.fmt("%@ expected no exception, actual %@", msg, actual));
+        this.ok(actual===false, CoreTest.fmt("%@ expected no exception, actual %@", msg, actual));
       } else if (expected===Error || expected===null || expected===true) {
-        ok(!!actual, CoreTest.fmt("%@ expected exception, actual %@", msg, actual));
+        this.ok(!!actual, CoreTest.fmt("%@ expected exception, actual %@", msg, actual));
       } else {
-        equals(actual, expected, msg);
+        this.equals(actual, expected, msg);
       }
     },
     
