@@ -28,15 +28,11 @@ SC.AceTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var labelContent;
     
-    context.setClass('def', dataSource.get('isDefault') || 0);
-    context.setClass('cancel', dataSource.get('isCancel') || 0);
+    context.setClass('icon', !!dataSource.get('icon') || NO);
+    context.setClass('def', dataSource.get('isDefault') || NO);
+    context.setClass('cancel', dataSource.get('isCancel') || NO);
     
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
-
-    // Add an icon class name to the button if it contains an icon in its
-    // title.
-    context.setClass('icon', !!dataSource.get('icon'));
-
 
     // Create the inner label element that contains the text and, optionally,
     // an icon.
@@ -64,6 +60,7 @@ SC.AceTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       jquery.addClass('active');
     }
     
+    jquery.setClass('icon', !!dataSource.get('icon') || NO);
     jquery.setClass('def', dataSource.get('isDefault') || NO);
     jquery.setClass('cancel', dataSource.get('isCancel') || NO);
 
