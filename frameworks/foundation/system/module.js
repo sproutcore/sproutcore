@@ -203,9 +203,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   _evaluateStringLoadedModule: function(module) {
     var moduleSource = module.source;
 
-    with (window) {
-      eval(moduleSource);
-    }
+    jQuery.globalEval(moduleSource);
     delete module.source;
 
     module.isReady = YES;
