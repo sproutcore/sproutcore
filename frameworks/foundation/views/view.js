@@ -1958,6 +1958,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
 
     this._previousLayout = this.get('layout');
+    this._lastTheme = this.get('theme');
   },
 
   /**
