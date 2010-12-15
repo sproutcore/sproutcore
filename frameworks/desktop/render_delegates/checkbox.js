@@ -31,7 +31,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var theme = dataSource.get('theme');
     
-    var isSelected = dataSource.get('isSelected');
+    var isSelected = dataSource.get('isSelected') || NO;
     var isActive = dataSource.get('isActive');
     var isDisabled = !dataSource.get('isEnabled');
 
