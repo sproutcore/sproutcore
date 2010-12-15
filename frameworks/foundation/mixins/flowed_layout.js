@@ -422,16 +422,17 @@ SC.FlowedLayout = {
     var isObserving = this._scfl_isObserving || SC.CoreSet.create(),
         nowObserving = SC.CoreSet.create();
     
-    var children = this.get("childViews"), child, idx, len = children.length,
-        rows = [], row = [], rowSize = 0, 
+    var children = this.get('childViews'), child, idx, len = children.length,
+        rows = [], row = [],
+        startRowSize = 0, rowSize = 0, 
         startsNewRow, newRowPending = NO,
         rowOffset = 0, itemOffset = 0, 
         width = this.get('frame').width,
         height = this.get('frame').height,
-        canWrap = this.get("canWrap"),
-        layoutDirection = this.get("layoutDirection"),
-        padding = this.get("_scfl_validFlowPadding"),
-        childSize, childSpacing, align = this.get("align"),
+        canWrap = this.get('canWrap'),
+        layoutDirection = this.get('layoutDirection'),
+        padding = this.get('_scfl_validFlowPadding'),
+        childSize, childSpacing, childSpacedSize, align = this.get('align'),
         longestRow = 0;
     
     
@@ -505,7 +506,7 @@ SC.FlowedLayout = {
         newRowPending = NO;
         
         // first, flow this row
-        this.flowRow(row, primaryContainerSize, padding, rowOffset, rowSize, primary, secondary, align);
+        this.flowRow(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align);
 
         // We need another row.
         row = [];
