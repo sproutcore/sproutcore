@@ -70,6 +70,7 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
       // for such a rare case.
       var context = SC.RenderContext(jquery[0]);
       this.render(dataSource, context);
+      context.update();
       return;
     }
     

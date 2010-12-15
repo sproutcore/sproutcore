@@ -143,7 +143,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     // Force regeneration of buttons
     this._renderAsFirstTime = YES;
   
-    this.notifyPropertyChange('_displayItems');
+    this.notifyPropertyChange('displayItems');
   },
 
   // ..........................................................
