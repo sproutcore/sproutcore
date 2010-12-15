@@ -16,7 +16,9 @@ SC.BaseTheme.collectionRenderDelegate = SC.RenderDelegate.create({
     context.setClass('active', dataSource.get('isActive'));
   },
   
-  update: function() {
-
+  update: function(dataSource, jquery) {
+    jquery.setClass('focus', dataSource.get('isFirstResponder'));
+    jquery.setClass('disabled', !dataSource.get('isEnabled'));
+    jquery.setClass('active', dataSource.get('isActive'));
   }
 });
