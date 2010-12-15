@@ -154,7 +154,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     }
   },
   
-  displayProperties: 'value minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
+  displayProperties: 'displayValue minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
   
   renderDelegateName: 'progressRenderDelegate',
   
@@ -180,8 +180,9 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     if(value<minimum) value = 0.0;
     // cannot be larger then maximum
     if(value>maximum) value = 1.0;
+    
     return value;
-  }.property('value').cacheable()
+  }.property('value', 'maximum', 'minimum').cacheable()
 
   
 }) ;

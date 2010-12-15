@@ -19,7 +19,7 @@ SC.BaseTheme.PROGRESS_OFFSET_RANGE = 24;
   - isIndeterminate
   - isRunning
   - isEnabled
-  - value
+  - value (from 0 to 1)
   
   There are a few other properties supported for backwards-compatibility
   with certain ProgressView implementations; these ProgressViews should
@@ -44,7 +44,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var theme = dataSource.get('theme');
     
-    var inner, animatedBackground, value, cssString, backPosition,
+    var inner, animatedBackground, value = dataSource.get('value') * 100, 
+        cssString, backPosition,
         isIndeterminate = dataSource.get('isIndeterminate'),
         isRunning = dataSource.get('isRunning'),
         isEnabled = dataSource.get('isEnabled'),
@@ -66,20 +67,20 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       offsetRange = dataSource.get('offsetRange');
     }
   
+    var classNames = {
+      'sc-indeterminate': isIndeterminate,
+      'sc-empty': (value <= 0),
+      'sc-complete': (value >= 100)
+    };
+    
     // compute value for setting the width of the inner progress
     if (!isEnabled) {
       value = "0%" ;
     } else if (isIndeterminate) {
       value = "120%";
     } else {
-      value = (dataSource.get('value') * 100) + "%";
+      value = value + "%";
     }
-
-    var classNames = {
-      'sc-indeterminate': isIndeterminate,
-      'sc-empty': (value <= 0),
-      'sc-complete': (value >= 100)
-    };
     
     var classString = this._createClassNameString(classNames);
     context.push('<div class="sc-inner ', classString, '" style="width: ', 
