@@ -1662,12 +1662,14 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var view   = this.get('contentView'), 
         f      = (view) ? view.get('frame') : null,
         scale  = this._scale,
-        width  = (f) ? f.width  * scale : 0,
-        height = (f) ? f.height * scale : 0,
+        width  = 0,
+        height = 0,
         dim, dimWidth, dimHeight;
     
-    width = view.get('calculatedWidth') || f.width || 0;
-    height = view.get('calculatedHeight') || f.height || 0;
+    if (view) {
+      width = view.get('calculatedWidth') || f.width || 0;
+      height = view.get('calculatedHeight') || f.height || 0;
+    }
     
     width *= scale;
     height *= scale;
