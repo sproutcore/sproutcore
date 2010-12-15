@@ -11,6 +11,8 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var theme = dataSource.get('theme');
     
+    if (dataSource.get('isSelected')) context.addClass('sel');
+    
     var state = '';
     state += dataSource.get('isSelected') ? 'open' : 'closed';
     if (dataSource.get('isActive')) state += ' active';
@@ -24,6 +26,8 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   
   update: function(dataSource, jquery) {
     var theme = dataSource.get('theme');
+
+    if (dataSource.get('isSelected')) jquery.addClass('sel');
 
     jquery.find('img').setClass({
       open: dataSource.get('isSelected'),
