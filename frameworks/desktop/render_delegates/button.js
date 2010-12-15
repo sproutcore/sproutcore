@@ -20,14 +20,17 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var theme             = dataSource.get('theme');
     var minWidth          = dataSource.get('titleMinWidth');
+    var toolTip           = dataSource.get('toolTip');
     var labelContent;
-    
+
+    context.setClass('icon', !!dataSource.get('icon') || 0);    
     context.setClass('def', dataSource.get('isDefault') || 0);
     context.setClass('cancel', dataSource.get('isCancel') || 0);
-
-    // Add an icon class name to the button if it contains an icon in its
-    // title.
-    context.setClass('icon', !!dataSource.get('icon'));
+    
+    if (toolTip) {
+      context.attr('title', toolTip);
+      context.attr('alt', toolTip);
+    }
 
     // Specify a minimum width for the inner part of the button.
     minWidth = (minWidth ? "style='min-width: " + minWidth + "px'" : '');
@@ -64,6 +67,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     if (dataSource.get('isActive')) jquery.addClass('active');
     if (dataSource.get('isDefault')) jquery.addClass('default');
     if (dataSource.get('isCancel')) jquery.addClass('cancel');
+    if (dataSource.get('icon')) jquery.addClass('icon');
+
 
     theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
