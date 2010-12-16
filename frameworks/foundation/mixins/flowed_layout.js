@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('views/view');
+
 SC.ALIGN_JUSTIFY = "justify";
 /**
   Indicates that the content should be aligned to the top.
@@ -22,6 +24,7 @@ SC.ALIGN_MIDDLE = 'middle';
 SC.ALIGN_BOTTOM = 'bottom';
 
 
+console.log('titlebar_view.js: SC.LAYOUT_HORIZONTAL', SC.LAYOUT_HORIZONTAL);
 
 /**
   @namespace 
