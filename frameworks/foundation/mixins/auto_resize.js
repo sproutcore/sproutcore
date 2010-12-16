@@ -16,11 +16,11 @@ SC.AutoResize = {
   /**
     Determines the property containing the string to measure.
     
-    Currently, this may only be set _before_ initialization.
+    For efficiency, this may only be set _before_ initialization.
     
     @property {String}
   */
-  autoResizeField: "value",
+  autoResizeField: 'displayTitle',
   
   /**
     If YES, automatically resizes the view (default). If NO, only measures,
@@ -36,7 +36,7 @@ SC.AutoResize = {
     
     @property {Boolean}
   */
-  shouldMeasureSize: YES, // if NO, nothing happens.
+  shouldMeasureSize: YES,
   
   /**
     Determines if the view's width should be resized
@@ -79,7 +79,7 @@ SC.AutoResize = {
     Begins observing the auto resize field.
   */
   initMixin: function() {
-    this.addObserver(this.get("autoResizeField"), this, "_scar_valueDidChange");
+    this.addObserver(this.get('autoResizeField'), this, this._scar_valueDidChange);
   },
   
   /**
@@ -89,31 +89,62 @@ SC.AutoResize = {
   */
   batchResizeId: null,
   
+  _SCAR_measurementPending: NO,
+  _SCAR_requestedBatchResizeId: null,
+  
+  // if the batch id changed while a request is out, we have to fix it
+  _SCAR_batchResizeIdDidChange: function() {
+    var batchResizeId = this.get('batchResizeId'),
+    requestedBatchResizeId = this._SCAR_requestedBatchResizeId;
+    
+    // check if a request is out and the id changed
+    if(this._SCAR_measurementPending && this._SCAR_requestedBatchResizeId !== batchResizeId) {
+      // if so, cancel the old request and make a new one
+      SC.AutoResize.cancelResize(this, requestedBatchResizeId);
+      SC.AutoResize.requestResize(this, batchResizeId);
+    }
+  }.observes('batchResizeId'),
+  
   measureSizeLater: function() {
+    if (!this.get('shouldMeasureSize')) return;
+    
     var batchResizeId = this.get('batchResizeId');
     
-    if(batchResizeId) SC.AutoResize.requestResize(this, batchResizeId);
-    else this.invokeOnce(this.measureSize);
+    SC.AutoResize.requestResize(this, batchResizeId);
+    
+    this._SCAR_measurementPending = YES;
+    this._SCAR_requestedBatchResizeId = batchResizeId;
   },
   
   measureSize: function(batch) {
-    if (!this.get("shouldMeasureSize")) return;
+    var metrics, layer, value = this.get(this.get('autoResizeField')), autoSizePadding;
     
-    var metrics, layer = this.kindOf(SC.TextFieldView) ? this.$input()[0] : this.get("layer");
+    // if there's nothing to measure, don't bother actually measuring it
+    if(SC.none(value) || value === "") metrics = { width: 0, height: 0 };
     
-    // return if there wasn't one (no font sizes, etc. to use with measuring)
-    if (!layer) return;
-     
-    // get metrics, using layer as example element
-    if(batch) metrics = SC.measureString(this.get(this.get("autoResizeField")));
-    else metrics = SC.metricsForString(this.get(this.get("autoResizeField")), layer);
+    // get metrics in batch mode
+    else if(batch) metrics = SC.measureString(value);
     
-    // set it
-    this.set("measuredSize", metrics);
-    if (this.get("shouldAutoResize")) {
-      if (this.get('shouldResizeWidth')) this.adjust("width", metrics.width + this.get("autoSizePadding"));
-      if (this.get('shouldResizeHeight')) this.adjust("height", metrics.height + this.get("autoSizePadding"));
+    // do a singleton measurement using our own layer
+    else {
+      layer = this.kindOf(SC.TextFieldView) ? this.$input()[0] : this.get('layer');
+      if(!layer) return;
+      metrics = SC.metricsForString(value, layer);
     }
+    
+    this.set('measuredSize', metrics);
+    
+    // if we are allowed to autoresize, add padding and adjust layout
+    if (this.get('shouldAutoResize')) {
+      autoSizePadding = this.get('autoSizePadding');
+      
+      if (this.get('shouldResizeWidth')) this.adjust('width', metrics.width + autoSizePadding);
+      if (this.get('shouldResizeHeight')) this.adjust('height', metrics.height + autoSizePadding);
+    }
+    
+    this._SCAR_measurementPending = NO;
+    
+    return metrics;
   },
   
   // we need to update the measurement when the value changes
@@ -140,37 +171,66 @@ SC.AutoResize = {
     this.measureSizeLater();
   },
   
-  needResize: {},
+  needResize: null,
+  untaggedViews: null,
 
   requestResize: function(view, id) {
-    var views = SC.AutoResize.needResize[id] || (SC.AutoResize.needResize[id] = SC.CoreSet.create());
-
-    views.add(view);
+    // views with no tag just get put in their own list
+    if(SC.none(id)) {
+      var untaggedViews = SC.AutoResize.untaggedViews || (SC.AutoResize.untaggedViews = SC.CoreSet.create());
+      
+      untaggedViews.add(view);
+      
+    // views with a tag get a set for each tag
+    } else {
+      var needResize = SC.AutoResize.needResize || (SC.AutoResize.needResize = {}),
+      views = needResize[id] || (needResize[id] = SC.CoreSet.create());
+      
+      views.add(view);
+    }
 
     SC.RunLoop.currentRunLoop.invokeLast(SC.AutoResize.doBatchResize);
   },
+  
+  cancelResize: function(view, id) {
+    var set = SC.none(id) ? SC.AutoResize.untaggedViews : SC.AutoResize.needResize[id];
+    
+    if(set) set.remove(view);
+  },
 
   doBatchResize: function() {
-    var tag, views, view, layer;
-
-    for(tag in SC.AutoResize.needResize) {
-      views = SC.AutoResize.needResize[tag];
-
+    var tag, views, view, layer, batches;
+    
+    // first measure all the batched views
+    batches = SC.AutoResize.needResize;
+    for(tag in batches) {
+      views = batches[tag];
+      
+      // step through until you find one with a layer
       while(view = views.pop()) {
         layer = view.get('layer');
-
+        
+        // use the layer to prepare the measurement
         if(layer) {
           SC.prepareStringMeasurement(layer);
           view.measureSize(YES);
           break;
         }
       }
-
+      
+      // now measure the rest using the same settings
       while(view = views.pop()) {
         view.measureSize(YES);
       }
 
       SC.teardownStringMeasurement();
+    }
+    
+    // measure views with no batch id
+    views = SC.AutoResize.untaggedViews;
+    if(!views) return;
+    while(view = views.pop()) {
+      view.measureSize();
     }
   }
 };
