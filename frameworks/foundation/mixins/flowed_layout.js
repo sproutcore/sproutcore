@@ -455,7 +455,7 @@ SC.FlowedLayout = {
     
     rowOffset = padding[secondary];
     itemOffset = padding[primary];
-    
+    /*
     // if we cannot wrap, the row size is our frame (minus padding)
     if (!canWrap) {
       if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
@@ -464,7 +464,7 @@ SC.FlowedLayout = {
         rowSize = startRowSize = width - padding.right - padding.left;
       }
     }
-        
+      */  
     // now, loop through all child views and group them into rows.
     // note that we are NOT positioning.
     // when we are done with a row, we call flowRow to finish it.
