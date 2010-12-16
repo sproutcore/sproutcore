@@ -164,7 +164,7 @@ SC.Record = SC.Object.extend(
     possibly patch into this yourself also if you are building your own 
     relationships.
     
-    Note this must be a regular Array - NOT any object implmenting SC.Array.
+    Note this must be a regular Array - NOT any object implementing SC.Array.
     
     @property {Array}
   */
@@ -318,7 +318,7 @@ SC.Record = SC.Object.extend(
     not transform the underlying attribute at all.
   
     @param {String} key the attribute you want to read
-    @returns {Object} the value of the key, or null if it doesn't exist
+    @returns {Object} the value of the key, or undefined if it doesn't exist
   */
   readAttribute: function(key) {
     var store = this.get('store'), storeKey = this.storeKey;
