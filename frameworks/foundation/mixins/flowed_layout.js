@@ -46,6 +46,10 @@ SC.FlowedLayout = {
   */
   autoResize: YES,
   
+  shouldResizeWidth: YES,
+  
+  shouldResizeHeight: YES,
+  
   /**
     The alignment of items within rows or columns.
   */
@@ -408,12 +412,21 @@ SC.FlowedLayout = {
   },
   
   clippingFrame: function() {
-    return { left: 0, top: 0, width: this.get('calculatedWidth'), height: this.get('calculatedHeight') };
+    var ret = sc_super(),
+    cw = this.get('calculatedWidth'), ch = this.get('calculatedHeight');
+    
+    if(cw) ret.width = cw;
+    if(ch) ret.height = ch;
+    
+    return ret;
   }.property('calculatedWidth', 'calculatedHeight'),
   
   _scfl_calculatedSizeDidChange: function() {
-    this.$().css('minWidth', this.get('calculatedWidth'));
-    this.$().css('minHeight', this.get('calculatedHeight'));
+    var elem = this.$(),
+    cw = this.get('calculatedWidth'), ch = this.get('calculatedHeight');
+    
+    if(cw) elem.css('minWidth', this.get('calculatedWidth'));
+    if(ch) elem.css('minHeight', this.get('calculatedHeight'));
   }.observes('calculatedWidth', 'calculatedHeight'),
   
   _scfl_tile: function() {
@@ -537,17 +550,17 @@ SC.FlowedLayout = {
     if (this.get('autoResize')) {
       if(longestRow) {
         if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-          this.set('calculatedWidth', longestRow + padding[primary_os]);
+          if(this.get('shouldResizeWidth')) this.set('calculatedWidth', longestRow + padding[primary_os]);
         } else {
-          this.set('calculatedHeight', longestRow + padding[primary_os]);
+          if(this.get('shouldResizeHeight')) this.set('calculatedHeight', longestRow + padding[primary_os]);
         }
       }
       
       if(rowOffset + rowSize) {
         if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-          this.set('calculatedHeight', rowOffset + rowSize + padding[secondary_os]);
+          if(this.get('shouldResizeHeight')) this.set('calculatedHeight', rowOffset + rowSize + padding[secondary_os]);
         } else {
-          this.set('calculatedWidth', rowOffset + rowSize + padding[secondary_os]);
+          if(this.get('shouldResizeWidth')) this.set('calculatedWidth', rowOffset + rowSize + padding[secondary_os]);
         }
       }
     }
@@ -590,7 +603,7 @@ SC.FlowedLayout = {
     Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are layed out in the order they appear in childViews.
   */
   reorder: function(views) {
-    if(SC.typeOf(views) === SC.T_ARRAY) views = arguments;
+    if(!SC.typeOf(views) === SC.T_ARRAY) views = arguments;
     
     var i = views.length, childViews = this.childViews, view;
     
