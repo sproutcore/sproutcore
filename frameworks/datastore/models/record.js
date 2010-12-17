@@ -240,10 +240,11 @@ SC.Record = SC.Object.extend(
     
     @param {boolean} recordOnly, optional param if you want to only THIS record
       even if it is a child record.
+    @param {Function} callback, optional callback that will fire when request finishes
     
     @returns {SC.Record} receiver
   */
-  refresh: function(recordOnly) { 
+  refresh: function(recordOnly, callback) { 
     var store = this.get('store'), rec, ro,
         sk = this.get('storeKey'),
         prKey = store.parentStoreKeyExists();
@@ -252,10 +253,10 @@ SC.Record = SC.Object.extend(
     // we will commit this record
     ro = recordOnly || (SC.none(recordOnly) && SC.none(prKey));
     if (ro){
-      store.refreshRecord(null, null, sk);
+      store.refreshRecord(null, null, sk, callback);
     } else if (prKey){
       rec = store.materializeRecord(prKey);
-      rec.refresh(recordOnly);
+      rec.refresh(recordOnly, callback);
     }
 
     return this ;
@@ -266,7 +267,7 @@ SC.Record = SC.Object.extend(
     records destroyed in the store as well as changing the isDestroyed 
     property on the record to YES.  If this is a new record, this will avoid 
     creating the record in the first place.
-    
+
     @param {boolean} recordOnly, optional param if you want to only THIS record
       even if it is a child record. 
     
@@ -646,9 +647,11 @@ SC.Record = SC.Object.extend(
       to the data source
     @param {boolean} recordOnly, optional param if you want to only commit a single
       record if it has a parent.
+    @param {Function} callback, optional callback that the store will fire once the 
+    datasource finished committing
     @returns {SC.Record} receiver
   */
-  commitRecord: function(params, recordOnly) {    
+  commitRecord: function(params, recordOnly, callback) {    
     var store = this.get('store'), rec, ro,
         sk = this.get('storeKey'),
         prKey = store.parentStoreKeyExists();
@@ -657,12 +660,11 @@ SC.Record = SC.Object.extend(
     // we will commit this record
     ro = recordOnly || (SC.none(recordOnly) && SC.none(prKey));
     if (ro){
-      store.commitRecord(undefined, undefined, this.get('storeKey'), params);
+      store.commitRecord(undefined, undefined, this.get('storeKey'), params, callback);
     } else if (prKey){
       rec = store.materializeRecord(prKey);
-      rec.commitRecord(params, recordOnly);
+      rec.commitRecord(params, recordOnly, callback);
     }
-    
     return this ;
   },
   
