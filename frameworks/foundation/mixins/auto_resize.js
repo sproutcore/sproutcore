@@ -117,7 +117,7 @@ SC.AutoResize = {
   },
   
   measureSize: function(batch) {
-    var metrics, layer, value = this.get(this.get('autoResizeField')), autoSizePadding;
+    var metrics, layer, value = this.get(this.get('autoResizeField')), autoSizePadding, paddingHeight, paddingWidth;
     
     // if there's nothing to measure, don't bother actually measuring it
     if(SC.none(value) || value === "") metrics = { width: 0, height: 0 };
@@ -138,8 +138,14 @@ SC.AutoResize = {
     if (this.get('shouldAutoResize')) {
       autoSizePadding = this.get('autoSizePadding');
       
-      if (this.get('shouldResizeWidth')) this.adjust('width', metrics.width + autoSizePadding);
-      if (this.get('shouldResizeHeight')) this.adjust('height', metrics.height + autoSizePadding);
+      if(SC.typeOf(autoSizePadding) === SC.T_NUMBER) paddingHeight = paddingWidth = autoSizePadding;
+      else {
+        paddingHeight = autoSizePadding.height;
+        paddingWidth = autoSizePadding.width;
+      }
+      
+      if (this.get('shouldResizeWidth')) this.adjust('width', metrics.width + paddingWidth);
+      if (this.get('shouldResizeHeight')) this.adjust('height', metrics.height + paddingHeight);
     }
     
     this._SCAR_measurementPending = NO;
