@@ -18,9 +18,11 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
-    var theme             = dataSource.get('theme');
-    var minWidth          = dataSource.get('titleMinWidth');
-    var toolTip           = dataSource.get('toolTip');
+    var theme             = dataSource.get('theme'),
+        minWidth          = dataSource.get('titleMinWidth'),
+        toolTip           = dataSource.get('displayToolTip'),
+        view              = dataSource.get('view');
+    
     var labelContent;
 
     context.setClass('icon', !!dataSource.get('icon') || 0);    
@@ -31,7 +33,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       context.attr('title', toolTip);
       context.attr('alt', toolTip);
     }
-
+    
     // Specify a minimum width for the inner part of the button.
     minWidth = (minWidth ? "style='min-width: " + minWidth + "px'" : '');
     context = context.push("<span class='sc-button-inner' " + minWidth + ">");

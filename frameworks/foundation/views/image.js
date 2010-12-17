@@ -75,7 +75,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     @property {String}
   */
   value: null,
-
+  
   /**
     If YES, image view will use the imageCache to control loading.  This 
     setting is generally preferred.
@@ -113,9 +113,8 @@ SC.ImageView = SC.View.extend(SC.Control,
     context.attr('src', src) ;
     
     // If there is a toolTip set, grab it and localize if necessary.
-    var toolTip = this.get('toolTip') ;
+    var toolTip = this.get('displayToolTip') ;
     if (SC.typeOf(toolTip) === SC.T_STRING) {
-      if (this.get('localize')) toolTip = toolTip.loc() ;
       context.attr('title', toolTip) ;
       context.attr('alt', toolTip) ;
     }
