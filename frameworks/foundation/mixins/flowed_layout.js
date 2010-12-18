@@ -472,7 +472,6 @@ SC.FlowedLayout = {
     // calculate spacer size
     spacerSize = Math.max(0, row.plan.maximumRowLength - row.rowLength) / spacerCount;
     
-    
     //
     // STEP TWO: ADJUST FOR ALIGNMENT
     // Note: if there are spacers, this has no effect, because they fill all available
@@ -505,10 +504,12 @@ SC.FlowedLayout = {
       position += item.itemLength;
       
       // if justification is on, we have one more spacer
-      if (align === SC.ALIGN_JUSTIFY) position += spacerSize;
+      // note that we check idx because position is used to determine the new rowLength.
+      if (align === SC.ALIGN_JUSTIFY && idx < len - 1) position += spacerSize;
     }
     
     row.shouldExpand = shouldExpand;
+    row.rowLength = position;
     row.rowSize = rowSize;
     
   },
@@ -596,11 +597,21 @@ SC.FlowedLayout = {
     
     if (this.get('autoResize')) {
       if (isVertical) {
-        this.set('calculatedHeight', longestRow + plan.rowStartPadding + plan.rowEndPadding);
-        this.set('calculatedWidth', totalSize + plan.planStartPadding + plan.planEndPadding);
+        if (this.get('shouldResizeHeight')) {
+          this.set('calculatedHeight', longestRow + plan.rowStartPadding + plan.rowEndPadding);
+        }
+        
+        if (this.get('shouldResizeWidth')) {
+          this.set('calculatedWidth', totalSize + plan.planStartPadding + plan.planEndPadding);
+        }
       } else {
-        this.set('calculatedWidth', longestRow + plan.rowStartPadding + plan.rowEndPadding);
-        this.set('calculatedHeight', totalSize + plan.planStartPadding + plan.planEndPadding);
+        if (this.get('shouldResizeWidth')) {
+          this.set('calculatedWidth', longestRow + plan.rowStartPadding + plan.rowEndPadding);
+        }
+        
+        if (this.get('shouldResizeHeight')) {
+           this.set('calculatedHeight', totalSize + plan.planStartPadding + plan.planEndPadding); 
+        }
       }
     }
   },
