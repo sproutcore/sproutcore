@@ -509,7 +509,7 @@ SC.FlowedLayout = {
     }
     
     row.shouldExpand = shouldExpand;
-    row.rowLength = position;
+    row.rowLength = position - row.plan.rowStartPadding; // row length does not include padding
     row.rowSize = rowSize;
     
   },
@@ -572,21 +572,11 @@ SC.FlowedLayout = {
         
         // the size is more questionable: we only change that if the
         // item wants.
-        if (item.fillRow) {
-          if (isVertical) {
-            layout.width = row.rowSize - item.spacing.left - item.spacing.right;
-          } else {
-            layout.height = row.rowSize - item.spacing.top - item.spacing.bottom;
-          }
-        }
+        if (item.fillRow) layout[isVertical ? 'width' : 'height'] = row.rowSize;
+        if (item.isSpacer) layout[isVertical ? 'height' : 'width'] = item.itemLength;
         
-        if (item.isSpacer) {
-          if (isVertical) {
-            layout.height = item.itemLength - item.spacing.top - item.spacing.bottom;
-          } else {
-            layout.width = item.itemLength - item.spacing.left - item.spacing.right;
-          }
-        }
+        if (layout.width !== undefined) layout.width -= item.spacing.left + item.spacing.right;
+        if (layout.height !== undefined) layout.height -= item.spacing.top + item.spacing.bottom;
         
         item.child.adjust(layout);
         item.child._scfl_lastLayout = layout;
@@ -595,23 +585,16 @@ SC.FlowedLayout = {
       }
     }
     
+    totalSize += plan.planStartPadding + plan.planEndPadding;
+    longestRow += plan.rowStartPadding + plan.rowEndPadding;
+    
     if (this.get('autoResize')) {
-      if (isVertical) {
-        if (this.get('shouldResizeHeight')) {
-          this.set('calculatedHeight', longestRow + plan.rowStartPadding + plan.rowEndPadding);
-        }
-        
-        if (this.get('shouldResizeWidth')) {
-          this.set('calculatedWidth', totalSize + plan.planStartPadding + plan.planEndPadding);
-        }
-      } else {
-        if (this.get('shouldResizeWidth')) {
-          this.set('calculatedWidth', longestRow + plan.rowStartPadding + plan.rowEndPadding);
-        }
-        
-        if (this.get('shouldResizeHeight')) {
-           this.set('calculatedHeight', totalSize + plan.planStartPadding + plan.planEndPadding); 
-        }
+      if (this.get('shouldResizeHeight')) {
+        this.set('calculatedHeight', isVertical ? longestRow : totalSize);
+      }
+      
+      if (this.get('shouldResizeWidth')) {
+        this.set('calculatedWidth', isVertical ? totalSize : longestRow);
       }
     }
   },
