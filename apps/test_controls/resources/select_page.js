@@ -15,6 +15,7 @@ TestControls.selectPage = SC.View.design({
     
     // Plain Views
     header: SC.LabelView.design({
+      fillWidth: YES,
       layout: { width: 250, height: 18 },
       value: "Select View",
       classNames: "header".w()

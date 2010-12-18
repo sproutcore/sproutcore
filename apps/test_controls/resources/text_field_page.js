@@ -21,7 +21,8 @@ TestControls.textFieldPage = SC.View.design({
       header: SC.LabelView.design({
         layout: { width: 200, height: 44 },
         classNames: "header".w(),
-        value: "Text Fields"
+        value: "Text Fields",
+        fillWidth: YES
       }),
     
       normal: SC.FormView.row(SC.TextFieldView.design({

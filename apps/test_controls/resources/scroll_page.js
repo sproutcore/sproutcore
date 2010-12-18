@@ -15,6 +15,7 @@ TestControls.scrollPage = SC.View.design({
       layout: { left: 20, top: 40, right: 20, bottom: 40 },
       childViews: "header list incrementalList imageList".w(),
       header: SC.LabelView.design({
+        fillWidth: YES,
         layout: { width: 300, height: 24 },
         classNames: "header".w(),
         value: "Scroll Views"

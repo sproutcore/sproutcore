@@ -14,6 +14,7 @@ TestControls.segmentedPage = SC.View.design({
     childViews: "header small normal large jumbo disabled multiple multiple_side_by_side overflow".w(),
     
     header: SC.LabelView.design({
+      fillWidth: YES,
       layout: {width:300, height:24},
       classNames: "header".w(),
       value: "Segmented Views "

@@ -14,6 +14,7 @@ TestControls.slidersPage = SC.View.design({
     childViews: "header small normal jumbo disabled".w(),
     // Plain Views
     header: SC.LabelView.design({
+      fillWidth: YES,
       layout: { width: 250, height: 18 },
       value: "Sliders",
       classNames: "header".w()

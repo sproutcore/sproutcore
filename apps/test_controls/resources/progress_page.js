@@ -15,6 +15,7 @@ TestControls.progressPage = SC.View.design({
     childViews: "header normal disabled".w(),
     
     header: SC.LabelView.design({
+      fillWidth: YES,
       layout: { width: 250, height: 18 },
       value: "Progress Bars",
       classNames: "header".w()

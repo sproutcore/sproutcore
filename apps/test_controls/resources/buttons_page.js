@@ -17,7 +17,7 @@ TestControls.buttonsPage = SC.View.design({
       classNames: ["sample_controls"],
       childViews: "header style flags small normal huge jumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
       header: SC.LabelView.design({
-        flowSize: { widthPercentage: 1 },
+        fillWidth: YES,
         layout: {width: 200, height: 24 },
         
         classNames: "header".w(),
@@ -25,6 +25,9 @@ TestControls.buttonsPage = SC.View.design({
       }),
       
       style: SC.FormView.row("Theme", SC.SegmentedView.design({
+        controlSize: SC.LARGE_CONTROL_SIZE,
+        flowSpacing: { bottom: 20 },
+        
         align: 'left',
         layout: { width: 300, height: 30 },
         items: [
@@ -123,6 +126,7 @@ TestControls.buttonsPage = SC.View.design({
         fillWidth: YES
       }),
       disclosureHeader: SC.LabelView.design({
+        fillWidth: YES,
         layout: { width: 400, height: 24 },
         classNames: "header".w(),
         value: "Disclosure Buttons"

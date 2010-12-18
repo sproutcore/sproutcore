@@ -14,6 +14,7 @@ TestControls.checkboxesPage = SC.View.design({
     childViews: "header small normal disabled multiple".w(),
     
     header: SC.LabelView.design({
+      fillWidth: YES,
       layout: { width: 200, height: 24 },
       classNames: "header".w(),
       value: "Checkboxes"

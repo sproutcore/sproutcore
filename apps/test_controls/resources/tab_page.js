@@ -15,7 +15,8 @@ TestControls.tabPage = SC.View.design({
     header: SC.LabelView.design({
       layout: {width:300, height:24},
       classNames: "header".w(),
-      value: "Tab Views"
+      value: "Tab Views",
+      fillWidth: YES
     }),
     
     top: SC.FormView.row(SC.TabView.design({
