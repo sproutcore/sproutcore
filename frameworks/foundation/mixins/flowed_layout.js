@@ -115,11 +115,8 @@ SC.FlowedLayout = {
     since our last record of it.
   */
   layoutDidChangeFor: function(c) {
-    // if we have not flowed yet, ignore as well
-    if (!this._scfl_itemLayouts) return sc_super();
-    
     // now, check if anything has changed
-    var l = this._scfl_itemLayouts[SC.guidFor(c)], cl = c.get('layout'), f = c.get('frame');
+    var l = c._scfl_lastLayout, cl = c.get('layout'), f = c.get('frame');
     if (!l) return sc_super();
     
     var same = YES;
@@ -324,10 +321,10 @@ SC.FlowedLayout = {
     
     if (isVertical) {
       plan.maximumRowLength = frame.height - plan.rowStartPadding - plan.rowEndPadding;
-      plan.fitToPlanSize = frame.width;
+      plan.fitToPlanSize = frame.width - plan.planStartPadding - plan.planEndPadding;
     } else {
       plan.maximumRowLength = frame.width - plan.rowStartPadding - plan.rowEndPadding;
-      plan.fitToPlanSize = frame.height;
+      plan.fitToPlanSize = frame.height - plan.planStartPadding - plan.planEndPadding;
     }
     
     return plan;
@@ -424,7 +421,7 @@ SC.FlowedLayout = {
         fillRow: isVertical ? child.get('fillWidth') : child.get('fillHeight'),
         
         // whether this item is a spacer, and thus should be resized to its itemLength
-        isSpacer: NO,
+        isSpacer: child.get('isSpacer'),
         
         // these will get set if necessary during the positioning code
         left: undefined, top: undefined,
@@ -458,14 +455,14 @@ SC.FlowedLayout = {
   */
   _scfl_positionChildrenInRow: function(row) {
     var items = row.items, len = items.length, idx, item, position, rowSize = 0,
-        spacerCount, spacerSize, align = row.plan.align, shouldExpand = YES;
+        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = YES;
     
     // 
     // STEP ONE: DETERMINE SPACER SIZE + COUNT
     // 
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
-      if (item.child.get('isSpacer')) spacerCount += item.child.get('spaceUnits') || 1;
+      if (item.isSpacer) spacerCount += item.child.get('spaceUnits') || 1;
     }
     
     // justification is like adding a spacer between every item. We'll actually account for
@@ -478,11 +475,13 @@ SC.FlowedLayout = {
     
     //
     // STEP TWO: ADJUST FOR ALIGNMENT
+    // Note: if there are spacers, this has no effect, because they fill all available
+    // space.
     //
     position = 0;
-    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) {
+    if (spacerCount === 0 && (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM)) {
       position = row.plan.maximumRowLength - row.rowLength;
-    } else if (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE) {
+    } else if (spacerCount === 0 && (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE)) {
       position = (row.plan.maximumRowLength / 2) - (row.rowLength / 2);
     }
     
@@ -493,8 +492,7 @@ SC.FlowedLayout = {
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
       
-      if (item.child.get('isSpacer')) {
-        item.isSpacer = YES;
+      if (item.isSpacer) {
         item.itemLength += spacerSize * (item.child.get('spaceUnits') || 1);
       }
       
@@ -523,7 +521,7 @@ SC.FlowedLayout = {
     // are filling to (the combined size of all _other_ rows).
     for (idx = 0; idx < len; idx++) {
       if (rows[idx].shouldExpand) fillRowCount++;
-      planSize += rows[idx].size;
+      planSize += rows[idx].rowSize;
     }
     
     fillSpace = plan.fitToPlanSize - planSize;
@@ -549,7 +547,7 @@ SC.FlowedLayout = {
   */
   _scfl_applyPlan: function(plan) {
     var rows = plan.rows, rowIdx, rowsLen, row, longestRow = 0, totalSize = 0,
-        items, itemIdx, itemsLen, item,
+        items, itemIdx, itemsLen, item, layout,
         
         isVertical = plan.isVertical;
     
@@ -565,31 +563,32 @@ SC.FlowedLayout = {
         item = items[itemIdx];
         item.child.beginPropertyChanges();
         
-        if (isNaN(row.rowSize + item.itemLength + row.position + item.position)) debugger;
+        layout = {};
         
         // we are _going_ to set position. that much is certain.
-        item.child.adjust({
-          left: item.spacing.left + (isVertical ? row.position : item.position),
-          top: item.spacing.top + (isVertical ? item.position : row.position)
-        });
+        layout.left = item.spacing.left + (isVertical ? row.position : item.position);
+        layout.top = item.spacing.top + (isVertical ? item.position : row.position);
         
         // the size is more questionable: we only change that if the
         // item wants.
         if (item.fillRow) {
           if (isVertical) {
-            item.child.adjust('width', row.rowSize - item.spacing.left - item.spacing.right);
+            layout.width = row.rowSize - item.spacing.left - item.spacing.right;
           } else {
-            item.child.adjust('height', row.rowSize - item.spacing.top - item.spacing.bottom);
+            layout.height = row.rowSize - item.spacing.top - item.spacing.bottom;
           }
         }
         
         if (item.isSpacer) {
           if (isVertical) {
-            item.child.adjust('height', item.itemLength - item.spacing.top - item.spacing.bottom);
+            layout.height = item.itemLength - item.spacing.top - item.spacing.bottom;
           } else {
-            item.child.adjust('width', item.itemLength - item.spacing.left - item.spacing.right);
+            layout.width = item.itemLength - item.spacing.left - item.spacing.right;
           }
         }
+        
+        item.child.adjust(layout);
+        item.child._scfl_lastLayout = layout;
         
         item.child.endPropertyChanges();
       }
@@ -597,11 +596,11 @@ SC.FlowedLayout = {
     
     if (this.get('autoResize')) {
       if (isVertical) {
-        this.set('calculatedHeight', longestRow);
-        this.set('calculatedWidth', totalSize);
+        this.set('calculatedHeight', longestRow + plan.rowStartPadding + plan.rowEndPadding);
+        this.set('calculatedWidth', totalSize + plan.planStartPadding + plan.planEndPadding);
       } else {
-        this.set('calculatedWidth', longestRow);
-        this.set('calculatedHeight', totalSize);
+        this.set('calculatedWidth', longestRow + plan.rowStartPadding + plan.rowEndPadding);
+        this.set('calculatedHeight', totalSize + plan.planStartPadding + plan.planEndPadding);
       }
     }
   },
