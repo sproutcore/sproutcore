@@ -176,7 +176,7 @@ SC.FlowedLayout = {
     Determines whether the specified child view should be included in the flow layout.
     By default, if it has isVisible: NO or useAbsoluteLayout: YES, it will not be included.
   */
-  shouldIncludeChildInFlow: function(c) {
+  shouldIncludeChildInFlow: function(idx, c) {
     return c.get('isVisible') && !c.get('useAbsoluteLayout');
   },
   
@@ -184,7 +184,7 @@ SC.FlowedLayout = {
     Returns the flow spacings for a given view. By default, returns the view's flowSpacing,
     and if they don't exist, the defaultFlowSpacing for this view.
   */
-  flowSpacingForView: function(idx, view) {
+  flowSpacingForChild: function(idx, view) {
     var spacing = view.get("flowSpacing");
     if (SC.none(spacing)) spacing = this.get("defaultFlowSpacing");
     
@@ -201,14 +201,14 @@ SC.FlowedLayout = {
   },
   
   /**
-    Returns the flow size for a given view. The default version checks the view's
-    calculatedWidth/Height, then its frame.
+    Returns the flow size for a given view, including spacing. The default version 
+    checks the view's calculatedWidth/Height, then its frame.
     
     For spacers, this returns an empty size.
     
     This should return a structure like: { width: whatever, height: whatever }
   */
-  flowSizeForView: function(idx, view) {
+  flowSizeForChild: function(idx, view) {
     var cw = view.get('calculatedWidth'), ch = view.get('calculatedHeight');
     
     var calc = {}, f = view.get('frame');
@@ -219,30 +219,14 @@ SC.FlowedLayout = {
     if (cw) {
       calc.width = cw;
     } else {
-      // if the width is not calculated, we can't just use the frame because
-      // we may have altered the frame. _scfl_cachedFlowSize is valid, however,
-      // if the frame width is equal to _scfl_cachedCalculatedFlowSize.width, as 
-      // that means the width has not been recomputed.
-      //
-      // Keep in mind that if we are the ones who recomputed it, we can use our
-      // original value. If it was recomputed by the view itself, then its value
-      // should be ok and unmanipulated by us, in theory.
-      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.width == f.width) {
-        calc.width = view._scfl_cachedFlowSize.width;
-      } else {
-        calc.width = f.width;
-      }
+      calc.width = f.width;
     }
     
     // same for calculated height
     if (ch) {
       calc.height = ch;
     } else {
-      if (view._scfl_cachedCalculatedFlowSize && view._scfl_cachedCalculatedFlowSize.height == f.height) {
-        calc.height = view._scfl_cachedFlowSize.height;
-      } else {
-        calc.height = f.height;
-      }
+      calc.height = f.height;
     }
     
     // if it is a spacer, we must set the dimension that it
@@ -263,147 +247,13 @@ SC.FlowedLayout = {
       calc.width = 0;
     }
     
+    // get spacing
+    var spacing = this.flowSpacingForChild(idx, view);
+    calc.width += spacing.width;
+    calc.height += spacing.height;
+    
     // return
     return calc;
-  },
-  
-  /**
-    Takes a row and positions everything within the row, calling updateLayout.
-    It should return the row height.
-  */
-  flowRow: function(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align) {
-    
-    // we deal with values already offset for padding
-    // therefore, we must adjust availableRowLength
-    if (primary === 'left') availableRowLength -= padding['left'] + padding['right'];
-    else availableRowLength -= padding['top'] + padding['bottom'];
-    
-    // if it is justified, we'll add spacing between ALL views.
-    var item, len = row.length, idx, layout, rowLength = 0, totalSpaceUnits = 0, spacePerUnit = 0;
-    
-    // first, determine the width of all items, and find out how many virtual spacers there are
-    // this width includes spacing
-    for (idx = 0; idx < len; idx++) {
-      item = row[idx];
-      if (item.get("isSpacer")) totalSpaceUnits += item.get("spaceUnits") || 1;
-      else rowLength += item._scfl_cachedSpacedSize[primary === "left" ? "width" : "height"];
-    }
-    
-    // add space units for justification
-    // when justifying, we give one space unit between each item
-    if (len > 1 && align === SC.ALIGN_JUSTIFY) {
-      totalSpaceUnits += len - 1;
-    }
-    
-    // calculate space per unit if needed
-    if (totalSpaceUnits > 0) {
-      spacePerUnit = (availableRowLength - rowLength) / totalSpaceUnits;
-      rowLength = availableRowLength;
-    }
-    
-    // prepare.
-    // we will setup x, y
-    // we _may_ set up width and/or height, if the view is a spacer or has
-    // fillHeight/fillWidth.
-    var x = padding['left'], y = padding['top'], width, height, itemSize = 0;
-    
-    if (primary === 'left') y = rowOffset;
-    else x = rowOffset;
-    
-    // handle align
-    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) {
-      if (primary === 'left') x = (availableRowLength - rowLength - padding.right);
-      else y = (availableRowLength - rowLength - padding.bottom);
-    } else if (align === SC.ALIGN_CENTER || align === SC.ALIGN_MIDDLE) {
-      if (primary === 'left') x = (availableRowLength - padding.top - padding.bottom) / 2 - rowLength / 2;
-      else y = (availableRowLength - padding.top - padding.bottom) / 2 - rowLength / 2;
-    }
-    
-    // position
-    for (idx = 0; idx < len; idx++) {
-      item = row[idx];
-      
-      width = undefined; height = undefined;
-      
-      // sometimes a view wants to fill the row; that is, if we flow horizontally,
-      // be the full height, and vertically, fill the width. This only applies if
-      // we are not wrapping...
-      //
-      // Since we still position with spacing, we have to set the width to the total row
-      // size minus the spacing. The spaced size holds only the spacing because the
-      // flow size method returns 0.
-      if (item.get("fillHeight") && primary === "left") {
-        height = rowSize - item._scfl_cachedSpacedSize.height;
-      }
-      if (item.get("fillWidth") && primary === "top") {
-        width = rowSize - item._scfl_cachedSpacedSize.width;
-      }
-      
-      // update offset
-      if (item.get('isSpacer')) {
-        // the cached size is the minimum size for the spacer
-        itemSize = item._scfl_cachedSpacedSize[primary === 'left' ? 'width' : 'height'];
-        
-        // get the spacer size
-        itemSize = Math.max(itemSize, spacePerUnit * (item.get('spaceUnits') || 1));
-        
-        // and finally, set back the cached flow size value--
-        // not including spacing (this is the view size for rendering)
-        // spacers include 
-        if (primary === "left") {
-          width = itemSize;
-        } else {
-          height = itemSize;
-        }
-      } else {
-        if (primary === "left") {
-          itemSize = item._scfl_cachedSpacedSize.width;
-        } else {
-          itemSize = item._scfl_cachedSpacedSize.height;
-        }
-      }
-      
-      this.flowPositionView(idx, item, x, y, width, height);
-      
-      if (primary === 'left') x += itemSize;
-      else y += itemSize;
-      
-      // update justification
-      if (align === SC.ALIGN_JUSTIFY) {
-        if (primary === 'left') x += spacePerUnit;
-        else y += spacePerUnit;
-      }
-    }
-    
-    if (primary === 'left') return x;
-    return y;
-  },
-  
-  flowPositionView: function(idx, item, x, y, width, height) {
-    var last = this._scfl_itemLayouts[SC.guidFor(item)],
-        spacing = item._scfl_cachedSpacing;
-    var l = {
-      left: x + spacing.left,
-      top: y + spacing.top
-    };
-    
-    if (width !== undefined) l.width = width;
-    if (height !== undefined) l.height = height;
-
-    // we must set this first, or it will think it has to update layout again, and again, and again
-    // and we get a crash.
-    this._scfl_itemLayouts[SC.guidFor(item)] = l;
-
-    // Also, never set if the same. We only want to compare layout properties, though
-    if (last && 
-      last.left == l.left && last.top == l.top && 
-      last.width == l.width && l.width !== undefined && 
-      last.height == l.height && l.height !== undefined
-    ) {
-      return;
-    }
-    
-    item.adjust(l);
   },
   
   // hacky, but only way to allow us to use calculatedWidth/Height and avoid clobbering
@@ -414,172 +264,350 @@ SC.FlowedLayout = {
   },
   
   clippingFrame: function() {
-    var ret = sc_super(),
-    cw = this.get('calculatedWidth'), ch = this.get('calculatedHeight');
-    
-    if(cw) ret.width = cw;
-    if(ch) ret.height = ch;
-    
-    return ret;
+    return { left: 0, top: 0, width: this.get('calculatedWidth'), height: this.get('calculatedHeight') };
   }.property('calculatedWidth', 'calculatedHeight'),
   
   _scfl_calculatedSizeDidChange: function() {
-    var elem = this.$(),
-    cw = this.get('calculatedWidth'), ch = this.get('calculatedHeight');
-    
-    if(cw) elem.css('minWidth', this.get('calculatedWidth'));
-    if(ch) elem.css('minHeight', this.get('calculatedHeight'));
+    this.$().css('minWidth', this.get('calculatedWidth'));
+    this.$().css('minHeight', this.get('calculatedHeight'));
   }.observes('calculatedWidth', 'calculatedHeight'),
   
-  _scfl_tile: function() {
-    if (!this._scfl_itemLayouts) this._scfl_itemLayouts = {};
+  /**
+    @private
+    Creates a plan, initializing all of the basic properties in it, but not
+    doing anything further.
     
-    var isObserving = this._scfl_isObserving || SC.CoreSet.create(),
-        nowObserving = SC.CoreSet.create();
+    Other methods should be called to do this:
     
-    var children = this.get('childViews'), child, idx, len = children.length,
-        rows = [], row = [],
-        startRowSize = 0, rowSize = 0, 
-        startsNewRow, newRowPending = NO,
-        rowOffset = 0, itemOffset = 0, 
-        width = this.get('frame').width,
-        height = this.get('frame').height,
-        canWrap = this.get('canWrap'),
-        layoutDirection = this.get('layoutDirection'),
-        padding = this.get('_scfl_validFlowPadding'),
-        childSize, childSpacing, childSpacedSize, align = this.get('align'),
-        longestRow = 0;
+    - _scfl_distributeChildrenIntoRows distributes children into rows.
+    - _scfl_positionChildrenInRows positions the children within the rows.
+      - this calls _scfl_positionChildrenInRow
+    - _scfl_positionRows positions and sizes rows within the plan.
     
+    The plan's structure is defined inside the method.
     
-    var primary, primary_os, primary_d, secondary, secondary_os, secondary_d, flowLimit, availableRowLength;
-    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-      availableRowLength = width;
-      flowLimit = width - padding["right"];
+    Some of these methods may eventually be made public and/or delegate methods.
+  */
+  _scfl_createPlan: function() {
+    var layoutDirection = this.get('layoutDirection'),
+        flowPadding = this.get('_scfl_validFlowPadding'),
+        frame = this.get('frame');
+    
+    var isVertical = (layoutDirection === SC.LAYOUT_VERTICAL);
+    
+    // A plan hash contains general information about the layout, and also,
+    // the collection of rows.
+    //
+    // This method only fills out a subset of the properties in a plan.
+    // 
+    var plan = {
+      // The rows array starts empty. It will get filled out by the method
+      // _scfl_distributeChildrenIntoRows.
+      rows: undefined,
       
-      primary = "left"; secondary = "top";
-      primary_os = "right"; secondary_os = "bottom";
-      primary_d = "width"; secondary_d = "height";
+      // These properties are calculated once here, but later used by
+      // the various methods.
+      isVertical: layoutDirection === SC.LAYOUT_VERTICAL,
+      isHorizontal: layoutDirection === SC.LAYOUT_HORIZONTAL,
+      
+      flowPadding: flowPadding,
+      
+      planStartPadding: flowPadding[isVertical ? 'left' : 'top'],
+      planEndPadding: flowPadding[isVertical ? 'right' : 'bottom'],
+      
+      rowStartPadding: flowPadding[isVertical ? 'top' : 'left'],
+      rowEndPadding: flowPadding[isVertical ? 'bottom' : 'right'],
+      
+      maximumRowLength: undefined, // to be calculated below
+      
+      // if any rows need to fit to fill, this is the size to fill
+      fitToPlanSize: undefined,
+      
+      
+      align: this.get('align')
+    };
+    
+    if (isVertical) {
+      plan.maximumRowLength = frame.height - plan.rowStartPadding - plan.rowEndPadding;
+      plan.fitToPlanSize = frame.width;
     } else {
-      availableRowLength = height;
-      flowLimit = height - padding["bottom"];
-      
-      primary = "top"; secondary = "left";
-      primary_os = "bottom"; secondary_os = "right";
-      primary_d = "height"; secondary_d = "width";
+      plan.maximumRowLength = frame.width - plan.rowStartPadding - plan.rowEndPadding;
+      plan.fitToPlanSize = frame.height;
     }
     
-    rowOffset = padding[secondary];
-    itemOffset = padding[primary];
-    /*
-    // if we cannot wrap, the row size is our frame (minus padding)
-    if (!canWrap) {
-      if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-        rowSize = startRowSize = height - padding.top - padding.bottom;
-      } else {
-        rowSize = startRowSize = width - padding.right - padding.left;
-      }
-    }
-      */  
-    // now, loop through all child views and group them into rows.
-    // note that we are NOT positioning.
-    // when we are done with a row, we call flowRow to finish it.
-    for (idx = 0; idx < len; idx++) {
-      // get a child.
-      child = children[idx];
+    return plan;
+  },
+  
+  _scfl_distributeChildrenIntoRows: function(plan) {
+    var children = this.get('childViews'), child, idx, len = children.length,
+        isVertical = plan.isVertical, rows = [], lastIdx;
+    
+    lastIdx = -1; idx = 0;
+    while (idx < len && idx !== lastIdx) {
+      lastIdx = idx;
       
-      // update observing lists
-      isObserving.remove(SC.guidFor(child));
-      nowObserving.add(child);
-      
-      // we need to check if it manually starts a new row, because if it does this is remembered even if the child isn't visible
-      startsNewRow = child.get('startsNewRow');
-      
-      // skip positioning of items with isVisible === NO or isHidden === YES
-      if (!this.shouldIncludeChildInFlow(child)) {
-        // if the hidden view started a new row, remember it for later
-        newRowPending = startsNewRow || newRowPending;
-        continue;
-      }
-      
-      // get spacing, size, and cache
-      childSize = this.flowSizeForView(idx, child);
-            
-      childSpacing = this.flowSpacingForView(idx, child);
-      childSpacedSize = {
-        width: childSize.width + childSpacing.left + childSpacing.right,
-        height: childSize.height + childSpacing.top + childSpacing.bottom
+      var row = {
+        // always a referene to the plan
+        plan: plan,
+        
+        // the combined size of the items in the row. This is used, for instance,
+        // in justification or right-alignment.
+        rowLength: undefined,
+        
+        // the size of the row. When flowing horizontally, this is the height;
+        // it is the opposite dimension of rowLength. It is calculated
+        // both while positioning items in the row and while positioning the rows
+        // themselves.
+        rowSize: undefined,
+        
+        // whether this row should expand to fit any available space. In this case,
+        // the size is the row's minimum size.
+        shouldExpand: undefined,
+        
+        // to be decided by _scfl_distributeItemsIntoRows
+        items: undefined,
+        
+        // to be decided by _scfl_positionRows
+        position: undefined
       };
       
-      // flowRow will use this; it's purely here for performance
-      child._scfl_cachedFlowSize = childSize;
-      child._scfl_cachedSpacedSize = childSpacedSize;
-      child._scfl_cachedSpacing = childSpacing;
+      this._scfl_distributeChildrenIntoRow(children, idx, row);
+      rows.push(row);
+    }
+    
+    plan.rows = rows;
+  },
+  
+  /**
+    @private
+    Distributes as many children as possible into a single row, stating
+    at the given index, and returning the index of the next item, if any.
+  */
+  _scfl_distributeChildrenIntoRow: function(children, startingAt, row) {
+    var idx, len = children.length, plan = row.plan, child, childSpacedSize, 
+        items = [], itemOffset = 0, isVertical = plan.isVertical, itemSize, itemLength;
+    
+    var max = row.plan.maximumRowLength;
+    
+    
+    for (idx = startingAt; idx < len; idx++) {
+      child = children[idx];
+      if (!this.shouldIncludeChildInFlow(idx, child)) continue;
       
-      // determine if the item can fit in the row including the collapsed right margin+padding or if it explicitly starts a new row
-      if (startsNewRow || newRowPending || (canWrap && row.length > 0 && itemOffset + childSize[primary_d] >= flowLimit)) {
-        // regardless of why we just created a new row, so the flag needs to be reset
-        newRowPending = NO;
+      childSpacedSize = this.flowSizeForChild(idx, child);
+      itemLength = childSpacedSize[isVertical ? 'height' : 'width'];
+      itemSize = childSpacedSize[isVertical ? 'width' : 'height'];
+      
+      // there are two cases where we must start a new row: if the child has
+      // startsNewRow === YES, and if the item cannot fit. Neither applies if there
+      // is nothing in the row yet.
+      if ((child.get('startsNewRow') || itemOffset + itemLength > max) && items.length > 0) {
+        break;
+      }
+      
+      var item = {
+        child: child,
         
-        // first, flow this row
-        this.flowRow(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align);
-
-        // We need another row.
-        row = [];
-        rows.push(row);
-        rowOffset += rowSize;
-        rowSize = startRowSize;
-        itemOffset = padding[primary];
+        itemLength: itemLength,
+        itemSize: itemSize,
+        
+        // The position in the row.
+        //
+        // note: in one process or another, this becomes left or top.
+        // but before that, it is calculated.
+        position: undefined,
+        
+        // whether this item should attempt to fill to the row's size
+        fillRow: isVertical ? child.get('fillWidth') : child.get('fillHeight'),
+        
+        // whether this item is a spacer, and thus should be resized to its itemLength
+        isSpacer: NO,
+        
+        // these will get set if necessary during the positioning code
+        left: undefined, top: undefined,
+        width: undefined, height: undefined
+      };
       
-      }
-
-      // add too row and update row size+item offset
-      row.push(child);
-      rowSize = Math.max(childSpacedSize[secondary_d], rowSize);
-      itemOffset += childSpacedSize[primary_d];
-      longestRow = Math.max(longestRow, itemOffset);
+      items.push(items);
+      itemOffset += itemLength;
+      row.rowLength = itemOffset;
     }
     
+    row.items = items;
+  },
+  
+  _scfl_positionChildrenInRows: function(plan) {
+    var rows = plan.rows, len = rows.length, idx;
     
-    // flow last row
-    itemOffset = this.flowRow(row, rowOffset, rowSize, availableRowLength, padding, primary, secondary, align);
-    longestRow = Math.max(longestRow, itemOffset);
-
+    for (idx = 0; idx < len; idx++) {
+      this._scfl_positionChildrenInRow(rows[idx]);
+    }
+  },
+  
+  /**
+    @private
+    Positions items within a row. The items are already in the row, this just
+    modifies the 'position' property.
     
-    // update calculated width/height
-    this._scfl_lastFrameSize = this.get('frame');
+    This also marks a tentative size of the row, and whether it should be expanded
+    to fit in any available extra space. Note the term 'size' rather than 'length'...
+  */
+  _scfl_positionChildrenInRow: function(row) {
+    var items = row.items, len = items.length, idx, item, position, rowSize = 0,
+        spacerCount, spacerSize, align = row.plan.align, shouldExpand = YES;
     
-    // size is now calculated the same whether canWrap is on or not
-    if (this.get('autoResize')) {
-      if(longestRow) {
-        if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-          if(this.get('shouldResizeWidth')) this.set('calculatedWidth', longestRow + padding[primary_os]);
-        } else {
-          if(this.get('shouldResizeHeight')) this.set('calculatedHeight', longestRow + padding[primary_os]);
-        }
+    // 
+    // STEP ONE: DETERMINE SPACER SIZE + COUNT
+    // 
+    for (idx = 0; idx < len; idx++) {
+      item = items[idx];
+      if (item.child.get('isSpacer')) spacerCount += item.child.get('spaceUnits') || 1;
+    }
+    
+    // justification is like adding a spacer between every item. We'll actually account for
+    // that later, but for now...
+    if (align === SC.ALIGN_JUSTIFY) spacerCount += len - 1;
+    
+    // calculate spacer size
+    spacerSize = (row.plan.maximumRowLength - row.rowLength) / spacerCount;
+    
+    
+    //
+    // STEP TWO: ADJUST FOR ALIGNMENT
+    //
+    if (align === SC.ALIGN_RIGHT || align === SC.ALIGN_BOTTOM) {
+      position = row.plan.maximumRowLength - row.rowLength;
+    } else if (align === SC.ALIGN_CENTER || SC.ALIGN_MIDDLE) {
+      position = (row.plan.maximumRowLength / 2) - (row.rowLength / 2);
+    }
+    
+    position += row.plan.rowStartPadding;
+    
+    // 
+    // STEP TWO: LOOP + POSITION
+    // 
+    for (idx = 0; idx < len; idx++) {
+      item = items[idx];
+      
+      if (item.child.get('isSpacer')) {
+        item.isSpacer = YES;
+        item.itemLength += spacerSize * (item.child.get('spaceUnits') || 1);
       }
       
-      if(rowOffset + rowSize) {
-        if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-          if(this.get('shouldResizeHeight')) this.set('calculatedHeight', rowOffset + rowSize + padding[secondary_os]);
-        } else {
-          if(this.get('shouldResizeWidth')) this.set('calculatedWidth', rowOffset + rowSize + padding[secondary_os]);
+      // if the item is not a fill-row item, this row has a size that all fill-row
+      // items should expand to
+      if (!item.fillRow) shouldExpand = NO;
+      rowSize = Math.max(item.itemSize, rowSize);
+      
+      item.position = position;
+      position += item.itemLength;
+      
+      // if justification is on, we have one more spacer
+      if (align === SC.ALIGN_JUSTIFY) position += spacerSize;
+    }
+    
+    row.shouldExpand = shouldExpand;
+    row.rowSize = rowSize;
+    
+  },
+
+  _scfl_positionRows: function(plan) {
+    var rows = plan.rows, len = rows.length, idx, row, position,
+        fillRowCount = 0, planSize = 0, fillSpace;
+    
+    // first, we need a count of rows that need to fill, and the size they
+    // are filling to (the combined size of all _other_ rows).
+    for (idx = 0; idx < len; idx++) {
+      if (rows[idx].shouldExpand) fillRowCount++;
+      planSize += rows[idx].size;
+    }
+    
+    fillSpace = plan.fitToPlanSize - planSize;
+    
+    // now, position+size the rows
+    position = plan.planStartPadding;
+    for (idx = 0; idx < len; idx++) {
+      row = rows[idx];
+      
+      if (row.shouldExpand && fillSpace > 0) {
+        row.rowSize += fillSpace / fillRowCount;
+        fillRowCount--;
+      }
+      
+      row.position = position;
+      position += row.rowSize;
+    }
+  },
+  
+  /**
+    @private
+    Positions all of the child views according to the plan.
+  */
+  _scfl_applyPlan: function(plan) {
+    var rows = plan.rows, rowIdx, rowsLen, row,
+        items, itemIdx, itemsLen, item,
+        
+        isVertical = plan.isVertical;
+    
+    for (rowIdx = 0; rowIdx < rowsLen; rowIdx++) {
+      row = rows[rowIdx];
+      items = row.items; itemsLen = items.length;
+      
+      for (itemIdx = 0; itemIdx < itemsLen; itemIdx++) {
+        item = items[itemIdx];
+        item.child.beginPropertyChanges();
+        
+        // we are _going_ to set position. that much is certain.
+        item.child.adjust({
+          left: isVertical ? row.position : item.position,
+          top: isVertical ? item.position : row.position
+        });
+        
+        // the size is more questionable: we only change that if the
+        // item wants.
+        if (item.fillRow) {
+          item.child.adjust(isVertical ? 'width' : 'height', row.rowSize);
         }
+        
+        if (item.isSpacer) {
+          item.child.adjust(isVertical ? 'height' : 'width', item.itemLength);
+        }
+        
+        item.child.endPropertyChanges();
       }
     }
+  },
+  
+  _scfl_tile: function() {
+    // first, do the plan
+    var plan = this._scfl_createPlan();
+    this._scfl_distributeChildrenIntoRows(plan);
+    this._scfl_positionChildrenInRows(plan);
+    this._scfl_positionRows(plan);
+    this._scfl_applyPlan(plan);
     
+    // second, observe all children, and stop observing any children we no longer
+    // should be observing.
+    var previouslyObserving = this._scfl_isObserving,
+        nowObserving = SC.CoreSet.create();
     
-    // cleanup on aisle 7
-    len = isObserving.length;
+    var children = this.get('childViews'), len = children.length, idx, child;
     for (idx = 0; idx < len; idx++) {
-      this.unobserveChildLayout(isObserving[idx]);
-    }
-
-    len = nowObserving.length;
-    for (idx = 0; idx < len; idx++) {
-      this.observeChildLayout(nowObserving[idx]);
+      child = children[idx];
+      
+      if (!previouslyObserving.contains(child)) {
+        this.observeChildLayout(child);
+      } else {
+        previouslyObserving.remove(child);
+      }
+      
+      nowObserving.add(child);
     }
     
-    this._scfl_isObserving = nowObserving;
+    len = previouslyObserving.length;
+    for (idx = 0; idx < len; idx++) {
+      this.unobserveChildLayout(previouslyObserving[idx]);
+    }
   },
   
   _scfl_frameDidChange: function() {
