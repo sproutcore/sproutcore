@@ -755,6 +755,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         evaluate:       function (r,w) {
                           var all    = this.leftSide.evaluate(r,w) || [];
                           var value = this.rightSide.evaluate(r,w);
+                          // workaround: SC.typeOf doesn't recognize SC.RecordArray as T_ARRAY
+                          if (all instanceof SC.RecordArray)
+                            all = all.toArray();
                           switch(SC.typeOf(all)) {
                             case SC.T_STRING:
                               return (all.indexOf(value) !== -1); 
