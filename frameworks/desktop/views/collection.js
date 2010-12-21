@@ -2288,8 +2288,8 @@ SC.CollectionView = SC.View.extend(
 
     // handle hover events.
     if (view !== last) {
-      if (last && last.mouseOut) last.mouseOut(ev);
-      if (view && view.mouseOver) view.mouseOver(ev);
+      if (last && last.mouseExited) last.mouseExited(ev);
+      if (view && view.mouseEntered) view.mouseEntered(ev);
     }
     this._lastHoveredItem = view ;
 
@@ -2298,10 +2298,10 @@ SC.CollectionView = SC.View.extend(
   },
   
   /** @private */
-  mouseOut: function(ev) {
+  mouseExited: function(ev) {
     var view = this._lastHoveredItem ;
     this._lastHoveredItem = null ;
-    if (view && view.mouseOut) view.mouseOut(ev) ;
+    if (view && view.mouseExited) view.mouseExited(ev) ;
     return YES ;
   },
   
