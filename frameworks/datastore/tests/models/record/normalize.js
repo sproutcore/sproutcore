@@ -57,12 +57,12 @@ module("SC.Record normalize method", {
 
     // A parent record
     MyApp.FooParent = SC.Record.extend({
-      childRecordNamespace: MyApp,
+      nestedRecordNamespace: MyApp,
       myChild: SC.ChildAttribute.attr('MyApp.FooChild')
     });
 
     // A child record
-    MyApp.FooChild = SC.ChildRecord.extend({
+    MyApp.FooChild = SC.Record.extend({
     });
     
     MyApp.Bar = SC.Record.extend({
