@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('models/record');
-sc_require('models/child_record');
 
 /** @class
 
@@ -463,7 +462,7 @@ SC.RecordAttribute.registerTransform(Date, {
       if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
       if (d[14]) {
          offset = (Number(d[16]) * 60) + Number(d[17]);
-         offset *= ((d[15] == '-') ? 1 : -1);
+         offset *= ((d[15] === '-') ? 1 : -1);
       }
 
       offset -= date.getTimezoneOffset();

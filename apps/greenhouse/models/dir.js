@@ -13,13 +13,13 @@ require('core');
   @property name
   @property contents
   
-  @extends SC.ChildRecord
+  @extends SC.Record
   @version 0.1
 */
-Greenhouse.Dir = SC.ChildRecord.extend(
+Greenhouse.Dir = SC.Record.extend(
 /** @scope Greenhouse.Dir.prototype */ {
   type: 'Dir',
-  childRecordNamespace: Greenhouse,
+  nestedRecordNamespace: Greenhouse,
   
   name: SC.Record.attr(String),
   dir: SC.Record.attr(String),  
