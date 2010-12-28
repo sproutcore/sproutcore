@@ -321,8 +321,7 @@ if (SC.platform.supportsCSSTransforms) {
   module('ACCELERATED LAYOUT VARIATIONS', {
     setup: function(){
       commonSetup.setup();
-      // Force support
-      child.hasAcceleratedLayer = YES;
+      child.wantsAcceleratedLayer = YES;
     },
 
     teardown: commonSetup.teardown
@@ -342,18 +341,16 @@ if (SC.platform.supportsCSSTransforms) {
   test("layout {top, left, bottom, right}", function() {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-    var expectedTransform = 'translateX(0px) translateY(0px)';
-    if (SC.platform.supportsCSS3DTransforms) expectedTransform += ' translateZ(0px)';
-    var no_f = { x: 10, y: 10, width: 0, height: 0, transform: expectedTransform } ;
-    var with_f = { x: 10, y: 10, width: 180, height: 180, transform: expectedTransform } ;
-    var s = { top: 10, left: 10, bottom: 10, right: 10, transform: expectedTransform } ;
+    var no_f = { x: 10, y: 10, width: 0, height: 0, transform: null } ;
+    var with_f = { x: 10, y: 10, width: 180, height: 180, transform: null } ;
+    var s = { top: 10, left: 10, bottom: 10, right: 10, transform: null } ;
 
     performLayoutTest(layout, no_f, s, with_f, s) ;
   }) ;
 
   test("layout {top, left, width: auto, height: auto}", function() {
     child = SC.View.create({
-      hasAcceleratedLayer: YES, // Force this
+      wantsAcceleratedLayer: YES,
       useStaticLayout: YES,
       render: function(context) {
         // needed for auto
@@ -367,11 +364,9 @@ if (SC.platform.supportsCSSTransforms) {
     document.body.appendChild(layer);
   
     var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
-    var expectedTransform = 'translateX(0px) translateY(0px)';
-    if (SC.platform.supportsCSS3DTransforms) expectedTransform += ' translateZ(0px)';
-    var no_f = { x: 0, y: 0, width: 0, height: 0, transform: expectedTransform };
-    var with_f = { x: 0, y: 0, width: 20, height: 20, transform: expectedTransform };
-    var s = { top: 0, left: 0, width: 'auto', height: 'auto', transform: expectedTransform };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, transform: null };
+    var with_f = { x: 0, y: 0, width: 20, height: 20, transform: null };
+    var s = { top: 0, left: 0, width: 'auto', height: 'auto', transform: null };
   
     performLayoutTest(layout, no_f, s, with_f, s);
   
@@ -381,11 +376,9 @@ if (SC.platform.supportsCSSTransforms) {
   test("layout w/ percentage {top, left, width, height}", function() {
 
     var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
-    var expectedTransform = 'translateX(0px) translateY(0px)';
-    if (SC.platform.supportsCSS3DTransforms) expectedTransform += ' translateZ(0px)';
-    var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: expectedTransform } ;
-    var no_f = { top: '10%', left: '10%', width: '50%', height: '50%', transform: expectedTransform } ;
-    var with_f = { top: '10%', left: '10%', width: '50%', height: '50%', transform: expectedTransform } ;
+    var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
+    var no_f = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
+    var with_f = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
 
     performLayoutTest(layout, no_f, s, with_f, s) ;
   }) ;
@@ -494,7 +487,7 @@ test("layout {top, left, bottom, right, centerX, centerY, height, width} - top/l
 
 
 test("layout {centerX, centerY, width:auto, height:auto}", function() {
-  var error=null;
+  var error= 'NONE';
   var layout = { centerX: 0.1, centerY: 0.1, width: 'auto', height: 'auto' };
 
   child.set('layout', layout) ;
@@ -503,8 +496,9 @@ test("layout {centerX, centerY, width:auto, height:auto}", function() {
   }catch(e){
     error=e;
   }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
-  'error if centerx/y and width/height are set at the same time ' + error );
+
+  equals(SC.T_ERROR, SC.typeOf(error), 'Layout style functions should throw an '+
+                                         'error if centerx/y and width/height are set at the same time ' + error );
   
 }) ;
 
@@ -584,8 +578,8 @@ test("frame loc shifts with centerX/centerY", function(){
   verifyFrameResize(layout, before, after);
 });
 
-
-
+test("for proper null variables");
+// nothing should get passed through as undefined, instead we want null in certain cases
 
 
 

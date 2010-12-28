@@ -1,7 +1,7 @@
 // ==========================================================================
-// Ki.Statechart Unit Test
+// SC.Statechart Unit Test
 // ==========================================================================
-/*globals Ki */
+/*globals SC */
 
 var statechart = null;
 
@@ -9,22 +9,22 @@ var statechart = null;
 // CONTENT CHANGING
 // 
 
-module("Ki.Statechart: With Concurrent States - Send Event Tests", {
+module("SC.Statechart: With Concurrent States - Send Event Tests", {
   setup: function() {
 
-    statechart = Ki.Statechart.create({
+    statechart = SC.Statechart.create({
       
       monitorIsActive: YES,
       
-      rootState: Ki.State.design({
+      rootState: SC.State.design({
         
         initialSubstate: 'x',
         
-        x: Ki.State.design({
+        x: SC.State.design({
           
           substatesAreConcurrent: YES,
           
-          a: Ki.State.design({
+          a: SC.State.design({
 
             initialSubstate: 'c',
 
@@ -32,18 +32,18 @@ module("Ki.Statechart: With Concurrent States - Send Event Tests", {
 
             eventA: function() { this.set('eventAInvoked', YES); },
 
-            c: Ki.State.design({
+            c: SC.State.design({
               eventB: function() { this.gotoState('d'); },
               eventD: function() { this.gotoState('y'); }
             }),
 
-            d: Ki.State.design({
+            d: SC.State.design({
               eventC: function() { this.gotoState('c'); }
             })
 
           }),
 
-          b: Ki.State.design({
+          b: SC.State.design({
 
             initialSubstate: 'e',
 
@@ -51,12 +51,12 @@ module("Ki.Statechart: With Concurrent States - Send Event Tests", {
 
             eventA: function() { this.set('eventAInvoked', YES); },
 
-            e: Ki.State.design({
+            e: SC.State.design({
               eventB: function() { this.gotoState('f'); },
               eventD: function() { this.gotoState('y'); }
             }),
 
-            f: Ki.State.design({
+            f: SC.State.design({
               eventC: function() { this.gotoState('e'); }
             })
 
@@ -64,7 +64,7 @@ module("Ki.Statechart: With Concurrent States - Send Event Tests", {
           
         }),
         
-        y: Ki.State.design()
+        y: SC.State.design()
         
       })
       

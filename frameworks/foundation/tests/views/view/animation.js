@@ -218,8 +218,7 @@ if (SC.platform.supportsCSSTransitions) {
   module("ANIMATION WITH ACCELERATED LAYER", {
     setup: function(){
       commonSetup.setup();
-      // Force support
-      view.hasAcceleratedLayer = YES;
+      view.wantsAcceleratedLayer = YES;
     },
 
     teardown: commonSetup.teardown
@@ -234,7 +233,7 @@ if (SC.platform.supportsCSSTransitions) {
 
   test("doesn't use acceleration when not appropriate", function(){
     SC.RunLoop.begin();
-    view.adjust({ height: '', bottom: 0 });
+    view.adjust({ height: null, bottom: 0 });
     view.animate('top', 100, 1);
     SC.RunLoop.end();
     equals(transitionFor(view), 'top 1s linear', 'transition is not on transform');
