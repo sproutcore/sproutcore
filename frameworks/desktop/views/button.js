@@ -297,7 +297,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   },
 
   /** @private
-    Remove the active class on mouseOut if mouse is down.
+    Remove the active class on mouseExited if mouse is down.
   */
   mouseExited: function(evt) {
     if (this._isMouseDown) {

@@ -282,21 +282,27 @@ SC.RunLoop.isRunLoopInProgress = function() {
 */
 SC.run = function(callback, target, forceNested) {
   var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
-  
-  try {
+
+  // Only use a try/catch block if we have an ExceptionHandler
+  // since in some browsers try/catch causes a loss of the backtrace
+  if (SC.ExceptionHandler && SC.ExceptionHandler.enabled) {
+    try {
+      if(forceNested || !alreadyRunning) SC.RunLoop.begin();
+      if (callback) callback.call(target);
+      if(forceNested || !alreadyRunning) SC.RunLoop.end();
+    } catch (e) {
+      SC.ExceptionHandler.handleException(e);
+
+      // Now that we've handled the exception, throw it again so the browser
+      // can deal with it (and potentially use it for debugging).
+      // (We don't throw it in IE because the user will see two errors)
+      if (!SC.browser.msie) {
+        throw e;
+      }
+    }
+  } else {
     if(forceNested || !alreadyRunning) SC.RunLoop.begin();
     if (callback) callback.call(target);
     if(forceNested || !alreadyRunning) SC.RunLoop.end();
-  } catch (e) {
-    if (SC.ExceptionHandler) {
-      SC.ExceptionHandler.handleException(e);
-    }
-
-    // Now that we've handled the exception, throw it again so the browser
-    // can deal with it (and potentially use it for debugging).
-    // (We don't throw it in IE because the user will see two errors)
-    if (!SC.browser.msie) {
-      throw e;
-    }
   }
 };

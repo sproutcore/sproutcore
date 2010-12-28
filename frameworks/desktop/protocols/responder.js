@@ -56,7 +56,7 @@ SC.ResponderProtocol = {
     @param evt {SC.Event} the mousemove event
     @returns {void}
   */
-  mouseOut: function(evt) {},
+  mouseExited: function(evt) {},
   
   /**
     Called when the mouse enters the view and the root responder is not in a
@@ -65,7 +65,7 @@ SC.ResponderProtocol = {
     @param evt {SC.Event} the mousemove event
     @returns {void}
   */
-  mouseOver: function(evt) {},
+  mouseEntered: function(evt) {},
   
   /**
     Called when the mouse moves within the view and the root responder is not in a

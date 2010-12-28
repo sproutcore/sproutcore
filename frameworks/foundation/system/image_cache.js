@@ -336,7 +336,8 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     // if entry is loading, abort it also.  Call local abort method in-case
     // browser decides not to follow up.
     if (this._loading.indexOf(entry) >= 0) {
-      queue.image.abort();
+      // In some cases queue.image is undefined. Is it ever defined?
+      if (queue.image) queue.image.abort();
       this.imageStatusDidChange(entry, this.ABORTED);
     }
     
