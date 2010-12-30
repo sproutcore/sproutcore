@@ -193,3 +193,42 @@ test("subclasses should contain defined subclasses", function() {
   var kls2 = obj1.extend();
   ok(obj1.subclasses.contains(kls2), 'obj1.subclasses should contain kls2');
 });
+
+module("Concatenated property testing", {
+  
+  setup: function() {
+    var klass = SC.Object.extend({
+      concatenatedProperties: 'foo',
+      foo: 'bar'
+    });
+    
+    obj = klass.create({ foo: 'baz' });
+    obj1 = klass.create({ foo: 'baz', fooReset: true });
+  },
+  
+  teardown: function() {
+    obj = undefined ;
+    obj1 = undefined ;
+  }
+  
+});
+
+test("Concatenated properties should be arrays", function() {
+  var foo = obj.get('foo');
+  ok(SC.typeOf(foo) === SC.T_ARRAY, "should be an array");
+  
+  foo = obj1.get('foo');
+  ok(SC.typeOf(foo) === SC.T_ARRAY, "should be an array");
+});
+
+test("An instance should include the parent's property.", function() {
+  var foo = obj.get('foo');
+  ok(foo.indexOf('bar') !== -1);
+  ok(foo.indexOf('baz') !== -1);
+});
+
+test("An instance should not include the parent's property when keyReset is true.", function() {
+  var foo = obj1.get('foo');
+  ok(foo.indexOf('bar') === -1);
+  ok(foo.indexOf('baz') !== -1);
+});
