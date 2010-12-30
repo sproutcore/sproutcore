@@ -43,21 +43,23 @@ SC._object_extend = function _object_extend(base, ext) {
   base._kvo_cloned = null;
 
   // get some common vars
-  var key, idx, len, cur, cprops = base.concatenatedProperties, K = SC.K ;
-  var p1,p2;
+  var key, idx, len, cur, cprops = base.concatenatedProperties, K = SC.K, 
+      p1, p2, rkey ;
 
   // first, save any concat props.  use old or new array or concat
   idx = (cprops) ? cprops.length : 0 ;
   var concats = (idx>0) ? {} : null;
   while(--idx>=0) {
-    key = cprops[idx]; p1 = base[key]; p2 = ext[key];
+    key = cprops[idx]; p1 = base[key]; p2 = ext[key]; rkey = key + 'Reset';
 
-    if (p1) {
-      if (!(p1 instanceof Array)) p1 = SC.$A(p1);
-      concats[key] = (p2) ? p1.concat(p2) : p2 ;
-    } else {
+    // `key`Reset: YES means: don't concatenate `key` with base[key]
+    if (ext[rkey] || !p1) {
       if (!(p2 instanceof Array)) p2 = SC.$A(p2);
       concats[key] = p2 ;
+      delete ext[rkey] ; // don't propogate the reset to subclasses
+    } else if (p1) {
+      if (!(p1 instanceof Array)) p1 = SC.$A(p1);
+      concats[key] = (p2) ? p1.concat(p2) : p2 ;
     }
   }
 
