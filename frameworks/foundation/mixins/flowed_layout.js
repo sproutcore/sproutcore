@@ -572,11 +572,19 @@ SC.FlowedLayout = {
         
         // the size is more questionable: we only change that if the
         // item wants.
-        if (item.fillRow) layout[isVertical ? 'width' : 'height'] = row.rowSize;
-        if (item.isSpacer) layout[isVertical ? 'height' : 'width'] = item.itemLength;
+        if (item.fillRow) {
+          layout[isVertical ? 'width' : 'height'] = row.rowSize;
+        }
+        if (item.isSpacer) {
+          layout[isVertical ? 'height' : 'width'] = item.itemLength;
+        }
         
-        if (layout.width !== undefined) layout.width -= item.spacing.left + item.spacing.right;
-        if (layout.height !== undefined) layout.height -= item.spacing.top + item.spacing.bottom;
+        if (layout.width !== undefined) {
+          layout.width -= item.spacing.left + item.spacing.right;
+        }
+        if (layout.height !== undefined) {
+          layout.height -= item.spacing.top + item.spacing.bottom;
+        }
         
         item.child.adjust(layout);
         item.child._scfl_lastLayout = layout;
@@ -588,6 +596,7 @@ SC.FlowedLayout = {
     totalSize += plan.planStartPadding + plan.planEndPadding;
     longestRow += plan.rowStartPadding + plan.rowEndPadding;
     
+    this.beginPropertyChanges();
     if (this.get('autoResize')) {
       if (this.get('shouldResizeHeight')) {
         this.set('calculatedHeight', isVertical ? longestRow : totalSize);
@@ -597,6 +606,7 @@ SC.FlowedLayout = {
         this.set('calculatedWidth', isVertical ? totalSize : longestRow);
       }
     }
+    this.endPropertyChanges();
   },
   
   _scfl_tile: function() {
