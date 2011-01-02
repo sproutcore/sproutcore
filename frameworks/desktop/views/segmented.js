@@ -212,11 +212,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         i, j;
   
     // Update childViews 
-    if (childViews.length > items.length) {   // We've lost segments (ie. childViews)
+    if (childViews.get('length') > items.get('length')) {   // We've lost segments (ie. childViews)
       
       // Remove unneeded segments from the end back
-      for (i = childViews.length - 1; i >= items.length; i--) {
-        childView = childViews[i];
+      for (i = childViews.get('length') - 1; i >= items.get('length'); i--) {
+        childView = childViews.objectAt(i);
         
         // If a selected childView has been removed then update our value
         if (SC.isArray(value)) {
@@ -226,10 +226,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         }
         
         // Remove any observers on the matching item of this childView
-        item = this.cachedItems[i];
+        item = this.cachedItems.objectAt(i);
         if (item instanceof SC.Object) {
-          for (j = itemKeys.length - 1; j >= 0; j--) {
-            itemKey = this.get(itemKeys[j]);
+          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+            itemKey = this.get(itemKeys.objectAt(j));
           
             if (itemKey) item.removeObserver(itemKey, this, this.itemContentDidChange);
           }
@@ -241,19 +241,19 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
       
       // Update the new last segment (this segment may be first and last after this point)
-      childView = childViews[items.length - 1];
+      childView = childViews.objectAt(items.get('length') - 1);
       childView.set({'isLastSegment': YES, 'isMiddleSegment': NO});
       
       // Update our value which may have changed
       this.set('value', value);
       
-    } else if (childViews.length < items.length) {  // We've gained segments
+    } else if (childViews.get('length') < items.get('length')) {  // We've gained segments
     
       // Update the class of the segment previously last
-      if (childViews.length > 0) {
+      if (childViews.get('length') > 0) {
         
-        childView = childViews[childViews.length - 1];
-        if (childViews.length === 1) {
+        childView = childViews.objectAt(childViews.get('length') - 1);
+        if (childViews.get('length') === 1) {
           childView.set({'isLastSegment': NO});
         } else {
           childView.set({'isLastSegment': NO, 'isMiddleSegment': YES});
@@ -261,8 +261,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
 
       // Create the new segments
-      for (i = childViews.length; i < items.length; i++) {
-        localItem = items[i];
+      for (i = childViews.get('length'); i < items.get('length'); i++) {
+        localItem = items.objectAt(i);
         
         // Skip null/undefined items (but don't skip empty strings)
         if (SC.none(localItem)) continue;
@@ -284,8 +284,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         } else if (localItem instanceof SC.Object)  {
           
           // We don't need to make any changes to SC.Object items, but we can observe them
-          for (j = itemKeys.length - 1; j >= 0; j--) {
-            itemKey = this.get(itemKeys[j]);
+          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+            itemKey = this.get(itemKeys.objectAt(j));
           
             if (itemKey) localItem.addObserver(itemKey, this, this.itemContentDidChange);
           }
@@ -326,9 +326,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         });
         
         // Assign the properties from the item
-        for (j = itemKeys.length - 1; j >= 0; j--) {
-          itemKey = this.get(itemKeys[j]);
-          viewKey = viewKeys[j];
+        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+          itemKey = this.get(itemKeys.objectAt(j));
+          viewKey = viewKeys.objectAt(j);
         
           // Don't overwrite the default value if none exists in the item
           if (!SC.none(localItem.get(itemKey))) childView.set(viewKey, localItem.get(itemKey));
@@ -337,8 +337,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         // Assign segment specific properties based on position
         childView.set('index', i);
         childView.set('isFirstSegment', i === 0);
-        childView.set('isMiddleSegment',  i < items.length - 1 && i > 0);
-        childView.set('isLastSegment', i === items.length - 1);
+        childView.set('isMiddleSegment',  i < items.get('length') - 1 && i > 0);
+        childView.set('isLastSegment', i === items.get('length') - 1);
         
         // Attach the child
         this.appendChild(childView);
@@ -364,7 +364,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (childView) {
       
       // Update the childView
-      for (i = itemKeys.length - 1; i >= 0; i--) {
+      for (i = itemKeys.get('length') - 1; i >= 0; i--) {
         itemKey = this.get(itemKeys[i]); 
         viewKey = viewKeys[i];
         
@@ -412,7 +412,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (!this.get('allowsMultipleSelection') && !this.get('allowsEmptySelection')){
       items = this.get('displayItems').slice(0);
       
-      len = items.length;
+      len = items.get('length');
       value = this.get('value');
       isArray = SC.isArray(value);
       if (evt.which === 39 || evt.which === 40) {  
@@ -694,7 +694,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
     
     // Clean up previously selected segments (and assign new ones)
-    for (var i = childViews.length - 1; i >= 0; i--) {
+    for (var i = childViews.get('length') - 1; i >= 0; i--) {
       childView = childViews[i];
       if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
         childView.set('isSelected', YES);
