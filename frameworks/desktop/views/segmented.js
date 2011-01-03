@@ -224,153 +224,99 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         } else if (value === childView.get('value')) {
           value = null;
         }
-        
-        // Remove any observers on the matching item of this childView
-        item = this.cachedItems.objectAt(i);
-        if (item instanceof SC.Object) {
-          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-            itemKey = this.get(itemKeys.objectAt(j));
-          
-            if (itemKey) item.removeObserver(itemKey, this, this.itemContentDidChange);
-          }
-        }
-        
-        // Finally remove the cached item & its childView
-        this.cachedItems.removeAt(i);
+
         this.removeChild(childView);
       }
-      
-      // Update the new last segment (this segment may be first and last after this point)
-      childView = childViews.objectAt(items.get('length') - 1);
-      childView.set({'isLastSegment': YES, 'isMiddleSegment': NO});
       
       // Update our value which may have changed
       this.set('value', value);
       
     } else if (childViews.get('length') < items.get('length')) {  // We've gained segments
-    
-      // Update the class of the segment previously last
-      if (childViews.get('length') > 0) {
-        
-        childView = childViews.objectAt(childViews.get('length') - 1);
-        if (childViews.get('length') === 1) {
-          childView.set({'isLastSegment': NO});
-        } else {
-          childView.set({'isLastSegment': NO, 'isMiddleSegment': YES});
-        }
-      }
 
       // Create the new segments
       for (i = childViews.get('length'); i < items.get('length'); i++) {
-        localItem = items.objectAt(i);
-        
-        // Skip null/undefined items (but don't skip empty strings)
-        if (SC.none(localItem)) continue;
-        
-        // Normalize the item (may be a String, Object or SC.Object)
-        if (SC.typeOf(localItem) === SC.T_STRING) {
-          
-          localItem = SC.Object.create({
-            'title': localItem.humanize().titleize(),
-            'value': localItem
-          });
-          
-          // Update our keys accordingly
-          this.set('itemTitleKey', 'title');
-          this.set('itemValueKey', 'value');
-        } else if (SC.typeOf(localItem) === SC.T_HASH) {
-          
-          localItem = SC.Object.create(localItem);
-        } else if (localItem instanceof SC.Object)  {
-          
-          // We don't need to make any changes to SC.Object items, but we can observe them
-          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-            itemKey = this.get(itemKeys.objectAt(j));
-          
-            if (itemKey) localItem.addObserver(itemKey, this, this.itemContentDidChange);
-          }
-        } else {
-          SC.Logger.error('SC.SegmentedView items may be Strings, Objects (ie. Hashes) or SC.Objects only');
-        }
-        
-        // Determine whether this segment is selected based on the view's existing value(s)
-        isSelected = NO;
-        if (SC.isArray(value) ? value.indexOf(localItem.get(this.get('itemValueKey'))) >= 0 : value === localItem.get(this.get('itemValueKey'))) {
-          isSelected = YES;
-        }
     
-        // We create a default SC.ButtonView like object for each segment
-        childView = SC.View.create(SC.Control, {
-          /* SC.Control (note: this brings its own display properties: 'isEnabled', 'isSelected', 'isActive', 'controlSize') */
-          isEnabled: YES,
-          isActive: NO,
-          isSelected: isSelected,
+        // We create a default SC.ButtonView-like object for each segment
+        childView = SC.SegmentView.create({
           controlSize: this.get('controlSize'),
-          /* SC.Button (note: we don't actually mix this in, because it doesn't define displayProperties or renderMixin) */
-          title: '',
-          value: null,
-          icon: null,
-          localize: this.get('localize'),
-          keyEquivalent: null,
-          escapeHTML: YES,      // TODO: Modification currently unsupported
-          needsEllipsis: YES,   // TODO: Modification currently unsupported
-          /* SC.ButtonView */
-          hint: '',   // TODO: SC.ButtonView has a toolTip, but the render delegate wants a hint property (which is it?)
-          titleMinWidth: null,
-          supportFocusRing: NO, // TODO: Modification currently unsupported
-          /* SC.View */
-          theme: this.get('theme'),
-          renderDelegateName: 'segmentRenderDelegate',
-          useStaticLayout: YES,
-          displayProperties: ['icon', 'title', 'value', 'toolTip', 'isDefault', 'isCancel', 'titleMinWidth', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'index'] // TODO: isDefault, isCancel, value not really supported
+          localize: this.get('localize')
         });
-        
-        // Assign the properties from the item
-        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-          itemKey = this.get(itemKeys.objectAt(j));
-          viewKey = viewKeys.objectAt(j);
-        
-          // Don't overwrite the default value if none exists in the item
-          if (!SC.none(localItem.get(itemKey))) childView.set(viewKey, localItem.get(itemKey));
-        }
-        
-        // Assign segment specific properties based on position
-        childView.set('index', i);
-        childView.set('isFirstSegment', i === 0);
-        childView.set('isMiddleSegment',  i < items.get('length') - 1 && i > 0);
-        childView.set('isLastSegment', i === items.get('length') - 1);
         
         // Attach the child
         this.appendChild(childView);
+      }  
+    }
+    
+    // Because the items array can be altered with insertAt or removeAt, we can't be sure that the items 
+    // continue to match 1-to-1 the existing views, so once we have the correct number of childViews, 
+    // simply update them all
+    childViews = this.get('childViews');
+    
+    for (i = 0; i < items.get('length'); i++) {
+      localItem = items.objectAt(i);
+      childView = childViews.objectAt(i);
+      
+      // Skip null/undefined items (but don't skip empty strings)
+      if (SC.none(localItem)) continue;
+        
+      // Normalize the item (may be a String, Object or SC.Object)
+      if (SC.typeOf(localItem) === SC.T_STRING) {
+        
+        localItem = SC.Object.create({
+          'title': localItem.humanize().titleize(),
+          'value': localItem
+        });
+        
+        // Update our keys accordingly
+        this.set('itemTitleKey', 'title');
+        this.set('itemValueKey', 'value');
+      } else if (SC.typeOf(localItem) === SC.T_HASH) {
+        
+        localItem = SC.Object.create(localItem);
+      } else if (localItem instanceof SC.Object)  {
+          
+        // We don't need to make any changes to SC.Object items, but we can observe them
+        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+          itemKey = this.get(itemKeys.objectAt(j));
+        
+          if (itemKey) {
+            localItem.removeObserver(itemKey, this, this.itemContentDidChange);
+            localItem.addObserver(itemKey, this, this.itemContentDidChange, i);
+          }
+        }
+      } else {
+        SC.Logger.error('SC.SegmentedView items may be Strings, Objects (ie. Hashes) or SC.Objects only');
       }
       
-      // Cache these items (only so that we may remove observers if 'items' is altered externally)
-      // TODO: look into the necessity of this.  Do removed items need to have observers removed?
-      this.cachedItems = SC.clone(items);
+      // Determine whether this segment is selected based on the view's existing value(s)
+      isSelected = NO;
+      if (SC.isArray(value) ? value.indexOf(localItem.get(this.get('itemValueKey'))) >= 0 : value === localItem.get(this.get('itemValueKey'))) {
+        isSelected = YES;
+      }
+      childView.set('isSelected', isSelected);
+        
+      // Assign segment specific properties based on position
+      childView.set('index', i);
+      childView.set('isFirstSegment', i === 0);
+      childView.set('isMiddleSegment',  i < items.get('length') - 1 && i > 0);
+      childView.set('isLastSegment', i === items.get('length') - 1);
+      
+      // Be sure to update the view's properties for the (possibly new) matched item
+      childView.updateItem(this, localItem);
     }
+    
   }.observes('*items.[]'),
   
-  itemContentDidChange: function(item) {
-    var childViews = this.get('childViews'),
-        childView,
-        itemKeys = this.get('itemKeys'),
-        itemKey,
-        viewKeys = this.get('viewKeys'),
-        viewKey,
-        i;
+  itemContentDidChange: function(item, key, alwaysNull, index) {
+    var items = this.get('items'),
+        childViews = this.get('childViews'),
+        childView;
 
-    i = this.cachedItems.indexOf(item);
-    childView = childViews[i];
+    childView = childViews.objectAt(index);
     if (childView) {
       
       // Update the childView
-      for (i = itemKeys.get('length') - 1; i >= 0; i--) {
-        itemKey = this.get(itemKeys[i]); 
-        viewKey = viewKeys[i];
-        
-        // Don't overwrite the default value if none exists in the item
-        if (!SC.none(item.get(itemKey))) childView.set(viewKey, item.get(itemKey));
-      }
+      childView.updateItem(this, item);
     } else {
       SC.Logger.warn("Item content change was observed on item without matching segment child view.");
     }
@@ -417,7 +363,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       isArray = SC.isArray(value);
       if (evt.which === 39 || evt.which === 40) {  
         for(i=0; i< len-1; i++){
-          item=items[i];
+          item=items.objectAt(i);
           if( isArray ? (value.indexOf(item.get('value'))>=0) : (item.get('value')===value)){
             this.triggerItemAtIndex(i+1);
           }
@@ -426,7 +372,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
       else if (evt.which === 37 || evt.which === 38) {
         for(i=1; i< len; i++){
-          item=items[i];
+          item=items.objectAt(i);
           if( isArray ? (value.indexOf(item.get('value'))>=0) : (item.get('value')===value)){
             this.triggerItemAtIndex(i-1);
           }
@@ -695,7 +641,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     // Clean up previously selected segments (and assign new ones)
     for (var i = childViews.get('length') - 1; i >= 0; i--) {
-      childView = childViews[i];
+      childView = childViews.objectAt(i);
       if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
         childView.set('isSelected', YES);
       } else {
