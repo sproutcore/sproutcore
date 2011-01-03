@@ -180,7 +180,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {Array}
   */
   itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey'.w(),
-  viewKeys: 'title value isEnabled icon titleMinWidth hint keyEquivalent'.w(),
+  viewKeys: 'title value isEnabled icon width toolTip keyEquivalent'.w(),
   
   /**
     Call itemsDidChange once to initialize segment child views for the items that exist at
