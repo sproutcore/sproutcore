@@ -610,7 +610,11 @@ SC.Binding = {
     if (!this._oneWay && this._fromTarget) {
       if (log) console.log("%@: %@ -> %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "->") ;
-      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      if (this.isForward()) {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      } else {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, tv) ;
+      }
       if (bench) SC.Benchmark.end(this.toString() + "->") ;
     }
 
@@ -618,7 +622,11 @@ SC.Binding = {
     if (this._toTarget) {
       if (log) console.log("%@: %@ <- %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
-      this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      if (this.isForward()) {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      } else {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, v) ;
+      }
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
     }
   },
@@ -704,6 +712,19 @@ SC.Binding = {
     }
   },
 
+  /**
+    Returns the direction of the binding.  If isForward is YES, then the value 
+    being passed came from the "from" side of the binding (i.e. the "Binding.path" 
+    you named).  If isForward is NO, then the value came from the "to" side (i.e. 
+    the property you named with "propertyBinding").  You can vary your transform 
+    behavior if you are based on the direction of the change.
+    
+    @returns {Boolean}
+  */
+  isForward: function() {
+    return this._fromTarget === this._bindingSource;
+  },
+  
   /**
     Configures the binding as one way.  A one-way binding will relay changes
     on the "from" side to the "to" side, but not the other way around.  This
@@ -825,7 +846,7 @@ SC.Binding = {
     if (placeholder === undefined) {
       placeholder = SC.MULTIPLE_PLACEHOLDER ;
     }
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, binding) {
       if (value && value.isEnumerable) {
         var len = value.get('length');
         value = (len>1) ? placeholder : (len<=0) ? null : value.firstObject();
@@ -844,7 +865,7 @@ SC.Binding = {
   */
   notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, binding) {
       if (SC.none(value) || (value === '') || (SC.isArray(value) && value.length === 0)) {
         value = placeholder ;
       }
@@ -862,7 +883,7 @@ SC.Binding = {
   */
   notNull: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, binding) {
       if (SC.none(value)) value = placeholder ;
       return value ;
     }) ;
