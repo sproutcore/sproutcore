@@ -176,19 +176,19 @@ test("changing first output should propograte to third after flush", function() 
 module("Custom Binding", {
   
   setup: function() {
-	Bon1 = SC.Object.extend({
-		value1: "hi",
-		value2: 83,
-		array1: []
-	});
-	
-	bon2 = SC.Object.create({
-		val1: "hello",
-		val2: 25,
-		arr: [1,2,3,4]
-	});
-	
-	TestNamespace = {
+  Bon1 = SC.Object.extend({
+    value1: "hi",
+    value2: 83,
+    array1: []
+  });
+  
+  bon2 = SC.Object.create({
+    val1: "hello",
+    val2: 25,
+    arr: [1,2,3,4]
+  });
+  
+  TestNamespace = {
       bon2: bon2,
       Bon1: Bon1
     } ;
@@ -197,45 +197,45 @@ module("Custom Binding", {
   teardown: function() { 
     delete Bon1 ;
     delete bon2 ;
-	//delete TestNamespace;
+  //delete TestNamespace;
   }
 });
 
 test("Binding value1 such that it will recieve only single values", function() {
-	var bon1 = Bon1.create({
-		value1Binding: SC.Binding.single("TestNamespace.bon2.val1"),
-		array1Binding: SC.Binding.single("TestNamespace.bon2.arr")
-	});
-	SC.Binding.flushPendingChanges();
-	var a = [23,31,12,21];
-	bon2.set("arr", a);
-	bon2.set("val1","changed");
-	SC.Binding.flushPendingChanges();
-	equals(bon2.get("val1"),bon1.get("value1"));
-	equals("@@MULT@@",bon1.get("array1"));
-	bon1.destroy();
+  var bon1 = Bon1.create({
+    value1Binding: SC.Binding.single("TestNamespace.bon2.val1"),
+    array1Binding: SC.Binding.single("TestNamespace.bon2.arr")
+  });
+  SC.Binding.flushPendingChanges();
+  var a = [23,31,12,21];
+  bon2.set("arr", a);
+  bon2.set("val1","changed");
+  SC.Binding.flushPendingChanges();
+  equals(bon2.get("val1"),bon1.get("value1"));
+  equals("@@MULT@@",bon1.get("array1"));
+  bon1.destroy();
 });
 
 test("Single binding using notEmpty function.", function() {
-	var bond = Bon1.create ({
-	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null,'(EMPTY)')
-	});
-	SC.Binding.flushPendingChanges();
-	bon2.set("arr", []);
-	SC.Binding.flushPendingChanges();
-	equals("(EMPTY)",bond.get("array1"));
+  var bond = Bon1.create ({
+    array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null,'(EMPTY)')
+  });
+  SC.Binding.flushPendingChanges();
+  bon2.set("arr", []);
+  SC.Binding.flushPendingChanges();
+  equals("(EMPTY)",bond.get("array1"));
 });
 
 test("Binding with transforms, function to check the type of value", function() {
-	var jon = Bon1.create({
-		value1Binding: SC.Binding.transform(function(val1) {
-			return (SC.typeOf(val1) == SC.T_STRING)? val1 : "";
-		}).from("TestNamespace.bon2.val1")
-	});
-	SC.Binding.flushPendingChanges();
-	bon2.set("val1","changed");
-	SC.Binding.flushPendingChanges();
-	equals(jon.get("value1"), bon2.get("val1"));
+  var jon = Bon1.create({
+    value1Binding: SC.Binding.transform(function(val1) {
+      return (SC.typeOf(val1) == SC.T_STRING)? val1 : "";
+    }).from("TestNamespace.bon2.val1")
+  });
+  SC.Binding.flushPendingChanges();
+  bon2.set("val1","changed");
+  SC.Binding.flushPendingChanges();
+  equals(jon.get("value1"), bon2.get("val1"));
 });
 
 test("two bindings to the same value should sync in the order they are initialized", function() {
