@@ -639,16 +639,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         break;
     }
     
-    // Clean up previously selected segments (and assign new ones)
-    for (var i = childViews.get('length') - 1; i >= 0; i--) {
-      childView = childViews.objectAt(i);
-      if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
-        childView.set('isSelected', YES);
-      } else {
-        childView.set('isSelected', NO);
-      }
-    }
-    
     // also, trigger target if needed.
     var actionKey = this.get('itemActionKey'),
         targetKey = this.get('itemTargetKey'),
@@ -676,6 +666,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       resp.sendAction(action, this.get('target'), this, this.get('pane'));
     }
   },
+  
+  /** @private
+    Whenever the value changes, update the segments accordingly.
+  */
+  valueDidChange: function() {
+    var value = this.get('value'),
+        childViews = this.get('childViews'),
+        childView;
+    
+    for (var i = childViews.get('length') - 1; i >= 0; i--) {
+      childView = childViews.objectAt(i);
+      if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
+        childView.set('isSelected', YES);
+      } else {
+        childView.set('isSelected', NO);
+      }
+    }
+  }.observes('value'),
   
   /** tied to the isEnabled state */
    acceptsFirstResponder: function() {
