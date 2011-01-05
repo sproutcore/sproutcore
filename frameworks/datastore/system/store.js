@@ -1176,7 +1176,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Unloads a group of records.  If you have a set of record ids, unloading
     them this way can be faster than retrieving each record and unloading 
     it individually.
-    
+
     You can pass either a single recordType or an array of recordTypes.  If
     you pass a single recordType, then the record type will be used for each
     record.  If you pass an array, then each id must have a matching record 
@@ -1186,33 +1186,44 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     and ids.  In this case the first two parameters will be ignored.  This
     is usually only used by low-level internal methods.  You will not usually
     unload records this way.
-    
+
     @param {SC.Record|Array} recordTypes class or array of classes
-    @param {Array} ids ids to unload
+    @param {Array} ids (optional) ids to unload
     @param {Array} storeKeys (optional) store keys to unload
     @returns {SC.Store} receiver
   */
   unloadRecords: function(recordTypes, ids, storeKeys, newStatus) {
     var len, isArray, idx, id, recordType, storeKey;
-    if(storeKeys===undefined){
-      len = ids.length;
+
+    if (storeKeys === undefined) {
       isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
       if (!isArray) recordType = recordTypes;
-      for(idx=0;idx<len;idx++) {
-        if (isArray) recordType = recordTypes[idx] || SC.Record;
-        id = ids ? ids[idx] : undefined ;
-        this.unloadRecord(recordType, id, undefined, newStatus);
+      if (ids === undefined) {
+        len = isArray ? recordTypes.length : 1;
+        for (idx = 0; idx < len; idx++) {
+          if (isArray) recordType = recordTypes[idx];
+          storeKeys = this.storeKeysFor(recordType);
+          this.unloadRecords(undefined, undefined, storeKeys, newStatus);
+        }
+      } else {
+        len = ids.length;
+        for (idx = 0; idx < len; idx++) {
+          if (isArray) recordType = recordTypes[idx] || SC.Record;
+          id = ids ? ids[idx] : undefined;
+          this.unloadRecord(recordType, id, undefined, newStatus);
+        }
       }
-    }else{
+    } else {
       len = storeKeys.length;
-      for(idx=0;idx<len;idx++) {
-        storeKey = storeKeys ? storeKeys[idx] : undefined ;
+      for (idx = 0; idx < len; idx++) {
+        storeKey = storeKeys ? storeKeys[idx] : undefined;
         this.unloadRecord(undefined, undefined, storeKey, newStatus);
       }
     }
-    return this ;
+
+    return this;
   },
-  
+
   /**
     Destroys a record, removing the data hash from the store and adding the
     record to the destroyed changelog.  If you try to destroy a record that is 
