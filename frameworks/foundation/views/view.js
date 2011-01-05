@@ -379,11 +379,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
   /**
     Set to true when the item is enabled.   Note that changing this value
-    will also alter the isVisibleInWindow property for this view and any
-    child views.
-
-    Note that if you apply the SC.Control mixin, changing this property will
-    also automatically add or remove a 'disabled' CSS class name as well.
+    will alter the isVisibleInWindow property for this view and any
+    child views as well as to automatically add or remove a 'disabled' CSS 
+    class name.
 
     This property is observable and bindable.
 
