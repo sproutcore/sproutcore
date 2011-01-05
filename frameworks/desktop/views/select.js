@@ -358,7 +358,7 @@ SC.SelectView = SC.ButtonView.extend(
     idx = 0 ;
 
     items.forEach(function(object) {
-    if (object) {
+    if (object || object === 0) {
 
       //Get the name value. If value key is not specified convert obj
       //to string
