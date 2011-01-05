@@ -899,8 +899,6 @@ SC.CollectionView = SC.View.extend(
           // will likely change the layerId when re-using the view.  So
           // we'll destroy the layer now.
           existing.destroyLayer();
-        } else {
-          existing.destroy();
         }
 
         // We don't want the old layer hanging around, even if we are going
@@ -910,6 +908,7 @@ SC.CollectionView = SC.View.extend(
         if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
         
         containerView.removeChild(existing);
+        if (!shouldReuse) existing.destroy();
       }
       
       // …then the redraws…
