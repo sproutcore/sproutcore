@@ -22,7 +22,6 @@ SC.DisclosureView = SC.ButtonView.extend(
   
   classNames: ['sc-disclosure-view'],
   
-  theme: 'disclosure',
   renderDelegateName: 'disclosureRenderDelegate',
 
   buttonBehavior: SC.TOGGLE_BEHAVIOR,

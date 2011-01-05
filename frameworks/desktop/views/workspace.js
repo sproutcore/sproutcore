@@ -247,22 +247,5 @@ SC.WorkspaceView = SC.View.extend({
   
   displayProperties: "hasTopToolbar hasBottomToolbar".w(),
   
-  render: function(context, firstTime) {
-    var settings = {
-      classNames: {
-        'top-toolbar': this.get('hasTopToolbar'),
-        'bottom-toolbar': this.get('hasBottomToolbar')
-      },
-      contentProvider: this
-    };
-
-    if (firstTime) {
-      this._workspaceRenderer = this.get('theme').renderer('workspace');
-      this._workspaceRenderer.attr(settings);
-      this._workspaceRenderer.render(context);
-    } else {
-      this._workspaceRenderer.attr(settings);
-      this._workspaceRenderer.update(context.$());
-    }
-  }
+  renderDelegateName: 'workspaceRenderDelegate'
 });

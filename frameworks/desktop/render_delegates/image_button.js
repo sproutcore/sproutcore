@@ -1,4 +1,12 @@
-SC.BaseTheme.imageButtonRenderDelegate = SC.Object.create({
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
+SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
+  name: 'image-button',
   render: function(dataSource, context) {
     var image = dataSource.get('image');
 

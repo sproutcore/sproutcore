@@ -36,12 +36,12 @@ aView: SC.LabelView.design(SC.Animatable, {
 */
 SC.Animatable = {
   /** @scope SC.Animatable.prototype */
-  
+
   /**
   Walks like a duck.
   */
   isAnimatable: YES,
-  
+
   transitions: {},
   concatenatedProperties: ["transitions"],
 
@@ -53,7 +53,7 @@ SC.Animatable = {
 
   // collections of CSS transitions we have available
   _cssTransitionFor: {
-    "left": "left", "top": "top", 
+    "left": "left", "top": "top",
     "right": "right", "bottom": "bottom",
     "width": "width", "height": "height",
     "opacity": "opacity",
@@ -80,7 +80,7 @@ SC.Animatable = {
 
     this._animatable_original_willDestroyLayer = this.willDestroyLayer || function(){};
     this.willDestroyLayer = this._animatable_willDestroyLayer;
-    
+
     this._animatable_original_willRemoveFromParent = this.willRemoveFromParent || function(){};
     this.willRemoveFromParent = this._animatable_will_remove_from_parent;
 
@@ -125,14 +125,14 @@ SC.Animatable = {
     // Setting this conditionally allows us to disableAnimation in the init method, before initMixin gets called
     if (this._disableAnimation === undefined) this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
     this._transitionCallbacks = {}; // define callback set
-    
+
     // alert if layer already created
     if (!SC.none(this.get("layer"))) {
       var o = this._animatable_original_didCreateLayer;
       this._animatable_original_didCreateLayer = function(){};
       this.didCreateLayer();
       this._animatable_original_didCreateLayer = o;
-      
+
     }
   },
 
@@ -148,33 +148,42 @@ SC.Animatable = {
     SC.Event.remove(this.get('layer'), "transitionEnd", this, this.transitionEnd);
     return this._animatable_original_willDestroyLayer();
   },
-  
+
   /**
   Stops all animations on the layer when this occurs by calling resetAnimation.
   */
   _animatable_will_remove_from_parent: function() {
     this.resetAnimation();
   },
-  
+
   /**
   Disables animation.
-  
+
   It is like parenthesis. Each "disable" must be matched by an "enable".
   If you call disable twice, you need two enables to start it. Three times, you need
   three enables.
   */
   disableAnimation: function() {
-    // This fallback is necessary if disableAnimation is called in the init method before initMixin is called
-    if (this._disableAnimation === undefined) this._disableAnimation = 0;
-    this._disableAnimation++;
+    if (this._disableAnimation < 1) {
+      this.updateStyle();
+      this._disableAnimation = 1;
+      this.updateStyle();
+    } else {
+      this._disableAnimation++;
+    }
   },
-  
+
   /**
   Enables animation if it was disabled (or moves towards that direction, at least).
   */
   enableAnimation: function() {
-    this._disableAnimation--; 
-    if (this._disableAnimation < 0) this._disableAnimation = 0;
+    if (this._disableAnimation <= 1) {
+      this.updateStyle();
+      this._disableAnimation = 0;
+      this.updateStyle();
+    } else {
+      this._disableAnimation--;
+    }
   },
 
   /**
@@ -258,11 +267,11 @@ SC.Animatable = {
 
   /**
   Returns the current set of styles and layout according to JavaScript transitions.
-  
+
   That is, for transitions managed by JavaScript (rather than CSS), the current position
   (even mid-transition) will be returned. For CSS-based transitions, the target position
   will be returned. This function is mostly useful for testing.
-  
+
   It will return null if there is no such style.
   */
   getCurrentJavaScriptStyles: function() {
@@ -280,7 +289,7 @@ SC.Animatable = {
     this.enableAnimation();
     this.updateStyle();
   },
-  
+
   /**
     Stops all JavaScript animations on the object. In their tracks. Hah hah.
     @private
@@ -324,7 +333,7 @@ SC.Animatable = {
         else if (i == "centerX") { l[i] = f.x + (f.width / 2) - (p.width / 2); continue; }
         else if (i == "centerY") { l[i] = f.y + (f.height / 2) - (p.height / 2); continue; }
       }
-      
+
       if (SC.none(l[i])) {
         if (!SC.none(start[i])) l[i] = start[i];
         else l[i] = target[i];
@@ -334,7 +343,7 @@ SC.Animatable = {
   },
 
   _TMP_CSS_TRANSITIONS: [],
-  
+
   /**
   @private
   Returns a string with CSS for the timing portion of a transition.
@@ -351,7 +360,7 @@ SC.Animatable = {
     }
     return timing_function;
   },
-  
+
   /**
   @private
     Triggers updateStyle at end of run loop.
@@ -381,7 +390,7 @@ SC.Animatable = {
 
   /**
   Immediately applies styles to elements, and starts any needed transitions.
-  
+
   Called automatically when style changes, but if you need styles to be adjusted
   immediately (for instance, if you have temporarily disabled animation to set a
   start state), you may want to call manually too.
@@ -440,33 +449,19 @@ SC.Animatable = {
     // no use doing anything else if no layer.
     if (!layer) return;
 
-    // compare new style to old style. Manually, to skip guid stuff that can
-    // mess things up a bit.
-    var equal = true;
-    for (i in newStyle)
-    {
-      if (i[0] == "_") continue;
-      if (newStyle[i] != this._animatableCurrentStyle[i])
-      {
-        equal = false;
-        break;
-      }
-    }
-    if (equal) return this;
-
     // get a normalized starting point based off of our style
     var startingPoint = this._getStartStyleHash(this._animatableCurrentStyle, newStyle);
     var endingPoint = {};
-    
+
     // prepare stuff for timing function calc
     var timing;
-    
+
     // also prepare an array of CSS transitions to set up. Do this always so we get (and keep) all transitions.
     var cssTransitions = this._TMP_CSS_TRANSITIONS;
     if (SC.platform.supportsCSSTransitions) {
       // first, handle special cases
       var timing_function;
-      
+
       ////**SPECIAL TRANSFORM CASE**////
       // this is a VERY special case. If right or bottom are supplied, can't do it. If left+top need
       // animation at different speeds: can't do it.
@@ -476,12 +471,12 @@ SC.Animatable = {
         cssTransitions.push("-"+SC.platform.cssPrefix+"-transform " + transitionForTiming.duration + "s " + timing_function);
       }
       ////**END SPECIAL TRANSFORM CASE**////
-      
+
       // loop
       for (i in this.transitions) {
         if (!this._cssTransitionFor[i]) continue;
 
-        ////**SPECIAL TRANSFORM CASE**////        
+        ////**SPECIAL TRANSFORM CASE**////
         if (specialTransform && (i == "left" || i == "top")) {
           if (this.transitions["left"].action){
             this._transitionCallbacks["-"+SC.platform.cssPrefix+"-transform"] = {
@@ -504,17 +499,17 @@ SC.Animatable = {
 
         // get timing function
         timing_function = this.cssTimingStringFor(this.transitions[i]);
-        
+
         // sanitize name
-        cssTransitions.push(this._cssTransitionFor[i] + " " + this.transitions[i].duration + "s " + timing_function);		
+        cssTransitions.push(this._cssTransitionFor[i] + " " + this.transitions[i].duration + "s " + timing_function);
       }
     }
 
     for (i in newStyle)
     {
       if (i[0] == "_") continue; // guid (or something else we can't deal with anyway)
-      
-      
+
+
       // if it needs to be set right away since it is not animatable, _getStartStyleHash
       // will have done that. But if we aren't supposed to animate it, we need to know, now.
       var shouldSetImmediately = !this.transitions[i] || newStyle[i] == startingPoint[i];
@@ -555,9 +550,9 @@ SC.Animatable = {
 
       // well well well... looks like we need to animate. Prepare an animation structure.
       // (WHY ARE WE ALWAYS PREPARING?)
-      var applier = this._animateTickPixel, 
-      property = i, 
-      startValue = startingPoint[i], 
+      var applier = this._animateTickPixel,
+      property = i,
+      startValue = startingPoint[i],
       endValue = newStyle[i];
 
       // special property stuff
@@ -641,15 +636,15 @@ SC.Animatable = {
   /**
   @private
   Adjusts display and queues a change for the other properties.
-  
+
   layer: the layer to modify
   styles: the styles to set
   delayed: styles to set after a brief delay (if any)
   */
   _animatableApplyStyles: function(layer, styles, delayed)
-  {	
+  {
     if (!layer) return;
-    
+
     // handle a specific style first: display. There is a special case because it disrupts transitions.
     var needsRender = NO;
     if (styles["display"] && layer.style["display"] !== styles["display"]) {
@@ -668,7 +663,7 @@ SC.Animatable = {
 
     // get timer
     var timer = this._animators["display-styles"];
-    
+
     // set settings
     timer.holder = this;
     timer.action = this._animatableApplyNonDisplayStylesFromTimer;
@@ -677,9 +672,9 @@ SC.Animatable = {
     timer.styles = styles;
     timer.delayed = delayed;
     this._animatableCurrentStyle = styles;
-    
+
     // schedule.
-    if (this._disableAnimation > 0) {
+    if (this._disableAnimation > 0 || !needsRender) {
       timer.inLoopAction();
     } else {
       // after setting transition or display, we must wait a moment;
@@ -687,7 +682,7 @@ SC.Animatable = {
       SC.Animatable.addTimer(timer);
     }
   },
-  
+
   _animatableApplyNonDisplayStylesFromTimer: function() {
     SC.run(function() {
       this.inLoopAction();
@@ -740,7 +735,7 @@ SC.Animatable = {
       // go back to previous
       this.holder.layout = prev;
     }
-    
+
     // queue up any delayed styles
     if (this.delayed) {
       // set settings
@@ -880,7 +875,7 @@ SC.Animatable = {
       percent = this.holder._solveBezier(timing[0], timing[1], timing[2], timing[3], percent, d);
     }
 
-    // calculate new position			
+    // calculate new position
     var value = Math.floor(sv + (dv * percent));
     this.holder._animatableCurrentStyle[this.property] = value;
 
@@ -908,7 +903,7 @@ SC.Animatable = {
 
     // check if we should keep going (we only set display none, and only at end)
     var e = this.end;
-    if (t < e) 
+    if (t < e)
     {
       SC.Animatable.addTimer(this);
       return;
@@ -955,7 +950,7 @@ SC.Animatable = {
       percent = this.holder._solveBezier(timing[0], timing[1], timing[2], timing[3], percent, d);
     }
 
-    // calculate new position			
+    // calculate new position
     var value = Math.round((sv + (dv * percent)) * 100) / 100;
     this.holder._animatableCurrentStyle[this.property] = value;
 
@@ -1004,7 +999,7 @@ SC.Animatable = {
       percent = this.holder._solveBezier(timing[0], timing[1], timing[2], timing[3], percent, d);
     }
 
-    // calculate new position			
+    // calculate new position
     var value = sv + (dv * percent);
     this.holder._animatableCurrentStyle[this.property] = value;
 
@@ -1020,7 +1015,7 @@ SC.Animatable = {
     }
 
     this.style[style] = Math.round(value - (this.holder._animatableCurrentStyle[widthOrHeight] / 2)) + "px";
-    
+
     if (t < e) SC.Animatable.addTimer(this);
     else {
       this.going = false;
@@ -1041,30 +1036,30 @@ SC.mixin(SC.Animatable, {
 
   /** Linear transition **/
   TRANSITION_NONE: "linear",
-  
+
   /** 'ease' transition if using CSS transitions; otherwise linear. **/
   TRANSITION_CSS_EASE: "ease",
-  
+
   /** 'ease-in' transition if using CSS transitions; otherwise linear. **/
   TRANSITION_CSS_EASE_IN: "ease-in",
-  
+
   /** 'ease-out' transition if using CSS transitions; otherwise linear. **/
   TRANSITION_CSS_EASE_OUT: "ease-out",
-  
+
   /** 'ease-in-out' transition if using CSS transitions; otherwise linear. **/
   TRANSITION_CSS_EASE_IN_OUT: "ease-in-out",
 
   /** 'ease' transition. **/
   TRANSITION_EASE: [0.25, 0.1, 0.25, 1.0],
-  
+
   TRANSITION_LINEAR: [0.0, 0.0, 1.0, 1.0],
-  
+
   /** 'ease-in' transition. **/
   TRANSITION_EASE_IN: [0.42, 0.0, 1.0, 1.0],
-  
+
   /** 'ease-out' transition. **/
   TRANSITION_EASE_OUT: [0, 0, 0.58, 1.0],
-  
+
   /** 'ease-in-out' transition if using CSS transitions; otherwise linear. **/
   TRANSITION_EASE_IN_OUT: [0.42, 0, 0.58, 1.0],
 
@@ -1077,17 +1072,17 @@ SC.mixin(SC.Animatable, {
   baseTimer: {
     next: null
   },
-  
+
   // keep track of whether the timer is running
   going: false,
-  
+
   // ticks and tocs
   _ticks: 0,
   _timer_start_time: null,
-  
+
   // the global tiemr interval
   interval: 10,
-  
+
   // the current time (a placeholder, really)
   currentTime: new Date().getTime(),
 
@@ -1098,7 +1093,7 @@ SC.mixin(SC.Animatable, {
   stats: SC.Object.create({
     lastFPS: 0
   }),
-  
+
   /**
     Adds a timer.
     @private
@@ -1112,7 +1107,7 @@ SC.mixin(SC.Animatable, {
     animator.isQueued = true;
     if (!SC.Animatable.going) SC.Animatable.start();
   },
-  
+
   /**
     Removes a timer.
     @private
@@ -1135,7 +1130,7 @@ SC.mixin(SC.Animatable, {
   },
 
   timeout: function()
-  {	
+  {
     SC.Animatable.currentTime = new Date().getTime();
     var start = SC.Animatable.currentTime;
 
@@ -1158,7 +1153,7 @@ SC.mixin(SC.Animatable, {
     // still, only called once per frame, so should _very_ minimally impact performance and memory.
     if (SC.Animatable._ticks < 1000000) SC.Animatable._ticks++; // okay, put _some_ limit on it
 
-    // now see about doing next bit...	
+    // now see about doing next bit...
     var end = new Date().getTime();
     var elapsed = end - start;
     if (SC.Animatable.baseTimer.next)

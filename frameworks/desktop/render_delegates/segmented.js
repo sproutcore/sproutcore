@@ -2,59 +2,57 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.segmentedRenderDelegate = SC.RendererRenderDelegate.create({
-  rendererName: 'segmented',
+/**
+  Renders and updates the HTML representation of SC.SegmentedView.
+*/
+SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
+  name: 'segmented',
   
-  render: function(view, context) {    
-    var rendererName = this.get('rendererName');
-    var renderer = view.get('theme').renderer(rendererName);
-
-    renderer.attr(view.getChangedDisplayProperties());
-    this.updateRenderer(view, renderer);
-
-    renderer.render(context);
-
-    view._scrrd_renderer = renderer;
-  },
-  
-  update: function(view, $) {
-    var renderer = view._scrrd_renderer;
-
-    renderer.attr(view.getChangedDisplayProperties());
-    this.updateRenderer(view, renderer);
-
-    renderer.update($);
-  },
-
-  updateRenderer: function(view, r) {
-    var items = view.get('displayItems'), value = view.get('value'), isArray = SC.isArray(value),
-        activeIndex = view.get("activeIndex"), item;
-    for (var idx = 0, len = items.length; idx < len; idx++) {
-      item = items[idx];
-      
-      item.classNames = {
-        active: activeIndex === idx,
-        sel: isArray ? value.indexOf(item.value) > -1 : value === item.value
-      };
-    }
-
-    // set the attributes
-    var size = view.get('controlSize');
-    r.attr({
-      segments: items,
-      align: view.get('align'),
-      layoutDirection: view.get('layoutDirection'),
-      size: size === SC.AUTO_CONTROL_SIZE ? view.get('frame') : size,
-      themeName: view._themeClassName
-    });
-  },
-
-  indexForClientPosition: function(view, cq, x, y) {
-    var renderer = view._scrrd_renderer;
+  /*
+    We render everything external to the segments and let each segment use it's own render
+    delegate to render its contents.
     
-    return renderer.indexForClientPosition(cq, x, y);
+    */
+  render: function(dataSource, context) {  
+    // Use text-align to align the segments
+    context.addStyle('text-align', dataSource.get('align'));
+  },
+  
+  update: function(dataSource, jquery) {
+    jquery.css('text-align', dataSource.get('align'));
+  },
+  
+  /**
+    Return the DOM elements of the segments.  This will be measured by the view to 
+    determine which segments should be overflowed.
+  */
+  segmentLayers: function(dataSource) {
+    return dataSource.$('.sc-segment');
+  },
+
+  indexForClientPosition: function(dataSource, x, y) {
+    var segmentLayers = dataSource.$('.sc-segment'), 
+        length, i,
+        segmentLayer, rect,
+        point;
+    
+    point = {x: x, y: y};
+    for (i = 0, length = segmentLayers.length; i < length; i++) {
+      segmentLayer = segmentLayers[i];
+      rect = segmentLayer.getBoundingClientRect();
+      
+      // Convert client rect into standard rect
+      rect.x = rect.left;
+      rect.y = rect.top;
+      
+      // Return the index early if found
+      if (SC.pointInRect(point, rect)) return i;
+    }
+    
+    // Default not found
+    return -1;
   }
 });

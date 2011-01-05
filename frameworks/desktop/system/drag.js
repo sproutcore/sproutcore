@@ -5,7 +5,7 @@
 // ========================================================================
 
 SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
-SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x0007; // includes SC.DRAG_REORDER
+SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x000F; SC.DRAG_DATA = 0x0008; // includes SC.DRAG_REORDER
 SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20;
 
 /**
@@ -109,6 +109,14 @@ SC.Drag = SC.Object.extend(
     @type Boolean
   */
   ghost: YES,
+
+  /**
+    If NO, the source will not be copied, clone, no ghost view will get created,
+    and it won't be moved.
+
+    @type Boolean
+  */
+	sourceIsDraggable: YES,
   
   /**
     If YES, then the ghostView will slide back to its original location if 
@@ -277,8 +285,10 @@ SC.Drag = SC.Object.extend(
     This will actually start the drag process. Called by SC.Drag.start().
   */
   startDrag: function() {
-    // create the ghost view
-    this._createGhostView() ;
+		if (this.get('sourceIsDraggable')) {
+	    // create the ghost view
+	    this._createGhostView() ;
+		}
     
     var evt = this.event ;
     
@@ -287,32 +297,34 @@ SC.Drag = SC.Object.extend(
     var loc = { x: evt.pageX, y: evt.pageY } ;
     this.set('location', loc) ;
     
-    var dv = this._getDragView() ;
-    var pv = dv.get('parentView') ;
+		if (this.get('sourceIsDraggable')) {
+	    var dv = this._getDragView() ;
+	    var pv = dv.get('parentView') ;
 
-    // convert to global cooridinates
-    var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
+	    // convert to global cooridinates
+	    var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
 
-    if (this.get('ghost')) {
-      // Hide the dragView
-      this._dragViewWasVisible = dv.get('isVisible') ;
-      dv.set('isVisible', NO) ;
-    }
+	    if (this.get('ghost')) {
+	      // Hide the dragView
+	      this._dragViewWasVisible = dv.get('isVisible') ;
+	      dv.set('isVisible', NO) ;
+	    }
 
-    if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
-    else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
+	    if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
+	    else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
     
-    // position the ghost view
-    if(!this._ghostViewHidden) this._positionGhostView(evt) ;
+	    // position the ghost view
+	    if(!this._ghostViewHidden) this._positionGhostView(evt) ;
     
-    if (evt.makeTouchResponder) {
-      // Should use invokeLater if I can figure it out
-      var self = this;
-      SC.Timer.schedule({ target: evt, action: function(){ if (!evt.hasEnded) evt.makeTouchResponder(self, YES); }, interval: 1 });
-    } else {
-      // notify root responder that a drag is in process
-      this.ghostView.rootResponder.dragDidStart(this, evt) ;
-    }
+	    if (evt.makeTouchResponder) {
+	      // Should use invokeLater if I can figure it out
+	      var self = this;
+	      SC.Timer.schedule({ target: evt, action: function(){ if (!evt.hasEnded) evt.makeTouchResponder(self, YES); }, interval: 1 });
+	    } else {
+	      // notify root responder that a drag is in process
+	      this.ghostView.rootResponder.dragDidStart(this, evt) ;
+	    }
+		}
     
     var source = this.source ;
     if (source && source.dragDidBegin) source.dragDidBegin(this, loc) ;
@@ -339,12 +351,14 @@ SC.Drag = SC.Object.extend(
 
     if (target && target.dragExited) target.dragExited(this, this._lastMouseDraggedEvent);
 
-    this._destroyGhostView();
+		if (this.get('sourceIsDraggable')) {
+	    this._destroyGhostView();
 
-    if (this.get('ghost')) {
-      if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES);
-      this._dragViewWasVisible = null;
-    }
+	    if (this.get('ghost')) {
+	      if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES);
+	      this._dragViewWasVisible = null;
+	    }	
+		}
 
     var source = this.source;
     if (source && source.dragDidEnd) source.dragDidEnd(this, loc, SC.DRAG_NONE);
@@ -423,7 +437,7 @@ SC.Drag = SC.Object.extend(
     if (source && source.dragDidMove) source.dragDidMove(this, loc) ;
     
     // reposition the ghostView
-    if(!this._ghostViewHidden) this._positionGhostView(evt) ;
+    if(this.get('sourceIsDraggable') && !this._ghostViewHidden) this._positionGhostView(evt) ;
   },
 
   touchesDragged: function(evt){
@@ -471,14 +485,16 @@ SC.Drag = SC.Object.extend(
       }
     }
 
-    // destroy the ghost view
-    this._destroyGhostView() ;
+		if (this.get('sourceIsDraggable')) {
+	    // destroy the ghost view
+	    this._destroyGhostView() ;
 
-    if (this.get('ghost')) {
-      // Show the dragView if it was visible
-      if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES) ;
-      this._dragViewWasVisible = null;
-    }
+	    if (this.get('ghost')) {
+	      // Show the dragView if it was visible
+	      if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES) ;
+	      this._dragViewWasVisible = null;
+	    }	
+		}
 
     // notify the source that everything has completed
     var source = this.source ;

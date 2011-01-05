@@ -2,12 +2,6 @@
   display: block;
 }
 
-.sc-theme .sc-segmented-view .sc-segment {
-	text-decoration: none ;
-	color: black ;
-	text-align: center ;
-}
-
 .sc-theme .sc-segment:active, .sc-segment:focus {
 	outline: none;
 }
@@ -21,8 +15,6 @@
 	width: 16px;
 }
 
-
-
 .sc-theme .sc-segmented-view.disabled .sc-segment img.icon {
 	opacity: 0.5;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
@@ -33,19 +25,22 @@
 /* @group Layout */
 
 .sc-theme .sc-segmented-view .sc-segment {
-	display: block;
+	display: inline-block;
 	top: 0;
 	height: 24px;
 	line-height: 24px;
 	text-shadow: #fff 0px 1px 0px;
 	margin-left: -1px;
+	text-decoration: none ;
+	color: black ;
+	text-align: center ;
 }
 
 .sc-theme .sc-segmented-view .sc-button-inner {
-	display: block;
-	min-width: 20px;
-	min-height: 24px;
-	border: none;
+  display: block;
+  min-width: 20px;
+  min-height: 24px;
+  border: none;
 }
 
 .sc-theme .sc-segmented-view .sc-segment {
@@ -57,17 +52,17 @@
 
 
 .sc-theme .sc-segmented-view .sc-segment .sc-button-inner {
-	padding-left: 0;
-	padding-right: 11px;
-	background:  transparent;
+  padding-left: 0;
+  padding-right: 11px;
+  background:  transparent;
 }
 
 .sc-theme .sc-segmented-view .sc-segment label {
-	display:  block;
-	line-height: 24px;
-	height:  24px;
-	text-align: center;
-	background:  transparent;
+  display: block;
+  line-height: 24px;
+  height:  24px;
+  text-align: center;
+  background:  transparent;
 }
 
 /* @end */

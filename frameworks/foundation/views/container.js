@@ -27,6 +27,8 @@ SC.ContainerView = SC.View.extend(
 
   classNames: ['sc-container-view'],
   
+  renderDelegateName: 'containerRenderDelegate',
+  
   /**
     Optional path name for the content view.  Set this to a property path
     pointing to the view you want to display.  This will automatically change

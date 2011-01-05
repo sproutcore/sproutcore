@@ -199,7 +199,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param {Object} context optional context to pass to the handler as event.data
     @returns {Object} receiver
   */
-  add: function(elem, eventType, target, method, context) {
+  add: function(elem, eventType, target, method, context, useCapture) {
 
     // if a CQ object is passed in, either call add on each item in the 
     // matched set, or simply get the first element and use that.
@@ -212,6 +212,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
+
+		if (!useCapture) {
+			var useCapture = NO;
+		};
     
     // cannot register events on text nodes, etc.
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
@@ -236,7 +240,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         handlers = events[eventType]; 
     if (!handlers) {
       handlers = events[eventType] = {} ;
-      this._addEventListener(elem, eventType) ;
+      this._addEventListener(elem, eventType, useCapture) ;
     }
     
     // Build the handler array and add to queue
@@ -645,8 +649,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param elem {Element} the target element
     @param eventType {String} the event type
   */
-  _addEventListener: function(elem, eventType) {
+  _addEventListener: function(elem, eventType, useCapture) {
     var listener, special = this.special[eventType] ;
+
+		if (!useCapture) {
+			var useCapture = NO;
+		};
 
     // Check for a special event handler
     // Only use addEventListener/attachEvent if the special
@@ -665,7 +673,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       
       // Bind the global event handler to the element
       if (elem.addEventListener) {
-        elem.addEventListener(eventType, listener, NO);
+        elem.addEventListener(eventType, listener, useCapture);
       } else if (elem.attachEvent) {
         // attachEvent is not working for IE8 and xhr objects
         // there is currently a hack in request , but it needs to fixed here.
@@ -726,7 +734,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   _global: {},
 
   /** @private properties to copy from native event onto the event */
-  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches animationName elapsedTime".split(" ")
+  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches animationName elapsedTime dataTransfer".split(" ")
   
 }) ;
 

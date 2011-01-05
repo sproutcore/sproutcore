@@ -1,8 +1,0 @@
-@view(sc-toolbar-view) {
-  background: sprite(toolbar.png repeat-x [0, 1]);
-  color: #555;
-  text-shadow: 0px 1px 1px white;
-  border-bottom: 1px solid #999;
-  -webkit-box-shadow: 0px 0px 4px rgba(0, 0, 0, .5);
-  z-index: 10;
-}

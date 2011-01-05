@@ -27,11 +27,9 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
   tagName: 'label',
   ariaRole: 'checkbox',
-  
-  /**
-    A CheckboxView actually just renders a button in the theme "checkbox".
-  */
-  theme: 'checkbox',
+
+  // no special theme for Checkbox; button defaults to 'square', so we have to stop that.
+  themeName: null,
   renderDelegateName: 'checkboxRenderDelegate',
 
   /* Ellipsis is disabled by default to allow multiline text */

@@ -1,0 +1,24 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+
+// collections don't need their own rendering; however, in future, constants
+// like the row height will likely be specified on the render delegate.
+SC.BaseTheme.collectionRenderDelegate = SC.RenderDelegate.create({
+  name: 'collection',
+  
+  render: function(dataSource, context) {
+    context.setClass('focus', dataSource.get('isFirstResponder'));
+    context.setClass('disabled', !dataSource.get('isEnabled'));
+    context.setClass('active', dataSource.get('isActive'));
+  },
+  
+  update: function(dataSource, jquery) {
+    jquery.setClass('focus', dataSource.get('isFirstResponder'));
+    jquery.setClass('disabled', !dataSource.get('isEnabled'));
+    jquery.setClass('active', dataSource.get('isActive'));
+  }
+});

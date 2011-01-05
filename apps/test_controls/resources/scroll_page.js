@@ -21,7 +21,7 @@ TestControls.scrollPage = SC.View.design({
       }),
       list: SC.FormView.row(SC.ScrollView.design({
         backgroundColor: "white",
-        flowSize: { width: 320, height: 460 },
+        layout: { width: 320, height: 460 },
         contentView: SC.ListView.design({
           computeNowShowing: function() {
             return this.get('allContentIndexes');
@@ -40,7 +40,7 @@ TestControls.scrollPage = SC.View.design({
       })),
       incrementalList: SC.FormView.row(SC.ScrollView.design({
         backgroundColor: "white",
-        flowSize: { width: 320, height: 460 },
+        layout: { width: 320, height: 460 },
         contentView: SC.ListView.design({
           classNames: ['big-list'],
           rowHeight: 44,
@@ -57,7 +57,7 @@ TestControls.scrollPage = SC.View.design({
       imageList: SC.FormView.row(SC.ScrollView.design({
         backgroundColor: "gray",
         canScale: YES,
-        flowSize: { width: 320, height: 460 },
+        layout: { width: 320, height: 460 },
         contentView: SC.ListView.design({
           classNames: ['big-list'],
           rowHeight: 44,

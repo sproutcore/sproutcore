@@ -899,6 +899,8 @@ SC.CollectionView = SC.View.extend(
           // will likely change the layerId when re-using the view.  So
           // we'll destroy the layer now.
           existing.destroyLayer();
+        } else {
+          existing.destroy();
         }
 
         // We don't want the old layer hanging around, even if we are going
@@ -971,6 +973,8 @@ SC.CollectionView = SC.View.extend(
             // will likely change the layerId when re-using the view.  So
             // we'll destroy the layer now.
             view.destroyLayer();
+          } else {
+            view.destroy();
           }
         }
       }
@@ -1001,19 +1005,7 @@ SC.CollectionView = SC.View.extend(
   },
   
   displayProperties: 'isFirstResponder isEnabled isActive'.w(),
-  
-  /** @private
-    If we're asked to render the receiver view for the first time but the 
-    child views still need to be added, go ahead and add them.
-  */
-  render: function(context, firstTime) {
-    // add classes for other state.
-    context.setClass('focus', this.get('isFirstResponder'));
-    context.setClass('disabled', !this.get('isEnabled'));
-    context.setClass('active', this.get('isActive'));
-
-    return sc_super();
-  },
+  renderDelegateName: 'collectionRenderDelegate',
     
 
   _TMP_ATTRS: {},
@@ -2288,8 +2280,8 @@ SC.CollectionView = SC.View.extend(
 
     // handle hover events.
     if (view !== last) {
-      if (last && last.mouseOut) last.mouseOut(ev);
-      if (view && view.mouseOver) view.mouseOver(ev);
+      if (last && last.mouseExited) last.mouseExited(ev);
+      if (view && view.mouseEntered) view.mouseEntered(ev);
     }
     this._lastHoveredItem = view ;
 
@@ -2298,10 +2290,10 @@ SC.CollectionView = SC.View.extend(
   },
   
   /** @private */
-  mouseOut: function(ev) {
+  mouseExited: function(ev) {
     var view = this._lastHoveredItem ;
     this._lastHoveredItem = null ;
-    if (view && view.mouseOut) view.mouseOut(ev) ;
+    if (view && view.mouseExited) view.mouseExited(ev) ;
     return YES ;
   },
   

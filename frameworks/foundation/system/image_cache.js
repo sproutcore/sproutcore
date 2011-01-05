@@ -216,11 +216,12 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     if (entry) {
       // var img = (entry.image = new Image()) ;
       var img = entry.image ;
+      if(!img) return;
       img.onabort = this._imageDidAbort ;
       img.onerror = this._imageDidError ;
       img.onload = this._imageDidLoad ;
       img.src = entry.url ;
-
+      
       // add to loading queue.
       this._loading.push(entry) ;
     
@@ -335,7 +336,8 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     // if entry is loading, abort it also.  Call local abort method in-case
     // browser decides not to follow up.
     if (this._loading.indexOf(entry) >= 0) {
-      queue.image.abort();
+      // In some cases queue.image is undefined. Is it ever defined?
+      if (queue.image) queue.image.abort();
       this.imageStatusDidChange(entry, this.ABORTED);
     }
     

@@ -320,7 +320,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     Also, because
   */
-  _themeDidChange: function() {
+  _sc_view_themeDidChange: function() {
     if (this._lastTheme === this.get('theme')) return;
     this._lastTheme = this.get('theme');
 
@@ -329,8 +329,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     for (idx = 0; idx < len; idx++) {
       childViews[idx].notifyPropertyChange('baseTheme');
     }
-
-    // replace the layer
+    
     if (this.get('layer')) this.replaceLayer();
   }.observes('theme'),
 
@@ -356,6 +355,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       return   theme || SC.Theme.find(SC.defaultTheme);
     }
   }.property('baseThemeName', 'parentView').cacheable(),
+  
+  /**
+   * Returns the named property if it is specified on the view, and
+   * otherwise returns the named constant from the view's theme.
+   *
+   * @param {String} property The property on the view.
+   * @param {String} constantName The name of the constant on the theme.
+  */
+  getThemedProperty: function(property, constantName){
+    var value = this.get(property);
+    if (value !== undefined) return value;
+    
+    var theme = this.get('theme');
+    if (!theme) return undefined;
+    
+    return theme[constantName];
+  },
 
   // ..........................................................
   // IS ENABLED SUPPORT
@@ -363,11 +379,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
   /**
     Set to true when the item is enabled.   Note that changing this value
-    will also alter the isVisibleInWindow property for this view and any
-    child views.
-
-    Note that if you apply the SC.Control mixin, changing this property will
-    also automatically add or remove a 'disabled' CSS class name as well.
+    will alter the isVisibleInWindow property for this view and any
+    child views as well as to automatically add or remove a 'disabled' CSS 
+    class name.
 
     This property is observable and bindable.
 
@@ -1025,18 +1039,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateLayer: function(optionalContext) {
-    var mixins, idx, len, renderDelegate, hasLegacyRenderMethod;
+    var mixins, idx, len, hasLegacyRenderMethod;
 
     var context = optionalContext || this.renderContext(this.get('layer')) ;
     this._renderLayerSettings(context, NO);
-    renderDelegate = this.get('renderDelegate');
 
     // If the render method takes two parameters, we assume that it is a
     // legacy implementation that takes context and firstTime. If it has only
     // one parameter, we assume it is the render delegates style that requires
     // only context. Note that, for backwards compatibility, the default
     // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = (this.render.length === 2);
+    hasLegacyRenderMethod = !this.update;
     // Call render with firstTime set to NO to indicate an update, rather than
     // full re-render, should be performed.
     if (hasLegacyRenderMethod) {
@@ -1223,8 +1236,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @param {Boolean} firstTime Provided for compatibility when rendering legacy views only.
   */
   renderToContext: function(context, firstTime) {
-    var renderDelegate = this.get('renderDelegate'),
-        hasLegacyRenderMethod, mixins, idx, len;
+    var hasLegacyRenderMethod, mixins, idx, len;
 
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
@@ -1238,7 +1250,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // one parameter, we assume it is the render delegates style that requires
     // only context. Note that, for backwards compatibility, the default
     // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = (this.render.length === 2);
+    hasLegacyRenderMethod = !this.update;
 
     // Let the render method handle rendering. If we have a render delegate
     // object set, it will be used there.
@@ -1273,9 +1285,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       context.addClass(themeClassNames[idx]);
     }
 
-    // If this view has no cursor and should inherit it from the parent,
-    // then it sets its own cursor view.  This sets the cursor rather than
-    // simply using the parent's cursor object so that its cursorless
+    var renderDelegate = this.get('renderDelegate');
+    if (renderDelegate && renderDelegate.name) {
+      context.addClass(renderDelegate.name);
+    }
 
     context.addClass(this.get('classNames'));
 
@@ -1322,129 +1335,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       this.updateLayer(context);
     }
   },
-
+  
   /**
-    Returns a hash containing property names and their values for the display
-    properties that have changed since the last time this method was called.
-    Every display property is returned the first time it is called.
-
-    For example, if this view had two display properties, isActive and items,
-    you might receive a hash like this:
-
-    {
-      isActive: YES,
-      items: ['item1', 'item2']
-    }
-
-    Note that this method will look for display representations of properties
-    before the actual property name. For example, if title was a display
-    property, and the view contained both title and displayTitle properties,
-    the value of displayTitle would be returned.
-
-    @returns {Object}
+    [RO] Pass this object as the data source for render delegates. This proxy object
+    for the view relays requests for properties like 'title' to 'displayTitle'
+    as necessary. 
+    
+    If you ever communicate with your view's render delegate, you should pass this 
+    object as the data source.
+    
+    The proxy that forwards RenderDelegate requests for properties to the view,
+    handling display*, keeps track of the delegate's state, etc.
   */
-  getChangedDisplayProperties: function() {
-    var idx, len, displayProperties, key, val,
-        displayKey, displayPropertiesHash;
-
-    displayPropertiesHash = {
-      contains: function() {
-        var idx, len = arguments.length, key;
-
-        for (idx = 0; idx < len; idx++) {
-          key = arguments[idx];
-
-          if (this.hasOwnProperty(key)) {
-            return YES;
-          }
-        }
-
-        return NO;
-      }
-    };
-
-    displayProperties = this.get('displayProperties');
-    len = displayProperties.length;
-
-    for (idx = 0; idx < len; idx++) {
-      key = displayProperties[idx];
-
-      // Convert to display version of key name
-      // E.g., title -> displayTitle
-      displayKey = 'display'+key.capitalize();
-
-      val = this.get(displayKey);
-
-      if (val && this.didChangeFor('getChangedDisplayProperties', displayKey)) {
-        displayPropertiesHash[key] = val;
-      } else if (this.didChangeFor('getChangedDisplayProperties', key)) {
-        displayPropertiesHash[key] = this.get(key);
-      }
-    }
-
-    return displayPropertiesHash;
-  },
-
-  /**
-    Returns a hash containing property names and their values for the display
-    properties.
-
-    For example, if this view had two display properties, isActive and items,
-    you would receive a hash like this:
-
-    {
-      isActive: YES,
-      items: ['item1', 'item2']
-    }
-
-    Note that this method will look for display representations of properties
-    before the actual property name. For example, if title was a display
-    property, and the view contained both title and displayTitle properties,
-    the value of displayTitle would be returned.
-
-    @returns {Object}
-  */
-  getDisplayProperties: function() {
-    var idx, len, displayProperties, key, val,
-        displayKey, displayPropertiesHash;
-
-    displayPropertiesHash = {
-      contains: function() {
-        var idx, len = arguments.length, key;
-
-        for (idx = 0; idx < len; idx++) {
-          key = arguments[idx];
-
-          if (this.hasOwnProperty(key)) {
-            return YES;
-          }
-        }
-
-        return NO;
-      }
-    };
-
-    displayProperties = this.get('displayProperties');
-    len = displayProperties.length;
-
-    for (idx = 0; idx < len; idx++) {
-      key = displayProperties[idx];
-
-      // Convert to display version of key name
-      // E.g., title -> displayTitle
-      displayKey = 'display'+key.capitalize();
-
-      val = this.get(displayKey);
-
-      if (val) {
-        displayPropertiesHash[key] = val;
-      } else {
-        displayPropertiesHash[key] = this.get(key);
-      }
-    }
-
-    return displayPropertiesHash;
-  },
+  renderDelegateProxy: function() {
+    return SC.View._RenderDelegateProxy.createForView(this);
+  }.property('renderDelegate').cacheable(),
 
   /**
     Your render method should invoke this method to render any child views,
@@ -1481,10 +1386,38 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     By setting a render delegate, the render and update methods will be called
     on that object instead of the view itself.
+    
+    For your convenience, the view will provide its displayProperties to the
+    RenderDelegate. In some cases, you may have a conflict between the RenderDelegate's
+    API and your view's. For instance, you may have a 'value' property that is
+    any number, but the render delegate expects a percentage. Make a 'displayValue'
+    property, add _it_ to displayProperties instead of 'value', and the Render Delegate
+    will automatically use that when it wants to find 'value.'
+    
+    You can also set the render delegate by using the 'renderDelegateName' property.
 
     @property {Object}
   */
-  renderDelegate: null,
+  renderDelegate: function(key, value) {
+    if (value) this._setRenderDelegate = value;
+    if (this._setRenderDelegate) return this._setRenderDelegate;
+    
+    // If this view does not have a render delegate but has
+    // renderDelegateName set, try to retrieve the render delegate from the
+    // theme.
+    var renderDelegateName = this.get('renderDelegateName'), renderDelegate;
+
+    if (renderDelegateName) {
+      renderDelegate = this.get('theme')[renderDelegateName];
+      if (!renderDelegate) {
+        throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
+      }
+
+      return renderDelegate;
+    }
+    
+    return null;
+  }.property('renderDelegateName', 'theme'),
 
   /**
     The name of the property of the current theme that contains the render
@@ -1528,9 +1461,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     if (renderDelegate) {
       if (firstTime) {
-        renderDelegate.render(this, context);
+        renderDelegate.render(this.get('renderDelegateProxy'), context);
       } else {
-        renderDelegate.update(this, context.$());
+        renderDelegate.update(this.get('renderDelegateProxy'), context.$());
       }
     }
 
@@ -1607,6 +1540,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {String}
   */
   toolTip: null,
+  
+  /**
+    The computed tooltip.  This is generated by localizing the toolTip 
+    property if necessary.
+    
+    @property {String}
+  */
+  displayToolTip: function() {
+    var ret = this.get('toolTip');
+    return (ret && this.get('localize')) ? ret.loc() : (ret || '');
+  }.property('toolTip','localize').cacheable(),
 
   /**
     Determines if the user can select text within the view.  Normally this is
@@ -1624,6 +1568,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     You can set this array to include any properties that should immediately
     invalidate the display.  The display will be automatically invalidated
     when one of these properties change.
+    
+    These are the properties that will be visible to any Render Delegate.
+    When the RenderDelegate asks for a property it needs, the view checks the
+    displayProperties array. It first looks for the property name prefixed
+    by 'display'; for instance, if the render delegate needs a 'title',
+    the view will attempt to find 'displayTitle'. If there is no 'displayTitle'
+    in displayProperties, the view will then try 'title'. If 'title' is not
+    in displayProperties either, an error will be thrown.
+    
+    This allows you to avoid collisions between your view's API and the Render 
+    Delegate's API.
 
     Implementation note:  'isVisible' is also effectively a display property,
     but it is not declared as such because the same effect is implemented
@@ -1638,18 +1593,31 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   displayProperties: ['isFirstResponder'],
 
   /**
-    You can set this to an SC.Cursor instance; its class name will
-    automatically be added to the layer's classNames, allowing you
-    to efficiently change the cursor for a large group of views with
-    just one change to the SC.Cursor object.  The cursor property
-    is only used when the layer is created, so if you need to change
-    it to a different cursor object, you will have to destroy and
-    recreate the view layer.  (In this case you might investigate
-    setting cursors using CSS directly instead of SC.Cursor.)
+    You can set this to an SC.Cursor instance; whenever that SC.Cursor's
+    'cursorStyle' changes, the cursor for this view will automatically
+    be updated to match. This allows you to coordinate the cursors of
+    many views by making them all share the same cursor instance.
+    
+    For example, SC.SplitView uses this ensure that it and all of its
+    children have the same cursor while dragging, so that whether you are
+    hovering over the divider or another child of the split view, the
+    proper cursor is visible.
 
     @property {SC.Cursor String}
   */
-  cursor: null,
+  cursor: function(key, value) {
+    var parent;
+    
+    if (value) this._setCursor = value;
+    if (this._setCursor !== undefined) return this._setCursor;
+    
+    parent = this.get('parentView');
+    if (this.get('shouldInheritCursor') && parent) {
+      return parent.get('cursor');
+    }
+    
+    return null;
+  }.property('parentView', 'shouldInheritCursor').cacheable(),
 
   /**
     A child view without a cursor of its own inherits its parent's cursor by
@@ -2002,28 +1970,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   init: function() {
     var parentView = this.get('parentView'),
         theme = this.get('theme'),
-        renderDelegate = this.get('renderDelegate'), renderDelegateName,
         path, root, idx, len, lp, dp ;
 
-    sc_super() ;
-
-    this.layoutStyleCalculator = SC.View.LayoutStyleCalculator.create({ view: this });
-
-    // If this view does not have a render delegate but has
-    // renderDelegateName set, try to retrieve the render delegate from the
-    // theme.
-    if (!renderDelegate) {
-      renderDelegateName = this.get('renderDelegateName');
-
-      if (renderDelegateName) {
-        renderDelegate = theme[renderDelegateName];
-        if (!renderDelegate) {
-          throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
-        }
-
-        this.set('renderDelegate', renderDelegate);
-      }
-    }
+    sc_super();
+    
+	this.layoutStyleCalculator = SC.View.LayoutStyleCalculator.create({ view: this });
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
@@ -2041,7 +1992,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     dp = this.get('displayProperties') ;
     idx = dp.length ;
     while (--idx >= 0) {
-      this.addObserver(dp[idx], this, this.displayDidChange) ;
+      this.addObserver(dp[idx], this, this.displayDidChange);
     }
 
     // register for drags
@@ -2051,6 +2002,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
 
     this._previousLayout = this.get('layout');
+    this._lastTheme = this.get('theme');
   },
 
   /**
@@ -2734,11 +2686,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     // views with SC.Border mixin applied applied
     if (this.get('hasBorder')) {
-      borderTop = this.get('borderTop');
-      borderLeft = this.get('borderLeft');
-      f.height -= borderTop+this.get('borderBottom');
+      borderTop = this.get('borderTop') || 0;
+      borderLeft = this.get('borderLeft') || 0;
+      f.height -= borderTop+ (this.get('borderBottom') || 0);
       f.y += borderTop;
-      f.width -= borderLeft+this.get('borderRight');
+      f.width -= borderLeft + (this.get('borderRight') || 0);
       f.x += borderLeft;
     }
 
@@ -4013,6 +3965,106 @@ SC.View.runCallback = function(callback){
   }
 };
 
+/**
+  @class
+  @private
+  View Render Delegate Proxies are tool SC.Views use to:
+  
+  a) limit properties the render delegate can access to the displayProperties
+  b) look up 'display*' ('displayTitle' instead of 'title') to help deal with
+     differences between the render delegate's API and the view's.
+  
+  RenderDelegateProxies are fully valid data sources for render delegates. They
+  act as proxies to the view, interpreting the .get and .didChangeFor commands
+  based on the view's displayProperties.
+  
+  This tool is not useful outside of SC.View itself, and as such, is private.
+*/
+SC.View._RenderDelegateProxy = {
+  
+  // for testing:
+  isViewRenderDelegateProxy: YES,
+  
+  /**
+   * Creates a View Render Delegate Proxy for the specified view.
+   * 
+   * Implementation note: this creates a hash of the view's displayProperties
+   * array so that the proxy may quickly determine whether a property is a
+   * displayProperty or not. This could cause issues if the view's displayProperties
+   * array is modified after instantiation.
+   *
+   * @param {SC.View} view The view this proxy should proxy to. 
+   * @returns SC.View._RenderDelegateProxy
+  */
+  createForView: function(view) {
+    var ret = SC.beget(this);
+    
+    // set up displayProperty lookup for performance
+    var dp = view.get('displayProperties'), lookup = {};
+    for (var idx = 0, len = dp.length; idx < len; idx++) {
+      lookup[dp[idx]] = YES;
+    }
+    
+    // also allow the few special properties through
+    lookup['theme'] = YES;
+    
+    ret._displayPropertiesLookup = lookup;
+    ret.renderState = {};
+    
+    ret.view = view;
+    return ret;
+  },
+  
+  
+  /**
+   * Provides the render delegate with any property it needs.
+   *
+   * This first looks up whether the property exists in the view's
+   * displayProperties, and whether it exists prefixed with 'display';
+   * for instance, if the render delegate asks for 'title', this will
+   * look for 'displayTitle' in the view's displayProperties array.
+   *
+   * @param {String} property The name of the property the render delegate needs. 
+   * @returns The value.
+  */
+  get: function(property) {
+    if (this[property] !== undefined) return this[property];
+    
+    var displayProperty = 'display' + property.capitalize();
+    
+    if (this._displayPropertiesLookup[displayProperty]) {
+      return this.view.get(displayProperty);
+    } else if (this._displayPropertiesLookup[property]) {
+      return this.view.get(property);
+    }
+         
+    return undefined;
+  },
+  
+  /**
+   * Checks if any of the specified properties have changed.
+   *
+   * For each property passed, this first determines whether to use the
+   * 'display' prefix. Then, it calls view.didChangeFor with context and that
+   * property name.
+   *
+  */
+  didChangeFor: function(context) {
+    var len = arguments.length, idx;
+    for (idx = 1; idx < len; idx++) {
+      var property = arguments[idx], 
+          displayProperty = 'display' + property.capitalize();
+    
+      if (this._displayPropertiesLookup[displayProperty]) {
+        if (this.view.didChangeFor(context, displayProperty)) return YES;
+      } else if (this._displayPropertiesLookup[property]) {
+        if (this.view.didChangeFor(context, property)) return YES;        
+      }
+    }
+    
+    return NO;
+  }
+};
 
 SC.View.LayoutStyleCalculator = SC.Object.extend({
 

@@ -66,15 +66,15 @@ test("Passes data source as first parameter if render delegate is not the view",
 
   var renderDelegate = SC.Object.create({
     render: function(dataSource, context, firstTime) {
-      equals(dataSource, view, 'passes view as data source');
-      ok(context._STYLE_REGEX, 'passes render context');
-      equals(firstTime, undefined, 'does not pass third parameter');
+      equals(dataSource, view.get('renderDelegateProxy'), "passes the view's render delegate proxy as data source");
+      ok(context._STYLE_REGEX, "passes render context");
+      equals(firstTime, undefined, "does not pass third parameter");
       renderCallCount++;
     },
 
     update: function(dataSource, elem) {
-      equals(dataSource, view, 'passes view as data source');
-      ok(elem.jquery, 'passes a jQuery object as first parameter'); 
+      equals(dataSource, view.get('renderDelegateProxy'), "passes view's render delegate proxy as data source");
+      ok(elem.jquery, "passes a jQuery object as first parameter"); 
       updateCallCount++;
     }  
   });
@@ -141,7 +141,7 @@ test("Views that do not override render should render their child views", functi
     renderDelegateView: SC.View.design({
       renderDelegate: SC.Object.create({
         render: function(dataSource, context) {
-          ok(dataSource.isView, "Render delegate should get passed a view for its data source");
+          ok(dataSource.isViewRenderDelegateProxy, "Render delegate should get passed a view's proxy for its data source");
           renderDelegateCount++;
         },
         

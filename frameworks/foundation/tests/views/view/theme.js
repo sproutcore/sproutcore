@@ -9,8 +9,8 @@
 
 module("SC.View#themes");
 
-var t1 = SC.Theme.register("sc-test-1", SC.BaseTheme.extend({classNames: ["test-1"]}));
-var t2 = SC.Theme.register("sc-test-2", SC.BaseTheme.extend({classNames: ["test-2"]}));
+var t1 = SC.Theme.addTheme("sc-test-1", SC.BaseTheme.extend({name: 'test-1' }));
+var t2 = SC.Theme.addTheme("sc-test-2", SC.BaseTheme.extend({name: 'test-2' }));
 
 test("changing themes propagates to child view.", function() {
   var view = SC.View.create({
@@ -35,7 +35,7 @@ test("adding child to parent propagates theme to child view.", function() {
   });
   
   ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
-  equals(child.get("theme"), SC.Theme.find("sc-base"), "view's child's theme should start at base theme");
+  equals(child.get("theme"), SC.Theme.find('sc-base'), "view's child's theme should start at base theme");
   view.appendChild(child);
   equals(t1, child.get("theme"), "view's child's theme should be sc-test-1");
 });

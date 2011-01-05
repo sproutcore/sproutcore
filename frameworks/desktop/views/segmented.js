@@ -92,14 +92,20 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   //
    
   /**
-    The array of items to display.  This can be a simple array of strings,
-    objects or hashes.  If you pass objects or hashes, you must also set the
+    The array of items to display.  This may be a simple array of strings, objects
+    or SC.Objects.  If you pass objects or SC.Objects, you must also set the
     various itemKey properties to tell the SegmentedView how to extract the
     information it needs.
     
+    Note: only SC.Object items support key-value coding and therefore can be 
+    observered by the view for changes to titles, values, icons, widths, 
+    isEnabled values & tooltips.
+    
+    TODO: explain how to notify the view of changes to String & Object items
+    
     @property {Array}
   */
-  items: [],
+  items: null,
 
   /** 
     The key that contains the title for each item.
@@ -164,129 +170,166 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     equivalent in the tab.
   */
   itemKeyEquivalentKey: null,
-
-  /**
-    The array of itemKeys that will be searched to build the displayItems
-    array.  This is used internally by the class.  You will not generally
-    need to access or edit this array.
+  
+  /** @private
+    The following properties are used to map items to child views. Item keys
+    are looked up on the item based on this view's value for each 'itemKey'.  
+    If a value in the item is found, then that value is mapped to a child
+    view using the matching viewKey.
     
     @property {Array}
   */
-  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey'.w(),
+  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey'.w(),
+  viewKeys: 'title value isEnabled icon width toolTip keyEquivalent'.w(),
   
   /**
-    This computed property is generated from the items array based on the 
-    itemKey properties that you set.  The return value is an array of arrays
-    that contain private information used by the SegmentedView to render. 
-    
-    You will not generally need to access or edit this property.
-    
-    @property {Array}
+    Call itemsDidChange once to initialize segment child views for the items that exist at
+    creation time.
   */
-  displayItems: function() {
-    var items = this.get('items'), loc = this.get('localize'),
-      keys=null, itemType, cur, ret = [], max = items.get('length'), idx, 
-      item, fetchKeys = SC._segmented_fetchKeys, fetchItem = SC._segmented_fetchItem;
-    
-    // loop through items and collect data
-    for(idx=0;idx<max;idx++) {
-      item = items.objectAt(idx) ;
-      if (SC.none(item)) continue; //skip is null or undefined
-      
-      // if the item is a string, build the array using defaults...
-      itemType = SC.typeOf(item);
-      if (itemType === SC.T_STRING) {
-        cur = {
-          title: item.humanize().titleize(),
-          value: item,
-          isEnabled: YES,
-          icon: null,
-          width: null,
-          toolTip: null,
-          index: idx
-        };
-        // cur = [item.humanize().titleize(), item, YES, null, null,  null, idx] ;
-        
-      // if the item is not an array, try to use the itemKeys.
-      } else if (itemType !== SC.T_ARRAY) {
-        // get the itemKeys the first time
-        if (keys===null) {
-          keys = this.itemKeys.map(fetchKeys,this);
-        }
-        
-        // now loop through the keys and try to get the values on the item
-        cur = keys.map(fetchItem, item);
-        
-        // create the actual item
-        cur = {
-          title: cur[0],
-          value: cur[1],
-          isEnabled: cur[2],
-          icon: cur[3],
-          width: cur[4],
-          toolTip: cur[5],
-          index: idx
-        };
-        
-        // special case 1...if title key is null, try to make into string
-        if (!keys[0] && item.toString) cur.title = item.toString(); 
-        
-        // special case 2...if value key is null, use item itself
-        if (!keys[1]) cur.value = item;
-        
-        // special case 3...if isEnabled is null, default to yes.
-        if (!keys[2]) cur.isEnabled = YES ; 
-      }
-      
-      // finally, be sure to loc the title if needed
-      if (loc && cur.title) cur.title = cur.title.loc();
-
-      // finally, be sure to loc the toolTip if needed
-      if (loc && cur.toolTip && SC.typeOf(cur.toolTip) === SC.T_STRING) cur.toolTip = cur.toolTip.loc();
-      
-      // add to return array
-      ret[ret.length] = cur;
-    }
-    
-    // all done, return!
-    return ret ;
-  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey'),
-  
-  /** If the items array itself changes, add/remove observer on item... */
-  itemsDidChange: function() { 
-    if (this._items) {
-      this._items.removeObserver('[]',this,this.itemContentDidChange) ;
-    } 
-    this._items = this.get('items') ;
-    if (this._items) {
-      this._items.addObserver('[]', this, this.itemContentDidChange) ;
-    }
-    
-    this.itemContentDidChange();
-  }.observes('items'),
-  
-  /** 
-    Invoked whenever the item array or an item in the array is changed.  This method will reginerate the list of items.
-  */
-  itemContentDidChange: function() {
-    this.set('renderLikeFirstTime', YES);
-    this.notifyPropertyChange('displayItems');
-  },
-  
   init: function() {
     sc_super();
-    this.itemsDidChange() ;
+    
+    this.itemsDidChange();
   },
+  
+  /**
+    Called whenever the number of items changes.  This method populates SegmentedView's childViews, taking
+    care to re-use existing childViews if possible.
+    
+    */
+  itemsDidChange: function() {
+    var items = this.get('items') || [],
+        item,
+        localItem,                        // Used to avoid altering the original items
+        childViews = this.get('childViews'),
+        childView,
+        value = this.get('value'),        // The value can change if items that were once selected are removed
+        isSelected,
+        itemKeys = this.get('itemKeys'),
+        itemKey, 
+        viewKeys = this.get('viewKeys'),
+        viewKey,
+        i, j;
+  
+    // Update childViews 
+    if (childViews.get('length') > items.get('length')) {   // We've lost segments (ie. childViews)
+      
+      // Remove unneeded segments from the end back
+      for (i = childViews.get('length') - 1; i >= items.get('length'); i--) {
+        childView = childViews.objectAt(i);
+        
+        // If a selected childView has been removed then update our value
+        if (SC.isArray(value)) {
+          value.removeObject(childView.get('value'));
+        } else if (value === childView.get('value')) {
+          value = null;
+        }
 
+        this.removeChild(childView);
+      }
+      
+      // Update our value which may have changed
+      this.set('value', value);
+      
+    } else if (childViews.get('length') < items.get('length')) {  // We've gained segments
+
+      // Create the new segments
+      for (i = childViews.get('length'); i < items.get('length'); i++) {
+    
+        // We create a default SC.ButtonView-like object for each segment
+        childView = SC.SegmentView.create({
+          controlSize: this.get('controlSize'),
+          localize: this.get('localize')
+        });
+        
+        // Attach the child
+        this.appendChild(childView);
+      }  
+    }
+    
+    // Because the items array can be altered with insertAt or removeAt, we can't be sure that the items 
+    // continue to match 1-to-1 the existing views, so once we have the correct number of childViews, 
+    // simply update them all
+    childViews = this.get('childViews');
+    
+    for (i = 0; i < items.get('length'); i++) {
+      localItem = items.objectAt(i);
+      childView = childViews.objectAt(i);
+      
+      // Skip null/undefined items (but don't skip empty strings)
+      if (SC.none(localItem)) continue;
+        
+      // Normalize the item (may be a String, Object or SC.Object)
+      if (SC.typeOf(localItem) === SC.T_STRING) {
+        
+        localItem = SC.Object.create({
+          'title': localItem.humanize().titleize(),
+          'value': localItem
+        });
+        
+        // Update our keys accordingly
+        this.set('itemTitleKey', 'title');
+        this.set('itemValueKey', 'value');
+      } else if (SC.typeOf(localItem) === SC.T_HASH) {
+        
+        localItem = SC.Object.create(localItem);
+      } else if (localItem instanceof SC.Object)  {
+          
+        // We don't need to make any changes to SC.Object items, but we can observe them
+        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+          itemKey = this.get(itemKeys.objectAt(j));
+        
+          if (itemKey) {
+            localItem.removeObserver(itemKey, this, this.itemContentDidChange);
+            localItem.addObserver(itemKey, this, this.itemContentDidChange, i);
+          }
+        }
+      } else {
+        SC.Logger.error('SC.SegmentedView items may be Strings, Objects (ie. Hashes) or SC.Objects only');
+      }
+      
+      // Determine whether this segment is selected based on the view's existing value(s)
+      isSelected = NO;
+      if (SC.isArray(value) ? value.indexOf(localItem.get(this.get('itemValueKey'))) >= 0 : value === localItem.get(this.get('itemValueKey'))) {
+        isSelected = YES;
+      }
+      childView.set('isSelected', isSelected);
+        
+      // Assign segment specific properties based on position
+      childView.set('index', i);
+      childView.set('isFirstSegment', i === 0);
+      childView.set('isMiddleSegment',  i < items.get('length') - 1 && i > 0);
+      childView.set('isLastSegment', i === items.get('length') - 1);
+      
+      // Be sure to update the view's properties for the (possibly new) matched item
+      childView.updateItem(this, localItem);
+    }
+    
+  }.observes('*items.[]'),
+  
+  itemContentDidChange: function(item, key, alwaysNull, index) {
+    var items = this.get('items'),
+        childViews = this.get('childViews'),
+        childView;
+
+    childView = childViews.objectAt(index);
+    if (childView) {
+      
+      // Update the childView
+      childView.updateItem(this, item);
+    } else {
+      SC.Logger.warn("Item content change was observed on item without matching segment child view.");
+    }
+  },
   
   // ..........................................................
   // RENDERING/DISPLAY SUPPORT
   // 
   
-  displayProperties: ['displayItems', 'value', 'activeIndex'],
+  displayProperties: ['align'],
   
   renderDelegateName: 'segmentedRenderDelegate',
-
+  
   // ..........................................................
   // EVENT HANDLING
   // 
@@ -299,7 +342,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var renderDelegate = this.get('renderDelegate');
 
     if (renderDelegate && renderDelegate.indexForClientPosition) {
-      return renderDelegate.indexForClientPosition(this, this.$(), evt.clientX, evt.clientY);
+      return renderDelegate.indexForClientPosition(this, evt.clientX, evt.clientY);
     }
   },
   
@@ -313,14 +356,15 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       return YES ; // handled
     }    
     if (!this.get('allowsMultipleSelection') && !this.get('allowsEmptySelection')){
-      items = this.get('displayItems');
-      len = items.length;
+      items = this.get('displayItems').slice(0);
+      
+      len = items.get('length');
       value = this.get('value');
       isArray = SC.isArray(value);
       if (evt.which === 39 || evt.which === 40) {  
         for(i=0; i< len-1; i++){
-          item=items[i];
-          if( isArray ? (value.indexOf(item.value)>=0) : (item.value===value)){
+          item=items.objectAt(i);
+          if( isArray ? (value.indexOf(item.get('value'))>=0) : (item.get('value')===value)){
             this.triggerItemAtIndex(i+1);
           }
         }
@@ -328,8 +372,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
       else if (evt.which === 37 || evt.which === 38) {
         for(i=1; i< len; i++){
-          item=items[i];
-          if( isArray ? (value.indexOf(item.value)>=0) : (item.value===value)){
+          item=items.objectAt(i);
+          if( isArray ? (value.indexOf(item.get('value'))>=0) : (item.get('value')===value)){
             this.triggerItemAtIndex(i-1);
           }
         }
@@ -340,92 +384,167 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   },
   
   mouseDown: function(evt) {
+    var childViews = this.get('childViews'),
+        childView,
+        index;
+        
     if (!this.get('isEnabled')) return YES; // nothing to do
-    var idx = this.displayItemIndexForEvent(evt);
     
-    // if mouse was pressed on a button, then start detecting pressed events
-    if (idx>=0) {
-      this._isMouseDown = YES ;
-      this.set('activeIndex', idx);
+    index = this.displayItemIndexForEvent(evt);
+    if (index >= 0) {                          
+      
+      childView = childViews[index];
+      childView.set('isActive', YES);
+      
+      this.activeChildView = childView;
+      
+      // if mouse was pressed on a button, then start detecting pressed events
+      this._isMouseDown = YES;
     }
     
     return YES ;
   },
   
   mouseUp: function(evt) {
-    var idx = this.displayItemIndexForEvent(evt);
-    // if mouse was pressed on a button then detect where we where when we
-    // release and use that one.
-    if (this._isMouseDown && (idx>=0)) this.triggerItemAtIndex(idx);
+    var activeChildView,
+        index;
+        
+    index = this.displayItemIndexForEvent(evt);
     
-    // cleanup
-    this._isMouseDown = NO ;
-    this.set('activeIndex', -1);
+    if (this._isMouseDown && (index >= 0)) {
+    
+      // Clean up
+      this.triggerItemAtIndex(index);
+    
+      activeChildView = this.activeChildView;
+      activeChildView.set('isActive', NO);
+      this.activeChildView = null;
+      
+      this._isMouseDown = NO;
+    }
+      
     return YES ;
   },
   
   mouseMoved: function(evt) {
+    var childViews = this.get('childViews'),
+        activeChildView,
+        childView,
+        index;
+        
     if (this._isMouseDown) {
-      var idx = this.displayItemIndexForEvent(evt);
-      this.set('activeIndex', idx);
-    }
-    return YES;
-  },
-  
-  mouseExited: function(evt) {
-    // if mouse was pressed down initially, start detection again
-    if (this._isMouseDown) {
-      var idx = this.displayItemIndexForEvent(evt);
-      this.set('activeIndex', idx);
+      // Update the last segment
+      index = this.displayItemIndexForEvent(evt);
+      
+      activeChildView = this.activeChildView;
+      childView = childViews[index];
+      
+      if (childView && childView !== activeChildView) {
+        // Changed
+        if (activeChildView) activeChildView.set('isActive', NO);
+        childView.set('isActive', YES);
+        
+        this.activeChildView = childView;
+      }
     }
     return YES;
   },
   
   mouseEntered: function(evt) {
-    // if mouse was down, hide active index
+    var childViews = this.get('childViews'),
+        childView,
+        index;
+        
+    // if mouse was pressed down initially, start detection again
     if (this._isMouseDown) {
-      var idx = this.displayItemIndexForEvent(evt);
-      this.set('activeIndex', -1);
+      index = this.displayItemIndexForEvent(evt);
+      
+      if (index >= 0) {
+        childView = childViews[index];
+        childView.set('isActive', YES);
+        
+        this.activeChildView = childView;
+      }
     }
-    return YES ;
+    return YES;
   },
   
-  
+  mouseExited: function(evt) {
+    var activeChildView;
+        
+    // if mouse was down, hide active index
+    if (this._isMouseDown) {
+      activeChildView = this.activeChildView;
+      if (activeChildView) activeChildView.set('isActive', NO);
+        
+      this.activeChildView = null;
+    }
+    
+    return YES;
+  },
   
   touchStart: function(touch) {
-    if (!this.get('isEnabled')) return YES; // nothing to do
-    var idx = this.displayItemIndexForEvent(touch);
+    var childViews = this.get('childViews'),
+        childView,
+        index;
     
-    // if mouse was pressed on a button, then start detecting pressed events
-    if (idx>=0) {
-      this._isTouching = YES ;
-      this.set('activeIndex', idx);
+    if (!this.get('isEnabled')) return YES; // nothing to do
+    
+    index = this.displayItemIndexForEvent(touch);
+    
+    if (index >= 0) {   
+      childView = childViews[index];
+      childView.set('isActive', YES);
+      this.activeChildView = childView;
+      
+      this._isTouching = YES;
     }
     
     return YES ;
   },
   
   touchEnd: function(touch) {
-    var idx = this.displayItemIndexForEvent(touch);
+    var activeChildView,
+        index;
+        
+    index = this.displayItemIndexForEvent(touch);
     // if mouse was pressed on a button then detect where we where when we
     // release and use that one.
-    if (this._isTouching && (idx>=0)) this.triggerItemAtIndex(idx);
+    if (this._isTouching && (index >= 0)) this.triggerItemAtIndex(index);
     
     // cleanup
-    this._isTouching = NO ;
-    this.set('activeIndex', -1);
+    activeChildView = this.activeChildView;
+    activeChildView.set('isActive', NO);
+    this.activeChildView = null;
+    
+    this._isTouching = NO;
+      
     return YES ;
   },
   
   touchesDragged: function(evt, touches) {
-    var isTouching = this.touchIsInBoundary(evt);
+    var isTouching = this.touchIsInBoundary(evt),
+        childViews = this.get('childViews'),
+        activeChildView,
+        childView,
+        index;
 
     if (isTouching) {
       if (!this._isTouching) {
         this._touchDidEnter(evt);
       }
-      var idx = this.displayItemIndexForEvent(evt);
-      this.set('activeIndex', idx);
+      index = this.displayItemIndexForEvent(evt);
+      
+      activeChildView = this.activeChildView;
+      childView = childViews[index];
+      
+      if (childView && childView !== activeChildView) {
+        // Changed
+        if (activeChildView) activeChildView.set('isActive', NO);
+        childView.set('isActive', YES);
+        
+        this.activeChildView = childView;
+      }
     } else {
       if (this._isTouching) this._touchDidExit(evt);
     }
@@ -436,53 +555,70 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   },
   
   _touchDidExit: function(evt) {
-    var idx = this.displayItemIndexForEvent(evt);
-    this.set('activeIndex', -1);
+    var activeChildView;
+    
+    activeChildView = this.activeChildView;
+    activeChildView.set('isActive', NO);
+    this.activeChildView = null;
 
     return YES;
   },
   
   _touchDidEnter: function(evt) {
-    // if mouse was down, hide active index
-    var idx = this.displayItemIndexForEvent(evt);
-    this.set('activeIndex', idx);
-
-    return YES ;
+    var childViews = this.get('childViews'),
+        childView,
+        index;
+    
+    index = this.displayItemIndexForEvent(evt);
+    
+    if (index >= 0) {
+      childView = childViews[index];
+      childView.set('isActive', YES);
+      this.activeChildView = childView;
+    }
+      
+    return YES;
   },
 
   /** 
     Simulates the user clicking on the segment at the specified index. This
     will update the value if possible and fire the action.
   */
-  triggerItemAtIndex: function(idx) {
-    var items = this.get('displayItems'),
-        item  = items.objectAt(idx),
+  triggerItemAtIndex: function(index) {
+    var childViews = this.get('childViews'),
+        childView,
         sel, value, val, empty, mult;
-        
-    if (!item.isEnabled) return this; // nothing to do!
+    
+    childView = childViews[index];
+    
+    if (!childView.get('isEnabled')) return this; // nothing to do!
 
     empty = this.get('allowsEmptySelection');
     mult = this.get('allowsMultipleSelection');
     
     
     // get new value... bail if not enabled. Also save original for later.
-    sel = item.value;
+    sel = childView.get('value');
     value = val = this.get('value') ;
-    if (!SC.isArray(value)) value = [value]; // force to array
+      
+    if (SC.empty(value)) {
+      value = [];
+    } else if (!SC.isArray(value)) {
+      value = [value]; // force to array
+    }
     
     // if we do not allow multiple selection, either replace the current
     // selection or deselect it
     if (!mult) {
       // if we allow empty selection and the current value is the same as
       // the selected value, then deselect it.
-      if (empty && (value.get('length')===1) && (value.objectAt(0)===sel)){
+      if (empty && (value.get('length')===1) && (value.objectAt(0)===sel)) {
         value = [];
       
       // otherwise, simply replace the value.
       } else value = [sel] ;
       
-    // if we do allow multiple selection, then add or remove item to the
-    // array.
+    // if we do allow multiple selection, then add or remove item to the array.
     } else {
       if (value.indexOf(sel) >= 0) {
         if (value.get('length')>1 || (value.objectAt(0)!==sel) || empty) {
@@ -507,7 +643,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var actionKey = this.get('itemActionKey'),
         targetKey = this.get('itemTargetKey'),
         action, target = null,
-        resp = this.getPath('pane.rootResponder');
+        resp = this.getPath('pane.rootResponder'),
+        item;
 
     if (actionKey && (item = this.get('items').objectAt(item.index))) {
       // get the source item from the item array.  use the index stored...
@@ -530,6 +667,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
   
+  /** @private
+    Whenever the value changes, update the segments accordingly.
+  */
+  valueDidChange: function() {
+    var value = this.get('value'),
+        childViews = this.get('childViews'),
+        childView;
+    
+    for (var i = childViews.get('length') - 1; i >= 0; i--) {
+      childView = childViews.objectAt(i);
+      if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
+        childView.set('isSelected', YES);
+      } else {
+        childView.set('isSelected', NO);
+      }
+    }
+  }.observes('value'),
+  
   /** tied to the isEnabled state */
    acceptsFirstResponder: function() {
      if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
@@ -551,15 +706,4 @@ SC.SegmentedView = SC.View.extend(SC.Control,
      if (this._isFocused) this._isFocused = NO ;
    }
     
-}) ;
-
-// Helpers defined here to avoid creating lots of closures...
-SC._segmented_fetchKeys = function(k) { return this.get(k); };
-SC._segmented_fetchItem = function(k) { 
-  if (!k) return null;
-  return this.get ? this.get(k) : this[k]; 
-};
-
-
-
-
+});

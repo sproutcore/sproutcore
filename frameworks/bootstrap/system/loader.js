@@ -7,19 +7,6 @@
 
 // sc_require("system/browser");
 
-SC.bundleDidLoad = function(bundle) {
-  var info = this.MODULE_INFO[bundle] ;
-  if (!info) info = this.MODULE_INFO[bundle] = {} ;
-  info.loaded = true ;
-};
-
-SC.bundleIsLoaded = function(bundle) {
-  var info = this.MODULE_INFO[bundle] ;
-  return info ? !!info.loaded : false ;
-};
-
-SC.loadBundle = function() { throw "SC.loadBundle(): SproutCore is not loaded."; };
-
 SC.setupBodyClassNames = function() {
   var el = document.body ;
   if (!el) return ;

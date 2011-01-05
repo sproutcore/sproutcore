@@ -8,7 +8,9 @@
 /**
   Renders and updates the HTML representation of SC.ButtonView.
 */
-SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
+SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
+  name: 'button',
+  
   /**
     Called when we need to create the HTML that represents the button.
 
@@ -16,14 +18,22 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
-    var displayProperties = dataSource.getDisplayProperties();
-    var minWidth          = displayProperties.titleMinWidth;
+    var theme             = dataSource.get('theme'),
+        minWidth          = dataSource.get('titleMinWidth'),
+        toolTip           = dataSource.get('displayToolTip'),
+        view              = dataSource.get('view');
+    
     var labelContent;
 
-    // Add an icon class name to the button if it contains an icon in its
-    // title.
-    context.setClass('icon', !!displayProperties.icon);
-
+    context.setClass('icon', !!dataSource.get('icon') || 0);    
+    context.setClass('def', dataSource.get('isDefault') || 0);
+    context.setClass('cancel', dataSource.get('isCancel') || 0);
+    
+    if (toolTip) {
+      context.attr('title', toolTip);
+      context.attr('alt', toolTip);
+    }
+    
     // Specify a minimum width for the inner part of the button.
     minWidth = (minWidth ? "style='min-width: " + minWidth + "px'" : '');
     context = context.push("<span class='sc-button-inner' " + minWidth + ">");
@@ -31,19 +41,14 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     // Create the inner label element that contains the text and, optionally,
     // an icon.
     context = context.begin('label').addClass('sc-button-label');
-    labelContent = this._htmlForTitleAndIcon(displayProperties);
-    context.push(labelContent);
-
-    // By adding the 'ellipsis' class, the text-overflow: ellipsis CSS
-    // rule will be applied.
-    if (displayProperties.needsEllipsis){
-      context.addClass('ellipsis');
-    }
-
+    
+    // NOTE: we don't add the label class names because button styles its own label.
+    theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
+    
     context.push("</span>");
 
-    if (displayProperties.supportFocusRing) {
+    if (dataSource.get('supportFocusRing')) {
       context.push('<div class="focus-ring">',
                     '<div class="focus-left"></div>',
                     '<div class="focus-middle"></div>',
@@ -59,60 +64,15 @@ SC.BaseTheme.buttonRenderDelegate = SC.Object.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
-    var displayProperties = dataSource.getChangedDisplayProperties();
+    var theme = dataSource.get('theme');
+    
+    if (dataSource.get('isActive')) jquery.addClass('active');
+    if (dataSource.get('isDefault')) jquery.addClass('default');
+    if (dataSource.get('isCancel')) jquery.addClass('cancel');
+    if (dataSource.get('icon')) jquery.addClass('icon');
 
-    if (displayProperties.contains('isActive')) {
-      if (displayProperties.isActive) {
-        jquery.addClass('active');
-      }
-    }
 
-    if (displayProperties.contains('title', 'isActive')) {
-      jquery.find('label').html(this._htmlForTitleAndIcon(dataSource.getDisplayProperties()));
-    }
-  },
-
-  /**
-    Returns the HTML for the button's label, which can include a title and
-    an icon.
-
-    @param {Object} displayProperties the object containing the properties needed to generate the label
-    @returns {String} a string of HTML
-  */
-  _htmlForTitleAndIcon: function(displayProperties) {
-    var title = displayProperties.title,
-        titleMinWidth = displayProperties.titleMinWidth,
-        hint = displayProperties.hint,
-        escapeHTML = displayProperties.escapeHTML,
-        icon = displayProperties.icon || '';
-
-    // Escape the title of the button if needed. This prevents potential
-    // XSS attacks.
-    if (title && escapeHTML) {
-      title = SC.RenderContext.escapeHTML(title) ;
-    }
-
-    if (hint && !title) {
-      if (escapeHTML) {
-        hint = SC.RenderContext.escapeHTML(hint);
-      }
-      title = "<span class='sc-hint'>" + hint + "</span>";
-    }
-
-    if (icon) {
-      // If the icon property is the path to an image, create an image tag
-      // that points to that URL.
-      if (icon.indexOf('/') >= 0) {
-        icon = '<img src="'+icon+'" alt="" class="icon" />';
-
-      // Otherwise, the icon property is a class name that should be added
-      // to the image tag. Display a blank image so that the user can add
-      // background image using CSS.
-      } else {
-        icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="'+icon+'" />';
-      }
-    }
-
-    return icon+title;
+    theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
+  
 });

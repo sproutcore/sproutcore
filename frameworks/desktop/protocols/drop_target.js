@@ -46,8 +46,8 @@ SC.DropTarget = {
     events.  SproutCore knows to register your view when this property
     is true on view creation.
   */  
-  isDropTarget: true,
-  
+  isDropTarget: YES,
+
   /**
     Called when the drag is started, regardless of where or not your drop
     target is current. You can use this to highlight your drop target

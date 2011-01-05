@@ -13,96 +13,114 @@ TestControls.buttonsPage = SC.View.design({
     
     contentView: SC.FormView.design({
       labelWidth: 100,
-      flowPadding: { left: 20, top: 10, bottom: 40, right: 20 },
+      flowPadding: { left: 20, top: 30, bottom: 40, right: 20 },
       classNames: ["sample_controls"],
-      childViews: "header small normal huge jumbo smallToggle normalToggle hugeToggle jumboToggle disabledSmall disabledNormal disabledHuge disabledJumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
+      childViews: "header style flags small normal huge jumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
       header: SC.LabelView.design({
+        flowSize: { widthPercentage: 1 },
         layout: {width: 200, height: 24 },
+        
         classNames: "header".w(),
         value: "Buttons"
       }),
+      
+      style: SC.FormView.row("Theme", SC.SegmentedView.design({
+        align: 'left',
+        layout: { width: 300, height: 30 },
+        items: [
+          {name: 'Normal', 'value': 'square'},
+          {name: 'Point Left', value: 'point-left'},
+          {name: 'Point Right', value: 'point-right'},
+          {name: 'Capsule', value: 'capsule'}
+        ],
+        
+        itemTitleKey: 'name',
+        itemValueKey: 'value',
+        
+        valueBinding: 'TestControls.buttonsController.theme'
+      })),
+      
+      flags: SC.FormView.row(SC.View.design(SC.FlowedLayout, {
+        childViews: 'shouldToggle shouldDisable shouldBeDefault shouldBeCancel'.w(),
+        
+        isSpacer: YES,
+        
+        shouldToggle: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Toggleable",
+          valueBinding: 'TestControls.buttonsController.toggleable'
+        }),
+
+        shouldDisable: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Disable",
+          valueBinding: 'TestControls.buttonsController.disabled'
+        }),
+
+        shouldBeDefault: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Default",
+          valueBinding: 'TestControls.buttonsController.default'
+        }),
+
+        shouldBeCancel: SC.CheckboxView.design({
+          layout: { width: 100, height: 24 },
+          title: "Cancel",
+          valueBinding: 'TestControls.buttonsController.cancel'
+        })
+      })),
+      
       normal: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
+        controlSize: SC.REGULAR_CONTROL_SIZE,
         layout: { height: 24, width: 100 },
-        title: "Click Me"
+        title: "Click Me",
+        
+        themeNameBinding: 'TestControls.buttonsController.theme',
+        buttonBehaviorBinding: 'TestControls.buttonsController.buttonBehavior',
+        isEnabledBinding: SC.Binding.not('TestControls.buttonsController.disabled'),
+        isDefaultBinding: 'TestControls.buttonsController.default',
+        isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
 
       small: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
+        controlSize: SC.SMALL_CONTROL_SIZE,
         layout: { height: 18, width: 100 },
-        title: "Click Me"
+        title: "Click Me",
+        
+        themeNameBinding: 'TestControls.buttonsController.theme',
+        buttonBehaviorBinding: 'TestControls.buttonsController.buttonBehavior',
+        isEnabledBinding: SC.Binding.not('TestControls.buttonsController.disabled'),
+        isDefaultBinding: 'TestControls.buttonsController.default',
+        isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
 
       huge: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
+        controlSize: SC.HUGE_CONTROL_SIZE,
         layout: { height: 30, width: 100 },
-        title: "Click Me"
+        title: "Click Me",
+        
+        themeNameBinding: 'TestControls.buttonsController.theme',
+        buttonBehaviorBinding: 'TestControls.buttonsController.buttonBehavior',
+        isEnabledBinding: SC.Binding.not('TestControls.buttonsController.disabled'),
+        isDefaultBinding: 'TestControls.buttonsController.default',
+        isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
 
       jumbo: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 44, width: 100 },
-        title: "Click Me"
-      })),
-      
-      normalToggle: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 24, width: 100 },
-        title: "Click Me",
-        buttonBehavior: SC.TOGGLE_BEHAVIOR
-      })),
-
-      smallToggle: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 18, width: 100 },
-        title: "Click Me",
-        buttonBehavior: SC.TOGGLE_BEHAVIOR
-      })),
-
-      hugeToggle: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 30, width: 100 },
-        title: "Click Me",
-        buttonBehavior: SC.TOGGLE_BEHAVIOR
-      })),
-
-      jumboToggle: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
+        controlSize: SC.JUMBO_CONTROL_SIZE,
         layout: { height: 44, width: 100 },
         title: "Click Me",
-        buttonBehavior: SC.TOGGLE_BEHAVIOR
-      })),
-      
-      disabledSmall: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 18, width: 150 },
-        isEnabled: NO,
-        title: "Don't Click Me"
-      })),
-      
-      disabledNormal: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 24, width: 150 },
-        isEnabled: NO,
-        title: "Don't Click Me"
-      })),
-      
-      disabledHuge: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 30, width: 150 },
-        isEnabled: NO,
-        title: "Don't Click Me"
-      })),
-      
-      disabledJumbo: SC.FormView.row(SC.ButtonView.design({
-        controlSize: SC.AUTO_CONTROL_SIZE,
-        layout: { height: 44, width: 150 },
-        isEnabled: NO,
-        title: "Don't Click Me"
+        
+        themeNameBinding: 'TestControls.buttonsController.theme',
+        buttonBehaviorBinding: 'TestControls.buttonsController.buttonBehavior',
+        isEnabledBinding: SC.Binding.not('TestControls.buttonsController.disabled'),
+        isDefaultBinding: 'TestControls.buttonsController.default',
+        isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
       
       space: SC.View.design({
-        flowSize: { widthPercentage: 1, height: 24 }
+        isSpacer: YES,
+        fillWidth: YES
       }),
       disclosureHeader: SC.LabelView.design({
         layout: { width: 400, height: 24 },

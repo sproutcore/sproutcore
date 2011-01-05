@@ -80,7 +80,8 @@ config :ace,
   :required => :empty_theme, 
   :theme_name => 'sc-theme',
   :test_required  => ['sproutcore/testing'],
-  :debug_required => ['sproutcore/debug']
+  :debug_required => ['sproutcore/debug'],
+  :css_theme => 'ace'
 
 # CONFIGURE APPS
 
@@ -101,6 +102,8 @@ config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
   # end
   
 end
+
+config :test_controls, :css_theme => 'ace.test-controls'
 
 config :greenhouse, 
   :required => [:sproutcore, :'sproutcore/designer', :statechart],

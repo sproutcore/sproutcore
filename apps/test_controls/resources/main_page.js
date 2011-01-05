@@ -77,9 +77,11 @@ TestControls.mainPage = SC.Page.create({
         })
       }),
       detailView: SC.WorkspaceView.design({
+        themeName: 'ace',
+        themeNameBinding: 'TestControls.categoryController.themeName',
         topToolbar: SC.ToolbarView.design({
           layout: { top: 0, left: 0, right: 0, height: 32 },
-          childViews: "showMaster label".w(),
+          childViews: "showMaster label useDarkTheme".w(),
           showMaster: SC.ButtonView.design({
             layout: { left: 7, centerY: 0, height: 30, width: 100 },
             controlSize: SC.AUTO_CONTROL_SIZE,
@@ -95,6 +97,12 @@ TestControls.mainPage = SC.Page.create({
             classNames: "embossed".w(),
             isVisible: NO,
             isVisibleBinding: SC.Binding.from(".parentView.masterIsHidden")
+          }),
+          
+          useDarkTheme: SC.CheckboxView.design({
+            layout: { right: 10, centerY: 0, height: 18, width: 150 },
+            title: "Use Dark Theme",
+            valueBinding: 'TestControls.categoryController.useDarkTheme'
           })
         }),
         contentView: SC.ContainerView.design({

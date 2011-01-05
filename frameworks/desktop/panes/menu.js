@@ -527,6 +527,8 @@ SC.MenuPane = SC.PickerPane.extend(
     }
   },
 
+  renderDelegateName: 'menuRenderDelegate',
+
   /** @private
     The render method is responsible for adding the control size class
     name to the menu pane.

@@ -33,7 +33,8 @@ TestControls.textFieldPage = SC.View.design({
       disabled: SC.FormView.row(SC.TextFieldView.design({
         layout: { left: 0, width: 150, height: 44, centerY: 0},
         isEnabled: NO,
-        value: "Disabled"
+        value: "Disabled",
+        isSpacer: YES
       }))
     })
   })

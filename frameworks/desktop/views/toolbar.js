@@ -45,11 +45,7 @@ SC.ToolbarView = SC.View.extend(
     sc_super(); 
   },
   
-  createRenderer: function(theme) {
-    return theme.toolbar();
-  },
-  
-  updateRenderer: function(renderer) {}
+  renderDelegateName: 'toolbarRenderDelegate'
 
 });
 

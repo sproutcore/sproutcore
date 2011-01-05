@@ -32,7 +32,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
 
   classNames: ['sc-label-view'],
 
-  displayProperties: 'value textAlign fontWeight icon escapeHTML'.w(),
+  displayProperties: 'displayTitle textAlign fontWeight icon escapeHTML needsEllipsis hint'.w(),
 
 
   
@@ -127,7 +127,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     
     @field
   */
-  displayValue: function() {
+  displayTitle: function() {
     var value, formatter;
     
     value = this.get('value') ;
@@ -193,17 +193,6 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     layer.css('opacity', 0.0);
   },
   
-  updateRenderer: function(r) {
-    r.attr({
-      "value": this.get("displayValue"),
-      "icon": this.get("icon"),
-      "hint": this.get("hint"),
-      "escapeHTML": this.get("escapeHTML"),
-      "isEditing": this.get("isEditing"),
-      "textAlign": this.get("textAlign"),
-      "fontWeight": this.get("fontWeight")
-    });
-  },
   
   /** @private 
     Hide the label view while the inline editor covers it.
