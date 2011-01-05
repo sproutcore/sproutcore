@@ -137,6 +137,7 @@ SC.SelectFieldView = SC.FieldView.extend(
         // var html = [] ;       
         if(!firstTime){
           selectElement=this.$input()[0];
+          if (!selectElement) return;
           selectElement.innerHTML='';
         } 
       
