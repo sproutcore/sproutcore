@@ -344,7 +344,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // clone if needed
     if (!editables[propertyName]) {
       ret = hash[propertyName];
-      if (ret && ret.isCopyable) ret = hash[propertyName] = ret.copy();
+      if (ret && ret.isCopyable) ret = hash[propertyName] = ret.copy(YES);
       editables[propertyName] = YES ;
     }
     
