@@ -14,29 +14,19 @@ TestControls.progressPage = SC.View.design({
     
     childViews: "header normal disabled".w(),
     
-    // Plain Views
     header: SC.LabelView.design({
       layout: { width: 250, height: 18 },
       value: "Progress Bars",
       classNames: "header".w()
     }),
-    
-    // RAW
-    normal: SC.FormRowView.design({
-      // rowDelegate: automatically calculated because parent.isRowDelegate
-      label: "Normal", // Also, FormView can set this automatically by going over childViews.
-      
-      childViews: "progress".w(), // this is what makes this rather tedious...
-      progress: SC.ProgressView.design({
-        layout: { height: 20, width: 200 },
-        value: 0.25
-      })
-    }),
-    
-    // Helper
+
+    normal: SC.FormView.row(SC.ProgressView.design({
+      layout: { height: 20, width: 200 }
+    })),
+
     disabled: SC.FormView.row(SC.ProgressView.design({
       layout: { height: 20, width: 200 },
-      isEnabled: NO      
+      isEnabled: NO
     }))
   })
 });
