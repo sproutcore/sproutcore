@@ -157,6 +157,7 @@ SC.FlowedLayout = {
     c.addObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
   },
   
   /**
@@ -168,6 +169,7 @@ SC.FlowedLayout = {
     c.removeObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
   },
   
   /**
