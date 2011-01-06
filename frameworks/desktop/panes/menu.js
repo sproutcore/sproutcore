@@ -895,7 +895,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /** @private */
   mouseDown: function(evt) {
-    this.modalPaneDidClick();
+    this.modalPaneDidClick(evt);
     return YES ;
   },
 
