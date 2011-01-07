@@ -122,7 +122,7 @@ SC.CollectionFastPath = {
     
     @private
   */
-  contentIndexIsGroup: function(index, contentObject) {
+  contentIndexIsGroup: function(view, content, index) {
     var contentDelegate = this.get("contentDelegate");
     
     // setup our properties
@@ -145,7 +145,7 @@ SC.CollectionFastPath = {
     var del = this.get('contentDelegate'),
         groupIndexes = this.get('_contentGroupIndexes'),
         key, ExampleView,
-        isGroupView = this.contentIndexIsGroup(index, item);
+        isGroupView = this.contentIndexIsGroup(this, this.get('content'), index);
 
     if (isGroupView) {
       // so, if it is indeed a group view, we go that route to get the example view
@@ -174,7 +174,7 @@ SC.CollectionFastPath = {
   */
   setAttributesForItem: function(item, index, attrs) {
     var del = this.get('contentDelegate'), 
-        isGroupView = this.contentIndexIsGroup(index),
+        isGroupView = this.contentIndexIsGroup(this, this.get('content'), index),
         ExampleView = this.exampleViewForItem(item, index),
         content = this.get("content");
     
