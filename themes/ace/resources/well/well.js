@@ -5,10 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.AceTheme.Well = SC.AceTheme.subtheme('well');
-
-SC.AceTheme.Well.containerRenderDelegate = SC.RenderDelegate.create({
-  name: 'container',
+SC.AceTheme.wellRenderDelegate = SC.RenderDelegate.create({
+  name: 'well',
   render: function(dataSource, context) {
     
   },

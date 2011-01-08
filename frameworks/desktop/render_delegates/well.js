@@ -5,11 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.Well = SC.BaseTheme.subtheme('well');
-
 // the 'well'-styled container
-SC.BaseTheme.Well.containerRenderDelegate = SC.Object.create({
-  name: 'container',
+SC.BaseTheme.wellRenderDelegate = SC.Object.create({
+  name: 'well',
   
   render: function(dataSource, context) {
     context.push("<div class='top-left-edge'></div>",
