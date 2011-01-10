@@ -29,9 +29,10 @@ config :bootstrap,  :required => [], :use_modules => false
 
 config :jquery,     :required => []
 config :runtime,    :required => [:jquery]
-config :foundation, :required => [:jquery, :runtime]
+config :amber,      :required => [:runtime]
+config :foundation, :required => [:amber]
 config :datastore,  :required => [:foundation]
-config :statechart, :required => [:runtime]
+config :statechart, :required => [:amber]
 config :desktop,    :required => [:foundation]
 config :media,      :required => [:desktop]
 
