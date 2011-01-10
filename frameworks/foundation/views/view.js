@@ -12,6 +12,7 @@ sc_require('system/responder') ;
 sc_require('system/theme');
 
 sc_require('mixins/string') ;
+sc_require('mixins/delegate_support');
 
 /** Select a horizontal layout for various views.*/
 SC.LAYOUT_HORIZONTAL = 'sc-layout-horizontal';

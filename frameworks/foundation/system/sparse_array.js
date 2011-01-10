@@ -5,9 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/enumerable') ;
-sc_require('mixins/array') ;
-sc_require('mixins/observable') ;
 sc_require('mixins/delegate_support') ;
 
 /**

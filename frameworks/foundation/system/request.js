@@ -5,6 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('mixins/delegate_support');
 sc_require('system/response');
 
 /**

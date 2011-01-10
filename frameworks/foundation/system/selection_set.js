@@ -5,11 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/object');
-sc_require('mixins/enumerable');
-sc_require('mixins/copyable');
-sc_require('mixins/freezable');
-
 /** @class
 
   A SelectionSet contains a set of objects that represent the current
