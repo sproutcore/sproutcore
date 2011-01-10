@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/responder_context');
-
 /** @class
 
   The root object for a SproutCore application.  Usually you will create a 

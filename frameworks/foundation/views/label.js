@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/view') ;
-sc_require('mixins/control') ;
 sc_require('mixins/inline_editable');
 sc_require('mixins/inline_editor_delegate');
 

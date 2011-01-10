@@ -4,8 +4,6 @@
 // Portions copyright ©2008 Apple Inc.  All rights reserved.
 // ========================================================================
 
-sc_require('controllers/object');
-sc_require('mixins/selection_support');
 sc_require('private/tree_item_observer');
 
 /**

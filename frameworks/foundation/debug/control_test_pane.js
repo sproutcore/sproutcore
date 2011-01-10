@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('panes/pane');
-
 /*global test */
 
 // TODO: IMPROVE CODE QUALITY.  This code was put together quickly in order to

@@ -5,9 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/view') ;
-sc_require('mixins/control') ;
-
 SC.IMAGE_STATE_NONE = 'none';
 SC.IMAGE_STATE_LOADING = 'loading';
 SC.IMAGE_STATE_LOADED = 'loaded';
