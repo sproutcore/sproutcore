@@ -1016,8 +1016,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       notCalculated: YES,
       
       enableScrolling: { 
-        x: contentWidth * this._scale > containerWidth || this.get("alwaysBounceHorizontal"), 
-        y: contentHeight * this._scale > containerHeight || this.get("alwaysBounceVertical") 
+        x: (contentWidth * this._scale > containerWidth || this.get("alwaysBounceHorizontal")) && this.get('canScrollHorizontal'),
+        y: (contentHeight * this._scale > containerHeight || this.get("alwaysBounceVertical")) && this.get('canScrollVertical')
       },
       scrolling: { x: NO, y: NO },
       

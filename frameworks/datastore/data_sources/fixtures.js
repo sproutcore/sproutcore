@@ -64,6 +64,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   
   /** @private */
   fetch: function(store, query) {
+    var latency = this.get('latency');
     
     // can only handle local queries out of the box
     if (query.get('location') !== SC.Query.LOCAL) {
@@ -75,7 +76,14 @@ SC.FixturesDataSource = SC.DataSource.extend(
     }
     
     if (this.get('simulateRemoteResponse')) {
-      this.invokeLater(this._fetch, this.get('latency'), store, query);
+      // during tests, invokeLater is undefined
+      if (this.invokeLater) {
+        this.invokeLater(this._fetch, latency, store, query);
+      } else {
+        setTimeout(function(that) {
+          that._fetch(store, query);
+        }, latency, this);
+      }
       
     } else this._fetch(store, query);
   },
@@ -84,7 +92,6 @@ SC.FixturesDataSource = SC.DataSource.extend(
     Actually performs the fetch.  
   */
   _fetch: function(store, query) {
-    
     // NOTE: Assumes recordType or recordTypes is defined.  checked in fetch()
     var recordType = query.get('recordType'),
         recordTypes = query.get('recordTypes') || [recordType];
@@ -115,14 +122,20 @@ SC.FixturesDataSource = SC.DataSource.extend(
     if (!ret) return ret ;
     
     if (this.get('simulateRemoteResponse')) {
-      this.invokeLater(this._retrieveRecords, latency, store, storeKeys);
+      // during tests, invokeLater is undefined
+      if (this.invokeLater) {
+        this.invokeLater(this._retrieveRecords, latency, store, storeKeys);
+      } else {
+        setTimeout(function(that) {
+          that._retrieveRecords(store, storeKeys);
+        }, latency, this);
+      }
     } else this._retrieveRecords(store, storeKeys);
     
     return ret ;
   },
   
   _retrieveRecords: function(store, storeKeys) {
-    
     storeKeys.forEach(function(storeKey) {
       var ret        = [], 
           recordType = SC.Store.recordTypeFor(storeKey),
@@ -146,7 +159,14 @@ SC.FixturesDataSource = SC.DataSource.extend(
     if (!ret) return ret ;
     
     if (this.get('simulateRemoteResponse')) {
-      this.invokeLater(this._updateRecords, latency, store, storeKeys);
+      // during tests, invokeLater is undefined
+      if (this.invokeLater) {
+        this.invokeLater(this._updateRecords, latency, store, storeKeys);
+      } else {
+        setTimeout(function(that) {
+          that._updateRecords(store, storeKeys);
+        }, latency, this);
+      }
     } else this._updateRecords(store, storeKeys);
     
     return ret ;
@@ -172,7 +192,14 @@ SC.FixturesDataSource = SC.DataSource.extend(
     var latency = this.get('latency');
     
     if (this.get('simulateRemoteResponse')) {
-      this.invokeLater(this._createRecords, latency, store, storeKeys);
+      // during tests, invokeLater is undefined
+      if (this.invokeLater) {
+        this.invokeLater(this._createRecords, latency, store, storeKeys);
+      } else {
+        setTimeout(function(that) {
+          that._createRecords(store, storeKeys);
+        }, latency, this);
+      }
     } else this._createRecords(store, storeKeys);
     
     return YES ;
@@ -206,7 +233,14 @@ SC.FixturesDataSource = SC.DataSource.extend(
     if (!ret) return ret ;
     
     if (this.get('simulateRemoteResponse')) {
-      this.invokeLater(this._destroyRecords, latency, store, storeKeys);
+      // during tests, invokeLater is undefined
+      if (this.invokeLater) {
+        this.invokeLater(this._destroyRecords, latency, store, storeKeys);
+      } else {
+        setTimeout(function(that) {
+          that._destroyRecords(store, storeKeys);
+        }, latency, this);
+      }
     } else this._destroyRecords(store, storeKeys);
     
     return ret ;

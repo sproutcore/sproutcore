@@ -1056,7 +1056,7 @@ SC.CollectionView = SC.View.extend(
         groupIndexes = this.get('_contentGroupIndexes'),
         isGroupView = NO,
         key, E, layout, layerId,
-        viewPoolKey, viewPool, reuseFunc, parentView, isEnabled, isSelected,
+        viewPoolKey, parentView, isEnabled, isSelected,
         outlineLevel, disclosureState, isVisibleInWindow;
 
     // otherwise generate...
@@ -1088,85 +1088,130 @@ SC.CollectionView = SC.View.extend(
     isVisibleInWindow = this.isVisibleInWindow;
     layout            = this.layoutForContentIndex(idx);    
     
+    ret = this.createItemViewForContentIndex(layout,isVisibleInWindow,idx,parentView,layerId,isEnabled,item,isSelected,outlineLevel,disclosureState,E,viewPoolKey,isGroupView,itemViews);
     
+    return ret ;
+  },
+  
+  /**
+    Internal method for itemViewForContentIndex. Returns an item view from the pool if possible, or creates a new one.
+    You will not usually need to call this method yourself
+    
+  */
+  createItemViewForContentIndex: function(layout,isVisibleInWindow,idx,parentView,layerId,isEnabled,item,isSelected,outlineLevel,disclosureState,E,viewPoolKey,isGroupView,itemViews){
+    var ret,
+        columns = this.get('columns');
+      
     // If the view is reusable and there is an appropriate view inside the
     // pool, simply reuse it to avoid having to create a new view.
     if (E  &&  E.isReusableInCollections) {
-      // Lazily create the view pool.
-      viewPool = this[viewPoolKey];
-      if (!viewPool) viewPool = this[viewPoolKey] = [];
       
-      // Is there a view we can re-use?
-      if (viewPool.length > 0) {
-        ret = viewPool.pop();
-
-        // Tell the view it's about to be re-used.
-        reuseFunc = ret.prepareForReuse;
-        if (reuseFunc) reuseFunc.call(ret);
-        
-        // Set the new state.  We'll set content last, because it's the most
-        // likely to have observers.
-        ret.beginPropertyChanges();
-        ret.set('contentIndex', idx);
-        ret.set('layerId', layerId);
-        ret.set('isEnabled', isEnabled);
-        ret.set('isSelected', isSelected);
-        ret.set('outlineLevel', outlineLevel);
-        ret.set('disclosureState', disclosureState);
-        ret.set('isVisibleInWindow', isVisibleInWindow);
-        
-        // TODO:  In theory this shouldn't be needed, but without it, we
-        //        sometimes get errors when doing a full reload, because
-        //        'childViews' contains the view but the parent is not set.
-        //        This implies a timing issue with the general flow of
-        //        collection view.
-        ret.set('parentView', parentView);
-        
-        // Since we re-use layerIds, we need to reset SproutCore's internal
-        // mapping table.
-        SC.View.views[layerId] = ret;
-        
-        if (layout) {
-          ret.set('layout', layout);
-        }
-        else {
-          ret.set('layout', E.prototype.layout);
-        }
-        ret.set('content', item);
-        ret.endPropertyChanges();
-      }
+      ret = this._retrieveViewFromPool(viewPoolKey,idx,layerId,isEnabled,isSelected,outlineLevel,disclosureState,isVisibleInWindow, parentView, layout, E, item);
+      
     }
-    
+
     // If we weren't able to re-use a view, then create a new one.
     if (!ret) {
-      // collect some other state
-      var attrs = this._TMP_ATTRS;
-      attrs.contentIndex      = idx;
-      attrs.content           = item;
-      attrs.owner             = attrs.displayDelegate = this;
-      attrs.parentView        = parentView;   // Same here; shouldn't be needed
-      attrs.page              = this.page;
-      attrs.layerId           = layerId;
-      attrs.isEnabled         = isEnabled;
-      attrs.isSelected        = isSelected;
-      attrs.outlineLevel      = outlineLevel;
-      attrs.disclosureState   = disclosureState;
-      attrs.isGroupView       = isGroupView;
-      attrs.isVisibleInWindow = isVisibleInWindow;
-      if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
-      else attrs.classNames = this._COLLECTION_CLASS_NAMES;
+      ret = this._createNewItemView(idx,item,parentView, layerId, isEnabled, isSelected, outlineLevel, disclosureState, isGroupView, isVisibleInWindow, layout, E);
+    }
+
+    itemViews[idx] = ret;
     
+    return ret;
+    
+  },
+  
+  /**
+    Internal method for itemViewForContentIndex. Creates a new item view.
+    You will not usually need to call this method yourself
+    
+    @private
+  */
+  _createNewItemView: function(idx,item,parentView,layerId, isEnabled, isSelected, outlineLevel, disclosureState, isGroupView, isVisibleInWindow, layout, E){
+    var ret;
+    
+    // collect some other state
+    var attrs = this._TMP_ATTRS;
+    attrs.contentIndex      = idx;
+    attrs.content           = item;
+    attrs.owner             = attrs.displayDelegate = this;
+    attrs.parentView        = parentView;   // Same here; shouldn't be needed
+    attrs.page              = this.page;
+    attrs.layerId           = layerId;
+    attrs.isEnabled         = isEnabled;
+    attrs.isSelected        = isSelected;
+    attrs.outlineLevel      = outlineLevel;
+    attrs.disclosureState   = disclosureState;
+    attrs.isGroupView       = isGroupView;
+    attrs.isVisibleInWindow = isVisibleInWindow;
+    if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
+    else attrs.classNames = this._COLLECTION_CLASS_NAMES;
+
+    if (layout) {
+      attrs.layout = layout;
+    } else {
+      delete attrs.layout ;
+    }
+
+    ret = this.createItemView(E, idx, attrs);
+    return ret;
+  },
+  
+  
+  /**
+    Internal method for itemViewForContentIndex. Retrieves a view instance from the pool, if possible.
+    You will not usually need to call this method yourself
+    
+    @private
+  */
+  _retrieveViewFromPool: function(viewPoolKey,idx,layerId,isEnabled,isSelected,outlineLevel,disclosureState,isVisibleInWindow, parentView, layout, E, item){
+    var ret,viewPool,reuseFunc;
+    
+    // Lazily create the view pool.
+    viewPool = this[viewPoolKey];
+    if (!viewPool) viewPool = this[viewPoolKey] = [];
+
+    // Is there a view we can re-use?
+    if (viewPool.length > 0) {
+      ret = viewPool.pop();
+
+      // Tell the view it's about to be re-used.
+      reuseFunc = ret.prepareForReuse;
+      if (reuseFunc) reuseFunc.call(ret);
+
+      // Set the new state.  We'll set content last, because it's the most
+      // likely to have observers.
+      ret.beginPropertyChanges();
+      ret.set('contentIndex', idx);
+      ret.set('layerId', layerId);
+      ret.set('isEnabled', isEnabled);
+      ret.set('isSelected', isSelected);
+      ret.set('outlineLevel', outlineLevel);
+      ret.set('disclosureState', disclosureState);
+      ret.set('isVisibleInWindow', isVisibleInWindow);
+
+      // TODO:  In theory this shouldn't be needed, but without it, we
+      //        sometimes get errors when doing a full reload, because
+      //        'childViews' contains the view but the parent is not set.
+      //        This implies a timing issue with the general flow of
+      //        collection view.
+      ret.set('parentView', parentView);
+
+      // Since we re-use layerIds, we need to reset SproutCore's internal
+      // mapping table.
+      SC.View.views[layerId] = ret;
+
       if (layout) {
-        attrs.layout = layout;
-      } else {
-        delete attrs.layout ;
+        ret.set('layout', layout);
       }
-    
-      ret = this.createItemView(E, idx, attrs);
+      else {
+        ret.set('layout', E.prototype.layout);
+      }
+      ret.set('content', item);
+      ret.endPropertyChanges();
     }
     
-    itemViews[idx] = ret ;
-    return ret ;
+    return ret;
   },
   
   /**
@@ -1233,6 +1278,17 @@ SC.CollectionView = SC.View.extend(
   },
   
 
+  /**
+     Extracts the content index from the passed itemView. 
+
+     @param {String} id the layer id
+   */
+   contentIndexForItemView: function(itemView) {
+    var content = itemView.get('content');
+    return !SC.none(content)?this.get('content').indexOf(content):NO;
+   },
+
+
   /** 
     Find the first content item view for the passed event.
     
@@ -1247,7 +1303,8 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.View} the item view or null
   */
   itemViewForEvent: function(evt) {
-    var responder = this.getPath('pane.rootResponder') ;
+    var column=null,
+        responder = this.getPath('pane.rootResponder') ;
     if (!responder) return null ; // fast path
     
     var base    = SC.guidFor(this) + '-',
@@ -1273,13 +1330,16 @@ SC.CollectionView = SC.View.extend(
       return null;    
     }
     
+    if (SC.kindOf(this,SC.DataView)){
+      column = this.columnForLayerId(id);
+    }
     // okay, found the DOM node for the view, go ahead and create it
     // first, find the contentIndex
     if (contentIndex >= this.get('length')) {
       throw "layout for item view %@ was found when item view does not exist (%@)".fmt(id, this);
     }
     
-    return this.itemViewForContentIndex(contentIndex);
+    return column?this._itemViewForRowAndColumn(contentIndex,column):this.itemViewForContentIndex(contentIndex);
   },
   
   // ..........................................................
@@ -3064,11 +3124,11 @@ SC.CollectionView = SC.View.extend(
       
     // if the target view has its own internal action handler,
     // trigger that.
-    } else if (SC.typeOf(view._action) == SC.T_FUNCTION) {
+    } else if (SC.typeOf(view._action) === SC.T_FUNCTION) {
       return view._action(evt) ;
       
     // otherwise call the action method to support older styles.
-    } else if (SC.typeOf(view.action) == SC.T_FUNCTION) {
+    } else if (SC.typeOf(view.action) === SC.T_FUNCTION) {
       return view.action(evt) ;
     }
   }

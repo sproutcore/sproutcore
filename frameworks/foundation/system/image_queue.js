@@ -12,8 +12,7 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
 /**
   @class
   
-  The image cache can be used to control the order of loading images into the
-   browser cache.
+  The image queue can be used to control the order of loading images.
   
   Images queues are necessary because browsers impose strict limits on the 
   number of concurrent connections that can be open at any one time to any one 
@@ -21,7 +20,7 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   queue, you can improve the percieved performance of your application by 
   ensuring the images you need most load first.
   
-  Note that if you use the SC.ImageView class, it will use this image cache 
+  Note that if you use the SC.ImageView class, it will use this image queue 
   for you automatically.
   
   h1. Loading Images
@@ -48,13 +47,13 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   h1. Aborting Image Loads
   
   If you request an image load but then no longer require the image for some 
-  reason, you should notify the imageCache by calling the releaseImage() 
+  reason, you should notify the imageQueue by calling the releaseImage() 
   method.  Pass the URL, target and method that you included in your original 
   loadImage() request.  
   
   If you have requested an image before, you should always call releaseImage() 
   when you are finished with it, even if the image has already loaded.  This 
-  will allow the imageCache to properly manage its own internal resources.
+  will allow the imageQueue to properly manage its own internal resources.
   
   This method may remove the image from the queue of images that need or load 
   or it may abort an image load in progress to make room for other images.  If 
@@ -62,18 +61,18 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   
   h1. Reloading an Image
   
-  If you have already loaded an image, the imageCache will avoid loading the 
-  image again.  However, if you need to force the imageCache to reload the 
+  If you have already loaded an image, the imageQueue will avoid loading the 
+  image again.  However, if you need to force the imageQueue to reload the 
   image for some reason, you can do so by calling reloadImage(), passing the 
-  URL. 
+  URL.
   
-  This will cause the image cache to attempt to load the image again the next 
+  This will cause the image queue to attempt to load the image again the next 
   time you call loadImage on it.
   
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
+SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
 
   /**
     The maximum number of images that can load from a single hostname at any
@@ -83,7 +82,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
   loadLimit: 4,
   
   /**
-    The number of currently active requests on the cache. 
+    The number of currently active requests on the queue. 
   */
   activeRequests: 0,
   
@@ -101,7 +100,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     }}}
     
     If you do pass a target/method you can optionally also choose to load the 
-    image either in the foreground or in the background.  The image cache 
+    image either in the foreground or in the background.  The imageQueue 
     prioritizes foreground images over background images.  This does not impact 
     how many images load at one time.
     
@@ -109,7 +108,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     @param {Object} target
     @param {String|Function} method
     @param {Boolean} isBackgroundFlag
-    @returns {SC.imageCache} receiver
+    @returns {SC.imageQueue} receiver
   */
   loadImage: function(url, target, method, isBackgroundFlag) {
     // normalize params
@@ -126,7 +125,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
       isBackgroundFlag = SC.none(target) && SC.none(method);
     }
     
-    // get image entry in cache.  If entry is loaded, just invoke callback
+    // get image entry in queue.  If entry is loaded, just invoke callback
     // and quit.
     var entry = this._imageEntryFor(url) ;
     if (entry.status === this.IMAGE_LOADED) {
@@ -148,10 +147,9 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     @param {String} url
     @param {Object} target
     @param {String|Function} method
-    @returns {SC.imageCache} receiver
+    @returns {SC.imageQueue} receiver
   */
   releaseImage: function(url, target, method) {
-    
     // get entry.  if there is no entry, just return as there is nothing to 
     // do.
     var entry = this._imageEntryFor(url, NO) ;
@@ -193,7 +191,7 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
     automatically when the queue becomes active.
   */
   loadNextImage: function() {
-    var entry = null, queue;
+    var queue, entry, img;
 
     // only run if we don't have too many active request...
     if (this.get('activeRequests')>=this.get('loadLimit')) return; 
@@ -207,13 +205,13 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
       queue = this._backgroundQueue ;
       while(queue.length>0 && !entry) entry = queue.shift();
     }
-    this.set('isLoading', !!entry); // update isLoading...
     
     // if we have an entry, then initiate an image load with the proper 
     // callbacks.
-    if (entry) {
-      // var img = (entry.image = new Image()) ;
-      var img = entry.image ;
+    img = entry ? entry.image : null;
+    if (img) {
+      this.set('isLoaded', YES);
+      img = entry.image ;
       if(!img) return;
       img.onabort = this._imageDidAbort ;
       img.onerror = this._imageDidError ;
@@ -227,7 +225,9 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
       // or until load limit is reached.
       this.incrementProperty('activeRequests');
       this.loadNextImage();
-    } 
+    } else {
+      this.set('isLoading', NO);
+    }
   },
   
   // ..........................................................
@@ -345,19 +345,19 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
   /** @private invoked by Image().  Note that this is the image instance */
   _imageDidAbort: function() {
     SC.run(function() {
-      SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ABORTED);
+      SC.imageQueue.imageStatusDidChange(this.entry, SC.imageQueue.ABORTED);
     }, this);
   },
   
   _imageDidError: function() {
     SC.run(function() {
-      SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ERROR);
+      SC.imageQueue.imageStatusDidChange(this.entry, SC.imageQueue.ERROR);
     }, this);
   },
   
   _imageDidLoad: function() {
     SC.run(function() {
-      SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.LOADED);
+      SC.imageQueue.imageStatusDidChange(this.entry, SC.imageQueue.LOADED);
     }, this);
   },
 
@@ -385,10 +385,12 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
         value = SC.IMAGE_FAILED_ERROR ;
         break;
     }
+    SC.RunLoop.begin();
     entry.callbacks.forEach(function(x){
       var target = x[0], method = x[1];
       method.call(target, url, value);
     },this);
+    SC.RunLoop.end();
     
     // now clear callbacks so they aren't called again.
     entry.callbacks = [];

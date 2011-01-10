@@ -138,7 +138,25 @@ SC.platform = {
     are received.
   */
   _simtouch_mousemove: function(evt) {
-    if (!this._mousedown) return NO;
+    if (!this._mousedown) {
+      /*
+        we need to capture when was the first spot that the altKey was pressed and use it as
+        the center point of a pinch
+       */
+      if(evt.altKey && this._pinchCenter == null) {
+        this._pinchCenter = {
+          pageX: evt.pageX,
+          pageY: evt.pageY,
+          screenX: evt.screenX,
+          screenY: evt.screenY,
+          clientX: evt.clientX,
+          clientY: evt.clientY
+        };
+      } else if(!evt.altKey && this._pinchCenter != null){
+        this._pinchCenter = null;
+      }
+      return NO;
+    }
 
     var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchmove');
     return SC.RootResponder.responder.touchmove(manufacturedEvt);
@@ -179,12 +197,12 @@ SC.platform = {
     @returns {Event} the mouse event with an added changedTouches array
   */
   manufactureTouchEvent: function(evt, type) {
-    var touch, touchIdentifier = this._simtouch_counter;
+    var touch1, touch2, touchIdentifier1 = this._simtouch_counter;
 
-    touch = {
+    touch1 = {
       type: type,
       target: evt.target,
-      identifier: touchIdentifier,
+      identifier: touchIdentifier1,
       pageX: evt.pageX,
       pageY: evt.pageY,
       screenX: evt.screenX,
@@ -192,8 +210,38 @@ SC.platform = {
       clientX: evt.clientX,
       clientY: evt.clientY
     };
+    evt.touches = [ touch1 ];
 
-    evt.changedTouches = evt.touches = [ touch ];
+    /*
+      simulate pinch gesture
+     */
+    if(evt.altKey && this._pinchCenter != null)
+    {
+      //calculate the mirror position of the virtual touch
+      var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX ,
+          pageY = this._pinchCenter.pageY + this._pinchCenter.pageY - evt.pageY,
+          screenX = this._pinchCenter.screenX + this._pinchCenter.screenX - evt.screenX,
+          screenY = this._pinchCenter.screenY + this._pinchCenter.screenY - evt.screenY,
+          clientX = this._pinchCenter.clientX + this._pinchCenter.clientX - evt.clientX,
+          clientY = this._pinchCenter.clientY + this._pinchCenter.clientY - evt.clientY,
+          touchIdentifier2 = this._simtouch_counter + 1;
+      
+      touch2 = {
+        type: type,
+        target: evt.target,
+        identifier: touchIdentifier2,
+        pageX: pageX,
+        pageY: pageY,
+        screenX: screenX,
+        screenY: screenY,
+        clientX: clientX,
+        clientY: clientY
+      };
+
+      evt.touches = [ touch1 , touch2];
+    }
+    evt.changedTouches = evt.touches;
+
     return evt;
   },
 
@@ -233,7 +281,11 @@ SC.platform = {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
-  }()
+  }(),
+  
+  supportsWebSQLDatabase: function() {
+    return ('openDatabase' in window);
+  }
 };
 
 /* Calculate CSS Prefixes */
