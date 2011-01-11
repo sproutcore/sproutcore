@@ -232,7 +232,7 @@ SC.StatechartManager = {
     var trace = this.get('trace'),
         rootState = this.get('rootState');
     
-    if (trace) SC.Logger.info('BEGIN initialize statechart');
+    if (trace) SC.Logger.debugGroup("initialize statechart");
     
     if (SC.typeOf(rootState) === SC.T_FUNCTION && rootState.statePlugin) {
       rootState = rootState.apply(this);
@@ -248,7 +248,7 @@ SC.StatechartManager = {
     this.set('statechartIsInitialized', YES);
     this.gotoState(rootState);
     
-    if (trace) SC.Logger.info('END initialize statechart');
+    if (trace) SC.Logger.debugGroupEnd("initialize statechart");
   },
   
   /**
@@ -337,7 +337,7 @@ SC.StatechartManager = {
   gotoState: function(state, fromCurrentState, context, useHistory) {
     
     if (!this.get('statechartIsInitialized')) {
-      SC.Logger.error('can not go to state %@. statechart has not yet been initialized'.fmt(state));
+      SC.Logger.error("Cannot go to state %@. statechart has not yet been initialized", state);
       return;
     }
     
@@ -352,7 +352,7 @@ SC.StatechartManager = {
     state = rootState.getSubstate(state);
     
     if (SC.none(state)) {
-      SC.Logger.error('Can not to goto state %@. Not a recognized state in statechart'.fmt(paramState));
+      SC.Logger.error("Cannot goto state %@. Not a recognized state in statechart", paramState);
       return;
     }
     
@@ -378,8 +378,7 @@ SC.StatechartManager = {
       // Check to make sure the current state given is actually a current state of this statechart
       fromCurrentState = rootState.getSubstate(fromCurrentState);
       if (SC.none(fromCurrentState) || !fromCurrentState.get('isCurrentState')) {
-        var msg = 'Can not to goto state %@. %@ is not a recognized current state in statechart';
-        SC.Logger.error(msg.fmt(paramState, paramFromCurrentState));
+        SC.Logger.error("Cannot goto state %@. %@ is not a recognized current state in statechart", paramState, paramFromCurrentState);
         this._gotoStateLocked = NO;
         return;
       }
@@ -391,9 +390,9 @@ SC.StatechartManager = {
     }
         
     if (trace) {
-      SC.Logger.info('BEGIN gotoState: %@'.fmt(state));
-      SC.Logger.info('starting from current state: %@'.fmt(fromCurrentState));
-      SC.Logger.info('current states before: %@'.fmt(this.get('currentStates')));
+      SC.Logger.debugGroup("gotoState: %@", state);
+      SC.Logger.debug("starting from current state: %@", fromCurrentState);
+      SC.Logger.debug("current states before: %@", this.get('currentStates'));
     }
 
     // If there is a current state to start the transition process from, then determine what
@@ -409,9 +408,9 @@ SC.StatechartManager = {
     pivotState = this._findPivotState(exitStates, enterStates);
 
     if (pivotState) {
-      if (trace) SC.Logger.info('pivot state = ' + pivotState);
+      if (trace) SC.Logger.debug("pivot state = %@", pivotState);
       if (pivotState.get('substatesAreConcurrent')) {
-        SC.Logger.error('Can not go to state %@. Pivot state %@ has concurrent substates.'.fmt(state, pivotState));
+        SC.Logger.error("Cannot go to state %@. Pivot state %@ has concurrent substates.", state, pivotState);
         this._gotoStateLocked = NO;
         return;
       }
@@ -455,7 +454,7 @@ SC.StatechartManager = {
   */
   resumeGotoState: function() {
     if (!this.get('gotoStateSuspended')) {
-      SC.Logger.error('Can not resume goto state since it has not been suspended');
+      SC.Logger.error("Cannot resume goto state since it has not been suspended");
       return;
     }
     
@@ -507,8 +506,8 @@ SC.StatechartManager = {
     this.notifyPropertyChange('currentStates');
     
     if (this.get('trace')) {
-      SC.Logger.info('current states after: %@'.fmt(this.get('currentStates')));
-      SC.Logger.info('END gotoState: %@'.fmt(gotoState));
+      SC.Logger.debug("current states after: %@", this.get('currentStates'));
+      SC.Logger.debugGroupEnd("gotoState: %@", gotoState);
     }
     
     // Okay. We're done with the current state transition. Make sure to unlock the
@@ -528,7 +527,7 @@ SC.StatechartManager = {
       }
     }
       
-    if (this.get('trace')) SC.Logger.info('exiting state: ' + state);
+    if (this.get('trace')) SC.Logger.debug("exiting state: %@", state);
     
     state.set('currentSubstates', []);
     state.notifyPropertyChange('isCurrentState');
@@ -558,7 +557,7 @@ SC.StatechartManager = {
       }
     }
     
-    if (this.get('trace')) SC.Logger.info('entering state: ' + state);
+    if (this.get('trace')) SC.Logger.debug("entering state: %@", state);
     
     state.notifyPropertyChange('isCurrentState');
     var result = this.enterState(state, context);
@@ -595,14 +594,14 @@ SC.StatechartManager = {
   */
   gotoHistoryState: function(state, fromCurrentState, context, recursive) {
     if (!this.get('statechartIsInitialized')) {
-      SC.Logger.error("can not go to state %@'s history state. Statechart has not yet been initialized".fmt(state));
+      SC.Logger.error("Cannot go to state %@'s history state. Statechart has not yet been initialized", state);
       return;
     }
     
     state = this.getState(state);
   
     if (!state) {
-      SC.Logger.error("Can not to goto state %@'s history state. Not a recognized state in statechart".fmt(state));
+      SC.Logger.error("Cannot to goto state %@'s history state. Not a recognized state in statechart", state);
       return;
     }
     
