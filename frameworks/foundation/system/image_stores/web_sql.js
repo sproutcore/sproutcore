@@ -5,7 +5,6 @@
 // ==========================================================================
 
 sc_require('system/image_store');
-sc_require('system/platform');
 
 /**
   @class

@@ -74,9 +74,9 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
         context.fillRect(0, 0, frame.width, frame.height);
       }
       
-      if (image) {
+      if (image && image.complete) {
         frame = this._calculateFitFrame(frame, fit, image.width, image.height);
-        context.drawImage(image, 0, 0, image.width, image.height, frame.x, frame.y, frame.width, frame.height);
+        context.drawImage(image, frame.x, frame.y, frame.width, frame.height);
       }
     }
   },

@@ -61,8 +61,6 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         toolTip = dataSource.get('displayToolTip');
     
-    SC.Logger.log("inside renderDelegate", toolTip);
-    
     jquery.attr('src', image.src);
     
     if (imageValue !== this._last_class) jquery.setClass(this._last_class, NO);

@@ -251,49 +251,71 @@ SC.ImageView = SC.View.extend(SC.Control,
   */
   _image_valueDidChange: function() {
     var value = this.get('imageValue'),
-        type = this.get('type'),
-        image;
+        type = this.get('type');
     
     // check to see if our value has changed
     if (value !== this._iv_value) {
       this._iv_value = value;
       
-      if (type === SC.IMAGE_TYPE_URL) {
-        if (this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
-          this.set('image', SC.BLANK_IMAGE);
-          SC.ImageView.store.load(value, this, this._storedImageDidLoad);
-        } else if (this.get('useImageQueue')) {
-          this.set('image', SC.BLANK_IMAGE);
-          this._loadImage();
-        } else {
-          image = new Image();
-          image.src = value;
-          this.didLoad(image);
+      /*
+        TODO [CC] Need to fix this. SC.BLANK_IMAGE might not be complete yet (?!?)
+              and this causes the canvas render to freak.
+      */
+      // this.set('image', SC.BLANK_IMAGE);
+      this.set('status', SC.IMAGE_STATE_LOADING);
+      
+      // order: local image store, image queue, normal load
+      if (!this._loadImageUsingStore()) {
+        if (!this._loadImageUsingQueue()) {
+          if (!this._loadImage()) {
+            // CSS class? this will be handled automatically
+          }
         }
-      } else {
-        image = SC.BLANK_IMAGE;
-        this.didLoad(image);
       }
     }
   }.observes('imageValue'),
   
+  /** @private
+    Tries to load the image value from the SC.ImageView.store object. If the imageValue is not
+    a URL, it won't attempt to load it using this method.
+    
+    @returns YES if loading using SC.ImageView.store, NO otherwise
+  */
+  _loadImageUsingStore: function() {
+    var value = this.get('imageValue'),
+        type = this.get('type');
+    
+    if (type === SC.IMAGE_TYPE_URL && this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
+      SC.ImageView.store.load(value, this, this._storedImageDidLoad);
+      return YES;
+    }
+    
+    return NO;
+  },
+  
   _storedImageDidLoad: function(url, image) {
     var value = this.get('imageValue');
     
-    // check to see if we actually got the image
-    // we can't rely on image.src as it will be a datauri
-    if (SC.ok(image) && value === url) {
-      this.didLoad(image);
-    } else if (this.get('useImageQueue')) {
-      this._loadImage();
-    } else {
-      image = new Image();
-      image.src = value;
-      this.didLoad(image);
+    // if this isn't true, then the value changed while the stored image was loading
+    if (value === url) {
+      if (SC.ok(image)) {
+        this.didLoad(image);
+      } else {
+        // it failed, try other methods
+        if (!this._loadImageUsingQueue()) {
+          this._loadImage();
+        }
+      }
     }
   },
   
-  _loadImage: function() {
+  /** @private
+    Tries to load the image value using the SC.imageQueue object. If the imageValue is not
+    a URL, it won't attempt to load it using this method.
+    
+    @returns YES if loading using SC.imageQueue, NO otherwise
+  */
+  _loadImageUsingQueue: function() {
     var value = this.get('imageValue'),
         type = this.get('type');
     
@@ -301,9 +323,61 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (type === SC.IMAGE_TYPE_URL && this.get('useImageQueue')) {
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
       
-      this.set('status', SC.IMAGE_STATE_LOADING);
-      SC.imageQueue.loadImage(value, this, this._loadImageDidComplete, isBackground);
+      SC.imageQueue.loadImage(value, this, this._loadImageUsingQueueDidComplete, isBackground);
+      return YES;
     }
+    
+    return NO;
+  },
+  
+  _loadImageUsingQueueDidComplete: function(url, image) {
+    var value = this.get('imageValue');
+    
+    if (value === url) {
+      if (SC.ok(image)) {
+        if (this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
+          SC.ImageView.store.save(value, image);
+        }
+        
+        this.didLoad(image);
+      } else {
+        // if loading it using the queue didn't work, it's useless to try loading the image normally
+        this.didError(image);
+      }
+    }
+  },
+  
+  /** @private
+    Loads an image using a normal Image object, without using the SC.imageQueue.
+    
+    @returns YES if it will load, NO otherwise
+  */
+  _loadImage: function() {
+    var value = this.get('imageValue'),
+        type = this.get('type'),
+        that = this,
+        image;
+    
+    if (type === SC.IMAGE_TYPE_URL) {
+      image = new Image();
+      
+      image.onerror = image.onabort = function() {
+        SC.run(function() {
+          that._loadImageDidComplete(value, SC.$error("SC.Image.FailedError", "Image", -101));
+        });
+      };
+      
+      image.onload = function() {
+        SC.run(function() {
+          that._loadImageDidComplete(value, image);
+        });
+      };
+      
+      image.src = value;
+      return YES;
+    }
+    
+    return NO;
   },
   
   _loadImageDidComplete: function(url, image) {
@@ -311,8 +385,8 @@ SC.ImageView = SC.View.extend(SC.Control,
     
     if (value === url) {
       if (SC.ok(image)) {
-        if (this.get('useImageStore')) {
-          SC.imageStore.save(value, image);
+        if (this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
+          SC.ImageView.store.save(value, image);
         }
         
         this.didLoad(image);
@@ -324,17 +398,13 @@ SC.ImageView = SC.View.extend(SC.Control,
   
   didLoad: function(image) {
     this.set('status', SC.IMAGE_STATE_LOADED);
-    if (image) this.set('image', image);
-    
-    this.displayDidChange();
+    if (!image) image = SC.BLANK_IMAGE;
+    this.set('image', image);
   },
   
   didError: function(error) {
     this.set('status', SC.IMAGE_STATE_FAILED);
-    this.displayDidChange();
-    /*
-      TODO Do something with error?
-    */
+    this.set('image', SC.BLANK_IMAGE);
   }
 
 }) ;
