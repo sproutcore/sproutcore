@@ -2304,7 +2304,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (SC.ANIMATABLE_PROPERTIES[key]) {
         curAnim = layout.animate[key];
 
-        if (value === null) { throw "Can only animate to an actual value!"; }
+        // loose comparison used instead of (value === null || value === undefined)
+        if (value == null) { throw "Can only animate to an actual value!"; }
 
         // FIXME: We should check more than duration
         if (curAnim && curAnim.duration !== options.duration) { didChange = YES; }
@@ -2990,11 +2991,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
       }
 
+      // loose comparison used instead of (layout.X === null || layout.X === undefined)
       if (
-        layout.left !== null && !SC.isPercentage(layout.left) && layout.left !== AUTO &&
-        layout.top !== null && !SC.isPercentage(layout.top) && layout.top !== AUTO &&
-        layout.width !== null && !SC.isPercentage(layout.width) && layout.width !== AUTO &&
-        layout.height !== null && !SC.isPercentage(layout.height) && layout.height !== AUTO
+        layout.left != null && !SC.isPercentage(layout.left) && layout.left !== AUTO &&
+        layout.top != null && !SC.isPercentage(layout.top) && layout.top !== AUTO &&
+        layout.width != null && !SC.isPercentage(layout.width) && layout.width !== AUTO &&
+        layout.height != null && !SC.isPercentage(layout.height) && layout.height !== AUTO
       ) {
        return YES;
       }
@@ -3041,7 +3043,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   _cssNumber: function(val){
-    if (val === null) { return null; }
+    // loose comparison used instead of (value === null || value === undefined)
+    if (val == null) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return "auto"; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val || 0); }
@@ -4076,45 +4079,47 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
 
+    // loose comparison used instead of (value === null || value === undefined)
+
     var right = (this.right = layout.right);
-    this.hasRight = (right !== null);
+    this.hasRight = (right != null);
 
     var left = (this.left = layout.left);
-    this.hasLeft = (left !== null);
+    this.hasLeft = (left != null);
 
     var top = (this.top = layout.top);
-    this.hasTop = (top !== null);
+    this.hasTop = (top != null);
 
     var bottom = (this.bottom = layout.bottom);
-    this.hasBottom = (bottom !== null);
+    this.hasBottom = (bottom != null);
 
     var width = (this.width = layout.width);
-    this.hasWidth = (width !== null);
+    this.hasWidth = (width != null);
 
     var height = (this.height = layout.height);
-    this.hasHeight = (height !== null);
+    this.hasHeight = (height != null);
 
     this.minWidth = ((layout.minWidth === undefined) ? null : layout.minWidth);
 
     var maxWidth = (this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth);
-    this.hasMaxWidth = (maxWidth !== null);
+    this.hasMaxWidth = (maxWidth != null);
 
     this.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
 
     var maxHeight = (this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight);
-    this.hasMaxHeight = (maxHeight !== null);
+    this.hasMaxHeight = (maxHeight != null);
 
     var centerX = (this.centerX = layout.centerX);
-    this.hasCenterX = (centerX !== null);
+    this.hasCenterX = (centerX != null);
 
     var centerY = (this.centerY = layout.centerY);
-    this.hasCenterY = (centerY !== null);
+    this.hasCenterY = (centerY != null);
 
     // the toString here is to ensure that it doesn't get px added to it
-    this.zIndex  = (layout.zIndex  !== null) ? layout.zIndex.toString() : null;
-    this.opacity = (layout.opacity !== null) ? layout.opacity.toString() : null;
+    this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
+    this.opacity = (layout.opacity != null) ? layout.opacity.toString() : null;
 
-    this.backgroundPosition = (layout.backgroundPosition !== null) ? layout.backgroundPosition : null;
+    this.backgroundPosition = (layout.backgroundPosition != null) ? layout.backgroundPosition : null;
 
     this.ret = {
       marginTop: null,
@@ -4285,7 +4290,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       for(var transformName in transformMap) {
         var layoutTransform = layout[transformName];
 
-        if(layoutTransform !== null) {
+        if(layoutTransform != null) {
           transforms.push(transformMap[transformName](layoutTransform));
         }
       }
@@ -4359,7 +4364,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
   _cssNumber: function(val){
-    if (val === null) { return null; }
+    if (val == null) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return SC.LAYOUT_AUTO; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val); }
