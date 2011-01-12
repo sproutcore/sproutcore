@@ -28,8 +28,12 @@ SC._detectBrowser = function(rawUserAgent, language) {
     mac:          !!/macintosh/.test(userAgent) || (/mac os x/.test(userAgent) && !/like mac os x/.test(userAgent)),
     language:     language.split('-', 1)[0]
   };
-
+  
+  
+  browser.isIE8OrLower = !!(browser.msie && parseInt(browser.msie,10) <= 8);
+  
   browser.current = browser.msie ? 'msie' : browser.mozilla ? 'mozilla' : browser.chrome ? 'chrome' : browser.safari ? 'safari' : browser.opera ? 'opera' : 'unknown' ;
+    
   return browser ;
 };
 

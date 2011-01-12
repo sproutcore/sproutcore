@@ -30,7 +30,20 @@ SC.setupBodyClassNames = function() {
   classNames.push(browser) ;
   if (browser === 'chrome') classNames.push('safari');
   classNames.push(platform) ;
-  if (parseInt(SC.browser.msie,0)==7) classNames.push('ie7') ;
+  
+  var ieVersion = parseInt(SC.browser.msie,10);
+  if (ieVersion) {
+    if (ieVersion === 7) {
+      classNames.push('ie7');
+    } 
+    else if (ieVersion === 8) {
+      classNames.push('ie8');
+    }
+    else if (ieVersion === 9) {
+      classNames.push('ie9');
+    }
+  }
+  
   if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
   if ('createTouch' in document) classNames.push('touch');
   el.className = classNames.join(' ') ;

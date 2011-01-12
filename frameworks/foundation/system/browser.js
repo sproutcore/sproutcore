@@ -15,7 +15,6 @@ SC.mixin(SC.browser, (function() {
   SC.extend(browser, /** @scope SC.browser */ {
     
     isOpera: !!browser.opera,
-    isIe: !!browser.msie,
     isIE: !!browser.msie,
     isSafari: !!browser.safari,
     isMobileSafari: (!!browser.mobileSafari || !!browser.standalone),
@@ -52,7 +51,6 @@ SC.mixin(SC.browser, (function() {
     }
     
   }) ;
-  
   return browser ;
 
 })() );
