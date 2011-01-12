@@ -2306,8 +2306,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (SC.ANIMATABLE_PROPERTIES[key]) {
         curAnim = layout.animate[key];
 
-        if (value == null) { throw "Can only animate to an actual value!"; }
-
+        if (value === null) { throw "Can only animate to an actual value!"; }
+        
         // FIXME: We should check more than duration
         if (curAnim && curAnim.duration !== options.duration) { didChange = YES; }
 
@@ -2992,10 +2992,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
 
       if (
-        layout.left != null && !SC.isPercentage(layout.left) && layout.left != SC.LAYOUT_AUTO &&
-        layout.top != null && !SC.isPercentage(layout.top) && layout.top != SC.LAYOUT_AUTO &&
-        layout.width != null && !SC.isPercentage(layout.width) && layout.width != SC.LAYOUT_AUTO &&
-        layout.height != null && !SC.isPercentage(layout.height) && layout.height != SC.LAYOUT_AUTO
+        layout.left !== null && !SC.isPercentage(layout.left) && layout.left != SC.LAYOUT_AUTO &&
+        layout.top !== null && !SC.isPercentage(layout.top) && layout.top != SC.LAYOUT_AUTO &&
+        layout.width !== null && !SC.isPercentage(layout.width) && layout.width != SC.LAYOUT_AUTO &&
+        layout.height !== null && !SC.isPercentage(layout.height) && layout.height != SC.LAYOUT_AUTO
       ) {
        return YES;
       }
@@ -3014,7 +3014,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _handleTransformMistakes: function(layout) {
     if (SC.platform.supportsCSSTransforms) {
       // Check to see if we're using transforms
-      var transformAnimationDuration;
+      var transformAnimationDuration, key;
       for(key in layout){
         if (SC.CSS_TRANSFORM_MAP[key]) {
             // To prevent:
@@ -3042,7 +3042,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   _cssNumber: function(val){
-    if (val == null) { return null; }
+    if (val === null) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return "auto"; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val || 0); }
@@ -3066,7 +3066,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       layout:       this.get('layout'),
       turbo:        this.get('hasAcceleratedLayer'),
       staticLayout: this.get('useStaticLayout')
-    }
+    };
 
     var calculator = this.get('layoutStyleCalculator');
     calculator.set(props);
@@ -4077,46 +4077,49 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
 
-    var right = this.right = layout.right;
-    this.hasRight = (right != null);
+    var right, left, top, bottom, width, height, maxWidth, maxHeight, centerX,
+        centerY;
+    
+    right = this.right = layout.right;
+    this.hasRight = (right !== null && right !== undefined);
 
-    var left = this.left = layout.left;
-    this.hasLeft = (left != null);
+    left = this.left = layout.left;
+    this.hasLeft = (left !== null && left !== undefined);
 
-    var top = this.top = layout.top;
-    this.hasTop = (top != null);
+    top = this.top = layout.top;
+    this.hasTop = (top !== null && top !== undefined);
 
-    var bottom = this.bottom = layout.bottom;
-    this.hasBottom = (bottom != null);
+    bottom = this.bottom = layout.bottom;
+    this.hasBottom = (bottom !== null && bottom !== undefined);
 
-    var width = this.width = layout.width;
-    this.hasWidth = (width != null);
+    width = this.width = layout.width;
+    this.hasWidth = (width !== null && width !== undefined);
 
-    var height = this.height = layout.height;
-    this.hasHeight = (height != null);
+    height = this.height = layout.height;
+    this.hasHeight = (height !== null && height !== undefined);
 
     this.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
 
-    var maxWidth = this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
-    this.hasMaxWidth = (maxWidth != null);
+    maxWidth = this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
+    this.hasMaxWidth = (maxWidth !== null && maxWidth !== undefined);
 
     this.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
 
-    var maxHeight = this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
-    this.hasMaxHeight = (maxHeight != null);
+    maxHeight = this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
+    this.hasMaxHeight = (maxHeight !== null && maxHeight !== undefined);
 
-    var centerX = this.centerX = layout.centerX;
-    this.hasCenterX = (centerX != null);
+    centerX = this.centerX = layout.centerX;
+    this.hasCenterX = (centerX !== null && centerX !== undefined);
 
-    var centerY = this.centerY = layout.centerY;
-    this.hasCenterY = (centerY != null);
+    centerY = this.centerY = layout.centerY;
+    this.hasCenterY = (centerY !== null && centerY !== undefined);
 
     // the toString here is to ensure that it doesn't get px added to it
-    this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
-    this.opacity = (layout.opacity != null) ? layout.zIndex.toString() : null;
+    this.zIndex  = (layout.zIndex !== null && layout.zIndex !== undefined) ? layout.zIndex.toString() : null;
+    this.opacity = (layout.opacity !== null && layout.opacity !== undefined) ? layout.opacity.toString() : null;
 
-    this.backgroundPosition = (layout.backgroundPosition != null) ? layout.backgroundPosition : null;
-
+    this.backgroundPosition = (layout.backgroundPosition !== null && layout.backgroundPosition !== undefined) ? layout.backgroundPosition : null;
+    
     this.ret = {
       marginTop: null,
       marginLeft: null
@@ -4144,7 +4147,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     if (SC.platform.supportsCSSTransforms) {
       // Check to see if we're using transforms
       var animations = layout.animate,
-          transformAnimationDuration;
+          transformAnimationDuration, key;
 
       if (animations) {
         for(key in animations){
@@ -4222,14 +4225,16 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       }
     }
 
-    if (!hasSize && !hasFinish) { ret[finish] = 0 };
+    if (!hasSize && !hasFinish) { 
+      ret[finish] = 0;
+    }
 
     return translate;
   },
 
   _calculateCenter: function(direction) {
     var layout = this.layout, ret = this.ret,
-        size, center, start, margin;
+        size, center, start, margin, finish;
 
     if (direction === 'x') {
         size   = 'width';
@@ -4285,7 +4290,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       for(var transformName in transformMap) {
         var layoutTransform = layout[transformName];
 
-        if(layoutTransform != null) {
+        if(layoutTransform !== null && layoutTransform !== undefined) {
           transforms.push(transformMap[transformName](layoutTransform));
         }
       }
@@ -4359,21 +4364,22 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
   _cssNumber: function(val){
-    if (val == null) { return null; }
+    if (val === null) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return SC.LAYOUT_AUTO; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val); }
   },
 
   calculate: function() {
-    var layout = this.get('layout'), ret = {}, pdim = null,
+    var layout = this.get('layout'), pdim = null,
         translateTop = null,
         translateLeft = null,
         turbo = this.get('turbo'),
-        ret = this.ret
         dims = this.dims,
         loc = this.loc,
-        view = this.get('view');
+        view = this.get('view'),
+        ret = this.ret,
+        value, key;
 
     this._handleMistakes(layout);
 
@@ -4476,7 +4482,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   },
 
   runAnimationCallback: function(callback, evt, propertyName, cancelled) {
-    view = this.get('view');
+    var view = this.get('view');
     if (callback) {
       if (SC.typeOf(callback) !== SC.T_HASH) callback = { action: callback };
       callback.source = view;
