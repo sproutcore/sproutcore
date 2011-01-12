@@ -2976,15 +2976,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers) {
       var layout = this.get('layout'),
           animations = layout.animate,
+          left = layout.left,
+          top = layout.top,
+          width = layout.width,
+          height = layout.height,
           key;
 
-      if (animations && (animations['top'] || animations['left'])) {
+      if (animations && (animations.top || animations.left)) {
         for (key in animations) {
           // If we're animating other transforms at different speeds, don't use acceleratedLayer
           if (
             SC.CSS_TRANSFORM_MAP[key] &&
-            ((animations['top'] && animations['top'].duration !== animations[key].duration) ||
-             (animations['left'] && animations['left'].duration !== animations[key].duration))
+            ((animations.top && animations.top.duration !== animations[key].duration) ||
+             (animations.left && animations.left.duration !== animations[key].duration))
           ) {
             return NO;
           }
@@ -2992,10 +2996,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
 
       if (
-        layout.left !== null && !SC.isPercentage(layout.left) && layout.left != SC.LAYOUT_AUTO &&
-        layout.top !== null && !SC.isPercentage(layout.top) && layout.top != SC.LAYOUT_AUTO &&
-        layout.width !== null && !SC.isPercentage(layout.width) && layout.width != SC.LAYOUT_AUTO &&
-        layout.height !== null && !SC.isPercentage(layout.height) && layout.height != SC.LAYOUT_AUTO
+        left !== null && left !== undefined && !SC.isPercentage(left) && left != SC.LAYOUT_AUTO &&
+        top !== null && top !== undefined && !SC.isPercentage(top) && top != SC.LAYOUT_AUTO &&
+        width !== null && width !== undefined && !SC.isPercentage(width) && width != SC.LAYOUT_AUTO &&
+        height !== null && height !== undefined && !SC.isPercentage(height) && height != SC.LAYOUT_AUTO
       ) {
        return YES;
       }
@@ -4077,7 +4081,8 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
 
-    var right, left, top, bottom, width, height, maxWidth, maxHeight, centerX,
+    var backgroundPosition = layout.backgroundPosition,
+        right, left, top, bottom, width, height, maxWidth, maxHeight, centerX,
         centerY;
     
     right = this.right = layout.right;
@@ -4118,7 +4123,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     this.zIndex  = (layout.zIndex !== null && layout.zIndex !== undefined) ? layout.zIndex.toString() : null;
     this.opacity = (layout.opacity !== null && layout.opacity !== undefined) ? layout.opacity.toString() : null;
 
-    this.backgroundPosition = (layout.backgroundPosition !== null && layout.backgroundPosition !== undefined) ? layout.backgroundPosition : null;
+    this.backgroundPosition = (backgroundPosition !== null && backgroundPosition !== undefined) ? backgroundPosition : null;
     
     this.ret = {
       marginTop: null,
