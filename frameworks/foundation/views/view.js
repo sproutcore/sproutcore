@@ -2306,7 +2306,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (SC.ANIMATABLE_PROPERTIES[key]) {
         curAnim = layout.animate[key];
 
-        if (value === null) { throw "Can only animate to an actual value!"; }
+        if (value === null || value === undefined) { throw "Can only animate to an actual value!"; }
         
         // FIXME: We should check more than duration
         if (curAnim && curAnim.duration !== options.duration) { didChange = YES; }
@@ -3046,7 +3046,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
 
   _cssNumber: function(val){
-    if (val === null) { return null; }
+    if (val === null || val === undefined) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return "auto"; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val || 0); }
@@ -4093,7 +4093,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     top = this.top = layout.top;
     this.hasTop = (top !== null && top !== undefined);
-
+    
     bottom = this.bottom = layout.bottom;
     this.hasBottom = (bottom !== null && bottom !== undefined);
 
@@ -4369,7 +4369,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
   _cssNumber: function(val){
-    if (val === null) { return null; }
+    if (val === null || val === undefined) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return SC.LAYOUT_AUTO; }
     else if (SC.isPercentage(val)) { return (val*100)+"%"; }
     else { return Math.floor(val); }
