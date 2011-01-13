@@ -30,7 +30,7 @@ SC.TableHeadView = SC.View.extend({
   dragOrder: null,
   
   init: function() {
-    // TODO: Figure out why the `columns` observer doesn't work
+    sc_super();
     this._scthv_handleChildren();
   },
     

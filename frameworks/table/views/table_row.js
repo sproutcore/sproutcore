@@ -41,7 +41,7 @@ SC.TableRowView = SC.View.extend({
   // 
   
   init: function() {
-    // TODO: Figure out why the `columns` observer doesn't work
+    sc_super();
     this._sctrv_handleChildren();
   },
   
