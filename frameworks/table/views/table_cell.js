@@ -53,6 +53,7 @@ SC.TableCellView = SC.View.extend({
     column.addObserver('maxWidth', this, '_sctcv_layoutDidChange');
     column.addObserver('minWidth', this, '_sctcv_layoutDidChange');
     
+    return sc_super();
   },
     
   _sctcv_layoutDidChange: function(sender, key, value, rev) {
