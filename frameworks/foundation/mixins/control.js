@@ -275,6 +275,7 @@ SC.Control = {
       this.get('contentValueKey') :
       this.getDelegateProperty('contentValueKey', this.displayDelegate),
       content = this.get('content') ;
+    
     if (!key || !content) return ; // do nothing if disabled
     
     // get value -- set on content if changed
@@ -285,7 +286,7 @@ SC.Control = {
       // avoid re-writing inherited props
       if (content[key] !== value) content[key] = value ;
     }
-  }.observes('value'),
+  },      // Will be set as an observer by code below
   
   /**
     The name of the property this control should display if it is part of an
@@ -416,14 +417,63 @@ SC.Control = {
     // add observer to new content if necessary.
     if (content && content.addObserver) content.addObserver('*', this, f) ;
     
+    this._setupValueObserver();
+    
     // notify that value did change.
     this.contentPropertyDidChange(content, '*') ;
-    
   }.observes('content'),
   
   // since we always observe *, just call the update function
-  _control_contentValueKeyDidChange: function() {
+  _control_contentValueKeyDidChange: function() {    
+    this._setupValueObserver();
+    
     // notify that value did change.
     this.contentPropertyDidChange(this.get('content'), '*') ;
-  }.observes('contentValueKey')
+  }.observes('contentValueKey'),
+  
+  // whether value is currently being observed or not
+  _valueIsObserved: NO,
+  
+  // manages whether value is observed and written back to content[contentValueKey]. value is not observed for complex types.
+  // called any time content or contentValueKey changes
+  _setupValueObserver: function() {
+    var expectsComplex = this._expectsComplexValue(),
+    valueIsObserved = this._valueIsObserved;
+    
+    // if value is currently being observed and content[contentValueKey] is complex, remove the observer
+    if(valueIsObserved) {
+      if(expectsComplex) {
+        this.removeObserver('value', this, this.updateContentWithValueObserver);
+        this._valueIsObserved = NO;
+      }
+    }
+    
+    // if value is not currently being observed and content[contentValueKey] is primitive, add the observer
+    else {
+      if(!expectsComplex) {
+        this.addObserver('value', this, this.updateContentWithValueObserver);
+        this._valueIsObserved = YES;
+      }
+    }
+  },
+  
+  // returns whether the schema for this.content says this this.content.get('contentValueKey') is a complex value
+  _expectsComplexValue: function() {
+    // from updateContentWithValueObserver
+    var key = this.contentValueKey ?
+        this.get('contentValueKey') :
+        this.getDelegateProperty('contentValueKey', this.displayDelegate),
+        content = this.get('content'),
+        ret     = NO,
+        attr, typeClass;
+
+    if (key  &&  content) {
+      attr = content[key];
+      
+      if (attr  &&  attr.isRecordAttribute) ret = attr.get('typeClass').isComplex;
+    }
+    
+    return ret;
+  }
+
 };
