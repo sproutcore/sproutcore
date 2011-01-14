@@ -9,7 +9,8 @@
 sc_require('system/image_stores/web_sql');
 
 SC.FILL = "fill";
-SC.BEST_FIT = "bestFit";
+SC.FIT_SMALLEST = "fitSmallest";
+SC.FIT_LARGEST = "fitLargest";
 SC.FIT_WIDTH = "fitWidth";
 SC.FIT_HEIGHT = "fitHeight";
 
@@ -55,14 +56,14 @@ SC.ImageView = SC.View.extend(SC.Control,
 
   classNames: 'sc-image-view',
 
-  displayProperties: 'image status fit toolTip width height'.w(),
+  displayProperties: 'image offsetX offsetY rotation status scale toolTip width height'.w(),
 
   renderDelegateName: function() {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
   }.property('useCanvas').cacheable(),
 
   tagName: function() {
-    return this.get('useCanvas') ? 'canvas' : 'img';
+    return this.get('useCanvas') ? 'canvas' : 'div';
   }.property('useCanvas').cacheable(),
 
 
@@ -76,15 +77,6 @@ SC.ImageView = SC.View.extend(SC.Control,
     always be treated as a background image.
   */
   canLoadInBackground: NO,
-
-  /**
-    Determines how the image will fit into its containing space. Possible
-    values: SC.FILL, SC.BEST_FIT, SC.FIT_WIDTH, SC.FIT_HEIGHT.
-
-    @property {String}
-    @default SC.FILL
-  */
-  fit: SC.FILL,
 
   /*
     TODO [CC] Find a less hacky way of accomplishing this
@@ -122,7 +114,40 @@ SC.ImageView = SC.View.extend(SC.Control,
     @default YES
   */
   localize: YES,
-  
+
+  /**
+    The amount in pixels to offset the image horizontally within its frame.
+
+    @property {Number}
+    @default {0}
+  */
+  offsetX: 0,
+
+  /**
+    The amount in pixels to offset the image vertically within its frame.
+
+    @property {Number}
+    @default {0}
+  */
+  offsetY: 0,
+
+  /**
+    The amount in degrees that the image should be rotated within its frame.
+
+    @property {Number} -360 to +360
+    @default {0}
+  */
+  rotation: 0,
+
+  /**
+    Determines how the image will scale to fit within its containing space. Possible
+    values: SC.FILL, SC.FIT_SMALLEST, SC.FIT_LARGEST, SC.FIT_WIDTH, SC.FIT_HEIGHT or a percentage.
+
+    @property {String|Number}
+    @default SC.FILL
+  */
+  scale: SC.FILL,
+
   /**
     Current load status of the image.
 
