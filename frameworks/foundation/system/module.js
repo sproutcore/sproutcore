@@ -487,7 +487,6 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var dependenciesMet;
     var callbacks, targets;
 
-
     if (log) console.log("SC.Module: Module '%@' finished loading.".fmt(moduleName));
 
     if (!module) {
@@ -518,38 +517,38 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     }
   },
 
-	/**
-  	@private
+  /**
+    @private
 
-  	If necessary, converts a property path into a target object.
+    If necessary, converts a property path into a target object.
 
-  	@param {String|Object} targetName the string or object representing the target
-  	@returns Object
+    @param {String|Object} targetName the string or object representing the target
+    @returns Object
   */
-	_targetForTargetName: function(targetName){
-		if (SC.typeOf(targetName) === SC.T_STRING) {
-			return SC.objectForPropertyPath(targetName);
-		}
+  _targetForTargetName: function(targetName){
+    if (SC.typeOf(targetName) === SC.T_STRING) {
+      return SC.objectForPropertyPath(targetName);
+    }
 
-		return targetName;
-	},
+    return targetName;
+  },
 
-	/**
-  	@private
+  /**
+    @private
 
-  	If necessary, converts a property path into a method object.
+    If necessary, converts a property path into a method object.
 
-  	@param {String|Object} methodName the string or object representing the method
-  	@param {Object} target the target from which to retrieve the method
-  	@returns Object
+    @param {String|Object} methodName the string or object representing the method
+    @param {Object} target the target from which to retrieve the method
+    @returns Object
   */
-	_methodForMethodNameInTarget: function(methodName, target){
-		if (SC.typeOf(methodName) === SC.T_STRING) {
-			return SC.objectForPropertyPath(methodName, target);
-		}
+  _methodForMethodNameInTarget: function(methodName, target){
+    if (SC.typeOf(methodName) === SC.T_STRING) {
+      return SC.objectForPropertyPath(methodName, target);
+    }
 
-		return methodName;
-	}
+    return methodName;
+  }
 });
 
 /**
