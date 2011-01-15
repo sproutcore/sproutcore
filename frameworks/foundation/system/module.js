@@ -279,9 +279,17 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       el.setAttribute('type', "text/javascript") ;
       el.setAttribute('src', url) ;
 
-      el.onload = function() {
-        SC.Module._moduleDidLoad(moduleName);
-      };
+      if (SC.browser.isIE) {
+        el.onreadystatechange = function() {
+          if (this.readyState == 'complete' || this.readyState == 'loaded') {
+            SC.Module._moduleDidLoad(moduleName);
+          }
+        };
+      } else {
+        el.onload = function() {
+          SC.Module._moduleDidLoad(moduleName);
+        };
+      }
 
       document.body.appendChild(el) ;
     }
