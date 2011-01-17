@@ -873,16 +873,20 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // if a RecordArray was not found, then create one and also add it to the
     // list of record arrays to update.
     if (!ret && createIfNeeded) {
-      cache[key] = ret = SC.RecordArray.create({ store: this, query: query });
-
-      ra = this.get('recordArrays');
-      if (!ra) this.set('recordArrays', ra = SC.Set.create());
-      ra.add(ret);
-
-      if (refreshIfNew) this.refreshQuery(query);
+      if (query.scope) {
+        ret = query.scope.createNestedRecordArray(this, query);
+      } else {
+        ret = SC.RecordArray.create({ store: this, query: query });
+        ra = this.get('recordArrays');
+        if (!ra) this.set('recordArrays', ra = SC.Set.create());
+        ra.add(ret);
+      }
+      cache[key] = ret;
+      if (refreshIfNew) {
+          this.refreshQuery(query);
+          this.flush();
+      }
     }
-    
-    this.flush();
     return ret ;
   },
   
