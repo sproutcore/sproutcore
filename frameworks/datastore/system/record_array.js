@@ -425,7 +425,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     changed.addEach(storeKeys);
     
     this.set('needsFlush', YES);
-    this.enumerableContentDidChange();
+    this.flush();
 
     return this;
   },
@@ -490,16 +490,18 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
               if (!didChange) storeKeys = storeKeys.copy(); 
               storeKeys.pushObject(storeKey); 
             }
+            // if storeKey is mew in array, array did change
+            // if storeKey was in array before, we still need to reorder
+            didChange = YES ;
           // if storeKey should NOT be in set but IS -- remove it
           } else {
             if (storeKeys.indexOf(storeKey)>=0) {
               if (!didChange) storeKeys = storeKeys.copy();
               storeKeys.removeObject(storeKey);
+              didChange = YES ;
             } // if (storeKeys.indexOf)
           } // if (included)
         }, this);
-        // make sure resort happens
-        didChange = YES ;
       } // if (changed)
     
     // if no storeKeys, then we have to go through all of the storeKeys 
@@ -547,6 +549,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       if (SC.compare(oldStoreKeys, storeKeys) !== 0){
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
       }
+      this.enumerableContentDidChange();
     }
 
     this._insideFlush = NO;
