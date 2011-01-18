@@ -38,8 +38,8 @@ SC.AdjustableImage = {
       scale = scaleX > scaleY ? scaleX : scaleY;
     } else if (scale === SC.FIT_LARGEST) {
       scale = scaleX < scaleY ? scaleX : scaleY;
-    } else if ((SC.typeOf(scale) !== SC.T_NUMBER) || ((SC.typeOf(scale) === SC.T_NUMBER) && (scale < 0))) {
-      SC.Logger.warn("SC.AdjustableImage: scale must be one of SC.FILL, SC.FIT_WIDTH, SC.FIT_HEIGHT, SC.FIT_SMALLEST, SC.FIT_LARGEST or a number greater than 0.00".fmt(this));
+    } else if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
+      SC.Logger.warn("SC.AdjustableImage: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FIT_WIDTH, SC.FIT_HEIGHT, SC.FIT_SMALLEST, SC.FIT_LARGEST or a positive number greater than 0.00.".fmt(scale));
 
       // Don't attempt to scale or offset the image
       return result;
@@ -48,8 +48,8 @@ SC.AdjustableImage = {
     // Scale the image according to the scale parameter
     imageWidth *= scale;
     imageHeight *= scale;
-    result.width = imageWidth;
-    result.height = imageHeight;
+    result.width = Math.round(imageWidth);
+    result.height = Math.round(imageHeight);
 
     // Center the image within its frame
     result.x = Math.round((frame.width / 2) - (imageWidth / 2));
