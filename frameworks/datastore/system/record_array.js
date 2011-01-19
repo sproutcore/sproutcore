@@ -640,7 +640,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
       if (SC.compare(oldStoreKeys, storeKeys) !== 0){
-          console.log(this.query.conditions + ' ' + oldStoreKeys + ' - ' + storeKeys);
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
         // notify all nested RecordArrays of the changes in this RecordArray
         var nestedRecordArrays = this.get('nestedRecordArrays');
