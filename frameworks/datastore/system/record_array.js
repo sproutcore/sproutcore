@@ -637,12 +637,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       if (storeKeys && (storeKeys===oldStoreKeys)) {
         storeKeys = storeKeys.copy();
       }
-      
+
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
       if (SC.compare(oldStoreKeys, storeKeys) !== 0){
+          console.log(this.query.conditions + ' ' + oldStoreKeys + ' - ' + storeKeys);
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
-        // something really changed in the RecordArray, so we can notify any observers
-        this.enumerableContentDidChange();
         // notify all nested RecordArrays of the changes in this RecordArray
         var nestedRecordArrays = this.get('nestedRecordArrays');
         if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidChangeStoreKeys', relevantChangedStoreKeys);
@@ -721,7 +720,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (storeKeys) storeKeys.addObserver('[]', this, f);
     
     var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
-    this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
+    if (prev && storeKeys.length > 0) this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
     
   }.observes('storeKeys'),
   
