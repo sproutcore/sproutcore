@@ -476,27 +476,27 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!changed) changed = this._scq_changedStoreKeys = SC.IndexSet.create();
     changed.addEach(storeKeys);
 
-    this.set('needsFlush', YES);
-    // notify all nested RecordArrays that their parent RecordArray became dirty
-    var nestedRecordArrays = this.get('nestedRecordArrays');
-    if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidBecomeDirty');
-
-    this.enumerableContentDidChange();
+    this.parentDidBecomeDirty();
     return this;
   },
 
   /** @private
-    Called by the parent RecordArray whenever it became dirty.
+    Called by the parent RecordArray or the store (via storeDidChangeStoreKeys) whenever it became dirty.
 
     @returns {SC.RecordArray} receiver
   */
   parentDidBecomeDirty: function() {
     var nestedRecordArrays = this.get('nestedRecordArrays');
 
-    // recursively notify all nested RecordArrays too
-    if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidBecomeDirty');
     this.set('needsFlush', YES);
-    this.enumerableContentDidChange();
+    if (nestedRecordArrays && nestedRecordArrays.get('length') > 0) {
+      // recursively notify all nested RecordArrays too
+      nestedRecordArrays.invoke('parentDidBecomeDirty');
+    } else {
+      // the flush will automatically be invoked by the last nested RecordArray, so we only need to invoke it
+      // manually when there are no nested RecordArrays
+      this.flush();
+    }
     return this;
   },
 
@@ -580,6 +580,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
               if (!didChange) storeKeys = storeKeys.copy(); 
               storeKeys.pushObject(storeKey);
               relevantChangedStoreKeys.push(storeKey);
+              didChange = YES ;
             }
           // if storeKey should NOT be in set but IS -- remove it
           } else {
@@ -587,11 +588,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
               if (!didChange) storeKeys = storeKeys.copy();
               storeKeys.removeObject(storeKey);
               relevantChangedStoreKeys.push(storeKey);
+              didChange = YES ;
             } // if (storeKeys.indexOf)
           } // if (included)
         }, this);
-        // make sure resort happens
-        didChange = YES ;
       } // if (changed)
     
     // if no storeKeys, then we have to go through all of the storeKeys 
@@ -641,12 +641,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
       if (SC.compare(oldStoreKeys, storeKeys) !== 0){
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
+        // something really changed in the RecordArray, so we can notify any observers
+        this.enumerableContentDidChange();
+        // notify all nested RecordArrays of the changes in this RecordArray
+        var nestedRecordArrays = this.get('nestedRecordArrays');
+        if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidChangeStoreKeys', relevantChangedStoreKeys);
       }
 
-      // now we know which storekeys actually were relevant to this RecordArray, so we can
-      // notify all nested RecordArrays
-      var nestedRecordArrays = this.get('nestedRecordArrays');
-      if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidChangeStoreKeys', relevantChangedStoreKeys);
     }
 
     this._insideFlush = NO;
