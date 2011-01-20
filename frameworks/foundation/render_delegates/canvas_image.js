@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('render_delegates/render_delegate');
-sc_require('private/adjustable_image');
 
 /**
   @class
@@ -31,19 +30,27 @@ sc_require('private/adjustable_image');
             will not be visible.
   - scale: If provided, the image will maintain aspect ratio as specified by this
           property. One of
+            - SC.SCALE_NONE
             - SC.FILL
-            - SC.FIT_SMALLEST
-            - SC.FIT_LARGEST
-            - SC.FIT_WIDTH
-            - SC.FIT_HEIGHT
+            - SC.FILL_PROPORTIONALLY
+            - SC.BEST_FIT
+            - SC.BEST_FIT_DOWN_ONLY
             - percentage {Number}
           If not provided, SC.FILL will be the default (ie. expected image behaviour)
-  - offsetX: If provided, the image will be offset horizontally by this amount
-  - offsetY: If provided, the image will be offset vertically by this amount
+  - align: If provided, the image will align itself within its frame.  One of
+            - SC.ALIGN_CENTER
+            - SC.ALIGN_TOP_LEFT
+            - SC.ALIGN_TOP
+            - SC.ALIGN_TOP_RIGHT
+            - SC.ALIGN_RIGHT
+            - SC.ALIGN_BOTTOM_RIGHT
+            - SC.ALIGN_BOTTOM
+            - SC.ALIGN_BOTTOM_LEFT
+            - SC.ALIGN_LEFT
   - backgroundColor: If provided, the canvas will render a backgroundColor
 */
 
-SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableImage, {
+SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
   name: 'canvasImage',
 
   /** @private
@@ -61,13 +68,9 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableI
   update: function(dataSource, jquery) {
     var elem = jquery[0],
         image = dataSource.get('image'),
-        frame = {width: dataSource.get('width') || 0, height: dataSource.get('height') || 0},
-        scale = dataSource.get('scale') || SC.FILL,
-        offsetX = dataSource.get('offsetX') || 0,
-        offsetY = dataSource.get('offsetY') || 0,
-        rotation =  dataSource.get('rotation') || 0,
+        frame = dataSource.get('frame'),
         backgroundColor = dataSource.get('backgroundColor'),
-        imageRect,
+        innerFrame = dataSource.get('innerFrame'),
         midX = 0, midY = 0,
         context;
 
@@ -85,21 +88,7 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableI
       }
 
       if (image && image.complete) {
-
-        imageRect = this.calculateImageRect(image, frame, scale, offsetX, offsetY);
-
-        // For rotation move to the center of the image and then rotate
-        if (rotation !== 0) {
-          midX = imageRect.width / 2 + imageRect.x;
-          midY = imageRect.height / 2 + imageRect.y;
-          context.translate(midX, midY);
-          context.rotate(rotation * Math.PI / 180);
-
-          imageRect.x = imageRect.x - midX;
-          imageRect.y = imageRect.y - midY;
-        }
-
-        context.drawImage(image, imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+        context.drawImage(image, Math.round(innerFrame.x), Math.round(innerFrame.y), Math.round(innerFrame.width), Math.round(innerFrame.height));
       }
     }
   }

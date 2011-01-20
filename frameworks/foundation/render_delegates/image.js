@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('render_delegates/render_delegate');
-sc_require('private/adjustable_image');
 
 /**
   @class
@@ -34,19 +33,26 @@ sc_require('private/adjustable_image');
           If not provided, SC.IMAGE_TYPE_URL is the default
   - scale: If provided, the image will maintain aspect ratio as specified by this
           property. One of
+            - SC.SCALE_NONE
             - SC.FILL
-            - SC.FIT_SMALLEST
-            - SC.FIT_LARGEST
-            - SC.FIT_WIDTH
-            - SC.FIT_HEIGHT
+            - SC.FILL_PROPORTIONALLY
+            - SC.BEST_FIT
+            - SC.BEST_FIT_DOWN_ONLY
             - percentage {Number}
           If not provided, SC.FILL will be the default (ie. expected image behaviour)
-  - offsetX: If provided, the image will be offset horizontally by this amount
-  - offsetY: If provided, the image will be offset vertically by this amount
-  - rotation: If provided, the image will be rotated by this amount in degrees (WebKit only)
+  - align: If provided, the image will align itself within its frame.  One of
+            - SC.ALIGN_CENTER
+            - SC.ALIGN_TOP_LEFT
+            - SC.ALIGN_TOP
+            - SC.ALIGN_TOP_RIGHT
+            - SC.ALIGN_RIGHT
+            - SC.ALIGN_BOTTOM_RIGHT
+            - SC.ALIGN_BOTTOM
+            - SC.ALIGN_BOTTOM_LEFT
+            - SC.ALIGN_LEFT
 */
 
-SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableImage, {
+SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
   name: 'image',
 
   render: function(dataSource, context) {
@@ -54,12 +60,10 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableImage, 
         imageValue = dataSource.get('imageValue'),
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         toolTip = dataSource.get('displayToolTip'),
-        frame = {width: dataSource.get('width') || 0, height: dataSource.get('height') || 0},
+        frame = dataSource.get('frame'),
         scale = dataSource.get('scale') || SC.FILL,
-        offsetX = dataSource.get('offsetX') || 0,
-        offsetY = dataSource.get('offsetY') || 0,
-        rotation =  dataSource.get('rotation') || 0,
-        imageRect;
+        align = dataSource.get('align') || SC.ALIGN_CENTER,
+        innerFrame = dataSource.get('innerFrame');
 
     // Place the img within a div, so that we may scale & offset the img
     context = context.begin('img');
@@ -76,14 +80,12 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableImage, 
     }
 
     // Adjust the layout of the img
-    imageRect = this.calculateImageRect(image, frame, scale, offsetX, offsetY);
     context.addStyle({
       'position': 'absolute',
-      'left': imageRect.x,
-      'top': imageRect.y,
-      'width': imageRect.width,
-      'height': imageRect.height,
-      '-webkit-transform': 'rotateZ(%@deg)'.fmt(rotation)
+      'left': Math.round(innerFrame.x),
+      'top': Math.round(innerFrame.y),
+      'width': Math.round(innerFrame.width),
+      'height': Math.round(innerFrame.height)
     });
 
     context = context.end();
@@ -94,12 +96,10 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableImage, 
         imageValue = dataSource.get('imageValue'),
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         toolTip = dataSource.get('displayToolTip'),
-        frame = {width: dataSource.get('width') || 0, height: dataSource.get('height') || 0},
+        frame = dataSource.get('frame'),
         scale = dataSource.get('scale') || SC.FILL,
-        offsetX = dataSource.get('offsetX') || 0,
-        offsetY = dataSource.get('offsetY') || 0,
-        rotation =  dataSource.get('rotation') || 0,
-        imageRect;
+        align = dataSource.get('align') || SC.ALIGN_CENTER,
+        innerFrame = dataSource.get('innerFrame');
 
     jquery = jquery.find('img');
     jquery.attr('src', image.src);
@@ -114,14 +114,12 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create(SC.AdjustableImage, 
     }
 
     // Adjust the layout of the img
-    imageRect = this.calculateImageRect(image, frame, scale, offsetX, offsetY);
     jquery.css({
       'position': 'absolute',
-      'left': imageRect.x,
-      'top': imageRect.y,
-      'width': imageRect.width,
-      'height': imageRect.height,
-      '-webkit-transform': 'rotateZ(%@deg)'.fmt(rotation)
+      'left': Math.round(innerFrame.x),
+      'top': Math.round(innerFrame.y),
+      'width': Math.round(innerFrame.width),
+      'height': Math.round(innerFrame.height)
     });
   }
 

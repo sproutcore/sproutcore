@@ -6,13 +6,11 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/image_stores/web_sql');
-
+SC.SCALE_NONE = "none";
 SC.FILL = "fill";
-SC.FIT_SMALLEST = "fitSmallest";
-SC.FIT_LARGEST = "fitLargest";
-SC.FIT_WIDTH = "fitWidth";
-SC.FIT_HEIGHT = "fitHeight";
+SC.FILL_PROPORTIONALLY = "fillProportionally";
+SC.BEST_FIT = "fitBest";
+SC.BEST_FIT_DOWN_ONLY = "fitBestDown";
 
 SC.IMAGE_STATE_NONE = 'none';
 SC.IMAGE_STATE_LOADING = 'loading';
@@ -56,7 +54,7 @@ SC.ImageView = SC.View.extend(SC.Control,
 
   classNames: 'sc-image-view',
 
-  displayProperties: 'image offsetX offsetY rotation status scale toolTip width height'.w(),
+  displayProperties: 'image innerFrame frame status scale toolTip'.w(),
 
   renderDelegateName: function() {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
@@ -72,31 +70,123 @@ SC.ImageView = SC.View.extend(SC.Control,
   //
 
   /**
+    Align the image within its frame.
+
+    <table>
+    <tr><td>SC.ALIGN_TOP_LEFT</td><td>SC.ALIGN_TOP</td><td>SC.ALIGN_TOP_RIGHT</td></tr>
+    <tr><td>SC.ALIGN_LEFT</td><td>SC.ALIGN_CENTER/td><td>SC.ALIGN_RIGHT</td></tr>
+    <tr><td>SC.ALIGN_BOTTOM_LEFT</td><td>SC.ALIGN_BOTTOM</td><td>SC.ALIGN_BOTTOM_RIGHT</td></tr>
+    </table>
+
+    @property {SC.ALIGN_CENTER|SC.ALIGN_TOP_LEFT|SC.ALIGN_TOP|SC.ALIGN_TOP_RIGHT|SC.ALIGN_RIGHT|SC.ALIGN_BOTTOM_RIGHT|SC.BOTTOM|SC.BOTTOM_LEFT|SC.LEFT|Number}
+    @default SC.FILL
+  */
+  align: SC.ALIGN_CENTER,
+
+  /**
     If YES, this image can load in the background.  Otherwise, it is treated
     as a foreground image.  If the image is not visible on screen, it will
     always be treated as a background image.
   */
   canLoadInBackground: NO,
 
-  /*
-    TODO [CC] Find a less hacky way of accomplishing this
-  */
-  /**
-    Only used because of how RenderDelegates are passed values.
-
-    @property {Number}
-    @default 0
-    @observes frame
-  */
-  height: function() {
-    return this.get('frame').height;
-  }.property('frame').cacheable(),
-
   /**
     @property {Image}
     @default SC.BLANK_IMAGE
   */
   image: SC.BLANK_IMAGE,
+
+  innerFrame: function() {
+    var image = this.get('image'),
+        align = this.get('align'),
+        scale = this.get('scale'),
+        frame = this.get('frame'),
+        imageWidth = image.width,
+        imageHeight = image.height,
+        scaleX,
+        scaleY,
+        result;
+
+    // Fast path
+    result = { x: 0, y: 0, width: frame.width , height: frame.height };
+    if (scale === SC.FILL) return result;
+
+    // Determine the appropriate scale
+    scaleX = frame.width / imageWidth;
+    scaleY = frame.height / imageHeight;
+
+    switch (scale) {
+      case SC.FILL_PROPORTIONALLY:
+        scale = scaleX > scaleY ? scaleX : scaleY;
+        break;
+      case SC.BEST_FIT:
+        scale = scaleX < scaleY ? scaleX : scaleY;
+        break;
+      case SC.BEST_FIT_DOWN_ONLY:
+        if ((imageWidth > frame.width) || (imageHeight > frame.height)) {
+          scale = scaleX < scaleY ? scaleX : scaleY;
+        } else {
+          scale = 1.0;
+        }
+        break;
+      case SC.SCALE_NONE:
+        scale = 1.0;
+        break;
+      default: // Number
+        if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
+          SC.Logger.warn("SC.AdjustableImage: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
+
+          // Don't attempt to scale or offset the image
+          return result;
+        }
+    }
+
+    imageWidth *= scale;
+    imageHeight *= scale;
+    result.width = Math.round(imageWidth);
+    result.height = Math.round(imageHeight);
+
+    // Align the image within its frame
+    switch (align) {
+      case SC.ALIGN_LEFT:
+        result.x = 0;
+        result.y = (frame.height / 2) - (imageHeight / 2);
+        break;
+      case SC.ALIGN_RIGHT:
+        result.x = frame.width - imageWidth;
+        result.y = (frame.height / 2) - (imageHeight / 2);
+        break;
+      case SC.ALIGN_TOP:
+        result.x = (frame.width / 2) - (imageWidth / 2);
+        result.y = 0;
+        break;
+      case SC.ALIGN_BOTTOM:
+        result.x = (frame.width / 2) - (imageWidth / 2);
+        result.y = frame.height - imageHeight;
+        break;
+      case SC.ALIGN_TOP_LEFT:
+        result.x = 0;
+        result.y = 0;
+        break;
+      case SC.ALIGN_TOP_RIGHT:
+        result.x = frame.width - imageWidth;
+        result.y = 0;
+        break;
+      case SC.ALIGN_BOTTOM_LEFT:
+        result.x = 0;
+        result.y = frame.height - imageHeight;
+        break;
+      case SC.ALIGN_BOTTOM_RIGHT:
+        result.x = frame.width - imageWidth;
+        result.y = frame.height - imageHeight;
+        break;
+      default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
+        result.x = (frame.width / 2) - (imageWidth / 2);
+        result.y = (frame.height / 2) - (imageHeight / 2);
+    }
+
+    return result;
+  }.property('align', 'image', 'scale', 'frame').cacheable(),
 
   /**
     @property {String}
@@ -116,34 +206,22 @@ SC.ImageView = SC.View.extend(SC.Control,
   localize: YES,
 
   /**
-    The amount in pixels to offset the image horizontally within its frame.
+    Determines how the image will scale to fit within its containing space.
 
-    @property {Number}
-    @default {0}
-  */
-  offsetX: 0,
+    Examples:
 
-  /**
-    The amount in pixels to offset the image vertically within its frame.
+      SC.SCALE_NONE - don't scale
+      SC.FILL - stretch/shrink the image to fill the ImageView frame
+      SC.FILL_PROPORTIONALLY - stretch/shrink the image to fill the ImageView frame while maintaining
+        aspect ratio, such that the shortest dimension will just fit within the frame and the longest dimension will
+        overflow and be cropped
+      SC.BEST_FIT - stretch/shrink the image to fit the ImageView frame while maintaining aspect ration,
+        such that the longest dimension will just fit within the frame
+      SC.BEST_FIT_DOWN_ONLY - shrink the image to fit the ImageView frame while maintaining aspect ration,
+        such that the longest dimension will just fit within the frame.  Do not stretch the image if the image's
+        width is less than the frame's width.
 
-    @property {Number}
-    @default {0}
-  */
-  offsetY: 0,
-
-  /**
-    The amount in degrees that the image should be rotated within its frame.
-
-    @property {Number} -360 to +360
-    @default {0}
-  */
-  rotation: 0,
-
-  /**
-    Determines how the image will scale to fit within its containing space. Possible
-    values: SC.FILL, SC.FIT_SMALLEST, SC.FIT_LARGEST, SC.FIT_WIDTH, SC.FIT_HEIGHT or a percentage.
-
-    @property {String|Number}
+    @property {SC.SCALE_NONE|SC.FILL|SC.FILL_PROPORTIONALLY|SC.BEST_FIT|SC.BEST_FIT_DOWN_ONLY|Number}
     @default SC.FILL
   */
   scale: SC.FILL,
@@ -175,11 +253,18 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.property('imageValue').cacheable(),
 
   /**
+    The canvas element is more performant than the img element, since we can
+    update the canvas image without causing browser reflow.  As an additional
+    benefit, canvas images are less easily copied, which is generally in line
+    with acting as an 'application'.
+
     @property {Boolean}
-    @default NO
+    @default YES if supported
     @since SproutCore 1.5
   */
-  useCanvas: NO,
+  useCanvas: function() {
+    return SC.platform.supportsCanvas;
+  }.property().cacheable(),
 
   /**
     If YES, image view will use the SC.imageQueue to control loading.  This
@@ -189,31 +274,6 @@ SC.ImageView = SC.View.extend(SC.Control,
     @default YES
   */
   useImageQueue: YES,
-
-  /**
-    If YES, the image will be stored using a SC.ImageStore object. It will use the
-    store defined at SC.ImageView.store. This will store the image locally and make
-    it available offline. Note that this only works when using a URL as the value.
-
-    @property {Boolean}
-    @default NO
-    @since SproutCore 1.5
-  */
-  wantsImageStored: NO,
-
-  /*
-    TODO [CC] Find a less hacky way of accomplishing this
-  */
-  /**
-    Only used because of how RenderDelegates are passed values.
-
-    @property {Number}
-    @default 0
-    @observes frame
-  */
-  width: function() {
-    return this.get('frame').width;
-  }.property('frame').cacheable(),
 
   /**
     A url or CSS class name.
@@ -282,57 +342,18 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (value !== this._iv_value) {
       this._iv_value = value;
 
-      /*
-        TODO [CC] Need to fix this. SC.BLANK_IMAGE might not be complete yet (?!?)
-              and this causes the canvas render to freak.
-      */
-      // this.set('image', SC.BLANK_IMAGE);
+      // While the new image is loading use SC.BLANK_IMAGE as a placeholder
+      this.set('image', SC.BLANK_IMAGE);
       this.set('status', SC.IMAGE_STATE_LOADING);
 
-      // order: local image store, image queue, normal load
-      if (!this._loadImageUsingStore()) {
-        if (!this._loadImageUsingQueue()) {
-          if (!this._loadImage()) {
-            // CSS class? this will be handled automatically
-          }
+      // order: image queue, normal load
+      if (!this._loadImageUsingQueue()) {
+        if (!this._loadImage()) {
+          // CSS class? this will be handled automatically
         }
       }
     }
   }.observes('imageValue'),
-
-  /** @private
-    Tries to load the image value from the SC.ImageView.store object. If the imageValue is not
-    a URL, it won't attempt to load it using this method.
-
-    @returns YES if loading using SC.ImageView.store, NO otherwise
-  */
-  _loadImageUsingStore: function() {
-    var value = this.get('imageValue'),
-        type = this.get('type');
-
-    if (type === SC.IMAGE_TYPE_URL && this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
-      SC.ImageView.store.load(value, this, this._storedImageDidLoad);
-      return YES;
-    }
-
-    return NO;
-  },
-
-  _storedImageDidLoad: function(url, image) {
-    var value = this.get('imageValue');
-
-    // if this isn't true, then the value changed while the stored image was loading
-    if (value === url) {
-      if (SC.ok(image)) {
-        this.didLoad(image);
-      } else {
-        // it failed, try other methods
-        if (!this._loadImageUsingQueue()) {
-          this._loadImage();
-        }
-      }
-    }
-  },
 
   /** @private
     Tries to load the image value using the SC.imageQueue object. If the imageValue is not
@@ -360,10 +381,6 @@ SC.ImageView = SC.View.extend(SC.Control,
 
     if (value === url) {
       if (SC.ok(image)) {
-        if (this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
-          SC.ImageView.store.save(value, image);
-        }
-
         this.didLoad(image);
       } else {
         // if loading it using the queue didn't work, it's useless to try loading the image normally
@@ -410,10 +427,6 @@ SC.ImageView = SC.View.extend(SC.Control,
 
     if (value === url) {
       if (SC.ok(image)) {
-        if (this.get('wantsImageStored') && SC.ImageView.store && SC.ImageView.store.isImageStore) {
-          SC.ImageView.store.save(value, image);
-        }
-
         this.didLoad(image);
       } else {
         this.didError(image);
@@ -441,5 +454,3 @@ SC.ImageView = SC.View.extend(SC.Control,
 SC.ImageView.valueIsUrl = function(value) {
   return value ? value.indexOf('/') >= 0 : NO ;
 } ;
-
-SC.ImageView.store = SC.WebSQLImageStore.create();
