@@ -54,7 +54,7 @@ SC.ImageView = SC.View.extend(SC.Control,
 
   classNames: 'sc-image-view',
 
-  displayProperties: 'image innerFrame frame status scale toolTip'.w(),
+  displayProperties: 'image imageValue innerFrame frame status scale toolTip type'.w(),
 
   renderDelegateName: function() {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
