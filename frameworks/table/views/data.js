@@ -441,6 +441,66 @@ SC.DataView = SC.ListView.extend({
   /** @private */
   _cv_columnsDidChange: function() {
     this.reload(null);
-  }.observes('columns')
+  }.observes('columns'),
+
+
+    /* CollectionView in SC 1.4 does not call createItemViewForContentIndex
+     * as the 1.5 version does, so this is a copy of the function in 1.5 that does. */
+    itemViewForContentIndex: function(idx, rebuild) {
+      var ret;
+
+      // Use the cached view for this index, if we have it.  We'll do this up-
+      // front to avoid
+      var itemViews = this._sc_itemViews;
+      if (!itemViews) {
+        itemViews = this._sc_itemViews = [] ;
+      }
+      else if (!rebuild && (ret = itemViews[idx])) {
+        return ret ;
+      }
+
+      // return from cache if possible
+      var content   = this.get('content'),
+          item = content.objectAt(idx),
+          del  = this.get('contentDelegate'),
+          groupIndexes = this.get('_contentGroupIndexes'),
+          isGroupView = NO,
+          key, E, layout, layerId,
+          viewPoolKey, parentView, isEnabled, isSelected,
+          outlineLevel, disclosureState, isVisibleInWindow;
+
+      // otherwise generate...
+
+      // first, determine the class to use
+      isGroupView = groupIndexes && groupIndexes.contains(idx);
+      if (isGroupView) isGroupView = del.contentIndexIsGroup(this, content,idx);
+      if (isGroupView) {
+        key  = this.get('contentGroupExampleViewKey');
+        if (key && item) E = item.get(key);
+        if (!E) E = this.get('groupExampleView') || this.get('exampleView');
+        viewPoolKey = '_GROUP_VIEW_POOL';
+      } else {
+        key  = this.get('contentExampleViewKey');
+        if (key && item) E = item.get(key);
+        if (!E) E = this.get('exampleView');
+        viewPoolKey = '_VIEW_POOL';
+      }
+
+
+      // Collect other state that we'll need whether we're re-using a previous
+      // view or creating a new view.
+      parentView        = this.get('containerView') || this;
+      layerId           = this.layerIdFor(idx);
+      isEnabled         = del.contentIndexIsEnabled(this, content, idx);
+      isSelected        = del.contentIndexIsSelected(this, content, idx);
+      outlineLevel      = del.contentIndexOutlineLevel(this, content, idx);
+      disclosureState   = del.contentIndexDisclosureState(this, content, idx);
+      isVisibleInWindow = this.isVisibleInWindow;
+      layout            = this.layoutForContentIndex(idx);
+
+      ret = this.createItemViewForContentIndex(layout,isVisibleInWindow,idx,parentView,layerId,isEnabled,item,isSelected,outlineLevel,disclosureState,E,viewPoolKey,isGroupView,itemViews);
+
+      return ret ;
+    }
   
 });
