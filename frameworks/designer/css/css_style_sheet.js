@@ -1,11 +1,9 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-sc_require('css/css_rule') ;
 
 /**
   @class SC.CSSStyleSheet
@@ -21,24 +19,26 @@ SC.CSSStyleSheet = SC.Object.extend(
   init: function() {
     sc_super() ;
     
-    var ss = this.styleSheet ;
+    var ss = this.styleSheetElement ;
     if (!ss) {
       // create the stylesheet object the hard way (works everywhere)
-      ss = this.styleSheet = document.createElement('style') ;
+      ss = this.styleSheetElement = document.createElement('style') ;
       ss.type = 'text/css' ;
       var head = document.getElementsByTagName('head')[0] ;
       if (!head) head = document.documentElement ; // fix for Opera
       head.appendChild(ss) ;
     }
     
+		this.styleSheet = document.styleSheets[document.styleSheets.length - 1]; 
+
     // cache this object for later
     var ssObjects = this.constructor.styleSheets ;
-    if (!ssObjects) ssObjects = this.constructor.styleSheets = {} ;
-    ssObjects[SC.guidFor(ss)] ;
+    if (!ssObjects) ssObjects = this.constructor.styleSheets = {};
     
     // create rules array
-    var rules = ss.rules || SC.EMPTY_ARRAY ;
-    var array = SC.SparseArray.create(rules.length) ;
+    var rules = ss.cssRules || SC.EMPTY_ARRAY ;
+    var array = SC.SparseArray.create();
+		// array.provideLength(rules.length);
     array.delegate = this ;
     this.rules = array ;
     
@@ -93,8 +93,37 @@ SC.CSSStyleSheet = SC.Object.extend(
   /**
     You can also insert and remove rules on the rules property array.
   */
-  insertRule: function(rule) {
+  insertRule: function(rule,i) {
     var rules = this.get('rules') ;
+		rules.pushObject(rule);
+		if (!SC.none(i))
+		{
+		  var styleSheetElement = this.styleSheet;
+  		if (SC.browser.msie)
+  		{
+		    //break up the rule for IE
+		    var brokenRule = rule.split('{');
+		    var hash = brokenRule[1];
+		    //remove trailing bracket and split by ;
+		    rules = brokenRule[1].substr(0,brokenRule[1].length-1).split(';');
+		    for (var idx =0;idx<rules.length;idx++)
+		    {
+          //add the rule
+		      styleSheetElement.addRule(brokenRule[0],rules[idx]+';');
+		    }
+  		}
+  		else
+  		{ 
+  		  if (i<styleSheetElement.cssRules.length)
+  		  {
+  		    i = styleSheetElement.insertRule(rule,i);
+		    }
+		    else
+		    {
+		      i = styleSheetElement.insertRule(rule,styleSheetElement.cssRules.length);
+		    }
+  		}
+	  }
   },
   
   /**
@@ -105,8 +134,26 @@ SC.CSSStyleSheet = SC.Object.extend(
     rules.removeObject(rule) ;
   },
   
+  deleteRuleByIndex: function(i) {
+    var styleSheetElement = this.styleSheet;
+	  if (i<styleSheetElement.cssRules.length)
+	  {
+	    styleSheetElement.deleteRule(i);
+	  }
+	  else
+	  {
+	    //index too large, delete last if any
+	  }
+  },
+  
   // TODO: implement a destroy method
   
+	destroy: function() {
+		var ss = this.get('styleSheetElement');
+		ss.parentNode.removeChild(ss);
+		sc_super();
+	},
+
   /**
     @private
     
@@ -115,7 +162,7 @@ SC.CSSStyleSheet = SC.Object.extend(
   */
   sparseArrayDidRequestIndex: function(array, idx) {
     // sc_assert(this.rules === array) ;
-    var rules = this.styleSheet.rules || SC.EMPTY_ARRAY ;
+    var rules = this.styleSheet.cssRules || SC.EMPTY_ARRAY ;
     var rule = rules[idx] ;
     if (rule) {
       array.provideContentAtIndex(idx, SC.CSSRule.create({ 
@@ -128,7 +175,7 @@ SC.CSSStyleSheet = SC.Object.extend(
   /** @private synchronize the browser's rules array with our own */
   sparseArrayDidReplace: function(array, idx, amt, objects) {
     var cssRules = objects.collect(function(obj) { return obj.rule; }) ;
-    this.styleSheet.rules.replace(idx, amt, cssRules) ;
+    this.styleSheet.cssRules.replace(idx, amt, cssRules) ;
   }
   
 });
@@ -154,7 +201,7 @@ SC.mixin(SC.CSSStyleSheet,
     
     if (!nameOrUrl) return null ; // no name or url? fail!
     
-    if (!isUrl && nameOrUrl.indexOf('.css') == -1) {
+    if (!isUrl && nameOrUrl.indexOf('.css') === -1) {
       nameOrUrl = nameOrUrl + '.css' ;
     }
     
@@ -181,7 +228,7 @@ SC.mixin(SC.CSSStyleSheet,
         if (ssName = ss.href) {
           ssName = ssName.split('/') ; // break up URL
           ssName = ssName[ssName.length-1] ; // get last component
-          if (ssName == nameOrUrl) {
+          if (ssName === nameOrUrl) {
             guid = SC.guidFor(ss) ;
             ssObject = ssObjects[guid] ;
             if (!ssObject) {
