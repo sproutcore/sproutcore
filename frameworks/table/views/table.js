@@ -109,7 +109,6 @@ SC.TableView = SC.View.extend({
   sortDescriptorBinding: '*content.orderBy',
   
   createChildViews: function() {
-    
     var childViews = [], childView=null;
     
      this._tableHeaderView = childView = this.createChildView(SC.ScrollView.design({
