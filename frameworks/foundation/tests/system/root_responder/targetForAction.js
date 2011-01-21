@@ -6,8 +6,8 @@
 
 /*global module test equals context ok same Q$ htmlbody Dummy */
 
-var r, sender, pane, barView, fooView, defaultResponder;
-var keyPane, mainPane, globalResponder, actionSender ;
+var r, r2, sender, pane, barView, fooView, defaultResponder;
+var keyPane, mainPane, globalResponder, globalResponderContext, actionSender ;
 
 var CommonSetup = {
   setup: function() { 
@@ -26,6 +26,10 @@ var CommonSetup = {
     globalResponder = SC.Object.create({ 
       globalAction: action 
     });
+    
+    // global default responder as a responder context 
+    // set on RootResponder
+    globalResponderContext = SC.Object.create(SC.ResponderContext);
     
     // explicit pane
     pane = SC.Pane.create({ 
@@ -59,6 +63,12 @@ var CommonSetup = {
       defaultResponder: globalResponder 
     }); 
     
+    r2 = SC.RootResponder.create({
+      mainPane: mainPane,
+      keyPane: keyPane,
+      defaultResponder: globalResponderContext
+    });
+    
     barView = pane.childViews[0];
     ok(barView.bar, 'barView should implement bar');
     
@@ -74,8 +84,9 @@ var CommonSetup = {
   },
 
   teardown: function() {
-    r = sender = pane = window.Dummy = barView = fooView = null; 
-    defaultResponder = keyPane = mainPane = globalResponder = null;    
+    r = r2 = sender = pane = window.Dummy = barView = fooView = null; 
+    defaultResponder = keyPane = mainPane = globalResponder = null; 
+    globalResponderContext = null;    
   }
 };
 
@@ -201,6 +212,8 @@ test("no target, no explicit pane", function() {
   equals(r.targetForAction('globalAction'), globalResponder,
     'should find global defaultResponder');
   equals(r.targetForAction('imaginaryAction'), null, 'should return null for not-found action');
+  equals(r2.targetForAction('globalAction'), globalResponderContext,
+    'should find global defaultResponder');
 });
 
 // ..........................................................
