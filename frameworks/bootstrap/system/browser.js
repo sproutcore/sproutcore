@@ -26,6 +26,7 @@ SC._detectBrowser = function(rawUserAgent, language) {
     chrome:       /chrome/.test( userAgent ) ? version : 0,
     windows:      !!/windows/.test(userAgent),
     mac:          !!/macintosh/.test(userAgent) || (/mac os x/.test(userAgent) && !/like mac os x/.test(userAgent)),
+    android:      !!/android/.test(userAgent),
     language:     language.split('-', 1)[0]
   };
 

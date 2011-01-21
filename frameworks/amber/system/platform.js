@@ -14,6 +14,12 @@
   robust apps.
 */
 SC.platform = {
+  
+  /*
+    NOTES
+      - A development version of Chrome 9 incorrectly reported supporting touch
+      - Android is assumed to support touch, but incorrectly reports that it does not
+  */
   /**
     YES if the current device supports touch events, NO otherwise.
 
@@ -22,8 +28,8 @@ SC.platform = {
 
     @property {Boolean}
   */
-  touch: ('createTouch' in document) && SC.browser.chrome < 9, // Ugly hack for Chrome 9 issue
-
+  touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
+  
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
 
@@ -88,6 +94,8 @@ SC.platform = {
       //@ endif
       return;
     }
+    
+    SC.Logger.log("Simulating touch events");
 
     // Tell the app that we now "speak" touch
     SC.platform.touch = YES;
