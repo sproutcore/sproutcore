@@ -40,7 +40,7 @@ SC.BLANK_IMAGE.width = SC.BLANK_IMAGE.height = 1;
   The ImageView can be used to efficiently display images in the browser.
   It includes a built in support for a number of features that can improve
   your page load time if you use a lot of images including a image loading
-  queue and automatic support for CSS spriting.
+  cache and automatic support for CSS spriting.
 
   Note that there are actually many controls that will natively include
   images using an icon property name.
@@ -267,13 +267,13 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.property().cacheable(),
 
   /**
-    If YES, image view will use the SC.imageQueue to control loading.  This
+    If YES, image view will use the SC.imageCache to control loading.  This
     setting is generally preferred.
 
     @property {Boolean}
     @default YES
   */
-  useImageQueue: YES,
+  useImageCache: YES,
 
   /**
     A url or CSS class name.
@@ -305,8 +305,8 @@ SC.ImageView = SC.View.extend(SC.Control,
     this._image_valueDidChange();
 
     if (this.get('useImageCache') !== undefined) {
-      SC.Logger.warn("%@ has useImageCache set, please set useImageQueue instead".fmt(this));
-      this.set('useImageQueue', this.get('useImageCache'));
+      SC.Logger.warn("%@ has useImageCache set, please set useImageCache instead".fmt(this));
+      this.set('useImageCache', this.get('useImageCache'));
     }
   },
 
@@ -346,8 +346,8 @@ SC.ImageView = SC.View.extend(SC.Control,
       this.set('image', SC.BLANK_IMAGE);
       this.set('status', SC.IMAGE_STATE_LOADING);
 
-      // order: image queue, normal load
-      if (!this._loadImageUsingQueue()) {
+      // order: image cache, normal load
+      if (!this._loadImageUsingCache()) {
         if (!this._loadImage()) {
           // CSS class? this will be handled automatically
         }
@@ -356,41 +356,41 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.observes('imageValue'),
 
   /** @private
-    Tries to load the image value using the SC.imageQueue object. If the imageValue is not
+    Tries to load the image value using the SC.imageCache object. If the imageValue is not
     a URL, it won't attempt to load it using this method.
 
-    @returns YES if loading using SC.imageQueue, NO otherwise
+    @returns YES if loading using SC.imageCache, NO otherwise
   */
-  _loadImageUsingQueue: function() {
+  _loadImageUsingCache: function() {
     var value = this.get('imageValue'),
         type = this.get('type');
 
     // now update local state as needed....
-    if (type === SC.IMAGE_TYPE_URL && this.get('useImageQueue')) {
+    if (type === SC.IMAGE_TYPE_URL && this.get('useImageCache')) {
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
 
-      SC.imageQueue.loadImage(value, this, this._loadImageUsingQueueDidComplete, isBackground);
+      SC.imageCache.loadImage(value, this, this._loadImageUsingCacheDidComplete, isBackground);
       return YES;
     }
 
     return NO;
   },
 
-  _loadImageUsingQueueDidComplete: function(url, image) {
+  _loadImageUsingCacheDidComplete: function(url, image) {
     var value = this.get('imageValue');
 
     if (value === url) {
       if (SC.ok(image)) {
         this.didLoad(image);
       } else {
-        // if loading it using the queue didn't work, it's useless to try loading the image normally
+        // if loading it using the cache didn't work, it's useless to try loading the image normally
         this.didError(image);
       }
     }
   },
 
   /** @private
-    Loads an image using a normal Image object, without using the SC.imageQueue.
+    Loads an image using a normal Image object, without using the SC.imageCache.
 
     @returns YES if it will load, NO otherwise
   */

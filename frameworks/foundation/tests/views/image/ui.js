@@ -21,7 +21,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     })
     .add("image_loaded", SC.ImageView, {
       value: logoURL, layout : { width: 200, height: 300 },
-      useImageQueue: NO,
+      useImageCache: NO,
       useCanvas: NO
     })
     .add('sprite_image', SC.ImageView, {
@@ -115,40 +115,41 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     equals(canvasEl.attr('height'), 300, "The height of the canvas element should be set");
   });
 
-  // test("Using imageQueue", function() {
-  //   var imageHolder = pane.view('image_holder'),
-  //       timestamp = SC.DateTime.create(),
-  //       imageView1,
-  //       imageView2;
-  //
-  //   // Set the first view to load in the background (ie. it should load last although it was created first)
-  //   imageView1 = SC.ImageView.create({
-  //     value: sampleURLs[0] + "?lastmod=" + timestamp.get('milliseconds'),
-  //     canLoadInBackground: YES
-  //   });
-  //   imageView2 = SC.ImageView.create({
-  //     value: sampleURLs[1] + "?lastmod=" + timestamp.get('milliseconds'),
-  //     canLoadInBackground: NO
-  //   });
-  //
-  //   // The second image should load first and the first not be loaded yet
-  //   imageView2.addObserver('status', this, function() {
-  //     equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status');
-  //     equals(imageView1.get('status'), SC.IMAGE_STATE_LOADING, 'imageView1 status');
-  //   });
-  //
-  //   imageView1.addObserver('status', this, function() {
-  //     equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status');
-  //     equals(imageView1.get('status'), SC.IMAGE_STATE_LOADED, 'imageView1 status');
-  //
-  //     window.start(); // starts the test runner
-  //   });
-  //
-  //   imageHolder.appendChild(imageView1);
-  //   imageHolder.appendChild(imageView2);
-  //
-  //   stop();
-  // });
+  test("Using imageCache", function() {
+    var imageHolder = pane.view('image_holder'),
+        timestamp = SC.DateTime.create(),
+        imageView1,
+        imageView2;
+
+    // Set the first view to load in the background (ie. it should load last although it was created first)
+    imageView1 = SC.ImageView.create({
+      value: sampleURLs[0] + "?lastmod=" + timestamp.get('milliseconds'),
+      canLoadInBackground: YES
+    });
+    imageView2 = SC.ImageView.create({
+      value: sampleURLs[1] + "?lastmod=" + timestamp.get('milliseconds'),
+      canLoadInBackground: NO
+    });
+
+    console.log("1: %@, 2: %@".fmt(sampleURLs[0] + "?lastmod=" + timestamp.get('milliseconds'), sampleURLs[1] + "?lastmod=" + timestamp.get('milliseconds')));
+    stop();
+
+    // The second image should load first and the first not be loaded yet
+    imageView2.addObserver('status', this, function() {
+      equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status');
+      equals(imageView1.get('status'), SC.IMAGE_STATE_LOADING, 'imageView1 status');
+    });
+
+    imageView1.addObserver('status', this, function() {
+      equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status');
+      equals(imageView1.get('status'), SC.IMAGE_STATE_LOADED, 'imageView1 status');
+
+      window.start(); // starts the test runner
+    });
+
+    imageHolder.appendChild(imageView1);
+    imageHolder.appendChild(imageView2);
+  });
 
   test("Scaling images (img)", function() {
     var imageHolder = pane.view('image_holder'),
@@ -162,6 +163,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       layout: { top: 0, left: 0, width: 588, height: 90 },
       useCanvas: NO
     });
+
+    stop();
 
     // Default is SC.FILL
     imageView.addObserver('status', this, function() {
@@ -212,8 +215,6 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     });
 
     imageHolder.appendChild(imageView);
-
-    stop();
   });
 
   test("Scaling images (canvas)", function() {
@@ -227,6 +228,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       value: logoURL + "?lastmod=" + timestamp.get('milliseconds'),
       layout: { top: 0, left: 0, width: 588, height: 90 }
     });
+
+    stop();
 
     imageView.addObserver('status', this, function() {
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
@@ -282,8 +285,6 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     });
 
     imageHolder.appendChild(imageView);
-
-    stop();
   });
 
   test("Aligning images (img)", function() {
@@ -299,6 +300,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       useCanvas: NO,
       scale: SC.SCALE_NONE
     });
+
+    stop();
 
     // Default is SC.FILL
     imageView.addObserver('status', this, function() {
@@ -371,8 +374,6 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     });
 
     imageHolder.appendChild(imageView);
-
-    stop();
   });
 
   test("Aligning images (canvas)", function() {
@@ -387,6 +388,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       layout: { top: 0, left: 0, width: 588, height: 120 },
       scale: SC.SCALE_NONE
     });
+
+    stop();
 
     // Default is SC.FILL
     imageView.addObserver('status', this, function() {
@@ -467,8 +470,6 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     });
 
     imageHolder.appendChild(imageView);
-
-    stop();
   });
 })();
 
