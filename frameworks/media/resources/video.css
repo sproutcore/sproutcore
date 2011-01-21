@@ -1,35 +1,30 @@
 
-.sc-media-controls .stop
-{
-  background: static_url('controls.png') no-repeat -8px 4px;  
+.sc-media-controls .stop {
+  @include slice("controls.png", $left: 8, $top: 4);
   height: 20px;
   width: 22px;
 }
 
-.sc-media-controls .play
-{
-  background: static_url('controls.png') no-repeat 7px 4px;  
+.sc-media-controls .play {
+  @include slice("controls.png", $left: -7, $top: 4);
   height: 20px;
   width: 22px;
 }
 
-.sc-media-controls .theater
-{
-  background: static_url('controls.png') no-repeat -24px 4px;  
+.sc-media-controls .theater {
+  @include slice("controls.png", $left: 24, $top: 4);
   height: 20px;
   width: 18px;
 }
 
-.sc-media-controls .minus
-{
-  background: static_url('controls.png') no-repeat -45px 3px;
+.sc-media-controls .minus {
+  @include slice("controls.png", $left: 45, $top: 3);
   height: 20px;
   width: 20px;
 }
 
-.sc-media-controls .plus
-{
-  background: static_url('controls.png') no-repeat -60px 3px;
+.sc-media-controls .plus {
+  @include slice("controls.png", $left: 60, $top: 3);
   height: 20px;
   width: 20px;
 }
