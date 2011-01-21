@@ -22,6 +22,7 @@ SC.mixin(SC.browser, (function() {
     isMozilla: !!browser.mozilla,
     isWindows: !!browser.windows,
     isMac: !!browser.mac,
+    isAndroid: !!browser.android,
     isiPhone: ((!!browser.mobileSafari || !!browser.standalone) && (viewport == 320 || viewport == 480)),
 
     /**

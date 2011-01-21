@@ -14,6 +14,12 @@
   robust apps.
 */
 SC.platform = {
+  
+  /*
+    NOTES
+      - A development version of Chrome 9 incorrectly reported supporting touch
+      - Android is assumed to support touch, but incorrectly reports that it does not
+  */
   /**
     YES if the current device supports touch events, NO otherwise.
 
@@ -22,7 +28,7 @@ SC.platform = {
 
     @property {Boolean}
   */
-  touch: ('createTouch' in document) && SC.browser.chrome < 9, // Ugly hack for Chrome 9 issue
+  touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
   
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
@@ -88,6 +94,8 @@ SC.platform = {
       //@ endif
       return;
     }
+    
+    SC.Logger.log("Simulating touch events");
 
     // Tell the app that we now "speak" touch
     SC.platform.touch = YES;
@@ -143,7 +151,7 @@ SC.platform = {
         we need to capture when was the first spot that the altKey was pressed and use it as
         the center point of a pinch
        */
-      if(evt.altKey && this._pinchCenter == null) {
+      if (evt.altKey && this._pinchCenter === null) {
         this._pinchCenter = {
           pageX: evt.pageX,
           pageY: evt.pageY,
@@ -152,7 +160,7 @@ SC.platform = {
           clientX: evt.clientX,
           clientY: evt.clientY
         };
-      } else if(!evt.altKey && this._pinchCenter != null){
+      } else if (!evt.altKey && this._pinchCenter !== null){
         this._pinchCenter = null;
       }
       return NO;
@@ -215,8 +223,7 @@ SC.platform = {
     /*
       simulate pinch gesture
      */
-    if(evt.altKey && this._pinchCenter != null)
-    {
+    if (evt.altKey && this._pinchCenter !== null) {
       //calculate the mirror position of the virtual touch
       var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX ,
           pageY = this._pinchCenter.pageY + this._pinchCenter.pageY - evt.pageY,

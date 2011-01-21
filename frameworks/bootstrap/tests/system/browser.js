@@ -67,6 +67,11 @@ test("Mac", function(){
   testUserAgent(userAgent, { mac: false });
 });
 
+test("Android", function() {
+  var userAgent = "Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; SCH-I500 Build/ECLAIR) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17";
+  testUserAgent(userAgent, {android: true});
+});
+
 test("Language", function(){
   equals(SC._detectBrowser(undefined, 'en-US').language, 'en', "should only show base language part");
 });
