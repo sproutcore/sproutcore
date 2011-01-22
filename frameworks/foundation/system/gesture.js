@@ -270,7 +270,7 @@ SC.Gesture = SC.Object.extend({
   */
   take: function(touch) {
     touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
-    if (touch.touchResponder && touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
+    if (SC.none(touch.touchResponder) || touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
   },
   
   /**
