@@ -1,7 +1,7 @@
 # ==========================================================================
 # SproutCore JavaScript Framework - Buildfile
 # copyright (c) 2009 - Apple Inc.
-#           portions copyright Sprout Systems Inc. and contributors
+#           portions copyright Strobe Inc. and contributors
 # ==========================================================================
 
 # This buildfile defines the configurations needed to link together the 
