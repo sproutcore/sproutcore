@@ -86,7 +86,7 @@ Greenhouse.mainPage = SC.Page.design({
     
     footer: SC.LabelView.design({
       layout: { bottom: 0, height: 30, left: 0, right: 0},
-      value: '©2010 Sprout Systems Inc. & Contributors',
+      value: '©2011 Strobe Inc. & Contributors',
       textAlign: SC.ALIGN_CENTER,
       classNames: ['footer']
     })

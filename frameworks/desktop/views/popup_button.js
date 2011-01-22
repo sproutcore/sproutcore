@@ -27,7 +27,7 @@ SC.PopupButtonView.design({
   @extends SC.ButtonView
   @author Santosh Shanbhogue
   @author Tom Dale
-  @copyright 2008-2010, Sprout Systems, Inc. and contributors.
+  @copyright 2008-2011, Strobe Inc. and contributors.
   @version 1.0
 */
 SC.PopupButtonView = SC.ButtonView.extend(
