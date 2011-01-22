@@ -45,7 +45,7 @@ $theme.segment {
   &.active {
     .left { @include slice("segmented_active.png", $left: 100, $width: 8); }
     .right { @include slice("segmented_active.png", $left: 92, $width: 8); }
-    .middle { @include slice("segmented_active.png", $left: 8, $width: 1); }
+    .middle { @include slice("segmented_active.png", $left: 8, $width: 1, $repeat: repeat-x); }
   }
   
   &.active.sc-first-segment {
@@ -61,7 +61,7 @@ $theme.segment {
   &.sel {
     .left { @include slice("segmented_selected.png", $left: 100, $width: 8); }
     .right { @include slice("segmented_selected.png", $left: 92, $width: 8); }
-    .middle { @include slice("segmented_selected.png", $left: 8, $width: 1); }
+    .middle { @include slice("segmented_selected.png", $left: 8, $width: 1, $repeat: repeat-x); }
     
     .sc-button-label { color: white; text-shadow: 0px -1px 1px rgba(0,0,0,.7);}
   }
@@ -79,7 +79,7 @@ $theme.segment {
   &.sel.active {
     .left { @include slice("segmented_selected_active.png", $left: 100, $width: 8); }
     .right { @include slice("segmented_selected_active.png", $left: 92, $width: 8); }
-    .middle { @include slice("segmented_selected_active.png", $left: 8, $width: 1); }
+    .middle { @include slice("segmented_selected_active.png", $left: 8, $width: 1, $repeat: repeat-x); }
   }
 
   &.sel.active.sc-first-segment {
