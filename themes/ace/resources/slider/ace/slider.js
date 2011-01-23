@@ -39,9 +39,17 @@ SC.AceTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     if (dataSource.didChangeFor('sliderRenderDelegate', 'value')) {
       var handle = dataSource.get('renderState')._cachedHandle;
-      if (!handle) handle = dataSource.get('renderState')._cachedHandle = jquery.find('.sc-handle');
-      
-      handle.css('left', dataSource.get('value') + "%");
+      if (!handle) {
+        handle = dataSource.get('renderState')._cachedHandle = jquery.find('.sc-handle');
+      }
+
+      var frame = dataSource.get('frame'), value = dataSource.get('value');
+      if (frame && SC.platform.supportsCSS3DTransforms) {
+        value = (value / 100) * frame.width;
+        handle[0].style.cssText = "-webkit-transform: translate3d(" + value + "px,0,0);";
+      } else {
+        handle.css('left', value + "%");
+      }
     }
   }
   
