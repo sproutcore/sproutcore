@@ -23,6 +23,7 @@ TestControls.mainPage = SC.Page.create({
   
   mainPane: SC.MainPane.design(SC.Animatable, {
     childViews: "split".w(),
+    wantsTouchIntercept: YES,
     
     split: SC.MasterDetailView.design ({
       classNames: [ window.navigator.standalone ? "round-toolbars" : "normal" ],
