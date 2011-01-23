@@ -341,9 +341,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     if (!ret) return NO ; // if either did not pass, does not contain
 
     // if we have a scope - check for that as well
-    var scope = this.get('scope');
-    if (scope && !scope.contains(record)) return NO ;
-    
+    if (!this.scopeContains(record)) return NO;
+
     // now try parsing
     if (!this._isReady) this.parse(); // prepare the query if needed
     if (!this._isReady) return NO ;
@@ -352,6 +351,73 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
     return this._tokenTree.evaluate(record, parameters);
+  },
+
+  /** @private
+    Checks if a record is contained in the scope of this query
+
+    @param {SC.Record} The record to check
+    @returns {Boolean}
+   */
+  scopeContains: function(record) {
+    var scope = this.get('scope'),
+        included = NO,
+        i;
+
+    if (!scope) return YES;
+    for (i = 0; i < scope.length; i += 1) {
+      if (scope[i].operator == this._RELATIONAL_OPERATOR_UNION) {
+        included = included || scope[i].source.contains(record);
+      } else if (scope[i].operator == this._RELATIONAL_OPERATOR_DIFFERENCE) {
+        included = included && !scope[i].source.contains(record);
+      }
+    }
+    return included;
+  },
+
+  /** @private
+    Returns all storeKeys of this query.
+    The results are rebuilt from scratch, this is only used by the RecordArray for populating
+    itself the first time.
+
+    @param {SC.Store}
+    @returns {Array} The source storeKeys of this query
+   */
+  getSourceStoreKeys: function(store) {
+    var scope = this.get('scope'),
+        K = SC.Record,
+        sourceKeys,
+        storeKeys = [],
+        recordType, rec, status;
+
+    sourceKeys = SC.IndexSet.create();
+    if (scope) {
+      scope.forEach(function(scopeItem) {
+        var scopeSourceKeys = scopeItem.source.get('storeKeys');
+        if (!scopeSourceKeys) return;
+        if (scopeItem.operator == this._RELATIONAL_OPERATOR_UNION) {
+          sourceKeys.addEach(scopeItem.source.get('storeKeys'));
+        } else if (scopeItem.operator == this._RELATIONAL_OPERATOR_DIFFERENCE) {
+          sourceKeys.removeEach(scopeItem.source.get('storeKeys'));
+        }
+      }, this);
+    } else if (recordType = this.get('expandedRecordTypes')) {
+      recordType.forEach(function(rt) {
+        sourceKeys.addEach(store.storeKeysFor(rt));
+      });
+    }
+
+    // loop through storeKeys to determine if it belongs in this query or not.
+    sourceKeys.forEach(function(storeKey) {
+      status = store.peekStatus(storeKey);
+      if (!(status & K.EMPTY) && !((status & K.DESTROYED) || (status === K.BUSY_DESTROYING))) {
+        rec = store.materializeRecord(storeKey);
+        if (rec && this.contains(rec)) {
+          storeKeys.push(storeKey);
+        }
+      }
+    }, this);
+    return storeKeys;
   },
   
   /**
@@ -465,28 +531,56 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     return this._isReady;
   },
   
+  _RELATIONAL_OPERATOR_UNION: 1,
+  _RELATIONAL_OPERATOR_DIFFERENCE: 2,
+
   /**
-    Returns the same query but with the scope set to the passed record array.
-    This will copy the receiver.  It also stores these queries in a cache to
-    reuse them if possible.
-    
-    @param {SC.RecordArray} recordArray the scope
-    @returns {SC.Query} new query
-  */
-  queryWithScope: function(recordArray) {
-    // look for a cached query on record array.
-    var key = SC.keyFor('__query__', SC.guidFor(this)),
-        ret = recordArray[key];
-        
-    if (!ret) {
-      recordArray[key] = ret = this.copy();
-      ret.set('scope', recordArray);
-      ret.freeze();
-    }
-    
-    return ret ;
+    Adds a scope to the query. from() is an alias for and() to make the API more meaningful.
+    For example: SC.Query.local(...).from(myRecordArray)
+
+    @param {SC.RecordArray} The source RecordArray
+    @returns {SC.Query}
+   */
+  from: function(recordArray) {
+    return this.and(recordArray);
   },
-  
+
+  /**
+    Union operator: SC.Query.local(...).from(ra1).and(ra2)
+    returns a query based on the union of RecordArrays ra1 and ra2.
+
+    @param {SC.RecordArray} The source RecordArray
+    @returns {SC.Query}
+   */
+  and: function(recordArray) {
+    return this._pushToScope(recordArray, this._RELATIONAL_OPERATOR_UNION);
+  },
+
+  /**
+    Difference operator: SC.Query.local(...).from(ra1).without(ra2)
+    returns a query based RecordArray ra1 without the elements of RecordArray ra2.
+
+    @param {SC.RecordArray} The source RecordArray
+    @returns {SC.Query}
+   */
+  without: function(recordArray) {
+    return this._pushToScope(recordArray, this._RELATIONAL_OPERATOR_DIFFERENCE);
+  },
+
+  /** @private
+    Helper function to add a scope to the query
+
+    @param {SC.RecordArray} The source RecordArray
+    @param {Number} The scope operator constant
+    @returns {SC.Query}
+   */
+  _pushToScope: function(recordArray, operator) {
+    var newQuery = this.copy(),
+        scope = this.get('scope') || [];
+    scope.push({ source: recordArray, operator: operator });
+    return newQuery.set('scope', scope).freeze();
+  },
+
   // ..........................................................
   // PRIVATE SUPPORT
   // 
@@ -1309,7 +1403,52 @@ SC.Query.mixin( /** @scope SC.Query */ {
     return storeKeys;
   },
   
-  /** 
+    /**
+      Merges two sorted sets of storeKeys.
+
+      @param {Array} First sorted array of storeKeys
+      @param {Array} First sorted array of storeKeys
+      @param {SC.Query} query to use for comparing
+      @param {SC.Store} store to materialize records from
+      @returns {Array} Merged store keys.
+    */
+    mergeStoreKeys: function(storeKeys1, storeKeys2, query, store) {
+      // Set tmp variable because we can't pass variables to sort function.
+      // Do this instead of generating a temporary closure function for perf.
+      // We'll use a stack-based approach in case our sort routine ends up
+      // calling code that triggers a recursive invocation of orderStoreKeys.
+      var K           = SC.Query,
+          tempStores  = K._TMP_STORES,
+          tempQueries = K._TMP_QUERIES,
+          mergedStoreKeys = [],
+          idx1 = 0,
+          idx2 = 0,
+          len1 = storeKeys1.length,
+          len2 = storeKeys2.length;
+      if (!tempStores)  tempStores  = K._TMP_STORES = [];
+      if (!tempQueries) tempQueries = K._TMP_QUERIES = [];
+
+      tempStores.push(store);
+      tempQueries.push(query);
+
+      for (idx1 = 0; idx1 < len1; idx1 += 1) {
+        while (idx2 < len2 && SC.Query.compareStoreKeys(storeKeys1[idx1], storeKeys2[idx2]) >= 0) {
+          mergedStoreKeys.push(storeKeys2[idx2]);
+          idx2 += 1;
+        }
+          mergedStoreKeys.push(storeKeys1[idx1]);
+      }
+      for (idx2; idx2 < len2; idx2 += 1) {
+        mergedStoreKeys.push(storeKeys2[idx2]);
+      }
+
+      K._TMP_STORES.pop();
+      K._TMP_QUERIES.pop();
+
+      return mergedStoreKeys;
+    },
+
+  /**
     Default sort method that is used when calling containsStoreKeys()
     or containsRecords() on this query. Simply materializes two records based 
     on storekeys before passing on to compare() .

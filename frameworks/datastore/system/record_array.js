@@ -72,18 +72,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   query: null,
 
   /**
-   * The parent RecordArray if this RecordArray is nested.
-   * This property will be set accordingly if you create a new RecordArray by issuing
-   * a nested query with RecordArray#find(...)
-   *
-   * @property {SC.RecordArray}
-   */
-  parent: null,
-
-  /**
    * Set of nested RecordArrays.
-   * A RecordArray will automatically be created as nested RecordArray when created by RecordArray#find().
-   * Only changes relevant to this RecordArray will be considered when updating nested RecordArrays.
+   * A RecordArray will automatically be registered as nestedRecordArray when created using
+   * a scoped query (like query.from(...).and(...).without(...))
+   * Only changes relevant to this RecordArray will be handed down to nested RecordArrays.
    *
    * @property {SC.Set}
    */
@@ -313,7 +305,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   find: function(query, target) {
     if (query && query.isQuery) {
-      return this.get('store').find(query.queryWithScope(this));
+      return this.get('store').find(query.from(this));
     } else return sc_super();
   },
   
@@ -343,22 +335,23 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
   
   /**
-    Destroys the record array and any nested RecordArrays. Releases any storeKeys, and deregisters with
-    the owner store and the parent RecordArray.
+    Destroys the record array and all nested RecordArrays. Releases any storeKeys, deregisters with
+    the owner store and the parent RecordArrays.
     
     @returns {SC.RecordArray} receiver
   */
   destroy: function() {
     if (!this.get('isDestroyed')) {
-      var parent = this.get('parent'),
+      var parents = this.getPath('query.scope'),
           nestedRecordArrays = this.get('nestedRecordArrays');
 
-      if (parent) parent.recordArrayWillDestroy(this);
+      if (parents) parents.forEach(function(scopeItem) {
+        scopeItem.source.recordArrayWillDestroy(this);
+      }, this);
       if (nestedRecordArrays) nestedRecordArrays.invoke('destroy');
       this.get('store').recordArrayWillDestroy(this);
     } 
-    
-    sc_super();
+    return sc_super();
   },
 
   /**
@@ -367,8 +360,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   recordArrayWillDestroy: function(recordArray) {
-    var ra = this.get('nestedRecordArrays');
-    if (ra) ra.remove(recordArray);
+    var nestedRecordArrays = this.get('nestedRecordArrays');
+    if (nestedRecordArrays) nestedRecordArrays.remove(recordArray);
     return this;
   },
   
@@ -438,29 +431,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /** @private
-    Called whenever the store is asked to process a nested query.
-    Caching of RecordArrays by query is done by the store, so we don't need to worry about this here.
-    This method will never be called if a RecordArray for the specified query already exists.
-
-    @param {SC.Store} store
-    @param {SC.Query} query
-    @returns {SC.RecordArray} The newly created RecordArray
-  */
-  createNestedRecordArray: function(store, query) {
-      var recordArray = SC.RecordArray.create({ store: this.get('store'), parent: this, query: query }),
-          nestedRecordArrays = this.get('nestedRecordArrays');
-
-      if (!nestedRecordArrays) this.set('nestedRecordArrays', nestedRecordArrays = SC.Set.create());
-      nestedRecordArrays.add(recordArray);
-      return recordArray;
-  },
-  
-  /** @private
     Called by the store whenever it changes the state of certain store keys.
-    If the receiver cares about these changes, it will mark itself as dirty.
-    The next time you try to access the record array it will update any 
-    pending changes.
-    
+    If the receiver cares about these changes, it will mark itself as dirty and notify
+    all nested RecordArrays about this.
+
     @param {SC.Array} storeKeys the effected store keys
     @param {SC.Set} recordTypes the record types for the storeKeys.
     @returns {SC.RecordArray} receiver
@@ -481,7 +455,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /** @private
-    Called by the parent RecordArray or the store (via storeDidChangeStoreKeys) whenever it became dirty.
+    Called by the parent RecordArrays or the store (via storeDidChangeStoreKeys) whenever they become dirty.
 
     @returns {SC.RecordArray} receiver
   */
@@ -489,14 +463,36 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var nestedRecordArrays = this.get('nestedRecordArrays');
 
     this.set('needsFlush', YES);
-    if (nestedRecordArrays && nestedRecordArrays.get('length') > 0) {
-      // recursively notify all nested RecordArrays too
-      nestedRecordArrays.invoke('parentDidBecomeDirty');
-    } else {
-      // the flush will automatically be invoked by the last nested RecordArray, so we only need to invoke it
-      // manually when there are no nested RecordArrays
-      this.flush();
-    }
+    // recursively notify all nested RecordArrays too
+    if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidBecomeDirty');
+    return this;
+  },
+
+
+  /** @private
+    Called by the store to register newly created RecordArrays with their parent RecordArrays
+    if the query is scoped.
+
+    @returns {SC.RecordArray} receiver
+   */
+  registerWithParents: function() {
+    this.getPath('query.scope').forEach(function(scopeItem) {
+      scopeItem.source.registerNestedRecordArray(this);
+    }, this);
+    return this;
+  },
+
+  /** @private
+    Called by registerWithParents() to register a RecordArray as nested RecordArray with its parent.
+
+    @param {SC.RecordArray} The RecordArray to register as child with this RecordArray
+    @returns {SC.RecordArray} receiver
+   */
+  registerNestedRecordArray: function(child) {
+    var nestedRecordArrays = this.get('nestedRecordArrays');
+
+    if (!nestedRecordArrays) this.set('nestedRecordArrays', nestedRecordArrays = SC.Set.create());
+    nestedRecordArrays.add(child);
     return this;
   },
 
@@ -507,12 +503,31 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   parentDidChangeStoreKeys: function(storeKeys) {
-      if (storeKeys.get('length') == 0) return this;
-      var changed = this._scq_changedStoreKeys;
+    if (storeKeys.length == 0) return this;
+    var changed = this._scq_changedStoreKeys;
 
-      if (!changed) changed = this._scq_changedStoreKeys = SC.IndexSet.create();
-      changed.addEach(storeKeys);
-      return this;
+    if (!changed) changed = this._scq_changedStoreKeys = SC.IndexSet.create();
+    changed.addEach(storeKeys);
+    return this;
+  },
+
+  /** @private
+    Called by the store to flush the RecordArrays after they have be informed about changes in the store.
+    flush() is only called on the leafs of the query tree because flush() takes care itself of flushing the
+    parents.
+
+    @param {Array} storeKeys that changed in the parent RecordArray
+    @returns {SC.RecordArray} receiver
+  */
+  flushFromLeafs: function() {
+    var nestedRecordArrays = this.get('nestedRecordArrays');
+
+    if (nestedRecordArrays) {
+      nestedRecordArrays.invoke('flushFromLeafs');
+    } else {
+      this.flush();
+    }
+    return this;
   },
 
   /**
@@ -551,13 +566,16 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this._insideFlush = YES;
     // if this is a nested RecordArray we have to make sure that all parent RecordArrays are flushed
     // before we flush ourselves
-    var parent = this.get('parent');
-    if (parent) parent.flush();
+    var parents = this.getPath('query.scope');
+    if (parents) parents.forEach(function(scopeItem) {
+        scopeItem.source.flush();
+    }, this);
     
-    // OK, actually generate some results
+ // OK, actually generate some results
     var storeKeys = this.get('storeKeys'),
         changed   = this._scq_changedStoreKeys,
         relevantChangedStoreKeys = [],
+        addedStoreKeys = [],
         didChange = NO,
         K         = SC.Record,
         rec, status, recordType, sourceKeys, scope, included;
@@ -573,12 +591,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
             rec = store.materializeRecord(storeKey);
             included = !!(rec && query.contains(rec));
           } else included = NO ;
-          
+
           // if storeKey should be in set but isn't -- add it.
           if (included) {
             if (storeKeys.indexOf(storeKey)<0) {
-              if (!didChange) storeKeys = storeKeys.copy(); 
-              storeKeys.pushObject(storeKey);
+              if (!didChange) storeKeys = storeKeys.copy();
+              addedStoreKeys.push(storeKey);
               relevantChangedStoreKeys.push(storeKey);
               didChange = YES ;
             }
@@ -593,54 +611,33 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
           } // if (included)
         }, this);
       } // if (changed)
-    
-    // if no storeKeys, then we have to go through all of the storeKeys 
+
+    // if no storeKeys, then we have to go through all of the storeKeys
     // and decide if they belong or not.  ick.
     } else {
-      
-      // collect the base set of keys.  if query has a parent scope, use that
-      if (scope = query.get('scope')) {
-        sourceKeys = scope.flush().get('storeKeys');
 
-      // otherwise, lookup all storeKeys for the named recordType...
-      } else if (recordType = query.get('expandedRecordTypes')) {
-        sourceKeys = SC.IndexSet.create();
-        recordType.forEach(function(cur) { 
-          sourceKeys.addEach(store.storeKeysFor(recordType));
-        });
-      }
-
-      // loop through storeKeys to determine if it belongs in this query or 
-      // not.
-      storeKeys = [];
-      sourceKeys.forEach(function(storeKey) {
-        status = store.peekStatus(storeKey);
-        if (!(status & K.EMPTY) && !((status & K.DESTROYED) || (status === K.BUSY_DESTROYING))) {
-          rec = store.materializeRecord(storeKey);
-          if (rec && query.contains(rec)) {
-            storeKeys.push(storeKey);
-            relevantChangedStoreKeys.push(storeKey);
-          }
-        }
-      });
-      
+      // collect the base set of keys
+      addedStoreKeys = relevantChangedStoreKeys = query.getSourceStoreKeys(store);
       didChange = YES ;
     }
 
     // clear set of changed store keys
     if (changed) changed.clear();
-    
+
     // only resort and update if we did change
     if (didChange) {
-      
-      // storeKeys must be a new instance because orderStoreKeys() works on it
-      if (storeKeys && (storeKeys===oldStoreKeys)) {
-        storeKeys = storeKeys.copy();
+      // First sort the new storeKeys
+      addedStoreKeys = SC.Query.orderStoreKeys(addedStoreKeys, query, store);
+        console.log(query.conditions + addedStoreKeys);
+      // then merge them with the existing storeKeys
+      if (addedStoreKeys.length > 0) {
+          storeKeys = SC.Query.mergeStoreKeys(storeKeys || [], addedStoreKeys, query, store);
+      } else {
+          storeKeys = storeKeys ? storeKeys.copy() : [];
       }
 
-      storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
       if (SC.compare(oldStoreKeys, storeKeys) !== 0){
-        this.set('storeKeys', SC.clone(storeKeys)); // replace content
+        this.set('storeKeys', storeKeys); // replace content
         // notify all nested RecordArrays of the changes in this RecordArray
         var nestedRecordArrays = this.get('nestedRecordArrays');
         if (nestedRecordArrays) nestedRecordArrays.invoke('parentDidChangeStoreKeys', relevantChangedStoreKeys);
@@ -709,8 +706,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var storeKeys = this.get('storeKeys');
     
     var prev = this._prevStoreKeys, 
-        f    = this._storeKeysContentDidChange,
-        fs   = this._storeKeysStateDidChange;
+        f    = this._storeKeysContentDidChange;
     
     if (storeKeys === prev) return; // nothing to do
     
@@ -719,7 +715,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (storeKeys) storeKeys.addObserver('[]', this, f);
     
     var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
-    if (prev && storeKeys.length > 0) this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
+    if (prev || (storeKeys && storeKeys.length > 0)) this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
     
   }.observes('storeKeys'),
   
