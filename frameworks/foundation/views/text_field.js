@@ -942,6 +942,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
 
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+
   mouseUp: function(evt) {
     this._txtFieldMouseDown=NO;
     // The caret/selection could have moved.  In some browsers, though, the
