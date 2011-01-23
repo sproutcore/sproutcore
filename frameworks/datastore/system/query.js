@@ -755,20 +755,19 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         evaluate:       function (r,w) {
                           var all    = this.leftSide.evaluate(r,w) || [];
                           var value = this.rightSide.evaluate(r,w);
-                          switch(SC.typeOf(all)) {
-                            case SC.T_STRING:
-                              return (all.indexOf(value) !== -1); 
-                            case SC.T_ARRAY:
-                              var found  = false;
-                              var i      = 0;
-                              while ( found===false && i<all.length ) {
-                                if ( value == all[i] ) found = true;
-                                i++;
-                              }
-                              return found;
-                            default:
-                              //do nothing
-                              break;
+
+                          var allType = SC.typeOf(all);
+                          if (allType === SC.T_STRING) {
+                            return (all.indexOf(value) !== -1);
+                          } else if (allType === SC.T_ARRAY || all.toArray) {
+                            if (allType !== SC.T_ARRAY) all = all.toArray();
+                            var found  = false;
+                            var i      = 0;
+                            while ( found===false && i<all.length ) {
+                              if ( value == all[i] ) found = true;
+                              i++;
+                            }
+                            return found;
                           }
                         }
     },
