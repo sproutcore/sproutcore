@@ -69,6 +69,26 @@ SC.ALIGN_MIDDLE = 'middle';
 SC.ALIGN_BOTTOM = 'bottom';
 
 /**
+  Indicates that the content should be aligned to the top and left.
+*/
+SC.ALIGN_TOP_LEFT = 'top-left';
+
+/**
+  Indicates that the content should be aligned to the top and right.
+*/
+SC.ALIGN_TOP_RIGHT = 'top-right';
+
+/**
+  Indicates that the content should be aligned to the bottom and left.
+*/
+SC.ALIGN_BOTTOM_LEFT = 'bottom-left';
+
+/**
+  Indicates that the content should be aligned to the bottom and right.
+*/
+SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
+
+/**
   This variable is here to make the tab focus behavior work like safari's.
 */
 SC.SAFARI_FOCUS_BEHAVIOR = YES;

@@ -23,7 +23,7 @@ SC.platform = {
     @property {Boolean}
   */
   touch: ('createTouch' in document) && SC.browser.chrome < 9, // Ugly hack for Chrome 9 issue
-  
+
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
 
@@ -218,14 +218,14 @@ SC.platform = {
     Whether the browser can properly handle 3D CSS transforms. Calculated later.
   */
   supportsCSS3DTransforms: NO,
-  
+
   /**
     Whether the browser can handle accelerated layers. While supports3DTransforms tells us if they will
     work in principle, sometimes accelerated layers interfere with things like getBoundingClientRect.
     Then everything breaks.
   */
   supportsAcceleratedLayers: NO,
-  
+
   /**
     Wether the browser supports the hashchange event.
   */
@@ -233,6 +233,10 @@ SC.platform = {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
+  }(),
+
+  supportsCanvas: function() {
+    return !!document.createElement('canvas').getContext;
   }()
 };
 
@@ -292,13 +296,13 @@ SC.platform = {
     if (window.media && window.media.matchMedium) {
       if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
     } else if(window.styleMedia && window.styleMedia.matchMedium) {
-      if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;    
+      if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
     }
   }catch(e){
     //Catch to support IE9 exception
     SC.platform.supportsCSS3DTransforms = NO;
   }
-  
+
   // Unfortunately, this has to be manual, as I can't think of a good way to test it
   // webkit-only for now.
   if (SC.platform.supportsCSSTransforms && SC.platform.cssPrefix === "webkit") {
