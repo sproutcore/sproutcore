@@ -628,7 +628,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (didChange) {
       // First sort the new storeKeys
       addedStoreKeys = SC.Query.orderStoreKeys(addedStoreKeys, query, store);
-        console.log(query.conditions + addedStoreKeys);
       // then merge them with the existing storeKeys
       if (addedStoreKeys.length > 0) {
           storeKeys = SC.Query.mergeStoreKeys(storeKeys || [], addedStoreKeys, query, store);
