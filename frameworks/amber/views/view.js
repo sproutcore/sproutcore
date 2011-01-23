@@ -2733,7 +2733,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (pf) {
       ret = { width: pf.width, height: pf.height };
     } else {
-      var f = frame ;
+      var f = frame || {};
       ret = {
         width: (f.left || 0) + (f.width || 0) + (f.right || 0),
         height: (f.top || 0) + (f.height || 0) + (f.bottom || 0)
