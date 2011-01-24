@@ -5,6 +5,8 @@
 
 var router;
 
+SC.routes.wantsHistory = YES;
+
 module('SC.routes setup');
 
 test('Setup', function() {
@@ -19,7 +21,7 @@ module('SC.routes setup', {
         return;
       }
     });
-    SC.run(function() { 
+    SC.run(function() {
       SC.routes.add('foo', router, router.route);
     });
   }
@@ -88,7 +90,7 @@ test('Route tree', function() {
   ok(s, 'There should be a wildcardRoutes tree for a');
   
   equals(r.routeForParts(['a'], {}), null, 'routeForParts should return null for non existant routes');
-  equals(r.routeForParts(['a', 'b'], {}), null, 'routeForParts should return null for non existant routes');  
+  equals(r.routeForParts(['a', 'b'], {}), null, 'routeForParts should return null for non existant routes');
   equals(r.routeForParts(abc, {}), c, 'routeForParts should return the correct route for a/b/c');
   
   equals(r.routeForParts(abd, {}), d, 'routeForParts should return the correct route for a/b/d');
@@ -111,7 +113,7 @@ module('SC.routes location', {
   
 });
 
-var routeWorks = function(route, name) {  
+var routeWorks = function(route, name) {
   SC.routes.set('location', route);
   equals(SC.routes.get('location'), route, name + ' route has been set');
   
@@ -123,7 +125,7 @@ var routeWorks = function(route, name) {
   stop();
 };
 
-test('Null route', function() {  
+test('Null route', function() {
   SC.routes.set('location', null);
   equals(SC.routes.get('location'), '', 'Null route is the empty string');
 });
@@ -296,21 +298,23 @@ module('SC.routes location observing', {
 test('Location change', function() {
   var timer;
   
-  timer = setTimeout(function() {
-    ok(false, 'Route change was not notified within 2 seconds');
-    window.start();
-  }, 2000);
-  
-  router.addObserver('hasBeenNotified', function() {
-    equals(router.get('hasBeenNotified'), YES, 'router should have been notified');
-    clearTimeout(timer);
-    window.start();
-  });
-  
-  SC.routes.add('foo', router, router.route);
-  window.location.hash = 'foo';
-  
-  stop();  
+  if (!SC.routes.get('usesHistory')) {
+    timer = setTimeout(function() {
+      ok(false, 'Route change was not notified within 2 seconds');
+      window.start();
+    }, 2000);
+
+    router.addObserver('hasBeenNotified', function() {
+      equals(router.get('hasBeenNotified'), YES, 'router should have been notified');
+      clearTimeout(timer);
+      window.start();
+    });
+
+    SC.routes.add('foo', router, router.route);
+    window.location.hash = 'foo';
+
+    stop();
+  }
 });
 
 module('_extractParametersAndRoute');
@@ -337,7 +341,7 @@ test('_extractParametersAndRoute with ? syntax', function() {
        'route should be well formatted with the given parameters even if there is no initial route');
 });
 
-test('_extractParametersAndRoute with & syntax', function() {  
+test('_extractParametersAndRoute with & syntax', function() {
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5&format=h264' }),
        { route: 'videos/5', params:'&format=h264', format: 'h264' },
        'route parameters should be correctly extracted');
