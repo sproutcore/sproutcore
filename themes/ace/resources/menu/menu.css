@@ -35,13 +35,13 @@ $theme.menu {
     /* CHECKBOXES */
     .checkbox {
       top: 3px;
-      width: 1px; height: 12px;
+      width: 12px; height: 12px;
       @include slice(checkmark.png);
     }
     
     &.focus .checkbox, &:hover .checkbox {
       top: 4px; /* NOTE THE SLIGHT DIFFERENCE */
-      @incldue slice(checkmark_active.png);
+      @include slice(checkmark_active.png);
     }
     
     /* SEPARATORS */
