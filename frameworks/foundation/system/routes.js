@@ -38,24 +38,25 @@
   and earlier, which do not modify the history stack when the location hash
   changes.
   
-  SC.routes also supports "HTML5 history", which uses a '/' instead of a '#'
+  SC.routes also supports HTML5 history, which uses a '/' instead of a '#'
   in the URLs, so that all your website's URLs are consistent.
 */
 SC.routes = SC.Object.create({
   
   /**
-    Set this property to YES if you want to use "HTML5 history", if available
-    on the browser, instead of the location hash.
+    Set this property to YES if you want to use HTML5 history, if available on
+    the browser, instead of the location hash.
     
-    "HTML 5 history" uses the history.pushState method and the window's
-    popstate event.
+    HTML 5 history uses the history.pushState method and the window's popstate
+    event.
     
     By default it is NO, so your URLs will look like:
     {{{
       http://domain.tld/my_app#notes/edit/4
     }}}
     
-    If set to YES and the browser supports pushState(), your URLs will look like:
+    If set to YES and the browser supports pushState(), your URLs will look
+    like:
     {{{
       http://domain.tld/my_app/notes/edit/4
     }}}
@@ -71,8 +72,8 @@ SC.routes = SC.Object.create({
   wantsHistory: NO,
   
   /**
-    A read-only boolean indicating whether or not "HTML5 history" is used.
-    Based on the value of wantsHistory and the browser's support for pushState.
+    A read-only boolean indicating whether or not HTML5 history is used. Based
+    on the value of wantsHistory and the browser's support for pushState.
     
     @see wantsHistory
     @property
@@ -84,11 +85,20 @@ SC.routes = SC.Object.create({
     The base URI used to resolve routes (which are relative URLs). Only used
     when usesHistory is equal to YES.
     
-    By default, it uses the value of the href attribute of the <base> tag of
-    the HTML document. For example:
+    The build tools automatically configure this value if you have the
+    html5_history option activated in the Buildfile:
+    {{{
+      config :my_app, :html5_history => true
+    }}}
+    
+    Alternatively, it uses by default the value of the href attribute of the
+    <base> tag of the HTML document. For example:
     {{{
       <base href="http://domain.tld/my_app">
     }}}
+    
+    The value can also be customized before or during the exectution of the
+    main() method.
     
     @see http://www.w3.org/TR/html5/semantics.html#the-base-element
     @property

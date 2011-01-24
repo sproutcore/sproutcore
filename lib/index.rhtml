@@ -100,6 +100,16 @@
 <% unless @content_for_page_javascript.blank? %>
 <%= @content_for_page_javascript %>
 <% end -%>
+<% # If config.html5_history is true, HTML5 history will be activated for
+   # SC.routes and the SC.routes.baseURI setting will be automatically
+   # set.
+-%>
+<% if config.html5_history %>
+<script>
+  SC.routes.wantsHistory = true;
+  SC.routes.baseURI = <%= "#{@bundle.index_root}/#{language}".to_json %>;
+</script>
+<% end %>
 <% #
    # If you use old-style view helpers in your page, this method must be 
    # called to actually add the page views to your HTML.  Normally this will
