@@ -267,13 +267,13 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.property().cacheable(),
 
   /**
-    If YES, image view will use the SC.imageCache to control loading.  This
+    If YES, image view will use the SC.imageQueue to control loading.  This
     setting is generally preferred.
 
     @property {Boolean}
     @default YES
   */
-  useImageCache: YES,
+  useImageQueue: YES,
 
   /**
     A url or CSS class name.
@@ -305,8 +305,8 @@ SC.ImageView = SC.View.extend(SC.Control,
     this._image_valueDidChange();
 
     if (this.get('useImageCache') !== undefined) {
-      SC.Logger.warn("%@ has useImageCache set, please set useImageCache instead".fmt(this));
-      this.set('useImageCache', this.get('useImageCache'));
+      SC.Logger.warn("%@ has useImageCache set, please set useImageQueue instead".fmt(this));
+      this.set('useImageQueue', this.get('useImageCache'));
     }
   },
 
@@ -356,20 +356,20 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.observes('imageValue'),
 
   /** @private
-    Tries to load the image value using the SC.imageCache object. If the imageValue is not
+    Tries to load the image value using the SC.imageQueue object. If the imageValue is not
     a URL, it won't attempt to load it using this method.
 
-    @returns YES if loading using SC.imageCache, NO otherwise
+    @returns YES if loading using SC.imageQueue, NO otherwise
   */
   _loadImageUsingCache: function() {
     var value = this.get('imageValue'),
         type = this.get('type');
 
     // now update local state as needed....
-    if (type === SC.IMAGE_TYPE_URL && this.get('useImageCache')) {
+    if (type === SC.IMAGE_TYPE_URL && this.get('useImageQueue')) {
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
 
-      SC.imageCache.loadImage(value, this, this._loadImageUsingCacheDidComplete, isBackground);
+      SC.imageQueue.loadImage(value, this, this._loadImageUsingCacheDidComplete, isBackground);
       return YES;
     }
 
@@ -390,7 +390,7 @@ SC.ImageView = SC.View.extend(SC.Control,
   },
 
   /** @private
-    Loads an image using a normal Image object, without using the SC.imageCache.
+    Loads an image using a normal Image object, without using the SC.imageQueue.
 
     @returns YES if it will load, NO otherwise
   */
