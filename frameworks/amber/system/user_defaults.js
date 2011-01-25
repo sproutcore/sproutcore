@@ -363,14 +363,14 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
                     hash[row['key']]=row['value'];
                   }
                   transaction.parent.dataHash = hash;
-                  SC.run(function() { SC.userDefaults.set('ready', YES); });
+                  SC.run(function() { jQuery.ready(true); });
                 }, obj.killTransaction);
           }
         );
         this._safari3DB=myDB;
       }
     }else{
-      this.set('ready', YES);
+      jQuery.ready(true);
     }
   },
 
@@ -380,20 +380,10 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     return true; // fatal transaction error
   },
 
-  _nullDataHandler: function(transaction, results){},
-
-  readyCallback: function(ob, func){
-    this.func = func;
-    this.ob = ob;
-  },
-
-  readyChanged: function(){
-    if(this.ready===YES){
-      var f = this.func;
-      if(f) f.apply(this.ob);
-    }
-  }.observes('ready')
+  _nullDataHandler: function(transaction, results){}
 });
+
+jQuery.readyWait++;
 
 /** global user defaults. */
 SC.userDefaults = SC.UserDefaults.create();
