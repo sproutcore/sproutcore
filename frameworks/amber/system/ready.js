@@ -44,6 +44,9 @@ SC.mixin({
   },
 
   onReady: {
+    startRunLoop: function() {
+      SC.RunLoop.begin();
+    },
     setupLocales: function() {
       SC.Locale.createCurrentLocale();
       jQuery("body").addClass(SC.Locale.currentLanguage.toLowerCase());
@@ -53,14 +56,17 @@ SC.mixin({
     },
     done: function() {
       SC.isReady = true;
-      SC.RunLoop.end();
       if(window.main) { main(); }
+      SC.RunLoop.end();
     }
   }
 
 }) ;
 
-jQuery(document).ready(SC.onReady.setupLocales).ready(SC.onReady.removeLoading);
+jQuery(document)
+  .ready(SC.onReady.startRunLoop)
+  .ready(SC.onReady.setupLocales)
+  .ready(SC.onReady.removeLoading);
 jQuery.event.special.ready._default = SC.onReady.done;
 
 SC.removeLoading = YES;
