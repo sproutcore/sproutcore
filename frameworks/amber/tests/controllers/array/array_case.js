@@ -208,11 +208,11 @@ test("verify rangeObserver fires when content is deleted", function() {
 // VERIFY SC.ARRAY COMPLIANCE
 // 
 
-// SC.ArraySuite.generate("SC.ArrayController", {
-//   newObject: function(amt) {
-//     if (amt === undefined || typeof amt === SC.T_NUMBER) {
-//       amt = this.expected(amt);
-//     }
-//     return SC.ArrayController.create({ content: amt });
-//   }
-// });
+SC.ArraySuite.generate("SC.ArrayController", {
+  newObject: function(amt) {
+    if (amt === undefined || typeof amt === SC.T_NUMBER) {
+      amt = this.expected(amt);
+    }
+    return SC.ArrayController.create({ content: amt });
+  }
+});
