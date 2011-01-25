@@ -43,11 +43,20 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
     for (i = 0, length = segmentLayers.length; i < length; i++) {
       segmentLayer = segmentLayers[i];
       rect = segmentLayer.getBoundingClientRect();
-      
+      rect = { 
+        left: rect.left, top: rect.top, width: rect.width, height: rect.height,
+        bottom: rect.bottom, right: rect.right
+      };
+
+      if (rect.bottom !== undefined) {
+        rect.width = rect.right - rect.left;
+        rect.height = rect.bottom - rect.top;
+      }
+
       // Convert client rect into standard rect
       rect.x = rect.left;
       rect.y = rect.top;
-      
+
       // Return the index early if found
       if (SC.pointInRect(point, rect)) return i;
     }
