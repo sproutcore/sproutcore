@@ -31,25 +31,6 @@ sc_require('render_delegates/render_delegate');
               - SC.IMAGE_TYPE_URL
               - SC.IMAGE_TYPE_CSS_CLASS
           If not provided, SC.IMAGE_TYPE_URL is the default
-  - scale: If provided, the image will maintain aspect ratio as specified by this
-          property. One of
-            - SC.SCALE_NONE
-            - SC.FILL
-            - SC.FILL_PROPORTIONALLY
-            - SC.BEST_FIT
-            - SC.BEST_FIT_DOWN_ONLY
-            - percentage {Number}
-          If not provided, SC.FILL will be the default (ie. expected image behaviour)
-  - align: If provided, the image will align itself within its frame.  One of
-            - SC.ALIGN_CENTER
-            - SC.ALIGN_TOP_LEFT
-            - SC.ALIGN_TOP
-            - SC.ALIGN_TOP_RIGHT
-            - SC.ALIGN_RIGHT
-            - SC.ALIGN_BOTTOM_RIGHT
-            - SC.ALIGN_BOTTOM
-            - SC.ALIGN_BOTTOM_LEFT
-            - SC.ALIGN_LEFT
 */
 
 SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
@@ -59,11 +40,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     var image = dataSource.get('image'),
         imageValue = dataSource.get('imageValue'),
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
-        toolTip = dataSource.get('toolTip'),
-        frame = dataSource.get('frame'),
-        scale = dataSource.get('scale') || SC.FILL,
-        align = dataSource.get('align') || SC.ALIGN_CENTER,
-        innerFrame = dataSource.get('innerFrame');
+        toolTip = dataSource.get('toolTip');
 
     // Place the img within a div, so that we may scale & offset the img
     context = context.begin('img');
@@ -80,13 +57,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     }
 
     // Adjust the layout of the img
-    context.addStyle({
-      'position': 'absolute',
-      'left': Math.round(innerFrame.x),
-      'top': Math.round(innerFrame.y),
-      'width': Math.round(innerFrame.width),
-      'height': Math.round(innerFrame.height)
-    });
+    context.addStyle(this.imageStyles(dataSource));
 
     context = context.end();
   },
@@ -94,12 +65,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     var image = dataSource.get('image'),
         imageValue = dataSource.get('imageValue'),
-        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
-        toolTip = dataSource.get('toolTip'),
-        frame = dataSource.get('frame'),
-        scale = dataSource.get('scale') || SC.FILL,
-        align = dataSource.get('align') || SC.ALIGN_CENTER,
-        innerFrame = dataSource.get('innerFrame');
+        toolTip = dataSource.get('toolTip');
 
     jquery = jquery.find('img');
     jquery.attr('src', image.src);
@@ -114,13 +80,18 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     }
 
     // Adjust the layout of the img
-    jquery.css({
+    jquery.css(this.imageStyles(dataSource));
+  },
+
+  imageStyles: function(dataSource) {
+    var innerFrame = dataSource.get('innerFrame');
+    return {
       'position': 'absolute',
       'left': Math.round(innerFrame.x),
       'top': Math.round(innerFrame.y),
       'width': Math.round(innerFrame.width),
       'height': Math.round(innerFrame.height)
-    });
+    };
   }
 
 });

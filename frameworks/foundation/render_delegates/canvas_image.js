@@ -70,7 +70,6 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
         image = dataSource.get('image'),
         frame = dataSource.get('frame'),
         backgroundColor = dataSource.get('backgroundColor'),
-        innerFrame = dataSource.get('innerFrame'),
         midX = 0, midY = 0,
         context;
 
@@ -88,9 +87,14 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
       }
 
       if (image && image.complete) {
-        context.drawImage(image, Math.round(innerFrame.x), Math.round(innerFrame.y), Math.round(innerFrame.width), Math.round(innerFrame.height));
+        this.updateImage(context, image, dataSource);
       }
     }
+  },
+
+  updateImage: function(context, image, dataSource) {
+    var frame = dataSource.get('innerFrame');
+    context.drawImage(image, Math.round(frame.x), Math.round(frame.y), Math.round(frame.width), Math.round(frame.height));
   }
 
 });
