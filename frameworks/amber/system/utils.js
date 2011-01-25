@@ -11,19 +11,19 @@ sc_require('system/browser');
 SC.mixin( /** @scope SC */ {
 
   _downloadFrames: 0, // count of download frames inserted into document
-  
+
   _copy_computed_props: [
     "maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
     "fontFamily", "fontSize", "fontStyle", "fontWeight", "fontVariant", "lineHeight",
     "whiteSpace"
   ],
-  
+
   /**
     Starts a download of the file at the named path.
-    
+
     Use this method when you want to cause a file to be downloaded to a users
     desktop instead of having it display in the web browser.  Note that your
-    server must return a header indicating that the file  is intended for 
+    server must return a header indicating that the file  is intended for
     download also.
   */
   download: function(path) {
@@ -35,19 +35,19 @@ SC.mixin( /** @scope SC */ {
     tempDLIFrame.style.height='0px';
     tempDLIFrame.style.position='absolute';
     tempDLIFrame.style.top='-10000px';
-    tempDLIFrame.style.left='-10000px';    
+    tempDLIFrame.style.left='-10000px';
     // Don't set the iFrame content yet if this is Safari
     if (!SC.browser.isSafari) {
       SC.$(tempDLIFrame).attr('src',path);
     }
     document.getElementsByTagName('body')[0].appendChild(tempDLIFrame);
     if (SC.browser.isSafari) {
-      SC.$(tempDLIFrame).attr('src',path);    
+      SC.$(tempDLIFrame).attr('src',path);
     }
     this._downloadFrames = this._downloadFrames + 1;
     if (!SC.browser.isSafari) {
-      var r = function() { 
-        document.body.removeChild(document.getElementById(frameId)); 
+      var r = function() {
+        document.body.removeChild(document.getElementById(frameId));
         frameId = null;
       } ;
       r.invokeLater(null, 2000);
@@ -59,13 +59,13 @@ SC.mixin( /** @scope SC */ {
   /**
     Takes a URL of any type and normalizes it into a fully qualified URL with
     hostname.  For example:
-    
+
     {{{
-      "some/path" => "http://localhost:4020/some/path" 
+      "some/path" => "http://localhost:4020/some/path"
       "/some/path" => "http://localhost:4020/some/path"
       "http://localhost:4020/some/path" => "http://localhost:4020/some/path"
     }}}
-    
+
     @param url {String} the URL
     @returns {String} the normalized URL
   */
@@ -79,64 +79,64 @@ SC.mixin( /** @scope SC */ {
     }
     return url ;
   },
-  
+
   /** Return true if the number is between 0 and 1 */
   isPercentage: function(val){
     return (val<1 && val>0);
   },
 
-  
-  
+
+
   /** Return the left edge of the frame */
-  minX: function(frame) { 
-    return frame.x || 0; 
+  minX: function(frame) {
+    return frame.x || 0;
   },
-  
+
   /** Return the right edge of the frame. */
-  maxX: function(frame) { 
-    return (frame.x || 0) + (frame.width || 0); 
+  maxX: function(frame) {
+    return (frame.x || 0) + (frame.width || 0);
   },
-  
+
   /** Return the midpoint of the frame. */
   midX: function(frame) {
     return (frame.x || 0) + ((frame.width || 0) / 2) ;
   },
-  
+
   /** Return the top edge of the frame */
   minY: function(frame) {
     return frame.y || 0 ;
   },
-  
+
   /** Return the bottom edge of the frame */
   maxY: function(frame) {
     return (frame.y || 0) + (frame.height || 0) ;
   },
-  
+
   /** Return the midpoint of the frame */
   midY: function(frame) {
     return (frame.y || 0) + ((frame.height || 0) / 2) ;
   },
-  
+
   /** Returns the point that will center the frame X within the passed frame. */
   centerX: function(innerFrame, outerFrame) {
     return (outerFrame.width - innerFrame.width) / 2 ;
   },
-  
+
   /** Return the point that will center the frame Y within the passed frame. */
   centerY: function(innerFrame, outerFrame) {
     return (outerFrame.height - innerFrame.height) /2  ;
   },
-  
+
   /** Check if the given point is inside the rect. */
   pointInRect: function(point, f) {
     return  (point.x >= SC.minX(f)) &&
             (point.y >= SC.minY(f)) &&
-            (point.x <= SC.maxX(f)) && 
+            (point.x <= SC.maxX(f)) &&
             (point.y <= SC.maxY(f)) ;
   },
-  
+
   /** Return true if the two frames match.  You can also pass only points or sizes.
-  
+
     @param r1 {Rect} the first rect
     @param r2 {Rect} the second rect
     @param delta {Float} an optional delta that allows for rects that do not match exactly. Defaults to 0.1
@@ -145,15 +145,15 @@ SC.mixin( /** @scope SC */ {
   rectsEqual: function(r1, r2, delta) {
     if (!r1 || !r2) return (r1 == r2) ;
     if (!delta && delta !== 0) delta = 0.1;
-    if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return NO ; 
-    if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return NO ; 
-    if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return NO ; 
-    if ((r1.height != r2.height) && (Math.abs(r1.height - r2.height) > delta)) return NO ; 
+    if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return NO ;
+    if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return NO ;
+    if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return NO ;
+    if ((r1.height != r2.height) && (Math.abs(r1.height - r2.height) > delta)) return NO ;
     return YES ;
   },
-  
-  /** Returns the insersection between two rectangles. 
-  
+
+  /** Returns the insersection between two rectangles.
+
     @param r1 {Rect} The first rect
     @param r2 {Rect} the second rect
     @returns {Rect} the intersection rect.  width || height will be 0 if they do not interset.
@@ -166,15 +166,15 @@ SC.mixin( /** @scope SC */ {
       width: Math.min(SC.maxX(r1), SC.maxX(r2)),
       height: Math.min(SC.maxY(r1), SC.maxY(r2))
     } ;
-    
+
     // convert edges to w/h
     ret.width = Math.max(0, ret.width - ret.x) ;
     ret.height = Math.max(0, ret.height - ret.y) ;
     return ret ;
   },
-  
+
   /** Returns the union between two rectangles
-  
+
     @param r1 {Rect} The first rect
     @param r2 {Rect} The second rect
     @returns {Rect} The union rect.
@@ -187,26 +187,26 @@ SC.mixin( /** @scope SC */ {
       width: Math.max(SC.maxX(r1), SC.maxX(r2)),
       height: Math.max(SC.maxY(r1), SC.maxY(r2))
     } ;
-    
+
     // convert edges to w/h
     ret.width = Math.max(0, ret.width - ret.x) ;
     ret.height = Math.max(0, ret.height - ret.y) ;
     return ret ;
   },
-  
-  /** Duplicates the passed rect.  
-  
-    This is faster than Object.clone(). 
-    
+
+  /** Duplicates the passed rect.
+
+    This is faster than Object.clone().
+
     @param r {Rect} The rect to clone.
     @returns {Rect} The cloned rect
   */
   cloneRect: function(r) {
     return { x: r.x, y: r.y, width: r.width, height: r.height } ;
   },
-  
-  /** Returns a string representation of the rect as {x, y, width, height}.  
-    
+
+  /** Returns a string representation of the rect as {x, y, width, height}.
+
     @param r {Rect} The rect to stringify.
     @returns {String} A string representation of the rect.
   */
@@ -218,7 +218,7 @@ SC.mixin( /** @scope SC */ {
       return '{x:'+r.x+', y:'+r.y+', width:'+r.width+', height:'+r.height+'}';
     }
   },
-  
+
   /**
     Returns a string representation of the layout hash.
 
@@ -229,13 +229,13 @@ SC.mixin( /** @scope SC */ {
       - bottom: the bottom edge
       - height: the height
       - width: the width
-      - centerX: an offset from center X 
+      - centerX: an offset from center X
       - centerY: an offset from center Y
       - minWidth: a minimum width
       - minHeight: a minimum height
       - maxWidth: a maximum width
       - maxHeight: a maximum height
-    
+
     @param layout {Hash} The layout hash to stringify.
     @returns {String} A string representation of the layout hash.
   */
@@ -254,10 +254,10 @@ SC.mixin( /** @scope SC */ {
         keyValues.push(key + ':' + layout[key]);
       }
     }
-    
+
     return '{' + keyValues.join(', ') + '}';
   },
-  
+
   /**
     Given a string and a fixed width, calculates the height of that
     block of text using a style string, a set of class names,
@@ -272,12 +272,12 @@ SC.mixin( /** @scope SC */ {
   */
   heightForString: function(str, width, style, classNames, ignoreEscape) {
     var elem = this._heightCalcElement, classes, height;
-    
+
     if(!ignoreEscape) str = SC.RenderContext.escapeHTML(str);
-    
+
     // Coalesce the array of class names to one string, if the array exists
     classes = (classNames && SC.typeOf(classNames) === SC.T_ARRAY) ? classNames.join(' ') : '';
-    
+
     if (!width) width = 100; // default to 100 pixels
 
     // Only create the offscreen element once, then cache it
@@ -300,30 +300,30 @@ SC.mixin( /** @scope SC */ {
     elem = null; // don't leak memory
     return height;
   },
-  
+
   /**
     Sets up a string measuring environment.
-  
+
     You may want to use this, in conjunction with teardownStringMeasurement and
-    measureString, instead of metricsForString, if you will be measuring many 
-    strings with the same settings. It would be a lot more efficient, as it 
+    measureString, instead of metricsForString, if you will be measuring many
+    strings with the same settings. It would be a lot more efficient, as it
     would only prepare and teardown once instead of several times.
-  
-    @param exampleElement The example element to grab styles from, or the style 
+
+    @param exampleElement The example element to grab styles from, or the style
                           string to use.
     @param classNames {String} (Optional) Class names to add to the test element.
   */
   prepareStringMeasurement: function(exampleElement, classNames) {
     var element = this._metricsCalculationElement, classes, styles, style,
         cqElem;
-    
+
     // collect the class names
     classes = SC.A(classNames).join(' ');
-    
+
     // get the calculation element
     if (!element) {
       var parentElement = document.createElement("div");
-      
+
       // to make sure the measurement element is never visible, put it inside a 0x0 element with overflow: hidden
       SC.mixin(parentElement.style, {
         position: 'absolute',
@@ -333,14 +333,14 @@ SC.mixin( /** @scope SC */ {
         right: '0px',
         overflow: 'hidden'
       });
-      
+
       element = this._metricsCalculationElement = document.createElement("div");
-      
+
       parentElement.appendChild(element);
       document.body.insertBefore(parentElement, null);
     }
 
-    cqElem = SC.$(element);    
+    cqElem = SC.$(element);
     // two possibilities: example element or type string
     if (SC.typeOf(exampleElement) != SC.T_STRING) {
       var computed = null;
@@ -381,70 +381,70 @@ SC.mixin( /** @scope SC */ {
     } else {
       // it is a style string already
       style = exampleElement;
-      
+
       // set style
       cqElem.attr("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
     }
-    
+
     element.className = classes;
     element = null;
   },
-  
+
   /**
     Tears down the string measurement environment. Usually, this doesn't _have_
     to be called, but there are too many what ifs: for example, what if the measurement
     environment has a bright green background and is over 10,000px wide? Guess what: it will
     become visible on the screen.
-  
+
     So, generally, we tear the measurement environment down so that it doesn't cause issue.
     However, we keep the DOM element for efficiency.
   */
   teardownStringMeasurement: function() {
     var element = this._metricsCalculationElement;
-    
+
     // clear element
     element.innerHTML = "";
     element.className = "";
     element.setAttribute("style", ""); // get rid of any junk from computed style.
     element = null;
   },
-  
+
   /**
     Measures a string in the prepared environment.
-  
+
     An easier and simpler alternative (but less efficient for bulk measuring) is metricsForString.
-  
+
     @param string {String} The string to measure.
     @param ignoreEscape {Boolean} To NOT html escape the string.
   */
   measureString: function(string, ignoreEscape) {
     if(!ignoreEscape) string = SC.RenderContext.escapeHTML(string);
-    
+
     var element = this._metricsCalculationElement;
     if (!element) {
       throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
     }
-    
+
     // the conclusion of which to use (innerText or textContent) should be cached
     if (typeof element.innerText != "undefined") element.innerText = string;
     else element.textContent = string;
-    
+
     // generate result
     var result = {
       width: element.clientWidth,
       height: element.clientHeight
     };
-    
+
     element = null;
     return result;
   },
-  
+
   /**
     Given a string and an example element or style string, and an optional
     set of class names, calculates the width and height of that block of text.
-  
+
     To constrain the width, set max-width on the exampleElement or in the style string.
-  
+
     @param string {String} The string to measure.
     @param exampleElement The example element to grab styles from, or the style string to use.
     @param classNames {String} (Optional) Class names to add to the test element.
@@ -459,7 +459,7 @@ SC.mixin( /** @scope SC */ {
 
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
-    
+
     If you pass NULL to this method, it will return a { x:0, y:0 }
     @param el The DOM element
     @returns {Point} A hash with x,y offsets.
@@ -478,10 +478,10 @@ SC.mixin( /** @scope SC */ {
         var userAgent = navigator.userAgent,
             index = userAgent.indexOf('Mobile/'),
             mobileBuildNumber = userAgent.substring(index+7, index+9);
-        if (mobileBuildNumber > "8A") isIOS41 = true; 
-      
+        if (mobileBuildNumber > "8A") isIOS41 = true;
+
       }
-      
+
       if (SC.browser.mobileSafari && (parseInt(SC.browser.mobileSafari, 0)>532 || isIOS41)) {
         return { x:boundingRect.left+(window.pageXOffset || 0), y:boundingRect.top+(window.pageYOffset || 0) };
       }
@@ -489,11 +489,11 @@ SC.mixin( /** @scope SC */ {
         return { x:boundingRect.left, y:boundingRect.top };
       }
     }
-    
+
     var valueL = 0, valueT = 0, cqElement, overflow, left, top, offsetParent,
         element = el, isFirefox3 = SC.browser.mozilla >= 3 ;
     // add up all the offsets for the element.
-   
+
     while (element) {
       cqElement = SC.$(element);
       valueT += (element.offsetTop  || 0);
@@ -506,8 +506,8 @@ SC.mixin( /** @scope SC */ {
         valueL += (element.clientLeft || 0);
       }
 
-      // bizarely for FireFox if your offsetParent has a border, then it can 
-      // impact the offset. 
+      // bizarely for FireFox if your offsetParent has a border, then it can
+      // impact the offset.
       if (SC.browser.mozilla) {
         overflow = cqElement.attr('overflow') ;
         if (overflow !== 'visible') {
@@ -518,7 +518,7 @@ SC.mixin( /** @scope SC */ {
           }
           valueL += left; valueT += top ;
         }
-        
+
         // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
         // clientLeft of the offset parent.
         offsetParent = element.offsetParent ;
@@ -542,43 +542,43 @@ SC.mixin( /** @scope SC */ {
         valueT -= element.scrollTop  || 0;
         valueL -= element.scrollLeft || 0;
       }
-      
+
       element = element.parentNode ;
     }
 
     return { x: valueL, y: valueT } ;
   },
-  
+
   /** A Point at {0,0} */
   ZERO_POINT: { x: 0, y: 0 },
-  
+
   /** A zero length range at zero. */
   ZERO_RANGE: { start: 0, length: 0 },
 
   RANGE_NOT_FOUND: { start: 0, length: -1 },
-  
+
   /** Returns true if the passed index is in the specified range */
   valueInRange: function(value, range) {
-    return (value >= 0) && (value >= range.start) && (value < (range.start + range.length));  
+    return (value >= 0) && (value >= range.start) && (value < (range.start + range.length));
   },
-  
+
   /** Returns first value of the range. */
   minRange: function(range) { return range.start; },
-  
+
   /** Returns the first value outside of the range. */
   maxRange: function(range) { return (range.length < 0) ? -1 : (range.start + range.length); },
-  
+
   /** Returns the union of two ranges.  If one range is null, the other
    range will be returned.  */
-  unionRanges: function(r1, r2) { 
+  unionRanges: function(r1, r2) {
     if ((r1 == null) || (r1.length < 0)) return r2 ;
     if ((r2 == null) || (r2.length < 0)) return r1 ;
-    
+
     var min = Math.min(r1.start, r2.start),
         max = Math.max(SC.maxRange(r1), SC.maxRange(r2)) ;
     return { start: min, length: max - min } ;
   },
-  
+
   /** Returns the intersection of the two ranges or SC.RANGE_NOT_FOUND */
   intersectRanges: function(r1, r2) {
     if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
@@ -588,7 +588,7 @@ SC.mixin( /** @scope SC */ {
     if (max < min) return SC.RANGE_NOT_FOUND ;
     return { start: min, length: max-min };
   },
-  
+
   /** Returns the difference of the two ranges or SC.RANGE_NOT_FOUND */
   subtractRanges: function(r1, r2) {
     if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
@@ -598,12 +598,12 @@ SC.mixin( /** @scope SC */ {
     if (max < min) return SC.RANGE_NOT_FOUND ;
     return { start: min, length: max-min };
   },
-  
+
   /** Returns a clone of the range. */
-  cloneRange: function(r) { 
-    return { start: r.start, length: r.length }; 
+  cloneRange: function(r) {
+    return { start: r.start, length: r.length };
   },
-  
+
   /** Returns true if the two passed ranges are equal.  A null value is
     treated like RANGE_NOT_FOUND.
   */
@@ -630,7 +630,7 @@ SC.mixin( /** @scope SC */ {
       b = Math.round(255 * rgb[i][2]);
     }
     return this.parseColor('rgb(' + r + ',' + g + ',' + b + ')');
-  },  
+  },
 
   /** Returns hsv color from hex value */
   convertHexToHsv: function (hex) {
@@ -689,38 +689,38 @@ SC.mixin( /** @scope SC */ {
     if (number < 16) return '0' + digits;
     return digits;
   },
-  
-  
+
+
   // Get the computed style from specific element. Useful for cloning styles
   getStyle: function(oElm, strCssRule){
-  	var strValue = "";
-  	if(document.defaultView && document.defaultView.getComputedStyle){
-  		strValue = document.defaultView.getComputedStyle(oElm, "").getPropertyValue(strCssRule);
-  	}
-  	else if(oElm.currentStyle){
-  		strCssRule = strCssRule.replace(/\-(\w)/g, function (strMatch, p1){
-  			return p1.toUpperCase();
-  		});
-  		strValue = oElm.currentStyle[strCssRule];
-  	}
-  	return strValue;
+    var strValue = "";
+    if(document.defaultView && document.defaultView.getComputedStyle){
+      strValue = document.defaultView.getComputedStyle(oElm, "").getPropertyValue(strCssRule);
+    }
+    else if(oElm.currentStyle){
+     strCssRule = strCssRule.replace(/\-(\w)/g, function (strMatch, p1){
+      return p1.toUpperCase();
+     });
+     strValue = oElm.currentStyle[strCssRule];
+    }
+    return strValue;
   },
 
   // Convert double byte characters to standard Unicode. Considers only
   // conversions from zenkaku to hankaky roomaji
-  uniJapaneseConvert: function (str){ 
+  uniJapaneseConvert: function (str){
     var nChar, cString= '', j, jLen;
-    //here we cycle through the characters in the current value 
-    for (j=0, jLen = str.length; j<jLen; j++){ 
+    //here we cycle through the characters in the current value
+    for (j=0, jLen = str.length; j<jLen; j++){
       nChar = str.charCodeAt(j);
 
-      //here we do the unicode conversion from zenkaku to hankaku roomaji 
+      //here we do the unicode conversion from zenkaku to hankaku roomaji
       nChar = ((nChar>=65281 && nChar<=65392)?nChar-65248:nChar);
 
-      //MS IME seems to put this character in as the hyphen from keyboard but not numeric pad... 
+      //MS IME seems to put this character in as the hyphen from keyboard but not numeric pad...
       nChar = ( nChar===12540?45:nChar) ;
-      cString = cString + String.fromCharCode(nChar); 
+      cString = cString + String.fromCharCode(nChar);
     }
-    return cString; 
+    return cString;
   }
 }) ;
