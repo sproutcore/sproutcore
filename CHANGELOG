@@ -1,3 +1,35 @@
+*SproutCore 1.4.5 (January 25, 2010)*
+
+* Removed old HISTORY file
+* Remove content observer when destroyed
+* DRY up ContentDisplay, add tests
+* Convert array like objects to arrays for SC.Query CONTAINS - Fixes #138
+* Fixed regression in SC.Animatable
+* Allow SC.SelectView's that whose items are numbers and start at 0
+* Missed a copyright
+* Updated Copyrights
+* Fix for SC.RootResponder's targetForAction. Now checks default responder for a isResponderContext property.
+* Moved a .sc-video-view CSS rule in the correct file.
+* MouseWheel fix for WebKit
+* Changed CollectionFastPath#contentIndexIsGroup signature to match protocol for delegate
+* Pass the event when calling modalPaneDidClick.
+* [#128] BUGFIX: Disconnect bindings when object is destroyed
+* Fixed issue with destroying unused items in CollectionView
+* Don't try to modify select field element if it doesn't exist yet
+* Enhance unloadRecords allowing unloading all records of a specific type
+* fixed timing issues where css3 transitions are applied incorrectly
+* Return the picker pane after popup
+* Added test for SC.Record.normalize() not preserving hash value of toOne without a defaultValue.
+* SC.Record.normalize() would not preserve has value of toOne relationship that did not declare a defaultValue. All tests pass.
+* Added tests for SC.CascadeDataSource.
+* Fixed bug with retrieveRecords in SC.CascadeDataSource not passing all arguments.
+* SC.Observable.addProbe() fix for iPad/iPhone -- console.log currently only accepts one argument.
+* CollectionView calls destroy to removed item views that will not be reused
+* Check for image before trying to abort - Fixes #106
+* Updated references to mouseOut and mouseOver to mouseExited and mouseEntered - Fixes #100
+* Fixed bug with toggling isEnabled on SelectFieldView
+
+
 *SproutCore 1.4.4 (November 12, 2010)*
 
 * Fix SC.platform.touch for Chrome 9
