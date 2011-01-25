@@ -94,7 +94,7 @@ SC.SelectionSupport = {
     //
     // Note also if we don't allowSelection, we don't clear the old selection;
     // we just don't allow it to be changed.
-    if ((value === undefined) || !this.get('allowsSelection')) value = old;
+    if ((value === undefined) || !this.get('allowsSelection')) { value = old; }
 
     len = (value && value.isEnumerable) ? value.get('length') : 0;
 
@@ -115,8 +115,8 @@ SC.SelectionSupport = {
     if ((len === 0) && !this.get('allowsEmptySelection')) {
       if (oldlen === 0) {
         value = this.get('firstSelectableObject');
-        if (value) value = SC.SelectionSet.create().addObject(value).freeze();
-        else value = SC.SelectionSet.EMPTY;
+        if (value) { value = SC.SelectionSet.create().addObject(value).freeze(); }
+        else { value = SC.SelectionSet.EMPTY; }
         len = value.get('length');
 
       } else {
@@ -126,7 +126,7 @@ SC.SelectionSupport = {
     }
 
     // if value is empty or is not enumerable, then use empty set
-    if (len === 0) value = SC.SelectionSet.EMPTY;
+    if (len === 0) { value = SC.SelectionSet.EMPTY; }
 
     // always use a frozen copy...
     value = value.frozenCopy();
@@ -161,13 +161,13 @@ SC.SelectionSupport = {
 
     // handle passing an empty array
     if (!objects || objects.get('length') === 0) {
-      if (!extend) this.set('selection', SC.SelectionSet.EMPTY);
+      if (!extend) { this.set('selection', SC.SelectionSet.EMPTY); }
       return this;
     }
 
     var sel = this.get('selection');
-    if (extend && sel) sel = sel.copy();
-    else sel = SC.SelectionSet.create();
+    if (extend && sel) { sel = sel.copy(); }
+    else { sel = SC.SelectionSet.create(); }
 
     sel.addObjects(objects).freeze();
     this.set('selection', sel);
@@ -184,10 +184,10 @@ SC.SelectionSupport = {
   */
   selectObject: function(object, extend) {
     if (object === null) {
-      if (!extend) this.set('selection', null);
+      if (!extend) { this.set('selection', null); }
       return this;
 
-    } else return this.selectObjects([object], extend);
+    } else { return this.selectObjects([object], extend); }
   },
 
   /**
@@ -198,9 +198,9 @@ SC.SelectionSupport = {
   */
   deselectObjects: function(objects) {
 
-    if (!objects || objects.get('length') === 0) return this; // nothing to do
+    if (!objects || objects.get('length') === 0) { return this; } // nothing to do
     var sel = this.get('selection');
-    if (!sel || sel.get('length') === 0) return this; // nothing to do
+    if (!sel || sel.get('length') === 0) { return this; } // nothing to do
     // find index for each and remove it
     sel = sel.copy().removeObjects(objects).freeze();
     this.set('selection', sel.freeze());
@@ -214,8 +214,8 @@ SC.SelectionSupport = {
     @returns {Object} receiver
   */
   deselectObject: function(object) {
-    if (!object) return this; // nothing to do
-    else return this.deselectObjects([object]);
+    if (!object) { return this; } // nothing to do
+    else { return this.deselectObjects([object]); }
   },
 
   /**
@@ -231,7 +231,7 @@ SC.SelectionSupport = {
     var indexSet; // Selection index set for arranged objects
 
     // If we don't have any selection, there's nothing to update
-    if (!selectionSet) return this;
+    if (!selectionSet) { return this; }
     // Remove any selection set objects that are no longer in the content
     indexSet = selectionSet.indexSetForSource(arrangedObjects);
     if ((indexSet && (indexSet.get('length') !== selectionSet.get('length'))) || (!indexSet && (selectionSet.get('length') > 0))) { // then the selection content has changed
