@@ -336,10 +336,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   */
   _scac_observableContent: function() {
     var ret = this._scac_cached;
-    if (ret !== NO) { return ret; }
+    if (ret) { return ret; }
 
-    var content = this.get('content'),
-        orderBy, func, t, len;
+    var content = this.get('content'), func, len, order;
 
     // empty content
     if (SC.none(content)) { return (this._scac_cached = []); }
@@ -351,7 +350,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
 
     // no-wrap
-    orderBy = this.get('orderBy');
+    var orderBy = this.get('orderBy');
     if (!orderBy) {
       if (content.isSCArray) { return (this._scac_cached = content) ; }
       else { throw "%@.orderBy is required for unordered content".fmt(this); }
@@ -360,56 +359,36 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // all remaining enumerables must be sorted.
 
     // build array - then sort it
-    switch(SC.typeOf(orderBy)) {
-    case SC.T_STRING:
+    var type = SC.typeOf(orderBy);
+
+    if(type === SC.T_STRING) {
       orderBy = [orderBy];
-      break;
-    case SC.T_FUNCTION:
-      func = orderBy ;
-      break;
-    case SC.T_ARRAY:
-      break;
-    default:
+    } else if(type === SC.T_FUNCTION) {
+      func = orderBy;
+    } else if(type !== SC.T_ARRAY) {
       throw "%@.orderBy must be Array, String, or Function".fmt(this);
     }
 
     // generate comparison function if needed - use orderBy
-    if (!func) {
-      len = orderBy.get('length');
-      func = function(a,b) {
-        var idx=0, status=0, key, aValue, bValue, descending;
-        for(idx=0;(idx<len)&&(status===0);idx++) {
-          key = orderBy.objectAt(idx);
-          descending = NO;
+    func = func || function(a,b) {
+      var status, key, match, descending;
 
-          if (key.indexOf('ASC') > -1) {
-            key = key.split('ASC ')[1];
-          } else if (key.indexOf('DESC') > -1) {
-            key = key.split('DESC ')[1];
-            descending = YES;
-          }
+      for(var i=0, l=orderBy.get('length'); i<l && !status; i++) {
+        key = orderBy.objectAt(i);
 
-          if (!a) { aValue = a ; }
-          else if (a.isObservable) { aValue = a.get(key); }
-          else { aValue = a[key]; }
+        match = key.match(/^(ASC )?(DESC )?(.*)$/);
+        key = match[3]; order = match[2] ? -1 : 1;
 
-          if (!b) { bValue = b ; }
-          else if (b.isObservable) { bValue = b.get(key); }
-          else { bValue = b[key]; }
+        if (a) { a = a.isObservable ? a.get(key) : a[key]; }
+        if (b) { b = b.isObservable ? b.get(key) : b[key]; }
 
-          status = SC.compare(aValue, bValue);
-          if (descending) { status = (-1) * status; }
-        }
-        return status ;
-      };
-    }
+        status = SC.compare(a, b) * order;
+      }
 
-    ret = [];
-    content.forEach(function(o) { ret.push(o); });
-    ret.sort(func);
+      return status ;
+    };
 
-    func = null ; // avoid memory leaks
-    return (this._scac_cached = ret) ;
+    return (this._scac_cached = content.toArray().sort(func)) ;
   },
 
   /** @private
@@ -424,18 +403,15 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         orders = !!this.get('orderBy'),
         last   = this._scac_content,
         oldlen = this._scac_length || 0,
-        ro     = this._scac_rangeObserver,
-        func   = this._scac_rangeDidChange,
         efunc  = this._scac_enumerableDidChange,
         sfunc  = this._scac_contentStatusDidChange,
         newlen;
 
-    if (last === cur) return this; // nothing to do
+    if (last === cur) { return this; } // nothing to do
 
     // teardown old observer
     if (last) {
-      if (ro && last.isSCArray) last.removeRangeObserver(ro);
-      else if (last.isEnumerable) last.removeObserver('[]', this, efunc);
+      if (last.isEnumerable) { last.removeObserver('[]', this, efunc); }
       last.removeObserver('status', this, sfunc);
     }
 
@@ -449,14 +425,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // also, calculate new length.  do it manually instead of using
     // get(length) because we want to avoid computed an ordered array.
     if (cur) {
-      if (!orders && cur.isSCArray) ro = cur.addRangeObserver(null,this,func);
-      else if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
+      if (cur.isEnumerable) { cur.addObserver('[]', this, efunc); }
       newlen = cur.isEnumerable ? cur.get('length') : 1;
       cur.addObserver('status', this, sfunc);
 
-    } else newlen = SC.none(cur) ? 0 : 1;
-
-    this._scac_rangeObserver = ro;
+    } else {
+      newlen = SC.none(cur) ? 0 : 1;
+    }
 
 
     // finally, notify enumerable content has changed.
@@ -485,29 +460,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.endPropertyChanges();
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
-
-  /** @private
-    Whenever array content changes, need to simply forward notification.
-
-    Assumes that content is not null and is SC.Array.
-  */
-  _scac_rangeDidChange: function(array, objects, key, indexes) {
-    if (key !== '[]') return ; // nothing to do
-
-    var content = this.get('content');
-    this._scac_length = content.get('length');
-    this._scac_cached = NO; // invalidate
-
-    // if array length has changed, just notify every index from min up
-    if (indexes) {
-      this.beginPropertyChanges();
-      indexes.forEachRange(function(start, length) {
-        this.enumerableContentDidChange(start, length, 0);
-      }, this);
-      this.endPropertyChanges();
-      this.updateSelectionAfterContentChange();
-    }
-  },
 
   /** @private
     Whenver the content "status" property changes, relay out.
