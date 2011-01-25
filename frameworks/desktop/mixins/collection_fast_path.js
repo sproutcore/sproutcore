@@ -27,7 +27,7 @@ SC.CollectionFastPath = {
   */
   createItemViewFromExampleView: function(exampleView, attrs) {
     // create the example view
-    var ret = exampleView.create(attrs);
+    var ret = this.createItemView(exampleView, null, attrs);
     
     // for our pooling, if it is poolable, mark the view as poolable and
     // give it a reference to its pool.
