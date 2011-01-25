@@ -2,7 +2,7 @@
 // CoreQuery Tests
 // ========================================================================
 
-// This file tests additions to CoreQuery.  These should function even if you use 
+// This file tests additions to CoreQuery.  These should function even if you use
 // jQuery
 module("CoreQuery.within() && within()");
 
@@ -13,10 +13,10 @@ test("should return if passed RAW element that is child", function() {
       <div class="child2"></div>\
     </div>\
   </div>') ;
-  
+
   var child = cq.find('.child1');
   equals(cq.within(child.get(0)), YES, "cq.within(DOMElement) = YES") ;
-  
+
   var notChild = SC.$('<div class="not-child"></div>') ;
   equals(cq.within(notChild.get(0)), NO, "cq.hadChild(DOMElement) = NO");
   child = notChild = cq = null ;
@@ -29,10 +29,10 @@ test("should return if passed CQ with element that is child", function() {
       <div class="child2"></div>\
     </div>\
   </div>') ;
-  
+
   var child = cq.find('.child1');
   equals(cq.within(child), YES, "cq.within(DOMElement) = YES") ;
-  
+
   var notChild = SC.$('<div class="not-child"></div>') ;
   equals(cq.within(notChild), NO, "cq.hadChild(DOMElement) = NO");
   child = notChild = cq = null ;
@@ -50,10 +50,10 @@ test("should work if matched set has multiple element", function() {
     </div>\
   </div>').find('.root') ;
   equals(cq.length, 3, "should have three element in matched set");
-  
+
   var child = cq.find('.child1');
   equals(cq.within(child), YES, "cq.within(DOMElement) = YES") ;
-  
+
   var notChild = SC.$('<div class="not-child"></div>') ;
   equals(cq.within(notChild), NO, "cq.hadChild(DOMElement) = NO");
   child = notChild = cq = null ;
@@ -63,4 +63,3 @@ test("should return YES if matching self", function() {
   var cq = SC.$('<div></div>');
   equals(cq.within(cq), YES, "should not match");
 });
-
