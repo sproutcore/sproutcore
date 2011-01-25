@@ -4,6 +4,7 @@
 // ========================================================================
 
 sc_require('views/text_field') ;
+sc_require('system/utils/misc') ;
 
 /**
   @class

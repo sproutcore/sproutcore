@@ -6,67 +6,67 @@
 // ==========================================================================
 /**
   @namespace
-  
+
   Implements common selection management properties for controllers.
-  
+
   Selection can be managed by any controller in your applications.  This
   mixin provides some common management features you might want such as
   disabling selection, or restricting empty or multiple selections.
-  
-  To use this mixin, simply add it to any controller you want to manage 
+
+  To use this mixin, simply add it to any controller you want to manage
   selection and call updateSelectionAfterContentChange()
   whenever your source content changes.  You can also override the properties
-  defined below to configure how the selection management will treat your 
+  defined below to configure how the selection management will treat your
   content.
-  
-  This mixin assumes the arrangedObjects property will return an SC.Array of 
+
+  This mixin assumes the arrangedObjects property will return an SC.Array of
   content you want the selection to reflect.
-  
-  Add this mixin to any controller you want to manage selection.  It is 
+
+  Add this mixin to any controller you want to manage selection.  It is
   already applied to the CollectionController and ArrayController.
-  
+
   @since SproutCore 1.0
 */
 SC.SelectionSupport = {
 
   // ..........................................................
   // PROPERTIES
-  // 
+  //
   /**
     Walk like a duck.
-    
+
     @property {Boolean}
   */
   hasSelectionSupport: YES,
 
   /**
     If YES, selection is allowed. Default is YES.
-    
+
     @property {Boolean}
   */
   allowsSelection: YES,
 
   /**
     If YES, multiple selection is allowed. Default is YES.
-    
+
     @property {Boolean}
   */
   allowsMultipleSelection: YES,
 
   /**
     If YES, allow empty selection Default is YES.
-    
+
     @property {Boolean}
   */
   allowsEmptySelection: YES,
 
   /**
-    Override to return the first selectable object.  For example, if you 
+    Override to return the first selectable object.  For example, if you
     have groups or want to otherwise limit the kinds of objects that can be
     selected.
-    
+
     the default imeplementation returns firstObject property.
-    
+
     @returns {Object} first selectable object
   */
   firstSelectableObject: function() {
@@ -77,7 +77,7 @@ SC.SelectionSupport = {
     This is the current selection.  You can make this selection and another
     controller's selection work in concert by binding them together. You
     generally have a master selection that relays changes TO all the others.
-    
+
     @property {SC.SelectionSet}
   */
   selection: function(key, value) {
@@ -91,7 +91,7 @@ SC.SelectionSupport = {
     // whenever we have to recompute selection, reapply all the conditions to
     // the selection.  This ensures that changing the conditions immediately
     // updates the selection.
-    // 
+    //
     // Note also if we don't allowSelection, we don't clear the old selection;
     // we just don't allow it to be changed.
     if ((value === undefined) || !this.get('allowsSelection')) value = old;
@@ -110,7 +110,7 @@ SC.SelectionSupport = {
       }
     }
 
-    // if we don't allow empty selection, block that also.  select first 
+    // if we don't allow empty selection, block that also.  select first
     // selectable item if necessary.
     if ((len === 0) && !this.get('allowsEmptySelection')) {
       if (oldlen === 0) {
@@ -138,7 +138,7 @@ SC.SelectionSupport = {
 
   /**
     YES if the receiver currently has a non-zero selection.
-    
+
     @property {Boolean}
   */
   hasSelection: function() {
@@ -148,11 +148,11 @@ SC.SelectionSupport = {
 
   // ..........................................................
   // METHODS
-  // 
+  //
   /**
     Selects the passed objects in your content.  If you set "extend" to YES,
     then this will attempt to extend your selection as well.
-  
+
     @param {SC.Enumerable} objects objects to select
     @param {Boolean} extend optionally set to YES to extend selection
     @returns {Object} receiver
@@ -175,9 +175,9 @@ SC.SelectionSupport = {
   },
 
   /**
-    Selects a single passed object in your content.  If you set "extend" to 
+    Selects a single passed object in your content.  If you set "extend" to
     YES then this will attempt to extend your selection as well.
-    
+
     @param {Object} object object to select
     @param {Boolean} extend optionally set to YES to extend selection
     @returns {Object} receiver
@@ -192,7 +192,7 @@ SC.SelectionSupport = {
 
   /**
     Deselects the passed objects in your content.
-    
+
     @param {SC.Enumerable} objects objects to select
     @returns {Object} receiver
   */
@@ -209,7 +209,7 @@ SC.SelectionSupport = {
 
   /**
     Deselects the passed object in your content.
-    
+
     @param {SC.Object} object single object to select
     @returns {Object} receiver
   */
@@ -219,9 +219,9 @@ SC.SelectionSupport = {
   },
 
   /**
-    Call this method whenever your source content changes to ensure the 
+    Call this method whenever your source content changes to ensure the
     selection always remains up-to-date and valid.
-    
+
     @returns {Object}
   */
   updateSelectionAfterContentChange: function() {
@@ -238,7 +238,7 @@ SC.SelectionSupport = {
       selectionSet = selectionSet.copy().constrain(arrangedObjects).freeze();
       this.set('selection', selectionSet);
     }
-    
+
     // Reselect an object if required (if content length > 0)
     if ((selectionSet.get('length') === 0) && arrangedObjects && (arrangedObjects.get('length') > 0) && !allowsEmptySelection) {
       this.selectObject(this.get('firstSelectableObject'), NO);

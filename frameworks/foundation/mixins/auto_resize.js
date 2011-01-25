@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require("system/utils/string_measurement");
+
 /**
   @namespace
   Use this mixin to make your view automatically resize based upon its value,
