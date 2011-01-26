@@ -46,8 +46,8 @@ SC.Observers = {
       tuple = propertyPath;
     }
 
-    // if a tuple was found, add the observer immediately...
-    if (tuple) {
+    // if a tuple was found and is observable, add the observer immediately...
+    if (tuple && tuple[0].addObserver) {
       tuple[0].addObserver(tuple[1],target, method) ;
 
     // otherwise, save this in the queue.
@@ -98,23 +98,26 @@ SC.Observers = {
   flush: function(object) {
 
     // flush any observers that we tried to setup but didn't have a path yet
-    var oldQueue = this.queue ;
-    if (oldQueue && oldQueue.length > 0) {
+    var oldQueue = this.queue, i,
+        queueLen = oldQueue.length;
+    
+    if (oldQueue && queueLen > 0) {
       var newQueue = (this.queue = []) ;
 
-      for ( var i=0,l=oldQueue.length; i<l; i++ ) {
+      for (i=0; i<queueLen; i++ ) {
         var item = oldQueue[i];
         if ( !item ) continue;
-
+        
         var tuple = SC.tupleForPropertyPath( item[0], item[3] );
-        if( tuple ) {
+        // check if object is observable (yet) before adding an observer
+        if( tuple && tuple[0].addObserver ) {
           tuple[0].addObserver( tuple[1], item[1], item[2] );
         } else {
           newQueue.push( item );
         }
       }
     }
-
+    
     // if this object needsRangeObserver then see if any pending range
     // observers need it.
     if ( object._kvo_needsRangeObserver ) {
@@ -123,7 +126,7 @@ SC.Observers = {
           out = this._TMP_OUT,
           ro;
 
-      for ( var i=0; i<len; i++ ) {
+      for ( i=0; i<len; i++ ) {
         ro = set[i]; // get the range observer
         if ( ro.setupPending(object) ) {
           out.push(ro); // save to remove later
