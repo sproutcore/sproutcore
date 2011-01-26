@@ -7,13 +7,6 @@
 
 sc_require('mixins/string');
 
-/** 
-  Indicates a value has a mixed state of both on and off. 
-  
-  @property {String}
-*/
-SC.MIXED_STATE = '__MIXED__' ;
-
 /**
   Option for controls to automatically calculate their size (should be default 
   on controls that use renderers).

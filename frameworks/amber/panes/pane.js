@@ -8,6 +8,13 @@
 sc_require('views/view');
 sc_require('mixins/responder_context');
 
+/** 
+  Indicates a value has a mixed state of both on and off. 
+  
+  @property {String}
+*/
+SC.MIXED_STATE = '__MIXED__' ;
+
 /** @class
   A Pane is like a regular view except that it does not need to live within a 
   parent view.  You usually use a Pane to form the root of a view hierarchy in 
