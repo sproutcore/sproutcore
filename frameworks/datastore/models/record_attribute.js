@@ -49,8 +49,6 @@ sc_require('models/child_record');
 */
 SC.RecordAttribute = SC.Object.extend(
   /** @scope SC.RecordAttribute.prototype */ {
-    
-  isRecordAttribute: YES,
 
   /**
     The default value.  If attribute is null or undefined, this default value
