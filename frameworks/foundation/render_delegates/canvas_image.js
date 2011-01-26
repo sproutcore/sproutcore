@@ -94,7 +94,7 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
 
   updateImage: function(context, image, dataSource) {
     var frame = dataSource.get('innerFrame');
-    context.drawImage(image, Math.round(frame.x), Math.round(frame.y), Math.round(frame.width), Math.round(frame.height));
+    context.drawImage(image, Math.floor(frame.x), Math.floor(frame.y), Math.floor(frame.width), Math.floor(frame.height));
   }
 
 });
