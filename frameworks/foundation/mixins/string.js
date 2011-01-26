@@ -93,23 +93,6 @@ SC.INFLECTION_CONSTANTS = {
 
 SC.StringInflections = {
   /**
-    Capitalizes a string.
-
-    h2. Examples
-
-    | *Input String* | *Output String* |
-    | my favorite items | My favorite items |
-    | css-class-name | Css-class-name |
-    | action_name | Action_name |
-    | innerHTML | InnerHTML |
-
-    @return {String} capitalized string
-  */
-  capitalize: function() {
-    return this.charAt(0).toUpperCase() + this.slice(1) ;
-  },
-
-  /**
     Capitalizes every word in a string.  Unlike titleize, spaces or dashes
     will remain in-tact.
 
