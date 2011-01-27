@@ -1190,7 +1190,7 @@ SC.Observable = {
     this may be more efficient.
 
     NOTE: By default, the set() method will not set the value unless it has
-    changed. However, this check can skipped by setting .property().indempotent(NO)
+    changed. However, this check can skipped by setting .property().idempotent(NO)
     setIfChanged() may be useful in this case.
 
     @param key {String|Hash} the key to change
