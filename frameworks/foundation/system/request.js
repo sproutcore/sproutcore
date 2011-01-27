@@ -68,7 +68,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     this.header('X-Requested-With', 'XMLHttpRequest');
     //TODO: we need to have the SC version in a SC variable.
     //For now I'm harcoding the variable.
-    this.header('X-SproutCore-Version', '1.5');
+    this.header('X-SproutCore-Version', SC.VERSION);
   },
   
   /**
