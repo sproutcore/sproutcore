@@ -9,8 +9,8 @@ require('core');
 /** @class
 
   file properties
-  @dir
-  @name
+  @property dir
+  @property name
   
   @extends SC.ChildRecord
   @version 0.1
