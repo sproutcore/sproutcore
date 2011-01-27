@@ -3005,52 +3005,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   }.property('wantsAcceleratedLayer').cacheable(),
 
 
-  _invalidAutoValue: function(property){
-    var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(this, property),
-                               "%@".fmt(this),-1);
-    console.error(error.toString());
-    throw error ;
-  },
-
-  _handleTransformMistakes: function(layout) {
-    if (SC.platform.supportsCSSTransforms) {
-      // Check to see if we're using transforms
-      var transformAnimationDuration, key;
-      for(key in layout){
-        if (SC.CSS_TRANSFORM_MAP[key]) {
-            // To prevent:
-            //   this.animate('scale', ...);
-            //   this.animate('rotate', ...);
-            // Use this instead
-            //   this.animate({ scale: ..., rotate: ... }, ...);
-          if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
-            throw "Animations of transforms must be executed simultaneously!";
-          }
-
-          // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
-          // at different speeds. So, to handle that case, we just force them to all have the same length.
-
-          // First time around this will never be true, but we're concerned with subsequent runs.
-          if (transformAnimationDuration && layout[key].duration !== transformAnimationDuration) {
-            console.warn("Can't animate transforms with different durations! Using first duration specified.");
-            layout[key].duration = transformAnimationDuration;
-          }
-
-          transformAnimationDuration = layout[key].duration;
-        }
-      }
-    }
-  },
-
-  _cssNumber: function(val){
-    // loose comparison used instead of (value === null || value === undefined)
-    if (val == null) { return null; }
-    else if (val === SC.LAYOUT_AUTO) { return "auto"; }
-    else if (SC.isPercentage(val)) { return (val*100)+"%"; }
-    else { return Math.floor(val || 0); }
-  },
-
-
   layoutStyleCalculator: null,
 
   /**
