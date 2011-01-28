@@ -79,7 +79,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     </table>
 
     @property {SC.ALIGN_CENTER|SC.ALIGN_TOP_LEFT|SC.ALIGN_TOP|SC.ALIGN_TOP_RIGHT|SC.ALIGN_RIGHT|SC.ALIGN_BOTTOM_RIGHT|SC.BOTTOM|SC.BOTTOM_LEFT|SC.LEFT|Number}
-    @default SC.FILL
+    @default SC.ALIGN_CENTER
   */
   align: SC.ALIGN_CENTER,
 
