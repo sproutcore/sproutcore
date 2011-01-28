@@ -2,8 +2,8 @@
   "name": "/foundation",
   "views": [
     {
-      "name": "View",
-      "scClass": "SC.View"
+      "name": "Field",
+      "scClass": "SC.FieldView"
     },
     
     {
@@ -24,6 +24,12 @@
     {
       "name": "Text Field",
       "scClass": "SC.TextFieldView"
+    }
+  ],
+  "controllers": [
+    {
+      "name": "Tree",
+      "scClass": "SC.TreeController"
     }
   ]
 }
