@@ -25,7 +25,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       // Events
       //
       openInspector: function(anchor){
-        if(anchor) Greenhouse.openInspectorPicker.set('anchor', anchor);
+        if(anchor) Greenhouse.setPath('inspectorStates.openInspectorPicker.anchor', anchor);
         this.gotoState('openInspectorPicker');
       },
 

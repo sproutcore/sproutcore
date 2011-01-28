@@ -97,7 +97,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       fileSelectedIsAPage: function(){
         Greenhouse.loadIframeWithPage(this._firstTime);
         this._firstTime = NO;
-        this.goHistoryState('pageSelected');
+        this.gotoHistoryState('pageSelected');
       },
 
       fileSelectedIsNotAPage: function(){
