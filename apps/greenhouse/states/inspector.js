@@ -140,8 +140,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       // Events
       //
       toggleDockedInspector: function(){
-        var libState = Greenhouse.get('libraryClosed').state();
-        if (libState !== Greenhouse.get('dockedLibrary')) Greenhouse.sendEvent('undock');
+        var states = Greenhouse.get('currentStates') || [];
+        if (states.indexOf(Greenhouse.getState('dockedLibrary'))) Greenhouse.sendEvent('undock');
         this.gotoState('inspectorClosed');
       }
     })
