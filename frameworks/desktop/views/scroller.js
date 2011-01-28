@@ -180,6 +180,14 @@ SC.ScrollerView = SC.View.extend(
     @property {Number}
   */
   buttonOverlap: 11,
+  
+  /**
+    The minimium length that the thumb will be, regardless of how much content
+    is in the scroll view.
+
+    @property {Number}
+  */
+  minimumThumbLength: 20,
 
   // ..........................................................
   // INTERNAL SUPPORT
@@ -321,10 +329,10 @@ SC.ScrollerView = SC.View.extend(
 
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        thumb.css('height', Math.max(size, 20));
+        thumb.css('height', Math.max(size, this.get('minimumThumbLength')));
         break;
       case SC.LAYOUT_HORIZONTAL:
-        thumb.css('width', Math.max(size,20));
+        thumb.css('width', Math.max(size, this.get('minimumThumbLength')));
         break;
     }
 
@@ -389,7 +397,7 @@ SC.ScrollerView = SC.View.extend(
     length = Math.floor(this.get('trackLength') * this.get('proportion'));
     length = isNaN(length) ? 0 : length;
 
-    return Math.max(length,20);
+    return Math.max(length, this.get('minimumThumbLength'));
   }.property('trackLength', 'proportion').cacheable(),
 
   /**
