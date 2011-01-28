@@ -134,7 +134,7 @@ SC.ImageView = SC.View.extend(SC.Control,
         break;
       default: // Number
         if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
-          SC.Logger.warn("SC.AdjustableImage: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
+          SC.Logger.warn("SC.ImageView: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
 
           // Don't attempt to scale or offset the image
           return result;
