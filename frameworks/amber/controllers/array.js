@@ -403,6 +403,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         orders = !!this.get('orderBy'),
         last   = this._scac_content,
         oldlen = this._scac_length || 0,
+        func   = this._scac_rangeDidChange,
         efunc  = this._scac_enumerableDidChange,
         sfunc  = this._scac_contentStatusDidChange,
         newlen;
@@ -411,7 +412,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     // teardown old observer
     if (last) {
-      if (last.isEnumerable) { last.removeObserver('[]', this, efunc); }
+      if (ro && last.isSCArray) { last.removeRangeObserver(ro); }
+      else if (last.isEnumerable) { last.removeObserver('[]', this, efunc); }
       last.removeObserver('status', this, sfunc);
     }
 
@@ -425,7 +427,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // also, calculate new length.  do it manually instead of using
     // get(length) because we want to avoid computed an ordered array.
     if (cur) {
-      if (cur.isEnumerable) { cur.addObserver('[]', this, efunc); }
+      if (!orders && cur.isSCArray) { ro = cur.addRangeObserver(null, this, func); }
+      else if (cur.isEnumerable) { cur.addObserver('[]', this, efunc); }
       newlen = cur.isEnumerable ? cur.get('length') : 1;
       cur.addObserver('status', this, sfunc);
 
@@ -433,6 +436,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       newlen = SC.none(cur) ? 0 : 1;
     }
 
+    this._scac_rangeObserver = ro;
 
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
@@ -440,6 +444,29 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.enumerableContentDidChange(0, newlen, newlen - oldlen);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
+
+  /** @private
+    Whenever array content changes, need to simply forward notification.
+
+    Assumes that content is not null and is SC.Array.
+  */
+  _scac_rangeDidChange: function(array, objects, key, indexes) {
+    if (key !== '[]') { return ; } // nothing to do
+
+    var content = this.get('content');
+    this._scac_length = content.get('length');
+    this._scac_cached = NO; // invalidate
+
+    // if array length has changed, just notify every index from min up
+    if (indexes) {
+      this.beginPropertyChanges();
+      indexes.forEachRange(function(start, length) {
+        this.enumerableContentDidChange(start, length, 0);
+      }, this);
+      this.endPropertyChanges();
+      this.updateSelectionAfterContentChange();
+    }
+  },
 
   /** @private
     Whenever enumerable content changes, need to regenerate the

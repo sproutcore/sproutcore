@@ -10,14 +10,14 @@
 var content, controller, extra;
 
 var TestObject = SC.Object.extend({
-  title: "test",  
+  title: "test",
   toString: function() { return "TestObject(%@)".fmt(this.get("title")); }
 });
 
 
 // ..........................................................
 // EMPTY
-// 
+//
 
 module("SC.ArrayController - array_case - EMPTY", {
   setup: function() {
@@ -25,7 +25,7 @@ module("SC.ArrayController - array_case - EMPTY", {
     controller = SC.ArrayController.create({ content: content });
     extra = TestObject.create({ title: "FOO" });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -42,9 +42,9 @@ test("state properties", function() {
 test("addObject", function() {
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
+
   SC.run(function() { controller.addObject(extra); });
-  
+
   same(content, [extra], 'addObject(extra) should work');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), 1, 'should update length of controller');
@@ -53,9 +53,9 @@ test("addObject", function() {
 test("removeObject", function() {
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
+
   SC.run(function() { controller.removeObject(extra); });
-  
+
   same(content, [], 'removeObject(extra) should have no effect');
   equals(callCount, 0, 'should not notify observer since content did not change');
 });
@@ -68,9 +68,9 @@ test("basic array READ operations", function() {
 test("basic array WRITE operations", function() {
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
+
   controller.replace(0,1,[extra]);
-  
+
   same(content, [extra], 'should modify content');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), 1, 'should update length of controller');
@@ -83,18 +83,18 @@ test("arrangedObjects", function() {
 
 // ..........................................................
 // NON-EMPTY ARRAY
-// 
+//
 
 module("SC.ArrayController - array_case - NON-EMPTY", {
   setup: function() {
     content = "1 2 3 4 5".w().map(function(x) {
       return TestObject.create({ title: x });
     });
-    
+
     controller = SC.ArrayController.create({ content: content });
     extra = TestObject.create({ title: "FOO" });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -111,12 +111,12 @@ test("state properties", function() {
 test("addObject", function() {
   var expected = content.slice();
   expected.push(extra);
-  
+
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
+
   SC.run(function() { controller.addObject(extra); });
-  
+
   same(content, expected, 'addObject(extra) should work');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), expected.length, 'should update length of controller');
@@ -125,12 +125,12 @@ test("addObject", function() {
 test("removeObject", function() {
   var expected = content.slice(), obj = expected[3];
   expected.removeObject(obj);
-  
+
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
+
   SC.run(function() { controller.removeObject(obj); });
-  
+
   same(content, expected, 'removeObject(extra) should remove object');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), expected.length, 'should update length of controller');
@@ -138,7 +138,7 @@ test("removeObject", function() {
 
 test("basic array READ operations", function() {
   equals(controller.get("length"), content.length, 'length should be empty');
-  
+
   var loc = content.length+1; // verify 1 past end as well
   while(--loc>=0) {
     equals(controller.objectAt(loc), content[loc], "objectAt(%@) should return same value at content[%@]".fmt(loc, loc));
@@ -148,12 +148,12 @@ test("basic array READ operations", function() {
 test("basic array WRITE operations", function() {
   var expected = content.slice();
   expected.replace(3,1,[extra]);
-  
+
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
+
   controller.replace(3,1,[extra]);
-  
+
   same(content, expected, 'should modify content');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), expected.length, 'should update length of controller');
@@ -164,14 +164,14 @@ test("arrangedObjects", function() {
 });
 
 test("array orderBy using function", function(){
-  var testFunc = function(a,b){ 
+  var testFunc = function(a,b){
     if(a.get('title') > b.get('title')) return -1;
-    else if (a.get('title') == b.get('title')) return 0; 
-    else return 1; 
+    else if (a.get('title') == b.get('title')) return 0;
+    else return 1;
   };
   var expected = content.slice();
   expected.sort(testFunc);
-  
+
   var testController = SC.ArrayController.create({
     content: content,
     orderBy: testFunc
@@ -181,23 +181,23 @@ test("array orderBy using function", function(){
 
 // ..........................................................
 // ADD SPECIAL CASES HERE
-// 
+//
 
 test("verify rangeObserver fires when content is deleted", function() {
-  
+
   content = "1 2 3 4 5".w().map(function(x) {
     return TestObject.create({ title: x });
   });
-  
+
   controller = SC.ArrayController.create({ content: content });
 
   var cnt = 0,
       observer = SC.Object.create({ method: function() { cnt++; } });
   controller.addRangeObserver(SC.IndexSet.create(0,2), observer, observer.method);
-      
+
   SC.RunLoop.begin();
   content.length = 0 ;
-  content.enumerableContentDidChange(); 
+  content.enumerableContentDidChange();
   SC.RunLoop.end();
 
   equals(cnt, 1, 'range observer should have fired once');
@@ -206,7 +206,7 @@ test("verify rangeObserver fires when content is deleted", function() {
 
 // ..........................................................
 // VERIFY SC.ARRAY COMPLIANCE
-// 
+//
 
 SC.ArraySuite.generate("SC.ArrayController", {
   newObject: function(amt) {
