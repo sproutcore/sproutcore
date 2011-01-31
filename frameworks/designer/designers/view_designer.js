@@ -1135,7 +1135,7 @@ SC.ViewDesigner.mixin({
   didLoadDesign: function(designedView, sourceView, attrs) {
     designedView.isDesign = YES ; // indicates that we need a designer.
     designedView.designAttrs = attrs;
-    designedView.sourceView = sourceView;
+    //designedView.sourceView = sourceView; TODO: not sure we need this...
   },
 
   /**
@@ -1170,8 +1170,8 @@ SC.ViewDesigner.mixin({
       view.designer = DesignerClass.create({
         view: view,
         viewClass: design,
-        designAttrs: origDesign.designAttrs,
-        sourceView: origDesign.sourceView
+        designAttrs: origDesign.designAttrs
+        //sourceView: origDesign.sourceView TODO: not sure we need this...
       });
     }
   }

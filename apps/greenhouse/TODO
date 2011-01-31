@@ -1,28 +1,3 @@
--JS config file to store all custom files (in design/greenhouse.json or ./greenhouse.json) and load all configs of all frameworks currently required
-- move all desingers into the /designer folder of their respective frameworks
-- open main page if it exists 
-
-
-
-
-
-
-DEMO Punch-list:
-- adding a base view to a new page [MB] @Done
-- exceptions when dragging view or controller into page [MB] @Done
-- cleanup dimensions of modals [EG] @Done
-- finish tear-off picker panes [MB/EG] @Done
-- binding value is undefined [EG/MB]
-- fix add custom view event [MB] @Done
-- add js beautifier [MB] @Done
-
-
-
-- Inner run loop not triggering re-draw of anchor view [CJ]
-- figure out location for SC meetup [MB/EG]
-
-
-
 TODO for demo:
 - delete views from page
 v change view type inline
@@ -35,12 +10,21 @@ v View hierarchy inchworm view...
 - routes that choose project
 
 New UI Changes:
-- move (tools) inspector to picker/tear-off menu
 - update grid view to have horizontal scroll 
-- dock tear-off pickers to side 
 
 Done stuff...
 =========================
+- dock tear-off pickers to side 
+- move (tools) inspector to picker/tear-off menu
+- Inner run loop not triggering re-draw of anchor view [MB] @Done
+- adding a base view to a new page [MB] @Done
+- exceptions when dragging view or controller into page [MB] @Done
+- cleanup dimensions of modals [EG] @Done
+- finish tear-off picker panes [MB/EG] @Done
+- binding value is undefined [EG/MB]
+- fix add custom view event [MB] @Done
+- add js beautifier [MB] @Done
+-JS config file to store all custom files (in design/greenhouse.json or ./greenhouse.json) and load all configs of all frameworks currently required
 v add a controller (or execute any sc-gen command via greenhouse) @Done
 - page creation broken! @Done
 ^ draw lines to hook up bindings @Done
