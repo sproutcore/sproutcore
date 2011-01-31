@@ -384,7 +384,7 @@ SC.StringInflections = {
 
 /** @private */
 SC.String.strip = SC.String.trim; // convenience alias.
-SC.String.supplement(SC.StringInflections);
+SC.supplement(SC.String, SC.StringInflections);
 
 // Apply SC.String mixin to built-in String object
 SC.supplement(String.prototype, SC.StringInflections) ;
