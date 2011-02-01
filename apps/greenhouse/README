@@ -1,16 +1,9 @@
 Getting Started with Greenhouse (PageDesigner)
 ==============================================================================
 
-git clone git://github.com/sproutit/sproutcore-abbot.git abbot
-cd abbot
-mkdir frameworks
-cd frameworks
-git clone git://github.com/sproutit/sproutcore.git sproutcore
-git checkout greenhouse
-
 to run:
-cd into/your/project
-../abbot/bin/sc-server --filesystem
+cd into/your/sc_project
+sc-server
 
 visit:
 http://localhost:4020/sproutcore/greenhouse
