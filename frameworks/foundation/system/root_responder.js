@@ -506,7 +506,8 @@ SC.RootResponder = SC.Object.extend({
 
     // 3. an explicit pane was passed...
     if (pane) {
-      return this._responderFor(pane, methodName, firstResponder) ;
+      target = this._responderFor(pane, methodName); 
+      if (target) return target;
     }
 
     // 4. no target or pane passed... try to find target in the active panes
