@@ -8,7 +8,260 @@
 
 /** @class
 
-  TODO: Describe
+  A DataSource connects an in-memory store to one or more server backends. 
+  To connect to a data backend on a server, subclass <code>SC.DataSource</code>
+  and implement the necessary data source methods to communicate with the 
+  particular backend. 
+  
+  
+  h2. Create a Data Source
+  
+  To implement the data source, subclass <code>SC.DataSource</code> in a file
+  located either in the root level of your app or framework, or in a directory
+  called "data_sources":
+  
+	{{{
+  	MyApp.DataSource = SC.DataSource.extend({
+  		// implement the data source API...
+  	});
+	}}}
+  
+  
+	h2. Connect to a Data Source
+	
+	New SproutCore applications are wired up to fixtures as their data source.
+  When you are ready to connect to a server, swap the use of fixtures with a 
+  call to the desired data source. 
+  
+  In core.js:
+  
+  {{{
+  	// change...
+  	store: SC.Store.create().from(SC.Record.fixtures)
+  	
+  	// to...
+  	store: SC.Store.create().from('MyApp.DataSource')
+  }}}
+  
+  Note that the data source class name is referenced by string since the file
+  in which it is defined may not have been loaded yet. The first time a 
+  data store tries to access its data source it will look up the class name 
+  and instantiate that data source. 
+  
+  
+  h2. Implement the Data Source API
+  
+	There are three methods that a data store invokes on its data source:
+  
+  <ul>
+  	<li>
+  		<code>fetch()</code> &mdash; called the first time you try to 
+  		<code>find()</code> a query on a store or any time you refresh the record 
+  		array after that.
+	  </li>
+  	<li>
+  		<code>retrieveRecords()</code> &mdash; called when you access an individual 
+  		record that has not been loaded yet
+		</li>
+		<li>
+			<code>commitRecords()</code> &mdash; called if the the store has changes 
+			pending and its <code>commitRecords()</code> method is invoked.
+		</li>
+	</ul>
+
+	The data store will call the <code>commitRecords()</code> method when records 
+	need to be created, updated, or deleted. If the server that the data source
+	connects to handles these three actions in a uniform manner, it may be 
+	convenient to implement the <code>commitRecords()</code> to handle record 
+	creation, updating, and deletion. 
+	
+	However, if the calls the data source will need to make to the server to 
+	create, update, and delete records differ from each other to a significant 
+	enough degree, it will be more convenient to rely on the default behavior
+	of <code>commitRecords()</code> and instead implement the three methods that
+	it will call by default:
+	
+	<ul>
+		<li>
+			<code>createRecords()</code> &mdash; called with a list of records that
+			are new and need to be created on the server.
+		</li>
+		<li>
+			<code>updateRecords()</code> &mdash; called with a list of records that
+			already exist on the server but that need to be updated.
+		</li>
+		<li>
+			<code>destroyRecords()</code> &mdash; called with a list of records that
+			should be deleted on the server.
+		</li>
+	</ul>
+			
+	
+	h3. Multiple records
+	
+	The <code>retrieveRecords()</code>, <code>createRecords()</code>, 
+	<code>updateRecords()</code> and <code>destroyRecords()</code> 	methods all 
+	work on multiple records. If your server API accommodates calls	where you can
+	pass a list of records, this might be the best level at which to implement the
+	Data Source API. On the other hand, if the server requires that you send
+	commands for it for individual records, you can rely on the default
+	implementation of these four methods, which will call the following for each
+	individual record, one at a time:
+	
+	- <code>retrieveRecord()</code> &mdash; called to retrieve a single record.
+	- <code>createRecord()</code> &mdash; called to create a single record.
+	- <code>updateRecord()</code> &mdash; called to update a single record.
+	- <code>destroyRecord()</code> &mdash; called to destroy a single record.
+	
+	
+	h3. Return Values
+	
+	All of the methods you implement must return one of three values:
+	- <code>YES</code> &mdash; all the records were handled.
+	- <code>NO</code> &mdash; none of the records were handled.
+	- <code>SC.MIXED_STATE</code> &mdash; some, but not all of the records were handled.
+	
+	
+	h3. Store Keys  
+	
+	Whenever a data store invokes one of the data source methods it does so 
+	with a storeKeys or storeKey argument. Store keys are transient integers
+	assigned to each data hash when it is first loaded into the store. It is
+	used to track data hashes as they move up and down nested stores (even if
+	no associated record is ever created from it).
+	
+	When passed a storeKey you can use it to retrieve the status, data hash,
+	record type, or record ID, using the following data store methods:
+	
+	<ul>
+		<li>
+			<code>readDataHash(storeKey)</code> &mdash; returns the data hash 
+			associated with a store key, if any.
+		</li>
+		<li>
+			<code>readStatus(storeKey)</code> &mdash; returns the current record 
+			status associated with the store key. May be <code>SC.Record.EMPTY</code>.
+		</li>
+		<li>
+			<code>SC.Store.recordTypeFor(storeKey)</code> &mdash; returns the record 
+			type for the associated store key.
+		</li>
+		<li>
+			<code>recordType.idFor(storeKey)</code> &mdash; returns the record ID for
+			the associated store key. You must call this method on <code>SC.Record</code>
+			subclass itself, not on an instance of <code>SC.Record</code>.
+		</li>
+	</ul>
+	
+	These methods are safe for reading data from the store. To modify data 
+	in the data store you must use the store callbacks described below. The
+	store callbacks will ensure that the record states remain consistent. 
+	
+	
+	h3. Store Callbacks
+	
+	When a data store calls a data source method, it puts affected records
+	into a <code>BUSY</code> state. To guarantee data integrity and consistency, 
+ 	these records cannot be modified by the rest of the application while they are 
+ 	in the <code>BUSY</code> state. 
+	
+	Because records are "locked" while in the <code>BUSY</code> state, it is the
+	data source's	responsibility to invoke a callback on the store for each record 
+	or querythat was passed to it and that the data source handled. To reduce the 
+	amount of work that a data source must do, the data store will automatically 
+	unlock the relevant records if the the data source method returned 
+	<code>NO</code>, indicating that the records were unhandled. 
+	
+	Although a data source can invoke callback methods at any time, they 
+	should usually be invoked after receiving a response from the server. 
+	For example, when the data source commits a change to a record by issuing
+	a command to the server, it waits for the server to acknowledge the 
+	command before invoking the <code>dataSourceDidComplete()</code> callback. 
+	
+	In some cases a data source may be able to assume a server's response
+	and invoke the callback on the store immediately. This can improve
+	performance because the record can be unlocked right away.
+	
+	
+	h3. Record-Related Callbacks
+	
+	When <code>retrieveRecords()</code>, <code>commitRecords()</code>, or any of
+	the related methods are	called on a data source, the store puts any records to
+	be handled by the data store in a <code>BUSY</code> state. To release the
+	records the data source must invoke one of the record-related callbacks on the
+	store:
+	
+	<ul>
+		<li>
+			<code>dataSourceDidComplete(storeKey, dataHash, id)</code> &mdash; the
+			most common callback. You might use this callback when you have retrieved 
+			a record to	load its contents into the store. The callback tells the store 
+			that the data source is finished with the storeKey in question. The 
+			<code>dataHash</code> and <code>id</code>	arguments are optional and will
+			replace the current dataHash and/or id. Also see "Loading Records" below.
+		</li>
+		<li>
+			<code>dataSourceDidError(storeKey, error)</code> &mdash; a data source 
+			should call this when a request could not be completed because an error
+			occurred. The error	argument is optional and can contain more information 
+			about the error.
+		</li>
+		<li>
+			<code>dataSourceDidCancel(storeKey)</code> &mdash; a data source should 
+			call this when an operation is cancelled for some reason. This could be 
+			used when the user is able to cancel an operation that is in progress. 
+		</li>
+	</ul>
+	
+	h3. Loading Records into the Store
+	
+	Instead of orchestrating multiple <code>dataSourceDidComplete()</code> 
+	callbacks when loading multiple records, a data source can call the
+	<code>loadRecords()</code> method on the store, passing in a 
+	<code>recordType</code>, and array of data hashes, and optionally
+	an array of ids. The <code>loadRecords()</code> method takes care of looking 
+	up storeKeys and calling the <code>dataSourceDidComplete()</code> callback as 
+	needed. 
+	
+	<code>loadRecords()</code> is often the most convenient way to get large 
+	blocks of data into the store, especially in response to a <code>fetch()</code>
+	or <code>retrieveRecords()</code> call.
+	
+	
+	h3. Query-Related Callbacks
+	
+	Like records, queries that are passed through the <code>fetch()</code> method 
+	also have an associated status property; accessed through the <code>status</code>
+	property on the record array returned from <code>find()</code>. To properly 
+	reset this status, a data source must invoke an appropriate query-related 
+	callback on the store. 
+	The callbacks for queries are similar to those for records:
+	
+	<ul>
+		<li>
+			<code>dataSourceDidFetchQuery(query)</code> &mdash; the data source must 
+			call this when it has completed fetching any related data for the query. 
+			This returns the query results (record array) status into a 
+			<code>READY</code> state. 
+		</li>
+		<li>
+			<code>dataSourceDidErrorQuery(query, error)</code> &mdash; the data source
+			should call this if it encounters an error in executing the query. This 
+			puts the query results into an <code>ERROR</code> state. 
+		</li>
+		<li>
+			<code>dataSourceDidCancelQuery(query)</code> &mdash; the data source 
+			should call this if loading the results is cancelled.
+		</li>
+	</ul>
+	
+	In addition to these callbacks, the method 
+	<code>loadQueryResults(query, storeKey)</code> is used by data sources when
+	handling remote queries. This method is similar to 
+	<code>dataSourceDidFetchQuery()</code>, except that you also provide an array 
+	of storeKeys (or a promise to provide store keys) that comprises the result set.
+	
+	
   
   @extend SC.Object
   @since SproutCore 1.0

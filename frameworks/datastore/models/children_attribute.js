@@ -11,7 +11,7 @@ sc_require('models/child_attribute');
 /** @class
   
   ChildrenAttribute is a subclass of ChildAttribute and handles to-many 
-  relationships for child records
+  relationships for child records.
   
   When setting ( .set() ) the value of a toMany attribute, make sure
   to pass in an array of SC.Record objects.
