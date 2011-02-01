@@ -4283,7 +4283,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
         animation = animations[key];
 
         var isTransformProperty = SC.CSS_TRANSFORM_MAP[key];
-        var isTurboProperty = (key === 'top' && translateTop) || (key === 'left' && translateLeft);
+        var isTurboProperty = (key === 'top' && translateTop != null) || (key === 'left' && translateLeft != null);
 
         if (SC.platform.supportsCSSTransforms && (isTurboProperty || isTransformProperty)) {
           this._animatedTransforms.push(key);
