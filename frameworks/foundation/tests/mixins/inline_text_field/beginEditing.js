@@ -25,6 +25,8 @@ pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
     editor = pane._pane.childViews[length - 1];
 
     ok(!editor.get('isFirstResponder'), "should not be first responder yet");
+
+    sc_super();
   },
 
   inlineEditorDidBeginEditing: function(inlineEditor) {
@@ -35,6 +37,8 @@ pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
     editor = pane._pane.childViews[length - 1];
 
     ok(editor.get('isFirstResponder'), "should be first responder now");
+
+    sc_super();
   }
 }).add("label2", SC.LabelView, {
   value: 'Can\'t Touch This',
@@ -116,24 +120,21 @@ test("fails when required options are missing",
 function() {
   try {
     optionsForLabel1["frame"] = null;
-    SC.InlineTextFieldView.beginEditing(optionsForLabel1);
-    ok(NO, "should fail if frame missing");
+    ok(SC.InlineTextFieldView.beginEditing(optionsForLabel1) === NO, "should fail if frame missing");
   } catch(e1) {
     ok(YES, "should fail if frame missing: %@".fmt(e1));
   }
 
   try {
     optionsForLabel1["delegate"] = null;
-    SC.InlineTextFieldView.beginEditing(optionsForLabel1);
-    ok(NO, "should fail if delegate missing");
+    ok(SC.InlineTextFieldView.beginEditing(optionsForLabel1) === NO, "should fail if delegate missing");
   } catch(e2) {
     ok(YES, "should fail if delegate missing: %@".fmt(e2));
   }
 
   try {
     optionsForLabel1["exampleElement"] = null;
-    SC.InlineTextFieldView.beginEditing(optionsForLabel1);
-    ok(NO, "should fail if exampleElement missing");
+    ok(SC.InlineTextFieldView.beginEditing(optionsForLabel1) === NO, "should fail if exampleElement missing");
   } catch(e3) {
     ok(YES, "should fail if exampleElement missing: %@".fmt(e3));
   }

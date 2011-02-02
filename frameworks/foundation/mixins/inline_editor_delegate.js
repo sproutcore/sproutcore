@@ -6,134 +6,197 @@
 // ==========================================================================
 
 /**
-  This delegate controls the editing capability of a view. It allows you to customize when a view that uses it is allowed to begin and end editing, as well as the type of editor it uses.
+  @protocol
+  
+  This delegate is consulted by view implementing SC.InlineEditable and
+  SC.InlineEditor and controls the lifecycle of the editor as well as begin
+  notified of events in the editing process.
   
   By default it edits an SC.LabelView using an SC.InlineTextFieldView.
+
+  All methods will be attempted to be called on the inlineEditorDelegate of the
+  inlineEditor or inlineEditable first and then the target view if it didn't exist
+  on the delegate. This allows you to implement default delegate handlers on your
+  editable view.
   
   @since SproutCore 1.0
 */
 SC.InlineEditorDelegate = {
-  // quack
-  isInlineEditorDelegate: YES,
-
-  /**
-    The exampleInlineTextFieldView property is by default a 
-    SC.InlineTextFieldView but it can be set to a customized inline text field
-    view.
-
-    @property
-    @type {SC.View}
-    @default {SC.InlineTextFieldView}
+  /** REQUIRED FUNCTIONS **/
+  /*
+  * @method
+  *
+  * Acquires an editor for the view. This may simply create one and return it,
+  * or you may implement more complex lifecycle management like pooling of
+  * editors.
+  *
+  * May return null if for some reason an editor could not be required.
+  *
+  * @params {SC.InlineEditable} the view that is begin edited
+  * @returns {SC.InlineEditor} an editor for the view
   */
-  exampleInlineTextFieldView: SC.InlineTextFieldView,
-  
-  inlineEditorClassName: null,
+  acquireEditor:function(editable) {},
 
-  /**
-    If you want the inline editor to be multiline set this property to YES.
-  
-    @type {Boolean}
-    @default {NO}
+  /*
+  * @method
+  *
+  * Releases an editor. This may simply remove it from its parent and dispose of
+  * it, or you may implement more complex lifecycle management like pooling of
+  * editors.
+  *
+  * @params {SC.InlineEditor} the editor being released
+  * @returns {Boolean} YES if it was successfully released
   */
-  isInlineEditorMultiline: NO,
+  releaseEditor:function(editor) {},
 
-  /**
-    Call to tell the delegate to begin editing the given view. Returns YES if it was able to begin editing.
-  
-    @param {SC.View} the view the user is trying to edit
-    @param {Object} the current value of the view
-    @returns {Boolean} YES if the view began editing
+  /** OPTIONAL FUNCTIONS **/
+  /*
+  * @method
+  *
+  * Determines if the view should be allowed to begin editing and returns YES if
+  * so. Isn't passed the editor because it hasn't been created yet. If this
+  * method is not defined the editor will assume it is always allowed to begin
+  * editing.
+  *
+  * @params {SC.InlineEditable} the view that is attempting to begin editing
+  * @params {Object} the current value of the view
+  * @returns {Boolean} YES if the view is allowed to edit
   */
-  beginEditingFor: function(view, startingValue) {
-    if(!view.get('isEditable')) return NO;
-    if(view.get('isEditing')) return YES;
-    
-    var el = view.$(),
-        value = view.get('value') || '',
-        f = SC.viewportOffset(el[0]),
-        frameTemp = view.convertFrameFromView(view.get('frame'), null),
-        exampleEditor = this.get('exampleInlineTextFieldView');
-        f.width=frameTemp.width;
-        f.height=frameTemp.height;
-    
-    view.inlineEditorWillBeginEditing();
-    
-    exampleEditor.beginEditing({
-      pane: view.get('pane'),
-      frame: f,
-      layout: view.get('layout'),
-      exampleInlineTextFieldView: exampleEditor,
-      delegate: this,
-      inlineEditorClassName: this.get('inlineEditorClassName'),
-      exampleElement: el,
-      value: startingValue,
-      multiline: this.get('isInlineEditorMultiline'),
-      isCollection: NO
-    });
-    
-    exampleEditor.editor._target = view;
-  },
+  inlineEditorShouldBeginEditing: function(editable, value) {},
 
-  /**
-    The view the editor view should attach itself to as child. For example if you are editing a row of a formview inside a scrollview, you should attach to the scrollview's containerview or the formview's div, not the label itself. This way you will scroll with the target view but also be above it so editors can reuse views.
-  
-    @param {SC.View} the view attempting to begin editing
-    @returns {SC.View} the view that the editor should be a child of
+  /*
+  * @method
+  *
+  * Notifies the delegate that the view was allowed to begin editing and the
+  * editor has been acquired, but hasn't actually done any setup. Most views will
+  * set their current value as the starting value of the editor here, and
+  * depending on the editor other configuration options may be available.
+  *
+  * Since the editor's value hasn't been configured with, the value passed here will be
+  * the default value of the editor.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the value the editor will start with
   */
-  parentViewForEditor: function(view) {
-    return view.get('parentView');
-  },
+  inlineEditorWillBeginEditing:function(editor, value, editable) {},
 
-  /**
-    Called to tell the editor associated with the given view that the user wants to end editing and save their changes.
-  
-    @param {SC.View} the view whose edit mode is being commited
-    @param {Object} the current value of the view
-    @returns {Boolean} YES if the editor was able to end and commit
+  /*
+  * @method
+  *
+  * Notifies the delegate that the editor has finished setting up itself and is
+  * now editing.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the value the editor started with
   */
-  commitEditingFor: function(view) {
-    if(!view.get('isEditing')) return NO;
-    
-    // TODO: figure out how a validator works without a form
-    return SC.InlineTextFieldView.commitEditing();
-  },
-  
-  /**
-    Called to tell the editor associated with the given view that the user wants to end editing and discard their changes.
-  
-    @param {SC.View} the view whose edit mode is ending
-    @param {Object} the current value of the view
-    @returns {Boolean} YES if the editor was able to end
-  */
-  discardEditingFor: function(view) {
-    if(!view.get('isEditing')) return NO;
-    
-    return SC.InlineTextFieldView.discardEditing();
-  },
-  
-  /*************
-    Calls from the editor to the view
-    These only have did, not will, because the delegate decides what to do with them.
-  *************/
-  // notify the view that its editor began editing
-  inlineEditorDidBeginEditing: function(editor) {
-    var view = editor._target;
+  inlineEditorDidBeginEditing:function(editor, value, editable) {},
 
-    return view.inlineEditorDidBeginEditing(editor);
-  },
-  
-  // returns true if the finalvalue is valid, false otherwise
-  // this is seperate function from inlineEditorDidCommitEditing because it could just be validiting without actually commiting, for example if a field validates as you type
-  inlineEditorShouldCommitEditing: function(editor, finalValue) {
-    var view = editor._target;
-    
-    return view.inlineEditorShouldCommitEditing(editor, finalValue);
-  },
-  
-  // ask the view if finalvalue is valid, and then commit it and cleanup the editor
-  inlineEditorDidEndEditing: function(editor, finalValue) {
-    var view = editor._target;
-    
-    return view.inlineEditorDidEndEditing(editor, finalValue);
-  }
+  /*
+  * @method
+  *
+  * Determines if the editor is allowed to end editing and store its value back
+  * to the view being edited. If this method is not defined the editor will
+  * assume it is always allowed to commit.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the value the editor is attempting to commit
+  */
+  inlineEditorShouldCommitEditing:function(editor, value, editable) {},
+
+  /*
+  * @method
+  *
+  * Notifies the delegate that the editor was allowed to commit and is going to
+  * commit but hasn't actually performed any cleanup yet.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the value the editor ended with
+  */
+  inlineEditorWillCommitEditing:function(editor, value, editable) {},
+
+  /*
+  * @method
+  *
+  * Notifies the delegate that the editor was allowed to commit and finished
+  * performing any cleanup necessary. This is where you should save the final
+  * value back to your view after performing any necessary transforms to it.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the value the editor ended with
+  */
+  inlineEditorDidCommitEditing:function(editor, value, editable) {},
+
+  /*
+  * @method
+  *
+  * Determines if the editor is allowed to discard its current value and end
+  * editing. If this method is undefined the editor will assume it is always
+  * allowed to discard.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  */
+  inlineEditorShouldDiscardEditing:function(editor, editable) {},
+
+  /*
+  * @method
+  *
+  * Notifies the delegate that the view was allowed to discard editing but
+  * hasn't performed any cleanup yet.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  */
+  inlineEditorWillDiscardEditing:function(editor, editable) {},
+
+  /*
+  * @method
+  *
+  * Notifies the delegate that the editor has finished cleaning up after
+  * discarding editing.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  */
+  inlineEditorDidDiscardEditing:function(editor, editable) {},
+
+  /** BACKWARDS COMPATIBILITY **/
+  /*
+  * @method
+  *
+  * Notifies the delegate that the editor will end editing but hasn't cleaned up
+  * yet. This can be caused by both commit or discard. If it was a discard, the
+  * value will be the same as the current value of the editable view. Otherwise,
+  * it was a commit and the value will be the value of the editor.
+  *
+  * This method is for backwards compatibility and should not be used.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the final value of the edit
+  */
+  inlineEditorWillEndEditing: function(editor, value, editable) {},
+
+  /*
+  * @method
+  *
+  * Notifies the delegate that the editor has cleaned up after editing. This can
+  * be caused by both commit or discard. If it was a discard, the value will be
+  * the same as the current value of the editable view. Otherwise, it was a
+  * commit and the value will be the value of the editor.
+
+  *
+  * This method is for backwards compatibility and should not be used.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the final value of the edit
+  */
+  inlineEditorDidEndEditing: function(editor, value, editable) {}
 };
+

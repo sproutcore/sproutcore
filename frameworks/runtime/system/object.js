@@ -66,7 +66,6 @@ SC._detect_base = function _detect_base(func, parent, name) {
 */
 SC._object_extend = function _object_extend(base, ext, proto) {
   if (!ext) { throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?"; }
-
   // set _kvo_cloned for later use
   base._kvo_cloned = null;
 

@@ -5,85 +5,275 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/**
-  This mixin is used for views that show a seperate editor view to edit. If your view is itself editable, use SC.Editable.
-  
-  To use this, you must also implement an InlineEditorDelegate to manage the editor view and an InlineEditableDelegate to manage the result of editing. For simplicity these may all be implemented by your view itself, but for more complex views or editors they should be kept seperate.
+/*
+* @mixin
+*
+* This mixin is used for views that show a seperate editor view to edit.
+* For example, the default behavior of SC.LabelView if isEditable is set
+* to YES is to popup an SC.InlineTextFieldView when double clicked. This is a
+* seperate text input that will handle the editing and save its value back to
+* the label when it is finished.
+*
+* To use this functionality, all you have to do is apply this mixin to
+* your view. You may define your own SC.InlineEditorDelegate to further
+* customize editing behavior.
+*
+* {{{
+*   MyProject.MyView = SC.View.extend(SC.InlineEditable, {
+*     inlineEditorDelegate: myDelegate
+*   });
+* }}}
+*
+* The delegate methods will default to your view unless the
+* inlineEditorDelegate implements them. Simple views do not require a
+* seperate delegate. If your view has a more complicated editing
+* interaction, you may also implement a custom delegate. For example, if
+* you have a form with several views that all edit together, you might
+* set the parent view as the delegate so it can manage the lifecycle and
+* layout of the editors.
+*
+* See SC.InlineEditorDelegate for more information on using a delegate to
+* customize your view's edit behavior.
+*
+* Your view can now be edited by calling beginEditing() on it.
+*
+* {{{
+*   myView.beginEditing();
+* }}}
+*
+* This will create an editor for the view. You can then end the editing process
+* by calling commitEditing() or discardEditing() on either the view or the
+* editor. commitEditing() will save the value and discard will revert to the
+* original value.
+*
+* {{{
+*   myView.commitEditing();
+*   myView.discardEditing();
+* }}}
+*
+* Note that the editor is a private property of the view, so the only views that
+* should be able to access the methods on it are the editor itself, the view it
+* is editing, and their delegates.
 */
-// TODO: ask juan if this should be combined with SC.Editable
 SC.InlineEditable = {
-  
-  editorDelegate: null,
-  /**
-    Enables editing using the inline editor.
+  /*
+  * Walk like a duck.
+  *
+  * @type {Boolean}
+  */
+  isInlineEditable: YES,
+
+  /*
+  * Flag to enable or disable editing.
+  *
+  * @type {Boolean}
   */
   isEditable: YES,
 
-  /**
-    YES if currently editing label view.
+  /*
+  * The view that will be used to edit this view. Defaults to
+  * SC.InlineTextFieldView, which is simply a text field that positions itself
+  * over the view being edited.
+  *
+  * @type {SC.InlineEditor}
+  */
+  exampleEditor: SC.InlineTextFieldView,
+
+  /*
+  * Indicates whether the view is currently editing. Attempting to
+  * beginEditing a view that is already editing will fail.
+  *
+  * @type {Boolean}
   */
   isEditing: NO,
-  
-  /**
-    Opens the inline text editor (closing it if it was already open for 
-    another view).
-    
-    @return {Boolean} YES if did begin editing
+
+  /*
+  * Delegate that will be notified of events related to the editing
+  * process. Also responsible for managing the lifecycle of the editor.
+  *
+  * @type {SC.InlineEditorDelegate}
+  */
+  inlineEditorDelegate: SC.InlineTextFieldDelegate,
+
+  /*
+  * @private
+  *
+  * The editor responsible for editing this view.
+  *
+  * @type {SC.InlineEditor}
+  */
+  _editor: null,
+
+  /*
+  * @method
+  *
+  * Tells the view to start editing. This will create an editor for it
+  * and transfer control to the editor.
+  *
+  * Will fail if the delegate returns NO to inlineEditorShouldBeginEditing.
+  *
+  * @returns {Boolean} whether the view succesfully entered edit mode
   */
   beginEditing: function() {
-    if(this.get('isEditing')) return YES;
-    
-    return this.invokeDelegateMethod(this.get('editorDelegate'), 'beginEditingFor', this, this.get('value'));
+    var del;
+
+    del = this.delegateFor('inlineEditorShouldBeginEditing', this.inlineEditorDelegate);
+    if(del && !del.inlineEditorShouldBeginEditing(this, this.get('value'))) return NO;
+
+    this._editor = this.invokeDelegateMethod(this.inlineEditorDelegate, 'acquireEditor', this);
+
+    if(this._editor) return this._editor.beginEditing(this);
+    else return NO;
   },
-  
-  /**
-    Cancels the current inline editor and then exits editor. 
-    
-    @return {Boolean} NO if the editor could not exit.
-  */
-  discardEditing: function() {
-    if (!this.get('isEditing')) return YES;
-    
-    return this.invokeDelegateMethod(this.get('editorDelegate'), 'discardEditingFor', this);
-  },
-  
-  /**
-    Commits current inline editor and then exits editor.
-    
-    @return {Boolean} NO if the editor could not exit
+
+  /*
+  * @method
+  *
+  * Tells the view to save the value currently in the editor and finish
+  * editing. The delegate will be consulted first by calling
+  * inlineEditorShouldCommitEditing, and the operation will not be
+  * allowed if the delegate returns NO.
+  *
+  * Will fail if the delegate returns NO to inlineEditorShouldCommitEditing.
+  *
+  * @returns {Boolean} whether the delegate allowed the value to be committed
   */
   commitEditing: function() {
-    if (!this.get('isEditing')) return YES;
-    
-    return this.invokeDelegateMethod(this.get('editorDelegate'), 'commitEditingFor', this);
+    return this._editor ? this._editor.commitEditing() : NO;
   },
-  
-  /** @private
-    Set editing to true so edits will no longer be allowed.
+
+  /*
+  * @method
+  *
+  * Tells the view to leave edit mode and revert to the value it had
+  * before editing. May fail if the delegate returns NO to
+  * inlineEditorShouldDiscardEditing. It is possible for the delegate to
+  * return false to inlineEditorShouldDiscardEditing but true to
+  * inlineEditorShouldCommitEditing, so a client view may attempt to
+  * call commitEditing in case discardEditing fails.
+  *
+  * Will fail if the delegate returns NO to inlineEditorShouldDiscardEditing.
+  *
+  * @returns {Boolean} whether the delegate allowed the view to discard its value
   */
-  inlineEditorWillBeginEditing: function(editor) {
+  discardEditing: function() {
+    return this._editor ? this._editor.discardEditing() : NO;
+  },
+
+  /*
+  * @method
+  *
+  * Allows the view to begin editing if it is editable and it is not
+  * already editing.
+  *
+  * @returns {Boolean} if the view is allowed to begin editing
+  */
+  inlineEditorShouldBeginEditing: function() {
+    return !this.isEditing && this.isEditable;
+  },
+
+  // TODO: implement validator
+  /*
+  * @method
+  *
+  * By default, the editor starts with the value of the view being edited.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the initial value of the editor
+  */
+  inlineEditorWillBeginEditing: function(editor, value, editable) {
+    editor.set('value', this.get('value'));
+  },
+
+  /*
+  * @method
+  *
+  * Sets isEditing to YES once editing has begun.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the initial value of the editor
+  */
+  inlineEditorDidBeginEditing: function(editor, value, editable) {
     this.set('isEditing', YES);
   },
 
-  /** @private 
-    Hide the label view while the inline editor covers it.
+  /*
+  * @method
+  *
+  * Calls inlineEditorWillEndEditing for backwards compatibility.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the initial value of the editor
   */
-  inlineEditorDidBeginEditing: function(editor) {
-    return YES;
+  inlineEditorWillCommmitEditing: function(editor, value, editable) {
+    if(this.inlineEditorWillEndEditing) this.inlineEditorWillEndEditing(editor, value);
   },
-  
-  // TODO: use validator
-  inlineEditorShouldCommitEditing: function(editor, finalValue) {
-    this.setIfChanged('value', finalValue) ;
-    return YES;
-  },
-  
-  /** @private
-    Update the field value and make it visible again.
+
+  /*
+  * @method
+  *
+  * By default, commiting editing simply sets the value that the editor
+  * returned and cleans up.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the initial value of the editor
   */
-  inlineEditorDidEndEditing: function(editor, finalValue) {
-    this.inlineEditorShouldCommitEditing(editor, finalValue);
-    this.set('isEditing', NO) ;
-    return YES;
+  inlineEditorDidCommitEditing: function(editor, value, editable) {
+    editable.setIfChanged('value', value);
+
+    if(this.inlineEditorDidEndEditing) this.inlineEditorDidEndEditing(editor, value);
+
+    this._endEditing();
+  },
+
+  /*
+  * @method
+  *
+  * Calls inlineEditorWillEndEditing for backwards compatibility.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the initial value of the editor
+  */
+  inlineEditorWillDiscardEditing: function(editor, editable) {
+    if(this.inlineEditorWillEndEditing) this.inlineEditorWillEndEditing(editor, this.get('value'));
+  },
+
+  /*
+  * @method
+  *
+  * Calls inlineEditorDidEndEditing for backwards compatibility and then
+  * cleans up.
+  *
+  * @params {SC.InlineEditable} the view being edited
+  * @params {SC.InlineEditor} the editor for the view
+  * @params {Object} the initial value of the editor
+  */
+  inlineEditorDidDiscardEditing: function(editor, editable) {
+    if(this.inlineEditorDidEndEditing) this.inlineEditorDidEndEditing(editor, this.get('value'));
+
+    this._endEditing();
+  },
+
+  /*
+  * @method
+  * @private
+  *
+  * Shared code used to cleanup editing after both discarding and commiting.
+  */
+  _endEditing: function() {
+    // _editor may be null if we were called using the
+    // SC.InlineTextFieldView class methods
+    if(this._editor) {
+      this.invokeDelegateMethod(this.inlineEditorDelegate, 'releaseEditor', this._editor);
+      this._editor = null;
+    }
+
+    this.set('isEditing', NO);
   }
 };
+
