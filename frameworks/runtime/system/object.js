@@ -282,6 +282,10 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     return ret ;
   },
 
+  reopen: function(props) {
+    return SC._object_extend(this.prototype, props);
+  },
+
   /**
     Creates a new instance of the class.
 
