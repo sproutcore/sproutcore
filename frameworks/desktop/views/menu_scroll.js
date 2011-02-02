@@ -385,12 +385,39 @@ SC.MenuScrollView = SC.ScrollView.extend({
     @type {SC.ContainerView}
   */
   containerView: SC.ContainerView,
-  
+
   // ..........................................................
   // METHODS
-  // 
+  //
+  scrollToVisible: function(view) {
+    // if no view is passed, do default
+    if (arguments.length === 0) return sc_super();
 
-  
+    var contentView = this.get('contentView') ;
+    if (!contentView) return NO; // nothing to do if no contentView.
+
+    // get the frame for the view - should work even for views with static
+    // layout, assuming it has been added to the screen.
+    var vf = view.get('frame');
+    if (!vf) return NO; // nothing to do
+
+    // convert view's frame to an offset from the contentView origin.  This
+    // will become the new scroll offset after some adjustment.
+    vf = contentView.convertFrameFromView(vf, view.get('parentView')) ;
+
+    var vscroll2 = this.get('verticalScrollerView2');
+    if (vscroll2 && vscroll2.get('isVisible')) {
+      vf.height += vscroll2.get('frame').height;
+    }
+
+    var vscroll = this.get('verticalScrollerView');
+    if (vscroll && vscroll.get('isVisible')) {
+      vf.top -= vscroll.get('frame').height;
+    }
+
+    return this.scrollToRect(vf);
+  },
+
   /**
     Adjusts the layout for the various internal views.  This method is called
     once when the scroll view is first configured and then anytime a scroller
