@@ -36,7 +36,7 @@ if (typeof console === 'undefined') {
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.5.0.pre.2
+  @version 1.5.0.pre.3
   @namespace
 
   The SproutCore namespace.  All SproutCore methods and functions are defined
@@ -57,7 +57,7 @@ if (typeof console === 'undefined') {
 var SC = SC || {} ;
 var SproutCore = SproutCore || SC ;
 
-SC.VERSION = '1.5.0.pre.2';
+SC.VERSION = '1.5.0.pre.3';
 
 /**
   @private
