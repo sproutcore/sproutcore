@@ -147,6 +147,10 @@ SC._object_extend = function _object_extend(base, ext) {
         }
         outlets[outlets.length] = key ;
       }
+
+      if (value.isEnhancement) {
+        value = SC._enhance(base[key], value);
+      }
     }
 
     // copy property
@@ -175,6 +179,16 @@ SC._object_extend = function _object_extend(base, ext) {
 
   return base ;
 } ;
+
+SC._enhance = function(originalFunction, enhancement) {
+  return function() {
+    var args = Array.prototype.slice.call(arguments, 0);
+    var self = this;
+
+    args.unshift(function() { return originalFunction.apply(self, arguments); });
+    return enhancement.apply(this, args);
+  };
+}
 
 /** @class
 

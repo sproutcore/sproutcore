@@ -815,6 +815,11 @@ SC.Function = {
     return fn ;
   },
 
+  enhance: function(fn) {
+    fn.isEnhancement = true;
+    return fn ;
+  },
+
   observes: function(fn, propertyPaths) {
     // sort property paths into local paths (i.e just a property name) and
     // full paths (i.e. those with a . or * in them)
@@ -989,6 +994,10 @@ SC.mixin(Function.prototype,
   */
   idempotent: function(aFlag) {
     return SC.Function.idempotent(this, aFlag)
+  },
+
+  enhance: function() {
+    return SC.Function.enhance(this);
   },
 
   /**
