@@ -12,19 +12,26 @@ SC.BENCHMARK_LOG_READY = YES;
 sc_require('system/event') ;
 
 SC.mixin({
-  _isReadyBound: NO,
+  /** @private
+    Set this _isReadyBound if you'd like to avoid SC from setting up the DOM
+    listeners to determine when to DOM is loaded, and it's safe to call
+    _didBecomeReady() .
+    
+    This is a private variable, so play at your own risk.
+  */
+  _isReadyBound: (SC._isReadyBound!==undefined ? SC._isReadyBound: NO),
   
   /** @private configures the ready event handler if needed */
   _bindReady: function() {
     if (this._isReadyBound) return;
     this._isReadyBound = YES ;
-
+    
     // Mozilla, Opera (see further below for it) and webkit nightlies 
     // currently support this event.  Use the handy event callback
     if ( document.addEventListener && !SC.browser.opera) {
       document.addEventListener( "DOMContentLoaded", SC._didBecomeReady, NO );
     }
-
+    
     // If IE is used and is not in a frame
     // Continually check to see if the document is ready
     if (SC.browser.msie && (window === top)) {
@@ -38,11 +45,12 @@ SC.mixin({
           setTimeout( arguments.callee, 0 );
           return;
         }
+        
         // and execute any waiting functions
         SC._didBecomeReady();
       })();
     }
-
+    
     if ( SC.browser.opera ) {
       document.addEventListener( "DOMContentLoaded", function () {
         if (SC.isReady) return;
@@ -56,7 +64,7 @@ SC.mixin({
         SC._didBecomeReady();
       }, NO);
     }
-
+    
     if (SC.browser.safari && SC.browser.safari < 530.0 ) {
       console.error("ready() is not yet supported on Safari 3.1 and earlier");
       // TODO: implement ready() in < Safari 4 
@@ -85,8 +93,14 @@ SC.mixin({
   /** @private handlers scheduled to execute on ready. */
   _readyQueue: [],
   
-  _afterReadyQueue: [],
-
+  /**
+    isReady is YES when the DOM has successfully loaded and the SproutCore
+    framework itself is initialized and the main() function of the application 
+    has been invoked.
+    
+    @property
+    @type Boolean
+  */
   isReady: NO,
   
   /** @private invoked when the document becomes ready. */
