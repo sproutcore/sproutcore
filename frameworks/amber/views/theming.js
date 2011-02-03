@@ -1,7 +1,12 @@
-sc_require("views/base");
+sc_require("views/view");
 
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
+
+  init: function(original) {
+    original();
+    this._lastTheme = this.get('theme');
+  }.enhance(),
 
   // ..........................................................
   // THEME SUPPORT

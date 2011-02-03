@@ -541,7 +541,7 @@ SC.View.reopen(
   },
 
   /**
-    Returns YES if the receiver is a subview of a given view or if it’s
+    Returns YES if the receiver is a subview of a given view or if it's
     identical to that view. Otherwise, it returns NO.
 
     @property {SC.View} view
@@ -549,9 +549,9 @@ SC.View.reopen(
   isDescendantOf: function(view) {
     var parentView = this.get('parentView');
 
-    if(this===view) return YES;
-    else if(parentView) return parentView.isDescendantOf(view);
-    else return NO;
+    if(this === view) { return YES; }
+    else if(parentView) { return parentView.isDescendantOf(view); }
+    else { return NO; }
   },
 
   /**
@@ -661,7 +661,7 @@ SC.View.reopen(
     }
     if (mixins = this.renderMixin) {
       len = mixins.length;
-      for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, NO) ;
+      for(idx=0; idx<len; ++idx) { mixins[idx].call(this, context, NO) ; }
     }
 
     context.update() ;
@@ -674,9 +674,9 @@ SC.View.reopen(
 
     // If this view uses static layout, then notify that the frame (likely)
     // changed.
-    if (this.useStaticLayout) this.viewDidResize();
+    if (this.useStaticLayout) { this.viewDidResize(); }
 
-    if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
+    if (this.didUpdateLayer) { this.didUpdateLayer(); } // call to update DOM
     if(this.designer && this.designer.viewDidUpdateLayer) {
       this.designer.viewDidUpdateLayer(); //let the designer know
     }
@@ -707,7 +707,7 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   createLayer: function() {
-    if (this.get('layer')) return this ; // nothing to do
+    if (this.get('layer')) { return this ; } // nothing to do
 
     var context = this.renderContext(this.get('tagName')) ;
 
@@ -727,10 +727,10 @@ SC.View.reopen(
   */
   _notifyDidCreateLayer: function() {
     this.notifyPropertyChange("layer");
-    if (this.didCreateLayer) this.didCreateLayer() ;
+    if (this.didCreateLayer) { this.didCreateLayer() ; }
 
     // Animation prep
-    if (SC.platform.supportsCSSTransitions) this.resetAnimation();
+    if (SC.platform.supportsCSSTransitions) { this.resetAnimation(); }
 
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
@@ -738,13 +738,13 @@ SC.View.reopen(
         childView;
     if (mixins) {
       len = mixins.length ;
-      for (idx=0; idx<len; ++idx) mixins[idx].call(this) ;
+      for (idx=0; idx<len; ++idx) { mixins[idx].call(this) ; }
     }
 
     len = childViews.length ;
     for (idx=0; idx<len; ++idx) {
       childView = childViews[idx];
-      if (!childView) continue;
+      if (!childView) { continue; }
 
       // A parent view creating a layer might result in the creation of a
       // child view's DOM node being created via a render context without
@@ -807,16 +807,16 @@ SC.View.reopen(
     null for receiver.
   */
   _notifyWillDestroyLayer: function() {
-    if (this.willDestroyLayer) this.willDestroyLayer() ;
+    if (this.willDestroyLayer) { this.willDestroyLayer() ; }
     var mixins = this.willDestroyLayerMixin, len, idx,
         childViews = this.get('childViews') ;
     if (mixins) {
       len = mixins.length ;
-      for (idx=0; idx<len; ++idx) mixins[idx].call(this) ;
+      for (idx=0; idx<len; ++idx) { mixins[idx].call(this) ; }
     }
 
     len = childViews.length ;
-    for (idx=0; idx<len; ++idx) childViews[idx]._notifyWillDestroyLayer() ;
+    for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer() ; }
 
     this.set('layer', null) ;
   },
@@ -871,7 +871,7 @@ SC.View.reopen(
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
-      for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
+      for(idx=0; idx<len; ++idx) { mixins[idx].call(this, context, firstTime) ; }
     }
 
     this.endPropertyChanges() ;
@@ -971,7 +971,7 @@ SC.View.reopen(
   */
 
   _notifyDidAppendToDocument: function() {
-    if (this.didAppendToDocument) this.didAppendToDocument();
+    if (this.didAppendToDocument) { this.didAppendToDocument(); }
 
     var i=0, child, childLen, children = this.get('childViews');
     for(i=0, childLen=children.length; i<childLen; i++) {
@@ -1102,8 +1102,8 @@ SC.View.reopen(
   cursor: function(key, value) {
     var parent;
 
-    if (value) this._setCursor = value;
-    if (this._setCursor !== undefined) return this._setCursor;
+    if (value) { this._setCursor = value; }
+    if (this._setCursor !== undefined) { return this._setCursor; }
 
     parent = this.get('parentView');
     if (this.get('shouldInheritCursor') && parent) {
@@ -1232,223 +1232,6 @@ SC.View.reopen(
   */
   acceptsFirstResponder: NO,
 
-  // ..........................................................
-  // KEY RESPONDER
-  //
-
-  /** @property
-    YES if the view is currently first responder and the pane the view belongs
-    to is also key pane.  While this property is set, you should expect to
-    receive keyboard events.
-  */
-  isKeyResponder: NO,
-
-  /**
-    This method is invoked just before you lost the key responder status.
-    The passed view is the view that is about to gain keyResponder status.
-    This gives you a chance to do any early setup. Remember that you can
-    gain/lose key responder status either because another view in the same
-    pane is becoming first responder or because another pane is about to
-    become key.
-
-    @param {SC.Responder} responder
-  */
-  willLoseKeyResponderTo: function(responder) {},
-
-  /**
-    This method is invoked just before you become the key responder.  The
-    passed view is the view that is about to lose keyResponder status.  You
-    can use this to do any setup before the view changes.
-    Remember that you can gain/lose key responder status either because
-    another view in the same pane is becoming first responder or because
-    another pane is about to become key.
-
-    @param {SC.Responder} responder
-  */
-  willBecomeKeyResponderFrom: function(responder) {},
-
-  /**
-    Invokved just after the responder loses key responder status.
-  */
-  didLoseKeyResponderTo: function(responder) {},
-
-  /**
-    Invoked just after the responder gains key responder status.
-  */
-  didBecomeKeyResponderFrom: function(responder) {},
-
-  /**
-    This method will process a key input event, attempting to convert it to
-    an appropriate action method and sending it up the responder chain.  The
-    event is converted using the SC.KEY_BINDINGS hash, which maps key events
-    into method names.  If no key binding is found, then the key event will
-    be passed along using an insertText() method.
-
-    @param {SC.Event} event
-    @returns {Object} object that handled event, if any
-  */
-  interpretKeyEvents: function(event) {
-    var codes = event.commandCodes(), cmd = codes[0], chr = codes[1], ret;
-
-    if (!cmd && !chr) return null ;  //nothing to do.
-
-    // if this is a command key, try to do something about it.
-    if (cmd) {
-      var methodName = SC.MODIFIED_KEY_BINDINGS[cmd] || SC.BASE_KEY_BINDINGS[cmd.match(/[^_]+$/)[0]];
-      if (methodName) {
-        var target = this, pane = this.get('pane'), handler = null;
-        while(target && !(handler = target.tryToPerform(methodName, event))){
-          target = (target===pane)? null: target.get('nextResponder') ;
-        }
-        return handler ;
-      }
-    }
-
-    if (chr && this.respondsTo('insertText')) {
-      // if we haven't returned yet and there is plain text, then do an insert
-      // of the text.  Since this is not an action, do not send it up the
-      // responder chain.
-      ret = this.insertText(chr, event);
-      return ret ? (ret===YES ? this : ret) : null ; // map YES|NO => this|nil
-    }
-
-    return null ; //nothing to do.
-  },
-
-  /**
-    This method is invoked by interpretKeyEvents() when you receive a key
-    event matching some plain text.  You can use this to actually insert the
-    text into your application, if needed.
-
-    @param {SC.Event} event
-    @returns {Object} receiver or object that handled event
-  */
-  insertText: function(chr) {
-    return NO ;
-  },
-
-  /**
-    Recursively travels down the view hierarchy looking for a view that
-    implements the key equivalent (returning to YES to indicate it handled
-    the event).  You can override this method to handle specific key
-    equivalents yourself.
-
-    The keystring is a string description of the key combination pressed.
-    The evt is the event itself. If you handle the equivalent, return YES.
-    Otherwise, you should just return sc_super.
-
-    @param {String} keystring
-    @param {SC.Event} evt
-    @returns {Boolean}
-  */
-  performKeyEquivalent: function(keystring, evt) {
-    var ret = NO,
-        childViews = this.get('childViews'),
-        len = childViews.length,
-        idx = -1 ;
-    while (!ret && (++idx < len)) {
-      ret = childViews[idx].performKeyEquivalent(keystring, evt) ;
-    }
-    return ret ;
-  },
-
-  /**
-    Optionally points to the next key view that should gain focus when tabbing
-    through an interface.  If this is not set, then the next key view will
-    be set automatically to the next child.
-  */
-  nextKeyView: null,
-
-  /**
-    Computes the next valid key view, possibly returning the receiver or null.
-    This is the next key view that acceptsFirstResponder.
-
-    @property
-    @type SC.View
-  */
-  nextValidKeyView: function() {
-    var seen = [],
-        rootView = this.get('pane'), ret = this.get('nextKeyView');
-
-    if(!ret) ret = rootView._computeNextValidKeyView(this, seen);
-
-    if(SC.TABBING_ONLY_INSIDE_DOCUMENT && !ret) {
-      ret = rootView._computeNextValidKeyView(rootView, seen);
-    }
-
-    return ret ;
-  }.property('nextKeyView'),
-
-  _computeNextValidKeyView: function(currentView, seen) {
-    var ret = this.get('nextKeyView'),
-        children, i, childLen, child;
-    if(this !== currentView && seen.indexOf(currentView)!=-1 &&
-      this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')){
-      return this;
-    }
-    seen.push(this); // avoid cycles
-
-    // find next sibling
-    if (!ret) {
-      children = this.get('childViews');
-      for(i=0, childLen = children.length; i<childLen; i++){
-        child = children[i];
-        if(child.get('isVisibleInWindow') && child.get('isVisible')){
-          ret = child._computeNextValidKeyView(currentView, seen);
-        }
-        if (ret) return ret;
-      }
-      ret = null;
-    }
-    return ret ;
-  },
-
-  /**
-    Optionally points to the previous key view that should gain focus when
-    tabbing through the interface. If this is not set then the previous
-    key view will be set automatically to the previous child.
-  */
-  previousKeyView: null,
-
-  /**
-    Computes the previous valid key view, possibly returning the receiver or
-    null.  This is the previous key view that acceptsFirstResponder.
-
-    @property
-    @type SC.View
-  */
-  previousValidKeyView: function() {
-    var seen = [],
-        rootView = this.pane(), ret = this.get('previousKeyView');
-    if(!ret) ret = rootView._computePreviousValidKeyView(this, seen);
-    return ret ;
-  }.property('previousKeyView'),
-
-  _computePreviousValidKeyView: function(currentView, seen) {
-    var ret = this.get('previousKeyView'),
-        children, i, child;
-
-    if(this !== currentView && seen.indexOf(currentView)!=-1 &&
-      this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')){
-      return this;
-    }
-    seen.push(this); // avoid cycles
-
-    // find next sibling
-    if (!ret) {
-      children = this.get('childViews');
-      for(i=children.length-1; 0<=i; i--){
-        child = children[i];
-        if(child.get('isVisibleInWindow') && child.get('isVisible')){
-          ret = child._computePreviousValidKeyView(currentView, seen);
-        }
-        if (ret) return ret;
-      }
-      ret = null;
-    }
-    return ret ;
-  },
-
   // .......................................................
   // CORE DISPLAY METHODS
   //
@@ -1463,7 +1246,7 @@ SC.View.reopen(
   */
   init: function() {
     var parentView = this.get('parentView'),
-        path, root, idx, len, lp, dp ;
+        path, root, lp, displayProperties ;
 
     sc_super();
 
@@ -1474,29 +1257,18 @@ SC.View.reopen(
     // SC.RootResponder to dispatch incoming events.
     SC.View.views[this.get('layerId')] = this;
 
-    var childViews = this.get('childViews');
-
     // setup child views.  be sure to clone the child views array first
-    this.childViews = childViews ? childViews.slice() : [] ;
+    this.childViews = this.get('childViews').slice() ;
     this.createChildViews() ; // setup child Views
-    this._hasCreatedChildViews = YES;
 
     // register display property observers ..
     // TODO: Optimize into class setup
-    dp = this.get('displayProperties') ;
-    idx = dp.length ;
-    while (--idx >= 0) {
-      this.addObserver(dp[idx], this, this.displayDidChange);
+    displayProperties = this.get('displayProperties') ;
+    for(var i=0, l=displayProperties.length; i<l; i++) {
+      this.addObserver(displayProperties[i], this, this.displayDidChange);
     }
 
-    // register for drags
-    if (this.get('isDropTarget')) SC.Drag.addDropTarget(this) ;
-
-    // register scroll views for autoscroll during drags
-    if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
-
     this._previousLayout = this.get('layout');
-    this._lastTheme = this.get('theme');
   },
 
   /**
@@ -1527,18 +1299,12 @@ SC.View.reopen(
     memory manager.
   */
   destroy: function() {
-    if (this.get('isDestroyed')) return this; // nothing to do
+    if (this.get('isDestroyed')) { return this; } // nothing to do
 
     this._destroy(); // core destroy method
 
     // remove from parent if found
     this.removeFromParent() ;
-
-    // unregister for drags
-    if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
-
-    // unregister for autoscroll during drags
-    if (this.get('isScrollable')) SC.Drag.removeScrollableView(this) ;
 
     //Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
     sc_super();
@@ -1546,7 +1312,7 @@ SC.View.reopen(
   },
 
   _destroy: function() {
-    if (this.get('isDestroyed')) return this ; // nothing to do
+    if (this.get('isDestroyed')) { return this ; } // nothing to do
 
     // destroy the layer -- this will avoid each child view destroying
     // the layer over and over again...
@@ -1556,7 +1322,7 @@ SC.View.reopen(
     var childViews = this.get('childViews'), len = childViews.length, idx ;
     if (len) {
       childViews = childViews.slice() ;
-      for (idx=0; idx<len; ++idx) childViews[idx].destroy() ;
+      for (idx=0; idx<len; ++idx) { childViews[idx].destroy() ; }
     }
 
     // next remove view from global hash
@@ -1601,7 +1367,9 @@ SC.View.reopen(
         // is this is a key name, lookup view class
         if (typeof key === SC.T_STRING) {
           view = this[key];
-        } else key = null ;
+        } else {
+          key = null ;
+        }
 
         if (!view) {
           console.error ("No view with name "+key+" has been found in "+this.toString());
@@ -1611,7 +1379,7 @@ SC.View.reopen(
 
         if (view.isClass) {
           view = this.createChildView(view) ; // instantiate if needed
-          if (key) this[key] = view ; // save on key name if passed
+          if (key) { this[key] = view ; } // save on key name if passed
         }
       }
       childViews[idx] = view;
@@ -1635,13 +1403,13 @@ SC.View.reopen(
   */
   createChildView: function(view, attrs) {
     // attrs should always exist...
-    if (!attrs) attrs = {} ;
+    if (!attrs) { attrs = {} ; }
     // clone the hash that was given so we dont pollute it if it's being reused
-    else attrs = SC.clone(attrs);
+    else { attrs = SC.clone(attrs); }
 
     attrs.owner = attrs.parentView = this ;
     attrs.isVisibleInWindow = this.get('isVisibleInWindow');
-    if (!attrs.page) attrs.page = this.page ;
+    if (!attrs.page) { attrs.page = this.page ; }
 
     // Now add this to the attributes and create.
     view = view.create(attrs) ;
@@ -1654,7 +1422,7 @@ SC.View.reopen(
 
   /**
     The 'frame' property depends on the 'layout' property as well as the
-    parent view’s frame.  In order to properly invalidate any cached values,
+    parent view's frame.  In order to properly invalidate any cached values,
     we need to invalidate the cache whenever 'layout' changes.  However,
     observing 'layout' does not guarantee that; the observer might not be run
     immediately.
@@ -1671,12 +1439,12 @@ SC.View.reopen(
     // To allow layout to be a computed property, we check if any property has
     // changed and if layout is dependent on the property.
     // If it is we call layoutDidChange.
-    var layoutChange=false;
+    var layoutChange = false;
     if(typeof this.layout === "function" && this._kvo_dependents) {
       var dependents = this._kvo_dependents[key];
-      if(dependents && dependents.indexOf('layout')!=-1) layoutChange = true;
+      if(dependents && dependents.indexOf('layout')!=-1) { layoutChange = true; }
     }
-    if(key==='layout' || layoutChange) this.layoutDidChange();
+    if(key==='layout' || layoutChange) { this.layoutDidChange(); }
     // Resume notification as usual.
     sc_super();
   },
@@ -1700,156 +1468,40 @@ SC.View.reopen(
   adjust: function(key, value) {
     var layout = SC.clone(this.get('layout')), didChange = NO, cur ;
 
-    if (key === undefined) return this ; // nothing to do.
+    if (key === undefined) { return this ; } // nothing to do.
 
     // handle string case
     if (SC.typeOf(key) === SC.T_STRING) {
+      hash = {};
+      hash[key] = value;
+    } else {
+      hash = key;
+    }
+
+    for(key in hash) {
+      if (!hash.hasOwnProperty(key)) { continue; }
+
+      value = hash[key] ;
       cur = layout[key] ;
-      if (SC.none(value)) {
-        if (cur !== undefined) didChange = YES ;
+
+      if (value === undefined || cur == value) { continue; }
+
+      if (value === null) {
         delete layout[key] ;
       } else {
-        if (cur !== value) didChange = YES ;
         layout[key] = value ;
       }
 
-    // handle hash -- do it this way to avoid creating memory unless needed
-    } else {
-      var hash = key;
-      for(key in hash) {
-        if (!hash.hasOwnProperty(key)) continue;
-        value = hash[key] ;
-        cur = layout[key] ;
-
-        if (value === null) {
-          if (cur !== undefined) didChange = YES ;
-          delete layout[key] ;
-        } else if (value !== undefined) {
-          if (cur !== value) didChange = YES ;
-          layout[key] = value ;
-        }
-      }
-    }
-    // now set adjusted layout
-    if (didChange) this.set('layout', layout) ;
-
-    return this ;
-  },
-
-
-  /**
-    Animate a given property using CSS animations.
-
-    Takes a key, value and either a duration, or a hash of options.
-    The options hash has the following parameters
-      - duration: Duration of animation in seconds
-      - callback: Callback method to run when animation completes
-      - timing: Animation timing function
-
-    @param {String|Hash} key
-    @param {Object} value
-    @params {Number|Hash} duration or options
-    @returns {SC.View} receiver
-  */
-  animate: function(keyOrHash, valueOrOptions, optionsOrCallback, callback) {
-    var hash, options;
-
-    if (typeof keyOrHash === SC.T_STRING) {
-      hash = {};
-      hash[keyOrHash] = valueOrOptions;
-      options = optionsOrCallback;
-    } else {
-      hash = keyOrHash;
-      options = valueOrOptions;
-      callback = optionsOrCallback;
-    }
-
-    var optionsType = SC.typeOf(options);
-    if (optionsType === SC.T_NUMBER) {
-      options = { duration: options };
-    } else if (optionsType !== SC.T_HASH) {
-      throw "Must provide options hash or duration!";
-    }
-
-    if (callback) options.callback = callback;
-
-    var timing = options.timing;
-    if (timing) {
-      if (typeof timing !== SC.T_STRING) {
-        options.timing = "cubic-bezier("+timing[0]+", "+timing[1]+", "+
-                                         timing[2]+", "+timing[3]+")";
-      }
-    } else {
-      options.timing = 'linear';
-    }
-
-    var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim, key;
-
-    if (!layout.animate) layout.animate = {};
-
-    // Very similar to #adjust
-    for(key in hash) {
-      if (!hash.hasOwnProperty(key)) continue;
-      value = hash[key];
-      cur = layout[key];
-
-      if (cur !== value) { didChange = YES; }
-
-      if (SC.ANIMATABLE_PROPERTIES[key]) {
-        curAnim = layout.animate[key];
-
-        // loose comparison used instead of (value === null || value === undefined)
-        if (value == null) { throw "Can only animate to an actual value!"; }
-
-        // FIXME: We should check more than duration
-        if (curAnim && curAnim.duration !== options.duration) { didChange = YES; }
-
-        layout.animate[key] = options;
-      }
-
-      layout[key] = value;
-
-    }
-
-    // now set adjusted layout
-    if (didChange) this.set('layout', layout) ;
-
-    return this ;
-  },
-
-  /**
-  Resets animation, stopping all existing animations.
-  */
-  resetAnimation: function() {
-    var layout = this.get('layout'),
-        animations = layout.animate,
-        didChange = NO, key;
-
-    if (!animations) return;
-
-    var hasAnimations;
-
-    for (key in animations) {
       didChange = YES;
-      delete animations[key];
     }
 
+    // now set adjusted layout
     if (didChange) {
-      this.set('layout', layout);
-      this.notifyPropertyChange('layout');
+      this.set('layout', layout) ;
     }
 
-    return this;
+    return this ;
   },
-
-  /**
-    Called when animation ends, should not usually be called manually
-  */
-  transitionDidEnd: function(evt){
-    // WARNING: Sometimes this will get called more than once for a property. Not sure why.
-    this.get('layoutStyleCalculator').transitionDidEnd(evt);
-  },
-
 
   /**
     The layout describes how you want your view to be positions on the
@@ -1980,13 +1632,15 @@ SC.View.reopen(
   */
   scrollToVisible: function() {
     var pv = this.get('parentView');
-    while(pv && !pv.get('isScrollable')) pv = pv.get('parentView');
+    while(pv && !pv.get('isScrollable')) { pv = pv.get('parentView'); }
 
     // found view, first make it scroll itself visible then scroll this.
     if (pv) {
       pv.scrollToVisible();
       return pv.scrollToVisible(this);
-    } else return NO ;
+    } else {
+      return NO ;
+    }
   },
 
   /**
@@ -2053,7 +1707,7 @@ SC.View.reopen(
       // need layer to be able to compute rect
       if (layer = this.get('layer')) {
         f = SC.viewportOffset(layer); // x,y
-        if (pv) f = pv.convertFrameFromView(f, null);
+        if (pv) { f = pv.convertFrameFromView(f, null); }
 
         /*
           TODO Can probably have some better width/height values - CC
@@ -2066,7 +1720,7 @@ SC.View.reopen(
     }
 
 
-    if (!pdim) pdim = this.computeParentDimensions(layout) ;
+    if (!pdim) { pdim = this.computeParentDimensions(layout) ; }
     dH = pdim.height;
     dW = pdim.width;
 
@@ -2078,13 +1732,13 @@ SC.View.reopen(
         f.x = lL ;
       }
       if (lW !== undefined) {
-        if(lW === AUTO) f.width = AUTO ;
-        else if(SC.isPercentage(lW)) f.width = dW*lW ;
-        else f.width = lW ;
+        if(lW === AUTO) { f.width = AUTO ; }
+        else if(SC.isPercentage(lW)) { f.width = dW*lW ; }
+        else { f.width = lW ; }
       } else { // better have lR!
         f.width = dW - f.x ;
-        if(lR && SC.isPercentage(lR)) f.width = f.width - (lR*dW) ;
-        else f.width = f.width - (lR || 0) ;
+        if(lR && SC.isPercentage(lR)) { f.width = f.width - (lR*dW) ; }
+        else { f.width = f.width - (lR || 0) ; }
       }
     // handle right aligned
     } else if (!SC.none(lR)) {
@@ -2455,76 +2109,6 @@ SC.View.reopen(
     if (this.didEndLiveResize) this.didEndLiveResize() ;
     return this ;
   },
-
-  /**
-    Setting wantsAcceleratedLayer to YES will use transforms to move the
-    layer when available. On some platforms transforms are hardware accelerated.
-  */
-  wantsAcceleratedLayer: NO,
-
-  /**
-    Specifies whether transforms can be used to move the layer.
-  */
-  hasAcceleratedLayer: function(){
-    if (this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers) {
-      var layout = this.get('layout'),
-          animations = layout.animate,
-          AUTO = SC.LAYOUT_AUTO,
-          key;
-
-      if (animations && (animations['top'] || animations['left'])) {
-        for (key in animations) {
-          // If we're animating other transforms at different speeds, don't use acceleratedLayer
-          if (
-            SC.CSS_TRANSFORM_MAP[key] &&
-            ((animations['top'] && animations['top'].duration !== animations[key].duration) ||
-             (animations['left'] && animations['left'].duration !== animations[key].duration))
-          ) {
-            return NO;
-          }
-        }
-      }
-
-      // loose comparison used instead of (layout.X === null || layout.X === undefined)
-      if (
-        layout.left != null && !SC.isPercentage(layout.left) && layout.left !== AUTO &&
-        layout.top != null && !SC.isPercentage(layout.top) && layout.top !== AUTO &&
-        layout.width != null && !SC.isPercentage(layout.width) && layout.width !== AUTO &&
-        layout.height != null && !SC.isPercentage(layout.height) && layout.height !== AUTO
-      ) {
-       return YES;
-      }
-    }
-    return NO;
-  }.property('wantsAcceleratedLayer').cacheable(),
-
-
-  layoutStyleCalculator: null,
-
-  /**
-    layoutStyle describes the current styles to be written to your element
-    based on the layout you defined.  Both layoutStyle and frame reset when
-    you edit the layout property.  Both are read only.
-
-    Computes the layout style settings needed for the current anchor.
-
-    @property {Hash}
-    @readOnly
-  */
-  layoutStyle: function() {
-    var props = {
-      layout:       this.get('layout'),
-      turbo:        this.get('hasAcceleratedLayer'),
-      staticLayout: this.get('useStaticLayout')
-    };
-
-    var calculator = this.get('layoutStyleCalculator');
-    calculator.set(props);
-
-    return calculator.calculate();
-  }.property().cacheable(),
-
-
 
   /**
     The view responsible for laying out this view.  The default version

@@ -1,4 +1,33 @@
-sc_require('views/base');
+sc_require('views/view');
+
+SC.View.reopen(
+  /** @scope SC.View.prototype */ {
+
+  layoutStyleCalculator: null,
+
+  /**
+    layoutStyle describes the current styles to be written to your element
+    based on the layout you defined.  Both layoutStyle and frame reset when
+    you edit the layout property.  Both are read only.
+
+    Computes the layout style settings needed for the current anchor.
+
+    @property {Hash}
+    @readOnly
+  */
+  layoutStyle: function() {
+    var props = {
+      layout:       this.get('layout'),
+      turbo:        this.get('hasAcceleratedLayer'),
+      staticLayout: this.get('useStaticLayout')
+    };
+
+    var calculator = this.get('layoutStyleCalculator');
+    calculator.set(props);
+
+    return calculator.calculate();
+  }.property().cacheable()
+});
 
 SC.View.LayoutStyleCalculator = SC.Object.extend({
 

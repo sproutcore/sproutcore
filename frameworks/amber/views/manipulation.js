@@ -1,3 +1,5 @@
+sc_require("views/view");
+
 SC.View.reopen({
   /**
     Insert the view into the the receiver's childNodes array.

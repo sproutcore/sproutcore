@@ -1,3 +1,5 @@
+sc_require("views/view");
+
 SC.View.reopen({
   // ..........................................................
   // IS ENABLED SUPPORT

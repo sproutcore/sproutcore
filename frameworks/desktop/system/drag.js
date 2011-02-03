@@ -8,6 +8,31 @@ SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
 SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x000F; SC.DRAG_DATA = 0x0008; // includes SC.DRAG_REORDER
 SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20;
 
+// Add draggable and scrollable support to SC.View
+SC.View.reopen(
+  /** @scope SC.View.prototype */ {
+
+  init: function(original) {
+    original();
+
+    // register for drags
+    if (this.get('isDropTarget')) { SC.Drag.addDropTarget(this) ; }
+
+    // register scroll views for autoscroll during drags
+    if (this.get('isScrollable')) { SC.Drag.addScrollableView(this) ; }
+  },
+
+  destroy: function(original) {
+    // unregister for drags
+    if (this.get('isDropTarget')) { SC.Drag.removeDropTarget(this) ; }
+
+    // unregister for autoscroll during drags
+    if (this.get('isScrollable')) { SC.Drag.removeScrollableView(this) ; }
+
+    return original();
+  }
+});
+
 /**
   @class
   
