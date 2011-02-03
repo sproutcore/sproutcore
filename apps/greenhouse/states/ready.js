@@ -138,7 +138,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         var designer = Greenhouse.designController.get('content');
 
         if(designer){
-          designer.designProperties.pushObject("newProperty"); //TODO: generate better name....
+          this._propertyCount = this._propertyCount ? this._propertyCount+1 : 1;
+          designer.designProperties.pushObject("newProperty"+this._propertyCount); //TODO: generate better name....
           designer.propertyDidChange('editableProperties');
         }
       },
