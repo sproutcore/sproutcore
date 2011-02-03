@@ -8,7 +8,7 @@
 
 // ..........................................................
 // createChildViews()
-// 
+//
 module("SC.View#createChildViews");
 
 test("calls createChildView() for each class or string in childViews array", function() {
@@ -17,12 +17,12 @@ test("calls createChildView() for each class or string in childViews array", fun
     childViews: [
       SC.View.extend({ key: 0 }), // class - should be called
       SC.View.create({ key: 1 }), // NOT class - should NOT be called
-      'customClassName'           // string - should be called 
+      'customClassName'           // string - should be called
     ],
 
     // this shuld be used for the 'customClassName' item above
     customClassName: SC.View.extend({ key: 2 }),
-    
+
     // patch to record results...
     createChildView: function(childView) {
       called.push(childView.prototype.key);
@@ -30,10 +30,10 @@ test("calls createChildView() for each class or string in childViews array", fun
       return sc_super();
     }
   });
-  
+
   // createChildViews() is called automatically during create.
   same(called, [0,2], 'called createChildView for correct children');
-  
+
   // make sure childViews array is correct now.
   var cv = v.childViews, len = cv.length, idx;
   for(idx=0;idx<len;idx++) {
@@ -51,7 +51,7 @@ test("should not error when there is a dud view name in childViews list.", funct
     ],
     // this shuld be used for the 'customClassName' item above
     customClassName: SC.View.extend({ key: 2 }),
-    
+
     // patch to record results...
     createChildView: function(childView) {
       called.push(childView.prototype.key);
@@ -59,7 +59,7 @@ test("should not error when there is a dud view name in childViews list.", funct
       return sc_super();
     }
   });
-  
+
   // createChildViews() is called automatically during create.
   same(called, [2], 'called createChildView for correct children');
 });
@@ -72,9 +72,9 @@ test("should not throw error when there is an extra space in the childViews list
     customClassName: SC.View.extend({ key: 2 }),
     customKlassName: SC.View.extend({ key: 3 })
   });
-  
+
   ok(true, "called awake without issue.");
-  
+
 });
 
 test("should not create layer for created child views", function() {
@@ -87,12 +87,12 @@ test("should not create layer for created child views", function() {
 
 // ..........................................................
 // createChildView()
-// 
+//
 
 var view, myViewClass ;
 module("SC.View#createChildView", {
   setup: function() {
-    view = SC.View.create({ page: SC.Object.create() }); 
+    view = SC.View.create({ page: SC.Object.create() });
     myViewClass = SC.View.extend({ isMyView: YES, foo: 'bar' });
   }
 });
@@ -117,6 +117,4 @@ test("should set newView.page to receiver.page unless custom attr is passed", fu
   v = view.createChildView(myViewClass, { page: myPage }) ;
   equals(v.get('page'), myPage, 'v.page == custom page');
 });
-
-
 

@@ -10,14 +10,13 @@
 var content, controller, extra;
 
 var TestObject = SC.Object.extend({
-  title: "test",  
+  title: "test",
   toString: function() { return "TestObject(%@)".fmt(this.get("title")); }
 });
 
-
 // ..........................................................
 // NULL VALUE
-// 
+//
 
 module("SC.ArrayController - null_case", {
   setup: function() {
@@ -25,7 +24,7 @@ module("SC.ArrayController - null_case", {
     controller = SC.ArrayController.create({ content: content });
     extra = TestObject.create({ title: "FOO" });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -53,7 +52,7 @@ test("removeObject", function() {
 test("basic array operations", function() {
   equals(controller.get("length"), 0, 'length should be empty');
   equals(controller.objectAt(0), undefined, "objectAt() should return undefined");
-  
+
   should_throw(function() {
     controller.replace(0,1,[extra]);
   }, Error, 'replace() should throw an error since it is not editable');

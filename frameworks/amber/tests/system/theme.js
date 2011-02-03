@@ -17,16 +17,16 @@ module("SC.Theme", {
       "classNames": ["ace"]
     });
     SC.Theme.addTheme(Ace);
-    
+
     // Dark
     Dark = Ace.subtheme("dark");
-    
+
     // Capsule
     Capsule = Ace.subtheme("capsule");
   },
-  
+
   teardown: function() {
-    
+
   }
 });
 
@@ -73,5 +73,4 @@ test("Calling find on a subtheme instance finds the proper theme.", function(){
   // and now we are testing said specialization
   themeIs(capsule, capsule, ["ace", "dark", "capsule"]);
 });
-
 

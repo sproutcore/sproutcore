@@ -14,7 +14,6 @@ var TestObject = SC.Object.extend({
   toString: function() { return "TestObject(%@)".fmt(this.get("title")); }
 });
 
-
 // ..........................................................
 // allowsSingleContent
 //
@@ -65,7 +64,6 @@ test("removeObject - destroyOnRemoval", function() {
   equals(content.isDestroyed, YES, 'content.isDestroyed should be destroyed');
 });
 
-
 test("basic array READ operations", function() {
   equals(controller.get("length"), 1, 'length should be 1');
   equals(controller.objectAt(0), content, "objectAt(0) should return content");
@@ -80,7 +78,6 @@ test("basic array WRITE operations", function() {
 test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
 });
-
 
 // ..........................................................
 // allowsSingleContent=NO

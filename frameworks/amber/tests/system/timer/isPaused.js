@@ -6,9 +6,9 @@
 module("Timer.isPaused") ;
 
 test("setting isPaused should stop firing", function() {
-  
+
   var firedCount = 0, f1, f2, f3 ;
-  
+
   SC.RunLoop.begin() ;
   var start = SC.RunLoop.currentRunLoop.get('startTime') ;
   var t = SC.Timer.schedule({
@@ -18,7 +18,7 @@ test("setting isPaused should stop firing", function() {
     repeats: YES
   });
   SC.RunLoop.end() ;
-  
+
   // wait for timer to fire twice, then pause it.
   var tries1 = 10 ;
   f1 = function f1() {
@@ -36,7 +36,7 @@ test("setting isPaused should stop firing", function() {
       setTimeout(f2, 300) ;
     }
   };
-  
+
   // once timer paused, make sure it did not fire again.
   f2 = function f2() {
     equals(0, firedCount, 'timer kept firing!') ;
@@ -44,7 +44,7 @@ test("setting isPaused should stop firing", function() {
     t.set('isPaused', NO) ;
     setTimeout(f3, 300) ;
   } ;
-  
+
   // once timer has verified paused, unpause and make sure it fires again.
   var tries2 = 10 ;
   f3 = function f3() {
@@ -55,7 +55,7 @@ test("setting isPaused should stop firing", function() {
         equals(NO, YES, "Timer did not resume") ;
         window.start() ; // starts the test runner
       }
-      
+
     // timer fired, clean up.
     } else {
       t.invalidate() ;
@@ -63,7 +63,7 @@ test("setting isPaused should stop firing", function() {
       window.start() ; // starts the test runner
     }
   };
-  
+
   stop() ; // stops the test runner
   setTimeout(f1, 300) ;
 });

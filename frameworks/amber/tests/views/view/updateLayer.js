@@ -6,12 +6,12 @@
 
 /*global module test equals context ok same */
 
-// NOTE: This file tests both updateLayer() and the related methods that 
+// NOTE: This file tests both updateLayer() and the related methods that
 // will trigger it.
 
 // ..........................................................
 // TEST: updateLayer()
-// 
+//
 module("SC.View#updateLayer");
 
 test("invokes renderLayerSettings() and then updates layer element", function() {
@@ -31,7 +31,7 @@ test("invokes renderLayerSettings() and then updates layer element", function() 
 
 // ..........................................................
 // TEST: updateLayerIfNeeded()
-// 
+//
 var view, callCount ;
 module("SC.View#updateLayerIfNeeded", {
   setup: function() {
@@ -42,11 +42,11 @@ module("SC.View#updateLayerIfNeeded", {
       updateLayer: function() { callCount++; }
     });
     callCount = 0 ;
-    
+
     view.createLayer();
     view.set("layerNeedsUpdate", YES);
   }
-  
+
 });
 
 test("does not call updateLayer if layerNeedsUpdate is NO", function() {
@@ -64,7 +64,7 @@ test("does not call updateLayer if isVisibleInWindow is NO", function() {
 test("does call updateLayer() if isVisible & layerNeedsUpdate", function() {
   equals(view.get('isVisibleInWindow'), YES, 'precond - isVisibleInWindow');
   equals(view.get('layerNeedsUpdate'), YES, 'precond - layerNeedsUpdate');
-  
+
   view.updateLayerIfNeeded();
   ok(callCount > 0, 'updateLayer() did run');
 });
@@ -87,7 +87,7 @@ test("only runs updateLayer() once if called multiple times (since layerNeedsUpd
 
 // ..........................................................
 // TEST: layerNeedsUpdate auto-trigger
-// 
+//
 module("SC.View#layerNeedsUpdate auto-triggers", {
   setup: function() {
     // use fake method to isolate call...
@@ -102,8 +102,8 @@ test("setting layerNeedsUpdate calls updateLayerIfNeeded at end of runloop", fun
   SC.RunLoop.begin();
   view.set('layerNeedsUpdate', YES);
   SC.RunLoop.end();
-  
-  equals(callCount, 1, 'updateLayerIfNeeded did run');  
+
+  equals(callCount, 1, 'updateLayerIfNeeded did run');
 });
 
 test("setting & resetting only triggers updateLayerIfNeeded once per runloop", function() {
@@ -112,13 +112,13 @@ test("setting & resetting only triggers updateLayerIfNeeded once per runloop", f
       .set('layerNeedsUpdate', NO)
       .set('layerNeedsUpdate', YES);
   SC.RunLoop.end();
-  
-  equals(callCount, 1, 'updateLayerIfNeeded did run');  
+
+  equals(callCount, 1, 'updateLayerIfNeeded did run');
 });
 
 // ..........................................................
 // INTEGRATION SCENARIOS
-// 
+//
 
 module("SC.View#updateLayer - integration");
 
@@ -130,19 +130,19 @@ test("layerNeedsUpdate actually triggers updateLayer", function() {
     updateLayer: function() { callCount++; }
   });
   view.createLayer();
-  
+
   SC.RunLoop.begin();
   view.set('layerNeedsUpdate', YES);
   SC.RunLoop.end();
-  
+
   equals(callCount, 1, 'updateLayer did run b/c layerNeedsUpdate is YES');
   callCount = 0 ;
-  
+
   SC.RunLoop.begin();
   view.set('layerNeedsUpdate', YES);
   view.set('layerNeedsUpdate', NO);
   SC.RunLoop.end();
-  
+
   equals(callCount, 0, 'updateLayer did NOT run b/c layerNeedsUpdate is NO');
 });
 

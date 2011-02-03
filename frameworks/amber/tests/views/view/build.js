@@ -14,29 +14,29 @@ module('SC.Buildable', {
         this.called_any = YES;
         this.called_buildIn = YES;
       },
-      
+
       resetBuild: function() {
         this.called_any = YES;
         this.called_resetBuild = YES;
       },
-      
+
       buildOut: function() {
         this.called_any = YES;
         this.called_buildOut = YES;
       },
-      
+
       buildOutDidCancel: function() {
         this.called_any = YES;
         this.called_buildOutDidCancel = YES;
       },
-      
+
       buildInDidCancel: function() {
         this.called_any = YES;
         this.called_buildInDidCancel = YES;
       }
     });
   },
-  
+
   teardown: function() {
   }
 });
@@ -65,7 +65,7 @@ test("buildOutFromView starts build out", function() {
   buildableView.willBuildInToView(parent);
   buildableView.buildInToView(parent);
   buildableView.buildInDidFinish(); // hack this in here, because our implementations above purposefully don't.
-  
+
   ok(!buildableView.isBuildingOut, "Should not yet be building out.");
   buildableView.buildOutFromView(parent);
   ok(buildableView.isBuildingOut, "View should now be building out.");
@@ -78,7 +78,7 @@ test("resetBuildState cancels buildOut", function() {
 
   buildableView.buildOutFromView(parent);
   ok(buildableView.isBuildingOut, "View should now be building out.");
-  
+
   buildableView.resetBuildState(parent);
   ok(!buildableView.isBuildingOut, "View should no longer be building out.");
   ok(buildableView.called_buildOutDidCancel, "Cancel ought to have been called.");

@@ -8,7 +8,7 @@
 
 // ..........................................................
 // createLayer()
-// 
+//
 module("SC.View#createLayer");
 
 test("returns the receiver", function() {
@@ -19,15 +19,15 @@ test("returns the receiver", function() {
 test("calls renderToContext() and sets layer to resulting element", function() {
   var v= SC.View.create({
     tagName: 'span',
-    
+
     renderToContext: function(context, firstTime) {
       context.push("foo");
     }
   });
-  
+
   equals(v.get('layer'), null, 'precondition - has no layer');
   v.createLayer();
-  
+
   var elem = v.get('layer');
   ok(!!elem, 'has element now');
   equals(elem.innerHTML, 'foo', 'has innerHTML from context');
@@ -38,10 +38,10 @@ test("calls renderToContext() and sets layer to resulting element", function() {
 test("invokes didCreateLayer() on receiver and all child views", function() {
   var callCount = 0, mixinCount = 0;
   var v= SC.View.create({
-    
+
     didCreateLayer: function() { callCount++; },
     didCreateLayerMixin: function() { mixinCount++; },
-    
+
     childViews: [SC.View.extend({
       didCreateLayer: function() { callCount++; },
       childViews: [SC.View.extend({
@@ -50,7 +50,7 @@ test("invokes didCreateLayer() on receiver and all child views", function() {
       }), SC.View.extend({ /* no didCreateLayer */ })]
     })]
   });
-  
+
   // verify setup...
   ok(v.didCreateLayer, 'precondition - has root');
   ok(v.childViews[0].didCreateLayer, 'precondition - has firstChild');
@@ -66,7 +66,7 @@ test("generated layer include HTML from child views as well", function() {
   var v = SC.View.create({
     childViews: [ SC.View.extend({ layerId: "foo" })]
   });
-  
+
   v.createLayer();
   ok(Q$('#foo', v.get('layer')).get(0), 'has element with child layerId');
 });
@@ -81,7 +81,7 @@ test("does NOT assign layer to child views immediately", function() {
 
 // ..........................................................
 // USE CASES
-// 
+//
 
 // when view is first created, createLayer is NOT called
 

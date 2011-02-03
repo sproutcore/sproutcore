@@ -11,18 +11,18 @@
   A Page object is used to store a set of views that can be lazily configured
   as needed.  The page object works by overloading the get() method.  The
   first time you try to get the page
-  
+
   @extends SC.Object
 */
 SC.Page = SC.Object.extend(
 /** @scope SC.Page.prototype */ {
-  
+
   /**
     When you create a page, you can set it's "owner" property to an
     object outside the page definition. This allows views in the page
     to use the owner object as a target, (as well as other objects
     accessible through the owner object). E.g.
-    
+
     {{{
       myButton: SC.ButtonView.design({
         title: 'Click me',
@@ -30,11 +30,11 @@ SC.Page = SC.Object.extend(
         action: 'buttonClicked'
       })
     }}}
-    
+
     Usually, you'll set 'owner' to the object defined in core.js.
   */
   owner: null,
-  
+
   get: function(key) {
     var value = this[key] ;
     if (value && value.isClass) {
@@ -43,13 +43,13 @@ SC.Page = SC.Object.extend(
       return value ;
     } else return sc_super();
   },
-  
+
   /**
-    Finds all views defined on this page instances and builds them.  This is 
+    Finds all views defined on this page instances and builds them.  This is
     a quick, brute force way to wake up all of the views in a page object.  It
-    is not generally recommended. Instead, you should use get() or getPath() 
+    is not generally recommended. Instead, you should use get() or getPath()
     to retrieve views and rely on the lazy creation process to set them up.
-    
+
     @return {SC.Page} receiver
   */
   awake: function() {
@@ -90,19 +90,18 @@ SC.Page = SC.Object.extend(
   }
 
   //needsDesigner: YES,
-  
+
   //inDesignMode: YES
-    
+
 }) ;
 
 // ..........................................................
 // SUPPORT FOR LOADING PAGE DESIGNS
-// 
+//
 
 /** Calling design() on a page is the same as calling create() */
 SC.Page.design = SC.Page.create ;
 
 /** Calling localization returns passed attrs. */
 SC.Page.localization = function(attrs) { return attrs; };
-
 

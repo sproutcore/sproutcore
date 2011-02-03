@@ -25,7 +25,7 @@ var commonSetup = {
       layout: { top: 0, right: 0, width: 200, height: 200, zIndex: 100 }
     });
     pane.append();
-    
+
     view = SC.View.create({
       backgroundColor: '#888',
       layout: { left: 0, top: 0, height: 100, width: 100 }
@@ -56,7 +56,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, 1);
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s linear', 'add transition');  
+    equals(transitionFor(view), 'left 1s linear', 'add transition');
   });
 
   test("callbacks work in general", function(){
@@ -176,7 +176,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
     equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'add transition');
     equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'has both transforms');
-    equals(45, view.get('layout').rotateX, 'rotateX is 45deg'); 
+    equals(45, view.get('layout').rotateX, 'rotateX is 45deg');
   });
 
   test("should handle conflicting transform animations", function(){
@@ -207,7 +207,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.invokeLater('animate', 1, { top: 100, scale: 2 }, 0.5);
     SC.RunLoop.end();
-    
+
     setTimeout(function(){
       start();
       equals(view.get('layout').animateTop, undefined, "animateTop is undefined");

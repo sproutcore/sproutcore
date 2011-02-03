@@ -277,7 +277,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     var platformTransform = "-" + SC.platform.cssPrefix + "-transform";
 
-
     // animate({ scale: 2, rotateX: 90 })
     // both scale and rotateX are transformProperties
     // so they both actually are animating the same CSS key, i.e. -webkit-transform
@@ -342,7 +341,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     this._handleMistakes(layout);
 
-
     // X DIRECTION
 
     if (this.hasLeft || this.hasRight || !this.hasCenterX) {
@@ -351,7 +349,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       this._calculateCenter("x");
     }
 
-
     // Y DIRECTION
 
     if (this.hasTop || this.hasBottom || !this.hasCenterY) {
@@ -359,7 +356,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     } else {
       this._calculateCenter("y");
     }
-
 
     // these properties pass through unaltered (after prior normalization)
     ret.minWidth   = this.minWidth;
@@ -375,7 +371,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     this._calculateTransforms(translateLeft, translateTop);
     this._calculateAnimations(translateLeft, translateTop);
-
 
     // convert any numbers into a number + "px".
     for(key in ret) {
@@ -487,7 +482,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
       if (layer) { layer.style[SC.platform.domCSSPrefix+"Transition"] = updatedCSS.join(', '); }
     }
-
 
     var layout = this.getPath('view.layout'),
         idx;

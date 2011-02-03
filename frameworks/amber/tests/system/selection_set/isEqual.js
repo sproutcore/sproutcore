@@ -23,10 +23,9 @@ test("set.isEqual(null)", function() {
   ok(!set1.isEqual(null), 'null should return NO');
 });
 
-
 test("set1.isEqual(set2)", function() {
   ok(set1.isEqual(set2), 'same content should return YES');
-  
+
   set1.add(content, 4,4);
   set2.add(content, 4,4);
   ok(set1.isEqual(set2), 'same content should return YES');
@@ -38,7 +37,7 @@ test("set1.isEqual(set2)", function() {
   set1.remove(content, 4,4);
   set2.remove(content, 4,4);
   ok(set1.isEqual(set2), 'same content should return YES');
-  
+
 });
 
 test("multiple content objects", function() {
@@ -51,7 +50,7 @@ test("multiple content objects", function() {
 
   set2.add(content,4,4);
   ok(set1.isEqual(set2), 'should not be same when set2 has both content');
-  
+
 });
 
 test("set1.isEqual(set2) after set2 is filled and emptied", function() {

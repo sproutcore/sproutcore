@@ -221,7 +221,6 @@ SC.View.reopen(
     method will be called to allow you to update the existing HTML
     representation.
 
-
     The default implementation of this method calls renderChildViews().
 
     For backwards compatibility, this method will also call the appropriate

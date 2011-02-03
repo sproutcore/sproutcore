@@ -171,7 +171,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       this.windowSizeDidChange(null, wDim);
     }
 
-
     // If there is a minWidth or minHeight set on the pane, take that
     // into account when calculating dimensions.
 
@@ -551,7 +550,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     return this ;
   },
 
-
   /**
     Called just after the pane has lost its keyPane status.  Notifies the
     current keyView of the change.  The keyView can use this method to do any
@@ -901,7 +899,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(current);
       }
-
 
       // For historical reasons, we'll also layout the child views if
       // necessary.

@@ -138,7 +138,7 @@ SC.Theme = {
     } else {
       result.themes = SC.beget(this.themes);
     }
-    
+
     // we also have private ("invisible") child themes; look at invisibleSubtheme
     // method.
     result._privateThemes = {};
@@ -179,21 +179,21 @@ SC.Theme = {
     // and return the theme class
     return t;
   },
-  
+
   /**
     Semi-private, only used by SC.View to create "invisible" subthemes. You
     should never need to call this directly, nor even worry about.
-    
+
     Invisible subthemes are only available when find is called _on this theme_;
     if find() is called on a child theme, it will _not_ locate this theme.
-    
+
     The reason for "invisible" subthemes is that SC.View will create a subtheme
-    when it finds a theme name that doesn't exist. For example, imagine that you 
+    when it finds a theme name that doesn't exist. For example, imagine that you
     have a parent view with theme "base", and a child view with theme "popup".
     If no "popup" theme can be found inside "base", SC.View will call
     base.subtheme. This will create a new theme with the name "popup",
     derived from "base". Everyone is happy.
-    
+
     But what happens if you then change the parent theme to "ace"? The view
     will try again to find "popup", and it will find it-- but it will still be
     a child theme of "base"; SC.View _needs_ to re-subtheme it, but it won't
@@ -205,11 +205,11 @@ SC.Theme = {
 
     // add to our set of themes
     this._privateThemes[name] = t;
-    
+
     // and return the theme class
     return t;
   },
-  
+
   //
   // THEME MANAGEMENT
   //

@@ -282,7 +282,6 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     return this ;
   },
 
-
   /**
     Returns YES if the selection contains the named index, range of indexes.
 
@@ -315,7 +314,6 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     if (!set) return NO ;
     return set.intersects(start, length);
   },
-
 
   // ..........................................................
   // OBJECT-BASED API
@@ -442,7 +440,6 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     return NO ;
   },
-
 
   // ..........................................................
   // GENERIC HELPER METHODS

@@ -6,22 +6,22 @@
 // ==========================================================================
 
 SC.json = {
-  
+
   /**
     Encodes an object graph to a JSON output.  Beware that JSON cannot deal
     with circular references.  If you try to encode an object graph with
     references it could hang your browser.
-    
+
     @param {Object} root object graph
     @returns {String} encode JSON
   */
   encode: function(root) {
     return JSON.stringify(root) ;
   },
-  
+
   /**
     Decodes a JSON file in a safe way, returning the generated object graph.
-  
+
     @param {String} encoded JSON
     @returns {Object} object graph or Error if there was a problem.
   */
@@ -41,13 +41,11 @@ SC.json = {
 
     See http://www.JSON.org/js.html
 
-
     This code should be minified before deployment.
     See http://javascript.crockford.com/jsmin.html
 
     USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
     NOT CONTROL.
-
 
     This file creates a global JSON object containing two methods: stringify
     and parse.
@@ -122,7 +120,6 @@ SC.json = {
             text = JSON.stringify(['e', {pluribus: 'unum'}]);
             // text is '["e",{"pluribus":"unum"}]'
 
-
             text = JSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
             // text is '[\n\t"e",\n\t{\n\t\t"pluribus": "unum"\n\t}\n]'
 
@@ -131,7 +128,6 @@ SC.json = {
                     'Date(' + this[key] + ')' : value;
             });
             // text is '["Date(---current time---)"]'
-
 
         JSON.parse(text, reviver)
             This method parses a JSON text to produce an object or array.
@@ -174,7 +170,6 @@ SC.json = {
                 return value;
             });
 
-
     This is a reference implementation. You are free to copy, modify, or
     redistribute.
 */
@@ -187,7 +182,6 @@ SC.json = {
     lastIndex, length, parse, prototype, push, replace, slice, stringify,
     test, toJSON, toString, valueOf
 */
-
 
 // Create a JSON object only if one does not already exist. We create the
 // methods in a closure to avoid creating global variables.
@@ -238,7 +232,6 @@ if (!this.JSON) {
         },
         rep;
 
-
     function quote(string) {
 
 // If the string contains no control characters, no quote characters, and no
@@ -255,7 +248,6 @@ if (!this.JSON) {
             }) + '"' :
             '"' + string + '"';
     }
-
 
     function str(key, holder) {
 
@@ -429,7 +421,6 @@ if (!this.JSON) {
         };
     }
 
-
 // If the JSON object does not yet have a parse method, give it one.
 
     if (typeof JSON.parse !== 'function') {
@@ -460,7 +451,6 @@ if (!this.JSON) {
                 }
                 return reviver.call(holder, key, value);
             }
-
 
 // Parsing happens in four stages. In the first stage, we replace certain
 // Unicode characters with escape sequences. JavaScript handles many characters

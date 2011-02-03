@@ -117,8 +117,6 @@ SC.ANIMATABLE_PROPERTIES = {
   rotateZ: YES
 };
 
-
-
 /**
   @class
 
@@ -338,7 +336,6 @@ SC.View.reopen(
     return this;
   },
 
-
   /** @private
     Whenever the view’s visibility changes, we need to recompute whether it is
     actually visible inside the window (a view is only visible in the window
@@ -356,8 +353,6 @@ SC.View.reopen(
 
     this.recomputeIsVisibleInWindow();
   }.observes('isVisible'),
-
-
 
   // ..........................................................
   // CHILD VIEW SUPPORT
@@ -821,8 +816,6 @@ SC.View.reopen(
     this.set('layer', null) ;
   },
 
-
-
   /**
     @private
 
@@ -1225,7 +1218,6 @@ SC.View.reopen(
     return this.get('parentView') ;
   }.property('parentView').cacheable(),
 
-
   /** @property
     Set to YES if your view is willing to accept first responder status.  This
     is used when calculcating key responder loop.
@@ -1448,7 +1440,6 @@ SC.View.reopen(
     // Resume notification as usual.
     sc_super();
   },
-
 
   /**
     This convenience method will take the current layout, apply any changes
@@ -1719,7 +1710,6 @@ SC.View.reopen(
       return null; // can't compute
     }
 
-
     if (!pdim) { pdim = this.computeParentDimensions(layout) ; }
     dH = pdim.height;
     dW = pdim.width;
@@ -1988,7 +1978,6 @@ SC.View.reopen(
         (layout.width !== undefined) && (layout.height !== undefined)
       );
 
-
       // If it's fixed, our frame still could have changed if it's fixed to a
       // percentage of the parent.
       if (isFixed) {
@@ -2012,8 +2001,6 @@ SC.View.reopen(
       this.viewDidResize();
     }
   },
-
-
 
   /**
     This method is invoked on your view when the view resizes due to a layout
@@ -2138,7 +2125,6 @@ SC.View.reopen(
         currentLayout  = this.get('layout'),
         didResize      = YES,
         previousWidth, previousHeight, currentWidth, currentHeight;
-
 
     // Handle old style rotation
     if (!SC.none(currentLayout.rotate)) {
@@ -2869,7 +2855,6 @@ SC.View._RenderDelegateProxy = {
     return ret;
   },
 
-
   /**
    * Provides the render delegate with any property it needs.
    *
@@ -2922,5 +2907,4 @@ SC.View._RenderDelegateProxy = {
 
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
-
 

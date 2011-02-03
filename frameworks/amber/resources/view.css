@@ -2,8 +2,8 @@
   These CSS styles apply to all views.
 */
 
-/* default behaviors for all views: 
- - use "pointer" cursor unless otherwise required 
+/* default behaviors for all views:
+ - use "pointer" cursor unless otherwise required
  - clip overflow
 */
 .sc-view {
@@ -52,6 +52,6 @@
 
 /*User the following to know what view has the focus in webkit*/
 /*.sc-view .focus {
-  outline: auto 5px -webkit-focus-ring-color; 
+  outline: auto 5px -webkit-focus-ring-color;
   outline-offset: -2px;
 }*/

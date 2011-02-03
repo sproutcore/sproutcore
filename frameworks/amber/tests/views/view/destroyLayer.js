@@ -10,18 +10,18 @@ module("SC.View#destroyLayer");
 
 test("it if has no layer, does nothing", function() {
   var callCount = 0;
-  var view = SC.View.create({ 
+  var view = SC.View.create({
     willDestroyLayer: function() { callCount++; }
   });
   ok(!view.get('layer'), 'precond - does NOT have layer');
-  
+
   view.destroyLayer();
   equals(callCount, 0, 'did not invoke callback');
 });
 
 test("if it has a layer, calls willDestroyLayer on receiver and child views then deletes the layer", function() {
   var callCount = 0;
-  
+
   var view = SC.View.create({
     willDestroyLayer: function() { callCount++; },
     childViews: [SC.View.extend({
@@ -33,9 +33,9 @@ test("if it has a layer, calls willDestroyLayer on receiver and child views then
   });
   view.createLayer();
   ok(view.get('layer'), 'precond - view has layer');
-  
+
   view.destroyLayer();
-  equals(callCount, 2, 'invoked destroy layer');  
+  equals(callCount, 2, 'invoked destroy layer');
   ok(!view.get('layer'), 'view no longer has layer');
 });
 
@@ -46,11 +46,11 @@ test("if it has a layer, calls willDestroyLayerMixin on receiver and child views
   var mixinA = {
     willDestroyLayerMixin: function() { callCount++; }
   };
-  
+
   var mixinB = {
     willDestroyLayerMixin: function() { callCount++; }
   };
-  
+
   var view = SC.View.create(mixinA, mixinB, {
     childViews: [SC.View.extend(mixinA, mixinB, {
       childViews: [SC.View.extend(mixinA)]
@@ -58,7 +58,7 @@ test("if it has a layer, calls willDestroyLayerMixin on receiver and child views
   });
   view.createLayer();
   view.destroyLayer();
-  equals(callCount, 5, 'invoked willDestroyLayerMixin on all mixins');  
+  equals(callCount, 5, 'invoked willDestroyLayerMixin on all mixins');
 });
 
 test("returns receiver", function() {
@@ -69,15 +69,14 @@ test("returns receiver", function() {
 test("removes layer from parentNode if in DOM", function() {
   var view = SC.View.create();
   var layer = view.createLayer().get('layer');
-  
+
   ok(layer, 'precond - has layer');
   document.body.appendChild(layer); // add to document body
-  
+
   view.destroyLayer();
 
   if(layer.parentNode) equals(layer.parentNode.nodeType, 11, 'layer no longer in parent node');
   else equals(layer.parentNode, null, 'layer no longer in parent node');
   layer = null; // cleanup
 });
-
 

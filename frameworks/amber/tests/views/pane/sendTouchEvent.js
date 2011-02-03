@@ -17,7 +17,7 @@ module("SC.Pane#sendTouchEvent - single view", {
       equals(theEvent, evt, 'should pass event');
       return YES;
     };
-    
+
     defaultResponder = SC.Object.create({ defaultEvent: handler });
     pane = SC.Pane.create({
       defaultResponder: defaultResponder,
@@ -35,8 +35,8 @@ module("SC.Pane#sendTouchEvent - single view", {
     ok(barView.barEvent, 'has barEvent handler');
 
     evt = SC.Object.create(); // mock
-  }, 
-  
+  },
+
   teardown: function() {
     pane = fooView = barView = defaultResponder = evt = null ;
   }
@@ -72,10 +72,8 @@ test("when invoked with target = nested view", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
-  
+
 });
-
-
 
 test("when invoked with target = middle view", function() {
   var handler ;
@@ -87,13 +85,12 @@ test("when invoked with target = middle view", function() {
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendTouchEvent('fooEvent', evt, fooView);
   equals(callCount, 1, 'should invoke handler');
   equals(handler[0], fooView, 'should return responder that handled event');
   equals(handler.get('length'), 1, 'should only be handled by one view');
-  
 
   // test event handler on default responder
   callCount = 0;
@@ -101,7 +98,6 @@ test("when invoked with target = middle view", function() {
   equals(callCount, 1, 'should invoke handler');
   equals(handler[0], defaultResponder, 'should return responder that handled event');
   equals(handler.get('length'), 1, 'should only be handled by one view');
-  
 
   // test unhandled event handler
   callCount = 0;
@@ -109,10 +105,8 @@ test("when invoked with target = middle view", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
-  
+
 });
-
-
 
 test("when invoked with target = pane", function() {
   var handler ;
@@ -124,7 +118,7 @@ test("when invoked with target = pane", function() {
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendTouchEvent('fooEvent', evt, pane);
   equals(callCount, 0, 'should not invoke handler');
@@ -144,17 +138,15 @@ test("when invoked with target = pane", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
-  
+
 });
-
-
 
 test("when invoked with target = null", function() {
   var handler ;
 
   // should start @ first responder
   pane.firstResponder = fooView;
-  
+
   // test event handler on child view of target
   callCount = 0;
   handler = pane.sendTouchEvent('barEvent', evt);
@@ -162,7 +154,7 @@ test("when invoked with target = null", function() {
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendTouchEvent('fooEvent', evt);
   equals(callCount, 1, 'should invoke handler');
@@ -180,7 +172,7 @@ test("when invoked with target = null", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(SC.typeOf(handler), SC.T_ARRAY, 'should return array if no handlers');
   equals(handler.get('length'), 0, 'array should be empty');
-  
+
 });
 
 module("SC.Pane#sendTouchEvent - multiple views", {
@@ -192,13 +184,13 @@ module("SC.Pane#sendTouchEvent - multiple views", {
       equals(theEvent, evt, 'should pass event');
       return YES;
     };
-    
+
     handlerNo = function(theEvent) {
       callCount++ ;
       equals(theEvent, evt, 'should pass event');
       return NO;
     };
-    
+
     handlerMixed = function(theEvent) {
       callCount++ ;
       equals(theEvent, evt, 'should pass event');
@@ -224,8 +216,8 @@ module("SC.Pane#sendTouchEvent - multiple views", {
     ok(barView.barEvent, 'has barEvent handler');
 
     evt = SC.Object.create(); // mock
-  }, 
-  
+  },
+
   teardown: function() {
     pane = fooView = barView = defaultResponder = evt = null ;
   }

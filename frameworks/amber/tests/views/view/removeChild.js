@@ -9,17 +9,17 @@
 // .......................................................
 // removeChild()
 //
-  
+
 var parent, child;
 module("SC.View#removeChild", {
-	setup: function() {
-		parent = SC.View.create({ childViews: [SC.View] });
-		child = parent.childViews[0];
-	}
+  setup: function() {
+    parent = SC.View.create({ childViews: [SC.View] });
+    child = parent.childViews[0];
+  }
 });
 
 test("returns receiver", function() {
-	equals(parent.removeChild(child), parent, 'receiver');
+  equals(parent.removeChild(child), parent, 'receiver');
 });
 
 test("removes child from parent.childViews array", function() {
@@ -35,11 +35,11 @@ test("sets parentView property to null", function() {
 });
 
 test("does nothing if passed null", function() {
-  
+
   // monkey patch callbacks to make sure nothing runs.
   var callCount = 0;
   parent.willRemoveChild = parent.didRemoveChild = function() { callCount++; };
-  
+
   parent.removeChild(null);
   equals(callCount, 0, 'did not invoke callbacks');
 });
@@ -53,7 +53,7 @@ test("invokes child.willRemoveFromParent before removing if defined", function()
     equals(child.get('parentView'), parent, 'still in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
@@ -64,16 +64,15 @@ test("invokes parent.willRemoveChild before removing if defined", function() {
   var callCount = 0;
   parent.willRemoveChild = function(view) {
     equals(view, child, 'passed child as param');
-    
+
     // verify invoked BEFORE removal
     equals(child.get('parentView'), parent, 'still in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
-
 
 test("invokes child.didRemoveFromParent AFTER removing if defined", function() {
 
@@ -86,7 +85,7 @@ test("invokes child.didRemoveFromParent AFTER removing if defined", function() {
     ok(!child.get('parentView'), 'no longer in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
@@ -97,24 +96,24 @@ test("invokes parent.didRemoveChild before removing if defined", function() {
   var callCount = 0;
   parent.didRemoveChild = function(view) {
     equals(view, child, 'passed child as param');
-    
+
     // verify invoked BEFORE removal
     ok(!child.get('parentView'), 'no longer in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
 
 test("invokes parentViewDidChange() on child view.  this is used by the view internals to update layer loc", function() {
 
-	// monkey patch to test
-	var callCount = 0;
-	child.parentViewDidChange = function() { callCount++; };
-	
-	parent.removeChild(child);
-	equals(callCount, 1, 'invoked parentViewDidChange');
+  // monkey patch to test
+  var callCount = 0;
+  child.parentViewDidChange = function() { callCount++; };
+
+  parent.removeChild(child);
+  equals(callCount, 1, 'invoked parentViewDidChange');
 });
 
 // VERIFY LAYER CHANGES ARE DEFERRED
@@ -122,11 +121,11 @@ test("should not move layer immediately", function() {
 
   parent.createLayer();
 
-	var parentLayer = parent.get('layer'), childLayer = child.get('layer');  
+  var parentLayer = parent.get('layer'), childLayer = child.get('layer');
   ok(parentLayer, 'precond - parent has layer');
   ok(childLayer, 'precond - child has layer');
   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
-  
+
   parent.removeChild(child);
   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
 });
@@ -136,7 +135,7 @@ test("should not move layer immediately", function() {
 //
 var view;
 module("SC.View#removeAllChildren", {
- setup: function() { 
+ setup: function() {
   view = SC.View.create({
     childViews: [SC.View, SC.View, SC.View]
   });
@@ -145,15 +144,15 @@ module("SC.View#removeAllChildren", {
 
 test("removes all child views", function() {
   equals(view.childViews.length, 3, 'precond - has child views');
-  
+
   view.removeAllChildren();
   equals(view.childViews.length, 0, 'removed all children');
 });
 
 test("returns receiver", function() {
-	equals(view.removeAllChildren(), view, 'receiver');
+  equals(view.removeAllChildren(), view, 'receiver');
 });
-  
+
 // .......................................................
 // removeFromParent()
 //
@@ -163,27 +162,25 @@ test("removes view from parent view", function() {
   var parent = SC.View.create({ childViews: [SC.View] });
   var child = parent.childViews[0];
   ok(child.get('parentView'), 'precond - has parentView');
-  
+
   child.removeFromParent();
   ok(!child.get('parentView'), 'no longer has parentView');
   ok(parent.childViews.indexOf(child)<0, 'no longer in parent childViews');
 });
 
 test("returns receiver", function() {
-	equals(child.removeFromParent(), child, 'receiver');
+  equals(child.removeFromParent(), child, 'receiver');
 });
 
 test("does nothing if not in parentView", function() {
   var callCount = 0;
   var child = SC.View.create();
 
-	// monkey patch for testing...
-	child.willRemoveFromParent = function() { callCount++; };  
-	ok(!child.get('parentView'), 'precond - has no parent');
-	
-	child.removeFromParent();
-	equals(callCount, 0, 'did not invoke callback');
+  // monkey patch for testing...
+  child.willRemoveFromParent = function() { callCount++; };
+  ok(!child.get('parentView'), 'precond - has no parent');
+
+  child.removeFromParent();
+  equals(callCount, 0, 'did not invoke callback');
 });
-
-
 

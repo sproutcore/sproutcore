@@ -10,10 +10,10 @@ SC.mixin(SC.browser, (function() {
   var viewport  = window.innerWidth,
       browser = SC.browser,
       standalone = navigator.standalone;
-  
+
   // Add more SC-like descriptions...
   SC.extend(browser, /** @scope SC.browser */ {
-    
+
     isOpera: !!browser.opera,
     isIe: !!browser.msie,
     isIE: !!browser.msie,
@@ -27,7 +27,7 @@ SC.mixin(SC.browser, (function() {
     /**
       The current browser name.  This is useful for switch statements. */
     current: browser.msie ? 'msie' : browser.mozilla ? 'mozilla' : browser.safari ? 'safari' : browser.opera ? 'opera' : 'unknown',
-    
+
     /**
       Pass any number of arguments, and this will check them against the browser
       version split on ".".  If any of them are not equal, return the inequality.
@@ -47,12 +47,12 @@ SC.mixin(SC.browser, (function() {
         if (isNaN(check)) return 0;
         if (check !== 0) return check;
       }
-      
+
       return 0;
     }
-    
+
   }) ;
-  
+
   return browser ;
 
 })() );

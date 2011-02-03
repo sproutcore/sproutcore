@@ -15,17 +15,17 @@ module("SC.Pane#layout", {
     });
     pane.append();
   },
-  
+
   teardown: function() {
     pane.remove();
   }
 });
 
-test("make sure that a call to adjust actually adjusts the view's size", function() {  
+test("make sure that a call to adjust actually adjusts the view's size", function() {
   SC.run(function() {
     pane.adjust({ width: 100, height: 50 });
   });
-  
+
   equals(pane.$()[0].style.width, '100px', 'width should have been adjusted');
   equals(pane.$()[0].style.height, '50px', 'height should have been adjusted');
 });

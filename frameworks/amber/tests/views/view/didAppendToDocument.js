@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start Q$ */
 
-
 var pane, view;
 
 module("SC.View#didAppendToDocument");
@@ -32,8 +31,8 @@ test("Check that didAppendToDocument gets called at the right moment", function(
    view  = pane.childViews[0];
    view.displayDidChange();
    SC.RunLoop.begin().end();
-   equals(counter, 2, "");  
- 
+   equals(counter, 2, "");
+
    var additionalView = SC.View.extend({
      didAppendToDocument: function(){
        counter++;
@@ -41,8 +40,8 @@ test("Check that didAppendToDocument gets called at the right moment", function(
    });
    additionalView = additionalView.create();
    pane.appendChild(additionalView);
- 
+
    SC.RunLoop.begin().end();
-   equals(counter, 3, "");  
+   equals(counter, 3, "");
    pane.remove();
 });

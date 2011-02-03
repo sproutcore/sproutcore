@@ -63,7 +63,6 @@ SC.platform = {
   */
   standalone: !!navigator.standalone,
 
-
   /**
     Prefix for browser specific CSS attributes. Calculated later.
   */
@@ -234,14 +233,14 @@ SC.platform = {
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
   }(),
-  
+
   /**
     Wether the browser supports HTML5 history.
   */
   supportsHistory: function() {
     return !!(window.history && window.history.pushState);
   }(),
-  
+
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
   }()

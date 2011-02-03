@@ -14,7 +14,6 @@ var TestObject = SC.Object.extend({
   toString: function() { return "TestObject(%@)".fmt(this.get("title")); }
 });
 
-
 // ..........................................................
 // EMPTY
 //
@@ -79,7 +78,6 @@ test("basic array WRITE operations", function() {
 test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
 });
-
 
 // ..........................................................
 // NON-EMPTY ARRAY
@@ -202,7 +200,6 @@ test("verify rangeObserver fires when content is deleted", function() {
 
   equals(cnt, 1, 'range observer should have fired once');
 });
-
 
 // ..........................................................
 // VERIFY SC.ARRAY COMPLIANCE

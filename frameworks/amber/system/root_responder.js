@@ -52,7 +52,7 @@ SC.RootResponder = SC.Object.extend({
     pane attaches or detaches, it will update itself in this array.
   */
   panes: null,
-  
+
   init: function() {
     sc_super();
     this.panes = SC.Set.create();
@@ -226,7 +226,6 @@ SC.RootResponder = SC.Object.extend({
       }
     }
 
-
     // If we found an appropriate candidate, make it the new key pane.
     // Otherwise, make the main pane the key pane (if it accepts it).
     if (!newKeyPane) {
@@ -307,12 +306,12 @@ SC.RootResponder = SC.Object.extend({
     // calculate new window size...
     var newSize = this.computeWindowSize(), oldSize = this.get('currentWindowSize');
     this.set('currentWindowSize', newSize); // update size
-    
+
     if (!SC.rectsEqual(newSize, oldSize)) {
       //Notify orientation change. This is faster than waiting for the orientation
       //change event.
       if(SC.platform.touch){
-        var body = SC.$(document.body);    
+        var body = SC.$(document.body);
         if(newSize.height>= newSize.width) {
           SC.device.set('orientation', 'portrait');
         }
@@ -343,7 +342,7 @@ SC.RootResponder = SC.Object.extend({
     Handle window focus.  Change hasFocus and add sc-focus CSS class
     (removing sc-blur).  Also notify panes.
   */
-  focus: function() { 
+  focus: function() {
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
@@ -353,25 +352,24 @@ SC.RootResponder = SC.Object.extend({
     }
     return YES ; // allow default
   },
-  
+
   /**
     Handle window focus event for IE. Listening to the focus event is not
-    reliable as per every focus event you receive you inmediately get a blur 
+    reliable as per every focus event you receive you inmediately get a blur
     event (Only on IE of course ;)
   */
   focusin: function() {
     this.focus();
   },
-  
+
   /**
     Handle window blur event for IE. Listening to the focus event is not
-    reliable as per every focus event you receive you inmediately get a blur 
+    reliable as per every focus event you receive you inmediately get a blur
     event (Only on IE of course ;)
   */
   focusout: function() {
     this.blur();
   },
-
 
   /**
     Handle window focus.  Change hasFocus and add sc-focus CSS class (removing
@@ -428,7 +426,7 @@ SC.RootResponder = SC.Object.extend({
   */
   sendAction: function( action, target, sender, pane, context, firstResponder) {
     target = this.targetForAction(action, target, sender, pane, firstResponder) ;
-    
+
     // HACK: If the target is a ResponderContext, forward the action.
     if (target && target.isResponderContext) {
       return !!target.sendAction(action, sender, context, firstResponder);
@@ -437,7 +435,7 @@ SC.RootResponder = SC.Object.extend({
 
   _responderFor: function(target, methodName, firstResponder) {
     var defaultResponder = target ? target.get('defaultResponder') : null;
-    
+
     if (target) {
       target = firstResponder || target.get('firstResponder') || target;
       do {
@@ -489,7 +487,7 @@ SC.RootResponder = SC.Object.extend({
     // 2. an explicit target was passed...
     if (target) {
       if (SC.typeOf(target) === SC.T_STRING) {
-        target =  SC.objectForPropertyPath(target) || 
+        target =  SC.objectForPropertyPath(target) ||
                   SC.objectForPropertyPath(target, sender);
       }
 
@@ -506,7 +504,7 @@ SC.RootResponder = SC.Object.extend({
 
     // 3. an explicit pane was passed...
     if (pane) {
-      target = this._responderFor(pane, methodName, firstResponder); 
+      target = this._responderFor(pane, methodName, firstResponder);
       if (target) return target;
     }
 
@@ -621,7 +619,7 @@ SC.RootResponder = SC.Object.extend({
     // handle basic events
     this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mousemove selectstart contextmenu'.w(), document)
         .listenFor('resize'.w(), window);
-        
+
     if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
     else this.listenFor('focus blur'.w(), window);
 
@@ -674,8 +672,6 @@ SC.RootResponder = SC.Object.extend({
     var mousewheel = SC.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel';
     SC.Event.add(document, mousewheel, this, this.mousewheel);
 
-
-
     // If the browser is identifying itself as a touch-enabled browser, but
     // touch events are not present, assume this is a desktop browser doing
     // user agent spoofing and simulate touch events automatically.
@@ -706,7 +702,7 @@ SC.RootResponder = SC.Object.extend({
           // Iterate through the touches we're currently tracking
           for (touch in touches) {
             if (touches[touch]._rescuedElement) continue; // only do once
-            
+
             target = elem = touches[touch].target;
 
             // Travel up the hierarchy looking for the document body
@@ -721,11 +717,11 @@ SC.RootResponder = SC.Object.extend({
               // Actually clone this node and replace it in the original
               // layer if needed
               if (target.parentNode && target.cloneNode) {
-                var clone = target.cloneNode(true);  
+                var clone = target.cloneNode(true);
                 target.parentNode.replaceChild(clone, target);
                 target.swapNode = clone; // save for restore later
               }
-              
+
               // Create a holding pen if needed for these views...
               var pen = SC.touchHoldingPen;
               if (!pen) {
@@ -740,7 +736,7 @@ SC.RootResponder = SC.Object.extend({
               // // In MobileSafari, our target can sometimes
               // // be a text node, so make sure we handle that case.
               // textNode = (target.nodeType === 3);
-              // 
+              //
               // if (textNode && target.parentElement) {
               //   // Hide the text node's parent element if it has one
               //   target = target.parentElement;
@@ -753,10 +749,10 @@ SC.RootResponder = SC.Object.extend({
               //   // Standard Element, just toggle its display off.
               //   target.style.display = 'none';
               // }
-              // 
+              //
               // // Now move the captured and hidden element back to the DOM.
               // document.body.appendChild(target);
-              
+
               // ...and save the element to be garbage collected on
               // touchEnd.
               touches[touch]._rescuedElement = target;
@@ -766,15 +762,15 @@ SC.RootResponder = SC.Object.extend({
       };
       SC.RunLoop.prototype.endRunLoop = patch;
     }
-    
+
     // Orientation changes are not being reliably reported with iPhone 0S 3
     // We do this initialization to double check the right orientation.
-    // This happens if the orientation has changed from the moment the app 
+    // This happens if the orientation has changed from the moment the app
     // started loading until the app is set until isReady
     if(SC.platform.touch){
       var newSize = this.computeWindowSize(),
           body = SC.$(document.body);
-    
+
       if(newSize.height>= newSize.width) {
         SC.device.set('orientation', 'portrait');
       }
@@ -783,7 +779,7 @@ SC.RootResponder = SC.Object.extend({
       }
     }
   },
-  
+
   // ................................................................................
   // TOUCH SUPPORT
   //
@@ -833,21 +829,21 @@ SC.RootResponder = SC.Object.extend({
   */
   averagedTouchesForView: function(view, added) {
     var t = this.touchesForView(view),
-    
+
     // cache per view to avoid gc
     averaged = view._scrr_averagedTouches || (view._scrr_averagedTouches = {});
-    
+
     if ((!t || t.length === 0) && !added) {
       averaged.x = 0;
       averaged.y = 0;
       averaged.d = 0;
       averaged.touchCount = 0;
-      
+
     } else {
       // make array of touches using cached array
       var touches = this._averagedTouches_touches || (this._averagedTouches_touches = []);
       touches.length = 0;
-    
+
       // copy touches into array
       if (t) {
         var i, len = t.length;
@@ -888,26 +884,26 @@ SC.RootResponder = SC.Object.extend({
 
       // average
       ad /= len;
-    
+
       averaged.x = ax;
       averaged.y = ay;
       averaged.d = ad;
       averaged.touchCount = len;
     }
-    
+
     return averaged;
   },
 
   assignTouch: function(touch, view) {
     // sanity-check
     if (touch.hasEnded) throw "Attemt to assign a touch that is already finished.";
-    
+
     // unassign from old view if necessary
     if (touch.view === view) return;
     if (touch.view) {
       this.unassignTouch(touch);
     }
-    
+
     // create view entry if needed
     if (!this._touchedViews[SC.guidFor(view)]) {
       this._touchedViews[SC.guidFor(view)] = {
@@ -996,14 +992,13 @@ SC.RootResponder = SC.Object.extend({
   */
   makeTouchResponder: function(touch, responder, shouldStack, upViewChain) {
 
-    // In certain cases (SC.Gesture being one), we have to call makeTouchResponder 
+    // In certain cases (SC.Gesture being one), we have to call makeTouchResponder
     // from inside makeTouchResponder so we queue it up here.
     if (this._isMakingTouchResponder) {
       this._queuedTouchResponder = [touch, responder, shouldStack, upViewChain];
       return;
     }
     this._isMakingTouchResponder = YES;
-
 
     var stack = touch.touchResponders, touchesForView;
 
@@ -1024,7 +1019,7 @@ SC.RootResponder = SC.Object.extend({
     else pane = this.get('keyPane') || this.get('mainPane') ;
 
     // if the responder is not already in the stack...
-    
+
     if (stack.indexOf(responder) < 0) {
       // if we need to go up the view chain, do so
       if (upViewChain) {
@@ -1036,7 +1031,7 @@ SC.RootResponder = SC.Object.extend({
           responder = null;
         }
       } else {
-        
+
         if ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch) {
           if (!responder.touchStart(touch)) responder = null;
         } else {
@@ -1054,7 +1049,7 @@ SC.RootResponder = SC.Object.extend({
       // get passed back to the touch responder-- even while it continues to get events because
       // the touchResponder is still set!
       this.unassignTouch(touch);
-      
+
       // pop all other items
       var idx = stack.length - 1, last = stack[idx];
       while (last && last !== responder) {
@@ -1092,7 +1087,6 @@ SC.RootResponder = SC.Object.extend({
         touch.nextTouchResponder = stack[stack.length - 2];
       }
     }
-
 
     this._isMakingTouchResponder = NO;
     this._flushQueuedTouchResponder();
@@ -1148,32 +1142,32 @@ SC.RootResponder = SC.Object.extend({
     // Thankfully, makeTouchResponder does exactly that: starts at the view it is supplied and keeps calling startTouch
     this.makeTouchResponder(touch, target, shouldStack, YES);
   },
-  
+
   /** @private
     Artificially calls endTouch for any touch which is no longer present. This is necessary because
     _sometimes_, WebKit ends up not sending endtouch.
   */
   endMissingTouches: function(presentTouches) {
     var idx, len = presentTouches.length, map = {}, end = [];
-    
+
     // make a map of what touches _are_ present
     for (idx = 0; idx < len; idx++) {
       map[presentTouches[idx].identifier] = YES;
     }
-    
+
     // check if any of the touches we have recorded are NOT present
     for (idx in this._touches) {
       var id = this._touches[idx].identifier;
       if (!map[id]) end.push(this._touches[idx]);
     }
-    
+
     // end said touches
     for (idx = 0, len = end.length; idx < len; idx++) {
       this.endTouch(end[idx]);
       this.finishTouch(end[idx]);
     }
   },
-  
+
   _touchCount: 0,
   /** @private
     Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
@@ -1182,16 +1176,16 @@ SC.RootResponder = SC.Object.extend({
   */
   endTouch: function(touchEntry, action, evt) {
     if (!action) action = "touchEnd";
-    
+
     var responderIdx, responders, responder, originalResponder;
-    
+
     // unassign
     this.unassignTouch(touchEntry);
 
     // call end for all items in chain
     if (touchEntry.touchResponder) {
       originalResponder = touchEntry.touchResponder;
-      
+
       responders = touchEntry.touchResponders;
       responderIdx = responders.length - 1;
       responder = responders[responderIdx];
@@ -1202,7 +1196,7 @@ SC.RootResponder = SC.Object.extend({
         } catch(e) {
           console.error('crashed on endTouch');
         }
-        
+
         // check to see if the responder changed, and stop immediately if so.
         if (touchEntry.touchResponder !== originalResponder) break;
 
@@ -1213,19 +1207,19 @@ SC.RootResponder = SC.Object.extend({
       }
     }
   },
-  
+
   /**
     @private
     "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
   */
   finishTouch: function(touch) {
     var elem;
-    
+
     // ensure the touch is indeed unassigned.
     this.unassignTouch(touch);
-    
-    // If we rescued this touch's initial element, we should remove it 
-    // from the DOM and garbage collect now. See setup() for an 
+
+    // If we rescued this touch's initial element, we should remove it
+    // from the DOM and garbage collect now. See setup() for an
     // explanation of this bug/workaround.
     if (elem = touch._rescuedElement) {
       if (elem.swapNode && elem.swapNode.parentNode) {
@@ -1237,8 +1231,7 @@ SC.RootResponder = SC.Object.extend({
       elem.swapNode = null;
       elem = null;
     }
-    
-    
+
     // clear responders (just to be thorough)
     touch.touchResponders = null;
     touch.touchResponder = null;
@@ -1267,7 +1260,7 @@ SC.RootResponder = SC.Object.extend({
       // sometimes WebKit is a bit... iffy:
       this.endMissingTouches(evt.touches);
 
-      // as you were...    
+      // as you were...
       // loop through changed touches, calling touchStart, etc.
       var idx, touches = evt.changedTouches, len = touches.length,
           target, view, touch, touchEntry;
@@ -1310,12 +1303,11 @@ SC.RootResponder = SC.Object.extend({
       }
     }, this);
 
-    
     // hack for text fields
     if (hidingTouchIntercept) {
       return YES;
     }
-    
+
     return evt.hasCustomEventHandling;
   },
 
@@ -1462,12 +1454,11 @@ SC.RootResponder = SC.Object.extend({
       }
     }, this);
 
-    
     // for text fields
     if (hidesTouchIntercept) {
       return YES;
     }
-    
+
     return evt.hasCustomEventHandling;
   },
 
@@ -1479,11 +1470,10 @@ SC.RootResponder = SC.Object.extend({
     evt.isCancel = YES;
     this.touchend(evt);
   },
-	
+
   // ..........................................................
   // KEYBOARD HANDLING
   //
-
 
   /**
     Invoked on a keyDown event that is not handled by any actual value.  This
@@ -1579,7 +1569,7 @@ SC.RootResponder = SC.Object.extend({
     var keyCode = evt.keyCode;
     if(SC.browser.mozilla && evt.keyCode===9){
       this.keydownCounter=1;
-    } 
+    }
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
     // trigger a keyDown if it is is enter onKeyup.
@@ -1620,7 +1610,6 @@ SC.RootResponder = SC.Object.extend({
 
       // Arrow keys are handled in keypress for firefox
       if (keyCode>=37 && keyCode<=40 && SC.browser.mozilla) return YES;
-
 
       ret = this.sendEvent('keyDown', evt) ;
 
@@ -1692,11 +1681,11 @@ SC.RootResponder = SC.Object.extend({
   /**
     IE's default behavior to blur textfields and other controls can only be
     blocked by returning NO to this event. However we don't want to block
-    its default behavior otherwise textfields won't loose focus by clicking on 
-    an empty area as it's expected. If you want to block IE from bluring another 
-    control set blockIEDeactivate to true on the especific view in which you 
-    want to avoid this. Think of an autocomplete menu, you want to click on 
-    the menu but don't loose focus. 
+    its default behavior otherwise textfields won't loose focus by clicking on
+    an empty area as it's expected. If you want to block IE from bluring another
+    control set blockIEDeactivate to true on the especific view in which you
+    want to avoid this. Think of an autocomplete menu, you want to click on
+    the menu but don't loose focus.
   */
   beforedeactivate: function(evt) {
     var toElement = evt.toElement;
@@ -1718,9 +1707,9 @@ SC.RootResponder = SC.Object.extend({
       evt.allowDefault();
       return YES;
     }
-    
+
     if(!SC.browser.msie) window.focus();
-    
+
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
     // than 8 pixels away from the mouse down event.
@@ -1753,7 +1742,6 @@ SC.RootResponder = SC.Object.extend({
 
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
-  
 
     return view ? evt.hasCustomEventHandling : YES;
   },
@@ -1770,9 +1758,9 @@ SC.RootResponder = SC.Object.extend({
       evt.allowDefault();
       return YES;
     }
-    
+
     this.targetViewForEvent(evt);
-    
+
     if (this._drag) {
       this._drag.tryToPerform('mouseUp', evt) ;
       this._drag = null ;
@@ -1820,7 +1808,7 @@ SC.RootResponder = SC.Object.extend({
     // Save timestamp of mouseup at last possible moment.
     // (This is used to calculate double click events)
     this._lastMouseUpAt = Date.now() ;
-  
+
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
 
@@ -1835,7 +1823,7 @@ SC.RootResponder = SC.Object.extend({
   mousewheel: function(evt) {
     var view = this.targetViewForEvent(evt) ,
         handler = this.sendEvent('mouseWheel', evt, view) ;
-  
+
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
 
@@ -1855,7 +1843,7 @@ SC.RootResponder = SC.Object.extend({
       evt.allowDefault();
       return YES;
     }
-    
+
     if (SC.browser.msie) {
       if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
     }
@@ -1884,15 +1872,15 @@ SC.RootResponder = SC.Object.extend({
        } else {
          var lh = this._lastHovered || [] , nh = [] , exited, loc, len,
              view = this.targetViewForEvent(evt) ;
-         
-         // first collect all the responding view starting with the 
+
+         // first collect all the responding view starting with the
          // target view from the given mouse move event
          while (view && (view !== this)) {
            nh.push(view);
            view = view.get('nextResponder');
          }
-        
-         // next exit views that are no longer part of the 
+
+         // next exit views that are no longer part of the
          // responding chain
          for (loc=0, len=lh.length; loc < len; loc++) {
            view = lh[loc] ;
@@ -1901,7 +1889,7 @@ SC.RootResponder = SC.Object.extend({
              view.tryToPerform('mouseExited', evt);
            }
          }
-         
+
          // finally, either perform mouse moved or mouse entered depending on
          // whether a responding view was or was not part of the last
          // hovered views
@@ -2024,13 +2012,13 @@ SC.Touch = function(touch, touchContext) {
   // get the raw target view (we'll refine later)
   this.touchContext = touchContext;
   this.identifier = touch.identifier; // for now, our internal id is WebKit's id.
-  
+
   var target = touch.target, targetView;
   if (target && SC.$(target).hasClass("touch-intercept")) {
     touch.target.style.webkitTransform = "translate3d(0px,-5000px,0px)";
     target = document.elementFromPoint(touch.pageX, touch.pageY);
     if (target) targetView = SC.$(target).view()[0];
-    
+
     this.hidesTouchIntercept = NO;
     if (target.tagName === "INPUT") {
       this.hidesTouchIntercept = touch.target;
@@ -2107,7 +2095,6 @@ SC.Touch.prototype = {
     this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
   },
 
-
   /**
     Captures, or recaptures, the touch. This works from the touch's raw target view
     up to the startingPoint, and finds either a view that returns YES to captureTouch() or
@@ -2124,7 +2111,7 @@ SC.Touch.prototype = {
   touchesForView: function(view) {
     return this.touchContext.touchesForView(view);
   },
-  
+
   /**
     Same as touchesForView, but sounds better for responders.
   */

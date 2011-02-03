@@ -372,7 +372,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // flush jQuery buffers
     jQuery.Buffer.flush();
 
-
     // now cleanup element...
     elem = this._elem = null ;
     return this.prevObject || this ;
@@ -846,7 +845,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     return this;
   },
 
-
   /**
     Apply the passed styles to the tag.  You can pass either a single key
     value pair or a hash of styles.  Note that if you set a style on an
@@ -942,7 +940,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       return this;
     }
 
-
     var key, attrs = this._attrs, didChange = NO ;
     if (!attrs) this._attrs = attrs = {} ;
 
@@ -990,7 +987,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     return ret;
   },
 
-
   /** @private
   */
   _camelizeStyleName: function(name) {
@@ -1032,7 +1028,6 @@ SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
   this method to avoid errors.  You can also do this with the text() helper
   method on a render context.
 */
-
 
 if (!SC.browser.isSafari || parseInt(SC.browser.version, 10) < 526) {
   SC.RenderContext._safari3 = YES;

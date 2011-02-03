@@ -10,8 +10,8 @@ htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute; }</styl
 
 // ..........................................................
 // COMMON SETUP CODE
-// 
-var pane, a, b, aa, aaa, bb, f ; 
+//
+var pane, a, b, aa, aaa, bb, f ;
 var A_LEFT = 10, A_TOP = 10, B_LEFT = 100, B_TOP = 100;
 
 function setupFrameViews() {
@@ -29,13 +29,13 @@ function setupFrameViews() {
       .childView(SC.View.design()
         .layout({ top: B_TOP, left: B_LEFT, width: 10, height: 10 })))
     .create();
-        
+
   a = pane.childViews[0];
   b = pane.childViews[1];
   aa = a.childViews[0];
   aaa = aa.childViews[0];
   bb = b.childViews[0];
-  
+
   f = { x: 10, y: 10, width: 10, height: 10 };
   pane.append();
 }
@@ -70,7 +70,6 @@ test("convert nested child -> top level", function() {
   same(result, f, 'should convert frame');
 });
 
-
 test("convert a -> sibling", function() {
   var result = a.convertFrameToView(f, b);
   f.x += A_LEFT - B_LEFT; f.y += A_TOP - B_TOP ;
@@ -88,8 +87,6 @@ test("convert nested child -> parent sibling", function() {
   f.x += A_LEFT*3 - B_LEFT; f.y += A_TOP*3 - B_TOP ;
   same(result, f, 'should convert frame');
 });
-
-
 
 test("convert a -> child", function() {
   var result = a.convertFrameToView(f, aa);
@@ -109,8 +106,6 @@ test("convert nested child -> parent", function() {
   same(result, f, 'should convert frame');
 });
 
-
-
 test("convert a -> nested child", function() {
   var result = a.convertFrameToView(f, aaa);
   f.x -= (A_LEFT+A_LEFT); f.y -= (A_TOP+A_TOP) ;
@@ -123,14 +118,11 @@ test("convert nested child -> direct parent (child)", function() {
   same(result, f, 'should convert frame');
 });
 
-
-
 test("convert a -> child of sibling", function() {
   var result = a.convertFrameToView(f, bb);
   f.x += A_LEFT - (B_LEFT+B_LEFT); f.y += A_TOP - (B_TOP+B_TOP) ;
   same(result, f, 'should convert frame');
 });
-
 
 test("convert child -> child of sibling", function() {
   var result = aa.convertFrameToView(f, bb);
@@ -143,7 +135,6 @@ test("convert nested child -> child of sibling", function() {
   f.x += A_LEFT*3 - (B_LEFT+B_LEFT); f.y += A_TOP*3 - (B_TOP+B_TOP) ;
   same(result, f, 'should convert frame');
 });
-
 
 // ..........................................................
 // convertFrameFromView()
@@ -170,7 +161,6 @@ test("convert nested child <- top level", function() {
   same(result, f, 'should convert frame');
 });
 
-
 test("convert a <- sibling", function() {
   var result = a.convertFrameFromView(f, b);
   f.x += B_LEFT - A_LEFT; f.y += B_TOP - A_TOP ;
@@ -188,8 +178,6 @@ test("convert nested child <- parent sibling", function() {
   f.x += B_LEFT - A_LEFT*3; f.y += B_TOP - A_TOP*3;
   same(result, f, 'should convert frame');
 });
-
-
 
 test("convert a <- child", function() {
   var result = a.convertFrameFromView(f, aa);
@@ -209,8 +197,6 @@ test("convert nested child <- parent", function() {
   same(result, f, 'should convert frame');
 });
 
-
-
 test("convert a <- nested child", function() {
   var result = a.convertFrameFromView(f, aaa);
   f.x += (A_LEFT+A_LEFT); f.y += (A_TOP+A_TOP) ;
@@ -223,14 +209,11 @@ test("convert nested child <- direct parent (child)", function() {
   same(result, f, 'should convert frame');
 });
 
-
-
 test("convert a <- child of sibling", function() {
   var result = a.convertFrameFromView(f, bb);
   f.x += (B_LEFT+B_LEFT) - A_LEFT ; f.y += (B_TOP+B_TOP) - A_TOP ;
   same(result, f, 'should convert frame');
 });
-
 
 test("convert child <- child of sibling", function() {
   var result = aa.convertFrameFromView(f, bb);

@@ -2,7 +2,6 @@
 // Rect utility Tests
 // ========================================================================
 
-
 module("Rect utilities");
 
 test("Get the X & Y points of a rect", function() {
@@ -11,7 +10,7 @@ test("Get the X & Y points of a rect", function() {
   equals(SC.minX(frame),50,'Left edge');
   equals(SC.maxX(frame),750,'Right edge');
   equals(SC.midX(frame),400,'Horizontal midpoint');
-  
+
   equals(SC.minY(frame),40, 'Top edge');
   equals(SC.maxY(frame),9040,'Bottom edge');
   equals(SC.midY(frame),4540,'Vertical midpoint');
@@ -23,7 +22,7 @@ test("Treat empty object as frame with 0 width and height", function() {
   equals(SC.minX(frame),0,'Left edge');
   equals(SC.maxX(frame),0,'Right edge');
   equals(SC.midX(frame),0,'Horizontal midpoint');
-  
+
   equals(SC.minY(frame),0,'Top edge');
   equals(SC.maxY(frame),0,'Bottom edge');
   equals(SC.midY(frame),0,'Vertical midpoint');
@@ -31,7 +30,7 @@ test("Treat empty object as frame with 0 width and height", function() {
 
 test("pointInRect() to test if a given point is inside the rect", function(){
   var frame = { x: 50, y: 40, width: 700, height: 9000 };
-  
+
   ok(SC.pointInRect({ x: 100, y: 100 }, frame), "Point in rect");
   equals(NO, SC.pointInRect({ x: 40, y: 100 }, frame), "Point out of rect horizontally");
   equals(NO, SC.pointInRect({ x: 600, y: 9100 }, frame), "Point out of rect vertically");
@@ -41,7 +40,7 @@ test("pointInRect() to test if a given point is inside the rect", function(){
 
 test("rectsEqual() tests equality with default delta", function() {
   var frame = { x: 50, y: 50, width: 100, height: 100 };
-  
+
   equals(SC.rectsEqual(frame, frame), YES, "Frames are same object");
   equals(SC.rectsEqual(frame, { x: 50, y: 50, width: 100, height: 100 }), YES, "Frames have same position and dimensions");
   equals(SC.rectsEqual(frame, { x: 50.08, y: 50, width: 100, height: 100 }), YES, "Frame.x above, within delta");
@@ -57,7 +56,7 @@ test("rectsEqual() tests equality with default delta", function() {
 
 test("rectsEqual() tests equality with null delta", function() {
   var frame = { x: 50, y: 50, width: 100, height: 100 };
-  
+
   equals(SC.rectsEqual(frame, frame), YES, "Frames are same object");
   equals(SC.rectsEqual(frame, { x: 50, y: 50, width: 100, height: 100 }, null), YES, "Frames have same position and dimensions");
   equals(SC.rectsEqual(frame, { x: 50.08, y: 50, width: 100, height: 100 }, null), YES, "Frame.x above, within delta");
@@ -73,7 +72,7 @@ test("rectsEqual() tests equality with null delta", function() {
 
 test("rectsEqual() tests equality with delta of 10", function() {
   var frame = { x: 50, y: 50, width: 100, height: 100 };
-  
+
   equals(SC.rectsEqual(frame, frame), YES, "Frames are same object");
   equals(SC.rectsEqual(frame, { x: 50, y: 50, width: 100, height: 100 }, 10), YES, "Frames have same position and dimensions");
   equals(SC.rectsEqual(frame, { x: 59.99, y: 50, width: 100, height: 100 }, 10), YES, "Frame.x above, within delta");
@@ -89,7 +88,7 @@ test("rectsEqual() tests equality with delta of 10", function() {
 
 test("rectsEqual() tests equality with delta of 0", function() {
   var frame = { x: 50, y: 50, width: 100, height: 100 };
-  
+
   equals(SC.rectsEqual(frame, frame), YES, "Frames are same object");
   equals(SC.rectsEqual(frame, { x: 50, y: 50, width: 100, height: 100 }, 0), YES, "Frames have same position and dimensions");
   equals(SC.rectsEqual(frame, { x: 50.0001, y: 50, width: 100, height: 100 }, 0), NO, "Frame.x not equal");

@@ -15,7 +15,7 @@ module("SC.RootResponder#makeMenuPane", {
       acceptsMenuPane: YES
     });
   },
-  
+
   teardown: function() {
     menu.remove();
     menu = responder = null;

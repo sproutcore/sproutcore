@@ -11,7 +11,7 @@ var context = null;
 
 // ..........................................................
 // id()
-// 
+//
 module("SC.RenderContext#id", {
   setup: function() {
     context = SC.RenderContext().id('foo') ;

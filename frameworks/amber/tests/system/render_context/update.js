@@ -14,7 +14,7 @@ module("SC.RenderContext#update", {
     elem = document.createElement('div');
     context = SC.RenderContext(elem) ;
   },
-  
+
   teardown: function() {
     elem = context = null; // avoid memory leaks
   }
@@ -49,14 +49,14 @@ test("clears internal _elem to avoid memory leaks on update", function() {
 
 // ..........................................................
 // Attribute Editing
-// 
+//
 module("SC.RenderContext#update - attrs", {
   setup: function() {
     elem = document.createElement('div');
     SC.$(elem).attr("foo", "initial");
     context = SC.RenderContext(elem);
   },
-  
+
   teardown: function() {
     elem = context = null ;
   }
@@ -87,14 +87,14 @@ test("removes attribute if value is null", function() {
 
 // ..........................................................
 // ID
-// 
+//
 module("SC.RenderContext#update - id", {
   setup: function() {
     elem = document.createElement('div');
     SC.$(elem).attr("id", "foo");
     context = SC.RenderContext(elem);
   },
-  
+
   teardown: function() {
     elem = context = null ;
   }
@@ -121,14 +121,14 @@ test("set id overrides attr", function() {
 
 // ..........................................................
 // Class Name Editing
-// 
+//
 module("SC.RenderContext#update - className", {
   setup: function() {
     elem = document.createElement('div');
     SC.$(elem).attr("class", "foo bar");
     context = SC.RenderContext(elem);
   },
-  
+
   teardown: function() {
     elem = context = null ;
   }
@@ -155,14 +155,14 @@ test("set class names override class attr", function() {
 
 // ..........................................................
 // Style Editing
-// 
+//
 module("SC.RenderContext#update - style", {
   setup: function() {
     elem = document.createElement('div');
     SC.$(elem).attr("style", "color: red;");
     context = SC.RenderContext(elem);
   },
-  
+
   teardown: function() {
     elem = context = null ;
   }
@@ -173,33 +173,32 @@ test("does not change styles if retrieved but not edited", function() {
   context.update();
   var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
-  
+
   equals(style.toLowerCase(), "color: red;", "style");
 });
 
 test("replaces style name if styles edited", function() {
   context.styles({ color: "black" });
   context.update();
-  
+
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
   var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
-  
+
   equals(style.toLowerCase(), "color: black;", "attribute");
 });
-
 
 test("set styles override style attr", function() {
   context.attr("style", "color: green");
   context.styles({ color: "black" });
   context.update();
-  
+
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
   var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
-  
+
   equals(style.toLowerCase(), "color: black;", "attribute");
 });
 

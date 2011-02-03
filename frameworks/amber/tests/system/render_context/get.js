@@ -13,7 +13,7 @@ module("SC.RenderContext#get", {
   setup: function() {
     context = SC.RenderContext();
   },
-  
+
   teardown: function() {
     context = null;
   }

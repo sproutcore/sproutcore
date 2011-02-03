@@ -9,19 +9,19 @@ var src, src2, content, controller;
 
 // ..........................................................
 // NO MULTIPLE CONTENT
-// 
+//
 
 module("SC.ObjectController - multiple_case - ALLOWSMULTIPLE = NO", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
     src2       = SC.Object.create({ foo: "foo2", bar: "bar1" });
     content    = [src, src2];
-    controller = SC.ObjectController.create({ 
+    controller = SC.ObjectController.create({
       content: content,
-      allowsMultipleContent: NO 
+      allowsMultipleContent: NO
     });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -37,7 +37,7 @@ test("getting any value should return undefined", function() {
 });
 
 test("setting any unknown value should have no effect", function() {
-  equals(controller.set("foo", "FOO"), controller, 'controller.set(foo, FOO) should return self');  
+  equals(controller.set("foo", "FOO"), controller, 'controller.set(foo, FOO) should return self');
   equals(controller.set("bar", "BAR"), controller, 'controller.set(bar, BAR) should return self');
   equals(src.get("foo"), "foo1", 'src.get(foo)');
   equals(src.get("bar"), "bar1", 'src.get(bar)');
@@ -45,19 +45,19 @@ test("setting any unknown value should have no effect", function() {
 
 // ..........................................................
 // MULTIPLE CONTENT
-// 
+//
 
 module("SC.ObjectController - multiple_case - ALLOWSMULTIPLE = YES", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
     src2       = SC.Object.create({ foo: "foo2", bar: "bar1" });
     content    = [src, src2];
-    controller = SC.ObjectController.create({ 
+    controller = SC.ObjectController.create({
       content: content,
-      allowsMultipleContent: YES 
+      allowsMultipleContent: YES
     });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -69,10 +69,10 @@ test("getting any unknown value", function() {
 });
 
 test("setting any unknown value should pass through", function() {
-  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');  
+  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');
   equals(controller.set("bar", "EDIT"), controller, 'controller.set(bar, EDIT) should return self');
   equals(controller.set("baz", "EDIT"), controller, 'controller.set(baz, EDIT) should return self');
-  
+
   equals(src.get("foo"), "EDIT", 'src.get(foo)');
   equals(src.get("bar"), "EDIT", 'src.get(bar)');
   equals(src.get("baz"), "EDIT", 'src.get(bar)');
@@ -95,14 +95,14 @@ test("changing a property on a content object", function() {
 
 test("hasContent", function() {
   equals(controller.get("hasContent"), YES, 'should have content');
-  
+
   var callCount = 0;
   controller.addObserver("hasContent", function() { callCount++; });
-  
+
   controller.set("content", null);
   equals(controller.get("hasContent"), NO, "hasContent should == NO after setting to null");
   ok(callCount > 0, 'hasContent observer should fire when setting to null');
-  
+
   callCount = 0;
   controller.set("content", content);
   equals(controller.get("hasContent"), YES, "hasContent should == YES after setting back to content");

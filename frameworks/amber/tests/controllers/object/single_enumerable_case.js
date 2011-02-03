@@ -9,18 +9,18 @@ var src, content, controller;
 
 // ..........................................................
 // SINGLE OBSERVABLE OBJECT IN SET
-// 
+//
 
 module("SC.ObjectController - single_enumerable_case - OBSERVABLE OBJECT", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
     content    = SC.Set.create().add(src); // use generic enumerable
-    controller = SC.ObjectController.create({ 
+    controller = SC.ObjectController.create({
       content: content,
-      allowsMultipleContent: NO 
+      allowsMultipleContent: NO
     });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -32,10 +32,10 @@ test("getting any unknown value should pass through to object", function() {
 });
 
 test("setting any unknown value should pass through", function() {
-  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');  
+  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');
   equals(controller.set("bar", "EDIT"), controller, 'controller.set(bar, EDIT) should return self');
   equals(controller.set("baz", "EDIT"), controller, 'controller.set(baz, EDIT) should return self');
-  
+
   equals(src.get("foo"), "EDIT", 'src.get(foo)');
   equals(src.get("bar"), "EDIT", 'src.get(bar)');
   equals(src.get("baz"), "EDIT", 'src.get(bar)');
@@ -69,7 +69,7 @@ test("changing the content from one to another", function() {
   src2.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
   equals(callCount, 1, 'observer on controller should have fired');
-  
+
   callCount = 0;
   content.set("foo", "BAR");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit of non-content object should not change value");
@@ -78,14 +78,14 @@ test("changing the content from one to another", function() {
 
 test("hasContent", function() {
   equals(controller.get("hasContent"), YES, 'should have content');
-  
+
   var callCount = 0;
   controller.addObserver("hasContent", function() { callCount++; });
-  
+
   controller.set("content", null);
   equals(controller.get("hasContent"), NO, "hasContent should == NO after setting to null");
   ok(callCount > 0, 'hasContent observer should fire when setting to null');
-  
+
   callCount = 0;
   controller.set("content", content);
   equals(controller.get("hasContent"), YES, "hasContent should == YES after setting back to content");
@@ -94,18 +94,18 @@ test("hasContent", function() {
 
 // ..........................................................
 // SINGLE OBSERVABLE OBJECT WITH ALLOWS MULTIPLE YES
-// 
+//
 
 module("SC.ObjectController - single_enumerable_case - ALLOWS MULTIPLE", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
     content    = SC.Set.create().add(src); // use generic enumerable
-    controller = SC.ObjectController.create({ 
+    controller = SC.ObjectController.create({
       content: content,
-      allowsMultipleContent: YES 
+      allowsMultipleContent: YES
     });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -117,10 +117,10 @@ test("getting any unknown value should pass through to object", function() {
 });
 
 test("setting any unknown value should pass through", function() {
-  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');  
+  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');
   equals(controller.set("bar", "EDIT"), controller, 'controller.set(bar, EDIT) should return self');
   equals(controller.set("baz", "EDIT"), controller, 'controller.set(baz, EDIT) should return self');
-  
+
   equals(src.get("foo"), "EDIT", 'src.get(foo)');
   equals(src.get("bar"), "EDIT", 'src.get(bar)');
   equals(src.get("baz"), "EDIT", 'src.get(bar)');
@@ -154,7 +154,7 @@ test("changing the content from one to another", function() {
   src2.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
   equals(callCount, 1, 'observer on controller should have fired');
-  
+
   callCount = 0;
   content.set("foo", "BAR");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit of non-content object should not change value");
@@ -163,14 +163,14 @@ test("changing the content from one to another", function() {
 
 test("hasContent", function() {
   equals(controller.get("hasContent"), YES, 'should have content');
-  
+
   var callCount = 0;
   controller.addObserver("hasContent", function() { callCount++; });
-  
+
   controller.set("content", null);
   equals(controller.get("hasContent"), NO, "hasContent should == NO after setting to null");
   ok(callCount > 0, 'hasContent observer should fire when setting to null');
-  
+
   callCount = 0;
   controller.set("content", content);
   equals(controller.get("hasContent"), YES, "hasContent should == YES after setting back to content");
@@ -179,19 +179,19 @@ test("hasContent", function() {
 
 // ..........................................................
 // SINGLE OBSERVABLE OBJECT IN COLLECTION, ADDED AFTER CONTROLLER CONTENT SET
-// 
+//
 
 module("SC.ObjectController - single_enumerable_case - ALLOWS MULTIPLE", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
     content    = SC.Set.create(); // use generic enumerable
-    controller = SC.ObjectController.create({ 
+    controller = SC.ObjectController.create({
       content: content,
-      allowsMultipleContent: YES 
+      allowsMultipleContent: YES
     });
     content.add(src)
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
@@ -203,10 +203,10 @@ test("getting any unknown value should pass through to object", function() {
 });
 
 test("setting any unknown value should pass through", function() {
-  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');  
+  equals(controller.set("foo", "EDIT"), controller, 'controller.set(foo, EDIT) should return self');
   equals(controller.set("bar", "EDIT"), controller, 'controller.set(bar, EDIT) should return self');
   equals(controller.set("baz", "EDIT"), controller, 'controller.set(baz, EDIT) should return self');
-  
+
   equals(src.get("foo"), "EDIT", 'src.get(foo)');
   equals(src.get("bar"), "EDIT", 'src.get(bar)');
   equals(src.get("baz"), "EDIT", 'src.get(bar)');
@@ -240,7 +240,7 @@ test("changing the content from one to another", function() {
   src2.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
   equals(callCount, 1, 'observer on controller should have fired');
-  
+
   callCount = 0;
   content.set("foo", "BAR");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit of non-content object should not change value");
@@ -249,14 +249,14 @@ test("changing the content from one to another", function() {
 
 test("hasContent", function() {
   equals(controller.get("hasContent"), YES, 'should have content');
-  
+
   var callCount = 0;
   controller.addObserver("hasContent", function() { callCount++; });
-  
+
   controller.set("content", null);
   equals(controller.get("hasContent"), NO, "hasContent should == NO after setting to null");
   ok(callCount > 0, 'hasContent observer should fire when setting to null');
-  
+
   callCount = 0;
   controller.set("content", content);
   equals(controller.get("hasContent"), YES, "hasContent should == YES after setting back to content");

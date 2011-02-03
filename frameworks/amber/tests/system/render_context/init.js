@@ -32,7 +32,7 @@ test("it should have a length of 1 with a null value for the first time, saving 
 test("if script tag is passed, should mark context._selfClosing as NO" ,function() {
   var context = SC.RenderContext('script');
   ok(context._selfClosing === NO, "selfClosing MUST be no");
-  
+
   context = SC.RenderContext('SCRIPT');
   ok(context._selfClosing === NO, "selfClosing MUST be no 2");
 });

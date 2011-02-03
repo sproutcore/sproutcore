@@ -100,7 +100,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     added as range requests are completed.
   */
   requestedRangeIndex: null,
-  
+
   /**
     Make sure to create the index array during init so that it is not shared
     between all instances.
@@ -108,13 +108,13 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   init: function() {
     sc_super();
     this.requestedRangeIndex = [];
-    
+
     this._TMP_PROVIDE_ARRAY = [];
     this._TMP_PROVIDE_RANGE = { length: 1 };
     this._TMP_RANGE = {};
   },
-  
-  /** 
+
+  /**
     Returns the object at the specified index.  If the value for the index
     is currently undefined, invokes the didRequestIndex() method to notify
     the delegate.
@@ -122,9 +122,9 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     The omitMaterializing flag ensures that the object will not be materialized,
     but it simply checks for the presence of an object at the specified index
     and will return YES (or undefined if not found). This is useful in the case
-    of SparseArrays, where you might NOT want to request the index to be loaded, 
+    of SparseArrays, where you might NOT want to request the index to be loaded,
     but simply need a shallow check to see if the position has been filled.
-    
+
     @param {Number} idx the index to get
     @param {Boolean} omitMaterializing
     @return {Object} the object
@@ -298,7 +298,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
         var start = range.start, loc = Math.min(start + range.length, content.length);
         while (--loc>=start) content[loc] = undefined;
       }
-    }    
+    }
     this.enumerableContentDidChange(range.start, range.length) ; // notify
     return this ;
   },

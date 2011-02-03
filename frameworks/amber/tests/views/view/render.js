@@ -87,7 +87,6 @@ test("creates a context and then invokes renderToContext or updateLayer on each 
   equals(view.renderChildViews(curContext, curFirstTime), curContext, 'returns context');
   equals(runCount, 3, 'renderToContext() invoked for each child view');
 
-
   // VERIFY: firstTime= NO
   runCount = 0 ; //reset
   curContext = view.renderContext('div');

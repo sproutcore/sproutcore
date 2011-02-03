@@ -19,10 +19,10 @@ module("SC.View#themes");
     //"childViews": "child".w(),
     //theme: "sc-test-1",
     //child: SC.View.extend({
-      
+
     //})
   //});
-  
+
   //ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
   //ok(t1 === view.child.get("theme"), "view's child's theme should be sc-test-1");
   //view.set('themeName', 'sc-test-2');
@@ -35,7 +35,7 @@ module("SC.View#themes");
   //var view = SC.View.create({
     //theme: "sc-test-1"
   //});
-  
+
   //ok(t1 === view.get("theme"), "view's theme should be sc-test-1");
   //equals(child.get("theme"), SC.Theme.find('sc-base'), "view's child's theme should start at base theme");
   //view.appendChild(child);

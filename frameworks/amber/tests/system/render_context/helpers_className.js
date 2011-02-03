@@ -11,7 +11,7 @@ var context = null;
 
 // ..........................................................
 // classNames()
-// 
+//
 module("SC.RenderContext#classNames", {
   setup: function() {
     context = SC.RenderContext() ;
@@ -36,11 +36,11 @@ test("returns classNames if set", function() {
 test("clone on next retrieval if classNames(foo) set with cloneOnModify=YES", function() {
   var cl = 'foo bar'.w();
   context.classNames(cl, YES);
-  
+
   var result = context.classNames();
   ok(result !== cl, "class name is NOT same instance");
   same(result, cl, "but arrays are equivalent");
-  
+
   equals(result, context.classNames(), "2nd retrieval is same instance");
 });
 
@@ -48,14 +48,14 @@ test("extracts class names from element on first retrieval", function() {
   var elem = document.createElement('div');
   SC.$(elem).attr('class', 'foo bar');
   context = SC.RenderContext(elem);
-  
+
   var result = context.classNames();
   same(result, ['foo', 'bar'], 'extracted class names');
 });
 
 // ..........................................................
 // hasClass()
-// 
+//
 module("SC.RenderContext#hasClass", {
   setup: function() {
     context = SC.RenderContext().classNames('foo bar'.w()) ;
@@ -98,7 +98,7 @@ test("should add class name to existing classNames array on currentTag", functio
 test("should only add class name once - does nothing if name already in array", function() {
   same(context.classNames(), ['foo'], 'precondition - has foo classname');
   context._classNamesDidChange = NO; // reset  to pretend once not modified
-  
+
   context.addClass('foo');
   same(context.classNames(), ['foo'], 'no change');
   equals(context._classNamesDidChange, NO, "note did not change");
@@ -106,7 +106,7 @@ test("should only add class name once - does nothing if name already in array", 
 
 // ..........................................................
 // removeClass()
-// 
+//
 module("SC.RenderContext#removeClass", {
   setup: function() {
     context = SC.RenderContext().classNames(['foo', 'bar']) ;
@@ -115,7 +115,7 @@ module("SC.RenderContext#removeClass", {
 
 test("should remove class if already in classNames array", function() {
   ok(context.classNames().indexOf('foo')>=0, "precondition - has foo");
-  
+
   context.removeClass('foo');
   ok(context.classNames().indexOf('foo')<0, "does not have foo");
 });
@@ -135,7 +135,7 @@ test("should do nothing if there are no class names", function() {
   context = context.begin();
   same(context.classNames(), [], 'precondition - no class names');
   context._classNamesDidChange = NO; // reset to pretend not modified
-  
+
   context.removeClass('foo');
   same(context.classNames(), [], 'still no class names -- and no errors');
   equals(context._classNamesDidChange, NO, "note did not change");
@@ -143,7 +143,7 @@ test("should do nothing if there are no class names", function() {
 
 // ..........................................................
 // setClass
-// 
+//
 module("SC.RenderContext#setClass", {
   setup: function() {
     context = SC.RenderContext().addClass('foo') ;

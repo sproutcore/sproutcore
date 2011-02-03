@@ -8,15 +8,15 @@
 /**
   Indicates that the collection view expects to accept a drop ON the specified
   item.
-  
+
   @property {Number}
 */
 SC.DROP_ON = 0x01 ;
 
 /**
-  Indicates that the collection view expects to accept a drop BEFORE the 
+  Indicates that the collection view expects to accept a drop BEFORE the
   specified item.
-  
+
   @property {Number}
 */
 SC.DROP_BEFORE = 0x02 ;
@@ -25,15 +25,15 @@ SC.DROP_BEFORE = 0x02 ;
   Indicates that the collection view expects to accept a drop AFTER the
   specified item.  This is treated just like SC.DROP_BEFORE is most views
   except for tree lists.
-  
+
   @property {Number}
 */
 SC.DROP_AFTER = 0x04 ;
 
 /**
-  Indicates that the collection view want's to know which operations would 
+  Indicates that the collection view want's to know which operations would
   be allowed for either drop operation.
-  
+
   @property {Number}
 */
 SC.DROP_ANY = 0x07 ;
@@ -94,18 +94,18 @@ SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
 SC.SAFARI_FOCUS_BEHAVIOR = YES;
 
 SC.mixin(/** @lends SC */ {
-  
+
   /**
     Reads or writes data from a global cache.  You can use this facility to
     store information about an object without actually adding properties to
     the object itself.  This is needed especially when working with DOM,
     which can leak easily in IE.
-    
+
     To read data, simply pass in the reference element (used as a key) and
     the name of the value to read.  To write, also include the data.
-    
+
     You can also just pass an object to retrieve the entire cache.
-    
+
     @param elem {Object} An object or Element to use as scope
     @param name {String} Optional name of the value to read/write
     @param data {Object} Optional data.  If passed, write.
@@ -114,67 +114,67 @@ SC.mixin(/** @lends SC */ {
   data: function(elem, name, data) {
     elem = (elem === window) ? "@window" : elem ;
     var hash = SC.hashFor(elem) ; // get the hash key
-    
+
     // Generate the data cache if needed
     var cache = SC._data_cache ;
     if (!cache) SC._data_cache = cache = {} ;
-    
+
     // Now get cache for element
     var elemCache = cache[hash] ;
     if (name && !elemCache) cache[hash] = elemCache = {} ;
-    
-    // Write data if provided 
+
+    // Write data if provided
     if (elemCache && (data !== undefined)) elemCache[name] = data ;
-    
+
     return (name) ? elemCache[name] : elemCache ;
   },
-  
+
   /**
     Removes data from the global cache.  This is used throughout the
     framework to hold data without creating memory leaks.
-    
-    You can remove either a single item on the cache or all of the cached 
+
+    You can remove either a single item on the cache or all of the cached
     data for an object.
-    
+
     @param elem {Object} An object or Element to use as scope
-    @param name {String} optional name to remove. 
+    @param name {String} optional name to remove.
     @returns {Object} the value or cache that was removed
   */
   removeData: function(elem, name) {
     elem = (elem === window) ? "@window" : elem ;
     var hash = SC.hashFor(elem) ;
-    
+
     // return undefined if no cache is defined
     var cache = SC._data_cache ;
     if (!cache) return undefined ;
-    
+
     // return undefined if the elem cache is undefined
     var elemCache = cache[hash] ;
     if (!elemCache) return undefined;
-    
+
     // get the return value
     var ret = (name) ? elemCache[name] : elemCache ;
-    
+
     // and delete as appropriate
     if (name) {
       delete elemCache[name] ;
     } else {
       delete cache[hash] ;
     }
-    
+
     return ret ;
   }
 }) ;
 
 SC.mixin(Function.prototype, /** @scope Function.prototype */ {
   /**
-    Creates a timer that will execute the function after a specified 
+    Creates a timer that will execute the function after a specified
     period of time.
-    
+
     If you pass an optional set of arguments, the arguments will be passed
-    to the function as well.  Otherwise the function should have the 
+    to the function as well.  Otherwise the function should have the
     signature:
-    
+
     {{{
       function functionName(timer)
     }}}
@@ -191,11 +191,11 @@ SC.mixin(Function.prototype, /** @scope Function.prototype */ {
       args.unshift(target);
       // f = f.bind.apply(f, args) ;
       var func = f ;
-      // Use "this" in inner func because it get its scope by 
+      // Use "this" in inner func because it get its scope by
       // outer func f (=target). Could replace "this" with target for clarity.
       f = function() { return func.apply(this, args.slice(1)); } ;
     }
     return SC.Timer.schedule({ target: target, action: f, interval: interval });
-  }    
+  }
 
 });

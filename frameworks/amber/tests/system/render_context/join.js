@@ -13,7 +13,7 @@ module("SC.RenderContext#join", {
   setup: function() {
     context = SC.RenderContext().push("line1", "line2") ;
   },
-  
+
   teardown: function() {
     context = null;
   }

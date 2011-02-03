@@ -10,9 +10,9 @@
 
 // ..........................................................
 // BASE TESTS
-// 
-// These tests exercise the API.  See below for tests that cover edge 
-// conditions.  If you find a bug, we recommend that you add a test in the 
+//
+// These tests exercise the API.  See below for tests that cover edge
+// conditions.  If you find a bug, we recommend that you add a test in the
 // edge case section.
 
 var FRAME = { x: 10, y: 10, width: 30, height: 30 } ;
@@ -20,18 +20,18 @@ var FRAME = { x: 10, y: 10, width: 30, height: 30 } ;
 var pane, view ; // test globals
 
 module("isVisibleInWindow", {
-  
+
   setup: function() {
     pane = SC.MainPane.create() ;
-    view = SC.View.create() ; 
+    view = SC.View.create() ;
   },
-  
+
   teardown: function() {
     view = null ;
     pane.remove() ;
     pane = null ;
   }
-  
+
 });
 
 test("a new view should not be visible initially", function() {

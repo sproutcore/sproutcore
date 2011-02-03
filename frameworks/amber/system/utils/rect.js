@@ -94,5 +94,4 @@ SC.mixin( /** @scope SC */ {
     }
   }
 
-
 });

@@ -109,7 +109,6 @@
   it from the run loop.  Repeating timers can be fired anytime and it will
   not interrupt their regular scheduled times.
 
-
   @extends SC.Object
   @author Charles Jolley
   @version 1.0
@@ -549,5 +548,4 @@ SC.Timer.returnTimerToPool = function(timer) {
   this._timerPool.push(timer);
   return this ;
 };
-
 

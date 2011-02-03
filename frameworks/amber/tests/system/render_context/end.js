@@ -82,7 +82,7 @@ test("emits self closing tag if tag has no content and c._selfClosing !== NO", f
 
 test("emits two tags even if tag has no content if opts.selfClosing == NO", function() {
   context._selfClosing = NO;
-  
+
   context.end();
   equals(context.length, 2, "has two lines");
   equals(context.get(0), "<div>", "has opening tag");
@@ -97,15 +97,15 @@ test("does NOT emit self closing tag if it has content, even if opts.selfClosing
 });
 
 test("it should make sure to clear reused temporary attributes object", function() {
-  
+
   // generate one tag...
   context.begin('input')
     .id("foo")
     .styles({ foo: "bar" })
     .classNames("foo bar".w())
     .push("line")
-  .end(); 
-  
+  .end();
+
   // generate second tag...will reuse internal temporary attrs object.
   context.begin('input').id("bar").end();
   var str = context.get(context.length-1);
@@ -116,7 +116,7 @@ test("it should work when nested more than one level deep", function() {
   context.begin().id("foo")
     .begin().id("bar").end()
   .end();
-  
+
   var str = context.join('');
   ok(str.match(/id="foo"/), 'has foo');
   ok(str.match(/id="bar"/), 'has bar');

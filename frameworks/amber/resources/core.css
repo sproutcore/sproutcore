@@ -1,16 +1,16 @@
 .sc-view {
-	font-family: "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
-	font-size: 12px;
-	line-height: 1.4;
+  font-family: "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .ellipsis {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
   -ms-text-overflow: ellipsis;
 }
 
@@ -51,18 +51,18 @@ body {
 .sc-view blockquote,
 .sc-view th,
 .sc-view td {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .sc-view table {
-	border-collapse: collapse;
-	border-spacing: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 .sc-view fieldset,
 .sc-view img {
-	border: 0;
+  border: 0;
 }
 
 .sc-view address,
@@ -75,22 +75,22 @@ body {
 .sc-view th,
 .sc-view var,
 .sc-view optgroup {
-	font-style: inherit;
-	font-weight: inherit;
+  font-style: inherit;
+  font-weight: inherit;
 }
 
 .sc-view del,
 .sc-view ins {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 .sc-view li {
-	list-style: none;
+  list-style: none;
 }
 
 .sc-view caption,
 .sc-view th {
-	text-align: left;
+  text-align: left;
 }
 
 .sc-view h1,
@@ -99,32 +99,32 @@ body {
 .sc-view h4,
 .sc-view h5,
 .sc-view h6 {
-	font-size: 100%;
-	font-weight: normal;
+  font-size: 100%;
+  font-weight: normal;
 }
 
 .sc-view q:before,
 .sc-view q:after {
-	content: '';
+  content: '';
 }
 
 .sc-view abbr,
 .sc-view acronym {
-	border: 0;
-	font-variant: normal;
+  border: 0;
+  font-variant: normal;
 }
 
 .sc-view sup {
-	vertical-align: baseline;
+  vertical-align: baseline;
 }
 
 .sc-view sub {
-	vertical-align: baseline;
+  vertical-align: baseline;
 }
 
 /*because legend doesn't inherit in IE */
 .sc-view legend {
-	color: #000;
+  color: #000;
 }
 
 .sc-view input,
@@ -133,10 +133,10 @@ body {
 .sc-view select,
 .sc-view optgroup,
 .sc-view option {
-	font-family: inherit;
-	font-size: inherit;
-	font-style: inherit;
-	font-weight: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
 }
 
 /*@purpose To enable resizing for IE */
@@ -145,12 +145,8 @@ body {
 .sc-view button,
 .sc-view textarea,
 .sc-view select {
-	font-size: 100%;
+  font-size: 100%;
 }
-
-
-
-
 
 /* YUI reset*/
 
@@ -166,7 +162,7 @@ version: 2.7.0
  * YUI Fonts
  * @module fonts
  * @namespace yui-
- * @requires 
+ * @requires
  */
 
 /**
@@ -174,29 +170,29 @@ version: 2.7.0
  * x-small is for IE6/7 quirks mode.
  */
 .sc-view body {
-	font:13px/1.231 "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
-	/* for IE6/7 */ 
-	*font-size:small; 
-	/* for IE Quirks Mode */
-	*font:x-small; 
+  font:13px/1.231 "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
+  /* for IE6/7 */
+  *font-size:small;
+  /* for IE Quirks Mode */
+  *font:x-small;
 }
 
 /**
  * Nudge down to get to 13px equivalent for these form elements
- */ 
+ */
 .sc-view select,
 .sc-view input,
 .sc-view textarea,
 .sc-view button {
-	font:99% "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
+  font:99% "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
 }
 
 /**
  * To help tables remember to inherit
  */
 .sc-view table {
-	font-size:inherit;
-	font:100%;
+  font-size:inherit;
+  font:100%;
 }
 
 /**
@@ -207,11 +203,10 @@ version: 2.7.0
 .sc-view kbd,
 .sc-view samp,
 .sc-view tt {
-	font-family:monospace;
-	*font-size:108%;
-	line-height:100%;
+  font-family:monospace;
+  *font-size:108%;
+  line-height:100%;
 }
-
 
 /*YUI fonts*/
 
@@ -231,30 +226,30 @@ version: 2.7.0
 */
 
 .sc-view body {
-	/* For breathing room between content and viewport. */
-	margin:10px;
+  /* For breathing room between content and viewport. */
+  margin:10px;
 }
 
 .sc-view h1 {
-	/* 18px via YUI Fonts CSS foundation. */
-	font-size: 138.5%;
+  /* 18px via YUI Fonts CSS foundation. */
+  font-size: 138.5%;
 }
 
 .sc-view h2 {
-	/* 16px via YUI Fonts CSS foundation. */
-	font-size: 123.1%;
+  /* 16px via YUI Fonts CSS foundation. */
+  font-size: 123.1%;
 }
 
 .sc-view h3 {
-	/* 14px via YUI Fonts CSS foundation. */
-	font-size: 108%;
+  /* 14px via YUI Fonts CSS foundation. */
+  font-size: 108%;
 }
 
 .sc-view h1,
 .sc-view h2,
 .sc-view h3 {
-	/* Top & bottom margin based on font size. */
-	margin: 0em 0;
+  /* Top & bottom margin based on font size. */
+  margin: 0em 0;
 }
 
 .sc-view h1,
@@ -265,43 +260,43 @@ version: 2.7.0
 .sc-view h6,
 .sc-view strong,
 .sc-view dt {
-	/* Bringing boldness back to headers and the strong element. */
-	font-weight: bold;
+  /* Bringing boldness back to headers and the strong element. */
+  font-weight: bold;
 }
 .sc-view optgroup {
-	font-weight:normal;
+  font-weight:normal;
 }
 
 .sc-view abbr,
 .sc-view acronym {
-	/* Indicating to users that more info is available. */
-	border-bottom: 1px dotted #000;
-	cursor: help;
+  /* Indicating to users that more info is available. */
+  border-bottom: 1px dotted #000;
+  cursor: help;
 }
 
 .sc-view em {
-	/* Bringing italics back to the em element. */
-	font-style: italic;
+  /* Bringing italics back to the em element. */
+  font-style: italic;
 }
 
 .sc-view del {
-	/* Striking deleted phrases. */
-	text-decoration: line-through;
+  /* Striking deleted phrases. */
+  text-decoration: line-through;
 }
 
 .sc-view blockquote,
 .sc-view ul,
 .sc-view ol,
 .sc-view dl {
-	/* Giving blockquotes and lists room to breath. */
-	margin: 1em;
+  /* Giving blockquotes and lists room to breath. */
+  margin: 1em;
 }
 
 .sc-view ol,
 .sc-view ul,
 .sc-view dl {
-	/* Bringing lists on to the page with breathing room. */
-	margin-left: 2em;
+  /* Bringing lists on to the page with breathing room. */
+  margin-left: 2em;
 }
 /*
 .sc-view ol li {
@@ -318,40 +313,40 @@ version: 2.7.0
 */
 .sc-view th,
 .sc-view td {
-	/* Borders and padding to make the table readable. */
-	border: 1px solid #000;
-	padding: .5em;
+  /* Borders and padding to make the table readable. */
+  border: 1px solid #000;
+  padding: .5em;
 }
 
 .sc-view th {
-	/* Distinguishing table headers from data cells. */
-	font-weight: bold;
-	text-align: center;
+  /* Distinguishing table headers from data cells. */
+  font-weight: bold;
+  text-align: center;
 }
 
 .sc-view caption {
-	/* Coordinated margin to match cell's padding. */
-	margin-bottom: .5em;
-	/* Centered so it doesn't blend in to other content. */
-	text-align: center;
+  /* Coordinated margin to match cell's padding. */
+  margin-bottom: .5em;
+  /* Centered so it doesn't blend in to other content. */
+  text-align: center;
 }
 
 .sc-view sup {
-	/* to preserve line-height and selector appearance */
-	vertical-align: super;
+  /* to preserve line-height and selector appearance */
+  vertical-align: super;
 }
 
 .sc-view sub {
-	/* to preserve line-height and selector appearance */
-	vertical-align: sub;
+  /* to preserve line-height and selector appearance */
+  vertical-align: sub;
 }
 
 .sc-view p,
 .sc-view fieldset,
 .sc-view table,
 .sc-view pre {
-	/* So things don't run into each other. */
-	margin-bottom: 1em;
+  /* So things don't run into each other. */
+  margin-bottom: 1em;
 }
 /* Opera requires 1px of passing to render with contemporary native chrome */
 .sc-view button,
@@ -359,13 +354,8 @@ version: 2.7.0
 .sc-view input[type="radio"],
 .sc-view input[type="reset"],
 .sc-view input[type="submit"] {
-	padding:1px;
+  padding:1px;
 }
 
-
 /* YUI base*/
-
-
-
-
 

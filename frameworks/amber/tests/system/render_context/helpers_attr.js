@@ -9,11 +9,9 @@
 
 var context = null;
 
-
-
 // ..........................................................
 // attr
-// 
+//
 module("SC.RenderContext#attr", {
   setup: function() {
     context = SC.RenderContext().attr({ foo: 'foo' }) ;
@@ -37,7 +35,7 @@ test("should return receiver", function() {
 test("should create attrs hash if needed", function() {
   context = SC.RenderContext().begin();
   equals(context._attrs, null, 'precondition - has no attrs');
-  
+
   context.attr('foo', 'bar');
   equals(context._attrs.foo, 'bar', 'has styles');
 });
@@ -46,5 +44,4 @@ test("should assign all attrs if a hash is passed", function() {
   context.attr({ foo: 'bar', bar: 'bar' });
   same(context._attrs, { foo: 'bar', bar: 'bar' }, 'has same styles');
 });
- 
 

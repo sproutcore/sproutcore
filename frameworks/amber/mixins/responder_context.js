@@ -262,7 +262,6 @@ SC.ResponderContext = {
       this.makeFirstResponder(responder);
     }
 
-
     return working ;
   }
 
