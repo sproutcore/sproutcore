@@ -13,7 +13,7 @@ module("SC.View#render");
 
 test("default implementation invokes renderChildViews if firstTime = YES", function() {
 
-  var rendered = 0, updated = 0, parentRendered = 0, parentUpdated = 0, curContext, curFirstTime;
+  var rendered = 0, updated = 0, parentRendered = 0, parentUpdated = 0 ;
   var view = SC.View.create({
     displayProperties: ["triggerRenderProperty"],
     childViews: ["child"],
