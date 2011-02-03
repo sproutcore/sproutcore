@@ -243,6 +243,13 @@ SC.View.reopen(
   },
 
   applyAttributesToContext: function(original, context) {
+    var theme = this.get('theme');
+    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
+
+    for (idx = 0; idx < len; idx++) {
+      context.addClass(themeClassNames[idx]);
+    }
+
     original(context);
 
     var renderDelegate = this.get('renderDelegate');

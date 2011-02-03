@@ -194,7 +194,7 @@ SC.View.reopen(
       // For historical reasons, we'll also layout the child views if
       // necessary.
       if (current) {
-        if (this.get('childViewsNeedLayout')) this.invokeOnce(this.layoutChildViewsIfNeeded);
+        if (this.get('childViewsNeedLayout')) { this.invokeOnce(this.layoutChildViewsIfNeeded); }
       }
       else {
         // Also, if we were previously visible and were the first responder,
@@ -203,7 +203,7 @@ SC.View.reopen(
         // this work is not strictly related to computing the visibility, but
         // view performance is critical, so avoiding the extra observer is
         // worthwhile.
-        if (this.get('isFirstResponder')) this.resignFirstResponder();
+        if (this.get('isFirstResponder')) { this.resignFirstResponder(); }
       }
     }
 
@@ -770,28 +770,17 @@ SC.View.reopen(
   },
 
   applyAttributesToContext: function(context) {
-    var theme = this.get('theme');
-    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
-
-    for (idx = 0; idx < len; idx++) {
-      context.addClass(themeClassNames[idx]);
-    }
-
     context.addClass(this.get('classNames'));
 
     var cursor = this.get('cursor');
-    if (cursor) context.addClass(cursor.get('className'));
+    if (cursor) { context.addClass(cursor.get('className')); }
 
-    if (this.get('isTextSelectable')) context.addClass('allow-select');
-    if (!this.get('isVisible')) context.addClass('hidden');
-    if (this.get('isFirstResponder')) context.addClass('focus');
-    if (this.get('useStaticLayout')) context.addClass('sc-static-layout');
+    if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
+    if (!this.get('isVisible')) { context.addClass('hidden'); }
+    if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
-    if (this.get('backgroundColor')) {
-      context.css('backgroundColor', this.get('backgroundColor'));
-    }
   },
 
   /**
