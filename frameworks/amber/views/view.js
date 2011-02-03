@@ -450,11 +450,8 @@ SC.View.reopen(
       value = this._view_layer;
       if (!value) {
         var parent = this.get('parentView');
-        if (parent) parent = parent.get('layer');
-        if (parent) {
-          this._view_layer = value = this.findLayerInParentLayer(parent);
-        }
-        parent = null ; // avoid memory leak
+        if (parent) { parent = parent.get('layer'); }
+        if (parent) { this._view_layer = value = this.findLayerInParentLayer(parent); }
       }
     }
     return value ;
@@ -468,12 +465,11 @@ SC.View.reopen(
     @returns {SC.CoreQuery} the CoreQuery object for the DOM node
   */
   $: function(sel) {
-    var ret, layer = this.get('layer') ;
-    // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would
-    // return an object selecting the document.
-    ret = !layer ? SC.$([]) : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
-    layer = null ; // avoid memory leak
-    return ret ;
+    var layer = this.get('layer') ;
+
+    if(!layer) { return SC.$(); }
+    else if(sel === undefined) { return SC.$(layer); }
+    else { return SC.$(sel, layer); }
   },
 
   /**
@@ -497,8 +493,8 @@ SC.View.reopen(
     @readOnly
   */
   layerId: function(key, value) {
-    if (value) this._layerId = value;
-    if (this._layerId) return this._layerId;
+    if (value) { this._layerId = value; }
+    if (this._layerId) { return this._layerId; }
     return SC.guidFor(this) ;
   }.property().cacheable(),
 
@@ -508,9 +504,10 @@ SC.View.reopen(
     Handles changes in the layer id.
   */
   layerIdDidChange: function() {
-    var layer  = this.get("layer"),
-        lid    = this.get("layerId"),
+    var layer  = this.get('layer'),
+        lid    = this.get('layerId'),
         lastId = this._lastLayerId;
+
     if (lid !== lastId) {
       // if we had an earlier one, remove from view hash.
       if (lastId && SC.View.views[lastId] === this) {
@@ -524,7 +521,7 @@ SC.View.reopen(
       SC.View.views[lid] = this;
 
       // and finally, set the actual layer id.
-      if (layer) layer.id = lid;
+      if (layer) { layer.id = lid; }
     }
   }.observes("layerId"),
 
@@ -539,38 +536,8 @@ SC.View.reopen(
     @returns {DOMElement} the discovered layer
   */
   findLayerInParentLayer: function(parentLayer) {
-    var layerId = this.get('layerId'),
-        node, i, ilen, childNodes, elem, usedQuerySelector;
-
-    // first, let's try the fast path...
-    elem = document.getElementById(layerId) ;
-
-    // TODO: use code generation to only really do this check on IE
-    if (SC.browser.msie && elem && elem.id !== layerId) elem = null;
-
-    // if no element was found the fast way, search down the parentLayer for
-    // the element.  This code should not be invoked very often.  Usually a
-    // DOM element will be discovered by the first method above.
-    // This code uses a BFS algorithm as is expected to find the layer right
-    // below the parent.
-    if (!elem) {
-      elem = parentLayer.firstChild ;
-      var q = [];
-      q.push(parentLayer);
-      while (q.length !==0) {
-        node = q.shift();
-        if (node.id===layerId) {
-          return node;
-        }
-        childNodes = node.childNodes;
-        for (i=0, ilen=childNodes.length;  i < ilen;  ++i) {
-          q.push(childNodes[i]);
-        }
-      }
-      elem = null;
-    }
-
-    return elem;
+    var id = "#" + this.get('layerId');
+    return jQuery(id)[0] || jQuery(id, parentLayer)[0] ;
   },
 
   /**
