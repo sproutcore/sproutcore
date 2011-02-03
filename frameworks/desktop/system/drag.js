@@ -20,7 +20,7 @@ SC.View.reopen(
 
     // register scroll views for autoscroll during drags
     if (this.get('isScrollable')) { SC.Drag.addScrollableView(this) ; }
-  },
+  }.enhance(),
 
   destroy: function(original) {
     // unregister for drags
@@ -30,7 +30,7 @@ SC.View.reopen(
     if (this.get('isScrollable')) { SC.Drag.removeScrollableView(this) ; }
 
     return original();
-  }
+  }.enhance()
 });
 
 /**
