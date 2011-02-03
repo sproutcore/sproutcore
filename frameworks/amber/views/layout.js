@@ -967,7 +967,12 @@ SC.View.reopen(
     this.get('layoutStyleCalculator').willRenderAnimations();
     context.addStyle(this.get('layoutStyle'));
     this.get('layoutStyleCalculator').didRenderAnimations();
-  }
+  },
+
+  _renderLayerSettings: function(original, context, firstTime) {
+    original(context, firstTime);
+    this.renderLayout(context, firstTime);
+  }.enhance()
 
 });
 

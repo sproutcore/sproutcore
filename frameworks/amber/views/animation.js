@@ -25,6 +25,11 @@ SC.ANIMATABLE_PROPERTIES = {
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
+  didCreateLayerMixin: function() {
+    // Animation prep
+    if (SC.platform.supportsCSSTransitions) { this.resetAnimation(); }
+  },
+
   /**
     Animate a given property using CSS animations.
 

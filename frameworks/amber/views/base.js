@@ -1,1 +1,1 @@
-SC.View = SC.Responder.extend(SC.DelegateSupport);
+SC.CoreView = SC.Responder.extend(SC.DelegateSupport);

@@ -86,7 +86,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
   @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
-SC.View.reopen(
+SC.CoreView.reopen(
 /** @scope SC.View.prototype */ {
 
   concatenatedProperties: 'outlets displayProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
@@ -612,9 +612,6 @@ SC.View.reopen(
     this.notifyPropertyChange("layer");
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
-    // Animation prep
-    if (SC.platform.supportsCSSTransitions) { this.resetAnimation(); }
-
     // and notify others
     var mixins = this.didCreateLayerMixin, len, idx,
         childViews = this.get('childViews'),
@@ -765,8 +762,6 @@ SC.View.reopen(
     context.resetStyles();
 
     this.applyAttributesToContext(context);
-
-    this.renderLayout(context, firstTime);
   },
 
   applyAttributesToContext: function(context) {
@@ -1325,7 +1320,7 @@ SC.View.reopen(
 
 });
 
-SC.View.mixin(/** @scope SC.View */ {
+SC.CoreView.mixin(/** @scope SC.CoreView */ {
 
   /** @private walk like a duck -- used by SC.Page */
   isViewClass: YES,
@@ -1533,7 +1528,7 @@ SC.outlet = function(path, root) {
 };
 
 /** @private on unload clear cached divs. */
-SC.View.unload = function() {
+SC.CoreView.unload = function() {
   // delete view items this way to ensure the views are cleared.  The hash
   // itself may be owned by multiple view subclasses.
   var views = SC.View.views;
@@ -1545,7 +1540,7 @@ SC.View.unload = function() {
   }
 } ;
 
-SC.View.runCallback = function(callback){
+SC.CoreView.runCallback = function(callback){
   var additionalArgs = SC.$A(arguments).slice(1),
       typeOfAction = SC.typeOf(callback.action);
 
@@ -1576,6 +1571,8 @@ SC.View.runCallback = function(callback){
     }
   }
 };
+
+SC.View = SC.CoreView.extend({});
 
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
