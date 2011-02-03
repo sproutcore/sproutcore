@@ -964,26 +964,83 @@ test("Record relationships are NOT propagated if related store item does NOT exi
   ok(SC.none(g1.get('relative')), 'g1 should not be related to g2');
 });
 
-test("Record Attribute can define attribute key", function () {
-  MyApp.Generic = SC.Record.extend({
-    aunty: SC.Record.toOne('MyApp.Generic', {
-      inverse: 'relative',
+test("Record Attribute can reference renamed attribute key", function () {
+  MyApp.Master = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'master',
       isMaster: YES,
-      key: 'relative'
+      key: 'alice'
     })
   });
 
+  MyApp.Slave = SC.Record.extend({
+    master: SC.Record.toOne('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO
+    })
+  });
+
+  // link one -> one
   SC.RunLoop.begin();
-  MyApp.store.loadRecords(MyApp.Generic, [
-    { guid: 'g1' },
-    { guid: 'g2', relative: 'g1' }
+  MyApp.store.loadRecords(MyApp.Slave, [
+    { guid: 's1' }
   ]);
   SC.RunLoop.end();
 
-  var g1 = MyApp.store.find(MyApp.Generic, 'g1'),
-      g2 = MyApp.store.find(MyApp.Generic, 'g2');
 
-  equals(g2.get('aunty'), g1, 'g2 should be relative of g1');
+  var s1 = MyApp.store.find(MyApp.Slave, 's1');
+  ok(s1.get('status') & SC.Record.READY_CLEAN, 'precond - s1 should be ready clean');
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Master, [
+    { guid: 'm1', alice: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var m1 = MyApp.store.find(MyApp.Master, 'm1');
+
+  equals(m1.get('slave'), s1, 'm1 should be master of s1');
+  equals(s1.get('master'), m1, 's1 should have master of m1');
+});
+
+
+test("Record Attribute can reference renamed attribute key (on remote side)", function () {
+  MyApp.Master = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'master',
+      isMaster: YES
+    })
+  });
+
+  MyApp.Slave = SC.Record.extend({
+    master: SC.Record.toOne('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO,
+      key: 'bob'
+    })
+  });
+
+  // link one -> one
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Slave, [
+    { guid: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+
+  var s1 = MyApp.store.find(MyApp.Slave, 's1');
+  ok(s1.get('status') & SC.Record.READY_CLEAN, 'precond - s1 should be ready clean');
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Master, [
+    { guid: 'm1', slave: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var m1 = MyApp.store.find(MyApp.Master, 'm1');
+
+  equals(m1.get('slave'), s1, 'm1 should be master of s1');
+  equals(s1.get('master'), m1, 's1 should have master of m1');
 });
 
 test("Record property does change on linkage", function () {
@@ -1073,4 +1130,125 @@ test("RecordAttribute flag 'createIfEmpty' tests", function () {
   ok(SC.none(m2), 'm2 should NOT have been creaetd');
   ok(!s2.get('master') ||
       s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
+});
+
+/**
+  createIfEmpty RecordAttribute flag can be a function.
+ */
+test("RecordAttribute flag 'createIfEmpty' can be a function", function () {
+  MyApp.Master = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'master',
+      isMaster: YES,
+      createIfEmpty: function () {
+        return NO;
+      }
+    })
+  });
+
+  MyApp.Slave = SC.Record.extend({
+    master: SC.Record.toOne('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO,
+      createIfEmpty: YES // should be a noop
+    })
+  });
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Master, [
+    { guid: 'm1', slave: 's1' }
+  ]);
+
+  MyApp.store.loadRecords(MyApp.Slave, [
+    { guid: 's2', master: 'm2' }
+  ]);
+  SC.RunLoop.end();
+
+  var m1 = MyApp.store.find(MyApp.Master, 'm1'),
+      m2 = MyApp.store.find(MyApp.Master, 'm2'),
+      s1 = MyApp.store.find(MyApp.Slave, 's1'),
+      s2 = MyApp.store.find(MyApp.Slave, 's2');
+
+  // test lazy creation on isMaster => NO
+  ok(!s1, 's1 should NOT be created lazily');
+
+  // test lazy creation fails on isMaster => NO
+  ok(SC.none(m2), 'm2 should NOT have been creaetd');
+  ok(!s2.get('master') ||
+      s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
+});
+
+
+/**
+   createIfEmpty should ride the chain all the way to the top.
+
+   That is, if a record's primaryKey is a record that has the
+   flag 'createIfEmpty' on it, it should lazily create that one,
+   and so on.
+ */
+test("RecordAttribute flag 'createIfEmpty' will create chains of records properly", function () {
+  MyApp.SuperMaster = SC.Record.extend({
+    master: SC.Record.toOne('MyApp.Master', {
+      inverse: 'superMaster',
+      isMaster: YES,
+      createIfEmpty: YES
+    })
+  });
+
+  MyApp.Master = SC.Record.extend({
+    primaryKey: 'slave',
+
+    superMaster: SC.Record.toOne('MyApp.SuperMaster', {
+      inverse: 'master',
+      isMaster: NO
+    }),
+
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'master',
+      isMaster: YES,
+      createIfEmpty: YES
+    })
+  });
+
+  MyApp.Slave = SC.Record.extend({
+    primaryKey: 'subSlave',
+
+    master: SC.Record.toOne('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO
+    }),
+
+    subSlave: SC.Record.toOne('MyApp.SubSlave', {
+      inverse: 'slave',
+      isMaster: YES,
+      createIfEmpty: YES
+    })
+  });
+
+  MyApp.SubSlave = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'subSlave',
+      isMaster: NO
+    })
+  });
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.SuperMaster, [
+    { guid: 'sm', master: 's' }
+  ]);
+  SC.RunLoop.end();
+
+  var sm = MyApp.store.find(MyApp.SuperMaster, 'sm'),
+      m = MyApp.store.find(MyApp.Master, 's'),
+      s = MyApp.store.find(MyApp.Slave, 's'),
+      ss = MyApp.store.find(MyApp.SubSlave, 's');
+
+  ok(m, 'm should be created lazily');
+  equals(m.get('superMaster'), sm, 'sm should be master of m');
+
+  ok(s, 's should be created lazily');
+  equals(s.get('master'), m, 'm should be master of s');
+
+  ok(ss, 'ss should be created lazily');
+  equals(ss.get('slave'), s, 's should be master of ss');
 });

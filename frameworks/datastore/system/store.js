@@ -2646,17 +2646,44 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     If the flag createIfEmpty is set to YES, then the inverse record will be
     created lazily.
+
+    @param {SC.Record} recordType The inverse record type.
+    @param {String} id The id of the recordType to add.
+    @param {SC.RecordAttribute} toAttr The record attribute that represents
+      the relationship being created.
+    @param {String} relativeID The ID of the model that needs to have it's
+      relationship updated.
    */
   _inverseDidAddRelationship: function(recordType, id, toAttr, relativeID) {
     var storeKey = recordType.storeKeyFor(id),
         dataHash = this.readDataHash(storeKey),
         status = this.peekStatus(storeKey),
         key = toAttr.inverse,
-        proto = recordType.prototype;
+        hashKey = toAttr.inverse,
+        proto = recordType.prototype,
+        primaryAttr = proto[proto.primaryKey],
+        shouldRecurse = false;
 
-    // TODO: should createIfEmpty apply to DESTROYED_* states?
+    // in case the SC.RecordAttribute defines a `key` field, we need to use that
+    hashKey = (proto[key] && (proto[key].get && proto[key].get('key')) ||
+               proto[key].key) || key;
+
     if ((status === SC.Record.EMPTY) &&
-        (toAttr.get && toAttr.get('createIfEmpty') || toAttr.createIfEmpty)) {
+        (SC.typeOf(toAttr.createIfEmpty) === SC.T_FUNCTION && toAttr.createIfEmpty() ||
+         SC.typeOf(toAttr.createIfEmpty) !== SC.T_FUNCTION && toAttr.createIfEmpty)) {
+
+      if (!SC.none(primaryAttr) && primaryAttr.typeClass &&
+          SC.typeOf(primaryAttr.typeClass()) === SC.T_CLASS) {
+
+        // Recurse to create the record that this primaryKey points to iff it
+        // also should be created if the record is empty.
+        // Identifies chained relationships where the object up the chain
+        // doesn't exist yet.
+
+        // TODO: this can lead to an infinite recursion if the relationship
+        // graph is cyclic
+        shouldRecurse = true;
+      }
       dataHash = {};
       dataHash[proto.primaryKey] = id;
     }
@@ -2664,24 +2691,29 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!dataHash || !key) return;
 
     if (SC.instanceOf(proto[key], SC.SingleAttribute)) {
-      dataHash[key] = relativeID;
+      dataHash[hashKey] = relativeID;
     } else if (SC.instanceOf(proto[key], SC.ManyAttribute)) {
-      dataHash[key] = dataHash[key] || [];
+      dataHash[hashKey] = dataHash[hashKey] || [];
 
       if (dataHash[key].indexOf(relativeID) < 0) {
-        dataHash[key].push(relativeID);
+        dataHash[hashKey].push(relativeID);
       }
     }
 
-    this.pushRetrieve(recordType, id, dataHash, undefined, true);
+    this.pushRetrieve(recordType, id, dataHash, undefined, !shouldRecurse);
   },
 
 
   /** @private
     Iterates over keys on the recordType prototype, looking for RecordAttributes
     that have relationships (toOne or toMany).
+
+    @param {SC.Record} recordType The record type to do introspection on to see
+      if it has any RecordAttributes that have relationships to other records.
+    @param {String} id The id of the record being pushed in.
+    @param {Number} storeKey The storeKey
    */
-  _pushIterator: function (recordType, id, storeKey, lambda, self) {
+  _pushIterator: function (recordType, id, storeKey, lambda) {
     var proto = recordType.prototype,
         attr, currentHash, key, inverseType;
 
@@ -2698,7 +2730,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
         if (SC.typeOf(inverseType) !== SC.T_CLASS) continue;
 
-        lambda.apply(self, [inverseType, currentHash, attr,
+        lambda.apply(this, [inverseType, currentHash, attr,
                             attr.get && attr.get('key') || key]);
       }
     }
@@ -2717,7 +2749,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         // update old relationships
         existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
         this._inverseDidRelinquishRelationships(inverseType, existingIDs, toAttr, id);
-    }, this);
+    });
 
     return sc_super();
   },
@@ -2727,12 +2759,24 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     relationships to ensure that the master-slave relationship is kept intact.
 
     For use cases, see the test for pushRelationships.
+
+    The `ignore` argument is only set to true when adding the inverse
+    relationship (to prevent infinite recursion).
    */
   pushRetrieve: function (recordType, id, dataHash, storeKey, ignore) {
+    // avoid infinite recursions when additional changes are propogated
+    // from `_inverseDidAddRelationship`
     if (!ignore) {
       var existingIDs, inverseIDs;
 
       this._pushIterator(recordType, id, storeKey,
+        /**
+          @param {SC.Record} inverseType - in a Master-Slave
+          relationship when pushing master, Slave is the inverse type
+          @param {Object} currentHash - the hash in the data store (data to be replaced by `dataHash`)
+          @param {SC.RecordAttribute} toAttr - key in `recordType.prototype` that names isMaster and has an inverse
+          @param {String} keyValue - the property name in the datahash that defines this foreign key relationship
+         */
         function (inverseType, currentHash, toAttr, keyValue) {
           // update old relationships
           existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
@@ -2746,7 +2790,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
             }), toAttr, id);
 
           this._inverseDidAddRelationships(inverseType, inverseIDs, toAttr, id);
-      }, this);
+        });
     }
 
     storeKey = storeKey || recordType.storeKeyFor(id);
