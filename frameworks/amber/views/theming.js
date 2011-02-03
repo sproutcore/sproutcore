@@ -90,7 +90,7 @@ SC.View.reopen(
       childViews[idx].notifyPropertyChange('baseTheme');
     }
 
-    if (this.get('layer')) this.replaceLayer();
+    if (this.get('layer')) { this.replaceLayer(); }
   }.observes('theme'),
 
   /**
@@ -158,8 +158,8 @@ SC.View.reopen(
     @property {Object}
   */
   renderDelegate: function(key, value) {
-    if (value) this._setRenderDelegate = value;
-    if (this._setRenderDelegate) return this._setRenderDelegate;
+    if (value) { this._setRenderDelegate = value; }
+    if (this._setRenderDelegate) { return this._setRenderDelegate; }
 
     // If this view does not have a render delegate but has
     // renderDelegateName set, try to retrieve the render delegate from the
@@ -251,3 +251,105 @@ SC.View.reopen(
     }
   }.enhance()
 });
+
+/**
+  @class
+  @private
+  View Render Delegate Proxies are tool SC.Views use to:
+
+  a) limit properties the render delegate can access to the displayProperties
+  b) look up 'display*' ('displayTitle' instead of 'title') to help deal with
+     differences between the render delegate's API and the view's.
+
+  RenderDelegateProxies are fully valid data sources for render delegates. They
+  act as proxies to the view, interpreting the .get and .didChangeFor commands
+  based on the view's displayProperties.
+
+  This tool is not useful outside of SC.View itself, and as such, is private.
+*/
+SC.View._RenderDelegateProxy = {
+
+  // for testing:
+  isViewRenderDelegateProxy: YES,
+
+  /**
+   * Creates a View Render Delegate Proxy for the specified view.
+   *
+   * Implementation note: this creates a hash of the view's displayProperties
+   * array so that the proxy may quickly determine whether a property is a
+   * displayProperty or not. This could cause issues if the view's displayProperties
+   * array is modified after instantiation.
+   *
+   * @param {SC.View} view The view this proxy should proxy to.
+   * @returns SC.View._RenderDelegateProxy
+  */
+  createForView: function(view) {
+    var ret = SC.beget(this);
+
+    // set up displayProperty lookup for performance
+    var dp = view.get('displayProperties'), lookup = {};
+    for (var idx = 0, len = dp.length; idx < len; idx++) {
+      lookup[dp[idx]] = YES;
+    }
+
+    // also allow the few special properties through
+    lookup.theme = YES;
+
+    ret._displayPropertiesLookup = lookup;
+    ret.renderState = {};
+
+    ret.view = view;
+    return ret;
+  },
+
+
+  /**
+   * Provides the render delegate with any property it needs.
+   *
+   * This first looks up whether the property exists in the view's
+   * displayProperties, and whether it exists prefixed with 'display';
+   * for instance, if the render delegate asks for 'title', this will
+   * look for 'displayTitle' in the view's displayProperties array.
+   *
+   * @param {String} property The name of the property the render delegate needs.
+   * @returns The value.
+  */
+  get: function(property) {
+    if (this[property] !== undefined) { return this[property]; }
+
+    var displayProperty = 'display' + property.capitalize();
+
+    if (this._displayPropertiesLookup[displayProperty]) {
+      return this.view.get(displayProperty);
+    } else if (this._displayPropertiesLookup[property]) {
+      return this.view.get(property);
+    }
+
+    return undefined;
+  },
+
+  /**
+   * Checks if any of the specified properties have changed.
+   *
+   * For each property passed, this first determines whether to use the
+   * 'display' prefix. Then, it calls view.didChangeFor with context and that
+   * property name.
+   *
+  */
+  didChangeFor: function(context) {
+    var len = arguments.length, idx;
+    for (idx = 1; idx < len; idx++) {
+      var property = arguments[idx],
+          displayProperty = 'display' + property.capitalize();
+
+      if (this._displayPropertiesLookup[displayProperty]) {
+        if (this.view.didChangeFor(context, displayProperty)) { return YES; }
+      } else if (this._displayPropertiesLookup[property]) {
+        if (this.view.didChangeFor(context, property)) { return YES; }
+      }
+    }
+
+    return NO;
+  }
+};
+

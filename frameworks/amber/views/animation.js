@@ -1,4 +1,26 @@
 sc_require("views/view");
+sc_require("views/layout_style");
+
+/**
+  Properties that can be animated
+  (Hash for faster lookup)
+*/
+SC.ANIMATABLE_PROPERTIES = {
+  top:     YES,
+  left:    YES,
+  bottom:  YES,
+  right:   YES,
+  width:   YES,
+  height:  YES,
+  centerX: YES,
+  centerY: YES,
+  opacity: YES,
+  scale:   YES,
+  rotate:  YES,
+  rotateX: YES,
+  rotateY: YES,
+  rotateZ: YES
+};
 
 SC.View.reopen(
   /** @scope SC.View.prototype */ {

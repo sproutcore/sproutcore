@@ -1,5 +1,35 @@
 sc_require('views/view');
 
+/**
+  Map to CSS Transforms
+*/
+
+SC.CSS_TRANSFORM_MAP = {
+  rotate: function(val){
+    return null;
+  },
+
+  rotateX: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotateX('+val+')';
+  },
+
+  rotateY: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotateY('+val+')';
+  },
+
+  rotateZ: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotateZ('+val+')';
+  },
+
+  scale: function(val){
+    if (SC.typeOf(val) === SC.T_ARRAY) val = val.join(', ');
+    return 'scale('+val+')';
+  }
+};
+
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
