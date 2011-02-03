@@ -44,11 +44,11 @@
 
     <script>
       (function() { 
-        var styles;
+        var styles = [];
         if (window.devicePixelRatio == 2 || window.location.search.indexOf("2x") > -1) {
-          styles = <%= stylesheets_for_client nil, { :x2 => true, :javascript => true } %>;
+          styles = <%= stylesheet_urls_for_client(nil, { :x2 => true }).to_json %>;
         } else {
-          styles = <%= stylesheets_for_client nil, { :javascript => true } %>;
+          styles = <%= stylesheet_urls_for_client.to_json %>;
         }
 
         var head = document.getElementsByTagName("head")[0];
