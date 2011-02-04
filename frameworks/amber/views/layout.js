@@ -347,6 +347,7 @@ SC.View.reopen(
 
         /*
           TODO Can probably have some better width/height values - CC
+          FIXME This will probably not work right with borders - PW
         */
         f.width = layer.offsetWidth;
         f.height = layer.offsetHeight;
