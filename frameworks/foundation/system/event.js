@@ -78,7 +78,7 @@ SC.Event = function(originalEvent) {
   }
   
   // Normalize wheel delta values for mousewheel events
-  if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll') {
+  if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
     var deltaMultiplier = 1,
         version = parseFloat(SC.browser.version);
 

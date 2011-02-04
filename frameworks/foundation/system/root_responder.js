@@ -620,7 +620,7 @@ SC.RootResponder = SC.Object.extend({
     // handle basic events
     this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mousemove selectstart contextmenu'.w(), document)
         .listenFor('resize'.w(), window);
-        
+
     if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
     else this.listenFor('focus blur'.w(), window);
 
@@ -669,11 +669,22 @@ SC.RootResponder = SC.Object.extend({
       }
     }, this);
 
-    // handle mousewheel specifically for FireFox
-    var mousewheel = SC.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel';
+    var mousewheel = 'mousewheel';
+
+    // Firefox emits different mousewheel events than other browsers
+    if (SC.browser.mozilla) {
+      // For Firefox <3.5, subscribe to DOMMouseScroll events
+      if (SC.browser.compareVersion(1,9,1) < 0) {
+        mousewheel = 'DOMMouseScroll';
+
+      // For Firefox 3.5 and greater, we can listen for MozMousePixelScroll,
+      // which supports pixel-precision scrolling devices, like MacBook
+      // trackpads.
+      } else {
+        mousewheel = 'MozMousePixelScroll';
+      }
+    }
     SC.Event.add(document, mousewheel, this, this.mousewheel);
-
-
 
     // If the browser is identifying itself as a touch-enabled browser, but
     // touch events are not present, assume this is a desktop browser doing
