@@ -47,7 +47,7 @@ function performLayoutTest(layout, no_s, with_f, with_s) {
   // test
   layoutKeys.forEach(function(key) {
     testKey = key === 'transform' ? SC.platform.domCSSPrefix+'Transform' : key;
-    equals(layoutStyle[testKey], no_s[key], "STYLE NO PARENT %@".fmt(key)) ;  
+    equals(layoutStyle[testKey], no_s[key], "STYLE NO PARENT %@".fmt(key));
   });
 
   // add parent
@@ -61,7 +61,7 @@ function performLayoutTest(layout, no_s, with_f, with_s) {
   // test again
   layoutKeys.forEach(function(key) {
     testKey = key === 'transform' ? SC.platform.domCSSPrefix+'Transform' : key;
-    equals(layoutStyle[testKey], with_s[key], "STYLE W/ PARENT %@".fmt(key)) ;  
+    equals(layoutStyle[testKey], with_s[key], "STYLE W/ PARENT %@".fmt(key));
   });
 
   frameKeys.forEach(function(key){
@@ -237,14 +237,14 @@ test("layout {top, left, width: auto, height: auto}", function() {
   parent.createLayer();
   var layer = parent.get('layer');
   document.body.appendChild(layer);
-  
+
   var layout = { top: 0.1, left: 0.1, width: 'auto', height: 'auto' };
   // var no_f = { x: 0, y: 0, width: 0, height: 0 };
   var with_f = { x: 20, y: 20, width: 180, height: 180 };
   var s = { top: '10%', left: '10%', width: 'auto', height: 'auto' };
-  
+
   performLayoutTest(layout, s, with_f, s);
-  
+
   layer.parentNode.removeChild(layer);
 });
 
@@ -387,10 +387,10 @@ if (SC.platform.supportsCSSTransforms) {
 
     var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
     var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
-    var no_f = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
-    var with_f = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
+    // var no_f = { top: '10%', left: '10%', width: '50%', height: '50%' } ;
+    var with_f = { x: 20, y: 20, width: 100, height: 100 } ;
 
-    performLayoutTest(layout, no_f, s, with_f, s) ;
+    performLayoutTest(layout, s, with_f, s) ;
   }) ;
 
 }
@@ -434,7 +434,7 @@ test("layout {right, bottom} - assume top/left=0", function() {
 
   var layout = { right: 0.1, bottom: 0.1 };
   // var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
-  var with_f = { x: 20, y: 20, width: 180, height: 180 } ;
+  var with_f = { x: 0, y: 0, width: 180, height: 180 } ;
   var s = { bottom: '10%', right: '10%', top: 0, left: 0 } ;
   
   performLayoutTest(layout, s, with_f, s) ;
@@ -445,7 +445,7 @@ test("layout {right, bottom, maxWidth, maxHeight} - assume top/left=null", funct
 
   var layout = { right: 0.1, bottom: 0.1, maxWidth: 10, maxHeight: 10 };
   // var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
-  var with_f = { x: 170, y: 170, width: 10, height: 10 } ;
+  var with_f = { x: 0, y: 0, width: 10, height: 10 } ;
   var s = { bottom: '10%', right: '10%', top: null, left: null, maxWidth: 10, maxHeight: 10 } ;
 
   performLayoutTest(layout, s, with_f, s) ;
@@ -456,7 +456,7 @@ test("layout {centerX, centerY} - assume width/height=0", function() {
 
   var layout = { centerX: 0.1, centerY: 0.1 };
   // var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
-  var with_f = { x: 100, y: 100, width: 0, height: 0 } ;
+  var with_f = { x: 120, y: 120, width: 0, height: 0 } ;
   var s = { width: 0, height: 0, top: "50%", left: "50%", marginTop: "50%", marginLeft: "50%" } ;
   performLayoutTest(layout, s, with_f, s) ;
   
