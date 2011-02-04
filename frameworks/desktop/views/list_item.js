@@ -51,8 +51,20 @@ SC.ListItemView = SC.View.extend(
   content: null,
   
   /**
+    The index of the content object in the ListView to which this
+    ListItemView belongs.
+
+    For example, if this ListItemView represents the first object
+    in a ListView, this property would be 0.
+
+    @type Number
+    @isReadOnly
+  */
+  contentIndex: null,
+
+  /**
     (displayDelegate) True if you want the item view to display an icon.
-    
+
     If false, the icon on the list item view will be hidden.  Otherwise,
     space will be left for the icon next to the list item view.
   */
