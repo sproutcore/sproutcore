@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('platform/motion');
+sc_require('platform');
 
 /**
   h1. Device Motion
