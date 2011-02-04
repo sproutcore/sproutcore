@@ -1492,11 +1492,8 @@ SC.CollectionView = SC.View.extend(
         sel.addObject(content.objectAt(indexes.get('firstObject')));
         
       // otherwise select an index range
-      } else {
-        indexes.forEach(function(index) {
-          sel.addObject(content.objectAt(index));
-        });
-      }
+      } else sel.add(content, indexes);
+      
     }
 
     // give delegate one last chance
