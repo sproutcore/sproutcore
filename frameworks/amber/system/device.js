@@ -10,6 +10,10 @@ require('system/ready');
 require('system/root_responder');
 require('system/platform');
 
+SC.PORTRAIT_ORIENTATION = 'portrait';
+SC.LANDSCAPE_ORIENTATION = 'landscape';
+SC.NO_ORIENTATION = 'desktop'; // value 'desktop' for backwards compatibility
+
 /**
   The device object allows you to check device specific properties such as 
   orientation and if the device is offline, as well as observe when they change 
@@ -36,13 +40,14 @@ require('system/platform');
 SC.device = SC.Object.create({
   
   /**
-    Sets the orientation for touch devices, either 'landscape' or 'portrait'. 
-    Will be 'desktop' in the case of non-touch devices.
+    Sets the orientation for touch devices, either SC.LANDSCAPE_ORIENTATION
+    or SC.PORTRAIT_ORIENTATION. Will be SC.NO_ORIENTATION in the case of
+    non-touch devices that are also not simulating touch events.
   
     @property {String}
-    @default 'desktop'
+    @default SC.NO_ORIENTATION
   */
-  orientation: 'desktop',
+  orientation: SC.NO_ORIENTATION,
   
   /**
     Indicates whether the device is currently online or offline. For browsers
@@ -80,13 +85,10 @@ SC.device = SC.Object.create({
   */
   init: function() {
     sc_super();
-    if(SC.platform.touch) this.orientationchange();
     
-    if(navigator && navigator.onLine===false) {
+    if (navigator && navigator.onLine === false) {
       this.set('isOffline', YES);
     }
-    
-    this.panes = SC.Set.create();
   },
   
   /**
@@ -95,36 +97,93 @@ SC.device = SC.Object.create({
   */
   setup: function() {
     var responder = SC.RootResponder.responder;
-    responder.listenFor('orientationchange'.w(), window, this);
     responder.listenFor('online offline'.w(), document, this);
+    
+    this.orientationHandlingShouldChange();
   },
   
   // ..........................................................
-  // EVENT HANDLING
+  // ORIENTATION HANDLING
   //
   
-  orientationchange: function(evt) {
-    if(window.orientation===0 || window.orientation===180) {
-      this.set('orientation', 'portrait');
+  /**
+    Determines which method to use for orientation changes.
+    Either detects orientation changes via the current size
+    of the window, or by the window.onorientationchange event.
+  */
+  orientationHandlingShouldChange: function() {
+    if (SC.platform.windowSizeDeterminesOrientation) {
+      SC.Event.remove(window, 'orientationchange', this, this.orientationchange);
+      this.windowSizeDidChange(SC.RootResponder.responder.get('currentWindowSize'));
+    } else if (SC.platform.supportsOrientationChange) {
+      SC.Event.add(window, 'orientationchange', this, this.orientationchange);
+      this.orientationchange();
     }
-    else {
-      this.set('orientation', 'landscape');
+  },
+  
+  /**
+    @param {Hash} newSize The new size of the window
+    @returns YES if the method altered the orientation, NO otherwise
+  */
+  windowSizeDidChange: function(newSize) {
+    if (SC.platform.windowSizeDeterminesOrientation) {
+      if (!SC.browser.mobileSafari || SC.browser.android) {
+        // in any browser other than iOS, use height vs. width test
+        if (SC.platform.touch) {
+          if (newSize.height >= newSize.width) {
+            this.set('orientation', SC.PORTRAIT_ORIENTATION);
+          } else {
+            this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+          }
+        } else {
+          this.set('orientation', SC.NO_ORIENTATION);
+        }
+      } else {
+        // in mobile safari, because some of its chrome can make the
+        // above match landscape falsely, we compare to screen.width
+        if (newSize.width === window.screen.width) {
+          this.set('orientation', SC.PORTRAIT_ORIENTATION);
+        } else {
+          this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+        }
+      }
+      return YES;
+    }
+    return NO;
+  },
+  
+  /**
+    Called when the window.onorientationchange event is fired.
+  */
+  orientationchange: function(evt) {
+    if (window.orientation === 0 || window.orientation === 180) {
+      this.set('orientation', SC.PORTRAIT_ORIENTATION);
+    } else {
+      this.set('orientation', SC.LANDSCAPE_ORIENTATION);
     }
   },
   
   orientationObserver: function(){
     var body = SC.$(document.body),
-        or = this.get('orientation');
+        orientation = this.get('orientation');
     
-    if(or === "portrait") {
+    if (orientation === SC.PORTRAIT_ORIENTATION) {
       body.addClass('portrait');
+    } else {
+      body.removeClass('portrait');
+    }
+    
+    if (orientation === SC.LANDSCAPE_ORIENTATION) {
+      body.addClass('landscape');
+    } else {
       body.removeClass('landscape');
     }
-    if( or === "landscape" ) {
-      body.removeClass('portrait');
-      body.addClass('landscape');
-    }
   }.observes('orientation'),
+  
+  
+  // ..........................................................
+  // CONNECTION HANDLING
+  // 
   
   online: function(evt) {
     this.set('isOffline', NO);

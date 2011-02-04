@@ -115,6 +115,10 @@ SC.platform = {
     this.replaceEvent('mousemove', this._simtouch_mousemove);
     this.replaceEvent('mousedown', this._simtouch_mousedown);
     this.replaceEvent('mouseup', this._simtouch_mouseup);
+
+    // fix orientation handling
+    SC.platform.windowSizeDeterminesOrientation = YES;
+    SC.device.orientationHandlingShouldChange();
   },
 
   /** @private
@@ -252,7 +256,29 @@ SC.platform = {
   
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
-  }()
+  }(),
+  
+  supportsOrientationChange: ('onorientationchange' in window),
+  
+  /*
+    TODO [CC] On Android, SC.browser.mobileSafari returns YES, so we need to
+              explicitly check for non-Android mobileSafari browsers. There
+              is obviously a better way to handle this (ie. target the iOS
+              platform itself; we need more robust checking). Here's the kicker,
+              only certain Android devices support the onorientationchange
+              event, so those that don't need to fallback on the resize
+  */
+  /**
+    Because iOS is slow to dispatch the window.onorientationchange event,
+    we use the window size to determine the orientation on iOS devices
+    and desktop environments when SC.platform.touch is YES (ie. when
+    SC.platform.simulateTouchEvents has been called)
+    
+    @property {Boolean}
+    @default NO
+  */
+  windowSizeDeterminesOrientation: (SC.browser.mobileSafari && !SC.browser.android) || !('onorientationchange' in window)
+
 };
 
 /* Calculate CSS Prefixes */
