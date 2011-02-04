@@ -115,10 +115,6 @@ SC.CoreView.reopen(
   */
   parentView: null,
 
-  // ..........................................................
-  // IS VISIBLE IN WINDOW SUPPORT
-  //
-
   /**
     The isVisible property determines if the view is shown in the view
     hierarchy it is a part of. A view can have isVisible == YES and still have
@@ -133,115 +129,6 @@ SC.CoreView.reopen(
   isVisible: YES,
   isVisibleBindingDefault: SC.Binding.bool(),
 
-  /**
-    YES only if the view and all of its parent views are currently visible
-    in the window.  This property is used to optimize certain behaviors in
-    the view.  For example, updates to the view layer are not performed
-    if the view until the view becomes visible in the window.
-  */
-  isVisibleInWindow: NO,
-
-  /**
-   By default we don't disable the context menu. Overriding this property
-   can enable/disable the context menu per view.
-  */
-  isContextMenuEnabled: function() {
-    return SC.CONTEXT_MENU_ENABLED;
-  }.property(),
-
-  /**
-    Recomputes the isVisibleInWindow property based on the visibility of the
-    view and its parent.  If the recomputed value differs from the current
-    isVisibleInWindow state, this method will also call
-    recomputIsVisibleInWindow() on its child views as well.  As an optional
-    optimization, you can pass the isVisibleInWindow state of the parentView
-    if you already know it.
-
-    You will not generally need to call or override this method yourself. It
-    is used by the SC.View hierarchy to relay window visibility changes up
-    and down the chain.
-
-    @property {Boolean} parentViewIsVisible
-    @returns {SC.View} receiver
-  */
-  recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    var previous = this.get('isVisibleInWindow'),
-        current  = this.get('isVisible'),
-        parentView;
-
-    // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
-    // this approach only goes up to the parentView if necessary.
-    if (current) {
-      // If we weren't passed in 'parentViewIsVisible' (we generally aren't;
-      // it's an optimization), then calculate it.
-      if (parentViewIsVisible === undefined) {
-        parentView = this.get('parentView');
-        parentViewIsVisible = parentView ? parentView.get('isVisibleInWindow') : NO;
-      }
-      current = current && parentViewIsVisible;
-    }
-
-    // If our visibility has changed, then set the new value and notify our
-    // child views to update their value.
-    if (previous !== current) {
-      this.set('isVisibleInWindow', current);
-
-      var childViews = this.get('childViews'), len = childViews.length, idx;
-      for(idx=0;idx<len;idx++) {
-        childViews[idx].recomputeIsVisibleInWindow(current);
-      }
-
-      // For historical reasons, we'll also layout the child views if
-      // necessary.
-      if (current) {
-        if (this.get('childViewsNeedLayout')) { this.invokeOnce(this.layoutChildViewsIfNeeded); }
-      }
-      else {
-        // Also, if we were previously visible and were the first responder,
-        // resign it.  This more appropriately belongs in a
-        // 'isVisibleInWindow' observer or some such helper method because
-        // this work is not strictly related to computing the visibility, but
-        // view performance is critical, so avoiding the extra observer is
-        // worthwhile.
-        if (this.get('isFirstResponder')) { this.resignFirstResponder(); }
-      }
-    }
-
-    // If we're in this function, then that means one of our ancestor views
-    // changed, or changed its 'isVisibleInWindow' value.  That means that if
-    // we are out of sync with the layer, then we need to update our state
-    // now.
-    //
-    // For example, say we're isVisible=NO, but we have not yet added the
-    // 'hidden' class to the layer because of the "don't update the layer if
-    // we're not visible in the window" check.  If any of our parent views
-    // became visible, our layer would incorrectly be shown!
-    this.updateLayerIfNeeded(YES);
-
-    return this;
-  },
-
-
-  /** @private
-    Whenever the view’s visibility changes, we need to recompute whether it is
-    actually visible inside the window (a view is only visible in the window
-    if it is marked as visibile and its parent view is as well), in addition
-    to updating the layer accordingly.
-  */
-  _sc_isVisibleDidChange: function() {
-    // 'isVisible' is effectively a displayProperty, but we'll call
-    // displayDidChange() manually here instead of declaring it as a
-    // displayProperty because that avoids having two observers on
-    // 'isVisible'.  A single observer is:
-    //   a.  More efficient
-    //   b.  More correct, because we can guarantee the order of operations
-    this.displayDidChange();
-
-    this.recomputeIsVisibleInWindow();
-  }.observes('isVisible'),
-
-
-
   // ..........................................................
   // CHILD VIEW SUPPORT
   //
@@ -255,58 +142,6 @@ SC.CoreView.reopen(
     @property {Array}
   */
   childViews: SC.EMPTY_CHILD_VIEWS_ARRAY,
-
-  /**
-    This method is called whenever the receiver's parentView has changed.
-    The default implementation of this method marks the view's display
-    location as dirty so that it will update at the end of the run loop.
-
-    You will not usually need to override or call this method yourself, though
-    if you manually patch the parentView hierarchy for some reason, you should
-    call this method to notify the view that it's parentView has changed.
-
-    @returns {SC.View} receiver
-  */
-  parentViewDidChange: function() {
-    this.recomputeIsVisibleInWindow() ;
-
-    this.resetBuildState();
-    this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocationIfNeeded) ;
-
-    // We also need to iterate down through the view hierarchy and invalidate
-    // all our child view's caches for 'pane', since it could have changed.
-    //
-    // Note:  In theory we could try to avoid this invalidation if we
-    //        do this only in cases where we "know" the 'pane' value might
-    //        have changed, but those cases are few and far between.
-
-    this._invalidatePaneCacheForSelfAndAllChildViews();
-
-    return this ;
-  },
-
-  /** @private
-    We want to cache the 'pane' property, but it's impossible for us to
-    declare a dependence on all properties that can affect the value.  (For
-    example, if our grandparent gets attached to a new pane, our pane will
-    have changed.)  So when there's the potential for the pane changing, we
-    need to invalidate the caches for all our child views, and their child
-    views, and so on.
-  */
-  _invalidatePaneCacheForSelfAndAllChildViews: function () {
-    var childView, childViews = this.get('childViews'),
-        len = childViews.length, idx ;
-
-    this.notifyPropertyChange('pane');
-
-    for (idx=0; idx<len; ++idx) {
-      childView = childViews[idx];
-      if (childView._invalidatePaneCacheForSelfAndAllChildViews) {
-        childView._invalidatePaneCacheForSelfAndAllChildViews();
-      }
-    }
-  },
 
   // ..........................................................
   // LAYER SUPPORT
@@ -380,33 +215,6 @@ SC.CoreView.reopen(
     if (this._layerId) { return this._layerId; }
     return SC.guidFor(this) ;
   }.property().cacheable(),
-
-  _lastLayerId: null,
-
-  /**
-    Handles changes in the layer id.
-  */
-  layerIdDidChange: function() {
-    var layer  = this.get('layer'),
-        lid    = this.get('layerId'),
-        lastId = this._lastLayerId;
-
-    if (lid !== lastId) {
-      // if we had an earlier one, remove from view hash.
-      if (lastId && SC.View.views[lastId] === this) {
-        delete SC.View.views[lastId];
-      }
-
-      // set the current one as the new old one
-      this._lastLayerId = lid;
-
-      // and add the new one
-      SC.View.views[lid] = this;
-
-      // and finally, set the actual layer id.
-      if (layer) { layer.id = lid; }
-    }
-  }.observes("layerId"),
 
   /**
     Attempts to discover the layer in the parent layer.  The default
@@ -953,134 +761,6 @@ SC.CoreView.reopen(
   */
   displayProperties: ['isFirstResponder'],
 
-  /**
-    You can set this to an SC.Cursor instance; whenever that SC.Cursor's
-    'cursorStyle' changes, the cursor for this view will automatically
-    be updated to match. This allows you to coordinate the cursors of
-    many views by making them all share the same cursor instance.
-
-    For example, SC.SplitView uses this ensure that it and all of its
-    children have the same cursor while dragging, so that whether you are
-    hovering over the divider or another child of the split view, the
-    proper cursor is visible.
-
-    @property {SC.Cursor String}
-  */
-  cursor: function(key, value) {
-    var parent;
-
-    if (value) { this._setCursor = value; }
-    if (this._setCursor !== undefined) { return this._setCursor; }
-
-    parent = this.get('parentView');
-    if (this.get('shouldInheritCursor') && parent) {
-      return parent.get('cursor');
-    }
-
-    return null;
-  }.property('parentView', 'shouldInheritCursor').cacheable(),
-
-  /**
-    A child view without a cursor of its own inherits its parent's cursor by
-    default.  Set this to NO to prevent this behavior.
-
-    @property {Boolean}
-  */
-  shouldInheritCursor: YES,
-
-  // ..........................................................
-  // LAYER LOCATION
-  //
-
-  /**
-    Set to YES when the view's layer location is dirty.  You can call
-    updateLayerLocationIfNeeded() to clear this flag if it is set.
-
-    @property {Boolean}
-  */
-  layerLocationNeedsUpdate: NO,
-
-  /**
-    Calls updateLayerLocation(), but only if the view's layer location
-    currently needs to be updated.  This method is called automatically at
-    the end of a run loop if you have called parentViewDidChange() at some
-    point.
-
-    @property {Boolean} force This property is ignored.
-    @returns {SC.View} receiver
-    @test in updateLayerLocation
-  */
-  updateLayerLocationIfNeeded: function(force) {
-    if (this.get('layerLocationNeedsUpdate')) {
-      this.updateLayerLocation() ;
-    }
-    return this ;
-  },
-
-  /**
-    This method is called when a view changes its location in the view
-    hierarchy.  This method will update the underlying DOM-location of the
-    layer so that it reflects the new location.
-
-    @returns {SC.View} receiver
-  */
-  updateLayerLocation: function() {
-    // collect some useful value
-    // if there is no node for some reason, just exit
-    var node = this.get('layer'),
-        parentView = this.get('parentView'),
-        parentNode = parentView ? parentView.get('containerLayer') : null ;
-
-    // remove node from current parentNode if the node does not match the new
-    // parent node.
-    if (node && node.parentNode && node.parentNode !== parentNode) {
-      node.parentNode.removeChild(node);
-    }
-
-    // CASE 1: no new parentView.  just remove from parent (above).
-    if (!parentView) {
-      if (node && node.parentNode) { node.parentNode.removeChild(node); }
-
-    // CASE 2: parentView has no layer, view has layer.  destroy layer
-    // CASE 3: parentView has no layer, view has no layer, nothing to do
-    } else if (!parentNode) {
-      if (node) {
-        if (node.parentNode) { node.parentNode.removeChild(node); }
-        this.destroyLayer();
-      }
-
-    // CASE 4: parentView has layer, view has no layer.  create layer & add
-    // CASE 5: parentView has layer, view has layer.  move layer
-    } else {
-      if (!node) {
-        this.createLayer() ;
-        node = this.get('layer') ;
-        if (!node) { return; } // can't do anything without a node.
-      }
-
-      var siblings = parentView.get('childViews'),
-          nextView = siblings.objectAt(siblings.indexOf(this)+1),
-          nextNode = (nextView) ? nextView.get('layer') : null ;
-
-      // before we add to parent node, make sure that the nextNode exists...
-      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-        nextView.updateLayerLocationIfNeeded() ;
-        nextNode = nextView.get('layer') ;
-      }
-
-      // add to parentNode if needed.
-      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-        parentNode.insertBefore(node, nextNode) ;
-      }
-    }
-
-    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
-
-    this.set('layerLocationNeedsUpdate', NO) ;
-
-    return this ;
-  },
-
   // .......................................................
   // SC.RESPONDER SUPPORT
   //
@@ -1117,9 +797,6 @@ SC.CoreView.reopen(
 
     sc_super();
 
-    // TODO: This makes it impossible to override
-    this.layoutStyleCalculator = SC.View.LayoutStyleCalculator.create({ view: this });
-
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
     SC.View.views[this.get('layerId')] = this;
@@ -1134,8 +811,6 @@ SC.CoreView.reopen(
     for(var i=0, l=displayProperties.length; i<l; i++) {
       this.addObserver(displayProperties[i], this, this.displayDidChange);
     }
-
-    this._previousLayout = this.get('layout');
   },
 
   /**
@@ -1154,7 +829,7 @@ SC.CoreView.reopen(
     sc_super();
     var childViews = this.get('childViews'), len = childViews.length, idx ;
     for (idx=0; idx<len; ++idx) {
-      if (!childViews[idx]) continue ;
+      if (!childViews[idx]) { continue ; }
       childViews[idx].awake() ;
     }
   },
@@ -1335,7 +1010,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView */ {
     @function
   */
   design: function() {
-    if (this.isDesign) return this; // only run design one time
+    if (this.isDesign) { return this; } // only run design one time
     var ret = this.extend.apply(this, arguments);
     ret.isDesign = YES ;
     if (SC.ViewDesigner) {
@@ -1539,38 +1214,6 @@ SC.CoreView.unload = function() {
    }
   }
 } ;
-
-SC.CoreView.runCallback = function(callback){
-  var additionalArgs = SC.$A(arguments).slice(1),
-      typeOfAction = SC.typeOf(callback.action);
-
-  // if the action is a function, just try to call it.
-  if (typeOfAction == SC.T_FUNCTION) {
-    callback.action.apply(callback.target, additionalArgs);
-
-  // otherwise, action should be a string.  If it has a period, treat it
-  // like a property path.
-  } else if (typeOfAction === SC.T_STRING) {
-    if (callback.action.indexOf('.') >= 0) {
-      var path = callback.action.split('.') ;
-      var property = path.pop() ;
-
-      var target = SC.objectForPropertyPath(path, window) ;
-      var action = target.get ? target.get(property) : target[property];
-      if (action && SC.typeOf(action) == SC.T_FUNCTION) {
-        action.apply(target, additionalArgs);
-      } else {
-        throw 'SC.runCallback could not find a function at %@'.fmt(callback.action) ;
-      }
-
-    // otherwise, try to execute action direction on target or send down
-    // responder chain.
-    // FIXME: Add support for additionalArgs to this
-    // } else {
-    //  SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
-    }
-  }
-};
 
 SC.View = SC.CoreView.extend({});
 

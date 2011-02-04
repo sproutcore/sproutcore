@@ -32,7 +32,6 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 
 SC.LAYOUT_AUTO = 'auto';
 
-
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
@@ -59,6 +58,15 @@ SC.View.reopen(
   // ...........................................
   // LAYOUT
   //
+
+  init: function(original) {
+    original();
+
+    // TODO: This makes it impossible to override
+    this.layoutStyleCalculator = SC.View.LayoutStyleCalculator.create({ view: this });
+
+    this._previousLayout = this.get('layout');
+  }.enhance(),
 
   /**
     The 'frame' property depends on the 'layout' property as well as the
