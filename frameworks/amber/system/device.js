@@ -6,6 +6,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+require('system/core_query');
 require('system/ready');
 require('system/root_responder');
 require('system/platform');
@@ -123,10 +124,14 @@ SC.device = SC.Object.create({
     var body = SC.$(document.body),
         or = this.get('orientation');
     
-    body.setClass({
-      'portrait': or === SC.PORTRAIT_ORIENTATION,
-      'landscape': or === SC.LANDSCAPE_ORIENTATION
-    });
+    if(or === "portrait") {
+      body.addClass('portrait');
+      body.removeClass('landscape');
+    }
+    if( or === "landscape" ) {
+      body.removeClass('portrait');
+      body.addClass('landscape');
+    }
   }.observes('orientation'),
   
   online: function(evt) {
