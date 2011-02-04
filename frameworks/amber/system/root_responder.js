@@ -311,15 +311,8 @@ SC.RootResponder = SC.Object.extend({
     if (!SC.rectsEqual(newSize, oldSize)) {
       //Notify orientation change. This is faster than waiting for the orientation
       //change event.
-      if(SC.platform.touch){
-        var body = SC.$(document.body);
-        if(newSize.height>= newSize.width) {
-          SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
-        }
-        else {
-          SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
-        }
-      }
+      SC.device.windowSizeDidChange(newSize);
+      
       // notify panes
       if (this.panes) {
         SC.run(function() {
@@ -764,22 +757,6 @@ SC.RootResponder = SC.Object.extend({
         }
       };
       SC.RunLoop.prototype.endRunLoop = patch;
-    }
-    
-    // Orientation changes are not being reliably reported with iPhone 0S 3
-    // We do this initialization to double check the right orientation.
-    // This happens if the orientation has changed from the moment the app 
-    // started loading until the app is set until isReady
-    if(SC.platform.touch){
-      var newSize = this.computeWindowSize(),
-          body = SC.$(document.body);
-    
-      if(newSize.height>= newSize.width) {
-        SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
-      }
-      else {
-        SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
-      }
     }
   },
   
