@@ -325,18 +325,14 @@ SC.View.reopen(
         lcX = layout.centerX,
         lcY = layout.centerY;
 
-    if (lW !== undefined &&
-        lW === SC.LAYOUT_AUTO &&
-        stLayout !== undefined && !stLayout) {
+    if (lW === AUTO && stLayout !== undefined && !stLayout) {
       error = SC.Error.desc(("%@.layout() cannot use width:auto if "+
                 "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       console.error(error.toString()) ;
       throw error ;
     }
 
-    if (lH !== undefined &&
-        lH === SC.LAYOUT_AUTO &&
-        stLayout !== undefined && !stLayout) {
+    if (lH === AUTO && stLayout !== undefined && !stLayout) {
        error = SC.Error.desc(("%@.layout() cannot use height:auto if "+
                 "staticLayout is disabled").fmt(this),"%@".fmt(this), -1);
        console.error(error.toString())  ;
