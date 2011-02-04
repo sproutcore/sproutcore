@@ -23,7 +23,7 @@ var parent, child;
   @param {Hash} with_s expected layoutStyle for view with parent
   @returns {void}
 */
-function performLayoutTest(layout, no_s, with_f, with_s) {
+function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   // make sure we add null properties and convert numbers to 'XXpx' to style layout.
   var layoutKeys = 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight'.w();
   if (SC.platform.supportsCSSTransforms) { layoutKeys.push('transform'); }
@@ -42,6 +42,7 @@ function performLayoutTest(layout, no_s, with_f, with_s) {
   child.set('layout', layout) ;
 
   var layoutStyle = child.get('layoutStyle'),
+      frame = child.get('frame'),
       testKey;
 
   // test
@@ -50,13 +51,22 @@ function performLayoutTest(layout, no_s, with_f, with_s) {
     equals(layoutStyle[testKey], no_s[key], "STYLE NO PARENT %@".fmt(key));
   });
 
+  if (frame && no_f) {
+    frameKeys.forEach(function(key){
+      equals(frame[key], no_f[key], "FRAME NO PARENT %@".fmt(key));
+    });
+  } else {
+    equals(frame, no_f, "FRAME NO PARENT");
+  }
+
+
   // add parent
   SC.RunLoop.begin();
   parent.appendChild(child);
   SC.RunLoop.end();
 
   layoutStyle = child.get('layoutStyle');
-  var frame = child.get('frame');
+  frame = child.get('frame');
 
   // test again
   layoutKeys.forEach(function(key) {
@@ -115,40 +125,40 @@ test("layout {top, left, width, height}", function() {
 
   var layout = { top: 10, left: 10, width: 50, height: 50 };
   var s = { top: 10, left: 10, width: 50, height: 50 } ;
-  // var no_f = { x: 10, y: 10, width: 50, height: 50 } ;
+  var no_f = { x: 10, y: 10, width: 50, height: 50 } ;
   var with_f = { x: 10, y: 10, width: 50, height: 50 } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {top, left, bottom, right}", function() {
 
   var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-  // var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
+  var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
   var with_f = { x: 10, y: 10, width: 180, height: 180 } ;
   var s = { top: 10, left: 10, bottom: 10, right: 10 } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {bottom, right, width, height}", function() {
 
   var layout = { bottom: 10, right: 10, width: 50, height: 50 };
-  // var no_f = { x: 0, y: 0, width: 50, height: 50 } ;
+  var no_f = { x: 0, y: 0, width: 50, height: 50 } ;
   var with_f = { x: 140, y: 140, width: 50, height: 50 } ;
   var s = { bottom: 10, right: 10, width: 50, height: 50 } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {centerX, centerY, width, height}", function() {
 
   var layout = { centerX: 10, centerY: 10, width: 60, height: 60 };
-  // var no_f = { x: 10, y: 10, width: 60, height: 60 } ;
+  var no_f = { x: 10, y: 10, width: 60, height: 60 } ;
   var with_f = { x: 80, y: 80, width: 60, height: 60 } ;
   var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%" } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {top, left, width: auto, height: auto}", function() {
@@ -166,11 +176,11 @@ test("layout {top, left, width: auto, height: auto}", function() {
   document.body.appendChild(layer);
   
   var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
-  // var no_f = { x: 0, y: 0, width: 0, height: 0 };
+  var no_f = null;
   var with_f = { x: 0, y: 0, width: 20, height: 20 };
   var s = { top: 0, left: 0, width: 'auto', height: 'auto' };
 
-  performLayoutTest(layout, s, with_f, s);
+  performLayoutTest(layout, no_f, s, with_f, s);
 
   layer.parentNode.removeChild(layer);
 });
@@ -188,40 +198,40 @@ test("layout {top, left, width, height}", function() {
 
   var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
   var s = { top: '10%', left: '10%', width: '50%', height: '50%' } ;
-  // var no_f = { top: '10%', left: '10%', width: '50%', height: '50%' } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 20, y: 20, width: 100, height: 100 } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {top, left, bottom, right}", function() {
 
   var layout = { top: 0.1, left: 0.1, bottom: 0.1, right: 0.1 };
-  // var no_f = { top: '10%', left: '10%', bottom: '10%', right: '10%' };
+  var no_f = { x: 0, y: 0, width: 0, height: 0 };
   var with_f =  { x: 20, y: 20, width: 160, height: 160 };
   var s = { top: '10%', left: '10%', bottom: '10%', right: '10%' } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {bottom, right, width, height}", function() {
 
   var layout = { bottom: 0.1, right: 0.1, width: 0.5, height: 0.5 };
-  // var no_f = { bottom: '10%', right: '10%', width: '50%', height: '50%' };
+  var no_f = { x: 0, y: 0, width: 0, height: 0 };
   var with_f = { x: 80, y: 80, width: 100, height: 100 };
   var s = { bottom: '10%', right: '10%', width: '50%', height: '50%' } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {centerX, centerY, width, height}", function() {
 
   var layout = { centerX: 0.1, centerY: 0.1, width: 0.6, height: 0.6 };
-  // var no_f = { x: 10, y: 10, width: 60, height: 60 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 60, y: 60, width: 120, height: 120 } ;
   var s = { marginLeft: '-20%', marginTop: '-20%', width: '60%', height: '60%', top: "50%", left: "50%" } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {top, left, width: auto, height: auto}", function() {
@@ -239,11 +249,11 @@ test("layout {top, left, width: auto, height: auto}", function() {
   document.body.appendChild(layer);
 
   var layout = { top: 0.1, left: 0.1, width: 'auto', height: 'auto' };
-  // var no_f = { x: 0, y: 0, width: 0, height: 0 };
+  var no_f = null;
   var with_f = { x: 20, y: 20, width: 180, height: 180 };
   var s = { top: '10%', left: '10%', width: 'auto', height: 'auto' };
 
-  performLayoutTest(layout, s, with_f, s);
+  performLayoutTest(layout, no_f, s, with_f, s);
 
   layer.parentNode.removeChild(layer);
 });
@@ -342,20 +352,20 @@ if (SC.platform.supportsCSSTransforms) {
     var expectedTransform = 'translateX(10px) translateY(10px)';
     if (SC.platform.supportsCSS3DTransforms) expectedTransform += ' translateZ(0px)';
     var s = { top: 0, left: 0, width: 50, height: 50, transform: expectedTransform } ;
-    // var no_f = { x: 0, y: 0, width: 50, height: 50 } ;
+    var no_f = { x: 10, y: 10, width: 50, height: 50 } ;
     var with_f = { x: 10, y: 10, width: 50, height: 50} ;
 
-    performLayoutTest(layout, s, with_f, s) ;
+    performLayoutTest(layout, no_f, s, with_f, s) ;
   }) ;
 
   test("layout {top, left, bottom, right}", function() {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-    // var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
+    var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
     var with_f = { x: 10, y: 10, width: 180, height: 180 } ;
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: null } ;
 
-    performLayoutTest(layout, s, with_f, s) ;
+    performLayoutTest(layout, no_f, s, with_f, s) ;
   }) ;
 
   test("layout {top, left, width: auto, height: auto}", function() {
@@ -374,11 +384,11 @@ if (SC.platform.supportsCSSTransforms) {
     document.body.appendChild(layer);
   
     var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
-    // var no_f = { x: 0, y: 0, width: 0, height: 0 };
+    var no_f = null;
     var with_f = { x: 0, y: 0, width: 200, height: 200 };
     var s = { top: 0, left: 0, width: 'auto', height: 'auto', transform: null };
   
-    performLayoutTest(layout, s, with_f, s);
+    performLayoutTest(layout, no_f, s, with_f, s);
   
     layer.parentNode.removeChild(layer);
   });
@@ -387,10 +397,10 @@ if (SC.platform.supportsCSSTransforms) {
 
     var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
     var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null } ;
-    // var no_f = { top: '10%', left: '10%', width: '50%', height: '50%' } ;
+    var no_f = { x: 0, y: 0, width: 0, height: 0 };
     var with_f = { x: 20, y: 20, width: 100, height: 100 } ;
 
-    performLayoutTest(layout, s, with_f, s) ;
+    performLayoutTest(layout, no_f, s, with_f, s) ;
   }) ;
 
 }
@@ -412,86 +422,86 @@ module('INVALID LAYOUT VARIATIONS', commonSetup);
 test("layout {top, left} - assume right/bottom=0", function() {
   
   var layout = { top: 0.1, left: 0.1 };
-  // var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 20, y: 20, width: 180, height: 180 } ;
   var s = { bottom: 0, right: 0, top: '10%', left: '10%' } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
 test("layout {height, width} - assume top/left=0", function() {
 
   var layout = { height: 0.6, width: 0.6 };
-  // var no_f = { x: 0, y: 0, width: 60, height: 60 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 0, y: 0, width: 120, height: 120 } ;
   var s = { width: '60%', height: '60%', top: 0, left: 0 } ;
   
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
 
 test("layout {right, bottom} - assume top/left=0", function() {
 
   var layout = { right: 0.1, bottom: 0.1 };
-  // var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 0, y: 0, width: 180, height: 180 } ;
   var s = { bottom: '10%', right: '10%', top: 0, left: 0 } ;
   
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
 
 test("layout {right, bottom, maxWidth, maxHeight} - assume top/left=null", function() {
 
   var layout = { right: 0.1, bottom: 0.1, maxWidth: 10, maxHeight: 10 };
-  // var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 0, y: 0, width: 10, height: 10 } ;
   var s = { bottom: '10%', right: '10%', top: null, left: null, maxWidth: 10, maxHeight: 10 } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
 
 }) ;
 
 test("layout {centerX, centerY} - assume width/height=0", function() {
 
   var layout = { centerX: 0.1, centerY: 0.1 };
-  // var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 120, y: 120, width: 0, height: 0 } ;
   var s = { width: 0, height: 0, top: "50%", left: "50%", marginTop: "50%", marginLeft: "50%" } ;
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
 
 test("layout {top, left, centerX, centerY, height, width} - top/left take presidence", function() {
 
   var layout = { top: 0.1, left: 0.1, centerX: 0.1, centerY: 0.1, height: 0.6, width: 0.6 };
-  // var no_f = { x: 10, y: 10, width: 60, height: 60 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 20, y: 20, width: 120, height: 120 } ;
   var s = { width: '60%', height: '60%', top: '10%', left: '10%' } ;
   
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
 
 test("layout {bottom, right, centerX, centerY, height, width} - bottom/right take presidence", function() {
 
   var layout = { bottom: 0.1, right: 0.1, centerX: 0.1, centerY: 0.1, height: 0.6, width: 0.6 };
-  // var no_f = { x: 0, y: 0, width: 60, height: 60 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 60, y: 60, width: 120, height: 120 } ;
   var s = { width: '60%', height: '60%', bottom: '10%', right: '10%' } ;
 
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
 
 test("layout {top, left, bottom, right, centerX, centerY, height, width} - top/left take presidence", function() {
 
   var layout = { top: 0.1, left: 0.1, bottom: 0.1, right: 0.1, centerX: 0.1, centerY: 0.1, height: 0.6, width: 0.6 };
-  // var no_f = { x: 10, y: 10, width: 60, height: 60 } ;
+  var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
   var with_f = { x: 20, y: 20, width: 120, height: 120 } ;
   var s = { width: '60%', height: '60%', top: '10%', left: '10%' } ;
   
-  performLayoutTest(layout, s, with_f, s) ;
+  performLayoutTest(layout, no_f, s, with_f, s) ;
   
 }) ;
 
