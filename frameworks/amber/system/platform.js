@@ -14,6 +14,12 @@
   robust apps.
 */
 SC.platform = {
+  
+  /*
+    NOTES
+      - A development version of Chrome 9 incorrectly reported supporting touch
+      - Android is assumed to support touch, but incorrectly reports that it does not
+  */
   /**
     YES if the current device supports touch events, NO otherwise.
 
@@ -22,8 +28,8 @@ SC.platform = {
 
     @property {Boolean}
   */
-  touch: ('createTouch' in document) && SC.browser.chrome < 9, // Ugly hack for Chrome 9 issue
-
+  touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
+  
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
 
@@ -87,6 +93,8 @@ SC.platform = {
       //@ endif
       return;
     }
+    
+    SC.Logger.log("Simulating touch events");
 
     // Tell the app that we now "speak" touch
     SC.platform.touch = YES;
@@ -106,6 +114,10 @@ SC.platform = {
     this.replaceEvent('mousemove', this._simtouch_mousemove);
     this.replaceEvent('mousedown', this._simtouch_mousedown);
     this.replaceEvent('mouseup', this._simtouch_mouseup);
+
+    // fix orientation handling
+    SC.platform.windowSizeDeterminesOrientation = YES;
+    SC.device.orientationHandlingShouldChange();
   },
 
   /** @private
@@ -243,7 +255,29 @@ SC.platform = {
 
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
-  }()
+  }(),
+  
+  supportsOrientationChange: ('onorientationchange' in window),
+  
+  /*
+    TODO [CC] On Android, SC.browser.mobileSafari returns YES, so we need to
+              explicitly check for non-Android mobileSafari browsers. There
+              is obviously a better way to handle this (ie. target the iOS
+              platform itself; we need more robust checking). Here's the kicker,
+              only certain Android devices support the onorientationchange
+              event, so those that don't need to fallback on the resize
+  */
+  /**
+    Because iOS is slow to dispatch the window.onorientationchange event,
+    we use the window size to determine the orientation on iOS devices
+    and desktop environments when SC.platform.touch is YES (ie. when
+    SC.platform.simulateTouchEvents has been called)
+    
+    @property {Boolean}
+    @default NO
+  */
+  windowSizeDeterminesOrientation: (SC.browser.mobileSafari && !SC.browser.android) || !('onorientationchange' in window)
+
 };
 
 /* Calculate CSS Prefixes */

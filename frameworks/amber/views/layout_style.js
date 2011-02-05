@@ -1,5 +1,35 @@
 sc_require('views/view');
 
+/**
+  Map to CSS Transforms
+*/
+
+SC.CSS_TRANSFORM_MAP = {
+  rotate: function(val){
+    return null;
+  },
+
+  rotateX: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotateX('+val+')';
+  },
+
+  rotateY: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotateY('+val+')';
+  },
+
+  rotateZ: function(val){
+    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
+    return 'rotateZ('+val+')';
+  },
+
+  scale: function(val){
+    if (SC.typeOf(val) === SC.T_ARRAY) val = val.join(', ');
+    return 'scale('+val+')';
+  }
+};
+
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
@@ -499,3 +529,36 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
 });
 
+SC.CoreView.runCallback = function(callback){
+  var additionalArgs = SC.$A(arguments).slice(1),
+      typeOfAction = SC.typeOf(callback.action);
+
+  // if the action is a function, just try to call it.
+  if (typeOfAction == SC.T_FUNCTION) {
+    callback.action.apply(callback.target, additionalArgs);
+
+  // otherwise, action should be a string.  If it has a period, treat it
+  // like a property path.
+  } else if (typeOfAction === SC.T_STRING) {
+    if (callback.action.indexOf('.') >= 0) {
+      var path = callback.action.split('.') ;
+      var property = path.pop() ;
+
+      var target = SC.objectForPropertyPath(path, window) ;
+      var action = target.get ? target.get(property) : target[property];
+      if (action && SC.typeOf(action) == SC.T_FUNCTION) {
+        action.apply(target, additionalArgs);
+      } else {
+        throw 'SC.runCallback could not find a function at %@'.fmt(callback.action) ;
+      }
+
+    // otherwise, try to execute action direction on target or send down
+    // responder chain.
+    // FIXME: Add support for additionalArgs to this
+    // } else {
+    //  SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source, callback.source.get("pane"), null, callback.source);
+    }
+  }
+};
+
+SC.View.runCallback = SC.CoreView.runCallback;

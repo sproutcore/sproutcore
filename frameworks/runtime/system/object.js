@@ -22,6 +22,24 @@ SC.BENCHMARK_OBJECTS = NO;
 // definition because SC.Object is copied frequently and we want to keep the
 // number of class methods to a minimum.
 
+SC._detect_base = function _detect_base(func, parent, name) {
+  return function thunk() {
+    var base = parent[name] || SC.K;
+
+    // NOTE: It is possible to cache the base, so that the first
+    // call to sc_super will avoid doing the lookup again. However,
+    // since the cost of the extra method dispatch is low and is
+    // only incurred on sc_super, but also creates another possible
+    // weird edge-case (when a class is enhanced after first used),
+    // we'll leave it off for now unless profiling demonstrates that
+    // it's a hotspot.
+    //if(base && func === base) { func.base = function() {}; }
+    //else { func.base = base; }
+
+    return base.apply(this, arguments);
+  };
+};
+
 /** @private
   Augments a base object by copying the properties from the extended hash.
   In addition to simply copying properties, this method also performs a
@@ -36,8 +54,8 @@ SC.BENCHMARK_OBJECTS = NO;
   @param {Hash} extension
   @returns {Hash} base hash
 */
-SC._object_extend = function _object_extend(base, ext) {
-  if (!ext) throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?";
+SC._object_extend = function _object_extend(base, ext, proto) {
+  if (!ext) { throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?"; }
 
   // set _kvo_cloned for later use
   base._kvo_cloned = null;
@@ -105,7 +123,8 @@ SC._object_extend = function _object_extend(base, ext) {
       // add super to funcs.  Be sure not to set the base of a func to
       // itself to avoid infinite loops.
       if (!value.superclass && (value !== (cur=base[key]))) {
-        value.superclass = value.base = cur || K;
+        value.superclass = cur || K;
+        value.base = proto ? SC._detect_base(value, proto, key) : cur || K;
       }
 
       // handle regular observers
@@ -289,7 +308,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
-    for(idx=0;idx<len;idx++) SC._object_extend(base, arguments[idx]) ;
+    for(idx=0;idx<len;idx++) { SC._object_extend(base, arguments[idx], this.prototype) ; }
     base.constructor = ret; // save constructor
 
     if (bench) SC.Benchmark.end('SC.Object.extend') ;
@@ -297,7 +316,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   },
 
   reopen: function(props) {
-    return SC._object_extend(this.prototype, props);
+    return SC._object_extend(this.prototype, props, null);
   },
 
   /**
@@ -450,7 +469,7 @@ SC.Object.prototype = {
   _object_init: function(extensions) {
     // apply any new properties
     var idx, len = (extensions) ? extensions.length : 0;
-    for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx]) ;
+    for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx], null) ;
     SC.generateGuid(this, "sc") ; // add guid
     this.init() ; // call real init
 

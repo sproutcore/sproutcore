@@ -2,6 +2,181 @@ sc_require("views/view");
 
 SC.View.reopen({
   /**
+    This code exists to make it possible to pool SC.Views. We are not going to pool SC.Views in Amber
+    */
+  _lastLayerId: null,
+
+  /**
+    Handles changes in the layer id.
+  */
+  layerIdDidChange: function() {
+    var layer  = this.get('layer'),
+        lid    = this.get('layerId'),
+        lastId = this._lastLayerId;
+
+    if (lid !== lastId) {
+      // if we had an earlier one, remove from view hash.
+      if (lastId && SC.View.views[lastId] === this) {
+        delete SC.View.views[lastId];
+      }
+
+      // set the current one as the new old one
+      this._lastLayerId = lid;
+
+      // and add the new one
+      SC.View.views[lid] = this;
+
+      // and finally, set the actual layer id.
+      if (layer) { layer.id = lid; }
+    }
+  }.observes("layerId"),
+
+  /**
+    This method is called whenever the receiver's parentView has changed.
+    The default implementation of this method marks the view's display
+    location as dirty so that it will update at the end of the run loop.
+
+    You will not usually need to override or call this method yourself, though
+    if you manually patch the parentView hierarchy for some reason, you should
+    call this method to notify the view that it's parentView has changed.
+
+    @returns {SC.View} receiver
+  */
+  parentViewDidChange: function() {
+    this.recomputeIsVisibleInWindow() ;
+
+    this.resetBuildState();
+    this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocationIfNeeded) ;
+
+    // We also need to iterate down through the view hierarchy and invalidate
+    // all our child view's caches for 'pane', since it could have changed.
+    //
+    // Note:  In theory we could try to avoid this invalidation if we
+    //        do this only in cases where we "know" the 'pane' value might
+    //        have changed, but those cases are few and far between.
+
+    this._invalidatePaneCacheForSelfAndAllChildViews();
+
+    return this ;
+  },
+
+  /** @private
+    We want to cache the 'pane' property, but it's impossible for us to
+    declare a dependence on all properties that can affect the value.  (For
+    example, if our grandparent gets attached to a new pane, our pane will
+    have changed.)  So when there's the potential for the pane changing, we
+    need to invalidate the caches for all our child views, and their child
+    views, and so on.
+  */
+  _invalidatePaneCacheForSelfAndAllChildViews: function () {
+    var childView, childViews = this.get('childViews'),
+        len = childViews.length, idx ;
+
+    this.notifyPropertyChange('pane');
+
+    for (idx=0; idx<len; ++idx) {
+      childView = childViews[idx];
+      if (childView._invalidatePaneCacheForSelfAndAllChildViews) {
+        childView._invalidatePaneCacheForSelfAndAllChildViews();
+      }
+    }
+  },
+
+  // ..........................................................
+  // LAYER LOCATION
+  //
+
+  /**
+    Set to YES when the view's layer location is dirty.  You can call
+    updateLayerLocationIfNeeded() to clear this flag if it is set.
+
+    @property {Boolean}
+  */
+  layerLocationNeedsUpdate: NO,
+
+  /**
+    Calls updateLayerLocation(), but only if the view's layer location
+    currently needs to be updated.  This method is called automatically at
+    the end of a run loop if you have called parentViewDidChange() at some
+    point.
+
+    @property {Boolean} force This property is ignored.
+    @returns {SC.View} receiver
+    @test in updateLayerLocation
+  */
+  updateLayerLocationIfNeeded: function(force) {
+    if (this.get('layerLocationNeedsUpdate')) {
+      this.updateLayerLocation() ;
+    }
+    return this ;
+  },
+
+  /**
+    This method is called when a view changes its location in the view
+    hierarchy.  This method will update the underlying DOM-location of the
+    layer so that it reflects the new location.
+
+    @returns {SC.View} receiver
+  */
+  updateLayerLocation: function() {
+    // collect some useful value
+    // if there is no node for some reason, just exit
+    var node = this.get('layer'),
+        parentView = this.get('parentView'),
+        parentNode = parentView ? parentView.get('containerLayer') : null ;
+
+    // remove node from current parentNode if the node does not match the new
+    // parent node.
+    if (node && node.parentNode && node.parentNode !== parentNode) {
+      node.parentNode.removeChild(node);
+    }
+
+    // CASE 1: no new parentView.  just remove from parent (above).
+    if (!parentView) {
+      if (node && node.parentNode) { node.parentNode.removeChild(node); }
+
+    // CASE 2: parentView has no layer, view has layer.  destroy layer
+    // CASE 3: parentView has no layer, view has no layer, nothing to do
+    } else if (!parentNode) {
+      if (node) {
+        if (node.parentNode) { node.parentNode.removeChild(node); }
+        this.destroyLayer();
+      }
+
+    // CASE 4: parentView has layer, view has no layer.  create layer & add
+    // CASE 5: parentView has layer, view has layer.  move layer
+    } else {
+      if (!node) {
+        this.createLayer() ;
+        node = this.get('layer') ;
+        if (!node) { return; } // can't do anything without a node.
+      }
+
+      var siblings = parentView.get('childViews'),
+          nextView = siblings.objectAt(siblings.indexOf(this)+1),
+          nextNode = (nextView) ? nextView.get('layer') : null ;
+
+      // before we add to parent node, make sure that the nextNode exists...
+      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
+        nextView.updateLayerLocationIfNeeded() ;
+        nextNode = nextView.get('layer') ;
+      }
+
+      // add to parentNode if needed.
+      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
+        parentNode.insertBefore(node, nextNode) ;
+      }
+    }
+
+    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
+
+    this.set('layerLocationNeedsUpdate', NO) ;
+
+    return this ;
+  },
+
+  /**
     Insert the view into the the receiver's childNodes array.
 
     The view will be added to the childNodes array before the beforeView.  If

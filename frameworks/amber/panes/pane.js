@@ -6,6 +6,9 @@
 // ==========================================================================
 
 sc_require('views/view');
+sc_require('views/layout');
+sc_require('views/touch');
+sc_require('views/theming');
 sc_require('mixins/responder_context');
 
 /**

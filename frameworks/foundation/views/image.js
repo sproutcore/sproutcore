@@ -403,17 +403,23 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (type === SC.IMAGE_TYPE_URL) {
       image = new Image();
 
-      image.onerror = image.onabort = function() {
+      var errorFunc = function() {
         SC.run(function() {
           that._loadImageDidComplete(value, SC.$error("SC.Image.FailedError", "Image", -101));
         });
       };
 
-      image.onload = function() {
+      var loadFunc = function() {
         SC.run(function() {
           that._loadImageDidComplete(value, image);
         });
       };
+
+      // Using bind here instead of setting onabort/onerror/onload directly
+      // fixes an issue with images having 0 width and height
+      $(image).bind('error', errorFunc);
+      $(image).bind('abort', errorFunc); 
+      $(image).bind('load', loadFunc);
 
       image.src = value;
       return YES;
