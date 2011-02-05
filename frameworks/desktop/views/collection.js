@@ -2342,7 +2342,7 @@ SC.CollectionView = SC.View.extend(
 
     if (this.get('useToggleSelection')) {
       var sel = this.get('selection');
-      isSelected = sel && sel.containsObject(itemView.get('content')); }
+      isSelected = sel && sel.containsObject(itemView.get('content'));
     }
 
     if (isSelected) {
