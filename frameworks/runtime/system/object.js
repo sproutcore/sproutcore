@@ -24,7 +24,7 @@ SC.BENCHMARK_OBJECTS = NO;
 
 SC._detect_base = function _detect_base(func, parent, name) {
   return function thunk() {
-    var base = parent[name];
+    var base = parent[name] || SC.K;
 
     // NOTE: It is possible to cache the base, so that the first
     // call to sc_super will avoid doing the lookup again. However,
