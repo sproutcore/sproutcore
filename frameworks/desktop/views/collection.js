@@ -2308,7 +2308,7 @@ SC.CollectionView = SC.View.extend(
 
       // We're faking the selection visually here
       // Only track this if we added a selection so we can remove it later
-      if (!itemView.get('isSelected')) {
+      if (itemView && !itemView.get('isSelected')) {
         itemView.set('isSelected', YES);
         this._touchSelectedView = itemView;
       } else {
@@ -2325,8 +2325,7 @@ SC.CollectionView = SC.View.extend(
         Math.abs(touch.pageX - touch.startX) > 5 ||
         Math.abs(touch.pageY - touch.startY) > 5
       ) {
-        this.select(null, NO);
-        if (this._touchSelectedView) this._touchSelectedView.set('isSelected', NO);
+        // This calls touchCancelled
         touch.makeTouchResponder(touch.nextTouchResponder);
       }
     }, this);
@@ -2338,14 +2337,16 @@ SC.CollectionView = SC.View.extend(
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
         isSelected = NO;
 
+    // Remove fake selection in case our contentIndex is -1, a select event will add it back
+    if (this._touchSelectedView) { this._touchSelectedView.set('isSelected', NO); }
+
     if (this.get('useToggleSelection')) {
-      var sel = this.get('selection'),
-          isSelected = sel && sel.containsObject(itemView.get('content'));
+      var sel = this.get('selection');
+      isSelected = sel && sel.containsObject(itemView.get('content')); }
     }
 
     if (isSelected) {
       this.deselect(contentIndex);
-      if (this._touchSelectedView) this._touchSelectedView.set('isSelected', NO);
     } else {
       this.select(contentIndex, NO);
 
@@ -2355,8 +2356,8 @@ SC.CollectionView = SC.View.extend(
   },
 
   touchCancelled: function(evt) {
-    this.select(null, NO);
-    if (this._touchSelectedView) this._touchSelectedView.set('isSelected', NO);
+    // Remove fake selection
+    if (this._touchSelectedView) { this._touchSelectedView.set('isSelected', NO); }
   },
 
   /** @private */
