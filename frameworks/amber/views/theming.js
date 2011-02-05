@@ -308,7 +308,6 @@ SC.View._RenderDelegateProxy = {
     return ret;
   },
 
-
   /**
    * Provides the render delegate with any property it needs.
    *

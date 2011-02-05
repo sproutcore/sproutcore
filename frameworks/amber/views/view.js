@@ -509,8 +509,6 @@ SC.CoreView.reopen(
     this.set('layer', null) ;
   },
 
-
-
   /**
     @private
 
@@ -771,7 +769,6 @@ SC.CoreView.reopen(
   nextResponder: function() {
     return this.get('parentView') ;
   }.property('parentView').cacheable(),
-
 
   /** @property
     Set to YES if your view is willing to accept first responder status.  This
@@ -1219,5 +1216,4 @@ SC.View = SC.CoreView.extend({});
 
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
-
 

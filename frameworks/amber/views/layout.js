@@ -97,7 +97,6 @@ SC.View.reopen(
     sc_super();
   },
 
-
   /**
     This convenience method will take the current layout, apply any changes
     you pass and set it again.  It is more convenient than having to do this
@@ -363,7 +362,6 @@ SC.View.reopen(
       }
       return null; // can't compute
     }
-
 
     if (!pdim) { pdim = this.computeParentDimensions(layout) ; }
     dH = pdim.height;
@@ -633,7 +631,6 @@ SC.View.reopen(
         (layout.width !== undefined) && (layout.height !== undefined)
       );
 
-
       // If it's fixed, our frame still could have changed if it's fixed to a
       // percentage of the parent.
       if (isFixed) {
@@ -657,8 +654,6 @@ SC.View.reopen(
       this.viewDidResize();
     }
   },
-
-
 
   /**
     This method is invoked on your view when the view resizes due to a layout
@@ -783,7 +778,6 @@ SC.View.reopen(
         currentLayout  = this.get('layout'),
         didResize      = YES,
         previousWidth, previousHeight, currentWidth, currentHeight;
-
 
     // Handle old style rotation
     if (!SC.none(currentLayout.rotate)) {

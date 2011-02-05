@@ -91,7 +91,6 @@ SC.View.reopen(
     return this;
   },
 
-
   /** @private
     Whenever the view's visibility changes, we need to recompute whether it is
     actually visible inside the window (a view is only visible in the window

@@ -14,7 +14,7 @@
   robust apps.
 */
 SC.platform = {
-  
+
   /*
     NOTES
       - A development version of Chrome 9 incorrectly reported supporting touch
@@ -29,7 +29,7 @@ SC.platform = {
     @property {Boolean}
   */
   touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
-  
+
   bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
   pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
 
@@ -93,7 +93,7 @@ SC.platform = {
       //@ endif
       return;
     }
-    
+
     SC.Logger.log("Simulating touch events");
 
     // Tell the app that we now "speak" touch
@@ -256,9 +256,9 @@ SC.platform = {
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
   }(),
-  
+
   supportsOrientationChange: ('onorientationchange' in window),
-  
+
   /*
     TODO [CC] On Android, SC.browser.mobileSafari returns YES, so we need to
               explicitly check for non-Android mobileSafari browsers. There
@@ -272,7 +272,7 @@ SC.platform = {
     we use the window size to determine the orientation on iOS devices
     and desktop environments when SC.platform.touch is YES (ie. when
     SC.platform.simulateTouchEvents has been called)
-    
+
     @property {Boolean}
     @default NO
   */
