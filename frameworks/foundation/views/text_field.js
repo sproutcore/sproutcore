@@ -65,7 +65,21 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @type String
   */
   hint: '',
-  
+
+  /*
+  * Localizes the hint if necessary.
+  */
+  formattedHint: function() {
+    var hint = this.get('hint');
+
+    return this.get('localize') ? hint.loc() : hint;
+  }.property('hint', 'localize').cacheable(),
+
+  /*
+  * Whether the hint should be localized or not.
+  */
+  localize: YES,
+
   /**
     If YES then the text field is currently editing.
     
@@ -315,7 +329,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'hint fieldValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
+  displayProperties: 'formattedHint fieldValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
 
   createChildViews: function() {
     sc_super();
@@ -454,11 +468,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('hint'), disabled, name, adjustmentStyle, type, 
+    var hint = this.get('formattedHint'), disabled, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
         maxLength = this.get('maxLength'), isOldSafari;
-        
+
     context.setClass('text-area', this.get('isTextArea'));
     
     //Adding this to differentiate between older and newer versions of safari
@@ -487,7 +501,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
                   
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
       if(!this.get('_supportsPlaceHolder') && (!value || (value && value.length===0))) {
-        value = this.get('hint');
+        value = hint;
         context.setClass('sc-hint', YES);
       } 
       
@@ -613,7 +627,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if(!this.get('_supportsPlaceHolder') && this._hintON){
       var currentValue = this.$input().val();
       if(!currentValue || (currentValue && currentValue.length===0)){
-        this.$input().val(this.get('hint'));
+        this.$input().val(this.get('formattedHint'));
       }
     }
     if(this.get('isTextArea')) {
