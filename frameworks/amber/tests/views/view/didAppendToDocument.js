@@ -26,14 +26,17 @@ test("Check that didAppendToDocument gets called at the right moment", function(
        })
      ]
    });
-   equals(counter, 0, "");
+   equals(counter, 0, "precond - has not been called yet");
    pane.append(); // make sure there is a layer...
-   equals(counter, 1, "");
+   equals(counter, 1, "didAppendToDocument was called once");
    view  = pane.childViews[0];
-   view.displayDidChange();
-   SC.RunLoop.begin().end();
-   equals(counter, 2, "");  
- 
+
+   SC.run(function() {
+     view.updateLayer();
+   });
+
+   equals(counter, 2, "didAppendToDocument is called every time a new DOM element is created");
+
    var additionalView = SC.View.extend({
      didAppendToDocument: function(){
        counter++;
@@ -41,8 +44,8 @@ test("Check that didAppendToDocument gets called at the right moment", function(
    });
    additionalView = additionalView.create();
    pane.appendChild(additionalView);
- 
+
    SC.RunLoop.begin().end();
-   equals(counter, 3, "");  
+   equals(counter, 3, "");
    pane.remove();
 });
