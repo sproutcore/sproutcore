@@ -13,7 +13,7 @@ htmlbody('<div id="appendtest"></div>');
 //
 module("SC.Pane#appendTo");
 
-test("adding to document for first time", function() {
+test("adding to document for first time - appendTo(elem)", function() {
   var pane = SC.Pane.create();
   ok(!pane.get('layer'), 'precond - does not yet have layer');
   ok(!pane.get('isVisibleInWindow'), 'precond - isVisibleInWindow = NO');
@@ -28,8 +28,81 @@ test("adding to document for first time", function() {
   equals(layer.parentNode, elem, 'layer should belong to parent');
   ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
   ok(pane.rootResponder, 'should have rootResponder');
-
 });
+
+test("adding to document for first time - appendTo(string)", function() {
+  var pane = SC.Pane.create();
+  ok(!pane.get('layer'), 'precond - does not yet have layer');
+  ok(!pane.get('isVisibleInWindow'), 'precond - isVisibleInWindow = NO');
+
+  // now add
+  pane.appendTo("#appendtest");
+  var layer = pane.get('layer');
+  ok(layer, 'should create layer');
+  equals(layer.parentNode, jQuery("#appendtest")[0], 'layer should belong to parent');
+  ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
+  ok(pane.rootResponder, 'should have rootResponder');
+});
+
+test("adding to document for first time - appendTo(jquery)", function() {
+  var pane = SC.Pane.create();
+  ok(!pane.get('layer'), 'precond - does not yet have layer');
+  ok(!pane.get('isVisibleInWindow'), 'precond - isVisibleInWindow = NO');
+
+  // now add
+  pane.appendTo(jQuery("#appendtest"));
+  var layer = pane.get('layer');
+  ok(layer, 'should create layer');
+  equals(layer.parentNode, jQuery("#appendtest")[0], 'layer should belong to parent');
+  ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
+  ok(pane.rootResponder, 'should have rootResponder');
+});
+
+test("adding to document for first time - prependTo(elem)", function() {
+  var pane = SC.Pane.create();
+  ok(!pane.get('layer'), 'precond - does not yet have layer');
+  ok(!pane.get('isVisibleInWindow'), 'precond - isVisibleInWindow = NO');
+
+  var elem = Q$('body').get(0);
+  ok(elem, 'precond - found element to add to');
+
+  // now add
+  pane.prependTo(elem);
+  var layer = pane.get('layer');
+  ok(layer, 'should create layer');
+  equals(layer.parentNode, elem, 'layer should belong to parent');
+  ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
+  ok(pane.rootResponder, 'should have rootResponder');
+});
+
+test("adding to document for first time - prependTo(string)", function() {
+  var pane = SC.Pane.create();
+  ok(!pane.get('layer'), 'precond - does not yet have layer');
+  ok(!pane.get('isVisibleInWindow'), 'precond - isVisibleInWindow = NO');
+
+  // now add
+  pane.prependTo("#appendtest");
+  var layer = pane.get('layer');
+  ok(layer, 'should create layer');
+  equals(layer.parentNode, jQuery("#appendtest")[0], 'layer should belong to parent');
+  ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
+  ok(pane.rootResponder, 'should have rootResponder');
+});
+
+test("adding to document for first time - prependTo(jquery)", function() {
+  var pane = SC.Pane.create();
+  ok(!pane.get('layer'), 'precond - does not yet have layer');
+  ok(!pane.get('isVisibleInWindow'), 'precond - isVisibleInWindow = NO');
+
+  // now add
+  pane.prependTo(jQuery("#appendtest"));
+  var layer = pane.get('layer');
+  ok(layer, 'should create layer');
+  equals(layer.parentNode, jQuery("#appendtest")[0], 'layer should belong to parent');
+  ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
+  ok(pane.rootResponder, 'should have rootResponder');
+});
+
 
 test("adding a pane twice should have no effect", function() {
   var cnt = 0;

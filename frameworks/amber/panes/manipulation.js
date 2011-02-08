@@ -6,12 +6,13 @@ SC.Pane.reopen(
   /**
     Inserts the pane's layer as the first child of the passed element.
 
-    @param {DOMElement} elem the element to prepend to
+    @param {DOMElement|jQuery|String} elem the element to prepend the pane's layer to.
+      This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @returns {SC.Pane} receiver
   */
   prependTo: function(elem) {
     return this.insert(function(layer) {
-      elem.insertBefore(layer, elem.firstChild);
+      jQuery(elem).prepend(layer);
     });
   },
 

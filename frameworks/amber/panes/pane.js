@@ -481,18 +481,15 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /**
-    Inserts the pane into the DOM as the last child of the passed DOM element.
-    You can pass in either a CoreQuery object or a selector, which will be
-    converted to a CQ object.  You can optionally pass in the rootResponder
-    to use for this operation.  Normally you will not need to pass this as
-    the default responder is suitable.
+    Inserts the pane into the DOM.
 
-    @param {DOMElement} elem the element to append to
+    @param {DOMElement|jQuery|String} elem the element to append the pane's layer to.
+      This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @returns {SC.Pane} receiver
   */
   appendTo: function(elem) {
     return this.insert(function(layer) {
-      elem.insertBefore(layer, null);
+      jQuery(elem).append(layer);
     });
   },
 
