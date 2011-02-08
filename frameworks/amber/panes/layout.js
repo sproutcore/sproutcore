@@ -99,5 +99,10 @@ SC.Pane.reopen(
   /** @private */
   paneLayoutDidChange: function() {
     this.invokeOnce(this.updateLayout);
-  }.observes('layout')
+  }.observes('layout'),
+
+  recomputeDependentProperties: function(original) {
+    this.set('currentWindowSize', this.rootResponder.computeWindowSize()) ;
+    original();
+  }.enhance()
 });

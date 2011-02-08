@@ -499,25 +499,29 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     with the rootResponder.
   */
   paneDidAttach: function() {
-
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
 
-    // set currentWindowSize
-    this.set('currentWindowSize', responder.computeWindowSize()) ;
+    this.set('isPaneAttached', YES);
 
-    // update my own location
-    this.set('isPaneAttached', YES) ;
-    this.parentViewDidChange() ;
+    this.recomputeDependentProperties();
 
-    //notify that the layers have been appended to the document
+    // notify that the layers have been appended to the document
     this._notifyDidAppendToDocument();
 
     // handle intercept if needed
     this._addIntercept();
     return this ;
   },
+
+  /**
+    This method is called after the pane is attached and before child views
+    are notified that they were appended to the document. Override this
+    method to recompute properties that depend on the pane's existence
+    in the DOM but must be run prior to child view notification.
+   */
+  recomputeDependentProperties: function() {},
 
   /**
     YES when the pane is currently attached to a document DOM.  Read only.
@@ -594,7 +598,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   recomputeIsVisibleInWindow: function() {
     if (this.get('designer') && SC.suppressMain) return sc_super();
     var previous = this.get('isVisibleInWindow'),
-        current  = this.get('isVisible') && this.get("isPaneAttached");
+        current  = this.get('isVisible') && this.get('isPaneAttached');
 
     // If our visibility has changed, then set the new value and notify our
     // child views to update their value.
