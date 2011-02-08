@@ -10,22 +10,34 @@
 // conditions.  If you find a bug, we recommend that you add a test in the 
 // edge case section.
 
-var FRAME = { x: 10, y: 10, width: 30, height: 30 } ;
+(function() {
+  var FRAME = { x: 10, y: 10, width: 30, height: 30 } ;
 
-var pane, view ; // test globals
+  var pane, view ; // test globals
 
-module('SC.MainPane');
+  module('SC.MainPane', {
+    setup: function() {
+      pane = SC.MainPane.create();
+    },
 
-test("should attach when calling append()", function() {
-  var pane = SC.MainPane.create() ;
-  pane.append() ;
-  equals(pane.get('isPaneAttached'), YES) ;
-});
+    teardown: function() {
+      pane.remove();
+    }
+  });
 
-test("appending should make pane main & key", function() {
-  var pane = SC.MainPane.create() ;
-  pane.append();
-  var r = pane.get('rootResponder');
-  equals(r.get('mainPane'), pane, 'should become mainPane');
-  equals(r.get('keyPane'), pane, 'should become keyPane');
-});
+  test("should not be attached before calling append()", function() {
+    equals(pane.get('isPaneAttached'), NO) ;
+  });
+
+  test("should attach when calling append()", function() {
+    pane.append() ;
+    equals(pane.get('isPaneAttached'), YES) ;
+  });
+
+  test("appending should make pane main & key", function() {
+    pane.append();
+    var r = pane.get('rootResponder');
+    equals(r.get('mainPane'), pane, 'should become mainPane');
+    equals(r.get('keyPane'), pane, 'should become keyPane');
+  });
+})();
