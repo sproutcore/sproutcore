@@ -191,7 +191,7 @@ SC.mixin(SC.device,
     if (aY < min) aY = min;
     else if (aY > max) aY = max;
     
-    if (orientation !== 'landscape') {
+    if (orientation === 'landscape') {
       swap = aX;
       aX = aY;
       aY = swap;
