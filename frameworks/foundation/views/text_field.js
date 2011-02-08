@@ -59,7 +59,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isTextArea: NO,
 
   /**
-    The hint to display while the field is not active.  Can be a loc key.
+    The hint to display while the field is not active.
     
     @property
     @type String
@@ -96,6 +96,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     If false, 'value' is only updated when commitEditing() is called (this
     is called automatically when the text field loses focus), or whenever
     the return key is pressed while editing the field.
+    
+    @property
+    @type Boolean
   */
   continuouslyUpdatesValue: YES,
 
@@ -103,6 +106,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     If no, will not allow transform or validation errors (SC.Error objects)
     to be passed to 'value'.  Upon focus lost, the text field will revert
     to its previous value.
+    
+    @property
+    @type Boolean
   */
   allowsErrorAsValue: YES,
 
@@ -125,6 +131,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     defined on the "padding" element.  If you would like to customize the
     amount of left padding used when the accessory view is visible, make the
     accessory view wider, with empty space on the right.
+    
+    @property
+    @type SC.View
   */
   leftAccessoryView: null,
 
@@ -148,6 +157,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     defined on the "padding" element.  If you would like to customize the
     amount of right padding used when the accessory view is visible, make the
     accessory view wider, with empty space on the left.
+    
+    @property
+    @type SC.View
   */
   rightAccessoryView: null,
   
@@ -218,7 +230,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         }
         else {
           // In IE8, input elements don't have hasOwnProperty() defined.
-          try{
+          try {
             if ('selectionStart' in element) {
               start = element.selectionStart ;
             }
@@ -473,7 +485,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
       context.push('<span class="padding" '+adjustmentStyle+'>');
                   
-      value = this.get('escapeHTML')?SC.RenderContext.escapeHTML(value):value;
+      value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
       if(!this.get('_supportsPlaceHolder') && (!value || (value && value.length===0))) {
         value = this.get('hint');
         context.setClass('sc-hint', YES);
@@ -958,7 +970,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     evt.allowDefault();
     return YES;
   },
-
+  
   mouseDown: function(evt) {
     var fieldValue = this.get('fieldValue'); // use 'fieldValue' since we want actual text
     this._txtFieldMouseDown=YES;
