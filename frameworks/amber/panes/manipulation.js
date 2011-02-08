@@ -4,9 +4,9 @@ SC.Pane.reopen(
   /** @scope SC.Pane.prototype */ {
 
   /**
-    inserts the pane's rootElement into the top of the passed DOM element.
+    Inserts the pane's layer as the first child of the passed element.
 
-    @param {DOMElement} elem the element to append to
+    @param {DOMElement} elem the element to prepend to
     @returns {SC.Pane} receiver
   */
   prependTo: function(elem) {
