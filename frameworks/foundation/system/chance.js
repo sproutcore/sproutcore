@@ -37,7 +37,7 @@ SC.chance = {
   PRELOAD_CONCURRENCY: 50,
 
   preloadImages: function() {
-    if (CHANCE_SLICES) {
+    if (window.CHANCE_SLICES) {
       this.images = CHANCE_SLICES;
     }
 
