@@ -573,7 +573,9 @@ SC.ListItemView = SC.View.extend(
       multiline: NO,
       isCollection: YES,
       validator: validator,
-      escapeHTML: escapeHTML
+      escapeHTML: escapeHTML,
+      pane: this.get('pane'),
+      layout: this.get('layout')
     }) ;
 
     // restore old line height for original item if the old line height 
