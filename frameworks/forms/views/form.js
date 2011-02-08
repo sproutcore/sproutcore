@@ -134,8 +134,8 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         v = this.get(key);
         if (v.isClass && v.prototype.isControl && !v.prototype.contentValueKey && v.prototype.isFormRow) {
           v.prototype.contentValueKey = key ;
-        } else if (v.isClass && !v.prototype.isFormRow && SC.none(v.prototype.label)) {
-          v.prototype.label = key;
+        } else {
+          v.prototype.formKey = key;
         }
       }
     }
