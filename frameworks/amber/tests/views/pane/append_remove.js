@@ -80,7 +80,23 @@ test("adding/remove/adding pane", function() {
   ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow should  = YES');
   ok(pane.rootResponder, 'should have rootResponder');
 });
-  
+
+test("removeFromParent throws an exception", function() {
+  var pane, exceptionCaught = false;
+
+  try {
+    pane = SC.Pane.create();
+    pane.append();
+    pane.removeFromParent();
+  } catch(e) {
+    exceptionCaught = (e instanceof SC.Error);
+  } finally {
+    pane.remove();
+  }
+
+  ok(exceptionCaught, "trying to call removeFromParent on a pane throws an exception");
+});
+
 // ..........................................................
 // remove()
 // 

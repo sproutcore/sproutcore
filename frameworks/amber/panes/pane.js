@@ -457,6 +457,30 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /**
+    Inserts the current pane into the page. The actual DOM insertion is done
+    by a function passed into `insert`, which receives the layer as a
+    parameter. This function is responsible for making sure a layer exists,
+    is not already attached, and for calling `paneDidAttach` when done.
+
+        pane = SC.Pane.create();
+        pane.insert(function(layer) {
+          jQuery(layer).insertBefore("#otherElement");
+        });
+
+    @param {Function} fn function which performs the actual DOM manipulation
+      necessary in order to insert the pane's layer into the DOM.
+    @returns {SC.Pane} receiver
+   */
+  insert: function(fn) {
+    var layer = this.get('layer');
+    if (!layer) { layer = this.createLayer().get('layer'); }
+
+    fn(layer);
+    if (!this.get('isPaneAttached')) { this.paneDidAttach(); }
+    return this;
+  },
+
+  /**
     Inserts the pane into the DOM as the last child of the passed DOM element.
     You can pass in either a CoreQuery object or a selector, which will be
     converted to a CQ object.  You can optionally pass in the rootResponder
@@ -467,96 +491,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
   */
   appendTo: function(elem) {
-    var layer = this.get('layer');
-    if (!layer) layer =this.createLayer().get('layer');
-
-    if (this.get('isPaneAttached') && (layer.parentNode === elem)) {
-      return this; // nothing to do
-    }
-
-    elem.insertBefore(layer, null); // add to DOM
-    elem = layer = null ;
-
-    return this.paneDidAttach(); // do the rest of the setup
+    return this.insert(function(layer) {
+      elem.insertBefore(layer, null);
+    });
   },
-
-  /**
-    inserts the pane's rootElement into the top of the passed DOM element.
-
-    @param {DOMElement} elem the element to append to
-    @returns {SC.Pane} receiver
-  */
-  prependTo: function(elem) {
-    if (this.get('isPaneAttached')) return this;
-
-    var layer = this.get('layer');
-    if (!layer) layer =this.createLayer().get('layer');
-
-    if (this.get('isPaneAttached') && (layer.parentNode === elem)) {
-      return this; // nothing to do
-    }
-
-    elem.insertBefore(layer, elem.firstChild); // add to DOM
-    elem = layer = null ;
-
-    return this.paneDidAttach(); // do the rest of the setup
-  },
-
-  /**
-    inserts the pane's rootElement into the hierarchy before the passed
-    element.
-
-    @param {DOMElement} elem the element to append to
-    @returns {SC.Pane} receiver
-  */
-  before: function(elem) {
-    if (this.get('isPaneAttached')) return this;
-
-    var layer = this.get('layer');
-    if (!layer) layer =this.createLayer().get('layer');
-
-    var parent = elem.parentNode ;
-
-    if (this.get('isPaneAttached') && (layer.parentNode === parent)) {
-      return this; // nothing to do
-    }
-
-    parent.insertBefore(layer, elem); // add to DOM
-    parent = elem = layer = null ;
-
-    return this.paneDidAttach(); // do the rest of the setup
-  },
-
-  /**
-    inserts the pane's rootElement into the hierarchy after the passed
-    element.
-
-    @param {DOMElement} elem the element to append to
-    @returns {SC.Pane} receiver
-  */
-  after: function(elem) {
-
-    var layer = this.get('layer');
-    if (!layer) layer =this.createLayer().get('layer');
-
-    var parent = elem.parentNode ;
-
-    if (this.get('isPaneAttached') && (layer.parentNode === parent)) {
-      return this; // nothing to do
-    }
-
-    parent.insertBefore(layer, elem.nextSibling); // add to DOM
-    parent = elem = layer = null ;
-
-    return this.paneDidAttach(); // do the rest of the setup
-  },
-
-  /**
-    This method has no effect in the pane.  Instead use remove().
-
-    @returns {void}
-  */
-  removeFromParent: function() { },
 
   /** @private
     Called when the pane is attached to a DOM element in a window, this will

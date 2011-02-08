@@ -846,7 +846,7 @@ SC.CoreView.reopen(
     this._destroy(); // core destroy method
 
     // remove from parent if found
-    this.removeFromParent() ;
+    if (this.get('parentView')) { this.removeFromParent(); }
 
     //Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
     sc_super();
