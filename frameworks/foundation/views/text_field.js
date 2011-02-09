@@ -27,6 +27,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   classNames: ['sc-text-field-view'],
   isTextField: YES,
 
+  /**
+    The WAI-ARIA role for text field view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'textbox',
+
   // ..........................................................
   // PROPERTIES
   //
@@ -433,6 +441,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     // update layer classes always
     context.setClass('not-empty', v.length > 0);
+
+    //addressing accessibility
+    if(firstTime) {
+      context.attr('aria-multiline', this.get('isTextArea'));
+      context.attr('aria-disabled', !this.get('isEnabled'));
+    }
+    context.attr('aria-invalid', !SC.ok(this.getFieldValue()));
 
     // If we have accessory views, we'll want to update the padding on the
     // hint to compensate for the width of the accessory view.  (It'd be nice
