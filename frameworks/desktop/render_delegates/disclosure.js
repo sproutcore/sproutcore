@@ -9,8 +9,22 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   name: 'disclosure',
   
   render: function(dataSource, context) {
-    var theme = dataSource.get('theme');
-    
+    var theme = dataSource.get('theme'),
+        value = dataSource.get('value'),
+        title = dataSource.get('title'),
+        view = dataSource.get('view'),
+        ariaLabel;
+
+    if(view) {
+      ariaLabel = view.get('ariaLabel');
+    }
+
+    //addresing accessibility
+    context.attr('aria-expanded', value);
+    if(ariaLabel && ariaLabel !== ""){
+      context.attr('aria-label', ariaLabel);
+    }
+
     if (dataSource.get('isSelected')) context.addClass('sel');
     
     var state = '';
@@ -25,7 +39,21 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
-    var theme = dataSource.get('theme');
+    var theme = dataSource.get('theme'),
+        value = dataSource.get('value'),
+        title = dataSource.get('title'),
+        view = dataSource.get('view'),
+        ariaLabel;
+
+    if(view) {
+      ariaLabel = view.get('ariaLabel');
+    }
+
+    //addresing accessibility
+    jquery.attr('aria-expanded', value);
+    if(ariaLabel && ariaLabel !== ""){
+      jquery.attr('aria-label', ariaLabel);
+    }
 
     if (dataSource.get('isSelected')) jquery.addClass('sel');
 
