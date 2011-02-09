@@ -32,18 +32,29 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     var theme = dataSource.get('theme');
     
     var isSelected = dataSource.get('isSelected'),
-        width = dataSource.get('width');
-    
+        width = dataSource.get('width'),
+        title = dataSource.get('title'),
+        value = dataSource.get('value'),
+        ariaLabeledBy = dataSource.get('ariaLabeledBy'),
+        ariaLabel     = dataSource.get('ariaLabel');
+
     context.setClass({
       active: dataSource.get('isActive'),
       mixed: dataSource.get('isMixed'),
       sel: dataSource.get('isSelected'),
       disabled: !dataSource.get('isEnabled')
     });
-    
+
+    //accessing accessibility
     context.attr('role', 'radio');
     context.attr('aria-checked', isSelected);
-    
+    if(ariaLabel !== "") {
+      context.attr('aria-label', ariaLabel);
+    }
+    if(ariaLabeledBy !== "") {
+      context.attr('aria-labelledby', ariaLabeledBy);
+    }
+
     if (width) context.css('width', width);
     
     context.push('<span class = "button"></span>');
@@ -56,8 +67,13 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     var theme = dataSource.get('theme');
     
-    var isSelected = dataSource.get('isSelected'), width = dataSource.get('width');
-    
+    var isSelected = dataSource.get('isSelected'),
+        width = dataSource.get('width'),
+        title = dataSource.get('title'),
+        value = dataSource.get('value'),
+        ariaLabeledBy = dataSource.get('ariaLabeledBy'),
+        ariaLabel     = dataSource.get('ariaLabel');
+
     jquery.setClass({
       active: dataSource.get('isActive'),
       mixed: dataSource.get('isMixed'),
@@ -66,7 +82,12 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     });
     
     jquery.attr('aria-checked', isSelected);
-    
+    if(ariaLabel !== ""){
+      jquery.attr('aria-label', ariaLabel);
+    }
+    if(ariaLabeledBy !== "") {
+      jquery.attr('aria-labelledby', ariaLabeledBy);
+    }
     jquery.css('width', width ? width : null);
     
     theme.labelRenderDelegate.update(dataSource, jquery.find('.sc-button-label'));
