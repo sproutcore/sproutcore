@@ -24,7 +24,15 @@ SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
   
   classNames: 'sc-slider-view',
-  
+
+  /**
+    The WAI-ARIA role for slider view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'slider',
+
   /**
     Bind this to the current value of the progress bar.  Note that by default 
     an empty value will disable the progress bar and a multiple value too make 
