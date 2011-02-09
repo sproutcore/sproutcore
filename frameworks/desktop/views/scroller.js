@@ -38,6 +38,13 @@ SC.ScrollerView = SC.View.extend(
 
   classNames: ['sc-scroller-view'],
 
+  /**
+    The WAI-ARIA role for scroller view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'scrollbar',
   // ..........................................................
   // PROPERTIES
   //
@@ -252,6 +259,9 @@ SC.ScrollerView = SC.View.extend(
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
+
+        //addressing accessibility
+        context.attr('aria-orientation', 'vertical');
         break;
         case SC.LAYOUT_HORIZONTAL:
         context.push('<div class="track"></div>',
@@ -261,7 +271,15 @@ SC.ScrollerView = SC.View.extend(
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
+
+        //addressing accessibility
+        context.attr('aria-orientation', 'horizontal');
       }
+
+      //addressing accessibility
+      context.attr('aria-valuemax', this.get('maximun'));
+      context.attr('aria-valuemin', this.get('minimum'));
+      context.attr('aria-valuenow', this.get('value'));
     } else {
       // The HTML has already been generated, so all we have to do is
       // reposition and resize the thumb
@@ -272,6 +290,10 @@ SC.ScrollerView = SC.View.extend(
       thumbElement = this.$('.thumb');
 
       this.adjustThumb(thumbElement, thumbPosition, thumbLength);
+
+      //addressing accessibility
+      context.attr('aria-valuenow', this.get('value'));
+
     }
   },
 
