@@ -14,8 +14,14 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
   
   render: function(dataSource, context) {
     var theme = dataSource.get('theme'),
-        buttonDelegate,
-        classes;
+        buttonDelegate, classes,
+        ariaLabeledBy = dataSource.get('ariaLabeledBy'),
+        containerView, isPartOfTabView = NO;
+
+        containerView = dataSource.view.parentView.parentView.containerView;
+        if(containerView) {
+          isPartOfTabView = YES;
+        }
 
     // Segment specific additions
     classes = {
@@ -28,6 +34,17 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     classes['sc-segment-' + dataSource.get('index')] = YES;
     context.setClass(classes);
 
+    // addressing accessibility
+    context.attr('role', 'tab');
+    context.attr('aria-selected', dataSource.get('isSelected'));
+    if(ariaLabeledBy !== "") {
+      context.attr('aria-labelledby',ariaLabeledBy);
+    }
+
+    if(isPartOfTabView) {
+      context.attr('aria-controls', containerView);
+    }
+
     // Use the SC.ButtonView render delegate for the current theme to render the segment as a button
     buttonDelegate = theme.buttonRenderDelegate;
     buttonDelegate.render(dataSource, context);
@@ -37,7 +54,14 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     var theme = dataSource.get('theme'),
         buttonDelegate,
         titleMinWidth,
-        classes = {};
+        classes = {},
+        ariaLabeledBy = dataSource.get('ariaLabeledBy'),
+        containerView, isPartOfTabView = NO;
+
+        containerView = dataSource.view.parentView.parentView.containerView;
+        if(containerView) {
+          isPartOfTabView = YES;
+        }
 
     // Segment specific additions
     // 1. This should be the proper way to do it, only update the classes if necessary, but SC.View will reset all the classes that we added in render!
@@ -61,7 +85,16 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     };
     classes['sc-segment-' + dataSource.get('index')] = YES;
     jquery.setClass(classes);
-    
+
+    // addressing accessibility
+    jquery.attr('role', 'tab');
+    jquery.attr('aria-selected', dataSource.get('isSelected'));
+    if(ariaLabeledBy !== "") {
+      jquery.attr('aria-labelledby',ariaLabeledBy);
+    }
+    if(isPartOfTabView) {
+      jquery.attr('aria-controls', containerView);
+    }
     // Use the SC.ButtonView render delegate for the current theme to update the segment as a button
     buttonDelegate = theme['buttonRenderDelegate'];
     buttonDelegate.update(dataSource, jquery);

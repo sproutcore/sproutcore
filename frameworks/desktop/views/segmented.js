@@ -34,6 +34,7 @@
   | *itemIconKey*  | an icon |
   | *itemActionKey* | an optional action to fire when pressed |
   | *itemTargetKey* | an optional target for the action |
+  | *itemAriaLabeledByKey* | an optional ariaLabel for WAI-ARIA attribute
 
   @extends SC.View
   @since SproutCore 1.0
@@ -44,6 +45,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   classNames: ['sc-segmented-view'],
   
   theme: 'square',
+
+  /**
+    The WAI-ARIA role for tab list view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: "tablist",
   
   /**
     The value of the segmented view.
@@ -106,6 +115,18 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {Array}
   */
   items: null,
+
+  /**
+  If items property is a hash, specify which property will function as
+  the ariaLabeledBy with this itemAriaLabeledByKey property.ariaLabeledBy is used
+  as the WAI-ARIA attribute for the radio view. This property is assigned to
+  'aria-labelledby' attribute, which defines a string value that labels the
+  element. Used to support voiceover.  It should be assigned a non-empty string,
+  if the 'aria-labelledby' attribute has to be set for the element.
+
+    @property {String}
+  */
+  itemAriaLabeledByKey: null,
 
   /** 
     The key that contains the title for each item.
@@ -179,8 +200,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     @property {Array}
   */
-  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey'.w(),
-  viewKeys: 'title value isEnabled icon titleMinWidth hint keyEquivalent'.w(),
+  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey itemAriaLabeledByKey itemAriaLabelKey'.w(),
+  viewKeys: 'title value isEnabled icon titleMinWidth hint keyEquivalent ariaLabeledBy'.w(),
   
   /**
     Call itemsDidChange once to initialize segment child views for the items that exist at
@@ -322,7 +343,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           theme: this.get('theme'),
           renderDelegateName: 'segmentRenderDelegate',
           useStaticLayout: YES,
-          displayProperties: ['icon', 'title', 'value', 'toolTip', 'isDefault', 'isCancel', 'titleMinWidth', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'index'] // TODO: isDefault, isCancel, value not really supported
+          ariaLabeledBy: "",
+          displayProperties: ['icon', 'title', 'value', 'toolTip', 'isDefault', 'isCancel', 'titleMinWidth', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'index', 'ariaLabeledBy' ] // TODO: isDefault, isCancel, value not really supported
         });
         
         // Assign the properties from the item
