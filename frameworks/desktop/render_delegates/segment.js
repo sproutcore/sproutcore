@@ -40,18 +40,6 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
         classes = {};
 
     // Segment specific additions
-    // 1. This should be the proper way to do it, only update the classes if necessary, but SC.View will reset all the classes that we added in render!
-    // if (displayProperties.contains('index', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment')) {
-    //   
-    //   if (displayProperties.index) classes['sc-segment-' + displayProperties.index] = YES;
-    //   if (displayProperties.isFirstSegment) classes['sc-first-segment'] = displayProperties.isFirstSegment;
-    //   if (displayProperties.isMiddleSegment) classes['sc-middle-segment'] = displayProperties.isMiddleSegment;
-    //   if (displayProperties.isLastSegment) classes['sc-last-segment'] = displayProperties.isLastSegment;
-    //   if (displayProperties.isOverflowSegment) classes['sc-overflow-segment'] = displayProperties.isOverflowSegment;
-    //   
-    //   jquery.setClass(classes);
-    // }
-    // 2. So just re-assign them (even if unchanged)
     classes = {
       'sc-segment': YES,
       'sc-first-segment': dataSource.get('isFirstSegment'),

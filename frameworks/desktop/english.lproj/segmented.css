@@ -4,58 +4,59 @@
 }
 
 .sc-segment:active, .sc-segment:focus {
-	outline: none;
+  outline: none;
 }
 
 .sc-segment img.icon {
-	position: relative;
-	vertical-align: middle;
-	top: -2px;
-	margin-right: 2px;
-	height: 16px;
-	width: 16px;
+  position: relative;
+  vertical-align: middle;
+  top: -2px;
+  margin-right: 2px;
+  height: 16px;
+  width: 16px;
 }
 
 /* @group Layout */
 
 .sc-segmented-view .sc-segment {
-	display: inline-block;
-	top: 0;
-	height: 22px;
-	line-height: 22px;
-	border-right: 1px #555 solid;
-	text-shadow: #b0b0b0 0px 1px 0px;
-	text-decoration: none ;
-	color: black ;
-	text-align: center;
+  position: relative;
+  display: inline-block;
+  top: 0;
+  height: 22px;
+  line-height: 22px;
+  border-right: 1px #555 solid;
+  text-shadow: #b0b0b0 0px 1px 0px;
+  text-decoration: none ;
+  color: black ;
+  text-align: center;
 }
 
 .sc-segmented-view .sc-button-inner {
-	display: block;
-	min-width: 20px;
-	min-height: 22px;
+  display: block;
+  min-width: 20px;
+  min-height: 22px;
 }
 
 .sc-segmented-view .sc-segment.sc-first-segment {
-	padding-left: 10px;
+  padding-left: 10px;
 }
 
 
 .sc-segmented-view .sc-segment.sc-first-segment .sc-button-inner {
-	padding-right: 10px;
+  padding-right: 10px;
 }
 .sc-segmented-view .sc-segment.sc-middle-segment .sc-button-inner {
-	padding-left: 10px;
-	padding-right: 10px;
-  
+  padding-left: 10px;
+  padding-right: 10px;
+
 }
 .sc-segmented-view .sc-segment.sc-last-segment .sc-button-inner {
-	padding-left: 10px;
+  padding-left: 10px;
 }
 
 .sc-segmented-view .sc-segment.sc-last-segment {
-	padding-right: 10px;
-	border:none;
+  padding-right: 10px;
+  border:none;
 }
 
 /* @end */
@@ -65,66 +66,66 @@
 /* NORMAL */
 
 .sc-segmented-view .sc-segment .sc-button-inner {
- 	background: #DDDDDD;
+  background: #DDDDDD;
 }
 
 .sc-segmented-view .sc-segment.sc-last-segment {
- 	background: #DDDDDD;
+  background: #DDDDDD;
 }
 
 .sc-segmented-view .sc-segment.sc-first-segment {
-	background: #DDDDDD;
+  background: #DDDDDD;
 }
 
 
 /* SELECTED */
 .sc-segmented-view .sc-segment.active .sc-button-inner,
 .sc-segmented-view .sc-segment.sel .sc-button-inner {
-	background: #999999;
-	text-shadow: #909090 0px 1px 0px;
+  background: #999999;
+  text-shadow: #909090 0px 1px 0px;
 }
 
 .sc-segmented-view .sc-segment.sc-last-segment.sel,
 .sc-segmented-view .sc-segment.sc-last-segment.active {
-	background: #999999;
+  background: #999999;
 }
 
 .sc-segmented-view .sc-segment.sc-first-segment.sel,
 .sc-segmented-view .sc-segment.sc-first-segment.active {
-	background: #999999;
+  background: #999999;
 }
 
 /* DISABLED */
 
 .sc-segmented-view .sc-segment.disabled .sc-button-inner,
 .sc-segmented-view.disabled .sc-segment .sc-button-inner {
-	background: #FFFFFF;
-	color: #999;
+  background: #FFFFFF;
+  color: #999;
 }
 
 .sc-segmented-view .sc-segment.sc-last-segment.disabled,
 .sc-segmented-view.disabled .sc-segment.sc-last-segment {
-	background: #FFFFFF;
+  background: #FFFFFF;
 }
 
 .sc-segmented-view .sc-segment.sc-first-segment.disabled,
 .sc-segmented-view.disabled .sc-segment.sc-first-segment {
-	background: #FFFFFF;
+  background: #FFFFFF;
 }
 
 .sc-segmented-view .sc-segment.sel .sc-button-inner.disabled,
 .sc-segmented-view.disabled .sc-segment.sel .sc-button-inner {
-	background: #FFFFFF;
+  background: #FFFFFF;
 }
 
 .sc-segmented-view .sc-segment.sc-last-segment.sel.disabled,
 .sc-segmented-view.disabled .sc-segment.sc-last-segment.sel {
-	background: #FFFFFF;
+  background: #FFFFFF;
 }
 
 .sc-segmented-view .sc-segment.sc-first-segment.sel.disabled,
 .sc-segmented-view.disabled .sc-segment.sc-first-segment.sel {
-	background: #FFFFFF;
+  background: #FFFFFF;
 }
 /* @end */
 
