@@ -14,3 +14,12 @@ SC.Theme.addTheme(Greenhouse.Theme);
  
 // Make it the default theme
 SC.defaultTheme = 'greenhouse';
+
+
+Greenhouse.Theme.Well.containerRenderDelegate = SC.Object.create({
+  name: 'container',
+  
+  render: function(dataSource, context) {},
+  
+  update: function() {}
+});
