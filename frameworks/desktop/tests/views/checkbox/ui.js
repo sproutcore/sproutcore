@@ -110,7 +110,7 @@ test("role", function() {
 
 test("aria-label", function() {
   var view = pane.view('aria-label');
-  equals(view.ariaLabel,'TEXT BOX', 'should have ariaLabel as TEXT-BOX');
-  equals(view.ariaLabeledBy,'TEXT BOX1', 'should have ariaLabeledby as TEXT-BOX1');
+  equals(view.$().attr('aria-label'),'TEXT BOX', 'should have ariaLabel as TEXT-BOX');
+  equals(view.$().attr('aria-labelledby'),'TEXT BOX1', 'should have ariaLabeledby as TEXT-BOX1');
 });
 })();
