@@ -23,7 +23,7 @@ SC.BENCHMARK_OBJECTS = NO;
 // number of class methods to a minimum.
 
 SC._detect_base = function _detect_base(func, parent, name) {
-  return function thunk() {
+  return function invoke_superclass_method() {
     var base = parent[name] || SC.K;
 
     // NOTE: It is possible to cache the base, so that the first
@@ -300,6 +300,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // now setup superclass, guid
     ret.superclass = this ;
+    ret.__sc_proto__ = this.prototype;
     SC.generateGuid(ret, "sc"); // setup guid
 
     ret.subclasses = SC.Set.create();
@@ -316,7 +317,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   },
 
   reopen: function(props) {
-    return SC._object_extend(this.prototype, props, null);
+    return SC._object_extend(this.prototype, props, this.__sc_proto__.prototype);
   },
 
   /**
