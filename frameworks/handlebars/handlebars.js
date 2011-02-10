@@ -919,6 +919,25 @@ Handlebars.JavaScriptCompiler = function() {};
   };
 
   JavaScriptCompiler.prototype = {
+    // PUBLIC API: You can override these methods in a subclass to provide
+    // alternative compiled forms for name lookup and buffering semantics
+    nameLookup: function(parent, name, type) {
+      if(JavaScriptCompiler.RESERVED_WORDS[name]) {
+        return parent + "['" + name + "']";
+      } else {
+        return parent + "." + name;
+      }
+    },
+
+    appendToBuffer: function(string) {
+      return "buffer = buffer + " + string + ";";
+    },
+
+    initializeBuffer: function() {
+      return this.quotedString("");
+    },
+    // END PUBLIC API
+
     compile: function(environment) {
       this.environment = environment;
 
@@ -979,7 +998,7 @@ Handlebars.JavaScriptCompiler = function() {};
 
     preamble: function() {
       var out = [];
-      out.push("var buffer = '', currentContext = context");
+      out.push("var buffer = " + this.initializeBuffer() + ", currentContext = context");
 
       var copies = "helpers = helpers || Handlebars.helpers;";
       if(this.environment.usePartial) { copies = copies + " partials = partials || Handlebars.partials;"; }
@@ -1047,12 +1066,12 @@ Handlebars.JavaScriptCompiler = function() {};
     },
 
     appendContent: function(content) {
-      this.source.push("buffer = buffer + " + this.quotedString(content) + ";");
+      this.source.push(this.appendToBuffer(this.quotedString(content)));
     },
 
     append: function() {
       var local = this.popStack();
-      this.source.push("if(" + local + " || " + local + " === 0) { buffer = buffer + " + local + "; }");
+      this.source.push("if(" + local + " || " + local + " === 0) { " + this.appendToBuffer(local) + " }");
     },
 
     appendEscaped: function() {
@@ -1063,7 +1082,7 @@ Handlebars.JavaScriptCompiler = function() {};
         this.eat(opcode);
       }
 
-      this.source.push("buffer = buffer + this.escapeExpression(" + this.popStack() + ")" + extra + ";");
+      this.source.push(this.appendToBuffer("this.escapeExpression(" + this.popStack() + ")" + extra));
     },
 
     getContext: function(depth) {
@@ -1078,19 +1097,11 @@ Handlebars.JavaScriptCompiler = function() {};
       }
     },
 
-    nameLookup: function(parent, name) {
-      if(JavaScriptCompiler.RESERVED_WORDS[name]) {
-        return parent + "['" + name + "']";
-      } else {
-        return parent + "." + name;
-      }
-    },
-
     lookupWithFallback: function(name) {
       if(name) {
-        this.pushStack(this.nameLookup('currentContext', name));
+        this.pushStack(this.nameLookup('currentContext', name, 'context'));
         var topStack = this.topStack();
-        this.source.push("if(" + topStack + " === undefined) { " + topStack + " = " + this.nameLookup('helpers', name) + "; }");
+        this.source.push("if(" + topStack + " === undefined) { " + topStack + " = " + this.nameLookup('helpers', name, 'helper') + "; }");
       } else {
         this.pushStack("currentContext");
       }
@@ -1098,7 +1109,7 @@ Handlebars.JavaScriptCompiler = function() {};
 
     lookup: function(name) {
       var topStack = this.topStack();
-      this.source.push(topStack + " = " + this.nameLookup(topStack, name) + ";");
+      this.source.push(topStack + " = " + this.nameLookup(topStack, name, 'context') + ";");
     },
 
     pushString: function(string) {
@@ -1165,7 +1176,7 @@ Handlebars.JavaScriptCompiler = function() {};
     },
 
     invokePartial: function(context) {
-      this.pushStack("this.invokePartial(" + this.nameLookup('partials', context) + ", '" + context + "', " + this.popStack() + ", helpers, partials);");
+      this.pushStack("this.invokePartial(" + this.nameLookup('partials', context, 'partial') + ", '" + context + "', " + this.popStack() + ", helpers, partials);");
     },
 
     // HELPERS

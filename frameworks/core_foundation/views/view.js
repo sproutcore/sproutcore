@@ -555,7 +555,7 @@ SC.CoreView.reopen(
       }
     }
 
-    if (firstTime) { this.renderChildViews(context, firstTime); }
+    if (firstTime && !this._didRenderChildViews) { this.renderChildViews(context, firstTime); }
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
