@@ -28,8 +28,9 @@ end
 config :bootstrap,  :required => [], :use_modules => false
 
 config :jquery,          :required => []
+config :handlebars,      :required => []
 config :runtime,         :required => [:jquery]
-config :core_foundation, :required => [:runtime]
+config :core_foundation, :required => [:runtime, :handlebars]
 config :foundation,      :required => [:core_foundation]
 config :datastore,       :required => [:foundation]
 config :statechart,      :required => [:core_foundation]
