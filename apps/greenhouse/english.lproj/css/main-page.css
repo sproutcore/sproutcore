@@ -8,8 +8,9 @@
 
 /* Toolbar */
 
-.toolbar {
+.ace .toolbar {
   background: static_url('images/toolbar-bg.png') repeat-x;
+  border-bottom: none;
 }
 
 .greenhouse-logo-s {
@@ -29,61 +30,33 @@
   background: static_url('images/icons/projects.png') no-repeat;
   width: 28px;
   height: 14px;
-  position: absolute;
-  top: 50%;
-  margin-top: -7px;
-  left: 50%;
-  margin-left: -14px;
 }
 .toolbar .save {
   background: static_url('images/icons/save.png') no-repeat;
   width: 14px;
   height: 15px;
-  position: absolute;
-  top: 50%;
-  margin-top: -8px;
-  left: 50%;
-  margin-left: -7px;
 }
 .toolbar .run {
   background: static_url('images/icons/run.png') no-repeat;
   width: 10px;
   height: 12px;
-  position: absolute;
-  top: 50%;
-  margin-top: -6px;
-  left: 50%;
-  margin-left: -5px;
 }
 .toolbar .library {
   background: static_url('images/icons/library.png') no-repeat;
   width: 21px;
   height: 16px;
-  position: absolute;
-  top: 50%;
-  margin-top: -8px;
-  left: 50%;
-  margin-left: -10px;
 }
 .toolbar .inspector {
   background: static_url('images/icons/inspector.png') no-repeat;
   width: 25px;
   height: 17px;
-  position: absolute;
-  top: 50%;
-  margin-top: -8px;
-  left: 50%;
-  margin-left: -12px;
+
 }
 .toolbar .actions {
   background: static_url('images/icons/actions.png') no-repeat;
   width: 28px;
   height: 17px;
-  position: absolute;
-  top: 50%;
-  margin-top: -8px;
-  left: 50%;
-  margin-left: -14px;
+
 }
 
 .toolbar .projects.active {

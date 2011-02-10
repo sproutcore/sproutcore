@@ -111,4 +111,5 @@ config :test_controls, :css_theme => 'ace.test-controls'
 
 config :greenhouse, 
   :required => [:sproutcore, :'sproutcore/designer', :statechart],
-  :theme    => :standard_theme
+  :theme => :ace,
+  :css_theme    => 'ace.greenhouse'
