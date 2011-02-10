@@ -27,14 +27,14 @@ end
 # CORE FRAMEWORKS
 config :bootstrap,  :required => [], :use_modules => false
 
-config :jquery,     :required => []
-config :runtime,    :required => [:jquery]
-config :amber,      :required => [:runtime]
-config :foundation, :required => [:amber]
-config :datastore,  :required => [:foundation]
-config :statechart, :required => [:amber]
-config :desktop,    :required => [:foundation]
-config :media,      :required => [:desktop]
+config :jquery,          :required => []
+config :runtime,         :required => [:jquery]
+config :core_foundation, :required => [:runtime]
+config :foundation,      :required => [:core_foundation]
+config :datastore,       :required => [:foundation]
+config :statechart,      :required => [:core_foundation]
+config :desktop,         :required => [:foundation]
+config :media,           :required => [:desktop]
 
 # APP-LEVEL FRAMEWORKS
 %w(mobile designer).each do |app_framework|
