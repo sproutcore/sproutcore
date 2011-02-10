@@ -92,12 +92,9 @@ Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelega
     @returns {SC.View} view or null
   */
   collectionViewDragViewFor: function(view, dragContent) {
-    var dragView = view.itemViewForContentIndex(dragContent.firstObject());
-    var layer = view.get('layer').cloneNode(false) ;
-    dragView.set('parentView', view) ;
-    dragView.set('layer', layer) ;
-    dragView.adjust({height: view.get('rowHeight'), top: (dragContent.firstObject()*view.get('rowHeight')) }) ;
-    return dragView ;
+    var selectedItemIndex = dragContent.firstObject();
+    var itemView = view.itemViewForContentIndex(selectedItemIndex);
+    return itemView;
   },
 
   /**
