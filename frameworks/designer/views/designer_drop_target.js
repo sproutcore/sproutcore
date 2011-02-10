@@ -118,10 +118,14 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     loc.x = loc.x - frame.x - rootDesignerFrame.x;
     loc.y = loc.y - frame.y - rootDesignerFrame.y;
     //setup design (use eval to make sure code comes from iframe)
+    //TODO use new Function("return "+data.get('scClass))() ?...
     design = eval(data.get('scClass'));
     defaults = data.get('defaults') || {};
     layout = defaults.layout || {};
     layout = SC.merge(layout, {top: loc.y, left: loc.x});
+    //pull width and height from ghost if none exists form defaults
+    if(!layout.width) layout.width = drag.getPath('ghostView.layout').width;
+    if(!layout.height) layout.height = drag.getPath('ghostView.layout').height;
     defaults.layout = layout;
     design = design.design(defaults);
     //drop it in the root designer
