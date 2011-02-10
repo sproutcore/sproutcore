@@ -116,37 +116,43 @@ test("AlertPane.info with icon, message, description, caption and 1 button (pass
   pane.dismiss();
 });
 
-test("users interaction with mutiple alert panes with 1-3 buttons", function() {
-  
-  var delegate = SC.Object.create({
-    
-    threeButtonAlertPane: function() {
-      pane = SC.AlertPane.warn("AlertPane.warn title", 'Click OK to see this alert pane again.  \nClick Other... to see other alert panes.', 'Click cancel to dismiss.', "OK", "Cancel", 'Other...', this);      
-    },
+test("Alert pane should have role as alertdialog", function() {
+  pane = SC.AlertPane.info("AlertPane.message", 'AlertPane.description', 'AlertPane.caption', null, null, null, this);      
+  equals(pane.$().attr('role'), 'alertdialog', 'Alert pane should have role as alertdialog');
+  pane.dismiss();
+});
 
-    twoButtonAlertPane: function() {
-      pane = SC.AlertPane.error("AlertPane.error title", 'Click OK to see one button alert pane.', 'Click cancel to dismiss.', "OK", "Cancel", delegate);      
-    },
-
-    oneButtonAlertPane: function() {
-      pane = SC.AlertPane.info("AlertPane.info title", 'Click OK to dismiss.', delegate);      
-    },
-   
-    alertPaneDidDismiss: function(alert, status) {
-      //console.log("%@.alertDidDismiss - %@".fmt(alert, status));
-      switch(status) {
-        case SC.BUTTON1_STATUS:
-          if(alert.icon && alert.icon.indexOf('alert')!=-1) this.invokeLater(this.threeButtonAlertPane, 1000);
-          if(alert.icon && alert.icon.indexOf('error')!=-1) this.oneButtonAlertPane();
-          break;
-        case SC.BUTTON3_STATUS:
-          this.twoButtonAlertPane();
-          break;
-      }
-    }
-  });
-
-  SC.RunLoop.begin();
-  delegate.threeButtonAlertPane();
-  SC.RunLoop.end();
-}) ;
+// test("users interaction with mutiple alert panes with 1-3 buttons", function() {
+//   
+//   var delegate = SC.Object.create({
+//     
+//     threeButtonAlertPane: function() {
+//       pane = SC.AlertPane.warn("AlertPane.warn title", 'Click OK to see this alert pane again.  \nClick Other... to see other alert panes.', 'Click cancel to dismiss.', "OK", "Cancel", 'Other...', this);      
+//     },
+// 
+//     twoButtonAlertPane: function() {
+//       pane = SC.AlertPane.error("AlertPane.error title", 'Click OK to see one button alert pane.', 'Click cancel to dismiss.', "OK", "Cancel", delegate);      
+//     },
+// 
+//     oneButtonAlertPane: function() {
+//       pane = SC.AlertPane.info("AlertPane.info title", 'Click OK to dismiss.', delegate);      
+//     },
+//    
+//     alertPaneDidDismiss: function(alert, status) {
+//       //console.log("%@.alertDidDismiss - %@".fmt(alert, status));
+//       switch(status) {
+//         case SC.BUTTON1_STATUS:
+//           if(alert.icon && alert.icon.indexOf('alert')!=-1) this.invokeLater(this.threeButtonAlertPane, 1000);
+//           if(alert.icon && alert.icon.indexOf('error')!=-1) this.oneButtonAlertPane();
+//           break;
+//         case SC.BUTTON3_STATUS:
+//           this.twoButtonAlertPane();
+//           break;
+//       }
+//     }
+//   });
+// 
+//   SC.RunLoop.begin();
+//   delegate.threeButtonAlertPane();
+//   SC.RunLoop.end();
+// }) ;
