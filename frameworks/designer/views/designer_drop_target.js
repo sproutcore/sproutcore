@@ -14,6 +14,8 @@
 SC.DesignerDropTarget = SC.ContainerView.extend(
   /** @scope SC.DesignerDropTarget.prototype */ {
   
+  inGlobalOffset: YES,
+  
   // ..........................................................
   // Key Events
   // 
@@ -106,7 +108,7 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     var data = drag.dataForType('SC.Object'),
         cv = this.get('contentView'),
         loc = drag.get('location'),
-        frame = drag.iframeFrame,
+        iframeOffset = drag.globalTargetOffset,
         design, size, newView, defaults, layout;
     var page = cv.get('page');
     var designController = page.get('designController'),
@@ -115,8 +117,8 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     //TODO: [MB] should we move most of this into the designer's addView?
     //size and location
     size = data.get('size');
-    loc.x = loc.x - frame.x - rootDesignerFrame.x;
-    loc.y = loc.y - frame.y - rootDesignerFrame.y;
+    loc.x = loc.x - iframeOffset.x - rootDesignerFrame.x;
+    loc.y = loc.y - iframeOffset.y - rootDesignerFrame.y;
     //setup design (use eval to make sure code comes from iframe)
     //TODO use new Function("return "+data.get('scClass))() ?...
     design = eval(data.get('scClass'));
