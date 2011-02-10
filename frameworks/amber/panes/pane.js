@@ -617,7 +617,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       // For historical reasons, we'll also layout the child views if
       // necessary.
       if (current) {
-        if (this.get('childViewsNeedLayout')) this.invokeOnce(this.layoutChildViewsIfNeeded);
+        if (this.get('childViewsNeedLayout')) {
+          this.invokeOnce(this.layoutChildViewsIfNeeded);
+        }
       }
       else {
         // Also, if we were previously visible and were the key pane, resign
@@ -625,7 +627,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
         // observer or some such helper method because this work is not
         // strictly related to computing the visibility, but view performance
         // is critical, so avoiding the extra observer is worthwhile.
-        if (this.get('isKeyPane')) this.resignKeyPane();
+        if (this.get('isKeyPane')) { this.resignKeyPane(); }
       }
     }
 
