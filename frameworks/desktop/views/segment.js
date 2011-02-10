@@ -16,45 +16,57 @@
 SC.SegmentView = SC.View.extend(SC.Control, {
   /* SC.Control (note: this brings its own display properties: 'isEnabled', 'isSelected', 'isActive', 'controlSize') */
   isEnabled: YES,
-  
+
   isActive: NO,
-  
+
   isSelected: NO,
-  
+
   controlSize: null,
-  
+
   /* SC.Button (note: we don't actually mix this in, because it doesn't define displayProperties or renderMixin) */
   title: '',
-  
+
   value: null,
-  
+
   icon: null,
-  
+
   localize: NO,
-  
+
   keyEquivalent: null,
-  
+
   // TODO: Modification currently unsupported in SegmentedView
-  escapeHTML: YES,        
-  
+  escapeHTML: YES,
+
   // TODO: Modification currently unsupported in SegmentedView
-  needsEllipsis: YES,     
-  
+  needsEllipsis: YES,
+
   /* SC.ButtonView */
   // TODO: Modification currently unsupported in SegmentedView (this may be deprecated in SC.ButtonView and should also be so here)
   supportFocusRing: NO,
-  
+
   /* SC.View */
   renderDelegateName: 'segmentRenderDelegate',
-  
+
   useStaticLayout: YES,
-  
+
   // TODO: isDefault, isCancel, value not really used by render delegate
-  displayProperties: ['icon', 'title', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'index'],
-  
+  displayProperties: ['icon', 'title', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
+
   /* SC.SegmentView */
-  
+
+  /**
+    The width of the segment.
+
+    @property {Number}
+  */
   width: null,
+
+  /**
+    The item represented by this view.
+
+    @property {Object || SC.Object}
+  */
+  localItem: null,
 
   /**
     Whenever the width property changes, adjust our layout accordingly.
@@ -62,7 +74,7 @@ SC.SegmentView = SC.View.extend(SC.Control, {
   widthDidChange: function() {
     this.adjust('width', this.get('width'));
   }.observes('width'),
-  
+
   /**
     Update our properties according to our matching item.
   */
@@ -72,13 +84,15 @@ SC.SegmentView = SC.View.extend(SC.Control, {
         viewKeys = parentView.get('viewKeys'),
         viewKey,
         i;
-    
+
     for (i = itemKeys.get('length') - 1; i >= 0; i--) {
-      itemKey = parentView.get(itemKeys.objectAt(i)); 
+      itemKey = parentView.get(itemKeys.objectAt(i));
       viewKey = viewKeys.objectAt(i);
 
       // Don't overwrite the default value if none exists in the item
       if (!SC.none(item.get(itemKey))) this.set(viewKey, item.get(itemKey));
     }
+
+    this.set('localItem', item);
   }
 });
