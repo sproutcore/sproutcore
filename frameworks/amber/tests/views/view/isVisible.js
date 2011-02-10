@@ -49,3 +49,31 @@ test("adding a new view to a visible pane should make it visible", function() {
   ok(!view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES") ;
   ok(view.$().hasClass('hidden'), "after view.set('isVisible', NO), view.$().hasClass('hidden') should be true") ;
 });
+
+test("a view with visibility can have a child view without visibility", function() {
+  var pane = SC.Pane.create({
+    childViews: ['visibleChild'],
+
+    visibleChild: SC.View.design({
+      childViews: ['noVisibilityChild'],
+      noVisibilityChild: SC.CoreView
+    })
+  });
+
+  var errored = false;
+
+  try {
+    pane.append();
+    pane.remove();
+  } catch(e) {
+    errored = true;
+  } finally {
+    try {
+      pane.remove();
+    } catch(e2) {
+      errored = true;
+    }
+  }
+
+  ok(!errored, "Inserting a pane containing a child with visibility that itself has a child without visibility does not cause an error");
+});
