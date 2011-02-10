@@ -16,7 +16,7 @@ test("template view should call the function of the associated template", functi
 
     templates: SC.Object.create({
       test_template: function(dataSource) {
-        return "<h1 id='twas-called'>template was called</h1>";
+        dataSource._renderContext.push("<h1 id='twas-called'>template was called</h1>");
       }
     })
   });
@@ -36,7 +36,7 @@ test("template view should call the function of the associated template with its
 
     templates: SC.Object.create({
       test_template: function(dataSource) {
-        return "<h1 id='twas-called'>template was called for " + dataSource.get('personName') + "</h1>";
+        dataSource._renderContext.push("<h1 id='twas-called'>template was called for " + dataSource.get('personName') + "</h1>");
       }
     })
   });

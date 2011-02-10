@@ -14,7 +14,9 @@ SC.TemplateView = SC.CoreView.extend(
   }.property('templateName').cacheable(),
 
   render: function(context) {
+    this._didRenderChildViews = YES;
     var template = this.get('template');
-    context.push( template(this) );
+    this._renderContext = context;
+    template(this);
   }
 });
