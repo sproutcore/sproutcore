@@ -122,7 +122,28 @@ test("sc_super to a non-method", function() {
   ok(error, "sc_super throws an error if there is no superclass method");
 });
 
-test("__sc_proto__ semantics", function() {
+test("sc_super works in enhanced methods", function() {
+  var Klass = SC.Object.extend({
+    loudly: function(string) {
+      console.log(string);
+      return string.toUpperCase();
+    }
+  });
+
+  var SubKlass = Klass.extend({
+    loudly: function(string) {}
+  });
+
+  SubKlass.reopen({
+    loudly: function(original, string) {
+      return sc_super();
+    }.enhance()
+  });
+
+  var object = SubKlass.create({});
+
+  equals("TOM DAAALE IS A FOO", object.loudly("Tom DAAALE is a foo"), "sc_super should work in enhanced methods");
+});
   var Klass = SC.Object.extend({});
   ok(Klass.__sc_super__ === SC.Object.prototype, "SproutCore remembers the original begetted prototype for subclasses");
 

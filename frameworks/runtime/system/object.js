@@ -24,7 +24,7 @@ SC.BENCHMARK_OBJECTS = NO;
 
 SC._detect_base = function _detect_base(func, parent, name) {
   return function invoke_superclass_method() {
-    var base = parent[name];
+    var base = parent[name], args;
 
     if (!base) {
       throw new Error("No '" + name + "' method was found on the superclass");
@@ -40,7 +40,13 @@ SC._detect_base = function _detect_base(func, parent, name) {
     //if(base && func === base) { func.base = function() {}; }
     //else { func.base = base; }
 
-    return base.apply(this, arguments);
+    if(func.isEnhancement) {
+      args = Array.prototype.slice.call(arguments, 1);
+    } else {
+      args = arguments;
+    }
+
+    return base.apply(this, args);
   };
 };
 
