@@ -56,8 +56,32 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       itemTitleKey: 'title',
       itemValueKey: 'value',
       layout: { left:12, height: 200, right:12, top:12}
+    })
+    .add("aria-role_tabView", SC.TabView, {
+
+      items: [
+        { title: "tab1", value: "tab1" },
+        { title: "tab2", value: "tab2" },
+        { title: "tab3", value: "tab3" }
+      ],
+
+      itemTitleKey: 'title',
+      itemValueKey: 'value',
+      layout: { left:12, height: 200, right:12, top:12}
+    })
+    .add("aria-controls_tabView", SC.TabView, {
+
+      items: [
+        { title: "tab1", value: "tab1" },
+        { title: "tab2", value: "tab2" },
+        { title: "tab3", value: "tab3" }
+      ],
+
+      itemTitleKey: 'title',
+      itemValueKey: 'value',
+      layout: { left:12, height: 200, right:12, top:12}
     });
-    
+
   pane.show(); // add a test to show the test pane
 
   // ..........................................................
@@ -69,8 +93,9 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     ok(pane.view('tabView1').get('isVisibleInWindow'), 'tabView1.isVisibleInWindow should be YES');
     ok(pane.view('tabView2').get('isVisibleInWindow'), 'tabView2.isVisibleInWindow should be YES');
     ok(pane.view('tabView3').get('isVisibleInWindow'), 'tabView3.isVisibleInWindow should be YES');
+    ok(pane.view('aria-role_tabView').get('isVisibleInWindow'), 'aria-role_tabView.isVisibleInWindow should be YES');
+    ok(pane.view('aria-controls_tabView').get('isVisibleInWindow'), 'aria-controls_tabView.isVisibleInWindow should be YES');
    });
-   
    
    test("Check that the tabView has the right classes set", function() {
      var viewElem=pane.view('tabView1').$();
@@ -84,5 +109,24 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
    });
   
+   test("Check that segmented view and container view of tabview has right roles set: tablist, and tabpanel", function(){
+     var viewElem = pane.view('aria-role_tabView').$(),
+         views    = pane.view('aria-role_tabView').childViews;
 
+     equals(views[1].$().attr('role'), "tablist", "segmented view of tabView has correct role set");
+     equals(views[0].$().attr('role'), "tabpanel", "container view of tabView has correct role set");
+
+   });
+
+   test("Check that segments of tabView have aria-controls attribute set", function() {
+     var views          = pane.view('aria-controls_tabView').childViews,
+         containerView  = views[0],
+         segments       = views[1].get('childViews'),
+         segmentViewElem, i, len;
+
+     for(i = 0, len = segments.length; i<len; ++i) {
+       segmentViewElem = segments[i].$();
+       equals(segmentViewElem.attr('aria-controls'), containerView, "segment " + (i+1) + " of the tabView has aria-controls set");
+     }
+   });
 })();
