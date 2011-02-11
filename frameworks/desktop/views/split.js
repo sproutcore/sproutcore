@@ -569,9 +569,16 @@ SC.SplitView = SC.View.extend(
     	this._inLiveResize = NO;
     	this.endLiveResize();
     	return YES;
-		}
-		
-		return NO;
+    }
+    
+    var cursor = this.get('thumbViewCursor'), 
+        cloneCursor = SC.clone(cursor),
+        dV= this.get('dividerView');
+    cursor.set('cursorStyle', SC.SYSTEM_CURSOR);
+    dV.set('cursor', cloneCursor);
+    this.set('cursor', cursor);
+    
+    return NO;
   },
   
   touchesDragged: function(evt){
@@ -791,7 +798,8 @@ SC.SplitView = SC.View.extend(
         // updates the cursor of the thumb view that called 
         // mouseDownInThumbView() to reflect the status of the drag
         tlThickness = this.thicknessForView(topLeftView),
-        brThickness = this.thicknessForView(bottomRightView);
+        brThickness = this.thicknessForView(bottomRightView),
+        dV = this.get('dividerView');
     this._layoutDirection = this.get('layoutDirection');
     if (topLeftView.get('isCollapsed') || 
         tlThickness === this.get("topLeftMinThickness") || 
@@ -809,6 +817,9 @@ SC.SplitView = SC.View.extend(
         thumbViewCursor.set('cursorStyle', this._layoutDirection === SC.LAYOUT_HORIZONTAL ? "ew-resize" : "ns-resize");
       }
     }
+    
+    dV.set('cursor', thumbViewCursor);
+    if( this._inLiveResize) this.set('cursor', thumbViewCursor);
   }.observes('layoutDirection'),
   
   /**
