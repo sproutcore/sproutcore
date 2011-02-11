@@ -7,11 +7,7 @@
 
 sc_require('panes/panel');
 sc_require('views/button');
-/** 
-  button1 : 1st button from the right. default:OK
-  button2 : 2nd button from the right. Optional. Could be Cancel or 2nd action.
-  button3 : 1st button from the left. Optional. Could be Cancel or alternative option.
-*/
+
 /** 
   Passed to delegate when alert pane is dismissed by pressing button 1
 */
@@ -50,11 +46,14 @@ SC.BUTTON3_STATUS = 'button3';
   - *show()* - displays an alert with a customizable icon to the left
   
   In addition to passing a message, description and caption, you can also customize
-  the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).  Just
-  pass these titles of these buttons to enable them or null to disable then.
+  the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).
   
-  Additionally, you can pass a delegate object as the last parameter.  This
-  delegate's 'alertPaneDidDismiss()' method will be called when the pane
+  button1 : 1st button from the right. default:OK
+  button2 : 2nd button from the right. Optional. Could be Cancel or 2nd action.
+  button3 : 1st button from the left. Optional. Could be Cancel or alternative option.
+  
+  Additionally, you can define a delegate object.  This delegate's 
+  'alertPaneDidDismiss()' method will be called when the pane
   is dismissed, passing the pane instance and a key indicating which 
   button was pressed.
   
@@ -63,13 +62,25 @@ SC.BUTTON3_STATUS = 'button3';
   Show a simple AlertPane with an OK button:
   
   {{{
-    SC.AlertPane.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.");
+    SC.AlertPane.warn({
+      message: "Could not load calendar",
+      description: "Your internet connection may be unavailable or our servers may be down.",
+      caption: "Try again in a few minutes."
+    });
   }}}
   
-  Show an AlertPane with a customized OK title (title will be 'Try Again'):
+  Show an AlertPane with a customized OK title (title will be 'Try Again') and
+  custom action:
   
   {{{
-    SC.AlertPane.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again");
+    SC.AlertPane.warn({
+      message: "Could not load calendar",
+      description: "Your internet connection may be unavailable or our servers may be down.",
+      caption: "Try again in a few minutes.",
+      buttons: [
+        { title: "Try Again" }
+      ]
+    });
   }}}
   
   Show an AlertPane with a custom OK, a Cancel button and an Extra button, 
@@ -77,7 +88,6 @@ SC.BUTTON3_STATUS = 'button3';
   the user's dismisses the dialog.
   
   {{{
-
     MyApp.calendarController = SC.Object.create({
       alertPaneDidDismiss: function(pane, status) {
         switch(status) {
@@ -94,12 +104,45 @@ SC.BUTTON3_STATUS = 'button3';
             break;
         }
       },
-      
       ...
     });
     
-    SC.AlertPane.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again", "Cancel", "More Info...", MyApp.calendarController);
+    
+    SC.AlertPane.warn({
+      message: "Could not load calendar",
+      description: "Your internet connection may be unavailable or our servers may be down.",
+      caption: "Try again in a few minutes.",
+      delegate: MyApp.calendarController,
+      buttons: [
+        { title: "Try Again" },
+        { title: "Cancel" },
+        { title: "More Info…" }
+      ]
+    });
   }}}
+  
+  Instead of using the delegate pattern above, you can also specify a target
+  and an action, similar to SC.ButtonView.
+  
+  {{{
+    SC.AlertPane.warn({
+      message: "Could not load calendar",
+      description: "Your internet connection may be unavailable or our servers may be down.",
+      caption: "Try again in a few minutes.",
+      buttons: [
+        { 
+          title: "OK", 
+          action: "didClickOK",
+          target: MyApp.calendarController
+        }
+      ]
+    });
+  }}}
+  
+  Also note that in addition to passing the action as a string of the method
+  name that will be invoked, you can also give a function reference as the
+  action.
+  
   
   @extends SC.PanelPane
   @since SproutCore 1.0
@@ -117,41 +160,21 @@ SC.AlertPane = SC.PanelPane.extend({
   ariaRole: 'alertdialog',
 
   /**
-    The WAI-ARIA attribute for the alert pane. This property is assigned to
-    'aria-labelledby' attribute, which defines a string value that labels the
-    element. Used to support voiceover. It should be assigned a non-empty string,
-    if the 'aria-labelledby' attribute has to be set for the element.
-
-    @property {String}
-  */
-  ariaLabeledBy: null,
-
-  /**
-    The WAI-ARIA attribute for the alert pane. This property is assigned to
-    'aria-describedby' attribute.Used to support voiceover. It is intended to
-    provide additional detail that some users might need. It should be assigned
-    a non-empty string, if the 'aria-describedby' attribute has to be set for
-    the element.
-
-    @property {String}
-  */
-  ariaDescribedBy: null,
-
-  /**
-    The delegate to notify when the pane is dismissed.  If you set a 
-    delegate, it should respond to the method:
+    If defined, the delegate is notified when the pane is dismissed. If you have 
+    set specific button actions, they will be called on the delegate object
     
+    The method to be called on your delegate will be:
     {{{
       alertPaneDidDismiss: function(pane, status)
     }}}
     
-    The status will be on of SC.BUTTON1_STATUS, SC.BUTTON2_STATUS or SC.BUTTON3_STATUS
+    The status will be one of SC.BUTTON1_STATUS, SC.BUTTON2_STATUS or SC.BUTTON3_STATUS
     depending on which button was clicked.
     
     @property {Object}
   */
   delegate: null,
-
+  
   /**
     The icon URL or class name.  If you do not set this, an alert icon will
     be shown instead.
@@ -203,26 +226,26 @@ SC.AlertPane = SC.PanelPane.extend({
   }.property('caption').cacheable(),
   
   /**
-    The button view for the button 1 (OK).
+    The button view for button 1 (OK).
     
     @property {SC.ButtonView}
   */
-  buttonOne: SC.outlet('contentView.childViews.1.childViews.1'),
-
+  button1: SC.outlet('contentView.childViews.1.childViews.1'),
+    
   /**
     The button view for the button 2 (Cancel).
     
     @property {SC.ButtonView}
   */
-  buttonTwo: SC.outlet('contentView.childViews.1.childViews.0'),
-
+  button2: SC.outlet('contentView.childViews.1.childViews.0'),
+    
   /**
     The button view for the button 3 (Extra).
     
     @property {SC.ButtonView}
   */
-  buttonThree: SC.outlet('contentView.childViews.2.childViews.0'),
-
+  button3: SC.outlet('contentView.childViews.2.childViews.0'),
+    
   /**
     The view for the button 3 (Extra) wrapper.
     
@@ -245,9 +268,8 @@ SC.AlertPane = SC.PanelPane.extend({
 
         render: function(context, firstTime) {
           var pane = this.get('pane');
-          var blank = SC.BLANK_IMAGE_URL ;
           if(pane.get('icon') == 'blank') context.addClass('plain');
-          context.push('<img src="'+blank+'" class="icon '+pane.get('icon')+'" />');
+          context.push('<img src="'+SC.BLANK_IMAGE_URL+'" class="icon '+pane.get('icon')+'" />');
           context.begin('h1').attr('class', 'header').text(pane.get('message') || '').end();
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');
@@ -260,35 +282,34 @@ SC.AlertPane = SC.PanelPane.extend({
         layout: { bottom: 13, height: 24, right: 18, width: 466 },
         childViews: ['cancelButton', 'okButton'],
         classNames: ['text-align-right'],
-        cancelButton : SC.ButtonView.extend({
-            useStaticLayout: YES,
-            actionKey: SC.BUTTON2_STATUS,
-            localize: YES,
-            titleMinWidth: 64,
-            layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
-            theme: 'capsule',
-            title: "Cancel", 
-            isCancel: YES,
-            action: "dismiss",
-            isVisible: NO
-          }),
-
-        okButton : SC.ButtonView.extend({
-            useStaticLayout: YES,
-            actionKey: SC.BUTTON1_STATUS,
-            localize: YES,
-            titleMinWidth: 64,
-            layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
-            theme: 'capsule',
-            title: "OK", 
-            isDefault: YES,
-            action: "dismiss"
-          })
+        
+        cancelButton: SC.ButtonView.extend({
+          useStaticLayout: YES,
+          actionKey: SC.BUTTON2_STATUS,
+          localize: YES,
+          titleMinWidth: 64,
+          layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
+          theme: 'capsule',
+          isCancel: YES,
+          action: "dismiss",
+          isVisible: NO
+        }),
+        
+        okButton: SC.ButtonView.extend({
+          useStaticLayout: YES,
+          actionKey: SC.BUTTON1_STATUS,
+          localize: YES,
+          titleMinWidth: 64,
+          layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
+          theme: 'capsule',
+          isDefault: YES,
+          action: "dismiss",
+          isVisible: NO
+        })
       }),
       
       SC.View.extend({
         layout: { bottom: 13, height: 24, left: 18, width: 150 },
-        isVisible: NO,
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
@@ -297,7 +318,6 @@ SC.AlertPane = SC.PanelPane.extend({
             titleMinWidth: 64,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
-            title: "Extra", 
             action: "dismiss",
             isVisible: NO
           })]
@@ -305,14 +325,40 @@ SC.AlertPane = SC.PanelPane.extend({
   }),
 
   /**
-    Action triggered whenever any button is pressed.  Notifies any delegate
-    and then hides the alert pane.
+    Action triggered whenever any button is pressed. Also the hides the 
+    alertpane itself.
+    
+    This will trigger the following chain of events:
+    1. If a delegate was given, and it has alertPaneDidDismiss it will be called
+    2. Otherwise it will look for the action of the button and call:
+       a) The action function reference if one was given
+       b) The action method on the target if one was given
+       c) If both a and b are missing, call the action on the rootResponder
+    
+    @param {SC.View} sender - the button view that was clicked
   */
   dismiss: function(sender) {
-    var del = this.delegate;
+    var del = this.delegate,
+        rootResponder, action, target;
+    
     if (del && del.alertPaneDidDismiss) {
       del.alertPaneDidDismiss(this, sender.get('actionKey'));
     }
+    else if(action = (sender && sender.get('action'))) {
+      if(SC.typeOf(action)===SC.T_FUNCTION) {
+        action.call(action);
+      }
+      else if(target = sender.get('target')) {
+        target.tryToPerform(action);
+      }
+      else {
+        rootResponder = this.getPath('pane.rootResponder');
+        if(rootResponder) {
+          rootResponder.sendAction(action, del, this);
+        }
+      }
+    }
+    
     this.remove(); // hide alert
   },
   
@@ -343,115 +389,168 @@ SC.AlertPane = SC.PanelPane.extend({
   }
 });
 
-/** @private
-  internal method normalizes arguments for processing by helper methods.
-*/
-SC.AlertPane._normalizeArguments = function(args) {
-  args = SC.A(args); // convert to real array
-  var len = args.length, delegate = args[len-1];
-  if (SC.typeOf(delegate) !== SC.T_STRING) {
-    args[len-1] = null;
-  } else delegate = null ;
-  args[7] = delegate ;
-  return args ;
-};
-
-/**
-  Displays a new alert pane according to the passed parameters.  Every 
-  parameter except for the message is optional.  You can always pass the 
-  delegate as the last parameter and it will be used, even if you omit items
-  in between.
+SC.AlertPane.mixin({
   
-  If you need to pass other parameters but you want to omit some others 
-  in between, pass null and the related UI item will be hidden
-  
-  Note that if you pass an icon, it should be 48 x 48 in size.
-  
-  @param {String} message the primary message
-  @param {String} description an optional detailed description
-  @param {String} caption an optional detailed fine print caption
-  @param {String} button1Title optional unlocalized title for button 1 (OK)
-  @param {String} button2Title optional unlocalized title for button 2 (Cancel)
-  @param {String} button3Title optional unlocalized title for button 3 (extra)
-  @param {String} iconUrl optional URL or class name for icon.
-  @param {Object} delegate optional delegate to notify when pane is dismissed
-  @returns {SC.AlertPane} new alert pane
-*/
-SC.AlertPane.show = function(message, description, caption, button1Title, button2Title, button3Title, iconUrl, delegate) {
-  
-  // get the delegate and normalize the rest of the params
-  var args = this._normalizeArguments(arguments);
-  
-  // create basic AlertPane
-  var ret = this.create({
-    message: args[0] || '',
-    description: args[1] || null,
-    caption: args[2] || null,
-    icon: args[6] || 'sc-icon-alert-48',
-    delegate: args[7]
-  });
-  
-  // customize buttons as needed
-  var buttonKeys = 'buttonOne buttonTwo buttonThree'.w(), button, title;
-  for(var idx=0;idx<3;idx++) {
-    button = ret.get(buttonKeys[idx]);
-    title = args[idx + 3];
-    if (title) {
-      button.set('title', title).set('isVisible', YES);
-      if(title=='?') button.set('titleMinWidth', 0);
-      if (idx==2) {
-        var button_wrapper = ret.get('buttonThreeWrapper');
-        button_wrapper.set('isVisible', YES);
-      }
+  /**
+    Show a dialog with a given set of hash attributes:
+    
+    {{{
+      SC.AlertPane.show({
+        message: "Could not load calendar",
+        description: "Your internet connection may be unavailable or our servers may be down.",
+        caption: "Try again in a few minutes.",
+        delegate: MyApp.calendarController
+      });
+    }}}
+    
+    See more examples for how to configure buttons and individual actions in the 
+    documentation for the SC.AlertPane class.
+    
+    @param {Hash} args
+  */
+  show: function(args) {
+    // normalize the arguments if this is a deprecated call
+    args = SC.AlertPane._argumentsCall.apply(this, arguments);
+    
+    var pane = this.create(args), 
+        idx = 0, 
+        buttons = args.buttons,
+        buttonView, title, action, target;
+    
+    if(buttons) {
+      buttons.forEach(function(button) {
+        idx++;
+        buttonView = pane.get('button%@'.fmt(idx));
+        
+        title = button.title;
+        action = button.action;
+        target = button.target;
+        
+        buttonView.set('title'.fmt(idx), title);
+        if(action) buttonView.set('action'.fmt(idx), action);
+        if(target) buttonView.set('target'.fmt(idx), target);
+        buttonView.set('isVisible', !!title);
+      });
     }
+    else {
+      // if there are no buttons defined, just add the standard OK button
+      buttonView = pane.get('button1');
+      buttonView.set('title', "OK");
+      buttonView.set('isVisible', YES);
+    }
+    
+    var show = pane.append(); // make visible.
+    pane.adjust('height', pane.childViews[0].$().height());
+    pane.updateLayout();
+    return show;
+  },
+  
+  /**
+    Same as show() just that it uses sc-icon-alert-48 CSS classname
+    as the dialog icon
+    
+    @param {Hash} args
+  */
+  warn: function(args) {
+    // normalize the arguments if this is a deprecated call
+    args = SC.AlertPane._argumentsCall.apply(this, arguments);
+    
+    args.icon = 'sc-icon-alert-48';
+    return this.show(args);
+  },
+  
+  /**
+    Same as show() just that it uses sc-icon-info-48 CSS classname
+    as the dialog icon
+    
+    @param {Hash} args
+  */
+  info: function(args) {
+    // normalize the arguments if this is a deprecated call
+    args = SC.AlertPane._argumentsCall.apply(this, arguments);
+    
+    args.icon = 'sc-icon-info-48';
+    return this.show(args);
+  },
+  
+  /**
+    Same as show() just that it uses sc-icon-error-48 CSS classname
+    as the dialog icon
+    
+    @param {Hash} args
+  */
+  error: function(args) {
+    // normalize the arguments if this is a deprecated call
+    args = SC.AlertPane._argumentsCall.apply(this, arguments);
+    
+    args.icon = 'sc-icon-error-48';
+    return this.show(args);
+  },
+  
+  /**
+    Same as show() just that it uses blank CSS classname
+    as the dialog icon
+    
+    @param {Hash} args
+  */
+  plain: function(args) {
+    // normalize the arguments if this is a deprecated call
+    args = SC.AlertPane._argumentsCall.apply(this, arguments);
+    
+    args.icon = 'blank';
+    return this.show(args);
+  },
+  
+  /** @private
+    Set properties to new structure for call that use the old arguments 
+    structure.
+    
+    Deprecated API but is preserved for now for backwards compatibility.
+    
+    @deprecated
+  */
+  _argumentsCall: function(args) {
+    var ret = args;
+    if(SC.typeOf(args)!==SC.T_HASH) {
+      //@if(debug)
+      SC.debug('SC.AlertPane has changed the signatures for show(), info(), warn(), error() and plain(). Please update accordingly.');
+      //@endif
+      var normalizedArgs = this._normalizeArguments(arguments);
+      
+      // now convert it to the new format for show()
+      ret = {
+        message: normalizedArgs[0],
+        description: normalizedArgs[1],
+        caption: normalizedArgs[2],
+        delegate: normalizedArgs[7],
+        icon: (normalizedArgs[6] || 'sc-icon-alert-48')
+      };
+      
+      // set buttons if there are any (and check if it's a string, since last
+      // argument could be the delegate object)
+      if(SC.typeOf(normalizedArgs[3])===SC.T_STRING || SC.typeOf(normalizedArgs[4])===SC.T_STRING || SC.typeOf(normalizedArgs[5])===SC.T_STRING) {
+        ret.buttons = [
+          { title: normalizedArgs[3] },
+          { title: normalizedArgs[4] },
+          { title: normalizedArgs[5] }
+        ];
+      }
+      
+    }
+    return ret;
+  },
+  
+  /** @private
+    internal method normalizes arguments for processing by helper methods.
+  */
+  _normalizeArguments: function(args) {
+    args = SC.A(args); // convert to real array
+    var len = args.length, delegate = args[len-1];
+    if (SC.typeOf(delegate) !== SC.T_STRING) {
+      args[len-1] = null;
+    } else delegate = null ;
+    args[7] = delegate ;
+    return args ;
   }
-  var show = ret.append() ; // make visible.
-  ret.adjust('height', ret.childViews[0].$().height()) ;
-  ret.updateLayout() ;
-  return show ;
-};
-
-/**
-  Displays a warning alert pane.  See SC.AlertPane.show() for complete details. 
   
-  @returns {SC.AlertPane} the pane
-*/
-SC.AlertPane.warn = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
-  var args = this._normalizeArguments(arguments);
-  args[6] = 'sc-icon-alert-48';
-  return this.show.apply(this, args);
-};
-
-
-/**
-  Displays a info alert pane.  See SC.AlertPane.show() for complete details. 
-  
-  @returns {SC.AlertPane} the pane
-*/
-SC.AlertPane.info = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
-  var args = this._normalizeArguments(arguments);
-  args[6] = 'sc-icon-info-48';
-  return this.show.apply(this, args);
-};
-
-/**
-  Displays a error allert pane.  See SC.AlertPane.show() for complete details. 
-  
-  @returns {SC.AlertPane} the pane
-*/
-SC.AlertPane.error = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
-  var args = this._normalizeArguments(arguments);
-  args[6] = 'sc-icon-error-48';
-  return this.show.apply(this, args);
-};
-
-/**
-  Displays a plain all-text allert pane w/o icon.  See SC.AlertPane.show() for complete details. 
-  
-  @returns {SC.AlertPane} the pane
-*/
-SC.AlertPane.plain = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
-  var args = this._normalizeArguments(arguments);
-  args[6] = 'blank';
-  return this.show.apply(this, args);
-};
+});
