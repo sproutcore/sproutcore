@@ -114,10 +114,13 @@ SC.View.reopen({
     var ret = NO,
         childViews = this.get('childViews'),
         len = childViews.length,
-        idx = -1 ;
+        idx = -1, view ;
     while (!ret && (++idx < len)) {
-      ret = childViews[idx].performKeyEquivalent(keystring, evt) ;
+      view = childViews[idx];
+
+      ret = view.tryToPerform('performKeyEquivalent', keystring, evt);
     }
+
     return ret ;
   },
 
