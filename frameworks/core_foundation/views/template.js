@@ -14,9 +14,19 @@ SC.TemplateView = SC.CoreView.extend(
   }.property('templateName').cacheable(),
 
   render: function(context) {
-    this._didRenderChildViews = YES;
-    var template = this.get('template');
-    this._renderContext = context;
-    template(this);
+    var originalView;
+
+    try {
+      originalView = SC.Handlebars.currentView;
+      SC.Handlebars.currentView = this;
+
+      this._didRenderChildViews = YES;
+      var template = this.get('template');
+      this._renderContext = context;
+      template(this);
+    } finally {
+      SC.Handlebars.currentView = originalView;
+    }
+
   }
 });

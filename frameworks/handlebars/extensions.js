@@ -42,3 +42,19 @@ Handlebars.registerHelper('view', function(path) {
 
   context.end();
 });
+
+Handlebars.registerHelper('bindProperty', function(property) {
+  var spanId = "handlebars-bound-" + jQuery.uuid++;
+  var result = this.get(property);
+
+  var currentView = SC.Handlebars.currentView;
+  var self = this;
+
+  this.addObserver(property, function() {
+    currentView.$("#" + spanId).html(Handlebars.Utils.escapeExpression(self.get(property)));
+  });
+
+  return new Handlebars.SafeString("<span id='" + spanId + "'>" +
+                                   Handlebars.Utils.escapeExpression(result) +
+                                   "</span>");
+});
