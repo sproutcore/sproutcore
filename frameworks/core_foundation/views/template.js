@@ -28,5 +28,10 @@ SC.TemplateView = SC.CoreView.extend(
       SC.Handlebars.currentView = originalView;
     }
 
-  }
+  },
+
+  // in TemplateView, updating is handled by observers created by helpers in the
+  // template. As a result, we create an empty update method so that the old
+  // (pre-1.5) behavior which would force a full re-render does not get activated.
+  update: function() { }
 });
