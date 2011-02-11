@@ -29,15 +29,7 @@ SC.FAST_SCROLL_DECELERATION = 0.85;
 SC.ScrollView = SC.View.extend(SC.Border, {
   /** @scope SC.ScrollView.prototype */
   classNames: ['sc-scroll-view'],
-  parent: this.parentView,
-  /**
-    The WAI-ARIA role for scroll view. This property's value should not be
-    changed.
 
-    @property {String}
-  */
-  ariaRole: 'scrollbar',
-  
   // ..........................................................
   // PROPERTIES
   // 
@@ -1647,22 +1639,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     views out in a ContainerView.
   */
   render: function(context, firstTime) {
-    var contentView = this.get('contentView');
-
     this.invokeLast(this.adjustElementScroll);
 
     if (firstTime) {
       context.push('<div class="corner"></div>');
-
-      //addressing accessibility
-      if(this.get('hasHorizontalScroller')) {
-        context.attr('aria-orientation', "horizontal");
-      } else if(this.get('hasVerticalScroller')) {
-        context.attr('aria-orientation', "vertical");
-      }
-
-      context.attr('aria-controls' , contentView);
-
     }
     return sc_super();
   },

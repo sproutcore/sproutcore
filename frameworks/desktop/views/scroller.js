@@ -215,6 +215,7 @@ SC.ScrollerView = SC.View.extend(
   render: function(context, firstTime) {
     var classNames = {},
         buttons = '',
+        parentView = this.get('parentView'),
         thumbPosition, thumbLength, thumbCenterLength, thumbElement,
         value, max, scrollerLength, length, pct;
 
@@ -277,9 +278,11 @@ SC.ScrollerView = SC.View.extend(
       }
 
       //addressing accessibility
-      context.attr('aria-valuemax', this.get('maximun'));
+      context.attr('aria-valuemax', this.get('maximum'));
       context.attr('aria-valuemin', this.get('minimum'));
       context.attr('aria-valuenow', this.get('value'));
+      context.attr('aria-controls' , parentView.get('contentView'));
+
     } else {
       // The HTML has already been generated, so all we have to do is
       // reposition and resize the thumb
