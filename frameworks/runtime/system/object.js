@@ -27,7 +27,7 @@ SC._detect_base = function _detect_base(func, parent, name) {
     var base = parent[name];
 
     if (!base) {
-      throw new Error("No '" + key + "' method was found on the superclass");
+      throw new Error("No '" + name + "' method was found on the superclass");
     }
 
     // NOTE: It is possible to cache the base, so that the first
