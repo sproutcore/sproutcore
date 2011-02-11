@@ -88,3 +88,41 @@ test("SC.TemplateView updates when a property changes", function() {
 
   equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
 });
+
+
+test("Handlebars templates update properties if a content object changes", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>Today\'s Menu</h1>{{#bindProperty "coffee"}}<h2>{{color}} coffee</h2><span id="price">{{bindProperty "price"}}</span>{{/bindProperty}}')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    coffee: SC.Object.create({
+      color: 'brown',
+      price: '$4'
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('h2').text(), "brown coffee", "precond - renders color correctly");
+  equals(view.$('#price').text(), '$4', "precond - renders price correctly");
+
+  view.set('coffee', SC.Object.create({
+    color: "mauve",
+    price: "$4.50"
+  }));
+
+  view.updateLayer();
+  equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
+  equals(view.$('#price').text(), "$4.50", "should update price field when content changes");
+
+  view.setPath('coffee.price', "$5");
+  view.updateLayer();
+
+  equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
+});
