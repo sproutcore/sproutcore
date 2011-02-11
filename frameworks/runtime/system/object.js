@@ -24,7 +24,11 @@ SC.BENCHMARK_OBJECTS = NO;
 
 SC._detect_base = function _detect_base(func, parent, name) {
   return function invoke_superclass_method() {
-    var base = parent[name] || SC.K;
+    var base = parent[name];
+
+    if (!base) {
+      throw new Error("No '" + key + "' method was found on the superclass");
+    }
 
     // NOTE: It is possible to cache the base, so that the first
     // call to sc_super will avoid doing the lookup again. However,
@@ -235,7 +239,10 @@ SC._enhance = function(originalFunction, enhancement) {
   @extends SC.Observable
   @since SproutCore 1.0
 */
-SC.Object = function(props) { return this._object_init(props); };
+SC.Object = function(props, klass) {
+  this.__sc_super__ = klass.prototype;
+  return this._object_init(props);
+};
 
 SC.mixin(SC.Object, /** @scope SC.Object */ {
 
@@ -289,7 +296,10 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // build a new constructor and copy class methods.  Do this before
     // adding any other properties so they are not overwritten by the copy.
-    var prop, ret = function(props) { return this._object_init(props); } ;
+    var prop, ret = function(props, klass) {
+      this.__sc_super__ = klass.prototype;
+      return this._object_init(props);
+    } ;
     for(prop in this) {
       if (!this.hasOwnProperty(prop)) continue ;
       ret[prop] = this[prop];
@@ -300,7 +310,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // now setup superclass, guid
     ret.superclass = this ;
-    ret.__sc_proto__ = this.prototype;
+    ret.__sc_super__ = this.prototype;
     SC.generateGuid(ret, "sc"); // setup guid
 
     ret.subclasses = SC.Set.create();
@@ -309,7 +319,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
-    for(idx=0;idx<len;idx++) { SC._object_extend(base, arguments[idx], this.prototype) ; }
+    for(idx=0;idx<len;idx++) { SC._object_extend(base, arguments[idx], ret.__sc_super__) ; }
     base.constructor = ret; // save constructor
 
     if (bench) SC.Benchmark.end('SC.Object.extend') ;
@@ -317,7 +327,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   },
 
   reopen: function(props) {
-    return SC._object_extend(this.prototype, props, this.__sc_proto__.prototype);
+    return SC._object_extend(this.prototype, props, this.__sc_super__);
   },
 
   /**
@@ -343,7 +353,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @returns {SC.Object} new instance of the receiver class.
   */
   create: function() {
-    var C=this, ret = new C(arguments);
+    var C=this, ret = new C(arguments, C);
     if (SC.ObjectDesigner) {
       SC.ObjectDesigner.didCreateObject(ret, SC.$A(arguments));
     }
@@ -470,7 +480,7 @@ SC.Object.prototype = {
   _object_init: function(extensions) {
     // apply any new properties
     var idx, len = (extensions) ? extensions.length : 0;
-    for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx], null) ;
+    for(idx=0;idx<len;idx++) { SC._object_extend(this, extensions[idx], this.__sc_super__) ; }
     SC.generateGuid(this, "sc") ; // add guid
     this.init() ; // call real init
 
