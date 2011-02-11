@@ -146,3 +146,35 @@ test("rotateX overrides rotate", function(){
   view.set('layout', { rotate: 45, rotateX: 90 });
   equals(view.get('layout').rotate, 90, "should set rotate to rotateX");
 });
+
+// The default implementation for viewDidResize calls internal layout-related
+// methods on child views. This test confirms that child views that do not
+// support layout do not cause this process to explode.
+test("Calling viewDidResize on a view notifies its child views", function() {
+  var regularViewCounter = 0, coreViewCounter = 0;
+
+  var view = SC.View.create({
+    childViews: ['regular', 'core'],
+
+    regular: SC.View.create({
+      viewDidResize: function() {
+        regularViewCounter++;
+        // Make sure we call the default implementation to
+        // ensure potential blow-uppy behavior is invoked
+        sc_super();
+      }
+    }),
+
+    core: SC.CoreView.create({
+      viewDidResize: function() {
+        coreViewCounter++;
+        sc_super();
+      }
+    })
+  });
+
+  view.viewDidResize();
+
+  equals(regularViewCounter, 1, "regular view's viewDidResize gets called");
+  equals(coreViewCounter, 1, "core view's viewDidResize gets called");
+});

@@ -597,7 +597,7 @@ SC.View.reopen(
       // frame changes should be sent all the time unless this property is
       // present to indicate that we want the old 1.0 API behavior instead.
       //
-      if (!cv.useStaticLayout) {
+      if (!cv.useStaticLayout && cv._sc_view_clippingFrameDidChange) {
         cv.notifyPropertyChange('clippingFrame') ;
         cv._sc_view_clippingFrameDidChange();
       }
@@ -679,7 +679,7 @@ SC.View.reopen(
     var cv = this.childViews, len, idx, view ;
     for (idx=0; idx<(len= cv.length); ++idx) {
       view = cv[idx];
-      view.parentViewDidResize();
+      view.tryToPerform('parentViewDidResize');
     }
   },
 
