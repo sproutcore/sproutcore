@@ -977,8 +977,16 @@ SC.View.reopen(
   _renderLayerSettings: function(original, context, firstTime) {
     original(context, firstTime);
     this.renderLayout(context, firstTime);
-  }.enhance()
+  }.enhance(),
 
+  applyAttributesToContext: function(original, context) {
+    original(context);
+
+    if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
+    if (this.get('backgroundColor')) {
+      context.css('backgroundColor', this.get('backgroundColor'));
+    }
+  }.enhance()
 });
 
 SC.View.mixin(
@@ -1136,14 +1144,5 @@ SC.View.mixin(
   */
   convertLayoutToCustomLayout: function(layout, layoutParams, parentFrame){
     // TODO: [EG] Create Top/Left/Width/Height to a Custom Layout conversion
-  },
-
-  applyAttributesToContext: function(original, context) {
-    original(context);
-
-    if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
-    if (this.get('backgroundColor')) {
-      context.css('backgroundColor', this.get('backgroundColor'));
-    }
-  }.enhance()
+  }
 });
