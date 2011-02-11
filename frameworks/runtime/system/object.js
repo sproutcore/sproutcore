@@ -245,8 +245,8 @@ SC._enhance = function(originalFunction, enhancement) {
   @extends SC.Observable
   @since SproutCore 1.0
 */
-SC.Object = function(props, klass) {
-  this.__sc_super__ = klass.prototype;
+SC.Object = function(props) {
+  this.__sc_super__ = SC.Object.prototype;
   return this._object_init(props);
 };
 
@@ -302,8 +302,8 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // build a new constructor and copy class methods.  Do this before
     // adding any other properties so they are not overwritten by the copy.
-    var prop, ret = function(props, klass) {
-      this.__sc_super__ = klass.prototype;
+    var prop, ret = function(props) {
+      this.__sc_super__ = ret.prototype;
       return this._object_init(props);
     } ;
     for(prop in this) {
@@ -359,7 +359,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @returns {SC.Object} new instance of the receiver class.
   */
   create: function() {
-    var C=this, ret = new C(arguments, C);
+    var C=this, ret = new C(arguments);
     if (SC.ObjectDesigner) {
       SC.ObjectDesigner.didCreateObject(ret, SC.$A(arguments));
     }
