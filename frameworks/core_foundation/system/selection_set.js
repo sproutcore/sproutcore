@@ -575,17 +575,20 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     Freezing a SelectionSet also freezes its internal sets.
   */
   freeze: function() {
-    if (this.isFrozen) return this ;
+    if (this.get('isFrozen')) { return this ; }
     var sets = this._sets,
         loc  = sets ? sets.length : 0,
         set ;
 
     while(--loc >= 0) {
-      if (set = sets[loc]) set.freeze();
+      set = sets[loc];
+      if (set) { set.freeze(); }
     }
 
-    if (this._objects) this._objects.freeze();
-    return sc_super();
+    if (this._objects) { this._objects.freeze(); }
+    this.set('isFrozen', YES);
+    return this;
+    // return sc_super();
   },
 
   // ..........................................................
