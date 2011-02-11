@@ -344,7 +344,7 @@ SC.AlertPane = SC.PanelPane.extend({
     if (del && del.alertPaneDidDismiss) {
       del.alertPaneDidDismiss(this, sender.get('actionKey'));
     }
-    else if(action = (sender && sender.get('action'))) {
+    else if(action = (sender && sender.get('customAction'))) {
       if(SC.typeOf(action)===SC.T_FUNCTION) {
         action.call(action);
       }
@@ -427,7 +427,7 @@ SC.AlertPane.mixin({
         target = button.target;
         
         buttonView.set('title'.fmt(idx), title);
-        if(action) buttonView.set('action'.fmt(idx), action);
+        if(action) buttonView.set('customAction'.fmt(idx), action);
         if(target) buttonView.set('target'.fmt(idx), target);
         buttonView.set('isVisible', !!title);
       });
