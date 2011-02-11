@@ -144,11 +144,30 @@ test("sc_super works in enhanced methods", function() {
 
   equals("TOM DAAALE IS A FOO", object.loudly("Tom DAAALE is a foo"), "sc_super should work in enhanced methods");
 });
+
+// When creating a new instance of a class or extending a class, SproutCore
+// keeps a record of the object that calls to sc_super should be looked up
+// on.
+//
+// Calls to sc_super are dynamic, which means that you can modify a class or
+// superclass of an object at runtime, and sc_super will correctly pick up
+// those changes. This is especially important for calls to reopen and
+// enhance.
+test("__sc_super__ semantics", function() {
+  var rootObject = SC.Object.create({});
+  ok(rootObject.__sc_super__ === SC.Object.prototype, "SproutCore remembers that new SC.Objects should super to SC.Object.prototype");
+
+  var basicObject = new SC.Object();
+  ok(basicObject.__sc_super__ === SC.Object.prototype, "SproutCore remembers that SC.Objects created by new SC.Object should super to SC.Object.prototype");
+
   var Klass = SC.Object.extend({});
   ok(Klass.__sc_super__ === SC.Object.prototype, "SproutCore remembers the original begetted prototype for subclasses");
 
   var object = Klass.create({});
   ok(object.__sc_super__ === Klass.prototype, "SproutCore remembers the original prototype for new instances");
+
+  var basicSubclassObject = new Klass();
+  ok(basicSubclassObject.__sc_super__ === Klass.prototype, "SproutCore remembers the original prototype for new instances created with new");
 
   var SubKlass = Klass.extend({});
   ok(SubKlass.__sc_super__ === Klass.prototype, "SproutCore remembers the original begetted prototype for custom subclasses");
