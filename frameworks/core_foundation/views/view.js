@@ -374,6 +374,16 @@ SC.CoreView.reopen(
     return this ;
   },
 
+  parentViewDidResize: function() {
+    this.viewDidResize();
+  },
+
+  /**
+    Override this in a child class to define behavior that should be invoked
+    when a parent's view was resized.
+   */
+  viewDidResize: function() {},
+
   /**
     Creates a new renderContext with the passed tagName or element.  You
     can override this method to provide further customization to the context
