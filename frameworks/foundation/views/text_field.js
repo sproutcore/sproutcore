@@ -447,7 +447,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       context.attr('aria-multiline', this.get('isTextArea'));
       context.attr('aria-disabled', !this.get('isEnabled'));
     }
-    context.attr('aria-invalid', !SC.ok(this.getFieldValue()));
+    if(!SC.ok(this.get('value'))) {
+      context.attr('aria-invalid', YES);
+    }
 
     // If we have accessory views, we'll want to update the padding on the
     // hint to compensate for the width of the accessory view.  (It'd be nice
