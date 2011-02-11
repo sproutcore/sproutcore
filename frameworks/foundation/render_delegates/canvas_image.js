@@ -69,32 +69,43 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
     var elem = jquery[0],
         image = dataSource.get('image'),
         frame = dataSource.get('frame'),
+        frameWidth = frame.width,
+        frameHeight = frame.height,
+        innerFrame = dataSource.get('innerFrame'),
         backgroundColor = dataSource.get('backgroundColor'),
-        midX = 0, midY = 0,
+        renderState = dataSource.get('renderState'),
         context;
 
-    if (elem && elem.getContext) {
-      elem.height = frame.height;
-      elem.width = frame.width;
+    // We only care about specific values, check specifically for what matters
+    var frameDidChange = ![frameWidth, frameHeight].isEqual(renderState._lastFrameValues),
+        innerFrameDidChange = ![innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height].isEqual(renderState._lastInnerFrameValues),
+        backgroundDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'backgroundColor'),
+        imageCompleteDidChange = (image && image.complete) !== renderState._lastImageComplete;
 
-      context = elem.getContext('2d');
+    if (frameDidChange || innerFrameDidChange || backgroundDidChange || imageCompleteDidChange) {
+      if (elem && elem.getContext) {
+        elem.height = frameHeight;
+        elem.width = frameWidth;
 
-      context.clearRect(0, 0, frame.width, frame.height);
+        context = elem.getContext('2d');
 
-      if (backgroundColor) {
-        context.fillStyle = backgroundColor;
-        context.fillRect(0, 0, frame.width, frame.height);
+        context.clearRect(0, 0, frameWidth, frameHeight);
+
+        if (backgroundColor) {
+          context.fillStyle = backgroundColor;
+          context.fillRect(0, 0, frameWidth, frameHeight);
+        }
+
+        if (image && image.complete) {
+          context.drawImage(image, Math.floor(innerFrame.x), Math.floor(innerFrame.y), Math.floor(innerFrame.width), Math.floor(innerFrame.height));
+        }
       }
 
-      if (image && image.complete) {
-        this.updateImage(context, image, dataSource);
-      }
+      // Update caches
+      renderState._lastFrameValues = [frameWidth, frameHeight];
+      renderState._lastInnerFrameValues = [innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height];
+      renderState._lastImageComplete = image && image.complete;
     }
-  },
-
-  updateImage: function(context, image, dataSource) {
-    var frame = dataSource.get('innerFrame');
-    context.drawImage(image, Math.floor(frame.x), Math.floor(frame.y), Math.floor(frame.width), Math.floor(frame.height));
   }
 
 });
