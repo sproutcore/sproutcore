@@ -65,3 +65,26 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
 
 });
 
+test("SC.TemplateView updates when a property changes", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{bindProperty "wham"}}{{/with}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
+
+  SC.run(function() { view.get('content').set('wham', 'bazam'); });
+
+  equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
+});
