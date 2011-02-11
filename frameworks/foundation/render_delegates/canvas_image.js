@@ -80,9 +80,9 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
     var frameDidChange = ![frameWidth, frameHeight].isEqual(renderState._lastFrameValues),
         innerFrameDidChange = ![innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height].isEqual(renderState._lastInnerFrameValues),
         backgroundDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'backgroundColor'),
-        imageCompleteDidChange = (image && image.complete) !== renderState._lastImageComplete;
+        imageDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'image') || (image && image.complete) !== renderState._lastImageComplete;
 
-    if (frameDidChange || innerFrameDidChange || backgroundDidChange || imageCompleteDidChange) {
+    if (frameDidChange || innerFrameDidChange || backgroundDidChange || imageDidChange) {
       if (elem && elem.getContext) {
         elem.height = frameHeight;
         elem.width = frameWidth;
