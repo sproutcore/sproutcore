@@ -1176,8 +1176,8 @@ SC.RootResponder = SC.Object.extend({
         // tell it
         try { // keep in mind that it might only _be_ here because it crashed...
           if (responder[action]) responder[action](touchEntry, evt);
-        } catch(e) {
-          console.error('crashed on endTouch');
+        } finally {
+          SC.Logger.error("An exception was thrown when calling %@ on %@".fmt(action, responder));
         }
 
         // check to see if the responder changed, and stop immediately if so.
