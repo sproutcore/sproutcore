@@ -503,8 +503,7 @@ Handlebars.registerHelper('each', function(context, fn, inverse) {
 });
 
 Handlebars.registerHelper('if', function(context, fn, inverse) {
-  var condition = typeof context === "function" ? context.call(this) : context;
-  if(!condition || condition == []) {
+  if(!context || context == []) {
     return inverse(this);
   } else {
     return fn(this);
@@ -524,7 +523,7 @@ Handlebars.logger = {
 
   // override in the host environment
   log: function(level, str) {}
-}
+};
 
 Handlebars.log = function(level, str) { Handlebars.logger.log(level, str); };
 ;
@@ -938,8 +937,9 @@ Handlebars.JavaScriptCompiler = function() {};
     },
     // END PUBLIC API
 
-    compile: function(environment) {
+    compile: function(environment, data) {
       this.environment = environment;
+      this.data = data;
 
       this.preamble();
 
@@ -947,7 +947,7 @@ Handlebars.JavaScriptCompiler = function() {};
       this.stackVars = [];
       this.registers = {list: []};
 
-      this.compileChildren(environment);
+      this.compileChildren(environment, data);
 
       Handlebars.log(Handlebars.logger.DEBUG, environment.disassemble() + "\n\n");
 
@@ -1015,9 +1015,11 @@ Handlebars.JavaScriptCompiler = function() {};
         escapeExpression: Handlebars.Utils.escapeExpression,
         invokePartial: Handlebars.VM.invokePartial,
         programs: [],
-        program: function(i, helpers, partials) {
+        program: function(i, helpers, partials, data) {
           var programWrapper = this.programs[i];
-          if(programWrapper) {
+          if(data) {
+            return Handlebars.VM.program(this.children[i], helpers, partials, data);
+          } else if(programWrapper) {
             return programWrapper;
           } else {
             programWrapper = this.programs[i] = Handlebars.VM.program(this.children[i], helpers, partials);
@@ -1039,11 +1041,14 @@ Handlebars.JavaScriptCompiler = function() {};
 
       var params = ["Handlebars", "context", "helpers", "partials"];
 
+      if(this.data) { params.push("data"); }
+
       for(var i=0, l=this.environment.depths.list.length; i<l; i++) {
         params.push("depth" + this.environment.depths.list[i]);
       }
 
-      if(params.length === 3 && !this.environment.usePartial) { params.pop(); }
+
+      if(params.length === 4 && !this.environment.usePartial) { params.pop(); }
 
       params.push(this.source.join("\n"));
 
@@ -1056,9 +1061,11 @@ Handlebars.JavaScriptCompiler = function() {};
 
       container.children = this.environment.children;
 
-      return function(context, helpers, partials, depth) {
+      return function(context, helpers, partials, data, $depth) {
         try {
-          return container.render.call(container, Handlebars, context, helpers, partials, depth);
+          var args = Array.prototype.slice.call(arguments);
+          args.unshift(Handlebars);
+          return container.render.apply(container, args);
         } catch(e) {
           throw e;
         }
@@ -1129,6 +1136,8 @@ Handlebars.JavaScriptCompiler = function() {};
         params.push(this.popStack());
       }
 
+      if(this.data) { params.push("data"); }
+
       var paramString = params.join(", ");
       var helperMissing = ["context"].concat(this.quotedString(original)).concat(params.slice(1));
 
@@ -1162,6 +1171,11 @@ Handlebars.JavaScriptCompiler = function() {};
       params.push(mainProgram, inverse);
       blockMissingParams.push(mainProgram, inverse);
 
+      if(this.data) {
+        params.push("data");
+        blockMissingParams.push("data");
+      }
+
       var nextStack = this.nextStack();
 
       this.source.push("if(typeof " + id + " === 'function') { " + nextStack + " = " + id + ".call(" + params.join(", ") + "); }");
@@ -1181,15 +1195,17 @@ Handlebars.JavaScriptCompiler = function() {};
 
     // HELPERS
 
-    compileChildren: function(environment) {
+    compiler: JavaScriptCompiler,
+
+    compileChildren: function(environment, data) {
       var children = environment.children, child, compiler;
       var compiled = [];
 
       for(var i=0, l=children.length; i<l; i++) {
         child = children[i];
-        compiler = new JavaScriptCompiler();
+        compiler = new this.compiler();
 
-        compiled[i] = compiler.compile(child);
+        compiled[i] = compiler.compile(child, data);
       }
 
       environment.rawChildren = children;
@@ -1203,6 +1219,8 @@ Handlebars.JavaScriptCompiler = function() {};
 
       var depths = this.environment.rawChildren[guid].depths.list;
 
+      if(this.data) { programParams.push("data"); }
+
       for(var i=0, l = depths.length; i<l; i++) {
         depth = depths[i];
 
@@ -1210,7 +1228,7 @@ Handlebars.JavaScriptCompiler = function() {};
         else { programParams.push("depth" + (depth - 1)); }
       }
 
-      if(!this.environment.usePartial) { 
+      if(!this.environment.usePartial) {
         if(programParams[3]) {
           programParams[2] = "null";
         } else {
@@ -1224,8 +1242,6 @@ Handlebars.JavaScriptCompiler = function() {};
         programParams[0] = "this.children[" + guid + "]";
         return "this.programWithDepth(" + programParams.join(", ") + ")";
       }
-
-      return "this.program(" + programParams.join(", ") + ")";
     },
 
     register: function(name, val) {
@@ -1281,22 +1297,22 @@ Handlebars.JavaScriptCompiler = function() {};
 })(Handlebars.Compiler, Handlebars.JavaScriptCompiler);
 
 Handlebars.VM = {
-  programWithDepth: function(fn, helpers, partials, depth) {
-    var args = [].slice.call(arguments, 1);
+  programWithDepth: function(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
     return function(context) {
       return fn.apply(this, [context].concat(args));
     };
   },
-  program: function(fn, helpers, partials) {
+  program: function(fn, helpers, partials, data) {
     return function(context) {
-      return fn(context, helpers, partials);
+      return fn(context, helpers, partials, data);
     };
   },
   noop: function() { return ""; },
-  compile: function(string) {
+  compile: function(string, data) {
     var ast = Handlebars.parse(string);
     var environment = new Handlebars.Compiler().compile(ast);
-    return new Handlebars.JavaScriptCompiler().compile(environment);
+    return new Handlebars.JavaScriptCompiler().compile(environment, data);
   },
   invokePartial: function(partial, name, context, helpers, partials) {
     if(partial === undefined) {
