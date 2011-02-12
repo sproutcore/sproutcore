@@ -1,3 +1,10 @@
+/**
+  This module specifically tests integration with Handlebars and SproutCore-specific
+  Handlebars extensions.
+
+  If you add additional template support to SC.TemplateView, you should create a new
+  file in which to test.
+*/
 module("SC.TemplateView - handlebars integration");
 
 test("template view should call the function of the associated template", function() {
@@ -179,4 +186,41 @@ test("Template views return a no-op function if their template cannot be found",
   equals(template(), '', 'should return an empty string');
 });
 
+test("Template views can belong to a pane and a parent view", function() {
+  var templates = SC.Object.create({
+    toDo: SC.Handlebars.compile('<h1>{{title}}</h1> (Created at {{createdAt}})')
+  });
+
+  var didCreateLayerWasCalled = NO;
+
+  var pane = SC.MainPane.design({
+    childViews: ['container'],
+
+    container: SC.View.design({
+      childViews: ['normalView', 'template'],
+
+      normalView: SC.View,
+
+      template: SC.TemplateView.design({
+        templates: templates,
+
+        templateName: 'toDo',
+        title: 'Do dishes',
+        createdAt: "Today",
+
+        didCreateLayer: function() {
+          didCreateLayerWasCalled = YES;
+        }
+      })
+    })
+  });
+
+  pane = pane.create().append();
+
+  equals(pane.$().children().length, 1, "pane has one child DOM element");
+  equals(pane.$().children().children().length, 2, "container view has two child DOM elements");
+  equals(pane.$().children().children().eq(1).html(), "<h1>Do dishes</h1> (Created at Today)", "renders template to the correct DOM element");
+  ok(didCreateLayerWasCalled, "didCreateLayer gets called on a template view after it gets rendered");
+  pane.remove();
+});
 
