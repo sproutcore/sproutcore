@@ -65,6 +65,41 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
 
 });
 
+test("child views can be inserted inside a bindProperty block", function() {
+  var templates = SC.Object.create({
+    nester: SC.Handlebars.compile("<h1 id='hello-world'>Hello {{world}}</h1>{{view \"TemplateTests.LabelView\"}}"),
+    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#bindProperty \"content\"}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/bindProperty}} {{world}}</div>"),
+    other: SC.Handlebars.compile("cruel")
+  });
+
+  TemplateTests.LabelView = SC.TemplateView.extend({
+    tagName: "aside",
+    cruel: "cruel",
+    world: "world?",
+    content: SC.Object.create({ blah: "wot" }),
+    templateName: 'nested',
+    templates: templates
+  });
+
+  TemplateTests.OtherView = SC.TemplateView.extend({
+    templates: templates,
+    templateName: 'other'
+  });
+
+  var view = SC.TemplateView.create({
+    world: "world!",
+    templateName: 'nester',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
+  ok(view.$("aside:contains('Goodbye wot cruel world?')").length === 1, "The child view renders its content once");
+  ok(view.$().html().match(/Hello world!.*<aside.*Goodbye.*wot.*cruel.*world?/), "parent view should appear before the child view");
+
+});
+
 test("SC.TemplateView updates when a property changes", function() {
   var templates = SC.Object.create({
    foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{bindProperty "wham"}}{{/with}}</h1>')
@@ -117,12 +152,20 @@ test("Handlebars templates update properties if a content object changes", funct
     price: "$4.50"
   }));
 
-  view.updateLayer();
   equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
   equals(view.$('#price').text(), "$4.50", "should update price field when content changes");
 
+  view.set('coffee', SC.Object.create({
+    color: "mauve",
+    price: "$5.50"
+  }));
+
+  equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
+  equals(view.$('#price').text(), "$5.50", "should update price field when content changes");
+
   view.setPath('coffee.price', "$5");
-  view.updateLayer();
 
   equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
 });
+
+
