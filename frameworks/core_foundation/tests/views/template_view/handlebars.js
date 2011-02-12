@@ -168,4 +168,15 @@ test("Handlebars templates update properties if a content object changes", funct
   equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
 });
 
+test("Template views return a no-op function if their template cannot be found", function() {
+  var view = SC.TemplateView.create({
+    templateName: 'cantBeFound'
+  });
+
+  var template = view.get('template');
+
+  ok(SC.typeOf(template) === 'function', 'template should be a function');
+  equals(template(), '', 'should return an empty string');
+});
+
 
