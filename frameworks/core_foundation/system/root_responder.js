@@ -1158,7 +1158,7 @@ SC.RootResponder = SC.Object.extend({
     the process; it would have to be restarted separately, through touch.end().
   */
   endTouch: function(touchEntry, action, evt) {
-    if (!action) action = "touchEnd";
+    if (!action) { action = "touchEnd"; }
 
     var responderIdx, responders, responder, originalResponder;
 
@@ -1166,7 +1166,7 @@ SC.RootResponder = SC.Object.extend({
     this.unassignTouch(touchEntry);
 
     // call end for all items in chain
-    if (touchEntry.touchResponder)
+    if (touchEntry.touchResponder) {
       originalResponder = touchEntry.touchResponder;
 
       responders = touchEntry.touchResponders;
