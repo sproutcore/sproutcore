@@ -1,9 +1,20 @@
 sc_require("views/view");
 
+// Global hash of shared templates. This will automatically be populated
+// by the build tools so that you can store your Handlebars templates in
+// separate files that get loaded into JavaScript at buildtime.
 SC.TEMPLATES = SC.Object.create();
 
+/** @class
+
+  SC.TemplateView allows you to create a view that uses the Handlebars templating
+  engine to generate its HTML representation.
+
+  @extends SC.CoreView
+  @since SproutCore 1.5
+*/
 SC.TemplateView = SC.CoreView.extend(
-  /** @scope SC.TemplateView.prototype */ {
+/** @scope SC.TemplateView.prototype */ {
 
   templateName: null,
 
