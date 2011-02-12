@@ -10,7 +10,15 @@ SC.TemplateView = SC.CoreView.extend(
   templates: SC.TEMPLATES,
 
   template: function() {
-    return this.get('templates').get(this.get('templateName'));
+    var templateName = this.get('templateName');
+    var template = this.get('templates').get(templateName);
+
+    if (!template) {
+      SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
+      return function() { return ''; };
+    }
+
+    return template;
   }.property('templateName').cacheable(),
 
   /**
