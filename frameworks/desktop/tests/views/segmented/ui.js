@@ -185,7 +185,7 @@ var pane;
 
   test("Check that all segments have the right classes set", function() {
     var viewElem=pane.view('3_empty').$();
-    var segments=pane.view('3_empty').$('.sc-segment');
+    var segments=pane.view('3_empty').$('.sc-segment-view');
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
 
@@ -214,7 +214,7 @@ var pane;
 
   test("Check that all segments have the right classes set (with icons)", function() {
     var viewElem=pane.view('3_empty,icon').$();
-    var segments=pane.view('3_empty,icon').$('.sc-segment');
+    var segments=pane.view('3_empty,icon').$('.sc-segment-view');
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
 
@@ -243,7 +243,7 @@ var pane;
 
 
   test("No value set", function() {
-    var segments=pane.view('3_empty').$('.sc-segment');
+    var segments=pane.view('3_empty').$('.sc-segment-view');
 
     // allow for a render to happen
     SC.RunLoop.begin().end();
@@ -258,7 +258,7 @@ var pane;
 
 
   test("Check that two items are selected.", function() {
-    var segments=pane.view('3_items,icon,2_sel').$('.sc-segment');
+    var segments=pane.view('3_items,icon,2_sel').$('.sc-segment-view');
     var count=0;
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
@@ -275,7 +275,7 @@ var pane;
 
 
   test("2_items,toolTip has toolTips assigned.", function() {
-    var segments=pane.view('2_items,toolTip').$('.sc-segment');
+    var segments=pane.view('2_items,toolTip').$('.sc-segment-view');
     ok((segments[0].title=="this is title1's tip"), 'first segment has expected tool tip assigned.');
     ok((segments[1].title=="this is title2's tip"), 'second segment has expected tool tip assigned.');
   });
@@ -288,7 +288,7 @@ var pane;
 
   test("Check that changing title re-renders the segments (for SC.Object items only).", function() {
     var sv = pane.view("3_items,widths");
-    var segments=sv.$('.sc-segment');
+    var segments=sv.$('.sc-segment-view');
     var defaults = ['A', 'B', 'C'];
     for (var i=0, len=segments.length - 1; i < len; i++){
       var segEl=segments[i];
@@ -310,7 +310,7 @@ var pane;
 
   test("Check that changing width re-renders the segments (for hash or object items only).", function() {
     var sv = pane.view("3_items,widths");
-    var segments=sv.$('.sc-segment');
+    var segments=sv.$('.sc-segment-view');
     for (var i=0, len=segments.length - 1; i < len; i++){
       var segEl=segments[i];
       var width=$(segEl).css('width');
@@ -334,7 +334,7 @@ var pane;
     var lastIsOverflow = function(sv) {
       SC.RunLoop.begin().end(); // allow for a render to happen
 
-      var segments=sv.$('.sc-segment');
+      var segments=sv.$('.sc-segment-view');
       var overflowEl = segments[segments.length - 1];
       ok($(overflowEl).hasClass('sc-overflow-segment'), 'overflow segment should have .sc-overflow-segment class');
       var overflowLabelEl = $(overflowEl).find('label')[0];
@@ -344,7 +344,7 @@ var pane;
     var lastIsSegment = function(sv, text) {
       SC.RunLoop.begin().end(); // allow for a render to happen
 
-      var segments=sv.$('.sc-segment');
+      var segments=sv.$('.sc-segment-view');
       var lastEl = segments[segments.length - 2];
       ok(!$(lastEl).hasClass('sc-overflow-segment'), 'last segment should not have .sc-overflow-segment class');
       var lastLabelEl = $(lastEl).find('label')[0];
@@ -389,7 +389,7 @@ var pane;
 
   test("Check that the overflow segment is selected when overflowed items are selected.", function() {
     var sv = pane.view("5_items,1_sel,widths,overflow");
-    var segments=sv.$('.sc-segment');
+    var segments=sv.$('.sc-segment-view');
 
     // the overflow item should be selected (because an overflowed item is selected)
     var overflowEl = segments[segments.length - 1];
