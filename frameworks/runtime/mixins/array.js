@@ -367,7 +367,7 @@ SC.Array = {
     The callback for a range observer should have the signature:
 
     {{{
-      function rangePropertyDidChange(array, objects, key, indexes, conext)
+      function rangePropertyDidChange(array, objects, key, indexes, context)
     }}}
 
     If the passed key is '[]' it means that the object itself changed.
