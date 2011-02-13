@@ -929,10 +929,10 @@ SC.CoreView.reopen(
           continue;
         }
 
-        if (view.isClass) {
-          view = this.createChildView(view) ; // instantiate if needed
-          if (key) { this[key] = view ; } // save on key name if passed
-        }
+        // createChildView creates the view if necessary, but also sets
+        // important properties, such as parentView
+        view = this.createChildView(view) ;
+        if (key) { this[key] = view ; } // save on key name if passed
       }
       childViews[idx] = view;
     }
@@ -954,17 +954,21 @@ SC.CoreView.reopen(
     @test in createChildViews
   */
   createChildView: function(view, attrs) {
-    // attrs should always exist...
-    if (!attrs) { attrs = {} ; }
-    // clone the hash that was given so we dont pollute it if it's being reused
-    else { attrs = SC.clone(attrs); }
+    if (!view.isClass) {
+      attrs = view;
+    } else {
+      // attrs should always exist...
+      if (!attrs) { attrs = {} ; }
+      // clone the hash that was given so we dont pollute it if it's being reused
+      else { attrs = SC.clone(attrs); }
+    }
 
     attrs.owner = attrs.parentView = this ;
     attrs.isVisibleInWindow = this.get('isVisibleInWindow');
     if (!attrs.page) { attrs.page = this.page ; }
 
     // Now add this to the attributes and create.
-    view = view.create(attrs) ;
+    if (view.isClass) { view = view.create(attrs); }
     return view ;
   },
 
