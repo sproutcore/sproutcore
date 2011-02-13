@@ -226,13 +226,7 @@ SC.View.reopen({
     return this ;
   },
 
-  /**
-    Removes the child view from the parent view.
-
-    @param {SC.View} view
-    @returns {SC.View} receiver
-  */
-  removeChild: function(view) {
+  removeChild: function(original, view) {
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
       throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
@@ -241,13 +235,7 @@ SC.View.reopen({
     if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
     if (this.willRemoveChild) { this.willRemoveChild(view) ; }
 
-    // update parent node
-    view.set('parentView', null) ;
-
-    // remove view from childViews array.
-    var childViews = this.get('childViews'),
-        idx = childViews.indexOf(view) ;
-    if (idx>=0) { childViews.removeAt(idx); }
+    original(view);
 
     // The DOM will need some fixing up, note this on the view.
     view.parentViewDidChange() ;
@@ -256,8 +244,8 @@ SC.View.reopen({
     if (this.didRemoveChild) { this.didRemoveChild(view); }
     if (view.didRemoveFromParent) { view.didRemoveFromParent(this) ; }
 
-    return this ;
-  },
+    return this;
+  }.enhance(),
 
   /**
     Removes all children from the parentView.
@@ -269,18 +257,6 @@ SC.View.reopen({
     while (view = childViews.objectAt(childViews.get('length')-1)) {
       this.removeChild(view) ;
     }
-    return this ;
-  },
-
-  /**
-    Removes the view from its parentView, if one is found.  Otherwise
-    does nothing.
-
-    @returns {SC.View} receiver
-  */
-  removeFromParent: function() {
-    var parent = this.get('parentView') ;
-    if (parent) { parent.removeChild(this) ; }
     return this ;
   },
 

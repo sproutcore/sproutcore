@@ -845,6 +845,36 @@ SC.CoreView.reopen(
   },
 
   /**
+    Removes the child view from the parent view.
+
+    @param {SC.View} view
+    @returns {SC.View} receiver
+  */
+  removeChild: function(view) {
+    // update parent node
+    view.set('parentView', null) ;
+
+    // remove view from childViews array.
+    var childViews = this.get('childViews'),
+        idx = childViews.indexOf(view) ;
+    if (idx>=0) { childViews.removeAt(idx); }
+
+    return this ;
+  },
+
+  /**
+    Removes the view from its parentView, if one is found.  Otherwise
+    does nothing.
+
+    @returns {SC.View} receiver
+  */
+  removeFromParent: function() {
+    var parent = this.get('parentView') ;
+    if (parent) { parent.removeChild(this) ; }
+    return this ;
+  },
+
+  /**
     You must call this method on a view to destroy the view (and all of its
     child views). This will remove the view from any parent node, then make
     sure that the DOM element managed by the view can be released by the
