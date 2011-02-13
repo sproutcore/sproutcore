@@ -37,7 +37,6 @@ Handlebars.registerHelper('view', function(path, data) {
   // tomdale wants to make SproutCore slow
   childView.render(context, YES);
 
-  context.end();
   return new Handlebars.SafeString(context.join());
 });
 
