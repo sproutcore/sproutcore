@@ -32,14 +32,25 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     var exampleViewClass = this.get('exampleViewClass');
     var self = this;
 
+    // the range observer system, while powerful, loses useful
+    // information that is available to the raw enumerableDidChange
+    // method. There should be a sanctioned way to observe that
+    // information, rather than trying to reverse-engineer the
+    // original change.
     indexes.forEachRange(function(start, length) {
-      var object = array.objectAt(start);
-      var itemView = self.createChildView(exampleViewClass.extend({
-        content: object
-      }));
-      self.get('childViews').pushObject(itemView);
+      var isDeletion = (array.get('length') < (start+length));
 
-      itemView.createLayer().$().appendTo(self.$());
+      if(isDeletion) {
+        self.get('childViews').objectAt(start).destroy();
+      } else {
+        var object = array.objectAt(start);
+        var itemView = self.createChildView(exampleViewClass.extend({
+          content: object
+        }));
+        self.get('childViews').pushObject(itemView);
+
+        itemView.createLayer().$().appendTo(self.$());
+      }
     });
   }
 });
