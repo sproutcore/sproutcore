@@ -12,7 +12,7 @@ sc_require('system/responder') ;
 sc_require('system/theme');
 
 sc_require('mixins/string') ;
-sc_require('views/base') ;
+sc_require('views/view/base') ;
 
 /**
   Default property to disable or enable by default the contextMenu
