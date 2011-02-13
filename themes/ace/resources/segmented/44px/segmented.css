@@ -1,6 +1,6 @@
 @theme(sc-jumbo-size) {
 
-$theme.segment {
+$theme.sc-segment-view {
 
   height: 44px;
   

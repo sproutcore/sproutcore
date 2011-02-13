@@ -1,4 +1,4 @@
-$theme.segmented {
+$theme.sc-segmented-view {
   overflow: visible;
 
   .disabled {
@@ -7,7 +7,7 @@ $theme.segmented {
 
 }
 
-$theme.segmented $theme.segment {
+$theme.sc-segmented-view $theme.sc-segment-view {
   margin: 0px;
   background: none;
   border: 0px none;

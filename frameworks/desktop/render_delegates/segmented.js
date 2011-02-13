@@ -9,7 +9,6 @@
   Renders and updates the HTML representation of SC.SegmentedView.
 */
 SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
-  name: 'segmented',
 
   /*
     We render everything external to the segments and let each segment use it's own render
@@ -32,7 +31,7 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
     It ignores the last segment (the overflow segment).
   */
   segmentWidths: function(dataSource) {
-    var elements = dataSource.$('.sc-segment'),
+    var elements = dataSource.$('.sc-segment-view'),
         el,
         widths = [];
 
@@ -45,7 +44,7 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
   },
 
   overflowSegmentWidth: function(dataSource) {
-    var elements = dataSource.$('.sc-segment'),
+    var elements = dataSource.$('.sc-segment-view'),
         el;
 
     el = elements[elements.length - 1];
@@ -54,7 +53,7 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
   },
 
   indexForClientPosition: function(dataSource, x, y) {
-    var segmentLayers = dataSource.$('.sc-segment'),
+    var segmentLayers = dataSource.$('.sc-segment-view'),
         length, i,
         segmentLayer, rect,
         point;

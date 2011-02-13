@@ -10,8 +10,7 @@
   SC.SegmentedView.
 */
 SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
-  name: 'segment',
-  
+
   render: function(dataSource, context) {
     var theme = dataSource.get('theme'),
         buttonDelegate,
@@ -19,7 +18,6 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
 
     // Segment specific additions
     classes = {
-      'sc-segment': YES,
       'sc-first-segment': dataSource.get('isFirstSegment'),
       'sc-middle-segment': dataSource.get('isMiddleSegment'),
       'sc-last-segment': dataSource.get('isLastSegment'),
@@ -41,7 +39,6 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
 
     // Segment specific additions
     classes = {
-      'sc-segment': YES,
       'sc-first-segment': dataSource.get('isFirstSegment'),
       'sc-middle-segment': dataSource.get('isMiddleSegment'),
       'sc-last-segment': dataSource.get('isLastSegment'),
@@ -49,7 +46,7 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     };
     if (!SC.none(dataSource.get('index'))) classes['sc-segment-' + dataSource.get('index')] = YES;
     jquery.setClass(classes);
-    
+
     // Use the SC.ButtonView render delegate for the current theme to update the segment as a button
     buttonDelegate = theme['buttonRenderDelegate'];
     buttonDelegate.update(dataSource, jquery);
