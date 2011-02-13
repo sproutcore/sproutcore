@@ -17,6 +17,9 @@ SC.SegmentView = SC.View.extend(SC.Control, {
 
   classNames: ['sc-segment-view'],
 
+  /* SC.View */
+  toolTip: '',
+
   /* SC.Control (note: this brings its own display properties: 'isEnabled', 'isSelected', 'isActive', 'controlSize') */
   isEnabled: YES,
 

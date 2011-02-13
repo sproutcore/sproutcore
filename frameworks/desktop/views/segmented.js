@@ -186,6 +186,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   overflowToolTip: 'More&hellip;',
 
+  /**
+    The icon to use for the overflow segment if it appears.
+
+    @property {String}
+  */
+  overflowIcon: null,
+
   /** @private
     The following properties are used to map items to child views. Item keys
     are looked up on the item based on this view's value for each 'itemKey'.
@@ -206,6 +213,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     var title = this.get('overflowTitle'),
         toolTip = this.get('overflowToolTip'),
+        icon = this.get('overflowIcon'),
         overflowView;
 
     overflowView = SC.SegmentView.create({
@@ -213,6 +221,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       localize: this.get('localize'),
       title: title,
       toolTip: toolTip,
+      icon: icon,
       isLastSegment: YES,
       isOverflowSegment: YES
     });
