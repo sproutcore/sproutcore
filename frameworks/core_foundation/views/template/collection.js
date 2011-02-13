@@ -14,18 +14,27 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }
   },
 
+  exampleViewClass: function() {
+    var exampleView = this.get('exampleView');
+    if(SC.typeOf(exampleView) === SC.T_STRING) {
+      return SC.objectForPropertyPath(exampleView);
+    } else {
+      return exampleView;
+    }
+  }.property('exampleView').cacheable(),
+
   contentDidChange: function() {
     var content = this.get('content');
     content.addRangeObserver(null, this, this.arrayContentDidChange);
   }.observes('content'),
 
   arrayContentDidChange: function(array, objects, key, indexes) {
-    var itemTemplate = this.get('exampleView');
+    var exampleViewClass = this.get('exampleViewClass');
     var self = this;
 
     indexes.forEachRange(function(start, length) {
       var object = array.objectAt(start);
-      var itemView = self.createChildView(itemTemplate.extend({
+      var itemView = self.createChildView(exampleViewClass.extend({
         content: object
       }));
       self.get('childViews').pushObject(itemView);
