@@ -1,5 +1,5 @@
 sc_require("views/view");
-sc_require("views/layout_style");
+sc_require("views/view/layout_style");
 
 /**
   Properties that can be animated
