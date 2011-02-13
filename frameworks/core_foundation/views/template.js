@@ -16,6 +16,11 @@ SC.TEMPLATES = SC.Object.create();
 SC.TemplateView = SC.CoreView.extend(
 /** @scope SC.TemplateView.prototype */ {
 
+  // This makes it easier to build custom views on top of TemplateView without
+  // gotchas, but may have tab navigation reprecussions. The tab navigation
+  // system should be revisited.
+  acceptsFirstResponder: YES,
+
   templateName: null,
 
   templates: SC.TEMPLATES,
