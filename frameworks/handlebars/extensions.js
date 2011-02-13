@@ -33,7 +33,7 @@ Handlebars.registerHelper('view', function(path, data) {
   childViews.pushObject(childView);
 
   var context = SC.RenderContext(childView.get('tagName'));
-
+  childView.applyAttributesToContext(context);
   // tomdale wants to make SproutCore slow
   childView.render(context, YES);
 

@@ -224,3 +224,23 @@ test("Template views can belong to a pane and a parent view", function() {
   pane.remove();
 });
 
+test("Template views add a layerId to child views created using the view helper", function() {
+  var templates = SC.Object.create({
+    parent: SC.Handlebars.compile('<aside>{{view "TemplateTests.ChildView"}}</aside>'),
+    child: SC.Handlebars.compile("I can't believe it's not butter.")
+  });
+
+  TemplateTests.ChildView = SC.TemplateView.extend({
+    templates: templates,
+    templateName: 'child'
+  });
+
+  var view = SC.TemplateView.create({
+    templates: templates,
+    templateName: 'parent'
+  });
+
+  view.createLayer();
+  var childView = view.getPath('childViews.firstObject');
+  equals(view.$().children().first().children().first().attr('id'), childView.get('layerId'));
+});
