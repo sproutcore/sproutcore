@@ -261,8 +261,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
-      if (current) current.willLoseKeyResponderTo(view) ;
-      if (view) view.willBecomeKeyResponderFrom(current) ;
+      if (current) { current.tryToPerform('willLoseKeyResponderTo', view); }
+      if (view) { view.tryToPerform('willBecomeKeyResponderFrom', current); }
     }
 
     // change setting
@@ -282,8 +282,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // and notify again if needed.
     if (isKeyPane) {
-      if (view) view.didBecomeKeyResponderFrom(current) ;
-      if (current) current.didLoseKeyResponderTo(view) ;
+      if (view) { view.tryToPerform('didBecomeKeyResponderFrom', current); }
+      if (current) { current.tryToPerform('didLoseKeyResponderTo', view); }
     }
 
     if (view) view.didBecomeFirstResponder(view);
