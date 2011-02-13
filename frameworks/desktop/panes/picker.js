@@ -34,83 +34,123 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 
 /**
   @class
+  
+  Display a non-modal pane that automatically repositions around a view so as 
+  to remain visible. 
+  
+  An @SC.PickerPane@ repositions around the view to which it is anchored as the 
+  browser window is resized so as to ensure the pane's content remains visible. 
+  A picker pane is useful for displaying supplementary information and does not 
+  block the user's interaction with other UI elements. Picker panes typically 
+  provide  a better user experience than modal panels.
 
-  Displays a non-modal, self anchor positioned picker pane.
-
-  The default way to use the picker pane is to simply add it to your page like this:
+  An @SC.PickerPane@ repositions itself according to the optional @preferMatrix@ 
+  argument passed in the @popup@ method call. The @preferMatrix@ specifies the sides 
+  in the order in which you want the @SC.PickerPane@ to try to arrange itself around 
+  the view to which it is anchored. The fifth element in the @preferMatrix@ specifies 
+  which side the @SC.PickerPane@ should display on when there isn't enough space 
+  around any of the preferred sides.   
+       
+  The simplest way to create and display a picker pane:
   
   {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({
-      })
-    }).popup(anchor);
+    SC.PickerPane.create({ 
+        layout: { width: 400, height: 200 }, 
+        contentView: SC.View.extend({})
+    }).popup(someView);
   }}}
   
-  This will cause your picker pane to display.
+  This displays the @SC.PickerPane@ anchored to @someView@. 
+      
+  h2. Positioning
   
-  Picker pane is a simple way to provide non-modal messaging that won't 
-  blocks the user's interaction with your application.  Picker panes are 
-  useful for showing important detail informations with optimized position around anchor.
-  They provide a better user experience than modal panel.
-
+  Anchor sides are defined by their index in SC.POINTER_LAYOUT, where @right@ is 
+  0, @left@ is 1, @top@ is 2, and @bottom@ is 3.
+  
+  For example, the @preferMatrix@ of @[3, 0, 1, 2, 2]@ says: "Display below the 
+  anchor (3); if there isn't enough space then display to the right of the 
+  anchor (0). If there isn't enough space either below or to the right of the anchor,
+  then appear to the left (1), unless there is also no space on the left, in which 
+  case display above the anchor (2)."
+  
+  h2. Default @preferMatrix@ Configurations
+  
+  TODO
+  
+  h2. Examples
+  
   Examples for applying popular customized picker position rules:
   
   1. default:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor);
   }}}
 
-  2. menu below the anchor with default offset matrix [1,4,3]:   
+  2. menu below the anchor with default @preferMatrix@ of <code>[1,4,3]</code>:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_MENU);
   }}}
 
-  3. menu on the right side of anchor with custom offset matrix [2,6,0]:   
+  3. menu on the right side of anchor with custom @preferMatrix@ of <code>[2,6,0]</code>:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
   }}}
 
-  4. fixed below the anchor with default offset matrix [1,4,3]:   
+  4. fixed below the anchor with default @preferMatrix@ of <code>[1,4,3]</code>:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_FIXED);
   }}}
 
-  5. fixed on the right side of anchor with custom offset matrix [-22,-17,0]:   
+  5. fixed on the right side of anchor with @preferMatrix@ of <code>[-22,-17,0]<code>:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
   }}}
 
-  6. pointer with default position pref matrix [0,1,2,3,2]:   
+  6. pointer with default @preferMatrix@ of <code>[0,1,2,3,2]</code>:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_POINTER);
   }}}
-  perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
-  fallback to perfect top (2)
+  
+  Positioning: right (0) > left (1) > top (2) > bottom (3). Fallback to top (2).
 
-  7. pointer with custom position pref matrix [3,0,1,2,2]:   
+  7. pointer with custom @preferMatrix@ of <code>[3,0,1,2,2]</code>:   
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_POINTER, [3,0,1,2,2]);
   }}}
 
-  perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
-  fallback to perfect top (2)
+  Positioning: bottom (3) > right (0) > left (1) > top (2). Fallback to top (2).
 
-  8. menu-pointer with default position pref matrix [3,0,1,2,3]:
+  8. menu-pointer with default @preferMatrix@ of <code>[3,0,1,2,3]</code>:
   {{{
-    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
+    SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
+      contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_MENU_POINTER);
   }}}
-  perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
-  fallback to perfect bottom (3)
   
+  Positioning: bottom (3) > right (0) > left (1) > top (2). Fallback to bottom (3).
+ 
   @extends SC.PalettePane
   @since SproutCore 1.0
 */
