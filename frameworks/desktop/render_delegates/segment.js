@@ -25,7 +25,7 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
       'sc-last-segment': dataSource.get('isLastSegment'),
       'sc-overflow-segment': dataSource.get('isOverflowSegment')
     };
-    if (dataSource.get('index')) classes['sc-segment-' + dataSource.get('index')] = YES;
+    if (!SC.none(dataSource.get('index'))) classes['sc-segment-' + dataSource.get('index')] = YES;
     context.setClass(classes);
 
     // Use the SC.ButtonView render delegate for the current theme to render the segment as a button
@@ -47,7 +47,7 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
       'sc-last-segment': dataSource.get('isLastSegment'),
       'sc-overflow-segment': dataSource.get('isOverflowSegment') || NO
     };
-    if (dataSource.get('index')) classes['sc-segment-' + dataSource.get('index')] = YES;
+    if (!SC.none(dataSource.get('index'))) classes['sc-segment-' + dataSource.get('index')] = YES;
     jquery.setClass(classes);
     
     // Use the SC.ButtonView render delegate for the current theme to update the segment as a button
