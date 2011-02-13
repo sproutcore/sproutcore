@@ -14,6 +14,9 @@
   @since SproutCore 1.5
 */
 SC.SegmentView = SC.View.extend(SC.Control, {
+
+  classNames: ['sc-segment-view'],
+
   /* SC.Control (note: this brings its own display properties: 'isEnabled', 'isSelected', 'isActive', 'controlSize') */
   isEnabled: YES,
 

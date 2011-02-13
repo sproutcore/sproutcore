@@ -1,6 +1,6 @@
 @theme(sc-small-size) {
 
-$theme.segment {
+$theme.sc-segment-view {
 
   height: 18px;
   
