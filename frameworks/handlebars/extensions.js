@@ -24,12 +24,18 @@ SC.Handlebars.compile = function(string) {
   return new SC.Handlebars.JavaScriptCompiler().compile(environment, true);
 };
 
-Handlebars.registerHelper('view', function(path, data) {
+Handlebars.registerHelper('view', function(path, fn, inverse, data) {
+  if (fn.isRenderData) { data = fn; fn = null; }
+
   var newView = SC.objectForPropertyPath(path);
   var currentView = data.view;
 
   var childViews = currentView.get('childViews');
   var childView = currentView.createChildView(newView);
+
+  // Set the template of the view to the passed block if we got one
+  if (fn) { childView.template = fn; }
+
   childViews.pushObject(childView);
 
   var context = SC.RenderContext(childView.get('tagName'));
