@@ -244,3 +244,19 @@ test("Template views add a layerId to child views created using the view helper"
   var childView = view.getPath('childViews.firstObject');
   equals(view.$().children().first().children().first().attr('id'), childView.get('layerId'));
 });
+
+test("Template views set the template of their children to a passed block", function() {
+  var templates = SC.Object.create({
+    parent: SC.Handlebars.compile('<h1>{{#view "TemplateTests.NoTemplateView"}}<span>It worked!</span>{{/view}}')
+  });
+
+  TemplateTests.NoTemplateView = SC.TemplateView.extend();
+
+  var view = SC.TemplateView.create({
+    templates: templates,
+    templateName: 'parent'
+  });
+
+  view.createLayer();
+  ok(view.$().html().match(/<h1>.*<span>.*<\/span>.*<\/h1>/), "renders the passed template inside the parent template");
+});
