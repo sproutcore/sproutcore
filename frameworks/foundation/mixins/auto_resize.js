@@ -166,7 +166,6 @@ SC.AutoResize = {
     could have changed, so it will need to be remeasured.
   */
   didAppendToDocument: function(){
-    sc_super(); // just in case
     this.measureSizeLater();
   },
   
@@ -175,7 +174,6 @@ SC.AutoResize = {
     When the layer is first created, measurement will need to take place.
   */
   didCreateLayer: function() {
-    sc_super();
     this.measureSizeLater();
   },
   

@@ -323,14 +323,12 @@ SC.SelectFieldView = SC.FieldView.extend(
     if (this.get('isEnabled') === false) this.$()[0].disabled = true;
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
     SC.Event.add(input, 'focus',this, this.fieldDidFocus);
-    return sc_super();
   },
   
   willDestroyLayer: function() {
     var input = this.$input();
     SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
     SC.Event.remove(input, 'blur', this, this.fieldDidBlur);
-    return sc_super();
   }
  
 });
