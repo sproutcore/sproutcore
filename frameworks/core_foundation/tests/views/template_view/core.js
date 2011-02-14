@@ -46,3 +46,10 @@ test("template view should call the function of the associated template with its
   equals("template was called for Tom DAAAALE", view.$('#twas-called').text(), "the named template was called with the view as the data source");
 });
 
+test("template view defaults to a noop template", function() {
+  var view;
+  view = SC.TemplateView.create({});
+  view.createLayer();
+
+  equals(view.$().html(), '', "view div should be empty");
+});

@@ -30,7 +30,12 @@ SC.TemplateView = SC.CoreView.extend(
     var template = this.get('templates').get(templateName);
 
     if (!template) {
-      SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
+      //@if(debug)
+      if (templateName) {
+        SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
+      }
+      //@endif
+
       return function() { return ''; };
     }
 
