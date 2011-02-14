@@ -310,6 +310,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - %M - Minute of the hour (00..59)
       - %p - Meridian indicator (``AM'' or ``PM'')
       - %S - Second of the minute (00..60)
+      - %s - Milliseconds of the second (000..999)
       - %U - Week number of the current year,
           starting with the first Sunday as the first
           day of the first week (00..53)
@@ -901,7 +902,7 @@ SC.DateTime.mixin(SC.Comparable,
   parse: function(str, fmt) {
     // Declared as an object not a literal since in some browsers the literal
     // retains state across function calls
-    var re = new RegExp('(?:%([aAbBcdHIjmMpSUWwxXyYZ%])|(.))', "g");
+    var re = new RegExp('(?:%([aAbBcdHIjmMpsSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
     
     if (SC.none(fmt)) fmt = SC.DATETIME_ISO8601;
@@ -922,6 +923,7 @@ SC.DateTime.mixin(SC.Comparable,
           case 'M': opts.minute = scanner.scanInt(1, 2); break;
           case 'p': opts.meridian = scanner.scanArray(['AM', 'PM']); break;
           case 'S': opts.second = scanner.scanInt(1, 2); break;
+          case 's': opts.millisecond = scanner.scanInt(1, 3); break;
           case 'U': throw "%U is not implemented";
           case 'W': throw "%W is not implemented";
           case 'w': throw "%w is not implemented";
@@ -1013,6 +1015,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'M': return this._pad(this._get('minute'));
       case 'p': return this._get('hour') > 11 ? 'PM' : 'AM';
       case 'S': return this._pad(this._get('second'));
+      case 's': return this._pad(this._get('millisecond'), 3);
       case 'u': return this._pad(this._get('utc')); //utc
       case 'U': return this._pad(this._get('week0'));
       case 'W': return this._pad(this._get('week1'));
@@ -1041,7 +1044,7 @@ SC.DateTime.mixin(SC.Comparable,
     // need to move into local time zone for these calculations
     this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
 
-    return format.replace(/\%([aAbBcdDHiIjmMpSUWwxXyYZ\%])/g, function() {
+    return format.replace(/\%([aAbBcdDHiIjmMpsSUWwxXyYZ\%])/g, function() {
       var v = that.__toFormattedString.call(that, arguments, start, timezone);
       return v;
     });
