@@ -207,6 +207,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
           webViewFrame.x += dropContainerLayout.left;
           webViewFrame.y += dropContainerLayout.top;
         }
+        //assign this to 
+        Greenhouse._webViewFrame = webViewFrame;
         
         //add existing targets
         innerTargets = iframe.SC.Drag._dropTargets;
@@ -232,7 +234,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         //make sure all drags have an iframeTargetOffset...
         SC.Drag.start = function(ops) {
           var ret = this.create(ops);
-          ret.globalTargetOffset = webViewFrame;
+          ret.globalTargetOffset = Greenhouse._webViewFrame;
           ret.startDrag();
           return ret;
         };
