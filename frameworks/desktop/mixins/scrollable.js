@@ -32,13 +32,6 @@ SC.Scrollable = {
   */
   isScrollable: true,
 
-  /**
-    The WAI-ARIA role for any view that include this mixin. This property's
-    value should not be changed.
-
-    @property {String}
-  */
-  ariaRole: 'scrollbar',
   /** 
     Amount to scroll one vertical line.
   

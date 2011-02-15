@@ -43,14 +43,6 @@ SC.Editable = {
   editorDelegate: null,
 
   /**
-    The WAI-ARIA role for any view that includes this mixin. This property's
-    value should not be changed.
-
-    @property {String}
-  */
-  ariaRole: 'textbox',
-  
-  /**
     Indicates whether a view is editable or not.  You can optionally 
     implement the methods in this mixin to disallow editing is isEditable is
     NO.

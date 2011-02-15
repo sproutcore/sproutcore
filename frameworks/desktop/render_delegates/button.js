@@ -24,8 +24,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
         view              = dataSource.get('view'),
         isSelected        = dataSource.get('isSelected'),
         isActive          = dataSource.get('isActive'),
-        menu              = dataSource.view.menu,
-        isPopUpButton     = NO;
+        isPopUpButton     = NO,
+        menu              = view.get('menu');
 
         if(menu) {
           isPopUpButton = YES;
@@ -81,7 +81,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     var theme         = dataSource.get('theme'),
         isSelected    = dataSource.get('isSelected'),
         isActive      = dataSource.get('isActive'),
-        menu          = dataSource.view.menu,
+        view          = dataSource.get('view'),
+        menu          = view.get('menu'),
         isPopUpButton = NO;
 
         if(menu) {

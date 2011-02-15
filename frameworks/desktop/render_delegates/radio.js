@@ -48,10 +48,10 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     //accessing accessibility
     context.attr('role', 'radio');
     context.attr('aria-checked', isSelected);
-    if(ariaLabel !== "") {
+    if(ariaLabel && ariaLabel !== "") {
       context.attr('aria-label', ariaLabel);
     }
-    if(ariaLabeledBy !== "") {
+    if(ariaLabeledBy && ariaLabeledBy !== "") {
       context.attr('aria-labelledby', ariaLabeledBy);
     }
 

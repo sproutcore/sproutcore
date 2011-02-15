@@ -53,7 +53,7 @@ SC.PanelPane = SC.Pane.extend({
 
     @property {String}
   */
-  ariaLabeledBy: "",
+  ariaLabeledBy: null,
 
   /**
     The WAI-ARIA attribute for the panel pane. This property is assigned to
@@ -64,7 +64,7 @@ SC.PanelPane = SC.Pane.extend({
 
     @property {String}
   */
-  ariaDescribedBy: "",
+  ariaDescribedBy: null,
 
   /**
     Indicates that a pane is modal and should not allow clicks to pass
@@ -196,10 +196,10 @@ SC.PanelPane = SC.Pane.extend({
 
     //addressing accessibility
     if(firstTime) {
-      if(ariaLabeledBy !== "") {
+      if(ariaLabeledBy && ariaLabeledBy !== "") {
         context.attr('aria-labelledby', ariaLabeledBy);
       }
-      if(ariaDescribedBy !== "") {
+      if(ariaDescribedBy && ariaDescribedBy !== "") {
        context.attr('aria-describedby', ariaDescribedBy);
       }
     }

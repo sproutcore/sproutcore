@@ -61,7 +61,7 @@ SC.ImageView = SC.View.extend(SC.Control,
 
     @property {String}
   */
-  ariaLabeledBy: "",
+  ariaLabeledBy: null,
 
   /**
     Current load status of the image.

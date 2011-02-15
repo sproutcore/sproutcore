@@ -239,11 +239,11 @@ SC.RadioView = SC.View.extend(SC.Control,
 
         if (ariaLabeledByKey) {
           ariaLabeledBy = item.get ? item.get(ariaLabeledByKey) : item[ariaLabeledByKey];
-        } else ariaLabeledBy = "";
+        } else ariaLabeledBy = null;
 
         if (ariaLabelKey) {
           ariaLabel = item.get ? item.get(ariaLabelKey) : item[ariaLabelKey];
-        } else ariaLabel = "";
+        } else ariaLabel = null;
 
         // if item is nil, use somedefaults...
       } else {

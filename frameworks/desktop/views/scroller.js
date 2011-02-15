@@ -278,10 +278,10 @@ SC.ScrollerView = SC.View.extend(
       }
 
       //addressing accessibility
-      context.attr('aria-valuemax', this.get('maximum'));
+      context.attr('aria-valuemax', this.get('maximun'));
       context.attr('aria-valuemin', this.get('minimum'));
       context.attr('aria-valuenow', this.get('value'));
-      context.attr('aria-controls' , parentView.get('contentView'));
+      context.attr('aria-controls' , parentView.getPath('contentView.layerId'));
 
     } else {
       // The HTML has already been generated, so all we have to do is

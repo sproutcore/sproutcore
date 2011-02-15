@@ -124,7 +124,7 @@ SC.AlertPane = SC.PanelPane.extend({
 
     @property {String}
   */
-  ariaLabeledBy: "",
+  ariaLabeledBy: null,
 
   /**
     The WAI-ARIA attribute for the alert pane. This property is assigned to
@@ -135,7 +135,7 @@ SC.AlertPane = SC.PanelPane.extend({
 
     @property {String}
   */
-  ariaDescribedBy: "",
+  ariaDescribedBy: null,
 
   /**
     The delegate to notify when the pane is dismissed.  If you set a 
@@ -333,10 +333,10 @@ SC.AlertPane = SC.PanelPane.extend({
 
     //addressing accessibility
     if(firstTime) {
-      if(ariaLabeledBy !== "") {
+      if(ariaLabeledBy && ariaLabeledBy !== "") {
         context.attr('aria-labelledby', ariaLabeledBy);
       }
-      if(ariaDescribedBy !== "") {
+      if(ariaDescribedBy && ariaDescribedBy !== "") {
        context.attr('aria-describedby', ariaDescribedBy);
       }
     }

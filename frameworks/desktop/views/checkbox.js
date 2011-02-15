@@ -33,7 +33,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
     @property {String}
   */
-  ariaRole: '',
+  ariaRole: 'checkbox',
 
   /**
     The WAI-ARIA attribute for the checkbox. This property is assigned to
@@ -43,7 +43,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
     @property {String}
   */
-  ariaLabeledBy: '',
+  ariaLabeledBy: null,
 
   /**
     The WAI-ARIA attribute for the checkbox. This property is assigned to
@@ -54,7 +54,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
     @property {String}
   */
-  ariaLabel: '',
+  ariaLabel: null,
 
   // no special theme for Checkbox; button defaults to 'square', so we have to stop that.
   themeName: null,

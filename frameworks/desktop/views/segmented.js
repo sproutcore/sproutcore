@@ -52,7 +52,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     @property {String}
   */
-  ariaRole: "tablist",
+  ariaRole: 'tablist',
   
   /**
     The value of the segmented view.
@@ -343,7 +343,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           theme: this.get('theme'),
           renderDelegateName: 'segmentRenderDelegate',
           useStaticLayout: YES,
-          ariaLabeledBy: "",
+          ariaLabeledBy: null,
           displayProperties: ['icon', 'title', 'value', 'toolTip', 'isDefault', 'isCancel', 'titleMinWidth', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'index', 'ariaLabeledBy' ] // TODO: isDefault, isCancel, value not really supported
         });
         

@@ -42,7 +42,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
 
     @property {String}
   */
-  ariaLabeledBy: "",
+  ariaLabeledBy: null,
   
   isEditable: NO,
   

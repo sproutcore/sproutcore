@@ -28,7 +28,7 @@ SC.DisclosureView = SC.ButtonView.extend(
     the element. Used to support voiceover. It is used when it is not
     possible to have a visible label on the screen.
   */
-  ariaLabel: "",
+  ariaLabel: null,
 
   renderDelegateName: 'disclosureRenderDelegate',
 

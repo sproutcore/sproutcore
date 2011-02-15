@@ -16,9 +16,10 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     var theme = dataSource.get('theme'),
         buttonDelegate, classes,
         ariaLabeledBy = dataSource.get('ariaLabeledBy'),
-        containerView, isPartOfTabView = NO;
+        containerView, isPartOfTabView = NO,
+        view = dataSource.get('view');
 
-        containerView = dataSource.view.parentView.parentView.containerView;
+        containerView = view.getPath('parentView.parentView.containerView');
         if(containerView) {
           isPartOfTabView = YES;
         }
@@ -37,12 +38,12 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
     // addressing accessibility
     context.attr('role', 'tab');
     context.attr('aria-selected', dataSource.get('isSelected'));
-    if(ariaLabeledBy !== "") {
+    if(ariaLabeledBy && ariaLabeledBy !== "") {
       context.attr('aria-labelledby',ariaLabeledBy);
     }
 
     if(isPartOfTabView) {
-      context.attr('aria-controls', containerView);
+      context.attr('aria-controls', containerView.get('layerId'));
     }
 
     // Use the SC.ButtonView render delegate for the current theme to render the segment as a button
@@ -56,9 +57,10 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
         titleMinWidth,
         classes = {},
         ariaLabeledBy = dataSource.get('ariaLabeledBy'),
-        containerView, isPartOfTabView = NO;
+        containerView, isPartOfTabView = NO,
+        view = dataSource.get('view');
 
-        containerView = dataSource.view.parentView.parentView.containerView;
+        containerView = view.getPath('parentView.parentView.containerView');
         if(containerView) {
           isPartOfTabView = YES;
         }
@@ -93,7 +95,7 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
       jquery.attr('aria-labelledby',ariaLabeledBy);
     }
     if(isPartOfTabView) {
-      jquery.attr('aria-controls', containerView);
+      jquery.attr('aria-controls', containerView.get('layerId'));
     }
     // Use the SC.ButtonView render delegate for the current theme to update the segment as a button
     buttonDelegate = theme['buttonRenderDelegate'];
