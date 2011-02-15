@@ -9,7 +9,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   // as soon as the empty layer was created
   didCreateLayer: function() {
     if(this.get('content')) {
-      var indexSet = SC.IndexSet.create(0, this.get('length'));
+      var indexSet = SC.IndexSet.create(0, this.getPath('content.length'));
       this.arrayContentDidChange(this.get('content'), null, '[]', indexSet);
     }
   },
@@ -25,7 +25,16 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
   contentDidChange: function() {
     var content = this.get('content');
+
+    if (content !== this._content) {
+      this.removeAllChildren();
+      this.$().empty();
+      this.didCreateLayer();
+    }
+
     content.addRangeObserver(null, this, this.arrayContentDidChange);
+
+    this._content = content;
   }.observes('content'),
 
   arrayContentDidChange: function(array, objects, key, indexes) {
@@ -38,18 +47,24 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     // information, rather than trying to reverse-engineer the
     // original change.
     indexes.forEachRange(function(start, length) {
-      var isDeletion = (array.get('length') < (start+length));
+      var isDeletion = (array.get('length') < (start+length)), object, i;
 
       if(isDeletion) {
-        self.get('childViews').objectAt(start).destroy();
-      } else {
-        var object = array.objectAt(start);
-        var itemView = self.createChildView(exampleViewClass.extend({
-          content: object
-        }));
-        self.get('childViews').pushObject(itemView);
+        var childViews = self.get('childViews');
 
-        itemView.createLayer().$().appendTo(self.$());
+        childViews.objectAt(start).destroy();
+      } else {
+        for(i=0; i<length; i++) {
+          object = array.objectAt(start + i);
+          var itemView = self.createChildView(exampleViewClass.extend({
+            content: object,
+            context: object,
+            tagName: 'li'
+          }));
+          self.get('childViews').pushObject(itemView);
+
+          itemView.createLayer().$().appendTo(self.$());
+        }
       }
     });
   }

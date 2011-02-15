@@ -27,7 +27,10 @@ SC.Handlebars.compile = function(string) {
 Handlebars.registerHelper('view', function(path, fn, inverse, data) {
   if (fn.isRenderData) { data = fn; fn = null; }
 
-  var newView = SC.objectForPropertyPath(path);
+  var newView;
+  if (path.isClass || path.isObject) { newView = path; }
+  else { newView = SC.objectForPropertyPath(path); }
+
   var currentView = data.view;
 
   var childViews = currentView.get('childViews');
@@ -76,4 +79,17 @@ Handlebars.registerHelper('bindProperty', function(property, fn, inverse, data) 
   renderContext = renderContext.end();
 
   return new Handlebars.SafeString(renderContext.join());
+});
+
+Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
+  var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
+  var exampleView = SC.TemplateView.extend({ template: fn });
+
+  if(collectionClass.isClass) {
+    collectionClass.prototype.exampleView = exampleView;
+  } else {
+    collectionClass.exampleView = exampleView;
+  }
+
+  return Handlebars.helpers.view.call(this, collectionClass, Handlebars.VM.noop, inverse, data);
 });

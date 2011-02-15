@@ -248,19 +248,6 @@ SC.View.reopen({
   }.enhance(),
 
   /**
-    Removes all children from the parentView.
-
-    @returns {SC.View} receiver
-  */
-  removeAllChildren: function() {
-    var childViews = this.get('childViews'), view ;
-    while (view = childViews.objectAt(childViews.get('length')-1)) {
-      this.removeChild(view) ;
-    }
-    return this ;
-  },
-
-  /**
     Replace the oldView with the specified view in the receivers childNodes
     array. This will also replace the DOM node of the oldView with the DOM
     node of the new view in the receivers DOM.
