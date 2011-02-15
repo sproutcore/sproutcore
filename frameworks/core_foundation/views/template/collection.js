@@ -38,35 +38,43 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   }.observes('content'),
 
   arrayContentDidChange: function(array, objects, key, indexes) {
-    var exampleViewClass = this.get('exampleViewClass');
-    var self = this;
+    var content = this.get('content'),
+        exampleViewClass = this.get('exampleViewClass'),
+        childViews = this.get('childViews'),
+        toDestroy = [], toReuse = [],
+        view, item, matchIndex, lastView, length, i;
 
-    // the range observer system, while powerful, loses useful
-    // information that is available to the raw enumerableDidChange
-    // method. There should be a sanctioned way to observe that
-    // information, rather than trying to reverse-engineer the
-    // original change.
-    indexes.forEachRange(function(start, length) {
-      var isDeletion = (array.get('length') < (start+length)), object, i;
-
-      if(isDeletion) {
-        var childViews = self.get('childViews');
-
-        childViews.objectAt(start).destroy();
+    // Destroy unused views
+    for (i=0, length=childViews.get('length'); i < length; i++) {
+      view = childViews.objectAt(i);
+      if (content.contains(view.get('content'))) {
+        toReuse.push(view);
       } else {
-        for(i=0; i<length; i++) {
-          object = array.objectAt(start + i);
-          var itemView = self.createChildView(exampleViewClass.extend({
-            content: object,
-            context: object,
-            tagName: 'li'
-          }));
-          self.get('childViews').pushObject(itemView);
-
-          itemView.createLayer().$().appendTo(self.$());
-        }
+        toDestroy.push(view);
       }
-    });
+    }
+    for (i=0, length=toDestroy.length; i < length; i++) { toDestroy[i].destroy(); }
+    for (i=0, length=toReuse.length; i < length; i++) { toReuse[i].$().remove(); }
+
+    childViews = [];
+
+    // Add items, using previous if possible
+    for (i=0, length=array.get('length'); i < length; i++) {
+      item = array.objectAt(i);
+      view = toReuse.find(function(v){ return v.get('content') === item; });
+      if (!view) {
+        view = this.createChildView(exampleViewClass.extend({
+          content: item,
+          context: item,
+          tagName: 'li'
+        }));
+      }
+      childViews.push(view);
+
+      view.createLayer().$().appendTo(this.$());
+    }
+
+    this.childViews = childViews;
   }
 });
 
