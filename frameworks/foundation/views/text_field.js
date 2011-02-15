@@ -977,9 +977,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     or not. Currently is disabled as in webkit there is a bug where the color 
     of the placeholder doesn't refresh all the time.
   */
-  _supportsPlaceHolder: function(){
-    return SC.browser.safari && !this.get('isTextArea');
-  }.property('isTextArea').cacheable(),
+  _supportsPlaceHolder: SC.platform.input.placeholder,
   
   
   valueObserver: function(){
