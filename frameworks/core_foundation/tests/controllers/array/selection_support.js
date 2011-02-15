@@ -316,3 +316,31 @@ function() {
   equals(selectionSet.get('length'), 0, 'selection set should have length 0');
   ok(indexSet === null, 'selection set should not still have an indexSet');
 });
+
+test("replacing content in an ArrayController propagates changes to bound arrangedObjects", function() {
+  equals(controller.getPath('arrangedObjects.length'), 5, "precond - controller has 5 items");
+
+  var obj, listChanged = 0;
+
+  SC.run(function() {
+    obj = SC.Object.create({
+      testController: controller,
+      listBinding: ".testController.arrangedObjects",
+      listDidChange: function() {
+        listChanged++;
+      }.observes('list')
+    });
+  });
+
+  equals(obj.getPath('list.length'), 5, "precond - binding has 5 items");
+
+  window.billy = true;
+
+  SC.run(function() {
+    controller.set('content', []);
+  });
+
+  equals(controller.getPath('arrangedObjects.length'), 0, "precond - controller has 5 items");
+  equals(obj.getPath('list.length'), 0, "binding has 0 items");
+  equals(listChanged, 1, "listDidChange was called");
+});
