@@ -142,11 +142,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _isFocused: NO,
   
   
-  init:function(){
-    var hintStatus = this.get('hintON'),
-        val = this.get('value');
-    if(!val || val && val.length===0) this.set('hintON', YES);
-    else this.set('hintON', NO);
+  init: function() {
+    var val = this.get('value');
+    this.set('hintON', (!val || val && val.length === 0));
     return sc_super();
   },
 
