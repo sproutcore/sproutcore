@@ -316,7 +316,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       //Adding to the body as is the only element never removed.
       document.body.addBehavior('#default#userData');
     }
-    this.HTML5DB_noLocalStorage = ((parseInt(SC.browser.safari, 0)>523) && (parseInt(SC.browser.safari, 0)<528));
+    this.HTML5DB_noLocalStorage = ((parseInt(SC.browser.webkit, 0)>523) && (parseInt(SC.browser.webkit, 0)<528));
     if(this.HTML5DB_noLocalStorage){
       var myDB;
       try {

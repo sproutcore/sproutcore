@@ -83,7 +83,7 @@ SC.Event = function(originalEvent) {
         version = parseFloat(SC.browser.version);
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
+    if (SC.browser.webkit && originalEvent.wheelDelta!==undefined) {
       this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
@@ -214,8 +214,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (!elem) return this; // nothing to do
 
 		if (!useCapture) {
-			var useCapture = NO;
-		};
+			useCapture = NO;
+		}
     
     // cannot register events on text nodes, etc.
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
@@ -653,8 +653,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     var listener, special = this.special[eventType] ;
 
 		if (!useCapture) {
-			var useCapture = NO;
-		};
+			useCapture = NO;
+		}
 
     // Check for a special event handler
     // Only use addEventListener/attachEvent if the special
