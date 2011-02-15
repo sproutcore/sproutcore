@@ -42,6 +42,10 @@ SC.TemplateView = SC.CoreView.extend(
     return template;
   }.property('templateName').cacheable(),
 
+  context: function() {
+    return this;
+  }.property().cacheable(),
+
   /**
     When the view is asked to render, we look for the appropriate
     template and invoke it with this view as the context, as well
@@ -54,7 +58,7 @@ SC.TemplateView = SC.CoreView.extend(
 
     this._didRenderChildViews = YES;
 
-    context.push(template(this, null, null, { view: this, isRenderData: true }));
+    context.push(template(this.get('context'), null, null, { view: this, isRenderData: true }));
   },
 
   // in TemplateView, updating is handled by observers created by helpers in the

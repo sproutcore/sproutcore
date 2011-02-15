@@ -863,6 +863,19 @@ SC.CoreView.reopen(
   },
 
   /**
+    Removes all children from the parentView.
+
+    @returns {SC.View} receiver
+  */
+  removeAllChildren: function() {
+    var childViews = this.get('childViews'), view ;
+    while (view = childViews.objectAt(childViews.get('length')-1)) {
+      this.removeChild(view) ;
+    }
+    return this ;
+  },
+
+  /**
     Removes the view from its parentView, if one is found.  Otherwise
     does nothing.
 

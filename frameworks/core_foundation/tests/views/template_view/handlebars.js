@@ -260,3 +260,18 @@ test("Template views set the template of their children to a passed block", func
   view.createLayer();
   ok(view.$().html().match(/<h1>.*<span>.*<\/span>.*<\/h1>/), "renders the passed template inside the parent template");
 });
+
+test("Child views created using the view helper should have their parent view set properly", function() {
+  TemplateTests = {};
+
+  var template = '{{#view "SC.TemplateView"}}{{#view "SC.TemplateView"}}{{view "SC.TemplateView"}}{{/view}}{{/view}}';
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile(template)
+  });
+
+  view.createLayer();
+
+  var childView = view.childViews[0].childViews[0];
+  equals(childView, childView.childViews[0].parentView, 'parent view is correct');
+});
