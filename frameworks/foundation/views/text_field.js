@@ -414,7 +414,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed 
-    isOldSafari= (parseInt(SC.browser.safari,0)<532);
+    isOldSafari= (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
     spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
@@ -891,7 +891,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       return YES ; // handled
     }
     // maxlength for textareas
-    if(!SC.browser.safari && this.get('isTextArea')){
+    if(!SC.browser.webkit && this.get('isTextArea')){
       var val = this.get('value'),
           code = evt.which;
     // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
@@ -994,7 +994,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (val && val.length>0) {
       this.set('hintON', NO);
       max = this.get('maxLength');
-      if(!SC.browser.safari && val.length>max){
+      if(!SC.browser.webkit && val.length>max){
         this.set('value', val.substr(0, max));
       }
     }else this.set('hintON', YES);

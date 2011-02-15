@@ -57,7 +57,7 @@ SC.mixin({
       }, NO);
     }
 
-    if (SC.browser.safari && SC.browser.safari < 530.0 ) {
+    if (SC.browser.webkit && SC.browser.webkit < 530.0 ) {
       console.error("ready() is not yet supported on Safari 3.1 and earlier");
       // TODO: implement ready() in < Safari 4 
       // var numStyles;
