@@ -30,8 +30,8 @@ SC.platform = {
   */
   touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
   
-  bounceOnScroll: (/iPhone|iPad|iPod/).test(navigator.platform),
-  pinchToZoom: (/iPhone|iPad|iPod/).test(navigator.platform),
+  bounceOnScroll: SC.browser.iOS,
+  pinchToZoom: SC.browser.iOS,
 
   input: {
     placeholder: ('placeholder' in document.createElement('input'))
@@ -260,14 +260,6 @@ SC.platform = {
   
   supportsOrientationChange: ('onorientationchange' in window),
   
-  /*
-    TODO [CC] On Android, SC.browser.mobileSafari returns YES, so we need to
-              explicitly check for non-Android mobileSafari browsers. There
-              is obviously a better way to handle this (ie. target the iOS
-              platform itself; we need more robust checking). Here's the kicker,
-              only certain Android devices support the onorientationchange
-              event, so those that don't need to fallback on the resize
-  */
   /**
     Because iOS is slow to dispatch the window.onorientationchange event,
     we use the window size to determine the orientation on iOS devices
@@ -277,7 +269,7 @@ SC.platform = {
     @property {Boolean}
     @default NO
   */
-  windowSizeDeterminesOrientation: (SC.browser.mobileSafari && !SC.browser.android) || !('onorientationchange' in window)
+  windowSizeDeterminesOrientation: SC.browser.iOS || !('onorientationchange' in window)
 
 };
 
