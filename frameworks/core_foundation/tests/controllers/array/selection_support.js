@@ -334,8 +334,6 @@ test("replacing content in an ArrayController propagates changes to bound arrang
 
   equals(obj.getPath('list.length'), 5, "precond - binding has 5 items");
 
-  window.billy = true;
-
   SC.run(function() {
     controller.set('content', []);
   });
