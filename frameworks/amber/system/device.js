@@ -133,12 +133,12 @@ SC.device = SC.Object.create({
         SC.run(function() {
           if (SC.platform.touch) {
             if (newSize.height >= newSize.width) {
-              this.set('orientation', SC.PORTRAIT_ORIENTATION);
+              SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
             } else {
-              this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+              SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
             }
           } else {
-            this.set('orientation', SC.NO_ORIENTATION);
+            SC.device.set('orientation', SC.NO_ORIENTATION);
           }
         });
       } else {
@@ -146,9 +146,9 @@ SC.device = SC.Object.create({
         // above match landscape falsely, we compare to screen.width
         SC.run(function() {
           if (newSize.width === window.screen.width) {
-            this.set('orientation', SC.PORTRAIT_ORIENTATION);
+            SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
           } else {
-            this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+            SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
           }
         });
       }
@@ -163,9 +163,9 @@ SC.device = SC.Object.create({
   orientationchange: function(evt) {
     SC.run(function() {
       if (window.orientation === 0 || window.orientation === 180) {
-        this.set('orientation', SC.PORTRAIT_ORIENTATION);
+        SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
       } else {
-        this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+        SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
       }
     });
   },
