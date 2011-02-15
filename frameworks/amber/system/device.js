@@ -128,25 +128,29 @@ SC.device = SC.Object.create({
   */
   windowSizeDidChange: function(newSize) {
     if (SC.platform.windowSizeDeterminesOrientation) {
-      if (!SC.browser.mobileSafari || SC.browser.android) {
+      if (!SC.browser.iOS) {
         // in any browser other than iOS, use height vs. width test
-        if (SC.platform.touch) {
-          if (newSize.height >= newSize.width) {
+        SC.run(function() {
+          if (SC.platform.touch) {
+            if (newSize.height >= newSize.width) {
+              this.set('orientation', SC.PORTRAIT_ORIENTATION);
+            } else {
+              this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+            }
+          } else {
+            this.set('orientation', SC.NO_ORIENTATION);
+          }
+        });
+      } else {
+        // in mobile safari, because some of its chrome can make the
+        // above match landscape falsely, we compare to screen.width
+        SC.run(function() {
+          if (newSize.width === window.screen.width) {
             this.set('orientation', SC.PORTRAIT_ORIENTATION);
           } else {
             this.set('orientation', SC.LANDSCAPE_ORIENTATION);
           }
-        } else {
-          this.set('orientation', SC.NO_ORIENTATION);
-        }
-      } else {
-        // in mobile safari, because some of its chrome can make the
-        // above match landscape falsely, we compare to screen.width
-        if (newSize.width === window.screen.width) {
-          this.set('orientation', SC.PORTRAIT_ORIENTATION);
-        } else {
-          this.set('orientation', SC.LANDSCAPE_ORIENTATION);
-        }
+        });
       }
       return YES;
     }
@@ -157,11 +161,13 @@ SC.device = SC.Object.create({
     Called when the window.onorientationchange event is fired.
   */
   orientationchange: function(evt) {
-    if (window.orientation === 0 || window.orientation === 180) {
-      this.set('orientation', SC.PORTRAIT_ORIENTATION);
-    } else {
-      this.set('orientation', SC.LANDSCAPE_ORIENTATION);
-    }
+    SC.run(function() {
+      if (window.orientation === 0 || window.orientation === 180) {
+        this.set('orientation', SC.PORTRAIT_ORIENTATION);
+      } else {
+        this.set('orientation', SC.LANDSCAPE_ORIENTATION);
+      }
+    });
   },
   
   orientationObserver: function(){
