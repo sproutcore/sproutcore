@@ -46,8 +46,8 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 
   An <code>SC.PickerPane</code> repositions itself according to the optional 
   <code>preferMatrix</code> argument passed in the <code>.popup()</code> method 
-  call. The <code>preferMatrix</code> either specifies an offset-based positioning 
-  behavior or a matrix-based positioning behavior depending on the 
+  call. The <code>preferMatrix</code> either specifies an offset-based arrangement 
+  behavior or a position-based arrangement behavior depending on the 
   <code>preferType</code> argument in the <code>.popup()</code> call.
              
   The simplest way to create and display a picker pane:
@@ -64,7 +64,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   h2. Positioning
   
   Picker pane positioning can be classified into two broad categories: 
-  offset-based and matrix-based. 
+  offset-based and position-based. 
   
   h3. Offset-based
     
@@ -79,7 +79,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   of the anchor.  
   
   
-  h3. Matrix-based
+  h3. Position-based
   
   When <code>preferType</code> is <code>SC.PICKER_POINTER</code> or 
   <code>SC.PICKER_MENU_POINTER</code>, then the <code>preferMatrix</code> 
@@ -125,13 +125,13 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   
   h3. <code>SC.PICKER_POINTER</code>
   
-  Positioning is matrix-based, with <code>preferMatrix</code> defaulting to 
+  Positioning is position-based, with <code>preferMatrix</code> defaulting to 
   <code>[0, 1, 2, 3, 2]</code>, i.e. right > left > top > bottom; fallback to top.
   
   
   h3. <code>SC.PICKER_MENU_POINTER</code>
   
-  Positioning is matrix-based, with <code>preferMatrix</code> defaulting to 
+  Positioning is position-based, with <code>preferMatrix</code> defaulting to 
   <code>[3, 0, 1, 2, 3]</code>, i.e. bottom, right, left, top; fallback to bottom.
   
   
