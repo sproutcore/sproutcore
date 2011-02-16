@@ -1,46 +1,10 @@
 // ==========================================================================
-// SC.Logger
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            Portions ©2008-2010 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
-/**
-  If {@link SC.Logger.format} is true, this delimiter will be put between arguments.
-
-  @property {String}
-*/
-SC.LOGGER_LOG_DELIMITER = ", ";
-
-/**
-  If {@link SC.Logger.error} falls back onto {@link SC.Logger.log}, this will be
-  prepended to the output.
-
-  @property {String}
-*/
-SC.LOGGER_LOG_ERROR = "ERROR: ";
-
-/**
-  If {@link SC.Logger.info} falls back onto {@link SC.Logger.log}, this will be
-  prepended to the output.
-
-  @property {String}
-*/
-SC.LOGGER_LOG_INFO = "INFO: ";
-
-/**
-  If {@link SC.Logger.warn} falls back onto {@link SC.Logger.log}, this will be
-  prepended to the output.
-
-  @property {String}
-*/
-SC.LOGGER_LOG_WARN = "WARNING: ";
-
-/**
-  If {@link SC.Logger.debug} falls back onto {@link SC.Logger.log}, this will be
-  prepended to the output.
-
-  @property {String}
-*/
-SC.LOGGER_LOG_DEBUG = "DEBUG: ";
 
 /** @class
 
@@ -56,27 +20,12 @@ SC.LOGGER_LOG_DEBUG = "DEBUG: ";
   @since Sproutcore 1.0
   @see <a href="http://getfirebug.com/logging.html">Firebug Logging Reference</a>
 */
-SC.Logger = SC.Object.create({
+SC.Logger = SC.Object.create(
+/** @scope SC.Logger */ {
 
   // ..........................................................
   // PROPERTIES
   //
-
-  /**
-    Whether or not to enable debug logging.
-
-    @property: {Boolean}
-  */
-  debugEnabled: NO,
-
-  /**
-    Computed property that checks for the existence of the reporter object.
-
-    @property {Boolean}
-  */
-  exists: function() {
-    return typeof(this.get('reporter')) !== 'undefined' && this.get('reporter') != null;
-  }.property('reporter').cacheable(),
 
   /**
     If console.log does not exist, SC.Logger will use window.alert instead.
@@ -89,14 +38,6 @@ SC.Logger = SC.Object.create({
   fallBackOnAlert: NO,
 
   /**
-    If some function, such as console.dir, does not exist,
-    SC.Logger will try console.log if this is true.
-
-    @property {Boolean}
-  */
-  fallBackOnLog: YES,
-
-  /**
     Whether or not to format multiple arguments together
     or let the browser deal with that.
 
@@ -104,52 +45,69 @@ SC.Logger = SC.Object.create({
   */
   format: YES,
 
-  /**
-    The reporter is the object which implements the actual logging functions.
-
-    @default The browser's console
-    @property {Object}
+  /** @private
+    Provide backwards compatibility for developers setting the reporter object.
   */
-  reporter: console,
+  reporter: function(key, value) {
+    if (value !== undefined) {
+      this.set('reporters', [value]);
+    }
+    return this.get('reporters')[0];
+  }.property(),
+
+  /**
+    An array of objects which can report messages. This will contain the 'console'
+    object, if it exists, by default.
+    
+    @property {Array}
+    @default []
+  */
+  reporters: [],
+
+  init: function() {
+    if (window.console !== undefined) this.get('reporters').push(window.console);
+  },
+
 
   // ..........................................................
-  // METHODS
+  // REPORTERS SUPPORT
+  // 
+
+  /**
+    @since SproutCore 1.5
+    @param {Object} reporter The report object to add
+    @returns {SC.Logger}
+  */
+  addReporter: function(reporter) {
+    this.get('reporters').push(reporter);
+    return this;
+  },
+
+  // ..........................................................
+  // LOGGING SUPPORT
   //
 
   /**
     Log output to the console, but only if it exists.
 
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if reporter.log exists, false otherwise
+    @returns {SC.Logger}
   */
   log: function() {
-    var reporter = this.get('reporter');
+    var reporters = this.get('reporters'),
+        args = arguments,
+        f;
 
     // log through the reporter
-    if (this.get('exists') && typeof(reporter.log) === "function") {
-      if (this.get('format')) {
-        reporter.log(this._argumentsToString.apply(this, arguments));
-      }
-      else {
-        reporter.log.apply(reporter, arguments);
-      }
-      return true;
-    }
+    reporters.forEach(function(reporter) {
+      if (reporter.log !== undefined && reporter.log.apply !== undefined) f = reporter.log;
+      else if (this.get('fallBackOnAlert')) f = alert;
 
-    // log through alert
-    else if (this.fallBackOnAlert) {
-      var s = this.get('format') ? this._argumentsToString.apply(this, arguments) : arguments;
-      // include support for overriding the alert through the reporter
-      // if it has come this far, it's likely this will fail
-      if (this.get('exists') && typeof(reporter.alert) === "function") {
-        reporter.alert(s);
-      }
-      else {
-        alert(s);
-      }
-      return true;
-    }
-    return false;
+      if (this.get('format')) args = [SC.A(args).join(", ")];
+      f.apply(reporter, args);
+    }, this);
+
+    return this;
   },
 
   /**
@@ -159,125 +117,86 @@ SC.Logger = SC.Object.create({
     {@link SC.Logger.fallBackOnLog} is true.
 
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to reporter, false if not
+    @returns {SC.Logger}
   */
   debug: function() {
-    var reporter = this.get('reporter');
+    var reporters = this.get('reporters'),
+        args = SC.A(arguments),
+        f;
 
-    if (this.get('debugEnabled') !== YES) {
-      return false;
-    }
+    reporters.forEach(function(reporter) {
+      if (reporter.debug !== undefined && reporter.debug.apply !== undefined) {
+        f = reporter.debug;
+      } else if (reporter.log !== undefined && reporter.log.apply !== undefined) {
+        args.unshift('DEBUG');
+        f = reporter.log;
+      } else if (this.get('fallBackOnAlert')) {
+        args.unshift('DEBUG');
+        f = alert;
+      }
 
-    if (this.get('exists') && (typeof reporter.debug === "function")) {
-      reporter.debug.apply(reporter, arguments);
-      return true;
-    }
-    else if (this.fallBackOnLog) {
-      var a = this._argumentsToArray(arguments);
-      if (typeof(a.unshift) === "function") a.unshift(SC.LOGGER_LOG_DEBUG);
-      return this.log.apply(this, a);
-    }
-    return false;
+      if (this.get('format')) args = [args.join(", ")];
+      f.apply(reporter, args);
+    }, this);
+
+    return this;
   },
 
   /**
     Prints the properties of an object.
 
-    Logs the object using {@link SC.Logger.log} if the reporter.dir function does not exist and
-    {@link SC.Logger.fallBackOnLog} is true.
-
     @param {Object}
-    @returns {Boolean} true if logged to console, false if not
+    @returns {SC.Logger}
   */
   dir: function() {
-    var reporter = this.get('reporter');
+    var reporters = this.get('reporters'),
+        args = SC.A(arguments),
+        f;
 
-    if (this.get('exists') && typeof(reporter.dir) === "function") {
-      // Firebug's console.dir doesn't support multiple objects here
-      // but maybe custom reporters will
-      reporter.dir.apply(reporter, arguments);
-      return true;
-    }
-    return (this.fallBackOnLog) ? this.log.apply(this, arguments) : false;
-  },
+    reporters.forEach(function(reporter) {
+      if (reporter.dir !== undefined && reporter.dir.apply !== undefined) {
+        f = reporter.dir;
+      } else if (reporter.log !== undefined && reporter.log.apply !== undefined) {
+        f = reporter.log;
+        args = args.map(function(obj) { return SC.inspect(obj); });
+      } else if (this.get('fallBackOnAlert')) {
+        f = alert;
+        args = args.map(function(obj) { return SC.inspect(obj); });
+      }
 
-  /**
-    Prints an XML outline for any HTML or XML object.
+      f.apply(reporter, args); // we don't want to format these results
+    }, this);
 
-    Logs the object using {@link SC.Logger.log} if reporter.dirxml function does not exist and
-    {@lnk SC.Logger.fallBackOnLog} is true.
-
-    @param {Object}
-    @returns {Boolean} true if logged to reporter, false if not
-  */
-  dirxml: function() {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.dirxml) === "function") {
-      // Firebug's console.dirxml doesn't support multiple objects here
-      // but maybe custom reporters will
-      reporter.dirxml.apply(reporter, arguments);
-      return true;
-    }
-    return (this.fallBackOnLog) ? this.log.apply(this, arguments) : false;
+    return this;
   },
 
   /**
     Log an error to the console
 
-    Logs the error using {@link SC.Logger.log} if reporter.error does not exist and
-    {@link SC.Logger.fallBackOnLog} is true.
-
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to reporter, false if not
+    @returns {SC.Logger}
   */
   error: function() {
-    var reporter = this.get('reporter');
+    var reporters = this.get('reporters'),
+        args = SC.A(arguments),
+        f;
 
-    if (this.get('exists') && typeof(reporter.error) === "function") {
-      reporter.error.apply(reporter, arguments);
-      return true;
-    }
-    else if (this.fallBackOnLog) {
-      var a = this._argumentsToArray(arguments);
-      if (typeof(a.unshift) === "function") a.unshift(SC.LOGGER_LOG_ERROR);
-      return this.log.apply(this, a);
-    }
-    return false;
-  },
+    reporters.forEach(function(reporter) {
+      if (reporter.error !== undefined && reporter.error.apply !== undefined) {
+        f = reporter.error;
+      } else if (reporter.log !== undefined && reporter.log.apply !== undefined) {
+        args.unshift('ERROR');
+        f = reporter.log;
+      } else if (this.get('fallBackOnAlert')) {
+        args.unshift('ERROR');
+        f = alert;
+      }
 
-  /**
-    Every log after this call until {@link SC.Logger.groupEnd} is called
-    will be indented for readability. You can create as many levels
-    as you want.
+      if (this.get('format')) args = [args.join(", ")];
+      f.apply(reporter, args);
+    }, this);
 
-    @param {String} [title] An optional title to display above the group
-    @returns {Boolean} true if reporter.group exists, false otherwise
-  */
-  group: function(s) {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.group) === "function") {
-      reporter.group(s);
-      return true;
-    }
-    return false;
-  },
-
-  /**
-    Ends a group declared with {@link SC.Logger.group}.
-
-    @returns {Boolean} true if the reporter.groupEnd exists, false otherwise
-    @see SC.Logger.group
-  */
-  groupEnd: function() {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.groupEnd) === "function") {
-      reporter.groupEnd();
-      return true;
-    }
-    return false;
+    return this;
   },
 
   /**
@@ -287,103 +206,29 @@ SC.Logger = SC.Object.create({
     {@link SC.Logger.fallBackOnLog} is true.
 
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to reporter, false if not
+    @returns {SC.Logger}
   */
   info: function() {
-    var reporter = this.get('reporter');
+    var reporters = this.get('reporters'),
+        args = SC.A(arguments),
+        f;
 
-    if (this.get('exists') && typeof(reporter.info) === "function") {
-      reporter.info.apply(reporter, arguments);
-      return true;
-    }
-    else if (this.fallBackOnLog) {
-      var a = this._argumentsToArray(arguments);
-      if (typeof(a.unshift) === "function") a.unshift(SC.LOGGER_LOG_INFO);
-      return this.log.apply(this, a);
-    }
-    return false;
-  },
+    reporters.forEach(function(reporter) {
+      if (reporter.info !== undefined && reporter.info.apply !== undefined) {
+        f = reporter.info;
+      } else if (reporter.log !== undefined && reporter.log.apply !== undefined) {
+        args.unshift('INFO');
+        f = reporter.log;
+      } else if (this.get('fallBackOnAlert')) {
+        args.unshift('INFO');
+        f = alert;
+      }
 
-  /**
-    Begins the JavaScript profiler, if it exists. Call {@link SC.Logger.profileEnd}
-    to end the profiling process and receive a report.
+      if (this.get('format')) args = [args.join(", ")];
+      f.apply(reporter, args);
+    }, this);
 
-    @returns {Boolean} true if reporter.profile exists, false otherwise
-  */
-  profile: function() {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.profile) === "function") {
-      reporter.profile();
-      return true;
-    }
-    return false;
-  },
-
-  /**
-    Ends the JavaScript profiler, if it exists.
-
-    @returns {Boolean} true if reporter.profileEnd exists, false otherwise
-    @see SC.Logger.profile
-  */
-  profileEnd: function() {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.profileEnd) === "function") {
-      reporter.profileEnd();
-      return true;
-    }
-    return false;
-  },
-
-  /**
-    Measure the time between when this function is called and
-    {@link SC.Logger.timeEnd} is called.
-
-    @param {String} name The name of the profile to begin
-    @returns {Boolean} true if reporter.time exists, false otherwise
-    @see SC.Logger.timeEnd
-  */
-  time: function(name) {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.time) === "function") {
-      reporter.time(name);
-      return true;
-    }
-    return false;
-  },
-
-  /**
-    Ends the profile specified.
-
-    @param {String} name The name of the profile to end
-    @returns {Boolean} true if reporter.timeEnd exists, false otherwise
-    @see SC.Logger.time
-  */
-  timeEnd: function(name) {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.timeEnd) === "function") {
-      reporter.timeEnd(name);
-      return true;
-    }
-    return false;
-  },
-
-  /**
-    Prints a stack-trace.
-
-    @returns {Boolean} true if reporter.trace exists, false otherwise
-  */
-  trace: function() {
-    var reporter = this.get('reporter');
-
-    if (this.get('exists') && typeof(reporter.trace) === "function") {
-      reporter.trace();
-      return true;
-    }
-    return false;
+    return this;
   },
 
   /**
@@ -393,60 +238,33 @@ SC.Logger = SC.Object.create({
     {@link SC.Logger.fallBackOnLog} is true.
 
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to reporter, false if not
+    @returns {SC.Logger}
   */
   warn: function() {
-    var reporter = this.get('reporter');
+    var reporters = this.get('reporters'),
+        args = SC.A(arguments),
+        f;
 
-    if (this.get('exists') && typeof(reporter.warn) === "function") {
-      reporter.warn.apply(reporter, arguments);
-      return true;
-    }
-    else if (this.fallBackOnLog) {
-      var a = this._argumentsToArray(arguments);
-      if (typeof(a.unshift) === "function") a.unshift(SC.LOGGER_LOG_WARN);
-      return this.log.apply(this, a);
-    }
-    return false;
-  },
+    reporters.forEach(function(reporter) {
+      if (reporter.warn !== undefined && reporter.warn.apply !== undefined) {
+        f = reporter.warn;
+      } else if (reporter.log !== undefined && reporter.log.apply !== undefined) {
+        args.unshift('WARN');
+        f = reporter.log;
+      } else if (this.get('fallBackOnAlert')) {
+        args.unshift('WARN');
+        f = alert;
+      }
 
-  // ..........................................................
-  // INTERNAL SUPPORT
-  //
+      if (this.get('format')) args = [args.join(", ")];
+      f.apply(reporter, args);
+    }, this);
 
-  /**
-    @private
-
-    The arguments function property doesn't support Array#unshift. This helper
-    copies the elements of arguments to a blank array.
-
-    @param {Array} arguments The arguments property of a function
-    @returns {Array} An array containing the elements of arguments parameter
-  */
-  _argumentsToArray: function(args) {
-    if (!args) return [];
-    var a = [];
-    for (var i = 0; i < args.length; i++) {
-      a[i] = args[i];
-    }
-    return a;
-  },
-
-  /**
-    @private
-
-    Formats the arguments array of a function by creating a string
-    with SC.LOGGER_LOG_DELIMITER between the elements.
-
-    @returns {String} A string of formatted arguments
-  */
-  _argumentsToString: function() {
-    var s = "";
-    for (var i = 0; i<arguments.length - 1; i++) {
-      s += arguments[i] + SC.LOGGER_LOG_DELIMITER;
-    }
-    s += arguments[arguments.length-1];
-    return s;
+    return this;
   }
 
 });
+
+SC.log = function() {
+  return SC.Logger.log.apply(SC.Logger, arguments);
+};
