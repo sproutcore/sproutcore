@@ -76,19 +76,17 @@ Handlebars.registerHelper('bindProperty', function(property, fn, inverse, data) 
   } else {
     renderContext.push(Handlebars.Utils.escapeExpression(result));
   }
-  renderContext = renderContext.end();
 
   return new Handlebars.SafeString(renderContext.join());
 });
 
 Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
   var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
-  var exampleView = SC.TemplateView.extend({ template: fn });
 
   if(collectionClass.isClass) {
-    collectionClass.prototype.exampleView = exampleView;
+    collectionClass.prototype.exampleViewTemplate = fn;
   } else {
-    collectionClass.exampleView = exampleView;
+    collectionClass.exampleViewTemplate = fn;
   }
 
   return Handlebars.helpers.view.call(this, collectionClass, Handlebars.VM.noop, inverse, data);
