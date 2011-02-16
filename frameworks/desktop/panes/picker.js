@@ -90,8 +90,8 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   around any of the preferred sides.
   
   Anchor sides are defined by their index in <code>SC.POINTER_LAYOUT</code>, where
-  right is <code>0</code>, left is <code>1</code>, above is <code>2</code>, and
-  below is <code>3</code>.
+  right is <code>0</code>, left is <code>1</code>, top is <code>2</code>, and
+  bottom is <code>3</code>.
   
   For example, the <code>preferMatrix</code> of @[3, 0, 1, 2, 2]@ says: "Display 
   below the anchor (3); if there isn't enough space then display to the right of the 
