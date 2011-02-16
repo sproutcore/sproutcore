@@ -53,3 +53,15 @@ test("template view defaults to a noop template", function() {
 
   equals(view.$().html(), '', "view div should be empty");
 });
+
+test("template views return YES to mouseDown if there is a mouseUp method", function() {
+  var view = SC.TemplateView.create();
+
+  ok(!view.tryToPerform('mouseDown'), "view returns NO if there is no mouseUp method");
+
+  view = SC.TemplateView.create({
+    mouseUp: function() { }
+  });
+
+  ok(view.tryToPerform('mouseDown'), "view returns YES if we add a mouseUp method");
+});
