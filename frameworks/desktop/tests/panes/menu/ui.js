@@ -221,3 +221,38 @@ test('Automatic Closing', function() {
   ok(!menu.get('isVisibleInWindow'), 'menu should close if anywhere other than a menu item is clicked');
 });
 
+test('aria-role attribute', function() {
+  var menuPane = SC.MenuPane.create({
+    layout: { width: 200 },
+    items: items,
+    itemCheckboxKey: 'isChecked'
+  }), menuItems,normalItem, itemWithCheckBox, separatorItem;
+  menuPane.popup();
+
+  equals(menuPane.$().attr('role'), 'menu', "menu pane should have role set");
+
+  menuItems = menuPane.get('menuItemViews');
+  normalItem        = menuItems[0];
+  itemWithCheckBox  = menuItems[1];
+  separatorItem     = menuItems[3];
+
+  equals(normalItem.$().attr('role'), 'menuitem', "normal menuitem has correct role set");
+  equals(itemWithCheckBox.$().attr('role'), 'menuitemcheckbox', "menuitem with checkbox has correct role set");
+  equals(separatorItem.$().attr('role'), 'separator', "separator menuitem has correct role set");
+  clickOn(menuPane);
+});
+
+test('aria-checked attribute', function() {
+  var menuPane = SC.MenuPane.create({
+    layout: { width: 200 },
+    items: items,
+    itemCheckboxKey: 'isChecked'
+  }),itemWithCheckBox;
+  menuPane.popup();
+
+  itemWithCheckBox = menuPane.get('menuItemViews')[1];
+
+  equals(itemWithCheckBox.$().attr('aria-checked'), "true", "checked menuitem has aria-checked attribute set");
+  clickOn(menuPane);
+});
+

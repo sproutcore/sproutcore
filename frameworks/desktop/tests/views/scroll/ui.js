@@ -37,6 +37,9 @@
       isVerticalScrollerVisible: YES,
       autohidesVerticalScroller: NO
       
+    })
+    .add("aria-controls_attribute", SC.ScrollView, {
+      contentView: iv
     });
 
     pane.show(); // add a test to show the test pane
@@ -146,5 +149,14 @@
      equals(container.get('layer').scrollLeft, 10, 'scrollLeft should be readjusted to 10');
      equals(container.get('layer').scrollTop, 10, 'scrollTop should be readjust to 10');
    });
-   
+
+   test('Scroller views of scroll view should have aria-controls set to its content', function() {
+     var view = pane.view("aria-controls_attribute"),
+         horizontalScrollerView = view.get('horizontalScrollerView'),
+         verticalScrollerView   = view.get('verticalScrollerView'),
+         contentView            = view.get('contentView');
+
+     equals(horizontalScrollerView.$().attr('aria-controls'), contentView, "horizontalScroller has aria-controls set");
+     equals(verticalScrollerView.$().attr('aria-controls'), contentView, "verticalScroller has aria-controls set");
+   });
 })();

@@ -44,7 +44,25 @@ SC.ImageView = SC.View.extend(SC.Control,
   /** Image views contain an img tag. */
   classNames: 'sc-image-view',
   tagName: 'img',
-  
+
+  /**
+    The WAI-ARIA role for image view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'img',
+
+  /**
+    The WAI-ARIA attribute for the image view. This property is assigned to
+    'aria-labelledby' attribute, which defines a string value that labels the
+    element. Used to support voiceover. It should be assigned a non-empty string,
+    if the 'aria-labelledby' attribute has to be set for the element.
+
+    @property {String}
+  */
+  ariaLabeledBy: null,
+
   /**
     Current load status of the image.
     
@@ -117,6 +135,11 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (SC.typeOf(toolTip) === SC.T_STRING) {
       context.attr('title', toolTip) ;
       context.attr('alt', toolTip) ;
+    }
+
+    //adressing accessibility
+    if(this.get('ariaLabeledBy') !== ""){
+      context.attr("aria-labelledby", this.get('ariaLabeledBy'));
     }
   },
   

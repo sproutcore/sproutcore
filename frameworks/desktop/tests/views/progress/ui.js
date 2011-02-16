@@ -42,6 +42,43 @@ var pane = SC.ControlTestPane.design()
     minimum: 0,
     maximum: 50
   })
+  .add("progress aria-role", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 10,
+    minimum: 0,
+    maximum: 50
+  })
+  .add("progress aria-valuemax", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 40,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("progress aria-valuemin", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 20,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("progress aria-valuenow", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 40,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("progress aria-valuetext", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 20,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("progress aria-disabled", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 50,
+    minimum: 0,
+    maximum: 100,
+    isEnabled: NO
+  })
   
   // Slider View UI
   .add("slider basic", SC.SliderView, {
@@ -69,6 +106,42 @@ var pane = SC.ControlTestPane.design()
     minimum: 0, 
     maximum: 100,
     step: 20
+  })
+  .add("slider aria-role", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 10,
+    minimum: 0,
+    maximum: 50
+  })
+  .add("slider aria-valuemax", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 40,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("slider aria-valuemin", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 20,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("slider aria-valuenow", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 40,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("slider aria-valuetext", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 20,
+    minimum: 0,
+    maximum: 100
+  })
+  .add("slider aria-orientation", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 50,
+    minimum: 0,
+    maximum: 100
   });
 
 pane.show(); // add a test to show the test pane
@@ -242,6 +315,31 @@ test("changing value to a string", function() {
   setTimeout(assertions, 200);
 });
 
+test("Check if aria role is set to progress view", function() {
+  var viewElem = pane.view('progress aria-role').$();
+  ok(viewElem.attr('role') === 'progressbar', 'aria-role is set to the progress view');
+});
+
+test("Check if attribute aria-valuemax is set correctly", function() {
+  var viewElem = pane.view('progress aria-valuemax').$();
+  equals(viewElem.attr('aria-valuemax'), 100, 'aria-valuemax should be 100');
+});
+
+test("Check if attribute aria-valuemin is set correctly", function() {
+  var viewElem = pane.view('progress aria-valuemin').$();
+  equals(viewElem.attr('aria-valuemin'), 0, 'aria-valuemin should be 0');
+});
+
+test("Check if attribute aria-valuenow is set correctly", function() {
+  var viewElem = pane.view('progress aria-valuenow').$();
+  equals(viewElem.attr('aria-valuenow'), 0.4, 'aria-valuenow should be 0.4');
+});
+
+test("Check if attribute aria-valuetext is set correctly", function() {
+  var viewElem = pane.view('progress aria-valuetext').$();
+  equals(viewElem.attr('aria-valuetext'), 0.2, 'aria-valuetext should be 0.2');
+});
+
 
 // ..........................................................
 // SC.SliderView
@@ -283,5 +381,35 @@ test("basic step 20", function() {
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
   equals(view.$('.sc-handle').css('left'), '60%', 'left of sc-handle should be 60%');
+});
+
+test("Check if aria role is set to slider view", function() {
+  var viewElem = pane.view('slider aria-role').$();
+  ok(viewElem.attr('role') === 'slider', 'aria-role is set to the slider  view');
+});
+
+test("Check if attribute aria-valuemax is set correctly", function() {
+  var viewElem = pane.view('slider aria-valuemax').$();
+  equals(viewElem.attr('aria-valuemax'), 100, 'aria-valuemax should be 100');
+});
+
+test("Check if attribute aria-valuemin is set correctly", function() {
+  var viewElem = pane.view('slider aria-valuemin').$();
+  equals(viewElem.attr('aria-valuemin'), 0, 'aria-valuemin should be 0');
+});
+
+test("Check if attribute aria-valuenow is set correctly", function() {
+  var viewElem = pane.view('slider aria-valuenow').$();
+  equals(viewElem.attr('aria-valuenow'), 40, 'aria-valuenow should be 40');
+});
+
+test("Check if attribute aria-valuetext is set correctly", function() {
+  var viewElem = pane.view('slider aria-valuetext').$();
+  equals(viewElem.attr('aria-valuetext'), 20, 'aria-valuetext should be 20');
+});
+
+test("Check if attribute aria-orientation is set correctly", function() {
+  var viewElem = pane.view('slider aria-orientation').$();
+  equals(viewElem.attr('aria-orientation'), "horizontal", 'aria-orientation should be horizontal');
 });
 })();

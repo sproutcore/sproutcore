@@ -88,3 +88,31 @@ test('hasButtons', function() {
   equals(view2.$('.endcap').length, 1, 'scrollers with buttons should have an endcap');
   equals(view2.$('.button-bottom, .button-top').length, 0, 'scrollers with buttons should not have an up or a down button');  
 });
+
+test('aria-role', function() {
+  var viewElem = view.$();
+  equals(viewElem.attr('role'), 'scrollbar', 'aria role set to the scroller');
+});
+
+test('aria-orientation', function(){
+  var viewElem = view.$();
+  equals(viewElem.attr('aria-orientation'), 'vertical', 'default aria-orientation should be vertical');
+});
+
+test('aria-valuemax', function(){
+  var viewElem = view1.$();
+  equals(viewElem.attr('aria-valuemax'), 100, 'aria-maximum attribute should be 100');
+});
+
+test('aria-valuemin', function(){
+  var viewElem = view1.$();
+  equals(viewElem.attr('aria-valuemin'), 10, 'aria-min attribute should be 10');
+});
+
+test('aria-valuenow', function(){
+  var viewElem;
+  view2.set('value', 80);
+  SC.RunLoop.begin().end();
+  viewElem = view2.$();
+  equals(viewElem.attr('aria-valuenow'), 80, 'aria-now attribute should be 10');
+});

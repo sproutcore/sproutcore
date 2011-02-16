@@ -17,8 +17,10 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     })
     .add("image_loaded", SC.ImageView, { 
       value: appleURL, status:'loaded', layout : {width: 200, height: 300}
+    })
+    .add("image_role", SC.ImageView, {
+      value: appleURL, status:'loaded', ariaLabeledBy: 'image view', layout : {width: 200, height: 300}
     });
-    
     pane.show();
 
 
@@ -33,7 +35,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       view.set('value', appleURL);
       ok(view.get('status') !== 'loaded', 'PRECOND - status should not be loaded (status=%@)'.fmt(view.get('status')));
      
-      var url = view.$().attr('src')
+      var url = view.$().attr('src');
   ok((url.indexOf('base64')!=-1) || (url.indexOf('blank.gif')!=-1), "The src should be blank URL. url = %@".fmt(url));    
     });
     
@@ -55,5 +57,10 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       ok((imageView.$().attr('alt') === testToolTip), "The alt attribute should be set to \"" + testToolTip + "\"");
     });
     
+    test("Verify that the role for image view is img", function() {
+      var imageView = pane.view('image_role');
+      equals(imageView.$().attr('role'),'img', "The role attribute should be set to img");
+      equals(imageView.$().attr('aria-labelledby'),'image view', "The aria-labelledby attribute should be set to image view");
+    });
 })();
   

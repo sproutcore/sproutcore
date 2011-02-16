@@ -136,4 +136,29 @@ test("Check that properties are mapped correctly", function() {
    
   });
 
+  test("Check that aria-selected is set to correct values, based on the state of the segment", function() {
+    view.triggerItemAtIndex(1);
+    SC.RunLoop.begin();
+    view.set('isEnabled', YES);
+    SC.RunLoop.end();
 
+    var segments = view.get('childViews'),
+    segment1     = segments[0],
+    layer, segmentEvent;
+
+    //aria-selected should be false when segment is not selected
+    equals(segment1.$().attr('aria-selected'), "false", "aria-selected is set to false when segment is not selected");
+
+    layer = segment1.get('layer');
+
+    //trigerring mousedown
+    segmentEvent = SC.Event.simulateEvent(layer, 'mousedown', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
+    SC.Event.trigger(layer, 'mousedown', [segmentEvent]);
+
+    //trigerring mouseup
+    segmentEvent = SC.Event.simulateEvent(layer, 'mouseup', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
+    SC.Event.trigger(layer, 'mouseup', [segmentEvent]);
+
+    //aria-selected should be true when segment is selected
+    equals(segment1.$().attr('aria-selected'), "true", "aria-selected is set to true when segment is selected");
+  });

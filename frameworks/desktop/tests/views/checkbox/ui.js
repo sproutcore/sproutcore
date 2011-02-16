@@ -36,6 +36,16 @@ var pane = SC.ControlTestPane.design()
     useStaticLayout: YES, 
     layout: { width: 'auto', right: 'auto' },
     title: 'Different Length Title'
+  })
+
+  .add("role", SC.CheckboxView, {
+    value: YES, title: "role-checkbox"
+  })
+
+  .add("aria-label", SC.CheckboxView, {
+    value: NO, title: "aria-label",
+    ariaLabel:'TEXT BOX',
+    ariaLabeledBy: 'TEXT BOX1'
   });
 
 pane.show(); // add a test to show the test pane
@@ -91,5 +101,16 @@ test("disabled - selected", function() {
   
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
+});
+
+test("role", function() {
+  var view = pane.view('role');
+  equals(view.$().attr('role'),'checkbox', 'should have role as checkbox');
+});
+
+test("aria-label", function() {
+  var view = pane.view('aria-label');
+  equals(view.$().attr('aria-label'),'TEXT BOX', 'should have ariaLabel as TEXT-BOX');
+  equals(view.$().attr('aria-labelledby'),'TEXT BOX1', 'should have ariaLabeledby as TEXT-BOX1');
 });
 })();

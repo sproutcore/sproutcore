@@ -9,8 +9,8 @@
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
-var itemList = [{ title: "Red", value: "red", enabled: YES }, { title: "Green", value: "green" }, { title: "Blue", value: "blue" }],
-itemList2 = [{ title: "Cyan", value: "cyan", enabled: YES }, { title: "Magenta", value: "magenta" }, { title: "Yellow", value: "yellow" },{ title: "blacK", value: "black"}],
+var itemList = [{ title: "Red", value: "red", enabled: YES,ariaLabeledBy: "color" }, { title: "Green", value: "green",ariaLabeledBy: "color"  }, { title: "Blue", value: "blue",ariaLabeledBy: "color" }],
+itemList2 = [{ title: "Cyan", value: "cyan", enabled: YES,ariaLabel: "itemList1" }, { title: "Magenta", value: "magenta",ariaLabel: "itemList1"  }, { title: "Yellow", value: "yellow",ariaLabel: "itemList1"  },{ title: "blacK", value: "black",ariaLabel: "itemList1" }],
 itemList3 = [{ title: "Red", value: "red", enabled: YES, width: 30 }, { title: "Green", value: "green", width: 50 }, { title: "Blue", value: "blue", width: 40 }];
 
 var pane = SC.ControlTestPane.design()
@@ -67,8 +67,45 @@ var pane = SC.ControlTestPane.design()
     itemTitleKey: 'title',
     itemValueKey: 'value',
     itemWidthKey: 'width'
-  });
+  })
 
+  .add("aria-role-group", SC.RadioView, {
+    value: "",
+    isEnabled: YES,
+    items: itemList,
+    itemTitleKey: 'title',
+    itemValueKey: 'value',
+    layoutDirection: SC.LAYOUT_HORIZONTAL
+  })
+
+  .add("aria-role-radio", SC.RadioView, {
+    value: "",
+    isEnabled: YES,
+    items: itemList,
+    itemTitleKey: 'title',
+    itemValueKey: 'value',
+    layoutDirection: SC.LAYOUT_HORIZONTAL
+  })
+
+  .add("aria-label", SC.RadioView, {
+    value: "",
+    isEnabled: YES,
+    items: itemList2,
+    itemAriaLabelKey: 'ariaLabel',
+    itemTitleKey: 'title',
+    itemValueKey: 'value',
+    layoutDirection: SC.LAYOUT_HORIZONTAL
+  })
+
+  .add("aria-labeledBy", SC.RadioView, {
+    value: "",
+    isEnabled: YES,
+    items: itemList,
+    itemAriaLabeledByKey: 'ariaLabeledBy',
+    itemTitleKey: 'title',
+    itemValueKey: 'value',
+    layoutDirection: SC.LAYOUT_HORIZONTAL
+  });
 pane.show(); // add a test to show the test pane
 
 pane.verifyButtons = function verifyButtons(view, items) {
@@ -249,5 +286,58 @@ test("item widths", function() {
   radioButtons.forEach(function(elem) {
     equals(SC.$(elem).width(), widths[idx], 'radio button %@ should width specified by itemWidthKey'.fmt(idx, widths[idx]));
     idx++;
+  });
+ }); 
+
+test("aria-role-group", function() {
+  var radioButton = pane.view('aria-role-group');
+  equals(radioButton.$().attr('role'),'radiogroup', 'role should be radiogroup');
+});
+
+test("aria-role-radio", function() {
+  var radioButtons = pane.view('aria-role-radio').$('.sc-radio-button');
+
+  var i = 0;
+  radioButtons.forEach(function(radioInput) {
+    var theInput = SC.$(radioInput),
+      idx = parseInt(theInput.attr('index'),0),
+      buttonValue = theInput.attr('value');
+
+    equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
+    equals(theInput.attr('role'), 'radio', 'radio button #%@ should have role as radio'.fmt(idx));
+
+    i++;
+  });
+});
+
+test("aria-label", function() {
+  var radioButtons = pane.view('aria-label').$('.sc-radio-button');
+
+  var i = 0;
+  radioButtons.forEach(function(radioInput) {
+    var theInput = SC.$(radioInput),
+      idx = parseInt(theInput.attr('index'),0),
+      buttonValue = theInput.attr('value');
+
+    equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
+    equals(theInput.attr('aria-label'), 'itemList1', 'radio button #%@ should have aria-label as itemList1'.fmt(idx));
+
+    i++;
+  });
+});
+
+test("aria-labeledBy", function() {
+  var radioButtons = pane.view('aria-labeledBy').$('.sc-radio-button');
+
+  var i = 0;
+  radioButtons.forEach(function(radioInput) {
+    var theInput = SC.$(radioInput),
+      idx = parseInt(theInput.attr('index'),0),
+      buttonValue = theInput.attr('value');
+
+    equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
+    equals(theInput.attr('aria-labelledby'), 'color', 'radio button #%@ should have aria-labelledby as color'.fmt(idx));
+
+    i++;
   });
 });

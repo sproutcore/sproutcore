@@ -26,7 +26,35 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
 
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
   tagName: 'label',
+
+  /**
+    The WAI-ARIA role of checkbox. This property's value should not be
+    changed.
+
+    @property {String}
+  */
   ariaRole: 'checkbox',
+
+  /**
+    The WAI-ARIA attribute for the checkbox. This property is assigned to
+    'aria-labelledby' attribute, which defines a string value that labels the
+    checkbox element. Used to support voiceover.It should be assigned a non-empty
+    string, if the 'aria-labelledby' attribute has to be set for the element.
+
+    @property {String}
+  */
+  ariaLabeledBy: null,
+
+  /**
+    The WAI-ARIA attribute for the checkbox. This property is assigned to
+    'aria-label' attribute, which defines a string value that labels the
+    checkbox element. Used to support voiceover. It is used when it is not
+    possible to have a visible label on the screen. It should be assigned a non-empty
+    string, if the 'aria-label' attribute has to be set for the element.
+
+    @property {String}
+  */
+  ariaLabel: null,
 
   // no special theme for Checkbox; button defaults to 'square', so we have to stop that.
   themeName: null,

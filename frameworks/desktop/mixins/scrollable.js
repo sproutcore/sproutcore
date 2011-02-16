@@ -31,7 +31,7 @@ SC.Scrollable = {
     Must always be true.
   */
   isScrollable: true,
-  
+
   /** 
     Amount to scroll one vertical line.
   

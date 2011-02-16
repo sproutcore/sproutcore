@@ -117,7 +117,9 @@ SC.TabView = SC.View.extend(
     
     containerView = this.containerView.extend(SC.Border, {
       layout: layout,
-      borderStyle: SC.BORDER_BLACK
+      borderStyle: SC.BORDER_BLACK,
+      //adding the role
+      ariaRole: 'tabpanel'
     });
 
     view = this.containerView = this.createChildView(containerView) ;

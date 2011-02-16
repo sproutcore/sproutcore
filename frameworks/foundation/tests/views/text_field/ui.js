@@ -54,9 +54,33 @@
     value: 'John Doe',
     isTextArea: YES,
     isEnabled: NO
+  })
+  
+  .add("aria-role", SC.TextFieldView, {
+    hint: "Full Name", 
+    value: 'John Doe',
+    isTextArea: YES,
+    isEnabled: YES
+  })
+
+  .add("aria-multiline", SC.TextFieldView, {
+    hint: "Full Name", 
+    value: 'John Doe',
+    isTextArea: YES,
+    isEnabled: YES
+  })
+  
+  .add("aria-disabled",SC.TextFieldView, {
+    hint: "Full Name", 
+    value: 'John Doe',
+    isTextArea: YES,
+    isEnabled: NO
+  })
+
+  .add("aria-invalid", SC.TextFieldView, {
+      value: SC.Error.create({errorValue:'Error Message'}),
+      isEnabled: YES
   });
-  
-  
     
 pane.show(); // add a test to show the test pane
 
@@ -527,4 +551,27 @@ test("editing a field should not change the cursor position", function() {
   ok(selection.get('start') == 2 && selection.get('end') == 3, 'cursor position should be unchanged');
 });
 
+test("should have role as textbox", function() {
+  var view = pane.view('aria-role');
+  var label = view.$();  
+  equals(label.attr('role'), 'textbox', 'role should be textbox');
+});
+
+test("should have aria-multiline as YES", function() {
+  var view = pane.view('aria-multiline');
+  var label = view.$();  
+  equals(label.attr('aria-multiline'), 'true', 'aria-multiline should be true');
+});
+
+test("should have aria-disabled as YES", function() {
+  var view = pane.view('aria-disabled');
+  var label = view.$();  
+  equals(label.attr('aria-disabled'), 'true', 'aria-disabled should be true');
+});
+
+test("should have aria-invalid as YES", function() {
+  var view = pane.view('aria-invalid');
+  var label = view.$();
+  equals(label.attr('aria-invalid'), 'true', 'aria-invalid should be true');
+});
 })();

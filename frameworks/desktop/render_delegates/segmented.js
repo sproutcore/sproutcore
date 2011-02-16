@@ -19,10 +19,18 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
   render: function(dataSource, context) {  
     // Use text-align to align the segments
     context.addStyle('text-align', dataSource.get('align'));
+
+    // addressing accessibility
+    context.attr('role', 'tablist');
+
   },
   
   update: function(dataSource, jquery) {
     jquery.css('text-align', dataSource.get('align'));
+
+    // addressing accessibility
+    jquery.attr('role', 'tablist');
+
   },
   
   /**
