@@ -14,28 +14,31 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }
   },
 
+  exampleView: "SC.TemplateView",
+
   exampleViewClass: function() {
     var exampleView = this.get('exampleView');
+
+
     if(SC.typeOf(exampleView) === SC.T_STRING) {
-      return SC.objectForPropertyPath(exampleView);
-    } else {
-      return exampleView;
+      exampleView = SC.objectForPropertyPath(exampleView);
     }
+
+    if (this.get('exampleViewTemplate')) {
+      exampleView = exampleView.extend({
+        template: this.get('exampleViewTemplate')
+      });
+    }
+    return exampleView;
   }.property('exampleView').cacheable(),
 
   contentDidChange: function() {
-    var content = this.get('content');
+    this.removeAllChildren();
+    this.$().empty();
+    this.didCreateLayer();
 
-    if (content !== this._content) {
-      this.removeAllChildren();
-      this.$().empty();
-      this.didCreateLayer();
-    }
-
-    content.addRangeObserver(null, this, this.arrayContentDidChange);
-
-    this._content = content;
-  }.observes('content'),
+    this.get('content').addRangeObserver(null, this, this.arrayContentDidChange);
+  }.observes('content').observes('content.[]'),
 
   arrayContentDidChange: function(array, objects, key, indexes) {
     var content = this.get('content'),
@@ -53,8 +56,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         toDestroy.push(view);
       }
     }
+
     for (i=0, length=toDestroy.length; i < length; i++) { toDestroy[i].destroy(); }
-    for (i=0, length=toReuse.length; i < length; i++) { toReuse[i].$().remove(); }
 
     childViews = [];
 
@@ -68,10 +71,9 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
           context: item,
           tagName: 'li'
         }));
+        view.createLayer().$().appendTo(this.$());
       }
       childViews.push(view);
-
-      view.createLayer().$().appendTo(this.$());
     }
 
     this.childViews = childViews;
