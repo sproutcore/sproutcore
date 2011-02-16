@@ -83,6 +83,18 @@ SC.Logger = SC.Object.create(
     return this;
   },
 
+  /**
+    @since SproutCore 1.5
+    @param {Boolean} keepConsole If NO, remove console from reporters as well
+    @returns {SC.Logger}
+  */
+  clearReporters: function(keepConsole) {
+    var ret = [];
+    if (keepConsole) ret.push(console);
+    this.set('reporters', ret);
+    return this;
+  },
+
   // ..........................................................
   // LOGGING SUPPORT
   //
