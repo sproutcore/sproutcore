@@ -52,7 +52,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {SC.Store}
   */
   store: function() {
-    return this.get('record').get('store');
+    return this.getPath('record.store');
   }.property('record').cacheable(),
   
   /**
@@ -62,7 +62,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {Number}
   */
   storeKey: function() {
-    return this.get('record').get('storeKey');
+    return this.getPath('record.storeKey');
   }.property('record').cacheable(),
   
   /**
@@ -118,7 +118,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   objectAt: function(idx) {
     var recs      = this._records, 
         children = this.get('readOnlyChildren'),
-        hash, ret;
+        hash, ret, pname = this.get('propertyName'),
+        parent = this.get('record');
     var len = children ? children.length : 0;
     
     if (!children) return undefined; // nothing to do
@@ -131,7 +132,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!hash) return undefined;
     
     // not in cache, materialize
-    recs[idx] = ret = this._materializeChild(hash);
+    recs[idx] = ret = parent.registerNestedRecord(hash, pname, pname+'.'+idx);
     
     return ret;
   },
@@ -143,18 +144,30 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   replace: function(idx, amt, recs) {
     var children = this.get('editableChildren'), 
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
-        record   = this.get('record'),
+        record   = this.get('record'), newRecs,
         
         pname    = this.get('propertyName'),
-        cr, recordType;  
-    children.replace(idx, amt, recs);
-    for(var i = idx; i <= idx+amt; i+=1){
-      this.objectAt(i);
-    }
+        cr, recordType;
+    newRecs = this._processRecordsToHashes(recs);
+    children.replace(idx, amt, newRecs);
     // notify that the record did change...
     record.recordDidChange(pname);
-    
+  
     return this;
+  },
+  
+  _processRecordsToHashes: function(recs){
+    var store, sk;
+    recs = recs || [];
+    recs.forEach( function(me, idx){
+      if (me.isNestedRecord){
+        store = me.get('store');
+        sk = me.storeKey;
+        recs[idx] = store.readDataHash(sk);
+      }
+    });
+    
+    return recs;
   },
   
   /*
@@ -170,57 +183,24 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //  
   
-  /** @private
-    Call to create an object from a hash
-  */
-  _materializeChild: function(hash){
-    var store = this.get('store'),
-        parentRecord = this.get('record'), 
-        recordType = this.get('defaultRecordType'),
-        id, ret, storeKey, pm;
-        
-    // Find the record type
-    if (!parentRecord) return undefined;
-    var nspace = parentRecord.get('childRecordNamespace');
-    // Get the record type.
-    if (hash.type && !SC.none(nspace)) {
-      recordType = nspace[hash.type];
-    }
-
-    if (!recordType || SC.typeOf(recordType) !== SC.T_CLASS) {
-      throw 'ChildrenArray: Error during transform: Invalid record type.';
-    }
-    
-    pm = recordType.prototype.primaryKey || 'childRecordKey';
-    id = hash[pm];
-    storeKey = store.storeKeyExists(recordType, id);
-    if (storeKey){
-      ret = store.materializeRecord(storeKey);
-    } 
-    else {
-      ret = parentRecord.registerChildRecord(recordType, hash);
-    }
-    return ret;
-  },
-
   /** @private 
     Invoked whenever the children array changes.  Observes changes.
   */
   recordPropertyDidChange: function(keys) {
-    
     if (keys && !keys.contains(this.get('propertyName'))) return this;
     
     var children = this.get('readOnlyChildren');
     var prev = this._prevChildren, f = this._childrenContentDidChange;
     
     if (children === prev) return this; // nothing to do
-    
+        
     if (prev) prev.removeObserver('[]', this, f);
     this._prevChildren = children;
     if (children) children.addObserver('[]', this, f);
     
     var rev = (children) ? children.propertyRevision : -1 ;
     this._childrenContentDidChange(children, '[]', children, rev);
+    return this;
   },
 
   /** @private

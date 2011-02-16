@@ -275,3 +275,21 @@ test("Child views created using the view helper should have their parent view se
   var childView = view.childViews[0].childViews[0];
   equals(childView, childView.childViews[0].parentView, 'parent view is correct');
 });
+
+test("Collection views that specify an example view class have their children be of that class", function() {
+  TemplateTests.ExampleViewCollection = SC.TemplateCollectionView.create({
+    exampleView: SC.TemplateView.extend({
+      isCustom: YES
+    }),
+
+    content: ['foo']
+  });
+
+  var parentView = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection "TemplateTests.ExampleViewCollection"}}OHAI{{/collection}}')
+  });
+
+  parentView.createLayer();
+
+  ok(parentView.childViews[0].childViews[0].isCustom, "uses the example view class");
+});
