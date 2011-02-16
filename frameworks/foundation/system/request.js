@@ -196,6 +196,8 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   // HELPER METHODS
   // 
 
+  concatenatedProperties: 'COPY_KEYS',
+
   COPY_KEYS: 'isAsynchronous isJSON isXML address type timeout body responseClass willSend didSend willReceive didReceive'.w(),
   
   /**
