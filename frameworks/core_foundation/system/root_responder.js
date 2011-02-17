@@ -1380,7 +1380,7 @@ SC.RootResponder = SC.Object.extend({
       for (idx = 0; idx < len; idx++) {
         touch = touches[idx];
         touchEntry = this._touches[touch.identifier];
-        touchEntry.event = null;
+        if (touchEntry) touchEntry.event = null;
       }
     }, this);
 
