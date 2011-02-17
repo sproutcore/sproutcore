@@ -22,6 +22,7 @@ module("SC.SegmentedView", {
           itemTitleKey: 'value',
           itemValueKey: 'value',
           itemIconKey: 'icon',
+          itemActionKey: 'action',
           value: "Item1 Item3".w(),
           allowsEmptySelection: NO,
           layout: { height: 25 } 
