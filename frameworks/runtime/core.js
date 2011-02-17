@@ -255,7 +255,7 @@ SC.mixin(/** @scope SC */ {
       return false;
     } else if ( obj.objectAt ) {
       return true ;
-    } else if ( obj.length && jQuery.type(obj) === "object" ) {
+    } else if ( obj.length !== undefined && jQuery.type(obj) === "object" ) {
       return true;
     }
 
