@@ -272,12 +272,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     A hash of child Records and there immediate parents
   */
-  childRecords: null,
+  childRecords: {},
   
   /**
     A hash of parent records with registered children
   */
-  parentRecords: null,
+  parentRecords: {},
   
   // ..........................................................
   // CORE ATTRIBUTE API
