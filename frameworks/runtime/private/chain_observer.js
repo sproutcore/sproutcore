@@ -86,12 +86,26 @@ SC._ChainObserver.prototype = {
 
     // if a new object, add observer on it...
     this.object = newObject ;
-    if (this.object && this.object.addObserver) {
-      this.object.addObserver(this.property, this, this.propertyDidChange);
-    }
 
-    // now, notify myself that my property value has probably changed.
-    this.propertyDidChange() ;
+    // when [].propName is used, we will want to set up observers on each item
+    // added to the Enumerable, and remove them when the item is removed from
+    // the Enumerable.
+    //
+    // In this case, we invoke addEnumerableObserver, which handles setting up
+    // and tearing down observers as items are added and removed from the
+    // Enumerable.
+    if (this.property === '[]' && this.next) {
+      if (this.object && this.object.addEnumerableObserver) {
+        this.object.addEnumerableObserver(this.next.property, this, this.propertyDidChange);
+      }
+    } else {
+      if (this.object && this.object.addObserver) {
+        this.object.addObserver(this.property, this, this.propertyDidChange);
+      }
+
+      // now, notify myself that my property value has probably changed.
+      this.propertyDidChange() ;
+    }
   },
 
   // the observer method invoked when the observed property changes.

@@ -815,11 +815,113 @@ SC.Reducers = /** @lends SC.Enumerable */ {
 
     @param {Number} start optional start offset for the content change
     @param {Number} length optional length of change
+    @param {Number} delta if you added or removed objects, the delta change
+    @param {Array} addedObjects the objects that were added
+    @param {Array} removedObjects the objects that were removed
     @returns {Object} receiver
   */
-  enumerableContentDidChange: function(start, length) {
+  enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
+    if (!addedObjects) { addedObjects = this; }
+    if (!removedObjects) { removedObjects = []; }
+
+    this._setupEnumerableObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
+
     return this ;
+  },
+
+  /**
+    @private
+
+    Clones a segment of an observer chain and applies it
+    to an element of this Enumerable.
+
+    @param {SC._ChainObserver} chainObserver the chain segment to begin from
+  */
+  _resumeChainObservingForItemWithChainObserver: function(item, chainObserver) {
+    var observer = SC.clone(chainObserver);
+    var key = observer.next.property;
+
+    // The chain observer should create new observers on the child object
+    observer.object = item;
+    item.addObserver(key, observer, observer.propertyDidChange);
+
+    // Maintain a list of observers on the item so we can remove them
+    // if it is removed from the enumerable.
+    item._kvo_for(SC.keyFor('_kvo_enumerable_observers', key)).push(observer);
+  },
+
+  /**
+    @private
+
+    When enumerable content has changed, remove enumerable observers from
+    items that are no longer in the enumerable, and add observers to newly
+    added items.
+
+    @param {Array} addedObjects the array of objects that have been added
+    @param {Array} removedObjects the array of objects that have been removed
+  */
+  _setupEnumerableObservers: function(addedObjects, removedObjects) {
+    // Get the list of keys for which this enumerable has enumerable observers
+    var observedKeys = this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet);
+    var kvoKey;
+
+    // Only setup and teardown enumerable observers if we have keys to observe
+    if (observedKeys.get('length') > 0) {
+      // Loop through removed objects and remove any enumerable observers that
+      // belong to them.
+      removedObjects.forEach(function(item) {
+        item._kvo_for('_kvo_enumerable_observers').forEach(function(observer) {
+          // Remove the observer if it is pointing at this enumerable.
+          // If the observer belongs to another enumerable, just ignore it.
+          if (observer.object === this) {
+            item.removeObserver(observer.key, observer, observer.propertyDidChange);
+          }
+        });
+      });
+
+      // For every enumerable observer, iterate over the new objects being
+      // added and resume the chain observer.
+      observedKeys.forEach(function(key) {
+        kvoKey = SC.keyFor('_kvo_enumerable_observers', key);
+
+        // Get all original ChainObservers associated with the key
+        this._kvo_for(kvoKey).forEach(function(observer) {
+          addedObjects.forEach(function(item) {
+            this._resumeChainObservingForItemWithChainObserver(item, observer);
+          }, this);
+          observer.propertyDidChange();
+        }, this);
+      }, this);
+    }
+  },
+
+  /**
+    @private
+
+    Adds an enumerable observer. Enumerable observers are able to
+    propagate chain observers to each member item in the enumerable,
+    so that the observer is fired whenever a single item changes.
+
+    You should never call this method directly. Instead, you should
+    call addObserver() with the special '[]' property in the path.
+
+    For example, if you wanted to observe changes to each item's isDone
+    property, you could call:
+
+        arrayController.addObserver('[].isDone');
+  */
+  addEnumerableObserver: function(key, target) {
+    // Add the key to a set so we know what we are observing
+    this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet).push(key);
+
+    // Add the passed ChainObserver to an ObserverSet for that key
+    var kvoKey = SC.keyFor('_kvo_enumerable_observers', key);
+    this._kvo_for(kvoKey).push(target);
+
+    this.forEach(function(item) {
+      this._resumeChainObservingForItemWithChainObserver(item, target);
+    }, this);
   },
 
   /**
