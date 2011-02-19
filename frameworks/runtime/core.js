@@ -8,9 +8,9 @@
 /*global NodeList */
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
-var require = require || function require() { } ;
-var sc_require = sc_require || require;
-var sc_resource = sc_resource || function sc_resource() {};
+if (!window.require) { window.require = function require(){}; }
+if (!window.sc_require) { window.sc_require = require };
+if (!window.sc_resource) {window.sc_resource = function sc_resource(){}; }
 sc_require('license') ;
 
 // ........................................
@@ -19,8 +19,8 @@ sc_require('license') ;
 // Most global constants should be defined inside of the SC namespace.
 // However the following two are useful enough and generally benign enough
 // to put into the global object.
-var YES = true ;
-var NO = false ;
+window.YES = true ;
+window.NO = false ;
 
 // prevent a console.log from blowing things up if we are on a browser that
 // does not support it
@@ -54,8 +54,8 @@ if (typeof console === 'undefined') {
   The core Base framework is based on the jQuery API with a number of
   performance optimizations.
 */
-var SC = SC || {} ;
-var SproutCore = SproutCore || SC ;
+window.SC = window.SC || {} ;
+window.SproutCore = window.SproutCore || SC ;
 
 SC.VERSION = '1.5.0.pre.3';
 
