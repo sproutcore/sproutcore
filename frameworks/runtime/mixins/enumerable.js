@@ -843,6 +843,12 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     observer.object = item;
     item.addObserver(key, observer, observer.propertyDidChange);
 
+    // if we're in the initial chained observer setup phase, add the tail
+    // of the current observer segment to the list of tracked tails.
+    if(chainObserver.root.tails) {
+      chainObserver.root.tails.pushObject(observer.tail());
+    }
+
     observer.propertyDidChange();
 
     // Maintain a list of observers on the item so we can remove them
@@ -924,7 +930,7 @@ SC.Reducers = /** @lends SC.Enumerable */ {
 
         arrayController.addObserver('[].isDone');
   */
-  addEnumerableObserver: function(key, target) {
+  addEnumerableObserver: function(key, target, action) {
     // Add the key to a set so we know what we are observing
     this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet).push(key);
 
@@ -932,9 +938,8 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     var kvoKey = SC.keyFor('_kvo_enumerable_observers', key);
     this._kvo_for(kvoKey).push(target);
 
-    this.forEach(function(item) {
-      this._resumeChainObservingForItemWithChainObserver(item, target);
-    }, this);
+    // set up chained observers on the initial content
+    this._setupEnumerableObservers(this);
   },
 
   /**
