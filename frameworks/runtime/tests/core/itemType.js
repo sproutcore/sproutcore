@@ -50,11 +50,10 @@ test("SC.isArray" ,function(){
 	var numarray      = [1,2,3],
 	    number        = 23,
 	    strarray      = ["Hello", "Hi"],
-    	string        = "Hello";
+    	string        = "Hello",
 	    object   	    = {},
       length        = {length: 12},
-      fn            = function() {},
-      nodelist      = document.getElementsByTagName("body")
+      fn            = function() {};
 
 	equals( SC.isArray(numarray), true,  "[1,2,3]" );
 	equals( SC.isArray(number),   false, "23" );
@@ -62,7 +61,11 @@ test("SC.isArray" ,function(){
 	equals( SC.isArray(string),   false, '"Hello"' );
 	equals( SC.isArray(object),   false, "{}" );
   equals( SC.isArray(length),   true,  "{length: 12}" );
-  equals( SC.isArray(window),   false, "window" )
-  equals( SC.isArray(fn),       false, "function() {}" )
-  equals( SC.isArray(nodelist), true, "NodeList" )
+  equals( SC.isArray(window),   false, "window" );
+  equals( SC.isArray(fn),       false, "function() {}" );
+
+  if (window.document) {
+    var nodelist      = document.getElementsByTagName("body")
+    equals( SC.isArray(nodelist), true, "NodeList" );
+  }
 });

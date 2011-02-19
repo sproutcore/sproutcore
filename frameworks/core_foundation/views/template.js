@@ -64,5 +64,23 @@ SC.TemplateView = SC.CoreView.extend(
   // in TemplateView, updating is handled by observers created by helpers in the
   // template. As a result, we create an empty update method so that the old
   // (pre-1.5) behavior which would force a full re-render does not get activated.
-  update: function() { }
+  update: function() { },
+
+  /**
+    Since mouseUp events will not fire unless we return YES to mouseDown, the
+    default mouseDown implementation returns YES if a mouseDown method exists.
+  */
+  mouseDown: function() {
+    if (this.mouseUp) { return YES; }
+    return NO;
+  }
+});
+
+
+SC.ready(function() {
+  // Load template source from embedded script tags (see loading.rhtml)
+  jQuery('script[type="text/x-handlebars-template"]').each(function() {
+    var self = jQuery(this);
+    SC.TEMPLATES.set(self.attr('data-template-name'), SC.Handlebars.compile(self.html()));
+  });
 });

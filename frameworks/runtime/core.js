@@ -8,9 +8,9 @@
 /*global NodeList */
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
-var require = require || function require() { } ;
-var sc_require = sc_require || require;
-var sc_resource = sc_resource || function sc_resource() {};
+if (!window.require) { window.require = function require(){}; }
+if (!window.sc_require) { window.sc_require = require };
+if (!window.sc_resource) {window.sc_resource = function sc_resource(){}; }
 sc_require('license') ;
 
 // ........................................
@@ -19,8 +19,8 @@ sc_require('license') ;
 // Most global constants should be defined inside of the SC namespace.
 // However the following two are useful enough and generally benign enough
 // to put into the global object.
-var YES = true ;
-var NO = false ;
+window.YES = true ;
+window.NO = false ;
 
 // prevent a console.log from blowing things up if we are on a browser that
 // does not support it
@@ -54,8 +54,8 @@ if (typeof console === 'undefined') {
   The core Base framework is based on the jQuery API with a number of
   performance optimizations.
 */
-var SC = SC || {} ;
-var SproutCore = SproutCore || SC ;
+window.SC = window.SC || {} ;
+window.SproutCore = window.SproutCore || SC ;
 
 SC.VERSION = '1.5.0.pre.3';
 
@@ -198,7 +198,7 @@ SC.mixin(/** @scope SC */ {
     var nativeType = jQuery.type(item);
 
     if (nativeType === "function") {
-      return item.isClass ? SC.T_CLASS : SC.T_FUNCTION
+      return item.isClass ? SC.T_CLASS : SC.T_FUNCTION;
     } else if (nativeType === "object") {
       if (item.isError) {
         return SC.T_ERROR ;
@@ -255,8 +255,8 @@ SC.mixin(/** @scope SC */ {
       return false;
     } else if ( obj.objectAt ) {
       return true ;
-    } else if ( obj.length && jQuery.type(obj) === "object" ) {
-      return true
+    } else if ( obj.length !== undefined && jQuery.type(obj) === "object" ) {
+      return true;
     }
 
     return false;
@@ -309,7 +309,7 @@ SC.mixin(/** @scope SC */ {
   // GUIDS & HASHES
   //
 
-  guidKey: jQuery.expando,
+  guidKey: jQuery.expando || ("SproutCore" + ( SC.VERSION + Math.random() ).replace( /\D/g, "" )),
 
   // Used for guid generation...
   _guidPrefixes: {"number": "nu", "string": "st"},
@@ -327,12 +327,12 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the unique guid for this instance.
   */
   guidFor: function(obj) {
+    var cache, ret,
+        type = typeof obj;
 
     // special cases where we don't want to add a key to object
     if (obj === undefined) return "(undefined)";
     if (obj === null) return "(null)";
-
-    var type = typeof obj;
 
     // Don't allow prototype changes to String etc. to change the guidFor
     if (type === SC.T_NUMBER || type === SC.T_STRING) {
@@ -344,7 +344,7 @@ SC.mixin(/** @scope SC */ {
       }
       return ret;
     } else if (type === SC.T_BOOL) {
-      return (obj) ? "(true)" : "(false)"
+      return (obj) ? "(true)" : "(false)";
     }
 
     var guidKey = this.guidKey;
@@ -354,9 +354,6 @@ SC.mixin(/** @scope SC */ {
     // lookup
     if (obj === Object) return '(Object)';
     if (obj === Array) return '(Array)';
-
-    var cache, ret;
-    var type = typeof obj;
 
     return SC.generateGuid(obj, "sc");
   },
@@ -615,8 +612,8 @@ SC.mixin(/** @scope SC */ {
       if ( deep ) {
         idx = ret.length;
         while ( idx-- ) { ret[idx] = SC.copy( ret[idx], true ); }
-        break ;
       }
+      break ;
 
     case "object":
       ret = {} ;
@@ -840,7 +837,7 @@ SC.Function = {
     return fn ;
   }
 
-}
+};
 
 SC.mixin(Function.prototype,
 /** @lends Function.prototype */ {
@@ -954,7 +951,7 @@ SC.mixin(Function.prototype,
     @returns {Function} the declared function instance
   */
   property: function() {
-    return SC.Function.property(this, arguments)
+    return SC.Function.property(this, arguments);
   },
 
   /**
@@ -993,7 +990,7 @@ SC.mixin(Function.prototype,
     @returns {Function} receiver
   */
   idempotent: function(aFlag) {
-    return SC.Function.idempotent(this, aFlag)
+    return SC.Function.idempotent(this, aFlag);
   },
 
   enhance: function() {
@@ -1023,7 +1020,7 @@ SC.CoreString = {
     }) ;
   },
   loc: function(str, formats) {
-    var str = SC.STRINGS[str] || str;
+    str = SC.STRINGS[str] || str;
     return SC.String.fmt(str, arguments) ;
   },
   w: function(str) {
@@ -1034,7 +1031,7 @@ SC.CoreString = {
     }
     return ary ;
   }
-}
+};
 
 SC.mixin(String.prototype,
 /** @lends Function.prototype */ {

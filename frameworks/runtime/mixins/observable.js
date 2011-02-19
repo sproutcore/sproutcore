@@ -5,7 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('private/observer_set') ;
+sc_require('private/observer_set');
+sc_require('private/chain_observer');
 
 /*globals logChange */
 
@@ -523,10 +524,16 @@ SC.Observable = {
     while(--idx >= lim) {
       dep = keys[idx] ;
 
-      // add dependent key to dependents array of key it depends on
-      queue = dependents[dep] ;
-      if (!queue) queue = dependents[dep] = [] ;
-      queue.push(key) ;
+      if (dep.indexOf('.') >= 0) {
+        this.addObserver(dep, this, function() {
+          this.propertyDidChange(key);
+        });
+      } else {
+        // add dependent key to dependents array of key it depends on
+        queue = dependents[dep] ;
+        if (!queue) { queue = dependents[dep] = [] ; }
+        queue.push(key) ;
+      }
     }
   },
 

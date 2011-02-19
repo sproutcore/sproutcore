@@ -646,7 +646,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         resp = this.getPath('pane.rootResponder'),
         item;
 
-    if (actionKey && (item = this.get('items').objectAt(item.index))) {
+    if (actionKey && (item = this.get('items').objectAt(index))) {
       // get the source item from the item array.  use the index stored...
       action = item.get ? item.get(actionKey) : item[actionKey];
       if (targetKey) {

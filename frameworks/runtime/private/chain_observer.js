@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('system/object');
-
 // ........................................................................
 // CHAIN OBSERVER
 //
@@ -26,8 +24,9 @@ require('system/object');
 //    })
 //  })
 //
-SC._ChainObserver = function(property) {
+SC._ChainObserver = function(property, root) {
   this.property = property ;
+  this.root = root || this ;
 } ;
 
 // This is the primary entry point.  Configures the chain.
@@ -39,17 +38,25 @@ SC._ChainObserver.createChain = function(rootObject, path, target, method, conte
       tail  = root;
 
   for(var i=1, l=parts.length; i<l; i++) {
-    tail = tail.next = new SC._ChainObserver(parts[i]) ;
+    tail = tail.next = new SC._ChainObserver(parts[i], root) ;
   }
+
+  var tails = root.tails = [tail];
 
   // Now root has the first observer and tail has the last one.
   // Feed the rootObject into the front to setup the chain...
   // do this BEFORE we set the target/method so they will not be triggered.
   root.objectDidChange(rootObject);
 
-  // Finally, set the target/method on the tail so that future changes will
-  // trigger.
-  tail.target = target; tail.method = method ; tail.context = context ;
+  tails.forEach(function(tail) {
+    // Finally, set the target/method on the tail so that future changes will
+    // trigger.
+    tail.target = target; tail.method = method ; tail.context = context ;
+  });
+
+  // no need to hold onto references to the tails; if the underlying
+  // objects go away, let them get garbage collected
+  root.tails = null;
 
   // and return the root to save
   return root ;
@@ -68,11 +75,27 @@ SC._ChainObserver.prototype = {
   // current property changes, the next observer will be notified.
   next: null,
 
+  root: null,
+
   // if not null, this is the final target observer.
   target: null,
 
   // if not null, this is the final target method
   method: null,
+
+  // an accessor method that traverses the list and finds the tail
+  tail: function() {
+    if(this._tail) { return this._tail; }
+
+    var tail = this;
+
+    while(tail.next) {
+      tail = tail.next;
+    }
+
+    this._tail = tail;
+    return tail;
+  },
 
   // invoked when the source object changes.  removes observer on old
   // object, sets up new observer, if needed.
@@ -86,12 +109,26 @@ SC._ChainObserver.prototype = {
 
     // if a new object, add observer on it...
     this.object = newObject ;
-    if (this.object && this.object.addObserver) {
-      this.object.addObserver(this.property, this, this.propertyDidChange);
-    }
 
-    // now, notify myself that my property value has probably changed.
-    this.propertyDidChange() ;
+    // when [].propName is used, we will want to set up observers on each item
+    // added to the Enumerable, and remove them when the item is removed from
+    // the Enumerable.
+    //
+    // In this case, we invoke addEnumerableObserver, which handles setting up
+    // and tearing down observers as items are added and removed from the
+    // Enumerable.
+    if (this.property === '@each' && this.next) {
+      if (this.object && this.object.addEnumerableObserver) {
+        this.object.addEnumerableObserver(this.next.property, this, this.propertyDidChange);
+      }
+    } else {
+      if (this.object && this.object.addObserver) {
+        this.object.addObserver(this.property, this, this.propertyDidChange);
+      }
+
+      // now, notify myself that my property value has probably changed.
+      this.propertyDidChange() ;
+    }
   },
 
   // the observer method invoked when the observed property changes.
@@ -104,7 +141,7 @@ SC._ChainObserver.prototype = {
 
     // if we have a next object in the chain, notify it that its object
     // did change...
-    if (this.next) this.next.objectDidChange(value) ;
+    if (this.next) { this.next.objectDidChange(value) ; }
 
     // if we have a target/method, call it.
     var target  = this.target,
