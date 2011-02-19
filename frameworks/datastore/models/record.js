@@ -855,7 +855,6 @@ SC.Record = SC.Object.extend(
         if (sk){
           store.writeDataHash(sk, hash);
           cr = store.materializeRecord(sk);
-          cr.storeDidChangeProperties();
         } else {
           cr = store.createRecord(recordType, hash) ;
           if (SC.none(id)){
