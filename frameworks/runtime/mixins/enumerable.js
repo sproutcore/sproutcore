@@ -821,9 +821,6 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     @returns {Object} receiver
   */
   enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
-    if (!addedObjects) { addedObjects = this; }
-    if (!removedObjects) { removedObjects = []; }
-
     this._setupEnumerableObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
 
@@ -839,12 +836,14 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     @param {SC._ChainObserver} chainObserver the chain segment to begin from
   */
   _resumeChainObservingForItemWithChainObserver: function(item, chainObserver) {
-    var observer = SC.clone(chainObserver);
-    var key = observer.next.property;
+    var observer = SC.clone(chainObserver.next);
+    var key = observer.property;
 
     // The chain observer should create new observers on the child object
     observer.object = item;
     item.addObserver(key, observer, observer.propertyDidChange);
+
+    observer.propertyDidChange();
 
     // Maintain a list of observers on the item so we can remove them
     // if it is removed from the enumerable.
@@ -862,7 +861,9 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     @param {Array} removedObjects the array of objects that have been removed
   */
   _setupEnumerableObservers: function(addedObjects, removedObjects) {
-    // Get the list of keys for which this enumerable has enumerable observers
+    if (!addedObjects) { addedObjects = this; }
+    if (!removedObjects) { removedObjects = []; }
+
     var observedKeys = this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet);
     var kvoKey;
 
@@ -880,17 +881,29 @@ SC.Reducers = /** @lends SC.Enumerable */ {
         });
       });
 
-      // For every enumerable observer, iterate over the new objects being
       // added and resume the chain observer.
       observedKeys.forEach(function(key) {
         kvoKey = SC.keyFor('_kvo_enumerable_observers', key);
 
+        var lastObserver;
+
         // Get all original ChainObservers associated with the key
         this._kvo_for(kvoKey).forEach(function(observer) {
-          addedObjects.forEach(function(item) {
-            this._resumeChainObservingForItemWithChainObserver(item, observer);
-          }, this);
-          observer.propertyDidChange();
+          // if there are no added objects or removed objects, this
+          // object is a proxy (like ArrayController), which does
+          // not currently receive the added or removed objects.
+          // As a result, walk down to the last element of the
+          // chain and trigger its propertyDidChange, which will
+          // invalidate anything listening.
+          if(!addedObjects.get('length') && !removedObjects.get('length')) {
+            lastObserver = observer;
+            while(lastObserver.next) { lastObserver = lastObserver.next; }
+            lastObserver.propertyDidChange();
+          } else {
+            addedObjects.forEach(function(item) {
+              this._resumeChainObservingForItemWithChainObserver(item, observer);
+            }, this);
+          }
         }, this);
       }, this);
     }
