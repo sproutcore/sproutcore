@@ -10,7 +10,7 @@ test("chained observers on enumerable properties are triggered when any item cha
   });
 
   var observerFiredCount = 0;
-  family.addObserver('momma.children.[].name', this, function() {
+  family.addObserver('momma.children.@each.name', this, function() {
     observerFiredCount++;
   });
 

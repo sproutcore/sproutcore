@@ -117,7 +117,7 @@ SC._ChainObserver.prototype = {
     // In this case, we invoke addEnumerableObserver, which handles setting up
     // and tearing down observers as items are added and removed from the
     // Enumerable.
-    if (this.property === '[]' && this.next) {
+    if (this.property === '@each' && this.next) {
       if (this.object && this.object.addEnumerableObserver) {
         this.object.addEnumerableObserver(this.next.property, this, this.propertyDidChange);
       }
