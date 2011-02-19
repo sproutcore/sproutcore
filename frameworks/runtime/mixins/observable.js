@@ -5,7 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('private/observer_set') ;
+sc_require('private/observer_set');
+sc_require('private/chain_observer');
 
 /*globals logChange */
 

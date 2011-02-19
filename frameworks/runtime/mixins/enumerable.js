@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
-require('system/enumerator');
+sc_require('core') ;
+sc_require('system/enumerator');
 
 /*globals Prototype */
 
