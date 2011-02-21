@@ -93,7 +93,7 @@ Greenhouse.DataSource = SC.DataSource.extend({
   fetchViewConfigs: function(store, query){
     if (!query.get('isRemote')) return NO ; 
     
-    SC.Request.getUrl('/sc/greenhouse-config.json?app=%@'.fmt(query.get('app')))
+    SC.Request.getUrl('/sc/greenhouseconf.json?app=%@'.fmt(query.get('app')))
       .set('isJSON', YES)
       .notify(this, 'fetchViewConfigsDidComplete', { query: query, store: store })
       .send();

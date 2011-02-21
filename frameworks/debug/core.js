@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -14,7 +14,7 @@ SC._mapDisplayNamesUseHashForSeenTypes = ['object', 'number', 'boolean', 'array'
 
 
 SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
-  if (!SC.browser.safari) return ;
+  if (!SC.browser.webkit) return ;
 
   // Lazily instantiate the hash of types we'll use a hash for the "have we
   // seen this before?" structure.  (Some types are not safe to put in a hash

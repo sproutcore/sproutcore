@@ -1,18 +1,11 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 sc_require('mixins/string');
-
-/** 
-  Indicates a value has a mixed state of both on and off. 
-  
-  @property {String}
-*/
-SC.MIXED_STATE = '__MIXED__' ;
 
 /**
   Option for controls to automatically calculate their size (should be default 

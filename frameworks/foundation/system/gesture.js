@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -270,7 +270,7 @@ SC.Gesture = SC.Object.extend({
   */
   take: function(touch) {
     touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
-    if (touch.touchResponder && touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
+    if (SC.none(touch.touchResponder) || touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
   },
   
   /**

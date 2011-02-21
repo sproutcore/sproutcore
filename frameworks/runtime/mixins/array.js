@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -367,7 +367,7 @@ SC.Array = {
     The callback for a range observer should have the signature:
 
     {{{
-      function rangePropertyDidChange(array, objects, key, indexes, conext)
+      function rangePropertyDidChange(array, objects, key, indexes, context)
     }}}
 
     If the passed key is '[]' it means that the object itself changed.
@@ -448,9 +448,11 @@ SC.Array = {
     @param {Number} start the starting index of the change
     @param {Number} amt the final range of objects changed
     @param {Number} delta if you added or removed objects, the delta change
+    @param {Array} addedObjects the objects that were added
+    @param {Array} removedObjects the objects that were removed
     @returns {SC.Array} receiver
   */
-  enumerableContentDidChange: function(start, amt, delta) {
+  enumerableContentDidChange: function(start, amt, delta, addedObjects, removedObjects) {
     var rangeob = this._array_rangeObservers,
         oldlen  = this._array_oldLength,
         newlen, length, changes ;
@@ -482,6 +484,7 @@ SC.Array = {
       changes.add(start, length);
     }
 
+    this._setupEnumerableObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
     this.endPropertyChanges();
 
@@ -588,19 +591,21 @@ if (!Array.prototype.lastIndexOf) {
 
     // primitive for array support.
     replace: function(idx, amt, objects) {
+      var removedObjects;
+
       if (this.isFrozen) throw SC.FROZEN_ERROR ;
       if (!objects || objects.length === 0) {
-        this.splice(idx, amt) ;
+        removedObjects = this.splice(idx, amt) ;
       } else {
         var args = [idx, amt].concat(objects) ;
-        this.splice.apply(this,args) ;
+        removedObjects = this.splice.apply(this,args) ;
       }
 
       // if we replaced exactly the same number of items, then pass only the
       // replaced range.  Otherwise, pass the full remaining array length
       // since everything has shifted
       var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
-      this.enumerableContentDidChange(idx, amt, len - amt) ;
+      this.enumerableContentDidChange(idx, amt, len - amt, objects, removedObjects) ;
       return this ;
     },
 

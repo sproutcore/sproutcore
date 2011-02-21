@@ -128,8 +128,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       // Events
       //
       toggleDockedLibrary: function(){
-        var iState = Greenhouse.get('inspectorClosed').state();
-        if (iState !== Greenhouse.get('dockedInspector')) Greenhouse.sendEvent('undock');
+        var states = Greenhouse.get('currentStates') || [];
+        if (states.indexOf(Greenhouse.getState('dockedInspector'))) Greenhouse.sendEvent('undock');
 
         this.gotoState('libraryClosed');
       }

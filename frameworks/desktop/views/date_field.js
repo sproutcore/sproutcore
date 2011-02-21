@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -85,7 +85,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   FUTURE: DatePickerSupport.
   createChildViews: function() {
     sc_super();
-    if (SC.browser.safari) {
+    if (SC.browser.webkit) {
       // ON MOZILLA DON'T WORK
       var view = Shared.DatePickerView.extend({
         layout: { right: 0, centerY: 0, width: 18, height: 15 }

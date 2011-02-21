@@ -427,6 +427,24 @@ test('setting one of two computed properties that depend on a third property sho
   equals(object.get('isOn'), NO, 'object.isOn should be NO');
 });
 
+test("dependent keys should be able to be specified as property paths", function() {
+  var depObj = SC.Object.create({
+    menu: SC.Object.create({
+      price: 5
+    }),
+
+    menuPrice: function() {
+      return this.getPath('menu.price');
+    }.property('menu.price').cacheable()
+  });
+
+  equals(depObj.get('menuPrice'), 5, "precond - initial value returns 5");
+
+  depObj.setPath('menu.price', 6);
+
+  equals(depObj.get('menuPrice'), 6, "cache is properly invalidated after nested property changes");
+});
+
 // ..........................................................
 // OBSERVABLE OBJECTS
 //

@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -50,36 +50,54 @@ SC.ContentDisplay = {
     this._display_contentDidChange();
   },
 
+  /**
+   * Remove observer on existing content object, if present
+   * @private
+   */
+  destroyMixin: function () {
+    if (!this._display_content) return;
+    this._display_stopObservingContent(this._display_content);
+    this._display_content = null;
+  },
+
+  /** @private */
+  _display_beginObservingContent: function(content) {
+    var f = this._display_contentPropertyDidChange;
+
+    if (SC.isArray(content)) {
+      content.invoke('addObserver', '*', this, f);
+    }
+    else if (content.addObserver) {
+      content.addObserver('*', this, f);
+    }
+  },
+
+  /** @private */
+  _display_stopObservingContent: function(content) {
+    var f = this._display_contentPropertyDidChange;
+
+    if (SC.isArray(content)) {
+      content.invoke('removeObserver', '*', this, f);
+    }
+    else if (content.removeObserver) {
+      content.removeObserver('*', this, f);
+    }
+  },
+
   /** @private */
   _display_contentDidChange: function(target, key, value) {
     // handle changes to the content...
-    if ((value = this.get('content')) != this._display_content) {
+    if ((value = this.get('content')) === this._display_content) return;
 
-      // get the handler method
-      var f = this._display_contentPropertyDidChange ;
-      
-      // stop listening to old content.
-      var content = this._display_content;
-      if (content) {
-        if (SC.isArray(content)) {
-          content.invoke('removeObserver', '*', this, f) ;
-        } else if (content.removeObserver) {
-          content.removeObserver('*', this, f) ;
-        }
-      }
-      
-      // start listening for changes on the new content object.
-      content = this._display_content = value ; 
-      if (content) {
-        if (SC.isArray(content)) {
-          content.invoke('addObserver', '*', this, f) ;
-        } else if (content.addObserver) {
-          content.addObserver('*', this, f) ;
-        }
-      }
+    // stop listening to old content.
+    var content = this._display_content;
+    if (content) this._display_stopObservingContent(content);
 
-      this.displayDidChange();
-    }
+    // start listening for changes on the new content object.
+    content = this._display_content = value;
+    if (content) this._display_beginObservingContent(content);
+
+    this.displayDidChange();
   }.observes('content', 'contentDisplayProperties'),
   
   /** @private Invoked when properties on the content object change. */

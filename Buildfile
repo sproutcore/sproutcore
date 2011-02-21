@@ -1,7 +1,7 @@
 # ==========================================================================
 # SproutCore JavaScript Framework - Buildfile
 # copyright (c) 2009 - Apple Inc.
-#           portions copyright Sprout Systems Inc. and contributors
+#           portions copyright Strobe Inc. and contributors
 # ==========================================================================
 
 # This buildfile defines the configurations needed to link together the 
@@ -27,13 +27,15 @@ end
 # CORE FRAMEWORKS
 config :bootstrap,  :required => [], :use_modules => false
 
-config :jquery,     :required => []
-config :runtime,    :required => [:jquery]
-config :foundation, :required => [:jquery, :runtime]
-config :datastore,  :required => [:foundation]
-config :statechart, :required => [:runtime]
-config :desktop,    :required => [:foundation]
-config :media,      :required => [:desktop]
+config :jquery,          :required => []
+config :handlebars,      :required => []
+config :runtime,         :required => [:jquery]
+config :core_foundation, :required => [:runtime, :handlebars]
+config :foundation,      :required => [:core_foundation]
+config :datastore,       :required => [:foundation]
+config :statechart,      :required => [:core_foundation]
+config :desktop,         :required => [:foundation]
+config :media,           :required => [:desktop]
 
 # APP-LEVEL FRAMEWORKS
 %w(mobile designer).each do |app_framework|
@@ -45,7 +47,7 @@ config :mobile,
   :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
 
 # WRAPPER FRAMEWORKS
-config :designer, :required => [:runtime, :foundation]
+config :designer, :required => [:runtime, :foundation, :desktop]
 config :sproutcore, :required => [:desktop, :datastore]
 config :mini, :required => [:runtime, :datastore]
 config :animation, :required => :foundation
@@ -92,8 +94,9 @@ config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
 
 %w(tests test_controls docs welcome).each do |app_target|
   config app_target, 
-  :required => [:desktop, :datastore, :core_tools],
-  :theme => :ace
+    :required => [:desktop, :datastore, :core_tools],
+    :theme => :ace,
+    :html5_history => true
 
   # mode :debug do
   #   config app_target, :combine_javascript => false
@@ -106,6 +109,3 @@ config :test_controls, :css_theme => 'ace.test-controls'
 config :greenhouse, 
   :required => [:sproutcore, :'sproutcore/designer', :statechart],
   :theme    => :standard_theme
-  
-
- 

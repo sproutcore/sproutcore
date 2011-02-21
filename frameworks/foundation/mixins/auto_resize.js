@@ -1,9 +1,11 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+sc_require("system/utils/string_measurement");
 
 /**
   @namespace
@@ -162,8 +164,7 @@ SC.AutoResize = {
     @private
     When the layer is first created, measurement will need to take place.
   */
-  render: function() {
-    sc_super();
+  didCreateLayer: function() {
     this.measureSizeLater();
   },
   

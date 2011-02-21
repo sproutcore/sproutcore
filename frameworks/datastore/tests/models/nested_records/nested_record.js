@@ -1,5 +1,5 @@
 /**
- * Nested Records (SC.ChildRecord) Unit Test
+ * Nested Records (SC.Record) Unit Test
  *
  * @author Evin Grano
  */
@@ -12,13 +12,13 @@ var NestedRecord, store, testParent, testParent2, childData1;
 var initModels = function(){
   NestedRecord.ParentRecordTest = SC.Record.extend({
     /** Child Record Namespace */
-    childRecordNamespace: NestedRecord,
+    nestedRecordNamespace: NestedRecord,
 
     name: SC.Record.attr(String),
     info: SC.Record.toOne('NestedRecord.ChildRecordTest', { nested: true })
   });
 
-  NestedRecord.ChildRecordTest = SC.ChildRecord.extend({
+  NestedRecord.ChildRecordTest = SC.Record.extend({
     id: SC.Record.attr(String),
     name: SC.Record.attr(String),
     value: SC.Record.attr(String)
@@ -44,7 +44,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
         type: 'ChildRecordTest',
         name: 'Child Name',
         value: 'Blue Goo',
-        id: '5001'
+        guid: '5001'
       }
     });
     // Test parent 2
@@ -54,7 +54,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
         type: 'ChildRecordTest',
         name: 'Child Name 2',
         value: 'Purple Goo',
-        id: '5002'
+        guid: '5002'
       }
     });
     SC.RunLoop.end();
@@ -67,7 +67,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
       type: 'ChildRecordTest',
       name: 'Child Name',
       value: 'Green Goo',
-      id: '5002'
+      guid: '5002'
     };
   },
 
@@ -92,7 +92,7 @@ test("Function: readAttribute()", function() {
       type: 'ChildRecordTest',
       name: 'Child Name',
       value: 'Blue Goo',
-      id: '5001'
+      guid: '5001'
     },
     "readAttribute should be correct for info child attribute");
   
@@ -105,7 +105,7 @@ test("Support Multiple Parent Records With Different Child Records", function() 
       type: 'ChildRecordTest',
       name: 'Child Name 2',
       value: 'Purple Goo',
-      id: '5002'
+      guid: '5002'
     },
     "readAttribute should be correct for info child attribute on new record");
   equals(testParent2.get('info').get('value'), 'Purple Goo', "get should retrieve the proper value on new record");
@@ -115,7 +115,7 @@ test("Support Multiple Parent Records With Different Child Records", function() 
       type: 'ChildRecordTest',
       name: 'Child Name',
       value: 'Blue Goo',
-      id: '5001'
+      guid: '5001'
     },
     "readAttribute should be correct for info child attribute on first record");
   equals(testParent.get('info').get('value'), 'Blue Goo', "get should retrieve the proper value on first record");
@@ -152,7 +152,7 @@ test("Basic Read", function() {
   // Test Child Record creation
   var cr = testParent.get('info');
   // Check Model Class information
-  ok(SC.kindOf(cr, SC.ChildRecord), "get() creates an actual instance that is a kind of a SC.ChildRecord Object");
+  ok(SC.kindOf(cr, SC.Record), "get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "get() creates an actual instance of a ChildRecordTest Object");
   
   // Check reference information
@@ -171,13 +171,9 @@ test("Basic Read", function() {
   var oldKey = cr.get(pm), newKey = sameCR.get(pm);
   equals(oldKey, newKey, "check to see if the Primary Key are the same");
   same(sameCR, cr, "check to see that it is the same child record as before");
-  
-  // ID check
-  id = sameCR.get('id');
-  ok((id !== oldKey), "if there is an id param, it should be different from the Primary Key: %@ != %@".fmt(id, oldKey));
 });
 
-test("Basic Write", function() {
+test("Basic Write As a Hash", function() {
   
   // Test general gets
   testParent.set('name', 'New Parent Name');
@@ -190,11 +186,12 @@ test("Basic Write", function() {
   testParent.set('info', {
     type: 'ChildRecordTest',
     name: 'New Child Name',
-    value: 'Red Goo'
+    value: 'Red Goo',
+    guid: '6001'
   });
   var cr = testParent.get('info');
   // Check Model Class information
-  ok(SC.kindOf(cr, SC.ChildRecord), "set() with an object creates an actual instance that is a kind of a SC.ChildRecord Object");
+  ok(SC.kindOf(cr, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "set() with an object creates an actual instance of a ChildRecordTest Object");
   
   // Check reference information
@@ -205,6 +202,43 @@ test("Basic Write", function() {
   equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
   var oldKey = oldCR.get(pm);
   ok(!(oldKey === key), 'check to see that the old child record has a different key from the new child record');
+  
+  // Check for changes on the child bubble to the parent.
+  cr.set('name', 'Child Name Change');
+  equals(cr.get('name'), 'Child Name Change', "after a set('name', <new>) on child, checking that the value is updated");
+  ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
+  ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
+  var newCR = testParent.get('info');
+  same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
+  same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
+});
+
+test("Basic Write As a Child Record", function() {
+  
+  // Test general gets
+  testParent.set('name', 'New Parent Name');
+  equals(testParent.get('name'), 'New Parent Name', "set() should change name attribute");
+  testParent.set('nothing', 'nothing');
+  equals(testParent.get('nothing'), 'nothing', "set should change non-existent property to a new property");
+  
+  // Test Child Record creation
+  var store = testParent.get('store');
+  var cr = store.createRecord(NestedRecord.ChildRecordTest, {type: 'ChildRecordTest', name: 'New Child Name', value: 'Red Goo', guid: '6001'});
+  // Check Model Class information
+  ok(SC.kindOf(cr, SC.Record), "before the set(), check for actual instance that is a kind of a SC.Record Object");
+  ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "before the set(), check for actual instance of a ChildRecordTest Object");
+  testParent.set('info', cr);
+  cr = testParent.get('info');
+  // Check Model Class information
+  ok(SC.kindOf(cr, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
+  ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "set() with an object creates an actual instance of a ChildRecordTest Object");
+  
+  // Check reference information
+  var pm = cr.get('primaryKey');
+  var key = cr.get(pm);
+  var storeRef = store.find(NestedRecord.ChildRecordTest, key);
+  ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
+  equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
   
   // Check for changes on the child bubble to the parent.
   cr.set('name', 'Child Name Change');

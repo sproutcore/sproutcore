@@ -1,12 +1,11 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 sc_require('models/record');
-sc_require('models/child_record');
 
 /** @class
 
@@ -469,7 +468,7 @@ SC.RecordAttribute.registerTransform(Date, {
       if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
       if (d[14]) {
          offset = (Number(d[16]) * 60) + Number(d[17]);
-         offset *= ((d[15] == '-') ? 1 : -1);
+         offset *= ((d[15] === '-') ? 1 : -1);
       }
 
       offset -= date.getTimezoneOffset();

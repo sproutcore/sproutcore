@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            portions copyright @2009 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -8,7 +8,8 @@
 /*global module test htmlbody ok equals same stop start */
 
 var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-var pane, view, elem, rect1, rect2, rect3;
+var pane, view;
+
 module("SC.SegmentedView", {
   setup: function() {
     SC.RunLoop.begin();
@@ -22,72 +23,42 @@ module("SC.SegmentedView", {
           itemTitleKey: 'value',
           itemValueKey: 'value',
           itemIconKey: 'icon',
+          itemActionKey: 'action',
           value: "Item1 Item3".w(),
           allowsEmptySelection: NO,
-          layout: { height: 25 } 
+          layout: { height: 25, width: 400 }
         })]
     });
     pane.append(); // make sure there is a layer...
     SC.RunLoop.end();
-    
+
     view = pane.childViews[0];
-    
-    var boundingRect = function(segment){
-      var r;
-      if (segment.getBoundingClientRect) {
-        r = segment.getBoundingClientRect();
-      }else{
-        r = {};
-        var ret   = SC.viewportOffset(segment); // get x & y
-        var cq = SC.$(segment);
-        r.top = ret.y;
-        r.left = ret.x;
-        r.bottom = ret.y + cq.outerHeight();
-        r.right = ret.x + cq.outerWidth();
-      }
-      
-      return r;
-    };
-    
-    
-    elem = view.get('layer').childNodes[0];
-    rect1 = boundingRect(elem);
-    elem = view.get('layer').childNodes[1];
-    rect2 = boundingRect(elem);
-    elem = view.get('layer').childNodes[2];
-    rect3 = boundingRect(elem);
-    
-    
-  }, 
-  
+  },
+
   teardown: function() {
     pane.remove();
-    pane = view = elem = rect1 = rect2 = rect3 = null ;
+    pane = view = null ;
   }
 });
 
 test("Check that properties are mapped correctly", function() {
-    view.triggerItemAtIndex(1);
-    SC.RunLoop.begin();
-    view.set('isEnabled', YES);
-    SC.RunLoop.end();
-    equals(view.get('value'), "Item2", "the second item should be selected.");
-    var items=view.displayItems();
-    equals(items[0].title, "Item1", 'Computed properties should match');
-    equals(items[0].value, "Item1", 'Computed properties should match');
-    equals(items[0].isEnabled, true, 'Computed properties should match');
-    equals(items[0].icon, iconURL, 'Computed properties should match');
-    equals(items[0].width, null, 'Computed properties should match');
-    equals(items[0].toolTip, null, 'Computed properties should match');
-    equals(items[0].index, 0, 'Computed properties should match');
-    
-    var firstItemEvent = SC.Event.simulateEvent(elem, 'mousedown', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
-    view.mouseDown(firstItemEvent);
-    equals(view._isMouseDown, YES, 'mousedown');
-    equals(view.get('activeIndex'), 0, '');
-    
- });
+  view.triggerItemAtIndex(1);
 
+  SC.RunLoop.begin();
+  view.set('isEnabled', YES);
+  SC.RunLoop.end();
+
+  equals(view.get('value'), "Item2", "the second item should be selected.");
+
+  var childViews = view.get('childViews');
+  equals(childViews[0].title, "Item1", 'Computed properties should match');
+  equals(childViews[0].value, "Item1", 'Computed properties should match');
+  equals(childViews[0].isEnabled, true, 'Computed properties should match');
+  equals(childViews[0].icon, iconURL, 'Computed properties should match');
+  equals(childViews[0].width, null, 'Computed properties should match');
+  equals(childViews[0].toolTip, null, 'Computed properties should match');
+  equals(childViews[0].index, 0, 'Computed properties should match');
+});
 
 
  test("Check that mouse actions work", function() {
@@ -134,31 +105,4 @@ test("Check that properties are mapped correctly", function() {
    equals(view._isMouseDown, YES, 'Mouse down flag on mouseout should still be ');
    equals(view.get('activeIndex'), -1, 'The active item is no longer specified.');
    
-  });
-
-  test("Check that aria-selected is set to correct values, based on the state of the segment", function() {
-    view.triggerItemAtIndex(1);
-    SC.RunLoop.begin();
-    view.set('isEnabled', YES);
-    SC.RunLoop.end();
-
-    var segments = view.get('childViews'),
-    segment1     = segments[0],
-    layer, segmentEvent;
-
-    //aria-selected should be false when segment is not selected
-    equals(segment1.$().attr('aria-selected'), "false", "aria-selected is set to false when segment is not selected");
-
-    layer = segment1.get('layer');
-
-    //trigerring mousedown
-    segmentEvent = SC.Event.simulateEvent(layer, 'mousedown', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
-    SC.Event.trigger(layer, 'mousedown', [segmentEvent]);
-
-    //trigerring mouseup
-    segmentEvent = SC.Event.simulateEvent(layer, 'mouseup', { clientX: rect1.left + 1, clientY: rect1.top + 1 });
-    SC.Event.trigger(layer, 'mouseup', [segmentEvent]);
-
-    //aria-selected should be true when segment is selected
-    equals(segment1.$().attr('aria-selected'), "true", "aria-selected is set to true when segment is selected");
   });

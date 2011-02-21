@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -22,6 +22,34 @@ SC.BENCHMARK_OBJECTS = NO;
 // definition because SC.Object is copied frequently and we want to keep the
 // number of class methods to a minimum.
 
+SC._detect_base = function _detect_base(func, parent, name) {
+  return function invoke_superclass_method() {
+    var base = parent[name], args;
+
+    if (!base) {
+      throw new Error("No '" + name + "' method was found on the superclass");
+    }
+
+    // NOTE: It is possible to cache the base, so that the first
+    // call to sc_super will avoid doing the lookup again. However,
+    // since the cost of the extra method dispatch is low and is
+    // only incurred on sc_super, but also creates another possible
+    // weird edge-case (when a class is enhanced after first used),
+    // we'll leave it off for now unless profiling demonstrates that
+    // it's a hotspot.
+    //if(base && func === base) { func.base = function() {}; }
+    //else { func.base = base; }
+
+    if(func.isEnhancement) {
+      args = Array.prototype.slice.call(arguments, 1);
+    } else {
+      args = arguments;
+    }
+
+    return base.apply(this, args);
+  };
+};
+
 /** @private
   Augments a base object by copying the properties from the extended hash.
   In addition to simply copying properties, this method also performs a
@@ -36,8 +64,8 @@ SC.BENCHMARK_OBJECTS = NO;
   @param {Hash} extension
   @returns {Hash} base hash
 */
-SC._object_extend = function _object_extend(base, ext) {
-  if (!ext) throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?";
+SC._object_extend = function _object_extend(base, ext, proto) {
+  if (!ext) { throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?"; }
 
   // set _kvo_cloned for later use
   base._kvo_cloned = null;
@@ -105,7 +133,8 @@ SC._object_extend = function _object_extend(base, ext) {
       // add super to funcs.  Be sure not to set the base of a func to
       // itself to avoid infinite loops.
       if (!value.superclass && (value !== (cur=base[key]))) {
-        value.superclass = value.base = cur || K;
+        value.superclass = cur || K;
+        value.base = proto ? SC._detect_base(value, proto, key) : cur || K;
       }
 
       // handle regular observers
@@ -147,6 +176,10 @@ SC._object_extend = function _object_extend(base, ext) {
         }
         outlets[outlets.length] = key ;
       }
+
+      if (value.isEnhancement) {
+        value = SC._enhance(base[key], value);
+      }
     }
 
     // copy property
@@ -176,6 +209,16 @@ SC._object_extend = function _object_extend(base, ext) {
   return base ;
 } ;
 
+SC._enhance = function(originalFunction, enhancement) {
+  return function() {
+    var args = Array.prototype.slice.call(arguments, 0);
+    var self = this;
+
+    args.unshift(function() { return originalFunction.apply(self, arguments); });
+    return enhancement.apply(this, args);
+  };
+}
+
 /** @class
 
   Root object for the SproutCore framework.  SC.Object is the root class for
@@ -202,7 +245,10 @@ SC._object_extend = function _object_extend(base, ext) {
   @extends SC.Observable
   @since SproutCore 1.0
 */
-SC.Object = function(props) { return this._object_init(props); };
+SC.Object = function(props) {
+  this.__sc_super__ = SC.Object.prototype;
+  return this._object_init(props);
+};
 
 SC.mixin(SC.Object, /** @scope SC.Object */ {
 
@@ -256,7 +302,10 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // build a new constructor and copy class methods.  Do this before
     // adding any other properties so they are not overwritten by the copy.
-    var prop, ret = function(props) { return this._object_init(props); } ;
+    var prop, ret = function(props) {
+      this.__sc_super__ = ret.prototype;
+      return this._object_init(props);
+    } ;
     for(prop in this) {
       if (!this.hasOwnProperty(prop)) continue ;
       ret[prop] = this[prop];
@@ -267,6 +316,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     // now setup superclass, guid
     ret.superclass = this ;
+    ret.__sc_super__ = this.prototype;
     SC.generateGuid(ret, "sc"); // setup guid
 
     ret.subclasses = SC.Set.create();
@@ -275,11 +325,15 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
-    for(idx=0;idx<len;idx++) SC._object_extend(base, arguments[idx]) ;
+    for(idx=0;idx<len;idx++) { SC._object_extend(base, arguments[idx], ret.__sc_super__) ; }
     base.constructor = ret; // save constructor
 
     if (bench) SC.Benchmark.end('SC.Object.extend') ;
     return ret ;
+  },
+
+  reopen: function(props) {
+    return SC._object_extend(this.prototype, props, this.__sc_super__);
   },
 
   /**
@@ -432,7 +486,7 @@ SC.Object.prototype = {
   _object_init: function(extensions) {
     // apply any new properties
     var idx, len = (extensions) ? extensions.length : 0;
-    for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx]) ;
+    for(idx=0;idx<len;idx++) { SC._object_extend(this, extensions[idx], this.__sc_super__) ; }
     SC.generateGuid(this, "sc") ; // add guid
     this.init() ; // call real init
 
@@ -533,6 +587,10 @@ SC.Object.prototype = {
     // destroy any mixins
     var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
+
+    // disconnect all bindings
+    this.bindings.invoke('disconnect');
+    this.bindings = null;
 
     return this ;
   },

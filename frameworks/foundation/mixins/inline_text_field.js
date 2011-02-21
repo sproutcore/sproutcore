@@ -1,9 +1,10 @@
 // ========================================================================
 // SproutCore
-// copyright 2006-2008 Sprout Systems, Inc.
+// copyright 2006-2011 Strobe Inc.
 // ========================================================================
 
 sc_require('views/text_field') ;
+sc_require('system/utils/misc') ;
 
 /**
   @class

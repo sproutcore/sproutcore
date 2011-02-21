@@ -48,7 +48,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
         defaultRecordType: recordType
       });
 
-      record[arrayKey] = this._cachedRef = ret ; // save on record
+      record[arrayKey] = ret ; // save on record
       rel = record.get('relationships');
       if (!rel) record.set('relationships', rel = []);
       rel.push(ret); // make sure we get notified of changes...
@@ -56,25 +56,18 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
 
     return ret;
   },
-      
-  orphan: function(parentRecord){
-    var cArray = this._cachedRef,
-        store, storeKey, attrs, key, 
-        len, param, cr;
-    
-    if (cArray) {
-      cArray.forEach( function(cr){
-        attrs = cr.get('readOnlyAttributes');
-        for(key in attrs) {
-          param = cr[key];
-          // Orphan all the child record and child records in a tree to clean up the store
-          if(param && param.isChildRecordTransform) param.orphan(parentRecord);
-        }
-        store = cr.get('store');
-        if(store) storeKey = cr.storeKey;
-        if(storeKey) store.unloadRecord(undefined, undefined, storeKey);
-      }, this);
+  
+  // Default fromType is just returning itself
+  fromType: function(record, key, value){
+    var sk, store, 
+        arrayKey = SC.keyFor('__kidsArray__', SC.guidFor(this)),
+        ret = record[arrayKey];
+    if (record) {
+      record.writeAttribute(key, value);
+      if (ret) ret = ret.recordPropertyDidChange();
     }
+    
+    return ret;
   }
 });
 

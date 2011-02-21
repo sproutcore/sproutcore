@@ -57,17 +57,31 @@ module("SC.Record normalize method", {
 
     // A parent record
     MyApp.FooParent = SC.Record.extend({
-      childRecordNamespace: MyApp,
+      nestedRecordNamespace: MyApp,
       myChild: SC.ChildAttribute.attr('MyApp.FooChild')
     });
 
     // A child record
-    MyApp.FooChild = SC.ChildRecord.extend({
+    MyApp.FooChild = SC.Record.extend({
     });
     
     MyApp.Bar = SC.Record.extend({
       // test toOne relationships
       relatedTo: SC.Record.toOne('MyApp.Bar', { defaultValue: '1' })
+    });
+    
+    MyApp.OneBar = SC.Record.extend({
+      manyFoos: SC.Record.toMany('MyApp.ManyFoo', {
+        key: 'many_foos',
+        inverse: 'oneBar'
+      })
+    });
+    
+    MyApp.ManyFoo = SC.Record.extend({
+      oneBar: SC.Record.toOne('MyApp.OneBar', {
+        key: 'bar_id',
+        inverse: 'manyFoos'
+      })
     });
     
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
@@ -270,4 +284,31 @@ test("normalizing a new record with a null child reference", function() {
 
   findRecord = MyApp.store.find(MyApp.FooParent, newRecordId);
   equals(findRecord.get('id'), newRecordId, 'id should be the same as the first');
+});
+
+test("normalizing a new record with toOne without defaultValue" ,function() {
+  
+  var oneBarHash = {
+    guid: 1,
+    many_foos: [1]
+  }
+  
+  var oneBarRecord = MyApp.store.createRecord(MyApp.OneBar, oneBarHash);
+
+  var fooHash = {
+    guid: 1,
+    bar_id: 1
+  };
+
+  var fooRecord = MyApp.store.createRecord(MyApp.ManyFoo, fooHash);
+  MyApp.store.commitRecords();
+    
+  equals(fooRecord.attributes()['bar_id'], 1, 'hash value of oneBar is 1');
+  equals(fooRecord.get('oneBar'), oneBarRecord, 'get value of oneBar is 1');
+
+  fooRecord.normalize();
+  
+  equals(fooRecord.attributes()['bar_id'], 1, 'hash value of oneBar after normalizing is still 1');
+  equals(fooRecord.get('oneBar'), oneBarRecord, 'get value of oneBar after normalizing remains 1');
+  
 });

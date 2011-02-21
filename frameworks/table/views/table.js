@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple, Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -30,7 +30,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   
   childViews: "tableHeadView scrollView".w(),
   
-  scrollView: SC.ScrollView.design({
+  scrollView: SC.ScrollView.extend({
     isVisible: YES,
     layout: {
       left:   -1,
@@ -40,7 +40,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     },
     hasHorizontalScroller: NO,
     borderStyle: SC.BORDER_NONE,
-    contentView: SC.View.design({
+    contentView: SC.View.extend({
     }),
     
     // FIXME: Hack.
@@ -65,9 +65,10 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   layout: { left: 0, right: 0, top: 0, bottom: 0 },
   
   init: function() {
+    sc_super();
+
     window.table = this; // DEBUG
     //this._sctv_columnsDidChange();
-    return sc_super();
   },
   
   
@@ -194,7 +195,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     @property
     @type SC.View
   */
-  tableHeadView: SC.TableHeadView.design({
+  tableHeadView: SC.TableHeadView.extend({
     layout: { top: 0, left: 0, right: 0 }
   }),
   

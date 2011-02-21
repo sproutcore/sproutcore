@@ -9,16 +9,16 @@ require('core');
 /** @class
 
   file properties
-  @dir
-  @name
+  @property dir
+  @property name
   
   @extends SC.ChildRecord
   @version 0.1
 */
-Greenhouse.File = SC.ChildRecord.extend(
+Greenhouse.File = SC.Record.extend(
 /** @scope Greenhouse.File.prototype */ {
   type: 'File',
-  childRecordNamespace: Greenhouse,
+  nestedRecordNamespace: Greenhouse,
   name: SC.Record.attr(String),
   dir: SC.Record.attr(String),
   body: SC.Record.attr(String),

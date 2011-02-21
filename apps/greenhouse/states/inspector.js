@@ -25,7 +25,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       // Events
       //
       openInspector: function(anchor){
-        if(anchor) Greenhouse.openInspectorPicker.set('anchor', anchor);
+        if(anchor) Greenhouse.setPath('inspectorStates.openInspectorPicker.anchor', anchor);
         this.gotoState('openInspectorPicker');
       },
 
@@ -140,8 +140,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       // Events
       //
       toggleDockedInspector: function(){
-        var libState = Greenhouse.get('libraryClosed').state();
-        if (libState !== Greenhouse.get('dockedLibrary')) Greenhouse.sendEvent('undock');
+        var states = Greenhouse.get('currentStates') || [];
+        if (states.indexOf(Greenhouse.getState('dockedLibrary'))) Greenhouse.sendEvent('undock');
         this.gotoState('inspectorClosed');
       }
     })

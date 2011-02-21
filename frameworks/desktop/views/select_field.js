@@ -1,6 +1,6 @@
 // ========================================================================
 // SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
+// Copyright ©2006-2011, Strobe Inc. and contributors.
 // Portions copyright ©2008 Apple Inc.  All rights reserved.
 // ========================================================================
 
@@ -137,6 +137,7 @@ SC.SelectFieldView = SC.FieldView.extend(
         // var html = [] ;       
         if(!firstTime){
           selectElement=this.$input()[0];
+          if (!selectElement) return;
           selectElement.innerHTML='';
         } 
       
@@ -322,14 +323,12 @@ SC.SelectFieldView = SC.FieldView.extend(
     if (this.get('isEnabled') === false) this.$()[0].disabled = true;
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
     SC.Event.add(input, 'focus',this, this.fieldDidFocus);
-    return sc_super();
   },
   
   willDestroyLayer: function() {
     var input = this.$input();
     SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
     SC.Event.remove(input, 'blur', this, this.fieldDidBlur);
-    return sc_super();
   }
  
 });

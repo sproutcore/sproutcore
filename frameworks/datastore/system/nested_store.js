@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -185,7 +185,7 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   reset: function() {
-
+    var nRecords, nr, sk;
     // requires a pstore to reset
     var parentStore = this.get('parentStore');
     if (!parentStore) throw SC.Store.NO_PARENT_STORE_ERROR;
@@ -194,6 +194,10 @@ SC.NestedStore = SC.Store.extend(
     this.dataHashes = SC.beget(parentStore.dataHashes);
     this.revisions  = SC.beget(parentStore.revisions);
     this.statuses   = SC.beget(parentStore.statuses);
+    
+    // beget nested records references
+    this.childRecords = SC.beget(parentStore.childRecords);
+    this.parentRecords = SC.beget(parentStore.parentRecords);
     
     // also, reset private temporary objects
     this.chainedChanges = this.locks = this.editables = null;
@@ -266,7 +270,8 @@ SC.NestedStore = SC.Store.extend(
     store.
   */
   _lock: function(storeKey) {
-    var locks = this.locks, rev, editables;
+    var locks = this.locks, rev, editables, 
+        pk, pr, path, tup, obj, key;
     
     // already locked -- nothing to do
     if (locks && locks[storeKey]) return this;
@@ -288,7 +293,24 @@ SC.NestedStore = SC.Store.extend(
     }
     
     if (pstore && editState === SC.Store.EDITABLE) {
-      this.dataHashes[storeKey] = SC.clone(pstore.dataHashes[storeKey], YES);
+      
+      pk = this.childRecords[storeKey];
+      if (pk){
+        // Since this is a nested record we have to actually walk up the parent chain
+        // to get to the root parent and clone that hash. And then reconstruct the 
+        // memory space linking.
+        this._lock(pk);
+        pr = this.parentRecords[pk];
+        if (pr) {
+          path = pr[storeKey];
+          tup = path ? SC.tupleForPropertyPath(path, this.dataHashes[pk]) : null;
+          if (tup){ obj = tup[0]; key = tup[1]; }
+          this.dataHashes[storeKey] = obj && key ? obj[key] : null;
+        }
+      }
+      else {
+        this.dataHashes[storeKey] = SC.clone(pstore.dataHashes[storeKey], YES);
+      }
       if (!editables) editables = this.editables = [];
       editables[storeKey] = 1 ; // mark as editable
       
@@ -375,7 +397,6 @@ SC.NestedStore = SC.Store.extend(
   
   /** @private - book-keeping for a single data hash. */
   dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
-    
     // update the revision for storeKey.  Use generateStoreKey() because that
     // gaurantees a universally (to this store hierarchy anyway) unique 
     // key value.

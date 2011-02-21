@@ -1,11 +1,12 @@
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('private/observer_set') ;
+sc_require('private/observer_set');
+sc_require('private/chain_observer');
 
 /*globals logChange */
 
@@ -523,10 +524,16 @@ SC.Observable = {
     while(--idx >= lim) {
       dep = keys[idx] ;
 
-      // add dependent key to dependents array of key it depends on
-      queue = dependents[dep] ;
-      if (!queue) queue = dependents[dep] = [] ;
-      queue.push(key) ;
+      if (dep.indexOf('.') >= 0) {
+        this.addObserver(dep, this, function() {
+          this.propertyDidChange(key);
+        });
+      } else {
+        // add dependent key to dependents array of key it depends on
+        queue = dependents[dep] ;
+        if (!queue) { queue = dependents[dep] = [] ; }
+        queue.push(key) ;
+      }
     }
   },
 
@@ -1190,7 +1197,7 @@ SC.Observable = {
     this may be more efficient.
 
     NOTE: By default, the set() method will not set the value unless it has
-    changed. However, this check can skipped by setting .property().indempotent(NO)
+    changed. However, this check can skipped by setting .property().idempotent(NO)
     setIfChanged() may be useful in this case.
 
     @param key {String|Hash} the key to change
@@ -1378,7 +1385,7 @@ SC.Observable = {
 
 /** @private used by addProbe/removeProbe */
 SC.logChange = function logChange(target, key, value) {
-  console.log("CHANGE: %@[%@] =>".fmt(target, key), target.get(key));
+  console.log("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key)));
 };
 
 /**

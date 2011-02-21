@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple, Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -37,12 +37,14 @@ SC.TableHeaderView = SC.View.extend({
   /**
     The view that is visible when the column is in drag mode.
   */
-  dragModeView: SC.ListView.design({
+  dragModeView: SC.ListView.extend({
     isVisible: NO,
     
     layout: { left: 0, right: 0, bottom: 0 },
     
     init: function() {
+      sc_super();
+
       var tableHeaderView = this.get('parentView');
       
       if (tableHeaderView) {
@@ -79,6 +81,8 @@ SC.TableHeaderView = SC.View.extend({
   // = For the column we look after, set up some observers. =
   // ========================================================
   init: function() {
+    sc_super();
+
     var column = this.get('column');
     column.addObserver('width',     this, '_scthv_layoutDidChange');
     column.addObserver('maxWidth',  this, '_scthv_layoutDidChange');
@@ -89,8 +93,6 @@ SC.TableHeaderView = SC.View.extend({
     // var tableContent = column.get('tableContent');
     // var columnContent = this._scthv_columnContentFromTableContent(tableContent);
     // this.set('content', columnContent);
-    
-    return sc_super();
   },
   
   /**

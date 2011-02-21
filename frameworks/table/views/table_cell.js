@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple, Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -47,12 +47,13 @@ SC.TableCellView = SC.View.extend({
   },
   
   init: function() {
+    sc_super();
+
     var column = this.get('column');
     
     column.addObserver('width',    this, '_sctcv_layoutDidChange');
     column.addObserver('maxWidth', this, '_sctcv_layoutDidChange');
     column.addObserver('minWidth', this, '_sctcv_layoutDidChange');
-    
   },
     
   _sctcv_layoutDidChange: function(sender, key, value, rev) {

@@ -1,7 +1,7 @@
 
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -26,12 +26,18 @@ SC.AceTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
-    var labelContent;
-    
+    var labelContent,
+        toolTip = dataSource.get('displayToolTip');
+
     context.setClass('icon', !!dataSource.get('icon') || NO);
     context.setClass('def', dataSource.get('isDefault') || NO);
     context.setClass('cancel', dataSource.get('isCancel') || NO);
     
+    if (toolTip) {
+      context.attr('title', toolTip);
+      context.attr('alt', toolTip);
+    }
+
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
 
     // Create the inner label element that contains the text and, optionally,

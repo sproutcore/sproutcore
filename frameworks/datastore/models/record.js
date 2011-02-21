@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -45,6 +45,11 @@ SC.Record = SC.Object.extend(
     @property {Boolean}
   */
   isRecord: YES,
+  
+  /**
+    If you have nested records
+  */
+  isParentRecord: NO,
   
   // ...............................
   // PROPERTIES
@@ -202,15 +207,27 @@ SC.Record = SC.Object.extend(
   }.property(),
   
   /**
-   * The child record cache.
-   */
-  childRecords: null,
-  
-  /**
    * The namespace which to retrieve the childRecord Types from
    */
-  childRecordNamespace: null,
-      
+  nestedRecordNamespace: null,
+  
+  /**
+    Function that returns whether this is a nested Record
+  */
+  isNestedRecord: function(){
+    var store = this.get('store'), ret,
+        sk = this.get('storeKey'),
+        prKey = store.parentStoreKeyExists(sk);
+    
+    ret = prKey ? YES : NO;
+    return ret;
+  }.property().cacheable(),
+  
+  parentRecord: function(){
+    var sk = this.storeKey, store = this.get('store');
+    return store.materializeParentRecord(sk);
+  }.property(),
+    
   // ...............................
   // CRUD OPERATIONS
   //
@@ -221,10 +238,26 @@ SC.Record = SC.Object.extend(
     record data from the server.  If the record is new and exists only in 
     memory then this call will have no effect.
     
+    @param {boolean} recordOnly, optional param if you want to only THIS record
+      even if it is a child record.
+    
     @returns {SC.Record} receiver
   */
-  refresh: function() { 
-    this.get('store').refreshRecord(null, null, this.get('storeKey'));
+  refresh: function(recordOnly) { 
+    var store = this.get('store'), rec, ro,
+        sk = this.get('storeKey'),
+        prKey = store.parentStoreKeyExists();
+
+    // If we only want to commit this record or it doesn't have a parent record
+    // we will commit this record
+    ro = recordOnly || (SC.none(recordOnly) && SC.none(prKey));
+    if (ro){
+      store.refreshRecord(null, null, sk);
+    } else if (prKey){
+      rec = store.materializeRecord(prKey);
+      rec.refresh(recordOnly);
+    }
+
     return this ;
   },
   
@@ -234,16 +267,31 @@ SC.Record = SC.Object.extend(
     property on the record to YES.  If this is a new record, this will avoid 
     creating the record in the first place.
     
+    @param {boolean} recordOnly, optional param if you want to only THIS record
+      even if it is a child record. 
+    
     @returns {SC.Record} receiver
   */
-  destroy: function() { 
-    this.get('store').destroyRecord(null, null, this.get('storeKey'));
-    this.notifyPropertyChange('status');
+  destroy: function(recordOnly) { 
+    var store = this.get('store'), rec, ro,
+        sk = this.get('storeKey'),
+        prKey = store.parentStoreKeyExists();
 
-    // If there are any aggregate records, we might need to propagate our new
-    // status to them.
-    this.propagateToAggregates();
-
+    // If we only want to commit this record or it doesn't have a parent record
+    // we will commit this record
+    ro = recordOnly || (SC.none(recordOnly) && SC.none(prKey));
+    if (ro){
+      store.destroyRecord(null, null, sk);
+      this.notifyPropertyChange('status');
+      // If there are any aggregate records, we might need to propagate our new
+      // status to them.
+      this.propagateToAggregates();
+      
+    } else if (prKey){
+      rec = store.materializeRecord(prKey);
+      rec.destroy(recordOnly);
+    }
+    
     return this ;
   },
 
@@ -262,6 +310,11 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   recordDidChange: function(key) {
+    
+    // If we have a parent, they changed too!
+    var p = this.get('parentRecord');
+    if (p) p.recordDidChange();
+    
     this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
     this.notifyPropertyChange('status');
 
@@ -452,7 +505,7 @@ SC.Record = SC.Object.extend(
       // also notify manyArrays
       var manyArrays = this.relationships,
           loc        = manyArrays ? manyArrays.length : 0 ;
-      while(--loc>=0) manyArrays[loc].recordPropertyDidChange(keys);
+      while(--loc>=0) manyArrays[loc].recordPropertyDidChange(keys);      
     }
   },
   
@@ -496,7 +549,7 @@ SC.Record = SC.Object.extend(
         if (typeClass) {
           keyForDataHash = valueForKey.get('key') || key; // handle alt keys
           isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
-          isChild  = valueForKey.isChildRecordTransform;
+          isChild  = valueForKey.isNestedRecordTransform;
           if (!isRecord && !isChild) {
             attrValue = this.get(key);
             if(attrValue!==undefined || (attrValue===null && includeNull)) {
@@ -517,7 +570,7 @@ SC.Record = SC.Object.extend(
               attrValue.normalize();
             }
           } else if (isRecord) {
-            attrValue = recHash[key];
+            attrValue = recHash[keyForDataHash];
             if (attrValue !== undefined) {
               // write value already there
               dataHash[keyForDataHash] = attrValue;
@@ -591,11 +644,25 @@ SC.Record = SC.Object.extend(
     
     @param {Hash} params optional additonal params that will passed down
       to the data source
+    @param {boolean} recordOnly, optional param if you want to only commit a single
+      record if it has a parent.
     @returns {SC.Record} receiver
   */
-  commitRecord: function(params) {
-    var store = this.get('store');
-    store.commitRecord(undefined, undefined, this.get('storeKey'), params);
+  commitRecord: function(params, recordOnly) {    
+    var store = this.get('store'), rec, ro,
+        sk = this.get('storeKey'),
+        prKey = store.parentStoreKeyExists();
+    
+    // If we only want to commit this record or it doesn't have a parent record
+    // we will commit this record
+    ro = recordOnly || (SC.none(recordOnly) && SC.none(prKey));
+    if (ro){
+      store.commitRecord(undefined, undefined, this.get('storeKey'), params);
+    } else if (prKey){
+      rec = store.materializeRecord(prKey);
+      rec.commitRecord(params, recordOnly);
+    }
+    
     return this ;
   },
   
@@ -698,64 +765,119 @@ SC.Record = SC.Object.extend(
     instance. If not, create the child record instance and add it to the child
     record cache.
 
-    @param {SC.ChildRecord} recordType The type of the child record to
-    register.
-    @param {Hash} hash The hash of attributes to apply to the child record.
+    @param {Hash} value The hash of attributes to apply to the child record.
+    @param {Integer} key The store key that we are asking for
    */
-  registerChildRecord: function(recordType, hash) {
-    var pm = recordType.primaryKey || 'childRecordKey';
-    var childKey = hash[pm];
-    var childRecord = null;
-    var crManager = this.get('childRecords');
-    if (childKey && crManager) {
-      childRecord = crManager[childKey];
+  registerNestedRecord: function(value, key, path) {
+    var store, psk, csk, childRecord, recordType;
+    
+    // if no path is entered it must be the key
+    if (SC.none(path)) path = key;
+    // if a record instance is passed, simply use the storeKey.  This allows 
+    // you to pass a record from a chained store to get the same record in the
+    // current store.
+    if (value && value.get && value.get('isRecord')) {
+      childRecord = value;
+    } 
+    else {
+      recordType = this._materializeNestedRecordType(value, key);
+      childRecord = this.createNestedRecord(recordType, value);
     }
-
-    if (SC.none(childRecord)) childRecord = this.createChildRecord(recordType, hash);
-
+    if (childRecord){
+      this.isParentRecord = YES;
+      store = this.get('store');
+      psk = this.get('storeKey');
+      csk = childRecord.get('storeKey');
+      store.registerChildToParent(psk, csk, path);
+    }
+      
     return childRecord;
   },
   
   /**
-    Creates a new child record instance.
+     private method that retrieves the recordType from the hash that is provided.
 
-    @param {SC.ChildRecord} recordType The type of the child record to create.
+     Important for use in polymorphism but you must have the following items in the
+     parent record:
+     
+     nestedRecordNamespace <= this is the object that has the SC.Records defined
+
+     @param {Hash} value The hash of attributes to apply to the child record.
+     @param {String} key the name of the key on the attribute
+    */
+  _materializeNestedRecordType: function(value, key){
+    var childNS, recordType, ret;
+
+    // Get the record type, first checking the "type" property on the hash.
+    if (SC.typeOf(value) === SC.T_HASH) {
+      // Get the record type.
+      childNS = this.get('nestedRecordNamespace');
+      if (value.type && !SC.none(childNS)) {
+        recordType = childNS[value.type];
+      }
+    }
+
+    // Maybe it's not a hash or there was no type property.
+    if (!recordType && key && this[key]) {
+      recordType = this[key].get('typeClass');
+    }
+
+    // When all else fails throw and exception.
+    if (!recordType || !SC.kindOf(recordType, SC.Record)) {
+      throw 'SC.Child: Error during transform: Invalid record type.';
+    }
+
+    return recordType;
+  },
+  
+  /**
+    Creates a new nested record instance.
+
+    @param {SC.Record} recordType The type of the nested record to create.
     @param {Hash} hash The hash of attributes to apply to the child record.
     (may be null)
    */
-  createChildRecord: function(childRecordType, hash) {
-    var cr = null;
+  createNestedRecord: function(recordType, hash) {
+    var store, id, sk, pk, cr = null, existingId = null;
     SC.run(function() {
-      // Generate the key used by the parent's child record manager.
-      var key = SC.Record._generateChildKey();
       hash = hash || {}; // init if needed
-      var pm = childRecordType.primaryKey || 'childRecordKey';
-      var childKey = hash[pm];
-      hash[pm] = key;
-
-      var store = this.get('store');
+      
+      existingId = hash[recordType.prototype.primaryKey];
+      
+      store = this.get('store');
       if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';
-
-      cr = store.createRecord(childRecordType, hash);
-      cr._parentRecord = this;
-
-      // ID processing if necessary
-      if(this.generateIdForChild) this.generateIdForChild(cr);
-
-      // Add the child record to the hash.
-      var crManager = this.get('childRecords');
-      if (SC.none(crManager)) {
-        //console.log('Creating Child Record Manager for (%@)'.fmt(SC.guidFor(this)));
-        crManager = SC.Object.create();
-        this.set('childRecords', crManager);
+      
+      if (!id && (pk = recordType.prototype.primaryKey)) {
+        id = hash[pk];
+        // In case there isnt a primary key supplied then we create on
+        // on the fly
+        sk = id ? store.storeKeyExists(recordType, id) : null;
+        if (sk){
+          store.writeDataHash(sk, hash);
+          cr = store.materializeRecord(sk);
+        } else {
+          cr = store.createRecord(recordType, hash) ;
+          if (SC.none(id)){
+            sk = cr.get('storeKey');
+            id = 'cr'+sk;
+            SC.Store.replaceIdFor(sk, id);
+            hash = store.readEditableDataHash(sk);
+            hash[pk] = id;
+          }
+        }
+        
       }
+      
+      // ID processing if necessary
+      if (SC.none(existingId) && this.generateIdForChild) this.generateIdForChild(cr);
 
-      crManager[key] = cr;
     }, this);
 
     return cr;
   },
   
+  _nestedRecordKey: 0,
+    
   /**
    * Override this function if you want to have a special way of creating 
    * ids for your child records
@@ -976,7 +1098,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     
     @property {SC.Error}
   */
-  BAD_STATE_ERROR:     SC.$error("Internal Inconsistency"),
+  BAD_STATE_ERROR:     SC.$error("Internal barf Inconsistency"),
 
   /**
     Error for when you try to create a new record that already exists.
@@ -1083,7 +1205,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   toMany: function(recordType, opts) {
     opts = opts || {};
-    var isNested = opts.nested;
+    var isNested = opts.nested || opts.isNested;
     var attr;
     if(isNested){
       attr = SC.ChildrenAttribute.attr(recordType, opts);
@@ -1109,7 +1231,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   toOne: function(recordType, opts) {
     opts = opts || {};
-    var isNested = opts.nested;
+    var isNested = opts.nested || opts.isNested;
     var attr;
     if(isNested){
       attr = SC.ChildAttribute.attr(recordType, opts);
@@ -1190,15 +1312,5 @@ SC.Record.mixin( /** @scope SC.Record */ {
     var ret = SC.Object.extend.apply(this, arguments);
     SC.Query._scq_didDefineRecordType(ret);
     return ret ;
-  },
-  
-  // ..........................................................
-  // PRIVATE METHODS
-  // 
-  
-  _generateChildKey: function() {
-    var newIdx = SC.Record._nextChildKey + 1;
-    SC.Record._nextChildKey = newIdx;
-    return newIdx; 
   }
 }) ;

@@ -28,3 +28,17 @@ test("should return an array for the object passed ",function(){
 	ret = SC.makeArray(arrayA);
 	equals(SC.isArray(ret),true) ;
 });
+
+test("isArray should return true for empty arguments", function() {
+  var func = function(foo, bar) {
+    ok(SC.isArray(arguments), "arguments is an array");
+  };
+  func();
+});
+
+test("SC.$A should return an empty array if passed an empty arguments object", function() {
+  var func = function(foo, bar) {
+    equals(SC.$A(arguments).length, 0, "returns an empty array");
+  };
+  func();
+});
