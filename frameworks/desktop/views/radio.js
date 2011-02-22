@@ -279,6 +279,12 @@ SC.RadioView = SC.View.extend(SC.Control,
     return ret; // done!
   }.property('value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
 
+
+  acceptsFirstResponder: function() {
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+    else return NO;
+  }.property('isEnabled'),
+  
   /**
     If the user clicks on of the items mark it as active on mouseDown unless
     is disabled.
