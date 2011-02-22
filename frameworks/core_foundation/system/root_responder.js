@@ -6,6 +6,7 @@
 // ==========================================================================
 
 require('system/ready');
+require('system/platform');
 
 /** Set to NO to leave the backspace key under the control of the browser.*/
 SC.CAPTURE_BACKSPACE_KEY = NO ;
