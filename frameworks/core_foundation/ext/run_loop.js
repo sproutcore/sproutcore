@@ -158,5 +158,3 @@ SC.RunLoop = SC.RunLoop.extend(
   }
 
 });
-
-SC.RunLoop.currentRunLoop = SC.RunLoop.create();

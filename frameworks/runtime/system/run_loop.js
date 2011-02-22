@@ -306,3 +306,5 @@ SC.run = function(callback, target, forceNested) {
     if(forceNested || !alreadyRunning) SC.RunLoop.end();
   }
 };
+
+SC.RunLoop.currentRunLoop = SC.RunLoop.create();
