@@ -95,7 +95,7 @@ module("Cyclical relationships", {
 test("getting all contacts in a group", function() {
   var group  = AB.store.find(AB.Group, 100);
   var expected = AB.store.find(AB.Contact).filterProperty('group', group);
-  same(group.get('contacts'), expected, 'contacts');
+  same(group.get('contacts').toArray(), expected, 'contacts');
 });
 
 test("finding favoriteContacts", function() {
