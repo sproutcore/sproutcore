@@ -1021,7 +1021,7 @@ SC.CoreString = {
   },
   loc: function(str, formats) {
     str = SC.STRINGS[str] || str;
-    return SC.String.fmt(str, arguments) ;
+    return SC.CoreString.fmt(str, arguments) ;
   },
   w: function(str) {
     var ary = [], ary2 = str.split(' '), len = ary2.length, string, idx=0;
