@@ -7,6 +7,7 @@
 
 sc_require('models/record');
 sc_require('models/record_attribute');
+sc_require('system/many_array');
 
 /** @class
   
