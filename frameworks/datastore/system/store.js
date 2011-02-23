@@ -148,8 +148,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // Replicate parent records references
-    attrs.childRecords = SC.clone(this.childRecords);
-    attrs.parentRecords = SC.clone(this.parentRecords);
+    attrs.childRecords = this.childRecords ? SC.clone(this.childRecords) : {};
+    attrs.parentRecords = this.parentRecords ? SC.clone(this.parentRecords) : {};
     
     var ret    = newStoreClass.create(attrs),
         nested = this.nestedStores;
