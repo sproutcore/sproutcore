@@ -158,3 +158,6 @@ SC.RunLoop = SC.RunLoop.extend(
   }
 
 });
+
+// Recreate the currentRunLoop with the new methods
+SC.RunLoop.currentRunLoop = SC.RunLoop.create();
