@@ -53,7 +53,6 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
     else{
       if(this._checkboxRenderSource){
         var source = this._checkboxRenderSource;
-        source.set('isSelected', context.get('value'));
         this._checkboxRenderDelegate.update(source, this.$('.sc-checkbox-view'));
       }
     }
@@ -79,11 +78,11 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
       // update only if mouse inside on mouse up...
       if (this._isInsideElementWithClassName('sc-checkbox-view',evt)) {
         content = this.get('content') ;
-        if (content && content.get) {
-          var value = content.get('value') ;
+        if (content && content.view && content.view.get) {
+          var value = content.view.get(content.get('key')) ;
           value = (value === SC.MIXED_STATE) ? YES : !value ;
-  
           content.view.set(content.get('key'), value); // update view
+          this._checkboxRenderSource.set('isSelected', value);
           
           this.displayDidChange(); // repaint view...
         }
@@ -113,7 +112,7 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
     var source = this._checkboxRenderSource;
     if (!source) {
       source = this._checkboxRenderSource = 
-      SC.Object.create({ renderState: {}, theme: this.get('theme') });
+      SC.Object.create({ renderState: {}, theme: this.get('theme')});
     }
 
     source
@@ -163,7 +162,7 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
   },
   
   _removeCheckboxActiveState: function() {
-    if (this._checkboxRenderer) {
+    if (this._checkboxRenderSource) {
       var source = this._checkboxRenderSource;
 
       source.set('isActive', NO);
