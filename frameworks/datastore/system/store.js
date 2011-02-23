@@ -1983,7 +1983,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
-    record.notifyPropertyChange('status');
+    if (record != null) {
+      record.notifyPropertyChange('status');
+    }
 
     return this ;
   },
@@ -2012,7 +2014,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
-    record.notifyPropertyChange('status');
+    if (record != null) {
+      record.notifyPropertyChange('status');
+    }
 
     return this ;
   },
@@ -2045,7 +2049,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
-    record.notifyPropertyChange('status');
+    if (record != null) {
+      record.notifyPropertyChange('status');
+    }
 
     return this ;
   },
