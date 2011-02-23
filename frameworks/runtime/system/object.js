@@ -177,7 +177,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       }
 
       if (value.isEnhancement) {
-        value = SC._enhance(base[key], value);
+        value = SC._enhance(base[key] || K, value);
       }
     }
 
