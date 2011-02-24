@@ -4,6 +4,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   tagName: 'ul',
   content: null,
   template: SC.Handlebars.compile(''),
+  emptyView: null,
 
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
@@ -47,6 +48,9 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         toDestroy = [], toReuse = [],
         view, item, matchIndex, lastView, length, i;
 
+    emptyView = this.get('emptyView');
+    if(emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
+
     // Destroy unused views
     for (i=0, length=childViews.get('length'); i < length; i++) {
       view = childViews.objectAt(i);
@@ -60,6 +64,15 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     for (i=0, length=toDestroy.length; i < length; i++) { toDestroy[i].destroy(); }
 
     childViews = [];
+
+    if(array.get('length') === 0 && this.get('inverseTemplate')) {
+      view = this.createChildView(SC.TemplateView.extend({
+        template: this.get('inverseTemplate'),
+        content: this
+      }));
+      this.set('emptyView', view);
+      view.createLayer().$().appendTo(this.$());
+    }
 
     // Add items, using previous if possible
     for (i=0, length=array.get('length'); i < length; i++) {
