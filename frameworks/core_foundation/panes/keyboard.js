@@ -58,7 +58,7 @@ SC.Pane.reopen(
     if (shouldForward && (responder = this.get('firstResponder'))) {
       newKeyView = (pane) ? pane.get('firstResponder') : null ;
       keyView = this.get('firstResponder') ;
-      if (keyView) keyView[methodName](newKeyView);
+      if (keyView && keyView[methodName]) { keyView[methodName](newKeyView); }
 
       if ((isKey !== undefined) && responder) {
         responder.set('isKeyResponder', isKey);
