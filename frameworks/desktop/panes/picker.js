@@ -38,17 +38,16 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   Display a non-modal pane that automatically repositions around a view so as 
   to remain visible. 
   
-  An <code>SC.PickerPane</code> repositions around the view to which it is anchored as the 
+  An `SC.PickerPane` repositions around the view to which it is anchored as the 
   browser window is resized so as to ensure the pane's content remains visible. 
   A picker pane is useful for displaying supplementary information and does not 
   block the user's interaction with other UI elements. Picker panes typically 
   provide a better user experience than modal panels.
 
-  An <code>SC.PickerPane</code> repositions itself according to the optional 
-  <code>preferMatrix</code> argument passed in the <code>.popup()</code> method 
-  call. The <code>preferMatrix</code> either specifies an offset-based arrangement 
-  behavior or a position-based arrangement behavior depending on the 
-  <code>preferType</code> argument in the <code>.popup()</code> call.
+  An `SC.PickerPane` repositions itself according to the optional `preferMatrix` 
+  argument passed in the `.popup()` method call. The `preferMatrix` either 
+  specifies an offset-based arrangement behavior or a position-based arrangement 
+  behavior depending on the `preferType` argument in the `.popup()` call.
              
   The simplest way to create and display a picker pane:
   
@@ -59,7 +58,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
     }).popup(someView);
   }}}
   
-  This displays the <code>SC.PickerPane</code> anchored to <code>someView</code>. 
+  This displays the `SC.PickerPane` anchored to `someView`. 
       
   h2. Positioning
   
@@ -68,71 +67,67 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   
   h3. Offset-based
     
-  When <code>preferType</code> is unspecified, <code>SC.PICKER_MENU</code> or 
-  <code>SC.PICKER_FIXED</code>, then the <code>preferMatrix</code> array describes
-  the offset that is used to position the 
+  When `preferType` is unspecified, `SC.PICKER_MENU` or `SC.PICKER_FIXED`, then 
+  the `preferMatrix` array describes the offset that is used to position the 
   pane below the anchor. The offset is described by an array of three values,
-  defaulting to <code>[1, 4, 3]</code>. The first value controls the x offset
-  and the second value the y offset. The third value can be <code>0</code> (right)
-  or <code>3</code> (bottom), controlling whether the origin of the pane is 
-  further offset by the width (in the case of 0) or the height (in the case of 3) 
-  of the anchor.  
+  defaulting to `[1, 4, 3]`. The first value controls the x offset and the second 
+  value the y offset. The third value can be `0` (right) or `3` (bottom), 
+  controlling whether the origin of the pane is further offset by the width 
+  (in the case of 0) or the height (in the case of 3) of the anchor.  
   
   
   h3. Position-based
   
-  When <code>preferType</code> is <code>SC.PICKER_POINTER</code> or 
-  <code>SC.PICKER_MENU_POINTER</code>, then the <code>preferMatrix</code> 
-  specifies the sides in the order in which you want the <code>SC.PickerPane</code> 
-  to try to arrange itself around the view to which it is anchored. The fifth 
-  element in the <code>preferMatrix</code> specifies which side the 
-  <code>SC.PickerPane</code> should display on when there isn't enough space
-  around any of the preferred sides.
+  When `preferType` is `SC.PICKER_POINTER` or `SC.PICKER_MENU_POINTER`, then 
+  the `preferMatrix` specifies the sides in the order in which you want the 
+  `SC.PickerPane` to try to arrange itself around the view to which it is 
+  anchored. The fifth element in the `preferMatrix` specifies which side the 
+  `SC.PickerPane` should display on when there isn't enough space around any 
+  of the preferred sides.
   
-  Anchor sides are defined by their index in <code>SC.POINTER_LAYOUT</code>, where
-  right is <code>0</code>, left is <code>1</code>, top is <code>2</code>, and
-  bottom is <code>3</code>.
+  Anchor sides are defined by their index in `SC.POINTER_LAYOUT`, where right 
+  is `0`, left is `1`, top is `2`, and bottom is `3`.
   
-  For example, the <code>preferMatrix</code> of @[3, 0, 1, 2, 2]@ says: "Display 
-  below the anchor (3); if there isn't enough space then display to the right of the 
-  anchor (0). If there isn't enough space either below or to the right of the anchor,
-  then appear to the left (1), unless there is also no space on the left, in which 
-  case display above the anchor (2)."
+  For example, the `preferMatrix` of `[3, 0, 1, 2, 2]` says: "Display below the 
+  anchor (3); if there isn't enough space then display to the right of the anchor (0). 
+  If there isn't enough space either below or to the right of the anchor, then appear 
+  to the left (1), unless there is also no space on the left, in which case display 
+  above the anchor (2)."
   
   h2. Position Rules
   
-  When invoking <code>.popup()</code> you can optionally specify a picker position
-  rule with the <code>preferType</code> argument. 
+  When invoking `.popup()` you can optionally specify a picker position rule with 
+  the `preferType` argument. 
   
-  If no <code>preferType</code> is specified, the picker pane is displayed just
-  below the anchor. The pane will reposition automatically for optimal visibility,
-  ensuring the top-left corner is visible.
+  If no `preferType` is specified, the picker pane is displayed just below the anchor. 
+  The pane will reposition automatically for optimal visibility, ensuring the top-left 
+  corner is visible.
   
   These position rules have the following behaviors:
   
-  h3.  <code>SC.PICKER_MENU</code>
+  h3.  `SC.PICKER_MENU`
   
-  Positioning is offset-based, with <code>preferMatrix</code> defaulting to 
-  <code>[1, 4, 3]</code>. Furthermore, a minimum left and right padding to window,
-  of 7px and 8px, respectively, is enforced.
-  
-  
-  h3. <code>SC.PICKER_FIXED</code>
-  
-  Positioning is offset-based, with <code>preferMatrix</code> defaulting to 
-  <code>[1, 4, 3]</code> and skipping @fitPositionToScreen@.
+  Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]`. 
+  Furthermore, a minimum left and right padding to window, of 7px and 8px, respectively, 
+  is enforced.
   
   
-  h3. <code>SC.PICKER_POINTER</code>
+  h3. `SC.PICKER_FIXED`
   
-  Positioning is position-based, with <code>preferMatrix</code> defaulting to 
-  <code>[0, 1, 2, 3, 2]</code>, i.e. right > left > top > bottom; fallback to top.
+  Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]` and 
+  skipping `fitPositionToScreen`.
   
   
-  h3. <code>SC.PICKER_MENU_POINTER</code>
+  h3. `SC.PICKER_POINTER`
   
-  Positioning is position-based, with <code>preferMatrix</code> defaulting to 
-  <code>[3, 0, 1, 2, 3]</code>, i.e. bottom, right, left, top; fallback to bottom.
+  Positioning is position-based, with `preferMatrix` defaulting to `[0, 1, 2, 3, 2]`, 
+  i.e. right > left > top > bottom; fallback to top.
+  
+  
+  h3. `SC.PICKER_MENU_POINTER`
+  
+  Positioning is position-based, with `preferMatrix` defaulting to `[3, 0, 1, 2, 3]`, 
+  i.e. bottom, right, left, top; fallback to bottom.
   
   
   
@@ -148,7 +143,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
     }).popup(anchor);
   }}}
 
-  2. menu below the anchor with default <code>preferMatrix</code> of <code>[1,4,3]</code>:   
+  2. menu below the anchor with default `preferMatrix` of `[1,4,3]`:   
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
@@ -156,7 +151,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
     }).popup(anchor, SC.PICKER_MENU);
   }}}
 
-  3. menu on the right side of anchor with custom <code>preferMatrix</code> of <code>[2,6,0]</code>:   
+  3. menu on the right side of anchor with custom `preferMatrix` of `[2,6,0]`:   
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
@@ -164,7 +159,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
     }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
   }}}
 
-  4. fixed below the anchor with default <code>preferMatrix</code> of <code>[1,4,3]</code>:   
+  4. fixed below the anchor with default `preferMatrix` of `[1,4,3]`:   
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
@@ -172,7 +167,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
     }).popup(anchor, SC.PICKER_FIXED);
   }}}
 
-  5. fixed on the right side of anchor with <code>preferMatrix</code> of <code>[-22,-17,0]</code>:   
+  5. fixed on the right side of anchor with `preferMatrix` of `[-22,-17,0]`:   
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
@@ -180,7 +175,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
     }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
   }}}
 
-  6. pointer with default <code>preferMatrix</code> of <code>[0,1,2,3,2]</code>:   
+  6. pointer with default `preferMatrix` of `[0,1,2,3,2]`:   
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
@@ -190,7 +185,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   
   Positioning: right (0) > left (1) > top (2) > bottom (3). Fallback to top (2).
 
-  7. pointer with custom <code>preferMatrix</code> of <code>[3,0,1,2,2]</code>:   
+  7. pointer with custom `preferMatrix` of `[3,0,1,2,2]`:   
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
@@ -200,7 +195,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 
   Positioning: bottom (3) > right (0) > left (1) > top (2). Fallback to top (2).
 
-  8. menu-pointer with default <code>preferMatrix</code> of <code>[3,0,1,2,3]</code>:
+  8. menu-pointer with default `preferMatrix` of `[3,0,1,2,3]`:
   {{{
     SC.PickerPane.create({
       layout: { width: 400, height: 200 },
