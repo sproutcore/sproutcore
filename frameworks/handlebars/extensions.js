@@ -95,10 +95,10 @@ Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
 
   if(fn) {
     if(collectionClass.isClass) {
-      collectionClass.prototype.exampleViewTemplate = fn;
+      collectionClass.prototype.itemViewTemplate = fn;
       collectionClass.prototype.inverseTemplate = inverse;
     } else {
-      collectionClass.exampleViewTemplate = fn;
+      collectionClass.itemViewTemplate = fn;
       collectionClass.inverseTemplate = inverse;
     }
   }
@@ -117,7 +117,7 @@ Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, in
 
   if(fn) {
     // attach the function to the original class so it can be used recursively
-    collectionClass.prototype.exampleViewTemplate = fn;
+    collectionClass.prototype.itemViewTemplate = fn;
   }
 
   if(collectionClass.isClass) {

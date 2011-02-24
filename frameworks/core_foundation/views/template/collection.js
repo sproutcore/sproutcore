@@ -15,23 +15,28 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }
   },
 
-  exampleView: "SC.TemplateView",
+  itemView: "SC.TemplateView",
 
-  exampleViewClass: function() {
-    var exampleView = this.get('exampleView');
+  itemViewClass: function() {
+    var itemView = this.get('itemView');
+    // hash of properties to override in our
+    // item view class
+    var extensions = {};
 
-
-    if(SC.typeOf(exampleView) === SC.T_STRING) {
-      exampleView = SC.objectForPropertyPath(exampleView);
+    if(SC.typeOf(itemView) === SC.T_STRING) {
+      itemView = SC.objectForPropertyPath(itemView);
     }
 
-    if (this.get('exampleViewTemplate')) {
-      exampleView = exampleView.extend({
-        template: this.get('exampleViewTemplate')
-      });
+    if (this.get('itemViewTemplate')) {
+      extensions.template = this.get('itemViewTemplate');
     }
-    return exampleView;
-  }.property('exampleView').cacheable(),
+
+    if (this.get('tagName') === 'ul') {
+      extensions.tagname = 'li';
+    }
+
+    return itemView.extend(extensions);
+  }.property('itemView').cacheable(),
 
   contentDidChange: function() {
     this.removeAllChildren();
@@ -43,7 +48,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
   arrayContentDidChange: function(array, objects, key, indexes) {
     var content = this.get('content'),
-        exampleViewClass = this.get('exampleViewClass'),
+        itemViewClass = this.get('itemViewClass'),
         childViews = this.get('childViews'),
         toDestroy = [], toReuse = [],
         view, item, matchIndex, lastView, length, i;
@@ -79,7 +84,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       item = array.objectAt(i);
       view = toReuse.find(function(v){ return v.get('content') === item; });
       if (!view) {
-        view = this.createChildView(exampleViewClass.extend({
+        view = this.createChildView(itemViewClass.extend({
           content: item,
           context: item,
           tagName: 'li'
