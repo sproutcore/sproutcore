@@ -61,19 +61,19 @@ Handlebars.registerHelper('bindProperty', function(property, fn, inverse, data) 
   this.addObserver(property, function() {
     var result = self.get(property);
 
-    if (fn && result) {
+    if (fn && (result !== null || result !== undefined)) {
       var renderContext = SC.RenderContext('span').id(spanId);
       renderContext.push(fn(self.get(property)));
       var element = renderContext.element();
       view.$("#" + spanId).replaceWith(element);
-    } else if (result) {
+    } else if (result !== null || result !== undefined) {
       view.$("#" + spanId).html(Handlebars.Utils.escapeExpression(self.get(property)));
     } else {
       view.$("#" + spanId).html("");
     }
   });
 
-  if(result) {
+  if (result !== null || result !== undefined) {
     if (fn) {
       renderContext.push(fn(result));
     } else {
