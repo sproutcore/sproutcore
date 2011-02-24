@@ -337,6 +337,10 @@ SC.Observable = {
 
     return this ;
   },
+  
+  setEach: function(hash) {
+    return this.set(hash);
+  },
 
   /**
     Called whenever you try to get or set an undefined property.
