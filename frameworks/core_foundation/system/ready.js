@@ -56,7 +56,7 @@ SC.mixin({
     },
     done: function() {
       SC.isReady = true;
-      if(window.main) { main(); }
+      if(window.main && !SC.suppressMain) { main(); }
       SC.RunLoop.end();
     }
   }

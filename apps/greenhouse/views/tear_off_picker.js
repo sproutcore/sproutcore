@@ -26,7 +26,7 @@ Greenhouse.TearOffPicker = SC.PickerPane.extend(
       Greenhouse.eventBlocker.set('isVisible', NO);
       this._blockedIframe = NO;
     }
-    return sc_super();
+    return YES;
   },
   
   mouseDown: function(evt) {

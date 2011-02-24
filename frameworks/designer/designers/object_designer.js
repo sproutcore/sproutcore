@@ -252,7 +252,7 @@ SC.ObjectDesigner.mixin({
   didLoadDesign: function(designedObject, sourceObject, attrs) {
     designedObject.isDesign = YES ; // indicates that we need a designer.
     designedObject.designAttrs = attrs;
-    designedObject.sourceObject = sourceObject;
+    //designedObject.sourceObject = sourceObject; TODO: don't need this..
   },
 
   /**
@@ -287,8 +287,8 @@ SC.ObjectDesigner.mixin({
       object.designer = DesignerClass.create({
         object: object,
         objectClass: design,
-        designAttrs: origDesign.designAttrs,
-        sourceObject: origDesign.sourceObject
+        designAttrs: origDesign.designAttrs
+        //sourceObject: origDesign.sourceObject TODO: don't need this
       });
     }
   }

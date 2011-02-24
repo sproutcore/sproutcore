@@ -210,7 +210,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
 
       enterState: function(){
         var picker = Greenhouse.dialogPage.get('propertyPicker');
-        picker.set('contentView', Greenhouse.dialogPage.get('propertyEditor'));
+        var cv = Greenhouse.dialogPage.get('propertyEditor');
+        picker.set('contentView', cv);
         var list = Greenhouse.inspectorsPage.getPath('propertiesInspector.list.contentView');
         var content = Greenhouse.propertyController.get('content');
 

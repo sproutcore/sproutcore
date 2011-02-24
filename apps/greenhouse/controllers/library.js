@@ -73,10 +73,6 @@ Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelega
     @returns {Object} the data object or null if the data could not be provided.
   */
   collectionViewDragDataForType: function(view, drag, dataType) {
-    //store the iframe's frame for use on drop
-    var webView = Greenhouse.appPage.getPath('webView');
-  
-    drag.iframeFrame = webView.get('parentView').convertFrameToView(webView.get('frame'), null);
     var ret = (dataType === 'SC.Object') ? this.get('selection').firstObject() : null;
     return ret ;
   },
@@ -92,12 +88,9 @@ Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelega
     @returns {SC.View} view or null
   */
   collectionViewDragViewFor: function(view, dragContent) {
-    var dragView = view.itemViewForContentIndex(dragContent.firstObject());
-    var layer = view.get('layer').cloneNode(false) ;
-    dragView.set('parentView', view) ;
-    dragView.set('layer', layer) ;
-    dragView.adjust({height: view.get('rowHeight'), top: (dragContent.firstObject()*view.get('rowHeight')) }) ;
-    return dragView ;
+    var selectedItemIndex = dragContent.firstObject();
+    var itemView = view.itemViewForContentIndex(selectedItemIndex);
+    return itemView;
   },
 
   /**

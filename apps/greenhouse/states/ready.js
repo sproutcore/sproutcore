@@ -73,6 +73,31 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         view.set('classNames', []);
         view.set('layout', SC.merge({centerX:0, centerY: 0}, s));
       }
+      // ..........................................................
+      // Wait for the view to re-draw and update the webViewFrame
+      // 
+      SC.run(function(){
+        var dropViewFrame,
+          webView = Greenhouse.appPage.get('webView'),
+          pv = webView.get('parentView'),
+          webViewFrame = webView.get('frame');
+          console.log(webViewFrame);
+          
+          webViewFrame = pv.convertFrameToView(webViewFrame, null);
+          
+          console.log(webViewFrame);
+          //add the drop container to the adjusted layout
+          pv = view.get('parentView');
+          dropViewFrame = pv.convertFrameToView(view.get('frame'), null);
+          if(dropViewFrame){
+            webViewFrame.x += dropViewFrame.x;
+            webViewFrame.y += dropViewFrame.y;
+          }
+          console.log(Greenhouse._webViewFrame);
+          //update 
+          Greenhouse._webViewFrame = webViewFrame;
+          console.log(Greenhouse._webViewFrame);
+      });
 
     },
     // ..........................................................
@@ -138,7 +163,8 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         var designer = Greenhouse.designController.get('content');
 
         if(designer){
-          designer.designProperties.pushObject("newProperty"); //TODO: generate better name....
+          this._propertyCount = this._propertyCount ? this._propertyCount+1 : 1;
+          designer.designProperties.pushObject("newProperty"+this._propertyCount); //TODO: generate better name....
           designer.propertyDidChange('editableProperties');
         }
       },

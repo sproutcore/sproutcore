@@ -81,8 +81,9 @@ Greenhouse.dialogPage = SC.Page.design({
   }),
   
   propertyEditor: SC.View.design({
-    childViews: 'title keyLabel key valueLabel value update cancel'.w(),
-    
+    // childViews: 'title keyLabel key valueLabel value update cancel'.w(),
+    childViews: 'title keyLabel key valueLabel value updateButton cancelButton'.w(),
+      
     title: SC.LabelView.design({
       layout: {top: 2, left: 15, right: 5, height: 22},
       value: "_Edit Property:".loc(),
@@ -123,7 +124,7 @@ Greenhouse.dialogPage = SC.Page.design({
       valueBinding: 'Greenhouse.propertyEditorController.value',
       isTextArea: YES
     }),
-    cancel: SC.ButtonView.design({
+    cancelButton: SC.ButtonView.design({
       layout: {bottom: 5, right: 105, width: 84, height: 24},
       isDefault: NO,
       action: 'cancel',
@@ -131,7 +132,7 @@ Greenhouse.dialogPage = SC.Page.design({
       keyEquivalent: 'escape',
       title: "_Cancel".loc()
     }),
-    update: SC.ButtonView.design({
+    updateButton: SC.ButtonView.design({
       layout: {bottom: 5, right: 15, width: 84, height: 24},
       isDefault: YES,
       action: 'update',

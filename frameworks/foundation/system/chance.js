@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require("system/ready");
 sc_require("system/task_queue");
 
 SC.chance = {
@@ -38,7 +37,7 @@ SC.chance = {
 
   preloadImages: function() {
     if (window.CHANCE_SLICES) {
-      this.images = CHANCE_SLICES;
+      this.images = window.CHANCE_SLICES;
     }
 
     var bank = this.bank, idx, con = this.PRELOAD_CONCURRENCY;

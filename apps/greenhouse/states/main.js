@@ -194,13 +194,22 @@ Greenhouse.mixin( /** @scope Greenhouse */{
         var iframe = Greenhouse.get('iframe'), 
             innerTargets,
             webViewFrame,
+            dropContainerLayout,
             webView = Greenhouse.appPage.get('webView');
 
         var pv = webView.get('parentView');
           webViewFrame = webView.get('frame');
         webViewFrame = pv.convertFrameToView(webViewFrame, null);
-
-
+        //add the drop container to the adjusted layout
+        dropContainerLayout = iframe.SC.designPage.getPath('designMainPane.container').layout;
+        
+        if(dropContainerLayout){
+          webViewFrame.x += dropContainerLayout.left;
+          webViewFrame.y += dropContainerLayout.top;
+        }
+        //assign this to 
+        Greenhouse._webViewFrame = webViewFrame;
+        
         //add existing targets
         innerTargets = iframe.SC.Drag._dropTargets;
 
@@ -221,33 +230,41 @@ Greenhouse.mixin( /** @scope Greenhouse */{
           delete iframe.SC.Drag._dropTargets[iframe.SC.guidFor(target)] ;
           delete SC.Drag._dropTargets[iframe.SC.guidFor(target)];
         };
+        
+        //make sure all drags have an iframeTargetOffset...
+        SC.Drag.start = function(ops) {
+          var ret = this.create(ops);
+          ret.globalTargetOffset = Greenhouse._webViewFrame;
+          ret.startDrag();
+          return ret;
+        };
+
+        //all inner drags are actually outer drags
+        iframe.SC.Drag.start = SC.Drag.start;
 
 
         SC.Drag.prototype._findDropTarget = function(evt) {
-          var loc = { x: evt.pageX, y: evt.pageY } ;
-
+          var loc = { x: evt.pageX, y: evt.pageY }, globalOffset = this.globalTargetOffset ;
           var target, frame ;
           var ary = this._dropTargets() ;
           for (var idx=0, len=ary.length; idx<len; idx++) {
             target = ary[idx] ;
-
             // If the target is not visible, it is not valid.
             if (!target.get('isVisibleInWindow')) continue ;
 
             // get clippingFrame, converted to the pane.
             frame = target.convertFrameToView(target.get('clippingFrame'), null) ;
-
-            //if this is in the iframe adjust the frame accordingly
-            if(target.get('targetIsInIFrame')){
-               frame.x = frame.x + webViewFrame.x;
-               frame.y = frame.y + webViewFrame.y;
-             }
+            //convert to iframe pane if it is in the winodw
+            if(globalOffset && target.inGlobalOffset){
+              frame.x += globalOffset.x;
+              frame.y += globalOffset.y;
+            }
             // check to see if loc is inside.  If so, then make this the drop target
             // unless there is a drop target and the current one is not deeper.
-            if (SC.pointInRect(loc, frame)) return target;
+            if(SC.pointInRect(loc, frame)) return target;
+
           } 
-          return null ;
-        };
+          return null ;        };
         //all inner drags are actually outer drags
         iframe.SC.Drag.start = SC.Drag.start;
       },
