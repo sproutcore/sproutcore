@@ -175,3 +175,17 @@ test("__sc_super__ semantics", function() {
   SubKlass.reopen({});
   ok(SubKlass.__sc_super__ === Klass.prototype, "Reopen doesn't break prototype recordkeeping");
 });
+
+test("enhance still works if there is no base method to enhance", function() {
+  var enhancer = {
+    weirdName: function(original) {
+      original();
+
+      return YES;
+    }.enhance()
+  };
+
+  var enhanced = SC.Object.create(enhancer);
+
+  ok(enhanced.weirdName(), "enhanced function runs with no errors");
+});
