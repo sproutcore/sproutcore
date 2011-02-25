@@ -278,7 +278,7 @@ test("Child views created using the view helper should have their parent view se
 
 test("Collection views that specify an example view class have their children be of that class", function() {
   TemplateTests.ExampleViewCollection = SC.TemplateCollectionView.create({
-    exampleView: SC.TemplateView.extend({
+    itemView: SC.TemplateView.extend({
       isCustom: YES
     }),
 

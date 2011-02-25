@@ -56,38 +56,75 @@ Handlebars.registerHelper('bindProperty', function(property, fn, inverse, data) 
   var spanId = "handlebars-bound-" + jQuery.uuid++;
   var result = this.get(property);
 
-  var self = this;
+  var self = this, renderContext = SC.RenderContext('span').id(spanId);
 
   this.addObserver(property, function() {
-    if (fn) {
-      var renderContext = SC.RenderContext('span').id(spanId);
+    var result = self.get(property);
 
+    if (fn && (result !== null || result !== undefined)) {
+      var renderContext = SC.RenderContext('span').id(spanId);
       renderContext.push(fn(self.get(property)));
       var element = renderContext.element();
       view.$("#" + spanId).replaceWith(element);
-    } else {
+    } else if (result !== null || result !== undefined) {
       view.$("#" + spanId).html(Handlebars.Utils.escapeExpression(self.get(property)));
+    } else {
+      view.$("#" + spanId).html("");
     }
   });
 
-  var renderContext = SC.RenderContext('span').id(spanId);
-  if (fn) {
-    renderContext.push(fn(result));
-  } else {
-    renderContext.push(Handlebars.Utils.escapeExpression(result));
+  if (result !== null || result !== undefined) {
+    if (fn) {
+      renderContext.push(fn(result));
+    } else {
+      renderContext.push(Handlebars.Utils.escapeExpression(result));
+    }
   }
 
   return new Handlebars.SafeString(renderContext.join());
 });
 
 Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
-  var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
+  var collectionClass;
 
-  if(collectionClass.isClass) {
-    collectionClass.prototype.exampleViewTemplate = fn;
+  if(typeof path === "string") {
+    collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
   } else {
-    collectionClass.exampleViewTemplate = fn;
+    collectionClass = path;
+  }
+
+  if(fn) {
+    if(collectionClass.isClass) {
+      collectionClass.prototype.itemViewTemplate = fn;
+      collectionClass.prototype.inverseTemplate = inverse;
+    } else {
+      collectionClass.itemViewTemplate = fn;
+      collectionClass.inverseTemplate = inverse;
+    }
   }
 
   return Handlebars.helpers.view.call(this, collectionClass, Handlebars.VM.noop, inverse, data);
+});
+
+Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, inverse, data) {
+  var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
+  var binding = SC.Binding.from(bindingString, this);
+
+  if(!inverse) {
+    data = fn;
+    fn = null;
+  }
+
+  if(fn) {
+    // attach the function to the original class so it can be used recursively
+    collectionClass.prototype.itemViewTemplate = fn;
+  }
+
+  if(collectionClass.isClass) {
+    collectionClass = collectionClass.extend({ contentBinding: binding });
+  } else {
+    collectionClass.bindings.push( binding.to('content', collectionClass) );
+  }
+
+  return Handlebars.helpers.collection.call(this, collectionClass, fn, inverse, data);
 });

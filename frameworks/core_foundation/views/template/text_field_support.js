@@ -1,7 +1,13 @@
 SC.TextFieldSupport = {
-  value: function() {
-    return this.$('input').val();
-  }.property(),
+  value: function(key, value) {
+    if (value !== undefined) {
+      this.$('input').val(value);
+    } else {
+      value = this.$('input').val();
+    }
+
+    return value;
+  }.property().idempotent(),
 
   didCreateLayer: function() {
     SC.Event.add(this.$('input'), 'focus', this, this.focusIn);

@@ -8,7 +8,7 @@ test("creating a collection view works", function() {
 
   var CollectionView = SC.TemplateCollectionView.extend({
     content: [{title: 'Hello'}],
-    exampleView: ExampleView
+    itemView: ExampleView
   });
 
   var collectionView = CollectionView.create();
