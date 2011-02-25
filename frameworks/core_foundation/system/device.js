@@ -5,10 +5,10 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('system/core_query');
-require('system/ready');
-require('system/root_responder');
-require('system/platform');
+sc_require('system/core_query');
+sc_require('system/ready');
+sc_require('system/root_responder');
+sc_require('system/platform');
 
 SC.PORTRAIT_ORIENTATION = 'portrait';
 SC.LANDSCAPE_ORIENTATION = 'landscape';
