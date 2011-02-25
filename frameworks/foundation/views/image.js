@@ -26,7 +26,8 @@ SC.IMAGE_TYPE_CSS_CLASS = 'CSS_CLASS';
 */
 SC.BLANK_IMAGE_DATAURL = "data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==";
 
-SC.BLANK_IMAGE_URL = SC.browser.msie && SC.browser.msie<8 ? sc_static('blank.gif') : SC.BLANK_IMAGE_DATAURL;
+SC.BLANK_IMAGE_URL = SC.browser.msie && SC.browser.msie<8 ? 
+                      sc_static('blank.gif') : SC.BLANK_IMAGE_DATAURL;
 
 SC.BLANK_IMAGE = new Image();
 SC.BLANK_IMAGE.src = SC.BLANK_IMAGE_URL;
@@ -53,11 +54,14 @@ SC.ImageView = SC.View.extend(SC.Control,
 /** @scope SC.ImageView.prototype */ {
 
   classNames: 'sc-image-view',
+  
+  ariaRole: 'img',
 
-  displayProperties: 'image imageValue innerFrame frame status scale toolTip type'.w(),
+  displayProperties: 'image type innerFrame status scale toolTip'.w(),
 
   renderDelegateName: function() {
-    return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
+    return (this.get('useCanvas') ? 'canvasImage' : 'image') 
+            + "RenderDelegate";
   }.property('useCanvas').cacheable(),
 
   tagName: function() {
@@ -97,97 +101,108 @@ SC.ImageView = SC.View.extend(SC.Control,
   image: SC.BLANK_IMAGE,
 
   innerFrame: function() {
-    var image = this.get('image'),
-        align = this.get('align'),
-        scale = this.get('scale'),
-        frame = this.get('frame'),
-        imageWidth = image.width,
-        imageHeight = image.height,
-        scaleX,
-        scaleY,
-        result;
-
-    // Fast path
-    result = { x: 0, y: 0, width: frame.width , height: frame.height };
-    if (scale === SC.FILL) return result;
-
-    // Determine the appropriate scale
-    scaleX = frame.width / imageWidth;
-    scaleY = frame.height / imageHeight;
-
-    switch (scale) {
-      case SC.FILL_PROPORTIONALLY:
-        scale = scaleX > scaleY ? scaleX : scaleY;
-        break;
-      case SC.BEST_FIT:
-        scale = scaleX < scaleY ? scaleX : scaleY;
-        break;
-      case SC.BEST_FIT_DOWN_ONLY:
-        if ((imageWidth > frame.width) || (imageHeight > frame.height)) {
+      var image = this.get('image'),
+          align = this.get('align'),
+          scale = this.get('scale'),
+          frame = this.get('frame'),
+          imageWidth = image.width,
+          imageHeight = image.height,
+          layout,
+          scaleX,
+          scaleY,
+          result;
+   
+      // Fast path
+      
+      if(this.useStaticLayout){
+        layout = this.get('layout');
+        result = { x: 0, y: 0, width: layout.width , height: layout.height };
+      }
+      else{
+        result = { x: 0, y: 0, width: frame.width , height: frame.height };
+      }
+      if (scale === SC.FILL || this.useStaticLayout) return result;
+   
+      // Determine the appropriate scale
+      scaleX = frame.width / imageWidth;
+      scaleY = frame.height / imageHeight;
+   
+      switch (scale) {
+        case SC.FILL_PROPORTIONALLY:
+          scale = scaleX > scaleY ? scaleX : scaleY;
+          break;
+        case SC.BEST_FIT:
           scale = scaleX < scaleY ? scaleX : scaleY;
-        } else {
+          break;
+        case SC.BEST_FIT_DOWN_ONLY:
+          if ((imageWidth > frame.width) || (imageHeight > frame.height)) {
+            scale = scaleX < scaleY ? scaleX : scaleY;
+          } else {
+            scale = 1.0;
+          }
+          break;
+        case SC.SCALE_NONE:
           scale = 1.0;
-        }
-        break;
-      case SC.SCALE_NONE:
-        scale = 1.0;
-        break;
-      default: // Number
-        if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
-          SC.Logger.warn("SC.ImageView: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
-
-          // Don't attempt to scale or offset the image
-          return result;
-        }
-    }
-
-    imageWidth *= scale;
-    imageHeight *= scale;
-    result.width = Math.round(imageWidth);
-    result.height = Math.round(imageHeight);
-
-    // Align the image within its frame
-    switch (align) {
-      case SC.ALIGN_LEFT:
-        result.x = 0;
-        result.y = (frame.height / 2) - (imageHeight / 2);
-        break;
-      case SC.ALIGN_RIGHT:
-        result.x = frame.width - imageWidth;
-        result.y = (frame.height / 2) - (imageHeight / 2);
-        break;
-      case SC.ALIGN_TOP:
-        result.x = (frame.width / 2) - (imageWidth / 2);
-        result.y = 0;
-        break;
-      case SC.ALIGN_BOTTOM:
-        result.x = (frame.width / 2) - (imageWidth / 2);
-        result.y = frame.height - imageHeight;
-        break;
-      case SC.ALIGN_TOP_LEFT:
-        result.x = 0;
-        result.y = 0;
-        break;
-      case SC.ALIGN_TOP_RIGHT:
-        result.x = frame.width - imageWidth;
-        result.y = 0;
-        break;
-      case SC.ALIGN_BOTTOM_LEFT:
-        result.x = 0;
-        result.y = frame.height - imageHeight;
-        break;
-      case SC.ALIGN_BOTTOM_RIGHT:
-        result.x = frame.width - imageWidth;
-        result.y = frame.height - imageHeight;
-        break;
-      default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
-        result.x = (frame.width / 2) - (imageWidth / 2);
-        result.y = (frame.height / 2) - (imageHeight / 2);
-    }
-
-    return result;
-  }.property('align', 'image', 'scale', 'frame').cacheable(),
-
+          break;
+        default: // Number
+          if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
+            SC.Logger.warn("SC.ImageView: The scale '%@' was not understood.  "+
+                          "Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY,"+
+                          " SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive "+
+                          "number greater than 0.00.".fmt(scale));
+   
+            // Don't attempt to scale or offset the image
+            return result;
+          }
+      }
+   
+      imageWidth *= scale;
+      imageHeight *= scale;
+      result.width = Math.round(imageWidth);
+      result.height = Math.round(imageHeight);
+   
+      // Align the image within its frame
+      switch (align) {
+        case SC.ALIGN_LEFT:
+          result.x = 0;
+          result.y = (frame.height / 2) - (imageHeight / 2);
+          break;
+        case SC.ALIGN_RIGHT:
+          result.x = frame.width - imageWidth;
+          result.y = (frame.height / 2) - (imageHeight / 2);
+          break;
+        case SC.ALIGN_TOP:
+          result.x = (frame.width / 2) - (imageWidth / 2);
+          result.y = 0;
+          break;
+        case SC.ALIGN_BOTTOM:
+          result.x = (frame.width / 2) - (imageWidth / 2);
+          result.y = frame.height - imageHeight;
+          break;
+        case SC.ALIGN_TOP_LEFT:
+          result.x = 0;
+          result.y = 0;
+          break;
+        case SC.ALIGN_TOP_RIGHT:
+          result.x = frame.width - imageWidth;
+          result.y = 0;
+          break;
+        case SC.ALIGN_BOTTOM_LEFT:
+          result.x = 0;
+          result.y = frame.height - imageHeight;
+          break;
+        case SC.ALIGN_BOTTOM_RIGHT:
+          result.x = frame.width - imageWidth;
+          result.y = frame.height - imageHeight;
+          break;
+        default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
+          result.x = (frame.width / 2) - (imageWidth / 2);
+          result.y = (frame.height / 2) - (imageHeight / 2);
+      }
+   
+      return result;
+    }.property('align', 'image', 'scale').cacheable(),
+  
   /**
     @property {String}
     @default null
@@ -212,13 +227,16 @@ SC.ImageView = SC.View.extend(SC.Control,
 
       SC.SCALE_NONE - don't scale
       SC.FILL - stretch/shrink the image to fill the ImageView frame
-      SC.FILL_PROPORTIONALLY - stretch/shrink the image to fill the ImageView frame while maintaining
-        aspect ratio, such that the shortest dimension will just fit within the frame and the longest dimension will
+      SC.FILL_PROPORTIONALLY - stretch/shrink the image to fill the ImageView 
+        frame while maintaining aspect ratio, such that the shortest dimension
+        will just fit within the frame and the longest dimension will
         overflow and be cropped
-      SC.BEST_FIT - stretch/shrink the image to fit the ImageView frame while maintaining aspect ration,
-        such that the longest dimension will just fit within the frame
-      SC.BEST_FIT_DOWN_ONLY - shrink the image to fit the ImageView frame while maintaining aspect ration,
-        such that the longest dimension will just fit within the frame.  Do not stretch the image if the image's
+      SC.BEST_FIT - stretch/shrink the image to fit the ImageView frame while 
+        maintaining aspect ration, such that the longest dimension will just 
+        fit within the frame
+      SC.BEST_FIT_DOWN_ONLY - shrink the image to fit the ImageView frame 
+        while maintaining aspect ration, such that the longest dimension will 
+        just fit within the frame.  Do not stretch the image if the image's
         width is less than the frame's width.
 
     @property {SC.SCALE_NONE|SC.FILL|SC.FILL_PROPORTIONALLY|SC.BEST_FIT|SC.BEST_FIT_DOWN_ONLY|Number}
@@ -263,7 +281,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     @since SproutCore 1.5
   */
   useCanvas: function() {
-    return SC.platform.supportsCanvas;
+    return SC.platform.supportsCanvas && !this.useStaticLayout;
   }.property().cacheable(),
 
   /**
@@ -303,11 +321,11 @@ SC.ImageView = SC.View.extend(SC.Control,
     sc_super();
 
     this._image_valueDidChange();
-
-    if (this.get('useImageCache') !== undefined) {
-      SC.Logger.warn("%@ has useImageCache set, please set useImageQueue instead".fmt(this));
-      this.set('useImageQueue', this.get('useImageCache'));
-    }
+     
+        if (this.get('useImageCache') !== undefined) {
+          SC.Logger.warn("%@ has useImageCache set, please set useImageQueue instead".fmt(this));
+          this.set('useImageQueue', this.get('useImageCache'));
+        }
   },
 
 
@@ -356,8 +374,8 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.observes('imageValue'),
 
   /** @private
-    Tries to load the image value using the SC.imageQueue object. If the imageValue is not
-    a URL, it won't attempt to load it using this method.
+    Tries to load the image value using the SC.imageQueue object. If the 
+    imageValue is not a URL, it won't attempt to load it using this method.
 
     @returns YES if loading using SC.imageQueue, NO otherwise
   */
@@ -367,7 +385,8 @@ SC.ImageView = SC.View.extend(SC.Control,
 
     // now update local state as needed....
     if (type === SC.IMAGE_TYPE_URL && this.get('useImageQueue')) {
-      var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
+      var isBackground = this.get('isVisibleInWindow') || 
+                        this.get('canLoadInBackground');
 
       SC.imageQueue.loadImage(value, this, this._loadImageUsingCacheDidComplete, isBackground);
       return YES;
@@ -383,7 +402,8 @@ SC.ImageView = SC.View.extend(SC.Control,
       if (SC.ok(image)) {
         this.didLoad(image);
       } else {
-        // if loading it using the cache didn't work, it's useless to try loading the image normally
+        // if loading it using the cache didn't work, it's useless to try 
+        // loading the image normally
         this.didError(image);
       }
     }
@@ -405,7 +425,8 @@ SC.ImageView = SC.View.extend(SC.Control,
 
       var errorFunc = function() {
         SC.run(function() {
-          that._loadImageDidComplete(value, SC.$error("SC.Image.FailedError", "Image", -101));
+          that._loadImageDidComplete(value, 
+            SC.$error("SC.Image.FailedError", "Image", -101));
         });
       };
 
@@ -417,9 +438,11 @@ SC.ImageView = SC.View.extend(SC.Control,
 
       // Using bind here instead of setting onabort/onerror/onload directly
       // fixes an issue with images having 0 width and height
-      $(image).bind('error', errorFunc);
-      $(image).bind('abort', errorFunc); 
-      $(image).bind('load', loadFunc);
+      
+      var jQImage = $(image);
+      jQImage.bind('error', errorFunc);
+      jQImage.bind('abort', errorFunc); 
+      jQImage.bind('load', loadFunc);
 
       image.src = value;
       return YES;

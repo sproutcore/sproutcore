@@ -98,14 +98,6 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     stop();
   });
 
-  test("Verify sprite image class", function() {
-    var imageView = pane.view('sprite_image'),
-        imgEl;
-
-    imgEl = imageView.$('img');
-
-    ok(imgEl.hasClass('sprite-class'), "The class value should be on the img element");
-  });
 
   test("Verify canvas rendering and properties", function() {
     var view = pane.view('image_canvas'),
