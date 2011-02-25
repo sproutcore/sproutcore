@@ -127,8 +127,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     }
     
     this._originalValue = options.value;
-    if (SC.none(this._originalValue))
+    if (SC.none(this._originalValue)){
       this._originalValue = "";
+    }
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
     if (this._multiline) {
       this.set('isTextArea', YES);
@@ -143,12 +144,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     //this.set('selectedRange', options.selectedRange || { start: this._originalValue.length, length: 0 }) ;
     
     // add to window.
-    
-    pane = options.pane;
-
+    //modified to get the pane and tarLayout from the delegate;
+    pane = del.get('pane');
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
-    tarLayout = options.layout;
+    tarLayout = del.get('layout');
     paneElem = pane.$()[0];
     if (this._optIsCollection && tarLayout.left) {
       layout.left=this._optframe.x-tarLayout.left-paneElem.offsetLeft-1;

@@ -609,6 +609,13 @@ SC.ListItemView = SC.View.extend(
   inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
    return YES ;
   },
+ 
+  /** @private
+   I suppose it makes sense to commit
+  */ 
+  inlineEditorShouldCommitEditing: function(inlineEditor){
+    return YES;
+  },
   
   /** @private
    Update the field value and make it visible again.
