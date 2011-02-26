@@ -72,10 +72,10 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
 
 });
 
-test("child views can be inserted inside a bindProperty block", function() {
+test("child views can be inserted inside a bind block", function() {
   var templates = SC.Object.create({
     nester: SC.Handlebars.compile("<h1 id='hello-world'>Hello {{world}}</h1>{{view \"TemplateTests.LabelView\"}}"),
-    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#bindProperty \"content\"}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/bindProperty}} {{world}}</div>"),
+    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#bind \"content\"}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/bind}} {{world}}</div>"),
     other: SC.Handlebars.compile("cruel")
   });
 
@@ -109,7 +109,7 @@ test("child views can be inserted inside a bindProperty block", function() {
 
 test("SC.TemplateView updates when a property changes", function() {
   var templates = SC.Object.create({
-   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{bindProperty "wham"}}{{/with}}</h1>')
+   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{bind "wham"}}{{/with}}</h1>')
   });
 
   var view = SC.TemplateView.create({
@@ -136,7 +136,7 @@ test("Handlebars templates update properties if a content object changes", funct
   var templates;
 
   templates = SC.Object.create({
-    menu: SC.Handlebars.compile('<h1>Today\'s Menu</h1>{{#bindProperty "coffee"}}<h2>{{color}} coffee</h2><span id="price">{{bindProperty "price"}}</span>{{/bindProperty}}')
+    menu: SC.Handlebars.compile('<h1>Today\'s Menu</h1>{{#bind "coffee"}}<h2>{{color}} coffee</h2><span id="price">{{bind "price"}}</span>{{/bind}}')
   });
 
   var view = SC.TemplateView.create({

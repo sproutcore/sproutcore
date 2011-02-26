@@ -7,16 +7,12 @@ SC.Handlebars.JavaScriptCompiler.prototype = SC.beget(Handlebars.JavaScriptCompi
 SC.Handlebars.JavaScriptCompiler.prototype.compiler = SC.Handlebars.JavaScriptCompiler;
 
 SC.Handlebars.JavaScriptCompiler.prototype.nameLookup = function(parent, name, type) {
-  return "SC.get(" + parent + ", " + this.quotedString(name) + ");";
+  if (type === 'context') {
+    return "SC.get(" + parent + ", " + this.quotedString(name) + ");";
+  } else {
+    return Handlebars.JavaScriptCompiler.prototype.nameLookup.call(this, parent, name, type);
+  }
 };
-
-// SC.Handlebars.JavaScriptCompiler.prototype.initializeBuffer = function() {
-//   return "data.renderContext";
-// };
-
-// SC.Handlebars.JavaScriptCompiler.prototype.appendToBuffer = function(string) {
-//   return "buffer.push(" + string + ");";
-// };
 
 SC.Handlebars.compile = function(string) {
   var ast = Handlebars.parse(string);
@@ -28,8 +24,15 @@ Handlebars.registerHelper('view', function(path, fn, inverse, data) {
   if (fn.isRenderData) { data = fn; fn = null; }
 
   var newView;
-  if (path.isClass || path.isObject) { newView = path; }
-  else { newView = SC.objectForPropertyPath(path); }
+  if (path.isClass || path.isObject) {
+   newView = path;
+   if (!newView) {
+    throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
+   }
+  } else {
+    newView = SC.objectForPropertyPath(path);
+    if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+  }
 
   var currentView = data.view;
 
@@ -49,7 +52,7 @@ Handlebars.registerHelper('view', function(path, fn, inverse, data) {
   return new Handlebars.SafeString(context.join());
 });
 
-Handlebars.registerHelper('bindProperty', function(property, fn, inverse, data) {
+Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
   if(fn.isRenderData) { data = fn; fn = null; }
   var view = data.view;
 
