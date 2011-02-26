@@ -13,7 +13,15 @@ sc_require('system/event') ;
 
 SC.mixin({
   isReady: NO,
-
+  
+  /**
+    Allows apps to avoid automatically attach the ready handlers if they
+    want to by setting this flag to YES
+    
+    @property {Boolean}
+  */
+  ignoreReady: SC.ignoreReady ? YES : NO,
+  
   /**
     Add the passed target and method to the queue of methods to invoke when
     the document is ready.  These methods will be called after the document
@@ -63,10 +71,13 @@ SC.mixin({
 
 }) ;
 
-jQuery(document)
-  .ready(SC.onReady.startRunLoop)
-  .ready(SC.onReady.setupLocales)
-  .ready(SC.onReady.removeLoading);
+//
+if(!SC.ignoreReady) {
+  jQuery(document)
+    .ready(SC.onReady.startRunLoop)
+    .ready(SC.onReady.setupLocales)
+    .ready(SC.onReady.removeLoading);
+}
 jQuery.event.special.ready._default = SC.onReady.done;
 
 SC.removeLoading = YES;
