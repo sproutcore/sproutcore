@@ -7,8 +7,14 @@ SC.CheckboxSupport = {
     }, this));
   },
 
-  value: function() {
-    return this.$('input').attr('checked');
-  }.property()
+  value: function(key, value) {
+    if (value !== undefined) {
+      this.$('input').attr('checked', value);
+    } else {
+      value = this.$('input').attr('checked');
+    }
+
+    return value;
+  }.property().idempotent()
 };
 
