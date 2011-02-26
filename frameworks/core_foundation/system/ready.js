@@ -37,8 +37,8 @@ SC.mixin({
     @returns {SC}
   */
   ready: function(target, method) {
-    var queue = this._readyQueue;
-
+    var queue = SC._readyQueue;
+    
     // normalize
     if (method === undefined) {
       method = target; target = null ;
@@ -46,8 +46,14 @@ SC.mixin({
       method = target[method] ;
     }
 
-    jQuery(document).ready(function() { method.call(target); });
-
+    if(SC.isReady) {
+      jQuery(document).ready(function() { method.call(target); });
+    }
+    else {
+      if(!queue) SC._readyQueue = [];
+      SC._readyQueue.push(function() { method.call(target); });
+    }
+    
     return this ;
   },
 
@@ -63,7 +69,19 @@ SC.mixin({
       jQuery("#loading").remove();
     },
     done: function() {
+      if(SC.isReady) return;
+      
       SC.isReady = true;
+      
+      var queue = SC._readyQueue, idx, len;
+      
+      if(queue) {
+        for(idx=0,len=queue.length;idx<len;idx++) {
+          queue[idx].call();
+        }
+        SC._readyQueue = null;
+      }
+      
       if(window.main && !SC.suppressMain) { main(); }
       SC.RunLoop.end();
     }
