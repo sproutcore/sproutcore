@@ -28,8 +28,15 @@ Handlebars.registerHelper('view', function(path, fn, inverse, data) {
   if (fn.isRenderData) { data = fn; fn = null; }
 
   var newView;
-  if (path.isClass || path.isObject) { newView = path; }
-  else { newView = SC.objectForPropertyPath(path); }
+  if (path.isClass || path.isObject) {
+   newView = path;
+   if (!newView) {
+    throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
+   }
+  } else {
+    newView = SC.objectForPropertyPath(path);
+    if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+  }
 
   var currentView = data.view;
 
