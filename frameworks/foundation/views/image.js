@@ -6,12 +6,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.SCALE_NONE = "none";
-SC.FILL = "fill";
-SC.FILL_PROPORTIONALLY = "fillProportionally";
-SC.BEST_FIT = "fitBest";
-SC.BEST_FIT_DOWN_ONLY = "fitBestDown";
-
 SC.IMAGE_STATE_NONE = 'none';
 SC.IMAGE_STATE_LOADING = 'loading';
 SC.IMAGE_STATE_LOADED = 'loaded';
@@ -47,14 +41,15 @@ SC.BLANK_IMAGE.width = SC.BLANK_IMAGE.height = 1;
 
   @extends SC.View
   @extends SC.Control
+  @extends SC.InnerLayout
   @since SproutCore 1.0
 */
-SC.ImageView = SC.View.extend(SC.Control,
+SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 /** @scope SC.ImageView.prototype */ {
 
   classNames: 'sc-image-view',
 
-  displayProperties: 'image imageValue innerFrame frame status scale toolTip type'.w(),
+  displayProperties: 'frame image imageValue innerFrame status toolTip type'.w(),
 
   renderDelegateName: function() {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
@@ -70,20 +65,6 @@ SC.ImageView = SC.View.extend(SC.Control,
   //
 
   /**
-    Align the image within its frame.
-
-    <table>
-    <tr><td>SC.ALIGN_TOP_LEFT</td><td>SC.ALIGN_TOP</td><td>SC.ALIGN_TOP_RIGHT</td></tr>
-    <tr><td>SC.ALIGN_LEFT</td><td>SC.ALIGN_CENTER/td><td>SC.ALIGN_RIGHT</td></tr>
-    <tr><td>SC.ALIGN_BOTTOM_LEFT</td><td>SC.ALIGN_BOTTOM</td><td>SC.ALIGN_BOTTOM_RIGHT</td></tr>
-    </table>
-
-    @property {SC.ALIGN_CENTER|SC.ALIGN_TOP_LEFT|SC.ALIGN_TOP|SC.ALIGN_TOP_RIGHT|SC.ALIGN_RIGHT|SC.ALIGN_BOTTOM_RIGHT|SC.BOTTOM|SC.BOTTOM_LEFT|SC.LEFT|Number}
-    @default SC.ALIGN_CENTER
-  */
-  align: SC.ALIGN_CENTER,
-
-  /**
     If YES, this image can load in the background.  Otherwise, it is treated
     as a foreground image.  If the image is not visible on screen, it will
     always be treated as a background image.
@@ -96,98 +77,6 @@ SC.ImageView = SC.View.extend(SC.Control,
   */
   image: SC.BLANK_IMAGE,
 
-  innerFrame: function() {
-    var image = this.get('image'),
-        align = this.get('align'),
-        scale = this.get('scale'),
-        frame = this.get('frame'),
-        imageWidth = image.width,
-        imageHeight = image.height,
-        scaleX,
-        scaleY,
-        result;
-
-    // Fast path
-    result = { x: 0, y: 0, width: frame.width , height: frame.height };
-    if (scale === SC.FILL) return result;
-
-    // Determine the appropriate scale
-    scaleX = frame.width / imageWidth;
-    scaleY = frame.height / imageHeight;
-
-    switch (scale) {
-      case SC.FILL_PROPORTIONALLY:
-        scale = scaleX > scaleY ? scaleX : scaleY;
-        break;
-      case SC.BEST_FIT:
-        scale = scaleX < scaleY ? scaleX : scaleY;
-        break;
-      case SC.BEST_FIT_DOWN_ONLY:
-        if ((imageWidth > frame.width) || (imageHeight > frame.height)) {
-          scale = scaleX < scaleY ? scaleX : scaleY;
-        } else {
-          scale = 1.0;
-        }
-        break;
-      case SC.SCALE_NONE:
-        scale = 1.0;
-        break;
-      default: // Number
-        if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
-          SC.Logger.warn("SC.ImageView: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
-
-          // Don't attempt to scale or offset the image
-          return result;
-        }
-    }
-
-    imageWidth *= scale;
-    imageHeight *= scale;
-    result.width = Math.round(imageWidth);
-    result.height = Math.round(imageHeight);
-
-    // Align the image within its frame
-    switch (align) {
-      case SC.ALIGN_LEFT:
-        result.x = 0;
-        result.y = (frame.height / 2) - (imageHeight / 2);
-        break;
-      case SC.ALIGN_RIGHT:
-        result.x = frame.width - imageWidth;
-        result.y = (frame.height / 2) - (imageHeight / 2);
-        break;
-      case SC.ALIGN_TOP:
-        result.x = (frame.width / 2) - (imageWidth / 2);
-        result.y = 0;
-        break;
-      case SC.ALIGN_BOTTOM:
-        result.x = (frame.width / 2) - (imageWidth / 2);
-        result.y = frame.height - imageHeight;
-        break;
-      case SC.ALIGN_TOP_LEFT:
-        result.x = 0;
-        result.y = 0;
-        break;
-      case SC.ALIGN_TOP_RIGHT:
-        result.x = frame.width - imageWidth;
-        result.y = 0;
-        break;
-      case SC.ALIGN_BOTTOM_LEFT:
-        result.x = 0;
-        result.y = frame.height - imageHeight;
-        break;
-      case SC.ALIGN_BOTTOM_RIGHT:
-        result.x = frame.width - imageWidth;
-        result.y = frame.height - imageHeight;
-        break;
-      default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
-        result.x = (frame.width / 2) - (imageWidth / 2);
-        result.y = (frame.height / 2) - (imageHeight / 2);
-    }
-
-    return result;
-  }.property('align', 'image', 'scale', 'frame').cacheable(),
-
   /**
     @property {String}
     @default null
@@ -198,33 +87,26 @@ SC.ImageView = SC.View.extend(SC.Control,
   }.property('value').cacheable(),
 
   /**
+    The frame for the inner img element or for the canvas to draw within, altered according to the scale
+    and align properties provided by SC.InnerFrame.
+
+    @property {Object}
+  */
+  innerFrame: function() {
+    var image = this.get('image'),
+        imageWidth = image.width,
+        imageHeight = image.height;
+
+    return this.innerFrameForSize(imageWidth, imageHeight);
+  }.property('align', 'image', 'scale', 'frame').cacheable(),
+
+  /**
     If YES, any specified toolTip will be localized before display.
 
     @property {Boolean}
     @default YES
   */
   localize: YES,
-
-  /**
-    Determines how the image will scale to fit within its containing space.
-
-    Examples:
-
-      SC.SCALE_NONE - don't scale
-      SC.FILL - stretch/shrink the image to fill the ImageView frame
-      SC.FILL_PROPORTIONALLY - stretch/shrink the image to fill the ImageView frame while maintaining
-        aspect ratio, such that the shortest dimension will just fit within the frame and the longest dimension will
-        overflow and be cropped
-      SC.BEST_FIT - stretch/shrink the image to fit the ImageView frame while maintaining aspect ration,
-        such that the longest dimension will just fit within the frame
-      SC.BEST_FIT_DOWN_ONLY - shrink the image to fit the ImageView frame while maintaining aspect ration,
-        such that the longest dimension will just fit within the frame.  Do not stretch the image if the image's
-        width is less than the frame's width.
-
-    @property {SC.SCALE_NONE|SC.FILL|SC.FILL_PROPORTIONALLY|SC.BEST_FIT|SC.BEST_FIT_DOWN_ONLY|Number}
-    @default SC.FILL
-  */
-  scale: SC.FILL,
 
   /**
     Current load status of the image.
@@ -294,6 +176,33 @@ SC.ImageView = SC.View.extend(SC.Control,
   */
   value: null,
 
+  /**
+    Recalculate our innerFrame if the outer frame has changed.
+
+    @returns {void}
+  */
+  // Note: SC.View's updateLayer() will call viewDidResize() if useStaticLayout is true.  The result of this
+  // is that since our display depends on the frame, when the view or parent view resizes, viewDidResize
+  // notifies that the frame has changed, so we update our view, which calls viewDidResize, which notifies
+  // that the frame has changed, so we update our view, etc. in an infinite loop.
+  viewDidResize: function() {
+    // 'frame' as a property is cached and won't be updated, however calling notifyPropertyChange on 'frame' causes the aforementioned infinite loop
+    // Instead, measure the frame ourselves and only notify if it has changed width or height
+    var layer = this.get('layer'),
+        width,
+        height;
+
+    if (layer) {
+      width = layer.offsetWidth;
+      height = layer.offsetHeight;
+
+      if (this._cachedWidth !== width || this._cachedHeight !== height) {
+        this.notifyPropertyChange('frame');
+        this._cachedWidth = width;
+        this._cachedHeight = height;
+      }
+    }
+  },
 
   // ..........................................................
   // Methods
@@ -418,7 +327,7 @@ SC.ImageView = SC.View.extend(SC.Control,
       // Using bind here instead of setting onabort/onerror/onload directly
       // fixes an issue with images having 0 width and height
       $(image).bind('error', errorFunc);
-      $(image).bind('abort', errorFunc); 
+      $(image).bind('abort', errorFunc);
       $(image).bind('load', loadFunc);
 
       image.src = value;
