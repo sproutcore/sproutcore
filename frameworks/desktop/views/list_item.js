@@ -591,6 +591,13 @@ SC.ListItemView = SC.View.extend(
   },
   
   /** @private
+  *** Should Commit?
+  */
+  inlineEditorShouldCommitEditing:function(inlineEditor){
+    return YES;
+  },
+  
+  /** @private
    Set editing to true so edits will no longer be allowed.
   */
   inlineEditorWillBeginEditing: function(inlineEditor) {

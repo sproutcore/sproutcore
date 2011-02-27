@@ -127,8 +127,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     }
     
     this._originalValue = options.value;
-    if (SC.none(this._originalValue))
-      this._originalValue = "";
+    if (SC.none(this._originalValue)){  //style cleanup to conform;  surrounded single line if statement with {}
+      this._originalValue = ""; 
+    }
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
     if (this._multiline) {
       this.set('isTextArea', YES);
@@ -144,11 +145,25 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     
     // add to window.
     
-    pane = options.pane;
+    
+    //pane isn't passed when a collection item is being edited.
+    //pane = options.pane;
+    if (this._optIsCollection){
+      pane = del.get('pane');
+    }else{
+      pane = options.pane;
+    }
+    
 
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
-    tarLayout = options.layout;
+    //layout isn't passed when a collection item is being edited
+    //tarLayout = options.layout;
+    if (this._optIsCollection){
+      tarLayout = del.get('layout');
+    }else{
+      tarLayout = options.layout;
+    }
     paneElem = pane.$()[0];
     if (this._optIsCollection && tarLayout.left) {
       layout.left=this._optframe.x-tarLayout.left-paneElem.offsetLeft-1;
@@ -245,6 +260,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     
     if (!this.get('isEditing') || !del) return YES ;
     
+    //ListItem doesn't have this method so I created it!
     if (!del.inlineEditorShouldCommitEditing(this, finalValue)) {
       //@if(debug)
       SC.Logger.warn('InlineTextField._endEditing() cannot end without inlineEditorShouldCommitEditing() on the delegate.');
