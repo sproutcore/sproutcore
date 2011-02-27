@@ -305,6 +305,11 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
   init: function() {
     sc_super();
+
+    // Increment the jQuery ready counter, so that SproutCore will
+    // defer loading the app until the user defaults are available.
+    jQuery.readyWait++;
+
     if(SC.userDefaults && SC.userDefaults.get('dataHash')){
       var dh = SC.userDefaults.get('dataHash');
       if (dh) this.dataHash=SC.userDefaults.get('dataHash')
@@ -382,8 +387,6 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
   _nullDataHandler: function(transaction, results){}
 });
-
-jQuery.readyWait++;
 
 /** global user defaults. */
 SC.userDefaults = SC.UserDefaults.create();
