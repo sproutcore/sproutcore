@@ -75,12 +75,3 @@ SC.TemplateView = SC.CoreView.extend(
     return NO;
   }
 });
-
-
-SC.ready(function() {
-  // Load template source from embedded script tags (see loading.rhtml)
-  jQuery('script[type="text/x-handlebars-template"]').each(function() {
-    var self = jQuery(this);
-    SC.TEMPLATES.set(self.attr('data-template-name'), SC.Handlebars.compile(self.html()));
-  });
-});
