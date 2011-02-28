@@ -88,10 +88,10 @@ SC.mixin( /** @scope SC */ {
     @returns {Boolean} YES if the point is within the element; NO otherwise
   */
 
-  // Note: This method is the most correct way to test the inclusion of a point in <em>document
-  // co-ordinates</em> within a DOM element.  First, it uses jQuery's 'offset' function which provides
-  // fallback for browsers that don't support 'getBoundingClientRect' and which adjusts for the document
-  // scroll offset.  Second, the offset must be adjusted to account for the element's left and top border
+  // Note: This method is the most correct way to test the inclusion of a point within a DOM element.
+  // First, it uses SC.offset which is a slightly improved version of jQuery's offset and much more reliable
+  // than writing your own offset determination code.
+  // Second, the offset must be adjusted to account for the element's left and top border
   // if not including the border or to account for the left and top margins when including the margins.
   pointInElement: function(point, elem, includeFlag, relativeToFlag) {
     var offset,
