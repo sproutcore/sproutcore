@@ -18,6 +18,7 @@ function transitionFor(view){
 
 var commonSetup = {
   setup: function() {
+
     SC.RunLoop.begin();
 
     pane = SC.Pane.create({
@@ -25,7 +26,7 @@ var commonSetup = {
       layout: { top: 0, right: 0, width: 200, height: 200, zIndex: 100 }
     });
     pane.append();
-    
+
     view = SC.View.create({
       backgroundColor: '#888',
       layout: { left: 0, top: 0, height: 100, width: 100 }
@@ -56,15 +57,15 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, 1);
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s linear', 'add transition');  
+    equals(transitionFor(view), 'left 1s linear', 'add transition');
   });
 
   test("callbacks work in general", function(){
-    stop(1000);
+    stop(2000);
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1, 'left', 100, .5, function() {
+    view.invokeLater('animate', 1000, 'left', 100, 0.500, function() {
       start();
       ok(true, "Callback was called.");
     });
@@ -72,11 +73,11 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("callbacks should have appropriate data", function(){
-    stop(1000);
+    stop(2000);
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1, 'left', 100, .5, function(data) {
+    view.invokeLater('animate', 1000, 'left', 100, 0.500, function(data) {
       start();
 
       // TODO: Test this better
@@ -113,7 +114,7 @@ if (SC.platform.supportsCSSTransitions) {
 
   // Pretty sure this does the job
   test("callbacks should be called for each property", function(){
-    stop(1000);
+    stop(2000);
     var stopped = true;
 
     expect(2);
@@ -121,7 +122,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1, { top: 100, left: 100 }, .5, function(data) {
+    view.invokeLater('animate', 1000, { top: 100, left: 100 }, 0.500, function(data) {
       if (stopped) {
         start();
         stopped = false;
@@ -144,10 +145,10 @@ if (SC.platform.supportsCSSTransitions) {
     expect(2);
 
     SC.RunLoop.begin();
-    view.invokeLater('animate', 1, 'top', 100, 1, function(){
+    view.invokeLater('animate', 500, 'top', 100, 0.250, function(){
       ok(true, 'top finished');
     });
-    view.invokeLater('animate', 500, 'left', 100, .5, function(){
+    view.invokeLater('animate', 1000, 'left', 100, 0.500, function(){
       ok(true, 'left finished');
       start();
     });
@@ -160,10 +161,10 @@ if (SC.platform.supportsCSSTransitions) {
     expect(2);
 
     SC.RunLoop.begin();
-    view.invokeLater('animate', 1, 'top', 100, 1, function(data){
+    view.invokeLater('animate', 500, 'top', 100, 0.500, function(data){
       equals(data.isCancelled, true, 'first cancelled');
     });
-    view.invokeLater('animate', 500, 'top', 0, .5, function(data){
+    view.invokeLater('animate', 1000, 'top', 0, 0.250, function(data){
       equals(data.isCancelled, false, 'second not cancelled');
       start();
     });
@@ -176,7 +177,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
     equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'add transition');
     equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'has both transforms');
-    equals(45, view.get('layout').rotateX, 'rotateX is 45deg'); 
+    equals(45, view.get('layout').rotateX, 'rotateX is 45deg');
   });
 
   test("should handle conflicting transform animations", function(){
@@ -202,12 +203,12 @@ if (SC.platform.supportsCSSTransitions) {
   test("should properly handle callbacks from conflicting transforms");
 
   test("removes animation property when done", function(){
-    stop(1500);
+    stop(2000);
 
     SC.RunLoop.begin();
-    view.invokeLater('animate', 1, { top: 100, scale: 2 }, 0.5);
+    view.invokeLater('animate', 1000, { top: 100, scale: 2 }, 0.500);
     SC.RunLoop.end();
-    
+
     setTimeout(function(){
       start();
       equals(view.get('layout').animateTop, undefined, "animateTop is undefined");
@@ -263,7 +264,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("callbacks should work properly with acceleration", function(){
-    stop(1000);
+    stop(2000);
     var stopped = true;
 
     expect(3);
@@ -271,7 +272,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1, { top: 100, left: 100, scale: 2 }, .5, function(data) {
+    view.invokeLater('animate', 1000, { top: 100, left: 100, scale: 2 }, 0.500, function(data) {
       if (stopped) {
         start();
         stopped = false;
