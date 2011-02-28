@@ -554,8 +554,10 @@ SC.ListItemView = SC.View.extend(
     escapeHTML = this.get('escapeHTML');
 
     ret = SC.InlineTextFieldView.beginEditing({
-      frame: f, 
-      exampleElement: el, 
+    	pane: this.get('pane'),
+    	frame: f, 
+      exampleElement: el,
+      layout: this.get('layout'),
       delegate: this, 
       value: v,
       multiline: NO,
@@ -575,6 +577,10 @@ SC.ListItemView = SC.View.extend(
   commitEditing: function() {
    if (!this.get('isEditing')) return YES ;
    return SC.InlineTextFieldView.commitEditing();
+  },
+  
+  inlineEditorShouldCommitEditing: function() {
+  		return YES;
   },
   
   discardEditing: function() {
