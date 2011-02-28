@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
   var logoURL = "http://www.sproutcore.com/assets/images/logo.png";
   var sampleURLs = [ "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/zion-hiker-the-sweetie-hiking-in-zion-narrows_w725_h544.jpg",
@@ -110,29 +109,38 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   test("Using imageQueue", function() {
     var imageHolder = pane.view('image_holder'),
         imageView1,
-        imageView2;
-
-    // Set the first view to load in the background (ie. it should load last although it was created first)
-    imageView1 = SC.ImageView.create({
-      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      canLoadInBackground: YES
-    });
-    imageView2 = SC.ImageView.create({
-      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      canLoadInBackground: NO
-    });
+        imageView2,
+        lastMod1,
+        lastMod2;
 
     stop();
 
+    // Only allow 1 image at a time
+    SC.imageQueue.loadLimit = 1;
+
+    // Add a random value so that the images appear as unique
+    lastMod1 = Math.round(Math.random() * 100000);
+    lastMod2 = Math.round(Math.random() * 100000);
+
+    // Set the first view to load in the background (ie. it should load last although it was created first)
+    imageView1 = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + lastMod1,
+      canLoadInBackground: YES
+    });
+    imageView2 = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + lastMod2,
+      canLoadInBackground: NO
+    });
+
     // The second image should load first and the first not be loaded yet
     imageView2.addObserver('status', this, function() {
-      equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status');
-      equals(imageView1.get('status'), SC.IMAGE_STATE_LOADING, 'imageView1 status');
+      equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status on imageView2 status change');
+      equals(imageView1.get('status'), SC.IMAGE_STATE_LOADING, 'imageView1 status on imageView2 status change');
     });
 
     imageView1.addObserver('status', this, function() {
-      equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status');
-      equals(imageView1.get('status'), SC.IMAGE_STATE_LOADED, 'imageView1 status');
+      equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status on imageView1 status change');
+      equals(imageView1.get('status'), SC.IMAGE_STATE_LOADED, 'imageView1 status on imageView1 status change');
 
       window.start(); // starts the test runner
     });
@@ -141,92 +149,27 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     imageHolder.appendChild(imageView2);
   });
 
-  test("Scaling images (img)", function() {
-    var imageHolder = pane.view('image_holder'),
-        imageView,
-        imgEl;
-
-    // The logo is 294x60
-    imageView = SC.ImageView.create({
-      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      layout: { top: 0, left: 0, width: 588, height: 90 },
-      useCanvas: NO
-    });
-
+  function testScale(imageView, isImg) {
     stop();
 
     // Default is SC.FILL
     imageView.addObserver('status', this, function() {
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
       setTimeout(function() {
-        imgEl = imageView.$('img');
-
-        equals(imgEl.css('width'), "588px", "SC.FILL width");
-        equals(imgEl.css('height'), "90px", "SC.FILL height");
-
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.SCALE_NONE);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('width'), "294px", "SC.SCALE_NONE width");
-        equals(imgEl.css('height'), "60px", "SC.SCALE_NONE height");
-
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.FILL_PROPORTIONALLY);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('width'), "588px", "SC.FILL_PROPORTIONALLY width");
-        equals(imgEl.css('height'), "120px", "SC.FILL_PROPORTIONALLY height");
-
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.BEST_FIT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('width'), "441px", "SC.BEST_FIT width");
-        equals(imgEl.css('height'), "90px", "SC.BEST_FIT height");
-
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.BEST_FIT_DOWN_ONLY);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('width'), "294px", "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
-        equals(imgEl.css('height'), "60px", "SC.BEST_FIT_DOWN_ONLY height (larger frame)");
-
-        SC.RunLoop.begin();
-        imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
-        SC.RunLoop.end();
-
-        equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-        equals(imgEl.css('height'), "30px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
-
-        window.start(); // starts the test runner
-      }, 100);
-    });
-
-    imageHolder.appendChild(imageView);
-  });
-
-  test("Scaling images (canvas)", function() {
-    var imageHolder = pane.view('image_holder'),
-        imageView,
-        innerFrame;
-
-    // The logo is 294x60
-    imageView = SC.ImageView.create({
-      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      layout: { top: 0, left: 0, width: 588, height: 90 }
-    });
-
-    stop();
-
-    imageView.addObserver('status', this, function() {
-      // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
-      setTimeout(function() {
-        innerFrame = imageView.get('innerFrame');
+        var imgEl,
+            innerFrame,
+            testImg = !imageView.get('useCanvas');
 
         // Default is SC.FILL
+        innerFrame  = imageView.get('innerFrame');
         equals(innerFrame.width, 588, "SC.FILL width");
         equals(innerFrame.height, 90, "SC.FILL height");
+        if (testImg) {
+          imgEl = imageView.$('img');
+
+          equals(imgEl.css('width'), "588px", "SC.FILL width");
+          equals(imgEl.css('height'), "90px", "SC.FILL height");
+        }
 
         SC.RunLoop.begin();
         imageView.set('scale', SC.SCALE_NONE);
@@ -235,6 +178,10 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 294, "SC.SCALE_NONE width");
         equals(innerFrame.height, 60, "SC.SCALE_NONE height");
+        if (testImg) {
+          equals(imgEl.css('width'), "294px", "SC.SCALE_NONE width");
+          equals(imgEl.css('height'), "60px", "SC.SCALE_NONE height");
+        }
 
         SC.RunLoop.begin();
         imageView.set('scale', SC.FILL_PROPORTIONALLY);
@@ -243,6 +190,10 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 588, "SC.FILL_PROPORTIONALLY width");
         equals(innerFrame.height, 120, "SC.FILL_PROPORTIONALLY height");
+        if (testImg) {
+          equals(imgEl.css('width'), "588px", "SC.FILL_PROPORTIONALLY width");
+          equals(imgEl.css('height'), "120px", "SC.FILL_PROPORTIONALLY height");
+        }
 
         SC.RunLoop.begin();
         imageView.set('scale', SC.BEST_FIT);
@@ -251,6 +202,10 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 441, "SC.BEST_FIT width");
         equals(innerFrame.height, 90, "SC.BEST_FIT height");
+        if (testImg) {
+          equals(imgEl.css('width'), "441px", "SC.BEST_FIT width");
+          equals(imgEl.css('height'), "90px", "SC.BEST_FIT height");
+        }
 
         SC.RunLoop.begin();
         imageView.set('scale', SC.BEST_FIT_DOWN_ONLY);
@@ -259,6 +214,10 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 294, "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
         equals(innerFrame.height, 60, "SC.BEST_FIT_DOWN_ONLY height (larger frame)");
+        if (testImg) {
+          equals(imgEl.css('width'), "294px", "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
+          equals(imgEl.css('height'), "60px", "SC.BEST_FIT_DOWN_ONLY height (larger frame)");
+        }
 
         SC.RunLoop.begin();
         imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
@@ -267,18 +226,204 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 147, "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
         equals(innerFrame.height, 30, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+        if (testImg) {
+          equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
+          equals(imgEl.css('height'), "30px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+        }
 
         window.start(); // starts the test runner
-      }, 200);
+      }, 100);
     });
+  }
+
+  test("Scaling images (img)", function() {
+    var imageHolder = pane.view('image_holder'),
+        imageView;
+
+    // The logo is 294x60
+    imageView = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
+      layout: { top: 0, left: 0, width: 588, height: 90 },
+      useCanvas: NO
+    });
+
+    testScale(imageView);
 
     imageHolder.appendChild(imageView);
   });
 
+  test("Scaling images (img) with static layout", function() {
+    var imageHolder = pane.view('image_holder'),
+        imageView;
+
+    // The logo is 294x60
+    imageView = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
+      layout: { top: 0, left: 0, width: 588, height: 90 },
+      useCanvas: NO,
+      useStaticLayout: YES
+    });
+
+    testScale(imageView);
+
+    imageHolder.appendChild(imageView);
+  });
+
+  test("Scaling images (canvas)", function() {
+    var imageHolder = pane.view('image_holder'),
+        imageView;
+
+    // The logo is 294x60
+    imageView = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
+      layout: { top: 0, left: 0, width: 588, height: 90 }
+    });
+
+    testScale(imageView);
+
+    imageHolder.appendChild(imageView);
+  });
+
+  test("Scaling images (canvas) with static layout", function() {
+    var imageHolder = pane.view('image_holder'),
+        imageView;
+
+    // The logo is 294x60
+    imageView = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
+      layout: { top: 0, left: 0, width: 588, height: 90 },
+      useStaticLayout: YES
+    });
+
+    testScale(imageView);
+
+    imageHolder.appendChild(imageView);
+  });
+
+  function testAlign(imageView) {
+    stop();
+
+    // Default is SC.FILL
+    imageView.addObserver('status', this, function() {
+      // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
+      setTimeout(function() {
+        var imgEl,
+            innerFrame,
+            testImg = !imageView.get('useCanvas');
+
+        // Default is SC.ALIGN_CENTER
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 30, "SC.ALIGN_CENTER top");
+        equals(innerFrame.x, 147, "SC.ALIGN_CENTER left");
+        if (testImg) {
+          imgEl = imageView.$('img');
+          equals(imgEl.css('top'), "30px", "SC.ALIGN_CENTER top");
+          equals(imgEl.css('left'), "147px", "SC.ALIGN_CENTER left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_TOP_LEFT);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 0, "SC.ALIGN_TOP_LEFT top");
+        equals(innerFrame.x, 0, "SC.ALIGN_TOP_LEFT left");
+        if (testImg) {
+          equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP_LEFT top");
+          equals(imgEl.css('left'), "0px", "SC.ALIGN_TOP_LEFT left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_TOP);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 0, "SC.ALIGN_TOP top");
+        equals(innerFrame.x, 147, "SC.ALIGN_TOP left");
+        if (testImg) {
+          equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP top");
+          equals(imgEl.css('left'), "147px", "SC.ALIGN_TOP left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_TOP_RIGHT);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 0, "SC.ALIGN_TOP_RIGHT top");
+        equals(innerFrame.x, 294, "SC.ALIGN_TOP_RIGHT left");
+        if (testImg) {
+          equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP_RIGHT top");
+          equals(imgEl.css('left'), "294px", "SC.ALIGN_TOP_RIGHT left");
+        }
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_RIGHT);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 30, "SC.ALIGN_RIGHT top");
+        equals(innerFrame.x, 294, "SC.ALIGN_RIGHT left");
+        if (testImg) {
+          equals(imgEl.css('top'), "30px", "SC.ALIGN_RIGHT top");
+          equals(imgEl.css('left'), "294px", "SC.ALIGN_RIGHT left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_BOTTOM_RIGHT);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM_RIGHT top");
+        equals(innerFrame.x, 294, "SC.ALIGN_BOTTOM_RIGHT left");
+        if (testImg) {
+          equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM_RIGHT top");
+          equals(imgEl.css('left'), "294px", "SC.ALIGN_BOTTOM_RIGHT left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_BOTTOM);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM top");
+        equals(innerFrame.x, 147, "SC.ALIGN_BOTTOM left");
+        if (testImg) {
+          equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM top");
+          equals(imgEl.css('left'), "147px", "SC.ALIGN_BOTTOM left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_BOTTOM_LEFT);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM_LEFT top");
+        equals(innerFrame.x, 0, "SC.ALIGN_BOTTOM_LEFT left");
+        if (testImg) {
+          equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM_LEFT top");
+          equals(imgEl.css('left'), "0px", "SC.ALIGN_BOTTOM_LEFT left");
+        }
+
+        SC.RunLoop.begin();
+        imageView.set('align', SC.ALIGN_LEFT);
+        SC.RunLoop.end();
+
+        innerFrame = imageView.get('innerFrame');
+        equals(innerFrame.y, 30, "SC.ALIGN_LEFT top");
+        equals(innerFrame.x, 0, "SC.ALIGN_LEFT left");
+        if (testImg) {
+          equals(imgEl.css('top'), "30px", "SC.ALIGN_LEFT top");
+          equals(imgEl.css('left'), "0px", "SC.ALIGN_LEFT left");
+        }
+
+        window.start(); // starts the test runner
+      }, 100);
+    });
+  }
+
   test("Aligning images (img)", function() {
     var imageHolder = pane.view('image_holder'),
-        imageView,
-        imgEl;
+        imageView;
 
     // The logo is 294x60
     imageView = SC.ImageView.create({
@@ -288,85 +433,32 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       scale: SC.SCALE_NONE
     });
 
-    stop();
+    testAlign(imageView);
 
-    // Default is SC.FILL
-    imageView.addObserver('status', this, function() {
-      // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
-      setTimeout(function() {
-        imgEl = imageView.$('img');
+    imageHolder.appendChild(imageView);
+  });
 
-        // Default is SC.ALIGN_CENTER
-        equals(imgEl.css('top'), "30px", "SC.ALIGN_CENTER top");
-        equals(imgEl.css('left'), "147px", "SC.ALIGN_CENTER left");
+  test("Aligning images (img) with static layout", function() {
+    var imageHolder = pane.view('image_holder'),
+        imageView;
 
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_TOP_LEFT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP_LEFT top");
-        equals(imgEl.css('left'), "0px", "SC.ALIGN_TOP_LEFT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_TOP);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP top");
-        equals(imgEl.css('left'), "147px", "SC.ALIGN_TOP left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_TOP_RIGHT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP_RIGHT top");
-        equals(imgEl.css('left'), "294px", "SC.ALIGN_TOP_RIGHT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_RIGHT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "30px", "SC.ALIGN_RIGHT top");
-        equals(imgEl.css('left'), "294px", "SC.ALIGN_RIGHT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_BOTTOM_RIGHT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM_RIGHT top");
-        equals(imgEl.css('left'), "294px", "SC.ALIGN_BOTTOM_RIGHT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_BOTTOM);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM top");
-        equals(imgEl.css('left'), "147px", "SC.ALIGN_BOTTOM left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_BOTTOM_LEFT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM_LEFT top");
-        equals(imgEl.css('left'), "0px", "SC.ALIGN_BOTTOM_LEFT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_LEFT);
-        SC.RunLoop.end();
-
-        equals(imgEl.css('top'), "30px", "SC.ALIGN_LEFT top");
-        equals(imgEl.css('left'), "0px", "SC.ALIGN_LEFT left");
-
-        window.start(); // starts the test runner
-      }, 100);
+    // The logo is 294x60
+    imageView = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
+      layout: { top: 0, left: 0, width: 588, height: 120 },
+      useCanvas: NO,
+      useStaticLayout: YES,
+      scale: SC.SCALE_NONE
     });
+
+    testAlign(imageView);
 
     imageHolder.appendChild(imageView);
   });
 
   test("Aligning images (canvas)", function() {
     var imageHolder = pane.view('image_holder'),
-        imageView,
-        innerFrame;
+        imageView;
 
     // The logo is 294x60
     imageView = SC.ImageView.create({
@@ -375,85 +467,24 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       scale: SC.SCALE_NONE
     });
 
-    stop();
+    testAlign(imageView);
 
-    // Default is SC.FILL
-    imageView.addObserver('status', this, function() {
-      // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
-      setTimeout(function() {
-        innerFrame = imageView.get('innerFrame');
+    imageHolder.appendChild(imageView);
+  });
 
-        // Default is SC.ALIGN_CENTER
-        equals(innerFrame.y, 30, "SC.ALIGN_CENTER top");
-        equals(innerFrame.x, 147, "SC.ALIGN_CENTER left");
+  test("Aligning images (canvas) with static layout", function() {
+    var imageHolder = pane.view('image_holder'),
+        imageView;
 
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_TOP_LEFT);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 0, "SC.ALIGN_TOP_LEFT top");
-        equals(innerFrame.x, 0, "SC.ALIGN_TOP_LEFT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_TOP);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 0, "SC.ALIGN_TOP top");
-        equals(innerFrame.x, 147, "SC.ALIGN_TOP left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_TOP_RIGHT);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 0, "SC.ALIGN_TOP_RIGHT top");
-        equals(innerFrame.x, 294, "SC.ALIGN_TOP_RIGHT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_RIGHT);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 30, "SC.ALIGN_RIGHT top");
-        equals(innerFrame.x, 294, "SC.ALIGN_RIGHT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_BOTTOM_RIGHT);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM_RIGHT top");
-        equals(innerFrame.x, 294, "SC.ALIGN_BOTTOM_RIGHT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_BOTTOM);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM top");
-        equals(innerFrame.x, 147, "SC.ALIGN_BOTTOM left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_BOTTOM_LEFT);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM_LEFT top");
-        equals(innerFrame.x, 0, "SC.ALIGN_BOTTOM_LEFT left");
-
-        SC.RunLoop.begin();
-        imageView.set('align', SC.ALIGN_LEFT);
-        SC.RunLoop.end();
-
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.y, 30, "SC.ALIGN_LEFT top");
-        equals(innerFrame.x, 0, "SC.ALIGN_LEFT left");
-
-        window.start(); // starts the test runner
-      }, 200);
+    // The logo is 294x60
+    imageView = SC.ImageView.create({
+      value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
+      layout: { top: 0, left: 0, width: 588, height: 120 },
+      useStaticLayout: YES,
+      scale: SC.SCALE_NONE
     });
+
+    testAlign(imageView);
 
     imageHolder.appendChild(imageView);
   });

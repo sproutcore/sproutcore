@@ -1,4 +1,4 @@
-sc_require("views/view");
+sc_require("views/view/base");
 
 // Global hash of shared templates. This will automatically be populated
 // by the build tools so that you can store your Handlebars templates in
@@ -74,13 +74,4 @@ SC.TemplateView = SC.CoreView.extend(
     if (this.mouseUp) { return YES; }
     return NO;
   }
-});
-
-
-SC.ready(function() {
-  // Load template source from embedded script tags (see loading.rhtml)
-  jQuery('script[type="text/x-handlebars-template"]').each(function() {
-    var self = jQuery(this);
-    SC.TEMPLATES.set(self.attr('data-template-name'), SC.Handlebars.compile(self.html()));
-  });
 });

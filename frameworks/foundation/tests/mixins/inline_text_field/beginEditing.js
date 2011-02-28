@@ -62,6 +62,7 @@ optionsForLabelFromView = function(view) {
   var optionsForLabel = {
     frame: f,
     delegate: view,
+    pane: pane._pane,
     exampleElement: view.$(),
     value: view.get('value'),
     multiline: view.get('isInlineEditorMultiline'),

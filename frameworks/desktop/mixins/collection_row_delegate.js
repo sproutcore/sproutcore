@@ -55,8 +55,16 @@ SC.CollectionRowDelegate = {
     @property
     @type Number
   */
-  rowHeight: function() {
-    return this.get('itemHeight') + this.get('rowPadding') * 2;
+  rowHeight: function(key, value) {
+    var rowPadding = this.get('rowPadding');
+    var itemHeight = this.get('itemHeight');
+
+    if (value !== undefined) {
+      this.set('itemHeight', value-rowPadding*2);
+      return value;
+    }
+
+    return itemHeight + rowPadding * 2;
   }.property('itemHeight', 'rowPadding'),
 
   /**

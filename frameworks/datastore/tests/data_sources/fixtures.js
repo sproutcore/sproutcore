@@ -107,10 +107,15 @@ test("Update and commit a record", function() {
       fixture = fixtures.fixtureForStoreKey(store, storeKey);
 
   equals(fixture.name, rec.get('name'), 'precond - fixture state should match name');
+  equals(rec.get('status'), SC.Record.READY_CLEAN, "Status should be READY_CLEAN because no changes have been made");
 
   rec.set('name', 'foo');
+  equals(rec.get('status'), SC.Record.READY_DIRTY, "Status should be READY_DIRTY after changing name");
+
   store.commitRecords();
-  
+  equals(store.readStatus(storeKey), SC.Record.READY_CLEAN, "Status in store should be READY_CLEAN after save");
+  equals(rec.get('status'), SC.Record.READY_CLEAN, "Status in record should be READY_CLEAN after save");
+
   fixture = fixtures.fixtureForStoreKey(store, storeKey);
   equals(fixture.name, rec.get('name'), 'fixture state should update to match new name');
     

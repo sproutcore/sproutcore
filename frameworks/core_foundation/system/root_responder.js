@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('system/ready');
-require('system/platform');
+sc_require('system/ready');
+sc_require('system/platform');
 
 /** Set to NO to leave the backspace key under the control of the browser.*/
 SC.CAPTURE_BACKSPACE_KEY = NO ;

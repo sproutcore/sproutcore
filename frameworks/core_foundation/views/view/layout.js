@@ -1,4 +1,4 @@
-require("views/view");
+sc_require("views/view");
 sc_require('views/view/layout_style') ;
 
 /** Select a horizontal layout for various views.*/
@@ -302,7 +302,7 @@ SC.View.reopen(
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null) ;
-  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidChange to check the frame for us
+  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidResize to check the frame for us
 
   /**
     Computes what the frame of this view would be if the parent were resized
