@@ -57,26 +57,26 @@ Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
   var view = data.view;
 
   var spanId = "handlebars-bound-" + jQuery.uuid++;
-  var result = this.get(property);
+  var result = this.getPath(property);
 
   var self = this, renderContext = SC.RenderContext('span').id(spanId);
 
   this.addObserver(property, function() {
-    var result = self.get(property);
+    var result = self.getPath(property);
 
-    if (fn && (result !== null || result !== undefined)) {
+    if (fn && (result !== null && result !== undefined)) {
       var renderContext = SC.RenderContext('span').id(spanId);
       renderContext.push(fn(self.get(property)));
       var element = renderContext.element();
       view.$("#" + spanId).replaceWith(element);
-    } else if (result !== null || result !== undefined) {
+    } else if (result !== null && result !== undefined) {
       view.$("#" + spanId).html(Handlebars.Utils.escapeExpression(self.get(property)));
     } else {
       view.$("#" + spanId).html("");
     }
   });
 
-  if (result !== null || result !== undefined) {
+  if (result !== null && result !== undefined) {
     if (fn) {
       renderContext.push(fn(result));
     } else {
@@ -89,6 +89,11 @@ Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
 
 Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
   var collectionClass;
+
+  if(!data) {
+    data = fn;
+    fn = null;
+  }
 
   if(typeof path === "string") {
     collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
@@ -113,7 +118,7 @@ Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, in
   var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
   var binding = SC.Binding.from(bindingString, this);
 
-  if(!inverse) {
+  if(!data) {
     data = fn;
     fn = null;
   }
