@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('panes/pane');
+sc_require('panes/pane');
 
 /** @class
 

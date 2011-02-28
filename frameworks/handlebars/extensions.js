@@ -1,4 +1,4 @@
-require("handlebars");
+sc_require("handlebars");
 
 SC.Handlebars = {};
 

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('system/builder') ;
+sc_require('system/builder') ;
 
 // Alias jQuery as SC.$ and SC.CoreQuery for compatibility
 SC.$ = SC.CoreQuery = jQuery ;

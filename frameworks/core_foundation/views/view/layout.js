@@ -1,4 +1,4 @@
-require("views/view");
+sc_require("views/view");
 sc_require('views/view/layout_style') ;
 
 /** Select a horizontal layout for various views.*/

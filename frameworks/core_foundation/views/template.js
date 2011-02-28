@@ -1,4 +1,4 @@
-sc_require("views/view");
+sc_require("views/view/base");
 
 // Global hash of shared templates. This will automatically be populated
 // by the build tools so that you can store your Handlebars templates in
