@@ -7,6 +7,8 @@
 
 /*global module test htmlbody ok equals same */
 
+htmlbody('<style></style>');
+
 (function() {
   var logoURL = "http://www.sproutcore.com/assets/images/logo.png";
   var sampleURLs = [ "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/zion-hiker-the-sweetie-hiking-in-zion-narrows_w725_h544.jpg",
