@@ -65,7 +65,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1000, 'left', 100, 0.500, function() {
+    view.invokeLater('animate', 1, 'left', 100, 0.500, function() {
       start();
       ok(true, "Callback was called.");
     });
@@ -77,7 +77,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1000, 'left', 100, 0.500, function(data) {
+    view.invokeLater('animate', 1, 'left', 100, 0.500, function(data) {
       start();
 
       // TODO: Test this better
@@ -122,7 +122,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1000, { top: 100, left: 100 }, 0.500, function(data) {
+    view.invokeLater('animate', 1, { top: 100, left: 100 }, 0.500, function(data) {
       if (stopped) {
         start();
         stopped = false;
@@ -145,10 +145,10 @@ if (SC.platform.supportsCSSTransitions) {
     expect(2);
 
     SC.RunLoop.begin();
-    view.invokeLater('animate', 500, 'top', 100, 0.250, function(){
+    view.invokeLater('animate', 1, 'top', 100, 0.250, function(){
       ok(true, 'top finished');
     });
-    view.invokeLater('animate', 1000, 'left', 100, 0.500, function(){
+    view.invokeLater('animate', 2, 'left', 100, 0.500, function(){
       ok(true, 'left finished');
       start();
     });
@@ -161,10 +161,10 @@ if (SC.platform.supportsCSSTransitions) {
     expect(2);
 
     SC.RunLoop.begin();
-    view.invokeLater('animate', 500, 'top', 100, 0.500, function(data){
+    view.invokeLater('animate', 1, 'top', 100, 0.500, function(data){
       equals(data.isCancelled, true, 'first cancelled');
     });
-    view.invokeLater('animate', 1000, 'top', 0, 0.250, function(data){
+    view.invokeLater('animate', 250, 'top', 0, 0.500, function(data){
       equals(data.isCancelled, false, 'second not cancelled');
       start();
     });
@@ -272,7 +272,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1000, { top: 100, left: 100, scale: 2 }, 0.500, function(data) {
+    view.invokeLater('animate', 1, { top: 100, left: 100, scale: 2 }, 0.500, function(data) {
       if (stopped) {
         start();
         stopped = false;
