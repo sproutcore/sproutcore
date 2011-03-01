@@ -188,21 +188,21 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
   doubleClick: function( evt ) { return this.beginEditing(); },
   
   
-  /** @private 
-    Hide the label view while the inline editor covers it.
-  */
-  inlineEditorDidBeginEditing: function(inlineEditor) {
-    var layer = this.$();
-    this._oldOpacity = layer.css('opacity') ;
-    layer.css('opacity', 0.0);
-  },
+//  /** @private 
+//    Hide the label view while the inline editor covers it.
+//  */
+//  inlineEditorDidBeginEditing: function(inlineEditor) {
+//    var layer = this.$();
+//    this._oldOpacity = layer.css('opacity') ;
+//    layer.css('opacity', 0.0);
+//  },
   
   
   /** @private 
     Hide the label view while the inline editor covers it.
   */
   inlineEditorDidBeginEditing: function(editor) {
-    this._oldOpacity = this.get('layout').opacity ;
+    this._oldOpacity = this.get('layout').opacity || "1";
     this.adjust('opacity', 0);
   },
   
