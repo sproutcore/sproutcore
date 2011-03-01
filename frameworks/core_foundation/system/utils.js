@@ -79,96 +79,73 @@ SC.mixin( /** @scope SC */ {
     return (outerFrame.height - innerFrame.height) /2  ;
   },
 
-  /** Finds the absolute viewportOffset for a given element.
-    This method is more accurate than the version provided by prototype.
+  /**
+    The offset of an element.
 
-    If you pass NULL to this method, it will return a { x:0, y:0 }
+    This function returns the left and top offset of an element with respect to either the document, the
+    viewport or the element's parent element.  In standard SproutCore applications, the coordinates of the
+    viewport are equivalent to the document, but a HTML5 application that wishes to use this component
+    of SproutCore might need to properly distinguish between the two.
+
+    For a useful discussion on the concepts of offsets and coordinates, see:
+    http://www.quirksmode.org/mobile/viewports.html.
+
+    @param {DOMElement|jQuery|String} elem the element to find the offset of.
+      This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
+    @param {String} relativeToFlag flag to determine which relative element to determine offset by.
+      One of either: 'document', 'viewport' or 'parent' (default: 'document').
+    @returns {Object} the offset of the element as an Object (ie. Hash) in the form { left: value, top: value }.
+   */
+  offset: function(elem, relativeToFlag) {
+    var userAgent,
+        index,
+        mobileBuildNumber,
+        result;
+
+    relativeToFlag = relativeToFlag || 'document';
+
+    if (relativeToFlag === 'parent') {
+      result = jQuery(elem).position();
+    } else {
+      result = jQuery(elem).offset();
+
+      // jQuery does not workaround a problem with Mobile Safari versions prior to 4.1 that add the scroll
+      // offset to the results of getBoundingClientRect.
+      //
+      // See http://dev.jquery.it/ticket/6446
+      if (SC.browser.mobileSafari) {
+        userAgent = navigator.userAgent;
+        index = userAgent.indexOf('Mobile/');
+        mobileBuildNumber = userAgent.substring(index + 7, index + 9);
+
+        if (parseInt(SC.browser.mobileSafari, 0) <= 532 || (mobileBuildNumber <= "8A")) {
+          result.left = result.left - window.pageXOffset;
+          result.top = result.top - window.pageYOffset;
+        }
+      }
+
+      // Subtract the scroll offset for viewport coordinates
+      if (relativeToFlag === 'viewport') {
+        result.left = result.left - window.pageXOffset;
+        result.top = result.top - window.pageYOffset;
+      }
+    }
+
+    return result;
+  },
+
+  /** @deprecated
+    Deprecated. SC.offset() is more accurate, more flexible in the value for the element parameter and
+    easier to understand.
+
     @param el The DOM element
-    @returns {Point} A hash with x,y offsets.
+    @returns {Point} A hash with x, y offsets.
   */
   viewportOffset: function(el) {
-    // Some browsers natively implement getBoundingClientRect, so if it's
-    // available we'll use it for speed.
-    if (el.getBoundingClientRect) {
-      var boundingRect = el.getBoundingClientRect(),
-          isIOS41 = false;
-      // we need to detect the mobileSafari build number in the userAgent.
-      // The webkit versions are the same but the results returned by getBoundingClientRect
-      // are very different one includes the scrolling from the top of the document , the other
-      // doesnt
-      if (SC.browser.mobileSafari){
-        var userAgent = navigator.userAgent,
-            index = userAgent.indexOf('Mobile/'),
-            mobileBuildNumber = userAgent.substring(index+7, index+9);
-        if (mobileBuildNumber > "8A") isIOS41 = true;
+    console.warn("SC.viewportOffset() has been deprecated in favor of SC.offset().  Please use SC.offset() from here on.");
+    var result = SC.offset(el, 'viewport');
 
-      }
-
-      if (SC.browser.mobileSafari && (parseInt(SC.browser.mobileSafari, 0)>532 || isIOS41)) {
-        return { x:boundingRect.left+(window.pageXOffset || 0), y:boundingRect.top+(window.pageYOffset || 0) };
-      }
-      else{
-        return { x:boundingRect.left, y:boundingRect.top };
-      }
-    }
-
-    var valueL = 0, valueT = 0, cqElement, overflow, left, top, offsetParent,
-        element = el, isFirefox3 = SC.browser.mozilla >= 3 ;
-    // add up all the offsets for the element.
-
-    while (element) {
-      cqElement = SC.$(element);
-      valueT += (element.offsetTop  || 0);
-      if (!isFirefox3 || (element !== el)) {
-        valueT += (element.clientTop  || 0);
-      }
-
-      valueL += (element.offsetLeft || 0);
-      if (!isFirefox3 || (element !== el)) {
-        valueL += (element.clientLeft || 0);
-      }
-
-      // bizarely for FireFox if your offsetParent has a border, then it can
-      // impact the offset.
-      if (SC.browser.mozilla) {
-        overflow = cqElement.attr('overflow') ;
-        if (overflow !== 'visible') {
-          left = parseInt(cqElement.attr('borderLeftWidth'),0) || 0 ;
-          top = parseInt(cqElement.attr('borderTopWidth'),0) || 0 ;
-          if (el !== element) {
-            left *= 2; top *= 2 ;
-          }
-          valueL += left; valueT += top ;
-        }
-
-        // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
-        // clientLeft of the offset parent.
-        offsetParent = element.offsetParent ;
-        if (SC.browser.mozilla.match(/1[.]9/) && offsetParent) {
-          valueT -= offsetParent.clientTop ;
-          valueL -= offsetParent.clientLeft;
-        }
-      }
-
-      // Safari fix
-      if (element.offsetParent == document.body &&
-        cqElement.attr('position') === 'absolute') break;
-
-      element = element.offsetParent ;
-
-    }
-
-    element = el;
-    while (element) {
-      if (!SC.browser.isOpera || element.tagName === 'BODY') {
-        valueT -= element.scrollTop  || 0;
-        valueL -= element.scrollLeft || 0;
-      }
-
-      element = element.parentNode ;
-    }
-
-    return { x: valueL, y: valueT } ;
+    return {x: result.left, y: result.top};
   }
 
 }) ;
