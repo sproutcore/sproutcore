@@ -35,6 +35,9 @@ SC._detectBrowser = function(userAgent, language) {
   browser.webkit = /webkit/.test(userAgent) ? webkitVersion : 0;
   browser.chrome = /chrome/.test(userAgent) ? version: 0;
   browser.mobileSafari = /apple.*mobile.*safari/.test(userAgent) && browser.iOS ? webkitVersion : 0;
+  browser.iPadSafari = /iPad/.test(userAgent) && browser.iOS ? webkitVersion : 0;
+  browser.iPhoneSafari = /iPhone/.test(userAgent) && browser.iOS ? webkitVersion : 0;
+  
   // this is a stupid test -- anything that aren't the following doesn't necessarily mean Safari
   browser.safari = browser.webkit && !browser.chrome && !browser.iOS && !browser.android ? webkitVersion : 0;
 
