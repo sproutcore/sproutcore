@@ -135,7 +135,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   maximumHorizontalScrollOffset: function() {
     var view = this.get('contentView') ;
-    var contentWidth = view ? view.get('frame').width : 0,
+    var contentWidth = (view && view.get('frame')) ? view.get('frame').width : 0,
         calculatedWidth = view ? view.get('calculatedWidth') : 0;
     
     // The following code checks if there is a calculatedWidth (collections)
@@ -1668,8 +1668,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         dim, dimWidth, dimHeight;
     
     if (view) {
-      width = view.get('calculatedWidth') || f.width || 0;
-      height = view.get('calculatedHeight') || f.height || 0;
+	  if (f) {
+        width = view.get('calculatedWidth') || f.width || 0;
+        height = view.get('calculatedHeight') || f.height || 0;
+      } else {
+        width = view.get('calculatedWidth') || 0;
+        height = view.get('calculatedHeight') || 0;
+      }
     }
     
     width *= scale;
