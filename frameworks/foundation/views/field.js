@@ -32,6 +32,14 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   isTextArea: NO,
 
+  /**
+    The WAI-ARIA role for field view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'textbox',
+
   _field_isMouseDown: NO,
 
   /**
@@ -312,7 +320,18 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     var ret = this.getFieldValue() ;
     if (this.objectForFieldValue) ret = this.objectForFieldValue(ret);
     return ret ;
+  },
+
+  render: function(context, firstTime) {
+    sc_super();
+
+    //addressing accessibility
+    if(firstTime) {
+      context.attr('aria-multiline', this.get('isTextArea'));
+      context.attr('aria-disabled', !this.get('isEnabled'));
+    }
   }
+
   
 });
 

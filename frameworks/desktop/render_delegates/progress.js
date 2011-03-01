@@ -42,7 +42,10 @@ SC.BaseTheme.PROGRESS_OFFSET_RANGE = 24;
 */
 SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
-    var theme = dataSource.get('theme');
+    var theme    = dataSource.get('theme'),
+        valueMax = dataSource.get('maximum'),
+        valueMin = dataSource.get('minimum'),
+        valueNow = dataSource.get('value');
     
     var inner, animatedBackground, value = dataSource.get('value') * 100, 
         cssString, backPosition,
@@ -52,6 +55,12 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
         offsetRange = theme.PROGRESS_OFFSET_RANGE,
         offset = (isIndeterminate && isRunning) ? 
                 (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
+
+    //addressing accessibility
+    context.attr('aria-valuemax', valueMax);
+    context.attr('aria-valuemin', valueMin);
+    context.attr('aria-valuenow', valueNow);
+    context.attr('aria-valuetext', valueNow);
       
     // offsetRange from dataSource only supported for backwards-compatibility
     if (dataSource.get('offsetRange')) {
@@ -93,7 +102,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   
   update: function(dataSource, $) {
     
-    var theme = dataSource.get('theme');
+    var theme    = dataSource.get('theme'),
+        valueNow = dataSource.get('value');
     
     var inner, value, cssString, backPosition,
         animatedBackground = theme.PROGRESS_ANIMATED_BACKGROUND_MATRIX,
@@ -119,7 +129,9 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       'sc-complete': (value >= 100)
     };
     
-    
+    //addressing accessibility
+    $.attr('aria-valuenow', valueNow);
+    $.attr('aria-valuetext', valueNow);
     
     $.setClass(classNames);
     inner = $.find('.sc-inner');

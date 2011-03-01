@@ -21,8 +21,16 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     var theme             = dataSource.get('theme'),
         minWidth          = dataSource.get('titleMinWidth'),
         toolTip           = dataSource.get('displayToolTip'),
-        view              = dataSource.get('view');
-    
+        view              = dataSource.get('view'),
+        isSelected        = dataSource.get('isSelected'),
+        isActive          = dataSource.get('isActive'),
+        isPopUpButton     = NO,
+        menu              = view.get('menu');
+
+        if(menu) {
+          isPopUpButton = YES;
+        }
+
     var labelContent;
 
     context.setClass('icon', !!dataSource.get('icon') || 0);    
@@ -32,6 +40,12 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     if (toolTip) {
       context.attr('title', toolTip);
       context.attr('alt', toolTip);
+    }
+
+    // addressing accessibility
+    context.attr('aria-pressed', isActive);
+    if(isPopUpButton) {
+      context.attr('aria-haspopup', isPopUpButton.toString());
     }
     
     // Specify a minimum width for the inner part of the button.
@@ -64,14 +78,27 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
-    var theme = dataSource.get('theme');
-    
+    var theme         = dataSource.get('theme'),
+        isSelected    = dataSource.get('isSelected'),
+        isActive      = dataSource.get('isActive'),
+        view          = dataSource.get('view'),
+        menu          = view.get('menu'),
+        isPopUpButton = NO;
+
+        if(menu) {
+          isPopUpButton = YES;
+        }
+
     if (dataSource.get('isActive')) jquery.addClass('active');
     if (dataSource.get('isDefault')) jquery.addClass('default');
     if (dataSource.get('isCancel')) jquery.addClass('cancel');
     if (dataSource.get('icon')) jquery.addClass('icon');
 
-
+    // addressing accessibility
+    jquery.attr('aria-pressed', isActive);
+    if(isPopUpButton) {
+      jquery.attr('aria-haspopup', isPopUpButton.toString());
+    }
     theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
   

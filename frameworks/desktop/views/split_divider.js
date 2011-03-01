@@ -34,12 +34,7 @@ SC.SplitDividerView = SC.View.extend(
   classNames: ['sc-split-divider-view'],
   
   /** @private */
-  prepareContext: function(context, firstTime) {
-    var splitView = this.get('splitView') ;
-    if (splitView) this.set('cursor', splitView.get('thumbViewCursor')) ;
-    return sc_super() ;
-  },
-  
+
   mouseDown: function(evt) {
     var splitView = this.get('splitView');
     return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();

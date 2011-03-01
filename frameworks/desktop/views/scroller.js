@@ -38,6 +38,13 @@ SC.ScrollerView = SC.View.extend(
 
   classNames: ['sc-scroller-view'],
 
+  /**
+    The WAI-ARIA role for scroller view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'scrollbar',
   // ..........................................................
   // PROPERTIES
   //
@@ -180,6 +187,14 @@ SC.ScrollerView = SC.View.extend(
     @property {Number}
   */
   buttonOverlap: 11,
+  
+  /**
+    The minimium length that the thumb will be, regardless of how much content
+    is in the scroll view.
+
+    @property {Number}
+  */
+  minimumThumbLength: 20,
 
   // ..........................................................
   // INTERNAL SUPPORT
@@ -200,6 +215,7 @@ SC.ScrollerView = SC.View.extend(
   render: function(context, firstTime) {
     var classNames = {},
         buttons = '',
+        parentView = this.get('parentView'),
         thumbPosition, thumbLength, thumbCenterLength, thumbElement,
         value, max, scrollerLength, length, pct;
 
@@ -244,6 +260,9 @@ SC.ScrollerView = SC.View.extend(
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
+
+        //addressing accessibility
+        context.attr('aria-orientation', 'vertical');
         break;
         case SC.LAYOUT_HORIZONTAL:
         context.push('<div class="track"></div>',
@@ -253,7 +272,17 @@ SC.ScrollerView = SC.View.extend(
                       '<div class="thumb-center"></div>',
                       '<div class="thumb-top"></div>',
                       '<div class="thumb-bottom"></div></div>');
+
+        //addressing accessibility
+        context.attr('aria-orientation', 'horizontal');
       }
+
+      //addressing accessibility
+      context.attr('aria-valuemax', this.get('maximun'));
+      context.attr('aria-valuemin', this.get('minimum'));
+      context.attr('aria-valuenow', this.get('value'));
+      context.attr('aria-controls' , parentView.getPath('contentView.layerId'));
+
     } else {
       // The HTML has already been generated, so all we have to do is
       // reposition and resize the thumb
@@ -264,6 +293,10 @@ SC.ScrollerView = SC.View.extend(
       thumbElement = this.$('.thumb');
 
       this.adjustThumb(thumbElement, thumbPosition, thumbLength);
+
+      //addressing accessibility
+      context.attr('aria-valuenow', this.get('value'));
+
     }
   },
 
@@ -321,10 +354,10 @@ SC.ScrollerView = SC.View.extend(
 
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        thumb.css('height', Math.max(size, 20));
+        thumb.css('height', Math.max(size, this.get('minimumThumbLength')));
         break;
       case SC.LAYOUT_HORIZONTAL:
-        thumb.css('width', Math.max(size,20));
+        thumb.css('width', Math.max(size, this.get('minimumThumbLength')));
         break;
     }
 
@@ -389,7 +422,7 @@ SC.ScrollerView = SC.View.extend(
     length = Math.floor(this.get('trackLength') * this.get('proportion'));
     length = isNaN(length) ? 0 : length;
 
-    return Math.max(length,20);
+    return Math.max(length, this.get('minimumThumbLength'));
   }.property('trackLength', 'proportion').cacheable(),
 
   /**

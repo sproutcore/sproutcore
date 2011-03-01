@@ -54,6 +54,13 @@ SC.ToolbarView = SC.View.extend(
   classNames: ['sc-toolbar-view'],
 
   /**
+    The WAI-ARIA role for toolbar view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'toolbar',
+  /**
     Default anchor location.  This will be applied automatically to the
     toolbar layout if you set it.
   */

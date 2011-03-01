@@ -32,7 +32,15 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
 
   displayProperties: 'displayTitle textAlign fontWeight icon escapeHTML needsEllipsis hint'.w(),
 
+  /**
+    The WAI-ARIA attribute for the label view. This property is assigned to
+    'aria-labelledby' attribute, which defines a string value that labels the
+    element. Used to support voiceover. It should be assigned a non-empty string,
+    if the 'aria-labelledby' attribute has to be set for the element.
 
+    @property {String}
+  */
+  ariaLabeledBy: null,
   
   isEditable: NO,
   
@@ -63,16 +71,14 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
     This is a default value that can be overridden by the
     settings on the owner view.
   */
-  escapeHTML: true,
+  escapeHTML: YES,
   escapeHTMLBindingDefault: SC.Binding.oneWay().bool(),
 
   /**
     If true, then the value will be localized.
-    
-    This is a default default that can be overidden by the
-    settings in the owner view.
+    This is a default that can be overidden by the settings in the owner view.
   */
-  localize: false,
+  localize: NO,
   localizeBindingDefault: SC.Binding.oneWay().bool(),
   
   /**

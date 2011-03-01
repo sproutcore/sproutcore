@@ -29,15 +29,28 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
   name: 'checkbox',
   
   render: function(dataSource, context) {
-    var theme = dataSource.get('theme');
-    
+    var theme = dataSource.get('theme'),
+        view  = dataSource.get('view'),
+        ariaLabel,ariaLabeledBy;
+
+    if(view) {
+      ariaLabel     = view.get('ariaLabel');
+      ariaLabeledBy = view.get('ariaLabeledBy');
+    }
+
     var isSelected = dataSource.get('isSelected') || NO;
     var isActive = dataSource.get('isActive');
     var isDisabled = !dataSource.get('isEnabled');
 
     context.attr('role', 'checkbox');
     context.attr('aria-checked', isSelected.toString());
-    
+    if(ariaLabeledBy && ariaLabeledBy !== "") {
+      context.attr('aria-labelledby', ariaLabeledBy);
+    }
+    if(ariaLabel && ariaLabel !== "") {
+      context.attr('aria-label', ariaLabel);
+    }
+
     context.setClass({
       'sel': isSelected,
       'active': isActive,
@@ -52,15 +65,28 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
-    var theme = dataSource.get('theme');
-    
+    var theme = dataSource.get('theme'),
+        view  = dataSource.get('view'),
+        ariaLabel,ariaLabeledBy;
+
+    if(view) {
+      ariaLabel     = view.get('ariaLabel');
+      ariaLabeledBy = view.get('ariaLabeledBy');
+    }
+
     var isSelected = dataSource.get('isSelected');
     var isActive = dataSource.get('isActive');
     var isDisabled = !dataSource.get('isEnabled');
 
     // address accessibility
     jquery.attr('aria-checked', isSelected.toString());
-    
+    if(ariaLabeledBy && ariaLabeledBy !== "") {
+      jquery.attr('aria-labelledby', ariaLabeledBy);
+    }
+    if(ariaLabel && ariaLabel !== "") {
+      jquery.attr('aria-label', ariaLabel);
+    }
+
     theme.labelRenderDelegate.update(dataSource, jquery.find('span.label'));
     
     // add class names

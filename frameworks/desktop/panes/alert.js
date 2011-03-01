@@ -105,11 +105,38 @@ SC.BUTTON3_STATUS = 'button3';
   @since SproutCore 1.0
 */
 SC.AlertPane = SC.PanelPane.extend({
-  
+
   classNames: 'sc-alert',
-  
+
+  /**
+    The WAI-ARIA role for alert pane. This property's value should not be
+    changed.
+
+    @property {String}
+  */
   ariaRole: 'alertdialog',
-  
+
+  /**
+    The WAI-ARIA attribute for the alert pane. This property is assigned to
+    'aria-labelledby' attribute, which defines a string value that labels the
+    element. Used to support voiceover. It should be assigned a non-empty string,
+    if the 'aria-labelledby' attribute has to be set for the element.
+
+    @property {String}
+  */
+  ariaLabeledBy: null,
+
+  /**
+    The WAI-ARIA attribute for the alert pane. This property is assigned to
+    'aria-describedby' attribute.Used to support voiceover. It is intended to
+    provide additional detail that some users might need. It should be assigned
+    a non-empty string, if the 'aria-describedby' attribute has to be set for
+    the element.
+
+    @property {String}
+  */
+  ariaDescribedBy: null,
+
   /**
     The delegate to notify when the pane is dismissed.  If you set a 
     delegate, it should respond to the method:
@@ -225,6 +252,7 @@ SC.AlertPane = SC.PanelPane.extend({
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');
           context.push('<div class="separator"></div>');
+
         }
       }),
 
@@ -295,7 +323,24 @@ SC.AlertPane = SC.PanelPane.extend({
   alertInfoDidChange: function() {
     var v = this.getPath('contentView.childViews.0');
     if (v) v.displayDidChange(); // re-render message
-  }.observes('icon', 'message', 'displayDescription', 'displayCaption')
+  }.observes('icon', 'message', 'displayDescription', 'displayCaption'),
+
+
+  render: function(context, firstTime) {
+    sc_super();
+    var ariaLabeledBy   = this.get('ariaLabeledBy'),
+        ariaDescribedBy = this.get('ariaDescribedBy');
+
+    //addressing accessibility
+    if(firstTime) {
+      if(ariaLabeledBy && ariaLabeledBy !== "") {
+        context.attr('aria-labelledby', ariaLabeledBy);
+      }
+      if(ariaDescribedBy && ariaDescribedBy !== "") {
+       context.attr('aria-describedby', ariaDescribedBy);
+      }
+    }
+  }
 });
 
 /** @private

@@ -62,8 +62,38 @@ SC.RadioView = SC.View.extend(SC.Control,
   // HTML design options
   classNames: ['sc-radio-view'],
 
+  /**
+    The WAI-ARIA role for a group of radio buttons. This property's value
+    should not be changed.
+
+    @property {String}
+  */
   ariaRole: 'radiogroup',
-  
+
+  /**
+  If items property is a hash, specify which property will function as
+  the ariaLabeledBy with this itemAriaLabeledByKey property.ariaLabeledBy is used
+  as the WAI-ARIA attribute for the radio view. This property is assigned to
+  'aria-labelledby' attribute, which defines a string value that labels the
+  element. Used to support voiceover.  It should be assigned a non-empty string,
+  if the 'aria-labelledby' attribute has to be set for the element.
+
+    @property {String}
+  */
+  itemAriaLabeledByKey: null,
+
+  /**
+    If items property is a hash, specify which property will function as
+    the ariaLabeled with this itemAriaLabelKey property.ariaLabel is used
+    as the WAI-ARIA attribute for the radio view. This property is assigned to
+    'aria-label' attribute, which defines a string value that labels the
+    element. Used to support voiceover.  It should be assigned a non-empty string,
+    if the 'aria-label' attribute has to be set for the element.
+
+    @property {String}
+  */
+  itemAriaLabelKey: null,
+
   /**
     The value of the currently selected item, and which will be checked in the 
     UI. This can be either a string or an array with strings for checking 
@@ -169,8 +199,11 @@ SC.RadioView = SC.View.extend(SC.Control,
         isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
         isEnabledKey = this.get('itemIsEnabledKey'), 
         iconKey = this.get('itemIconKey'),
+        ariaLabeledByKey = this.get('itemAriaLabeledByKey'),
+        ariaLabelKey = this.get('itemAriaLabelKey'),
         ret = this._displayItems || [], max = (items)? items.get('length') : 0,
-        item, title, width, value, idx, isEnabled, icon, sel, active;
+        item, title, width, value, idx, isEnabled, icon, sel, active,
+        ariaLabeledBy, ariaLabel;
     
     for(idx=0;idx<max;idx++) {
       item = items.objectAt(idx); 
@@ -204,6 +237,14 @@ SC.RadioView = SC.View.extend(SC.Control,
           icon = item.get ? item.get(iconKey) : item[iconKey];
         } else icon = null;
 
+        if (ariaLabeledByKey) {
+          ariaLabeledBy = item.get ? item.get(ariaLabeledByKey) : item[ariaLabeledByKey];
+        } else ariaLabeledBy = null;
+
+        if (ariaLabelKey) {
+          ariaLabel = item.get ? item.get(ariaLabelKey) : item[ariaLabelKey];
+        } else ariaLabel = null;
+
         // if item is nil, use somedefaults...
       } else {
         title = value = icon = null;
@@ -228,15 +269,22 @@ SC.RadioView = SC.View.extend(SC.Control,
         isSelected: (isArray && viewValue.indexOf(value) >= 0 && viewValue.length === 1) || (viewValue === value),
         isMixed: (isArray && viewValue.indexOf(value) >= 0),
         isActive: this._activeRadioButton === idx,
-        
+        ariaLabeledBy: ariaLabeledBy,
+        ariaLabel: ariaLabel,
         theme: this.get('theme'),
         renderState: {}
       }));
     }
 
     return ret; // done!
-  }.property('value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey').cacheable(),
+  }.property('value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
 
+
+  acceptsFirstResponder: function() {
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+    else return NO;
+  }.property('isEnabled'),
+  
   /**
     If the user clicks on of the items mark it as active on mouseDown unless
     is disabled.

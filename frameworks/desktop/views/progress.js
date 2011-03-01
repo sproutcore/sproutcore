@@ -44,6 +44,15 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     it indeterminate.
   */
   value: 0.50,
+
+  /**
+    The WAI-ARIA role for progress view. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'progressbar',
+
   valueBindingDefault: SC.Binding.single().notEmpty(),
   
   /**

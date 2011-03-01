@@ -65,6 +65,14 @@ SC.MenuPane = SC.PickerPane.extend(
 
   classNames: ['sc-menu'],
 
+  /**
+    The WAI-ARIA role for menu pane. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'menu',
+
   // ..........................................................
   // PROPERTIES
   //

@@ -1,3 +1,7 @@
 $theme.slider {
   &.disabled { opacity: .5; }
+
+  .thumb {
+    -webkit-transform: translate3d(0,0,0);
+  }
 }

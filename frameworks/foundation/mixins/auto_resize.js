@@ -162,15 +162,6 @@ SC.AutoResize = {
   
   /**
     @private
-    When the view is appended to the document, various factors (such as class names)
-    could have changed, so it will need to be remeasured.
-  */
-  didAppendToDocument: function(){
-    this.measureSizeLater();
-  },
-  
-  /**
-    @private
     When the layer is first created, measurement will need to take place.
   */
   didCreateLayer: function() {

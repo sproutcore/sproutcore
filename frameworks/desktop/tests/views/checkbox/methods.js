@@ -98,17 +98,19 @@ test("isSelected should alter sel classname and sync with value property", funct
 test("mouseDown and then mouseUp anywhere in the checkbox should toggle the selection", function() {
 
   var elem = view.get('layer');
-  
+
   SC.Event.trigger(elem, 'mousedown');
   ok(view.get('isActive'), 'view should be active');
   ok(view.get('value'), 'value should not change yet');
-  
+  equals(view.$().attr('aria-checked'), 'true', 'aria-checked should be true');
+
   // simulate mouseUp and browser-native change to control
   SC.Event.trigger(elem,'mouseup');
-  
+
   ok(!view.get('isActive'), 'view should no longer be active');
   ok(!view.get('value'), 'value should change to NO');
-  
+  equals(view.$().attr('aria-checked'), 'false', 'aria-checked should be false');
+
   elem = null ;
 });
 
@@ -122,15 +124,3 @@ test("isEnabled=NO should add disabled attr to input", function() {
   view.mouseUp();
   ok(view.get('value'), 'value should not change when clicked');
 });
-
-
-
-
-
-
-
-
-
-
-
-

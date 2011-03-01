@@ -48,6 +48,12 @@ sc_require('models/record');
 */
 SC.RecordAttribute = SC.Object.extend(
   /** @scope SC.RecordAttribute.prototype */ {
+  /**
+    Walk like a duck.
+
+    @property {Boolean}
+  */
+  isRecordAttribute: YES,
 
   /**
     The default value.  If attribute is null or undefined, this default value

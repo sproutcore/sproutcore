@@ -42,6 +42,22 @@ var pane = SC.ControlTestPane.design({height:24})
   .add("title,toolTip", SC.ButtonView, { 
     title: "Hello World", toolTip: 'Hello World is my tool tip'
   })
+
+  .add("aria-role", SC.ButtonView, {
+    title: 'aria-role',
+    ariaRole: 'button'
+  })
+
+  .add("aria-pressed", SC.ButtonView, {
+    title: 'aria-pressed',
+    ariaRole: 'button'
+  })
+
+  .add("aria-haspopup",SC.PopupButtonView, {
+    title: 'aria-haspopup',
+    ariaRole: 'button',
+    menu: ['a','b']
+  });
   // 
   // .add("autocontrolsize", SC.ButtonView, { 
   //   controlSize: SC.AUTO_CONTROL_SIZE,
@@ -67,6 +83,9 @@ test("Check that all button are visible", function() {
   ok(pane.view('title,icon,default').get('isVisibleInWindow'), 'title,icon,default.isVisibleInWindow should be YES');
   ok(pane.view('title,icon,selected').get('isVisibleInWindow'), 'title.icon,selected.isVisibleInWindow should be YES');
   ok(pane.view('title,toolTip').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
+  ok(pane.view('aria-role').get('isVisibleInWindow'), 'aria-role.isVisibleInWindow should be YES');
+  ok(pane.view('aria-pressed').get('isVisibleInWindow'), 'aria-pressed.isVisibleInWindow should be YES');
+  ok(pane.view('aria-haspopup').get('isVisibleInWindow'), 'aria-haspopup.isVisibleInWindow should be YES');
 });
   
 
@@ -168,6 +187,34 @@ test("Check that the title is set or not and if it is in the appropriate element
 test("Check if title,toolTip has the tool tip set", function() {
   var viewElem=pane.view('title,toolTip').$();
   ok(viewElem.attr("title") == 'Hello World is my tool tip', 'title,toolTip has the expected tool tip set.');
+});
+
+test("Check if aria role is set to button", function() {
+  var viewElem=pane.view('aria-role').$();
+  ok(viewElem.attr("role") == 'button', 'aria-role is set to button.');
+});
+
+test("Check if aria haspopup is set to button", function() {
+  var viewElem=pane.view('aria-haspopup').$();
+  ok(viewElem.attr("aria-haspopup") == 'true', 'aria-haspopup should be true.');
+});
+
+test("aria-pressed attribute to be false by default", function(){
+  var b = pane.view('aria-pressed').$();
+  equals(b.attr("aria-pressed") , "false", "should have false by default");
+});
+
+test("mouseDown and then mouseUp anywhere in the button should toggle the aria-pressed", function() {
+  var b = pane.view('aria-pressed');
+  var elem = b.get('layer');
+
+  SC.Event.trigger(elem, 'mousedown');
+  equals(b.$().attr('aria-pressed'), 'true', 'aria-pressed should be true when mousedown');
+
+  SC.Event.trigger(elem,'mouseup');
+  equals(b.$().attr('aria-pressed'), 'false', 'aria-pressed should be false when mouseup');
+
+  elem = null ;
 });
 
 // test("Check if AUTO_CONTROL_SIZE button automatically calculated the correct controlSize", function() {

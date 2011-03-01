@@ -43,7 +43,7 @@ $theme.sc-segment-view {
   &.active {
     .left { @include slice("segmented_active.png", $left: 100, $width: 8); }
     .right { @include slice("segmented_active.png", $left: 92, $width: 8); }
-    .middle { @include slice("segmented_active.png", $left: 8, $width: 1); }
+    .middle { @include slice("segmented_active.png", $left: 8, $width: 1, $repeat: repeat-x); }
   }
   
   &.active.sc-first-segment {
@@ -59,7 +59,7 @@ $theme.sc-segment-view {
   &.sel {
     .left { @include slice("segmented_selected.png", $left: 100, $width: 8); }
     .right { @include slice("segmented_selected.png", $left: 92, $width: 8); }
-    .middle { @include slice("segmented_selected.png", $left: 8, $width: 1); }
+    .middle { @include slice("segmented_selected.png", $left: 8, $width: 1, $repeat: repeat-x); }
   }
 
   &.sel.sc-first-segment {
@@ -75,7 +75,7 @@ $theme.sc-segment-view {
   &.sel.active {
     .left { @include slice("segmented_selected_active.png", $left: 100, $width: 8); }
     .right { @include slice("segmented_selected_active.png", $left: 92, $width: 8); }
-    .middle { @include slice("segmented_selected_active.png", $left: 8, $width: 1); }
+    .middle { @include slice("segmented_selected_active.png", $left: 8, $width: 1, $repeat: repeat-x); }
   }
 
   &.sel.active.sc-first-segment {

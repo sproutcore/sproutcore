@@ -48,6 +48,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 /** @scope SC.ImageView.prototype */ {
 
   classNames: 'sc-image-view',
+  
+  ariaRole: 'img',
 
   displayProperties: 'frame image imageValue innerFrame status toolTip type'.w(),
 

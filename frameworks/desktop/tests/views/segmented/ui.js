@@ -155,6 +155,25 @@ var pane;
       itemWidthKey: 'width',
       value: "D",
       layout: { height: 25 }
+    })
+    .add("aria-role_tab,tablist", SC.SegmentedView, {
+      items: [
+      {title: "Item 1"},
+      {title: "Item 2"},
+      {title: "Item 3"}
+      ],
+      itemTitleKey: "title",
+      layout: { height: 25 }
+    })
+    .add("aria-labelledby", SC.SegmentedView, {
+      items: [
+      {title: "Item 1", ariaLabeledBy: "item1"},
+      {title: "Item 2", ariaLabeledBy: "item2"},
+      {title: "Item 3", ariaLabeledBy: "item3"}
+      ],
+      itemTitleKey: "title",
+      itemAriaLabeledByKey: "ariaLabeledBy",
+      layout: { height: 25 }
     });
 
   pane.show(); // add a test to show the test pane
@@ -180,6 +199,9 @@ var pane;
     ok(pane.view('3_items,2_sel,emptySel,multiSel').get('isVisibleInWindow'), '3_items,2_sel,emptySel,multiSel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,leftAligned').get('isVisibleInWindow'), '3_items,leftAligned.isVisibleInWindow should be YES');
     ok(pane.view('3_items,rightAligned').get('isVisibleInWindow'), '3_items,rightAligned.isVisibleInWindow should be YES');
+    ok(pane.view('aria-role_tab,tablist').get('isVisibleInWindow'), 'aria-role_tab,tablist.isVisibleInWindow should be YES');
+    ok(pane.view('aria-labelledby').get('isVisibleInWindow'), 'aria-labelledby.isVisibleInWindow should be YES');
+
   });
 
 
@@ -395,4 +417,33 @@ var pane;
     var overflowEl = segments[segments.length - 1];
     ok($(overflowEl).hasClass('sel'), 'overflow segment should have .sel class');
   });
+
+  test("Check that the segmented view and segments have aria roles set", function() {
+    var sv        = pane.view("aria-role_tab,tablist"),
+        viewElem  = sv.$(),
+        segments, i, len, segmentViewElem, role;
+
+    equals(viewElem.attr('role'), 'tablist', "The segmented view has aria role set");
+
+    segments = sv.get('childViews');
+    for( i = 0, len = segments.length; i<len; ++i) {
+      segmentViewElem = segments[i].$();
+      role = segmentViewElem.attr('role');
+      equals(role, "tab", "segment " + (i+1) + " have aria role set");
+    }
+  });
+
+  test("Check that the segments have aria-labelled attribute set", function() {
+    var sv = pane.view('aria-labelledby'),
+        segments = sv.get('childViews'),
+        i, len, segmentViewElem, ariaLabeledBy, aria_labelledby;
+
+    for(i = 0, len = segments.length; i<len; ++i) {
+      ariaLabeledBy   = segments[i].get('ariaLabeledBy');
+      segmentViewElem = segments[i].$();
+      aria_labelledby = segmentViewElem.attr('aria-labelledby');
+      equals(aria_labelledby, ariaLabeledBy, "segment " + (i+1) + " has aria-labeledby set");
+    }
+  });
+
 })();

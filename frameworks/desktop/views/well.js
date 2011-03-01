@@ -48,8 +48,7 @@ SC.WellView = SC.ContainerView.extend(
     } 
   },
 
-  theme: 'well',
-  
+  renderDelegateName: 'wellRenderDelegate',
   /**
      Invoked whenever the content property changes.  This method will simply
      call replaceContent and set the contentLayout in the new contentView.

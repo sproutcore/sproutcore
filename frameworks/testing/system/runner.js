@@ -130,6 +130,16 @@ CoreTest.Runner = {
     result.html(str);
     
     if (this.errors) CoreTest.errors=this.errors.join('');
+
+
+    // Unload the SproutCore event system so that the user can select the text
+    // of the various events.  (It is handy when looking at failed tests.)
+    if (SC  &&  SC.Event  &&  SC.Event.unload) {
+      try {
+        SC.Event.unload();
+      }
+      catch (e) {}
+    }
   },
   
   planDidRecord: function(plan, module, test, assertions, timings) {

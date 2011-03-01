@@ -18,6 +18,10 @@ $theme.sc-segmented-view $theme.sc-segment-view {
   overflow:hidden;
   position: relative;
   padding: 0px;
+
+  .ie7 & {
+    display: inline;
+  }
   
   &.sc-first-segment { margin: 0px; padding: 0px ;}
   &.sc-last-segment { margin: 0px; padding: 0px; }

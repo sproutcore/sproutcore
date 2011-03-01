@@ -38,6 +38,13 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   name: 'label',
   
   render: function(dataSource, context) {
+    var view = dataSource.get('view'),
+        ariaLabeledBy;
+
+    if(view) {
+      ariaLabeledBy = view.get('ariaLabeledBy');
+    }
+
     // CONSIDER DEPRECATING THESE PROPERTIES BECAUSE THEY ARE
     // ANNOYING PAINS IN THE BUTT THAT EVERYONE HATES
     context.addStyle({
@@ -47,6 +54,11 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     
     context.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
     context.setClass('icon', dataSource.get('icon') || NO);
+
+    //addressing accessibility
+    if(ariaLabeledBy && ariaLabeledBy !== "") {
+      context.attr('aria-labelledby', ariaLabeledBy);
+    }
     
     var html = this._htmlForTitleAndIcon(dataSource);
     context.push(html);
@@ -58,6 +70,13 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
+    var view = dataSource.get('view'),
+        ariaLabeledBy;
+
+    if(view) {
+      ariaLabeledBy = view.get('ariaLabeledBy');
+    }
+
     // CONSIDER DEPRECATING THESE PROPERTIES BECAUSE THEY ARE
     // ANNOYING PAINS IN THE BUTT THAT EVERYONE HATES
     jquery.css({
@@ -66,7 +85,12 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     });
     
     jquery.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
-    
+
+    //addressing accessibility
+    if(ariaLabeledBy && ariaLabeledBy !== "") {
+      jquery.attr('aria-labelledby', ariaLabeledBy);
+    }
+
     var html = this._htmlForTitleAndIcon(dataSource);
     if (dataSource.get('renderState')._lastHTMLForTitleAndIcon !== html) {
       jquery.html(html);

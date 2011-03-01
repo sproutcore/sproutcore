@@ -22,6 +22,14 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   classNames: ['sc-menu-item'],
 
+  /**
+    The WAI-ARIA role for menu items. This property's value should not be
+    changed.
+
+    @property {String}
+  */
+  ariaRole: 'menuitem',
+
   escapeHTML: YES,
 
   /**
@@ -140,6 +148,16 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT ;
     this.set('itemWidth',itemWidth);
     this.set('itemHeight',itemHeight);
+
+    //addressing accessibility
+    if(content.get(menu.itemSeparatorKey)){
+      //assign the role of separator
+      context.attr('role', 'separator');
+    } else if (this.getContentProperty('itemCheckboxKey')) {
+      //assign the role of menuitemcheckbox
+      context.attr('role', 'menuitemcheckbox');
+      context.attr('aria-checked', true);
+    }
 
     context = context.begin('a').addClass('menu-item');
 

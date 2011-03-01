@@ -81,12 +81,10 @@ config :standard_theme,
 
 config :ace, 
   :required => :empty_theme, 
-  :theme_name => 'sc-theme',
+  :theme_name => nil,
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug'],
   :css_theme => 'ace'
-
-# CONFIGURE APPS
 
 # CONFIGURE APPS
 config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
@@ -100,11 +98,11 @@ config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
     :required => [:desktop, :datastore, :core_tools],
     :theme => :ace,
     :html5_history => true
-    
+
   # mode :debug do
   #   config app_target, :combine_javascript => false
   # end
-  
+
 end
 
 config :test_controls, :css_theme => 'ace.test-controls'

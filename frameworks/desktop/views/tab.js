@@ -117,7 +117,9 @@ SC.TabView = SC.View.extend(
     
     containerView = this.containerView.extend(SC.Border, {
       layout: layout,
-      borderStyle: SC.BORDER_BLACK
+      borderStyle: SC.BORDER_BLACK,
+      //adding the role
+      ariaRole: 'tabpanel'
     });
 
     view = this.containerView = this.createChildView(containerView) ;
@@ -175,7 +177,7 @@ SC.TabView = SC.View.extend(
     custom container view.  You can access this view but you cannot change 
     it.
   */
-  containerView: SC.ContainerView.extend({ theme: 'well' }),
+  containerView: SC.ContainerView.extend({ renderDelegateName: 'wellRenderDelegate' }),
   
   segmentedView: SC.SegmentedView
   

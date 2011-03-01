@@ -23,6 +23,7 @@ TestControls.mainPage = SC.Page.create({
   
   mainPane: SC.MainPane.design(SC.Animatable, {
     childViews: "split".w(),
+    wantsTouchIntercept: YES,
     
     split: SC.MasterDetailView.design ({
       classNames: [ window.navigator.standalone ? "round-toolbars" : "normal" ],
@@ -84,7 +85,7 @@ TestControls.mainPage = SC.Page.create({
           childViews: "showMaster label useDarkTheme".w(),
           showMaster: SC.ButtonView.design({
             layout: { left: 7, centerY: 0, height: 30, width: 100 },
-            controlSize: SC.AUTO_CONTROL_SIZE,
+            controlSize: SC.HUGE_CONTROL_SIZE,
             isVisible: NO,
             isVisibleBinding: ".parentView.masterIsHidden",
             title: "Tests",

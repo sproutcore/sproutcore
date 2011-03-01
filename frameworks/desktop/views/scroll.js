@@ -29,7 +29,7 @@ SC.FAST_SCROLL_DECELERATION = 0.85;
 SC.ScrollView = SC.View.extend(SC.Border, {
   /** @scope SC.ScrollView.prototype */
   classNames: ['sc-scroll-view'],
-  
+
   // ..........................................................
   // PROPERTIES
   // 
@@ -1640,6 +1640,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   render: function(context, firstTime) {
     this.invokeLast(this.adjustElementScroll);
+
     if (firstTime) {
       context.push('<div class="corner"></div>');
     }
