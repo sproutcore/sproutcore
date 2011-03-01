@@ -86,7 +86,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       if (!view) {
         view = this.createChildView(itemViewClass.extend({
           content: item,
-          context: item,
           tagName: 'li'
         }));
         view.createLayer().$().appendTo(this.$());
