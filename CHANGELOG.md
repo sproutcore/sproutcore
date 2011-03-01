@@ -1,3 +1,51 @@
+
+CHANGE LOG FOR 1.5
+==================
+
+1.5.0.pre.4
+-----------
+
+* We are beginning to move API that we don't believe will be ready before 1.5
+release into the `experimental` framework. If your apps rely on code that is
+migrated to experimental, please make sure you include it as a dependency. For
+more, please see frameworks/experimental/README.md.
+* Support for extending classes after they've been created with the
+reopen()/enhance() combo. For more, see: [this
+discussion](http://groups.google.com/group/sproutcore-dev/browse_thread/thread/d65ad54d6fddef5d)
+	- This change may break existing code if you call sc_super() in your mixins.
+	If your app throws exceptions after updating, please see [this post](http://groups.google.com/group/sproutcore-dev/browse_thread/thread/cc6a97e6133cb8cc).
+* Added SC.TemplateView and Handlebars. These allow you to specify the content
+of your views using templates.
+	- {{#view}} helper allows you to define child views
+	- {{#bind}} helper allows you to render a property, and automatically update DOM if that
+	property ever changes.
+	- {{#collection}} helpers allows you to render a simple collection of items
+	using templates
+	- SC.TextFieldSupport and SC.CheckboxSupport mixins for SC.TemplateViews
+	that wrap <input> elements.
+* Split SC.View into units of functionality. SC.View remains functionally the
+same, but you can now use SC.CoreView, a light-weight subset of SC.View.
+* SC.ImageView will use a <canvas> tag on platforms that support it, which
+improves performance significantly.
+* SC.SegmentedView now creates an overflow menu if there are too many segments
+to display.
+	- Class names for SC.SegmentedView have been cleaned up. You may need to
+	update your CSS if you were theming SC.SegmentedView.
+* You can now observe the contents of enumerables using the special `@each`
+key.
+* Dependent keys can accept property paths. For example, you can say
+.property('foo.bar'), and it will be invalidated if the `bar` property of
+`foo` changes.
+* Deprecated SC.viewportOffset(). Please use SC.offset() instead, which is
+more explicit about what it returns.
+* SC.browser now detects Android devices.
+* SC.device.orientation now works reliably on desktop, iOS, and Android 2.1
+and above.
+* Experimental support for gyroscope information, if provided by the browser.
+* Unit tests for runtime, desktop, foundation, core_foundation, and datastore
+are all passing.
+
+
 CHANGE LOG FOR 1.4
 ==================
 
