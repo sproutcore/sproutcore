@@ -10,3 +10,4 @@ tmp/
 bin
 .bundle
 Gemfile*
+.sass-cache/
