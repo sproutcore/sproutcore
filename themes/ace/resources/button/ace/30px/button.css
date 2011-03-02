@@ -1,33 +1,34 @@
 @theme(sc-huge-size) {
-  
+
   $theme.button {
-    
+
     .sc-button-label {
       margin-top:4px;
       height: 30px;
       font-size:13px;
     }
-    
-    
+
+
     @include slices("normal_button.png", $left: 3, $right: 3);
-    
+
     &.active {
-      @include slices("active_button.png", $left: 3, $right: 3);    
+      @include slices("active_button.png", $left: 3, $right: 3);
     }
-  
+
     &.sel, &.def {
-      @include slices("selected_button.png", $left: 3, $right: 3);    
-  
-      &.sel.active, &.def.active {
-        @include slices("selected_active_button.png", $left: 3, $right: 3);    
-      }
+      @include slices("selected_button.png", $left: 3, $right: 3);
+
+    }
+
+    &.sel.active, &.def.active {
+      @include slices("selected_active_button.png", $left: 3, $right: 3);
     }
   }
 
   @theme(point-left) {
     $theme.button {
       @include slices("normal_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-right);
-      
+
       .middle { left: 12px; }
 
       &.active {
@@ -43,11 +44,11 @@
       }
     }
   }
-  
+
   @theme(point-right) {
     $theme.button {
       @include slices("normal_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-left);
-      
+
       .middle { right: 12px; }
 
       &.active {
