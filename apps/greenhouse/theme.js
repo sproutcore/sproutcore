@@ -16,7 +16,7 @@ SC.Theme.addTheme(Greenhouse.Theme);
 SC.defaultTheme = 'greenhouse';
 
 
-Greenhouse.Theme.Well.containerRenderDelegate = SC.Object.create({
+Greenhouse.Theme.wellRenderDelegate = SC.Object.create({
   name: 'container',
   
   render: function(dataSource, context) {},
