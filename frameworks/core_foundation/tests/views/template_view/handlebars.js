@@ -239,6 +239,26 @@ test("Template updates correctly if a path is passed to the bind helper and the 
   equals(view.$('h1').text(), "$6", "updates when property is set on object controller");
 });
 
+test("Should insert a localized string if the {{loc}} helper is used", function() {
+  SC.stringsFor('en', {
+    'Brazil': 'Brasilia'
+  });
+
+  templates = SC.Object.create({
+    'loc': SC.Handlebars.compile('<h1>Country: {{loc "Brazil"}}')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'loc',
+    templates: templates,
+
+    country: 'Brazil'
+  });
+
+  view.createLayer();
+  equals(view.$('h1').text(), 'Country: Brasilia', "returns localized value");
+});
+
 test("Template views return a no-op function if their template cannot be found", function() {
   var view = SC.TemplateView.create({
     templateName: 'cantBeFound'

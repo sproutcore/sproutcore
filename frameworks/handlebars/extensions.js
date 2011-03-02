@@ -87,6 +87,10 @@ Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
   return new Handlebars.SafeString(renderContext.join());
 });
 
+Handlebars.registerHelper('loc', function(property) {
+  return property.loc();
+});
+
 Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
   var collectionClass;
 
