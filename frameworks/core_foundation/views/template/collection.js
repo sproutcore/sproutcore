@@ -44,7 +44,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     this.didCreateLayer();
 
     this.get('content').addRangeObserver(null, this, this.arrayContentDidChange);
-  }.observes('content').observes('content.[]'),
+  }.observes('content', '.content.[]'),
 
   arrayContentDidChange: function(array, objects, key, indexes) {
     var content = this.get('content'),
