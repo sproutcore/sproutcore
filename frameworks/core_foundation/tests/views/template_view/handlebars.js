@@ -175,6 +175,70 @@ test("Handlebars templates update properties if a content object changes", funct
   equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
 });
 
+test("Template updates correctly if a path is passed to the bind helper", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{bind "coffee.price"}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    coffee: SC.Object.create({
+      price: '$4'
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "$4", "precond - renders price");
+
+  view.setPath('coffee.price', "$5");
+
+  equals(view.$('h1').text(), "$5", "updates when property changes");
+
+  view.set('coffee', { price: "$6" });
+  equals(view.$('h1').text(), "$6", "updates when parent property changes");
+});
+
+test("Template updates correctly if a path is passed to the bind helper and the context object is an SC.ObjectController", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{bind "coffee.price"}}</h1>')
+  });
+
+  var controller = SC.ObjectController.create();
+  var realObject = SC.Object.create({
+    price: "$4"
+  });
+
+  controller.set('content', realObject);
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    coffee: controller
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "$4", "precond - renders price");
+
+  realObject.set('price', "$5");
+
+  equals(view.$('h1').text(), "$5", "updates when property is set on real object");
+
+  SC.run(function() {
+    controller.set('price', "$6" );
+  });
+
+  equals(view.$('h1').text(), "$6", "updates when property is set on object controller");
+});
+
 test("Template views return a no-op function if their template cannot be found", function() {
   var view = SC.TemplateView.create({
     templateName: 'cantBeFound'

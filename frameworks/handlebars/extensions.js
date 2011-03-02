@@ -70,7 +70,7 @@ Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
       var element = renderContext.element();
       view.$("#" + spanId).replaceWith(element);
     } else if (result !== null && result !== undefined) {
-      view.$("#" + spanId).html(Handlebars.Utils.escapeExpression(self.get(property)));
+      view.$("#" + spanId).html(Handlebars.Utils.escapeExpression(result));
     } else {
       view.$("#" + spanId).html("");
     }
