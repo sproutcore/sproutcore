@@ -129,4 +129,35 @@ test("selectedValue shouldn't have st string attached to it", function() {
   
 });
 
+test("changing the selected item in the select field appropriately notifies that the value has changed", function() {
+  SC.RunLoop.begin();
+  var newObjects2 =[{pos: 1,title:'US/Pacific'}, 
+  {pos: 2, title:'America/Vancouver'}, 
+  {pos: 3, title:'Canada/Mountain'},
+  {pos: 4, title:'Other...'}], elm;
+  pane.set('objs', newObjects2);
+  SC.RunLoop.end();  
+  SC.RunLoop.begin();
+  pane.set('selectedValue', 'America/Vancouver');
+  SC.RunLoop.end();  
+  selectedValue = view3.getFieldValue() ;
+  equals(selectedValue,'America/Vancouver', 'the new Value is ');
+  
+  
+  // Changing the selection in the box to 'Canada/Mountain' programmatically
+  SC.RunLoop.begin();
+  elm = view3.$input().get(0);
+  elm.childNodes[2].selected = true;
+  SC.RunLoop.end();
+  
+  // Trigger observer!
+  SC.RunLoop.begin();
+  SC.Event.trigger(elm, "change");
+  SC.RunLoop.end();
 
+  // See if the value propagated to the controller.
+  SC.RunLoop.begin();
+  selectedValue = pane.get('selectedValue') ;
+  SC.RunLoop.end();  
+  equals(selectedValue,'Canada/Mountain', 'the bound Value is ');
+});

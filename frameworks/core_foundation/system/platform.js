@@ -148,9 +148,29 @@ SC.platform = {
   /** @private
     When simulating touch events, this method is called when mousemove events
     are received.
+
+    If the altKey is depresed and pinch center not yet established, we will capture the mouse position.
   */
   _simtouch_mousemove: function(evt) {
-    if (!this._mousedown) return NO;
+    if (!this._mousedown) {
+      /*
+        we need to capture when was the first spot that the altKey was pressed and use it as
+        the center point of a pinch
+       */
+      if(evt.altKey && this._pinchCenter == null) {
+        this._pinchCenter = {
+          pageX: evt.pageX,
+          pageY: evt.pageY,
+          screenX: evt.screenX,
+          screenY: evt.screenY,
+          clientX: evt.clientX,
+          clientY: evt.clientY
+        };
+      } else if(!evt.altKey && this._pinchCenter != null){
+        this._pinchCenter = null;
+      }
+      return NO;
+    }
 
     var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchmove');
     return SC.RootResponder.responder.touchmove(manufacturedEvt);
@@ -186,17 +206,22 @@ SC.platform = {
     Note that this method edits the passed event in place, and returns
     that same instance instead of a new, modified version.
 
+    If altKey is depressed and we have previously captured a position for the center of
+    the pivot point for the virtual second touch, we will manufacture an additional touch.
+    The position of the virtual touch will be the reflection of the mouse position,
+    relative to the pinch center.
+
     @param {Event} evt the mouse event to modify
     @param {String} type the type of event (e.g., touchstart)
     @returns {Event} the mouse event with an added changedTouches array
   */
   manufactureTouchEvent: function(evt, type) {
-    var touch, touchIdentifier = this._simtouch_counter;
+    var realTouch, virtualTouch, realTouchIdentifier = this._simtouch_counter;
 
-    touch = {
+    realTouch = {
       type: type,
       target: evt.target,
-      identifier: touchIdentifier,
+      identifier: realTouchIdentifier,
       pageX: evt.pageX,
       pageY: evt.pageY,
       screenX: evt.screenX,
@@ -204,8 +229,38 @@ SC.platform = {
       clientX: evt.clientX,
       clientY: evt.clientY
     };
+    evt.touches = [ realTouch ];
 
-    evt.changedTouches = evt.touches = [ touch ];
+    /*
+      simulate pinch gesture
+     */
+    if(evt.altKey && this._pinchCenter != null)
+    {
+      //calculate the mirror position of the virtual touch
+      var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX ,
+          pageY = this._pinchCenter.pageY + this._pinchCenter.pageY - evt.pageY,
+          screenX = this._pinchCenter.screenX + this._pinchCenter.screenX - evt.screenX,
+          screenY = this._pinchCenter.screenY + this._pinchCenter.screenY - evt.screenY,
+          clientX = this._pinchCenter.clientX + this._pinchCenter.clientX - evt.clientX,
+          clientY = this._pinchCenter.clientY + this._pinchCenter.clientY - evt.clientY,
+          virtualTouchIdentifier = this._simtouch_counter + 1;
+
+      virtualTouch = {
+        type: type,
+        target: evt.target,
+        identifier: virtualTouchIdentifier,
+        pageX: pageX,
+        pageY: pageY,
+        screenX: screenX,
+        screenY: screenY,
+        clientX: clientX,
+        clientY: clientY
+      };
+
+      evt.touches = [ realTouch , virtualTouch];
+    }
+    evt.changedTouches = evt.touches;
+
     return evt;
   },
 
