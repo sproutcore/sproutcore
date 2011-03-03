@@ -40,8 +40,6 @@
   
 */
 SC.Editable = {
-  editorDelegate: null,
-
   /**
     Indicates whether a view is editable or not.  You can optionally 
     implement the methods in this mixin to disallow editing is isEditable is
@@ -85,7 +83,6 @@ SC.Editable = {
     // begin editing
     this.beginPropertyChanges();
     this.set('isEditing', YES) ;
-    this.becomeFirstResponder() ;
     this.endPropertyChanges();
     
     return YES ;
@@ -148,9 +145,6 @@ SC.Editable = {
   commitEditing: function() {
     if (!this.get('isEditing')) return YES;
     this.set('isEditing', NO) ;
-    this.resignFirstResponder() ;
-    
-    this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldCommitEditing', this, this.get('value'));
     
     return YES ;
   }

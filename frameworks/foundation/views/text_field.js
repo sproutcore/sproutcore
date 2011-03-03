@@ -48,6 +48,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   applyImmediately: YES,
 
+  /*
+  * Flag indicating whether the editor should automatically commit if you click
+  * outside it.
+  *
+  * @type {Boolean}
+  */
+  commitOnBlur: YES,
+
   /**
     If YES, the field will hide its text from display. The default value is NO.
     
@@ -749,6 +757,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidFocus: function(evt) {
+    this.becomeFirstResponder();
+
     this.beginEditing(evt);
     
     // We have to hide the intercept pane, as it blocks the events. 
@@ -770,7 +780,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidBlur: function(evt) {
-    this.commitEditing(evt);
+    this.resignFirstResponder() ;
+
+    if(this.get('commitOnBlur')) this.commitEditing(evt);
     
     // get the pane we hid intercept pane for (if any)
     var touchPane = this._didHideInterceptForPane;

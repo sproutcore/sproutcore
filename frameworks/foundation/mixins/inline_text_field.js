@@ -268,14 +268,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 	},
 
   /*
-  * Flag indicating whether the editor should automatically commit if you click
-  * outside it.
-  *
-  * @type {Boolean}
-  */
-  commitOnBlur: YES,
-
-  /*
   * Flag indicating whether the editor is allowed to use multiple lines.
   * If set to yes it will be rendered using a text area instead of a text input.
   *
@@ -335,6 +327,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     
     @returns {Boolean}
   */
+  // TODO: this seems to do almost the same thing as fieldDidBlur
   blurEditor: function(evt) {
     if (!this.get('isEditing')) return YES ;
     return this.commitOnBlur ? this.commitEditing() : this.discardEditing();
