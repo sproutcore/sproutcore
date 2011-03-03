@@ -209,17 +209,27 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @param {Hash} optional custom frame
   * @param {Boolean} if the view is a member of a collection
   */
-	positionOverTargetView: function(target, tarFrame, isCollection) {
+	positionOverTargetView: function(target, isCollection, pane, frame, elem) {
+    if(!pane) pane = target.get('pane');
+
+    if(!elem) elem = target.$()[0];
+
+    // if we weren't given a frame, build one from the target
+    if(!frame) {
+      var tempFrame = label.get('frame');
+
+      frame = SC.viewportOffset(elem);
+
+      frame.height = tempFrame.height;
+      frame.width = tempFrame.width;
+    }
+
     var layout={},
-		pane = target.get('pane'),
 		paneElem = pane.$()[0],
-		tarLayout = target.get('layout'),
-		frame = SC.viewportOffset(target.$()[0]);
+		tarLayout = target.get('layout');
 
-    if(!tarFrame) tarFrame = target.get('frame');
-
-    layout.height = tarFrame.height;
-    layout.width = tarFrame.width;
+    layout.height = frame.height;
+    layout.width = frame.width;
 
     if (isCollection && tarLayout.left) {
       layout.left=frame.x-tarLayout.left-paneElem.offsetLeft-1;
@@ -276,13 +286,24 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   beginEditing: function(original, label) {
 		if(!original(label)) return NO;
 
-    var pane = label.get('pane');
+    var pane = label.get('pane'), elem = this.get('exampleElement');
 
     this.beginPropertyChanges();
 
-    this.updateStyle(this.get('exampleElement') || label.$()[0]);
+    // if we have an exampleElement we need to make sure it's an actual
+    // DOM element not a jquery object
+    if(elem) {
+      if(elem.length) elem = elem[0];
+    }
 
-    this.positionOverTargetView(label, this.get('exampleFrame') || label.get('frame'), this.get('isCollection'));
+    // if we don't have an element we need to get it from the target
+    else {
+      elem = label.$()[0];
+    }
+
+    this.updateStyle(elem);
+
+    this.positionOverTargetView(label, this.get('isCollection'), pane, this.get('exampleFrame'), elem);
 
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
     this.becomeFirstResponder();
