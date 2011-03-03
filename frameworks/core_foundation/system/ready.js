@@ -20,7 +20,14 @@ SC.mixin({
     
     @property {Boolean}
   */
-  ignoreReady: SC.ignoreReady ? YES : NO,
+  suppressOnReady: SC.suppressOnReady ? YES : NO,
+  
+  /**
+    Allows apps to avoid automatically invoking main() when onReady is called
+    
+    @property {Boolean}
+  */
+  suppressMain: SC.suppressMain ? YES : NO,
   
   /**
     Add the passed target and method to the queue of methods to invoke when
@@ -58,20 +65,16 @@ SC.mixin({
   },
 
   onReady: {
-    startRunLoop: function() {
-      SC.RunLoop.begin();
-    },
-    setupLocales: function() {
-      SC.Locale.createCurrentLocale();
-      jQuery("body").addClass(SC.Locale.currentLanguage.toLowerCase());
-    },
-    removeLoading: function() {
-      jQuery("#loading").remove();
-    },
     done: function() {
       if(SC.isReady) return;
-      
       SC.isReady = true;
+      
+      SC.RunLoop.begin();
+      
+      SC.Locale.createCurrentLocale();
+      jQuery("body").addClass(SC.Locale.currentLanguage.toLowerCase());
+      
+      jQuery("#loading").remove();
       
       var queue = SC._readyQueue, idx, len;
       
@@ -83,22 +86,17 @@ SC.mixin({
       }
       
       if(window.main && !SC.suppressMain) { main(); }
+      
       SC.RunLoop.end();
     }
   }
 
 }) ;
 
-//
-if(!SC.ignoreReady) {
-  jQuery(document)
-    .ready(SC.onReady.startRunLoop)
-    .ready(SC.onReady.setupLocales)
-    .ready(SC.onReady.removeLoading);
+// let apps ignore the regular onReady handling if they need to
+if(!SC.suppressOnReady) {
+  jQuery.event.special.ready._default = SC.onReady.done;
 }
-jQuery.event.special.ready._default = SC.onReady.done;
-
-SC.removeLoading = YES;
 
 // default to app mode.  When loading unit tests, this will run in test mode
 SC.APP_MODE = "APP_MODE";
