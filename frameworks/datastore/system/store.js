@@ -2741,7 +2741,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Disassociate records that are related to the one being destroyed iff this
     record is the master (isMaster === YES).
    */
-  pushDestroy: function(recordType, id, storeKey) {
+  pushDestroy: function(original, recordType, id, storeKey) {
     var existingIDs;
 
     this._pushIterator(recordType, id, storeKey,
@@ -2751,8 +2751,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         this._inverseDidRelinquishRelationships(inverseType, existingIDs, toAttr, id);
     });
 
-    return sc_super();
-  },
+    return original(recordType, id, storeKey);
+  }.enhance(),
 
   /**
     Associate records that are added via a pushRetrieve, and update subsequent
@@ -2763,7 +2763,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     The `ignore` argument is only set to true when adding the inverse
     relationship (to prevent infinite recursion).
    */
-  pushRetrieve: function (recordType, id, dataHash, storeKey, ignore) {
+  pushRetrieve: function (original, recordType, id, dataHash, storeKey, ignore) {
     // avoid infinite recursions when additional changes are propogated
     // from `_inverseDidAddRelationship`
     if (!ignore) {
@@ -2802,11 +2802,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       ret;
 
     if (changeStatus) this.writeStatus(storeKey, K.READY_CLEAN);
-    ret = sc_super();
+    ret = original(recordType, id, dataHash, storeKey);
     if (changeStatus) this.writeStatus(storeKey, status);
 
     return ret;
-  }
+  }.enhance()
 }) ;
 
 SC.Store.mixin(/** @scope SC.Store.prototype */{
