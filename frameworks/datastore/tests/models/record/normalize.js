@@ -312,3 +312,25 @@ test("normalizing a new record with toOne without defaultValue" ,function() {
   equals(fooRecord.get('oneBar'), oneBarRecord, 'get value of oneBar after normalizing remains 1');
   
 });
+
+
+test("normalizing an undefined Date value", function () {
+  var Message = SC.Record.extend({
+    to: SC.Record.attr(String),
+    from: SC.Record.attr(String),
+    timestamp: SC.Record.attr(Date),
+    text: SC.Record.attr(String)
+  });
+
+  var message = MyApp.store.createRecord(Message, {
+    guid: 'chocolate-moose',
+    to: 'swedish.chef@muppets.com',
+    from: 'moose@muppets.com',
+    text: 'Bork bork bork!'
+  });
+
+  message.normalize();
+
+  equals(message.get('timestamp'), null, "normalizes to null");
+});
+
