@@ -27,7 +27,6 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
       key = this.get('contentValueKey');
       propertyKey = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
       value = content.get('value');
-      
       //do the label
       context.begin('label').addStyle({paddingLeft: 5}).text(propertyKey).end();
       if(value !== undefined){
@@ -37,6 +36,9 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
        else if(SC.typeOf(value) === SC.T_BOOL){
          this.renderCheckbox(context,content.get('value'));
          //context.begin('span').addStyle(this._valueStyle).text("bool").end();
+       }
+       else if(value.isBinding){
+         context.begin('span').addStyle(this._valueStyle).text(value.displayValue()).end();
        }
        else{
          value = value.toString();
