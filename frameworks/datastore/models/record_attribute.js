@@ -446,7 +446,10 @@ SC.RecordAttribute.registerTransform(Date, {
 
   /** @private - convert a string to a Date */
   to: function(str, attr) {
-    if (str === null) return null;
+
+    // If a null or undefined value is passed, don't
+    // do any normalization.
+    if (SC.none(str)) { return str; }
 
     var ret ;
     str = str.toString() || '';
@@ -488,6 +491,9 @@ SC.RecordAttribute.registerTransform(Date, {
   
   /** @private - convert a date to a string */
   from: function(date) { 
+
+    if (SC.none(date)) { return null; }
+
     var ret = this._dates[date.getTime()];
     if (ret) return ret ; 
     
