@@ -11,3 +11,4 @@ bin
 .bundle
 Gemfile*
 .sass-cache/
+.project
