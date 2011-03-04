@@ -199,7 +199,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable,
     return content && (content.get ? content.get('isEditable')!==NO : NO);
   }.property('content').cacheable(),
   
-  inlineEditorDelegate: SC.SingletonInlineEditorDelegate,
+  inlineEditorDelegate: SC.InlineTextFieldDelegate,
   
   /**
     Finds and retrieves the element containing the label.  This is used
@@ -533,7 +533,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable,
   *
   * Configures the editor to overlay the label properly.
   */
-  inlineEditorWillBeginEditing: function(editable, editor, value) {
+  inlineEditorWillBeginEditing: function(editor, editable, value) {
     var content   = this.get('content'),
         del       = this.get('displayDelegate'),
         labelKey  = this.getDelegateProperty('contentValueKey', del),
@@ -588,8 +588,8 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable,
   /** @private
    Hide the label view while the inline editor covers it.
   */
-  inlineEditorDidBeginEditing: function(original, inlineEditor, editable, value) {
-    original(inlineEditor, editable, value);
+  inlineEditorDidBeginEditing: function(original, inlineEditor, value, editable) {
+    original(inlineEditor, value, editable);
 
     var el = this.$label() ;
     this._oldOpacity = el.css('opacity');
@@ -603,7 +603,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable,
   /** @private
    Update the field value and make it visible again.
   */
-  inlineEditorDidCommitEditing: function(editable, editor, finalValue) {
+  inlineEditorDidCommitEditing: function(editor, finalValue, editable) {
     var content = this.get('content') ;
     var del = this.displayDelegate ;
     var labelKey = this.getDelegateProperty('contentValueKey', del) ;
@@ -616,11 +616,15 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable,
     else this.set('content', finalValue);
 
     this.displayDidChange();
+
+    this._endEditing();
   },
 
-  inlineEditorDidEndEditing: function() {
+  _endEditing: function(original) {
     this.$label().css('opacity', this._oldOpacity);
-  },
+
+    original();
+  }.enhance(),
 
   /** @private
     Fills the passed html-array with strings that can be joined to form the
