@@ -125,10 +125,12 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     if (!this._optframe || !del) {
       throw "At least frame and delegate options are required for inline editor";
     }
-    
+
     this._originalValue = options.value;
-    if (SC.none(this._originalValue))
+
+    if (SC.none(this._originalValue)){
       this._originalValue = "";
+    }
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
     if (this._multiline) {
       this.set('isTextArea', YES);
@@ -141,15 +143,25 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(
     this.set('validator', options.validator) ;
     this.set('value', this._originalValue) ;
     //this.set('selectedRange', options.selectedRange || { start: this._originalValue.length, length: 0 }) ;
-    
+
     // add to window.
-    
+
+
+    // First try to find the pane in the options hash.
+    // If it's not available, ask the delegate for it.
     pane = options.pane;
+    if (!pane) {
+      pane = del.get('pane');
+    }
+    paneElem = pane.$()[0];
 
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
+
     tarLayout = options.layout;
-    paneElem = pane.$()[0];
+    if (!tarLayout) {
+      tarLayout = del.get('layout');
+    }
     if (this._optIsCollection && tarLayout.left) {
       layout.left=this._optframe.x-tarLayout.left-paneElem.offsetLeft-1;
       if(SC.browser.msie==7) layout.left--;
