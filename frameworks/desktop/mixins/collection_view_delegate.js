@@ -8,7 +8,7 @@
 /**
   @namespace
 
-  A Collection View Delegate is consulted by a SC.CollectionView's to make
+  A Collection View Delegate is consulted by a SC.CollectionView to make
   policy decisions about certain behaviors such as selection control and
   drag and drop.  If you need to control other aspects of your data, you may
   also want to add the SC.CollectionContent mixin.

@@ -7,7 +7,7 @@
 /**
   @class
 
-  A ChildArray is used to map an array of ChildRecord
+  A ChildArray is used to map an array of ChildRecord objects.
   
   @extends SC.Enumerable
   @extends SC.Array
