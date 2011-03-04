@@ -63,7 +63,7 @@ SC.InnerFrame = {
     <tr><td>SC.FILL</td><td>{x: 0, y: 0, width: 20, height: 20}</td></tr>
     <tr><td>SC.FILL_PROPORTIONALLY</td><td>{x: 0, y: -5, width: 20, height: 30}</td></tr>
     <tr><td>SC.BEST_FIT</td><td>{x: 3, y: 0, width: 13, height: 20}</td></tr>
-    <tr><td>SC.BEST_FIT_DOWN_ONLY</td><td>{x: 5, y: 5, width: 10, height: 10}</td></tr>
+    <tr><td>SC.BEST_FIT_DOWN_ONLY</td><td>{x: 5, y: 3, width: 10, height: 15}</td></tr>
     </table>
 
     @returns {Object} the inner frame with properties: {x: value, y: value, width: value, height: value }
