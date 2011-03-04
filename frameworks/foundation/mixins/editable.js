@@ -83,6 +83,7 @@ SC.Editable = {
     // begin editing
     this.beginPropertyChanges();
     this.set('isEditing', YES) ;
+    this.becomeFirstResponder();
     this.endPropertyChanges();
     
     return YES ;
@@ -145,6 +146,7 @@ SC.Editable = {
   commitEditing: function() {
     if (!this.get('isEditing')) return YES;
     this.set('isEditing', NO) ;
+    this.resignFirstResponder();
     
     return YES ;
   }
