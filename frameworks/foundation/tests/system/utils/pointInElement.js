@@ -3,6 +3,7 @@
 // ========================================================================
 
 /*global module test htmlbody ok equals same */
+module("SC.pointInElement()");
 
 var view;
 
