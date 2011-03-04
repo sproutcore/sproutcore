@@ -394,31 +394,36 @@ case 9: yy_.yytext = yy_.yytext.substr(3,yy_.yyleng-5); this.begin("INITIAL"); r
 break;
 case 10: return 22; 
 break;
-case 11: return 29; 
+case 11: return 30; 
 break;
-case 12: /*ignore whitespace*/ 
+case 12: return 30; 
 break;
-case 13: this.begin("INITIAL"); return 18; 
+case 13: return 29; 
 break;
-case 14: this.begin("INITIAL"); return 18; 
+case 14: /*ignore whitespace*/ 
 break;
-case 15: yy_.yytext = yy_.yytext.substr(1,yy_.yyleng-2).replace(/\\"/g,'"'); return 27; 
+case 15: this.begin("INITIAL"); return 18; 
 break;
-case 16: return 30; 
+case 16: this.begin("INITIAL"); return 18; 
 break;
-case 17: return 'INVALID'; 
+case 17: yy_.yytext = yy_.yytext.substr(1,yy_.yyleng-2).replace(/\\"/g,'"'); return 27; 
 break;
-case 18: return 5; 
+case 18: return 30; 
+break;
+case 19: return 'INVALID'; 
+break;
+case 20: return 5; 
 break;
 }
 };
-lexer.rules = [/^[^\x00]*?(?=(\{\{))/,/^[^\x00]+/,/^\{\{>/,/^\{\{#/,/^\{\{\//,/^\{\{\^/,/^\{\{\s*else\b/,/^\{\{\{/,/^\{\{&/,/^\{\{!.*?\}\}/,/^\{\{/,/^\//,/^\s+/,/^\}\}\}/,/^\}\}/,/^"(\\["]|[^"])*"/,/^[a-zA-Z0-9_.]+(?=[} /])/,/^./,/^$/];
-lexer.conditions = {"mu":{"rules":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],"inclusive":false},"INITIAL":{"rules":[0,1,18],"inclusive":true}};return lexer;})()
+lexer.rules = [/^[^\x00]*?(?=(\{\{))/,/^[^\x00]+/,/^\{\{>/,/^\{\{#/,/^\{\{\//,/^\{\{\^/,/^\{\{\s*else\b/,/^\{\{\{/,/^\{\{&/,/^\{\{!.*?\}\}/,/^\{\{/,/^\.(?=[} ])/,/^\.\./,/^[/.]/,/^\s+/,/^\}\}\}/,/^\}\}/,/^"(\\["]|[^"])*"/,/^[a-zA-Z0-9_]+(?=[} /.])/,/^./,/^$/];
+lexer.conditions = {"mu":{"rules":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"inclusive":false},"INITIAL":{"rules":[0,1,20],"inclusive":true}};return lexer;})()
 parser.lexer = lexer;
 return parser;
 })();
+
 // lib/handlebars/base.js
-window.Handlebars = {};
+var Handlebars = {};
 
 Handlebars.Parser = handlebars;
 
