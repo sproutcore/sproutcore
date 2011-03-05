@@ -21,38 +21,36 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   name: 'slider',
   
   render: function(dataSource, context) {
-    var blankImage  = SC.BLANK_IMAGE_URL,
-        valueMax    = dataSource.get('maximum'),
-        valueMin    = dataSource.get('minimum'),
-        valueNow    = dataSource.get('value');
-
-    context.push('<span class="sc-inner">',
-                  '<span class="sc-leftcap"></span>',
-                  '<span class="sc-rightcap"></span>',
-                  '<img src="', blankImage, 
-                  '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
-                  '</span>');
-
-    //addressing accessibility
-    context.attr('aria-valuemax', valueMax);
-    context.attr('aria-valuemin', valueMin);
-    context.attr('aria-valuenow', valueNow);
-    context.attr('aria-valuetext', valueNow);
-    context.attr('aria-orientation', 'horizontal');
-
+    var blankImage = SC.BLANK_IMAGE_URL;
+    
+    context = context.begin('span').addClass('track');
+    this.includeSlices(dataSource, context, SC.THREE_SLICE);
+    context = context.end();
+    
+    context.push(
+      '<img src="', blankImage, 
+      '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
+      '</span>'
+    );
+    
+    dataSource.get('renderState')._cachedHandle = null;
   },
   
   update: function(dataSource, jquery) {
-
-    var valueNow    = dataSource.get('value');
-
     if (dataSource.didChangeFor('sliderRenderDelegate', 'value')) {
-      jquery.find(".sc-handle").css('left', dataSource.get('value') + "%");
-    }
+      var handle = dataSource.get('renderState')._cachedHandle;
+      if (!handle) {
+        handle = dataSource.get('renderState')._cachedHandle = jquery.find('.sc-handle');
+      }
 
-    //addressing accessibility
-    jquery.attr('aria-valuenow', valueNow);
-    jquery.attr('aria-valuetext', valueNow);
+      var frame = dataSource.get('frame'), value = dataSource.get('value');
+      if (frame && SC.platform.supportsCSS3DTransforms) {
+        value = (value / 100) * frame.width;
+        handle[0].style.cssText = "-webkit-transform: translate3d(" + value + "px,0,0);";
+      } else {
+        handle.css('left', value + "%");
+      }
+    }
   }
   
 });
