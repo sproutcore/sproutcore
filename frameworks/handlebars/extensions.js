@@ -20,8 +20,10 @@ SC.Handlebars.compile = function(string) {
   return new SC.Handlebars.JavaScriptCompiler().compile(environment, true);
 };
 
-Handlebars.registerHelper('view', function(path, fn, inverse, data) {
-  if (fn.isRenderData) { data = fn; fn = null; }
+Handlebars.registerHelper('view', function(path, options) {
+  var inverse = options.inverse;
+  var data = options.data;
+  var fn = options.fn;
 
   var newView;
   if (path.isClass || path.isObject) {
@@ -52,46 +54,72 @@ Handlebars.registerHelper('view', function(path, fn, inverse, data) {
   return new Handlebars.SafeString(context.join());
 });
 
-Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
-  if(fn.isRenderData) { data = fn; fn = null; }
-  var view = data.view;
 
-  var spanId = "handlebars-bound-" + jQuery.uuid++;
-  var result = this.getPath(property);
+(function() {
+  var bind = function(property, options, preserveContext, shouldDisplay) {
+    var data = options.data;
+    var view = data.view;
+    var fn = options.fn;
 
-  var self = this, renderContext = SC.RenderContext('span').id(spanId);
+    var spanId = "handlebars-bound-" + jQuery.uuid++;
+    var result = this.getPath(property);
 
-  this.addObserver(property, function() {
-    var result = self.getPath(property);
+    var self = this, renderContext = SC.RenderContext('span').id(spanId);
 
-    if (fn && (result !== null && result !== undefined)) {
-      var renderContext = SC.RenderContext('span').id(spanId);
-      renderContext.push(fn(self.get(property)));
-      var element = renderContext.element();
-      view.$("#" + spanId).replaceWith(element);
-    } else if (result !== null && result !== undefined) {
-      view.$("#" + spanId).html(Handlebars.Utils.escapeExpression(result));
-    } else {
-      view.$("#" + spanId).html("");
+    this.addObserver(property, function observer() {
+      var result = self.getPath(property);
+      var span = view.$("#" + spanId);
+
+      if(span.length === 0) {
+        self.removeObserver(property, observer);
+      }
+
+      if (fn && shouldDisplay(result)) {
+        var renderContext = SC.RenderContext('span').id(spanId);
+        renderContext.push(fn(self.get(property)));
+        var element = renderContext.element();
+        span.replaceWith(element);
+      } else if (shouldDisplay(result)) {
+        span.html(Handlebars.Utils.escapeExpression(result));
+      } else {
+        span.html("");
+      }
+    });
+
+    if (shouldDisplay(result)) {
+      if (preserveContext) {
+        renderContext.push(fn(this));
+      } else {
+        if (fn) {
+          renderContext.push(fn(result));
+        } else {
+          renderContext.push(Handlebars.Utils.escapeExpression(result));
+        }
+      }
     }
+
+    return new Handlebars.SafeString(renderContext.join());
+  };
+
+  Handlebars.registerHelper('bind', function(property, fn) {
+    return bind.call(this, property, fn, false, function(result) { return !SC.none(result); } );
   });
 
-  if (result !== null && result !== undefined) {
-    if (fn) {
-      renderContext.push(fn(result));
+  Handlebars.registerHelper('boundIf', function(property, fn) {
+    if(fn) {
+      return bind.call(this, property, fn, true, function(result) { return !!result; } );
     } else {
-      renderContext.push(Handlebars.Utils.escapeExpression(result));
+      throw "Cannot use boundIf helper without a block.";
     }
-  }
-
-  return new Handlebars.SafeString(renderContext.join());
-});
+  });
+})();
 
 Handlebars.registerHelper('loc', function(property) {
   return property.loc();
 });
 
-Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
+Handlebars.registerHelper('collection', function(path, fn, inverse) {
+  var data = fn.data;
   var collectionClass;
 
   if(!data) {
@@ -115,10 +143,15 @@ Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
     }
   }
 
-  return Handlebars.helpers.view.call(this, collectionClass, Handlebars.VM.noop, inverse, data);
+  var noop = function() { return ""; };
+  noop.data = fn.data;
+  noop.fn = noop;
+  return Handlebars.helpers.view.call(this, collectionClass, noop);
 });
 
-Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, inverse, data) {
+Handlebars.registerHelper('bindCollection', function(path, bindingString, fn) {
+  var data = fn.data;
+  var inverse = fn.data;
   var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
   var binding = SC.Binding.from(bindingString, this);
 
@@ -138,5 +171,5 @@ Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, in
     collectionClass.bindings.push( binding.to('content', collectionClass) );
   }
 
-  return Handlebars.helpers.collection.call(this, collectionClass, fn, inverse, data);
+  return Handlebars.helpers.collection.call(this, collectionClass, fn);
 });

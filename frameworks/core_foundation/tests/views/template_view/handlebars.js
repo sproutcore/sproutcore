@@ -131,6 +131,56 @@ test("SC.TemplateView updates when a property changes", function() {
   equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
 });
 
+test("should not update when a property is removed from the view", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('<h1 id="first">{{#bind "content"}}{{#bind "foo"}}{{bind "baz"}}{{/bind}}{{/bind}}</h1>')
+  });
+  var removeCalled = 0;
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      foo: SC.Object.create({
+        baz: "unicorns",
+
+        removeObserver: function(property, func) {
+          sc_super();
+          removeCalled++;
+        }
+      })
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "unicorns", "precond - renders the bound value");
+
+  var oldContent = view.get('content');
+
+  SC.run(function() {
+    view.set('content', SC.Object.create({
+      foo: SC.Object.create({
+        baz: "ninjas"
+      })
+    }));
+  });
+
+  equals(view.$('#first').text(), 'ninjas', "updates to new content value");
+
+  SC.run(function() {
+    oldContent.setPath('foo.baz', 'rockstars');
+  });
+
+  SC.run(function() {
+    oldContent.setPath('foo.baz', 'ewoks');
+  });
+
+  equals(removeCalled, 1, "does not try to remove observer more than once");
+  equals(view.$('#first').text(), "ninjas", "does not update removed object");
+});
+
 
 test("Handlebars templates update properties if a content object changes", function() {
   var templates;
@@ -376,4 +426,31 @@ test("Collection views that specify an example view class have their children be
   parentView.createLayer();
 
   ok(parentView.childViews[0].childViews[0].isCustom, "uses the example view class");
+});
+
+test("should update boundIf blocks if the conditional changes", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#boundIf "content.myApp.isEnabled"}}{{content.wham}}{{/boundIf}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am",
+      myApp: SC.Object.create({
+        isEnabled: YES
+      })
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "renders block when condition is true");
+
+  SC.run(function() { view.get('content').setPath('myApp.isEnabled', NO); });
+
+  equals(view.$('#first').text(), "", "re-renders without block when condition is false");
 });

@@ -36,26 +36,24 @@ test("a block passed to a collection helper defaults to the content property of 
   });
 
   var view = SC.TemplateView.create({
-    template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{this}}</aside> {{/collection}}')
+    template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{content}}</aside> {{/collection}}')
   });
 
   view.createLayer();
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'one aside element is created for each content item');
 });
 
-test("a block passed to a collection helper defaults to the content property of the context", function() {
+test("a block passed to a collection helper defaults to the view", function() {
   TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
     content: ['foo', 'bar', 'baz']
   });
 
   var view = SC.TemplateView.create({
-    template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{this}}</aside> {{/collection}}')
+    template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{content}}</aside> {{/collection}}')
   });
 
   view.createLayer();
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'precond - one aside element is created for each content item');
-
-  window.billy = true;
 
   SC.run(function() {
     TemplateTests.CollectionTestView.set('content', []);
