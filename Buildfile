@@ -87,7 +87,10 @@ config :ace,
   :css_theme => 'ace'
 
 # CONFIGURE APPS
-config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
+config :core_tools, :required => [
+  :desktop, :datastore, :animation, :forms,
+  "sproutcore/ace" #, "sproutcore/experimental/split_view"
+]
 
 # mode :debug do
 #   config :core_tools, :combine_javascript => false
@@ -104,8 +107,6 @@ config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
   # end
 
 end
-
-config :test_controls, :css_theme => 'ace.test-controls'
 
 config :greenhouse, 
   :required => [:sproutcore, :'sproutcore/designer', :statechart],
