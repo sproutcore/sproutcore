@@ -3,7 +3,6 @@ SC.ContentValueSupport = {
   /** @private */
   initMixin: function() {
     this._control_contentDidChange() ; // setup content observing if needed.
-    this.contentIsComplexDidChange();
   },
   
   /**
@@ -206,6 +205,6 @@ SC.ContentValueSupport = {
     attr = content[key];
 
     return attr && attr.isRecordAttribute && attr.get('typeClass').isComplex;
-  }.property('content')
+  }.property('content').cacheable()
 };
 
