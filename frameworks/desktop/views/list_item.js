@@ -546,9 +546,6 @@ SC.ListItemView = SC.View.extend(
 
     v = (labelKey && content) ? (content.get ? content.get(labelKey) : content[labelKey]) : content;
 
-    f = this.computeFrameWithParentFrame(null);
-    offset = SC.viewportOffset(el[0]);
-
     // if the label has a large line height, try to adjust it to something
     // more reasonable so that it looks right when we show the popup editor.
     lineHeight = this._oldLineHeight = el.css('lineHeight');
@@ -568,17 +565,21 @@ SC.ListItemView = SC.View.extend(
       } else oldLineHeight = null ;
     }
 
+    el = el[0];
+
+    offset = SC.viewportOffset(el);
+
     f.x = offset.x;
     f.y = offset.y+top + lineHeightShift ;
-    f.height = el[0].offsetHeight ;
-    f.width = el[0].offsetWidth ;
+    f.height = el.offsetHeight ;
+    f.width = el.offsetWidth ;
 
     escapeHTML = this.get('escapeHTML');
 
     editor.set({
       value: v,
       exampleFrame: f,
-      exampleElement: el[0],
+      exampleElement: el,
       multiline: NO,
       isCollection: YES,
       validator: validator,
