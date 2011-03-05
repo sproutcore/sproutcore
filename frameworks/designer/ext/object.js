@@ -11,7 +11,7 @@
 SC.Object.prototype.emitDesign = function() {
   
   // get design...
-  var ret = SC.DesignCoder.encode(this);
+  var ret = SC.ObjectCoder.encode(this);
   
   return ret ;
 };

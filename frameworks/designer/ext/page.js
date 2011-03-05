@@ -43,8 +43,12 @@ SC.Page.prototype.designController = function() {
 SC.Page.prototype.encodeDesign = function(c) {
   // step through and find all views.  encode them.
   for(var key in this) {
+    if(!this.hasOwnProperty(key)) continue;
     var view = this[key];
-    if (key !== '__sc_super__' && (view instanceof SC.View || view instanceof SC.Controller || view instanceof SC.Object)) c.js(key, view.emitDesign());
+    if (key !== '__sc_super__' && key !== '_designController' &&
+        (view instanceof SC.View || view instanceof SC.Controller || view instanceof SC.Object)){
+     c.js(key, view.emitDesign());      
+    }
   }
   
   // save page name;

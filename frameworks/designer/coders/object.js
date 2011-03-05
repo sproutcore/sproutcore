@@ -135,7 +135,7 @@ SC.ObjectCoder = SC.Object.extend({
     @returns {SC.ObjectCoder} receiver
   */
   bool: function(key, val) {
-    return this.js(key, val, function(x) { return x ? "YES" : "NO"; });
+    return this.js(key, val, function(x) { return x ? "true" : "false"; });
   },
 
   /**
