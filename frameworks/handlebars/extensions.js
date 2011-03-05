@@ -20,8 +20,10 @@ SC.Handlebars.compile = function(string) {
   return new SC.Handlebars.JavaScriptCompiler().compile(environment, true);
 };
 
-Handlebars.registerHelper('view', function(path, fn, inverse, data) {
-  if (fn.isRenderData) { data = fn; fn = null; }
+Handlebars.registerHelper('view', function(path, options) {
+  var inverse = options.inverse;
+  var data = options.data;
+  var fn = options.fn;
 
   var newView;
   if (path.isClass || path.isObject) {
@@ -52,9 +54,6 @@ Handlebars.registerHelper('view', function(path, fn, inverse, data) {
   return new Handlebars.SafeString(context.join());
 });
 
-Handlebars.registerHelper('bind', function(property, fn, inverse, data) {
-  if(fn.isRenderData) { data = fn; fn = null; }
-  var view = data.view;
 
 (function() {
   var bind = function(property, options, preserveContext, shouldDisplay) {
@@ -119,7 +118,8 @@ Handlebars.registerHelper('loc', function(property) {
   return property.loc();
 });
 
-Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
+Handlebars.registerHelper('collection', function(path, fn, inverse) {
+  var data = fn.data;
   var collectionClass;
 
   if(!data) {
@@ -143,10 +143,15 @@ Handlebars.registerHelper('collection', function(path, fn, inverse, data) {
     }
   }
 
-  return Handlebars.helpers.view.call(this, collectionClass, Handlebars.VM.noop, inverse, data);
+  var noop = function() { return ""; };
+  noop.data = fn.data;
+  noop.fn = noop;
+  return Handlebars.helpers.view.call(this, collectionClass, noop);
 });
 
-Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, inverse, data) {
+Handlebars.registerHelper('bindCollection', function(path, bindingString, fn) {
+  var data = fn.data;
+  var inverse = fn.data;
   var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
   var binding = SC.Binding.from(bindingString, this);
 
@@ -166,5 +171,5 @@ Handlebars.registerHelper('bindCollection', function(path, bindingString, fn, in
     collectionClass.bindings.push( binding.to('content', collectionClass) );
   }
 
-  return Handlebars.helpers.collection.call(this, collectionClass, fn, inverse, data);
+  return Handlebars.helpers.collection.call(this, collectionClass, fn);
 });
