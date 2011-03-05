@@ -377,3 +377,30 @@ test("Collection views that specify an example view class have their children be
 
   ok(parentView.childViews[0].childViews[0].isCustom, "uses the example view class");
 });
+
+test("should update boundIf blocks if the conditional changes", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#boundIf "content.myApp.isEnabled"}}{{content.wham}}{{/boundIf}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am",
+      myApp: SC.Object.create({
+        isEnabled: YES
+      })
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "renders block when condition is true");
+
+  SC.run(function() { view.get('content').setPath('myApp.isEnabled', NO); });
+
+  equals(view.$('#first').text(), "", "re-renders without block when condition is false");
+});
