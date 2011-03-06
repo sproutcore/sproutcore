@@ -19,3 +19,15 @@ SC.Binding.displayValue = function(){
 
 };
 
+
+SC.Binding.encodeDesign = function(coder){
+  var ret = "SC.Binding";
+  
+  if(this._fromPropertyPath){
+    ret= ret+".from('"+this._fromPropertyPath+"')";
+  }
+  if(this._oneWay){
+    ret = ret+".oneWay()";
+  }
+  return ret;//coder.js(key,ret);
+};
