@@ -22,14 +22,6 @@ SC.DisclosureView = SC.ButtonView.extend(
   
   classNames: ['sc-disclosure-view'],
 
-  /**
-    The WAI-ARIA attribute for the disclosure button. This property is assigned
-    to 'aria-label' attribute, which defines a string value that labels the
-    the element. Used to support voiceover. It is used when it is not
-    possible to have a visible label on the screen.
-  */
-  ariaLabel: null,
-
   renderDelegateName: 'disclosureRenderDelegate',
 
   buttonBehavior: SC.TOGGLE_BEHAVIOR,
