@@ -42,7 +42,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
 
     // accessibility
-    context.attr('aria-pressed', isActive);
+    context.attr('aria-pressed', isActive.toString());
     context.attr('aria-labelledby', labelId);
 
     // Create the inner label element that contains the text and, optionally,
@@ -69,7 +69,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     if (dataSource.get('isActive')) {
       jquery.addClass('active');
     }
-    
+
+    jquery.attr('aria-pressed', dataSource.get('isActive').toString());
+
     jquery.setClass('icon', !!dataSource.get('icon') || NO);
     jquery.setClass('def', dataSource.get('isDefault') || NO);
     jquery.setClass('cancel', dataSource.get('isCancel') || NO);
