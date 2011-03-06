@@ -20,38 +20,55 @@ SC.Handlebars.compile = function(string) {
   return new SC.Handlebars.JavaScriptCompiler().compile(environment, true);
 };
 
-Handlebars.registerHelper('view', function(path, options) {
-  var inverse = options.inverse;
-  var data = options.data;
-  var fn = options.fn;
+SC.Handlebars.ViewHelper = SC.Object.create({
+  helper: function(thisContext, path, options) {
+    var inverse = options.inverse;
+    var data = options.data;
+    var fn = options.fn;
 
-  var newView;
-  if (path.isClass || path.isObject) {
-   newView = path;
-   if (!newView) {
-    throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
-   }
-  } else {
-    newView = SC.objectForPropertyPath(path);
-    if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+    var newView;
+    if (path.isClass || path.isObject) {
+     newView = path;
+     if (!newView) {
+      throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
+     }
+    } else {
+      newView = SC.objectForPropertyPath(path);
+      if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+    }
+
+    var currentView = data.view;
+
+    var childViews = currentView.get('childViews');
+    var childView = currentView.createChildView(newView);
+
+    // Set the template of the view to the passed block if we got one
+    if (fn) { childView.template = fn; }
+
+    this.applyAttributes(options, childView);
+
+    childViews.pushObject(childView);
+
+    var context = SC.RenderContext(childView.get('tagName'));
+    childView.applyAttributesToContext(context);
+    // tomdale wants to make SproutCore slow
+    childView.render(context, YES);
+
+    return new Handlebars.SafeString(context.join());
+  },
+
+  applyAttributes: function(options, childView) {
+    var id = options.hash.id;
+    var classNames = options.hash['class'];
+
+    if (classNames) { childView.set('classNames', classNames); }
+    if (id) { childView.set('layerId', id); }
+
   }
+});
 
-  var currentView = data.view;
-
-  var childViews = currentView.get('childViews');
-  var childView = currentView.createChildView(newView);
-
-  // Set the template of the view to the passed block if we got one
-  if (fn) { childView.template = fn; }
-
-  childViews.pushObject(childView);
-
-  var context = SC.RenderContext(childView.get('tagName'));
-  childView.applyAttributesToContext(context);
-  // tomdale wants to make SproutCore slow
-  childView.render(context, YES);
-
-  return new Handlebars.SafeString(context.join());
+Handlebars.registerHelper('view', function(path, options) {
+  return SC.Handlebars.ViewHelper.helper(this, path, options);
 });
 
 
@@ -144,8 +161,11 @@ Handlebars.registerHelper('collection', function(path, fn, inverse) {
   }
 
   var noop = function() { return ""; };
+
   noop.data = fn.data;
+  noop.hash = fn.hash;
   noop.fn = noop;
+
   return Handlebars.helpers.view.call(this, collectionClass, noop);
 });
 

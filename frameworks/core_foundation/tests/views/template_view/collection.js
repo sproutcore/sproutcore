@@ -40,6 +40,7 @@ test("a block passed to a collection helper defaults to the content property of 
   });
 
   view.createLayer();
+
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'one aside element is created for each content item');
 });
 
@@ -59,5 +60,14 @@ test("a block passed to a collection helper defaults to the view", function() {
     TemplateTests.CollectionTestView.set('content', []);
   });
   equals(view.$('aside').length, 0, "all list item views should be removed from DOM");
+});
+
+test("should include an id attribute if id is set in the options hash", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView" id="baz"}}foo{{/collection}}')
+  });
+
+  view.createLayer();
+  equals(view.$('ul#baz').length, 1, "adds an id attribute");
 });
 

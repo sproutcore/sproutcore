@@ -454,3 +454,39 @@ test("should update boundIf blocks if the conditional changes", function() {
 
   equals(view.$('#first').text(), "", "re-renders without block when condition is false");
 });
+
+test("{{view}} id attribute should set id on layer", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('{{#view "TemplateTests.IdView" id="bar"}}baz{{/view}}')
+  });
+
+  TemplateTests.IdView = SC.TemplateView.create();
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('#bar').length, 1, "adds id attribute to layer");
+  equals(view.$('#bar').text(), 'baz', "emits content");
+});
+
+test("{{view}} class attribute should set class on layer", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('{{#view "TemplateTests.IdView" class="bar"}}baz{{/view}}')
+  });
+
+  TemplateTests.IdView = SC.TemplateView.create();
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('.bar').length, 1, "adds class attribute to layer");
+  equals(view.$('.bar').text(), 'baz', "emits content");
+});
