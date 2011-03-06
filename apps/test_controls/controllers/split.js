@@ -36,6 +36,39 @@ TestControls.splitController = SC.Controller.create({
     if (c.length > 0) {
       split.removeChild(c[c.length - 1]);
     }
-  }
+  },
+
+  children: [],
+
+  allAllowIndirect: function(key, value) {
+    if (value !== undefined) {
+      this.get('children').setEach('allowsIndirectAdjustments', value);
+      return value;
+    } else {
+      if (!this.get('children')) return NO;
+      var isYES = this.get('children').everyProperty('allowsIndirectAdjustments', YES),
+          isNO = this.get('children').everyProperty('allowsIndirectAdjustments', NO);
+
+      if (isYES) return YES;
+      if (isNO) return NO;
+      return SC.MIXED_STATE;
+    }
+  }.property('children', 'children.@each.allowsIndirectAdjustments').cacheable(),
+
+  allCompensateForMovement: function(key, value) {
+    if (value !== undefined) {
+      this.get('children').setEach('compensatesForMovement', value);
+      return value;
+    } else {
+      if (!this.get('children')) return NO;
+      var isYES = this.get('children').everyProperty('compensatesForMovement', YES),
+          isNO = this.get('children').everyProperty('compensatesForMovement', NO);
+
+      if (isYES) return YES;
+      if (isNO) return NO;
+      return SC.MIXED_STATE;
+    }
+  }.property('children', 'children.@each.compensatesForMovement').cacheable()
+
   
 });

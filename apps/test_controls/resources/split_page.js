@@ -55,7 +55,7 @@ TestControls.splitPage = SC.View.design({
     flowPadding: { top: 7 },
     defaultFlowSpacing: { right: 5, left: 5 },
     
-    childViews: 'direction resize spacer add remove'.w(),
+    childViews: 'direction resize allAllowIndirect allCompensateForMovement spacer add remove'.w(),
     
     direction: SC.SelectView.design({
       flowSpacing: { left: 5, top: 3, right: 5 },
@@ -74,10 +74,25 @@ TestControls.splitPage = SC.View.design({
     
     resize: SC.CheckboxView.design({
       flowSpacing: { top: 6, left: 5, right: 5 },
-      layout: { width: 200 },
+      layout: { width: 170 },
       title: "Resize Children to Fit",
       valueBinding: 'TestControls.splitController.shouldResizeChildrenToFit'
     }),
+
+    allAllowIndirect: SC.CheckboxView.design({
+      flowSpacing: { top: 6, left: 5, right: 5 },
+      layout: {width:150},
+      title: "Allow Indirect",
+      valueBinding: 'TestControls.splitController.allAllowIndirect'
+    }),
+
+    allCompensateForMovement: SC.CheckboxView.design({
+      flowSpacing: { top: 6, left: 5, right: 5 },
+      layout: { width:200 },
+      title: "Compensate for Movement",
+      valueBinding: 'TestControls.splitController.allCompensateForMovement'
+    }),
+
     
     spacer: SC.View.design({ isSpacer: YES }),
     
@@ -108,6 +123,11 @@ TestControls.splitPage = SC.View.design({
     layout: { bottom: 44 },
     
     contentView: SC.SplitView.design({
+      init: function() {
+        sc_super();
+        TestControls.splitController.bind('children', this, 'childViews');
+      },
+
       layoutDirectionBinding: 'TestControls.splitController.layoutDirection',
       
       shouldResizeChildrenToFitBinding: 'TestControls.splitController.shouldResizeChildrenToFit',
