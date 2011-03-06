@@ -27,7 +27,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     
     context.push('<img src = "' + SC.BLANK_IMAGE_URL + '" class = "disclosure button ' + state + '" />');
     
-    context = context.begin('span').addClass('sc-button-label');
+    context = context.begin('span').addClass('sc-button-label').id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
   },
