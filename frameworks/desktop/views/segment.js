@@ -15,6 +15,8 @@
 */
 SC.SegmentView = SC.View.extend(SC.Control, {
 
+  ariaRole: 'tab',
+
   classNames: ['sc-segment-view'],
 
   /* SC.View */
