@@ -21,22 +21,43 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   name: 'slider',
   
   render: function(dataSource, context) {
-    var blankImage = SC.BLANK_IMAGE_URL;
-    
+    var blankImage = SC.BLANK_IMAGE_URL,
+        valueMax    = dataSource.get('maximum'),
+        valueMin    = dataSource.get('minimum'),
+        valueNow    = dataSource.get('ariaValue');
+
+    //addressing accessibility
+    context.attr('aria-valuemax', valueMax);
+    context.attr('aria-valuemin', valueMin);
+    context.attr('aria-valuenow', valueNow);
+    context.attr('aria-valuetext', valueNow);
+    context.attr('aria-orientation', 'horizontal');
+
     context = context.begin('span').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
-    
+
     context.push(
       '<img src="', blankImage, 
       '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
       '</span>'
     );
-    
+
     dataSource.get('renderState')._cachedHandle = null;
   },
   
   update: function(dataSource, jquery) {
+    var valueMax    = dataSource.get('maximum'),
+        valueMin    = dataSource.get('minimum'),
+        valueNow    = dataSource.get('ariaValue');
+
+    //addressing accessibility
+    jquery.attr('aria-valuemax', valueMax);
+    jquery.attr('aria-valuemin', valueMin);
+    jquery.attr('aria-valuenow', valueNow);
+    jquery.attr('aria-valuetext', valueNow);
+    jquery.attr('aria-orientation', 'horizontal');
+
     if (dataSource.didChangeFor('sliderRenderDelegate', 'value')) {
       var handle = dataSource.get('renderState')._cachedHandle;
       if (!handle) {

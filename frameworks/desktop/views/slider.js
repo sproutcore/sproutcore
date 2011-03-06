@@ -82,7 +82,15 @@ SC.SliderView = SC.View.extend(SC.Control,
   // INTERNAL PROPERTIES
   // 
   
-  displayProperties: 'displayValue minimum maximum step frame'.w(),
+  displayProperties: 'displayValue ariaValue minimum maximum step frame'.w(),
+
+  /**
+   @property
+   The raw, unchanged value to be provided to screen readers and the like.
+  */
+  ariaValue: function() {
+    return this.get('value');
+  }.property('value').cacheable(),
 
   // The name of the render delegate which is creating and maintaining
   // the DOM associated with instances of this view

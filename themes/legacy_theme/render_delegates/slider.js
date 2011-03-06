@@ -24,14 +24,7 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     var blankImage  = SC.BLANK_IMAGE_URL,
         valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
-        valueNow    = dataSource.get('value');
-
-    context.push('<span class="sc-inner">',
-                  '<span class="sc-leftcap"></span>',
-                  '<span class="sc-rightcap"></span>',
-                  '<img src="', blankImage, 
-                  '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
-                  '</span>');
+        valueNow    = dataSource.get('ariaValue');
 
     //addressing accessibility
     context.attr('aria-valuemax', valueMax);
@@ -40,19 +33,31 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuetext', valueNow);
     context.attr('aria-orientation', 'horizontal');
 
+    context.push('<span class="sc-inner">',
+                  '<span class="sc-leftcap"></span>',
+                  '<span class="sc-rightcap"></span>',
+                  '<img src="', blankImage, 
+                  '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
+                  '</span>');
   },
   
   update: function(dataSource, jquery) {
+    var blankImage  = SC.BLANK_IMAGE_URL,
+        valueMax    = dataSource.get('maximum'),
+        valueMin    = dataSource.get('minimum'),
+        valueNow    = dataSource.get('ariaValue');
 
-    var valueNow    = dataSource.get('value');
+    //addressing accessibility
+    jquery.attr('aria-valuemax', valueMax);
+    jquery.attr('aria-valuemin', valueMin);
+    jquery.attr('aria-valuenow', valueNow);
+    jquery.attr('aria-valuetext', valueNow);
+    jquery.attr('aria-orientation', 'horizontal');
 
     if (dataSource.didChangeFor('sliderRenderDelegate', 'value')) {
       jquery.find(".sc-handle").css('left', dataSource.get('value') + "%");
     }
 
-    //addressing accessibility
-    jquery.attr('aria-valuenow', valueNow);
-    jquery.attr('aria-valuetext', valueNow);
   }
   
 });
