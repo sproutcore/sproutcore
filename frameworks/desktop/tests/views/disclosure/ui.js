@@ -23,21 +23,17 @@
 		})
 
     .add("aria-role", SC.DisclosureView, {
-        value: NO, isEnabled: YES,
-        ariaLabel:'Disclosure'
+        value: NO, isEnabled: YES
     })
 
     .add("aria-label", SC.DisclosureView, {
-        value: YES, isEnabled: YES,
-        ariaLabel:'Disclosure'
+        value: YES, isEnabled: YES
     })
     .add("aria-expanded", SC.DisclosureView, {
-        value: YES, isEnabled: YES,
-        ariaLabel:'Disclosure'
+        value: YES, isEnabled: YES
     })
     .add("aria-expanded-disabled", SC.DisclosureView, {
-        value: NO, isEnabled: NO,
-        ariaLabel:'Disclosure'
+        value: NO, isEnabled: NO
     });
 
 	pane.show();
@@ -87,7 +83,8 @@
 
     test("aria label should be present", function() {
       var view = pane.view('aria-label');
-      equals(view.$().attr('aria-label'), 'Disclosure', 'aria-label should be Disclosure');
+      var labelled_by = document.getElementById(view.$().attr('aria-labelledby'));
+      equals(view.$('span.sc-button-label')[0], labelled_by, 'aria-labelledby should be the label element');
     });
 
     test("aria pressed should be true if value is yes", function() {
@@ -97,7 +94,8 @@
 
     test("aria pressed should be false if value is no while the disclosure is disabled", function() {
       var view = pane.view('aria-expanded-disabled');
-      equals(view.get('ariaLabel'), 'Disclosure', 'aria-label should be Disclosure even if it is disabled');
+      var labelled_by = document.getElementById(view.$().attr('aria-labelledby'));
+      equals(view.$('span.sc-button-label')[0], labelled_by, 'aria-labelledby should be the label element even if disabled');
       equals(view.$().attr('aria-expanded'), 'false', 'aria-expanded should be false');
     });
 

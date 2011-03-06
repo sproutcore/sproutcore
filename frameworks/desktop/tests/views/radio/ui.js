@@ -230,7 +230,9 @@ test("disabled", function() {
     
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
     equals(theInput.attr('aria-checked'), 'false', 'radio button #%@ should not be checked'.fmt(idx));
-    ok(!theInput.hasClass('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
+    
+    // NOTE: the individual buttons SHOULD be disabled if the control itself is.
+    ok(theInput.hasClass('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
     i++;
   });
   
@@ -310,22 +312,6 @@ test("aria-role-radio", function() {
   });
 });
 
-test("aria-label", function() {
-  var radioButtons = pane.view('aria-label').$('.sc-radio-button');
-
-  var i = 0;
-  radioButtons.forEach(function(radioInput) {
-    var theInput = SC.$(radioInput),
-      idx = parseInt(theInput.attr('index'),0),
-      buttonValue = theInput.attr('value');
-
-    equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
-    equals(theInput.attr('aria-label'), 'itemList1', 'radio button #%@ should have aria-label as itemList1'.fmt(idx));
-
-    i++;
-  });
-});
-
 test("aria-labeledBy", function() {
   var radioButtons = pane.view('aria-labeledBy').$('.sc-radio-button');
 
@@ -336,7 +322,9 @@ test("aria-labeledBy", function() {
       buttonValue = theInput.attr('value');
 
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
-    equals(theInput.attr('aria-labelledby'), 'color', 'radio button #%@ should have aria-labelledby as color'.fmt(idx));
+
+    var labelled_by = document.getElementById(theInput.attr('aria-labelledby'));
+    equals(labelled_by, theInput.find('.sc-button-label')[0], 'radio button #%@ should have aria-labelledby pointing to label element'.fmt(idx));
 
     i++;
   });

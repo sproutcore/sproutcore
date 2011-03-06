@@ -168,13 +168,13 @@ test("Check that all buttons have the right classes set", function() {
 
 
 test("Check that the title is set or not and if it is in the appropriate element", function() {
-  var viewElem=pane.view('basic').$('span');
+  var viewElem=pane.view('basic').$('label');
   equals(viewElem.text(), '', 'should not have a title');
   viewElem=pane.view('basic').$('label');
   ok(viewElem!==null, 'should have a label element even with no title');
 
-  viewElem=pane.view('title').$('span');
-  equals(viewElem.text(), 'Hello World', 'should not have a title');
+  viewElem=pane.view('title').$('label');
+  equals(viewElem.text(), 'Hello World', 'should have a title');
   viewElem=pane.view('title').$('label');
   ok(viewElem!==null, 'should have a label element');
 

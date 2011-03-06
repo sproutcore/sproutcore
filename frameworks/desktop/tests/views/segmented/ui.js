@@ -220,8 +220,8 @@ var pane;
       if(i===seglen-1){
         ok((seg.className.indexOf('sc-last-segment')>=0), 'last segment has the right classname assigned.');
       }
-      ok((seg.childNodes[0].className.indexOf('sc-button-inner')>=0), 'segment '+i+' should have an inner-button.');
-      ok((seg.childNodes[0].childNodes[0].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
+
+      ok((seg.childNodes[3].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
 
       if(i !== 0 && i < seglen-1) {
         ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segments have the right classname assigned.');
@@ -233,7 +233,7 @@ var pane;
   });
 
 
-  test("Check that all segments have the right classes set (with icons)", function() {
+  test("Check that all segmechnts have the right classes set (with icons)", function() {
     var viewElem=pane.view('3_empty,icon').$();
     var segments=pane.view('3_empty,icon').$('.sc-segment-view');
 
@@ -249,9 +249,8 @@ var pane;
       if(i==seglen-1){
         ok((seg.className.indexOf('sc-last-segment')>=0), 'last segment has the right classname assigned.');
       }
-      ok((seg.childNodes[0].className.indexOf('sc-button-inner')>=0), 'segment '+i+' should have an inner-button.');
-      ok((seg.childNodes[0].childNodes[0].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
-      ok((seg.childNodes[0].childNodes[0].childNodes[0].src.length>0), 'segment '+i+' should have an icon.');
+      ok((seg.childNodes[3].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
+      ok((seg.childNodes[3].childNodes[0].src.length>0), 'segment '+i+' should have an icon.');
 
       if(i!==0 && i!=seglen-1){
         ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segments have the right classname assigned.');
@@ -439,7 +438,7 @@ var pane;
 
     for(i = 0, len = segments.length; i<len; ++i) {
       segmentViewElem = segments[i].$();
-      label = segments[i].$('label.sc-button-label');
+      label = segments[i].$('label.sc-button-label')[0];
       aria_labelledby = document.getElementById(segmentViewElem.attr('aria-labelledby'));
       equals(aria_labelledby, label, "segment " + (i+1) + " has aria-labeledby pointing at button label");
     }

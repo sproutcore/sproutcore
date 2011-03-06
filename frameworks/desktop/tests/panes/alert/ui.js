@@ -44,7 +44,7 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   
   // buttons
   ok(pane.childViews[0].childViews[1].$('div'), 'pane.div.div.div existance should be YES');
-  equals(pane.childViews[0].childViews[1].$('div').length, 2, 'pane.div.div should have 2 Buttons');
+  equals(pane.childViews[0].childViews[1].$('div.button').length, 2, 'pane.div.div should have 2 Buttons');
   ok(pane.childViews[0].$('div'), 'pane.div.div existance should be YES');
   
   var button1 = pane.childViews[0].childViews[1].childViews[1];
@@ -52,17 +52,17 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   var button3 = pane.childViews[0].childViews[2].childViews[0];
   
   if (button1Title) {
-    equals(button1.$('span').text(), button1Title, 'pane.div.div button1 should have custom title %@'.fmt(button1Title));
+    equals(button1.$('label').text(), button1Title, 'pane.div.div button1 should have custom title %@'.fmt(button1Title));
   } else {
-    equals(button1.$('span').text(), 'OK', 'pane.div.div button1 should have default title OK');
+    equals(button1.$('label').text(), 'OK', 'pane.div.div button1 should have default title OK');
   }
   if (button2Title) {
-    equals(button2.$('span').text(), button2Title, 'pane.div.div button2 should have custom title %@'.fmt(button2Title));
+    equals(button2.$('label').text(), button2Title, 'pane.div.div button2 should have custom title %@'.fmt(button2Title));
   } else {
     ok(button2.$().hasClass('hidden'), 'pane.div.div button2 should be hidden');
   }
   if (button3Title) {
-    equals(button3.$('span').text(), button3Title, 'pane.div button3 should have custom title %@'.fmt(button3Title));
+    equals(button3.$('label').text(), button3Title, 'pane.div button3 should have custom title %@'.fmt(button3Title));
   } else {
     ok(button3.$().hasClass('hidden'), 'pane.div button3 should be hidden');
   }
