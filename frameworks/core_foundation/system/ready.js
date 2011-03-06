@@ -56,7 +56,7 @@ SC.mixin({
     },
     done: function() {
       SC.isReady = true;
-      if(window.main && !SC.suppressMain) { main(); }
+      if(window.main && !SC.suppressMain && (SC.mode === SC.APP_MODE)) { main(); }
       SC.RunLoop.end();
     }
   }
