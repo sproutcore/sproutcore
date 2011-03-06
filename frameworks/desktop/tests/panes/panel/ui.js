@@ -52,32 +52,18 @@ test("Verify panel pane has aria role set", function() {
 
 });
 
-test("Verify panel pane has aria-labelledby attribute set, when ariaLabeledBy is provided", function() {
+test("Verify panel pane has aria-label attribute set, when ariaLabel is provided", function() {
   var pane = SC.PanelPane.create({
     layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
     contentView: SC.View.extend({
     }),
-    ariaLabeledBy: "Panel is labelled by this value for voiceover"
+    ariaLabel: "Panel is labelled by this value for voiceover"
   });
   pane.append();
 
-  equals(pane.$().attr('aria-labelledby'), 'Panel is labelled by this value for voiceover', "panel pane has aria-labelledby attribute set");
+  equals(pane.$().attr('aria-label'), 'Panel is labelled by this value for voiceover', "panel pane has aria-labelledby attribute set");
 
   pane.remove();
 
 });
 
-test("Verify panel pane has aria-describedby attribute set, when ariaDescribedBy is provided", function() {
-  var pane = SC.PanelPane.create({
-    layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
-    contentView: SC.View.extend({
-    }),
-    ariaDescribedBy: "Panel is described by this value for voiceover"
-  });
-  pane.append();
-
-  equals(pane.$().attr('aria-describedby'), 'Panel is described by this value for voiceover', "panel pane has aria-describedby attribute set");
-
-  pane.remove();
-
-});

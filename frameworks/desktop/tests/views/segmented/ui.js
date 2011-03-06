@@ -167,12 +167,11 @@ var pane;
     })
     .add("aria-labelledby", SC.SegmentedView, {
       items: [
-      {title: "Item 1", ariaLabeledBy: "item1"},
-      {title: "Item 2", ariaLabeledBy: "item2"},
-      {title: "Item 3", ariaLabeledBy: "item3"}
+      {title: "Item 1"},
+      {title: "Item 2"},
+      {title: "Item 3"}
       ],
       itemTitleKey: "title",
-      itemAriaLabeledByKey: "ariaLabeledBy",
       layout: { height: 25 }
     });
 
@@ -436,13 +435,13 @@ var pane;
   test("Check that the segments have aria-labelled attribute set", function() {
     var sv = pane.view('aria-labelledby'),
         segments = sv.get('childViews'),
-        i, len, segmentViewElem, ariaLabeledBy, aria_labelledby;
+        i, len, segmentViewElem, aria_labelledby, label;
 
     for(i = 0, len = segments.length; i<len; ++i) {
-      ariaLabeledBy   = segments[i].get('ariaLabeledBy');
       segmentViewElem = segments[i].$();
-      aria_labelledby = segmentViewElem.attr('aria-labelledby');
-      equals(aria_labelledby, ariaLabeledBy, "segment " + (i+1) + " has aria-labeledby set");
+      label = segments[i].$('label.sc-button-label');
+      aria_labelledby = document.getElementById(segmentViewElem.attr('aria-labelledby'));
+      equals(aria_labelledby, label, "segment " + (i+1) + " has aria-labeledby pointing at button label");
     }
   });
 

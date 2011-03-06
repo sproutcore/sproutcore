@@ -90,7 +90,6 @@ test("Check that all Label are visible", function() {
   ok(pane.view('bold').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('bold height').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('editable').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
-  ok(pane.view('aria-labelledby').get('isVisibleInWindow'), 'aria-labelledby isVisibleInWindow should be YES');
 });
   
 
