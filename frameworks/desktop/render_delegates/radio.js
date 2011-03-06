@@ -33,10 +33,7 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     
     var isSelected = dataSource.get('isSelected'),
         width = dataSource.get('width'),
-        title = dataSource.get('title'),
-        value = dataSource.get('value'),
-        ariaLabeledBy = dataSource.get('ariaLabeledBy'),
-        ariaLabel     = dataSource.get('ariaLabel');
+        labelId = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
       active: dataSource.get('isActive'),
@@ -48,31 +45,23 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     //accessing accessibility
     context.attr('role', 'radio');
     context.attr('aria-checked', isSelected);
-    if(ariaLabel && ariaLabel !== "") {
-      context.attr('aria-label', ariaLabel);
-    }
-    if(ariaLabeledBy && ariaLabeledBy !== "") {
-      context.attr('aria-labelledby', ariaLabeledBy);
-    }
+    context.attr('aria-labelledby', labelId);
 
     if (width) context.css('width', width);
-    
+
     context.push('<span class = "button"></span>');
-    
-    context = context.begin('span').addClass('sc-button-label');
+
+    context = context.begin('span').addClass('sc-button-label').id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
   },
-  
+
   update: function(dataSource, jquery) {
     var theme = dataSource.get('theme');
-    
+
     var isSelected = dataSource.get('isSelected'),
         width = dataSource.get('width'),
-        title = dataSource.get('title'),
-        value = dataSource.get('value'),
-        ariaLabeledBy = dataSource.get('ariaLabeledBy'),
-        ariaLabel     = dataSource.get('ariaLabel');
+        value = dataSource.get('value');
 
     jquery.setClass({
       active: dataSource.get('isActive'),
@@ -80,16 +69,10 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
       sel: dataSource.get('isSelected'),
       disabled: !dataSource.get('isEnabled')
     });
-    
+
     jquery.attr('aria-checked', isSelected);
-    if(ariaLabel !== ""){
-      jquery.attr('aria-label', ariaLabel);
-    }
-    if(ariaLabeledBy !== "") {
-      jquery.attr('aria-labelledby', ariaLabeledBy);
-    }
     jquery.css('width', width ? width : null);
-    
+
     theme.labelRenderDelegate.update(dataSource, jquery.find('.sc-button-label'));
   }
 });
