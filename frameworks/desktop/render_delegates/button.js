@@ -27,9 +27,10 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   */
   render: function(dataSource, context) {
     var labelContent,
-        toolTip =       dataSource.get('toolTip'),
-        isSelected =    dataSource.get('isSelected') || NO,
-        isActive =      dataSource.get('isActive') || NO;
+        toolTip     = dataSource.get('toolTip'),
+        isSelected  = dataSource.get('isSelected') || NO,
+        isActive    = dataSource.get('isActive') || NO,
+        labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
       'icon': !!dataSource.get('icon') || NO,
@@ -48,10 +49,11 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     // accessibility
     context.attr('aria-pressed', isActive);
+    context.attr('aria-labelledby', labelId);
 
     // Create the inner label element that contains the text and, optionally,
     // an icon.
-    context = context.begin('label').addClass('sc-button-label');
+    context = context.begin('label').addClass('sc-button-label').id(labelId);
     dataSource.get('theme').labelRenderDelegate.render(dataSource, context);
     context = context.end();
 
