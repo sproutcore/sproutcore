@@ -29,15 +29,15 @@ SC.InnerFrame = {
     <tr><td>SC.ALIGN_BOTTOM_LEFT</td><td>SC.ALIGN_BOTTOM</td><td>SC.ALIGN_BOTTOM_RIGHT</td></tr>
     </table>
 
-    @property {SC.ALIGN_CENTER|SC.ALIGN_TOP_LEFT|SC.ALIGN_TOP|SC.ALIGN_TOP_RIGHT|SC.ALIGN_RIGHT|SC.ALIGN_BOTTOM_RIGHT|SC.BOTTOM|SC.BOTTOM_LEFT|SC.LEFT|Number}
+    @property {SC.ALIGN_CENTER|SC.ALIGN_TOP_LEFT|SC.ALIGN_TOP|SC.ALIGN_TOP_RIGHT|SC.ALIGN_RIGHT|SC.ALIGN_BOTTOM_RIGHT|SC.BOTTOM|SC.BOTTOM_LEFT|SC.LEFT}
     @default SC.ALIGN_CENTER
   */
   align: SC.ALIGN_CENTER,
 
   /**
-    Return a frame (x, y, width, height) fitting the size innerWidth & innerHeight within the size
-    outerWidth & outerHeight according to the align and scale properties.  This is essential to
-    positioning child views or elements within parent views or elements in more elegant ways.
+    Returns a frame (x, y, width, height) fitting the source size (sourceWidth & sourceHeight) within the
+    destination size (destWidth & destHeight) according to the align and scale properties.  This is essential to
+    positioning child views or elements within parent views or elements in elegant ways.
 
     Examples using 'align' on a 10x10px inner size within a 20x20px outer size ('scale' = SC.SCALE_NONE):
 
@@ -64,12 +64,13 @@ SC.InnerFrame = {
     <tr><td>SC.FILL_PROPORTIONALLY</td><td>{x: 0, y: -5, width: 20, height: 30}</td></tr>
     <tr><td>SC.BEST_FIT</td><td>{x: 3, y: 0, width: 13, height: 20}</td></tr>
     <tr><td>SC.BEST_FIT_DOWN_ONLY</td><td>{x: 5, y: 3, width: 10, height: 15}</td></tr>
+    <tr><td>2.0</td><td>{x: 0, y: -5, width: 20, height: 30}</td></tr>
     </table>
 
     @returns {Object} the inner frame with properties: {x: value, y: value, width: value, height: value }
    */
 
-  innerFrameForSize: function(innerWidth, innerHeight, outerWidth, outerHeight) {
+  innerFrameForSize: function(sourceWidth, sourceHeight, destWidth, destHeight) {
     var align = this.get('align'),
         scale = this.get('scale'),
         scaleX,
@@ -77,12 +78,12 @@ SC.InnerFrame = {
         result;
 
     // Fast path
-    result = { x: 0, y: 0, width: outerWidth, height: outerHeight };
+    result = { x: 0, y: 0, width: destWidth, height: destHeight };
     if (scale === SC.FILL) return result;
 
     // Determine the appropriate scale
-    scaleX = outerWidth / innerWidth;
-    scaleY = outerHeight / innerHeight;
+    scaleX = destWidth / sourceWidth;
+    scaleY = destHeight / sourceHeight;
 
     switch (scale) {
       case SC.FILL_PROPORTIONALLY:
@@ -92,7 +93,7 @@ SC.InnerFrame = {
         scale = scaleX < scaleY ? scaleX : scaleY;
         break;
       case SC.BEST_FIT_DOWN_ONLY:
-        if ((innerWidth > outerWidth) || (innerHeight > outerHeight)) {
+        if ((sourceWidth > destWidth) || (sourceHeight > destHeight)) {
           scale = scaleX < scaleY ? scaleX : scaleY;
         } else {
           scale = 1.0;
@@ -110,51 +111,51 @@ SC.InnerFrame = {
         }
     }
 
-    innerWidth *= scale;
-    innerHeight *= scale;
-    result.width = Math.round(innerWidth);
-    result.height = Math.round(innerHeight);
+    sourceWidth *= scale;
+    sourceHeight *= scale;
+    result.width = Math.round(sourceWidth);
+    result.height = Math.round(sourceHeight);
 
     // Align the image within its frame
     switch (align) {
       case SC.ALIGN_LEFT:
         result.x = 0;
-        result.y = (outerHeight / 2) - (innerHeight / 2);
+        result.y = (destHeight / 2) - (sourceHeight / 2);
         break;
       case SC.ALIGN_RIGHT:
-        result.x = outerWidth - innerWidth;
-        result.y = (outerHeight / 2) - (innerHeight / 2);
+        result.x = destWidth - sourceWidth;
+        result.y = (destHeight / 2) - (sourceHeight / 2);
         break;
       case SC.ALIGN_TOP:
-        result.x = (outerWidth / 2) - (innerWidth / 2);
+        result.x = (destWidth / 2) - (sourceWidth / 2);
         result.y = 0;
         break;
       case SC.ALIGN_BOTTOM:
-        result.x = (outerWidth / 2) - (innerWidth / 2);
-        result.y = outerHeight - innerHeight;
+        result.x = (destWidth / 2) - (sourceWidth / 2);
+        result.y = destHeight - sourceHeight;
         break;
       case SC.ALIGN_TOP_LEFT:
         result.x = 0;
         result.y = 0;
         break;
       case SC.ALIGN_TOP_RIGHT:
-        result.x = outerWidth - innerWidth;
+        result.x = destWidth - sourceWidth;
         result.y = 0;
         break;
       case SC.ALIGN_BOTTOM_LEFT:
         result.x = 0;
-        result.y = outerHeight - innerHeight;
+        result.y = destHeight - sourceHeight;
         break;
       case SC.ALIGN_BOTTOM_RIGHT:
-        result.x = outerWidth - innerWidth;
-        result.y = outerHeight - innerHeight;
+        result.x = destWidth - sourceWidth;
+        result.y = destHeight - sourceHeight;
         break;
       default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
         if (align !== SC.ALIGN_CENTER && align !== SC.ALIGN_MIDDLE) {
           SC.Logger.warn("SC.InnerFrame: The align '%@' was not understood.  Align must be one of SC.ALIGN_CENTER/SC.ALIGN_MIDDLE, SC.ALIGN_LEFT, SC.ALIGN_RIGHT, SC.ALIGN_TOP, SC.ALIGN_BOTTOM, SC.ALIGN_TOP_LEFT, SC.ALIGN_TOP_RIGHT, SC.ALIGN_BOTTOM_LEFT or SC.ALIGN_BOTTOM_RIGHT.".fmt(align));
         }
-        result.x = (outerWidth / 2) - (innerWidth / 2);
-        result.y = (outerHeight / 2) - (innerHeight / 2);
+        result.x = (destWidth / 2) - (sourceWidth / 2);
+        result.y = (destHeight / 2) - (sourceHeight / 2);
     }
 
     return result;
