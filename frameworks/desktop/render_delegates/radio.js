@@ -46,6 +46,7 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     context.attr('role', 'radio');
     context.attr('aria-checked', isSelected);
     context.attr('aria-labelledby', labelId);
+    context.attr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
 
     if (width) context.css('width', width);
 
@@ -70,6 +71,7 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
       disabled: !dataSource.get('isEnabled')
     });
 
+    jquery.attr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
     jquery.attr('aria-checked', isSelected);
     jquery.css('width', width ? width : null);
 

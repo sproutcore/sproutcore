@@ -1,12 +1,6 @@
 $theme.radio-group {
-  
   line-height: 18px;
   vertical-align: middle;
-  
-  &.disabled {
-    opacity: .5;
-  }
-  
 }
 
 $theme.radio {

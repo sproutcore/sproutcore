@@ -250,6 +250,9 @@ SC.RadioView = SC.View.extend(SC.Control,
         title = value = icon = null;
         isEnabled = NO;
       }
+
+      // it can only be enabled if the radio view itself is enabled
+      isEnabled = isEnabled && this.get('isEnabled');
       
       if (item) {
         sel = (isArray) ? (viewValue.indexOf(value) >= 0) : (viewValue === value);
@@ -264,20 +267,18 @@ SC.RadioView = SC.View.extend(SC.Control,
         icon: icon,
         width: width,
         value: value,
-        
+
         isEnabled: isEnabled,
         isSelected: (isArray && viewValue.indexOf(value) >= 0 && viewValue.length === 1) || (viewValue === value),
         isMixed: (isArray && viewValue.indexOf(value) >= 0),
         isActive: this._activeRadioButton === idx,
-        ariaLabeledBy: ariaLabeledBy,
-        ariaLabel: ariaLabel,
         theme: this.get('theme'),
         renderState: {}
       }));
     }
 
     return ret; // done!
-  }.property('value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
+  }.property('isEnabled', 'value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
 
 
   acceptsFirstResponder: function() {

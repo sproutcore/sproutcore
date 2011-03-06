@@ -36,6 +36,7 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
     
     context.addClass(dataSource.get('layoutDirection'));
     context.attr('role', 'radiogroup');
+    context.attr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
     
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
@@ -63,6 +64,7 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
         items = dataSource.get('items'), idx, len = items.length, item;
     
     jquery.addClass(dataSource.get('layoutDirection'));
+    jquery.attr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
     
     if (dataSource.get('renderState').radioCount !== len) {
       // just regenerate if the count has changed. It would be better
