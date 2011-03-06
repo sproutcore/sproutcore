@@ -19,6 +19,7 @@ require("resources/scroll_page");
 require("resources/split_page");
 require("resources/list_page");
 require("resources/tab_page");
+require("resources/panels_page");
 
 TestControls.mainPage = SC.Page.create({
   
@@ -135,6 +136,8 @@ TestControls.mainPage = SC.Page.create({
   text_field_page: TestControls.textFieldPage,
   
   segmented_page: TestControls.segmentedPage,
+
+  panels_page: TestControls.panelsPage,
   
   flow_layout_page: TestControls.flowLayoutPage,
   

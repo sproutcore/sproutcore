@@ -55,6 +55,18 @@ TestControls.rootCategory = SC.Object.create({
     SC.Object.create({
       treeItemIsExpanded: YES,
       group: true,
+      name: 'Panels',
+      treeItemChildren: [
+        SC.Object.create({
+          name: 'Panels',
+          show: 'panels_page'
+        })
+      ]
+    }),
+
+    SC.Object.create({
+      treeItemIsExpanded: YES,
+      group: true,
       name: "Collections",
       treeItemChildren: [
         SC.Object.create({
