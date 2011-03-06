@@ -33,16 +33,6 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   displayProperties: 'displayTitle textAlign fontWeight icon escapeHTML needsEllipsis hint'.w(),
 
   /**
-    The WAI-ARIA attribute for the label view. This property is assigned to
-    'aria-labelledby' attribute, which defines a string value that labels the
-    element. Used to support voiceover. It should be assigned a non-empty string,
-    if the 'aria-labelledby' attribute has to be set for the element.
-
-    @property {String}
-  */
-  ariaLabeledBy: null,
-  
-  /**
     The delegate that gets notified of events related to the editing process. Set
     this to the object you want to handles the lifecycle of the inline editor.
 
