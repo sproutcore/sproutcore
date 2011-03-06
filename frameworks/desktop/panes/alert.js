@@ -192,6 +192,13 @@ SC.AlertPane = SC.PanelPane.extend({
   message: "",
 
   /**
+    The ARIA label for the alert is the message, by default.
+  */
+  ariaLabel: function() {
+    return this.get('message');
+  }.property('message').cacheable(),
+
+  /**
     An optional detailed decription.  Use this string to provide further 
     explanation of the condition and, optionally, ways the user can resolve
     the problem.
@@ -369,24 +376,8 @@ SC.AlertPane = SC.PanelPane.extend({
   alertInfoDidChange: function() {
     var v = this.getPath('contentView.childViews.0');
     if (v) v.displayDidChange(); // re-render message
-  }.observes('icon', 'message', 'displayDescription', 'displayCaption'),
+  }.observes('icon', 'message', 'displayDescription', 'displayCaption')
 
-
-  render: function(context, firstTime) {
-    sc_super();
-    var ariaLabeledBy   = this.get('ariaLabeledBy'),
-        ariaDescribedBy = this.get('ariaDescribedBy');
-
-    //addressing accessibility
-    if(firstTime) {
-      if(ariaLabeledBy && ariaLabeledBy !== "") {
-        context.attr('aria-labelledby', ariaLabeledBy);
-      }
-      if(ariaDescribedBy && ariaDescribedBy !== "") {
-       context.attr('aria-describedby', ariaDescribedBy);
-      }
-    }
-  }
 });
 
 SC.AlertPane.mixin({
