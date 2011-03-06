@@ -228,7 +228,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     @property {Array}
   */
   displayProperties: [
-    'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
+    'icon', 'displayTitle', 'value', 'toolTip', 'isDefault', 'isCancel', 
     'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing'
   ],
 

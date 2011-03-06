@@ -14,7 +14,7 @@ SC.AceTheme.PointRight = SC.AceTheme.subtheme("point-right", "point-right");
 SC.AceTheme.Capsule = SC.AceTheme.subtheme("capsule", "capsule");
 
 /**
-  Renders and updates the HTML representation of SC.ButtonView.
+  Renders and updates the HTML representation of a button.
 */
 SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   name: 'button',
@@ -27,18 +27,27 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   */
   render: function(dataSource, context) {
     var labelContent,
-        toolTip = dataSource.get('displayToolTip');
+        toolTip =       dataSource.get('toolTip'),
+        isSelected =    dataSource.get('isSelected') || NO,
+        isActive =      dataSource.get('isActive') || NO;
 
-    context.setClass('icon', !!dataSource.get('icon') || NO);
-    context.setClass('def', dataSource.get('isDefault') || NO);
-    context.setClass('cancel', dataSource.get('isCancel') || NO);
-    
+    context.setClass({
+      'icon': !!dataSource.get('icon') || NO,
+      'def': dataSource.get('isDefault'),
+      'cancel': dataSource.get('isCancel'),
+      'active': isActive,
+      'sel': isSelected
+    });
+
     if (toolTip) {
       context.attr('title', toolTip);
       context.attr('alt', toolTip);
     }
 
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
+
+    // accessibility
+    context.attr('aria-pressed', isActive);
 
     // Create the inner label element that contains the text and, optionally,
     // an icon.
@@ -47,10 +56,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     context = context.end();
 
     if (dataSource.get('supportFocusRing')) {
-      context.push('<div class="focus-ring">',
-                    '<div class="focus-left"></div>',
-                    '<div class="focus-middle"></div>',
-                    '<div class="focus-right"></div></div>');
+      context = context.begin('div').addClass('focus-ring');
+      this.includeSlices(dataSource, context, SC.THREE_SLICE);
+      context = context.end();
     }
   },
 

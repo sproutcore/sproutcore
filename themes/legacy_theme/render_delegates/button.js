@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  Renders and updates the HTML representation of SC.ButtonView.
+  Renders and updates the HTML representation of a button.
 */
 SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   name: 'button',
@@ -20,23 +20,16 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     var theme             = dataSource.get('theme'),
         minWidth          = dataSource.get('titleMinWidth'),
-        toolTip           = dataSource.get('displayToolTip'),
-        view              = dataSource.get('view'),
+        toolTip           = dataSource.get('toolTip'),
         isSelected        = dataSource.get('isSelected'),
-        isActive          = dataSource.get('isActive'),
-        isPopUpButton     = NO,
-        menu              = view.get('menu');
-
-        if(menu) {
-          isPopUpButton = YES;
-        }
+        isActive          = dataSource.get('isActive');
 
     var labelContent;
 
-    context.setClass('icon', !!dataSource.get('icon') || 0);    
+    context.setClass('icon', !!dataSource.get('icon') || 0);
     context.setClass('def', dataSource.get('isDefault') || 0);
     context.setClass('cancel', dataSource.get('isCancel') || 0);
-    
+
     if (toolTip) {
       context.attr('title', toolTip);
       context.attr('alt', toolTip);
@@ -44,10 +37,7 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     // addressing accessibility
     context.attr('aria-pressed', isActive);
-    if(isPopUpButton) {
-      context.attr('aria-haspopup', isPopUpButton.toString());
-    }
-    
+
     // Specify a minimum width for the inner part of the button.
     minWidth = (minWidth ? "style='min-width: " + minWidth + "px'" : '');
     context = context.push("<span class='sc-button-inner' " + minWidth + ">");
@@ -80,14 +70,7 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     var theme         = dataSource.get('theme'),
         isSelected    = dataSource.get('isSelected'),
-        isActive      = dataSource.get('isActive'),
-        view          = dataSource.get('view'),
-        menu          = view.get('menu'),
-        isPopUpButton = NO;
-
-        if(menu) {
-          isPopUpButton = YES;
-        }
+        isActive      = dataSource.get('isActive');
 
     if (dataSource.get('isActive')) jquery.addClass('active');
     if (dataSource.get('isDefault')) jquery.addClass('default');
@@ -96,9 +79,6 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     // addressing accessibility
     jquery.attr('aria-pressed', isActive);
-    if(isPopUpButton) {
-      jquery.attr('aria-haspopup', isPopUpButton.toString());
-    }
     theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
   

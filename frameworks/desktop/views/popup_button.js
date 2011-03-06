@@ -62,6 +62,8 @@ SC.PopupButtonView = SC.ButtonView.extend(
   // ..........................................................
   // INTERNAL SUPPORT
   //
+
+  renderDelegateName: 'popupButtonRenderDelegate',
   
   /**
     @private
