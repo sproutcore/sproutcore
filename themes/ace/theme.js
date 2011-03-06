@@ -1,3 +1,4 @@
+
 /**
  * @class
  * SproutCore's Ace theme.
@@ -7,7 +8,13 @@ SC.AceTheme = SC.BaseTheme.create({
   description: "A SproutCore built-in theme by Alex Iskander and contributors. Only supports browsers that implement CSS3."
 });
 
+// register the theme with SproutCore
 SC.Theme.addTheme(SC.AceTheme);
+
+// SC.ButtonView variants
+SC.AceTheme.PointLeft = SC.AceTheme.subtheme("point-left", "point-left");
+SC.AceTheme.PointRight = SC.AceTheme.subtheme("point-right", "point-right");
+SC.AceTheme.Capsule = SC.AceTheme.subtheme("capsule", "capsule");
 
 // Dark Variant
 /**

@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require("theme");
-
 /**
   Renders and updates DOM representations of progress bars.
   

@@ -45,7 +45,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
 
     context.setClass({
       'sel': isSelected,
-      'active': isActive,)
+      'active': isActive,
       'disabled': isDisabled
     });
     

@@ -23,6 +23,7 @@ SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
       'sc-last-segment': dataSource.get('isLastSegment'),
       'sc-overflow-segment': dataSource.get('isOverflowSegment')
     };
+
     if (!SC.none(dataSource.get('index'))) classes['sc-segment-' + dataSource.get('index')] = YES;
     context.setClass(classes);
 

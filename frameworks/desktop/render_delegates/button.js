@@ -7,12 +7,6 @@
 // ==========================================================================
 
 
-require("theme");
-
-SC.AceTheme.PointLeft = SC.AceTheme.subtheme("point-left", "point-left");
-SC.AceTheme.PointRight = SC.AceTheme.subtheme("point-right", "point-right");
-SC.AceTheme.Capsule = SC.AceTheme.subtheme("capsule", "capsule");
-
 /**
   Renders and updates the HTML representation of a button.
 */
