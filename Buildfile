@@ -89,7 +89,7 @@ config :ace,
 # CONFIGURE APPS
 config :core_tools, :required => [
   :desktop, :datastore, :animation, :forms,
-  "sproutcore/ace" #, "sproutcore/experimental/split_view"
+  "sproutcore/ace", "sproutcore/experimental/split_view"
 ]
 
 # mode :debug do
