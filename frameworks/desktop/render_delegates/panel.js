@@ -12,9 +12,16 @@ SC.BaseTheme.panelRenderDelegate = SC.RenderDelegate.create({
     context = context.begin('div').addClass('panel-background');
     this.includeSlices(dataSource, context, SC.NINE_SLICE);
     context = context.end();
+
+    // the label for the panel could change...
+    var ariaLabel = dataSource.get('ariaLabel');
+    context.attr('aria-label', ariaLabel || '');
   },
-  
-  update: function() {
-    // doesn't get updated
+
+  update: function(dataSource, jQuery) {
+    // the label for the panel could change...
+    var ariaLabel = dataSource.get('ariaLabel');
+    jQuery.attr('aria-label', ariaLabel || '');
+
   }
 });

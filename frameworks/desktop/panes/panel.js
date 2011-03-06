@@ -46,25 +46,12 @@ SC.PanelPane = SC.Pane.extend({
   ariaRole: 'dialog',
 
   /**
-    The WAI-ARIA attribute for the panel pane. This property is assigned to
-    'aria-labelledby' attribute, which defines a string value that labels the
-    element. Used to support voiceover. It should be assigned a non-empty string,
-    if the 'aria-labelledby' attribute has to be set for the element.
+    The WAI-ARIA label for the panel. Screen readers will use this to tell
+    the user a name for the panel.
 
     @property {String}
   */
-  ariaLabeledBy: null,
-
-  /**
-    The WAI-ARIA attribute for the panel pane. This property is assigned to
-    'aria-describedby' attribute.Used to support voiceover. It is intended to
-    provide additional detail that some users might need. It should be assigned
-    a non-empty string, if the 'aria-describedby' attribute has to be set for
-    the element.
-
-    @property {String}
-  */
-  ariaDescribedBy: null,
+  ariaLabel: null,
 
   /**
     Indicates that a pane is modal and should not allow clicks to pass
@@ -189,19 +176,5 @@ SC.PanelPane = SC.Pane.extend({
     return ret ;
   },
 
-  render: function(context, firstTime) {
-    sc_super();
-    var ariaLabeledBy   = this.get('ariaLabeledBy'),
-        ariaDescribedBy = this.get('ariaDescribedBy');
-
-    //addressing accessibility
-    if(firstTime) {
-      if(ariaLabeledBy && ariaLabeledBy !== "") {
-        context.attr('aria-labelledby', ariaLabeledBy);
-      }
-      if(ariaDescribedBy && ariaDescribedBy !== "") {
-       context.attr('aria-describedby', ariaDescribedBy);
-      }
-    }
-  }
+  displayProperties: ['ariaLabel']
 });
