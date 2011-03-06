@@ -71,13 +71,6 @@ var pane = SC.ControlTestPane.design()
   .add("editable", SC.LabelView, { 
      value: "double click me",
      isEditable: YES
-  })
-
-  .add("aria-labelledby", SC.LabelView, { 
-     value: "aria-labelledby",
-     fontWeight: SC.BOLD_WEIGHT,
-     height: 16,
-     ariaLabeledBy: 'Label View'
   });
 
 pane.show(); // add a test to show the test pane
@@ -162,8 +155,4 @@ test("Check that the title is set or not and if it is in the appropriate element
 
 });
 
-test("Check that the aria-labelledby is set to Label View", function() {
-  var viewElem=pane.view('aria-labelledby').$();
-  equals(viewElem.attr('aria-labelledby'), 'Label View', 'should have value set to Label view');
-});
 })();
