@@ -30,13 +30,10 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
   
   render: function(dataSource, context) {
     var theme = dataSource.get('theme'),
-        view  = dataSource.get('view'),
-        ariaLabel,ariaLabeledBy;
+        ariaLabel, labelId;
 
-    if(view) {
-      ariaLabel     = view.get('ariaLabel');
-      ariaLabeledBy = view.get('ariaLabeledBy');
-    }
+    // the label id is used so we can set the aria labelledby attribute
+    labelId = SC.guidFor(dataSource) + "-label";
 
     var isSelected = dataSource.get('isSelected') || NO;
     var isActive = dataSource.get('isActive');
@@ -44,35 +41,23 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
 
     context.attr('role', 'checkbox');
     context.attr('aria-checked', isSelected.toString());
-    if(ariaLabeledBy && ariaLabeledBy !== "") {
-      context.attr('aria-labelledby', ariaLabeledBy);
-    }
-    if(ariaLabel && ariaLabel !== "") {
-      context.attr('aria-label', ariaLabel);
-    }
+    context.attr('aria-labelledby', labelId);
 
     context.setClass({
       'sel': isSelected,
-      'active': isActive,
+      'active': isActive,)
       'disabled': isDisabled
     });
     
     context.push('<span class = "button"></span>');
     
-    context = context.begin('span').addClass('label');
+    context = context.begin('span').addClass('label').id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
   },
   
   update: function(dataSource, jquery) {
-    var theme = dataSource.get('theme'),
-        view  = dataSource.get('view'),
-        ariaLabel,ariaLabeledBy;
-
-    if(view) {
-      ariaLabel     = view.get('ariaLabel');
-      ariaLabeledBy = view.get('ariaLabeledBy');
-    }
+    var theme = dataSource.get('theme');
 
     var isSelected = dataSource.get('isSelected');
     var isActive = dataSource.get('isActive');
@@ -80,15 +65,12 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
 
     // address accessibility
     jquery.attr('aria-checked', isSelected.toString());
-    if(ariaLabeledBy && ariaLabeledBy !== "") {
-      jquery.attr('aria-labelledby', ariaLabeledBy);
-    }
-    if(ariaLabel && ariaLabel !== "") {
-      jquery.attr('aria-label', ariaLabel);
-    }
+
+    // NOTE: the other properties were already set in render, and should not
+    // need to be changed.
 
     theme.labelRenderDelegate.update(dataSource, jquery.find('span.label'));
-    
+
     // add class names
     jquery.setClass({
       'sel': isSelected,
