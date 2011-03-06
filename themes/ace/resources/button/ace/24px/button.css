@@ -16,7 +16,7 @@
     &.sel, &.def {
       @include slices("selected_button.png", $left: 3, $right: 3);    
   
-      &.sel.active, &.def.active {
+      &.active {
         @include slices("selected_active_button.png", $left: 3, $right: 3);    
       }
     }
@@ -66,7 +66,11 @@
     $theme.button {
       @include slices("normal_button_capsule.png", $left: 12, $right: 12, skip-middle);
       
-      .middle { left: 12px; right: 12px; }
+      & > .middle { left: 12px; right: 12px; }
+
+      &.active, &.sel, &.def, &.sel.active, &.sel.active.def {
+        & > .middle { left: 12px; right: 12px; }
+      }
 
       &.active {
         @include slices("active_button_capsule.png", $left: 12, $right: 12, skip-middle);
