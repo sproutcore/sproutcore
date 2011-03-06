@@ -45,7 +45,7 @@ SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
     var theme    = dataSource.get('theme'),
         valueMax = dataSource.get('maximum'),
         valueMin = dataSource.get('minimum'),
-        valueNow = dataSource.get('value');
+        valueNow = dataSource.get('ariaValue');
     
     var inner, animatedBackground, value = dataSource.get('value') * 100, 
         cssString, backPosition,
@@ -61,7 +61,7 @@ SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuemin', valueMin);
     context.attr('aria-valuenow', valueNow);
     context.attr('aria-valuetext', valueNow);
-      
+
     // offsetRange from dataSource only supported for backwards-compatibility
     if (dataSource.get('offsetRange')) {
       if (!this._hasGivenOffsetRangeDeprecationWarning) {
@@ -103,8 +103,16 @@ SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, $) {
     
     var theme    = dataSource.get('theme'),
-        valueNow = dataSource.get('value');
-    
+        valueMax = dataSource.get('maximum'),
+        valueMin = dataSource.get('minimum'),
+        valueNow = dataSource.get('ariaValue');
+
+    // make accessible
+    $.attr('aria-valuemax', valueMax);
+    $.attr('aria-valuemin', valueMin);
+    $.attr('aria-valuenow', valueNow);
+    $.attr('aria-valuetext', valueNow);
+
     var inner, value, cssString, backPosition,
         animatedBackground = theme.PROGRESS_ANIMATED_BACKGROUND_MATRIX,
         isIndeterminate = dataSource.get('isIndeterminate'),
@@ -128,10 +136,6 @@ SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
       'sc-empty': (value <= 0),
       'sc-complete': (value >= 100)
     };
-    
-    //addressing accessibility
-    $.attr('aria-valuenow', valueNow);
-    $.attr('aria-valuetext', valueNow);
     
     $.setClass(classNames);
     inner = $.find('.sc-inner');

@@ -28,14 +28,24 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   name: 'progress',
   
   render: function(dataSource, context) {
-    var theme = dataSource.get('theme');
-    
+    var theme = dataSource.get('theme'),
+        valueMax = dataSource.get('maximum'),
+        valueMin = dataSource.get('minimum'),
+        valueNow = dataSource.get('ariaValue');
+
     var value;
     if (dataSource.get('isIndeterminate')) {
       value = 120;
     } else {
       value = dataSource.get('value');
-    }  
+    }
+
+    // make accessible
+    context.attr('aria-valuemax', valueMax);
+    context.attr('aria-valuemin', valueMin);
+    context.attr('aria-valuenow', valueNow);
+    context.attr('aria-valuetext', valueNow);
+
     
     context.setClass({
       indeterminate: dataSource.get('isIndeterminate'),
@@ -56,15 +66,25 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, $) {
-    var theme = dataSource.get('theme');
-    
+    var theme = dataSource.get('theme'),
+        valueMax = dataSource.get('maximum'),
+        valueMin = dataSource.get('minimum'),
+        valueNow = dataSource.get('ariaValue');
+
+    // make accessible
+    $.attr('aria-valuemax', valueMax);
+    $.attr('aria-valuemin', valueMin);
+    $.attr('aria-valuenow', valueNow);
+    $.attr('aria-valuetext', valueNow);
+
+
     var value;
     if (dataSource.get('isIndeterminate')) {
       value = 120;
     } else {
       value = dataSource.get('value');
     }
-    
+
     $.setClass({
       indeterminate: dataSource.get('isIndeterminate'),
       running: dataSource.get('isRunning'),

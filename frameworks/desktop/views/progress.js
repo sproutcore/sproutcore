@@ -139,7 +139,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   _backgroundOffset: 0,
   _currentBackground: 1,
   _nextBackground: 1,
-  
+
   // start animating at the end of the init() method.  note that we call this
   // here because we want this to make sure this function is called anytime 
   // the progress view is instantiated.
@@ -162,11 +162,23 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       this.invokeLater(this._animateProgressBar, delay, 600);
     }
   },
-  
-  displayProperties: 'displayValue minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
-  
+
+  /**
+    The WAI-ARIA value for the progress view. This value will be passed to any
+    rendering code as-is, not converted into percentages, etc. It is computed
+    based on the original value property.
+
+    @property
+  */
+  ariaValue: function() {
+    return this.get('value');
+  }.property('value').cacheable(),
+
+
+  displayProperties: 'displayValue ariaValue minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
+
   renderDelegateName: 'progressRenderDelegate',
-  
+
   contentPropertyDidChange: function(target, key) {
     var content = this.get('content');
     this.beginPropertyChanges()
