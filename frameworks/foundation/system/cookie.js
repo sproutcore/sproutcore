@@ -142,7 +142,7 @@ SC.Cookie.mixin(
     @returns SC.Cookie object containing name and value of cookie
   */
   find: function(name) {
-    if (document.cookie && document.cookie != '') {
+    if (document.cookie && document.cookie !== '') {
       var cookies = document.cookie.split(';');
       for (var i = 0; i < cookies.length; i++) {
         var cookie = String(cookies[i]).trim();
@@ -158,3 +158,16 @@ SC.Cookie.mixin(
   }
 
 });
+
+SC.CookieMonster = {
+  nomNomNom: function(cookie) {
+    var isCookie = SC.kindOf(cookie, SC.Cookie);
+    if (isCookie) {
+      SC.Logger.log("YUM!");
+      return cookie.destroy();
+    }
+    
+    SC.Logger.error("Y U PASS ME NO COOKIE? %@", cookie);
+    return NO;
+  }
+};

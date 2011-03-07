@@ -2,13 +2,13 @@
 // SC.Cookie Unit Test
 // ==========================================================================
 
-/*globals module test equals */
+/*globals module test equals createCookie readCookie eraseCookies */
 
 var setCookies = ['cookie', 'cookie2', 'cookie-hashincreate', 'cookie-usingset', 'cookie-2-1', 'cookie-2-2', 'cookie-2-3', 'cookie-expires', 'cookie-destroy', 'cookie-find'];
 eraseCookies();
 setCookies = [];
 
-if (document.cookie != "") {
+if (document.cookie !== "") {
   SC.Logger.warn("document.cookie not empty -- test results may be contaminated -- %@".fmt(document.cookie));
 }
 
@@ -42,7 +42,7 @@ function readCookie(name) {
 	for(var i=0;i < ca.length;i++) {
 		var c = ca[i];
 		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+		if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
 	}
 	return null;
 }
@@ -160,4 +160,12 @@ test("find", function() {
   equals(result.get('value'), cookie.get('value'), "cookie values should be equal");
   
   setCookies = ["cookie-find"];
+});
+
+test("Coooooooookie", function() {
+  var cookie = SC.Cookie.create({name: "yummy!"}),
+      FakeCookie = SC.Object.extend();
+  
+  ok(SC.CookieMonster.nomNomNom(cookie) == null, "SC.CookieMonster nom nomed cookie");
+  equals(SC.CookieMonster.nomNomNom(FakeCookie.create()), NO, "SC.CookieMonster doesn't like fake cookies!");
 });
