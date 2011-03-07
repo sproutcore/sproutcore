@@ -11,7 +11,7 @@
 // BUILT-IN ARRAY
 // 
 
-sc_require('debug/test_suites/array/base');
+sc_require('debug/test_suites/array');
 
 SC.ArraySuite.generate("built-in Array");
 
