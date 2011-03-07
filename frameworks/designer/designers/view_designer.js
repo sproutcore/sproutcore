@@ -384,7 +384,8 @@ SC.ViewDesigner = SC.Object.extend(
   */
   encodeDesign: function(coder) {
     coder.set('className', SC._object_className(this.get('viewClass')));
-    this.encodeDesignProperties(coder);    
+    this.encodeDesignProperties(coder);
+    this.encodeDesignAttributeProperties(coder);
     this.encodeChildViewsDesign(coder);
     return YES ;
   },
