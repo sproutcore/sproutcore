@@ -51,7 +51,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     var context = SC.RenderContext(childView.get('tagName'));
 
     // Add id and class names passed to view helper
-    this.applyAttributes(options, childView, context);
+    this.applyAttributes(options.hash, childView, context);
 
     childView.applyAttributesToContext(context);
 
@@ -63,13 +63,19 @@ SC.Handlebars.ViewHelper = SC.Object.create({
   },
 
   applyAttributes: function(options, childView, context) {
-    var id = options.hash.id;
-    var classNames = options.hash['class'];
+    var id = options.id;
+    var classNames = options['class'];
 
-    if (classNames) { childView.set('classNames', classNames); }
-    if (id) { childView.set('layerId', id); }
+    if (classNames) {
+      context.addClass(classNames.split(' '));
+    }
 
-    var classBindings = options.hash.classBinding;
+    if (id) {
+      childView.set('layerId', id);
+      context.id(id);
+    }
+
+    var classBindings = options.classBinding;
     if (classBindings) {
       this.addClassBindings(classBindings, childView, context);
     }
@@ -201,14 +207,29 @@ Handlebars.registerHelper('collection', function(path, fn, inverse) {
     collectionClass = path;
   }
 
-  if(fn) {
-    if(collectionClass.isClass) {
-      collectionClass.prototype.itemViewTemplate = fn;
-      collectionClass.prototype.inverseTemplate = inverse;
-    } else {
-      collectionClass.itemViewTemplate = fn;
-      collectionClass.inverseTemplate = inverse;
+  var hash = fn.hash, itemHash = {}, match;
+
+  for (var prop in hash) {
+    if (fn.hash.hasOwnProperty(prop)) {
+      match = prop.match(/^item(.)(.*)$/);
+
+      if(match) {
+        itemHash[match[1].toLowerCase() + match[2]] = hash[prop];
+        delete hash[prop];
+      }
     }
+  }
+
+  if(fn) {
+    var collectionObject = collectionClass;
+
+    if(collectionObject.isClass) {
+      collectionObject = collectionObject.prototype;
+    }
+
+    collectionObject.itemViewTemplate = fn;
+    collectionObject.inverseTemplate = inverse;
+    collectionObject.itemViewOptions = itemHash;
   }
 
   var noop = function() { return ""; };
