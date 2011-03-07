@@ -490,3 +490,28 @@ test("{{view}} class attribute should set class on layer", function() {
   equals(view.$('.bar').length, 1, "adds class attribute to layer");
   equals(view.$('.bar').text(), 'baz', "emits content");
 });
+
+test("should be able to bind view class names to properties", function() {
+  var templates = SC.Object.create({
+    template: SC.Handlebars.compile('{{#view "TemplateTests.classBindingView" classBinding="isDone"}}foo{{/view}}')
+  });
+
+  TemplateTests.classBindingView = SC.TemplateView.create({
+    isDone: YES
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'template',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('.is-done').length, 1, "dasherizes property and sets class name");
+
+  SC.run(function() {
+    TemplateTests.classBindingView.set('isDone', NO);
+  });
+
+  equals(view.$('.is-done').length, 0, "removes class name if bound property is set to false");
+});
