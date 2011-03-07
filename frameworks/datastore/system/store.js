@@ -871,7 +871,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     SproutCore.
   */
   findAll: function(recordType, conditions, params) {
-    console.warn("SC.Store#findAll() will be removed in a future version of SproutCore.  Use SC.Store#find() instead");
+    SC.Logger.warn("SC.Store#findAll() will be removed in a future version of SproutCore.  Use SC.Store#find() instead");
     
 
     if (!recordType || !recordType.isQuery) {
@@ -2728,7 +2728,7 @@ SC.Store._getDefaultStore = function() {
 */
 SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded) {
   
-  console.warn("SC.Store.updateRecords() is deprecated.  Use loadRecords() instead");
+  SC.Logger.warn("SC.Store.updateRecords() is deprecated.  Use loadRecords() instead");
   
   var store = this._getDefaultStore(),
       len   = dataHashes.length,

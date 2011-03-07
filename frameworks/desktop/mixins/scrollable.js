@@ -22,7 +22,7 @@ SC.Scrollable = {
   
 //@if(debug)
   initMixin: function() {
-    console.warn("SC.Scrollable is deprecated and will be removed in a future version of SproutCore.  Consider pulling the mixin into your own app if you want to keep using it.");
+    SC.Logger.warn("SC.Scrollable is deprecated and will be removed in a future version of SproutCore.  Consider pulling the mixin into your own app if you want to keep using it.");
   },
 //@endif 
 

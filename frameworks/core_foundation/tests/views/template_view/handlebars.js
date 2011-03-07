@@ -454,3 +454,87 @@ test("should update boundIf blocks if the conditional changes", function() {
 
   equals(view.$('#first').text(), "", "re-renders without block when condition is false");
 });
+
+test("{{view}} id attribute should set id on layer", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('{{#view "TemplateTests.IdView" id="bar"}}baz{{/view}}')
+  });
+
+  TemplateTests.IdView = SC.TemplateView.create();
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('#bar').length, 1, "adds id attribute to layer");
+  equals(view.$('#bar').text(), 'baz', "emits content");
+});
+
+test("{{view}} class attribute should set class on layer", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('{{#view "TemplateTests.IdView" class="bar"}}baz{{/view}}')
+  });
+
+  TemplateTests.IdView = SC.TemplateView.create();
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('.bar').length, 1, "adds class attribute to layer");
+  equals(view.$('.bar').text(), 'baz', "emits content");
+});
+
+test("should be able to bind view class names to properties", function() {
+  var templates = SC.Object.create({
+    template: SC.Handlebars.compile('{{#view "TemplateTests.classBindingView" classBinding="isDone"}}foo{{/view}}')
+  });
+
+  TemplateTests.classBindingView = SC.TemplateView.create({
+    isDone: YES
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'template',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('.is-done').length, 1, "dasherizes property and sets class name");
+
+  SC.run(function() {
+    TemplateTests.classBindingView.set('isDone', NO);
+  });
+
+  equals(view.$('.is-done').length, 0, "removes class name if bound property is set to false");
+});
+
+test("should be able to bind element attributes using {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<img {{bindAttr src="content.url" alt="content.title"}}>');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: SC.Object.create({
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
+
+  SC.run(function() {
+    view.setPath('content.title', "El logo de Esproutcore");
+  });
+
+  equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
+});

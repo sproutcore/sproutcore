@@ -338,14 +338,14 @@ SC.View.reopen(
     if (lW === AUTO && stLayout !== undefined && !stLayout) {
       error = SC.Error.desc(("%@.layout() cannot use width:auto if "+
                 "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
-      console.error(error.toString()) ;
+      SC.Logger.error(error.toString()) ;
       throw error ;
     }
 
     if (lH === AUTO && stLayout !== undefined && !stLayout) {
        error = SC.Error.desc(("%@.layout() cannot use height:auto if "+
                 "staticLayout is disabled").fmt(this),"%@".fmt(this), -1);
-       console.error(error.toString())  ;
+       SC.Logger.error(error.toString())  ;
       throw error ;
     }
 
@@ -791,7 +791,7 @@ SC.View.reopen(
     if (!SC.none(currentLayout.rotate)) {
       if (SC.none(currentLayout.rotateX)) {
         currentLayout.rotateX = currentLayout.rotate;
-        console.warn('Please set rotateX instead of rotate');
+        SC.Logger.warn('Please set rotateX instead of rotate');
       }
     }
     if (!SC.none(currentLayout.rotateX)) {
@@ -805,7 +805,7 @@ SC.View.reopen(
       if (!SC.none(animations.rotate)) {
         if (SC.none(animations.rotateX)) {
           animations.rotateX = animations.rotate;
-          console.warn('Please animate rotateX instead of rotate');
+          SC.Logger.warn('Please animate rotateX instead of rotate');
         }
       }
       if (!SC.none(animations.rotateX)) {

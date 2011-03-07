@@ -100,7 +100,7 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
               // If we didn't capture information for this invocation, just
               // report what we can.  (We assume we'll always have all three
               // hashes or none.)
-              console.log("Invoking runloop-scheduled method %@ on %@, but we didn’t capture information about who scheduled it…".fmt(mName, target));
+              SC.Logger.log("Invoking runloop-scheduled method %@ on %@, but we didn’t capture information about who scheduled it…".fmt(mName, target));
             }
             else {
               originatingTargets = originatingTargets[originatingKey];             // Could be one target or an array of them
@@ -111,7 +111,7 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
               // scheduled this target/method?  If so, display them all nicely.
               // Otherwise, optimize our output for only one.
               if (originatingMethods  &&  SC.typeOf(originatingMethods) === SC.T_ARRAY) {
-                console.log("Invoking runloop-scheduled method %@ on %@, which was scheduled by multiple target/method pairs:".fmt(mName, target));
+                SC.Logger.log("Invoking runloop-scheduled method %@ on %@, which was scheduled by multiple target/method pairs:".fmt(mName, target));
               
                 var i, len,
                   originatingTarget,
@@ -123,13 +123,13 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
                   originatingMethod = originatingMethod.displayName || originatingMethod;
                   originatingStack  = originatingStacks[i];
   
-                  console.log("[%@]  originated by target %@,  method %@,  stack:".fmt(i, originatingTarget, originatingMethod), originatingStack);
+                  SC.Logger.log("[%@]  originated by target %@,  method %@,  stack:".fmt(i, originatingTarget, originatingMethod), originatingStack);
                 }
               }
               else {
                 var originatingMethodName = originatingMethods.displayName || originatingMethods;
 
-                console.log("Invoking runloop-scheduled method %@ on %@.  Originated by target %@,  method %@,  stack: ".fmt(mName, target, originatingTargets, originatingMethodName), originatingStacks);
+                SC.Logger.log("Invoking runloop-scheduled method %@ on %@.  Originated by target %@,  method %@,  stack: ".fmt(mName, target, originatingTargets, originatingMethodName), originatingStacks);
               }
             }
           }

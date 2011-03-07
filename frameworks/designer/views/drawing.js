@@ -173,15 +173,15 @@ SC.DrawingView = SC.View.extend({
             this._drawShapes(cntx);
           }
           else {
-            console.error("SC.DrawingView.render(): Canvas object context is not accessible.");
+            SC.Logger.error("SC.DrawingView.render(): Canvas object context is not accessible.");
           }
         }
         else {
-          console.error("SC.DrawingView.render(): Canvas element array length is zero.");
+          SC.Logger.error("SC.DrawingView.render(): Canvas element array length is zero.");
         }
       }
       else {
-        console.error("SC.DrawingView.render(): Canvas element is not accessible.");
+        SC.Logger.error("SC.DrawingView.render(): Canvas element is not accessible.");
       }
     }
     
@@ -190,7 +190,7 @@ SC.DrawingView = SC.View.extend({
   
   registerShapeDrawing: function(name, drawingFunction){
     if (!name) {
-      console.error('Can\'t register this drawing paradigm because name is null');
+      SC.Logger.error('Can\'t register this drawing paradigm because name is null');
       return NO;
     }
     
