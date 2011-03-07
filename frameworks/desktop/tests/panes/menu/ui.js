@@ -13,7 +13,7 @@ var items = [
   { title: 'Selected Menu Item', keyEquivalent: 'backspace' },
   { separator: YES },
   { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
-  { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: 'ctrl_p' },
+  { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: ['ctrl_p', 'ctrl_f'] },
   { separator: YES },
   { title: 'Selected Menu Item…', isChecked: YES, keyEquivalent: 'ctrl_shift_o' },
   { title: 'Item with Submenu', subMenu: [{ title: 'Submenu item 1' }, { title: 'Submenu item 2'}] },
@@ -224,6 +224,27 @@ test('Automatic Closing', function() {
   clickOn(menu);
   ok(!menu.get('isVisibleInWindow'), 'menu should close if anywhere other than a menu item is clicked');
 });
+
+test('keyEquivalents', function() {
+  var keyEquivalents = menu._keyEquivalents;
+  
+  // verify that keyEquivalents were mapped correctly and that multiple 
+  // keyEquivalents work
+  menu.items.forEach(function(item) {
+    var keyEq = item.keyEquivalent, idx, len;
+    if(!keyEq) return;
+    
+    if(SC.typeOf(keyEq)===SC.T_ARRAY) {
+      for(idx=0,len=keyEq.length;idx<len;idx++) {
+        ok(keyEquivalents[keyEq[idx]], "keyEquivalent should map to " + keyEq[idx]);
+      }
+    }
+    else {
+      ok(keyEquivalents[keyEq], "keyEquivalent should map to " + keyEq);
+    }
+  });
+});
+
 
 test('aria-role attribute', function() {
   var menuPane = SC.MenuPane.create({
