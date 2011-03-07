@@ -1,6 +1,8 @@
 sc_require('system/utils/types');
 
 SC.ContentValueSupport = {
+  hasContentValueSupport: YES,
+
   /** @private */
   initMixin: function() {
     this._control_contentDidChange() ; // setup content observing if needed.
