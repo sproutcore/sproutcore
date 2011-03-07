@@ -38,8 +38,7 @@ SC.ANCHOR_BOTTOM_RIGHT = { bottom: 0, right: 0 };
 /** @class
 
   A toolbar view can be anchored at the top or bottom of the window to contain
-  your main toolbar buttons.  The default implementation assumes you may have
-  a leftView, rightView, and centerView, which will be properly laid out.
+  your main toolbar buttons.
 
   You can also override the layout property yourself or simply set the
   anchorLocation to SC.ANCHOR_TOP or SC.ANCHOR_BOTTOM.  This will configure
@@ -49,7 +48,7 @@ SC.ANCHOR_BOTTOM_RIGHT = { bottom: 0, right: 0 };
   @since SproutCore 1.0
 */
 SC.ToolbarView = SC.View.extend(
-  /** @scope SC.ToolbarView.prototype */ {
+/** @scope SC.ToolbarView.prototype */ {
 
   classNames: ['sc-toolbar-view'],
 
@@ -60,6 +59,7 @@ SC.ToolbarView = SC.View.extend(
     @property {String}
   */
   ariaRole: 'toolbar',
+
   /**
     Default anchor location.  This will be applied automatically to the
     toolbar layout if you set it.
