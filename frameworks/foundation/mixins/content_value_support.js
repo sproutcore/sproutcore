@@ -1,3 +1,4 @@
+sc_require('system/utils/types');
 
 SC.ContentValueSupport = {
   /** @private */
@@ -132,25 +133,18 @@ SC.ContentValueSupport = {
       this.getDelegateProperty('contentValueKey', this.displayDelegate),
       content = this.get('content');
 
-    if (!key || !content) return ; // do nothing if disabled
-    
-    // if it's complex, it's already been changed so just notify
-    if(this.get('contentiscomplex')) {
-      content.notifyPropertyChange(key);
+    if (!key || !content || this.get('contentIsComplex')) return ; // do nothing if disabled
+
+    // get value -- set on content if changed
+    var value = this.get('value');
+
+    if (typeof content.setIfChanged === SC.T_FUNCTION) {
+      content.setIfChanged(key, value);
     }
 
-    else {
-      // get value -- set on content if changed
-      var value = this.get('value');
-
-      if (typeof content.setIfChanged === SC.T_FUNCTION) {
-        content.setIfChanged(key, value);
-      }
-
-      // avoid re-writing inherited props
-      else if (content[key] !== value) {
-        content[key] = value ;
-      }
+    // avoid re-writing inherited props
+    else if (content[key] !== value) {
+      content[key] = value ;
     }
   }.observes('value'),
   
@@ -204,7 +198,7 @@ SC.ContentValueSupport = {
 
     attr = content[key];
 
-    return attr && attr.isRecordAttribute && attr.get('typeClass').isComplex;
+    return attr && attr.isRecordAttribute && SC.isComplex(attr.get('typeClass'));
   }.property('content').cacheable()
 };
 
