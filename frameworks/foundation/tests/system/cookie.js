@@ -4,7 +4,7 @@
 
 /*globals module test equals createCookie readCookie eraseCookies */
 
-var setCookies = ['cookie', 'cookie2', 'cookie-hashincreate', 'cookie-usingset', 'cookie-2-1', 'cookie-2-2', 'cookie-2-3', 'cookie-expires', 'cookie-destroy', 'cookie-find'];
+var setCookies = ['cookie', 'cookie2', 'cookie-hashincreate', 'cookie-number', 'cookie-usingset', 'cookie-2-1', 'cookie-2-2', 'cookie-2-3', 'cookie-expires', 'cookie-destroy', 'cookie-find'];
 eraseCookies();
 setCookies = [];
 
@@ -85,6 +85,14 @@ test("Setting a cookie - no write", function() {
   equals(result, null, "value from document.cookie should be null");
   
   setCookies = ["cookie-nowrite"];
+});
+
+test("Setting a cookie - using an numeral expires", function() {
+  var cookie = SC.Cookie.create({name: "cookie-number", value: "testing value", expires: 1}).write();
+  var result = readCookie('cookie-number');
+  equals(result, "testing value", "value from document.cookie should be 'testing value'");
+  
+  setCookies = ["cookie-number"];
 });
 
 test("Setting 2 cookies", function() {
