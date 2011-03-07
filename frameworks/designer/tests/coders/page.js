@@ -50,5 +50,5 @@ test('Verify binding in page encoding', function () {
   SC.RunLoop.end();
 
   design = SC.DesignCoder.encode(bindingPage);
-  equals(design.trim(),'SC.Page.design({mainView: SC.View.design({valueBinding: "SC.Binding.from(\'.page.number\')"})})', 'binding types encoded');  
+  equals(design.trim(),'SC.Page.design({mainView: SC.View.design({valueBinding: SC.Binding.from(\'.page.number\')})})', 'binding types encoded');  
 });
