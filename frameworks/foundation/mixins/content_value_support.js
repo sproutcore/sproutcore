@@ -135,7 +135,7 @@ SC.ContentValueSupport = {
       this.getDelegateProperty('contentValueKey', this.displayDelegate),
       content = this.get('content');
 
-    if (!key || !content || this.get('contentIsComplex')) return ; // do nothing if disabled
+    if (!key || !content) return ; // do nothing if disabled
 
     // get value -- set on content if changed
     var value = this.get('value');
@@ -156,8 +156,6 @@ SC.ContentValueSupport = {
   */
   _control_content: null,
 
-  _valueIsObserved: NO,
-  
   /** @private
     Observes when a content object has changed and handles notifying 
     changes to the value of the content object.
@@ -190,17 +188,5 @@ SC.ContentValueSupport = {
     // notify that value did change.
     this.contentPropertyDidChange(this.get('content'), '*') ;
   }.observes('contentValueKey'),
-
-  contentIsComplex: function() {
-    var key = this.contentValueKey ? this.get('contentValueKey') : this.getDelegateProperty('contentValueKey', this.displayDelegate),
-    content = this.get('content'),
-    attr;
-
-    if(!key || !content) return NO;
-
-    attr = content[key];
-
-    return attr && attr.isRecordAttribute && SC.isComplex(attr.get('typeClass'));
-  }.property('content').cacheable()
 };
 
