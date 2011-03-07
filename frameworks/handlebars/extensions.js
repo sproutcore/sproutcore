@@ -188,6 +188,49 @@ Handlebars.registerHelper('view', function(path, options) {
   });
 })();
 
+Handlebars.registerHelper('bindAttr', function(options) {
+  var attrs = options.hash, attrKeys = SC.keys(options.hash);
+  var view = options.data.view;
+  var ret = [];
+
+  // Generate a unique id for this element. This will be added as a
+  // data attribute to the element so it can be looked up when
+  // the bound property changes.
+  var dataId = jQuery.uuid++;
+
+  // For each attribute passed, create an observer and emit the
+  // current value of the property as an attribute.
+  attrKeys.forEach(function(attr) {
+    var property = attrs[attr];
+
+    // Add an observer to the view for when the property changes.
+    // When the observer fires, find the element using the
+    // unique data id and update the attribute to the new value.
+    view.addObserver(property, function observer() {
+      var result = view.getPath(property);
+      var elem = view.$("[data-handlebars-id='" + dataId + "']");
+
+      // If we aren't able to find the element, it means the element
+      // to which we were bound has been removed from the view.
+      // In that case, we can assume the template has been re-rendered
+      // and we need to clean up the observer.
+      if (elem.length === 0) {
+        view.removeObserver(property, observer);
+        return;
+      }
+
+      elem.attr(attr, result);
+    });
+
+    // Return the current value, in the form src="foo.jpg"
+    ret.push(attr+'="'+view.getPath(property)+'"');
+  });
+
+  // Add the unique identifier
+  ret.push('data-handlebars-id="'+dataId+'"');
+  return ret.join(' ');
+});
+
 Handlebars.registerHelper('loc', function(property) {
   return property.loc();
 });

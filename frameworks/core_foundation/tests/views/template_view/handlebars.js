@@ -515,3 +515,26 @@ test("should be able to bind view class names to properties", function() {
 
   equals(view.$('.is-done').length, 0, "removes class name if bound property is set to false");
 });
+
+test("should be able to bind element attributes using {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<img {{bindAttr src="content.url" alt="content.title"}}>');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: SC.Object.create({
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
+
+  SC.run(function() {
+    view.setPath('content.title', "El logo de Esproutcore");
+  });
+
+  equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
+});
