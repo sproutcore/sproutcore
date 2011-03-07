@@ -9,7 +9,7 @@
 // invokeOnce and invokeLast) to record which code scheduled the
 // invokeOnce/invokeLast targets/methods.
 
-var SC = SC || {} ;
+window.SC = window.SC || {};
 
 
 // Declaring the variable will make it easier for people who want to enter it

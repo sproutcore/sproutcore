@@ -6,7 +6,7 @@
 // ==========================================================================
 
 // test
-var SC = SC || {} ;
+window.SC = window.SC || {};
 
 // Note:  We won't use SC.T_* here because those constants might not yet be
 //        defined.
