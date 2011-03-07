@@ -97,7 +97,7 @@ SC.device = SC.Object.create({
   */
   setup: function() {
     var responder = SC.RootResponder.responder;
-    responder.listenFor('online offline'.w(), document, this);
+    responder.listenFor('online offline'.w(), window, this);
     
     this.orientationHandlingShouldChange();
   },
