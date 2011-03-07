@@ -319,7 +319,7 @@ SC.ViewDesigner = SC.Object.extend(
       
       //handle bindings
       if (prop.length > 7 && prop.slice(-7) === "Binding" && val !== undefined){
-        coder.encode(prop,val.encodeDesign());
+        coder.js(prop,val.encodeDesign());
       }
       else{
         if (val !== undefined && (val !== proto[prop])) {
