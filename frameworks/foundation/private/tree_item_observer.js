@@ -700,6 +700,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   destroy: function() {
     this.invalidateBranchObserversAt(0);
     this._objectAtCache = null ;
+    this._notifyParent = NO ; // parent doesn't care anymore
     
     // cleanup observing
     var item = this.get('item');
@@ -708,6 +709,8 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     var children = this._children,
         ro = this._childrenRangeObserver;
     if (children && ro) children.removeRangeObserver(ro);
+    
+    this.set('length', 0);
     
     sc_super();
   },
