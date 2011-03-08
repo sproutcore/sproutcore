@@ -1,4 +1,5 @@
 sc_require('views/view');
+sc_require('views/view/animation');
 
 /**
   Map to CSS Transforms
