@@ -47,11 +47,11 @@ SC.View.reopen({
   }.observes('isEnabled'),
 
   applyAttributesToContext: function(original, context) {
+    var isEnabled = this.get('isEnabled');
+
     original(context);
 
-    if (!this.get('isEnabled')) {
-      context.addClass('disabled');
-      context.attr('aria-disabled', 'true');
-    }
+    context.setClass('disabled', !isEnabled);
+    context.attr('aria-disabled', !isEnabled ? 'true' : null);
   }.enhance()
 });
