@@ -585,9 +585,6 @@ SC.CoreView.reopen(
   applyAttributesToContext: function(context) {
     context.addClass(this.get('classNames'));
 
-    var cursor = this.get('cursor');
-    if (cursor) { context.addClass(cursor.get('className')); }
-
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
     if (!this.get('isVisible')) { context.addClass('hidden'); }
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
@@ -967,7 +964,7 @@ SC.CoreView.reopen(
         }
 
         if (!view) {
-          console.error ("No view with name "+key+" has been found in "+this.toString());
+          SC.Logger.error ("No view with name "+key+" has been found in "+this.toString());
           // skip this one.
           continue;
         }

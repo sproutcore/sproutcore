@@ -316,8 +316,15 @@ SC.ViewDesigner = SC.Object.extend(
     var view = this.get('view'), proto = this.get('viewClass').prototype ;
     props.forEach(function(prop) {
       var val = view[prop] ; // avoid get() since we don't want to exec props
-      if (val !== undefined && (val !== proto[prop])) {
-        coder.encode(prop, val) ;
+      
+      //handle bindings
+      if (prop.length > 7 && prop.slice(-7) === "Binding" && val !== undefined){
+        coder.js(prop,val.encodeDesign());
+      }
+      else{
+        if (val !== undefined && (val !== proto[prop])) {
+          coder.encode(prop, val) ;
+        }
       }
     }, this);
   },
@@ -377,7 +384,8 @@ SC.ViewDesigner = SC.Object.extend(
   */
   encodeDesign: function(coder) {
     coder.set('className', SC._object_className(this.get('viewClass')));
-    this.encodeDesignProperties(coder);    
+    this.encodeDesignProperties(coder);
+    this.encodeDesignAttributeProperties(coder);
     this.encodeChildViewsDesign(coder);
     return YES ;
   },

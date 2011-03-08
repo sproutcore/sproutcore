@@ -26,7 +26,8 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   @extends SC.StaticLayout
   @since SproutCore 1.0
 */
-SC.ListItemView = SC.View.extend(SC.InlineEditable,
+SC.ListItemView = SC.View.extend(
+    SC.InlineEditable,
     SC.Control,
 /** @scope SC.ListItemView.prototype */ {
 
@@ -583,6 +584,13 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable,
       validator: validator,
       escapeHTML: escapeHTML
     }) ;
+  },
+
+  /** @private
+    Allow editing.
+  */
+  inlineEditorShouldBeginEditing: function(inlineEditor) {
+    return YES ;
   },
 
   /** @private

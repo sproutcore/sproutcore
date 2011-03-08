@@ -40,6 +40,8 @@ SC.Cookie = SC.Object.extend({
   /**
     Amount of time until the cookie expires. Set to -1 in order to delete the cookie.
 
+    If passing an Integer, it is interpreted as a number of days.
+
     @property {Integer|SC.DateTime|Date}
   */
   expires: null,
@@ -100,32 +102,28 @@ SC.Cookie = SC.Object.extend({
         expires = this.get('expires'),
         path = this.get('path'),
         domain = this.get('domain'),
-        secure = this.get('secure');
+        secure = this.get('secure'),
+        output = '',
+        date;
 
-    var expiresOutput = '';
-    if (expires && (SC.typeOf(expires) === SC.T_NUMBER || (SC.DateTime && expires.get && expires.get('milliseconds')) || SC.typeOf(expires.toUTCString) === SC.T_FUNCTION)) {
-      var date;
-      if (SC.typeOf(expires) === SC.T_NUMBER) {
+    if (expires) {
+      if (typeof expires === SC.T_NUMBER) {
         date = new Date();
-        date.setTime(date.getTime()+(expires*24*60*60*1000));
-      }
-      else if (SC.DateTime && expires.get && expires.get('milliseconds')) {
+        date.setTime(date.getTime() + (expires*24*60*60*1000));
+      } else if (SC.DateTime && expires.get && expires.get('milliseconds')) {
         date = new Date(expires.get('milliseconds'));
-      }
-      else if (SC.typeOf(expires.toUTCString) === SC.T_FUNCTION) {
+      } else if (expires.toUTCString && expires.toUTCString.apply) {
         date = expires;
       }
 
-      if (date) {
-        expiresOutput = '; expires=' + date.toUTCString();
-      }
+      if (date) output = "; expires=" + date.toUTCString();
     }
 
-    var pathOutput = path ? '; path=' + path : '';
-    var domainOutput = domain ? '; domain=' + domain : '';
-    var secureOutput = secure ? '; secure' : '';
+    if (!SC.none(path)) output += '; path=' + path;
+    if (!SC.none(domain)) output += '; domain=' + domain;
+    if (secure === YES) output += '; secure';
 
-    document.cookie = [name, '=', encodeURIComponent(value), expiresOutput, pathOutput, domainOutput, secureOutput].join('');
+    document.cookie = name + "=" + encodeURIComponent(value) + output;
 
     return this;
   }
@@ -142,7 +140,7 @@ SC.Cookie.mixin(
     @returns SC.Cookie object containing name and value of cookie
   */
   find: function(name) {
-    if (document.cookie && document.cookie != '') {
+    if (document.cookie && document.cookie !== '') {
       var cookies = document.cookie.split(';');
       for (var i = 0; i < cookies.length; i++) {
         var cookie = String(cookies[i]).trim();
@@ -158,3 +156,16 @@ SC.Cookie.mixin(
   }
 
 });
+
+SC.CookieMonster = {
+  nomNomNom: function(cookie) {
+    var isCookie = SC.kindOf(cookie, SC.Cookie);
+    if (isCookie) {
+      SC.Logger.log("YUM!");
+      return cookie.destroy();
+    }
+    
+    SC.Logger.error("Y U PASS ME NO COOKIE? %@", cookie);
+    return NO;
+  }
+};

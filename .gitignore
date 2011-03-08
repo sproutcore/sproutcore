@@ -11,4 +11,4 @@ bin
 .bundle
 Gemfile*
 *.orig
-
+.sass-cache/

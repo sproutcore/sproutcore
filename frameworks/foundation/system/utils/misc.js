@@ -70,7 +70,68 @@ SC.mixin( /** @scope SC */ {
       cString = cString + String.fromCharCode(nChar);
     }
     return cString;
-  }
+  },
 
+  /**
+    Determines if the given point is within the given element.
+
+    The test rect will include the element's padding and can be configured to
+    optionally include the border or border and margin.
+
+    @param {Object} point the point as an Object (ie. Hash) in the form { x: value, y: value }.
+    @param {DOMElement|jQuery|String} elem the element to test inclusion within.
+      This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
+    @param {String} includeFlag flag to determine the dimensions of the element to test within.
+      One of either: 'padding', 'border' or 'margin' (default: 'border').
+    @param {String} relativeToFlag flag to determine which relative element to determine offset by.
+      One of either: 'document', 'viewport' or 'parent' (default: 'document').
+    @returns {Boolean} YES if the point is within the element; NO otherwise
+  */
+
+  // Note: This method is the most correct way to test the inclusion of a point within a DOM element.
+  // First, it uses SC.offset which is a slightly improved version of jQuery's offset and much more reliable
+  // than writing your own offset determination code.
+  // Second, the offset must be adjusted to account for the element's left and top border
+  // if not including the border or to account for the left and top margins when including the margins.
+  pointInElement: function(point, elem, includeFlag, relativeToFlag) {
+    var offset,
+        width,
+        height,
+        rect;
+
+    elem = jQuery(elem);
+    includeFlag = includeFlag || 'border';
+
+    // Find the offset
+    offset = SC.offset(elem, relativeToFlag);
+
+    // Find the dimensions
+    if (includeFlag === 'padding') {
+      width = elem.innerWidth();
+      height = elem.innerHeight();
+
+      // Adjust offset to account for top & left borders
+      offset.top += window.parseInt(elem.css('border-top-width').replace('px', ''));
+      offset.left += window.parseInt(elem.css('border-left-width').replace('px', ''));
+    } else {
+      width = elem.outerWidth(includeFlag === 'margin');
+      height = elem.outerHeight(includeFlag === 'margin');
+
+      if (includeFlag === 'margin') {
+        // Adjust offset to account for top & left margins
+        offset.top -= window.parseInt(elem.css('margin-top').replace('px', ''));
+        offset.left -= window.parseInt(elem.css('margin-left').replace('px', ''));
+      }
+    }
+
+    rect = {
+      x: offset.left,
+      y: offset.top,
+      width: width,
+      height: height
+    };
+
+    return SC.pointInRect(point, rect);
+  }
 
 });

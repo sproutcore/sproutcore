@@ -131,6 +131,56 @@ test("SC.TemplateView updates when a property changes", function() {
   equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
 });
 
+test("should not update when a property is removed from the view", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('<h1 id="first">{{#bind "content"}}{{#bind "foo"}}{{bind "baz"}}{{/bind}}{{/bind}}</h1>')
+  });
+  var removeCalled = 0;
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      foo: SC.Object.create({
+        baz: "unicorns",
+
+        removeObserver: function(property, func) {
+          sc_super();
+          removeCalled++;
+        }
+      })
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "unicorns", "precond - renders the bound value");
+
+  var oldContent = view.get('content');
+
+  SC.run(function() {
+    view.set('content', SC.Object.create({
+      foo: SC.Object.create({
+        baz: "ninjas"
+      })
+    }));
+  });
+
+  equals(view.$('#first').text(), 'ninjas', "updates to new content value");
+
+  SC.run(function() {
+    oldContent.setPath('foo.baz', 'rockstars');
+  });
+
+  SC.run(function() {
+    oldContent.setPath('foo.baz', 'ewoks');
+  });
+
+  equals(removeCalled, 1, "does not try to remove observer more than once");
+  equals(view.$('#first').text(), "ninjas", "does not update removed object");
+});
+
 
 test("Handlebars templates update properties if a content object changes", function() {
   var templates;
@@ -173,6 +223,90 @@ test("Handlebars templates update properties if a content object changes", funct
   view.setPath('coffee.price', "$5");
 
   equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
+});
+
+test("Template updates correctly if a path is passed to the bind helper", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{bind "coffee.price"}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    coffee: SC.Object.create({
+      price: '$4'
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "$4", "precond - renders price");
+
+  view.setPath('coffee.price', "$5");
+
+  equals(view.$('h1').text(), "$5", "updates when property changes");
+
+  view.set('coffee', { price: "$6" });
+  equals(view.$('h1').text(), "$6", "updates when parent property changes");
+});
+
+test("Template updates correctly if a path is passed to the bind helper and the context object is an SC.ObjectController", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{bind "coffee.price"}}</h1>')
+  });
+
+  var controller = SC.ObjectController.create();
+  var realObject = SC.Object.create({
+    price: "$4"
+  });
+
+  controller.set('content', realObject);
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    coffee: controller
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "$4", "precond - renders price");
+
+  realObject.set('price', "$5");
+
+  equals(view.$('h1').text(), "$5", "updates when property is set on real object");
+
+  SC.run(function() {
+    controller.set('price', "$6" );
+  });
+
+  equals(view.$('h1').text(), "$6", "updates when property is set on object controller");
+});
+
+test("Should insert a localized string if the {{loc}} helper is used", function() {
+  SC.stringsFor('en', {
+    'Brazil': 'Brasilia'
+  });
+
+  templates = SC.Object.create({
+    'loc': SC.Handlebars.compile('<h1>Country: {{loc "Brazil"}}')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'loc',
+    templates: templates,
+
+    country: 'Brazil'
+  });
+
+  view.createLayer();
+  equals(view.$('h1').text(), 'Country: Brasilia', "returns localized value");
 });
 
 test("Template views return a no-op function if their template cannot be found", function() {
@@ -292,4 +426,115 @@ test("Collection views that specify an example view class have their children be
   parentView.createLayer();
 
   ok(parentView.childViews[0].childViews[0].isCustom, "uses the example view class");
+});
+
+test("should update boundIf blocks if the conditional changes", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#boundIf "content.myApp.isEnabled"}}{{content.wham}}{{/boundIf}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am",
+      myApp: SC.Object.create({
+        isEnabled: YES
+      })
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "renders block when condition is true");
+
+  SC.run(function() { view.get('content').setPath('myApp.isEnabled', NO); });
+
+  equals(view.$('#first').text(), "", "re-renders without block when condition is false");
+});
+
+test("{{view}} id attribute should set id on layer", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('{{#view "TemplateTests.IdView" id="bar"}}baz{{/view}}')
+  });
+
+  TemplateTests.IdView = SC.TemplateView.create();
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('#bar').length, 1, "adds id attribute to layer");
+  equals(view.$('#bar').text(), 'baz', "emits content");
+});
+
+test("{{view}} class attribute should set class on layer", function() {
+  var templates = SC.Object.create({
+    foo: SC.Handlebars.compile('{{#view "TemplateTests.IdView" class="bar"}}baz{{/view}}')
+  });
+
+  TemplateTests.IdView = SC.TemplateView.create();
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('.bar').length, 1, "adds class attribute to layer");
+  equals(view.$('.bar').text(), 'baz', "emits content");
+});
+
+test("should be able to bind view class names to properties", function() {
+  var templates = SC.Object.create({
+    template: SC.Handlebars.compile('{{#view "TemplateTests.classBindingView" classBinding="isDone"}}foo{{/view}}')
+  });
+
+  TemplateTests.classBindingView = SC.TemplateView.create({
+    isDone: YES
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'template',
+    templates: templates
+  });
+
+  view.createLayer();
+
+  equals(view.$('.is-done').length, 1, "dasherizes property and sets class name");
+
+  SC.run(function() {
+    TemplateTests.classBindingView.set('isDone', NO);
+  });
+
+  equals(view.$('.is-done').length, 0, "removes class name if bound property is set to false");
+});
+
+test("should be able to bind element attributes using {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<img {{bindAttr src="content.url" alt="content.title"}}>');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: SC.Object.create({
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
+
+  SC.run(function() {
+    view.setPath('content.title', "El logo de Esproutcore");
+  });
+
+  equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
 });

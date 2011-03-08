@@ -84,7 +84,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       try{
         localStorage.load("SC.UserDefaults");
       }catch(e){
-        console.err("Couldn't load userDefaults in IE7: "+e.description);
+        SC.Logger.error("Couldn't load userDefaults in IE7: "+e.description);
       }
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
@@ -179,7 +179,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
         try{
           localStorage[key] = encodedValue;
         }catch(e){
-          console.error("Failed using localStorage. "+e);
+          SC.Logger.error("Failed using localStorage. "+e);
         }
       }
     }
@@ -241,7 +241,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
         try{
           delete localStorage[key];
         } catch(e) {
-          console.warn('Deleting local storage encountered a problem. '+e);
+          SC.Logger.warn('Deleting local storage encountered a problem. '+e);
         }
       }
     }
@@ -326,7 +326,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       var myDB;
       try {
         if (!window.openDatabase) {
-          console.error("Trying to load a database with safari version 3.1 "+
+          SC.Logger.error("Trying to load a database with safari version 3.1 "+
                   "to get SC.UserDefaults to work. You are either in a"+
                   " previous version or there is a problem with your browser.");
           return;
@@ -341,7 +341,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
         }
       } catch(e) {
-        console.error("Trying to load a database with safari version 3.1 "+
+        SC.Logger.error("Trying to load a database with safari version 3.1 "+
                 "to get SC.UserDefaults to work. You are either in a"+
                 " previous version or there is a problem with your browser.");
         return;

@@ -41,17 +41,17 @@ SC.BLANK_IMAGE.width = SC.BLANK_IMAGE.height = 1;
 
   @extends SC.View
   @extends SC.Control
-  @extends SC.InnerLayout
+  @extends SC.InnerFrame
   @since SproutCore 1.0
 */
 SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 /** @scope SC.ImageView.prototype */ {
 
   classNames: 'sc-image-view',
-  
+
   ariaRole: 'img',
 
-  displayProperties: 'frame image imageValue innerFrame status toolTip type'.w(),
+  displayProperties: 'frame image innerFrame toolTip'.w(),
 
   renderDelegateName: function() {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
@@ -97,9 +97,12 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   innerFrame: function() {
     var image = this.get('image'),
         imageWidth = image.width,
-        imageHeight = image.height;
+        imageHeight = image.height,
+        frame = this.get('frame');
 
-    return this.innerFrameForSize(imageWidth, imageHeight);
+    if (SC.none(frame)) return {x: 0, y: 0, width: 0, height: 0};  // frame is 'null' until rendered when useStaticLayout === YES
+
+    return this.innerFrameForSize(imageWidth, imageHeight, frame.width, frame.height);
   }.property('align', 'image', 'scale', 'frame').cacheable(),
 
   /**
@@ -188,8 +191,9 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   // notifies that the frame has changed, so we update our view, which calls viewDidResize, which notifies
   // that the frame has changed, so we update our view, etc. in an infinite loop.
   viewDidResize: function() {
-    // 'frame' as a property is cached and won't be updated, however calling notifyPropertyChange on 'frame' causes the aforementioned infinite loop
-    // Instead, measure the frame ourselves and only notify if it has changed width or height
+    // 'frame' as a property is cached and won't yet be updated, however calling notifyPropertyChange on 'frame'
+    // causes the aforementioned infinite loop.  Instead, measure the frame ourselves and only notify if it has
+    // changed width or height
     var layer = this.get('layer'),
         width,
         height;
@@ -309,7 +313,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     var value = this.get('imageValue'),
         type = this.get('type'),
         that = this,
-        image;
+        image,
+        jqImage;
 
     if (type === SC.IMAGE_TYPE_URL) {
       image = new Image();
@@ -326,11 +331,14 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
         });
       };
 
+      // Don't grab the jQuery object repeatedly
+      jqImage = $(image);
+
       // Using bind here instead of setting onabort/onerror/onload directly
       // fixes an issue with images having 0 width and height
-      $(image).bind('error', errorFunc);
-      $(image).bind('abort', errorFunc);
-      $(image).bind('load', loadFunc);
+      jqImage.bind('error', errorFunc);
+      jqImage.bind('abort', errorFunc);
+      jqImage.bind('load', loadFunc);
 
       image.src = value;
       return YES;

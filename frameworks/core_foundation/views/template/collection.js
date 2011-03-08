@@ -44,7 +44,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     this.didCreateLayer();
 
     this.get('content').addRangeObserver(null, this, this.arrayContentDidChange);
-  }.observes('content').observes('content.[]'),
+  }.observes('content', '.content.[]'),
 
   arrayContentDidChange: function(array, objects, key, indexes) {
     var content = this.get('content'),
@@ -79,6 +79,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       view.createLayer().$().appendTo(this.$());
     }
 
+    var itemOptions = this.itemViewOptions || {};
+
     // Add items, using previous if possible
     for (i=0, length=array.get('length'); i < length; i++) {
       item = array.objectAt(i);
@@ -86,7 +88,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       if (!view) {
         view = this.createChildView(itemViewClass.extend({
           content: item,
-          tagName: 'li'
+          tagName: 'li',
+
+          render: function(context) {
+            sc_super();
+            SC.Handlebars.ViewHelper.applyAttributes(itemOptions, this, context);
+          }
         }));
         view.createLayer().$().appendTo(this.$());
       }

@@ -128,7 +128,7 @@ SC.ResponderContext = {
 
     if (this._locked) {
       if (trace) {
-        console.log('%@: AFTER ACTION: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
+        SC.Logger.log('%@: AFTER ACTION: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
       }
 
       this._pendingResponder = responder;
@@ -136,7 +136,7 @@ SC.ResponderContext = {
     }
 
     if (trace) {
-      console.log('%@: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
+      SC.Logger.log('%@: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
     }
 
     if (responder) responder.set("becomingFirstResponder", YES);
@@ -233,7 +233,7 @@ SC.ResponderContext = {
 
     this._locked = YES;
     if (trace) {
-      console.log("%@: begin action '%@' (%@, %@)".fmt(this, action, sender, context));
+      SC.Logger.log("%@: begin action '%@' (%@, %@)".fmt(this, action, sender, context));
     }
 
     if (!handled && !working && this.tryToPerform) {
@@ -251,8 +251,8 @@ SC.ResponderContext = {
     }
 
     if (trace) {
-      if (!handled) console.log("%@:  action '%@' NOT HANDLED".fmt(this,action));
-      else console.log("%@: action '%@' handled by %@".fmt(this, action, this.responderNameFor(working)));
+      if (!handled) SC.Logger.log("%@:  action '%@' NOT HANDLED".fmt(this,action));
+      else SC.Logger.log("%@: action '%@' handled by %@".fmt(this, action, this.responderNameFor(working)));
     }
 
     this._locked = NO ;

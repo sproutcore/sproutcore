@@ -301,6 +301,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - %B - The full month name (``January'')
       - %c - The preferred local date and time representation
       - %d - Day of the month (01..31)
+      - %D - Day of the month (0..31)
       - %h - Hour of the day, 24-hour clock (0..23)
       - %H - Hour of the day, 24-hour clock (00..23)
       - %i - Hour of the day, 12-hour clock (1..12)
@@ -902,7 +903,7 @@ SC.DateTime.mixin(SC.Comparable,
   parse: function(str, fmt) {
     // Declared as an object not a literal since in some browsers the literal
     // retains state across function calls
-    var re = new RegExp('(?:%([aAbBcdHIjmMpsSUWwxXyYZ%])|(.))', "g");
+    var re = new RegExp('(?:%([aAbBcdDhHIjmMpsSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
     
     if (SC.none(fmt)) fmt = SC.DATETIME_ISO8601;
@@ -915,7 +916,9 @@ SC.DateTime.mixin(SC.Comparable,
           case 'b': opts.month = scanner.scanArray(this.abbreviatedMonthNames) + 1; break;
           case 'B': opts.month = scanner.scanArray(this.monthNames) + 1; break;
           case 'c': throw "%c is not implemented";
-          case 'd': opts.day = scanner.scanInt(1, 2); break;
+          case 'd':
+          case 'D': opts.day = scanner.scanInt(1, 2); break;
+          case 'h':
           case 'H': opts.hour = scanner.scanInt(1, 2); break;
           case 'I': opts.hour = scanner.scanInt(1, 2); break;
           case 'j': throw "%j is not implemented";
@@ -947,7 +950,7 @@ SC.DateTime.mixin(SC.Comparable,
         }
       }
     } catch (e) {
-      console.log('SC.DateTime.createFromString ' + e.toString());
+      SC.Logger.log('SC.DateTime.createFromString ' + e.toString());
       return null;
     }
     
@@ -1044,7 +1047,7 @@ SC.DateTime.mixin(SC.Comparable,
     // need to move into local time zone for these calculations
     this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
 
-    return format.replace(/\%([aAbBcdDHiIjmMpsSUWwxXyYZ\%])/g, function() {
+    return format.replace(/\%([aAbBcdDhHiIjmMpsSUWwxXyYZ\%])/g, function() {
       var v = that.__toFormattedString.call(that, arguments, start, timezone);
       return v;
     });

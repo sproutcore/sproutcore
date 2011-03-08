@@ -224,15 +224,31 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
       frame.width = tempFrame.width;
     }
 
-    var layout={},
-		paneElem = pane.$()[0],
-		tarLayout = target.get('layout');
+    // set field values
+    this.set('validator', options.validator) ;
+    this.set('value', this._originalValue) ;
+    //this.set('selectedRange', options.selectedRange || { start: this._originalValue.length, length: 0 }) ;
 
-    layout.height = frame.height;
-    layout.width = frame.width;
+    // add to window.
 
-    if (isCollection && tarLayout.left) {
-      layout.left=frame.x-tarLayout.left-paneElem.offsetLeft-1;
+
+    // First try to find the pane in the options hash.
+    // If it's not available, ask the delegate for it.
+    pane = options.pane;
+    if (!pane) {
+      pane = del.get('pane');
+    }
+    paneElem = pane.$()[0];
+
+    layout.height = this._optframe.height;
+    layout.width=this._optframe.width;
+
+    tarLayout = options.layout;
+    if (!tarLayout) {
+      tarLayout = del.get('layout');
+    }
+    if (this._optIsCollection && tarLayout.left) {
+      layout.left=this._optframe.x-tarLayout.left-paneElem.offsetLeft-1;
       if(SC.browser.msie==7) layout.left--;
     } else {
       layout.left=frame.x-paneElem.offsetLeft-1;

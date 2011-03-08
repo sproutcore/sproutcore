@@ -62,7 +62,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     }
 
     if (log) {
-      console.log("SC.Module: Attempting to load '%@'".fmt(moduleName));
+      SC.Logger.log("SC.Module: Attempting to load '%@'".fmt(moduleName));
     }
 
     // If we couldn't find anything in the SC.MODULE_INFO hash, we don't have any record of the
@@ -78,12 +78,12 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // If the module is already loaded, execute the callback immediately if SproutCore is loaded,
     // or else as soon as SC has finished loading.
     if (module.isLoaded) {
-      if (log) console.log("SC.Module: Module '%@' already loaded.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.Module: Module '%@' already loaded.".fmt(moduleName));
 
       // If the module has finished loading and we have the string
       // representation, try to evaluate it now.
       if (module.source) {
-        if (log) console.log("SC.Module: Evaluating JavaScript for module '%@'.".fmt(moduleName));
+        if (log) SC.Logger.log("SC.Module: Evaluating JavaScript for module '%@'.".fmt(moduleName));
         this._evaluateStringLoadedModule(module);
       }
 
@@ -101,7 +101,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // The module is not yet loaded, so register the callback and, if necessary, begin loading
     // the code.
     else {
-      if (log) console.log("SC.Module: Module '%@' is not loaded, loading now.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.Module: Module '%@' is not loaded, loading now.".fmt(moduleName));
 
       // If this method is called more than once for the same module before it is finished
       // loading, we might have multiple callbacks that need to be executed once it loads.
@@ -146,7 +146,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     if (module.isLoading || module.isLoaded) return;
 
-    if (SC.LOG_MODULE_LOADING) console.log("SC.Module: Prefetching module '%@'.".fmt(moduleName));
+    if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.Module: Prefetching module '%@'.".fmt(moduleName));
     this._loadDependenciesForModule(moduleName);
     this._loadCSSForModule(moduleName);
     this._loadJavaScriptForModule(moduleName);
@@ -169,7 +169,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var idx, len;
 
     if (SC.LOG_MODULE_LOADING) {
-      console.log("SC.Module: Module '%@' is marked for lazy instantiation, instantiating it now…".fmt(moduleName));
+      SC.Logger.log("SC.Module: Module '%@' is marked for lazy instantiation, instantiating it now…".fmt(moduleName));
     }
 
     len = lazyInfo.length;
@@ -178,7 +178,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       try {
         lazyInfo[idx]();
       } catch(e) {
-        console.error("SC.Module: Failed to lazily instatiate entry for  '%@'".fmt(moduleName));
+        SC.Logger.error("SC.Module: Failed to lazily instatiate entry for  '%@'".fmt(moduleName));
       }
     }
 
@@ -232,7 +232,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       url = styles[idx] ;
 
       if (url.length > 0) {
-        if (SC.LOG_MODULE_LOADING) console.log("SC.Module: Loading CSS file in '%@' -> '%@'".fmt(moduleName, url));
+        if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.Module: Loading CSS file in '%@' -> '%@'".fmt(moduleName, url));
         el = document.createElement('link') ;
         el.setAttribute('href', url) ;
         el.setAttribute('rel', "stylesheet") ;
@@ -273,7 +273,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     }
 
     if (url.length > 0) {
-      if (SC.LOG_MODULE_LOADING) console.log("SC.Module: Loading JavaScript file in '%@' -> '%@'".fmt(moduleName, url));
+      if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.Module: Loading JavaScript file in '%@' -> '%@'".fmt(moduleName, url));
 
       el = document.createElement('script') ;
       el.setAttribute('type', "text/javascript") ;
@@ -371,7 +371,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
             dependents.push(moduleName) ;
 
-            if (log) console.log("SC.Module: '%@' depends on '%@', loading dependency…".fmt(moduleName, requiredModuleName));
+            if (log) SC.Logger.log("SC.Module: '%@' depends on '%@', loading dependency…".fmt(moduleName, requiredModuleName));
 
             // Load dependencies
             SC.Module.loadModule(requiredModuleName) ;
@@ -427,7 +427,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       var moduleInfo = SC.MODULE_INFO[moduleName], callbacks ;
       if (!moduleInfo) return ; // shouldn't happen, but recover anyway
 
-      if (SC.LOG_MODULE_LOADING) console.log("SC.Module: Module '%@' has completed loading, invoking callbacks.".fmt(moduleName));
+      if (SC.LOG_MODULE_LOADING) SC.Logger.log("SC.Module: Module '%@' has completed loading, invoking callbacks.".fmt(moduleName));
 
       callbacks = moduleInfo.callbacks || [] ;
 
@@ -441,7 +441,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       var module = moduleInfo[moduleName];
       var log = SC.LOG_MODULE_LOADING;
 
-      if (log) console.log("SC.Module: Evaluating and invoking callbacks for '%@'.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.Module: Evaluating and invoking callbacks for '%@'.".fmt(moduleName));
 
       if (module.source) {
         this._evaluateStringLoadedModule(module);
@@ -466,7 +466,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         dependentName = dependents[idx];
         dependent = moduleInfo[dependentName];
         if (dependent.isLoaded && this._dependenciesMetForModule(dependentName)) {
-          if (log) console.log("SC.Module: Now that %@ has loaded, all dependencies for a dependent %@ are met.".fmt(moduleName, dependentName));
+          if (log) SC.Logger.log("SC.Module: Now that %@ has loaded, all dependencies for a dependent %@ are met.".fmt(moduleName, dependentName));
           this._evaluateAndInvokeCallbacks(dependentName);
         }
       }
@@ -487,16 +487,16 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var dependenciesMet;
     var callbacks, targets;
 
-    if (log) console.log("SC.Module: Module '%@' finished loading.".fmt(moduleName));
+    if (log) SC.Logger.log("SC.Module: Module '%@' finished loading.".fmt(moduleName));
 
     if (!module) {
-      if (log) console.log("SC._moduleDidLoad() called for unknown module '@'.".fmt(moduleName));
+      if (log) SC.Logger.log("SC._moduleDidLoad() called for unknown module '@'.".fmt(moduleName));
       module = SC.MODULE_INFO[moduleName] = { isLoaded: YES, isReady: YES } ;
       return;
     }
 
     if (module.isLoaded) {
-      if (log) console.log("SC._moduleDidLoad() called more than once for module '%@'. Skipping.".fmt(moduleName));
+      if (log) SC.Logger.log("SC._moduleDidLoad() called more than once for module '%@'. Skipping.".fmt(moduleName));
       return ;
     }
 
@@ -509,11 +509,11 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if (dependenciesMet) {
         this._evaluateAndInvokeCallbacks(moduleName);
       } else {
-        if (log) console.log("SC.Module: Dependencies for '%@' not met yet, waiting to evaluate.".fmt(moduleName));
+        if (log) SC.Logger.log("SC.Module: Dependencies for '%@' not met yet, waiting to evaluate.".fmt(moduleName));
       }
     } else {
       delete module.isPrefetching;
-      if (log) console.log("SC.Module: Module '%@' was prefetched, not evaluating until needed.".fmt(moduleName));
+      if (log) SC.Logger.log("SC.Module: Module '%@' was prefetched, not evaluating until needed.".fmt(moduleName));
     }
   },
 
