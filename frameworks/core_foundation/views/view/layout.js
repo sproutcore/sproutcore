@@ -294,17 +294,6 @@ SC.View.reopen(
   },
 
   /**
-    Frame describes the current bounding rect for your view.  This is always
-    measured from the top-left corner of the parent view.
-
-    @property {Rect}
-    @test in layoutStyle
-  */
-  frame: function() {
-    return this.computeFrameWithParentFrame(null) ;
-  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidResize to check the frame for us
-
-  /**
     Computes what the frame of this view would be if the parent were resized
     to the passed dimensions.  You can use this method to project the size of
     a frame based on the resize behavior of the parent.
@@ -319,10 +308,13 @@ SC.View.reopen(
     @param {Rect} pdim the projected parent dimensions
     @returns {Rect} the computed frame
   */
-  computeFrameWithParentFrame: function(pdim) {
+  computeFrameWithParentFrame: function(original, pdim) {
+    if (this.get('useStaticLayout')) {
+      return original(pdim);
+    }
+
     var layout = this.get('layout'),
         f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
-        stLayout = this.get('useStaticLayout'),
         pv = this.get('parentView'),
         dH, dW, //shortHand for parentDimensions
         borderTop, borderLeft,
@@ -335,37 +327,19 @@ SC.View.reopen(
         lcX = layout.centerX,
         lcY = layout.centerY;
 
-    if (lW === AUTO && stLayout !== undefined && !stLayout) {
+    if (lW === AUTO) {
       error = SC.Error.desc(("%@.layout() cannot use width:auto if "+
                 "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       SC.Logger.error(error.toString()) ;
       throw error ;
     }
 
-    if (lH === AUTO && stLayout !== undefined && !stLayout) {
+    if (lH === AUTO) {
        error = SC.Error.desc(("%@.layout() cannot use height:auto if "+
                 "staticLayout is disabled").fmt(this),"%@".fmt(this), -1);
        SC.Logger.error(error.toString())  ;
       throw error ;
     }
-
-    if (stLayout) {
-      // need layer to be able to compute rect
-      if (layer = this.get('layer')) {
-        f = SC.viewportOffset(layer); // x,y
-        if (pv) { f = pv.convertFrameFromView(f, null); }
-
-        /*
-          TODO Can probably have some better width/height values - CC
-          FIXME This will probably not work right with borders - PW
-        */
-        f.width = layer.offsetWidth;
-        f.height = layer.offsetHeight;
-        return f;
-      }
-      return null; // can't compute
-    }
-
 
     if (!pdim) { pdim = this.computeParentDimensions(layout) ; }
     dH = pdim.height;
@@ -520,7 +494,7 @@ SC.View.reopen(
     if (f.width < 0) f.width = 0 ;
 
     return f;
-  },
+  }.enhance(),
 
   computeParentDimensions: function(frame) {
     var ret, pv = this.get('parentView'), pf = (pv) ? pv.get('frame') : null ;

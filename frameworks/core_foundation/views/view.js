@@ -842,6 +842,47 @@ SC.CoreView.reopen(
   },
 
   /**
+    Frame describes the current bounding rect for your view.  This is always
+    measured from the top-left corner of the parent view.
+
+    @property {Rect}
+    @test in layoutStyle
+  */
+  frame: function() {
+    return this.computeFrameWithParentFrame(null) ;
+  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidResize to check the frame for us
+
+  /**
+    Computes the frame of the view by examining the view's DOM representation.
+    If no representation exists, returns null.
+
+    If a parent view is passed, its bounds will be taken into account when
+    calculating the frame.
+
+    @param {Rect} pdim the parent view's dimensions
+    @returns {Rect} the computed frame
+  */
+  computeFrameWithParentFrame: function(pdim) {
+    var layer;
+    var pv = this.get('parentView');
+
+    // need layer to be able to compute rect
+    if (layer = this.get('layer')) {
+      f = SC.viewportOffset(layer); // x,y
+      if (pv) { f = pv.convertFrameFromView(f, null); }
+
+      /*
+        TODO Can probably have some better width/height values - CC
+        FIXME This will probably not work right with borders - PW
+      */
+      f.width = layer.offsetWidth;
+      f.height = layer.offsetHeight;
+      return f;
+    }
+    return null; // can't compute
+  },
+
+  /**
     Removes the child view from the parent view.
 
     @param {SC.View} view
