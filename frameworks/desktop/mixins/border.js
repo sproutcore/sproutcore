@@ -100,7 +100,9 @@ SC.Border = {
 
   /** @private */
   initMixin: function() {
+    console.warn("SC.Border is deprecated, please set border in your layout");
     this._sc_border_borderStyleDidChange();
+    this._sc_border_borderDimensionsDidChange();
   },
 
   /** @private */
@@ -119,12 +121,23 @@ SC.Border = {
         borderSize = SC.Border.dimensions[borderStyle];
 
     if (borderSize) {
-      this.borderTop    = borderSize;
-      this.borderRight  = borderSize;
-      this.borderBottom = borderSize;
-      this.borderLeft   = borderSize;
+      this.beginPropertyChanges();
+      this.set('borderTop', borderSize);
+      this.set('borderRight', borderSize);
+      this.set('borderBottom', borderSize);
+      this.set('borderLeft', borderSize);
+      this.endPropertyChanges();
     }
-  }
+  },
+
+  _sc_border_borderDimensionsDidChange: function(){
+    var borderTop     = this.get('borderTop'),
+        borderRight   = this.get('borderRight'),
+        borderBottom  = this.get('borderBottom'),
+        borderLeft    = this.get('borderLeft');
+    this.adjust({ borderTop: borderTop, borderRight: borderRight, borderBottom: borderBottom, borderLeft: borderLeft });
+  }.observes('borderTop', 'borderRight', 'borderBottom', 'borderLeft')
+
 };
 
 SC.mixin(SC.Border, {

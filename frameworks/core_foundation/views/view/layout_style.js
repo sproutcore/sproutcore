@@ -105,6 +105,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var centerY = (this.centerY = layout.centerY);
     this.hasCenterY = (centerY != null);
 
+    var borderTop = (this.borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0);
+    var borderRight = (this.borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0);
+    var borderBottom = (this.borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0);
+    var borderLeft = (this.borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0);
+
     // the toString here is to ensure that it doesn't get px added to it
     this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
     this.opacity = (layout.opacity != null) ? layout.opacity.toString() : null;
@@ -170,10 +175,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   },
 
   _calculatePosition: function(direction) {
-    var translate = null, turbo = this.get('turbo'), layout = this.layout, ret = this.ret;
+    var translate = null, turbo = this.get('turbo'), ret = this.ret;
 
     var start, finish, size, maxSize, margin,
-        hasStart, hasFinish, hasSize, hasMaxSize;
+        hasStart, hasFinish, hasSize, hasMaxSize,
+        startBorderVal, finishBorder, sizeNum;
 
     if (direction === 'x') {
       start      = 'left';
@@ -181,6 +187,8 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       size       = 'width';
       maxSize    = 'maxWidth';
       margin     = 'marginLeft';
+      startBorder  = 'borderLeft';
+      finishBorder = 'borderRight';
       hasStart   = this.hasLeft;
       hasFinish  = this.hasRight;
       hasSize    = this.hasWidth;
@@ -191,15 +199,27 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       size       = 'height';
       maxSize    = 'maxHeight';
       margin     = 'marginTop';
+      startBorder  = 'borderTop';
+      finishBorder = 'borderBottom';
       hasStart   = this.hasTop;
       hasFinish  = this.hasBottom;
       hasSize    = this.hasHeight;
       hasMaxSize = this.hasMaxHeight;
     }
 
-    ret[size]   = this._cssNumber(layout[size]);
-    ret[start]  = this._cssNumber(layout[start]);
-    ret[finish] = this._cssNumber(layout[finish]);
+    ret[start]  = this._cssNumber(this[start]);
+    ret[finish] = this._cssNumber(this[finish]);
+
+    startBorderVal = this._cssNumber(this[startBorder]);
+    finishBorderVal = this._cssNumber(this[finishBorder]);
+    ret[startBorder+'Width'] = startBorderVal || null;
+    ret[finishBorder+'Width'] = finishBorderVal || null;
+
+    sizeNum = this[size];
+    // This is a normal number
+    if (sizeNum >= 1) { sizeNum -= (startBorderVal + finishBorderVal); }
+    ret[size] = this._cssNumber(sizeNum);
+
 
     if(hasStart) {
       if (turbo) {
@@ -223,8 +243,8 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   },
 
   _calculateCenter: function(direction) {
-    var layout = this.layout, ret = this.ret,
-        size, center, start, finish, margin;
+    var ret = this.ret,
+        size, center, start, finish, margin, startBorderVal, finishBorderVal;
 
     if (direction === 'x') {
         size   = 'width';
@@ -232,22 +252,34 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
         start  = 'left';
         finish = 'right';
         margin = 'marginLeft';
+        startBorder  = 'borderLeft';
+        finishBorder = 'borderRight';
     } else {
         size   = 'height';
         center = 'centerY';
         start  = 'top';
         finish = 'bottom';
         margin = 'marginTop';
+        startBorder  = 'borderTop';
+        finishBorder = 'borderBottom';
     }
 
     ret[start] = "50%";
-    ret[size]  = this._cssNumber(layout[size]) || 0;
 
-    var sizeValue   = layout[size],
-        centerValue = layout[center],
-        startValue  = layout[start];
+    startBorderVal = this._cssNumber(this[startBorder]);
+    finishBorderVal = this._cssNumber(this[finishBorder]);
+    ret[startBorder+'Width'] = startBorderVal || null;
+    ret[finishBorder+'Width'] = finishBorderVal || null;
+
+
+    var sizeValue   = this[size],
+        centerValue = this[center],
+        startValue  = this[start];
 
     var sizeIsPercent = SC.isPercentage(sizeValue), centerIsPercent = SC.isPercentage(centerValue, YES);
+
+    // If > 1 then it should be a normal number value
+    if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
 
     if((sizeIsPercent && centerIsPercent) || (!sizeIsPercent && !centerIsPercent)) {
       var value = centerValue - sizeValue/2;
@@ -257,7 +289,9 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       SC.Logger.warn("You have to set "+size+" and "+center+" using both percentages or pixels");
       ret[margin] = "50%";
     }
-    ret[finish] = null ;
+
+    ret[size] = this._cssNumber(sizeValue) || 0;
+    ret[finish] = null;
   },
 
   _calculateTransforms: function(translateLeft, translateTop){
@@ -483,7 +517,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   transitionDidEnd: function(evt) {
     var propertyName = evt.originalEvent.propertyName,
-        layout = this.getPath('view.layout'),
         animation, idx;
 
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
