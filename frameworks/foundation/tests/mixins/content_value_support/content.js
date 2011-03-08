@@ -10,10 +10,10 @@
 // contentPropertyDidChange()
 // 
 var view, content ;
-module('SC.Control#contentPropertyDidChange', {
+module('SC.ContentValueSupport#contentPropertyDidChange', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.View.create(SC.Control);
+    view = SC.View.create(SC.ContentValueSupport);
   },
   
   teardown: function() {
@@ -65,7 +65,7 @@ test("should no longer be invoked when a key is changed on a former content obje
 
 test("should fire even on a content object set when the object is created", function() {
   var callCount = 0;
-  var view = SC.View.create(SC.Control, {
+  var view = SC.View.create(SC.ContentValueSupport, {
     contentPropertyDidChange: function() { callCount++; },
     content: content
   });
@@ -79,10 +79,10 @@ test("should fire even on a content object set when the object is created", func
 // ..........................................................
 // updatePropertyFromContent()
 // 
-module("SC.Control#updatePropertyFromContent()", {
+module("SC.ContentValueSupport#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, { content: content });
+    view = SC.View.create(SC.ContentValueSupport, { content: content });
   },
   teardown: function() {
     content = null ;
@@ -125,10 +125,10 @@ test("should be able to get value from a content object that is not SC.Object", 
 // ..........................................................
 // updateContentWithValueObserver()
 // 
-module("SC.Control#updatePropertyFromContent()", {
+module("SC.ContentValueSupport#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, { 
+    view = SC.View.create(SC.ContentValueSupport, { 
       value: "bar",
       content: content,
       contentValueKey: "bar",
