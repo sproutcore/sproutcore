@@ -148,7 +148,7 @@ SC.extend = SC.mixin ;
 //
 // Enough with the bootstrap code.  Let's define some core functions
 
-SC.mixin(/** @scope SC */ {
+SC.mixin(/** @scope window.SC.prototype */ {
 
   // ........................................
   // GLOBAL CONSTANTS
@@ -175,7 +175,7 @@ SC.mixin(/** @scope SC */ {
     Use this instead of the built-in typeOf() to get the type of an item.
     It will return the same result across all browsers and includes a bit
     more detail.  Here is what will be returned:
-
+<pre>
     | Return Value Constant | Meaning |
     | SC.T_STRING | String primitive |
     | SC.T_NUMBER | Number primitive |
@@ -187,7 +187,7 @@ SC.mixin(/** @scope SC */ {
     | SC.T_CLASS | A SproutCore class (created using SC.Object.extend()) |
     | SC.T_OBJECT | A SproutCore object instance |
     | SC.T_HASH | A JavaScript object not inheriting from SC.Object |
-
+</pre>
     @param item {Object} the item to check
     @returns {String} the type
   */
@@ -536,21 +536,21 @@ SC.mixin(/** @scope SC */ {
   /**
     Empty array.  Useful for some optimizations.
 
-    @property {Array}
+		@type Array
   */
   EMPTY_ARRAY: [],
 
   /**
     Empty hash.  Useful for some optimizations.
 
-    @property {Hash}
+    @type Hash
   */
   EMPTY_HASH: {},
 
   /**
     Empty range. Useful for some optimizations.
 
-    @property {Range}
+    @type Range
   */
   EMPTY_RANGE: {start: 0, length: 0},
 
@@ -741,7 +741,7 @@ SC.mixin(/** @scope SC */ {
   /**
     Known loc strings
 
-    @property {Hash}
+    @type Hash
   */
   STRINGS: {},
 
@@ -752,6 +752,7 @@ SC.mixin(/** @scope SC */ {
     @param {String} lang the language the strings are for
     @param {Hash} strings hash of strings
     @returns {SC} receiver
+    @returns {SC2} receiver2
   */
   stringsFor: function(lang, strings) {
     SC.mixin(SC.STRINGS, strings);
