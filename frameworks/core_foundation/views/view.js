@@ -883,6 +883,49 @@ SC.CoreView.reopen(
   },
 
   /**
+    The clipping frame returns the visible portion of the view, taking into
+    account the clippingFrame of the parent view.  Keep in mind that
+    the clippingFrame is in the context of the view itself, not it's parent
+    view.
+
+    Normally this will be calculated based on the intersection of your own
+    clippingFrame and your parentView's clippingFrame.
+
+    @property {Rect}
+  */
+  clippingFrame: function() {
+    var f = this.get('frame'),
+        ret = f,
+        pv, cf;
+
+    if (!f) return null;
+    pv = this.get('parentView');
+    if (pv) {
+      cf = pv.get('clippingFrame');
+      if (!cf) return f;
+      ret = SC.intersectRects(cf, f);
+    }
+    ret.x -= f.x;
+    ret.y -= f.y;
+
+    return ret;
+  }.property('parentView', 'frame').cacheable(),
+
+  /** @private
+    This method is invoked whenever the clippingFrame changes, notifying
+    each child view that its clippingFrame has also changed.
+  */
+  _sc_view_clippingFrameDidChange: function() {
+    var cvs = this.get('childViews'), len = cvs.length, idx, cv ;
+    for (idx=0; idx<len; ++idx) {
+      cv = cvs[idx] ;
+
+      cv.notifyPropertyChange('clippingFrame') ;
+      cv._sc_view_clippingFrameDidChange();
+    }
+  },
+
+  /**
     Removes the child view from the parent view.
 
     @param {SC.View} view

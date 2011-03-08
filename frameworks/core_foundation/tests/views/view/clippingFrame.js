@@ -114,21 +114,3 @@ test("notifies receiver and each child if parent clipping frame changes", functi
   // number.
   equals(callCount, 2, 'should invoke observer on child and nested child');
 });
-
-
-test("does not notify child views of clippingFrame changes if child view has useStaticLayout: YES", function() {
-  var callCount = 0;
-  
-  aa.set('useStaticLayout', YES);
-
-  // setup observers
-  function observer() { callCount++; }
-  a.addObserver('clippingFrame', observer);
-  aa.addObserver('clippingFrame', observer);
-  
-  // now, adjust layout of child so that clipping frame will change...
-  a.adjust('top', -50);
-  
-  equals(callCount, 1, 'should invoke observer on child only');
-});
-
