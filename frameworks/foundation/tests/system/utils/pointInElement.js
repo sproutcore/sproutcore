@@ -3,11 +3,16 @@
 // ========================================================================
 
 /*global module test htmlbody ok equals same */
-module("SC.pointInElement()");
+module("SC.pointInElement()", {
+  setup: function(){
+    htmlbody('<style> .custom { background-color: #BBF; } .padding { padding: 10px !important; } .border { border: 10px red solid !important;} .margin { margin: 10px !important; } .padding-em { padding: 10em !important; } .border-em { border: 10em red solid !important;} .margin-em { margin: 10em !important; } .child { background-color: #AAA; width: 80px; height: 80px; } .absolute { position: absolute; top: 10px; left: 10px; } </style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+});
 
 var view;
-
-htmlbody('<style> .custom { background-color: #BBF; } .padding { padding: 10px !important; } .border { border: 10px red solid !important;} .margin { margin: 10px !important; } .padding-em { padding: 10em !important; } .border-em { border: 10em red solid !important;} .margin-em { margin: 10em !important; } .child { background-color: #AAA; width: 80px; height: 80px; } .absolute { position: absolute; top: 10px; left: 10px; } </style>');
 
 SC.CustomView = SC.View.extend({
   classNames: 'custom'.w(),

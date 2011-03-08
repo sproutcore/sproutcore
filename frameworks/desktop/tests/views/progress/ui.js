@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
 var pane = SC.ControlTestPane.design()
 
@@ -149,7 +148,14 @@ pane.show(); // add a test to show the test pane
 // ..........................................................
 // TEST VIEWS
 // 
-module("SC.ProgressView UI");
+module("SC.ProgressView UI", {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+};
 
 test("basic", function() {
   

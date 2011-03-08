@@ -5,11 +5,11 @@
 // ==========================================================================
 
 /*global module test equals context ok same Q$ htmlbody */
-htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute;  overflow: hidden; }</style>');
 
 var pane, a, aa ;
 module("SC.View#clippingFrame", {
   setup: function() {
+    htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute;  overflow: hidden; }</style>');
     SC.RunLoop.begin();
     pane = SC.Pane.design()
       .layout({ top: 0, left: 0, width: 200, height: 200 })
@@ -27,6 +27,7 @@ module("SC.View#clippingFrame", {
     pane.remove();
     pane = a = aa = null ;
     SC.RunLoop.end();
+    clearHtmlbody();
   }
 });
 

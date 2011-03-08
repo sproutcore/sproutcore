@@ -6,8 +6,6 @@
 
 /*global module test equals context ok same */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
 
 var pane = SC.ControlTestPane.design()
   .add("aria-role", SC.InlineTextFieldView.extend({
@@ -33,7 +31,11 @@ pane.show();
 
 module('SC.InlineTextFieldView ui', {
   setup: function() {
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     var view = pane.view('aria-role');
+  },
+  teardown: function(){
+    clearHtmlbody();
   }
 });
 

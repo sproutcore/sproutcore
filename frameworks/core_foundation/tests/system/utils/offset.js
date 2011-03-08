@@ -6,12 +6,13 @@
 
 var pane, view1, view2, view3, view4;
 
-htmlbody('<style> body { height: 1500px; width: 1500px; } </style>');
 
 
 module("SC.offset", {
 
   setup: function() {
+    htmlbody('<style> body { height: 1500px; width: 1500px; } </style>');
+
     var viewportEl;
 
     SC.RunLoop.begin();
@@ -75,6 +76,8 @@ module("SC.offset", {
       pane.remove();
       pane = view1 = view2 = view3 = view4 = null;
     // }
+
+    clearHtmlbody();
   }
 });
 

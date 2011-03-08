@@ -7,8 +7,6 @@
 
 /*global module test htmlbody ok equals same */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
 var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
 (function() {
 var pane = SC.ControlTestPane.design()
@@ -83,7 +81,14 @@ var pane = SC.ControlTestPane.design()
 pane.show(); // add a test to show the test pane
 
 
-module('SC.LabelView ui');
+module('SC.LabelView ui', {
+  setup: function() {
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+});
 
 test("Check that all Label are visible", function() {
   ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');

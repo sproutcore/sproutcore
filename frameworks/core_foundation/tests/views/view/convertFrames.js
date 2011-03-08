@@ -6,7 +6,6 @@
 
 /*global module test equals context ok same Q$ htmlbody */
 
-htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute; }</style>');
 
 // ..........................................................
 // COMMON SETUP CODE
@@ -15,6 +14,8 @@ var pane, a, b, aa, aaa, bb, f ;
 var A_LEFT = 10, A_TOP = 10, B_LEFT = 100, B_TOP = 100;
 
 function setupFrameViews() {
+  htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute; }</style>');
+
   pane = SC.Pane.design()
     .layout({ top: 0, left: 0, width: 400, height: 300 })
     .childView(SC.View.design()
@@ -43,6 +44,7 @@ function setupFrameViews() {
 function teardownFrameViews() {
   pane.remove() ;
   pane = a = aa = aaa = b = bb = null ;
+  clearHtmlbody();
 }
 
 // ..........................................................
