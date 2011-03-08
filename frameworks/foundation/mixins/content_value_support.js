@@ -1,5 +1,30 @@
-sc_require('system/utils/types');
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2010 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 
+/*
+* @mixin
+*
+* This mixin allows a view to get its value from a content object based
+* on the value of its contentValueKey.
+*
+* {{{
+* myView = SC.View.create({
+*   content: {prop: "abc123"},
+*
+*   contentValueKey: 'prop'
+* });
+*
+* // myView.get('value') will be "abc123"
+* }}}
+*
+* This is useful if you have a nested record structure and want to have
+* it be reflected in a nested view structure. If your data structures
+* only have primitive values, consider using SC.Control instead.
+*/
 SC.ContentValueSupport = {
   hasContentValueSupport: YES,
 
