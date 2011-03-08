@@ -4,7 +4,7 @@
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
+require("theme");
 SC.LegacyTheme.PROGRESS_ANIMATED_BACKGROUND_MATRIX = [];
 SC.LegacyTheme.PROGRESS_OFFSET_RANGE = 24;
 
