@@ -102,6 +102,11 @@
     view.set('nowShowing', viewToAdd);
     equals(view.get('contentView').get('value'), 'View2', 'contentView changes as intended when an uninstantiated view (class) is passed to nowShowing');
     
+    // Set nowShowing to an SC.CoreView
+    viewToAdd = SC.CoreView.design({value: 'View5'});
+    view.set('nowShowing', viewToAdd);
+    equals(view.get('contentView').get('value'), 'View5', 'contentView instantiates and inserts an SC.CoreView');
+
     // Set nowShowing to a non-view object.
     viewToAdd = SC.Object;
     view.set('nowShowing', viewToAdd);
