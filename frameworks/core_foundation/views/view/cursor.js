@@ -30,6 +30,13 @@ SC.View.reopen(
     return null;
   }.property('parentView', 'shouldInheritCursor').cacheable(),
 
+  applyAttributesToContext: function(original, context) {
+    var cursor = this.get('cursor');
+    if (cursor) { context.addClass(cursor.get('className')); }
+
+    original(context);
+  }.enhance(),
+
   /**
     A child view without a cursor of its own inherits its parent's cursor by
     default.  Set this to NO to prevent this behavior.
