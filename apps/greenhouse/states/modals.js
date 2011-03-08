@@ -22,7 +22,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
       parallelStatechart: 'modals',
 
       newBindingPopup: function(item){
-        Greenhouse.createBindingPopup.set('newItem', item);
+        Greenhouse.setPath('modalStates.createBindingPopup.newItem', item);
         this.gotoState('createBindingPopup');
       },
 
