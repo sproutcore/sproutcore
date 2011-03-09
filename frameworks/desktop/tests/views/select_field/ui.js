@@ -7,8 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
 var pane = SC.ControlTestPane.design()
     .add("basic", SC.SelectFieldView, { 
        objects:["1","2","3","4","5"]
@@ -56,7 +54,16 @@ var pane = SC.ControlTestPane.design()
 // TEST VIEWS
 // 
 
-module('SC.SelectFieldView ui', pane.standardSetup());
+module('SC.SelectFieldView ui', {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
 test("basic", function() {
   var view = pane.view('basic');

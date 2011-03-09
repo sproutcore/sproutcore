@@ -7,13 +7,6 @@
 
 /* Test SC.StackedView with a Comments example. */
 
-htmlbody(["<style>",
-  '.sc-stacked-view { border-bottom: 1px red solid; }',
-  '.comment-view.sel { background-color: #ccc; }',
-  '.comment-view { margin: 0 10px; padding: 10px 0; border-bottom: 1px #ccc solid; }',
-  '.comment-view p { padding-top: 28px; padding-bottom: 32px; }',
-'</style>'].join("\n"));
-
 var CommentView = SC.View.extend(SC.StaticLayout, SC.Control, {
   
   useStaticLayout: YES,
@@ -128,7 +121,21 @@ window.pane = pane ;
 // ..........................................................
 // BASIC TESTS
 // 
-module("Basic Tests", pane.standardSetup());
+module("Basic Tests", {
+  setup: function(){
+    htmlbody(["<style>",
+      '.sc-stacked-view { border-bottom: 1px red solid; }',
+      '.comment-view.sel { background-color: #ccc; }',
+      '.comment-view { margin: 0 10px; padding: 10px 0; border-bottom: 1px #ccc solid; }',
+      '.comment-view p { padding-top: 28px; padding-bottom: 32px; }',
+    '</style>'].join("\n"));
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
 test("removing an item should delete childView and adjust height", function() {
   var view = pane.view('basic'),

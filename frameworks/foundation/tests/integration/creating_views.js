@@ -6,9 +6,14 @@
 
 /*global module test equals context ok same htmlbody */
 
-module("Create a pane with some custom views and adding it to the window");
-
-htmlbody('<style>.sc-view { border: 1px red solid; z-index: -1; position: absolute; }</style>');
+module("Create a pane with some custom views and adding it to the window", {
+  setup: function(){
+    htmlbody('<style>.sc-view { border: 1px red solid; z-index: -1; position: absolute; }</style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+});
 
 test("layer creation and management", function() {
   

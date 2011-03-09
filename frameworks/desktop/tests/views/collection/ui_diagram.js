@@ -7,13 +7,6 @@
 
 /* Test SC.StackedView with a Comments example. */
 
-htmlbody(["<style>",
-  '.sc-collection-view { border: 1px black solid; background-color: white; }',
-  '.shape.sel { background-color: #f55; color: white; }',
-  '.shape { background-color: #ddd; border: 1px black solid; color: black; box-shadow: 3px 3px 5px #888; }',
-  '.shape label { position: absolute; left: 0; right: 0; height: 12px; margin-top: -6px; top: 50%; font-size: 11px; text-align: center; }',
-'</style>'].join("\n"));
-
 var ShapeView = SC.View.extend(SC.Control, {
   
   content: null,
@@ -166,8 +159,21 @@ window.pane = pane ;
 // ..........................................................
 // BASIC TESTS
 // 
-module("Basic Tests", pane.standardSetup());
-
+module("Basic Tests", {
+  setup: function(){
+    htmlbody(["<style>",
+      '.sc-collection-view { border: 1px black solid; background-color: white; }',
+      '.shape.sel { background-color: #f55; color: white; }',
+      '.shape { background-color: #ddd; border: 1px black solid; color: black; box-shadow: 3px 3px 5px #888; }',
+      '.shape label { position: absolute; left: 0; right: 0; height: 12px; margin-top: -6px; top: 50%; font-size: 11px; text-align: center; }',
+    '</style>'].join("\n"));
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
 
 // ..........................................................

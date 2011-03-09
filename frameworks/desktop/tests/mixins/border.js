@@ -11,6 +11,11 @@ var pane;
 
 module("SC.Border", {
   setup: function() {
+    var boxstyles = '<style>.box1-border { border-top: 10px solid red; border-left: 25px solid red; border-right: 109px solid green; border-bottom: 79px solid red; }'+
+                    '.box2-border { border-top: 10px solid red; border-left: 25px solid red; border-right: 109px solid green; border-bottom: 79px solid red; }'+
+                    '.box3-border { border-top: 10px solid red; border-left: 25px solid red; border-right: 109px solid green; border-bottom: 79px solid red; }</style>';
+    htmlbody(boxstyles);
+
     SC.RunLoop.begin();
     pane = SC.MainPane.create();
     pane.append();
@@ -20,13 +25,9 @@ module("SC.Border", {
   teardown: function() {
     pane.remove();
     pane = null;
+    clearHtmlbody();
   }
 });
-
-var boxstyles = '<style>.box1-border { border-top: 10px solid red; border-left: 25px solid red; border-right: 109px solid green; border-bottom: 79px solid red; }'+
-                '.box2-border { border-top: 10px solid red; border-left: 25px solid red; border-right: 109px solid green; border-bottom: 79px solid red; }'+
-                '.box3-border { border-top: 10px solid red; border-left: 25px solid red; border-right: 109px solid green; border-bottom: 79px solid red; }</style>';
-htmlbody(boxstyles);
 
 test('SC.View should not have border properties by default', function() {
   var view = SC.View.create();

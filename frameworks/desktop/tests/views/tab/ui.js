@@ -8,8 +8,6 @@
 /*global module test htmlbody ok equals same stop start */
 
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
 (function() {
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
 
@@ -63,7 +61,16 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   // ..........................................................
   // TEST VIEWS
   //
-  module('SC.TabView ui', pane.standardSetup());
+  module('SC.TabView ui', {
+    setup: function(){
+      htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+      pane.standardSetup().setup();
+    },
+    teardown: function(){
+      pane.standardSetup().teardown();
+      clearHtmlbody();
+    }
+  });
 
   test("Check that all tabViews are visible", function() {
     ok(pane.view('tabView1').get('isVisibleInWindow'), 'tabView1.isVisibleInWindow should be YES');

@@ -5,11 +5,11 @@
 // ==========================================================================
 
 /*global module test equals context ok same Q$ htmlbody */
-htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute;  overflow: hidden; }</style>');
 
 var pane, a, aa ;
 module("SC.View#clippingFrame", {
   setup: function() {
+    htmlbody('<style> .sc-view { border: 1px blue solid; position: absolute;  overflow: hidden; }</style>');
     SC.RunLoop.begin();
     pane = SC.Pane.design()
       .layout({ top: 0, left: 0, width: 200, height: 200 })
@@ -27,6 +27,7 @@ module("SC.View#clippingFrame", {
     pane.remove();
     pane = a = aa = null ;
     SC.RunLoop.end();
+    clearHtmlbody();
   }
 });
 
@@ -114,21 +115,3 @@ test("notifies receiver and each child if parent clipping frame changes", functi
   // number.
   equals(callCount, 2, 'should invoke observer on child and nested child');
 });
-
-
-test("does not notify child views of clippingFrame changes if child view has useStaticLayout: YES", function() {
-  var callCount = 0;
-  
-  aa.set('useStaticLayout', YES);
-
-  // setup observers
-  function observer() { callCount++; }
-  a.addObserver('clippingFrame', observer);
-  aa.addObserver('clippingFrame', observer);
-  
-  // now, adjust layout of child so that clipping frame will change...
-  a.adjust('top', -50);
-  
-  equals(callCount, 1, 'should invoke observer on child only');
-});
-

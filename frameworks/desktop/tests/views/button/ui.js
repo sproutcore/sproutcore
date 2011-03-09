@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
 (function() {
@@ -72,7 +71,14 @@ var pane = SC.ControlTestPane.design({height:24})
 
 pane.show(); // add a test to show the test pane
 
-module('SC.ButtonView ui');
+module('SC.ButtonView ui', {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+};
 
 test("Check that all button are visible", function() {
   ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');

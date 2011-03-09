@@ -7,8 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
 (function() {
   var pane = SC.ControlTestPane.design()
   .add("horizontal", SC.SeparatorView, { 
@@ -19,7 +17,16 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   });   
   pane.show(); 
 
-module("TODO: Test SC.Separator UI", pane.standardSetup());
+module("TODO: Test SC.Separator UI", {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
   test("basic", function() {
     var view = pane.view('horizontal');

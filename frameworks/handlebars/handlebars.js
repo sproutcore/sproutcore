@@ -438,7 +438,9 @@ parser.lexer = lexer;
 return parser;
 })();
 // lib/handlebars/base.js
-var Handlebars = {};
+
+// Support for node.js and Spade
+var Handlebars = (typeof exports !== 'undefined') ? exports : {};
 
 Handlebars.Parser = handlebars;
 
@@ -1396,4 +1398,4 @@ Handlebars.VM = {
   }
 };
 
-Handlebars.compile = Handlebars.VM.compile;;
+Handlebars.compile = Handlebars.VM.compile;

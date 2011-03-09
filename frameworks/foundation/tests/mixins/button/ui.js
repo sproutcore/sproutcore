@@ -6,9 +6,6 @@
 
 /*global module test equals context ok same */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
-
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.View.extend(SC.Control, SC.Button, 
     {
@@ -25,7 +22,11 @@ pane.show();
 
 module('SC.Button ui', {
   setup: function() {
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     var view = pane.view('basic');
+  },
+  teardown: function(){
+    clearHtmlbody();
   }
 });
 

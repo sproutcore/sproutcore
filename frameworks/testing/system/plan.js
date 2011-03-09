@@ -370,6 +370,21 @@ CoreTest.Plan = {
       
     });
   },
+
+  clearHtmlbody: function(){
+    var body = Q$('body')[0];
+
+    // first, find the first element with id 'htmlbody-begin'  if exists,
+    // remove everything after that to reset...
+    var begin = Q$('body #htmlbody-begin')[0];
+    if (!begin) {
+      begin = Q$('<div id="htmlbody-begin"></div>')[0];
+      body.appendChild(begin);
+    } else {
+      while(begin.nextSibling) body.removeChild(begin.nextSibling);
+    }
+    begin = null;
+  },
   
   /**
     Converts the passed string into HTML and then appends it to the main body 
@@ -377,24 +392,13 @@ CoreTest.Plan = {
     main page.
   */
   htmlbody: function htmlbody(string) {
-    this.synchronize(function() {
-      var html = Q$(string) ;
-      var body = Q$('body')[0];
+    var html = Q$(string) ;
+    var body = Q$('body')[0];
 
-      // first, find the first element with id 'htmlbody-begin'  if exists,
-      // remove everything after that to reset...
-      var begin = Q$('body #htmlbody-begin')[0];
-      if (!begin) {
-        begin = Q$('<div id="htmlbody-begin"></div>')[0];
-        body.appendChild(begin);
-      } else {
-        while(begin.nextSibling) body.removeChild(begin.nextSibling);
-      }
-      begin = null; 
+    this.clearHtmlbody();
 
-      // now append new content
-      html.each(function() { body.appendChild(this); });
-    }) ;
+    // now append new content
+    html.each(function() { body.appendChild(this); });
   },
   
   /**
@@ -690,6 +694,10 @@ window.test = function(desc, func) {
 }; 
 
 // reset htmlbody for unit testing
+window.clearHtmlbody = function() {
+  CoreTest.defaultPlan().clearHtmlbody(); 
+}; 
+
 window.htmlbody = function(string) {
   CoreTest.defaultPlan().htmlbody(string); 
 }; 

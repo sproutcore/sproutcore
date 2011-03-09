@@ -7,9 +7,15 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("SC.PickerPane UI");
+module("SC.PickerPane UI", {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+};
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 function evaluatePicker(pane) {
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
