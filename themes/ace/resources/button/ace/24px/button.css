@@ -14,19 +14,11 @@
     }
 
     &.sel, &.def {
-<<<<<<< HEAD
       @include slices("selected_button.png", $left: 3, $right: 3);    
   
       &.active {
         @include slices("selected_active_button.png", $left: 3, $right: 3);    
       }
-=======
-      @include slices("selected_button.png", $left: 3, $right: 3);
-    }
-
-    &.sel.active, &.def.active {
-      @include slices("selected_active_button.png", $left: 3, $right: 3);
->>>>>>> public/master
     }
   }
 
@@ -79,17 +71,12 @@
   @theme(capsule) {
     $theme.button {
       @include slices("normal_button_capsule.png", $left: 12, $right: 12, skip-middle);
-<<<<<<< HEAD
       
       & > .middle { left: 12px; right: 12px; }
 
       &.active, &.sel, &.def, &.sel.active, &.sel.active.def {
         & > .middle { left: 12px; right: 12px; }
       }
-=======
-
-      .middle { left: 12px; right: 12px; }
->>>>>>> public/master
 
       &.active {
         @include slices("active_button_capsule.png", $left: 12, $right: 12, skip-middle);
