@@ -431,7 +431,15 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     changed.addEach(storeKeys);
     
     this.set('needsFlush', YES);
-    this.enumerableContentDidChange();
+    
+    // if we have storeKeys already, then flush immediately because
+    // it will not be as expensive as if we are starting from scratch
+    if (this.get('storeKeys')) { 
+      this.flush(); 
+    }
+    else {
+      this.enumerableContentDidChange();
+    }
 
     return this;
   },
@@ -671,10 +679,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   _storeKeysContentDidChange: function(target, key, value, rev) {
     if (this._scra_records) this._scra_records.length=0 ; // clear cache
     
-    this.beginPropertyChanges()
-      .notifyPropertyChange('length')
-      .enumerableContentDidChange()
-    .endPropertyChanges();
+    this.enumerableContentDidChange();
   },
   
   /** @private */
