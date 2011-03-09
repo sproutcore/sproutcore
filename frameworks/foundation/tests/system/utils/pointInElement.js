@@ -3,18 +3,13 @@
 // ========================================================================
 
 /*global module test htmlbody ok equals same */
-module("SC.pointInElement()", {
-  setup: function(){
-    htmlbody('<style> .custom { background-color: #BBF; } .padding { padding: 10px !important; } .border { border: 10px red solid !important;} .margin { margin: 10px !important; } .padding-em { padding: 10em !important; } .border-em { border: 10em red solid !important;} .margin-em { margin: 10em !important; } .child { background-color: #AAA; width: 80px; height: 80px; } .absolute { position: absolute; top: 10px; left: 10px; } </style>');
-  },
-  teardown: function(){
-    clearHtmlbody();
-  }
-});
+
+
+(function() {
 
 var view;
 
-SC.CustomView = SC.View.extend({
+var CustomView = SC.View.extend({
   classNames: 'custom'.w(),
   displayProperties: 'childClasses'.w(),
 
@@ -24,60 +19,71 @@ SC.CustomView = SC.View.extend({
   }
 });
 
-(function() {
-var pane = SC.ControlTestPane.design()
-  .add("plain child", SC.CustomView, {
+var pane = SC.ControlTestPane.extend()
+  .add("plain child", CustomView, {
     classNames: ''.w(),
     childClasses: {},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("padded child", SC.CustomView, {
+  .add("padded child", CustomView, {
     classNames: ''.w(),
     childClasses: {padding: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("bordered child", SC.CustomView, {
+  .add("bordered child", CustomView, {
     classNames: ''.w(),
     childClasses: {border: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("margined child", SC.CustomView, {
+  .add("margined child", CustomView, {
     classNames: ''.w(),
     childClasses: {margin: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("margined positioned child", SC.CustomView, {
+  .add("margined positioned child", CustomView, {
     classNames: ''.w(),
     childClasses: {absolute: true, margin: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("padded bordered child", SC.CustomView, {
+  .add("padded bordered child", CustomView, {
     classNames: ''.w(),
     childClasses: {padding: true, border: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("bordered margined child", SC.CustomView, {
+  .add("bordered margined child", CustomView, {
     classNames: ''.w(),
     childClasses: {border: true, margin: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("padded margined child", SC.CustomView, {
+  .add("padded margined child", CustomView, {
     classNames: ''.w(),
     childClasses: {padding: true, margin: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("padded bordered margined child", SC.CustomView, {
+  .add("padded bordered margined child", CustomView, {
     classNames: ''.w(),
     childClasses: {padding: true, border: true, margin: true},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   })
-  .add("padded parent plain child", SC.CustomView, {
+  .add("padded parent plain child", CustomView, {
     classNames: 'padded'.w(),
     childClasses: {},
     layout: { left: 10, top: 10, width: 100, height: 50 }
   });
 
 pane.show();
+
+
+module("SC.pointInElement()", {
+  setup: function(){
+    htmlbody('<style> .custom { background-color: #BBF; } .padding { padding: 10px !important; } .border { border: 10px red solid !important;} .margin { margin: 10px !important; } .padding-em { padding: 10em !important; } .border-em { border: 10em red solid !important;} .margin-em { margin: 10em !important; } .child { background-color: #AAA; width: 80px; height: 80px; } .absolute { position: absolute; top: 10px; left: 10px; } </style>');
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
 
 
