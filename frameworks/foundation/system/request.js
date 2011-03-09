@@ -171,8 +171,6 @@ isAsynchronous: YES,
     The passed request is a frozen copy of the request, indicating the 
     options set at the time of the request.
 
-		@throws {SC.Test}
-    @deprecated This is deprecated
     @param {SC.Request} request A copy of the request object, frozen
     @param {SC.Response} response The object that will wrap the response
 		@returns BOOL YES on success, NO on failure
