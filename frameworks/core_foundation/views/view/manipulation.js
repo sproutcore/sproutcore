@@ -210,8 +210,8 @@ SC.View.reopen({
     childViews.insertAt(idx, view) ;
 
     // The DOM will need some fixing up, note this on the view.
-    view.tryToPerform('parentViewDidChange') ;
-    view.tryToPerform('layoutDidChange') ;
+    if(view.parentViewDidChange) view.parentViewDidChange();
+    if(view.layoutDidChange) view.layoutDidChange();
 
     var pane = view.get('pane');
     if(pane && pane.get('isPaneAttached')) {
@@ -239,7 +239,7 @@ SC.View.reopen({
     original(view);
 
     // The DOM will need some fixing up, note this on the view.
-    view.tryToPerform('parentViewDidChange') ;
+    if(view.parentViewDidChange) view.parentViewDidChange() ;
 
     // notify views
     if (this.didRemoveChild) { this.didRemoveChild(view); }
