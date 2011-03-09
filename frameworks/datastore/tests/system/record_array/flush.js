@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for RecordArray
-var store, storeKey, json, rec, storeKeys, recs, query;
+var store, storeKey, json, rec, storeKeys, recs, query, recsController, fooQuery, fooRecs, fooRecsController;
 module("SC.RecordArray core methods", {
   setup: function() {
     // setup dummy store
@@ -25,6 +25,25 @@ module("SC.RecordArray core methods", {
     // get record array.
     query = SC.Query.create({ recordType: SC.Record });
     recs = SC.RecordArray.create({ store: store, query: query });
+    
+    recsController = SC.Object.create({
+      content: recs,
+      bigCost: NO,
+      veryExpensiveObserver: function() {
+        this.set('bigCost', YES);
+      }.observes('.content.[]')
+    });
+    
+    fooQuery = SC.Query.create({ recordType: SC.Record, conditions: "foo='foo'" });
+    fooRecs = SC.RecordArray.create({ store: store, query: fooQuery });
+    
+    fooRecsController = SC.Object.create({
+      content: fooRecs,
+      bigCost: NO,
+      veryExpensiveObserver: function() {
+        this.set('bigCost', YES);
+      }.observes('.content.[]')
+    });
   }
 });
 
@@ -71,13 +90,9 @@ test("calling storeDidChangeStoreKeys() with a matching recordType", function() 
   store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
   
   equals(recs.get('needsFlush'), NO, 'PRECOND - should not need flush');
+  same(recs.get('storeKeys'), orig, 'PRECOND - storeKeys should not have changed yet');
   
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
-  
-  equals(recs.get('needsFlush'), YES, 'needs flush now');
-  same(recs.get('storeKeys'), orig, 'storeKeys should not have changed yet');
-  
-  recs.flush();
   
   orig.unshift(storeKey); // update - must be first b/c id.bar < id.foo
   equals(recs.get('needsFlush'), NO, 'should not need flush anymore');
@@ -90,7 +105,7 @@ test("calling storeDidChangeStoreKeys() with a matching recordType", function() 
     
 });
 
-test("calling storeDidChangeStoreKeys() with a non-mathcing recordType", function() {
+test("calling storeDidChangeStoreKeys() with a non-matching recordType", function() {
 
   var Foo = SC.Record.extend(),
       Bar = SC.Record.extend();
@@ -102,7 +117,7 @@ test("calling storeDidChangeStoreKeys() with a non-mathcing recordType", functio
 
   query = SC.Query.create({ recordType: Foo });
   recs = SC.RecordArray.create({ store: store, query: query });
-  recs.flush();
+
   equals(recs.get('length'), 1, 'should have a Foo record');
 
   // now simulate adding a Bar record
@@ -120,12 +135,34 @@ test("calling storeDidChangeStoreKeys() to remove a record", function() {
   equals(recs.get('length'), 1, 'PRECOND - should have storeKey');
   
   store.writeStatus(storeKey, SC.Record.DESTROYED_CLEAN);
+  equals(recs.get('storeKeys').length, 1, 'should still have storeKey');
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
   
-  equals(recs.get('needsFlush'), YES, 'should need flush after change');
-  equals(recs.get('storeKeys').length, 1, 'should still have storeKey');
-  
   equals(recs.get('length'), 0, 'should remove storeKey on flush()');
+});
+
+test("calling storeDidChangeStoreKeys() with a matching recordType should not unnecessarily call enumerableContentDidChange", function() {
+  // do initial setup
+  recs.flush(); 
+  fooRecs.flush();
+  
+  recsController.set('bigCost', NO);
+  fooRecsController.set('bigCost', NO);
+  
+  // do it this way instead of using store.createRecord() to isolate the 
+  // method call.
+  storeKey = SC.Record.storeKeyFor("bar");
+  json     = {  guid: "bar", foo: "bar" };
+  store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+  
+  equals(recsController.get('bigCost'), NO, 'PRECOND - recsController should not have spent big cost');
+  equals(fooRecsController.get('bigCost'), NO, 'PRECOND - fooRecsController should not have spent big cost');
+
+  recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
+  fooRecs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
+  
+  equals(recsController.get('bigCost'), YES, 'recsController should have spent big cost');
+  equals(fooRecsController.get('bigCost'), NO, 'fooRecsController should not have spent big cost');
 });
 
 
