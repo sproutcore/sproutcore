@@ -129,6 +129,17 @@ SC.CoreView.reopen(
   isVisible: YES,
   isVisibleBindingDefault: SC.Binding.bool(),
 
+  /**
+    Whether the view should be displayed. This is always YES,
+    unless the visibility module is added to SC.View.
+
+    If the visibility module is added, this property will be used to
+    optimize certain behaviors on the view. For example, updates to the
+    view layer will not be performed until the view becomes visible
+    in the window.
+  */
+  isVisibleInWindow: YES,
+
   // ..........................................................
   // CHILD VIEW SUPPORT
   //
@@ -256,6 +267,17 @@ SC.CoreView.reopen(
     this.set('layerNeedsUpdate', YES) ;
     return this;
   },
+
+  /**
+    Marks the view as needing a display update if the isVisible property changes.
+
+    Note that this behavior is identical to a display property. It is broken out
+    into its own observer so that it can be overridden with additional
+    functionality if the visibility module is applied to SC.View.
+  */
+  _sc_isVisibleDidChange: function() {
+    this.displayDidChange();
+  }.observes('isVisible'),
 
   /**
     Setting this property to YES will cause the updateLayerIfNeeded method to
