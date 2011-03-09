@@ -129,7 +129,7 @@ SC.SelectionSupport = {
     if (len === 0) { value = SC.SelectionSet.EMPTY; }
 
     // always use a frozen copy...
-    value = value.frozenCopy();
+    if(value !== old) value = value.frozenCopy();
     this._scsel_selection = value;
 
     return value;
