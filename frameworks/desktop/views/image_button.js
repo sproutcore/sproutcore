@@ -15,23 +15,25 @@
 
   For example:
 
-  SC.ImageButtonView.create({
-    action: 'imageButtonWasClicked',
+      SC.ImageButtonView.create({
+        action: 'imageButtonWasClicked',
 
-    image: 'image-button-icon'
-  });
+        image: 'my-image-button-icon'
+      });
 
   You could then add some CSS rule for a normal state:
 
-    .sc-image-button-view .image-button-icon {
-      background: sc_static('image-button-image');
-    }
+      $theme.image-button .my-image-button-icon {
+        @include slice('my-image-button-image.png');
 
-  And an active state:
+        // and an active state:
+        &.active {
+          @include slice('my-image-button-image-active.png');
+        }
+      }
 
-    .sc-image-button-view.active .image-button-icon {
-      background: sc_static('image-button-image-active');
-    }
+  Note: in addition to using SCSS and the Chance directives shown above, you
+  can use normal CSS syntax and sc_static.
 
   @extends SC.View
   @extends SC.Control
