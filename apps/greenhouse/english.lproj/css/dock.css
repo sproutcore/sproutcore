@@ -22,6 +22,7 @@
   border: none;
 }
 
+.sc-theme .anchored .sc-collection-view .sc-collection-item.sel,
 .sc-theme.focus .anchored .sc-collection-view.focus .sc-collection-item.sel {
   background: #A4BE49;
   color: #000;
@@ -64,6 +65,10 @@
 
 .anchored .inspector-docked {
   border-top: 1px solid #333;
+}
+
+.anchored .sc-label-view {
+  color: #fff;
 }
 
 .anchored .sc-label-view.title {

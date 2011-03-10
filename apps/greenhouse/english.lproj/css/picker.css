@@ -7,7 +7,8 @@
 
 
 /* Pointers */
-.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectBottom {
+
+.sc-pane.sc-panel.sc-picker.gh-picker .perfectBottom {
   width: 25px;
   height: 15px;
   top: -11px;
@@ -15,7 +16,7 @@
   margin-left: -13px;
   background: static_url('images/picker/pointer-top.png') no-repeat;
 }
-.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectTop {
+.sc-pane.sc-panel.sc-picker.gh-picker .perfectTop {
   width: 21px;
   height: 11px;
   bottom: -11px;
@@ -23,14 +24,14 @@
   margin-left: -11px;
   background: static_url('images/picker/pointer-bottom.png') no-repeat;
 }
-.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectLeft {
+.sc-pane.sc-panel.sc-picker.gh-picker .perfectLeft {
   width: 12px;
   height: 22px;
   right: -13px;
   top: 22%;
   background: static_url('images/picker/pointer-right.png') no-repeat;
 }
-.gh-picker.sc-pane.sc-panel.sc-palette.sc-picker .perfectRight {
+.sc-pane.sc-panel.sc-picker.gh-picker .perfectRight {
   width: 12px;
   height: 22px;
   left: -13px;
@@ -39,7 +40,12 @@
 }
 
 /* Edges */
-.gh-picker.sc-pane.sc-panel.sc-palette .top-left-edge {
+
+.gh-picker .panel-background div {
+  position: absolute;
+}
+
+.gh-picker .panel-background .top-left {
   width: 18px;
   height: 53px;
   top: 0px;
@@ -48,7 +54,7 @@
   background: static_url('images/picker/top-left.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .top-edge {
+.gh-picker .panel-background .top {
   left: 9px;
   right: 9px;
   height: 53px;
@@ -56,7 +62,7 @@
   background: static_url('images/picker/top.png') repeat-x;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .top-right-edge{
+.gh-picker .panel-background .top-right {
   width: 18px;
   height: 53px;
   top: 0px;
@@ -65,7 +71,7 @@
   background: static_url('images/picker/top-right.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .right-edge{
+.gh-picker .panel-background .right {
   top: 53px;
   bottom: 11px;
   width: 18px;
@@ -73,7 +79,7 @@
   background: static_url('images/picker/right.png') repeat-y;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .bottom-right-edge {
+.gh-picker .panel-background .bottom-right {
   width: 18px;
   height: 23px;
   bottom: -12px;
@@ -82,7 +88,7 @@
   background: static_url('images/picker/bottom-right.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .bottom-edge {
+.gh-picker .panel-background .bottom {
   left: 9px;
   right: 9px;
   height: 23px;
@@ -90,7 +96,7 @@
   background: static_url('images/picker/bottom.png') repeat-x;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .bottom-left-edge {
+.gh-picker .panel-background .bottom-left {
   width: 18px;
   height: 23px;
   bottom: -12px;
@@ -99,7 +105,7 @@
   background: static_url('images/picker/bottom-left.png') no-repeat;
 }
 
-.gh-picker.sc-pane.sc-panel.sc-palette .left-edge {
+.gh-picker .panel-background .left {
   top: 53px;
   bottom: 11px;
   width: 18px;
@@ -118,6 +124,7 @@
   border: none;
 }
 
+.sc-theme .sc-panel.sc-palette .sc-collection-view .sc-collection-item.sel,
 .sc-theme.focus .sc-panel.sc-palette .sc-collection-view.focus .sc-collection-item.sel {
   background: #A4BE49;
   color: #000;
