@@ -81,11 +81,10 @@ SC.SelectionSupport = {
     @property {SC.SelectionSet}
   */
   selection: function(key, value) {
-
     var old = this._scsel_selection,
     oldlen = old ? old.get('length') : 0,
-    content,
     empty,
+    arrangedObjects = this.get('arrangedObjects'),
     len;
 
     // whenever we have to recompute selection, reapply all the conditions to
@@ -110,9 +109,9 @@ SC.SelectionSupport = {
       }
     }
 
-    // if we don't allow empty selection, block that also.  select first
-    // selectable item if necessary.
-    if ((len === 0) && !this.get('allowsEmptySelection')) {
+    // if we don't allow empty selection, block that also, unless we
+    // have nothing to select.  select first selectable item if necessary.
+    if ((len === 0) && !this.get('allowsEmptySelection') && arrangedObjects && arrangedObjects.get('length') !== 0) {
       if (oldlen === 0) {
         value = this.get('firstSelectableObject');
         if (value) { value = SC.SelectionSet.create().addObject(value).freeze(); }
