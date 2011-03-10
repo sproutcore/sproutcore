@@ -215,33 +215,6 @@
 
 /* @group Mini-Icons */
 
-.sc-mini-icon { 
-	width: 16px; 
-	height: 16px; 
-	background-image: sc_static('icons/mini_454545'); 
-	border: none ;
-}
-
-.active .sc-mini-icon,
-.sel .sc-mini-icon { 
-	background-image: sc_static('icons/mini_222222'); 
-}
-
-.active .sc-mini-icon.inverted,
-.sel .sc-mini-icon.inverted,
-.sc-mini-icon.inverted { 
-	background-image: sc_static('icons/mini_ffffff'); 
-}
-
-.disabled .sc-mini-icon,
-.active.disabled .sc-mini-icon,
-.sel.disabled .sc-mini-icon,
-.disabled .sc-mini-icon.inverted,
-.active.disabled .sc-mini-icon.inverted,
-.sel.disabled .sc-mini-icon.inverted { 
-	background-image: sc_static('icons/mini_888888'); 
-}
-
 .sc-mini-icon.carat-1-n {
 	background-position: 0 0;
 }
