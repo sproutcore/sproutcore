@@ -1,5 +1,10 @@
 /* SC.LabelView */
 
+.sc-label-view {
+  font-weight: normal;
+  text-align: left;
+}
+
 .sc-label-view.sc-large-size {
 	font-size: 18px;
 	line-height: 24px;

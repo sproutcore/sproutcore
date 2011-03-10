@@ -106,13 +106,14 @@ test("Check that all Label are visible", function() {
 });
   
 
-test("Check that all labels have the right classes set", function() {
+test("Check that all labels have the right classes and styles set", function() {
   var viewElem=pane.view('basic').$();
   ok(viewElem.hasClass('sc-view'), 'basic.hasClass(sc-view) should be YES');
   ok(viewElem.hasClass('sc-label-view'), 'basic.hasClass(sc-label-view) should be YES');
   ok(!viewElem.hasClass('icon'), 'basic.hasClass(icon) should be NO');
   ok(!viewElem.hasClass('disabled'), 'basic.hasClass(disabled) should be YES');
-  
+  ok(viewElem.css('fontWeight') === 'normal', 'basic should have normal fontWeight');
+  ok(viewElem.css('textAlign') === 'left', 'basic should have left textAlign');
   
   viewElem=pane.view('disabled').$();
   ok(viewElem.hasClass('sc-view'), 'title.hasClass(sc-view) should be YES');
@@ -137,12 +138,14 @@ test("Check that all labels have the right classes set", function() {
   ok(viewElem.hasClass('sc-label-view'), 'title,icon.hasClass(sc-label-view) should be YES');
   ok(!viewElem.hasClass('icon'), 'title,icon.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon.hasClass(disabled) should be NO');
+  ok(viewElem.css('textAlign') === 'center', 'centered should have center textAlign');
  
   viewElem=pane.view('centered,icon').$();
   ok(viewElem.hasClass('sc-view'), 'title,icon,disabled.hasClass(sc-view) should be YES');
   ok(viewElem.hasClass('sc-label-view'), 'title,icon,disabled.hasClass(sc-label-view) should be YES');
   ok(viewElem.hasClass('icon'), 'title,icon,disabled.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,disabled.hasClass(disabled) should be YES');
+  ok(viewElem.css('textAlign') === 'center', 'centered,icon should have center textAlign');
  
   viewElem=pane.view('regular size').$();
   ok(viewElem.hasClass('sc-view'), 'title,icon,default.hasClass(sc-view) should be YES');
@@ -155,6 +158,7 @@ test("Check that all labels have the right classes set", function() {
   ok(viewElem.hasClass('sc-label-view'), 'title,icon,selected.hasClass(sc-label-view) should be YES');
   ok(!viewElem.hasClass('icon'), 'title,icon,selected.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
+  ok(viewElem.css('fontWeight') === 'bold', 'bold view should have bold fontWeight');
    
 });
 
@@ -171,4 +175,5 @@ test("Check that the aria-labelledby is set to Label View", function() {
   var viewElem=pane.view('aria-labelledby').$();
   equals(viewElem.attr('aria-labelledby'), 'Label View', 'should have value set to Label view');
 });
+
 })();

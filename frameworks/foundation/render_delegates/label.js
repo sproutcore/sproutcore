@@ -45,11 +45,13 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       ariaLabeledBy = view.get('ariaLabeledBy');
     }
 
-    // CONSIDER DEPRECATING THESE PROPERTIES BECAUSE THEY ARE
-    // ANNOYING PAINS IN THE BUTT THAT EVERYONE HATES
+    /*
+      TODO [CC @ 1.5] These properties have been deprecated. We should remove them
+            in the next release
+    */
     context.addStyle({
-      'textAlign': dataSource.get('textAlign'),
-      'fontWeight': dataSource.get('fontWeight')
+      fontWeight: dataSource.get('fontWeight') || null,
+      textAlign: dataSource.get('textAlign') || null
     });
     
     context.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
@@ -77,11 +79,13 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       ariaLabeledBy = view.get('ariaLabeledBy');
     }
 
-    // CONSIDER DEPRECATING THESE PROPERTIES BECAUSE THEY ARE
-    // ANNOYING PAINS IN THE BUTT THAT EVERYONE HATES
+    /*
+      TODO [CC @ 1.5] These properties have been deprecated. We should remove them
+            in the next release
+    */
     jquery.css({
-      'textAlign': dataSource.get('textAlign') || null,
-      'fontWeight': dataSource.get('fontWeight') || null
+      fontWeight: dataSource.get('fontWeight') || null,
+      textAlign: dataSource.get('textAlign') || null
     });
     
     jquery.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
