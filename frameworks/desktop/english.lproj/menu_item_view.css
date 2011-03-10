@@ -85,7 +85,7 @@
 .sc-menu-item.disabled div.checkbox,
 .sc-menu-item div.checkbox.inactive {
   background-image: url(data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==) top left no-repeat; 
-  *background-image: sc_static('blank.gif') top left no-repeat; /* IE < 8 */
+  *background-image: sc_static('foundation:blank.gif') top left no-repeat; /* IE < 8 */
 }
 
 .sc-menu-item span.value {
