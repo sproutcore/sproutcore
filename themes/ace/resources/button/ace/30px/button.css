@@ -23,6 +23,11 @@
     &.sel.active, &.def.active {
       @include slices("selected_active_button.png", $left: 3, $right: 3);
     }
+    
+    &.sc-static-layout .sc-button-label {
+      margin-left: 12px;
+      margin-right: 12px;
+    }
   }
 
   @theme(point-left) {

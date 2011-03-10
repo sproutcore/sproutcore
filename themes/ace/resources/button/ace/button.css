@@ -25,4 +25,12 @@ $theme.button {
     text-align: center;
     margin-top: 0px;
   }
+  
+  &.sc-static-layout {
+    display: inline-block;
+    
+    .ie7 & {
+      display: inline;
+    }
+  }
 }
