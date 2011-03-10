@@ -62,8 +62,12 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
   
   /**
     Specify the font weight for this.  You may pass SC.REGULAR_WEIGHT, or SC.BOLD_WEIGHT.
+    
+    @property {String} SC.REGULAR_WEIGHT|SC.BOLD_WEIGHT
+    @default null
+    @deprecated
   */
-  fontWeight: SC.REGULAR_WEIGHT,
+  fontWeight: null,
   
   /**
     If true, value will be escaped to avoid scripting attacks.
@@ -113,8 +117,12 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate, SC.InlineEdit
   
   /**
     Set the alignment of the label view.
+    
+    @property {String} SC.ALIGN_LEFT|SC.ALIGN_MIDDLE|SC.ALIGN_RIGHT
+    @default null
+    @deprecated
   */
-  textAlign: SC.ALIGN_LEFT,
+  textAlign: null,
 
   /**
     The name of the theme's SC.LabelView render delegate.
