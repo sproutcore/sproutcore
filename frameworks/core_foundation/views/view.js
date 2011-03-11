@@ -805,7 +805,7 @@ SC.CoreView.reopen(
 
     @property {Array}
   */
-  classNames: ['sc-view'],
+  classNames: [],
 
   /**
     Tool tip property that will be set to the title attribute on the HTML
@@ -1460,7 +1460,9 @@ SC.CoreView.unload = function() {
   }
 } ;
 
-SC.View = SC.CoreView.extend({});
+SC.View = SC.CoreView.extend({
+  classNames: ['sc-view']
+});
 
 //unload views for IE, trying to collect memory.
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
