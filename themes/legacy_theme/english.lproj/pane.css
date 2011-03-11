@@ -14,5 +14,5 @@ R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==
 */
 .sc-theme div.sc-ghost-view {
   background-image: url(data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==) top left no-repeat; 
-  *background-image: sc_static('blank.gif') top left no-repeat; /* IE < 8 */
+  *background-image: sc_static('sproutcore/foundation:blank.gif') top left no-repeat; /* IE < 8 */
 }
