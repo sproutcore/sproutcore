@@ -70,7 +70,7 @@ TestControls.buttonsPage = SC.View.design({
         })
       })),
       
-      normal: SC.FormView.row(SC.ButtonView.design({
+      normal: SC.FormView.row(SC.ButtonView.design(SC.AutoResize, {
         controlSize: SC.REGULAR_CONTROL_SIZE,
         layout: { height: 24, width: 100 },
         title: "Click Me",
@@ -82,7 +82,7 @@ TestControls.buttonsPage = SC.View.design({
         isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
 
-      small: SC.FormView.row(SC.ButtonView.design({
+      small: SC.FormView.row(SC.ButtonView.design(SC.AutoResize, {
         controlSize: SC.SMALL_CONTROL_SIZE,
         layout: { height: 18, width: 100 },
         title: "Click Me",
@@ -94,7 +94,7 @@ TestControls.buttonsPage = SC.View.design({
         isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
 
-      huge: SC.FormView.row(SC.ButtonView.design({
+      huge: SC.FormView.row(SC.ButtonView.design(SC.AutoResize, {
         controlSize: SC.HUGE_CONTROL_SIZE,
         layout: { height: 30, width: 100 },
         title: "Click Me",
@@ -106,7 +106,7 @@ TestControls.buttonsPage = SC.View.design({
         isCancelBinding: 'TestControls.buttonsController.cancel'
       })),
 
-      jumbo: SC.FormView.row(SC.ButtonView.design({
+      jumbo: SC.FormView.row(SC.ButtonView.design(SC.AutoResize, {
         controlSize: SC.JUMBO_CONTROL_SIZE,
         layout: { height: 44, width: 100 },
         title: "Click Me",
