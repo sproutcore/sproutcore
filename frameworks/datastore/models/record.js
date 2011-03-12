@@ -397,7 +397,9 @@ SC.Record = SC.Object.extend(
         attrs;
     
     attrs = store.readEditableDataHash(storeKey);
-    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
+    if (!attrs) {
+      throw SC.$error("Internal Inconsistency (BAD_STATE_ERROR): Cannot write property '%@' on %@.".fmt(key, this.toString()));
+    }
 
     // if value is the same, do not flag record as dirty
     if (value !== attrs[key]) {
@@ -1092,14 +1094,6 @@ SC.Record.mixin( /** @scope SC.Record */ {
   // ERRORS
   // 
   
-  /**
-    Error for when you try to modify a record while it is in a bad 
-    state.
-    
-    @property {SC.Error}
-  */
-  BAD_STATE_ERROR:     SC.$error("Internal barf Inconsistency"),
-
   /**
     Error for when you try to create a new record that already exists.
     
