@@ -26,6 +26,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   name: 'progress',
   
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var theme = dataSource.get('theme'),
         valueMax = dataSource.get('maximum'),
         valueMin = dataSource.get('minimum'),
@@ -64,6 +66,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, $) {
+    this.updateSizeClassName(dataSource, $);
+
     var theme = dataSource.get('theme'),
         valueMax = dataSource.get('maximum'),
         valueMin = dataSource.get('minimum'),

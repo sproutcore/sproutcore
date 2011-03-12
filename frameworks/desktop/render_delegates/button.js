@@ -12,7 +12,35 @@
 */
 SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   name: 'button',
-  
+
+  //
+  // SIZE DEFINITIONS
+  //
+  'sc-small-size': {
+    height: 18,
+    autoResizePadding: 15
+  },
+
+  'sc-regular-size': {
+    height: 24,
+    autoResizePadding: 20
+  },
+
+  'sc-huge-size': {
+    height: 30,
+    autoResizePadding: 30
+  },
+
+  'sc-jumbo-size': {
+    height: 44,
+    autoResizePadding: 50
+  },
+
+
+  //
+  // RENDERING LOGIC
+  //
+
   /**
     Called when we need to create the HTML that represents the button.
 
@@ -20,6 +48,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var labelContent,
         toolTip     = dataSource.get('toolTip'),
         isSelected  = dataSource.get('isSelected') || NO,
@@ -66,6 +96,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     if (dataSource.get('isActive')) {
       jquery.addClass('active');
     }

@@ -5,43 +5,56 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('render_delegates/panel');
+sc_require('render_delegates/picker');
 
-// because render delegates are instances and therefore not, currently,
-// subclassable, this is line-for-line the same render delegate as pickerRenderDelegate.
-// this is obviously not optimal.
-SC.BaseTheme.menuRenderDelegate = SC.RenderDelegate.create({
+// This is the same as a pickerRenderDelegate, but is named 'menu' instead.
+SC.BaseTheme.menuRenderDelegate = SC.BaseTheme.pickerRenderDelegate.create({
   name: 'menu',
-  
-  render: function(dataSource, context) {
-    var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
 
-    panelRenderDelegate.render(dataSource, context);
+  render: function(orig, dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+    orig(dataSource, context);
+  }.enhance(),
 
-    var preferType = dataSource.get('preferType');
-    var pointerPosition = dataSource.get('pointerPos');
-    var pointerPositionY = dataSource.get('pointerPosY');
+  update: function(orig, dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+    orig(dataSource, jquery);
+  }.enhance(),
 
-    if (preferType == SC.PICKER_POINTER || preferType == SC.PICKER_MENU_POINTER) {
-      context.push('<div class="sc-pointer ' + pointerPosition + '" style="margin-top: ' + pointerPositionY + 'px"></div>');
-      context.addClass(pointerPosition);
-    }
+  itemHeight: 20,
+  itemSeparatorHeight: 9,
+  menuHeightPadding: 6,
+  submenuOffsetX: 2,
+
+  verticalOffset: 23,
+
+  'sc-tiny-size': {
+    itemHeight: 10,
+    itemSeparatorHeight: 2,
+    menuHeightPadding: 2,
+    submenuOffsetX: 0
   },
-  
-  update: function(dataSource, $) {
-    var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
-    panelRenderDelegate.update(dataSource, $);
-    
-    var preferType = dataSource.get('preferType');
-    var pointerPosition = dataSource.get('pointerPos');
-    var pointerPositionY = dataSource.get('pointerPosY');
 
-    if (preferType == SC.PICKER_POINTER || preferType == SC.PICKER_MENU_POINTER) {
-      var el = $.find('.sc-pointer');
-      el.attr('class', "sc-pointer "+pointerPosition);
-      el.attr('style', "margin-top: "+pointerPositionY+"px");
-      $.addClass(pointerPosition);
-    }
+  'sc-small-size': {
+    itemHeight: 16,
+    itemSeparatorHeight: 7,
+    menuHeightPadding: 4,
+    submenuOffsetX: 2
+  },
 
+  'sc-large-size': {
+    itemHeight: 60,
+    itemSeparatorHeight: 20,
+    menuHeightPadding: 0,
+    submenuOffsetX: 4
+  },
+
+  // pretty sure these sizes are wrong, but I copied them from their original
+  // values so... please fix.
+  'sc-huge-size': {
+    itemHeight: 20,
+    itemSeparatorHeight: 9,
+    menuHeightPadding: 0,
+    submenuOffsetX: 0
   }
 });

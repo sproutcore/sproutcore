@@ -29,6 +29,8 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
   name: 'radio-group',
   
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var theme = dataSource.get('theme'),
         name = SC.guidFor(this),
         items = dataSource.get('items'), idx, len = items.length, item;
@@ -59,6 +61,8 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     var theme = dataSource.get('theme'),
         name = SC.guidFor(this),
         items = dataSource.get('items'), idx, len = items.length, item;

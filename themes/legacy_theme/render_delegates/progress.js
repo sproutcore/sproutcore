@@ -42,6 +42,8 @@ SC.LegacyTheme.PROGRESS_OFFSET_RANGE = 24;
 */
 SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var theme    = dataSource.get('theme'),
         valueMax = dataSource.get('maximum'),
         valueMin = dataSource.get('minimum'),
@@ -101,7 +103,8 @@ SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, $) {
-    
+    this.updateSizeClassName(dataSource, $);
+
     var theme    = dataSource.get('theme'),
         valueMax = dataSource.get('maximum'),
         valueMin = dataSource.get('minimum'),

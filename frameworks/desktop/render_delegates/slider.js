@@ -21,6 +21,8 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   name: 'slider',
   
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var blankImage = SC.BLANK_IMAGE_URL,
         valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
@@ -47,6 +49,8 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     var valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
         valueNow    = dataSource.get('ariaValue');

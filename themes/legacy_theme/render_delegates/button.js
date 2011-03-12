@@ -18,6 +18,8 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} context the render context instance
   */
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var theme             = dataSource.get('theme'),
         minWidth          = dataSource.get('titleMinWidth'),
         toolTip           = dataSource.get('toolTip'),
@@ -68,6 +70,8 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     var theme         = dataSource.get('theme'),
         isSelected    = dataSource.get('isSelected'),
         isActive      = dataSource.get('isActive');

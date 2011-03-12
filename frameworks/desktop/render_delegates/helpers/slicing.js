@@ -13,7 +13,7 @@ SC.NINE_SLICE = [
   'bottom-left', 'bottom', 'bottom-right'
 ];
 
-SC.mixin(SC.RenderDelegate.prototype, {
+SC.RenderDelegate.mixin({
   /*@scope SC.RenderDelegate.prototype*/
   
   /**

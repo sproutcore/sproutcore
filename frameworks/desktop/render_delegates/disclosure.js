@@ -9,6 +9,8 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   name: 'disclosure',
   
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var theme = dataSource.get('theme'),
         value = dataSource.get('value'),
         title = dataSource.get('title');
@@ -33,6 +35,8 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     var theme = dataSource.get('theme'),
         value = dataSource.get('value'),
         title = dataSource.get('title');

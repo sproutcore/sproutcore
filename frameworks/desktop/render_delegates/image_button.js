@@ -8,6 +8,9 @@
 SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
   name: 'image-button',
   render: function(dataSource, context) {
+    // render controlSize
+    this.addSizeClassName(dataSource, context);
+
     var image = dataSource.get('image');
 
     context.addClass('no-min-width');
@@ -21,6 +24,8 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
   },
 
   update: function(dataSource, $) {
+    this.updateSizeClassName(dataSource, $);
+
     if (dataSource.didChangeFor('imageButtonRenderDelegate', 'image')) {
       var image = dataSource.get('image');
 

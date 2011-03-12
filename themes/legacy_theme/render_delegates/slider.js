@@ -21,6 +21,8 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   name: 'slider',
   
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     var blankImage  = SC.BLANK_IMAGE_URL,
         valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
@@ -42,6 +44,8 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     var blankImage  = SC.BLANK_IMAGE_URL,
         valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
