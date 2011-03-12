@@ -363,13 +363,23 @@ SC.Control = {
     names.active = this.get('isActive') ;
 
     var controlSize = this.get("controlSize");
+    if (!controlSize) {
+      controlSize = SC.REGULAR_CONTROL_SIZE;
+    }
 
     if (firstTime) {
       context.setClass(names);
-      if (controlSize !== SC.AUTO_CONTROL_SIZE) context.addClass(controlSize);
+
+      // delegates handle adding 'controlSize' on their own. We only support it
+      // here for backwards-compatibility.
+      if (!this.get('renderDelegate')) {
+        context.addClass(controlSize);
+      }
     } else {
       context.$().setClass(names);
-      if (controlSize !== SC.AUTO_CONTROL_SIZE) context.$().addClass(controlSize);
+      if (!this.get('renderDelegate')) {
+        context.$().addClass(controlSize);
+      }
     }
 
     // if the control implements the $input() helper, then fixup the input
