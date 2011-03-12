@@ -68,13 +68,22 @@ SC.AutoResize = {
   measuredSize: { width: 0, height: 0 },
   
   /**
-    An amount to add to the calculated width and height to ensure that any parts
-    not included in the measurement by the browser are covered (otherwise artifacts
-    can occur).
-    
+    An amount to add to the calculated width and height to arrive at the measured
+    control size. For instance, a button may want to add the width of its left and
+    right side portions.
+
+    You may provide either a number to be added to both width and height, or a hash 
+    containing discreet width and height values.
+
+    If present, this will find the 'autoSizePadding' property from the view's render delegate.
+
     @private
+    @property
   */
-  autoSizePadding: 10,
+  autoSizePadding: SC.propertyFromRenderDelegate('autoResizePadding', 10),
+  _scar_autoResizePaddingDidChange: function() {
+    this.invokeOnce('measureSize');
+  },
   
   /**
     @private
