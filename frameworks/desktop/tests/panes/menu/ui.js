@@ -116,9 +116,11 @@ test('Control size', function() {
   });
   smallPane.popup();
   views = smallPane.get('menuItemViews');
-  equals(views[0].get('frame').height, SC.MenuPane.SMALL_MENU_ITEM_HEIGHT, 'should change itemHeight');
-  equals(views[1].get('frame').height, SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT, 'should change itemSeparatorHeight');
-  equals(views[0].get('frame').y, SC.MenuPane.SMALL_MENU_HEIGHT_PADDING/2, 'should change menuHeightPadding');
+
+  var small_constants = SC.BaseTheme.menuRenderDelegate['sc-small-size'];
+  equals(views[0].get('frame').height, small_constants.itemHeight, 'should change itemHeight');
+  equals(views[1].get('frame').height, small_constants.itemSeparatorHeight, 'should change itemSeparatorHeight');
+  equals(views[0].get('frame').y, small_constants.menuHeightPadding/2, 'should change menuHeightPadding');
   smallPane.remove();
 
   largePane = SC.MenuPane.create({
@@ -127,9 +129,11 @@ test('Control size', function() {
   });
   largePane.popup();
   views = largePane.get('menuItemViews');
-  equals(views[0].get('frame').height, SC.MenuPane.LARGE_MENU_ITEM_HEIGHT, 'should change itemHeight');
-  equals(views[1].get('frame').height, SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT, 'should change itemSeparatorHeight');
-  equals(views[0].get('frame').y, SC.MenuPane.LARGE_MENU_HEIGHT_PADDING/2, 'should change menuHeightPadding');
+
+  var large_constants = SC.BaseTheme.menuRenderDelegate['sc-large-size'];
+  equals(views[0].get('frame').height, large_constants.itemHeight, 'should change itemHeight');
+  equals(views[1].get('frame').height, large_constants.itemSeparatorHeight, 'should change itemSeparatorHeight');
+  equals(views[0].get('frame').y, large_constants.menuHeightPadding/2, 'should change menuHeightPadding');
   largePane.remove();
 });
 
