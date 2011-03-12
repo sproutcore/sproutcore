@@ -280,15 +280,15 @@ SC.View._RenderDelegateProxy = {
   isViewRenderDelegateProxy: YES,
 
   /**
-   * Creates a View Render Delegate Proxy for the specified view.
-   *
-   * Implementation note: this creates a hash of the view's displayProperties
-   * array so that the proxy may quickly determine whether a property is a
-   * displayProperty or not. This could cause issues if the view's displayProperties
-   * array is modified after instantiation.
-   *
-   * @param {SC.View} view The view this proxy should proxy to.
-   * @returns SC.View._RenderDelegateProxy
+    Creates a View Render Delegate Proxy for the specified view.
+
+    Implementation note: this creates a hash of the view's displayProperties
+    array so that the proxy may quickly determine whether a property is a
+    displayProperty or not. This could cause issues if the view's displayProperties
+    array is modified after instantiation.
+
+    @param {SC.View} view The view this proxy should proxy to.
+    @returns SC.View._RenderDelegateProxy
   */
   createForView: function(view) {
     var ret = SC.beget(this);
@@ -305,21 +305,25 @@ SC.View._RenderDelegateProxy = {
     ret._displayPropertiesLookup = lookup;
     ret.renderState = {};
 
-    ret.view = view;
+    ret._view = view;
     return ret;
   },
 
 
   /**
-   * Provides the render delegate with any property it needs.
-   *
-   * This first looks up whether the property exists in the view's
-   * displayProperties, and whether it exists prefixed with 'display';
-   * for instance, if the render delegate asks for 'title', this will
-   * look for 'displayTitle' in the view's displayProperties array.
-   *
-   * @param {String} property The name of the property the render delegate needs.
-   * @returns The value.
+    Provides the render delegate with any property it needs.
+
+    This first looks up whether the property exists in the view's
+    displayProperties, and whether it exists prefixed with 'display';
+    for instance, if the render delegate asks for 'title', this will
+    look for 'displayTitle' in the view's displayProperties array.
+
+    If the property is not in `displayProperties`, but a property
+    is defined on the view, an error will be thrown to assist in
+    debugging.
+
+   @param {String} property The name of the property the render delegate needs.
+   @returns The value.
   */
   get: function(property) {
     if (this[property] !== undefined) { return this[property]; }
@@ -327,21 +331,20 @@ SC.View._RenderDelegateProxy = {
     var displayProperty = 'display' + property.capitalize();
 
     if (this._displayPropertiesLookup[displayProperty]) {
-      return this.view.get(displayProperty);
+      return this._view.get(displayProperty);
     } else if (this._displayPropertiesLookup[property]) {
-      return this.view.get(property);
+      return this._view.get(property);
     }
 
     return undefined;
   },
 
   /**
-   * Checks if any of the specified properties have changed.
-   *
-   * For each property passed, this first determines whether to use the
-   * 'display' prefix. Then, it calls view.didChangeFor with context and that
-   * property name.
-   *
+   Checks if any of the specified properties have changed.
+
+   For each property passed, this first determines whether to use the
+   'display' prefix. Then, it calls view.didChangeFor with context and that
+   property name.
   */
   didChangeFor: function(context) {
     var len = arguments.length, idx;
@@ -350,13 +353,48 @@ SC.View._RenderDelegateProxy = {
           displayProperty = 'display' + property.capitalize();
 
       if (this._displayPropertiesLookup[displayProperty]) {
-        if (this.view.didChangeFor(context, displayProperty)) { return YES; }
+        if (this._view.didChangeFor(context, displayProperty)) { return YES; }
       } else if (this._displayPropertiesLookup[property]) {
-        if (this.view.didChangeFor(context, property)) { return YES; }
+        if (this._view.didChangeFor(context, property)) { return YES; }
       }
     }
 
     return NO;
   }
 };
+
+/**
+  Generates a computed property that will look up the specified property from
+  the view's render delegate, if present. You may specify a default value to
+  return if there is no such property or is no render delegate.
+  
+  The generated property is read+write, so it may be overriden.
+  
+  @param {String} propertyName The name of the property to get from the render delegate..
+  @param {Value} def The default value to use if the property is not present.
+*/
+SC.propertyFromRenderDelegate = function(propertyName, def) {
+  return function(key, value) {
+    // first, handle set() case
+    if (value !== undefined) {
+      this['_set_rd_' + key] = value;
+    }
+
+    // use any value set manually via set()  -- two lines ago.
+    var ret = this['_set_rd_' + key];
+    if (ret !== undefined) return ret;
+
+    // finally, try to get it from the render delegate
+    var renderDelegate = this.get('renderDelegate');
+    if (renderDelegate && renderDelegate.get) {
+      var proxy = this.get('renderDelegateProxy');
+      ret = renderDelegate.getPropertyFor(proxy, propertyName);
+    }
+
+    if (ret !== undefined) return ret;
+    
+    return def;
+  }.property('renderDelegate').cacheable();
+};
+
 
