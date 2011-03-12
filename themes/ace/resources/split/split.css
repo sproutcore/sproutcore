@@ -1,5 +1,31 @@
 /* TODO: when new SplitView lands, do this proper ($theme.split-divider) */
-$theme.sc-split-divider-view {
-  background: #555;
+$theme.split-divider {
+  background: transparent;
   border: 0px none;
+  z-index: 1;
+
+  .line {
+    background: #333;
+    border: 0px none;
+    position: absolute;
+  }
+
+
+  .sc-layout-horizontal & {
+    .line {
+      left: 5px;
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+    }
+  }
+
+  .sc-layout-vertical & {
+    .line {
+      top: 5px;
+      height: 1px;
+      left: 0px;
+      right: 0px;
+    }
+  }
 }

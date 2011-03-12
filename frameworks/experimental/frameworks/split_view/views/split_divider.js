@@ -33,5 +33,7 @@ SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
   
   movesSibling: SC.MOVES_CHILD,
   
-  size: 10
+  size: SC.propertyFromRenderDelegate('dividerSize', 10),
+
+  renderDelegateName: 'splitDividerRenderDelegate'
 });

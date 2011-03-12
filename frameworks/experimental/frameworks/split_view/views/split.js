@@ -34,7 +34,7 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
   other.
   
   SplitView can resize its children to fit (the default behavior), 
-  or resize itself to fit its children—allowing you to build column-
+  or resize itself to fit its children--allowing you to build column-
   based file browsers and the like. As one child (a divider, most likely) 
   is moved, SplitView can move additional children to get them out of the way.
   
@@ -148,6 +148,14 @@ SC.SplitView = SC.View.extend({
     this.cursor = SC.Cursor.create();
     sc_super();
   },
+
+  //
+  // RENDERING
+  // Things like layoutDirection must be rendered as class names.
+  // We delegate to a render delegaate.
+  //
+  displayProperties: 'layoutDirection'.w(),
+  renderDelegateName: 'splitRenderDelegate',
   
   //
   // UTILITIES
@@ -205,7 +213,7 @@ SC.SplitView = SC.View.extend({
    * Returns the position within the split view for a child view, 
    * such as a divider. This position is not necessarily identical
    * to the view's actual layout 'left' or 'right'; that position could
-   * be offset—for instance, to give a larger grab area to the divider.
+   * be offset--for instance, to give a larger grab area to the divider.
    *
    * The implementation for this is in the delegate method 
    * splitViewGetPositionForChild.

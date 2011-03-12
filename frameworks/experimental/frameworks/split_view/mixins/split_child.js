@@ -77,7 +77,7 @@ SC.SplitChild = {
    *
    * @type Number
   */
-  positionOffset: 0,
+  positionOffset: SC.propertyFromRenderDelegate('splitPositionOffset', 0),
   
   /**
    * An amount to add to the assigned size when adjusting layout.
@@ -92,10 +92,8 @@ SC.SplitChild = {
    *
    * @type Number
   */
-  sizeOffset: 0,
-  
-  
-  
+  sizeOffset: SC.propertyFromRenderDelegate('splitSizeOffset', 0),
+
   /**
    * If YES, the SC.SplitView can collapse this view when the user
    * double-clicks an adjacent divider, or when the view is resized
