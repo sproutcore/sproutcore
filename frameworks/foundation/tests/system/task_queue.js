@@ -1,9 +1,9 @@
 // ========================================================================
-// SC.UserDefaults Base Tests
+// SC.TaskQueue Base Tests
 // ========================================================================
 /*globals module test ok isObj equals expects */
 var taskQueue;
-module("User Defaults",{
+module("Task Queue",{
   setup: function(){
     taskQueue = SC.TaskQueue.create();
   }
