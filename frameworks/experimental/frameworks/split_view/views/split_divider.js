@@ -27,8 +27,9 @@ SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
   // set to prevent SC.SplitView from automatically creating dividers
   // to sit between this divider and another view.
   isSplitDivider: YES,
-  
-  allowsIndirectAdjustments: YES,
+
+  // NOTE: 'sc-fixed-size' is only hard-coded because SC.SplitView requires
+  // this file, and SC.FIXED_SIZE is defined inside SC.SplitView.
   autoResizeStyle: 'sc-fixed-size',
   
   movesSibling: SC.MOVES_CHILD,
