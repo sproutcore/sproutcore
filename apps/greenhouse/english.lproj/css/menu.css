@@ -21,11 +21,7 @@
   background: none;
 }
 
-.sc-panel.sc-menu .sc-menu-item a span {
-  color: #eaeaea;
-  text-shadow: 0 1px 0 #000;
-}
-
+.sc-panel.sc-menu .sc-menu-item a span,
 .sc-panel.sc-menu .sc-menu-item.focus a span {
   color: #eaeaea;
   text-shadow: 0 1px 0 #000;
@@ -40,13 +36,14 @@
 }
 
 /* Hide superfluous divs (css3 baby!) */
-.sc-panel.sc-menu .top-left-edge,
-.sc-panel.sc-menu .top-edge,
-.sc-panel.sc-menu .top-right-edge,
-.sc-panel.sc-menu .right-edge,
-.sc-panel.sc-menu .bottom-right-edge,
-.sc-panel.sc-menu .bottom-edge,
-.sc-panel.sc-menu .bottom-left-edge,
-.sc-panel.sc-menu .left-edge {
+.greenhouse.menu .panel-background .top-left,
+.greenhouse.menu .panel-background .top,
+.greenhouse.menu .panel-background .top-right,
+.greenhouse.menu .panel-background .left,
+.greenhouse.menu .panel-background .middle,
+.greenhouse.menu .panel-background .right,
+.greenhouse.menu .panel-background .bottom-left,
+.greenhouse.menu .panel-background .bottom,
+.greenhouse.menu .panel-background .bottom-right {
   display: none;
 }

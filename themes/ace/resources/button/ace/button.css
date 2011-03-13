@@ -30,4 +30,12 @@ $theme.button {
 
 
   }
+  
+  &.sc-static-layout {
+    display: inline-block;
+    
+    .ie7 & {
+      display: inline;
+    }
+  }
 }

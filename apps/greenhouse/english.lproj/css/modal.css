@@ -28,13 +28,14 @@
 }
 
 /* Hide superfluous divs (css3 baby!) */
-.sc-modal.for-sc-panel + .sc-panel .top-left-edge,
-.sc-modal.for-sc-panel + .sc-panel .top-edge,
-.sc-modal.for-sc-panel + .sc-panel .top-right-edge,
-.sc-modal.for-sc-panel + .sc-panel .right-edge,
-.sc-modal.for-sc-panel + .sc-panel .bottom-right-edge,
-.sc-modal.for-sc-panel + .sc-panel .bottom-edge,
-.sc-modal.for-sc-panel + .sc-panel .bottom-left-edge,
-.sc-modal.for-sc-panel + .sc-panel .left-edge {
+.greenhouse.panel .panel-background .top-left,
+.greenhouse.panel .panel-background .top,
+.greenhouse.panel .panel-background .top-right,
+.greenhouse.panel .panel-background .left,
+.greenhouse.panel .panel-background .middle,
+.greenhouse.panel .panel-background .right,
+.greenhouse.panel .panel-background .bottom-left,
+.greenhouse.panel .panel-background .bottom,
+.greenhouse.panel .panel-background .bottom-right {
   display: none;
 }

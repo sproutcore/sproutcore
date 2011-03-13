@@ -50,14 +50,8 @@
   background: static_url('images/app-selector/list-item-sel.png') repeat-x;
   border-bottom: 1px solid #1c1c1c;
 }
-.app-picker .sc-scroll-view .sc-list-item-view.first {
-  border-radius: 4px 4px 0 0;
-  -moz-border-radius: 4px 4px 0 0;
-  -webkit-border-radius: 4px 4px 0 0;
-  border-top: none;
-}
-
-.sc-theme.focus .app-picker .sc-collection-view.focus .sc-collection-item.sel.first, 
+.sc-theme.focus .app-picker .sc-collection-view.focus .sc-collection-item.sel.first,
+.app-picker .sc-scroll-view .sc-list-item-view.first,
 .app-picker .sc-scroll-view .sc-list-item-view.sel.first {
   border-radius: 4px 4px 0 0;
   -moz-border-radius: 4px 4px 0 0;
@@ -77,35 +71,37 @@
 
 /* HACK: Overriding Default Sproutcore button styling...quick and dirty */
 
-.app-picker .sc-button-view.def.capsule {
-  background: static_url('images/buttons/capsule-xl/regular-r.png') no-repeat right !important;
+.app-picker .sc-button-view.sc-regular-size.def.capsule .right {
+  background: static_url('images/buttons/capsule-xl/regular-r.png') !important;
+  width: 13px !important;
   height: 28px !important;
   max-height: 28px !important;
 }
-.app-picker .sc-button-view.def.capsule span {
-  background: static_url('images/buttons/capsule-xl/regular-l.png') no-repeat !important;
+.app-picker .sc-button-view.sc-regular-size.def.capsule .left {
+  background: static_url('images/buttons/capsule-xl/regular-l.png') !important;
+  width: 13px !important;
   height: 28px !important;
   max-height: 28px !important;
 }
-.app-picker .sc-button-view.def.capsule label {
-  background: static_url('images/buttons/capsule-xl/regular-m.png') repeat-x !important;
+.app-picker .sc-button-view.sc-regular-size.def.capsule .sc-button-label {
+  background: static_url('images/buttons/capsule-xl/regular-m.png') !important;
   font-size: 14px !important;
   color: #000 !important;
   text-shadow: 0 1px 0 #c5c5c5 !important;
   height: 28px !important;
   max-height: 28px !important;
-  line-height: 28px;
+  line-height: 28px !important;
+  margin: 0 13px !important;
+  padding: 0 !important;
 }
 
-.app-picker .sc-button-view.def.capsule.active {
-  background: static_url('images/buttons/capsule-xl/active-r.png') no-repeat right !important;
-  color: #313131 !important;
+.app-picker .sc-button-view.sc-regular-size.def.capsule.active .right {
+  background: static_url('images/buttons/capsule-xl/active-r.png') !important;
 }
-.app-picker .sc-button-view.def.capsule.active span {
-  background: static_url('images/buttons/capsule-xl/active-l.png') no-repeat !important;
-  color: #313131 !important;
+.app-picker .sc-button-view.sc-regular-size.def.capsule.active .left {
+  background: static_url('images/buttons/capsule-xl/active-l.png') !important;
 }
-.app-picker .sc-button-view.def.capsule.active label {
-  background: static_url('images/buttons/capsule-xl/active-m.png') repeat-x !important;
+.app-picker .sc-button-view.sc-regular-size.def.capsule.active .sc-button-label {
+  background: static_url('images/buttons/capsule-xl/active-m.png') !important;
   color: #313131 !important;
 }
