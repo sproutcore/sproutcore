@@ -27,15 +27,17 @@ TestControls.selectPage = SC.View.design({
         {"name": "Printer A", "value": "printer:a"},
         {"name": "Printer B", "value": "printer:b"},
         {"name": "Printer C", "value": "printer:c"},
-        {"separator": YES, name: "none" },
+
         {"name": "Printer D", "value": "printer:d"},
         {"name": "Printer E", "value": "printer:e"},
         {"name": "Printer F", "value": "printer:f"},
+
+        {"separator": YES, name: "none" },
         {"name": "MICR 1", "value": "printer:m1"},
         {"name": "MICR 2", "value": "printer:m2"}
       ],
       itemTitleKey: "name", itemValueKey: "value", itemSeparatorKey: "separator",
-      value: null
+      value: 'printer:a'
     })),
     disabled: SC.FormView.row(SC.SelectView.design({
       layout: { width: 150, height: 24 },
