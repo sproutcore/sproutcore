@@ -18,6 +18,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   // Properties
   //
   theme: 'popup',
+  renderDelegateName: 'selectRenderDelegate',
 
   items: null,
 
@@ -84,7 +85,8 @@ SC.SelectView = SC.PopupButtonView.extend({
    * The default menu has its properties bound to the SC.SelectView,
    * meaning that it will get all its items from the SelectView.
    * You may override them menu entirely with one of your own; if you
-   * mix in SC.SelectViewMenu, it'll get the bindings as well.
+   * mix in SC.SelectViewMenu, it'll get the bindings and the extended
+   * MenuItemView that draws its checkbox when it is the selected item.
    *
   */
   menu: SC.MenuPane.extend(SC.SelectViewMenu),
@@ -106,7 +108,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   */
   init: function() {
     sc_super();
-    
+
     // call valueDidChange to get the initial item, if any
     this._scsv_valueDidChange();
   },
@@ -123,16 +125,19 @@ SC.SelectView = SC.PopupButtonView.extend({
     } else {
       this.setIfChanged('value', sel[this.get('itemValueKey')]);
     }
+
   }.observes('selectedItem'),
 
   /**
-    * The title of the button, derived from the selected item.
+    The title of the button, derived from the selected item.
   */
   title: function() {
     var sel = this.get('selectedItem');
 
     if (!sel) {
       return this.get('defaultTitle');
+    } else if (sel.get) {
+      return sel.get(this.get('itemTitleKey'));
     } else {
       return sel[this.get('itemTitleKey')];
     }
@@ -144,6 +149,10 @@ SC.SelectView = SC.PopupButtonView.extend({
   */
   _scsv_valueDidChange: function() {
     var value = this.get('value');
+
+    if (!this.get('items')) {
+      return;
+    }
 
     var items = this.get('items'), len = items.length, idx;
     for (idx = 0; idx < len; idx++) {
@@ -159,15 +168,71 @@ SC.SelectView = SC.PopupButtonView.extend({
     * observers, createMenu is the natural point at which to set them initially.
     * @private
   */
-  createMenu: function(menu) {
+  createMenu: function(klass) {
     var attrs = {
+      selectView: this,
       selectedItem: this.get('selectedItem'),
-      minimumMenuWidth: this.get('minimumMenuWidth'),
-      preferMatrix: [15, -40, 2]
+      minimumMenuWidth: this.get('minimumMenuWidth')
     };
 
-    return menu.create(attrs);
+    return klass.create(attrs);
   },
+
+  /**
+    The amount by which to offset the menu's left position when displaying it.
+    This can be used to make sure the selected menu item is directly on top of
+    the label in the SelectView.
+
+    By default, this comes from the render delegate's menuLeftOffset property. 
+    If you are writing a theme, you should set the value there.
+  */
+  menuLeftOffset: SC.propertyFromRenderDelegate('menuLeftOffset', 0),
+
+  /**
+    The amount by which to offset the menu's top position when displaying it.
+    This is added to any amount calculated based on the 'top' of a menu item.
+
+    This can be used to make sure the selected menu item's label is directly on
+    top of the SelectView's label.
+
+    By default, this comes from the render delegate's menuTopOffset property.
+    If you are writing a theme, you should set the value there.
+  */
+  menuTopOffset: SC.propertyFromRenderDelegate('menuTopOffset', 0),
+
+  /**
+    Calculates the prefer matrix so that the selected menu item is positioned
+    directly over the SelectView.
+  */
+  menuPreferMatrix: function() {
+    var menu = this.get('menu'),
+        leftPosition = this.get('menuLeftOffset'),
+        topPosition = this.get('menuTopOffset');
+
+    if (!menu) {
+      return [leftPosition, topPosition, 2];
+    }
+
+    // We have to find the selected item, and then get its 'top' position so we
+    // can position the menu correctly.
+    var itemViews = menu.get('menuItemViews'), idx, len = itemViews.length, view;
+    for (idx = 0; idx < len; idx++) {
+      view = itemViews[idx];
+
+      // we have to compare via value
+      var value = view.get('content').get(this.get('itemValueKey'));
+      if (value === this.get('value')) {
+        break;
+      }
+    }
+
+    if (idx < len) {
+      return [leftPosition, topPosition - itemViews[idx].get('layout').top, 2];
+    }
+
+    return [leftPosition, topPosition, 2];
+
+  }.property('value', 'menu').cacheable(),
 
   minimumMenuWidth: function() {
     return this.get('frame').width;

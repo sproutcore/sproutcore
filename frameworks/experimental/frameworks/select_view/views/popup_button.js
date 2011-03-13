@@ -12,18 +12,12 @@ sc_require('views/button');
  * @author Alex Iskander
  */
 SC.PopupButtonView = SC.ButtonView.extend({
-  /** @scope SC.SelectView.prototype */
+  /** @scope SC.PopupButtonView.prototype */
 
   /**
-   * The menu that will pop up when this button is clicked.
-   *
-   * The default menu has its properties bound to the SC.SelectView,
-   * meaning that it will get all its items from the SelectView.
-   * You may override them menu entirely with one of your own; if you
-   * mix in SC.SelectViewMenu, it'll get the bindings as well.
-   *
+    The menu that will pop up when this button is clicked.
   */
-  menu: SC.MenuPane.extend(SC.SelectViewMenu),
+  menu: SC.MenuPane.extend(),
 
   /**
    * If YES, a menu instantiation task will be placed in SproutCore's
@@ -71,9 +65,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     var menu = this.get('menu');
 
     if (menu && menu.isClass && this.get('shouldLoadInBackground')) {
-      SC.backgroundTaskQueue.push(SC.SelectView.InstantiateMenu.create({
-        selectView: this
-      }));
+      SC.backgroundTaskQueue.push(SC.PopupButtonView.InstantiateMenu.create());
     }
   },
 
@@ -110,8 +102,6 @@ SC.PopupButtonView = SC.ButtonView.extend({
       menu = this.createMenu(menu);
     }
 
-    menu.set('selectView', this);
-
     this._currentMenu = menu;
     this.set('menu', menu);
 
@@ -139,6 +129,11 @@ SC.PopupButtonView = SC.ButtonView.extend({
   },
 
   /**
+    The prefer matrix (positioning information) to use to pop up the new menu.
+  */
+  menuPreferMatrix: [0, 0, 0],
+
+  /**
     * @private
     * The actual showing of the menu is delayed because bindings may need
     * to flush.
@@ -146,8 +141,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   _showMenu: function() {
     var menu = this.get('menu');
 
-    debugger;
-    menu.popup(this, null);
+    menu.popup(this, this.get('menuPreferMatrix'));
   },
 
   mouseDown: function(evt) {

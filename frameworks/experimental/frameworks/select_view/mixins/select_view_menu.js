@@ -12,6 +12,43 @@
 SC.SelectViewMenu = {
   selectView: null,
 
+  //
+  // CODE TO MAKE ITEMS BE CHECKED WHEN SELECTED:
+  //
+  value: null,
+  valueBinding: '.selectView.value',
+
+  // make sure to invalidate menu items when selection changes
+  valueDidChange: function() {
+    var items = this.get('menuItemViews'), idx, len = items.length, item;
+    for (idx = 0; idx < len; idx++) {
+      // if the item currently is checked, or if it _should_ be checked, we need to
+      // invalidate the isChecked property.
+      item = items[idx];
+      if (item._lastIsChecked) {
+        item.notifyPropertyChange('isChecked');
+      }
+
+      if (item.get('isChecked')) {
+        item.notifyPropertyChange('isChecked');
+      }
+    }
+  }.observes('value'),
+
+  exampleView: SC.MenuItemView.extend({
+    isChecked: function() {
+      // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
+      // the isChecked property needs to be invalidated.
+      this._lastIsChecked = this.getContentProperty('itemValueKey') === this.getPath('parentMenu.rootMenu.value');
+      return this._lastIsChecked;
+    }.property(),
+
+    displayProperties: ['isChecked']
+  }),
+
+  //
+  // CODE TO BIND TO SELECTVIEW PROPERTIES
+  //
   _svm_bindToProperties: [
     'items',
     'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
