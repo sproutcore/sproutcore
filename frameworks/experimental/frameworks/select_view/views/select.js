@@ -20,6 +20,9 @@ SC.SelectView = SC.PopupButtonView.extend({
   theme: 'popup',
   renderDelegateName: 'selectRenderDelegate',
 
+  /**
+    The items that should populate the menu.
+  */
   items: null,
 
   /**
@@ -101,6 +104,15 @@ SC.SelectView = SC.PopupButtonView.extend({
    */
   selectedItem: null,
   selectedItemBinding: '*menu.rootMenu.selectedItem',
+
+
+  /**
+    This is a property to enable/disable focus rings in buttons. 
+    For SelectView, it is a default.
+
+    @default YES
+  */
+  supportsFocusRing: YES,
 
 
   /**
@@ -242,6 +254,45 @@ SC.SelectView = SC.PopupButtonView.extend({
     if (this.get('menu') && !this.get('menu').isClass) {
       menu.set('minimumMenuWidth', this.get('minimumMenuWidth'));
     }
-  }
+  },
+
+  //
+  // KEY HANDLING
+  //
+  /**
+    @private
+
+    Handle Key event - Down arrow key
+  */
+  keyDown: function(event) {
+    if ( this.interpretKeyEvents(event) ) {
+      return YES;
+    }
+    else {
+      sc_super();
+    }
+  },
+
+  /**
+    @private
+
+    Pressing the Up or Down arrow key should display the menu pane
+  */
+  interpretKeyEvents: function(event) {
+    if (event) {
+      if ((event.keyCode === 38 || event.keyCode === 40)) {
+        this.showMenu();
+      }
+      else if (event.keyCode === 27) {
+        this.resignFirstResponder() ;
+      }
+    }
+    return sc_super();
+  },
+
+  /** Function overridden - tied to the isEnabled state */
+  acceptsFirstResponder: function() {
+    return this.get('isEnabled');
+  }.property('isEnabled').cacheable()
 
 });

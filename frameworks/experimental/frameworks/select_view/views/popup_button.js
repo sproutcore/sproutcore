@@ -178,6 +178,24 @@ SC.PopupButtonView = SC.ButtonView.extend({
     }
 
     return YES;
+  },
+
+  keyDown: function(event) {
+    if ( this.interpretKeyEvents(event) ) {
+      return YES;
+    }
+
+    event.allowDefault();
+    return NO;
+  },
+
+  interpretKeyEvents: function(event) {
+    if (event.which == 13) {
+      this.showMenu();
+      return YES;
+    }
+
+    return NO;
   }
 
 });

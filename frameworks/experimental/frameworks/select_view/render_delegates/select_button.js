@@ -1,3 +1,8 @@
+// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+
 /**
   Renders and updates the DOM representation of a SelectView.
 */
