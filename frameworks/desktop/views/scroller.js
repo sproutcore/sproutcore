@@ -125,7 +125,9 @@ SC.ScrollerView = SC.View.extend(
 
     @property
   */
-  isEnabled: YES,
+  isEnabled: function() {
+    return this.get('proportion') < 1;
+  }.property('proportion').cacheable(),
 
   /**
     Determine the layout direction.  Determines whether the scrollbar should
