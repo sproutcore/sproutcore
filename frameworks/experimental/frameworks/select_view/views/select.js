@@ -234,6 +234,26 @@ SC.SelectView = SC.PopupButtonView.extend({
       return [leftPosition, topPosition, 2];
     }
 
+    var idx = this.get('_selectedItemIndex'), itemViews = menu.get('menuItemViews');
+    if (idx > -1) {
+      return [leftPosition, topPosition - itemViews[idx].get('layout').top, 2];
+    }
+
+    return [leftPosition, topPosition, 2];
+
+  }.property('value', 'menu').cacheable(),
+
+  /**
+    Used to calculate things like the menu's top position.
+
+    @private
+  */
+  _selectedItemIndex: function() {
+    var menu = this.get('menu');
+    if (!menu) {
+      return -1;
+    }
+
     // We have to find the selected item, and then get its 'top' position so we
     // can position the menu correctly.
     var itemViews = menu.get('menuItemViews'), idx, len = itemViews.length, view;
@@ -248,12 +268,20 @@ SC.SelectView = SC.PopupButtonView.extend({
     }
 
     if (idx < len) {
-      return [leftPosition, topPosition - itemViews[idx].get('layout').top, 2];
+      return idx;
     }
 
-    return [leftPosition, topPosition, 2];
-
+    return -1;
   }.property('value', 'menu').cacheable(),
+
+  showMenu: function(orig) {
+    orig();
+
+    var menu = this.get('menu'), itemViews = menu.get('menuItemViews');
+
+    // HACK: currentMenuItem is not a documented property.
+    menu.set('currentMenuItem', itemViews[this.get('_selectedItemIndex')]);
+  }.enhance(),
 
   minimumMenuWidth: function() {
     return this.get('frame').width + this.get('menuMinimumWidthOffset');
@@ -291,9 +319,11 @@ SC.SelectView = SC.PopupButtonView.extend({
     if (event) {
       if ((event.keyCode === 38 || event.keyCode === 40)) {
         this.showMenu();
+        return YES;
       }
       else if (event.keyCode === 27) {
         this.resignFirstResponder() ;
+        return YES;
       }
     }
     return sc_super();
