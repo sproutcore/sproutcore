@@ -329,7 +329,7 @@ jQuery.Buffer = (function() {
       context.classNames = this._hashFromClassNames(this._el.className);
     }
 
-    context.classNames[value] = on || NO;
+    context.classNames[value] = on || false;
   };
 
   Buffer.prototype.hasClass = function(className) {
