@@ -180,23 +180,17 @@ SC.PopupButtonView = SC.ButtonView.extend({
     return YES;
   },
 
+  /**
+    Shows the menu when the user presses Enter. Otherwise, hands it off to button
+    to decide what to do.
+  */
   keyDown: function(event) {
-    if ( this.interpretKeyEvents(event) ) {
-      return YES;
-    }
-
-    event.allowDefault();
-    return NO;
-  },
-
-  interpretKeyEvents: function(event) {
     if (event.which == 13) {
       this.showMenu();
       return YES;
     }
 
-    return NO;
+    return sc_super();
   }
-
 });
 

@@ -784,6 +784,10 @@ SC.ButtonView = SC.View.extend(SC.Control,
       this.triggerActionAfterDelay(evt);
       return YES ; // handled
     }
+
+    // let other keys through to browser
+    evt.allowDefault();
+
     return NO;
   },
 
