@@ -512,7 +512,7 @@ SC.ScrollerView = SC.View.extend(
         thumbPosition = this.get('thumbPosition'),
         value, clickLocation, clickOffset,
         scrollerLength = this.get('scrollerLength');
-        
+
     // Determine the subcontrol that was clicked
     if (target.className.indexOf('thumb') >= 0) {
       // Convert the mouseDown coordinates to the view's coordinates
@@ -683,11 +683,11 @@ SC.ScrollerView = SC.View.extend(
       
       switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
-          if (evt.pageY < topButtonRect.bottom) nowScrollingUp = YES;
+          if (evt.clientY < topButtonRect.bottom) nowScrollingUp = YES;
           else nowScrollingDown = YES;
           break;
         case SC.LAYOUT_HORIZONTAL:
-          if (evt.pageX < topButtonRect.right) nowScrollingUp = YES;
+          if (evt.clientX < topButtonRect.right) nowScrollingUp = YES;
           else nowScrollingDown = YES;
           break;
       }
