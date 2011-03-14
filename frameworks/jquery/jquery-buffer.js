@@ -164,8 +164,18 @@ jQuery.Buffer = (function() {
     // now, if it is a special key, handle it specially.
     if (key === "class") {
       // note: setClass will return the value if "value" is undefined.
-      if (value === undefined) return this.setClass(value).join(' ');
-      else return this.setClass(value);
+      if (value === undefined) return this.setClass().join(' ');
+      else {
+        // if we have a string or array, we need to reset class names altogether
+        if (typeof value === "string" || jQuery.isArray(value)) {
+          var classNamesContext = this.bufferedCommand("flushClassNames");
+          classNamesContext.classNames = this._hashFromClassNames(value);
+          return;
+        } else {
+          // otherwise, hand it to setClass
+          return this.setClass(value);
+        }
+      }
     } else if (key === "html") {
       return this.html(value);
     } else if (key === "text") {
@@ -301,30 +311,25 @@ jQuery.Buffer = (function() {
       return v;
     }
 
-    // if on is defined
-    if (on !== undefined) {
-      if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
-      context.classNames[value] = on || NO;
-      return;
-    }
-
-    // if it is not, but we still have a string supplied (or array), we need to
-    // just use that as the class names.
-    if (typeof value === "string" || jQuery.isArray(value)) {
-      context.classNames = this._hashFromClassNames(value);
-      return;
-    }
-
-    // check value
+    // Hashes of key/values
     if (typeof value === "object") {
-      // this is a hash
       if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
 
       // loop over class names and set it properly.
       for (key in value) {
         context.classNames[key] = value[key];
       }
+
+      return;
     }
+
+    // value is not a hash of class names and values, so "on" must either be
+    // a boolean, or undefined meaning NO.
+    if (!context.classNames) {
+      context.classNames = this._hashFromClassNames(this._el.className);
+    }
+
+    context.classNames[value] = on || NO;
   };
 
   Buffer.prototype.hasClass = function(className) {
