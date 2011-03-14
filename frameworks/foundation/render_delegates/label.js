@@ -38,6 +38,8 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   name: 'label',
   
   render: function(dataSource, context) {
+    this.addSizeClassName(dataSource, context);
+
     // CONSIDER DEPRECATING THESE PROPERTIES BECAUSE THEY ARE
     // ANNOYING PAINS IN THE BUTT THAT EVERYONE HATES
     context.addStyle({
@@ -58,6 +60,8 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   },
   
   update: function(dataSource, jquery) {
+    this.updateSizeClassName(dataSource, jquery);
+
     // CONSIDER DEPRECATING THESE PROPERTIES BECAUSE THEY ARE
     // ANNOYING PAINS IN THE BUTT THAT EVERYONE HATES
     jquery.css({
