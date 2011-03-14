@@ -18,48 +18,29 @@ SC.Pane.reopen(
   computeParentDimensions: function(frame) {
     if(this.get('designer') && SC.suppressMain) { return sc_super(); }
 
-    var wframe = this.get('currentWindowSize'),
-        wDim = {x: 0, y: 0, width: 1000, height: 1000},
+    var wDim = {x: 0, y: 0, width: 1000, height: 1000},
         layout = this.get('layout');
 
-    if (wframe){
-      wDim.width = wframe.width;
-      wDim.height = wframe.height;
-    }
-    // Call the RootResponder instance...
-    else if (SC.RootResponder.responder) {
-      var wSize = SC.RootResponder.responder.get('currentWindowSize');
-      if (wSize){
-        wDim.width = wSize.width;
-        wDim.height = wSize.height;
-      }
-    }
-    // If all else fails then we need to Calculate it from the window size and DOM
-    else {
-      var size, body, docElement;
-      if(!this._bod || !this._docElement){
-        body = document.body;
-        docElement = document.documentElement;
-        this._body=body;
-        this._docElement=docElement;
-      }else{
-        body = this._body;
-        docElement = this._docElement;
-      }
+    // There used to be a whole bunch of code right here to calculate
+    // based first on a stored window size, then on root responder, then
+    // from document... but a) it is incorrect because we don't care about
+    // the window size, but instead, the clientWidth/Height of the body, and
+    // b) the performance benefits are not worth complicating the code that much.
+    if (document && document.body) {
+      wDim.width = document.body.clientWidth;
+      wDim.height = document.body.clientHeight;
 
-      if (window.innerHeight) {
-        wDim.width = window.innerWidth;
-        wDim.height = window.innerHeight;
-      } else if (docElement && docElement.clientHeight) {
-        wDim.width = docElement.clientWidth;
-        wDim.height = docElement.clientHeight;
-      } else if (body) {
-        wDim.width = body.clientWidth;
-        wDim.height = body.clientHeight;
+      // IE7 is the only browser which reports clientHeight _including_ scrollbar.
+      if (SC.browser.isIE && SC.browser.compareVersion("7.0") === 0) {
+        var scrollbarSize = SC.platform.get('scrollbarSize');
+        if (document.body.scrollWidth > wDim.width) {
+          wDim.width -= scrollbarSize;
+        }
+        if (document.body.scrollHeight > wDim.height) {
+          wDim.height -= scrollbarSize;
+        }
       }
-      this.windowSizeDidChange(null, wDim);
     }
-
 
     // If there is a minWidth or minHeight set on the pane, take that
     // into account when calculating dimensions.
