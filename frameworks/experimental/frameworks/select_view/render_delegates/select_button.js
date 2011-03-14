@@ -8,5 +8,6 @@
 */
 SC.BaseTheme.selectRenderDelegate = SC.BaseTheme.buttonRenderDelegate.create({
   menuLeftOffset: -3,
-  menuTopOffset: 2
+  menuTopOffset: 2,
+  menuMinimumWidthOffset: -18
 });

@@ -213,6 +213,15 @@ SC.SelectView = SC.PopupButtonView.extend({
   menuTopOffset: SC.propertyFromRenderDelegate('menuTopOffset', 0),
 
   /**
+    An amount to add to the menu's minimum width. For instance, this could be
+    set to a negative value to let arrows on the side of the SelectView be visible.
+
+    By default, this comes from the render delegate's menuMinimumWidthOffset property.
+    If you are writing a theme, you should set the value there.
+  */
+  menuMinimumWidthOffset: SC.propertyFromRenderDelegate('menuMinimumWidthOffset', 0),
+
+  /**
     Calculates the prefer matrix so that the selected menu item is positioned
     directly over the SelectView.
   */
@@ -247,8 +256,8 @@ SC.SelectView = SC.PopupButtonView.extend({
   }.property('value', 'menu').cacheable(),
 
   minimumMenuWidth: function() {
-    return this.get('frame').width;
-  }.property('frame').cacheable(),
+    return this.get('frame').width + this.get('menuMinimumWidthOffset');
+  }.property('frame', 'menuMinimumWidthOffset').cacheable(),
 
   minimumMenuWidthDidChange: function() {
     if (this.get('menu') && !this.get('menu').isClass) {
