@@ -1,5 +1,37 @@
 sc_require('extensions');
 
+/**
+  Adds the `bind`, `bindAttr`, and `boundIf` helpers to Handlebars.
+
+  # bind
+
+  `bind` can be used to display a value, then update that value if it changes.
+  For example, if you wanted to print the `title` property of `content`:
+
+      {{bind "content.title"}}
+
+  This will return the `title` property as a string, then create a new observer
+  at the specified path. If it changes, it will update the value in DOM. Note
+  that this will only work with SC.Object and subclasses, since it relies on
+  SproutCore's KVO system.
+
+  # bindAttr
+
+  `bindAttr` allows you to create a binding between DOM element attributes and
+  SproutCore objects. For example:
+
+      <img {{bindAttr src="imageUrl" alt="imageTitle"}}>
+
+  # boundIf
+
+  Use the `boundIf` helper to create a conditional that re-evaluates whenever
+  the bound value changes.
+
+      {{#boundIf "content.shouldDisplayTitle"}}
+        {{content.title}}
+      {{/boundIf}}
+*/
+
 (function() {
   var bind = function(property, options, preserveContext, shouldDisplay) {
     var data = options.data;
