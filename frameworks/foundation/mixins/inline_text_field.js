@@ -46,6 +46,23 @@ sc_require('delegates/inline_text_field');
   is defined by the inlineEditorDelegate of your view, and can be changed by using
   one other than the default.
 
+  h2. Customizing the editor
+
+  The editor has several parameters that can be used to customize it to your
+  needs. These options should be set on the editor passed to your delegate's (or
+  view's) inlineEditorWillBeginEditing method:
+
+  - *exampleFrame* The editors initial frame in viewport coordinates.
+  - *value* Initial value of the edit field.
+  - *exampleElement* A DOM element to use when copying styles.
+  - *multiline* If YES then the hitting return will add to the value instead of exiting the inline editor.
+  - *commitOnBlur* If YES then blurring will commit the value, otherwise it will discard the current value.  Defaults to YES.
+  - *validator* Validator to be attached to the field.
+
+  For backwards compatibility, calling the class method beginEditing with an
+  options hash will translate the values in the hash to the correct settings on
+  the editor.
+
   h2. Committing or Discarding Changes
   
   Normally the editor will automatically commit or discard its changes 
