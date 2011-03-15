@@ -289,6 +289,32 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
   });
 
+  test("should not add animation for properties that have the same value as existing layout", function() {
+    var callbacks = 0;
+
+    SC.RunLoop.begin();
+    // we set width to the same value, but we change height
+    view.invokeLater('animate', 1, {width: 100, height: 50}, 0.5, function() { callbacks++; });
+    SC.RunLoop.end();
+
+    ok(callbacks === 0, "precond - callback should not have been run yet");
+
+    stop(2000);
+
+    // we need to test changing the width at a later time
+    setTimeout(function() {
+      start();
+
+      equals(callbacks, 1, "callback should have been run once, for height change");
+
+      SC.RunLoop.begin();
+      view.animate('width', 50, 0.5);
+      SC.RunLoop.end();
+
+      equals(callbacks, 1, "callback should still have only been called once, even though width has now been animated");
+    }, 1000);
+  });
+
   test("should warn if multiple callbacks for transitions");
 
 }

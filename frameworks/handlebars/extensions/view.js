@@ -4,6 +4,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
   helper: function(thisContext, path, options) {
     var inverse = options.inverse;
     var data = options.data;
+    var view = data.view;
     var fn = options.fn;
 
     var newView;
@@ -13,7 +14,13 @@ SC.Handlebars.ViewHelper = SC.Object.create({
       throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
      }
     } else {
-      newView = SC.objectForPropertyPath(path);
+      // Path is relative, look it up with this view as the root
+      if (path.charAt(0) === '.') {
+        newView = SC.objectForPropertyPath(path.slice(1), view);
+      } else {
+        // Path is absolute, look up path on global (window) object
+        newView = SC.objectForPropertyPath(path);
+      }
       if (!newView) { throw "Unable to find view at path '" + path + "'"; }
     }
 
