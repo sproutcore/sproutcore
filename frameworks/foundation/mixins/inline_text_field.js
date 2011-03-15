@@ -216,7 +216,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     // if we weren't given a frame, build one from the target
     if(!frame) {
-      var tempFrame = label.get('frame');
+      var tempFrame = target.get('frame');
 
       frame = SC.viewportOffset(elem);
 
