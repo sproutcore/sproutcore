@@ -72,6 +72,22 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
 
 });
 
+test("should accept relative paths to views", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('Hey look, at {{view ".myCool.view"}}'),
+
+    myCool: SC.Object.create({
+      view: SC.TemplateView.create({
+        template: SC.Handlebars.compile("my cool view")
+      })
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$().text(), "Hey look, at my cool view");
+});
+
 test("child views can be inserted inside a bind block", function() {
   var templates = SC.Object.create({
     nester: SC.Handlebars.compile("<h1 id='hello-world'>Hello {{world}}</h1>{{view \"TemplateTests.LabelView\"}}"),

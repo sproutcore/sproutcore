@@ -22,10 +22,10 @@ module("SC.Pane#layout", {
 });
 
 test("make sure that a call to adjust actually adjusts the view's size", function() {  
-  SC.run(function() {
-    pane.adjust({ width: 100, height: 50 });
-  });
-  
+  SC.RunLoop.begin();
+  pane.adjust({ width: 100, height: 50 });
+  SC.RunLoop.end();
+
   equals(pane.$()[0].style.width, '100px', 'width should have been adjusted');
   equals(pane.$()[0].style.height, '50px', 'height should have been adjusted');
 });

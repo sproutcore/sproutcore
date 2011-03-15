@@ -65,3 +65,22 @@ test("template views return YES to mouseDown if there is a mouseUp method", func
 
   ok(view.tryToPerform('mouseDown'), "view returns YES if we add a mouseUp method");
 });
+
+test("should add a 'hidden' class to a template view when isVisible is true", function() {
+  var view = SC.TemplateView.create();
+
+  ok(view.get('isVisible'), "precond - views default to being visible");
+
+  view.set('template', function() { return "foo"; });
+
+  debugger;
+  view.createLayer();
+  ok(!view.$().hasClass('hidden'), "does not have hidden class applied");
+
+  SC.run(function() { view.set('isVisible', NO); });
+  ok(view.$().hasClass('hidden'), "adds hidden class when isVisible changes to NO");
+
+  SC.run(function() { view.set('isVisible', YES); });
+  ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes to YES");
+});
+

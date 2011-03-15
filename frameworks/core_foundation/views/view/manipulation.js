@@ -113,70 +113,6 @@ SC.View.reopen({
   },
 
   /**
-    This method is called when a view changes its location in the view
-    hierarchy.  This method will update the underlying DOM-location of the
-    layer so that it reflects the new location.
-
-    @returns {SC.View} receiver
-  */
-  updateLayerLocation: function() {
-    // collect some useful value
-    // if there is no node for some reason, just exit
-    var node = this.get('layer'),
-        parentView = this.get('parentView'),
-        parentNode = parentView ? parentView.get('containerLayer') : null ;
-
-    // remove node from current parentNode if the node does not match the new
-    // parent node.
-    if (node && node.parentNode && node.parentNode !== parentNode) {
-      node.parentNode.removeChild(node);
-    }
-
-    // CASE 1: no new parentView.  just remove from parent (above).
-    if (!parentView) {
-      if (node && node.parentNode) { node.parentNode.removeChild(node); }
-
-    // CASE 2: parentView has no layer, view has layer.  destroy layer
-    // CASE 3: parentView has no layer, view has no layer, nothing to do
-    } else if (!parentNode) {
-      if (node) {
-        if (node.parentNode) { node.parentNode.removeChild(node); }
-        this.destroyLayer();
-      }
-
-    // CASE 4: parentView has layer, view has no layer.  create layer & add
-    // CASE 5: parentView has layer, view has layer.  move layer
-    } else {
-      if (!node) {
-        this.createLayer() ;
-        node = this.get('layer') ;
-        if (!node) { return; } // can't do anything without a node.
-      }
-
-      var siblings = parentView.get('childViews'),
-          nextView = siblings.objectAt(siblings.indexOf(this)+1),
-          nextNode = (nextView) ? nextView.get('layer') : null ;
-
-      // before we add to parent node, make sure that the nextNode exists...
-      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-        nextView.updateLayerLocationIfNeeded() ;
-        nextNode = nextView.get('layer') ;
-      }
-
-      // add to parentNode if needed.
-      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-        parentNode.insertBefore(node, nextNode) ;
-      }
-    }
-
-    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
-
-    this.set('layerLocationNeedsUpdate', NO) ;
-
-    return this ;
-  },
-
-  /**
     Insert the view into the the receiver's childNodes array.
 
     The view will be added to the childNodes array before the beforeView.  If
@@ -210,8 +146,9 @@ SC.View.reopen({
     childViews.insertAt(idx, view) ;
 
     // The DOM will need some fixing up, note this on the view.
-    view.parentViewDidChange() ;
-    view.layoutDidChange() ;
+    if(view.parentViewDidChange) view.parentViewDidChange();
+    if(view.layoutDidChange) view.layoutDidChange();
+
     var pane = view.get('pane');
     if(pane && pane.get('isPaneAttached')) {
       view._notifyDidAppendToDocument();
@@ -238,7 +175,7 @@ SC.View.reopen({
     original(view);
 
     // The DOM will need some fixing up, note this on the view.
-    view.parentViewDidChange() ;
+    if(view.parentViewDidChange) view.parentViewDidChange() ;
 
     // notify views
     if (this.didRemoveChild) { this.didRemoveChild(view); }

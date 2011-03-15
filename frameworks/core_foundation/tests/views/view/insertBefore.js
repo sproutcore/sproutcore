@@ -157,8 +157,25 @@ test("invokes parentViewDidChange() on child view.  this is used by the view int
 	
 	parent.insertBefore(child, null);
 	equals(callCount, 1, 'invoked parentViewDidChange');
+
+  var coreView = SC.CoreView.create();
+  parent.insertBefore(coreView, null);
+  equals(parent.get('childViews').lastObject(), coreView, "inserts SC.CoreView");
 });
 
+test("invokes layoutDidChange() on child view", function() {
+
+	// monkey patch to test
+	var callCount = 0;
+	child.layoutDidChange = function() { callCount++; };
+
+	parent.insertBefore(child, null);
+	equals(callCount, 1, 'invoked layoutDidChange');
+
+  var coreView = SC.CoreView.create();
+  parent.insertBefore(coreView, null);
+  equals(parent.get('childViews').lastObject(), coreView, "inserts SC.CoreView");
+});
 // VERIFY LAYER CHANGES ARE DEFERRED
 test("should not move layer immediately", function() {
 

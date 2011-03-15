@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.CheckboxView, { 
@@ -53,7 +52,16 @@ pane.show(); // add a test to show the test pane
 // ..........................................................
 // TEST VIEWS
 // 
-module('SC.CheckboxView ui', pane.standardSetup());
+module('SC.CheckboxView ui', {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
 test("basic", function() {
   var view = pane.view('basic');

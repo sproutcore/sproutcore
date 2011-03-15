@@ -342,7 +342,7 @@ jQuery.Buffer = (function() {
     if (typeof value === "string") value = value.split(' ');
     
     var idx, len = value.length;
-    for (idx = 0; idx < len; idx++) context.classNames[value[idx].trim()] = true;
+    for (idx = 0; idx < len; idx++) context.classNames[jQuery.trim(value[idx])] = true;
   };
 
   Buffer.prototype.removeClass = function(value) {

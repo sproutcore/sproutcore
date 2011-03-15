@@ -129,6 +129,17 @@ SC.CoreView.reopen(
   isVisible: YES,
   isVisibleBindingDefault: SC.Binding.bool(),
 
+  /**
+    Whether the view should be displayed. This is always YES,
+    unless the visibility module is added to SC.View.
+
+    If the visibility module is added, this property will be used to
+    optimize certain behaviors on the view. For example, updates to the
+    view layer will not be performed until the view becomes visible
+    in the window.
+  */
+  isVisibleInWindow: YES,
+
   // ..........................................................
   // CHILD VIEW SUPPORT
   //
@@ -256,6 +267,17 @@ SC.CoreView.reopen(
     this.set('layerNeedsUpdate', YES) ;
     return this;
   },
+
+  /**
+    Marks the view as needing a display update if the isVisible property changes.
+
+    Note that this behavior is identical to a display property. It is broken out
+    into its own observer so that it can be overridden with additional
+    functionality if the visibility module is applied to SC.View.
+  */
+  _sc_isVisibleDidChange: function() {
+    this.displayDidChange();
+  }.observes('isVisible'),
 
   /**
     Setting this property to YES will cause the updateLayerIfNeeded method to
@@ -498,6 +520,78 @@ SC.CoreView.reopen(
     this.destroyLayer();
     //this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocation) ;
+  },
+
+  /**
+    If the parent view has changed, we need to insert this
+    view's layer into the layer of the new parent view.
+  */
+  parentViewDidChange: function() {
+    this.updateLayerLocation();
+  },
+
+  /**
+    This method is called when a view changes its location in the view
+    hierarchy.  This method will update the underlying DOM-location of the
+    layer so that it reflects the new location.
+
+    @returns {SC.View} receiver
+  */
+  updateLayerLocation: function() {
+    // collect some useful value
+    // if there is no node for some reason, just exit
+    var node = this.get('layer'),
+        parentView = this.get('parentView'),
+        parentNode = parentView ? parentView.get('containerLayer') : null ;
+
+    // remove node from current parentNode if the node does not match the new
+    // parent node.
+    if (node && node.parentNode && node.parentNode !== parentNode) {
+      node.parentNode.removeChild(node);
+    }
+
+    // CASE 1: no new parentView.  just remove from parent (above).
+    if (!parentView) {
+      if (node && node.parentNode) { node.parentNode.removeChild(node); }
+
+    // CASE 2: parentView has no layer, view has layer.  destroy layer
+    // CASE 3: parentView has no layer, view has no layer, nothing to do
+    } else if (!parentNode) {
+      if (node) {
+        if (node.parentNode) { node.parentNode.removeChild(node); }
+        this.destroyLayer();
+      }
+
+    // CASE 4: parentView has layer, view has no layer.  create layer & add
+    // CASE 5: parentView has layer, view has layer.  move layer
+    } else {
+      if (!node) {
+        this.createLayer() ;
+        node = this.get('layer') ;
+        if (!node) { return; } // can't do anything without a node.
+      }
+
+      var siblings = parentView.get('childViews'),
+          nextView = siblings.objectAt(siblings.indexOf(this)+1),
+          nextNode = (nextView) ? nextView.get('layer') : null ;
+
+      // before we add to parent node, make sure that the nextNode exists...
+      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
+        nextView.updateLayerLocationIfNeeded() ;
+        nextNode = nextView.get('layer') ;
+      }
+
+      // add to parentNode if needed.
+      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
+        parentNode.insertBefore(node, nextNode) ;
+      }
+    }
+
+    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
+
+    this.set('layerLocationNeedsUpdate', NO) ;
+
+    return this ;
   },
 
   /** @private -
@@ -838,6 +932,90 @@ SC.CoreView.reopen(
     for (idx=0; idx<len; ++idx) {
       if (!childViews[idx]) { continue ; }
       childViews[idx].awake() ;
+    }
+  },
+
+  /**
+    Frame describes the current bounding rect for your view.  This is always
+    measured from the top-left corner of the parent view.
+
+    @property {Rect}
+    @test in layoutStyle
+  */
+  frame: function() {
+    return this.computeFrameWithParentFrame(null) ;
+  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidResize to check the frame for us
+
+  /**
+    Computes the frame of the view by examining the view's DOM representation.
+    If no representation exists, returns null.
+
+    If a parent view is passed, its bounds will be taken into account when
+    calculating the frame.
+
+    @param {Rect} pdim the parent view's dimensions
+    @returns {Rect} the computed frame
+  */
+  computeFrameWithParentFrame: function(pdim) {
+    var layer;
+    var pv = this.get('parentView');
+
+    // need layer to be able to compute rect
+    if (layer = this.get('layer')) {
+      f = SC.viewportOffset(layer); // x,y
+      if (pv) { f = pv.convertFrameFromView(f, null); }
+
+      /*
+        TODO Can probably have some better width/height values - CC
+        FIXME This will probably not work right with borders - PW
+      */
+      f.width = layer.offsetWidth;
+      f.height = layer.offsetHeight;
+      return f;
+    }
+    return null; // can't compute
+  },
+
+  /**
+    The clipping frame returns the visible portion of the view, taking into
+    account the clippingFrame of the parent view.  Keep in mind that
+    the clippingFrame is in the context of the view itself, not it's parent
+    view.
+
+    Normally this will be calculated based on the intersection of your own
+    clippingFrame and your parentView's clippingFrame.
+
+    @property {Rect}
+  */
+  clippingFrame: function() {
+    var f = this.get('frame'),
+        ret = f,
+        pv, cf;
+
+    if (!f) return null;
+    pv = this.get('parentView');
+    if (pv) {
+      cf = pv.get('clippingFrame');
+      if (!cf) return f;
+      ret = SC.intersectRects(cf, f);
+    }
+    ret.x -= f.x;
+    ret.y -= f.y;
+
+    return ret;
+  }.property('parentView', 'frame').cacheable(),
+
+  /** @private
+    This method is invoked whenever the clippingFrame changes, notifying
+    each child view that its clippingFrame has also changed.
+  */
+  _sc_view_clippingFrameDidChange: function() {
+    var cvs = this.get('childViews'), len = cvs.length, idx, cv ;
+    for (idx=0; idx<len; ++idx) {
+      cv = cvs[idx] ;
+
+      cv.notifyPropertyChange('clippingFrame') ;
+      cv._sc_view_clippingFrameDidChange();
     }
   },
 

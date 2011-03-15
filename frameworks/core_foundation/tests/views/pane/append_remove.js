@@ -6,12 +6,17 @@
 
 /*global module test equals context ok same Q$ htmlbody */
 
-htmlbody('<div id="appendtest"></div>');
-
 // ..........................................................
 // appendTo()
 //
-module("SC.Pane#appendTo");
+module("SC.Pane#appendTo", {
+  setup: function(){
+    htmlbody('<div id="appendtest"></div>');
+  },
+  teardown: function(){
+    clearHtmlbody()
+  }
+});
 
 test("adding to document for first time - appendTo(elem)", function() {
   var pane = SC.Pane.create();

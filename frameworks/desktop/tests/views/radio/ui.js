@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 var itemList = [{ title: "Red", value: "red", enabled: YES,ariaLabeledBy: "color" }, { title: "Green", value: "green",ariaLabeledBy: "color"  }, { title: "Blue", value: "blue",ariaLabeledBy: "color" }],
 itemList2 = [{ title: "Cyan", value: "cyan", enabled: YES,ariaLabel: "itemList1" }, { title: "Magenta", value: "magenta",ariaLabel: "itemList1"  }, { title: "Yellow", value: "yellow",ariaLabel: "itemList1"  },{ title: "blacK", value: "black",ariaLabel: "itemList1" }],
@@ -141,7 +140,14 @@ pane.verifyLabels = function verifyLabels(view, items) {
 // ..........................................................
 // TEST VIEWS
 // 
-module('SC.RadioView UI');
+module('SC.RadioView UI', {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+  },
+  teardown: function(){
+    clearHtmlbody();
+  }
+};
 
 test("basic", function() {
   

@@ -96,6 +96,21 @@ test("adds disabled class if view isEnabled = NO", function() {
   
 });
 
+test("adds aria-disabled attribute if view isEnabled = NO", function() {
+  var view = SC.View.create(),
+      context = view.renderContext();
+  
+  context = view.renderContext();
+  view.set('isEnabled', NO);
+  view.prepareContext(context, YES);
+  ok(context.attr('aria-disabled'), 'should have the aria-disabled attribute');
+  
+  view.set('isEnabled', YES);
+  view.prepareContext(context, YES);
+  ok(context.attr('aria-disabled') === null, 'should NOT have the aria-disabled attribute');
+  
+});
+
 test("adds hidden class if view isVisible = NO", function() {
 
   var view = SC.View.create() ;

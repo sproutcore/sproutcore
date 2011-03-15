@@ -804,7 +804,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           this._styles = {};
         } else {
           if (this._cloneStyles) {
-            this._styles = SC.beget(this._styles);
+            this._styles = SC.clone(this._styles);
             this._cloneStyles = NO ;
           }
         }

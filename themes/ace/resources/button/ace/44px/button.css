@@ -13,6 +13,11 @@
     
     @include slices("normal_button.png", $left: 3, $right: 3);
     
+    &.sc-static-layout .sc-button-label {
+      margin-left: 3px;
+      margin-right: 3px;
+    }
+    
     &.active {
       @include slices("active_button.png", $left: 3, $right: 3);    
     }

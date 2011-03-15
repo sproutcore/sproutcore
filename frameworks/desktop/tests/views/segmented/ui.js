@@ -8,7 +8,6 @@
 /*global module test htmlbody ok equals same stop start */
 
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 var pane;
 (function() {
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
@@ -181,7 +180,16 @@ var pane;
   // ..........................................................
   // TEST VIEWS
   //
-  module('SC.SegmentedView ui', pane.standardSetup());
+  module('SC.SegmentedView ui', {
+    setup: function(){
+      htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+      pane.standardSetup().setup();
+    },
+    teardown: function(){
+      pane.standardSetup().teardown();
+      clearHtmlbody();
+    }
+  });
 
   test("Check that all segmentedViews are visible", function() {
     ok(pane.view('3_empty').get('isVisibleInWindow'), '3_empty.isVisibleInWindow should be YES');

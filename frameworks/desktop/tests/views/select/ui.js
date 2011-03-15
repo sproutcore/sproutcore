@@ -7,7 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 //control test pane
 var pane = SC.ControlTestPane.design()
@@ -92,7 +91,16 @@ var pane = SC.ControlTestPane.design()
 // TEST VIEWS
 //
 
-module('SC.SelectView ui', pane.standardSetup()) ;
+module('SC.SelectView ui', {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
+  },
+  teardown: function(){
+    pane.standardSetup().teardown();
+    clearHtmlbody();
+  }
+});
 
 //test1
 test("Check the visiblity of the selectButtons", function() {

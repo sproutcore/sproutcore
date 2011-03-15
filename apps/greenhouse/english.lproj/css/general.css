@@ -23,7 +23,6 @@
 /* General Styles
 ---------------------------------------------- */
 
-body.sc-theme,
 body.sc-theme > .sc-pane.sc-main{ 
   overflow: hidden;
   background: static_url('images/main-bg.png');

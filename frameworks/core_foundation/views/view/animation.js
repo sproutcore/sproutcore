@@ -82,26 +82,20 @@ SC.View.reopen(
 
     // Very similar to #adjust
     for(key in hash) {
-      if (!hash.hasOwnProperty(key)) { continue; }
+      if (!hash.hasOwnProperty(key) || !SC.ANIMATABLE_PROPERTIES[key]) { continue; }
       value = hash[key];
       cur = layout[key];
+      curAnim = layout.animate[key];
 
-      if (cur !== value) { didChange = YES; }
+      // loose comparison used instead of (value === null || value === undefined)
+      if (value == null) { throw "Can only animate to an actual value!"; }
 
-      if (SC.ANIMATABLE_PROPERTIES[key]) {
-        curAnim = layout.animate[key];
-
-        // loose comparison used instead of (value === null || value === undefined)
-        if (value == null) { throw "Can only animate to an actual value!"; }
-
-        // FIXME: We should check more than duration
-        if (curAnim && curAnim.duration !== options.duration) { didChange = YES; }
-
+      // FIXME: We should check more than duration
+      if (cur !== value || (curAnim && curAnim.duration !== options.duration)) {
+        didChange = YES;
         layout.animate[key] = options;
+        layout[key] = value;
       }
-
-      layout[key] = value;
-
     }
 
     // now set adjusted layout

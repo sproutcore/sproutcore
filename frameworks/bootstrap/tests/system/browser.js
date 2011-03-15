@@ -10,6 +10,9 @@ var cleanBrowser = {
   windows: 0,
   mac: 0,
   iOS: 0,
+  iPhone: 0,
+  iPod: 0,
+  iPad: 0,
   android: 0,
   opera: 0,
   msie: 0,
@@ -17,6 +20,9 @@ var cleanBrowser = {
   webkit: 0,
   chrome: 0,
   mobileSafari: 0,
+  iPadSafari: 0,
+  iPodSafari: 0,
+  iPhoneSafari: 0,
   safari: 0
 };
 
@@ -133,27 +139,27 @@ test("Firefox Windows 4.0b7pre", function() {
 
 test("Mobile Safari - iOS 3.2.2 iPad", function() {
   var userAgent = "Mozilla/5.0 (iPad; U; CPU OS 3_2_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B500 Safari/531.21.10";
-  testUserAgent(userAgent, { version: '531.21.10', webkit: '531.21.10', mobileSafari: '531.21.10', current: 'mobile-safari', iOS: true });
+  testUserAgent(userAgent, { version: '531.21.10', webkit: '531.21.10', mobileSafari: '531.21.10', iPadSafari: '531.21.10', current: 'mobile-safari', iOS: true, iPad: true });
 });
 
-test("Mobile Safari - iOS 4.0", function() {
+test("Mobile Safari - iOS 4.0 iPhone", function() {
   var userAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7";
-  testUserAgent(userAgent, { version: '532.9', webkit: '532.9', mobileSafari: '532.9', current: 'mobile-safari', iOS: true });
+  testUserAgent(userAgent, { version: '532.9', webkit: '532.9', mobileSafari: '532.9', iPhoneSafari: '532.9', current: 'mobile-safari', iOS: true, iPhone: true });
 });
 
-test("Mobile Safari - iOS 4.1", function() {
+test("Mobile Safari - iOS 4.1 iPhone", function() {
   var userAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B117 Safari/6531.22.7";
-  testUserAgent(userAgent, { version: '532.9', webkit: '532.9', mobileSafari: '532.9', current: 'mobile-safari', iOS: true });
+  testUserAgent(userAgent, { version: '532.9', webkit: '532.9', mobileSafari: '532.9', iPhoneSafari: '532.9', current: 'mobile-safari', iOS: true, iPhone: true });
 });
 
-test("iOS WebView - iOS 4.1", function() {
+test("iOS WebView - iOS 4.1 iPhone", function() {
   var userAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Mobile/8B117";
-  testUserAgent(userAgent, { version: '532.9', webkit: '532.9', current: 'unknown', iOS: true });
+  testUserAgent(userAgent, { version: '532.9', webkit: '532.9', current: 'unknown', iOS: true, iPhone: true });
 });
 
-test("iOS WebView - iOS 4.2.1", function() {
+test("iOS WebView - iOS 4.2.1 iPhone", function() {
   var userAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_1 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Mobile/8C14";
-  testUserAgent(userAgent, { version: '533.17.9', webkit: '533.17.9', current: 'unknown', iOS: true });
+  testUserAgent(userAgent, { version: '533.17.9', webkit: '533.17.9', current: 'unknown', iOS: true, iPhone: true });
 });
 
 test("Unknown", function() {

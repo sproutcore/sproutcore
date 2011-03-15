@@ -169,6 +169,11 @@ SC.View.reopen(
     - minHeight: a minimum height
     - maxWidth: a maximum width
     - maxHeight: a maximum height
+    - border: border on all sides
+    - borderTop: top border
+    - borderRight: right border
+    - borderBottom: bottom border
+    - borderLeft: bottom left
 
     Note that you can only use certain combinations to set layout.  For
     example, you may set left/right or left/width, but not left/width/right,
@@ -293,16 +298,19 @@ SC.View.reopen(
     }
   },
 
-  /**
-    Frame describes the current bounding rect for your view.  This is always
-    measured from the top-left corner of the parent view.
+  _adjustForBorder: function(frame, layout){
+    var borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0,
+        borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0,
+        borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0,
+        borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0;
 
-    @property {Rect}
-    @test in layoutStyle
-  */
-  frame: function() {
-    return this.computeFrameWithParentFrame(null) ;
-  }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidResize to check the frame for us
+    frame.x += borderLeft; // The border on the left pushes the frame to the right
+    frame.y += borderTop; // The border on the top pushes the frame down
+    frame.width -= (borderLeft + borderRight); // Border takes up space
+    frame.height -= (borderTop + borderBottom); // Border takes up space
+
+    return frame;
+  },
 
   /**
     Computes what the frame of this view would be if the parent were resized
@@ -319,13 +327,17 @@ SC.View.reopen(
     @param {Rect} pdim the projected parent dimensions
     @returns {Rect} the computed frame
   */
-  computeFrameWithParentFrame: function(pdim) {
-    var layout = this.get('layout'),
-        f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
-        stLayout = this.get('useStaticLayout'),
+  computeFrameWithParentFrame: function(original, pdim) {
+    var layout = this.get('layout');
+
+    if (this.get('useStaticLayout')) {
+      var f = original(pdim);
+      return f ? this._adjustForBorder(f, layout) : null;
+    }
+
+    var f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
         dH, dW, //shortHand for parentDimensions
-        borderTop, borderLeft,
         lR = layout.right,
         lL = layout.left,
         lT = layout.top,
@@ -335,37 +347,19 @@ SC.View.reopen(
         lcX = layout.centerX,
         lcY = layout.centerY;
 
-    if (lW === AUTO && stLayout !== undefined && !stLayout) {
+    if (lW === AUTO) {
       error = SC.Error.desc(("%@.layout() cannot use width:auto if "+
                 "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       SC.Logger.error(error.toString()) ;
       throw error ;
     }
 
-    if (lH === AUTO && stLayout !== undefined && !stLayout) {
+    if (lH === AUTO) {
        error = SC.Error.desc(("%@.layout() cannot use height:auto if "+
                 "staticLayout is disabled").fmt(this),"%@".fmt(this), -1);
        SC.Logger.error(error.toString())  ;
       throw error ;
     }
-
-    if (stLayout) {
-      // need layer to be able to compute rect
-      if (layer = this.get('layer')) {
-        f = SC.viewportOffset(layer); // x,y
-        if (pv) { f = pv.convertFrameFromView(f, null); }
-
-        /*
-          TODO Can probably have some better width/height values - CC
-          FIXME This will probably not work right with borders - PW
-        */
-        f.width = layer.offsetWidth;
-        f.height = layer.offsetHeight;
-        return f;
-      }
-      return null; // can't compute
-    }
-
 
     if (!pdim) { pdim = this.computeParentDimensions(layout) ; }
     dH = pdim.height;
@@ -480,15 +474,7 @@ SC.View.reopen(
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
 
-    // views with SC.Border mixin applied applied
-    if (this.get('hasBorder')) {
-      borderTop = this.get('borderTop') || 0;
-      borderLeft = this.get('borderLeft') || 0;
-      f.height -= borderTop+ (this.get('borderBottom') || 0);
-      f.y += borderTop;
-      f.width -= borderLeft + (this.get('borderRight') || 0);
-      f.x += borderLeft;
-    }
+    f = this._adjustForBorder(f, layout);
 
     // Account for special cases inside ScrollView, where we adjust the
     // element's scrollTop/scrollLeft property for performance reasons.
@@ -520,7 +506,7 @@ SC.View.reopen(
     if (f.width < 0) f.width = 0 ;
 
     return f;
-  },
+  }.enhance(),
 
   computeParentDimensions: function(frame) {
     var ret, pv = this.get('parentView'), pf = (pv) ? pv.get('frame') : null ;
@@ -538,73 +524,24 @@ SC.View.reopen(
   },
 
   /**
-    The clipping frame returns the visible portion of the view, taking into
-    account the contentClippingFrame of the parent view.  Keep in mind that
-    the clippingFrame is in the context of the view itself, not it's parent
-    view.
-
-    Normally this will be calculated based on the intersection of your own
-    clippingFrame and your parentView's contentClippingFrame.
-
-    @property {Rect}
+    The frame of the view including the borders
   */
-  clippingFrame: function() {
-    var f = this.get('frame'),
-        ret = f,
-        pv, cf;
+  borderFrame: function(){
+    var layout = this.get('layout'),
+        frame = this.get('frame'),
+        defaultBorder = layout.border,
+        topBorder = ((layout.topBorder !== undefined) ? layout.topBorder : layout.border) || 0,
+        rightBorder = ((layout.rightBorder !== undefined) ? layout.rightBorder : layout.border) || 0,
+        bottomBorder = ((layout.bottomBorder !== undefined) ? layout.bottomBorder : layout.border) || 0,
+        leftBorder = ((layout.leftBorder !== undefined) ? layout.leftBorder : layout.border) || 0;
 
-    if (!f) return null;
-    pv = this.get('parentView');
-    if (pv) {
-      cf = pv.get('contentClippingFrame');
-      if (!cf) return f;
-      ret = SC.intersectRects(cf, f);
-    }
-    ret.x -= f.x;
-    ret.y -= f.y;
-
-    return ret;
-  }.property('parentView', 'frame').cacheable(),
-
-  /**
-    The clipping frame child views should intersect with.  Normally this is
-    the same as the regular clippingFrame.  However, you may override this
-    method if you want the child views to actually draw more or less content
-    than is actually visible for some reason.
-
-    Usually this is only used by the ScrollView to optimize drawing on touch
-    devices.
-
-    @property {Rect}
-  */
-  contentClippingFrame: function() {
-    return this.get('clippingFrame');
-  }.property('clippingFrame').cacheable(),
-
-  /** @private
-    This method is invoked whenever the clippingFrame changes, notifying
-    each child view that its clippingFrame has also changed.
-  */
-  _sc_view_clippingFrameDidChange: function() {
-    var cvs = this.get('childViews'), len = cvs.length, idx, cv ;
-    for (idx=0; idx<len; ++idx) {
-      cv = cvs[idx] ;
-
-      // In SC 1.0 views with static layout did not receive notifications
-      // of frame changes because they didn't support frames.  In SC 1.1 they
-      // do support frames, so they should receive notifications.  Also in
-      // SC 1.1 SC.StaticLayout is merged into SC.View.  The mixin is only
-      // for compatibility.  This property is defined on the mixin.
-      //
-      // frame changes should be sent all the time unless this property is
-      // present to indicate that we want the old 1.0 API behavior instead.
-      //
-      if (!cv.useStaticLayout && cv._sc_view_clippingFrameDidChange) {
-        cv.notifyPropertyChange('clippingFrame') ;
-        cv._sc_view_clippingFrameDidChange();
-      }
-    }
-  },
+    return {
+      x: frame.x - leftBorder,
+      y: frame.y - topBorder,
+      width: frame.width + leftBorder + rightBorder,
+      height: frame.height + topBorder + bottomBorder
+    };
+  }.property('frame').cacheable(),
 
   /**
     This method may be called on your view whenever the parent view resizes.

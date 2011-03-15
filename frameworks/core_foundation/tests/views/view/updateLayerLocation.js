@@ -150,6 +150,25 @@ test("CASE 5b: insert child w/ layer before a sibling w/ NO layer - should creat
 	ok(parentHasChild(newParentLayer, childLayer), 'newParentLayer should have childLayer');
 });
 
+test("should insert a CoreView without layer before a sibling with layer", function() {
+  var newParent = SC.View.create().createLayer();
+  var newParentLayer = newParent.get('layer');
+
+  var sibling = SC.View.create().createLayer();
+  var siblingLayer = sibling.get('layer');
+
+  ok(newParentLayer, 'precond - newParent has a layer');
+  ok(sibling.get('layer'), 'precond - sibling has a layer');
+
+  child = SC.CoreView.create();
+
+  newParent.appendChild(sibling);
+  newParent.insertBefore(child, sibling);
+
+  ok(parentHasChild(newParentLayer, child.get('layer')), "child layer should belong to parent layer");
+  equals(child.get('layer').nextSibling, siblingLayer, "child layer should be inserted before sibling layer");
+});
+
 // .......................................................
 //  updateLayerLocationIfNeeded() 
 //
