@@ -457,37 +457,51 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
           layer = view.get('layer'),
           currentStyle = layer ? layer.style : null,
           newStyle = view.get('layoutStyle'),
+          activeAnimations = this._activeAnimations, activeAnimation,
+          pendingAnimations = this._pendingAnimations, pendingAnimation,
+          animatedTransforms = this._animatedTransforms,
+          transformsLength = animatedTransforms ? animatedTransforms.length : 0,
           transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
           layout = view.get('layout'),
-          key, callback, idx;
+          key, callback, idx, shouldCancel;
 
-      // Handle existing animations
-      if (this._activeAnimations) {
-        for(key in this._activeAnimations){
-          // TODO: Check for more than duration
-          if (
-            newStyle[key] !== (currentStyle ? currentStyle[key] : null) ||
-            !this._pendingAnimations || !this._pendingAnimations[key] ||
-            this._activeAnimations[key].duration !== this._pendingAnimations[key].duration
-          ) {
-            callback = this._activeAnimations[key].callback;
-            if (callback) {
-              if (this._animatedTransforms && this._animatedTransforms.length > 0) {
-                for (idx=0; idx < this._animatedTransforms.length; idx++) {
-                  this.runAnimationCallback(callback, null, this._animatedTransforms[idx], YES);
+      if (pendingAnimations) {
+        if (!activeAnimations) activeAnimations = {};
+        
+        for (key in pendingAnimations) {
+          if (!pendingAnimations.hasOwnProperty(key)) continue;
+          
+          pendingAnimation = pendingAnimations[key];
+          activeAnimation = activeAnimations[key];
+          shouldCancel = NO;
+          
+          if (newStyle[key] !== (currentStyle ? currentStyle[key] : null)) shouldCancel = YES;
+          
+          // if we have a new animation (an animation property has changed), cancel current
+          if (activeAnimation && (activeAnimation.duration !== pendingAnimation.duration || activeAnimation.timing !== pendingAnimation.timing)) {
+            shouldCancel = YES;
+          }
+          
+          if (shouldCancel && activeAnimation) {
+            if (callback = activeAnimation.callback) {
+              if (transformsLength > 0) {
+                for (idx=0; idx < transformsLength; idx++) {
+                  this.runAnimationCallback(callback, null, animatedTransforms[idx], YES);
                 }
                 this._animatedTransforms = null;
               } else {
                 this.runAnimationCallback(callback, null, key, YES);
               }
             }
-
+            
             this.removeAnimationFromLayout(key, YES);
           }
+          
+          activeAnimations[key] = pendingAnimation;
         }
       }
-
-      this._activeAnimations = this._pendingAnimations;
+      
+      this._activeAnimations = activeAnimations;
       this._pendingAnimations = null;
     }
   },
@@ -521,7 +535,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
-    if(animation) {
+    if (animation) {
       if (animation.callback) {
         // Charles says this is a good idea
         SC.RunLoop.begin();

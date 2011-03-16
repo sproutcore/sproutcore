@@ -171,6 +171,35 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
   });
 
+  test("should not cancel callback when value hasn't changed", function() {
+    var callbacks = 0, wasCancelled = NO, check = 0;
+    stop(2000);
+    
+    SC.RunLoop.begin();
+    view.invokeLater(function() {
+      // this triggers the initial layoutStyle code
+      view.animate('left', 79, 0.500, function(data) {
+        callbacks++;
+        wasCancelled = data.isCancelled;
+      });
+      // this triggers a re-render, re-running the layoutStyle code
+      view.displayDidChange();
+    }, 1);
+    SC.RunLoop.end();
+    
+    setTimeout(function() {
+      // capture the callbacks value
+      check = callbacks;
+    }, 250);
+    
+    setTimeout(function() {
+      start();
+      equals(check, 0, "the callback should not have been cancelled initially");
+      equals(callbacks, 1, "the callback should have been fired");
+      equals(wasCancelled, NO, "the callback should not have been cancelled");
+    }, 1000);
+  });
+
   test("should handle transform attributes", function(){
     SC.RunLoop.begin();
     view.animate('rotateX', 45, { duration: 1 });
