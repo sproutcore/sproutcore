@@ -73,7 +73,6 @@ test("should add a 'hidden' class to a template view when isVisible is true", fu
 
   view.set('template', function() { return "foo"; });
 
-  debugger;
   view.createLayer();
   ok(!view.$().hasClass('hidden'), "does not have hidden class applied");
 
