@@ -97,7 +97,6 @@ config :core_tools, :required => [:desktop, :datastore, :animation, :forms]
   config app_target, 
     :required => [:desktop, :datastore, :core_tools],
     :theme => :ace
-    # :html5_history => true
 
   # mode :debug do
   #   config app_target, :combine_javascript => false
