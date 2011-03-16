@@ -106,6 +106,7 @@ Handlebars.registerHelper('bindAttr', function(options) {
   // current value of the property as an attribute.
   attrKeys.forEach(function(attr) {
     var property = attrs[attr];
+    var value = view.getPath(property);
 
     // Add an observer to the view for when the property changes.
     // When the observer fires, find the element using the
@@ -123,11 +124,30 @@ Handlebars.registerHelper('bindAttr', function(options) {
         return;
       }
 
-      elem.attr(attr, result);
+      // A false result will remove the attribute from the element. This is
+      // to support attributes such as disabled, whose presence is meaningful.
+      if (result === NO) {
+        elem.removeAttr(attr);
+
+      // Likewise, a true result will set the attribute's name as the value.
+      } else if (result === YES) {
+        elem.attr(attr, attr);
+
+      } else {
+        elem.attr(attr, result);
+      }
     });
 
-    // Return the current value, in the form src="foo.jpg"
-    ret.push(attr+'="'+view.getPath(property)+'"');
+    // Use the attribute's name as the value when it is YES
+    if (value === YES) {
+      value = attr;
+    }
+
+    // Do not add the attribute when the value is false
+    if (value !== NO) {
+      // Return the current value, in the form src="foo.jpg"
+      ret.push(attr+'="'+value+'"');
+    }
   });
 
   // Add the unique identifier
