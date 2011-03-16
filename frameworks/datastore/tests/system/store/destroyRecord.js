@@ -10,7 +10,9 @@ var json1, json2, json3, json4, json5, json6;
 
 module("SC.Store#destroyRecord", {
   setup: function() {
-    
+
+    SC.RunLoop.begin();
+
     store = SC.Store.create();
     
     json1 = {
@@ -62,6 +64,8 @@ module("SC.Store#destroyRecord", {
     store.writeDataHash(storeKey5, json5, SC.Record.READY_NEW);
     storeKey6 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey6, json6, SC.Record.READY_CLEAN);
+
+    SC.RunLoop.end();
   }
 });
 
