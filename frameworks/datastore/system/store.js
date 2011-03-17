@@ -1525,17 +1525,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} ids ids to retrieve
     @param {Array} storeKeys (optional) store keys to retrieve
     @param {Boolean} isRefresh
+    @param {Function|Array} callback function or array of functions
     @returns {Array} storeKeys to be retrieved
   */
-  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh, callbacks) {
     
     var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        hasCallbackArray = SC.typeOf(callbacks) === SC.T_ARRAY,
         len     = (!storeKeys) ? ids.length : storeKeys.length,
         ret     = [],
         rev     = SC.Store.generateStoreKey(),
         K       = SC.Record,
-        recordType, idx, storeKey, status, ok;
+        recordType, idx, storeKey, status, ok, callback;
         
     if (!isArray) recordType = recordTypes;
     
@@ -1549,6 +1551,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (isArray) recordType = recordTypes[idx];
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
+      //collect the callback
+      callback = hasCallbackArray ? callbacks[idx] : callbacks;
       
       // collect status and process
       status = this.readStatus(storeKey);
@@ -1558,7 +1562,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         this.writeStatus(storeKey, K.BUSY_LOADING);
         this.dataHashDidChange(storeKey, rev, YES);
         ret.push(storeKey);
-
+        this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
       // otherwise, ignore record unless isRefresh is YES.
       } else if (isRefresh) {
         // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
@@ -1566,7 +1570,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           this.writeStatus(storeKey, K.BUSY_REFRESH | (status & 0x03)) ;
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
-
+          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
         // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
         } else if ((status == K.BUSY_DESTROYING) || (status == K.BUSY_CREATING) || (status == K.BUSY_COMMITTING)) {
           throw K.BUSY_ERROR ;
@@ -1610,6 +1614,61 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   _TMP_RETRIEVE_ARRAY: [],
   
+  _callback_queue: {},
+  
+  /**
+    @private
+    stores the callbacks for the storeKeys that are inflight
+  **/
+  _setCallbackForStoreKey: function(storeKey, callback, hasCallbackArray, storeKeys){
+    var queue = this._callback_queue;
+    if(hasCallbackArray) queue[storeKey] = {callback: callback, otherKeys: storeKeys};
+    else queue[storeKey] = callback;
+  },
+  /**
+    @private
+    retreives and calls callback for storkey if exists
+    also handles if a single callback is need for one key
+  **/
+  _retreiveCallbackForStoreKey: function(storeKey){
+    var queue = this._callback_queue,
+        callback = queue[storeKey],
+        allFinished, keys;
+    if(callback){
+      if(SC.typeOf(callback) === SC.T_FUNCTION){
+        callback.call(); //args?
+        delete queue[storeKey]; //cleanup
+      }
+      else if(SC.typeOf(callback) == SC.T_HASH){
+        callback.completed = YES;
+        keys = callback.storeKeys;
+        keys.forEach(function(key){
+          if(!queue[key].completed) allFinished = YES;
+        });
+        if(allFinished){
+          callback.callback.call(); // args?
+          //cleanup
+          keys.forEach(function(key){
+            delete queue[key];
+          });
+        }
+        
+      }
+    }
+  },
+  
+  /*
+    @private
+    
+  */
+  _cancelCallback: function(storeKey){
+    var queue = this._callback_queue;
+    if(queue[storeKey]){
+      delete queue[storeKey];
+    }
+  },
+  
+  
   /**
     Retrieves a record from the server.  If the record has already been loaded
     in the store, then this method will simply return.  Otherwise if your 
@@ -1625,9 +1684,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} id id to retrieve
     @param {Number} storeKey (optional) store key
     @param {Boolean} isRefresh
+    @param {Function} callback (optional)
     @returns {Number} storeKey that was retrieved 
   */
-  retrieveRecord: function(recordType, id, storeKey, isRefresh) {
+  retrieveRecord: function(recordType, id, storeKey, isRefresh, callback) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret;
     
@@ -1640,7 +1700,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    ret = this.retrieveRecords(recordType, id, storeKey, isRefresh);
+    ret = this.retrieveRecords(recordType, id, storeKey, isRefresh, callback);
     array.length = 0 ;
     return ret[0];
   },
@@ -1653,10 +1713,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
     @param {Number} storeKey (optional) optional store key
+    @param {Function} callback (optional) when refresh complets
     @returns {Boolean} YES if the retrieval was a success.
   */
-  refreshRecord: function(recordType, id, storeKey) {
-    return !!this.retrieveRecord(recordType, id, storeKey, YES);
+  refreshRecord: function(recordType, id, storeKey, callback) {
+    return !!this.retrieveRecord(recordType, id, storeKey, YES, callback);
   },
 
   /**
@@ -1667,10 +1728,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to destroy
     @param {Array} storeKeys (optional) store keys to destroy
+    @param {Function} callback (optional) when refresh complets
     @returns {Boolean} YES if the retrieval was a success.
   */
-  refreshRecords: function(recordTypes, ids, storeKeys) {
-    var ret = this.retrieveRecords(recordTypes, ids, storeKeys, YES);
+  refreshRecords: function(recordTypes, ids, storeKeys, callback) {
+    var ret = this.retrieveRecords(recordTypes, ids, storeKeys, YES, callback);
     return ret && ret.length>0;
   },
     
@@ -1687,16 +1749,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Set} storeKeys to commit
     @param {Hash} params optional additional parameters to pass along to the
       data source
-
+    @param {Function|Array} callback function or array of functions
+    
     @returns {Boolean} if the action was succesful.
   */
-  commitRecords: function(recordTypes, ids, storeKeys, params) {
+  commitRecords: function(recordTypes, ids, storeKeys, params, callbacks) {
     var source    = this._getDataSource(),
-        isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
+        isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        hasCallbackArray = SC.typeOf(callbacks) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
         rev       = SC.Store.generateStoreKey(),
         K         = SC.Record,
-        recordType, idx, storeKey, status, key, ret, len ;
+        recordType, idx, storeKey, status, key, ret, len, callback;
 
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
@@ -1718,6 +1782,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
       
+      //collect the callback
+      callback = hasCallbackArray ? callbacks[idx] : callbacks;
+      
       // collect status and process
       status = this.readStatus(storeKey);
       
@@ -1729,14 +1796,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
           retCreate.push(storeKey);
+          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
         } else if (status==K.READY_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_COMMITTING);
           this.dataHashDidChange(storeKey, rev, YES);
           retUpdate.push(storeKey);
+          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
         } else if (status==K.DESTROYED_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_DESTROYING);
           this.dataHashDidChange(storeKey, rev, YES);
           retDestroy.push(storeKey);
+          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
         } else if (status==K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
         }
@@ -1777,7 +1847,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       to the data source
     @returns {Boolean} if the action was successful.
   */
-  commitRecord: function(recordType, id, storeKey, params) {
+  commitRecord: function(recordType, id, storeKey, params, callback) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret ;
     if (id === undefined && storeKey === undefined ) return NO;
@@ -1790,7 +1860,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    ret = this.commitRecords(recordType, id, storeKey, params);
+    ret = this.commitRecords(recordType, id, storeKey, params, callback);
     array.length = 0 ;
     return ret;
   },
@@ -1826,11 +1896,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
       if(storeKey) {
         status = this.readStatus(storeKey);
-
+        
         if ((status == K.EMPTY) || (status == K.ERROR)) {
           throw K.NOT_FOUND_ERROR ;
         }
         ret.push(storeKey);
+        this._cancelCallback(storeKey);
       }
     }
     
@@ -2044,6 +2115,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } 
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
+    this._cancelCallback(storeKey);
     
     return this ;
   },
@@ -2084,7 +2156,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (record != null) {
       record.notifyPropertyChange('status');
     }
-
+    //update callbacks
+    this._retreiveCallbackForStoreKey(storeKey);
+    
     return this ;
   },
   
@@ -2115,6 +2189,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (record != null) {
       record.notifyPropertyChange('status');
     }
+
+    this._retreiveCallbackForStoreKey(storeKey);
 
     return this ;
   },
@@ -2151,6 +2227,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       record.notifyPropertyChange('status');
     }
 
+    this._retreiveCallbackForStoreKey(storeKey);
     return this ;
   },
 

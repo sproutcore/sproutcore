@@ -208,4 +208,14 @@ test("calling commitRecords() with params", function() {
   ds.expect(0);
 });
 
+test("calling commitRecords() with callbacks", function() {
+  var wasCalled = NO;
+  var cb = function(){wasCalled = YES;};
+  
+  store.commitRecord(null, null, storeKey2, {}, cb);
+  ok(store._callback_queue[storeKey2], "should have a callback in the queue");
+  ok(!wasCalled, "wasn't called yet");
+  store.dataSourceDidComplete(storeKey2);
+  ok(wasCalled, "callback fired!");
+});
 
