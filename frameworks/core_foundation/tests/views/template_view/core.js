@@ -83,3 +83,18 @@ test("should add a 'hidden' class to a template view when isVisible is true", fu
   ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes to YES");
 });
 
+test("should add a 'hidden' class to template views if isVisible is false before their layer is created", function() {
+  var view = SC.TemplateView.create({
+    isVisible: false
+  });
+
+  ok(!view.get('isVisible'), "precond - view is not visible");
+
+  view.set('template', function() { return "foo"; });
+
+  view.createLayer();
+  ok(view.$().hasClass('hidden'), "adds hidden class when rendering");
+
+  SC.run(function() { view.set('isVisible', YES); });
+  ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes");
+});

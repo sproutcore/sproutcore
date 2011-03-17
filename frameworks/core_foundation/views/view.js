@@ -1182,7 +1182,6 @@ SC.CoreView.reopen(
     }
 
     attrs.owner = attrs.parentView = this ;
-    attrs.isVisibleInWindow = this.get('isVisibleInWindow');
     if (!attrs.page) { attrs.page = this.page ; }
 
     // Now add this to the attributes and create.
