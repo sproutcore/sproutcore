@@ -152,7 +152,7 @@ var pane;
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
-      value: "D",
+      value: "E",
       layout: { height: 25 }
     })
     .add("aria-role_tab,tablist", SC.SegmentedView, {
@@ -241,7 +241,7 @@ var pane;
   });
 
 
-  test("Check that all segmechnts have the right classes set (with icons)", function() {
+  test("Check that all segments have the right classes set (with icons)", function() {
     var viewElem=pane.view('3_empty,icon').$();
     var segments=pane.view('3_empty,icon').$('.sc-segment-view');
 
@@ -384,7 +384,9 @@ var pane;
 
     // check that the overflowed items are stored
     var overflowItems = sv.overflowItems;
-    equals(overflowItems.length, 2, "there should be 2 overflowed items");
+
+    // five items, 70px wide, and a 342px wide container means 1 overflow.
+    equals(overflowItems.length, 1, "there should be 2 overflowed items");
 
     // 1. remove the last two items (the last item should no longer be an overflow segment)
     var items = sv.get('items');
