@@ -7,6 +7,7 @@ test("chained observers on enumerable properties are triggered when the observed
   var child1 = SC.Object.create({ name: "Bartholomew" });
   var child2 = SC.Object.create({ name: "Agnes" });
   var child3 = SC.Object.create({ name: "Dan" });
+  var child4 = SC.Object.create({ name: "Nancy" });
 
   family.set('momma', momma);
   momma.set('children', [child1, child2, child3]);
@@ -17,14 +18,14 @@ test("chained observers on enumerable properties are triggered when the observed
   });
 
   observerFiredCount = 0;
-  SC.run(function() { family.getPath('momma.children').objectAt(0).set('name', 'Teddy'); });
+  SC.run(function() { child1.set('name', 'Teddy'); });
   equals(observerFiredCount, 1, "observer fired after changing a child item's name");
 
   observerFiredCount = 0;
-  SC.run(function() { family.getPath('momma.children').pushObject(SC.Object.create({ name: "Nancy" })); });
+  SC.run(function() { momma.children.pushObject(child4); });
   equals(observerFiredCount, 1, "observer fired after adding a new item");
 
   observerFiredCount = 0;
-  SC.run(function() { family.getPath('momma.children').objectAt(3).set('name', "Herbert"); });
+  SC.run(function() { child4.set('name', "Herbert"); });
   equals(observerFiredCount, 1, "observer fired after changing property on new object");
 });
