@@ -34,6 +34,7 @@
   | *itemIconKey*  | an icon |
   | *itemActionKey* | an optional action to fire when pressed |
   | *itemTargetKey* | an optional target for the action |
+  | *segmentViewClass* | an optional target for the action |
 
   @extends SC.View
   @since SproutCore 1.0
@@ -192,6 +193,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {String}
   */
   overflowIcon: null,
+ 
+  /**
+    The view class to use when create segments.
+    
+    @property {SC.View}   
+  */                               
+  segmentViewClass: SC.SegmentView,
+  
 
   /** @private
     The following properties are used to map items to child views. Item keys
@@ -216,7 +225,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         icon = this.get('overflowIcon'),
         overflowView;
 
-    overflowView = SC.SegmentView.create({
+    overflowView = this.get('segmentViewClass').create({
       controlSize: this.get('controlSize'),
       localize: this.get('localize'),
       title: title,
@@ -249,6 +258,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         itemKey,
         viewKeys = this.get('viewKeys'),
         viewKey,
+        segmentViewClass = this.get('segmentViewClass'),
         i, j;
 
     // Update childViews
@@ -277,7 +287,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       for (i = childViews.get('length') - 1; i < items.get('length'); i++) {
 
         // We create a default SC.ButtonView-like object for each segment
-        childView = SC.SegmentView.create({
+        childView = segmentViewClass.create({
           controlSize: this.get('controlSize'),
           localize: this.get('localize')
         });
