@@ -8,6 +8,8 @@
 var parent, store, child, storeKey, json;
 module("SC.NestedStore#commitChangesFromNestedStore", {
   setup: function() {
+    SC.RunLoop.begin();
+
     parent = SC.Store.create();
     
     json = {
@@ -26,6 +28,8 @@ module("SC.NestedStore#commitChangesFromNestedStore", {
     child.dataHashDidChange(storeKey);
     child.changelog = SC.Set.create();
     child.changelog.add(storeKey);
+
+    SC.RunLoop.end();
   }
 });
 

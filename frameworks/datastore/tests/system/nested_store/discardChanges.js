@@ -11,6 +11,8 @@
 var parent, store, child, storeKey, json, args;
 module("SC.NestedStore#discardChanges", {
   setup: function() {
+    SC.RunLoop.begin();
+
     parent = SC.Store.create();
     
     json = {
@@ -41,7 +43,8 @@ module("SC.NestedStore#discardChanges", {
         force: force 
       });
     };
-    
+
+    SC.RunLoop.end();
   }
 });
 

@@ -9,6 +9,8 @@
 var rec, q;
 module("SC.Query comparison of record types", {
   setup: function() {
+    SC.RunLoop.begin();
+
     // setup dummy app and store
     window.MyApp = SC.Object.create({
       store: SC.Store.create()
@@ -25,6 +27,8 @@ module("SC.Query comparison of record types", {
     rec = window.MyApp.store.find(window.MyApp.Foo,1);
     
     q = SC.Query.create();
+
+    SC.RunLoop.end();
   }
 });
 

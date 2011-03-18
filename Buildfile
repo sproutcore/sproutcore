@@ -99,8 +99,7 @@ config :core_tools, :required => [
 %w(tests test_controls docs welcome).each do |app_target|
   config app_target, 
     :required => [:desktop, :datastore, :core_tools],
-    :theme => :ace,
-    :html5_history => true
+    :theme => :ace
 
   # mode :debug do
   #   config app_target, :combine_javascript => false

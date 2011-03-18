@@ -39,7 +39,7 @@ module("SC.Record#refresh", {
 
 test("calling refresh should call refreshRecord() on store", function() {
   MyApp.foo.refresh();
-  same(callInfo, [null,null,MyApp.foo.storeKey], 'refreshRecord() should be called on parent');
+  same(callInfo, [null,null,MyApp.foo.storeKey,undefined], 'refreshRecord() should be called on parent');
 });
 
 test("should return receiver", function() {

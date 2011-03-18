@@ -12,6 +12,8 @@ module("SC.Store#unloadRecords", {
       name: SC.Record.attr(String)
     });
 
+    SC.RunLoop.begin();
+
     store = SC.Store.create();
 
     store.createRecord(TestRecord, {
@@ -25,6 +27,8 @@ module("SC.Store#unloadRecords", {
     store.createRecord(TestRecord, {
       name: 'Baz'
     });
+
+    SC.RunLoop.end();
   }
 });
 

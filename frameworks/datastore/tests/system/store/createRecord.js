@@ -15,7 +15,9 @@ module("SC.Store#createRecord", {
       number: SC.Record.attr(Number, { defaultValue: 5 }),
       bool: SC.Record.attr(Boolean, { defaultValue: YES })
     });
-    
+
+    SC.RunLoop.begin();
+
     store = SC.Store.create();
     
     json = {
@@ -27,6 +29,8 @@ module("SC.Store#createRecord", {
     storeKey = SC.Store.generateStoreKey();
 
     store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+
+    SC.RunLoop.end();
   }
 });
 

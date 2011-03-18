@@ -11,7 +11,8 @@
 var parent, store, child, storeKey, json, args;
 module("SC.NestedStore#commitChanges", {
   setup: function() {
-    
+    SC.RunLoop.begin();
+
     parent = SC.Store.create();
     
     json = {
@@ -38,7 +39,8 @@ module("SC.NestedStore#commitChanges", {
         force: force 
       });
     };
-    
+
+    SC.RunLoop.end();
   }
 });
 

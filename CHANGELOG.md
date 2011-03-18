@@ -5,10 +5,15 @@ CHANGE LOG FOR 1.5
 1.5.0.pre.5
 -----------
 * Support for high resolution screens.
-* Support for ie7 base64 images using mhtml
-* Initial support for accesiblity (ARIA)
-* Improved SC.Logger , allows log recording and different reporting levels like log4j
+* Support for IE7 base64 images using MHTML
+* Initial support for accessibility (WAI-ARIA)
+* Improved SC.Logger, allows log recording and different reporting levels like log4j
 * Modular loading and whitelisting. 
+* Improvements and bug fixes in SC.TemplateView and Handlebars helpers
+* Added {{bindAttr}}, {{boundIf}}, and {{collection}} helpers
+* Fixes to Ace CSS
+* IE7 compatibility fixes
+* Numerous bug fixes and minor improvements
 
 
 1.5.0.pre.4

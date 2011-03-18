@@ -19,23 +19,27 @@ module("SC.Store#loadRecord", {
       isAlive: SC.Record.attr(Boolean)
     });
     
+    SC.RunLoop.begin();
+
     store = SC.Store.create();
     
     dataHashes = [ 
     
-      Person.create({ 
-        guid: 1,
-        first: "John",
-        last: "Sproutish",
-        age: 35,
-        isAlive: YES}),
-        
-      Person.create({
-        guid: 2,
-        first: "Sarah",
-        last: "Coop",
-        age: 28,
-        isAlive: YES })];
+    Person.create({ 
+      guid: 1,
+      first: "John",
+      last: "Sproutish",
+      age: 35,
+      isAlive: YES}),
+      
+    Person.create({
+      guid: 2,
+      first: "Sarah",
+      last: "Coop",
+      age: 28,
+      isAlive: YES })];
+
+    SC.RunLoop.end();
   }
 });
 

@@ -8,6 +8,8 @@
 var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
 module("SC.Query registered query extensions", {
   setup: function() {
+    SC.RunLoop.begin();
+
     // setup dummy app and store
     MyApp = SC.Object.create({
       store: SC.Store.create()
@@ -33,6 +35,8 @@ module("SC.Query registered query extensions", {
     
     
     q = SC.Query.create();
+
+    SC.RunLoop.end();
   }
 });
  
