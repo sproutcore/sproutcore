@@ -39,6 +39,7 @@ var ContentArray = SC.Object.extend(SC.Array, {
 
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.ScrollView.design({
+    borderStyle: SC.BORDER_NONE,
     layout: { left: 0, right: 0, top: 0, height: 300 },
     hasHorizontalScroller: NO,
     contentView: SC.ListView.design({
@@ -89,6 +90,9 @@ test("scrolling by small amount should update incremental rendering", function()
       exp;
 
   ok(listView.getPath('nowShowing.length') < listView.get('length'), 'precond - nowShowing has incremental range');
+
+  exp = SC.IndexSet.create(0, 15);
+  same(listView.get('nowShowing'), exp, 'nowShowing should start at just the first 20 items');
 
   // SCROLL DOWN ONE LINE
   SC.run(function() {
