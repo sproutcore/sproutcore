@@ -1755,8 +1755,6 @@ SC.RootResponder = SC.Object.extend({
       return YES;
     }
 
-    this.targetViewForEvent(evt);
-
     if (this._drag) {
       this._drag.tryToPerform('mouseUp', evt) ;
       this._drag = null ;
