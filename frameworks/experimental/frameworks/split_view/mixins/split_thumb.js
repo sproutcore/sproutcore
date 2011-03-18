@@ -130,7 +130,7 @@ SC.SplitThumb = {
   */
   // NOTE: While an edge case, this is implemented because it makes it _much_
   // easier to write the sample in the Test Controls app.
-  splitViewLayoutDirection: undefined,
+  splitViewLayoutDirection: null,
   splitViewLayoutDirectionBinding: '*splitView.layoutDirection',
   
   /**
