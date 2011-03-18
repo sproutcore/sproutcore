@@ -154,7 +154,7 @@
      var view = pane.view("aria-controls_attribute"),
          horizontalScrollerView = view.get('horizontalScrollerView'),
          verticalScrollerView   = view.get('verticalScrollerView'),
-         contentView            = view.get('contentView');
+         contentView            = view.get('contentView').get('layerId');
 
      equals(horizontalScrollerView.$().attr('aria-controls'), contentView, "horizontalScroller has aria-controls set");
      equals(verticalScrollerView.$().attr('aria-controls'), contentView, "verticalScroller has aria-controls set");
