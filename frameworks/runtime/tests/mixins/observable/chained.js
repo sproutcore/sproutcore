@@ -1,31 +1,30 @@
 module("chained observers");
 
-test("chained observers on enumerable properties are triggered when any item changes", function() {
-  var momma = SC.Object.create({
-    children: [ SC.Object.create({ name: "Bartholomew" }), SC.Object.create({ name: "Agnes" }), SC.Object.create({ name: "Dan" }) ]
-  });
+test("chained observers on enumerable properties are triggered when the observed property of any item changes", function() {
+  var family = SC.Object.create({ momma: null });
+  var momma = SC.Object.create({ children: [] });
 
-  var family = SC.Object.create({
-    momma: momma
-  });
+  var child1 = SC.Object.create({ name: "Bartholomew" });
+  var child2 = SC.Object.create({ name: "Agnes" });
+  var child3 = SC.Object.create({ name: "Dan" });
+
+  family.set('momma', momma);
+  momma.set('children', [child1, child2, child3]);
 
   var observerFiredCount = 0;
   family.addObserver('momma.children.@each.name', this, function() {
     observerFiredCount++;
   });
 
+  observerFiredCount = 0;
   SC.run(function() { family.getPath('momma.children').objectAt(0).set('name', 'Teddy'); });
-
   equals(observerFiredCount, 1, "observer fired after changing a child item's name");
 
-  //observerFiredCount = 0;
-  //SC.run(function() { family.getPath('momma.children').pushObject(SC.Object.create({ name: "Nancy" })); });
+  observerFiredCount = 0;
+  SC.run(function() { family.getPath('momma.children').pushObject(SC.Object.create({ name: "Nancy" })); });
+  equals(observerFiredCount, 1, "observer fired after adding a new item");
 
-  //equals(observerFiredCount, 1, "observer fired after adding a new item");
-
-  //observerFiredCount = 0;
-  //SC.run(function() { family.getPath('momma.children').objectAt(3).set('name', "Herbert"); });
-
-  //equals(observerFiredCount, 1, "observer fired after changing property on new object");
+  observerFiredCount = 0;
+  SC.run(function() { family.getPath('momma.children').objectAt(3).set('name', "Herbert"); });
+  equals(observerFiredCount, 1, "observer fired after changing property on new object");
 });
-
