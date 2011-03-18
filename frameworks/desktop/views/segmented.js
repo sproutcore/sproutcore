@@ -201,6 +201,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */                               
   segmentViewClass: SC.SegmentView,
   
+  /**
+    Additional item keys that get forewarded to the segment view.
+    @property {Array} 
+  */
+  additionalItemKeys: ''.w(),
+  
+  /**
+    Corresponding Keys for in the segment view for values from additionalItemKeys
+    @property {Array} 
+  */
+  additionalViewKeys: ''.w(),
 
   /** @private
     The following properties are used to map items to child views. Item keys
@@ -259,7 +270,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         viewKeys = this.get('viewKeys'),
         viewKey,
         segmentViewClass = this.get('segmentViewClass'),
-        i, j;
+        additionalItemKeys = this.get('additionalItemKeys'),
+        additionalViewKeys = this.get('additionalViewKeys'),  
+        i, j, k;
 
     // Update childViews
     if (childViews.get('length') - 1 > items.get('length')) {   // We've lost segments (ie. childViews)
@@ -350,7 +363,20 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       childView.set('isFirstSegment', i === 0);
       childView.set('isMiddleSegment',  i < items.get('length') - 1 && i > 0);
       childView.set('isLastSegment', i === items.get('length') - 1);
-
+      
+      // Set the additional item properties
+      
+      if (additionalItemKeys) {
+          
+          if (additionalItemKeys.get('length') === additionalViewKeys.get('length')) {
+              for (k = additionalItemKeys.get('length') - 1; k >=0; k--) {
+                  childView.set(additionalViewKeys.objectAt(k), localItem.get(this.get(additionalItemKeys.objectAt(k)))); 
+              }
+          } else {
+             SC.Logger.error('SC.SegmentedView additionalItemKeys length must be equal to additionalViewKeys');
+          } 
+      }
+      
       // Be sure to update the view's properties for the (possibly new) matched item
       childView.updateItem(this, localItem);
     }
