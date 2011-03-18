@@ -41,8 +41,13 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     var isActive = dataSource.get('isActive');
     var isDisabled = !dataSource.get('isEnabled');
 
+    var ariaIsSelected;
+    if (isSelected === SC.MIXED_STATE) ariaIsSelected = 'mixed';
+    else if (isSelected) ariaIsSelected = 'true';
+    else ariaIsSelected = 'false';
+
     context.attr('role', 'checkbox');
-    context.attr('aria-checked', isSelected.toString());
+    context.attr('aria-checked', ariaIsSelected);
     context.attr('aria-labelledby', labelId);
 
     context.setClass({
@@ -67,8 +72,13 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     var isActive = dataSource.get('isActive');
     var isDisabled = !dataSource.get('isEnabled');
 
+    var ariaIsSelected;
+    if (isSelected === SC.MIXED_STATE) ariaIsSelected = 'mixed';
+    else if (isSelected) ariaIsSelected = 'true';
+    else ariaIsSelected = 'false';
+
     // address accessibility
-    jquery.attr('aria-checked', isSelected.toString());
+    jquery.attr('aria-checked', ariaIsSelected);
 
     // NOTE: the other properties were already set in render, and should not
     // need to be changed.
@@ -83,4 +93,5 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     });
   }
 });
+
 
