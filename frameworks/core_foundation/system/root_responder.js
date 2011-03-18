@@ -1738,8 +1738,13 @@ SC.RootResponder = SC.Object.extend({
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
 
+    // Determine if any views took responsibility for the
+    // event. If so, save that information so we can prevent
+    // the next click event we receive from propagating to the browser.
+    var ret = view ? evt.hasCustomEventHandling : YES;
+    this._lastMouseDownCustomHandling = ret;
 
-    return view ? evt.hasCustomEventHandling : YES;
+    return ret;
   },
 
   /**
@@ -1803,7 +1808,33 @@ SC.RootResponder = SC.Object.extend({
     // (This is used to calculate double click events)
     this._lastMouseUpAt = Date.now() ;
 
-    return (handler) ? evt.hasCustomEventHandling : YES ;
+    // Determine if any views took responsibility for the
+    // event. If so, save that information so we can prevent
+    // the next click event we receive from propagating to the browser.
+    var ret = handler ? evt.hasCustomEventHandling : YES;
+    this._lastMouseUpCustomHandling = ret;
+
+    return ret;
+  },
+
+  /**
+    Certain browsers ignore us overriding mouseup and mousedown events and
+    still allow default behavior (such as navigating away when the user clicks
+    on a link). To block default behavior, we store whether or not the last
+    mouseup or mousedown events resulted in us calling preventDefault() or
+    stopPropagation(), in which case we make the same calls on the click event.
+
+    @param {Event} evt the click event
+    @returns {Boolean} whether the event should be propagated to the browser
+  */
+  click: function(evt) {
+    if (!this._lastMouseUpCustomHandling || !this._lastMouseDownCustomHandling) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      return NO;
+    }
+
+    return YES;
   },
 
   dblclick: function(evt){
