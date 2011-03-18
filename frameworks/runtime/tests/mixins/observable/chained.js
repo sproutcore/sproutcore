@@ -28,4 +28,10 @@ test("chained observers on enumerable properties are triggered when the observed
   observerFiredCount = 0;
   SC.run(function() { child4.set('name', "Herbert"); });
   equals(observerFiredCount, 1, "observer fired after changing property on new object");
+
+  momma.set('children', []);
+
+  observerFiredCount = 0;
+  SC.run(function() { child1.set('name', "Hanna"); });
+  equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
 });
