@@ -10,6 +10,7 @@
   SC.SegmentedView.
 */
 SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
+  name: 'segment',
 
   render: function(dataSource, context) {
     var theme = dataSource.get('theme'),
