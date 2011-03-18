@@ -1220,8 +1220,7 @@ SC.CoreView.reopen(
     @returns YES if the contextmenu can show up
   */
   contextMenu: function(evt) {
-    if(!this.get('isContextMenuEnabled')) evt.stop();
-    return true;
+    if (this.get('isContextMenuEnabled')) { return YES; }
   }
 
 });
