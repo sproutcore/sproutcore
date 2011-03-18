@@ -5,6 +5,15 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+// ..........................................................
+// CONSTANTS
+//
+SC.TOGGLE_BEHAVIOR = 'toggle';
+SC.PUSH_BEHAVIOR =   'push';
+SC.TOGGLE_ON_BEHAVIOR = 'on';
+SC.TOGGLE_OFF_BEHAVIOR = 'off';
+SC.HOLD_BEHAVIOR = 'hold';
+
 /** @class
 
   Implements a push-button-style button.  This class is used to implement
@@ -540,14 +549,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
 
 }) ;
 
-// ..........................................................
-// CONSTANTS
-//
-SC.TOGGLE_BEHAVIOR = 'toggle';
-SC.PUSH_BEHAVIOR =   'push';
-SC.TOGGLE_ON_BEHAVIOR = 'on';
-SC.TOGGLE_OFF_BEHAVIOR = 'off';
-SC.HOLD_BEHAVIOR = 'hold';
+
 
 /**
   The delay after which "click" behavior should transition to "click and hold"
