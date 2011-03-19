@@ -125,9 +125,20 @@ SC.ScrollerView = SC.View.extend(
 
     @property
   */
-  isEnabled: function() {
+  isEnabled: function(key, value) {
+    if (value !== undefined) {
+      this._scsv_isEnabled = value;
+    }
+
+    if (this._scsv_isEnabled !== undefined) {
+      return this._scsv_isEnabled;
+    }
+
     return this.get('proportion') < 1;
   }.property('proportion').cacheable(),
+
+  // to allow setting isEnabled manually
+  _scsv_isEnabled: undefined,
 
   /**
     Determine the layout direction.  Determines whether the scrollbar should
