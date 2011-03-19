@@ -1,16 +1,9 @@
-// ==========================================================================
-// Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2011 Apple Inc. All rights reserved.
-// License:   Licensed under MIT license (see license.js)
-// ==========================================================================
-
 SC.mixin({
   /**
     Returns a copy of the passed data that is stripped of internal SproutCore properties
     such as _sc_guid* properties.
   */
-  stripInternalProperties: function(content) {
+  cleanSCProperties: function(content) {
     // we need to sanitize hashes. Arrays could have hashes, so those too.
     if(SC.typeOf(content) === SC.T_ARRAY){
       var len = content.length;
@@ -25,7 +18,7 @@ SC.mixin({
       //Must be hash
       var hash = {};
       for (var key in content) {
-        if (key === SC.guidKey) continue;
+        if (key.substr(0, 9) === "_sc_guid_") continue;
         hash[key] = this.sanitizeContent(content[key]);
       }
       return hash;
