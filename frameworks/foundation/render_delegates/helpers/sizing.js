@@ -16,14 +16,6 @@ SC.RenderDelegate.mixin({
     SC.HUGE_CONTROL_SIZE, SC.JUMBO_CONTROL_SIZE
   ],
 
-  // empty hashes for them all (defaults)
-  'sc-tiny-size': {},
-  'sc-small-size': {},
-  'sc-regular-size': {},
-  'sc-large-size': {},
-  'sc-huge-size': {},
-  'sc-jumbo-size': {},
-
   /**
     Determines the correct size for the given data source, and returns the
     hash, if any, representing it.
@@ -53,11 +45,6 @@ SC.RenderDelegate.mixin({
     // don't have it.
     if (controlSize) {
       if (!this[controlSize]) {
-        SC.Logger.error(
-          "The control size `" + controlSize + "` is not available for the " +
-          name + " render delegate in this theme."
-        );
-
         return null;
       }
 
@@ -84,6 +71,11 @@ SC.RenderDelegate.mixin({
     for (idx = 0; idx < len; idx++) {
       key = sizes[idx];
       size = this[key];
+
+      // when the size is not defined, skip it.
+      if (!size) {
+        continue;
+      }
 
       if (
         // if no auto-size-selection params are supplied, then we cannot
@@ -117,6 +109,13 @@ SC.RenderDelegate.mixin({
 
     // hardcoded to return regular size if defined
     size = this['sc-regular-size'];
+
+    // if no sizes are defined for the render delegate, create one so we can return
+    // an actual hash.
+    if (!size) {
+      size = this['sc-regular-size'] = {};
+    }
+
     if (!size.name) { size.name = 'sc-regular-size'; }
     return size;
   },
