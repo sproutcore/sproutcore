@@ -45,7 +45,8 @@ SC.RenderDelegate.reopen({
     // don't have it.
     if (controlSize) {
       if (!this[controlSize]) {
-        return null;
+        // create a hash for the control size
+        this[controlSize] = {};
       }
 
       size = this[controlSize];
@@ -63,6 +64,9 @@ SC.RenderDelegate.reopen({
     var frame = dataSource.get('frame');
     if (!frame) {
       size = this['sc-regular-size'];
+
+      // create the size hash if needed
+      if (!size) { size = this['sc-regular-size'] = {}; }
       if (!size.name) { size.name = 'sc-regular-size'; }
       return size;
     }
@@ -110,13 +114,11 @@ SC.RenderDelegate.reopen({
     // hardcoded to return regular size if defined
     size = this['sc-regular-size'];
 
-    // if no sizes are defined for the render delegate, create one so we can return
-    // an actual hash.
-    if (!size) {
-      size = this['sc-regular-size'] = {};
-    }
-
+    // create the size hash if needed
+    if (!size) { size = this['sc-regular-size'] = {}; }
     if (!size.name) { size.name = 'sc-regular-size'; }
+
+
     return size;
   },
 
