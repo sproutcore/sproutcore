@@ -486,6 +486,7 @@ SC.Array = {
 
     this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
+    this._notifyEnumerableObservers(addedObjects, removedObjects);
     this.endPropertyChanges();
 
     return this ;

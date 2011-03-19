@@ -823,8 +823,97 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
     this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
+    this._notifyEnumerableObservers(addedObjects, removedObjects);
 
     return this ;
+  },
+
+  _notifyEnumerableObservers: function(addedObjects, removedObjects) {
+    var observers, members, member, memberLoc, membersLength;
+    var target, method, context;
+
+    observers = this._kvo_enumerable_observers;
+
+    if (observers) {
+      members = SC.clone(observers.getMembers());
+      membersLength = members.length;
+
+      for(memberLoc=0; memberLoc < membersLength; memberLoc++) {
+        member = members[memberLoc];
+
+        target = member[0];
+        method = member[1];
+        context = member[2];
+
+        method.call(target, this, addedObjects, removedObjects, context);
+      }
+    }
+  },
+
+  /**
+    Adds an enumerable observer to the enumerable. Enumerable observers
+  */
+  addEnumerableObserver: function(target, method, context) {
+    var observers;
+
+    // Normalize parameters. If a function is passed as
+    // target, make it the method.
+    if (method === undefined) {
+      method = target;
+      target = this;
+    }
+
+    // Call the observer in the context of the enumerable
+    // if no explicit target is given.
+    if (!target) { target = this; }
+
+    // If the method is provided as a string, look it up on
+    // the target.
+    if (typeof method === "string") {
+      method = target[method];
+    }
+
+    if (!method) {
+      throw "You must pass a method to addEnumerableObserver()";
+    }
+
+    observers = this._kvo_for('_kvo_enumerable_observers', SC.ObserverSet);
+    observers.add(target, method, context);
+  },
+
+  removeEnumerableObserver: function(target, method) {
+    var observers;
+
+    // Normalize parameters. If a function is passed as
+    // target, make it the method.
+    if (method === undefined) {
+      method = target;
+      target = this;
+    }
+
+    // Call the observer in the context of the enumerable
+    // if no explicit target is given.
+    if (!target) { target = this; }
+
+    // If the method is provided as a string, look it up on
+    // the target.
+    if (typeof method === "string") {
+      method = target[method];
+    }
+
+    if (!method) {
+      throw "You must pass a method to removeEnumerableObserver()";
+    }
+
+    observers = this._kvo_enumerable_observers;
+
+    if (observers) {
+      observers.remove(target, method);
+    } else {
+      throw "%@: Can't remove observers if no observer has been added."
+    }
+
+    return this;
   },
 
   /**
