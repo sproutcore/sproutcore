@@ -397,6 +397,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if (!method) {
         if (SC.LAZY_INSTANTIATION[moduleName]) {
           this._executeLazilyInstantiatedModule(moduleName, targetName, methodName);
+
+          target = this._targetForTargetName(targetName);
+          method = this._methodForMethodNameInTarget(methodName, target);
         } else {
           throw "SC.Module: could not find callback for '%@'".fmt(moduleName);
         }
