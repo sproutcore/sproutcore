@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.RenderDelegate.mixin({
+SC.RenderDelegate.reopen({
   /**
     A list of size names to look for when automatically determining
     control size. By default, this has all of the SproutCore control sizes.

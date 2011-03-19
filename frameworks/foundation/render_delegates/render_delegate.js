@@ -288,16 +288,16 @@ SC.RenderDelegate = {
   },
 
   /**
-    Mixes in extra capabilities into this render delegate.
+    Adds extra capabilities to this render delegate.
    
     You can use this to add helpers to all render delegates:
    
-        SC.RenderDelegate.mixin({
+        SC.RenderDelegate.reopen({
           myHelperMethod: function(dataSource) { ... }
         });
    
   */
-  mixin: function(mixin) {
+  reopen: function(mixin) {
     var i, v;
     for (i in mixin) {
       v = mixin[i];
@@ -381,3 +381,6 @@ SC.RenderDelegate = {
 // create and extend are technically identical.
 SC.RenderDelegate.extend = SC.RenderDelegate.create;
 
+// and likewise, as this is both a class and an instance, mixin makes
+// sense instead of reopen...
+SC.RenderDelegate.mixin = SC.RenderDelegate.reopen;
