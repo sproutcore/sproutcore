@@ -123,9 +123,9 @@ SC.MenuPane = SC.PickerPane.extend(
     controlSize.
 
     @type Number
-    @default null
+    @default itemHeight from theme if present, or 20.
   */
-  itemHeight: SC.propertyFromRenderDelegate('itemHeight'),
+  itemHeight: SC.propertyFromRenderDelegate('itemHeight', 20),
 
   /**
     The height of separator menu items.
@@ -137,9 +137,9 @@ SC.MenuPane = SC.PickerPane.extend(
     be inferred from controlSize.
 
     @type Number
-    @default null
+    @default itemSeparatorHeight from theme, or 9.
   */
-  itemSeparatorHeight: SC.propertyFromRenderDelegate('itemSeparatorHeight'),
+  itemSeparatorHeight: SC.propertyFromRenderDelegate('itemSeparatorHeight', 9),
 
   /**
     The height of the menu pane.  This is updated every time menuItemViews
@@ -161,9 +161,9 @@ SC.MenuPane = SC.PickerPane.extend(
     controlSize.
 
     @type Number
-    @default null
+    @default menuHeightPadding from theme, or 6
   */
-  menuHeightPadding: SC.propertyFromRenderDelegate('menuHeightPadding'),
+  menuHeightPadding: SC.propertyFromRenderDelegate('menuHeightPadding', 6),
 
   /**
     The amount of offset x while positioning submenu.
@@ -172,9 +172,9 @@ SC.MenuPane = SC.PickerPane.extend(
     controlSize.
 
     @type Number
-    @default null
+    @default submenuOffsetX from theme, or 2
   */
-  submenuOffsetX: SC.propertyFromRenderDelegate('submenuOffsetX'),
+  submenuOffsetX: SC.propertyFromRenderDelegate('submenuOffsetX', 2),
 
   /**
     The last menu item to be selected by the user.
