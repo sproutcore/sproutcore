@@ -57,8 +57,14 @@ SC.SegmentView = SC.View.extend(SC.Control, {
 
   useStaticLayout: YES,
 
+  displayTitle: function() {
+    var ret = this.get('title');
+    if (this.get('localize')) ret = ret.loc();
+    return ret;
+  }.property('title', 'localize').cacheable(),
+
   // TODO: isDefault, isCancel, value not really used by render delegate
-  displayProperties: ['icon', 'title', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
+  displayProperties: ['icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
 
   /* SC.SegmentView */
 
