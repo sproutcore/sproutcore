@@ -554,3 +554,27 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
 
   equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
 });
+
+test("should be able to bind boolean element attributes using {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<input type="check" {{bindAttr disabled="content.isDisabled" checked="content.isChecked"}} />');
+  var content = SC.Object.create({
+    isDisabled: false,
+    isChecked: true,
+  });
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: content
+  });
+
+  view.createLayer();
+
+  ok(!view.$('input').attr('disabled'), 'attribute does not exist upon initial render');
+  ok(view.$('input').attr('checked'), 'attribute is present upon initial render');
+
+  content.set('isDisabled', true);
+  content.set('isChecked', false);
+
+  ok(view.$('input').attr('disabled'), 'attribute exists after update');
+  ok(!view.$('input').attr('checked'), 'attribute is not present after update');
+});
