@@ -132,7 +132,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
 
   /**
     If YES, use a focus ring.
-    
+
     TODO: When is this property ever changed? Is this redundant with
     render delegates since it can now be turned on on a theme-by-theme
     basis? --TD
@@ -140,6 +140,54 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     @property {Boolean}
   */
   supportFocusRing: NO,
+
+  //
+  // Auto Resize Support
+  // These properties are provided so that SC.AutoResize can be mixed in
+  // to enable automatic resizing of the button.
+  //
+  /**
+    SC.ButtonView supports automatic resizing.
+
+    @private
+    @property
+  */
+  supportsAutoResize: YES,
+
+  /**
+    The layer for autoresizing buttons is the button layer itself.
+
+    TODO: get this from the render delegate so other elements may be used.
+
+    @private
+    @property
+  */
+  autoResizeLayer: function() {
+    return this.get('layer');
+  }.property('layer').cacheable(),
+
+  /**
+    The text to be used to automatically resize the view: the displayTitle.
+
+    @private
+    @property
+  */
+  autoResizeText: function() {
+    return this.get('displayTitle');
+  }.property('displayTitle').cacheable(),
+
+  /**
+    The padding to add to the measured size of the text to arrive at the measured
+    size for the view.
+
+    SC.ButtonView gets this from its render delegate, but if not supplied, defaults
+    to 10.
+
+    @default 10
+    @property
+  */
+  autoResizePadding: SC.propertyFromRenderDelegate('autoResizePadding', 10),
+
 
   // TODO: What the hell is this? --TD
   _labelMinWidthIE7: 0,
@@ -563,4 +611,4 @@ SC.ButtonView.CLICK_AND_HOLD_DELAY = SC.browser.msie ? 600 : 300;
 
 SC.REGULAR_BUTTON_HEIGHT=24;
 
-SC.ButtonView.hasGivenDeprecationWarning = NO;
+
