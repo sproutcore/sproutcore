@@ -45,10 +45,11 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
   @extends SC.Enumerable
   @since SproutCore 0.9.0
 */
-SC.Array = {
+SC.Array = /** @scope SC.Array.prototype */{
 
   /**
     Walk like a duck - use isSCArray to avoid conflicts
+    @type Boolean
   */
   isSCArray: YES,
 
@@ -202,6 +203,10 @@ SC.Array = {
   /**
     Push the object onto the end of the array.  Works just like push() but it
     is KVO-compliant.
+    
+    @param {Object} object the objects to push
+        
+    @return {Object} The passed object
   */
   pushObject: function(obj) {
     this.insertAt(this.get('length'), obj) ;
@@ -226,6 +231,8 @@ SC.Array = {
   /**
     Pop object from array or nil if none are left.  Works just like pop() but
     it is KVO-compliant.
+    
+    @return {Object} The popped object
   */
   popObject: function() {
     var len = this.get('length') ;
@@ -239,6 +246,8 @@ SC.Array = {
   /**
     Shift an object from start of array or nil if none are left.  Works just
     like shift() but it is KVO-compliant.
+        
+    @return {Object} The shifted object
   */
   shiftObject: function() {
     if (this.get('length') === 0) return null ;
@@ -250,6 +259,9 @@ SC.Array = {
   /**
     Unshift an object to start of array.  Works just like unshift() but it is
     KVO-compliant.
+        
+    @param {Object} obj the object to add
+    @return {Object} The passed object
   */
   unshiftObject: function(obj) {
     this.insertAt(0, obj) ;
@@ -272,7 +284,10 @@ SC.Array = {
   },
 
   /**
-    Compares each item in the array.  Returns true if they are equal.
+    Compares each item in the passed array to this one. 
+    
+    @param {Array} ary The array you want to compare to
+    @returns {Boolean} true if they are equal.
   */
   isEqual: function(ary) {
     if (!ary) return false ;
@@ -291,7 +306,7 @@ SC.Array = {
     Generates a new array with the contents of the old array, sans any null
     values.
 
-    @returns {Array}
+    @returns {Array} The new, compact array
   */
   compact: function() { return this.without(null); },
 
@@ -299,8 +314,8 @@ SC.Array = {
     Generates a new array with the contents of the old array, sans the passed
     value.
 
-    @param {Object} value
-    @returns {Array}
+    @param {Object} value The value you want to be removed
+    @returns {Array} The new, filtered array
   */
   without: function(value) {
     if (this.indexOf(value)<0) return this; // value not present.
@@ -315,7 +330,7 @@ SC.Array = {
     Generates a new array with only unique values from the contents of the
     old array.
 
-    @returns {Array}
+    @returns {Array} The new, de-duped array
   */
   uniq: function() {
     var ret = [] ;
@@ -369,9 +384,7 @@ SC.Array = {
 
     The callback for a range observer should have the signature:
 
-    {{{
-      function rangePropertyDidChange(array, objects, key, indexes, context)
-    }}}
+          function rangePropertyDidChange(array, objects, key, indexes, context)
 
     If the passed key is '[]' it means that the object itself changed.
 
@@ -522,6 +535,9 @@ SC.Array = SC.mixin({}, SC.Enumerable, SC.Array) ;
   Returns a new array that is a slice of the receiver.  This implementation
   uses the observable array methods to retrieve the objects for the new
   slice.
+  
+  If you don't pass in beginIndex and endIndex, it will act as a copy of the
+  array.
 
   @param beginIndex {Integer} (Optional) index to begin slicing from.
   @param endIndex {Integer} (Optional) index to end the slice at.
@@ -624,10 +640,15 @@ if (!Array.prototype.lastIndexOf) {
 
   });
 
-  // If browser did not implement indexOf natively, then override with
-  // specialized version
   var indexOf = Array.prototype.indexOf;
   if (!indexOf || (indexOf === SC.Array.indexOf)) {
+    /**
+      Returns the index for a particular object in the index.
+
+      @param {Object} object the item to search for
+      @param {NUmber} startAt optional starting location to search, default 0
+      @returns {Number} index of -1 if not found
+    */
     Array.prototype.indexOf = function(object, startAt) {
       var idx, len = this.length;
 
@@ -644,6 +665,13 @@ if (!Array.prototype.lastIndexOf) {
 
   var lastIndexOf = Array.prototype.lastIndexOf ;
   if (!lastIndexOf || (lastIndexOf === SC.Array.lastIndexOf)) {
+    /**
+      Returns the last index for a particular object in the index.
+
+      @param {Object} object the item to search for
+      @param {NUmber} startAt optional starting location to search, default 0
+      @returns {Number} index of -1 if not found
+    */
     Array.prototype.lastIndexOf = function(object, startAt) {
       var idx, len = this.length;
 

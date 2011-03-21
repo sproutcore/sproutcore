@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  @class
 
   Impelements some standard methods for copying an object.  Add this mixin to
   any object you create that can create a copy of itself.  This mixin is
@@ -19,7 +19,7 @@
 
   @since SproutCore 1.0
 */
-SC.Copyable = {
+SC.Copyable = /** @scope SC.Copyable.prototype */{
 
   /**
     Walk like a duck.  Indicates that the object can be copied.
@@ -62,6 +62,13 @@ SC.Copyable = {
 
 // Make Array copyable
 SC.mixin(Array.prototype, SC.Copyable);
+/**
+  Override to return a copy of the receiver.  Default implementation raises
+  an exception.
+
+  @param deep {Boolean} if true, a deep copy of the object should be made
+  @returns {Object} copy of receiver
+*/
 Array.prototype.copy = function(deep) {
 	var ret = this.slice(), idx;
 	if (deep) {

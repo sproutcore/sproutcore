@@ -24,6 +24,7 @@ sc_require('system/set');
   Whenever the observer fires, the queue will be flushed to connect any
   pending observers.
 
+  @private
   @since SproutCore 1.0
 */
 SC.Observers = {

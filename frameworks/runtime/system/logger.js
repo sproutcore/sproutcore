@@ -95,10 +95,10 @@ SC.LOGGER_LEVEL_NONE  = 'none';
   your application to potentially determine a subset of logging messages to
   output and/or record.  The order of levels is:
 
-      *  debug        SC.LOGGER_LEVEL_DEBUG
-      *  info         SC.LOGGER_LEVEL_INFO
-      *  warn         SC.LOGGER_LEVEL_WARN
-      *  error        SC.LOGGER_LEVEL_ERROR
+    -  debug        SC.LOGGER_LEVEL_DEBUG
+    -  info         SC.LOGGER_LEVEL_INFO
+    -  warn         SC.LOGGER_LEVEL_WARN
+    -  error        SC.LOGGER_LEVEL_ERROR
 
   All messages at the level or “above” will be output/recorded.  So, for
   example, if you set the level to 'info', all 'info', 'warn', and 'error'
@@ -122,10 +122,10 @@ SC.LOGGER_LEVEL_NONE  = 'none';
 
   As a convenience, this class also adds some shorthand methods to SC:
 
-    *  SC.debug()   ==>   SC.Logger.debug()
-    *  SC.info()    ==>   SC.Logger.info()
-    *  SC.warn()    ==>   SC.Logger.warn()
-    *  SC.error()   ==>   SC.Logger.error()
+    -  SC.debug()   ==>   SC.Logger.debug()
+    -  SC.info()    ==>   SC.Logger.info()
+    -  SC.warn()    ==>   SC.Logger.warn()
+    -  SC.error()   ==>   SC.Logger.error()
 
   …although note that no shorthand versions exist for the less-common
   functions, such as defining groups.
@@ -152,11 +152,11 @@ SC.Logger = SC.Object.create(
     The current log level determining what is output to the reporter object
     (usually your browser’s console).  Valid values are:
 
-      *  SC.LOGGER_LEVEL_DEBUG
-      *  SC.LOGGER_LEVEL_INFO
-      *  SC.LOGGER_LEVEL_WARN
-      *  SC.LOGGER_LEVEL_ERROR
-      *  SC.LOGGER_LEVEL_NONE
+      -  SC.LOGGER_LEVEL_DEBUG
+      -  SC.LOGGER_LEVEL_INFO
+      -  SC.LOGGER_LEVEL_WARN
+      -  SC.LOGGER_LEVEL_ERROR
+      -  SC.LOGGER_LEVEL_NONE
 
     If you do not specify this value, it will default to SC.LOGGER_LEVEL_DEBUG
     when running in development mode and SC.LOGGER_LEVEL_INFO when running in
@@ -172,11 +172,11 @@ SC.Logger = SC.Object.create(
     (usually your browser’s console).  Valid values are the same as with
     'logOutputLevel':
 
-      *  SC.LOGGER_LEVEL_DEBUG
-      *  SC.LOGGER_LEVEL_INFO
-      *  SC.LOGGER_LEVEL_WARN
-      *  SC.LOGGER_LEVEL_ERROR
-      *  SC.LOGGER_LEVEL_NONE
+      -  SC.LOGGER_LEVEL_DEBUG
+      -  SC.LOGGER_LEVEL_INFO
+      -  SC.LOGGER_LEVEL_WARN
+      -  SC.LOGGER_LEVEL_ERROR
+      -  SC.LOGGER_LEVEL_NONE
 
     If you do not specify this value, it will default to SC.LOGGER_LEVEL_NONE.
 
@@ -200,7 +200,7 @@ SC.Logger = SC.Object.create(
     like “type of entry: message” are avoided; if you need to parse this
     structure, you can determine which type of entry you’re looking at by
     checking for the 'message' and 'indentation' fields.
-
+<pre>
     Log entry:
     {
       type:               {Constant}     (SC.LOGGER_LEVEL_DEBUG, etc.)
@@ -208,7 +208,7 @@ SC.Logger = SC.Object.create(
       originalArguments:  {Arguments}    // optional
       timestamp:          {Date}
     }
-
+    
     Group entry (either beginning or end of):
     {
       type:         {Constant}     SC.LOGGER_LEVEL_DEBUG, etc.
@@ -217,6 +217,7 @@ SC.Logger = SC.Object.create(
       title:        {String}       Optional for new groups, and never present for end-of-group
       timestamp:    {Date}
     }
+</pre>
 
     @property {Array}
   */
@@ -309,11 +310,11 @@ SC.Logger = SC.Object.create(
     arguments, it is assumed to be a format string.  Thus, you can (and
     should) use it like:
 
-      SC.Logger.debug("%@:  My debug message", this);       // good
+        SC.Logger.debug("%@:  My debug message", this);       // good
 
     …and not:
 
-      SC.Logger.debug("%@:  My debug message".fmt(this));        // bad
+        SC.Logger.debug("%@:  My debug message".fmt(this));        // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the debug() invocation will be ignored, then the
@@ -362,11 +363,11 @@ SC.Logger = SC.Object.create(
     additional arguments, the first argument is assumed to be a format string.
     Thus, you can (and should) use it like:
 
-      SC.Logger.debugGroup("%@:  My debug group", this);       // good
+          SC.Logger.debugGroup("%@:  My debug group", this);       // good
 
     …and not:
 
-      SC.Logger.debugGroup("%@:  My debug group".fmt(this));   // bad
+          SC.Logger.debugGroup("%@:  My debug group".fmt(this));   // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the debug() invocation will be ignored, then the
@@ -404,11 +405,11 @@ SC.Logger = SC.Object.create(
     arguments, it is assumed to be a format string.  Thus, you can (and
     should) use it like:
 
-      SC.Logger.info("%@:  My info message", this);       // good
+          SC.Logger.info("%@:  My info message", this);       // good
 
     …and not:
 
-      SC.Logger.info("%@:  My info message".fmt(this));   // bad
+          SC.Logger.info("%@:  My info message".fmt(this));   // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the info() invocation will be ignored, then the
@@ -457,11 +458,11 @@ SC.Logger = SC.Object.create(
     additional arguments, the first argument is assumed to be a format string.
     Thus, you can (and should) use it like:
 
-      SC.Logger.infoGroup("%@:  My info group", this);       // good
+          SC.Logger.infoGroup("%@:  My info group", this);       // good
 
     …and not:
 
-      SC.Logger.infoGroup("%@:  My info group".fmt(this));   // bad
+          SC.Logger.infoGroup("%@:  My info group".fmt(this));   // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the info() invocation will be ignored, then the
@@ -499,11 +500,11 @@ SC.Logger = SC.Object.create(
     arguments, it is assumed to be a format string.  Thus, you can (and
     should) use it like:
 
-      SC.Logger.warn("%@:  My warning message", this);       // good
+          SC.Logger.warn("%@:  My warning message", this);       // good
 
     …and not:
 
-      SC.Logger.warn("%@:  My warning message".fmt(this));   // bad
+          SC.Logger.warn("%@:  My warning message".fmt(this));   // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the warn() invocation will be ignored, then the
@@ -553,11 +554,11 @@ SC.Logger = SC.Object.create(
     additional arguments, the first argument is assumed to be a format string.
     Thus, you can (and should) use it like:
 
-      SC.Logger.warnGroup("%@:  My warn group", this);       // good
+          SC.Logger.warnGroup("%@:  My warn group", this);       // good
 
     …and not:
 
-      SC.Logger.warnGroup("%@:  My warn group".fmt(this));   // bad
+          SC.Logger.warnGroup("%@:  My warn group".fmt(this));   // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the warn() invocation will be ignored, then the
@@ -594,11 +595,11 @@ SC.Logger = SC.Object.create(
     arguments, it is assumed to be a format string.  Thus, you can (and
     should) use it like:
 
-      SC.Logger.error("%@:  My error message", this);       // good
+          SC.Logger.error("%@:  My error message", this);       // good
 
     …and not:
 
-      SC.Logger.warn("%@:  My error message".fmt(this));    // bad
+          SC.Logger.warn("%@:  My error message".fmt(this));    // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the warn() invocation will be ignored, then the
@@ -647,11 +648,11 @@ SC.Logger = SC.Object.create(
     additional arguments, the first argument is assumed to be a format string.
     Thus, you can (and should) use it like:
 
-      SC.Logger.errorGroup("%@:  My error group", this);       // good
+          SC.Logger.errorGroup("%@:  My error group", this);       // good
 
     …and not:
 
-      SC.Logger.errorGroup("%@:  My error group".fmt(this));   // bad
+          SC.Logger.errorGroup("%@:  My error group".fmt(this));   // bad
 
     The former method can be more efficient because if the log levels are set
     in such a way that the error() invocation will be ignored, then the

@@ -25,7 +25,7 @@ SC.Enumerator = function(enumerableObject) {
   return this ;
 } ;
 
-SC.Enumerator.prototype = {
+SC.Enumerator.prototype = /** @scope SC.Enumerator.prototype */{
 
   /**
     Returns the next object in the enumeration or undefined when complete.

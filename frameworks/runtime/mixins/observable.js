@@ -19,7 +19,7 @@ sc_require('private/chain_observer');
 SC.LOG_OBSERVERS = NO ;
 
 /**
-  @namespace
+  @class
 
   Key-Value-Observing (KVO) simply allows one object to observe changes to a
   property on another object. It is one of the fundamental ways that models,
@@ -33,7 +33,8 @@ SC.LOG_OBSERVERS = NO ;
   but you will use the features provided by this module frequently, so it is
   important to understand how to use it.
 
-  h2. Enabling Key Value Observing
+  Enabling Key Value Observing
+  ---
 
   With KVO, you can write functions that will be called automatically whenever
   a property on a particular object changes.  You can use this feature to
@@ -43,35 +44,30 @@ SC.LOG_OBSERVERS = NO ;
   To use KVO, just use the KVO-aware methods get() and set() to access
   properties instead of accessing properties directly.  Instead of writing:
 
-  {{{
-    var aName = contact.firstName ;
-    contact.firstName = 'Charles' ;
-  }}}
+        var aName = contact.firstName ;
+        contact.firstName = 'Charles' ;
 
   use:
 
-  {{{
-    var aName = contact.get('firstName') ;
-    contact.set('firstName', 'Charles') ;
-  }}}
+        var aName = contact.get('firstName') ;
+        contact.set('firstName', 'Charles') ;
 
   get() and set() work just like the normal "dot operators" provided by
   JavaScript but they provide you with much more power, including not only
   observing but computed properties as well.
 
-  h2. Observing Property Changes
+  Observing Property Changes
+  ---
 
   You typically observe property changes simply by adding the observes()
   call to the end of your method declarations in classes that you write.  For
   example:
 
-  {{{
-    SC.Object.create({
-      valueObserver: function() {
-        // Executes whenever the "Value" property changes
-      }.observes('value')
-    }) ;
-  }}}
+        SC.Object.create({
+          valueObserver: function() {
+            // Executes whenever the "Value" property changes
+          }.observes('value')
+        }) ;
 
   Although this is the most common way to add an observer, this capability is
   actually built into the SC.Object class on top of two methods defined in
@@ -81,29 +77,27 @@ SC.LOG_OBSERVERS = NO ;
 
   To add an observer for a property, just call:
 
-  {{{
-    object.addObserver('propertyKey', targetObject, targetAction) ;
-  }}}
+        object.addObserver('propertyKey', targetObject, targetAction) ;
 
   This will call the 'targetAction' method on the targetObject to be called
   whenever the value of the propertyKey changes.
 
-  h2. Observer Parameters
+  Observer Parameters
+  ---
 
   An observer function typically does not need to accept any parameters,
   however you can accept certain arguments when writing generic observers.
   An observer function can have the following arguments:
 
-  {{{
-    propertyObserver(target, key, value, revision) ;
-  }}}
+        propertyObserver(target, key, value, revision) ;
 
   - *target* - This is the object whose value changed.  Usually this.
   - *key* - The key of the value that changed
   - *value* - this property is no longer used.  It will always be null
   - *revision* - this is the revision of the target object
 
-  h2. Implementing Manual Change Notifications
+  Implementing Manual Change Notifications
+  ---
 
   Sometimes you may want to control the rate at which notifications for
   a property are delivered, for example by checking first to make sure
@@ -115,34 +109,32 @@ SC.LOG_OBSERVERS = NO ;
   The example below will only notify if the "balance" property value actually
   changes:
 
-  {{{
 
-    automaticallyNotifiesObserversFor: function(key) {
-      return (key === 'balance') ? NO : sc_super() ;
-    },
+        automaticallyNotifiesObserversFor: function(key) {
+          return (key === 'balance') ? NO : sc_super() ;
+        },
 
-    balance: function(key, value) {
-      var balance = this._balance ;
-      if ((value !== undefined) && (balance !== value)) {
-        this.propertyWillChange(key) ;
-        balance = this._balance = value ;
-        this.propertyDidChange(key) ;
-      }
-      return balance ;
-    }
+        balance: function(key, value) {
+          var balance = this._balance ;
+          if ((value !== undefined) && (balance !== value)) {
+            this.propertyWillChange(key) ;
+            balance = this._balance = value ;
+            this.propertyDidChange(key) ;
+          }
+          return balance ;
+        }
 
-  }}}
 
-  h1. Implementation Details
+  Implementation Details
+  ---
 
   Internally, SproutCore keeps track of observable information by adding a
   number of properties to the object adopting the observable.  All of these
   properties begin with "_kvo_" to separate them from the rest of your object.
 
-  @static
   @since SproutCore 1.0
 */
-SC.Observable = {
+SC.Observable = /** @scope SC.Observable.prototype */{
 
   /**
     Walk like that ol' duck
@@ -161,7 +153,7 @@ SC.Observable = {
 
     The default implementation always returns YES.
 
-    @param key {String} the key that is changing
+    @param {String} key the key that is changing
     @returns {Boolean} YES if automatic notification should occur.
   */
   automaticallyNotifiesObserversFor: function(key) {
@@ -182,22 +174,22 @@ SC.Observable = {
     however it supports both computed properties and the unknownProperty
     handler.
 
-    *Computed Properties*
+    Computed Properties
+    ---
 
     Computed properties are methods defined with the property() modifier
     declared at the end, such as:
 
-    {{{
-      fullName: function() {
-        return this.getEach('firstName', 'lastName').compact().join(' ');
-      }.property('firstName', 'lastName')
-    }}}
+          fullName: function() {
+            return this.getEach('firstName', 'lastName').compact().join(' ');
+          }.property('firstName', 'lastName')
 
     When you call get() on a computed property, the property function will be
     called and the return value will be returned instead of the function
     itself.
 
-    *Unknown Properties*
+    Unknown Properties
+    ---
 
     Likewise, if you try to call get() on a property whose values is
     undefined, the unknownProperty() method will be called on the object.
@@ -205,7 +197,7 @@ SC.Observable = {
     instead.  This allows you to implement "virtual" properties that are
     not defined upfront.
 
-    @param key {String} the property to retrieve
+    @param {String} key the property to retrieve
     @returns {Object} the property value or undefined.
 
   */
@@ -229,7 +221,8 @@ SC.Observable = {
     object.key = value, except that it provides support for computed
     properties, the unknownProperty() method and property observers.
 
-    *Computed Properties*
+    Computed Properties
+    ---
 
     If you try to set a value on a key that has a computed property handler
     defined (see the get() method for an example), then set() will call
@@ -238,7 +231,8 @@ SC.Observable = {
     implement a property that is composed of one or more member
     properties.
 
-    *Unknown Properties*
+    Unknown Properties
+    ---
 
     If you try to set a value on a key that is undefined in the target
     object, then the unknownProperty() handler will be called instead.  This
@@ -246,7 +240,8 @@ SC.Observable = {
     are not predefined on the obejct.  If unknownProperty() returns
     undefined, then set() will simply set the value on the object.
 
-    *Property Observers*
+    Property Observers
+    ---
 
     In addition to changing the property, set() will also register a
     property change with the object.  Unless you have placed this call
@@ -256,17 +251,16 @@ SC.Observable = {
     declared on another object) will be placed in a queue and called at a
     later time in a coelesced manner.
 
-    *Chaining*
+    Chaining
+    ---
 
     In addition to property changes, set() returns the value of the object
     itself so you can do chaining like this:
 
-    {{{
-      record.set('firstName', 'Charles').set('lastName', 'Jolley');
-    }}}
+          record.set('firstName', 'Charles').set('lastName', 'Jolley');
 
-    @param key {String|Hash} the property to set
-    @param value {Object} the value to set or null.
+    @param {String|Hash} key the property to set
+    @param {Object} value the value to set or null.
     @returns {SC.Observable}
   */
   set: function(key, value) {
@@ -345,8 +339,8 @@ SC.Observable = {
     when the named property is not yet set in the object.  The default does
     nothing.
 
-    @param key {String} the key that was requested
-    @param value {Object} The value if called as a setter, undefined if called as a getter.
+    @param {String} key the key that was requested
+    @param {Object} value The value if called as a setter, undefined if called as a getter.
     @returns {Object} The new value for key.
   */
   unknownProperty: function(key,value) {
@@ -361,7 +355,7 @@ SC.Observable = {
     will not be sent until the changes are finished.  If you plan to make a
     large number of changes to an object at one time, you should call this
     method at the beginning of the changes to suspend change notifications.
-    When you are done making changes, all endPropertyChanges() to allow
+    When you are done making changes, call endPropertyChanges() to allow
     notification to resume.
 
     @returns {SC.Observable}
@@ -405,7 +399,7 @@ SC.Observable = {
     a pair.  If you do not, it may get the property change groups out of order
     and cause notifications to be delivered more often than you would like.
 
-    @param key {String} The property key that is about to change.
+    @param {String} key The property key that is about to change.
     @returns {SC.Observable}
   */
   propertyWillChange: function(key) {
@@ -425,8 +419,9 @@ SC.Observable = {
     a pair. If you do not, it may get the property change groups out of order
     and cause notifications to be delivered more often than you would like.
 
-    @param key {String} The property key that has just changed.
-    @param value {Object} The new value of the key.  May be null.
+    @param {String} key The property key that has just changed.
+    @param {Object} value The new value of the key.  May be null.
+    @param {Boolean} _keepCache Private property
     @returns {SC.Observable}
   */
   propertyDidChange: function(key,value, _keepCache) {
@@ -646,14 +641,13 @@ SC.Observable = {
     with different context parameters, your observer will only be called once
     with the last context you passed.
 
-    h2. Observer Methods
+    Observer Methods
+    ---
 
     Observer methods you pass should generally have the following signature if
     you do not pass a "context" parameter:
 
-    {{{
-      fooDidChange: function(sender, key, value, rev);
-    }}}
+          fooDidChange: function(sender, key, value, rev);
 
     The sender is the object that changed.  The key is the property that
     changes.  The value property is currently reserved and unused.  The rev
@@ -663,19 +657,17 @@ SC.Observable = {
     If you pass a "context" parameter, the context will be passed before the
     revision like so:
 
-    {{{
-      fooDidChange: function(sender, key, value, context, rev);
-    }}}
+          fooDidChange: function(sender, key, value, context, rev);
 
     Usually you will not need the value, context or revision parameters at
     the end.  In this case, it is common to write observer methods that take
     only a sender and key value as parameters or, if you aren't interested in
     any of these values, to write an observer that has no parameters at all.
 
-    @param key {String} the key to observer
-    @param target {Object} the target object to invoke
-    @param method {String|Function} the method to invoke.
-    @param context {Object} optional context
+    @param {String} key the key to observer
+    @param {Object} target the target object to invoke
+    @param {String|Function} method the method to invoke.
+    @param {Object} context optional context
     @returns {SC.Object} self
   */
   addObserver: function(key, target, method, context) {
@@ -727,7 +719,10 @@ SC.Observable = {
     Remove an observer you have previously registered on this object.  Pass
     the same key, target, and method you passed to addObserver() and your
     target will no longer receive notifications.
-
+    
+    @param {String} key the key to observer
+    @param {Object} target the target object to invoke
+    @param {String|Function} method the method to invoke.
     @returns {SC.Observable} reciever
   */
   removeObserver: function(key, target, method) {
@@ -910,7 +905,7 @@ SC.Observable = {
     key.  This is intended for debugging purposes only.  You generally do not
     want to rely on this method for production code.
 
-    @params key {String} the key to evaluate
+    @param {String} key the key to evaluate
     @returns {Array} array of Observer objects, describing the observer.
   */
   observersForKey: function(key) {
@@ -1200,8 +1195,8 @@ SC.Observable = {
     changed. However, this check can skipped by setting .property().idempotent(NO)
     setIfChanged() may be useful in this case.
 
-    @param key {String|Hash} the key to change
-    @param value {Object} the value to change
+    @param {String|Hash} key the key to change
+    @param {Object} value the value to change
     @returns {SC.Observable}
   */
   setIfChanged: function(key, value) {
@@ -1223,6 +1218,7 @@ SC.Observable = {
     Navigates the property path, returning the value at that point.
 
     If any object in the path is undefined, returns undefined.
+    @param {String} path The property path you want to retrieve
   */
   getPath: function(path) {
     var tuple = SC.tupleForPropertyPath(path, this) ;
@@ -1233,8 +1229,8 @@ SC.Observable = {
   /**
     Navigates the property path, finally setting the value.
 
-    @param path {String} the property path to set
-    @param value {Object} the value to set
+    @param {String} path the property path to set
+    @param {Object} value the value to set
     @returns {SC.Observable}
   */
   setPath: function(path, value) {
@@ -1251,8 +1247,8 @@ SC.Observable = {
     the value does not match the current value.  This will avoid sending
     unecessary change notifications.
 
-    @param path {String} the property path to set
-    @param value {Object} the value to set
+    @param {String} path the property path to set
+    @param {Object} value the value to set
     @returns {Object} this
   */
   setPathIfChanged: function(path, value) {
@@ -1287,8 +1283,8 @@ SC.Observable = {
   /**
     Increments the value of a property.
 
-    @param key {String} property name
-    @param increment {Number} the amount to increment (optional)
+    @param {String} key property name
+    @param {Number} increment the amount to increment (optional)
     @returns {Number} new value of property
   */
   incrementProperty: function(key,increment) {
@@ -1300,8 +1296,8 @@ SC.Observable = {
   /**
     Decrements the value of a property.
 
-    @param key {String} property name
-    @param increment {Number} the amount to decrement (optional)
+    @param {String} key property name
+    @param {Number} increment the amount to decrement (optional)
     @returns {Number} new value of property
   */
   decrementProperty: function(key,increment) {
@@ -1313,9 +1309,9 @@ SC.Observable = {
   /**
     Inverts a property.  Property should be a bool.
 
-    @param key {String} property name
-    @param value {Object} optional parameter for "true" value
-    @param alt {Object} optional parameter for "false" value
+    @param {String} key property name
+    @param {Object} value optional parameter for "true" value
+    @param {Object} alt optional parameter for "false" value
     @returns {Object} new value
   */
   toggleProperty: function(key,value,alt) {
@@ -1334,8 +1330,8 @@ SC.Observable = {
     method as a convenience instead of calling propertyWillChange() and
     propertyDidChange().
 
-    @param key {String} The property key that has just changed.
-    @param value {Object} The new value of the key.  May be null.
+    @param {String} key The property key that has just changed.
+    @param {Object} value The new value of the key.  May be null.
     @returns {SC.Observable}
   */
   notifyPropertyChange: function(key, value) {
@@ -1362,7 +1358,20 @@ SC.Observable = {
     return this ;
   },
 
+  /** 
+    Allows you to inspect a property for changes. Whenever the named property
+    changes, a log will be printed to the console. This (along with removeProbe)
+    are convenience methods meant for debugging purposes.
+  
+    @param {String} key The name of the property you want probed for changes
+  */
   addProbe: function(key) { this.addObserver(key,SC.logChange); },
+  
+  /** 
+    Stops a running probe from observing changes to the observer.
+  
+    @param {String} key The name of the property you want probed for changes
+  */
   removeProbe: function(key) { this.removeObserver(key,SC.logChange); },
 
   /**

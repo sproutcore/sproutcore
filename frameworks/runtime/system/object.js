@@ -239,13 +239,15 @@ SC._enhance = function(originalFunction, enhancement) {
   own, you should read this documentation to learn some of the details of
   how SC.Object's behave and how they differ from other frameworks.
 
-  h2. About SproutCore Classes
+  About SproutCore Classes
+  ===
 
   JavaScript is not a class-based language.  Instead it uses a type of
   inheritence inspired by self called "prototypical" inheritance.
   ...
 
-  h2. Using SproutCore objects with other JavaScript object.
+  Using SproutCore objects with other JavaScript object.
+  ===
 
   You can create a SproutCore object just like any other object...
   obj = new SC.Object() ;
@@ -267,7 +269,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     This is a shorthand for calling SC.mixin(MyClass, props...);
 
-    @params {Hash} props the properties you want to add.
+    @param {Hash} props the properties you want to add.
     @returns {Object} receiver
   */
   mixin: function(props) {
@@ -284,7 +286,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     Points to the superclass for this class.  You can use this to trace a
     class hierarchy.
 
-    @property {SC.Object}
+    @type SC.Object
   */
   superclass: null,
 
@@ -294,14 +296,14 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     when you plan to create several objects based on a class with similar
     properties.
 
-    h2. Init
+    Init:
 
     If you define an init() method, it will be called when you create
     instances of your new class.  Since SproutCore uses the init() method to
     do important setup, you must be sure to always call sc_super() somewhere
     in your init() to allow the normal setup to proceed.
 
-    @params {Hash} props the methods of properties you want to add
+    @param {Hash} props the methods of properties you want to add
     @returns {Class} A new object class
   */
   extend: function(props) {
@@ -376,7 +378,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   /**
     Walk like a duck.  You can use this to quickly test classes.
 
-    @property {Boolean}
+    @type Boolean
   */
   isClass: YES,
 
@@ -384,7 +386,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     Set of subclasses that extend from this class.  You can observe this
     array if you want to be notified when the object is extended.
 
-    @property {SC.Set}
+    @type SC.Set
   */
   subclasses: SC.Set.create(),
 
@@ -400,15 +402,13 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     receiver is the class passed, this will return NO since the class is not
     a subclass of itself.  See also kindOf().
 
-    h2. Example
+    Example:
 
-    {{{
-      ClassA = SC.Object.extend();
-      ClassB = ClassA.extend();
+          ClassA = SC.Object.extend();
+          ClassB = ClassA.extend();
 
-      ClassB.subclassOf(ClassA) => YES
-      ClassA.subclassOf(ClassA) => NO
-    }}}
+          ClassB.subclassOf(ClassA) => YES
+          ClassA.subclassOf(ClassA) => NO
 
     @param {Class} scClass class to compare
     @returns {Boolean}
@@ -437,15 +437,13 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     pass the receiver itself, since class is a kind of itself.  See also
     subclassOf().
 
-    h2. Example
+    Example:
 
-    {{{
-      ClassA = SC.Object.extend();
-      ClassB = ClassA.extend();
+          ClassA = SC.Object.extend();
+          ClassB = ClassA.extend();
 
-      ClassB.kindOf(ClassA) => YES
-      ClassA.kindOf(ClassA) => YES
-    }}}
+          ClassB.kindOf(ClassA) => YES
+          ClassA.kindOf(ClassA) => YES
 
     @param {Class} scClass class to compare
     @returns {Boolean}
@@ -515,25 +513,23 @@ SC.Object.prototype = {
     the inherited init method from SC.Object or else your instance may not
     function properly.
 
-    h2. Example
+    Example:
 
-    {{{
-      // dynamically apply a mixin specified in an object property
-      var MyClass = SC.Object.extend({
-         extraMixin: null,
+          // dynamically apply a mixin specified in an object property
+          var MyClass = SC.Object.extend({
+             extraMixin: null,
 
-         init: function() {
-           this.mixin(this.extraMixin);
-           sc_super();
-         }
-      });
+             init: function() {
+               this.mixin(this.extraMixin);
+               sc_super();
+             }
+          });
 
-      var ExampleMixin = { foo: "bar" };
+          var ExampleMixin = { foo: "bar" };
 
-      var instance = MyClass.create({ extraMixin: ExampleMixin }) ;
+          var instance = MyClass.create({ extraMixin: ExampleMixin }) ;
 
-      instance.get('foo') => "bar"
-    }}}
+          instance.get('foo') => "bar"
 
     @param {Hash} ext a hash to copy.  Only one.
     @returns {Object} receiver
@@ -562,7 +558,7 @@ SC.Object.prototype = {
     Although the default init() method returns the receiver, the return
     value is ignored.
 
-    @returns {void}
+    
   */
   init: function() {
     this.initObservable();
@@ -572,7 +568,7 @@ SC.Object.prototype = {
   /**
     Set to NO once this object has been destroyed.
 
-    @property {Boolean}
+    @type Boolean
   */
   isDestroyed: NO,
 
@@ -606,14 +602,14 @@ SC.Object.prototype = {
   /**
     Walk like a duck. Always YES since this is an object and not a class.
 
-    @property {Boolean}
+    @type Boolean
   */
   isObject: true,
 
   /**
     Returns YES if the named value is an executable function.
 
-    @param methodName {String} the property name to check
+    @param {String} methodName the property name to check
     @returns {Boolean}
   */
   respondsTo: function( methodName ) {
@@ -645,32 +641,30 @@ SC.Object.prototype = {
     - *With Build Tools:* sc_super();
     - *Without Build Tools:* arguments.callee.base.apply(this, arguments);
 
-    h2. Example
+    Example
 
     All of the following methods will call the superclass implementation of
     your method:
 
-    {{{
-      SC.Object.create({
+          SC.Object.create({
 
-        // DOES NOT WORK IN SAFARI 2 OR EARLIER
-        method1: function() {
-          this.superclass();
-        },
+            // DOES NOT WORK IN SAFARI 2 OR EARLIER
+            method1: function() {
+              this.superclass();
+            },
 
-        // REQUIRES SC-BUILD TOOLS
-        method2: function() {
-          sc_super();
-        },
+            // REQUIRES SC-BUILD TOOLS
+            method2: function() {
+              sc_super();
+            },
 
-        // WORKS ANYTIME
-        method3: function() {
-          arguments.callee.base.apply(this, arguments);
-        }
-      });
-    }}}
+            // WORKS ANYTIME
+            method3: function() {
+              arguments.callee.base.apply(this, arguments);
+            }
+          });
 
-    @params args {*args} any arguments you want to pass along.
+    @param {*args} args any arguments you want to pass along.
     @returns {Object} return value from super
   */
   superclass: function(args) {
@@ -683,18 +677,16 @@ SC.Object.prototype = {
     returns YES if the receiver is an instance of the named class.  See also
     kindOf().
 
-    h2. Example
+    Example
 
-    {{{
-      var ClassA = SC.Object.extend();
-      var ClassB = SC.Object.extend();
+          var ClassA = SC.Object.extend();
+          var ClassB = SC.Object.extend();
 
-      var instA = ClassA.create();
-      var instB = ClassB.create();
+          var instA = ClassA.create();
+          var instB = ClassB.create();
 
-      instA.instanceOf(ClassA) => YES
-      instB.instanceOf(ClassA) => NO
-    }}}
+          instA.instanceOf(ClassA) => YES
+          instB.instanceOf(ClassA) => NO
 
     @param {Class} scClass the class
     @returns {Boolean}
@@ -707,20 +699,18 @@ SC.Object.prototype = {
     Returns true if the receiver is an instance of the named class or any
     subclass of the named class.  See also instanceOf().
 
-    h2. Example
+    Example
 
-    {{{
-      var ClassA = SC.Object.extend();
-      var ClassB = SC.Object.extend();
+          var ClassA = SC.Object.extend();
+          var ClassB = SC.Object.extend();
 
-      var instA = ClassA.create();
-      var instB = ClassB.create();
+          var instA = ClassA.create();
+          var instB = ClassB.create();
 
-      instA.kindOf(ClassA) => YES
-      instB.kindOf(ClassA) => YES
-    }}}
+          instA.kindOf(ClassA) => YES
+          instB.kindOf(ClassA) => YES
 
-    @param scClass {Class} the class
+    @param {Class} scClass the class
     @returns {Boolean}
   */
   kindOf: function(scClass) { return this.constructor.kindOf(scClass); },
@@ -742,9 +732,9 @@ SC.Object.prototype = {
     method is called automatically for view classes but may be used for any
     object.
 
-    @returns {void}
+    
   */
-  awake: function(key) {
+  awake: function() {
     var outlets = this.outlets,
         i, len, outlet;
     for (i = 0, len = outlets.length;  i < len;  ++i) {
@@ -784,19 +774,17 @@ SC.Object.prototype = {
     selection immediately will have no effect. In this situation, you could do
     this instead:
 
-    {{{
-      // Creates a new MyRecord object and sets the selection of the
-      // myRecord collection controller to the new object.
-      createObjectAction: function(sender, evt) {
-        // create a new record and add it to the store
-        var obj = MyRecord.newRecord() ;
+          // Creates a new MyRecord object and sets the selection of the
+          // myRecord collection controller to the new object.
+          createObjectAction: function(sender, evt) {
+            // create a new record and add it to the store
+            var obj = MyRecord.newRecord() ;
 
-        // update the collection controller's selection
-        MyApp.myRecordCollectionController.invokeLast( function() {
-          this.set('selection', [obj]) ;
-        });
-      }
-    }}}
+            // update the collection controller's selection
+            MyApp.myRecordCollectionController.invokeLast( function() {
+              this.set('selection', [obj]) ;
+            });
+          }
 
     You can call invokeLast as many times as you like and the method will
     only be invoked once.
@@ -821,7 +809,7 @@ SC.Object.prototype = {
     should limit the number of properties you include in this list as it
     adds a slight overhead to new class and instance creation.
 
-    @property {Array}
+    @type Array
   */
   concatenatedProperties: ['concatenatedProperties', 'initMixin', 'destroyMixin']
 

@@ -11,7 +11,7 @@ sc_require('system/enumerator');
 /*globals Prototype */
 
 /**
-  @namespace
+  @class
 
   This mixin defines the common interface implemented by enumerable objects
   in SproutCore.  Most of these methods follow the standard Array iteration
@@ -22,7 +22,8 @@ sc_require('system/enumerator');
   can use any of these methods on simple arrays.  If Array already implements
   one of these methods, the mixin will not override them.
 
-  h3. Writing Your Own Enumerable
+  Writing Your Own Enumerable
+  -----
 
   To make your own custom class enumerable, you need two items:
 
@@ -33,11 +34,12 @@ sc_require('system/enumerator');
 
   2. If you must implement nextObject().  See documentation.
 
-  Once you have these two methods implement, apply the SC.Enumerable mixin
+  Once you have these two methods implemented, apply the SC.Enumerable mixin
   to your class and you will be able to enumerate the contents of your object
   like any other collection.
 
-  h3. Using SproutCore Enumeration with Other Libraries
+  Using SproutCore Enumeration with Other Libraries
+  -----
 
   Many other libraries provide some kind of iterator or enumeration like
   facility.  This is often where the most common API conflicts occur.
@@ -47,12 +49,12 @@ sc_require('system/enumerator');
 
   @since SproutCore 1.0
 */
-SC.Enumerable = {
+SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
   /**
     Walk like a duck.
 
-    @property {Boolean}
+    @type Boolean
   */
   isEnumerable: YES,
 
@@ -82,9 +84,9 @@ SC.Enumerable = {
     The default impementation of this method simply looks up the index.
     This works great on any Array-like objects.
 
-    @param index {Number} the current index of the iteration
-    @param previousObject {Object} the value returned by the last call to nextObject.
-    @param context {Object} a context object you can use to maintain state.
+    @param {Number} index the current index of the iteration
+    @param {Object} previousObject the value returned by the last call to nextObject.
+    @param {Object} context a context object you can use to maintain state.
     @returns {Object} the next object in the iteration or undefined
   */
   nextObject: function(index, previousObject, context) {
@@ -142,9 +144,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(item, index, enumerable) ;
-    }}}
+          function(item, index, enumerable) ;
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -154,8 +154,8 @@ SC.Enumerable = {
     object that will be set as "this" on the context.  This is a good way
     to give your iterator function access to the current object.
 
-    @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @param {Function} callback the callback to execute
+    @param {Object} target the target object to use
     @returns {Object} this
   */
   forEach: function(callback, target) {
@@ -217,9 +217,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(item, index, enumerable) ;
-    }}}
+        function(item, index, enumerable) ;
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -231,8 +229,8 @@ SC.Enumerable = {
     object that will be set as "this" on the context.  This is a good way
     to give your iterator function access to the current object.
 
-    @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @param {Function} callback the callback to execute
+    @param {Object} target the target object to use
     @returns {Array} The mapped array.
   */
   map: function(callback, target) {
@@ -257,7 +255,7 @@ SC.Enumerable = {
     Similar to map, this specialized function returns the value of the named
     property on all items in the enumeration.
 
-    @params key {String} name of the property
+    @param {String} key name of the property
     @returns {Array} The mapped array.
   */
   mapProperty: function(key) {
@@ -274,9 +272,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(item, index, enumerable) ;
-    }}}
+          function(item, index, enumerable) ;
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -288,8 +284,8 @@ SC.Enumerable = {
     object that will be set as "this" on the context.  This is a good way
     to give your iterator function access to the current object.
 
-    @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @param {Function} callback the callback to execute
+    @param {Object} target the target object to use
     @returns {Array} A filtered array.
   */
   filter: function(callback, target) {
@@ -350,8 +346,8 @@ SC.Enumerable = {
     can pass an optional second argument with the target value.  Otherwise
     this will match any property that evaluates to true.
 
-    @params key {String} the property to test
-    @param value {String} optional value to test against.
+    @param {String} key the property to test
+    @param {String} value optional value to test against.
     @returns {Array} filtered array
   */
   filterProperty: function(key, value) {
@@ -379,9 +375,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(item, index, enumerable) ;
-    }}}
+          function(item, index, enumerable) ;
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -393,8 +387,8 @@ SC.Enumerable = {
     object that will be set as "this" on the context.  This is a good way
     to give your iterator function access to the current object.
 
-    @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @param {Function} callback the callback to execute
+    @param {Object} target the target object to use
     @returns {Object} Found item or null.
   */
   find: function(callback, target) {
@@ -420,8 +414,8 @@ SC.Enumerable = {
 
     This method works much like the more generic find() method.
 
-    @params key {String} the property to test
-    @param value {String} optional value to test against.
+    @param {String} key the property to test
+    @param {String} value optional value to test against.
     @returns {Object} found item or null
   */
   findProperty: function(key, value) {
@@ -447,9 +441,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(item, index, enumerable) ;
-    }}}
+          function(item, index, enumerable) ;
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -461,14 +453,12 @@ SC.Enumerable = {
     object that will be set as "this" on the context.  This is a good way
     to give your iterator function access to the current object.
 
-    h4. Example Usage
+    Example Usage:
 
-    {{{
-      if (people.every(isEngineer)) { Paychecks.addBigBonus(); }
-    }}}
+          if (people.every(isEngineer)) { Paychecks.addBigBonus(); }
 
-    @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @param {Function} callback the callback to execute
+    @param {Object} target the target object to use
     @returns {Boolean}
   */
   every: function(callback, target) {
@@ -493,8 +483,8 @@ SC.Enumerable = {
     Returns YES if the passed property resolves to true for all items in the
     enumerable.  This method is often simpler/faster than using a callback.
 
-    @params key {String} the property to test
-    @param value {String} optional value to test against.
+    @param {String} key the property to test
+    @param {String} value optional value to test against.
     @returns {Array} filtered array
   */
   everyProperty: function(key, value) {
@@ -521,9 +511,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(item, index, enumerable) ;
-    }}}
+          function(item, index, enumerable) ;
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -535,14 +523,12 @@ SC.Enumerable = {
     object that will be set as "this" on the context.  This is a good way
     to give your iterator function access to the current object.
 
-    h4. Usage Example
+    Usage Example:
 
-    {{{
-      if (people.some(isManager)) { Paychecks.addBiggerBonus(); }
-    }}}
+          if (people.some(isManager)) { Paychecks.addBiggerBonus(); }
 
-    @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @param {Function} callback the callback to execute
+    @param {Object} target the target object to use
     @returns {Array} A filtered array.
   */
   some: function(callback, target) {
@@ -567,8 +553,8 @@ SC.Enumerable = {
     Returns YES if the passed property resolves to true for any item in the
     enumerable.  This method is often simpler/faster than using a callback.
 
-    @params key {String} the property to test
-    @param value {String} optional value to test against.
+    @param {String} key the property to test
+    @param {String} value optional value to test against.
     @returns {Boolean} YES
   */
   someProperty: function(key, value) {
@@ -595,9 +581,7 @@ SC.Enumerable = {
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-    {{{
-      function(previousValue, item, index, enumerable) ;
-    }}}
+          function(previousValue, item, index, enumerable) ;
 
     - *previousValue* is the value returned by the last call to the iterator.
     - *item* is the current item in the iteration.
@@ -614,10 +598,10 @@ SC.Enumerable = {
     pass a target object to set as this for the callback.  It's part of the
     spec. Sorry.
 
-    @params callback {Function} the callback to execute
-    @params initialValue {Object} initial value for the reduce
-    @params reducerProperty {String} internal use only.  May not be available.
-    @returns {Array} A filtered array.
+    @param {Function} callback the callback to execute
+    @param {Object} initialValue initial value for the reduce
+    @param {String} reducerProperty internal use only.  May not be available.
+    @returns {Object} The reduced value.
   */
   reduce: function(callback, initialValue, reducerProperty) {
     if (typeof callback !== "function") throw new TypeError() ;
@@ -657,8 +641,8 @@ SC.Enumerable = {
     implements it.  This method corresponds to the implementation in
     Prototype 1.6.
 
-    @param methodName {String} the name of the method
-    @param args {Object...} optional arguments to pass as well.
+    @param {String} methodName the name of the method
+    @param {Object...} args optional arguments to pass as well.
     @returns {Array} return values from calling invoke.
   */
   invoke: function(methodName) {
@@ -695,9 +679,9 @@ SC.Enumerable = {
     a useful way to attempt to apply changes to a collection of objects unless
     or until one fails.
 
-    @param targetValue {Object} the target return value
-    @param methodName {String} the name of the method
-    @param args {Object...} optional arguments to pass as well.
+    @param {Object} targetValue the target return value
+    @param {String} methodName the name of the method
+    @param {Object...} args optional arguments to pass as well.
     @returns {Array} return values from calling invoke.
   */
   invokeWhile: function(targetValue, methodName) {
@@ -745,7 +729,7 @@ SC.Enumerable = {
     Converts an enumerable into a matrix, with inner arrays grouped based
     on a particular property of the elements of the enumerable.
 
-    @params key {String} the property to test
+    @param {String} key the property to test
     @returns {Array} matrix of arrays
   */
   groupBy: function(key){
@@ -793,7 +777,8 @@ SC._buildReducerFor = function(reducerKey, reducerProperty) {
   }.property('[]') ;
 };
 
-SC.Reducers = /** @lends SC.Enumerable */ {
+/** @class */
+SC.Reducers = /** @scope SC.Reducers.prototype */ {
   /**
     This property will trigger anytime the enumerable's content changes.
     You can observe this property to be notified of changes to the enumerables
@@ -833,6 +818,7 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     Clones a segment of an observer chain and applies it
     to an element of this Enumerable.
 
+    @param {Object} item The element
     @param {SC._ChainObserver} chainObserver the chain segment to begin from
   */
   _resumeChainObservingForItemWithChainObserver: function(item, chainObserver) {
@@ -955,24 +941,19 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     property.  You can call this at the top of your unknownProperty handler
     like so:
 
-    {{{
       unknownProperty: function(key, value) {
         var ret = this.handleReduceProperty(key, value) ;
         if (ret === undefined) {
           // process like normal
         }
       }
-    }}}
 
-    @param {String} key
-      the reduce property key
+    @param {String} key the reduce property key
 
-    @param {Object} value
-      a value or undefined.
+    @param {Object} value a value or undefined.
 
-    @param {Boolean} generateProperty
-      only set to false if you do not want an optimized computed property
-      handler generated for this.  Not common.
+    @param {Boolean} generateProperty only set to false if you do not want 
+      an optimized computed property handler generated for this.  Not common.
 
     @returns {Object} the reduced property or undefined
   */
@@ -1019,6 +1000,13 @@ SC.Reducers = /** @lends SC.Enumerable */ {
 
   /**
     Reducer for @max reduced property.
+        
+    @param {Object} previousValue The previous value in the enumerable
+    @param {Object} item The current value in the enumerable
+    @param {Number} index The index of the current item in the enumerable
+    @param {String} reducerProperty (Optional) The property in the enumerable being reduced
+    
+    @returns {Object} reduced value
   */
   reduceMax: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
@@ -1029,7 +1017,16 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   },
 
   /**
-    Reducer for @maxObject reduced property.
+    Reduces an enumberable to the max of the items in the enumerable. If 
+    reducerProperty is passed, it will reduce that property. Otherwise, it will
+    reduce the item itself.
+        
+    @param {Object} previousValue The previous value in the enumerable
+    @param {Object} item The current value in the enumerable
+    @param {Number} index The index of the current item in the enumerable
+    @param {String} reducerProperty (Optional) The property in the enumerable being reduced
+    
+    @returns {Object} reduced value
   */
   reduceMaxObject: function(previousItem, item, index, e, reducerProperty) {
 
@@ -1050,7 +1047,16 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   },
 
   /**
-    Reducer for @min reduced property.
+    Reduces an enumberable to the min of the items in the enumerable. If 
+    reducerProperty is passed, it will reduce that property. Otherwise, it will
+    reduce the item itself.
+        
+    @param {Object} previousValue The previous value in the enumerable
+    @param {Object} item The current value in the enumerable
+    @param {Number} index The index of the current item in the enumerable
+    @param {String} reducerProperty (Optional) The property in the enumerable being reduced
+    
+    @returns {Object} reduced value
   */
   reduceMin: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
@@ -1061,7 +1067,16 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   },
 
   /**
-    Reducer for @maxObject reduced property.
+    Reduces an enumberable to the max of the items in the enumerable. If 
+    reducerProperty is passed, it will reduce that property. Otherwise, it will
+    reduce the item itself.
+        
+    @param {Object} previousValue The previous value in the enumerable
+    @param {Object} item The current value in the enumerable
+    @param {Number} index The index of the current item in the enumerable
+    @param {String} reducerProperty (Optional) The property in the enumerable being reduced
+    
+    @returns {Object} reduced value
   */
   reduceMinObject: function(previousItem, item, index, e, reducerProperty) {
 
@@ -1082,7 +1097,16 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   },
 
   /**
-    Reducer for @average reduced property.
+    Reduces an enumberable to the average of the items in the enumerable. If 
+    reducerProperty is passed, it will reduce that property. Otherwise, it will
+    reduce the item itself.
+        
+    @param {Object} previousValue The previous value in the enumerable
+    @param {Object} item The current value in the enumerable
+    @param {Number} index The index of the current item in the enumerable
+    @param {String} reducerProperty (Optional) The property in the enumerable being reduced
+    
+    @returns {Object} reduced value
   */
   reduceAverage: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
@@ -1095,7 +1119,16 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   },
 
   /**
-    Reducer for @sum reduced property.
+    Reduces an enumberable to the sum of the items in the enumerable. If 
+    reducerProperty is passed, it will reduce that property. Otherwise, it will
+    reduce the item itself.
+    
+    @param {Object} previousValue The previous value in the enumerable
+    @param {Object} item The current value in the enumerable
+    @param {Number} index The index of the current item in the enumerable
+    @param {String} reducerProperty (Optional) The property in the enumerable being reduced
+    
+    @returns {Object} reduced value
   */
   reduceSum: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {

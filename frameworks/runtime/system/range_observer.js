@@ -20,7 +20,7 @@
 
   @since SproutCore 1.0
 */
-SC.RangeObserver = {
+SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
 
   /**
     Walk like a duck.
@@ -94,6 +94,7 @@ SC.RangeObserver = {
     new objects instead.
 
     @param {SC.Array} source the source array
+    @param {SC.IndexSet} indexSet The index set representing the change
     @returns {SC.RangeObserver} receiver
   */
   update: function(source, indexSet) {
@@ -251,6 +252,8 @@ SC.RangeObserver = {
 
     @param {Object} the object that changed
     @param {String} key the property that changed
+    @param {Null} value No longer used
+    @param {Number} rev The revision of the change
     @returns {SC.RangeObserver} receiver
   */
   objectPropertyDidChange: function(object, key, value, rev) {

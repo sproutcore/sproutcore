@@ -21,19 +21,17 @@ sc_require('private/observer_set');
   your run loop is reached.  This improves the performance of your
   application.
 
-  h2. Example
+  Example:
 
   This is how you could write your mouseup handler in jQuery:
 
-  {{{
-    $('#okButton').on('click', function() {
-      SC.RunLoop.begin();
+        $('#okButton').on('click', function() {
+          SC.RunLoop.begin();
 
-      // handle click event...
+          // handle click event...
 
-      SC.RunLoop.end(); // allows bindings to trigger...
-    });
-  }}}
+          SC.RunLoop.end(); // allows bindings to trigger...
+        });
 
   @extends SC.Object
   @since SproutCore 1.0
@@ -61,7 +59,8 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   /**
     YES when a run loop is in progress
 
-    @property {Boolean}
+    @property
+    @type Boolean
   */
   isRunLoopInProgress: function() {
     return this._runLoopInProgress;
@@ -218,7 +217,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   The current run loop.  This is created automatically the first time you
   call begin().
 
-  @property {SC.RunLoop}
+  @type SC.RunLoop
 */
 SC.RunLoop.currentRunLoop = null;
 
@@ -226,7 +225,7 @@ SC.RunLoop.currentRunLoop = null;
   The default RunLoop class.  If you choose to extend the RunLoop, you can
   set this property to make sure your class is used instead.
 
-  @property {Class}
+  @type Class
 */
 SC.RunLoop.runLoopClass = SC.RunLoop;
 

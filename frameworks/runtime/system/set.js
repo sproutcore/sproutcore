@@ -273,7 +273,7 @@ SC.Set = SC.mixin({},
 
     If the object is already in the set it will not be added again.
 
-    @param obj {Object} the object to add
+    @param {Object} obj the object to add
     @returns {SC.Set} receiver
   */
   add: function(obj) {
@@ -304,6 +304,7 @@ SC.Set = SC.mixin({},
   /**
     Add all the items in the passed array or enumerable
 
+    @param {Array} objects
     @returns {SC.Set} receiver
   */
   addEach: function(objects) {
@@ -333,7 +334,7 @@ SC.Set = SC.mixin({},
 
     If the object is not in the set, nothing will be changed.
 
-    @param obj {Object} the object to remove
+    @param {Object} obj the object to remove
     @returns {SC.Set} receiver
   */
   remove: function(obj) {
@@ -389,6 +390,7 @@ SC.Set = SC.mixin({},
   /**
     Removes all the items in the passed array.
 
+    @param {Array} objects
     @returns {SC.Set} receiver
   */
   removeEach: function(objects) {
