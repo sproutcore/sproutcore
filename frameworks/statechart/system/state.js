@@ -822,7 +822,7 @@ SC.State = SC.Object.extend({
     
     @see #enterState
   */
-  willEnterState: function() { },
+  stateWillBecomeEntered: function() { },
   
   /**
     Notification called just after enterState is invoked. 
@@ -832,7 +832,7 @@ SC.State = SC.Object.extend({
     
     @see #enterState
   */
-  didEnterState: function() { 
+  stateDidBecomeEntered: function() { 
     this._setupAllStateObserveHandlers();
   },
   
@@ -872,7 +872,7 @@ SC.State = SC.Object.extend({
     
     @see #exitState
   */
-  willExitState: function() { 
+  stateWillBecomeExited: function() { 
     this._teardownAllStateObserveHandlers();
   },
   
@@ -884,7 +884,7 @@ SC.State = SC.Object.extend({
     
     @see #exitState
   */
-  didExitState: function() { },
+  stateDidBecomeExited: function() { },
   
   /** @private 
   
