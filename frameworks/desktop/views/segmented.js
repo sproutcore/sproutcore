@@ -34,7 +34,7 @@
   | *itemIconKey*  | an icon |
   | *itemActionKey* | an optional action to fire when pressed |
   | *itemTargetKey* | an optional target for the action |
-  | *segmentViewClass* | an optional target for the action |
+  | *segmentViewClass* | class that is used for creating segments |
 
   @extends SC.View
   @since SproutCore 1.0
