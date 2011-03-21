@@ -11,19 +11,18 @@ var pane, view1, view2, view3, view4;
 module("SC.offset", {
 
   setup: function() {
-    htmlbody('<style> body { height: 1500px; width: 1500px; } </style>');
-
-    var viewportEl;
+    htmlbody('<style> .sc-main { height: 2500px; width: 2500px; } </style>');
 
     SC.RunLoop.begin();
 
     // Even though a full SC app doesn't really allow the viewport to be scaled or scrolled by default (thus
     // the offset by viewport will always equal offset by document), we simulate an app that uses a
     // scrollable viewport to test the validity of the functions.
+    var viewportEl;
     if (SC.browser.mobileSafari) {
       viewportEl = $("[name='viewport']")[0];
 
-      viewportEl.setAttribute('content','initial-scale=0.9, minimum-scale=0.5, maximum-scale=1.2, user-scalable=yes, width=device-height');
+      viewportEl.setAttribute('content','initial-scale=0.8, minimum-scale=0.5, maximum-scale=1.2, user-scalable=yes, width=device-height');
     }
 
     pane = SC.MainPane.create({
