@@ -4,6 +4,11 @@ SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
   /**
+    Set to YES to indicate the view has visibility support added.
+  */
+  hasVisibility: YES,
+
+  /**
     YES only if the view and all of its parent views are currently visible
     in the window.  This property is used to optimize certain behaviors in
     the view.  For example, updates to the view layer are not performed

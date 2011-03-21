@@ -1186,6 +1186,11 @@ SC.CoreView.reopen(
 
     // Now add this to the attributes and create.
     if (view.isClass) { view = view.create(attrs); }
+
+    if (view.hasVisibility) {
+      view.set('isVisibleInWindow', this.get('isVisibleInWindow'));
+    }
+
     return view ;
   },
 
