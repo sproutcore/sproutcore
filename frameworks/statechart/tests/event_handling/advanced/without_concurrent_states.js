@@ -9,11 +9,7 @@ var statechart3 = null;
 var statechart4 = null;
 var TestState = null;
 
-// ..........................................................
-// CONTENT CHANGING
-// 
-
-module("SC.Statechart: No Concurrent States - Advanced Event Handling Tests", {
+module("Ki.Statechart: No Concurrent States - Advanced Event Handling Tests", {
   setup: function() {
     
     TestState = SC.State.extend({

@@ -5,10 +5,6 @@
 
 var statechart1, statechart2, statechart3, statechart4;
 
-// ..........................................................
-// CONTENT CHANGING
-// 
-
 module("SC.Statechart: Namespace - Access Substate Tests", {
   setup: function() {
     

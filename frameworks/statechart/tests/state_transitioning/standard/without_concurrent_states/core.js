@@ -4,10 +4,9 @@
 /*globals SC */
 
 var statechart = null;
-
-// ..........................................................
-// CONTENT CHANGING
-// 
+var root, stateA, stateB, stateC, stateD, stateE, stateF, stateG, stateH; 
+var stateI, stateJ, stateK, stateL, stateM, stateN, monitor;
+var allState;
 
 module("SC.Statechart: No Concurrent States - Goto State Tests", {
   setup: function() {
@@ -61,15 +60,34 @@ module("SC.Statechart: No Concurrent States - Goto State Tests", {
     });
     
     statechart.initStatechart();
+    
+    monitor = statechart.get('monitor');
+    root = statechart.get('rootState');
+    stateA = statechart.getState('a');
+    stateB = statechart.getState('b');
+    stateC = statechart.getState('c');
+    stateD = statechart.getState('d');
+    stateE = statechart.getState('e');
+    stateF = statechart.getState('f');
+    stateG = statechart.getState('g');
+    stateH = statechart.getState('h');
+    stateI = statechart.getState('i');
+    stateJ = statechart.getState('j');
+    stateK = statechart.getState('k');
+    stateL = statechart.getState('l');
+    stateM = statechart.getState('m');
+    stateN = statechart.getState('n');
   },
   
   teardown: function() {
     statechart.destroy();
+    statechart = monitor = root = null;
+    stateA = stateB = stateC = stateD = stateE = stateF = stateG = stateH = stateI = stateJ = null;
+    stateK = stateL = stateM = stateN = null;
   }
 });
 
 test("check statechart state objects", function() {
-  var stateG = statechart.getState('g');
   equals(SC.none(stateG), false, 'statechart should return a state object for state with name "g"');
   equals(stateG.get('name'), 'g', 'state g should have name "g"');
   equals(stateG.get('isCurrentState'), true, 'state G should be current state');
@@ -77,7 +95,6 @@ test("check statechart state objects", function() {
   equals(statechart.stateIsCurrentState('g'), true, 'statechart should have current state g');
   equals(statechart.stateIsCurrentState(stateG), true, 'statechart should have current state g');
   
-  var stateM = statechart.getState('m');
   equals(SC.none(stateM), false, 'statechart should return a state object for state with name "m"');
   equals(stateM.get('name'), 'm', 'state m should have name "m"');
   equals(stateM.get('isCurrentState'), false, 'state m should not be current state');
@@ -85,7 +102,6 @@ test("check statechart state objects", function() {
   equals(statechart.stateIsCurrentState('m'), false, 'statechart should not have current state m');
   equals(statechart.stateIsCurrentState(stateM), false, 'statechart should not have current state m');
   
-  var stateA = statechart.getState('a');
   equals(SC.none(stateA), false, 'statechart should return a state object for state with name "a"');
   equals(stateA.get('isCurrentState'), false, 'state m should not be current state');
   equals(stateA.stateIsCurrentSubstate('a'), false, 'state a should not have current substate g');
@@ -99,29 +115,31 @@ test("check statechart state objects", function() {
 });
 
 test("check statechart initialization", function() {
-  var monitor = statechart.get('monitor');
-  var root = statechart.get('rootState');
   equals(monitor.get('length'), 4, 'initial state sequence should be of length 4');
   equals(monitor.matchSequence().begin().entered(root, 'a', 'c', 'g').end(), true, 'initial sequence should be entered[ROOT, a, c, g]');
   equals(monitor.matchSequence().begin().entered(root, 'a', 'c', 'h').end(), false, 'initial sequence should not be entered[ROOT, a, c, h]');
+  
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('g'), true, 'current state should be g');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'c', 'g'), 'states root, A, C and G should all be entered');
 });
 
 test("go to state h", function() {
-  var monitor = statechart.get('monitor');
   monitor.reset();
   statechart.gotoState('h');
   
   equals(monitor.get('length'), 2, 'state sequence should be of length 2');
   equals(monitor.matchSequence().begin().exited('g').entered('h').end(), true, 'sequence should be exited[g], entered[h]');
   equals(monitor.matchSequence().begin().exited('h').entered('g').end(), false, 'sequence should not be exited[h], entered[g]');
+  
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('h'), true, 'current state should be h');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'c', 'h'), 'states root, A, C and H should all be entered');
 });
 
 test("go to states: h, d", function() {
-  var monitor = statechart.get('monitor');
   statechart.gotoState('h');
   
   monitor.reset();
@@ -133,10 +151,11 @@ test("go to states: h, d", function() {
   equals(monitor.matchSequence().begin().exited('g', 'c').entered('d', 'i').end(), false, 'sequence should not be exited[g, c], entered[d, f]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('i'), true, 'current state should be i');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'd', 'i'), 'states root, A, D and I should all be entered');
 });
 
 test("go to states: h, d, h", function() {
-  var monitor = statechart.get('monitor');
   statechart.gotoState('h');
   statechart.gotoState('d');
   
@@ -147,10 +166,11 @@ test("go to states: h, d, h", function() {
   equals(monitor.matchSequence().begin().exited('i', 'd').entered('c', 'h').end(), true, 'sequence should be exited[i, d], entered[c, h]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('h'), true, 'current state should be h');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'c', 'h'), 'states root, A, C and H should all be entered');
 });
 
 test("go to state b", function() {
-  var monitor = statechart.get('monitor');
   monitor.reset();
   statechart.gotoState('b');
   
@@ -160,10 +180,11 @@ test("go to state b", function() {
   equals(monitor.matchSequence().begin().exited('g', 'c', 'a').entered('b', 'k', 'e').end(), false, 'sequence should not be exited[g, c, a], entered[b, k, e]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('k'), true, 'current state should be k');
+  
+  ok(monitor.matchEnteredStates(root, 'b', 'e', 'k'), 'states root, B, E and K should all be entered');
 });
 
 test("go to state f", function() {
-  var monitor = statechart.get('monitor');
   monitor.reset();
   statechart.gotoState('f');
   
@@ -171,10 +192,11 @@ test("go to state f", function() {
   equals(monitor.matchSequence().begin().exited('g', 'c', 'a').entered('b', 'f', 'm').end(), true, 'sequence should be exited[g, c, a], entered[b, f, m]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('m'), true, 'current state should be m');
+  
+  ok(monitor.matchEnteredStates(root, 'b', 'f', 'm'), 'states root, B, F and M should all be entered');
 });
 
-test("go to state m", function() {
-  var monitor = statechart.get('monitor');
+test("go to state n", function() {
   monitor.reset();
   statechart.gotoState('n');
   
@@ -182,10 +204,11 @@ test("go to state m", function() {
   equals(monitor.matchSequence().begin().exited('g', 'c', 'a').entered('b', 'f', 'n').end(), true, 'sequence should be exited[g, c, a], entered[b, f, n]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('n'), true, 'current state should be n');
+  
+  ok(monitor.matchEnteredStates(root, 'b', 'f', 'n'), 'states root, B, F and N should all be entered');
 });
 
 test("re-enter state g", function() {
-  var monitor = statechart.get('monitor');
   monitor.reset();
   statechart.gotoState('g');
   
@@ -204,10 +227,11 @@ test("re-enter state g", function() {
   equals(monitor.matchSequence().begin().exited('g').entered('g').end(), true, 'sequence should be exited[g], entered[g]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('g'), true, 'current state should be g');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'c', 'g'), 'states root, A, C and G should all be entered');
 }); 
 
 test("go to g state's ancestor state a", function() {
-  var monitor = statechart.get('monitor');
   monitor.reset();
   statechart.gotoState('a');
   
@@ -215,10 +239,11 @@ test("go to g state's ancestor state a", function() {
   equals(monitor.matchSequence().begin().exited('g', 'c', 'a').entered('a', 'c', 'g').end(), true, 'sequence should be exited[g, c, a], entered[a, c, g]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('g'), true, 'current state should be g');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'c', 'g'), 'states root, A, C and G should all be entered');
 });
 
 test("go to state b and then go to root state", function() {
-  var monitor = statechart.get('monitor');
   statechart.gotoState('b');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('k'), true, 'current state should be k');
@@ -232,13 +257,11 @@ test("go to state b and then go to root state", function() {
         true, 'sequence should be exited[k, e, b, ROOT], entered[ROOT, a, c, g]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('g'), true, 'current state should be g');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'c', 'g'), 'states root, A, C and G should all be entered');
 });
 
 test("from state g, go to state m calling state g\'s gotoState", function() {
-  var monitor = statechart.get('monitor');
-  var stateG = statechart.getState('g'),
-      stateM = statechart.getState('m');
-  
   equals(stateG.get('isCurrentState'), true, 'state g should be current state');
   equals(stateM.get('isCurrentState'), false, 'state m should not be current state');
   
@@ -253,4 +276,6 @@ test("from state g, go to state m calling state g\'s gotoState", function() {
   
   equals(stateG.get('isCurrentState'), false, 'state g should not be current state');
   equals(stateM.get('isCurrentState'), true, 'state m should be current state');
+  
+  ok(monitor.matchEnteredStates(root, 'b', 'f', 'm'), 'states root, B, F and M should all be entered');
 });

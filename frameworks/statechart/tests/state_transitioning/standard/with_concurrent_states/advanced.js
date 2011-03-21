@@ -4,6 +4,9 @@
 /*globals SC */
 
 var statechart = null;
+var monitor, root, stateA, stateB, stateC, stateD, stateE, stateF, stateG;
+var stateH, stateI, stateJ, stateK, stateL, stateM, stateN, stateO, stateP;
+var stateQ, stateR, stateS, stateZ;
 
 // ..........................................................
 // CONTENT CHANGING
@@ -74,21 +77,40 @@ module("SC.Statechart: With Concurrent States - Goto State Advanced Tests", {
     });
     
     statechart.initStatechart();
+    
+    monitor = statechart.get('monitor');
+    root = statechart.get('rootState');
+    stateA = statechart.getState('a');
+    stateB = statechart.getState('b');
+    stateC = statechart.getState('c');
+    stateD = statechart.getState('d');
+    stateE = statechart.getState('e');
+    stateF = statechart.getState('f');
+    stateG = statechart.getState('g');
+    stateH = statechart.getState('h');
+    stateI = statechart.getState('i');
+    stateJ = statechart.getState('j');
+    stateK = statechart.getState('k');
+    stateL = statechart.getState('l');
+    stateM = statechart.getState('m');
+    stateN = statechart.getState('n');
+    stateO = statechart.getState('o');
+    stateP = statechart.getState('p');
+    stateQ = statechart.getState('q');
+    stateR = statechart.getState('r');
+    stateS = statechart.getState('s');
+    stateZ = statechart.getState('z');
   },
   
   teardown: function() {
     statechart.destroy();
+    monitor = root = stateA = stateB = stateC = stateD = stateE = stateF = stateG = null;
+    stateH = stateI = stateJ = stateK = stateL = stateM = stateN = stateO = stateP = null;
+    stateQ = stateR = stateS = stateZ = null;
   }
 });
 
 test("check statechart initialization", function() {
-  var monitor = statechart.get('monitor'),
-      root = statechart.get('rootState'), 
-      stateA = statechart.getState('a'),
-      stateC = statechart.getState('c'),
-      stateF = statechart.getState('f'),
-      stateG = statechart.getState('g');
-  
   equals(monitor.get('length'), 10, 'initial state sequence should be of length 10');
   equals(monitor.matchSequence().begin().entered(root, 'a', 'b', 'd', 'c', 'f', 'h', 'l', 'i', 'n').end(), true, 
          'initial sequence should be entered[ROOT, a, b, d, c, f, h, l, i, n]');
@@ -119,16 +141,11 @@ test("check statechart initialization", function() {
   equals(stateF.stateIsCurrentSubstate('n'), true, 'state f\'s current substate should be state n');
   
   equals(stateG.getPath('currentSubstates.length'), 0, 'state g should have no current substates');  
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'b', 'd', 'c', 'f', 'h', 'i', 'l', 'n'), 'states root, A, B, C, D, F, H, I, L and N should all be entered');
 });
 
 test("from state l, go to state g", function() {
-  var monitor = statechart.get('monitor'),
-      stateL = statechart.getState('l'), 
-      stateA = statechart.getState('a'),
-      stateC = statechart.getState('c'),
-      stateF = statechart.getState('f'),
-      stateG = statechart.getState('g');
-  
   monitor.reset();
   stateL.gotoState('g');
   
@@ -161,17 +178,11 @@ test("from state l, go to state g", function() {
   equals(stateG.getPath('currentSubstates.length'), 2, 'state g should have 2 current substates');
   equals(stateG.stateIsCurrentSubstate('p'), true, 'state g\'s current substate should be state p');
   equals(stateG.stateIsCurrentSubstate('r'), true, 'state g\'s current substate should be state r');
+  
+  ok(monitor.matchEnteredStates(root, 'a', 'b', 'd', 'c', 'g', 'j', 'k', 'p', 'r'), 'states root, A, B, C, D, G, J, K, P and R should all be entered');
 });
 
 test('from state l, go to state z', function() {
-  var monitor = statechart.get('monitor'),
-      stateL = statechart.getState('l'), 
-      stateA = statechart.getState('a'),
-      stateB = statechart.getState('b'),
-      stateC = statechart.getState('c'),
-      stateF = statechart.getState('f'),
-      stateG = statechart.getState('g');
-  
   monitor.reset();
   stateL.gotoState('z');
   
@@ -194,19 +205,11 @@ test('from state l, go to state z', function() {
    equals(stateC.getPath('currentSubstates.length'), 0, 'state c should have no current substates');
    equals(stateF.getPath('currentSubstates.length'), 0, 'state f should have no current substates');
    equals(stateG.getPath('currentSubstates.length'), 0, 'state g should have no current substates');
+   
+   ok(monitor.matchEnteredStates(root, 'z'), 'states root and Z should all be entered');
 });
 
 test('from state l, go to state z, and then go to state s', function() {
-  var monitor = statechart.get('monitor'),
-      stateL = statechart.getState('l'),
-      stateZ = statechart.getState('z'),
-      stateS = statechart.getState('s'), 
-      stateA = statechart.getState('a'),
-      stateB = statechart.getState('b'),
-      stateC = statechart.getState('c'),
-      stateF = statechart.getState('f'),
-      stateG = statechart.getState('g');
-  
   stateL.gotoState('z');
   
   monitor.reset();
@@ -231,4 +234,6 @@ test('from state l, go to state z, and then go to state s', function() {
    equals(stateC.getPath('currentSubstates.length'), 2, 'state c should have 2 current substates');
    equals(stateF.getPath('currentSubstates.length'), 0, 'state f should have no current substates');
    equals(stateG.getPath('currentSubstates.length'), 2, 'state g should have 2 current substates');
+   
+   ok(monitor.matchEnteredStates(root, 'a', 'b', 'd', 'c', 'g', 'j', 'k', 'p', 's'), 'states root, A, B, C, D, G, J, K, P and S should all be entered');
 });

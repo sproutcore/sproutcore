@@ -7,11 +7,7 @@ var statechart = null;
 externalState1 = null;
 externalState2 = null;
 
-// ..........................................................
-// CONTENT CHANGING
-// 
-
-module("SC.Statechart Mixin: Basic Unit test", {
+module("SC.State.plugin: Nest States Tests", {
   setup: function() {
     
     externalState1 = SC.State.extend({
