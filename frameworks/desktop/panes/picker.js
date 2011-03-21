@@ -262,6 +262,37 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     @property Number
   */
   extraRightOffset: 0,
+  
+  /**
+    The target object to invoke the remove action on when the user clicks off the 
+    picker that is to be removed.
+
+    If you set this target, the action will be called on the target object
+    directly when the user clicks off the picker. If you leave this property 
+    set to null, then the button will search the responder chain for a view that
+    implements the action when the button is pressed instead.
+
+    @property {Object}
+  */
+  removeTarget: null,
+  
+  /**
+    The name of the action you want triggered when the user clicks off the
+    picker pane that is to be removed. 
+    
+    This property is used in conjunction with the removeTarget property to execute
+    a method when the user clicks off the picker pane.  
+
+    If you do not set a target, then clicking off the picker pane will cause the
+    responder chain to search for a view that implements the action you name
+    here, if one was provided. 
+    
+    Note that this property is optional. If no explicit value is provided then the 
+    picker pane will perform the default action which is to simply remove itself.
+
+    @property {String}
+  */
+  removeAction: null,
 
   /**
     Displays a new picker pane according to the passed parameters.
@@ -706,8 +737,17 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
 
   /** @private - click away picker. */
   modalPaneDidClick: function(evt) {
-    var f = this.get("frame");
-    if(!this.clickInside(f, evt)) this.remove();
+    var f = this.get('frame'),
+        target = this.get('removeTarget') || null,
+        action = this.get('removeAction'),
+        rootResponder = this.get('rootResponder');
+        
+    if (!this.clickInside(f, evt)) {
+      if (action) {
+        rootResponder.sendAction(action, target, this, this, null, this);
+      } else this.remove();
+    }
+    
     return YES ; 
   },
 
