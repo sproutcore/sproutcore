@@ -11,6 +11,7 @@ var pane, view1, view2, view3, view4;
 module("SC.offset", {
 
   setup: function() {
+
     htmlbody('<style> .sc-main { height: 2500px; width: 2500px; } </style>');
 
     SC.RunLoop.begin();
@@ -131,6 +132,8 @@ test("A regular view not visible within the visual viewport", function() {
 });
 
 function testPosition4(element1, element2, element3, element4) {
+  window.scrollTo(100, 100);
+
   checkDocumentOffset(element1, 20, 20);
   checkViewportOffset(element1, -80, -80);
   checkParentOffset(element1, 20, 20);
@@ -151,6 +154,8 @@ function testPosition4(element1, element2, element3, element4) {
 }
 
 function testPosition3(element1, element2, element3, element4) {
+  window.scrollTo(10, 100);
+
   checkDocumentOffset(element1, 20, 20);
   checkViewportOffset(element1, -80, 10);
   checkParentOffset(element1, 20, 20);
@@ -171,6 +176,9 @@ function testPosition3(element1, element2, element3, element4) {
 }
 
 function testPosition2(element1, element2, element3, element4) {
+
+  window.scrollTo(10, 10);
+
   checkDocumentOffset(element1, 20, 20);
   checkViewportOffset(element1, 10, 10);
   checkParentOffset(element1, 20, 20);
