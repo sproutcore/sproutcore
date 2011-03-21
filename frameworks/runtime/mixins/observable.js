@@ -909,8 +909,10 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     @returns {Array} array of Observer objects, describing the observer.
   */
   observersForKey: function(key) {
-    var observers = this._kvo_for('_kvo_observers', key) ;
-    return observers.getMembers() ;
+    SC.Observers.flush(this) ; // hookup as many observers as possible.
+
+    var observers = this[SC.keyFor('_kvo_observers', key)];
+    return observers ? observers.getMembers() : [];
   },
 
   // this private method actually notifies the observers for any keys in the
