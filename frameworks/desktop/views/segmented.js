@@ -34,7 +34,7 @@
   | *itemIconKey*  | an icon |
   | *itemActionKey* | an optional action to fire when pressed |
   | *itemTargetKey* | an optional target for the action |
-  | *segmentViewClass* | class that is used for creating segments |
+  | *segmentViewClass* | class to be used for creating segments |
 
   @extends SC.View
   @since SproutCore 1.0
@@ -193,14 +193,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {String}
   */
   overflowIcon: null,
- 
+
   /**
-    The view class to use when create segments.
-    
-    @property {SC.View}   
-  */                               
+    The view class used when creating segments.
+
+    @property {SC.View}
+  */
   segmentViewClass: SC.SegmentView,
-  
+
 
   /** @private
     The following properties are used to map items to child views. Item keys
