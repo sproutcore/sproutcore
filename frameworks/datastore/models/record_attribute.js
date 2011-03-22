@@ -140,7 +140,7 @@ SC.RecordAttribute = SC.Object.extend(
     class, returns the type unchanged.  Otherwise attempts to lookup the 
     type as a property path.
     
-    @field
+    @property
     @type Object
     @default String
   */
@@ -155,7 +155,7 @@ SC.RecordAttribute = SC.Object.extend(
     registered using registerTransform for this attribute's type, otherwise
     defaults to using the default transform for String.
     
-    @field
+    @property
     @type Transform
   */
   transform: function() {
