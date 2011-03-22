@@ -954,15 +954,15 @@ SC.CoreView.reopen(
     Computes the frame of the view by examining the view's DOM representation.
     If no representation exists, returns null.
 
-    If a parent view is passed, its bounds will be taken into account when
+    If the view has a parent view, the parent's bounds will be taken into account when
     calculating the frame.
 
-    @param {Rect} pdim the parent view's dimensions
     @returns {Rect} the computed frame
   */
-  computeFrameWithParentFrame: function(pdim) {
-    var layer;
-    var pv = this.get('parentView');
+  computeFrameWithParentFrame: function() {
+    var layer,                            // The view's layer
+        pv = this.get('parentView'),      // The view's parent view (if it exists)
+        f;                                // The layer's coordinates in the document
 
     // need layer to be able to compute rect
     if (layer = this.get('layer')) {
