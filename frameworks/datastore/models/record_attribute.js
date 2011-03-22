@@ -41,6 +41,8 @@ sc_require('models/record');
   
   @extends SC.Object
   @see SC.Record
+  @see SC.ManyAttribute
+  @see SC.SingleAttribute
   @since SproutCore 1.0
 */
 SC.RecordAttribute = SC.Object.extend(
