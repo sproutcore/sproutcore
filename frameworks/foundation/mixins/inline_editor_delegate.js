@@ -50,7 +50,7 @@ SC.InlineEditorDelegate = {
     
     var el = view.$(),
         value = view.get('value') || '',
-        f = SC.viewportOffset(el[0]),
+        f = SC.offset(el[0]),
         frameTemp = view.convertFrameFromView(view.get('frame'), null),
         exampleEditor = this.get('exampleInlineTextFieldView');
         f.width=frameTemp.width;

@@ -53,7 +53,7 @@ pane.resetView = function(view) {
 
 optionsForLabelFromView = function(view) {
   var el = view.$(),
-  f = SC.viewportOffset(el[0]),
+  f = SC.offset(el[0]),
   frameTemp = view.convertFrameFromView(view.get('frame'), null);
 
   f.width = frameTemp.width;
@@ -220,7 +220,7 @@ function() {
 
 test("inline editor does not display the defaultValue if the label's value is the number 0",
 function() {
-  var view1 = pane.view('label1');;
+  var view1 = pane.view('label1');
   view1.set('value', 0);
   optionsForLabel1 = optionsForLabelFromView(view1);
 

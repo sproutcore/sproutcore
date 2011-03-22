@@ -2,7 +2,7 @@
 // SC Miscellaneous Utils Tests - documentOffset
 // ========================================================================
 
-/*global module test htmlbody ok equals same */
+/*global module test htmlbody clearHtmlbody ok equals same */
 
 var pane, view1, view2, view3, view4;
 
@@ -85,22 +85,22 @@ module("SC.offset", {
 function checkDocumentOffset(element, top, left) {
   var docOffset = SC.offset(element, 'document');
 
-  equals(docOffset.top, top, '%@ document offset top'.fmt(element[0].className));
-  equals(docOffset.left, left, '%@ document offset left'.fmt(element[0].className));
+  equals(docOffset.y, top, '%@ document offset top'.fmt(element[0].className));
+  equals(docOffset.x, left, '%@ document offset left'.fmt(element[0].className));
 }
 
 function checkViewportOffset(element, top, left) {
   var viewOffset = SC.offset(element, 'viewport');
 
-  equals(viewOffset.top, top, '%@ viewport offset top'.fmt(element[0].className));
-  equals(viewOffset.left, left, '%@ viewport offset left'.fmt(element[0].className));
+  equals(viewOffset.y, top, '%@ viewport offset top'.fmt(element[0].className));
+  equals(viewOffset.x, left, '%@ viewport offset left'.fmt(element[0].className));
 }
 
 function checkParentOffset(element, top, left) {
   var parentOffset = SC.offset(element, 'parent');
 
-  equals(parentOffset.top, top, '%@ parent offset top'.fmt(element[0].className));
-  equals(parentOffset.left, left, '%@ parent offset left'.fmt(element[0].className));
+  equals(parentOffset.y, top, '%@ parent offset top'.fmt(element[0].className));
+  equals(parentOffset.x, left, '%@ parent offset left'.fmt(element[0].className));
 }
 
 test("Regular views", function() {

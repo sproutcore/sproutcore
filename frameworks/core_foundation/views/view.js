@@ -966,7 +966,7 @@ SC.CoreView.reopen(
 
     // need layer to be able to compute rect
     if (layer = this.get('layer')) {
-      f = SC.viewportOffset(layer); // x,y
+      f = SC.offset(layer); // x,y
       if (pv) { f = pv.convertFrameFromView(f, null); }
 
       /*

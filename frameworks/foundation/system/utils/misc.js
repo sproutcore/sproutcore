@@ -111,22 +111,22 @@ SC.mixin( /** @scope SC */ {
       height = elem.innerHeight();
 
       // Adjust offset to account for top & left borders
-      offset.top += window.parseInt(elem.css('border-top-width').replace('px', ''));
-      offset.left += window.parseInt(elem.css('border-left-width').replace('px', ''));
+      offset.x += window.parseInt(elem.css('border-top-width').replace('px', ''));
+      offset.y += window.parseInt(elem.css('border-left-width').replace('px', ''));
     } else {
       width = elem.outerWidth(includeFlag === 'margin');
       height = elem.outerHeight(includeFlag === 'margin');
 
       if (includeFlag === 'margin') {
         // Adjust offset to account for top & left margins
-        offset.top -= window.parseInt(elem.css('margin-top').replace('px', ''));
-        offset.left -= window.parseInt(elem.css('margin-left').replace('px', ''));
+        offset.x -= window.parseInt(elem.css('margin-top').replace('px', ''));
+        offset.y -= window.parseInt(elem.css('margin-left').replace('px', ''));
       }
     }
 
     rect = {
-      x: offset.left,
-      y: offset.top,
+      x: offset.x,
+      y: offset.y,
       width: width,
       height: height
     };
