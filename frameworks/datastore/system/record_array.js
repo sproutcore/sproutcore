@@ -23,7 +23,8 @@ sc_require('models/record');
   The information below about RecordArray internals is only intended for those
   who need to override this class for some reason to do something special.
   
-  h2. Internal Notes
+  Internal Notes
+  ---
   
   Normally the RecordArray behavior is very simple.  Any array-like operations
   will be translated into similar calls onto the underlying array of 
@@ -61,7 +62,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     NOTE: You MUST set this property on the RecordArray when creating it or 
     else it will fail.
   
-    @property {SC.Store}
+    @type SC.Store
   */
   store: null,
 
@@ -73,14 +74,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     NOTE: You MUST set this property on the RecordArray when creating it or 
     else it will fail.
     
-    @property {SC.Query}
+    @type SC.Query
   */
   query: null,
 
   /**
     The array of storeKeys as retrieved from the owner store.
     
-    @property {SC.Array}
+    @type SC.Array
   */
   storeKeys: null,
 
@@ -88,14 +89,15 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     The current status for the record array.  Read from the underlying 
     store.
     
-    @property {Number}
+    @type Number
   */
   status: SC.Record.EMPTY,
   
   /**
     The current editabile state based on the query.
     
-    @property {Boolean}
+		@property
+    @type Boolean
   */
   isEditable: function() {
     var query = this.get('query');
@@ -108,6 +110,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /** @private
     Returned length is a pass-through to the storeKeys array.
+		@property
   */
   length: function() {
     this.flush(); // cleanup pending changes
@@ -214,7 +217,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns YES if the passed can be found in the record array.  This is 
     provided for compatibility with SC.Set.
     
-    @param {SC.Record} record the record
+    @param {SC.Record} record
     @returns {Boolean}
   */
   contains: function(record) {
@@ -224,7 +227,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private
     Returns the first index where the specified record is found.
     
-    @param {SC.Record} record the record
+    @param {SC.Record} record
     @param {Number} startAt optional starting index
     @returns {Number} index
   */
@@ -245,7 +248,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private 
     Returns the last index where the specified record is found.
     
-    @param {SC.Record} record the record
+    @param {SC.Record} record
     @param {Number} startAt optional starting index
     @returns {Number} index
   */
@@ -297,6 +300,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     on a Query if you pass it in.
     
     @param {SC.Query} query a SC.Query object
+		@param {Object} target the target object to use
+		
     @returns {SC.RecordArray} 
   */
   find: function(query, target) {
@@ -605,7 +610,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     before returning any results.  RecordArrays always start dirty and become
     clean the first time you try to access their contents.
     
-    @property {Boolean}
+    @type Boolean
   */
   needsFlush: YES,
 
@@ -617,7 +622,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns YES whenever the status is SC.Record.ERROR.  This will allow you 
     to put the UI into an error state.
     
-    @property {Boolean}
+		@property
+    @type Boolean
   */
   isError: function() {
     return this.get('status') & SC.Record.ERROR;
@@ -627,7 +633,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns the receiver if the record array is in an error state.  Returns null
     otherwise.
     
-    @property {SC.Record}
+		@property
+    @type SC.Record
   */
   errorValue: function() {
     return this.get('isError') ? SC.val(this.get('errorObject')) : null ;
@@ -637,7 +644,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns the current error object only if the record array is in an error state.
     If no explicit error object has been set, returns SC.Record.GENERIC_ERROR.
     
-    @property {SC.Error}
+		@property
+    @type SC.Error
   */
   errorObject: function() {
     if (this.get('isError')) {
@@ -690,12 +698,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
 });
 
-SC.RecordArray.mixin({  
+SC.RecordArray.mixin(/** @scope SC.RecordArray.prototype */{  
   
   /** 
     Standard error throw when you try to modify a record that is not editable
     
-    @property {SC.Error}
+    @type SC.Error
   */
   NOT_EDITABLE: SC.Error.desc("SC.RecordArray is not editable"),
   
@@ -704,7 +712,7 @@ SC.RecordArray.mixin({
     is exceeded, the query matching will be paced so as to not lock up the 
     browser (by essentially splitting the work with a setTimeout)
     
-    @property {Number}
+    @type Number
   */
   QUERY_MATCHING_THRESHOLD: 100
 });

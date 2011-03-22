@@ -32,7 +32,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     An (optional) name of the store, which can be useful during debugging,
     especially if you have multiple nested stores.
     
-    @property {String}
+    @type String
   */
   name: null,
 
@@ -40,7 +40,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     An array of all the chained stores that current rely on the receiver 
     store.
     
-    @property {Array}
+    @type Array
   */
   nestedStores: null,
 
@@ -49,21 +49,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     store and save changes.  You normally will set your data source when you
     first create your store in your application.
     
-    @property {SC.DataSource}
+    @type SC.DataSource
   */
   dataSource: null,
   
   /**
     This type of store is not nested.
     
-    @property {Boolean}
+		@default NO
+    @type Boolean
   */
   isNested: NO,
   
   /**
     This type of store is not nested.
     
-    @property {Boolean}
+		@default NO
+    @type Boolean
   */
   commitRecordsAutomatically: NO,
   
@@ -124,11 +126,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changes, call commitChanges() or destroyChanges() and then destroy() when
     you are finished with the chained store altogether.
     
-    {{{
-      store = MyApp.store.chain();
-      .. edit edit edit
-      store.commitChanges().destroy();
-    }}}
+			      store = MyApp.store.chain();
+			      .. edit edit edit
+			      store.commitChanges().destroy();
     
     @param {Hash} attrs optional attributes to set on new store
     @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)
@@ -196,7 +196,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     Shared by a store and its child stores until you make edits to it.
     
-    @property {Hash}
+    @type Hash
   */
   dataHashes: null,
 
@@ -207,7 +207,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     Shared by a store and its child stores until you make edits to it.
     
-    @property {Hash}
+    @type Hash
   */
   statuses: null,
     
@@ -221,7 +221,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changed. A store shares the revisions data with its parent until it 
     starts to make changes to it.
     
-    @property {Hash}
+    @type Hash
   */
   revisions: null,
 
@@ -234,7 +234,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Note that this is kept as an array because it will be stored as a dense 
     array on some browsers, making it faster.
     
-    @property {Array}
+    @type Array
   */
   editables: null,
     
@@ -243,7 +243,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     you call commitRecords() without passing any other parameters, the keys
     in this set will be committed instead.
   
-    @property {SC.Set}
+    @type SC.Set
   */
   changelog: null,
   
@@ -254,7 +254,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Errors passed form the data source in the call to dataSourceDidError() are
     stored here.
     
-    @property {Array}
+    @type Array
   */
   recordErrors: null,
   
@@ -265,7 +265,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Errors passed from the data source in the call to dataSourceDidErrorQuery()
     are stored here.
     
-    @property {Hash}
+    @type Hash
   */
   queryErrors: null,
   
@@ -777,7 +777,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Finds a single record instance with the specified recordType and id or an 
     array of records matching some query conditions.
     
-    h2. Finding a Single Record
+    Finding a Single Record
+    ---
     
     If you pass a single recordType and id, this method will return an actual
     record instance.  If the record has not been loaded into the store yet,
@@ -791,7 +792,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     the status property to be notified when the record data is available for 
     you to use it.
     
-    h2. Find a Collection of Records
+    Find a Collection of Records
+    ---
     
     If you pass only a record type or a query object, you can instead find 
     all records matching a specified set of conditions.  When you call find()
@@ -806,33 +808,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     You can detect whether a RecordArray is fetching from the server by 
     checking its status.
     
-    h2. Examples
+    Examples
+    ---
     
     Finding a single record:
     
-    {{{
-      MyApp.store.find(MyApp.Contact, "23"); // returns MyApp.Contact
-    }}}
+		      MyApp.store.find(MyApp.Contact, "23"); // returns MyApp.Contact
     
     Finding all records of a particular type:
     
-    {{{
-      MyApp.store.find(MyApp.Contact); // returns SC.RecordArray of contacts
-    }}}
+		      MyApp.store.find(MyApp.Contact); // returns SC.RecordArray of contacts
+    
     
     Finding all contacts with first name John:
     
-    {{{
-      var query = SC.Query.local(MyApp.Contact, "firstName = %@", "John");
-      MyApp.store.find(query); // returns SC.RecordArray of contacts
-    }}}
+    		  var query = SC.Query.local(MyApp.Contact, "firstName = %@", "John");
+		      MyApp.store.find(query); // returns SC.RecordArray of contacts
     
     Finding all contacts using a remote query:
     
-    {{{
-      var query = SC.Query.remote(MyApp.Contact);
-      MyApp.store.find(query); // returns SC.RecordArray filled by server
-    }}}
+    		  var query = SC.Query.remote(MyApp.Contact);
+		      MyApp.store.find(query); // returns SC.RecordArray filled by server
     
     @param {SC.Record|String} recordType the expected record type
     @param {String} id the id to load
@@ -1399,6 +1395,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     function for retrieving a parent record key
+
+		@param {Number} storeKey The store key of the parent
   */
   parentStoreKeyExists: function(storeKey){
     if (SC.none(storeKey)) return ;
@@ -1749,7 +1747,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Set} storeKeys to commit
     @param {Hash} params optional additional parameters to pass along to the
       data source
-    @param {Function|Array} callback function or array of functions
+    @param {Function|Array} callback function or array of callbacks
     
     @returns {Boolean} if the action was succesful.
   */
@@ -1845,6 +1843,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the storeKey of the record to commit
     @param {Hash} params optional additonal params that will passed down
       to the data source
+    @param {Function|Array} callback function or array of functions
     @returns {Boolean} if the action was successful.
   */
   commitRecord: function(recordType, id, storeKey, params, callback) {
@@ -2590,13 +2589,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
 }) ;
 
-SC.Store.mixin({
+SC.Store.mixin(/** @scope SC.Store.prototype */{
   
   /**
     Standard error raised if you try to commit changes from a nested store
     and there is a conflict.
     
-    @property {Error}
+    @type Error
   */
   CHAIN_CONFLICT_ERROR: new Error("Nested Store Conflict"),
   
@@ -2604,7 +2603,7 @@ SC.Store.mixin({
     Standard error if you try to perform an operation on a nested store 
     without a parent.
   
-    @property {Error}
+    @type Error
   */
   NO_PARENT_STORE_ERROR: new Error("Parent Store Required"),
   
@@ -2612,7 +2611,7 @@ SC.Store.mixin({
     Standard error if you try to perform an operation on a nested store that
     is only supported in root stores.
     
-    @property {Error}
+    @type Error
   */
   NESTED_STORE_UNSUPPORTED_ERROR: new Error("Unsupported In Nested Store"),
   
@@ -2620,14 +2619,14 @@ SC.Store.mixin({
     Standard error if you try to retrieve a record in a nested store that is
     dirty.  (This is allowed on the main store, but not in nested stores.)
     
-    @property {Error}
+    @type Error
   */
   NESTED_STORE_RETRIEVE_DIRTY_ERROR: new Error("Cannot Retrieve Dirty Record in Nested Store"),
 
   /**
     Data hash state indicates the data hash is currently editable
     
-    @property {String}
+    @type String
   */
   EDITABLE:  'editable',
   
@@ -2635,7 +2634,7 @@ SC.Store.mixin({
     Data hash state indicates the hash no longer tracks changes from a 
     parent store, but it is not editable.
     
-    @property {String}
+    @type String
   */
   LOCKED:    'locked',
 
@@ -2643,7 +2642,7 @@ SC.Store.mixin({
     Data hash state indicates the hash is tracking changes from the parent
     store and is not editable.
     
-    @property {String}
+    @type String
   */
   INHERITED: 'inherited',
   
@@ -2679,7 +2678,7 @@ SC.Store.mixin({
   /**
     Generates a new store key for use.
     
-    @property {Number}
+    @type Number
   */
   generateStoreKey: function() { return this.nextStoreKey++; },
   
