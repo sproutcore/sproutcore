@@ -98,3 +98,34 @@ test("should add a 'hidden' class to template views if isVisible is false before
   SC.run(function() { view.set('isVisible', YES); });
   ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes");
 });
+
+test("should return an empty rect as its frame if no layer exists", function() {
+  var view = SC.TemplateView.create({
+    template: function() { return "foo"; }
+  });
+
+  var f = view.get('frame');
+  ok(f, "returns a frame object");
+  equals(f.width, 0, "returns 0 width");
+  equals(f.height, 0, "returns 0 height");
+});
+
+test("should invalidate frame cache when layer is created", function() {
+  var pane = SC.MainPane.create().append();
+
+  var view = SC.TemplateView.create({
+    template: function() { return "foo"; }
+  });
+
+  var f = view.get('frame');
+  ok(f, "precond - returns a frame object");
+  equals(f.width, 0, "returns zero width because there is no layer");
+
+  pane.appendChild(view);
+
+  f = view.get('frame');
+  ok(f, "returns frame object");
+  equals(f.width, view.$().width(), "returns non-zero width");
+  pane.remove();
+});
+

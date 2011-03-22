@@ -449,7 +449,11 @@ SC.CoreView.reopen(
     invokes the same on all child views.
   */
   _notifyDidCreateLayer: function() {
-    this.notifyPropertyChange("layer");
+    this.beginPropertyChanges();
+    this.notifyPropertyChange('layer');
+    this.notifyPropertyChange('frame');
+    this.endPropertyChanges();
+
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
     // and notify others
@@ -973,7 +977,13 @@ SC.CoreView.reopen(
       f.height = layer.offsetHeight;
       return f;
     }
-    return null; // can't compute
+
+    // Unable to compute yet
+    if (this.get('hasLayout')) {
+      return null;
+    } else {
+      return { x: 0, y: 0, width: 0, height: 0 };
+    }
   },
 
   /**
