@@ -4,7 +4,7 @@
     setup: function() {
       array = [1, 2, 3];
 
-      array.addEnumerableObserver(function(source, addedObjects, removedObjects) {
+      array.addEnumerableObserver(function(addedObjects, removedObjects, source) {
         callCount = callCount ? callCount++ : 1;
         added = addedObjects;
         removed = removedObjects;
@@ -49,5 +49,36 @@
     array.removeEnumerableObserver(observer);
     array.pushObject(5);
     ok(!called, "observer does not fire after being removed");
+  });
+
+  test("should include both added and removed objects", function() {
+    array.replace(1, 1, [6, 7, 8]);
+
+    shouldAddAndRemove([6, 7, 8], [2]);
+  });
+
+  test("should include enumerable as third parameter", function() {
+    var testArray = ["John", "Paul", "Peter", "George"];
+
+    testArray.addEnumerableObserver(function(added, removed, source) {
+      equals(testArray, source, "passes correct enumerable as source parameter");
+    });
+
+    testArray.replace(2, 1, "Ringo");
+  });
+
+  test("should take target and action as callback", function() {
+    var testArray = ["Davy", "Micky", "Peter"];
+    var callbackCalled = false;
+    var boyBandController = SC.Object.create({
+      boyBandDidChange: function(added, removed, source, context) {
+        callbackCalled = true;
+        equals(context, "foo", "passes optional third parameter as context");
+      }
+    });
+
+    testArray.addEnumerableObserver(boyBandController, "boyBandDidChange", "foo");
+    testArray.pushObject("Michael");
+    ok(callbackCalled, "calls callback on correct object");
   });
 })();

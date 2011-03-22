@@ -828,6 +828,15 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     return this ;
   },
 
+  /**
+    Called when the contents of the enumerable mutates.
+
+    Implementers of classes that mixin SC.Enumerable should ensure that they
+    call enumerableContentDidChange(), which invokes this method automatically.
+
+    @param {Array} addedObjects the array of objects that were added to the enumerable
+    @param {Array} removedObjects the array of objects that were removed from the enumerable
+  */
   _notifyEnumerableObservers: function(addedObjects, removedObjects) {
     var observers, members, member, memberLoc, membersLength;
     var target, method, context;
@@ -845,13 +854,37 @@ SC.Reducers = /** @lends SC.Enumerable */ {
         method = member[1];
         context = member[2];
 
-        method.call(target, this, addedObjects, removedObjects, context);
+        method.call(target, addedObjects, removedObjects, this, context);
       }
     }
   },
 
   /**
-    Adds an enumerable observer to the enumerable. Enumerable observers
+    Adds an enumerable observer to the enumerable.
+
+    Enumerable observers are called whenever the enumerable's content
+    mutates. For example, adding an object via pushObject(), or replacing
+    objects via replace(), will cause all enumerable observers to be fired.
+
+    Observer methods that you register should have the following signature:
+
+        enumerableDidChange: function(addedObjects, removedObjects, sender)
+
+    addedObjects will contain an array of the objects added and removedObjects
+    will contain an array of the objects that were removed. The third paramter
+    is the enumerable that mutated. This is useful if you register the same
+    observer method on multiple enumerables.
+
+    If you pass a context parameter to addEnumerableObserver(), it will be
+    included when the observer is fired:
+
+        function(addedObjects, removedObjects, sender, context);
+
+    @param {Object} target the target object to invoke
+    @param {String|Function} method the method to invoke
+    @param {Object} context optional context
+
+    @returns {SC.Object} self
   */
   addEnumerableObserver: function(target, method, context) {
     var observers;
@@ -879,8 +912,19 @@ SC.Reducers = /** @lends SC.Enumerable */ {
 
     observers = this._kvo_for('_kvo_enumerable_observers', SC.ObserverSet);
     observers.add(target, method, context);
+
+    return this;
   },
 
+  /**
+    Removes an enumerable observer. Expects the same target and method that
+    were used to register the observer.
+
+    @param {Object} target the target object to invoke
+    @param {String|Function} method the method to invoke
+
+    @returns {SC.Object} self
+  */
   removeEnumerableObserver: function(target, method) {
     var observers;
 
@@ -910,7 +954,7 @@ SC.Reducers = /** @lends SC.Enumerable */ {
     if (observers) {
       observers.remove(target, method);
     } else {
-      throw "%@: Can't remove observers if no observer has been added."
+      throw "%@: Can't remove observers if no observer has been added.";
     }
 
     return this;
