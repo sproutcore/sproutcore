@@ -90,7 +90,7 @@ SC.AutoResize = {
   initMixin: function() {
     // @if (debug)
     if (!this.get('supportsAutoResize')) {
-      throw "View `%@` does not support automatic resize. See documentation for SC.AutoResize";
+      throw "View `%@` does not support automatic resize. See documentation for SC.AutoResize".fmt(this);
     }
     // @endif
   },
@@ -123,8 +123,8 @@ SC.AutoResize = {
     // check if a request is out and the id changed
     if(this._scar_measurementPending && this._scar_requestedBatchResizeId !== batchResizeId) {
       // if so, cancel the old request and make a new one
-      SC.AutoResizeManager.cancelMeasurement(this, requestedBatchResizeId);
-      SC.AutoResizeManager.scheduleMeasurement(this, batchResizeId);
+      SC.AutoResizeManager.cancelMeasurementForView(this, requestedBatchResizeId);
+      SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
     }
   }.observes('batchResizeId'),
 
@@ -138,7 +138,7 @@ SC.AutoResize = {
     }
 
     var batchResizeId = this.get('batchResizeId');
-    SC.AutoResizeManager.scheduleMeasurement(this, batchResizeId);
+    SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
 
     this._scar_measurementPending = YES;
     this._scar_requestedBatchResizeId = batchResizeId;
@@ -176,7 +176,7 @@ SC.AutoResize = {
     }
 
     // metrics should include padding
-    autoSizePadding = this.get('autoResizePadding');
+    autoSizePadding = this.get('autoResizePadding') || 0;
     if(SC.typeOf(autoSizePadding) === SC.T_NUMBER) {
       paddingHeight = paddingWidth = autoSizePadding;
     } else {
