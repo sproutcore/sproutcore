@@ -64,48 +64,10 @@ SC.Handlebars.ViewHelper = SC.Object.create({
 
     var classBindings = options.classBinding;
     if (classBindings) {
-      this.addClassBindings(classBindings, childView, context);
+      SC.Handlebars.bindClasses(childView, classBindings).forEach(function(className) {
+        context.setClass(className, YES);
+      });
     }
-  },
-
-  addClassBindings: function(classBindings, view, context) {
-    var classObservers = view._classObservers;
-
-    // Teardown any existing observers on the view.
-    if (classObservers) {
-      for (var prop in classObservers) {
-        if (classObservers.hasOwnProperty(prop)) {
-          view.removeObserver(prop, classObservers[prop]);
-        }
-      }
-    }
-
-    classObservers = view._classObservers = {};
-
-    // For each property passed, loop through and setup
-    // an observer.
-    classBindings.split(' ').forEach(function(property) {
-      // Normalize property path to be suitable for use
-      // as a class name. For exaple, content.foo.barBaz
-      // becomes bar-baz.
-
-      var dasherizedProperty = property.split('.').get('lastObject');
-      dasherizedProperty = dasherizedProperty.dasherize();
-
-      // Set up an observer on the view. If the bound property
-      // changes, toggle the class name
-      var observer = classObservers[property] = function() {
-        var shouldDisplay = view.getPath(property);
-        var elem = view.$();
-
-        elem.toggleClass(dasherizedProperty, shouldDisplay);
-      };
-
-      view.addObserver(property, observer);
-
-      // Add the class name to the view
-      context.setClass(dasherizedProperty, view.getPath(property));
-    });
   }
 });
 

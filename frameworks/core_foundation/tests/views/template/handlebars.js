@@ -578,3 +578,25 @@ test("should be able to bind boolean element attributes using {{bindAttr}}", fun
   ok(view.$('input').attr('disabled'), 'attribute exists after update');
   ok(!view.$('input').attr('checked'), 'attribute is not present after update');
 });
+
+test("should be able to add multiple classes using {{bindAttr class}}", function() {
+  var template = SC.Handlebars.compile('<div {{bindAttr class="content.isAwesomeSauce content.isAlsoCool"}}></div>');
+  var content = SC.Object.create({
+    isAwesomeSauce: true,
+    isAlsoCool: true
+  });
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: content
+  });
+
+  view.createLayer();
+
+  ok(view.$('div').hasClass('is-awesome-sauce'), "dasherizes first property and sets classname");
+  ok(view.$('div').hasClass('is-also-cool'), "dasherizes second property and sets classname");
+
+  content.set('isAwesomeSauce', false);
+
+  ok(!view.$('div').hasClass('is-awesome-sauce'), "removes dasherized class when property is set to false");
+});

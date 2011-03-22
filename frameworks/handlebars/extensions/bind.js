@@ -93,7 +93,7 @@ sc_require('extensions');
 })();
 
 Handlebars.registerHelper('bindAttr', function(options) {
-  var attrs = options.hash, attrKeys = SC.keys(options.hash);
+  var attrs = options.hash;
   var view = options.data.view;
   var ret = [];
 
@@ -101,6 +101,16 @@ Handlebars.registerHelper('bindAttr', function(options) {
   // data attribute to the element so it can be looked up when
   // the bound property changes.
   var dataId = jQuery.uuid++;
+
+  // Handle classes differently, as we can bind multiple classes
+  var classBindings = attrs['class'];
+  if (classBindings != null) {
+    var classResults = SC.Handlebars.bindClasses(view, classBindings, dataId);
+    ret.push('class="'+classResults.join(' ')+'"');
+    delete attrs['class'];
+  }
+
+  var attrKeys = SC.keys(attrs);
 
   // For each attribute passed, create an observer and emit the
   // current value of the property as an attribute.
