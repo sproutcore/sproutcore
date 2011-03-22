@@ -209,7 +209,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @type Boolean
   */
   shouldRenderBorder: YES,
-  
+
+  //
+  // SUPPORT FOR AUTOMATIC RESIZING
+  //
+  supportsAutoResize: YES,
+  autoResizeLayer: function() { return this.$input()[0]; }
+  .property('layer').cacheable(),
+
+  autoResizeText: function() { return this.get('value'); }
+  .property('value').cacheable(),
+
+  autoResizePadding: SC.propertyFromRenderDelegate('autoResizePadding', 20),
+
   /** @private
     Whether to show hint or not
   */
