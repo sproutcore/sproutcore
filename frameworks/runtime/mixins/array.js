@@ -502,7 +502,9 @@ SC.Array = /** @scope SC.Array.prototype */{
 
     this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
-    this._notifyEnumerableObservers(addedObjects, removedObjects);
+    if (addedObjects && removedObjects) {
+      this._notifyEnumerableObservers(addedObjects, removedObjects, start);
+    }
     this.endPropertyChanges();
 
     return this ;
