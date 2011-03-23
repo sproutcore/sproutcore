@@ -121,33 +121,50 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   adjust: function(key, value) {
-    var layout = SC.clone(this.get('layout')), didChange = NO, cur ;
+    var layout = this.get('layout'), didChange = NO, cur, hash;
 
     if (key === undefined) { return this ; } // nothing to do.
 
     // handle string case
     if (SC.typeOf(key) === SC.T_STRING) {
-      hash = {};
-      hash[key] = value;
-    } else {
-      hash = key;
-    }
+      // this is copied from below
+      cur = layout[key];
 
-    for(key in hash) {
-      if (!hash.hasOwnProperty(key)) { continue; }
+      if(value === undefined || cur == value) return this;
 
-      value = hash[key] ;
-      cur = layout[key] ;
+      layout = SC.clone(layout);
 
-      if (value === undefined || cur == value) { continue; }
-
-      if (value === null) {
-        delete layout[key] ;
+      if(value === null) {
+        delete layout[key];
       } else {
-        layout[key] = value ;
+        layout[key] = value;
       }
 
       didChange = YES;
+    }
+
+    else {
+      hash = key;
+
+      for(key in hash) {
+        if (!hash.hasOwnProperty(key)) { continue; }
+
+        value = hash[key] ;
+        cur = layout[key] ;
+
+        if (value === undefined || cur == value) { continue; }
+
+        // only clone the layout the first time we see a change
+        if(!didChange) layout = SC.clone(layout);
+
+        if (value === null) {
+          delete layout[key] ;
+        } else {
+          layout[key] = value ;
+        }
+
+        didChange = YES;
+      }
     }
 
     // now set adjusted layout
