@@ -94,6 +94,9 @@ test("should add a 'hidden' class to template views if isVisible is false before
 
   view.createLayer();
   ok(view.$().hasClass('hidden'), "adds hidden class when rendering");
+  $(document.body).append(view.$());
+  ok(!view.$().is(':visible'), "should be hidden when hidden class is added");
+  view.$().remove();
 
   SC.run(function() { view.set('isVisible', YES); });
   ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes");
