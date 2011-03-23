@@ -29,7 +29,7 @@ SC.NestedStore = SC.Store.extend(
     This is set to YES when there are changes that have not been committed 
     yet.
 
-    @property {Boolean}
+    @type Boolean
     @default NO
   */
   hasChanges: NO,
@@ -40,14 +40,16 @@ SC.NestedStore = SC.Store.extend(
     nested store using the SC.Store#chain() method and this property will be
     set for you.
     
-    @property {SC.Store}
+    @type SC.Store
+    @default null
   */
   parentStore: null,
 
   /**
     YES if the view is nested. Walk like a duck
     
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   isNested: YES,
 
@@ -67,7 +69,8 @@ SC.NestedStore = SC.Store.extend(
     ensuring that the sibling stores do not edit the same part of the object
     graph at the same time.
     
-    @property {Boolean} 
+    @type Boolean
+    @default YES
   */
   lockOnRead: YES,
 
@@ -85,7 +88,8 @@ SC.NestedStore = SC.Store.extend(
     Note that this is kept as an array because it will be stored as a dense 
     array on some browsers, making it faster.
     
-    @property {Array}
+    @type Array
+    @default null
   */
   locks: null,
 
@@ -95,7 +99,8 @@ SC.NestedStore = SC.Store.extend(
     chained stores.  For a log changes that may actually be committed back to
     the server see the changelog property.
     
-    @property {SC.Set}
+    @type SC.Set
+    @default YES
   */
   chainedChanges: null,
     
@@ -108,6 +113,7 @@ SC.NestedStore = SC.Store.extend(
     verify that condition for you.  See SC.Store#find() for info on using this
     method.
     
+    @param {SC.Query} query query object to use.
     @returns {SC.Record|SC.RecordArray}
   */
   find: function(query) {
@@ -181,8 +187,6 @@ SC.NestedStore = SC.Store.extend(
 
   /**
     Resets a store's data hash contents to match its parent.
-    
-    @returns {SC.Store} receiver
   */
   reset: function() {
     var nRecords, nr, sk;

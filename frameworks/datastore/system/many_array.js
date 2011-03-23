@@ -27,7 +27,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     recordType will tell what type to transform the record to when
     materializing the record.
 
-    @property {String}
+    @default null
+    @type String
   */
   recordType: null,
   
@@ -35,7 +36,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     If set, the record will be notified whenever the array changes so that 
     it can change its own state
     
-    @property {SC.Record}
+    @default null
+    @type SC.Record
   */
   record: null,
   
@@ -43,7 +45,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     If set will be used by the many array to get an editable version of the
     storeIds from the owner.
     
-    @property {String}
+    @default null
+    @type String
   */
   propertyName: null,
   
@@ -51,15 +54,17 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     The ManyAttribute that created this array.
   
-    @property {SC.ManyAttribute}
+    @default null
+    @type SC.ManyAttribute
   */
   manyAttribute: null,
   
   /**
     The store that owns this record array.  All record arrays must have a 
     store to function properly.
-
-    @property {SC.Store}
+    
+    @type SC.Store
+    @property 
   */
   store: function() {
     return this.get('record').get('store');
@@ -69,7 +74,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     The storeKey for the parent record of this many array.  Editing this 
     array will place the parent record into a READY_DIRTY state.
 
-    @property {Number}
+    @type Number
+    @property
   */
   storeKey: function() {
     return this.get('record').get('storeKey');
@@ -80,7 +86,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns the storeIds in read only mode.  Avoids modifying the record 
     unnecessarily.
     
-    @property {SC.Array}
+    @type SC.Array
+    @property 
   */
   readOnlyStoreIds: function() {
     return this.get('record').readAttribute(this.get('propertyName'));
@@ -91,7 +98,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns an editable array of storeIds.  Marks the owner records as 
     modified. 
     
-    @property {SC.Array}
+    @type {SC.Array}
+    @property
   */
   editableStoreIds: function() {
     var store    = this.get('store'),
@@ -117,7 +125,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Computed from owner many attribute
     
-    @property {Boolean}
+    @type Boolean
+    @property 
   */
   isEditable: function() {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -128,7 +137,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Computed from owner many attribute
     
-    @property {String}
+    @type String
+    @property 
   */
   inverse: function() {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -139,7 +149,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Computed from owner many attribute
     
-    @property {Boolean}
+    @type Boolean
+    @property
   */
   isMaster: function() {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -150,7 +161,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Computed from owner many attribute
     
-    @property {Array}
+    @type Array
+    @property 
   */
   orderBy: function() {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -165,7 +177,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private
     Returned length is a pass-through to the storeIds array.
     
-    @property {Number}
+    @type Number
+    @property
   */
   length: function() {
     var storeIds = this.get('readOnlyStoreIds');
@@ -310,10 +323,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Called by the ManyAttribute whenever a record is added on the inverse
     of the relationship.
     
-    @param {SC.Record} record the record this array is a part of
-    @param {String} key the key this array represents
-    @param {SC.Record} inverseRecord the record that was removed
-    @param {String} inverseKey the name of inverse that was changed
+    @param {SC.Record} inverseRecord the record this array is a part of
     @returns {SC.ManyArray} receiver
   */
   addInverseRecord: function(inverseRecord) {
@@ -338,7 +348,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
   
-  // binary search to find insertion location
+  /** @private
+      binary search to find insertion location
+  */
   _findInsertionLocation: function(rec, min, max, orderBy) {
     var idx   = min+Math.floor((max-min)/2),
         cur   = this.objectAt(idx),
@@ -352,6 +364,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     } else return idx;
   },
 
+  /** @private
+      function to compare to objects
+  */
   _compare: function(a, b, orderBy) {
     var t = SC.typeOf(orderBy),
         ret, idx, len;
