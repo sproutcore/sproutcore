@@ -1,13 +1,14 @@
 (function() {
-  var array, callCount, added, removed;
+  var array, callCount, added, removed, changeIndex;
   module("Enumerable Observers", {
     setup: function() {
       array = [1, 2, 3];
 
-      array.addEnumerableObserver(function(addedObjects, removedObjects, source) {
+      array.addEnumerableObserver(function(addedObjects, removedObjects, index, source) {
         callCount = callCount ? callCount++ : 1;
         added = addedObjects;
         removed = removedObjects;
+        changeIndex = index;
       });
     }
   });
@@ -55,12 +56,13 @@
     array.replace(1, 1, [6, 7, 8]);
 
     shouldAddAndRemove([6, 7, 8], [2]);
+    equals(changeIndex, 1, "passes correct index of change");
   });
 
-  test("should include enumerable as third parameter", function() {
+  test("should include enumerable as fourth parameter", function() {
     var testArray = ["John", "Paul", "Peter", "George"];
 
-    testArray.addEnumerableObserver(function(added, removed, source) {
+    testArray.addEnumerableObserver(function(added, removed, index, source) {
       equals(testArray, source, "passes correct enumerable as source parameter");
     });
 
@@ -71,9 +73,9 @@
     var testArray = ["Davy", "Micky", "Peter"];
     var callbackCalled = false;
     var boyBandController = SC.Object.create({
-      boyBandDidChange: function(added, removed, source, context) {
+      boyBandDidChange: function(added, removed, index, source, context) {
         callbackCalled = true;
-        equals(context, "foo", "passes optional third parameter as context");
+        equals(context, "foo", "passes optional context parameter");
       }
     });
 
