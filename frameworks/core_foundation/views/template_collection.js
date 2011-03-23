@@ -105,6 +105,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         render: renderFunc
       }));
 
+
       itemElem = view.createLayer().$();
       if (!insertAtElement) {
         elem.append(itemElem);
@@ -118,9 +119,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
     childViews.replace(changeIndex, 0, addedViews);
 
-    if (childViews.get('length') === 0) {
+    var inverseTemplate = this.get('inverseTemplate');
+    if (childViews.get('length') === 0 && inverseTemplate) {
       view = this.createChildView(SC.TemplateView.extend({
-        template: this.get('inverseTemplate'),
+        template: inverseTemplate,
         content: this
       }));
       this.set('emptyView', view);
