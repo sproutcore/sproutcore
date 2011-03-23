@@ -406,6 +406,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         func   = this._scac_rangeDidChange,
         efunc  = this._scac_enumerableDidChange,
         sfunc  = this._scac_contentStatusDidChange,
+        ro     = this._scac_rangeObserver,
         newlen;
 
     if (last === cur) { return this; } // nothing to do
