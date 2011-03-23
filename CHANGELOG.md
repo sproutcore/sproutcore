@@ -2,6 +2,22 @@
 CHANGE LOG FOR 1.5
 ==================
 
+Upcoming
+-----------
+
+*Rewrote the existing inline editing code to make it more generic and integrated it with SC.LabelView, SC.InlineTextFieldView and SC.ListItemView
+*Added a new SC.SplitView class to the experimental framework which is a re-write of the existing SC.SplitView class but with cleaner code and multi-pane support.
+*Introduced a new AlertPane API and backwards compatibility for the existing API. The new API allows us to create an AlertPane by defining a hash of parameters instead of single methods which take 15+ parameters.
+*Added the ability to programmatically trigger SC.Ready instead of automatically by jQuery which allows the app developer to decide when his app is ready to run
+*Moved render delegates from Ace to base_theme, and render delegates from base to legacy_theme
+*Renamed standard_theme to legacy_theme
+*Cleaned up old, broken css code in desktop and foundation frameworks
+*Updated ImageView documentation
+*Small bug fixes throughout
+*Added unit tests for new functionality
+*Fix failing unit tests
+
+
 1.5.0.pre.5
 -----------
 * Support for high resolution screens.
