@@ -103,8 +103,12 @@ SC._ChainObserver.prototype = {
     if (newObject === this.object) return; // nothing to do.
 
     // if an old object, remove observer on it.
-    if (this.object && this.object.removeObserver) {
-      this.object.removeObserver(this.property, this, this.propertyDidChange);
+    if (this.object) {
+      if (this.property === '@each' && this.object._removeContentObserver) {
+        this.object._removeContentObserver(this);
+      } else if (this.object.removeObserver) {
+        this.object.removeObserver(this.property, this, this.propertyDidChange);
+      }
     }
 
     // if a new object, add observer on it...
@@ -118,8 +122,8 @@ SC._ChainObserver.prototype = {
     // and tearing down observers as items are added and removed from the
     // Enumerable.
     if (this.property === '@each' && this.next) {
-      if (this.object && this.object.addEnumerableObserver) {
-        this.object.addEnumerableObserver(this.next.property, this, this.propertyDidChange);
+      if (this.object && this.object._addContentObserver) {
+        this.object._addContentObserver(this);
       }
     } else {
       if (this.object && this.object.addObserver) {
@@ -133,7 +137,6 @@ SC._ChainObserver.prototype = {
 
   // the observer method invoked when the observed property changes.
   propertyDidChange: function() {
-
     // get the new value
     var object = this.object ;
     var property = this.property ;

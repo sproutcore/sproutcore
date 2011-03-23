@@ -449,7 +449,11 @@ SC.CoreView.reopen(
     invokes the same on all child views.
   */
   _notifyDidCreateLayer: function() {
-    this.notifyPropertyChange("layer");
+    this.beginPropertyChanges();
+    this.notifyPropertyChange('layer');
+    this.notifyPropertyChange('frame');
+    this.endPropertyChanges();
+
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
     // and notify others
@@ -950,19 +954,19 @@ SC.CoreView.reopen(
     Computes the frame of the view by examining the view's DOM representation.
     If no representation exists, returns null.
 
-    If a parent view is passed, its bounds will be taken into account when
+    If the view has a parent view, the parent's bounds will be taken into account when
     calculating the frame.
 
-    @param {Rect} pdim the parent view's dimensions
     @returns {Rect} the computed frame
   */
-  computeFrameWithParentFrame: function(pdim) {
-    var layer;
-    var pv = this.get('parentView');
+  computeFrameWithParentFrame: function() {
+    var layer,                            // The view's layer
+        pv = this.get('parentView'),      // The view's parent view (if it exists)
+        f;                                // The layer's coordinates in the document
 
     // need layer to be able to compute rect
     if (layer = this.get('layer')) {
-      f = SC.viewportOffset(layer); // x,y
+      f = SC.offset(layer); // x,y
       if (pv) { f = pv.convertFrameFromView(f, null); }
 
       /*
@@ -973,7 +977,13 @@ SC.CoreView.reopen(
       f.height = layer.offsetHeight;
       return f;
     }
-    return null; // can't compute
+
+    // Unable to compute yet
+    if (this.get('hasLayout')) {
+      return null;
+    } else {
+      return { x: 0, y: 0, width: 0, height: 0 };
+    }
   },
 
   /**

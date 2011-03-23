@@ -1777,7 +1777,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // before we actually update the scrollTop/scrollLeft properties.
     // This gives views that use incremental rendering a chance to render
     // newly-appearing elements before they come into view.
-    if (content) {
+    if (content && content._viewFrameDidChange) {
       content._viewFrameDidChange();
 
       // Use accelerated drawing if the browser supports it

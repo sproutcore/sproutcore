@@ -2,7 +2,7 @@
 // SC Miscellaneous Utils Tests - documentOffset
 // ========================================================================
 
-/*global module test htmlbody ok equals same */
+/*global module test htmlbody clearHtmlbody ok equals same */
 
 var pane, view1, view2, view3, view4;
 
@@ -11,19 +11,19 @@ var pane, view1, view2, view3, view4;
 module("SC.offset", {
 
   setup: function() {
-    htmlbody('<style> body { height: 1500px; width: 1500px; } </style>');
 
-    var viewportEl;
+    htmlbody('<style> .sc-main { height: 2500px; width: 2500px; } </style>');
 
     SC.RunLoop.begin();
 
     // Even though a full SC app doesn't really allow the viewport to be scaled or scrolled by default (thus
     // the offset by viewport will always equal offset by document), we simulate an app that uses a
     // scrollable viewport to test the validity of the functions.
+    var viewportEl;
     if (SC.browser.mobileSafari) {
       viewportEl = $("[name='viewport']")[0];
 
-      viewportEl.setAttribute('content','initial-scale=0.9, minimum-scale=0.5, maximum-scale=1.2, user-scalable=yes, width=device-height');
+      viewportEl.setAttribute('content','initial-scale=0.8, minimum-scale=0.5, maximum-scale=1.2, user-scalable=yes, width=device-height');
     }
 
     pane = SC.MainPane.create({
@@ -85,22 +85,22 @@ module("SC.offset", {
 function checkDocumentOffset(element, top, left) {
   var docOffset = SC.offset(element, 'document');
 
-  equals(docOffset.top, top, '%@ document offset top'.fmt(element[0].className));
-  equals(docOffset.left, left, '%@ document offset left'.fmt(element[0].className));
+  equals(docOffset.y, top, '%@ document offset top'.fmt(element[0].className));
+  equals(docOffset.x, left, '%@ document offset left'.fmt(element[0].className));
 }
 
 function checkViewportOffset(element, top, left) {
   var viewOffset = SC.offset(element, 'viewport');
 
-  equals(viewOffset.top, top, '%@ viewport offset top'.fmt(element[0].className));
-  equals(viewOffset.left, left, '%@ viewport offset left'.fmt(element[0].className));
+  equals(viewOffset.y, top, '%@ viewport offset top'.fmt(element[0].className));
+  equals(viewOffset.x, left, '%@ viewport offset left'.fmt(element[0].className));
 }
 
 function checkParentOffset(element, top, left) {
   var parentOffset = SC.offset(element, 'parent');
 
-  equals(parentOffset.top, top, '%@ parent offset top'.fmt(element[0].className));
-  equals(parentOffset.left, left, '%@ parent offset left'.fmt(element[0].className));
+  equals(parentOffset.y, top, '%@ parent offset top'.fmt(element[0].className));
+  equals(parentOffset.x, left, '%@ parent offset left'.fmt(element[0].className));
 }
 
 test("Regular views", function() {
@@ -132,6 +132,8 @@ test("A regular view not visible within the visual viewport", function() {
 });
 
 function testPosition4(element1, element2, element3, element4) {
+  window.scrollTo(100, 100);
+
   checkDocumentOffset(element1, 20, 20);
   checkViewportOffset(element1, -80, -80);
   checkParentOffset(element1, 20, 20);
@@ -152,6 +154,8 @@ function testPosition4(element1, element2, element3, element4) {
 }
 
 function testPosition3(element1, element2, element3, element4) {
+  window.scrollTo(10, 100);
+
   checkDocumentOffset(element1, 20, 20);
   checkViewportOffset(element1, -80, 10);
   checkParentOffset(element1, 20, 20);
@@ -172,6 +176,9 @@ function testPosition3(element1, element2, element3, element4) {
 }
 
 function testPosition2(element1, element2, element3, element4) {
+
+  window.scrollTo(10, 10);
+
   checkDocumentOffset(element1, 20, 20);
   checkViewportOffset(element1, 10, 10);
   checkParentOffset(element1, 20, 20);

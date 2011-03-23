@@ -35,6 +35,11 @@ SC.LAYOUT_AUTO = 'auto';
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
+  /**
+    Set to YES to indicate the view has visibility support added.
+  */
+  hasLayout: YES,
+
   concatenatedProperties: ["layoutProperties"],
 
   /**

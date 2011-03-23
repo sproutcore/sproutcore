@@ -380,7 +380,7 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     }
     else {
       // Only really old versions will have to go through this code path.
-      ret   = SC.viewportOffset(anchor); // get x & y
+      ret   = SC.offset(anchor); // get x & y
       cq    = SC.$(anchor);
       ret.width = cq.outerWidth();
       ret.height = cq.outerHeight();

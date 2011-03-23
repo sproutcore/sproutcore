@@ -500,8 +500,9 @@ SC.Array = /** @scope SC.Array.prototype */{
       changes.add(start, length);
     }
 
-    this._setupEnumerableObservers(addedObjects, removedObjects);
+    this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
+    this._notifyEnumerableObservers(addedObjects, removedObjects);
     this.endPropertyChanges();
 
     return this ;

@@ -806,10 +806,143 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @returns {Object} receiver
   */
   enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
-    this._setupEnumerableObservers(addedObjects, removedObjects);
+    this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
+    this._notifyEnumerableObservers(addedObjects, removedObjects);
 
     return this ;
+  },
+
+  /**
+    Called when the contents of the enumerable mutates.
+
+    Implementers of classes that mixin SC.Enumerable should ensure that they
+    call enumerableContentDidChange(), which invokes this method automatically.
+
+    @param {Array} addedObjects the array of objects that were added to the enumerable
+    @param {Array} removedObjects the array of objects that were removed from the enumerable
+  */
+  _notifyEnumerableObservers: function(addedObjects, removedObjects) {
+    var observers, members, member, memberLoc, membersLength;
+    var target, method, context;
+
+    observers = this._kvo_enumerable_observers;
+
+    if (observers) {
+      members = SC.clone(observers.getMembers());
+      membersLength = members.length;
+
+      for(memberLoc=0; memberLoc < membersLength; memberLoc++) {
+        member = members[memberLoc];
+
+        target = member[0];
+        method = member[1];
+        context = member[2];
+
+        method.call(target, addedObjects, removedObjects, this, context);
+      }
+    }
+  },
+
+  /**
+    Adds an enumerable observer to the enumerable.
+
+    Enumerable observers are called whenever the enumerable's content
+    mutates. For example, adding an object via pushObject(), or replacing
+    objects via replace(), will cause all enumerable observers to be fired.
+
+    Observer methods that you register should have the following signature:
+
+        enumerableDidChange: function(addedObjects, removedObjects, sender)
+
+    addedObjects will contain an array of the objects added and removedObjects
+    will contain an array of the objects that were removed. The third paramter
+    is the enumerable that mutated. This is useful if you register the same
+    observer method on multiple enumerables.
+
+    If you pass a context parameter to addEnumerableObserver(), it will be
+    included when the observer is fired:
+
+        function(addedObjects, removedObjects, sender, context);
+
+    @param {Object} target the target object to invoke
+    @param {String|Function} method the method to invoke
+    @param {Object} context optional context
+
+    @returns {SC.Object} self
+  */
+  addEnumerableObserver: function(target, method, context) {
+    var observers;
+
+    // Normalize parameters. If a function is passed as
+    // target, make it the method.
+    if (method === undefined) {
+      method = target;
+      target = this;
+    }
+
+    // Call the observer in the context of the enumerable
+    // if no explicit target is given.
+    if (!target) { target = this; }
+
+    // If the method is provided as a string, look it up on
+    // the target.
+    if (typeof method === "string") {
+      method = target[method];
+    }
+
+    if (!method) {
+      throw "You must pass a method to addEnumerableObserver()";
+    }
+
+    observers = this._kvo_for('_kvo_enumerable_observers', SC.ObserverSet);
+    observers.add(target, method, context);
+
+    return this;
+  },
+
+  /**
+    Removes an enumerable observer. Expects the same target and method that
+    were used to register the observer.
+
+    @param {Object} target the target object to invoke
+    @param {String|Function} method the method to invoke
+
+    @returns {SC.Object} self
+  */
+  removeEnumerableObserver: function(target, method) {
+    var observers;
+
+    // Normalize parameters. If a function is passed as
+    // target, make it the method.
+    if (method === undefined) {
+      method = target;
+      target = this;
+    }
+
+    // Call the observer in the context of the enumerable
+    // if no explicit target is given.
+    if (!target) { target = this; }
+
+    // If the method is provided as a string, look it up on
+    // the target.
+    if (typeof method === "string") {
+      method = target[method];
+    }
+
+    if (!method) {
+      throw "You must pass a method to removeEnumerableObserver()";
+    }
+
+    observers = this._kvo_enumerable_observers;
+
+    if (observers) {
+      observers.remove(target, method);
+    } else {
+      throw "%@: Can't remove observers if no observer has been added.";
+    }
+
+    return this;
   },
 
   /**
@@ -839,7 +972,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     // Maintain a list of observers on the item so we can remove them
     // if it is removed from the enumerable.
-    item._kvo_for(SC.keyFor('_kvo_enumerable_observers', key)).push(observer);
+    item._kvo_for(SC.keyFor('_kvo_content_observers', key)).push(observer);
   },
 
   /**
@@ -852,31 +985,27 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @param {Array} addedObjects the array of objects that have been added
     @param {Array} removedObjects the array of objects that have been removed
   */
-  _setupEnumerableObservers: function(addedObjects, removedObjects) {
+  _setupContentObservers: function(addedObjects, removedObjects) {
     if (!addedObjects) { addedObjects = this; }
     if (!removedObjects) { removedObjects = []; }
 
-    var observedKeys = this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet);
+    var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var kvoKey;
 
     // Only setup and teardown enumerable observers if we have keys to observe
     if (observedKeys.get('length') > 0) {
-      // Loop through removed objects and remove any enumerable observers that
-      // belong to them.
-      removedObjects.forEach(function(item) {
-        item._kvo_for('_kvo_enumerable_observers').forEach(function(observer) {
-          // Remove the observer if it is pointing at this enumerable.
-          // If the observer belongs to another enumerable, just ignore it.
-          if (observer.object === this) {
-            item.removeObserver(observer.key, observer, observer.propertyDidChange);
-          }
-        });
-      });
 
       // added and resume the chain observer.
       observedKeys.forEach(function(key) {
-        kvoKey = SC.keyFor('_kvo_enumerable_observers', key);
+        kvoKey = SC.keyFor('_kvo_content_observers', key);
 
+        // Loop through removed objects and remove any enumerable observers that
+        // belong to them.
+        removedObjects.forEach(function(item) {
+          item._kvo_for(kvoKey).forEach(function(observer) {
+            observer.destroyChain();
+          }, this);
+        }, this);
         var lastObserver;
 
         // Get all original ChainObservers associated with the key
@@ -904,28 +1033,61 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   /**
     @private
 
-    Adds an enumerable observer. Enumerable observers are able to
+    Adds a content observer. Content observers are able to
     propagate chain observers to each member item in the enumerable,
     so that the observer is fired whenever a single item changes.
 
     You should never call this method directly. Instead, you should
-    call addObserver() with the special '[]' property in the path.
+    call addObserver() with the special '@each' property in the path.
 
     For example, if you wanted to observe changes to each item's isDone
     property, you could call:
 
-        arrayController.addObserver('[].isDone');
+        arrayController.addObserver('@each.isDone');
+
+    @param {SC._ChainObserver} chainObserver the chain observer to propagate
   */
-  addEnumerableObserver: function(key, target, action) {
+  _addContentObserver: function(chainObserver) {
+    var key = chainObserver.next.property;
+
     // Add the key to a set so we know what we are observing
-    this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet).push(key);
+    this._kvo_for('_kvo_content_observed_keys', SC.CoreSet).push(key);
 
     // Add the passed ChainObserver to an ObserverSet for that key
-    var kvoKey = SC.keyFor('_kvo_enumerable_observers', key);
-    this._kvo_for(kvoKey).push(target);
+    var kvoKey = SC.keyFor('_kvo_content_observers', key);
+    this._kvo_for(kvoKey).push(chainObserver);
 
     // set up chained observers on the initial content
-    this._setupEnumerableObservers(this);
+    this._setupContentObservers(this);
+  },
+
+  /**
+    @private
+
+    Removes a content observer. Pass the same chain observer
+    that was used to add the content observer.
+
+    @param {SC._ChainObserver} chainObserver the chain observer to propagate
+  */
+
+  _removeContentObserver: function(chainObserver) {
+    var observers, kvoKey;
+    var observedKeys = this._kvo_content_observed_keys;
+    var key = chainObserver.next.property;
+
+    if (observedKeys.contains(key)) {
+
+      kvoKey = SC.keyFor('_kvo_content_observers', key);
+      observers = this._kvo_for(kvoKey);
+
+      observers.removeObject(chainObserver);
+
+      this._setupContentObservers([], this);
+
+      if (observers.length === 0) {
+        this._kvo_for('_kvo_content_observed_keys').remove(key);
+      }
+    }
   },
 
   /**
