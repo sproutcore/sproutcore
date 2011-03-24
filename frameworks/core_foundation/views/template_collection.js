@@ -38,7 +38,14 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     return itemView.extend(extensions);
   }.property('itemView').cacheable(),
 
-  contentDidChange: function() {
+  /**
+    @private
+
+    When the content property of the collection changes, remove any existing
+    child views and observers, then set up an observer on the new content, if
+    needed.
+  */
+  _sctcv_contentDidChange: function() {
     this.removeAllChildren();
     this.$().empty();
     this.didCreateLayer();
