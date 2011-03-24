@@ -56,7 +56,9 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }
 
     content = this._content = this.get('content');
-    content.addEnumerableObserver(this, this.arrayContentDidChange);
+    if (content) {
+      content.addEnumerableObserver(this, this.arrayContentDidChange);
+    }
   }.observes('content'),
 
   /**
