@@ -447,7 +447,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
     this._scac_contentStatusDidChange();
-    this.enumerableContentDidChange(0, newlen, newlen - oldlen, cur, last);
+    this.enumerableContentDidChange(0, newlen, newlen - oldlen, cur, last||[]);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
