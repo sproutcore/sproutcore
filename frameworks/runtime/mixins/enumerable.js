@@ -869,7 +869,7 @@ SC.Reducers = /** @lends SC.Enumerable */ {
   _setupEnumerableObservers: function(addedObjects, removedObjects) {
     if (!addedObjects) { addedObjects = this; }
     if (!removedObjects) { removedObjects = []; }
-    
+
     var observedKeys = this._kvo_for('_kvo_enumerable_observed_keys', SC.CoreSet);
     var kvoKey;
 
@@ -906,8 +906,6 @@ SC.Reducers = /** @lends SC.Enumerable */ {
             while(lastObserver.next) { lastObserver = lastObserver.next; }
             lastObserver.propertyDidChange();
           } else {
-            if(addedObjects && !addedObjects.get('length')) addedObjects = [addedObjects];
-            
             addedObjects.forEach(function(item) {
               this._resumeChainObservingForItemWithChainObserver(item, observer);
             }, this);

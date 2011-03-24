@@ -321,6 +321,24 @@ SC.Array = {
     });
     return ret ;
   },
+  
+  /**
+    Generates a new array with all arrays flattened into one
+
+    @returns {Array}
+  */
+
+  flatten: function() {
+    var ret = []
+    this.forEach(function(k) {
+      if(SC.typeOf(k) == "array") {
+        ret = ret.concat(k.flatten())
+      } else {
+        ret.push(k);
+      }
+    }, this)
+    return ret;
+  }
 
   /**
     Returns the largest Number in an array of Numbers. Make sure the array
@@ -605,6 +623,7 @@ if (!Array.prototype.lastIndexOf) {
       // replaced range.  Otherwise, pass the full remaining array length
       // since everything has shifted
       var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
+      objects = SC.typeOf(objects) == "array" ? objects : [objects];
       this.enumerableContentDidChange(idx, amt, len - amt, objects, removedObjects) ;
       return this ;
     },
