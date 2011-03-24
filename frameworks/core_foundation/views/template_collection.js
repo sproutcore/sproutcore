@@ -136,7 +136,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       }));
       this.set('emptyView', view);
       view.createLayer().$().appendTo(elem);
-      this.childViews = [emptyView];
+      this.childViews = [view];
     }
   }
 });
