@@ -132,6 +132,20 @@ SC.mixin( /** @scope SC */ {
     };
 
     return SC.pointInRect(point, rect);
-  }
+  },
+  
+  
+  /**
+    Switch the scale of your app. Useful when vizualizing apps not designed
+    for iphone.
+  */
+  switchScale: function() {
+    $('head meta[name=viewport]').remove();
+    if(window.innerWidth === window.screen.width){
+      $('head').prepend('<meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, minimum-scale=0.5, user-scalable=0" />');
+    }else{
+      $('head').prepend('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0" />');
+    }
+  },
 
 });
