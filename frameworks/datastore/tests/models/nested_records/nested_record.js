@@ -248,6 +248,10 @@ test("Basic Write As a Child Record", function() {
   var newCR = testParent.get('info');
   same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
   same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
+
+  // Make sure you can set the child to null.
+  testParent.set('info', null);
+  equals(testParent.get('info'), null, 'should be able to set child record to null');
 });
 
 test("Child Status Changed", function() {
