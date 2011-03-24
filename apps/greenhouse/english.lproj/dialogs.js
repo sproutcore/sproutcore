@@ -82,7 +82,7 @@ Greenhouse.dialogPage = SC.Page.design({
   
   propertyEditor: SC.View.design({
     // childViews: 'title keyLabel key valueLabel value update cancel'.w(),
-    childViews: 'title keyLabel key valueLabel value updateButton cancelButton'.w(),
+    childViews: 'title keyLabel keyTF valueLabel valueTF updateButton cancelButton'.w(),
       
     title: SC.LabelView.design({
       layout: {top: 2, left: 15, right: 5, height: 22},
@@ -94,7 +94,7 @@ Greenhouse.dialogPage = SC.Page.design({
       layout: {top: 25, left: 15, right: 5, height: 22},
       value: "_Key:".loc()
     }),
-    key: SC.TextFieldView.design({
+    keyTF: SC.TextFieldView.design({
       layout: {top: 50, left: 15, right: 15, height: 22},
       valueBinding: 'Greenhouse.propertyEditorController.key'
     }),
@@ -119,7 +119,7 @@ Greenhouse.dialogPage = SC.Page.design({
       layout: {top: 80, left: 15, right: 5, height: 22},
       value: "_Value:".loc()
     }),
-    value: SC.TextFieldView.design({
+    valueTF: SC.TextFieldView.design({
       layout: {top: 100, left: 15, right: 15, height: 100},
       valueBinding: 'Greenhouse.propertyEditorController.value',
       isTextArea: YES

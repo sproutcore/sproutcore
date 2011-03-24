@@ -808,7 +808,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
     this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
-    this._notifyEnumerableObservers(addedObjects, removedObjects);
+    this._notifyEnumerableObservers(addedObjects, removedObjects, start);
 
     return this ;
   },
@@ -821,8 +821,9 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @param {Array} addedObjects the array of objects that were added to the enumerable
     @param {Array} removedObjects the array of objects that were removed from the enumerable
+    @param {Number} index the index at which the mutation occurred
   */
-  _notifyEnumerableObservers: function(addedObjects, removedObjects) {
+  _notifyEnumerableObservers: function(addedObjects, removedObjects, index) {
     var observers, members, member, memberLoc, membersLength;
     var target, method, context;
 
@@ -839,7 +840,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
         method = member[1];
         context = member[2];
 
-        method.call(target, addedObjects, removedObjects, this, context);
+        method.call(target, addedObjects, removedObjects, index, this, context);
       }
     }
   },
@@ -853,12 +854,14 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     Observer methods that you register should have the following signature:
 
-        enumerableDidChange: function(addedObjects, removedObjects, sender)
+        enumerableDidChange: function(addedObjects, removedObjects, index, source)
 
     addedObjects will contain an array of the objects added and removedObjects
-    will contain an array of the objects that were removed. The third paramter
-    is the enumerable that mutated. This is useful if you register the same
-    observer method on multiple enumerables.
+    will contain an array of the objects that were removed. The index parameter
+    contains the index at which the mutation occurred.
+
+    The fourth parameter, source, is the enumerable that mutated. This is useful
+    if you register the same observer method on multiple enumerables.
 
     If you pass a context parameter to addEnumerableObserver(), it will be
     included when the observer is fired:
