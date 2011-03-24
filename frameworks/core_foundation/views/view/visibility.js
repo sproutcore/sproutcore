@@ -89,7 +89,7 @@ SC.View.reopen(
     // now.
     //
     // For example, say we're isVisible=NO, but we have not yet added the
-    // 'hidden' class to the layer because of the "don't update the layer if
+    // 'sc-hidden' class to the layer because of the "don't update the layer if
     // we're not visible in the window" check.  If any of our parent views
     // became visible, our layer would incorrectly be shown!
     this.updateLayerIfNeeded(YES);

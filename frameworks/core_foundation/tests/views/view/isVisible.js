@@ -47,7 +47,7 @@ test("adding a new view to a visible pane should make it visible", function() {
   view.set('isVisible', NO);
   SC.RunLoop.end();
   ok(!view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES") ;
-  ok(view.$().hasClass('hidden'), "after view.set('isVisible', NO), view.$().hasClass('hidden') should be true") ;
+  ok(view.$().hasClass('sc-hidden'), "after view.set('isVisible', NO), view.$().hasClass('sc-hidden') should be true") ;
 });
 
 test("a view with visibility can have a child view without visibility", function() {

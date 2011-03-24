@@ -111,7 +111,7 @@ test("adds aria-disabled attribute if view isEnabled = NO", function() {
   
 });
 
-test("adds hidden class if view isVisible = NO", function() {
+test("adds sc-hidden class if view isVisible = NO", function() {
 
   var view = SC.View.create() ;
   var context ;
@@ -119,12 +119,12 @@ test("adds hidden class if view isVisible = NO", function() {
   context = view.renderContext();
   view.set('isVisible', YES);
   view.prepareContext(context, YES);
-  ok(!context.hasClass('hidden'), 'should NOT have hidden class');
+  ok(!context.hasClass('sc-hidden'), 'should NOT have sc-hidden class');
   
   context = view.renderContext();
   view.set('isVisible', NO);
   view.prepareContext(context, YES);
-  ok(context.hasClass('hidden'), 'should have hidden class');  
+  ok(context.hasClass('sc-hidden'), 'should have sc-hidden class');  
 });
 
 test("invokes render() passing context & firstTime", function() {

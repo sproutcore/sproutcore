@@ -112,5 +112,5 @@ test("setting isVisible to NO should trigger a layer update to hide the view", f
   view.set('isVisible', NO);
   SC.RunLoop.end();
   
-  ok(view.renderContext(view.get('layer')).classNames().indexOf('hidden') >= 0, "layer should have the 'hidden' class");
+  ok(view.renderContext(view.get('layer')).classNames().indexOf('sc-hidden') >= 0, "layer should have the 'sc-hidden' class");
 });

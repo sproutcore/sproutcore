@@ -684,7 +684,7 @@ SC.CoreView.reopen(
     context.addClass(this.get('classNames'));
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
-    if (!this.get('isVisible')) { context.addClass('hidden'); }
+    if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));

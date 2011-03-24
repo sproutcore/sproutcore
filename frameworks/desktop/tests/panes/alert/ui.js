@@ -59,12 +59,12 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   if (button2Title) {
     equals(button2.$('label').text(), button2Title, 'pane.div.div button2 should have custom title %@'.fmt(button2Title));
   } else {
-    ok(button2.$().hasClass('hidden'), 'pane.div.div button2 should be hidden');
+    ok(button2.$().hasClass('sc-hidden'), 'pane.div.div button2 should be hidden');
   }
   if (button3Title) {
     equals(button3.$('label').text(), button3Title, 'pane.div button3 should have custom title %@'.fmt(button3Title));
   } else {
-    ok(button3.$().hasClass('hidden'), 'pane.div button3 should be hidden');
+    ok(button3.$().hasClass('sc-hidden'), 'pane.div button3 should be hidden');
   }
 }
 
