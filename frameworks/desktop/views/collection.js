@@ -1457,7 +1457,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.CollectionView} receiver
   */
   select: function(indexes, extend) {
-
+    
     var content = this.get('content'),
         del     = this.get('selectionDelegate'),
         groupIndexes = this.get('_contentGroupIndexes'),
@@ -1493,9 +1493,9 @@ SC.CollectionView = SC.View.extend(
       // when selecting only one item, always select by content
       if (indexes.get('length')===1) {
         sel.addObject(content.objectAt(indexes.get('firstObject')));
-        
-      // otherwise select an index range
-      } else sel.add(content, indexes);
+      } else {
+        sel.addObjects(indexes.map(function(i) { return content.objectAt(i); }, this));
+      }
       
     }
 
