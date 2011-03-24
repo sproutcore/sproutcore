@@ -98,6 +98,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
           });
         }
       }
+
+      return YES;
     }
     // The module is not yet loaded, so register the callback and, if necessary, begin loading
     // the code.
@@ -126,6 +128,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         this._loadJavaScriptForModule(moduleName);
         module.isLoading = YES;
       }
+
+      return NO;
     }
   },
 
