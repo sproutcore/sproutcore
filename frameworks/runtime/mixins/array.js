@@ -629,6 +629,7 @@ if (!Array.prototype.lastIndexOf) {
       // replaced range.  Otherwise, pass the full remaining array length
       // since everything has shifted
       var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
+      objects = SC.typeOf(objects) == "array" ? objects : [objects];
       this.enumerableContentDidChange(idx, amt, len - amt, objects, removedObjects) ;
       return this ;
     },
