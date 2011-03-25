@@ -524,8 +524,9 @@ Handlebars.registerHelper('each', function(context, fn, inverse) {
   return ret;
 });
 
-Handlebars.registerHelper('if', function(context, fn, inverse) {
-  if(!context || context == []) {
+Handlebars.registerHelper('if', function(property, fn, inverse) {
+  var value = this.getPath(property);
+  if(!value || value == []) {
     return inverse(this);
   } else {
     return fn(this);
@@ -533,7 +534,7 @@ Handlebars.registerHelper('if', function(context, fn, inverse) {
 });
 
 Handlebars.registerHelper('unless', function(context, fn, inverse) {
-  Handlebars.helpers['if'].call(this, context, inverse, fn);
+  return Handlebars.helpers['if'].call(this, context, inverse, fn);
 });
 
 Handlebars.registerHelper('with', function(context, fn) {

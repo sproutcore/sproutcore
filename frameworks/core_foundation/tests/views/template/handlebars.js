@@ -600,3 +600,41 @@ test("should be able to add multiple classes using {{bindAttr class}}", function
 
   ok(!view.$('div').hasClass('is-awesome-sauce'), "removes dasherized class when property is set to false");
 });
+
+
+test("should support basic if statements", function() {
+  var template = SC.Handlebars.compile('<p>{{#if "content.isRed"}}red{{/if}}{{#if "content.isBlue"}}blue{{/if}}</p>');
+  var content = SC.Object.create({
+    isRed: false,
+    isBlue: true
+  });
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: content
+  });
+
+  view.createLayer();
+
+  console.debug(view.$('p'));
+  ok(view.$('p').text().match(/blue/), 'if shows content when given a true value');
+  ok(!view.$('p').text().match(/red/), 'if hides content when given a false value');
+});
+
+test("should support basic unless statements", function() {
+  var template = SC.Handlebars.compile('<p>{{#unless "content.isRed"}}red{{/unless}}{{#unless "content.isBlue"}}blue{{/unless}}</p>');
+  var content = SC.Object.create({
+    isRed: false,
+    isBlue: true
+  });
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: content
+  });
+
+  view.createLayer();
+
+  ok(view.$('p').text().match(/red/), 'unless shows content when given a false value');
+  ok(!view.$('p').text().match(/blue/), 'unless hides content when given a true value');
+});
