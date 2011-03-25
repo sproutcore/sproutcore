@@ -155,7 +155,7 @@ module("SC.ProgressView UI", {
   teardown: function(){
     clearHtmlbody();
   }
-};
+});
 
 test("basic", function() {
   

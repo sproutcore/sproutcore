@@ -14,7 +14,7 @@ module("SC.PickerPane UI", {
   teardown: function(){
     clearHtmlbody();
   }
-};
+});
 
 
 function evaluatePicker(pane) {

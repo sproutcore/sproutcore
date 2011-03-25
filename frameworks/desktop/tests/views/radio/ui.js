@@ -147,7 +147,7 @@ module('SC.RadioView UI', {
   teardown: function(){
     clearHtmlbody();
   }
-};
+});
 
 test("basic", function() {
   

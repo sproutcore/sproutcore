@@ -78,7 +78,7 @@ module('SC.ButtonView ui', {
   teardown: function(){
     clearHtmlbody();
   }
-};
+});
 
 test("Check that all button are visible", function() {
   ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');
