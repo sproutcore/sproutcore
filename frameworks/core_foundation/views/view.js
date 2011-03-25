@@ -1256,7 +1256,9 @@ SC.CoreView.mixin(/** @scope SC.CoreView */ {
   */
   design: function() {
     if (this.isDesign) {
+      //@ if (debug)
       SC.Logger.warn("SC.View#design called twice for %@.".fmt(this));
+      //@ endif
       return this;
     }
 
