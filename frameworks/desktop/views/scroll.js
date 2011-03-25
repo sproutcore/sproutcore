@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('views/scroller');
-sc_require('mixins/border');
 
 SC.NORMAL_SCROLL_DECELERATION = 0.95;
 SC.FAST_SCROLL_DECELERATION = 0.85;
@@ -26,7 +25,7 @@ SC.FAST_SCROLL_DECELERATION = 0.85;
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.ScrollView = SC.View.extend(SC.Border, {
+SC.ScrollView = SC.View.extend({
   /** @scope SC.ScrollView.prototype */
   classNames: ['sc-scroll-view'],
 

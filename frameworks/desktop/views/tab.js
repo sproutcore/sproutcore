@@ -108,16 +108,17 @@ SC.TabView = SC.View.extend(
     var childViews  = [], view, containerView, layout,
         tabLocation = this.get('tabLocation'),
         tabHeight   = this.get('tabHeight');
-    
-    layout = (tabLocation === SC.TOP_LOCATION) ?
-             { top: tabHeight/2+1, left: 0, right: 0, bottom: 0 } :
-             (tabLocation === SC.TOP_TOOLBAR_LOCATION) ?
-             { top: tabHeight+1, left: 0, right: 0, bottom: 0 } :
-             { top: 0, left: 0, right: 0, bottom: tabHeight-1 } ;
-    
-    containerView = this.containerView.extend(SC.Border, {
+
+    if (tabLocation === SC.TOP_LOCATION) {
+      layout = { top: tabHeight/2+1, left: 0, right: 0, bottom: 0, border: 1 };
+    } else if (tabLocation === SC.TOP_TOOLBAR_LOCATION) {
+      layout = { top: tabHeight+1, left: 0, right: 0, bottom: 0, border: 1 };
+    } else {
+      layout = { top: 0, left: 0, right: 0, bottom: tabHeight-1, border: 1 };
+    }
+
+    containerView = this.containerView.extend({
       layout: layout,
-      borderStyle: SC.BORDER_BLACK,
       //adding the role
       ariaRole: 'tabpanel'
     });
