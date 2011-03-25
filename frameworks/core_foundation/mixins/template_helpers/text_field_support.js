@@ -1,4 +1,8 @@
-SC.TextFieldSupport = {
+
+/** @class
+
+*/
+SC.TextFieldSupport = /** @scope SC.TextFieldSupport.prototype */{
   value: function(key, value) {
     if (value !== undefined) {
       this.$('input').val(value);

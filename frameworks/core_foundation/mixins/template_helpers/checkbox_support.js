@@ -1,4 +1,5 @@
-SC.CheckboxSupport = {
+/** @class */
+SC.CheckboxSupport = /** @scope SC.CheckboxSupport.prototype */{
   didCreateLayer: function() {
     this.$('input').change(jQuery.proxy(function() {
       SC.RunLoop.begin();

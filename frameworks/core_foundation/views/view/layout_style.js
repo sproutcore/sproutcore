@@ -583,7 +583,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
 });
 
-SC.CoreView.runCallback = function(callback){
+SC.CoreView.runCallback = function(callback)/** @scope SC.View.prototype */{
   var additionalArgs = SC.$A(arguments).slice(1),
       typeOfAction = SC.typeOf(callback.action);
 
