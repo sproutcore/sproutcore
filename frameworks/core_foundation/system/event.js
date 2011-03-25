@@ -103,7 +103,7 @@ SC.Event = function(originalEvent) {
     // normalize wheelDelta for Firefox
     // note that we multiple the delta on FF to make it's acceleration more 
     // natural.
-    } else if (!SC.none(originalEvent.detail)) {
+    } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
       deltaMultiplier = 10;
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
