@@ -65,11 +65,14 @@ SC.BaseTheme.segmentedRenderDelegate = SC.Object.create({
       rect = segmentLayer.getBoundingClientRect();
 
       // Convert client rect into standard rect
-      rect.x = rect.left;
-      rect.y = rect.top;
+      //rect.x = rect.left;
+      //rect.y = rect.top;
+      // IE8 won't let us add x and y to the rect
+      var naiveRectFix = {x:rect.left, y: rect.top, width: (rect.right-rect.left), height: (rect.bottom - rect.top)};
+
 
       // Return the index early if found
-      if (SC.pointInRect(point, rect)) return i;
+      if (SC.pointInRect(point, naiveRectFix)) return i;
     }
 
     // Default not found
