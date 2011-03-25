@@ -903,7 +903,7 @@ SC.DateTime.mixin(SC.Comparable,
   parse: function(str, fmt) {
     // Declared as an object not a literal since in some browsers the literal
     // retains state across function calls
-    var re = new RegExp('(?:%([aAbBcdDhHIjmMpsSUWwxXyYZ%])|(.))', "g");
+    var re = new RegExp('(?:%([aAbBcdDhHiIjmMpsSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
     
     if (SC.none(fmt)) fmt = SC.DATETIME_ISO8601;
@@ -920,6 +920,7 @@ SC.DateTime.mixin(SC.Comparable,
           case 'D': opts.day = scanner.scanInt(1, 2); break;
           case 'h':
           case 'H': opts.hour = scanner.scanInt(1, 2); break;
+          case 'i':
           case 'I': opts.hour = scanner.scanInt(1, 2); break;
           case 'j': throw "%j is not implemented";
           case 'm': opts.month = scanner.scanInt(1, 2); break;
