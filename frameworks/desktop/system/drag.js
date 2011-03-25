@@ -344,8 +344,15 @@ SC.Drag = SC.Object.extend(
 	    if (evt.makeTouchResponder) {
 	      // Should use invokeLater if I can figure it out
 	      var self = this;
-	      SC.Timer.schedule({ target: evt, action: function(){ if (!evt.hasEnded) evt.makeTouchResponder(self, YES); }, interval: 1 });
-	    } else {
+	      SC.Timer.schedule({ 
+	        target: evt, 
+	        action: function() { 
+	          if (!evt.hasEnded) evt.makeTouchResponder(self, YES);
+	        }, 
+	        interval: 1
+	      });
+	    } 
+	    else {
 	      // notify root responder that a drag is in process
 	      this.ghostView.rootResponder.dragDidStart(this, evt) ;
 	    }
@@ -356,6 +363,7 @@ SC.Drag = SC.Object.extend(
     
     // let all drop targets know that a drag has started
     var ary = this._dropTargets() ;
+    
     for (var idx=0, len=ary.length; idx<len; idx++) {
       ary[idx].tryToPerform('dragStarted', this, evt) ;
     }
