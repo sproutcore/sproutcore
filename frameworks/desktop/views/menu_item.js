@@ -381,7 +381,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
       if (responder) {
         // Send the action down the responder chain
-        responder.sendAction(action, target, this);
+        responder.sendAction(action, target, rootMenu);
       }
     }
 
