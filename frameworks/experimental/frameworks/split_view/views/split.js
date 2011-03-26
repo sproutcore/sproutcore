@@ -178,10 +178,10 @@ SC.SplitView = SC.View.extend({
     }
   }.property('frame', 'layoutDirection').cacheable(),
 
-  viewDidResize: function() {
-    this.notifyPropertyChange('frame');
+  viewDidResize: function(orig) {
     this.invokeOnce('_scsv_tile');
-  },
+    orig();
+  }.enhance(),
   
   layoutDirectionDidChange: function() {
     this.invokeOnce('_scsv_tile');
