@@ -3,20 +3,43 @@ module("SC.TemplateCollectionView");
 TemplateTests = {};
 
 test("creating a collection view works", function() {
-  var ExampleView = SC.TemplateView.extend({
-    tagName: 'li',
-    template: SC.Handlebars.compile('{{content/title}}')
+  var CollectionChildView = SC.TemplateView.extend({
+    template: SC.Handlebars.compile('<b>{{content.title}}</b>')
   });
+
+  var ListItemChildView = CollectionChildView.extend({ tagName: "li" });
+  var DefinitionTermChildView = CollectionChildView.extend({ tagName: "dt" });
 
   var CollectionView = SC.TemplateCollectionView.extend({
-    content: [{title: 'Hello'}],
-    itemView: ExampleView
+    content: [{title: 'Hello'}]
   });
+  
+  var defaultCollectionView = CollectionView.create();
+  var ulCollectionView  = CollectionView.create({ tagName: "ul" });
+  var olCollectionView  = CollectionView.create({ tagName: "ol" });
+  var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
+  var customTagCollectionView = CollectionView.create({ tagName: "p" })
+  
+  defaultCollectionView.createLayer();
+  ulCollectionView.createLayer();
+  olCollectionView.createLayer();
+  dlCollectionView.createLayer();
+  customTagCollectionView.createLayer();
+  
+  ok(defaultCollectionView.$().is("ul"), "Unordered list collection view was rendered (Default)");
+  equals(defaultCollectionView.$('li').length, 1, "List item view was rendered (Default)");
 
-  var collectionView = CollectionView.create();
-  collectionView.createLayer();
+  ok(ulCollectionView.$().is("ul"), "Unordered list collection view was rendered");
+  equals(ulCollectionView.$('li').length, 1, "List item view was rendered");
 
-  ok(collectionView.$('li').length === 1, "The child example view was rendered");
+  ok(olCollectionView.$().is("ol"), "Ordered collection collection view was rendered");
+  equals(olCollectionView.$('li').length, 1, "List item view was rendered");
+
+  ok(dlCollectionView.$().is("dl"), "Definition List collection view was rendered");
+  equals(dlCollectionView.$('dt').length, 1, "Definition term view was rendered");
+  
+  ok(customTagCollectionView.$().is("p"), "Paragraph collection view was rendered");
+  equals(customTagCollectionView.$('div').length, 1, "Child view was rendered");
 });
 
 test("passing a block to the collection helper sets it as the template for example views", function() {

@@ -15,7 +15,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }
   },
 
-  itemView: "SC.TemplateView",
+  itemView: 'SC.TemplateView',
 
   itemViewClass: function() {
     var itemView = this.get('itemView');
@@ -31,8 +31,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       extensions.template = this.get('itemViewTemplate');
     }
 
-    if (this.get('tagName') === 'ul') {
-      extensions.tagname = 'li';
+    if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {
+      extensions.tagName = 'li';
     }
 
     return itemView.extend(extensions);
@@ -109,8 +109,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       item = addedObjects.objectAt(idx);
       view = this.createChildView(itemViewClass.extend({
         content: item,
-        tagName: 'li',
-
         render: renderFunc
       }));
 
