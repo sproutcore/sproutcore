@@ -530,11 +530,27 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     'PROPERTY': {
       firstCharacter:   /[a-zA-Z_]/,
-      notAllowed:       /[^a-zA-Z_0-9]/,
+      notAllowed:       /[^a-zA-Z_0-9\.]/,
       evalType:         'PRIMITIVE',
       
       /** @ignore */
-      evaluate:         function (r,w) { return r.get(this.tokenValue); }
+      evaluate:         function (r,w) {
+                          var tokens = this.tokenValue.split('.');
+
+                          var len = tokens.length;
+                          if (len < 2) return r.get(this.tokenValue);
+
+                          var ret = r;
+                          for (var i = 0; i < len; i++) {
+                            if (!ret) return;
+                            if (ret.get) {
+                              ret = ret.get(tokens[i]);
+                            } else {
+                              ret = ret[tokens[i]];
+                            }
+                          }
+                          return ret;
+                        }
     },
 
     'NUMBER': {
