@@ -248,21 +248,16 @@ SC.FlowedLayout = {
     return calc;
   },
   
-  // hacky, but only way to allow us to use calculatedWidth/Height and avoid clobbering
-  // our own layout (interfering with our tiling) while still allowing scrolling.
-  renderMixin: function(context) {
-    context.css('minWidth', this.get('calculatedWidth'));
-    context.css('minHeight', this.get('calculatedHeight'));
-  },
-  
   clippingFrame: function() {
     return { left: 0, top: 0, width: this.get('calculatedWidth'), height: this.get('calculatedHeight') };
   }.property('calculatedWidth', 'calculatedHeight'),
   
   _scfl_calculatedSizeDidChange: function() {
-    this.$().css('minWidth', this.get('calculatedWidth'));
-    this.$().css('minHeight', this.get('calculatedHeight'));
-  }.observes('calculatedWidth', 'calculatedHeight'),
+    if(this.get('autoResize')) {
+      if(this.get('shouldResizeWidth')) this.adjust('minWidth', this.get('calculatedWidth'));
+      if(this.get('shouldResizeHeight')) this.adjust('minHeight', this.get('calculatedHeight'));
+    }
+  }.observes('autoResize', 'shouldResizeWidth', 'calculatedWidth', 'shouldResizeHeight', 'calculatedHeight'),
   
   /**
     @private
@@ -378,12 +373,19 @@ SC.FlowedLayout = {
   _scfl_distributeChildrenIntoRow: function(children, startingAt, row) {
     var idx, len = children.length, plan = row.plan, child, childSize, spacing, childSpacedSize, 
         items = [], itemOffset = 0, isVertical = plan.isVertical, itemSize, itemLength,
-        canWrap = this.get('canWrap');
+        canWrap = this.get('canWrap'),
+        newRowPending = NO;
     
     var max = row.plan.maximumRowLength;
     
     for (idx = startingAt; idx < len; idx++) {
       child = children[idx];
+
+      // this must be set before we check if the child is included because even
+      // if it isn't included, we need to remember that there is a line break
+      // for later
+      newRowPending = newRowPending || (idx !== startingAt && child.get('startsNewRow'));
+
       if (!this.shouldIncludeChildInFlow(idx, child)) continue;
       
       childSize = this.flowSizeForChild(idx, child);
@@ -396,10 +398,11 @@ SC.FlowedLayout = {
       itemLength = childSpacedSize[isVertical ? 'height' : 'width'];
       itemSize = childSpacedSize[isVertical ? 'width' : 'height'];
       
-      // there are two cases where we must start a new row: if the child has
+      // there are two cases where we must start a new row: if the child or a
+      // previous child in the row that wasn't included has
       // startsNewRow === YES, and if the item cannot fit. Neither applies if there
       // is nothing in the row yet.
-      if ((child.get('startsNewRow') || (canWrap && itemOffset + itemLength > max)) && items.length > 0) {
+      if ((newRowPending || (canWrap && itemOffset + itemLength > max)) && items.length > 0) {
         break;
       }
       
@@ -597,15 +600,11 @@ SC.FlowedLayout = {
     longestRow += plan.rowStartPadding + plan.rowEndPadding;
     
     this.beginPropertyChanges();
-    if (this.get('autoResize')) {
-      if (this.get('shouldResizeHeight')) {
-        this.set('calculatedHeight', isVertical ? longestRow : totalSize);
-      }
-      
-      if (this.get('shouldResizeWidth')) {
-        this.set('calculatedWidth', isVertical ? totalSize : longestRow);
-      }
-    }
+
+    this.set('calculatedHeight', isVertical ? longestRow : totalSize);
+
+    this.set('calculatedWidth', isVertical ? totalSize : longestRow);
+
     this.endPropertyChanges();
   },
   
