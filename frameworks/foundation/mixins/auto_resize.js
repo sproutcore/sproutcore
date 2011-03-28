@@ -268,7 +268,7 @@ SC.AutoResizeManager = {
     // views with a batch resize id set for each tag
     } else {
       var needResize = this.viewsNeedingResize || (this.viewsNeedingResize = {}),
-      views = needsResize[id] || (needResize[id] = SC.CoreSet.create());
+      views = needResize[id] || (needResize[id] = SC.CoreSet.create());
 
       views.add(view);
     }
@@ -304,7 +304,7 @@ SC.AutoResizeManager = {
     var tag, views, view, layer, batches;
 
     // first measure all the batched views
-    batches = this.needResize;
+    batches = this.viewsNeedingResize;
     for(tag in batches) {
       if (batches.hasOwnProperty(tag)) {
         views = batches[tag];
