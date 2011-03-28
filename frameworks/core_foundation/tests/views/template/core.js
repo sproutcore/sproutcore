@@ -132,3 +132,23 @@ test("should invalidate frame cache when layer is created", function() {
   pane.remove();
 });
 
+test("should invalidate frame cache when appended to document", function() {
+  var pane = SC.MainPane.create();
+
+  var view = SC.TemplateView.create({
+    template: function() { return "foo"; }
+  });
+
+  pane.appendChild(view);
+
+  var f = view.get('frame');
+  ok(f, "precond - returns a frame object");
+  equals(f.width, 0, "returns zero width because there is no layer");
+
+  pane.append();
+  f = view.get('frame');
+  ok(f, "returns frame object");
+  equals(f.width, view.$().width(), "returns non-zero width");
+  pane.remove();
+});
+

@@ -397,6 +397,7 @@ SC.CoreView.reopen(
   },
 
   parentViewDidResize: function() {
+    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     this.viewDidResize();
   },
 
@@ -449,10 +450,7 @@ SC.CoreView.reopen(
     invokes the same on all child views.
   */
   _notifyDidCreateLayer: function() {
-    this.beginPropertyChanges();
     this.notifyPropertyChange('layer');
-    this.notifyPropertyChange('frame');
-    this.endPropertyChanges();
 
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
@@ -751,6 +749,7 @@ SC.CoreView.reopen(
   */
 
   _notifyDidAppendToDocument: function() {
+    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
 
     var i=0, child, childLen, children = this.get('childViews');
