@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test parsing of query string
-var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
+var store, storeKey, rec1, rec2, rec3, rec4, rec5, rec6, MyApp, q;
 module("SC.Query evaluation of records", {
   setup: function() {
     
@@ -26,7 +26,8 @@ module("SC.Query evaluation of records", {
       { guid: 2, firstName: "Jane", lastName: "Doe", married: false },
       { guid: 3, firstName: "Emily", lastName: "Parker", bornIn: 1975, married: true },
       { guid: 4, firstName: "Johnny", lastName: "Cash", married: true },
-      { guid: 5, firstName: "Bert", lastName: "Berthold", married: true }
+      { guid: 5, firstName: "Bert", lastName: "Berthold", married: true },
+      { guid: 6, firstName: "Ronald", lastName: "Fitzgerald", parents: { father: "Frank", mother: "Nancy" }}
     ]);
     
     rec1 = MyApp.store.find(MyApp.Foo,1);
@@ -34,6 +35,7 @@ module("SC.Query evaluation of records", {
     rec3 = MyApp.store.find(MyApp.Foo,3);
     rec4 = MyApp.store.find(MyApp.Foo,4);
     rec5 = MyApp.store.find(MyApp.Foo,5);
+    rec6 = MyApp.store.find(MyApp.Foo,6);
     
 
     SC.RunLoop.end();
@@ -48,12 +50,21 @@ module("SC.Query evaluation of records", {
 // 
 
 test("should get record properties correctly", function() {
+
+  q.conditions = "fakeProp = 'Foo'";
+  q.parse();
+  equals(q.contains(rec1), false, 'John should not match: fakeProp = "Foo"');
   
   q.conditions = "firstName = 'John'";
   q.parse();
   equals(q.contains(rec1), true, 'John should match: firstName = "John"');
   equals(q.contains(rec2), false, 'Jane should not match: firstName = "John"');
-  
+
+  q.conditions = "parents.father = 'Frank'";
+  q.parse();
+  equals(q.contains(rec6), true, "Ronald should match: parents.father = 'Frank'");
+  equals(q.contains(rec1), false, "John should not match: parents.father = 'Frank'");
+
   q.conditions = "lastName BEGINS_WITH firstName";
   q.parse();
   equals(q.contains(rec5), true, 'Bert Berthold should match: lastName BEGINS_WITH firstName');
