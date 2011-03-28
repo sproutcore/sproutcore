@@ -34,4 +34,29 @@ test("chained observers on enumerable properties are triggered when the observed
   observerFiredCount = 0;
   SC.run(function() { child1.set('name', "Hanna"); });
   equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
+
+  momma.set('children', []);
+  observerFiredCount = 0;
+  SC.run(function() { momma.set('children', [child1, child2, child3, child4]); });
+  equals(observerFiredCount, 1, "observer did fire only once after setting 4 objects");
+
+  momma.set('children', [child1, child2, child3, child4]);
+  observerFiredCount = 0;
+  SC.run(function() { momma.set('children', []); });
+  equals(observerFiredCount, 1, "observer did fire once after setting 0 objects");
+
+  momma.set('children', []);
+  observerFiredCount = 0;
+  SC.run(function() { momma.get('children').pushObjects([child1, child2, child3, child4]); });
+  equals(observerFiredCount, 1, "observer did fire only once after adding 4 objects");
+
+  momma.set('children', [child1, child2, child3, child4]);
+  observerFiredCount = 0;
+  SC.run(function() { momma.get('children').removeObjects([child1, child2]); });
+  equals(observerFiredCount, 1, "observer did fire once after removing 2 of 4 objects");
+
+  momma.set('children', [child1, child2, child3, child4]);
+  observerFiredCount = 0;
+  SC.run(function() { momma.get('children').removeObjects([child1, child2, child3, child4]); });
+  equals(observerFiredCount, 1, "observer did fire once after removing all objects");
 });
