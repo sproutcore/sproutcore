@@ -445,6 +445,85 @@ test("dependent keys should be able to be specified as property paths", function
   equals(depObj.get('menuPrice'), 6, "cache is properly invalidated after nested property changes");
 });
 
+test("nested dependent keys should propagate after they update", function() {
+  window.DepObj = SC.Object.create({
+    restaurant: SC.Object.create({
+      menu: SC.Object.create({
+        price: 5
+      })
+    }),
+
+    price: function() {
+      return this.getPath('restaurant.menu.price');
+    }.property('restaurant.menu.price')
+  });
+
+  var bindObj = SC.Object.create({
+    priceBinding: "DepObj.price"
+  });
+
+  SC.run();
+
+  equals(bindObj.get('price'), 5, "precond - binding propagates");
+
+  DepObj.setPath('restaurant.menu.price', 10);
+
+  SC.run();
+
+  equals(bindObj.get('price'), 10, "binding propagates after a nested dependent keys updates");
+
+  DepObj.setPath('restaurant.menu', SC.Object.create({
+    price: 15
+  }));
+
+  SC.run();
+
+  equals(bindObj.get('price'), 15, "binding propagates after a middle dependent keys updates");
+});
+
+test("cacheable nested dependent keys should clear after their dependencies update", function() {
+  window.DepObj = SC.Object.create({
+    restaurant: SC.Object.create({
+      menu: SC.Object.create({
+        price: 5
+      })
+    }),
+
+    price: function() {
+      return this.getPath('restaurant.menu.price');
+    }.property('restaurant.menu.price').cacheable()
+  });
+
+  SC.run();
+
+  equals(DepObj.get('price'), 5, "precond - computed property is correct");
+
+  DepObj.setPath('restaurant.menu.price', 10);
+
+  equals(DepObj.get('price'), 10, "cacheable computed properties are invalidated even if no run loop occurred");
+  DepObj.setPath('restaurant.menu.price', 20);
+
+  equals(DepObj.get('price'), 20, "cacheable computed properties are invalidated after a second get before a run loop");
+
+  SC.run();
+
+  equals(DepObj.get('price'), 20, "precond - computed properties remain correct after a run loop");
+
+  DepObj.setPath('restaurant.menu', SC.Object.create({
+    price: 15
+  }));
+
+  equals(DepObj.get('price'), 15, "cacheable computed properties are invalidated after a middle property changes");
+
+  DepObj.setPath('restaurant.menu', SC.Object.create({
+    price: 25
+  }));
+
+  equals(DepObj.get('price'), 25, "cacheable computed properties are invalidated after a middle property changes again, before a run loop");
+});
+
+
+
 // ..........................................................
 // OBSERVABLE OBJECTS
 //

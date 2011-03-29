@@ -427,10 +427,25 @@ SC.Observable = /** @scope SC.Observable.prototype */{
   propertyDidChange: function(key,value, _keepCache) {
     this._kvo_revision = (this._kvo_revision || 0) + 1;
     var level = this._kvo_changeLevel || 0,
-        cachedep, idx, dfunc, cache, func,
-        log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO);
+        cachedep, idx, dfunc, func,
+        log = SC.LOG_OBSERVERS && (this.LOG_OBSERVING !== NO);
 
-    if (cache = this._kvo_cache) {
+    // If any dependent keys contain this property in their path,
+    // invalidate the cache of the computed property and re-setup chain with
+    // new value.
+    var chains = this._kvo_property_chains;
+    if (chains) {
+      var keyChains = chains[key];
+
+      if (keyChains) {
+        keyChains.forEach(function(chain) {
+          chain.trigger();
+        });
+      }
+    }
+
+    var cache = this._kvo_cache;
+    if (cache) {
 
       // clear any cached value
       if (!_keepCache) {
@@ -497,37 +512,40 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     @returns {Object} this
   */
   registerDependentKey: function(key, dependentKeys) {
-    var dependents = this._kvo_dependents,
-        func       = this[key],
+    var dependents      = this._kvo_dependents,
+        chainDependents = this._kvo_chain_dependents,
+        func            = this[key],
         keys, idx, lim, dep, queue;
 
-    // normalize input.
-    if (typeof dependentKeys === "object" && (dependentKeys instanceof Array)) {
-      keys = dependentKeys;
-      lim  = 0;
-    } else {
-      keys = arguments;
-      lim  = 1;
-    }
-    idx  = keys.length;
-
-    // define dependents if not defined already.
-    if (!dependents) this._kvo_dependents = dependents = {} ;
-
-    // for each key, build array of dependents, add this key...
-    // note that we ignore the first argument since it is the key...
-    while(--idx >= lim) {
-      dep = keys[idx] ;
-
-      if (dep.indexOf('.') >= 0) {
-        this.addObserver(dep, this, function() {
-          this.propertyDidChange(key);
-        });
+      // normalize input.
+      if (typeof dependentKeys === "object" && (dependentKeys instanceof Array)) {
+        keys = dependentKeys;
+        lim  = 0;
       } else {
-        // add dependent key to dependents array of key it depends on
-        queue = dependents[dep] ;
-        if (!queue) { queue = dependents[dep] = [] ; }
-        queue.push(key) ;
+        keys = arguments;
+        lim  = 1;
+      }
+      idx  = keys.length;
+
+      // define dependents if not defined already.
+      if (!dependents) this._kvo_dependents = dependents = {} ;
+
+      // for each key, build array of dependents, add this key...
+      // note that we ignore the first argument since it is the key...
+      while(--idx >= lim) {
+        dep = keys[idx] ;
+
+        if (dep.indexOf('.') >= 0) {
+          SC._PropertyChain.createChain(dep, this, key);
+        } else {
+          // add dependent key to dependents array of key it depends on
+          queue = dependents[dep] ;
+          if (!queue) { queue = dependents[dep] = [] ; }
+          queue.push(key) ;
+        }
+      }
+    },
+
     /** @private
 
       Helper method used by computeCachedDependents.  Just loops over the
