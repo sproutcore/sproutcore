@@ -124,12 +124,51 @@ SC.View.reopen({
     return ret ;
   },
 
+  firstKeyView: null,
+
+  getFirstKeyView: function() {
+    var firstKeyView = this.get('firstKeyView');
+    if(firstKeyView) return firstKeyView;
+
+    var childViews = this.get('childViews');
+
+    if(childViews) return childViews[0];
+  },
+
   /**
     Optionally points to the next key view that should gain focus when tabbing
     through an interface.  If this is not set, then the next key view will
     be set automatically to the next child.
   */
   nextKeyView: null,
+
+  getNextKeyView: function() {
+    var nextKeyView = this.get('nextKeyView');
+    if(nextKeyView) return nextKeyView;
+
+    var pv = this.get('parentView');
+    
+    if(pv) {
+      var childViews = pv.get('childViews');
+      return childViews[childViews.indexOf(this) + 1];
+    }
+  },
+
+  lastKeyView: null,
+
+  getLastKeyView: function() {
+    var lastKeyView = this.get('lastKeyView');
+    if(lastKeyView) return lastKeyView;
+
+    var view,
+    prev = this.get('firstKeyView');
+
+    while(view = prev.get('nextKeyView')) {
+      prev = view;
+    }
+
+    return prev;
+  },
 
   /**
     Computes the next valid key view, possibly returning the receiver or null.
@@ -139,40 +178,43 @@ SC.View.reopen({
     @type SC.View
   */
   nextValidKeyView: function() {
-    var seen = [],
-        rootView = this.get('pane'), ret = this.get('nextKeyView');
-
-    if(!ret) { ret = rootView._computeNextValidKeyView(this, seen); }
-
-    if(SC.TABBING_ONLY_INSIDE_DOCUMENT && !ret) {
-      ret = rootView._computeNextValidKeyView(rootView, seen);
-    }
-
-    return ret ;
+    return this._computeNextValidKeyView(this);
   }.property('nextKeyView'),
 
-  _computeNextValidKeyView: function(currentView, seen) {
-    var ret = this.get('nextKeyView'),
-        children, i, childLen, child;
-    if(this !== currentView && seen.indexOf(currentView)!=-1 &&
-      this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')){
-      return this;
-    }
-    seen.push(this); // avoid cycles
+  _computeNextValidKeyView: function(startView) {
+    var next;
 
-    // find next sibling
-    if (!ret) {
-      children = this.get('childViews');
-      for(i=0, childLen = children.length; i<childLen; i++){
-        child = children[i];
-        if(child._computeNextValidKeyView && child.get('isVisibleInWindow') && child.get('isVisible')){
-          ret = child._computeNextValidKeyView(currentView, seen);
-        }
-        if (ret) { return ret; }
-      }
-      ret = null;
+    // don't check our children if we aren't visible
+    if(this.get('isVisibleInWindow')) next = this.getFirstKeyView();
+
+    // if we have no children, check our sibling
+    if(!next) next = this.getNextKeyView();
+
+    // if we have children or siblings, see if they are valid
+    if(next) return next._validOrNextValid(startView);
+
+    // if they weren't, then go up our parents until we find one with a sibling
+    var parentView = this;
+    while(parentView = parentView.get('parentView')) {
+      next = parentView.getNextKeyView();
+
+      if(next) return next._validOrNextValid(startView);
     }
-    return ret ;
+
+    // if we reach root without finding one, start over from the beginning
+    return this.get('pane')._computeNextValidKeyView(startView);
+  },
+
+  _validOrNextValid: function(startView) {
+    // prevent infinite loop if nothing is a valid target (this shouldn't ever
+    // happen, but we still want to behave gracefully if it does)
+    if(this === startView) return null;
+    
+    // if we are a valid target, then success!
+    else if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
+
+    // otherwise keep searching starting here
+    else return this._computeNextValidKeyView(startView);
   },
 
   /**
@@ -182,6 +224,18 @@ SC.View.reopen({
   */
   previousKeyView: null,
 
+  getPreviousKeyView: function() {
+    var previousKeyView = this.get('previousKeyView');
+    if(previousKeyView) return previousKeyView;
+
+    var pv = this.get('parentView');
+
+    if(pv) {
+      var childViews = pv.get('childViews');
+      return childViews[childViews.indexOf(this) - 1];
+    }
+  },
+
   /**
     Computes the previous valid key view, possibly returning the receiver or
     null.  This is the previous key view that acceptsFirstResponder.
@@ -190,34 +244,42 @@ SC.View.reopen({
     @type SC.View
   */
   previousValidKeyView: function() {
-    var seen = [],
-        rootView = this.pane(), ret = this.get('previousKeyView');
-    if(!ret) { ret = rootView._computePreviousValidKeyView(this, seen); }
-    return ret ;
+    return this.computePreviousValidKeyView(this);
   }.property('previousKeyView'),
 
-  _computePreviousValidKeyView: function(currentView, seen) {
-    var ret = this.get('previousKeyView'),
-        children, i, child;
+  _computePreviousValidKeyView: function(startView) {
+    var prev;
 
-    if(this !== currentView && seen.indexOf(currentView)!=-1 &&
-      this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')){
-      return this;
-    }
-    seen.push(this); // avoid cycles
+    // don't check our children if we aren't visible
+    if(this.get('isVisibleInWindow')) next = this.getLastKeyView();
 
-    // find next sibling
-    if (!ret) {
-      children = this.get('childViews');
-      for(i=children.length-1; 0<=i; i--){
-        child = children[i];
-        if(child._computePreviousValidKeyView && child.get('isVisibleInWindow') && child.get('isVisible')){
-          ret = child._computePreviousValidKeyView(currentView, seen);
-        }
-        if (ret) { return ret; }
-      }
-      ret = null;
+    // if we have no children, check our sibling
+    if(!next) next = this.getPreviousKeyView();
+
+    // if we have children or siblings, see if they are valid
+    if(next) return next._validOrPreviousValid(startView);
+
+    // if they weren't, then go up our parents until we find one with a sibling
+    var parentView = this;
+    while(parentView = parentView.get('parentView')) {
+      next = parentView.getPreviousKeyView();
+
+      if(next) return next._validOrPreviousValid(startView);
     }
-    return ret ;
+
+    // if we reach root without finding one, start over from the beginning
+    return this.get('pane')._computePreviousValidKeyView(startView);
+  },
+
+  _validOrPreviousValid: function(startView) {
+    // prevent infinite loop if nothing is a valid target (this shouldn't ever
+    // happen, but we still want to behave gracefully if it does)
+    if(this === startView) return null;
+    
+    // if we are a valid target, then success!
+    else if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
+
+    // otherwise keep searching starting here
+    else return this._computePreviousValidKeyView(startView);
   }
 });
