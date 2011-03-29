@@ -53,3 +53,38 @@ test("suspended notifications should work when nesting property change groups", 
   SC.Observers.resumePropertyObserving();
   equals(callCount, 1, 'should notify observer when resumed');
 });
+
+
+module("SC.Observers.addObserver");
+
+test("Object not yet instantiated", function() {
+  var garage, car, observer, queueLength;
+  
+  garage = SC.Object.create({
+    car: SC.Object.extend({
+      make: null
+    })
+  });
+  
+  car = garage.get('car');
+  
+  observer = SC.Object.create({
+    callCount: 0,
+    makeDidChange: function() {
+      this.callCount += 1;
+    }
+  });
+  
+  ok(car.isClass, "The car object is not yet an instance, it's a class for now.");
+  
+  queueLength = SC.Observers.queue.length;
+  SC.Observers.addObserver('car.make', observer, 'makeDidChange', garage);
+  equals(SC.Observers.queue.length, queueLength + 1, "The observer should have been queued because the car object is a class, not an instance.");
+  
+  car = garage.car = car.create({ make: 'Renault' });
+  
+  SC.Observers.flush(garage);
+  
+  car.set('make', 'Ferrari');
+  equals(observer.callCount, 1, "The observer should have been called once.");
+});
