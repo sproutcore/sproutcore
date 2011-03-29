@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.workspaceRenderDelegate = SC.Object.create({
+SC.BaseTheme.workspaceRenderDelegate = SC.RenderDelegate.create({
   name: 'workspace',
   
   render: function() {

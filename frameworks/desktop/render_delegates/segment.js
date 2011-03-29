@@ -9,7 +9,7 @@
   Renders and updates the HTML representation of a segment child view within
   SC.SegmentedView.
 */
-SC.BaseTheme.segmentRenderDelegate = SC.Object.create({
+SC.BaseTheme.segmentRenderDelegate = SC.RenderDelegate.create({
   name: 'segment',
 
   render: function(dataSource, context) {
