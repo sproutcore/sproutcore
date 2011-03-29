@@ -992,6 +992,22 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     if (!addedObjects) { addedObjects = this; }
     if (!removedObjects) { removedObjects = []; }
 
+    // Check the last values passed and skip this step if they are
+    // the same.
+    //
+    // TODO: This is obviously a suboptimal workaround to the fact that
+    // enumerableContentDidChange can get called twice when implementing
+    // SC.ArrayController. We should revisit how enumerableContentDidChange
+    // works in that context. --TD
+    var lastAdded = this._lastAdded;
+    var lastRemoved = this._lastRemoved;
+
+    if(lastAdded === addedObjects) { addedObjects = []; }
+    if(lastRemoved === removedObjects) { removedObjects = []; }
+
+    this._lastAdded = addedObjects;
+    this._lastRemoved = removedObjects;
+
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var kvoKey;
 
