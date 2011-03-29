@@ -193,7 +193,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     // the style element is lazily created
     if(!styleElement) {
-      var head = document.getElementsByTagName('head')[0],
+      var head = document.getElementsByTagName('head')[0];
       styleElement = document.createElement('style');
 
       styleElement.type= 'text/css';
@@ -235,7 +235,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     if(!frame) {
       var tempFrame = target.get('frame');
 
-      frame = SC.viewportOffset(elem);
+      frame = SC.offset(elem);
 
       frame.height = tempFrame.height;
       frame.width = tempFrame.width;
