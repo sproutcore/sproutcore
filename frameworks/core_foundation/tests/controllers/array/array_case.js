@@ -203,6 +203,45 @@ test("verify rangeObserver fires when content is deleted", function() {
   equals(cnt, 1, 'range observer should have fired once');
 });
 
+test("should invalidate computed property once per changed key", function() {
+  var setCalls = 0;
+  var getCalls = 0;
+
+  window.peopleController = SC.ArrayController.create({
+    foo: YES,
+    content: [SC.Object.create({name:'Juan'}),
+              SC.Object.create({name:'Camilo'}),
+              SC.Object.create({name:'Pinzon'}),
+              SC.Object.create({name:'Señor'}),
+              SC.Object.create({name:'Daaaaaale'})],
+
+    fullNames: function(key, value) {
+      if (value !== undefined) {
+        setCalls++;
+        this.setEach('name', value);
+      } else {
+        getCalls++;
+      }
+
+      return this.getEach('name').join(' ');
+    }.property('@each.name')
+  });
+
+  try {
+    var peopleWatcher = SC.Object.create({
+      namesBinding: 'peopleController.fullNames'
+    });
+
+    SC.run();
+    SC.run(function() { peopleWatcher.set('names', 'foo bar baz'); });
+    equals(setCalls, 1, "calls set once");
+    equals(getCalls, 3, "calls get three times");
+  } finally {
+    delete window.peopleController;
+  }
+
+});
+
 
 // ..........................................................
 // VERIFY SC.ARRAY COMPLIANCE
