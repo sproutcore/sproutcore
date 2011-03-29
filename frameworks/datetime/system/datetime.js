@@ -425,10 +425,13 @@ SC.DateTime.mixin(SC.Comparable,
     The localized day names. Add the key '_SC.DateTime.dayNames' and its value
     to your strings.js file to add support for another language than English.
 
+    Default is evaluated on the document.ready event.
+
     @property
     @type {Array}
+    @default '_SC.DateTime.dayNames'.loc().w()
   */
-  dayNames: '_SC.DateTime.dayNames'.loc().w(),
+  dayNames: null,
   
   /** @private
     The English day names used for the 'lastMonday',
@@ -444,30 +447,39 @@ SC.DateTime.mixin(SC.Comparable,
     '_SC.DateTime.abbreviatedDayNames' and its value to your strings.js
     file to add support for another language than English.
 
+    Default is evaluated on the document.ready event.
+
     @property
     @type {Array}
+    @default '_SC.DateTime.abbreviatedDayNames'.loc().w()
   */
-  abbreviatedDayNames: '_SC.DateTime.abbreviatedDayNames'.loc().w(),
+  abbreviatedDayNames: null,
 
   /**
     The localized month names. Add the key '_SC.DateTime.monthNames' and its
     value to your strings.js file to add support for another language than
     English.
 
+    Default is evaluated on the document.ready event.
+
     @property
     @type {Array}
+    @default '_SC.DateTime.monthNames'.loc().w()
   */
-  monthNames: '_SC.DateTime.monthNames'.loc().w(),
+  monthNames: null,
 
   /**
     The localized abbreviated month names. Add the key
     '_SC.DateTime.abbreviatedMonthNames' and its value to your strings.js
     file to add support for another language than English.
 
+    Default is evaluated on the document.ready event.
+
     @property
     @type {Array}
+    @default '_SC.DateTime.abbreviatedMonthNames'.loc().w()
   */
-  abbreviatedMonthNames: '_SC.DateTime.abbreviatedMonthNames'.loc().w(),
+  abbreviatedMonthNames: null,
   
   /** @private
     The unique internal Date object used to make computations. Better
@@ -532,7 +544,31 @@ SC.DateTime.mixin(SC.Comparable,
     @type {Integer}
   */
   _DT_CACHE_MAX_LENGTH: 1000,
-  
+
+  /** @private
+    Called on document.ready.
+
+    Because localizations may have been modified by an application developer,
+    we need to wait for the ready event to actually evaluate the localizations.
+  */
+  _setup: function() {
+    if (!SC.DateTime.dayNames) {
+      SC.DateTime.dayNames = '_SC.DateTime.dayNames'.loc().w();
+    }
+
+    if (!SC.DateTime.abbreviatedDayNames) {
+      SC.DateTime.abbreviatedDayNames = '_SC.DateTime.abbreviatedDayNames'.loc().w();
+    }
+
+    if (!SC.DateTime.monthNames) {
+      SC.DateTime.monthNames = '_SC.DateTime.monthNames'.loc().w();
+    }
+
+    if (!SC.DateTime.abbreviatedMonthNames) {
+      SC.DateTime.abbreviatedMonthNames = '_SC.DateTime.abbreviatedMonthNames'.loc().w();
+    }
+  },
+
   /** @private
     Both args are optional, but will only overwrite _date and _tz if defined.
     This method does not affect the DateTime instance's actual time, but simply
@@ -1110,3 +1146,7 @@ SC.Binding.dateTime = function(format) {
     return value ? value.toFormattedString(format) : null;
   });
 };
+
+jQuery(document).ready(function() {
+  SC.DateTime._setup();
+});
