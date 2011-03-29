@@ -1,4 +1,4 @@
-module("chained observers");
+module("SC.Observable - Observing with @each");
 
 test("chained observers on enumerable properties are triggered when the observed property of any item changes", function() {
   var family = SC.Object.create({ momma: null });
@@ -18,8 +18,8 @@ test("chained observers on enumerable properties are triggered when the observed
   });
 
   observerFiredCount = 0;
-  SC.run(function() { child1.set('name', 'Teddy'); });
-  equals(observerFiredCount, 1, "observer fired after changing a child item's name");
+  SC.run(function() { momma.get('children').setEach('name', 'Juan'); });
+  equals(observerFiredCount, 3, "observer fired after changing child names");
 
   observerFiredCount = 0;
   SC.run(function() { momma.children.pushObject(child4); });
@@ -34,4 +34,26 @@ test("chained observers on enumerable properties are triggered when the observed
   observerFiredCount = 0;
   SC.run(function() { child1.set('name', "Hanna"); });
   equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
+});
+
+module("SC.Observable - dependent keys with @each");
+
+test("should invalidate property when property on any enumerable changes", function() {
+  var inventory = [];
+
+  for (var idx = 0; idx < 20; idx++) {
+    inventory.pushObject(SC.Object.create({
+      price: 5
+    }));
+  }
+  var restaurant = SC.Object.create({
+    totalCost: function() {
+      return inventory.reduce(function(prev, item) {
+        return prev+item.get('price');
+      }, 0);
+    }.property('@each.price')
+  });
+
+  equals(restaurant.get('totalCost'), 100, "precond - computes cost of all items");
+
 });
