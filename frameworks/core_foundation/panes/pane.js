@@ -252,6 +252,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
   */
   makeFirstResponder: function(view, evt) {
+    if(!view) view = this;
+
     var current=this.get('firstResponder'), isKeyPane=this.get('isKeyPane');
     if (current === view) return this ; // nothing to do
     if (SC.platform.touch && view && view.kindOf(SC.TextFieldView) && !view.get('focused')) return this;
