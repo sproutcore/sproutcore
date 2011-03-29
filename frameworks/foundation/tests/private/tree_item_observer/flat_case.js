@@ -301,11 +301,11 @@ test("contentGroupIndexes - not grouped", function() {
 test("contentGroupIndexes - grouped", function() {
   delegate.set('treeItemIsGrouped', YES);
   equals(delegate.get('treeItemIsGrouped'), YES, 'precond - delegate.treeItemIsGrouped == YES');
-  same(obs.contentGroupIndexes(null, obs), SC.IndexSet.create(0, obs.get('length')), 'contentGroupIndexes should cover entire set');
-  
+  same(obs.contentGroupIndexes(null, obs), SC.IndexSet.EMPTY, 'contentGroupIndexes should be an empty set');
+
   var idx, len = obs.get('length');
   for(idx=0;idx<len;idx++) {
-    equals(obs.contentIndexIsGroup(null, obs, idx), YES, 'obs.contentIndexIsGroup(null, obs, %@) should be YES'.fmt(idx));
+    equals(obs.contentIndexIsGroup(null, obs, idx), NO, 'obs.contentIndexIsGroup(null, obs, %@) should be NO'.fmt(idx));
   }
 });
 

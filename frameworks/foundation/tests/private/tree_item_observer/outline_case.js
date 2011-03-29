@@ -419,10 +419,10 @@ test("contentGroupIndexes - not grouped", function() {
 test("contentGroupIndexes - grouped", function() {
   delegate.set('treeItemIsGrouped', YES);
   equals(delegate.get('treeItemIsGrouped'), YES, 'precond - delegate.treeItemIsGrouped == YES');
-  
-  var set = SC.IndexSet.create(0).add(4).add(11);
-  same(obs.contentGroupIndexes(null, obs), set, 'contentGroupIndexes should cover just top leve items');
-  
+
+  var set = SC.IndexSet.create(0).add(4);
+  same(obs.contentGroupIndexes(null, obs), set, 'contentGroupIndexes should cover just top level group items');
+
   var idx, len = obs.get('length');
   for(idx=0;idx<len;idx++) {
     equals(obs.contentIndexIsGroup(null, obs, idx), set.contains(idx), 'obs.contentIndexIsGroup(null, obs, %@) (%@)'.fmt(idx, flattened[idx]));
