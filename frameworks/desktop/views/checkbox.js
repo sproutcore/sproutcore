@@ -62,8 +62,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     this.set('isActive', NO);
     this._isMouseDown = NO;
 
-    if(!this.get('isEnabled') || 
-      (evt && evt.target && !this.$().within(evt.target))) {
+    if(!this.get('isEnabled')) {
       return YES;
     }
     var val = this.get('value');
