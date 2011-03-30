@@ -34,11 +34,6 @@ SC.State = SC.Object.extend({
     @property {State}
   */
   parentState: null,
-
-  depth: function() {
-    if(this.get('isRootState')) return 0;
-    else return this.parentState.get('depth') + 1;
-  }.property('parentState', 'isRootState').cacheable(),
   
   /**
     This state's history state. Can be null. Managed by the statechart.
@@ -534,15 +529,7 @@ SC.State = SC.Object.extend({
     if (this.get('isCurrentState')) {
       fromState = this;
     } else if (this.get('hasCurrentSubstates')) {
-      var statechart = this.get('statechart');
-
-      // get actual state from string
-      state = statechart.get('rootState').getSubstate(state);
-
-      // find the correct state to transition from
-      // the statechart can do this too, but our list of currentSubstates is
-      // shorter so it may be more efficient here
-      fromState = statechart.findClosestState(state, this.get('currentSubstates'));
+      fromState = this.get('currentSubstates')[0];
     }
     
     this.get('statechart').gotoState(state, fromState, context);
