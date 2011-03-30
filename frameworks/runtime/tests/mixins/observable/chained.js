@@ -36,24 +36,3 @@ test("chained observers on enumerable properties are triggered when the observed
   equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
 });
 
-module("SC.Observable - dependent keys with @each");
-
-test("should invalidate property when property on any enumerable changes", function() {
-  var inventory = [];
-
-  for (var idx = 0; idx < 20; idx++) {
-    inventory.pushObject(SC.Object.create({
-      price: 5
-    }));
-  }
-  var restaurant = SC.Object.create({
-    totalCost: function() {
-      return inventory.reduce(function(prev, item) {
-        return prev+item.get('price');
-      }, 0);
-    }.property('@each.price')
-  });
-
-  equals(restaurant.get('totalCost'), 100, "precond - computes cost of all items");
-
-});

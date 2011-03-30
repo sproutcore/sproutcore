@@ -439,7 +439,10 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
       if (keyChains) {
         keyChains.forEach(function(chain) {
-          chain.trigger();
+          // Invalidate the property that depends on the changed key.
+          chain.notifyPropertyDidChange();
+          // Now that the chain is potentially invalid, rebuild it.
+          chain.rebuildChain();
         });
       }
     }
@@ -536,7 +539,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         dep = keys[idx] ;
 
         if (dep.indexOf('.') >= 0) {
-          SC._PropertyChain.createChain(dep, this, key);
+          SC._PropertyChain.createChain(dep, this, key).activate();
         } else {
           // add dependent key to dependents array of key it depends on
           queue = dependents[dep] ;
@@ -544,6 +547,53 @@ SC.Observable = /** @scope SC.Observable.prototype */{
           queue.push(key) ;
         }
       }
+    },
+
+    /** @private
+      Register a property chain so that dependent keys can be invalidated
+      when a property on this object changes.
+
+      @param {String} property the property on this object that invalidates the chain
+      @param {SC._PropertyChain} chain the chain to notify
+    */
+    registerDependentKeyWithChain: function(property, chain) {
+      var chains = this._chainsFor(property), next;
+      chains.add(chain);
+
+      next = chain.next;
+      if (next) { next.activate(this); }
+    },
+
+    /** @private
+      Removes a property chain from the object.
+
+      @param {String} property the property on this object that invalidates the chain
+      @param {SC._PropertyChain} chain the chain to notify
+    */
+    removeDependentKeyWithChain: function(property, chain) {
+      var chains = this._chainsFor(property), next;
+      chains.remove(chain);
+
+      if (chains.get('length') === 0) {
+        delete this._kvo_property_chains[property];
+      }
+
+      next = chain.next;
+      if (next) { next.deactivate(); }
+    },
+
+    /** @private
+      Returns an instance of SC.CoreSet in which to save SC._PropertyChains.
+
+      @param {String} property the property associated with the SC._PropertyChain
+      @returns {SC.CoreSet}
+    */
+    _chainsFor: function(property) {
+      this._kvo_property_chains = this._kvo_property_chains || {};
+      var chains = this._kvo_property_chains[property] || SC.CoreSet.create();
+      this._kvo_property_chains[property] = chains;
+
+      return chains;
     },
 
     /** @private

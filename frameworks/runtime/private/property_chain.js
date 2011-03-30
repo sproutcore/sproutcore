@@ -1,23 +1,106 @@
 sc_require('system/object');
 
-SC._PropertyChain = SC.Object.extend(SC.Enumerable, {
-  isPropertyChain: true,
+/**
+  @class
+  @private
 
+  SC._PropertyChain is used as the bookkeeping system for notifying the KVO
+  system of changes to computed properties that contains paths as dependent
+  keys.
+
+  Each instance of SC._PropertyChain serves as a node in a linked list. One node
+  is created for each property in the path, and stores a reference to the name
+  of the property and the object to which it belongs. If that property changes,
+  the SC._PropertyChain instance notifies its associated computed property to
+  invalidate, then rebuilds the chain with the new value.
+
+  To create a new chain, call SC._PropertyChain.createChain() with the target,
+  path, and property to invalidate if any of the objects in the path change.
+
+  For example, if you called createChain() with 'foo.bar.baz', it would
+  create a linked list like this:
+
+   ---------------------     ---------------------     ---------------------
+  | property:     'foo' |   | property:     'bar' |   | property:     'baz' |
+  | nextProperty: 'bar' |   | nextProperty: 'baz' |   | nextProperty: undef |
+  | next:           ------->| next:           ------->| next:     undefined |
+   ---------------------     ---------------------     ---------------------
+
+  @extends SC.Object
+  @since SproutCore 1.5
+*/
+
+SC._PropertyChain = SC.Object.extend(
+/** @scope SC.ObjectController.prototype */ {
+
+  /**
+    The object represented by this node in the chain.
+
+    @property {Object}
+  */
   object: null,
+
+  /**
+    The key on the previous object in the chain that contains the object
+    represented by this node in the chain.
+
+    @property {String}
+  */
   property: null,
 
-  nextObject: function(index, previousObject, context) {
-    return previousObject.next;
-  },
+  /**
+    The target object. This is the object passed to createChain(), and the
+    object which contains the +toInvalidate+ property that will be invalidated
+    if +property+ changes.
 
+    @property {Object}
+  */
+  target: null,
+
+  /**
+    The property of +target+ to invalidate when +property+ changes.
+
+    @property {String}
+  */
+  toInvalidate: null,
+
+  /**
+    The property key on +object+ that contains the object represented by the
+    next node in the chain.
+
+    @property {String}
+  */
+  nextProperty: null,
+
+  /**
+    Registers this segment of the chain with the object it represents.
+
+    This should be called with the object represented by the previous node in
+    the chain as the first parameter. If no previous object is provided, it will
+    assume it is the root node in the chain and treat the target as the previous
+    object.
+
+    @param {Object} [prev] The previous object in the chain.
+  */
   activate: function(prev) {
     var object   = this.get('object'),
         property = this.get('property');
 
-    // If this chain has not yet been associated with an object,
+    // If no parameter is passed, assume we are the root in the chain
+    // and look up property relative to the target, since dependent key
+    // paths are always relative.
+    if (!prev) { prev = this.get('target'); }
+
+    // If this node has not yet been associated with an object,
     // look up the object and associate it.
     if (!object) {
-      object = prev.get(property);
+      // In the special case of @each, we treat the enumerable as the next
+      // property.
+      if (property === '@each') {
+        object = prev;
+      } else {
+        object = prev.get(property);
+      }
       this.set('object', object);
     }
 
@@ -25,67 +108,52 @@ SC._PropertyChain = SC.Object.extend(SC.Enumerable, {
     // property chains.
     if (!object) { return; }
 
-    var next = this.next;
-
-    // Set up KVO property chains, if they don't already exist
-    var chains = this._chainsFor(this.get('nextProperty'), object);
-
-    chains.add(this);
-
-    // Unless we are at the tail of the chain, activate the next
-    // element of the chain.
-    if(next) { next.activate(object); }
+    // Register this node with the object, and tell it which key changing should
+    // cause the node to be notified.
+    object.registerDependentKeyWithChain(this.get('nextProperty'), this);
   },
 
+  /**
+    Removes this segment of the chain from the object it represents. This is usually
+    called when the object represented by the previous segment in the chain changes.
+  */
   deactivate: function() {
-    console.log('deactivate!');
     var object       = this.get('object'),
-        property     = this.get('property'),
         nextProperty = this.get('nextProperty');
 
     // If the chain element is not associated with an object,
     // we don't need to deactivate anything.
     if (!object) { return; }
 
-    var next = this.next;
-
-    // Set up KVO property chains, if they don't already exist
-    var chains = this._chainsFor(nextProperty, object);
-
-    chains.remove(this);
-
-    if (chains.get('length') === 0) {
-      delete object._kvo_property_chains[nextProperty];
-    }
-
-    // Unless we are at the tail of the chain, deactivate the
-    // next element of the chain.
-    if(next) { next.deactivate(); }
+    object.removeDependentKeyWithChain(nextProperty, this);
   },
 
-  trigger: function() {
+  /**
+    Invalidates the +toInvalidate+ property of the +target+ object.
+  */
+  notifyPropertyDidChange: function() {
     var target       = this.get('target'),
         toInvalidate = this.get('toInvalidate');
 
     // Tell the target of the chain to invalidate the property
     // that depends on this element of the chain
     target.propertyDidChange(toInvalidate);
+  },
 
-    // Tear down the rest of the existing chain
+  /**
+    Deactivates the current chain, then recreates it with the new
+    values.
+  */
+  rebuildChain: function() {
     this.deactivate();
-
-    // Activate the chain on the newly set object
     this.activate();
   },
 
-  _chainsFor: function(property, object) {
-    object._kvo_property_chains = object._kvo_property_chains || {};
-    var chains = object._kvo_property_chains[property] =
-      object._kvo_property_chains[property] || SC.CoreSet.create();
+  /**
+    Returns a string representation of the chain segment.
 
-    return chains;
-  },
-
+    @returns {String}
+  */
   toString: function() {
     return "SC._ChainProperty(target: %@, property: %@)".fmt(
       this.get('target'), this.get('property'));
@@ -93,15 +161,7 @@ SC._PropertyChain = SC.Object.extend(SC.Enumerable, {
 });
 
 SC._PropertyChain.createChain = function(path, target, toInvalidate) {
-  window.billy = target;
-
-  var log = YES;
   var parts = path.split('.');
-
-  if (log) {
-    console.log("Creating chain on %@.%@ to invalidate %@".fmt(target, path, toInvalidate));
-  }
-
   var len = parts.length - 1,
       i   = 1;
 
@@ -126,7 +186,5 @@ SC._PropertyChain.createChain = function(path, target, toInvalidate) {
     tail.set('length', len);
   }
 
-  root.activate(target);
   return root;
 };
-

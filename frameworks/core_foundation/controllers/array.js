@@ -495,6 +495,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     this._scac_enumerableChanges = enumerableChanges;
     this.invokeOnce(this._scac_propagateEnumerableObservers);
+
+    this.setupPropertyChainsForEnumerableContent(addedObjects, removedObjects);
   },
 
   /**

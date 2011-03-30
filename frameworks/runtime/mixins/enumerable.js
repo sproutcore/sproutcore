@@ -737,14 +737,14 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
         ret = [],
         last = null,
         context = SC.Enumerator._popContext(),
-        grouped = [], 
+        grouped = [],
         keyValues = [],
         idx, next, cur;
-    
+
     for(idx=0;idx<len;idx++) {
       next = this.nextObject(idx, last, context) ;
       cur = next ? (next.get ? next.get(key) : next[key]) : null;
-      if(SC.none(grouped[cur])) { 
+      if(SC.none(grouped[cur])) {
         grouped[cur] = []; keyValues.push(cur);
       }
       grouped[cur].push(next);
@@ -752,9 +752,9 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     }
     last = null;
     context = SC.Enumerator._pushContext(context);
-    
+
     for(idx=0,len=keyValues.length; idx < len; idx++){
-      ret.push(grouped[keyValues[idx]]);        
+      ret.push(grouped[keyValues[idx]]);
     }
     return ret ;
   }
@@ -809,8 +809,111 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     this._setupContentObservers(addedObjects, removedObjects);
     this.notifyPropertyChange('[]') ;
     this._notifyEnumerableObservers(addedObjects, removedObjects, start);
+  },
 
+  /**
+    For all registered property chains on this object, removed them from objects
+    being removed from the enumerable, and clone them onto newly added objects.
+
+    @param {Object[]} addedObjects the objects being added to the enumerable
+    @param {Object[]} removedObjects the objected being removed from the enumerable
+    @returns {Object} receiver
+  */
+  setupPropertyChainsForEnumerableContent: function(addedObjects, removedObjects) {
+    var chains = this._kvo_enumerable_property_chains;
+
+    if (chains) {
+      chains.forEach(function(chain) {
+        var idx, len = removedObjects.get('length'),
+            chainGuid = SC.guidFor(chain),
+            clonedChain, item, kvoChainList = '_kvo_enumerable_property_clones';
+
+        chain.notifyPropertyDidChange();
+
+        for (idx = 0; idx < len; idx++) {
+          item = removedObjects[idx];
+          clonedChain = item[kvoChainList][chainGuid];
+          clonedChain.deactivate();
+          delete item[kvoChainList][chainGuid];
+        }
+
+        len = addedObjects.get('length');
+        for (idx = 0; idx < len; idx++) {
+          this._clonePropertyChainToItem(chain, addedObjects[idx]);
+        }
+      }, this);
+    }
     return this ;
+  },
+
+  /**
+    Register a property chain to propagate to enumerable content.
+
+    This will clone the property chain to each item in the enumerable,
+    then save it so that it is automatically set up and torn down when
+    the enumerable content changes.
+
+    @param {String} property the property being listened for on this object
+    @param {SC._PropertyChain} chain the chain to clone to items
+  */
+  registerDependentKeyWithChain: function(property, chain) {
+    // Get the set of all existing property chains that should
+    // be propagated to enumerable contents. If that set doesn't
+    // exist yet, _kvo_for() will create it.
+    var kvoChainList = '_kvo_enumerable_property_chains',
+        chains, item, clone, cloneList;
+
+    chains = this._kvo_for(kvoChainList, SC.CoreSet);
+
+    // Save a reference to the chain on this object. If new objects
+    // are added to the enumerable, we will clone this chain and add
+    // it to the new object.
+    chains.add(chain);
+
+    this.forEach(function(item) {
+      this._clonePropertyChainToItem(chain, item);
+    }, this);
+  },
+
+  /**
+    Clones an SC._PropertyChain to a content item.
+
+    @param {SC._PropertyChain} chain
+    @param {Object} item
+  */
+  _clonePropertyChainToItem: function(chain, item) {
+    var clone        = SC.clone(chain),
+        kvoCloneList = '_kvo_enumerable_property_clones',
+        cloneList;
+
+    clone.object = item;
+
+    cloneList = item[kvoCloneList] = item[kvoCloneList] || {};
+    cloneList[SC.guidFor(chain)] = clone;
+
+    clone.activate(item);
+  },
+
+  /**
+    Removes a dependent key from the enumerable, and tears it down on
+    all content objects.
+
+    @param {String} property
+    @param {SC._PropertyChain} chain
+  */
+  removeDependentKeyWithChain: function(property, chain) {
+    var kvoChainList = '_kvo_enumerable_property_chains',
+        kvoCloneList = '_kvo_enumerable_property_clones',
+        chains, item, clone, cloneList;
+
+    this.forEach(function(item) {
+      item.removeDependentKeyWithChain(property, chain);
+
+      cloneList = item[kvoCloneList];
+      clone = cloneList[SC.guidFor(chain)];
+
+      clone.deactivate(item);
+    }, this);
   },
 
   /**
@@ -1133,7 +1236,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @param {Object} value a value or undefined.
 
-    @param {Boolean} generateProperty only set to false if you do not want 
+    @param {Boolean} generateProperty only set to false if you do not want
       an optimized computed property handler generated for this.  Not common.
 
     @returns {Object} the reduced property or undefined
@@ -1181,12 +1284,12 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
   /**
     Reducer for @max reduced property.
-        
+
     @param {Object} previousValue The previous value in the enumerable
     @param {Object} item The current value in the enumerable
     @param {Number} index The index of the current item in the enumerable
     @param {String} reducerProperty (Optional) The property in the enumerable being reduced
-    
+
     @returns {Object} reduced value
   */
   reduceMax: function(previousValue, item, index, e, reducerProperty) {
@@ -1198,15 +1301,15 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the max of the items in the enumerable. If 
+    Reduces an enumberable to the max of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
-        
+
     @param {Object} previousValue The previous value in the enumerable
     @param {Object} item The current value in the enumerable
     @param {Number} index The index of the current item in the enumerable
     @param {String} reducerProperty (Optional) The property in the enumerable being reduced
-    
+
     @returns {Object} reduced value
   */
   reduceMaxObject: function(previousItem, item, index, e, reducerProperty) {
@@ -1228,15 +1331,15 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the min of the items in the enumerable. If 
+    Reduces an enumberable to the min of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
-        
+
     @param {Object} previousValue The previous value in the enumerable
     @param {Object} item The current value in the enumerable
     @param {Number} index The index of the current item in the enumerable
     @param {String} reducerProperty (Optional) The property in the enumerable being reduced
-    
+
     @returns {Object} reduced value
   */
   reduceMin: function(previousValue, item, index, e, reducerProperty) {
@@ -1248,15 +1351,15 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the max of the items in the enumerable. If 
+    Reduces an enumberable to the max of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
-        
+
     @param {Object} previousValue The previous value in the enumerable
     @param {Object} item The current value in the enumerable
     @param {Number} index The index of the current item in the enumerable
     @param {String} reducerProperty (Optional) The property in the enumerable being reduced
-    
+
     @returns {Object} reduced value
   */
   reduceMinObject: function(previousItem, item, index, e, reducerProperty) {
@@ -1278,15 +1381,15 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the average of the items in the enumerable. If 
+    Reduces an enumberable to the average of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
-        
+
     @param {Object} previousValue The previous value in the enumerable
     @param {Object} item The current value in the enumerable
     @param {Number} index The index of the current item in the enumerable
     @param {String} reducerProperty (Optional) The property in the enumerable being reduced
-    
+
     @returns {Object} reduced value
   */
   reduceAverage: function(previousValue, item, index, e, reducerProperty) {
@@ -1300,15 +1403,15 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the sum of the items in the enumerable. If 
+    Reduces an enumberable to the sum of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
-    
+
     @param {Object} previousValue The previous value in the enumerable
     @param {Object} item The current value in the enumerable
     @param {Number} index The index of the current item in the enumerable
     @param {String} reducerProperty (Optional) The property in the enumerable being reduced
-    
+
     @returns {Object} reduced value
   */
   reduceSum: function(previousValue, item, index, e, reducerProperty) {
@@ -1372,23 +1475,23 @@ Array.prototype.isEnumerable = YES ;
     groupBy: function(key) {
       var len = this.length,
           ret = [],
-          grouped = [], 
+          grouped = [],
           keyValues = [],
           idx, next, cur;
-      
+
       for(idx=0;idx<len;idx++) {
         next = this[idx] ;
         cur = next ? (next.get ? next.get(key) : next[key]) : null;
         if(SC.none(grouped[cur])){ grouped[cur] = []; keyValues.push(cur); }
         grouped[cur].push(next);
       }
-      
+
       for(idx=0,len=keyValues.length; idx < len; idx++){
-        ret.push(grouped[keyValues[idx]]);        
+        ret.push(grouped[keyValues[idx]]);
       }
       return ret ;
     },
-    
+
     find: function(callback, target) {
       if (typeof callback !== "function") throw new TypeError() ;
       var len = this.length ;
