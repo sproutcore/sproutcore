@@ -121,7 +121,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       pitem = item ; // save parent
 
       for(idx=0;idx<len;idx++) {
-        console.log('idx = ' + idx);
         if (!(item = children.objectAt(idx))) continue ;
         if (!this._computeChildren(item, pitem, idx)) continue; // no children
         if (this._computeDisclosureState(item, pitem, idx) !== SC.LEAF_NODE) {
