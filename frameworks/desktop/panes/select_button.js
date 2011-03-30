@@ -857,14 +857,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
   }.property('isEnabled'),
 
   insertTab: function(evt) {
-    view = this.get('nextValidKeyView');
+    var view = this.get('nextValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
     return YES ; // handled
   },
 
   insertBacktab: function(evt) {
-    view = this.get('previousValidKeyView');
+    var view = this.get('previousValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
     return YES ; // handled
