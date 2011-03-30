@@ -366,7 +366,7 @@ SC.View.reopen({
     @type SC.View
   */
   previousValidKeyView: function() {
-    return this.computePreviousValidKeyView(this);
+    return this._computePreviousValidKeyView(this);
   }.property('previousKeyView'),
 
   /**
