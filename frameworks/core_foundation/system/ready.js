@@ -85,12 +85,7 @@ SC.mixin({
         SC._readyQueue = null;
       }
       
-<<<<<<< HEAD
-      if(window.main && !SC.suppressMain) { main(); }
-      
-=======
       if(window.main && !SC.suppressMain && (SC.mode === SC.APP_MODE)) { window.main(); }
->>>>>>> public/master
       SC.RunLoop.end();
     }
   }
