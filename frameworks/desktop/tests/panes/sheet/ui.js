@@ -36,8 +36,10 @@ test("verify sheet pane slide down works", function() {
     ok(slidePane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
     ok(slidePane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
     ok(slidePane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
-    window.start();
+    SC.RunLoop.begin();
     slidePane.remove();
+    SC.RunLoop.end();
+    window.start();
   };
   stop();
   setTimeout(f, 400);

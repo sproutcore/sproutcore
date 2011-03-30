@@ -143,16 +143,16 @@ var pane = SC.ControlTestPane.design()
     maximum: 100
   });
 
-pane.show(); // add a test to show the test pane
-
 // ..........................................................
 // TEST VIEWS
 // 
 module("SC.ProgressView UI", {
   setup: function(){
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
   },
   teardown: function(){
+    pane.standardSetup().teardown();
     clearHtmlbody();
   }
 });
@@ -348,7 +348,7 @@ test("Check if attribute aria-valuetext is set correctly", function() {
 // SC.SliderView
 //
 
-module("SC.SliderView UI");
+module("SC.SliderView UI", pane.standardSetup());
 
 test("basic", function() {
   var view = pane.view('slider basic');
