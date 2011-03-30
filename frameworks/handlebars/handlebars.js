@@ -533,7 +533,7 @@ Handlebars.registerHelper('if', function(context, fn, inverse) {
 });
 
 Handlebars.registerHelper('unless', function(context, fn, inverse) {
-  Handlebars.helpers['if'].call(this, context, inverse, fn);
+  return Handlebars.helpers['if'].call(this, context, inverse, fn);
 });
 
 Handlebars.registerHelper('with', function(context, fn) {

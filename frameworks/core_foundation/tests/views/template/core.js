@@ -66,7 +66,7 @@ test("template views return YES to mouseDown if there is a mouseUp method", func
   ok(view.tryToPerform('mouseDown'), "view returns YES if we add a mouseUp method");
 });
 
-test("should add a 'hidden' class to a template view when isVisible is true", function() {
+test("should add a 'sc-hidden' class to a template view when isVisible is true", function() {
   var view = SC.TemplateView.create();
 
   ok(view.get('isVisible'), "precond - views default to being visible");
@@ -74,16 +74,16 @@ test("should add a 'hidden' class to a template view when isVisible is true", fu
   view.set('template', function() { return "foo"; });
 
   view.createLayer();
-  ok(!view.$().hasClass('hidden'), "does not have hidden class applied");
+  ok(!view.$().hasClass('sc-hidden'), "does not have hidden class applied");
 
   SC.run(function() { view.set('isVisible', NO); });
-  ok(view.$().hasClass('hidden'), "adds hidden class when isVisible changes to NO");
+  ok(view.$().hasClass('sc-hidden'), "adds hidden class when isVisible changes to NO");
 
   SC.run(function() { view.set('isVisible', YES); });
-  ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes to YES");
+  ok(!view.$().hasClass('sc-hidden'), "removes hidden class when isVisible changes to YES");
 });
 
-test("should add a 'hidden' class to template views if isVisible is false before their layer is created", function() {
+test("should add a 'sc-hidden' class to template views if isVisible is false before their layer is created", function() {
   var view = SC.TemplateView.create({
     isVisible: false
   });
@@ -93,13 +93,13 @@ test("should add a 'hidden' class to template views if isVisible is false before
   view.set('template', function() { return "foo"; });
 
   view.createLayer();
-  ok(view.$().hasClass('hidden'), "adds hidden class when rendering");
+  ok(view.$().hasClass('sc-hidden'), "adds hidden class when rendering");
   $(document.body).append(view.$());
   ok(!view.$().is(':visible'), "should be hidden when hidden class is added");
   view.$().remove();
 
   SC.run(function() { view.set('isVisible', YES); });
-  ok(!view.$().hasClass('hidden'), "removes hidden class when isVisible changes");
+  ok(!view.$().hasClass('sc-hidden'), "removes hidden class when isVisible changes");
 });
 
 test("should return an empty rect as its frame if no layer exists", function() {
@@ -126,6 +126,26 @@ test("should invalidate frame cache when layer is created", function() {
 
   pane.appendChild(view);
 
+  f = view.get('frame');
+  ok(f, "returns frame object");
+  equals(f.width, view.$().width(), "returns non-zero width");
+  pane.remove();
+});
+
+test("should invalidate frame cache when appended to document", function() {
+  var pane = SC.MainPane.create();
+
+  var view = SC.TemplateView.create({
+    template: function() { return "foo"; }
+  });
+
+  pane.appendChild(view);
+
+  var f = view.get('frame');
+  ok(f, "precond - returns a frame object");
+  equals(f.width, 0, "returns zero width because there is no layer");
+
+  pane.append();
   f = view.get('frame');
   ok(f, "returns frame object");
   equals(f.width, view.$().width(), "returns non-zero width");

@@ -31,5 +31,5 @@ test("verify palette pane content container is visible at correct location with 
   equals(ret.width, '400px', 'pane should have width 400px');
   equals(ret.height, '200px', 'pane should have height 200px');
 
-  //pane.remove();
+  pane.remove();
 }) ;

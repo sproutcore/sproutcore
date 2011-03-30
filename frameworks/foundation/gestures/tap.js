@@ -18,7 +18,7 @@ SC.TapGesture = SC.Gesture.extend({
   tapDelay: 200,
 
   touchIsInGesture: function(touch, status) {
-    return !status.tapFlunked
+    return !touch.tapFlunked;
   },
 
   touchStart: function(touch) {
@@ -86,8 +86,12 @@ SC.TapGesture = SC.Gesture.extend({
   },
 
   _cancelTap: function(touch){
-    this.statusForTouch(touch).tapFlunked = YES;
+    // We don't set this on the touchStatus because the status is
+    // linked to an individual view/gesture and we want this to be
+    // global. If it's not a tap somewhere, it's not a tap anywhere.
+    touch.tapFlunked = YES;
 
+    this.release(touch);
     this.cancel(touch, this._tapCount);
 
     if (this._eventTimer) this._eventTimer.invalidate();

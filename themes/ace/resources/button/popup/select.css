@@ -4,6 +4,7 @@
     
     .sc-button-label {
       position: absolute;
+      z-index: 5; /* Appear above background */
       left: 7px;
       text-align: left;
       right: 25px;

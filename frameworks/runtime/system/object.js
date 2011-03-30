@@ -225,7 +225,7 @@ SC._enhance = function(originalFunction, enhancement) {
     args.unshift(function() { return originalFunction.apply(self, arguments); });
     return enhancement.apply(this, args);
   };
-}
+};
 
 /** @class
 
@@ -464,7 +464,13 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @function
   */
   design: function() {
-    if (this.isDesign) return this; // only run design one time
+    if (this.isDesign) {
+      //@ if (debug)
+      SC.Logger.warn("SC.Object#design called twice for %@.".fmt(this));
+      //@ endif
+      return this;
+    }
+
     var ret = this.extend.apply(this, arguments);
     ret.isDesign = YES ;
     if (SC.ObjectDesigner) {

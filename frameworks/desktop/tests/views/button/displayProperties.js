@@ -7,10 +7,10 @@
 /*global module test equals context ok same */
 
 var view ;
-module("SC.Button#displayProperties", {
+module("SC.ButtonView#displayProperties", {
   setup: function() {
-    view = SC.View.create(SC.Control, SC.Button, { 
-        isVisibleInWindow: YES 
+    view = SC.ButtonView.create({ 
+      isVisibleInWindow: YES 
     }).createLayer();
   },
   

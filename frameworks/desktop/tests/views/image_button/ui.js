@@ -11,7 +11,6 @@ module('SC.ImageButtonView ui');
 
 test("Check if icon class is set properly on ImageButton",function(){
   var viewElem=pane.view('iconchange').$('div');
-  console.error(viewElem[0]);
   ok(viewElem.hasClass('start'), 'Icon class set initially to "start"');
 });
 

@@ -10,10 +10,10 @@
 // contentPropertyDidChange()
 // 
 var view, content ;
-module('SC.Button#contentPropertyDidChange', {
+module('SC.ButtonView#contentPropertyDidChange', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.View.create(SC.Control, SC.Button);
+    view = SC.ButtonView.create();
     view.set('title', 'hello world');
   },
   
@@ -78,10 +78,10 @@ test("should fire even on a content object set when the object is created", func
 });
 
 
-module('SC.Button#titleRendering', {
+module('SC.ButtonView#titleRendering', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.View.create(SC.Control, SC.Button);
+    view = SC.ButtonView.create();
     view.set('title', 'hello world');
   },
   
@@ -97,21 +97,15 @@ test("should return the title localized or not", function() {
   equals(view.displayTitle(), 'hello world', 'should return an empty string as the title is not localized');
 });
 
-test("should return the button view context with the title set", function() {
-  context = SC.RenderContext();
-  ok((view.renderTitle(context, true).length>0), 'title string were added to the context');
-});
-
-
 
 
 // ..........................................................
 // updatePropertyFromContent()
 // 
-module("SC.Button#updatePropertyFromContent()", {
+module("SC.ButtonView#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, SC.Button, { content: content });
+    view = SC.ButtonView.create({ content: content });
   },
   teardown: function() {
     content = null ;
@@ -158,10 +152,10 @@ test("should be able to get value from a content object that is not SC.Object", 
 // ..........................................................
 // updateContentWithValueObserver()
 // 
-module("SC.Button#updatePropertyFromContent()", {
+module("SC.ButtonView#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, SC.Button, { 
+    view = SC.ButtonView.create({ 
       value: "bar",
       content: content,
       contentValueKey: "bar",

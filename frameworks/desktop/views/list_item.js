@@ -546,6 +546,12 @@ SC.ListItemView = SC.View.extend(
 
     v = (labelKey && content) ? (content.get ? content.get(labelKey) : content[labelKey]) : content;
 
+<<<<<<< HEAD
+=======
+    f = this.computeFrameWithParentFrame(null);
+    offset = SC.offset(el[0]);
+
+>>>>>>> public/master
     // if the label has a large line height, try to adjust it to something
     // more reasonable so that it looks right when we show the popup editor.
     lineHeight = this._oldLineHeight = el.css('lineHeight');

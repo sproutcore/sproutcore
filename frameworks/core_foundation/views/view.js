@@ -350,6 +350,7 @@ SC.CoreView.reopen(
   },
 
   parentViewDidResize: function() {
+    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     this.viewDidResize();
   },
 
@@ -402,10 +403,7 @@ SC.CoreView.reopen(
     invokes the same on all child views.
   */
   _notifyDidCreateLayer: function() {
-    this.beginPropertyChanges();
     this.notifyPropertyChange('layer');
-    this.notifyPropertyChange('frame');
-    this.endPropertyChanges();
 
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
@@ -637,7 +635,7 @@ SC.CoreView.reopen(
     context.addClass(this.get('classNames'));
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
-    if (!this.get('isVisible')) { context.addClass('hidden'); }
+    if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));
@@ -704,6 +702,7 @@ SC.CoreView.reopen(
   */
 
   _notifyDidAppendToDocument: function() {
+    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
 
     var i=0, child, childLen, children = this.get('childViews');
@@ -1208,7 +1207,13 @@ SC.CoreView.mixin(/** @scope SC.View.prototype */ {
     @function
   */
   design: function() {
-    if (this.isDesign) { return this; } // only run design one time
+    if (this.isDesign) {
+      //@ if (debug)
+      SC.Logger.warn("SC.View#design called twice for %@.".fmt(this));
+      //@ endif
+      return this;
+    }
+
     var ret = this.extend.apply(this, arguments);
     ret.isDesign = YES ;
     if (SC.ViewDesigner) {

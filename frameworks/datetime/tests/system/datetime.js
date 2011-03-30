@@ -324,6 +324,13 @@ test('parse without a format uses default ISO8601', function() {
   equals(SC.DateTime.parse("2010-09-17T18:35:08Z").toISO8601(), "2010-09-17T18:35:08+00:00");
 });
 
+test('parse with hours and meridian', function(){
+  equals(SC.DateTime.parse("03/25/2011 5:12:50PM Z", "%m/%d/%Y %I:%M:%S%p %Z").toISO8601(), "2011-03-25T17:12:50+00:00");
+  equals(SC.DateTime.parse("03/25/2011 5:12:50PM Z", "%m/%d/%Y %i:%M:%S%p %Z").toISO8601(), "2011-03-25T17:12:50+00:00");
+  equals(SC.DateTime.parse("03/25/2011 05:12:50PM Z", "%m/%d/%Y %I:%M:%S%p %Z").toISO8601(), "2011-03-25T17:12:50+00:00");
+  equals(SC.DateTime.parse("03/25/2011 05:12:50PM Z", "%m/%d/%Y %i:%M:%S%p %Z").toISO8601(), "2011-03-25T17:12:50+00:00");
+});
+
 test('bad parsing', function() {
   equals(SC.DateTime.parse(SC.DateTime.parse("foo")), null);
   equals(SC.DateTime.parse("2010-09-17T18:35:08Z", SC.DATETIME_ISO8601).toISO8601(), "2010-09-17T18:35:08+00:00");

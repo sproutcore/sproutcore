@@ -72,7 +72,7 @@ SC.IndexSet = SC.mixin({},
   /**
     To create a set, pass either a start and index or another IndexSet.
 
-    @param {Number} start 
+    @param {Number} start
     @param {Number} length
     @returns {SC.IndexSet}
   */
@@ -752,7 +752,7 @@ SC.IndexSet = SC.mixin({},
 
   /**
     Add all the ranges in the passed array.
-    
+
     @param {Enumerable} objects The list of ranges you want to add
   */
   addEach: function(objects) {
@@ -772,7 +772,7 @@ SC.IndexSet = SC.mixin({},
 
   /**
     Removes all the ranges in the passed array.
-    
+
     @param {Object...} objects The list of objects you want to remove
   */
   removeEach: function(objects) {

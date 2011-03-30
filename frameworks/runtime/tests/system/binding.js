@@ -195,9 +195,7 @@ module("Custom Binding", {
   },
   
   teardown: function() { 
-    delete Bon1 ;
-    delete bon2 ;
-	//delete TestNamespace;
+    bon2.destroy();
   }
 });
 
@@ -295,8 +293,8 @@ module("AND binding", {
   },
 
   teardown: function() {
-    delete SC.testControllerA;
-    delete SC.testControllerB;
+    SC.testControllerA.destroy();
+    SC.testControllerB.destroy();
   }
   
 });
@@ -352,8 +350,8 @@ module("OR binding", {
   },
 
   teardown: function() {
-    delete SC.testControllerA;
-    delete SC.testControllerB;
+    SC.testControllerA.destroy();
+    SC.testControllerB.destroy();
   }
   
 });
@@ -392,4 +390,54 @@ test("Binding refreshes after a couple of items have been pushed in the array", 
   fromObject.get('value').pushObjects(['foo', 'bar']);
   SC.Binding.flushPendingChanges();
   equals(toObject.get('value'), 'foo,bar');
+});
+
+
+module("propertyNameBinding with longhand", {
+  setup: function(){
+    TestNamespace = {
+      fromObject: SC.Object.create({
+        value: "originalValue"
+      }),
+      toObject: SC.Object.create({
+        valueBinding: SC.Binding.from('TestNamespace.fromObject.value'),
+        localValue: "originalLocal",
+        relativeBinding: SC.Binding.from('.localValue')
+      })
+    };
+  },
+  teardown: function(){
+    TestNamespace.fromObject.destroy();
+    TestNamespace.toObject.destroy();
+    delete TestNamespace.fromObject;
+    delete TestNamespace.toObject;
+  }
+});
+
+test("works with full path", function(){
+  SC.RunLoop.begin();
+  TestNamespace.fromObject.set('value', "updatedValue");
+  SC.RunLoop.end();
+
+  equals(TestNamespace.toObject.get('value'), "updatedValue");
+
+  SC.RunLoop.begin();
+  TestNamespace.fromObject.set('value', "newerValue");
+  SC.RunLoop.end();
+
+  equals(TestNamespace.toObject.get('value'), "newerValue");
+});
+
+test("works with local path", function(){
+  SC.RunLoop.begin();
+  TestNamespace.toObject.set('localValue', "updatedValue");
+  SC.RunLoop.end();
+
+  equals(TestNamespace.toObject.get('relative'), "updatedValue");
+
+  SC.RunLoop.begin();
+  TestNamespace.toObject.set('localValue', "newerValue");
+  SC.RunLoop.end();
+
+  equals(TestNamespace.toObject.get('relative'), "newerValue");
 });

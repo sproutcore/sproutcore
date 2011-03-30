@@ -15,7 +15,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }
   },
 
-  itemView: "SC.TemplateView",
+  itemView: 'SC.TemplateView',
 
   itemViewClass: function() {
     var itemView = this.get('itemView');
@@ -31,8 +31,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       extensions.template = this.get('itemViewTemplate');
     }
 
-    if (this.get('tagName') === 'ul') {
-      extensions.tagname = 'li';
+    if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {
+      extensions.tagName = 'li';
     }
 
     return itemView.extend(extensions);
@@ -80,13 +80,19 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         addedViews    = [],
         renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
 
+    // If the contents were empty before and this template collection has an empty view
+    // remove it now.
     emptyView = this.get('emptyView');
     if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
 
     // For each object removed from the content, remove the corresponding
     // child view from DOM and the child views array.
     len = removedObjects.get('length');
-    for (idx = changeIndex; idx < (changeIndex+len); idx++) {
+
+    // Loop through child views that correspond with the removed items.
+    // Note that we loop from the end of the array to the beginning because
+    // we are mutating it as we go.
+    for (idx = (changeIndex+len)-1; idx >= changeIndex; idx--) {
       childView = childViews[idx];
       childView.$().remove();
       childView.removeFromParent();
@@ -109,8 +115,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       item = addedObjects.objectAt(idx);
       view = this.createChildView(itemViewClass.extend({
         content: item,
-        tagName: 'li',
-
         render: renderFunc
       }));
 

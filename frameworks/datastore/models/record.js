@@ -1218,7 +1218,7 @@ SC.Record.mixin( /** @scope SC.Record.prototype */ {
     @constant
     @type SC.Error
   */
-  BAD_STATE_ERROR:     SC.$error("Internal barf Inconsistency"),
+  BAD_STATE_ERROR:     SC.$error("Internal Inconsistency"),
 
   /**
     Error for when you try to create a new record that already exists.

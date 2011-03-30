@@ -119,7 +119,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   },
 
   /** @private - just cascades */
-  commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
+  commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys, params) {
     var sources = this.get('dataSources'), 
         len     = sources ? sources.length : 0,
         ret     = NO,

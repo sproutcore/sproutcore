@@ -14,6 +14,7 @@ module("SC.onReady.done", {
   teardown: function() {
     window.main = realMainFunction;
     SC.mode = realApplicationMode;
+    SC.isReady = false;
   }
 });
 

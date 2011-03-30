@@ -67,8 +67,8 @@ SC.BaseTheme.segmentedRenderDelegate = SC.RenderDelegate.create({
       rect = segmentLayer.getBoundingClientRect();
 
       // Convert client rect into standard rect
-      rect.x = rect.left;
-      rect.y = rect.top;
+      // Remake the rect since IE8 won't let us modify the boundingClientRect
+      rect = { x: rect.left, y: rect.top, width: (rect.right-rect.left), height: (rect.bottom - rect.top) };
 
       // Return the index early if found
       if (SC.pointInRect(point, rect)) return i;

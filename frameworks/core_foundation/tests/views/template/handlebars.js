@@ -469,6 +469,10 @@ test("should update boundIf blocks if the conditional changes", function() {
   SC.run(function() { view.get('content').setPath('myApp.isEnabled', NO); });
 
   equals(view.$('#first').text(), "", "re-renders without block when condition is false");
+
+  SC.run(function() { view.get('content').setPath('myApp.isEnabled', YES); });
+
+  equals(view.$('#first').text(), "bam", "re-renders block when condition changes to true");
 });
 
 test("{{view}} id attribute should set id on layer", function() {

@@ -95,3 +95,11 @@ test('View frame should account for borders if border dimension properties are s
   equals(frame.height, elem.clientHeight, 'height equal');
 });
 
+test('Should be deprecated', function(){
+  var originalLogger = console.warn, logged;
+  console.warn = function(msg){ logged = msg; }
+  SC.View.create(SC.Border);
+  console.warn = originalLogger;
+
+  equals(logged, "SC.Border is deprecated, please set border in your layout");
+});

@@ -6,6 +6,12 @@
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
+/* Set here so when we set a border-width we'll see something
+ * Only set on div, since occasionally we rely on native styling */
+div.sc-view {
+  border: solid 0 black;
+}
+
 .ellipsis {
 	white-space: nowrap;
 	overflow: hidden;

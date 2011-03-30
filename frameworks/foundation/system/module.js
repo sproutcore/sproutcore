@@ -23,31 +23,32 @@ SC.LOG_MODULE_LOADING = YES;
 
 SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
-	/**
-		Returns YES if the module is ready; NO if it is not loaded or its
-		dependencies have not yet loaded.
+  /**
+    Returns YES if the module is ready; NO if it is not loaded or its
+    dependencies have not yet loaded.
 
-		@param {String} moduleName the name of the module to check
-		@returns {Boolean}
-	*/
-	isModuleReady: function(moduleName) {
-		var moduleInfo = SC.MODULE_INFO[moduleName] ;
-		return moduleInfo ? !!moduleInfo.isReady : NO ;
-	},
+    @param {String} moduleName the name of the module to check
+    @returns {Boolean}
+  */
+  isModuleReady: function(moduleName) {
+    var moduleInfo = SC.MODULE_INFO[moduleName] ;
+    return moduleInfo ? !!moduleInfo.isReady : NO ;
+  },
 
-	/**
-		Asynchronously loads a module if it is not already loaded. If you pass
-		a function, or a target and action, it will be called once the module
-		has finished loading.
+  /**
+    Asynchronously loads a module if it is not already loaded. If you pass
+    a function, or a target and action, it will be called once the module
+    has finished loading.
 
-		If the module you request has dependencies (as specified in the Buildfile)
-		that are not yet loaded, it will load them first before executing the
-		requested module.
+    If the module you request has dependencies (as specified in the Buildfile)
+    that are not yet loaded, it will load them first before executing the
+    requested module.
 
-		@param moduleName {String}
-		@param target {Function}
-		@param method {Function}
-	*/
+    @param moduleName {String}
+    @param target {Function}
+    @param method {Function}
+    @returns {Boolean} YES if already loaded, NO otherwise
+  */
   loadModule: function(moduleName, target, method) {
     var module = SC.MODULE_INFO[moduleName], callbacks, targets;
     var args   = SC.A(arguments).slice(3);
@@ -97,6 +98,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
           });
         }
       }
+
+      return YES;
     }
     // The module is not yet loaded, so register the callback and, if necessary, begin loading
     // the code.
@@ -125,6 +128,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         this._loadJavaScriptForModule(moduleName);
         module.isLoading = YES;
       }
+
+      return NO;
     }
   },
 

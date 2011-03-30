@@ -440,7 +440,7 @@ SC.SelectView = SC.ButtonView.extend(
         isEnabled: itemEnabled,
         checkbox: isChecked,
         target: this,
-        action: this.displaySelectedItem
+        action: 'displaySelectedItem'
       }) ;
 
       //Set the items in the itemList array
