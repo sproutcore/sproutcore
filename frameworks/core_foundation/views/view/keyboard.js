@@ -131,6 +131,7 @@ SC.View.reopen({
     given in childViews.
 
     @type SC.View
+    @default null
   */
   firstKeyView: null,
 
@@ -159,6 +160,7 @@ SC.View.reopen({
     The first way is not very efficient, so if you provide firstKeyView you should also provide lastKeyView.
 
     @type SC.View
+    @default null
   */
   lastKeyView: null,
 
@@ -200,10 +202,20 @@ SC.View.reopen({
   /**
     Optionally points to the next key view that should gain focus when tabbing
     through an interface.  If this is not set, then the next key view will
-    be set automatically to the next child.
+    be set automatically to the next sibling as defined by its parent's
+    childViews property.
 
     If any views define this, all of their siblings should define it as well,
-    otherwise undefined behavior may occur.
+    otherwise undefined behavior may occur. Their parent view should also define
+    a firstKeyView.
+
+    This may also be set to a view that is not a sibling, but once again all
+    views in the chain must define it or undefined behavior will occur.
+
+    Likewise, any view that sets nextKeyView should also set previousKeyView.
+
+    @type SC.View
+    @default null
   */
   nextKeyView: null,
 
@@ -304,9 +316,22 @@ SC.View.reopen({
   },
 
   /**
-    Optionally points to the previous key view that should gain focus when
-    tabbing through the interface. If this is not set then the previous
-    key view will be set automatically to the previous child.
+    Optionally points to the previous key view that should gain focus when tabbing
+    through an interface.  If this is not set, then the previous key view will
+    be set automatically to the previous sibling as defined by its parent's
+    childViews property.
+
+    If any views define this, all of their siblings should define it as well,
+    otherwise undefined behavior may occur. Their parent view should also define
+    a lastKeyView.
+
+    This may also be set to a view that is not a sibling, but once again all
+    views in the chain must define it or undefined behavior will occur.
+
+    Likewise, any view that sets previousKeyView should also set nextKeyView.
+
+    @type SC.View
+    @default null
   */
   previousKeyView: null,
 
