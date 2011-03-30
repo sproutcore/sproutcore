@@ -2062,6 +2062,20 @@ SC.CollectionView = SC.View.extend(
     return YES ; // always handle
   },
 
+  insertTab: function(evt) {
+    view = this.get('nextValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES ; // handled
+  },
+
+  insertBacktab: function(evt) {
+    view = this.get('previousValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES ; // handled
+  },
+
   // ..........................................................
   // MOUSE EVENTS
   // 
