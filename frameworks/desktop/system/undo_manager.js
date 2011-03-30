@@ -52,46 +52,46 @@ SC.UndoManager = SC.Object.extend(
   }.property('redoStack'),
 
   /** 
-    True if there is an undo action on the stack.
+    YES if there is an undo action on the stack.
     
     Use to validate your menu item.
   */
   canUndo: function() { 
-    return this.undoStack != null; 
+    return this.undoStack !== null; 
   }.property('undoStack'),
   
   /** 
-    True if there is an redo action on the stack.
+    YES if there is an redo action on the stack.
     
     Use to validate your menu item.
   */
   canRedo: function() { 
-    return this.redoStack != null; 
+    return this.redoStack !== null; 
   }.property('redoStack'),
   
   /**  
     Tries to undo the last action.  
   
-    Returns true if succeeded.  Fails if an undo group is currently open.
+    Returns YES if succeeded.  Fails if an undo group is currently open.
   */
   undo: function() { this._undoOrRedo('undoStack','isUndoing'); },
   
   /**  
     Tries to redo the last action.  
   
-    Returns true if succeeded.  Fails if an undo group is currently open.
+    Returns YES if succeeded.  Fails if an undo group is currently open.
   */
   redo: function() { this._undoOrRedo('redoStack','isRedoing'); },
   
   /**
-    True if the manager is currently undoing events. 
+    YES if the manager is currently undoing events. 
   */
-  isUndoing: false, 
+  isUndoing: NO, 
   
   /**
-    True if the manager is currently redoing events.
+    YES if the manager is currently redoing events.
   */
-  isRedoing: false, 
+  isRedoing: NO, 
   
   /** @private */
   groupingLevel: 0,
@@ -105,12 +105,22 @@ SC.UndoManager = SC.Object.extend(
     This is how you save new undo events.
     
     @param {Function} func A prebound function to be invoked when the undo executes.
+    @params target {Object} the target object to use.
     @param {String} [name] An optional name for the undo.  If you are using 
       groups, this is not necessary.
   */
-  registerUndo: function(func, name) {
+  registerUndo: function(func, target, name) {
+    if (!target) target = this;
     this.beginUndoGroup(name) ;
-    this._activeGroup.actions.push(func) ;
+    
+    this._activeGroup.actions.push(function() { 
+      func.call(target);
+    }) ;
+    
+    if (this.isUndoing == NO && this.isRedoing == NO) {
+      this.set('redoStack', null);
+    }
+    
     this.endUndoGroup(name) ;
   },
 
@@ -140,7 +150,7 @@ SC.UndoManager = SC.Object.extend(
   },
  
   /** end the undo group.  see beginUndoGroup() */
-  endUndoGroup: function(name) {
+  endUndoGroup: function() {
     // if more than one groups are active, just decrement the counter.
     if (!this._activeGroup) raise("endUndoGroup() called outside group.") ;
     if (this.groupingLevel > 1) {
@@ -163,15 +173,27 @@ SC.UndoManager = SC.Object.extend(
     this._activeGroup.name = name ;
   },
   
+  reset: function() {
+    while (this._activeGroup) {
+      this.endUndoGroup();
+    }
+    
+    this.set('redoStack', null);
+    this.set('undoStack', null);
+    this.set('isUndoing', NO);
+    this.set('isRedoing', NO);
+  },
+  
+  
   // --------------------------------
   // PRIVATE
   //
   _activeGroup: null, undoStack: null, redoStack: null, 
   _undoOrRedo: function(stack,state) {
-    if (this._activeGroup) return false ;
-    if (this.get(stack) == null) return true; // noting to do.
+    if (this._activeGroup) return NO ;
+    if (this.get(stack) === null) return YES; // nothing to do.
 
-    this.set(state, true) ;
+    this.set(state, YES) ;
     var group = this.get(stack) ;
     this.set(stack, group.prev) ;
     var action ;
@@ -181,7 +203,7 @@ SC.UndoManager = SC.Object.extend(
     while(action = group.actions.pop()) { action(); }
     if (useGroup) this.endUndoGroup(group.name) ;
     
-    this.set(state, false) ;
+    this.set(state, NO) ;
   }
   
 }) ;

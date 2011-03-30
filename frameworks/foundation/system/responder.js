@@ -65,6 +65,28 @@ SC.Responder = SC.Object.extend( /** SC.Responder.prototype */ {
   
   becomingFirstResponder: NO,
   
+  /**
+    Returns the undo manager for the responder by calling down the responder chain until an undoManager is returned.
+    If this responder does not have a nextResponder, then this is a top-level responder and it will create the undo manager.
+    If you want an undo manager created in a non-top-level responder then override this method in that responder with:
+    
+      undoManager: function() {
+        return SC.UndoManager.create();
+      }.property().cacheable(),
+    
+    @property {SC.UndoManager}
+  */
+  undoManager: function() {
+    var nextResponder = this.get('nextResponder');
+    
+    if (nextResponder) {
+      return nextResponder.get('undoManager');
+    }
+    else {
+      return SC.UndoManager.create(); 
+    }
+  }.property('nextResponder').cacheable(),
+  
   /** 
     Call this method on your view or responder to make it become first 
     responder.
