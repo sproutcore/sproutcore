@@ -18,10 +18,10 @@
   to "checkbox", the way the checkbox renders (including DOM) will actually
   be different than SC.ButtonView's.
   
-  @extends SC.FieldView
+  @extends SC.ButtonView
   @since SproutCore 1.0
 */
-SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
+SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   /** @scope SC.CheckboxView.prototype */ {
 
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],

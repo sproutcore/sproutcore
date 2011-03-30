@@ -31,7 +31,6 @@ SC.SegmentView = SC.View.extend(SC.Control, {
 
   controlSize: null,
 
-  /* SC.Button (note: we don't actually mix this in, because it doesn't define displayProperties or renderMixin) */
   title: '',
 
   value: null,

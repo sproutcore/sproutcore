@@ -87,7 +87,6 @@ SC.FileView = SC.FieldView.extend(
     })
   }),
   
-  /** SC.Button **/
   title: 'Choose File',
   
   /** SC.FieldView **/
