@@ -292,12 +292,12 @@ SC.View.reopen({
     @returns {SC.View}
   */
   _validOrNextValid: function(startView) {
+    // if we are a valid target, then success!
+    if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
+
     // prevent infinite loop if nothing is a valid target (this shouldn't ever
     // happen, but we still want to behave gracefully if it does)
-    if(this === startView) return null;
-    
-    // if we are a valid target, then success!
-    else if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
+    else if(this === startView) return null;
 
     // otherwise keep searching starting here
     else return this._computeNextValidKeyView(startView);
@@ -397,12 +397,12 @@ SC.View.reopen({
     @returns {SC.View}
   */
   _validOrPreviousValid: function(startView) {
+    // if we are a valid target, then success!
+    if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
+
     // prevent infinite loop if nothing is a valid target (this shouldn't ever
     // happen, but we still want to behave gracefully if it does)
-    if(this === startView) return null;
-    
-    // if we are a valid target, then success!
-    else if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
+    else if(this === startView) return null;
 
     // otherwise keep searching starting here
     else return this._computePreviousValidKeyView(startView);
