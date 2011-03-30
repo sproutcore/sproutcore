@@ -331,12 +331,11 @@ SC.View.reopen({
     @property
     @type SC.View
   */
+  // TODO: clean this up
   previousValidKeyView: function() {
     var cur = this, prev;
 
     while(YES) {
-      console.log(cur.get('layer'));
-      debugger;
       if(cur.get('parentView')) prev = cur._getPreviousKeyView();
       else prev = cur;
 
