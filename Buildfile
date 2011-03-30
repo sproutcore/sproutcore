@@ -34,11 +34,12 @@ config :'datetime/core', :required => [:runtime]
 config :datetime,        :required => [:'datetime/core']
 config :core_foundation, :required => [:runtime, :handlebars]
 config :'datetime/localized', :required => [:core_foundation]
-config :foundation,      :required => [:core_foundation, :datetime, :'datetime/localized']
+config :foundation,      :required => [:core_foundation, :datetime, :'datetime/localized', :ajax]
 config :datastore,       :required => [:runtime, :datetime]
 config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop]
+config :ajax,            :required => [:runtime, :core_foundation]
 
 # APP-LEVEL FRAMEWORKS
 %w(mobile designer).each do |app_framework|
