@@ -128,6 +128,39 @@ test("firstKeyView and nextKeyView of parents are respected", function() {
   equals(pane.view2.view6.get('nextValidKeyView'), pane.view1.view3, "order is respected when first and next are set");
 });
 
+test("nextValidKeyView is chosen correctly when nextKeyView is not a sibling", function() {
+  var testView = SC.View.extend({acceptsFirstResponder: YES}),
+  pane = SC.Pane.create({
+    childViews: ['view1', 'view2'],
+
+    view1: SC.View.extend({
+      childViews: ['view3', 'view4'],
+
+      view3: SC.View,
+
+      view4: testView
+    }),
+
+    view2: SC.View.extend({
+      childViews: ['view5', 'view6'],
+
+      view5: testView,
+
+      view6: SC.View
+    })
+  });
+
+  // fake the pane being attached
+  pane.set('isPaneAttached', YES);
+  pane.recomputeIsVisibleInWindow();
+
+  pane.view1.view4.set('nextKeyView', pane.view2.view5);
+  pane.view2.view5.set('nextKeyView', pane.view1.view4);
+
+  equals(pane.view1.view4.get('nextValidKeyView'), pane.view2.view5, "nextValidKeyView is correct");
+  equals(pane.view2.view5.get('nextValidKeyView'), pane.view1.view4, "nextValidKeyView is correct");
+});
+
 test("nextValidKeyView is chosen correctly when child of parent's previous sibling has nextKeyView set", function() {
   var testView = SC.View.extend({acceptsFirstResponder: YES}),
   pane = SC.Pane.create({
