@@ -142,6 +142,15 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       view.createLayer().$().appendTo(elem);
       this.childViews = [view];
     }
+
+    // Because the layer has been modified, we need to invalidate the frame
+    // property, if it exists, at the end of the run loop. This allows it to
+    // be used inside of SC.ScrollView.
+    this.invokeLast('invalidateFrame');
+  },
+
+  invalidateFrame: function() {
+    this.notifyPropertyChange('frame');
   }
 });
 
