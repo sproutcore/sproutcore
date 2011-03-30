@@ -265,6 +265,9 @@ SC.View.reopen({
     if(next) return next._validOrNextValid(startView);
 
     // if they weren't, then go up our parents until we find one with a sibling
+    // in a normal DFS this would be done implicitly when unrolling the stack,
+    // but we don't have the full stack since we didn't start at the root view
+    // so we have to do it manually
     var parentView = this;
     while(parentView = parentView.get('parentView')) {
       next = parentView._getNextKeyView();
@@ -352,6 +355,8 @@ SC.View.reopen({
 
     @returns {SC.View}
   */
+  // TODO: combine this with _computeNextValidKeyView by passing the next and
+  // first functions
   _computePreviousValidKeyView: function(startView) {
     var prev;
 
@@ -365,6 +370,9 @@ SC.View.reopen({
     if(next) return next._validOrPreviousValid(startView);
 
     // if they weren't, then go up our parents until we find one with a sibling
+    // in a normal DFS this would be done implicitly when unrolling the stack,
+    // but we don't have the full stack since we didn't start at the root view
+    // so we have to do it manually
     var parentView = this;
     while(parentView = parentView.get('parentView')) {
       next = parentView._getPreviousKeyView();
