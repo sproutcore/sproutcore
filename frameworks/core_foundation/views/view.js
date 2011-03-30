@@ -529,6 +529,7 @@ SC.CoreView.reopen(
     view's layer into the layer of the new parent view.
   */
   parentViewDidChange: function() {
+    this.parentViewDidResize();
     this.updateLayerLocation();
   },
 
