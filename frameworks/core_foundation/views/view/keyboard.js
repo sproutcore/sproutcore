@@ -217,7 +217,8 @@ SC.View.reopen({
     @type SC.View
     @default null
   */
-  nextKeyView: null,
+
+  nextKeyView: undefined,
 
   /**
     @private
@@ -229,7 +230,7 @@ SC.View.reopen({
   */
   _getNextKeyView: function() {
     var nextKeyView = this.get('nextKeyView');
-    if(nextKeyView) return nextKeyView;
+    if(nextKeyView !== undefined) return nextKeyView;
 
     var pv = this.get('parentView');
     
@@ -250,70 +251,35 @@ SC.View.reopen({
     @type SC.View
   */
   nextValidKeyView: function() {
-    return this._computeNextValidKeyView(this);
-  }.property('nextKeyView'),
+    var cur = this, next;
 
-  /**
-    @private
+    while(YES) {
+      next = null;
 
-    Computes the actual next keyView by performing a depth first search starting at the current view.
+      // only bother to check if we are visible
+      if(cur.get('isVisibleInWindow')) next = cur._getFirstKeyView();
 
-    @params {SC.View} startView the view the search started from; used to
-    prevent infinite recursion if no valid view can be found and the search wraps
-    all the way around
+      // if we have no children, check our sibling
+      if(!next) next = cur._getNextKeyView();
 
-    @returns {SC.View}
-  */
-  _computeNextValidKeyView: function(startView) {
-    var next;
+      // if we have no children or siblings, unroll up closest parent that has a
+      // next sibling
+      if(!next) while(cur = cur.get('parentView')) {
+        if(next = cur._getNextKeyView()) break;
+      }
 
-    // don't check our children if we aren't visible
-    if(this.get('isVisibleInWindow')) next = this._getFirstKeyView();
+      // if no parents have a next sibling, start over from the beginning
+      if(!next) next = this.get('pane');
 
-    // if we have no children, check our sibling
-    if(!next) next = this._getNextKeyView();
-
-    // if we have children or siblings, see if they are valid
-    if(next) return next._validOrNextValid(startView);
-
-    // if they weren't, then go up our parents until we find one with a sibling
-    // in a normal DFS this would be done implicitly when unrolling the stack,
-    // but we don't have the full stack since we didn't start at the root view
-    // so we have to do it manually
-    var parentView = this;
-    while(parentView = parentView.get('parentView')) {
-      next = parentView._getNextKeyView();
-
-      if(next) return next._validOrNextValid(startView);
+      // if it's a valid firstResponder, we're done!
+      if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) return next;
+      // this will only happen if no views are visible and accept first responder
+      else if(next === this) return null;
+      // otherwise keep looking
+      cur = next;
     }
 
-    // if we reach root without finding one, start over from the beginning
-    return this.get('pane')._computeNextValidKeyView(startView);
-  },
-
-  /**
-    @private
-
-    Returns the current view if it is a valid keyView, otherwise recurses back
-    to finding the next valid keyView.
-
-    @params {SC.View} startView the view the search started from; used to
-    prevent infinite recursion if no valid view can be found and the search wraps
-    all the way around
-
-    @returns {SC.View}
-  */
-  _validOrNextValid: function(startView) {
-    // if we are a valid target, then success!
-    if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
-
-    // prevent infinite loop if nothing is a valid target (this shouldn't ever
-    // happen, but we still want to behave gracefully if it does)
-    else if(this === startView) return null;
-
-    // otherwise keep searching starting here
-    else return this._computeNextValidKeyView(startView);
-  },
+  }.property('nextKeyView'),
 
   /**
     Optionally points to the previous key view that should gain focus when tabbing
@@ -333,7 +299,7 @@ SC.View.reopen({
     @type SC.View
     @default null
   */
-  previousKeyView: null,
+  previousKeyView: undefined,
 
   /**
     @private
@@ -345,7 +311,7 @@ SC.View.reopen({
   */
   _getPreviousKeyView: function() {
     var previousKeyView = this.get('previousKeyView');
-    if(previousKeyView) return previousKeyView;
+    if(previousKeyView !== undefined) return previousKeyView;
 
     var pv = this.get('parentView');
 
@@ -366,71 +332,31 @@ SC.View.reopen({
     @type SC.View
   */
   previousValidKeyView: function() {
-    return this._computePreviousValidKeyView(this);
-  }.property('previousKeyView'),
+    var cur = this, prev;
 
-  /**
-    @private
+    while(YES) {
+      console.log(cur.get('layer'));
+      debugger;
+      if(cur.get('parentView')) prev = cur._getPreviousKeyView();
+      else prev = cur;
 
-    Computes the actual previous keyView by performing a depth first search starting at the current view.
+      if(prev) {
+        do {
+          cur = prev;
+          prev = prev._getLastKeyView();
+        } while(prev && prev.get('isVisibleInWindow'));
 
-    @params {SC.View} startView the view the search started from; used to
-    prevent infinite recursion if no valid view can be found and the search wraps
-    all the way around
+        if(!prev) prev = cur;
+      }
 
-    @returns {SC.View}
-  */
-  // TODO: combine this with _computeNextValidKeyView by passing the next and
-  // first functions
-  _computePreviousValidKeyView: function(startView) {
-    var prev;
+      else {
+        prev = cur.get('parentView');
+      }
 
-    // don't check our children if we aren't visible
-    if(this.get('isVisibleInWindow')) next = this._getLastKeyView();
-
-    // if we have no children, check our sibling
-    if(!next) next = this._getPreviousKeyView();
-
-    // if we have children or siblings, see if they are valid
-    if(next) return next._validOrPreviousValid(startView);
-
-    // if they weren't, then go up our parents until we find one with a sibling
-    // in a normal DFS this would be done implicitly when unrolling the stack,
-    // but we don't have the full stack since we didn't start at the root view
-    // so we have to do it manually
-    var parentView = this;
-    while(parentView = parentView.get('parentView')) {
-      next = parentView._getPreviousKeyView();
-
-      if(next) return next._validOrPreviousValid(startView);
+      if(prev.get('isVisibleInWindow') && prev.get('acceptsFirstResponder')) return prev;
+      else if(prev === this) return null;
+      cur = prev;
     }
-
-    // if we reach root without finding one, start over from the beginning
-    return this.get('pane')._computePreviousValidKeyView(startView);
-  },
-
-  /**
-    @private
-
-    Returns the current view if it is a valid keyView, otherwise recurses back
-    to finding the next valid keyView.
-
-    @params {SC.View} startView the view the search started from; used to
-    prevent infinite recursion if no valid view can be found and the search wraps
-    all the way around
-
-    @returns {SC.View}
-  */
-  _validOrPreviousValid: function(startView) {
-    // if we are a valid target, then success!
-    if(this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')) return this;
-
-    // prevent infinite loop if nothing is a valid target (this shouldn't ever
-    // happen, but we still want to behave gracefully if it does)
-    else if(this === startView) return null;
-
-    // otherwise keep searching starting here
-    else return this._computePreviousValidKeyView(startView);
-  }
+  }.property('previousKeyView'),
 });
 
