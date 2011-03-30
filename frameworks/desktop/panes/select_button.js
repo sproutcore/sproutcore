@@ -856,6 +856,21 @@ SC.SelectButtonView = SC.ButtonView.extend(
     return this.get('isEnabled');
   }.property('isEnabled'),
 
+  insertTab: function(evt) {
+    view = this.get('nextValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES ; // handled
+  },
+
+  insertBacktab: function(evt) {
+    view = this.get('previousValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES ; // handled
+  },
+
+
   /** @private
     Override the button isSelectedDidChange function in order to not perform any action
     on selecting the select_button
