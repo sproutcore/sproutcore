@@ -419,7 +419,9 @@ isAsynchronous: YES,
     
     var listeners = this.get('listeners');
     if (!listeners) this.set('listeners', listeners = {});
-    listeners[status] = { target: target, action: action, params: params };
+    if(!listeners[status]) listeners[status] = [];
+    
+    listeners[status].push({ target: target, action: action, params: params });
 
     return this;
   }
