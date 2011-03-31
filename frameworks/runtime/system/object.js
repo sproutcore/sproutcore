@@ -118,14 +118,6 @@ SC._object_extend = function _object_extend(base, ext, proto) {
 
     // Possibly add to a bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
-      // Properties MUST be established before a binding can be made from them.
-      // We won't slow things down by checking in production, but in dev, give a warning.
-      // @if (debug)
-      var bindPropertyKey = key.substr(0, key.length - 7);
-      if (ext[bindPropertyKey] === undefined && base[bindPropertyKey] === undefined) {
-        SC.Logger.warn("Uninitialized property '%@'. '%@' will not work as expected.".fmt(bindPropertyKey, key));
-      }
-      // @endif
 
       if (!clonedBindings) {
         bindings = (bindings || SC.EMPTY_ARRAY).slice() ;
