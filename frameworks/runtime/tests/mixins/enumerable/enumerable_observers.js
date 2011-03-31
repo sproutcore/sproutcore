@@ -85,14 +85,12 @@
   });
 
   test("should fire only once per mutation operation", function() {
-      var boyBand = [];
-      var callbackCallCount = 0;
+      var boyBand, callbackCallCount;
       var boyBandController = SC.Object.create({
         boyBandDidChange: function(added, removed, index, source, context) {
           callbackCallCount++;
         }
       });
-      boyBand.addEnumerableObserver(boyBandController, "boyBandDidChange");
 
       function clearCallBackCountAndResetBoyBand(members) {
           callbackCallCount = 0;
