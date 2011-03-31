@@ -340,7 +340,7 @@ SC.Response = SC.Object.extend(
       action = notifier.action;
       if (SC.typeOf(action) === SC.T_STRING) action = target[action];
 
-      //handled = action.apply(target, params);
+      handled = action.apply(target, params);
       
     }
     
