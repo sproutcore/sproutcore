@@ -748,14 +748,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // passing the original event here instead that was potentially set from
       // loosing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
-      this.fieldDidBlur(this._origEvent);
+      this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
       if(!this.get('_supportsPlaceHolder') && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
       }
     }, this);
   },
-  
+
   fieldDidFocus: function(evt) {
     this.becomeFirstResponder();
 
