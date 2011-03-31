@@ -83,4 +83,46 @@
     testArray.pushObject("Michael");
     ok(callbackCalled, "calls callback on correct object");
   });
+
+  test("should fire only once per mutation operation", function() {
+      var boyBand = [];
+      var callbackCallCount = 0;
+      var boyBandController = SC.Object.create({
+        boyBandDidChange: function(added, removed, index, source, context) {
+          callbackCallCount++;
+        }
+      });
+      boyBand.addEnumerableObserver(boyBandController, "boyBandDidChange");
+
+      function clearCallBackCountAndResetBoyBand(members) {
+          callbackCallCount = 0;
+          boyBand.removeEnumerableObserver(boyBandController);
+          boyBand = members;
+          boyBand.addEnumerableObserver(boyBandController, "boyBandDidChange");
+      }
+
+      clearCallBackCountAndResetBoyBand(["Davy", "Micky", "Peter"]);
+      boyBand.pushObjects(["Michael", "Ricky", "Usher", "40cent"]);
+      equals(callbackCallCount, 1, "fires only once when adding many objects");
+
+      clearCallBackCountAndResetBoyBand(["Davy", "Micky", "Peter", "Michael", "Ricky", "Usher", "40cent"]);
+      boyBand.removeObjects(["Michael", "Ricky", "Usher", "40cent"]);
+      equals(callbackCallCount, 1, "fires only once when removing many objects");
+
+      clearCallBackCountAndResetBoyBand(["Davy", "Micky", "Peter", "Michael", "Ricky", "Usher", "40cent"]);
+      boyBand.removeAt(3, 4);
+      equals(callbackCallCount, 1, "fires only once when removing many objects starting at a specific index");
+
+      clearCallBackCountAndResetBoyBand(["Davy", "Micky", "Peter", "James"]);
+      boyBand.replace(3, 0, ["Michael", "Ricky", "Usher", "40cent"]);
+      equals(callbackCallCount, 1, "fires only once when replacing ZERO objects with multiple objects");
+
+      clearCallBackCountAndResetBoyBand(["Davy", "Micky", "Peter", "James"]);
+      boyBand.replace(3, 1, ["Michael", "Ricky", "Usher", "40cent"]);
+      equals(callbackCallCount, 1, "fires only once when replacing ONE objects with multiple objects");
+
+      clearCallBackCountAndResetBoyBand(["Davy", "Micky", "Peter", "James", "Pico", "Nano", "Micro"]);
+      boyBand.replace(3, 3, ["Michael", "Ricky", "Usher", "40cent"]);
+      equals(callbackCallCount, 1, "fires only once when replacing MANY objects with multiple objects");
+   });
 })();
