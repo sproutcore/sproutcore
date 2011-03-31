@@ -1662,16 +1662,18 @@ SC.ScrollView = SC.View.extend({
         scale  = this._scale,
         width  = 0,
         height = 0,
-        dim, dimWidth, dimHeight;
-    
-    if (view) {
-      width = view.get('calculatedWidth') || f.width || 0;
-      height = view.get('calculatedHeight') || f.height || 0;
-    }
-    
+        dim, dimWidth, dimHeight, calculatedWidth, calculatedHeight;
+
+    // If no view has been set yet, or it doesn't have a frame,
+    // we can avoid doing any work.
+    if (!view || !f) { return; }
+
+    width = view.get('calculatedWidth') || f.width || 0;
+    height = view.get('calculatedHeight') || f.height || 0;
+
     width *= scale;
     height *= scale;
-    
+
     // cache out scroll settings...
     if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth  = width;

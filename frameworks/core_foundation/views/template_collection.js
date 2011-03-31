@@ -46,7 +46,11 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     needed.
   */
   _sctcv_contentDidChange: function() {
-    this.removeAllChildren();
+    this.get('childViews').forEach(function() {
+      this.removeChild(view);
+      view.destroy();
+    }, this);
+
     this.$().empty();
     this.didCreateLayer();
 
@@ -96,6 +100,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       childView = childViews[idx];
       childView.$().remove();
       childView.removeFromParent();
+      childView.destroy();
     }
 
     // If we have content to display, create a view for
@@ -142,6 +147,15 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       view.createLayer().$().appendTo(elem);
       this.childViews = [view];
     }
+
+    // Because the layer has been modified, we need to invalidate the frame
+    // property, if it exists, at the end of the run loop. This allows it to
+    // be used inside of SC.ScrollView.
+    this.invokeLast('invalidateFrame');
+  },
+
+  invalidateFrame: function() {
+    this.notifyPropertyChange('frame');
   }
 });
 

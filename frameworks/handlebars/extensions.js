@@ -43,6 +43,20 @@ SC.Handlebars.compile = function(string) {
   return new SC.Handlebars.JavaScriptCompiler().compile(environment, true);
 };
 
+/**
+  Registers a helper in Handlebars that will be called if no property with the
+  given name can be found on the current context object, and no helper with
+  that name is registered.
+
+  This throws an exception with a more helpful error message so the user can
+  track down where the problem is happening.
+*/
+Handlebars.registerHelper('helperMissing', function(path, options) {
+  var error;
+
+  error = "%@ Handlebars error: Could not find property '%@' on object %@.";
+  throw error.fmt(options.data.view, path, this);
+});
 
 /**
   Determines the classes to add based on an array of bindings (provided as strings),

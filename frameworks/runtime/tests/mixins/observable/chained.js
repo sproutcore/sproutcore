@@ -4,7 +4,7 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-module("chained observers");
+module("SC.Observable - Observing with @each");
 
 test("chained observers on enumerable properties are triggered when the observed property of any item changes", function() {
   var family = SC.Object.create({ momma: null });
@@ -24,8 +24,8 @@ test("chained observers on enumerable properties are triggered when the observed
   });
 
   observerFiredCount = 0;
-  SC.run(function() { child1.set('name', 'Teddy'); });
-  equals(observerFiredCount, 1, "observer fired after changing a child item's name");
+  SC.run(function() { momma.get('children').setEach('name', 'Juan'); });
+  equals(observerFiredCount, 3, "observer fired after changing child names");
 
   observerFiredCount = 0;
   SC.run(function() { momma.children.pushObject(child4); });
@@ -41,3 +41,4 @@ test("chained observers on enumerable properties are triggered when the observed
   SC.run(function() { child1.set('name', "Hanna"); });
   equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
 });
+

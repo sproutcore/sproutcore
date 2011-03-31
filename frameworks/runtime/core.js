@@ -908,6 +908,16 @@ SC.mixin(Function.prototype,
     You should always register dependent keys for computed properties to
     ensure they update.
 
+    Sometimes you may need to depend on keys that are several objects deep. In
+    that case, you can provide a path to property():
+
+        capitalizedName: function() {
+          return this.getPath('person.fullName').toUpper();
+        }.property('person.firstName')
+
+    This will cause observers of +capitalizedName+ to be fired when either
+    +fullName+ _or_ +person+ changes.
+
     Using Computed Properties as Setters
     ---
 
