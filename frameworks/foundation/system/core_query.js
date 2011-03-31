@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-// SC.mixin(SC.$.fn, /** @scope SC.$.prototype */ {
+ SC.mixin(SC.$.fn, /** @scope SC.$.prototype */ {
 
   /**
     You can either pass a single class name and a boolean indicating whether
