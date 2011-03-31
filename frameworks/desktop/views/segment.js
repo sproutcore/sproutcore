@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /**
@@ -31,7 +31,6 @@ SC.SegmentView = SC.View.extend(SC.Control, {
 
   controlSize: null,
 
-  /* SC.Button (note: we don't actually mix this in, because it doesn't define displayProperties or renderMixin) */
   title: '',
 
   value: null,
@@ -57,8 +56,14 @@ SC.SegmentView = SC.View.extend(SC.Control, {
 
   useStaticLayout: YES,
 
+  displayTitle: function() {
+    var ret = this.get('title');
+    if (this.get('localize')) ret = ret.loc();
+    return ret;
+  }.property('title', 'localize').cacheable(),
+
   // TODO: isDefault, isCancel, value not really used by render delegate
-  displayProperties: ['icon', 'title', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
+  displayProperties: ['icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
 
   /* SC.SegmentView */
 

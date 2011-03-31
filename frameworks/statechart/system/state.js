@@ -1,12 +1,14 @@
 // ==========================================================================
-// Project:   SC.State - A Statechart Framework for SproutCore
-// Copyright: ©2010 Michael Cohen, and contributors.
+// Project:   SC.Statechart - A Statechart Framework for SproutCore
+// Copyright: ©2010, 2011 Michael Cohen, and contributors.
+//            Portions @2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /*globals SC */
 
 /**
+
   Represents a state within a statechart. 
   
   The statechart actively manages all states belonging to it. When a state is created, 
@@ -14,6 +16,9 @@
   
   You do not create an instance of a state itself. The statechart manager will go through its 
   state heirarchy and create the states itself.
+
+  @author Michael Cohen
+
 */
 SC.State = SC.Object.extend({
   
@@ -23,7 +28,7 @@ SC.State = SC.Object.extend({
     @property {String}
   */
   name: null,
-  
+   
   /**
     This state's parent state. Managed by the statechart
     
@@ -45,9 +50,14 @@ SC.State = SC.Object.extend({
     the state, the statechart will automatically change the property 
     to be a corresponding state object
     
-    The substate is only to be this state's immediate substates.
+    The substate is only to be this state's immediate substates. If
+    no initial substate is assigned then this states initial substate
+    will be an instance of an empty state (SC.EmptyState).
     
-    @property {State}
+    Note that a statechart's root state must always have an explicity
+    initial substate value assigned else an error will be thrown.
+    
+    @property {String|State}
   */
   initialSubstate: null,
   
@@ -88,12 +98,101 @@ SC.State = SC.Object.extend({
   */
   currentSubstates: null,
   
+  /** 
+    An array of this state's substates that are currently entered. Managed by
+    the statechart.
+    
+    @property {Array}
+  */
+  enteredSubstates: null,
+  
+  /** 
+    Indicates if this state should trace actions. Useful for debugging
+    purposes. Managed by the statechart.
+  
+    @see SC.StatechartManager#trace
+  
+    @property {Boolean}
+  */
+  trace: function() {
+    var key = this.getPath('statechart.statechartTraceKey');
+    return this.getPath('statechart.%@'.fmt(key));
+  }.property().cacheable(),
+  
+  /** 
+    Indicates who the owner is of this state. If not set on the statechart
+    then the owner is the statechart, otherwise it is the assigned
+    object. Managed by the statechart.
+    
+    @see SC.StatechartManager#owner
+  
+    @property {SC.Object}
+  */
+  owner: function() {
+    var sc = this.get('statechart'),
+        key = sc ? sc.get('statechartOwnerKey') : null,
+        owner = sc ? sc.get(key) : null;
+    return owner ? owner : sc;
+  }.property().cacheable(),
+  
   init: function() {
+    sc_super();
+
     this._registeredEventHandlers = {};
     this._registeredStringEventHandlers = {};
     this._registeredRegExpEventHandlers = [];
+    this._registeredStateObserveHandlers = {};
+
+    // Setting up observes this way is faster then using .observes,
+    // which adds a noticable increase in initialization time.
+    var sc = this.get('statechart'),
+        ownerKey = sc ? sc.get('statechartOwnerKey') : null,
+        traceKey = sc ? sc.get('statechartTraceKey') : null;
+
+    if (sc) {
+      sc.addObserver(ownerKey, this, '_statechartOwnerDidChange');
+      sc.addObserver(traceKey, this, '_statechartTraceDidChange');
+    }
   },
   
+  destroy: function() {
+    var sc = this.get('statechart'),
+        ownerKey = sc ? sc.get('statechartOwnerKey') : null,
+        traceKey = sc ? sc.get('statechartTraceKey') : null;
+
+    if (sc) {
+      sc.removeObserver(ownerKey, this, '_statechartOwnerDidChange');
+      sc.removeObserver(traceKey, this, '_statechartTraceDidChange');
+    }
+
+    var substates = this.get('substates');
+    if (substates) {
+      substates.forEach(function(state) {
+        state.destroy();
+      });
+    }
+    
+    this._teardownAllStateObserveHandlers();
+
+    this.set('substates', null);
+    this.set('currentSubstates', null);
+    this.set('enteredSubstates', null);
+    this.set('parentState', null);
+    this.set('historyState', null);
+    this.set('initialSubstate', null);
+    this.set('statechart', null);
+
+    this.notifyPropertyChange('trace');
+    this.notifyPropertyChange('owner');
+    
+    this._registeredEventHandlers = null;
+    this._registeredStringEventHandlers = null;
+    this._registeredRegExpEventHandlers = null;
+    this._registeredStateObserveHandlers = null;
+
+    sc_super();
+  },
+
   /**
     Used to initialize this state. To only be called by the owning statechart.
   */
@@ -112,7 +211,19 @@ SC.State = SC.Object.extend({
         statechart = this.get('statechart'),
         i = 0,
         len = 0,
-        valueIsFunc = NO;
+        valueIsFunc = NO,
+        historyState = null;
+            
+    if (SC.kindOf(initialSubstate, SC.HistoryState) && initialSubstate.isClass) {
+      historyState = this.createHistoryState(initialSubstate, { parentState: this, statechart: statechart });
+      this.set('initialSubstate', historyState);
+      
+      if (SC.none(historyState.get('defaultState'))) {
+        this.stateLogError("Initial substate is invalid. History state requires the name of a default state to be set");
+        this.set('initialSubstate', null);
+        historyState = null;
+      }
+    }
     
     // Iterate through all this state's substates, if any, create them, and then initialize
     // them. This causes a recursive process.
@@ -122,6 +233,11 @@ SC.State = SC.Object.extend({
       
       if (valueIsFunc && value.isEventHandler) {
         this._registerEventHandler(key, value);
+        continue;
+      }
+      
+      if (valueIsFunc && value.isStateObserveHandler) {
+        this._registerStateObserveHandler(key, value);
         continue;
       }
       
@@ -137,34 +253,40 @@ SC.State = SC.Object.extend({
         if (key === initialSubstate) {
           this.set('initialSubstate', state);
           matchedInitialSubstate = YES;
-        } 
+        } else if (historyState && historyState.get('defaultState') === key) {
+          historyState.set('defaultState', state);
+          matchedInitialSubstate = YES;
+        }
       }
     }
     
     if (!SC.none(initialSubstate) && !matchedInitialSubstate) {
-      SC.Logger.error("Unable to set initial substate %@ since it did not match any of state\'s %@ substates", initialSubstate, this);
+      this.stateLogError("Unable to set initial substate %@ since it did not match any of state's %@ substates".fmt(initialSubstate, this));
     }
-    
-    this.set('substates', substates);
-    this.set('currentSubstates', []);
     
     if (substates.length === 0) {
       if (!SC.none(initialSubstate)) {
-        SC.Logger.warn("Unable to make %@ an initial substate since state %@ has no substates", initialSubstate, this);
+        this.stateLogWarning("Unable to make %@ an initial substate since state %@ has no substates".fmt(initialSubstate, this));
       }
     } 
     else if (substates.length > 0) {
       if (SC.none(initialSubstate) && !substatesAreConcurrent) {
-        state = substates[0];
+        state = this.createEmptyState({ parentState: this, statechart: statechart });
         this.set('initialSubstate', state);
-        SC.Logger.warn("state %@ has no initial substate defined. Will default to using %@ as initial substate", this, state);
+        substates.push(state);
+        this[state.get('name')] = state;
+        state.initState();
+        this.stateLogWarning("state %@ has no initial substate defined. Will default to using an empty state as initial substate".fmt(this));
       } 
       else if (!SC.none(initialSubstate) && substatesAreConcurrent) {
         this.set('initialSubstate', null);
-        SC.Logger.warn("Cannot use %@ as initial substate since substates are all concurrent for state %@", initialSubstate, this);
+        this.stateLogWarning("Can not use %@ as initial substate since substates are all concurrent for state %@".fmt(initialSubstate, this));
       }
     }
     
+    this.set('substates', substates);
+    this.set('currentSubstates', []);
+    this.set('enteredSubstates', []);
     this.set('stateIsInitialized', YES);
   },
   
@@ -172,9 +294,21 @@ SC.State = SC.Object.extend({
     creates a substate for this state
   */
   createSubstate: function(state, attrs) {
-    if (!attrs) attrs = {};
-    state = state.create(attrs);
-    return state;
+    return state.create(attrs);
+  },
+  
+  /**
+    Create a history state for this state
+  */
+  createHistoryState: function(state, attrs) {
+    return state.create(attrs);
+  },
+  
+  /**
+    Create an empty state for this state's initial substate
+  */
+  createEmptyState: function(attrs) {
+    return SC.EmptyState.create(attrs);
   },
   
   /** @private 
@@ -212,8 +346,33 @@ SC.State = SC.Object.extend({
         continue;
       }
       
-      SC.Logger.error("Invalid event %@ for event handler %@ in state %@", event, name, this);
+      this.stateLogError("Invalid event %@ for event handler %@ in state %@".fmt(event, name, this));
     }
+  },
+  
+  /** @private 
+  
+    Registers state observe handlers with this state. State observe handlers behave just like
+    when you apply observes() on a method but will only be active when the state is currently 
+    entered, otherwise the handlers are inactive until the next time the state is entered
+  */
+  _registerStateObserveHandler: function(name, handler) {
+    var i = 0, 
+        args = handler.args, 
+        len = args.length, 
+        arg, validHandlers = YES;
+    
+    for (; i < len; i += 1) {
+      arg = args[i];
+      if (SC.typeOf(arg) !== SC.T_STRING || SC.empty(arg)) { 
+        this.stateLogError("Invalid argument %@ for state observe handler %@ in state %@".fmt(arg, name, this));
+        validHandlers = NO;
+      }
+    }
+    
+    if (!validHandlers) return;
+    
+    this._registeredStateObserveHandlers[name] = handler.args;
   },
   
   /** @private
@@ -275,7 +434,7 @@ SC.State = SC.Object.extend({
     }
     
     if (parent !== state && state !== this) {
-      SC.Logger.error("Cannot generate relative path from %@ since it not a parent state of %@", state, this);
+      this.stateLogError('Can not generate relative path from %@ since it not a parent state of %@'.fmt(state, this));
       return null;
     }
     
@@ -306,7 +465,7 @@ SC.State = SC.Object.extend({
     }
     
     if (valueType !== SC.T_STRING) {
-      SC.Logger.error("Cannot find matching subtype. value must be an object or string: %@", value);
+      this.stateLogError("Can not find matching subtype. value must be an object or string: %@".fmt(value));
       return null;
     }
     
@@ -332,8 +491,8 @@ SC.State = SC.Object.extend({
     if (matches[1] === "") {
       if (paths.__ki_paths__.length === 1) return paths[paths.__ki_paths__[0]];
       if (paths.__ki_paths__.length > 1) {
-        var msg = 'Cannot find substate matching %@ in state %@. Ambiguous with the following: %@';
-        SC.Logger.error(msg, value, this, paths.__ki_paths__);
+        var msg = 'Can not find substate matching %@ in state %@. Ambiguous with the following: %@';
+        this.stateLogError(msg.fmt(value, this, paths.__ki_paths__));
       }
     } 
     
@@ -347,8 +506,23 @@ SC.State = SC.Object.extend({
     Note that if the value given is a string, it will be assumed to be a path to a state. The path
     will be relative to the statechart's root state; not relative to this state.
     
+    Method can be called in the following ways: 
+    
+    {{{
+    
+      // With one argument
+      gotoState(<state>)
+      
+      // With two arguments
+      gotoState(<state>, <hash>)
+    
+    }}}
+    
+    Where <state> is either a string or a SC.State object and <hash> is a regular JS hash object.
+    
     @param state {SC.State|String} the state to go to
-    @param context Option. Any value that you want to pass along to states that will be entered
+    @param context {Hash} Optional. context object that will be supplied to all states that are
+           exited and entered during the state transition process
   */
   gotoState: function(state, context) {
     var fromState = null;
@@ -369,12 +543,30 @@ SC.State = SC.Object.extend({
     Note that if the value given is a string, it will be assumed to be a path to a state. The path
     will be relative to the statechart's root state; not relative to this state.
     
+    Method can be called in the following ways:
+    
+    {{{
+    
+      // With one argument
+      gotoHistoryState(<state>)
+      
+      // With two arguments
+      gotoHistoryState(<state>, <boolean | hash>)
+      
+      // With three arguments
+      gotoHistoryState(<state>, <boolean>, <hash>)
+    
+    }}}
+    
+    Where <state> is either a string or a SC.State object and <hash> is a regular JS hash object.
+    
     @param state {SC.State|String} the state whose history state to go to
-    @param context any value that you want to pass along to states that will be entered. can be null.
     @param recusive {Boolean} Optional. Indicates whether to follow history states recusively starting
-                              from the given state
+           from the given state
+    @param context {Hash} Optional. context object that will be supplied to all states that are exited
+           entered during the state transition process
   */
-  gotoHistoryState: function(state, context, recursive) {
+  gotoHistoryState: function(state, recursive, context) {
     var fromState = null;
     
     if (this.get('isCurrentState')) {
@@ -383,7 +575,7 @@ SC.State = SC.Object.extend({
       fromState = this.get('currentSubstates')[0];
     }
     
-    this.get('statechart').gotoHistoryState(state, fromState, context, recursive);
+    this.get('statechart').gotoHistoryState(state, fromState, recursive, context);
   },
   
   /**
@@ -402,8 +594,21 @@ SC.State = SC.Object.extend({
   */
   stateIsCurrentSubstate: function(state) {
     if (SC.typeOf(state) === SC.T_STRING) state = this.get('statechart').getState(state);
-    return this.get('currentSubstates').indexOf(state) >= 0;
+    var current = this.get('currentSubstates');
+    return !!current && current.indexOf(state) >= 0;
   }, 
+  
+  /**
+    Used to check if a given state is a substate of this state that is currently entered. 
+    
+    @param state {State|String} either a state object of the name of a state
+    @returns {Boolean} true if the given state is a entered substate, otherwise false is returned
+  */
+  stateIsEnteredSubstate: function(state) {
+    if (SC.typeOf(state) === SC.T_STRING) state = this.get('statechart').getState(state);
+    var entered = this.get('enteredSubstates');
+    return !!entered && entered.indexOf(state) >= 0;
+  },
   
   /**
     Indicates if this state is the root state of the statechart.
@@ -421,7 +626,7 @@ SC.State = SC.Object.extend({
   */
   isCurrentState: function() {
     return this.stateIsCurrentSubstate(this);
-  }.property().cacheable(),
+  }.property('currentSubstates').cacheable(),
   
   /**
     Indicates if this state is a concurrent state
@@ -431,6 +636,17 @@ SC.State = SC.Object.extend({
   isConcurrentState: function() {
     return this.getPath('parentState.substatesAreConcurrent');
   }.property(),
+  
+  /**
+    Indicates if this state is a currently entered state. 
+    
+    A state is currently entered if during a state transition process the
+    state's enterState method was invoked, but only after its exitState method 
+    was called, if at all.
+  */
+  isEnteredState: function() {
+    return this.stateIsEnteredSubstate(this);
+  }.property('enteredSubstates').cacheable(),
   
   /**
     Indicate if this state has any substates
@@ -446,8 +662,16 @@ SC.State = SC.Object.extend({
   */
   hasCurrentSubstates: function() {
     var current = this.get('currentSubstates');
-    return !SC.none(current) && current.get('length') > 0;
-  }.property('currentSubstates'),
+    return !!current && current.get('length') > 0;
+  }.property('currentSubstates').cacheable(),
+  
+  /**
+    Indicates if this state has any currently entered substates
+  */
+  hasEnteredSubstates: function() {
+    var entered = this.get('enteredSubstates');
+    return !!entered  && entered.get('length') > 0;
+  }.property('enteredSubstates').cacheable(),
   
   /**
     Used to re-enter this state. Call this only when the state a current state of
@@ -458,7 +682,7 @@ SC.State = SC.Object.extend({
     if (this.get('isCurrentState')) {
       statechart.gotoState(this);
     } else {
-       SC.Logger.error("Cannot re-enter state %@ since it is not a current state in the statechart", this);
+       SC.Logger.error('Can not re-enter state %@ since it is not a current state in the statechart'.fmt(this));
     }
   },
   
@@ -487,22 +711,22 @@ SC.State = SC.Object.extend({
       SC.State.extend({
       
         // Basic function handling event 'foo'
-        foo: function(sender, context) { ... },
+        foo: function(arg1, arg2) { ... },
         
         // event handler that handles 'frozen' and 'canuck'
-        eventHandlerA: function(event, sender, context) {
+        eventHandlerA: function(event, arg1, arg2) {
           ...
         }.handleEvent('frozen', 'canuck'),
         
         // event handler that handles events matching the regular expression /num\d/
         //   ex. num1, num2
-        eventHandlerB: function(event, sender, context) {
+        eventHandlerB: function(event, arg1, arg2) {
           ...
         }.handleEvent(/num\d/),
         
         // Handle any event that was not handled by some other
         // method on the state
-        unknownEvent: function(event, sender, context) {
+        unknownEvent: function(event, arg1, arg2) {
         
         }
       
@@ -510,23 +734,33 @@ SC.State = SC.Object.extend({
     
     }}}
   */
-  tryToHandleEvent: function(event, sender, context) {
-        
+  tryToHandleEvent: function(event, arg1, arg2) {
+
+    var trace = this.get('trace');
+
     // First check if the name of the event is the same as a registered event handler. If so,
     // then do not handle the event.
     if (this._registeredEventHandlers[event]) {
-      SC.Logger.warn("state %@ can not handle event %@ since it is a registered event handler", this, event);
+      this.stateLogWarning("state %@ can not handle event %@ since it is a registered event handler".fmt(this, event));
       return NO;
     }    
     
+    if (this._registeredStateObserveHandlers[event]) {
+      this.stateLogWarning("state %@ can not handle event %@ since it is a registered state observe handler".fmt(this, event));
+      return NO;
+    }
+    
     // Now begin by trying a basic method on the state to respond to the event
-    if (this.tryToPerform(event, sender, context)) return YES;
+    if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
+      if (trace) this.stateLogTrace("will handle event %@".fmt(event));
+      return (this[event](arg1, arg2) !== NO);
+    }
     
     // Try an event handler that is associated with an event represented as a string
     var handler = this._registeredStringEventHandlers[event];
     if (handler) {
-      handler.handler.call(this, event, sender, context);
-      return YES;
+      if (trace) this.stateLogTrace("%@ will handle event %@".fmt(handler.name, event));
+      return (handler.handler.call(this, event, arg1, arg2) !== NO);
     }
     
     // Try an event handler that is associated with events matching a regular expression
@@ -537,16 +771,16 @@ SC.State = SC.Object.extend({
     for (; i < len; i += 1) {
       handler = this._registeredRegExpEventHandlers[i];
       if (event.match(handler.regexp)) {
-        handler.handler.call(this, event, sender, context);
-        return YES;
+        if (trace) this.stateLogTrace("%@ will handle event %@".fmt(handler.name, event));
+        return (handler.handler.call(this, event, arg1, arg2) !== NO);
       }
     }
     
     // Final attempt. If the state has an unknownEvent function then invoke it to 
     // handle the event
     if (SC.typeOf(this['unknownEvent']) === SC.T_FUNCTION) {
-      this.unknownEvent(event, sender, context);
-      return YES;
+      if (trace) this.stateLogTrace("unknownEvent will handle event %@".fmt(event));
+      return (this.unknownEvent(event, arg1, arg2) !== NO);
     }
     
     // Nothing was able to handle the given event for this state
@@ -574,9 +808,34 @@ SC.State = SC.Object.extend({
     this state's resumeGotoState method or the statechart's resumeGotoState. If no asynchronous 
     action is to be perform, then nothing needs to be returned.
     
-    @param context A value passed along to states that are being entered. May be null.
+    When the enterState method is called, an optional context value may be supplied if
+    one was provided to the gotoState method.
+    
+    @param context {Hash} Optional value if one was supplied to gotoState when invoked
   */
   enterState: function(context) { },
+  
+  /**
+    Notification called just before enterState is invoked. 
+    
+    Note: This is intended to be used by the owning statechart but it can be overridden if 
+    you need to do something special.
+    
+    @see #enterState
+  */
+  stateWillBecomeEntered: function() { },
+  
+  /**
+    Notification called just after enterState is invoked. 
+    
+    Note: This is intended to be used by the owning statechart but it can be overridden if 
+    you need to do something special.
+    
+    @see #enterState
+  */
+  stateDidBecomeEntered: function() { 
+    this._setupAllStateObserveHandlers();
+  },
   
   /**
     Called whenever this state is to be exited during a state transition process. This is 
@@ -598,8 +857,100 @@ SC.State = SC.Object.extend({
     the active state transition process. In order to resume the process, you must call
     this state's resumeGotoState method or the statechart's resumeGotoState. If no asynchronous 
     action is to be perform, then nothing needs to be returned.
+    
+    When the exitState method is called, an optional context value may be supplied if
+    one was provided to the gotoState method.
+    
+    @param context {Hash} Optional value if one was supplied to gotoState when invoked
   */
-  exitState: function() { },
+  exitState: function(context) { },
+  
+  /**
+    Notification called just before exitState is invoked. 
+    
+    Note: This is intended to be used by the owning statechart but it can be overridden 
+    if you need to do something special.
+    
+    @see #exitState
+  */
+  stateWillBecomeExited: function() { 
+    this._teardownAllStateObserveHandlers();
+  },
+  
+  /**
+    Notification called just after exitState is invoked. 
+    
+    Note: This is intended to be used by the owning statechart but it can be overridden 
+    if you need to do something special.
+    
+    @see #exitState
+  */
+  stateDidBecomeExited: function() { },
+  
+  /** @private 
+  
+    Used to setup all the state observer handlers. Should be done when
+    the state has been entered.
+  */
+  _setupAllStateObserveHandlers: function() {
+    this._configureAllStateObserveHandlers('addObserver');
+  },
+  
+  /** @private 
+  
+    Used to teardown all the state observer handlers. Should be done when
+    the state is being exited.
+  */
+  _teardownAllStateObserveHandlers: function() {
+    this._configureAllStateObserveHandlers('removeObserver');
+  },
+  
+  /** @private 
+  
+    Primary method used to either add or remove this state as an observer
+    based on all the state observe handlers that have been registered with
+    this state.
+    
+    Note: The code to add and remove the state as an observer has been
+    taken from the observerable mixin and made slightly more generic. However,
+    having this code in two different places is not ideal, but for now this
+    will have to do. In the future the code should be refactored so that
+    there is one common function that both the observerable mixin and the 
+    statechart framework use.  
+  */
+  _configureAllStateObserveHandlers: function(action) {
+    var key, values, value, dotIndex, path, observer, i, root;
+
+    for (key in this._registeredStateObserveHandlers) {
+      values = this._registeredStateObserveHandlers[key];
+      for (i = 0; i < values.length; i += 1) {
+        path = values[i]; observer = key;
+  
+        // Use the dot index in the path to determine how the state
+        // should add itself as an observer.
+  
+        dotIndex = path.indexOf('.');
+
+        if (dotIndex < 0) {
+          this[action](path, this, observer);
+        } else if (path.indexOf('*') === 0) {
+          this[action](path.slice(1), this, observer);
+        } else {
+          root = null;
+
+          if (dotIndex === 0) {
+            root = this; path = path.slice(1);
+          } else if (dotIndex === 4 && path.slice(0, 5) === 'this.') {
+            root = this; path = path.slice(5);
+          } else if (dotIndex < 0 && path.length === 4 && path === 'this') {
+            root = this; path = '';
+          }
+
+          SC.Observers[action](path, this, observer, root);
+        }
+      }
+    }
+  },
   
   /**
     Call when an asynchronous action need to be performed when either entering or exiting
@@ -612,15 +963,95 @@ SC.State = SC.Object.extend({
     return SC.Async.perform(func, arg1, arg2);
   },
   
+  /** @override
+  
+    Returns YES if this state can respond to the given event, otherwise
+    NO is returned
+  
+    @param event {String} the value to check
+    @returns {Boolean}
+  */
+  respondsToEvent: function(event) {
+    if (this._registeredEventHandlers[event]) return false;
+    if (SC.typeOf(this[event]) === SC.T_FUNCTION) return true;
+    if (this._registeredStringEventHandlers[event]) return true;
+    if (this._registeredStateObserveHandlers[event]) return false;
+    
+    var len = this._registeredRegExpEventHandlers.length,
+        i = 0,
+        handler;
+        
+    for (; i < len; i += 1) {
+      handler = this._registeredRegExpEventHandlers[i];
+      if (event.match(handler.regexp)) return true;
+    }
+    
+    return SC.typeOf(this['unknownEvent']) === SC.T_FUNCTION;
+  },
+  
+  /**
+    Returns the path for this state relative to the statechart's
+    root state. 
+    
+    The path is a dot-notation string representing the path from
+    this state to the statechart's root state, but without including
+    the root state in the path. For instance, if the name of this
+    state if "foo" and the parent state's name is "bar" where bar's
+    parent state is the root state, then the full path is "bar.foo"
+  
+    @property {String}
+  */
+  fullPath: function() {
+    var root = this.getPath('statechart.rootState');
+    if (!root) return this.get('name');
+    return this.pathRelativeTo(root);
+  }.property('name', 'parentState').cacheable(),
+  
   toString: function() {
-    return "SC.State<%@, %@>".fmt(this.get("name"), SC.guidFor(this));
+    var className = SC._object_className(this.constructor);
+    return "%@<%@, %@>".fmt(className, this.get('fullPath'), SC.guidFor(this));
+  },
+  
+  /** @private */
+  _statechartTraceDidChange: function() {
+    this.notifyPropertyChange('trace');
+  },
+  
+  /** @private */
+  _statechartOwnerDidChange: function() {
+    this.notifyPropertyChange('owner');
+  },
+  
+  /** 
+    Used to log a state trace message
+  */
+  stateLogTrace: function(msg) {
+    var sc = this.get('statechart');
+    sc.statechartLogTrace("%@: %@".fmt(this, msg));
+  },
+
+  /** 
+    Used to log a state warning message
+  */
+  stateLogWarning: function(msg) {
+    var sc = this.get('statechart');
+    sc.statechartLogWarning(msg);
+  },
+  
+  /** 
+    Used to log a state error message
+  */
+  stateLogError: function(msg) {
+    var sc = this.get('statechart');
+    sc.statechartLogError(msg);
   }
   
 });
 
 /**
   Use this when you want to plug-in a state into a statechart. This is beneficial
-  in cases where you split your statechart's states up into multiple files.
+  in cases where you split your statechart's states up into multiple files and
+  don't want to fuss with the sc_require construct.
   
   Example:
   
@@ -634,19 +1065,33 @@ SC.State = SC.Object.extend({
           
           a: SC.State.plugin('path.to.a.state.class'),
           
-          b: SC.State.pluing('path.to.another.state.class)
+          b: SC.State.plugin('path.to.another.state.class')
         
         })
       
       })
     
     }}}
+    
+  You can also supply hashes the plugin feature in order to enhance a state or
+  implement required functionality:
+  
+    {{{
+    
+      SomeMixin = { ... };
+    
+      stateA: SC.State.plugin('path.to.state', SomeMixin, { ... })
+    
+    }}}
   
   @param value {String} property path to a state class
+  @param args {Hash,...} Optional. Hash objects to be added to the created state
 */
 SC.State.plugin = function(value) {
+  var args = SC.A(arguments); args.shift();
   var func = function() {
-    return SC.objectForPropertyPath(value);
+    var klass = SC.objectForPropertyPath(value);
+    return klass.extend.apply(klass, args);
   };
   func.statePlugin = YES;
   return func;
@@ -711,3 +1156,165 @@ Function.prototype.handleEvents = function() {
   this.events = arguments;
   return this;
 };
+
+/**
+  Extends the JS Function object with the stateObserves method that will
+  create a state observe handler on a given state object. 
+  
+  Use a stateObserves() instead of the common observes() method when you want a 
+  state to observer changes to some property on the state itself or some other 
+  object. 
+  
+  Any method on the state that has stateObserves is considered a state observe
+  handler and behaves just like when you use observes() on a method, but with an
+  important difference. When you apply stateObserves to a method on a state, those
+  methods will be active *only* when the state is entered, otherwise those methods
+  will be inactive. This removes the need for you having to explicitly call
+  addObserver and removeObserver. As an example:
+  
+  {{{
+  
+    state = SC.State.extend({
+    
+      foo: null,
+      
+      user: null,
+    
+      observeHandlerA: function(target, key) {
+        
+      }.stateObserves('MyApp.someController.status'),
+      
+      observeHandlerB: function(target, key) {
+      
+      }.stateObserves('foo'),
+      
+      observeHandlerC: function(target, key) {
+      
+      }.stateObserves('.user.name', '.user.salary')
+    
+    })
+  
+  }}}
+  
+  Above, state has three state observe handlers: observeHandlerA, observeHandlerB, and
+  observeHandlerC. When state is entered, the state will automatically add itself as
+  an observer for all of its registered state observe handlers. Therefore when
+  foo changes, observeHandlerB will be invoked, and when MyApp.someController's status
+  changes then observeHandlerA will be invoked. The moment that state is exited then
+  the state will automatically remove itself as an observer for all of its registered
+  state observe handlers. Therefore none of the state observe handlers will be
+  invoked until the next time the state is entered. 
+  
+  @param {String...} args
+*/
+Function.prototype.stateObserves = function() {
+  this.isStateObserveHandler = YES;
+  this.args = SC.A(arguments);
+  return this;
+};
+
+/**
+  Represents a history state that can be assigned to a SC.State object's
+  initialSubstate property. 
+  
+  If a SC.HistoryState object is assigned to a state's initial substate, 
+  then after a state is entered the statechart will refer to the history 
+  state object to determine the next course of action. If the state has 
+  its historyState property assigned then the that state will be entered, 
+  otherwise the default state assigned to history state object will be entered.
+  
+  An example of how to use:
+  
+  {{{
+  
+    stateA: SC.State.design({
+    
+      initialSubstate: SC.HistoryState({
+        defaultState: 'stateB'
+      }),
+      
+      stateB: SC.State.design({ ... }),
+      
+      stateC: SC.State.design({ ... })
+    
+    })
+  
+  }}}
+  
+  
+*/
+SC.HistoryState = SC.Object.extend({
+
+  /**
+    Used to indicate if the statechart should recurse the 
+    history states after entering the this object's parent state
+    
+    @property {Boolean}
+  */
+  isRecursive: NO,
+  
+  /**
+    The default state to enter if the parent state does not
+    yet have its historyState property assigned to something 
+    other than null.
+    
+    The value assigned to this property must be the name of an
+    immediate substate that belongs to the parent state. The
+    statechart will manage the property upon initialization.
+    
+    @property {String}
+  */
+  defaultState: null,
+  
+  /** @private
+    Managed by the statechart 
+    
+    The statechart that owns this object.
+  */
+  statechart: null,
+  
+  /** @private
+    Managed by the statechart 
+  
+    The state that owns this object
+  */
+  parentState: null,
+  
+  /**
+    Used by the statechart during a state transition process. 
+    
+    Returns a state to enter based on whether the parent state has
+    its historyState property assigned. If not then this object's
+    assigned default state is returned.
+  */
+  state: function() {
+    var defaultState = this.get('defaultState'),
+        historyState = this.getPath('parentState.historyState');
+    return !!historyState ? historyState : defaultState;
+  }.property().cacheable(),
+  
+  /** @private */
+  parentHistoryStateDidChange: function() {
+    this.notifyPropertyChange('state');
+  }.observes('*parentState.historyState')
+  
+});
+
+/** 
+  The default name given to an empty state
+*/
+SC.EMPTY_STATE_NAME = "__EMPTY_STATE__";
+
+/**
+  Represents an empty state that gets assigned as a state's initial substate 
+  if the state does not have an initial substate defined.
+*/
+SC.EmptyState = SC.State.extend({
+  
+  name: SC.EMPTY_STATE_NAME,
+  
+  enterState: function() {
+    this.stateLogWarning("No initial substate was defined for state %@. Entering default empty state".fmt(this.get('parentState')));
+  }
+  
+});

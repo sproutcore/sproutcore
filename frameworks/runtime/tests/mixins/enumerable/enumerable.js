@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -489,7 +489,6 @@ test("should invoke custom reducer", function() {
 test("should trigger observer of reduced prop when array changes once property retrieved once", function() {
   var src, ary2 = enumerables ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
-    console.log(ary2)
     src = ary2[idx2] ;
     // get the property...this will install the reducer property...
     src.get("@max(balance)") ;

@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 //            Portions ©2010 Strobe Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
@@ -150,8 +150,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     @since SproutCore 1.5
   */
   useCanvas: function() {
-    return SC.platform.supportsCanvas;
-  }.property().cacheable(),
+    return SC.platform.supportsCanvas && !this.get('useStaticLayout');
+  }.property('useStaticLayout').cacheable(),
 
   /**
     If YES, image view will use the SC.imageQueue to control loading.  This

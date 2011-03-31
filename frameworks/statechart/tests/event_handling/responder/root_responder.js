@@ -3,14 +3,14 @@
 // ==========================================================================
 /*globals SC statechart */
 
-window.startchart = null;
-var pane, button, fooInvokedCount;
+window.statechart = null;
+var responder, fooInvokedCount;
 
 // ..........................................................
 // CONTENT CHANGING
 // 
 
-module("SC.Statechart: No Concurrent States - Default Responder Tests", {
+module("SC.Statechart: No Concurrent States - Root Responder Default Responder Tests", {
   setup: function() {
     fooInvokedCount = 0;
     
@@ -38,50 +38,34 @@ module("SC.Statechart: No Concurrent States - Default Responder Tests", {
       
     });
     
-    statechart.initStatechart();
+    window.statechart.initStatechart();
+    
+    responder = SC.RootResponder.responder;
     
     SC.RunLoop.begin();
-    pane = SC.MainPane.create({
-      defaultResponder: 'statechart',
-      childViews: [
-        SC.ButtonView.extend({
-          action: 'foo'
-        })
-      ]
-    });
-    pane.append();
+    responder.set('defaultResponder', 'statechart');
     SC.RunLoop.end();
-    
-    button = pane.childViews[0];
   },
   
   teardown: function() {
-    pane.remove();
-    pane = button = fooInvokedCount = null;
     window.statechart = null;
+    responder = null;
+    SC.RootResponder.responder.set('defaultResponder', null);
   }
 });
 
 test("click button", function() {
-  var target;
-  
   equals(fooInvokedCount, 0, 'foo should not have been invoked');
   equals(statechart.stateIsCurrentState('a'), true, 'state a should be a current state');
   equals(statechart.stateIsCurrentState('b'), false, 'state b should not be a current state');
   
-  target = button.$().get(0);
-  SC.Event.trigger(target, "mousedown");
-  target = button.$().get(0);
-  SC.Event.trigger(target, "mouseup");
+  responder.sendAction('foo');
   
   equals(fooInvokedCount, 1, 'foo should have been invoked once');
   equals(statechart.stateIsCurrentState('a'), false, 'state a should not be a current state');
   equals(statechart.stateIsCurrentState('b'), true, 'state b should be a current state');
   
-  target = button.$().get(0);
-  SC.Event.trigger(target, "mousedown");
-  target = button.$().get(0);
-  SC.Event.trigger(target, "mouseup");
+  responder.sendAction('foo');
   
   equals(fooInvokedCount, 2, 'foo should have been invoked twice');
   equals(statechart.stateIsCurrentState('a'), true, 'state a should be a current state');

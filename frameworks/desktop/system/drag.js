@@ -1,8 +1,10 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2011, Strobe Inc. and contributors.
-// Portions copyright ©2008 Apple Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+
 
 SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
 SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x000F; SC.DRAG_DATA = 0x0008; // includes SC.DRAG_REORDER
@@ -344,8 +346,15 @@ SC.Drag = SC.Object.extend(
 	    if (evt.makeTouchResponder) {
 	      // Should use invokeLater if I can figure it out
 	      var self = this;
-	      SC.Timer.schedule({ target: evt, action: function(){ if (!evt.hasEnded) evt.makeTouchResponder(self, YES); }, interval: 1 });
-	    } else {
+	      SC.Timer.schedule({ 
+	        target: evt, 
+	        action: function() { 
+	          if (!evt.hasEnded) evt.makeTouchResponder(self, YES);
+	        }, 
+	        interval: 1
+	      });
+	    } 
+	    else {
 	      // notify root responder that a drag is in process
 	      this.ghostView.rootResponder.dragDidStart(this, evt) ;
 	    }
@@ -356,6 +365,7 @@ SC.Drag = SC.Object.extend(
     
     // let all drop targets know that a drag has started
     var ary = this._dropTargets() ;
+    
     for (var idx=0, len=ary.length; idx<len; idx++) {
       ary[idx].tryToPerform('dragStarted', this, evt) ;
     }

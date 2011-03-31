@@ -1,3 +1,9 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 /**
   This module specifically tests integration with Handlebars and SproutCore-specific
   Handlebars extensions.
@@ -469,6 +475,10 @@ test("should update boundIf blocks if the conditional changes", function() {
   SC.run(function() { view.get('content').setPath('myApp.isEnabled', NO); });
 
   equals(view.$('#first').text(), "", "re-renders without block when condition is false");
+
+  SC.run(function() { view.get('content').setPath('myApp.isEnabled', YES); });
+
+  equals(view.$('#first').text(), "bam", "re-renders block when condition changes to true");
 });
 
 test("{{view}} id attribute should set id on layer", function() {

@@ -3,7 +3,7 @@
  * ==========================================================================
  * SproutCore Costello -- Property Observing Library
  * Copyright ©2006-2011, Strobe Inc. and contributors.
- * Portions copyright ©2008-2010 Apple Inc. All rights reserved.
+ * Portions copyright ©2008-2011 Apple Inc. All rights reserved.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 

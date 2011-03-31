@@ -1,4 +1,11 @@
-SC.mixin(SC.$.fn, /** @scope SC.$.prototype */ {
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+
+ SC.mixin(SC.$.fn, /** @scope SC.$.prototype */ {
 
   /**
     You can either pass a single class name and a boolean indicating whether

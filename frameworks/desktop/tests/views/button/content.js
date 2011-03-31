@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Apple Inc. and contributors.
+// Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -10,10 +10,11 @@
 // contentPropertyDidChange()
 // 
 var view, content ;
-module('SC.Control#contentPropertyDidChange', {
+module('SC.ButtonView#contentPropertyDidChange', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.View.create(SC.Control);
+    view = SC.ButtonView.create();
+    view.set('title', 'hello world');
   },
   
   teardown: function() {
@@ -76,13 +77,35 @@ test("should fire even on a content object set when the object is created", func
   equals(callCount, 2, 'should call contentPropertyDidChange when changing content.foo');
 });
 
+
+module('SC.ButtonView#titleRendering', {
+  setup: function() {
+    content = SC.Object.create();
+    view = SC.ButtonView.create();
+    view.set('title', 'hello world');
+  },
+  
+  teardown: function() {
+    content = null;
+    view.destroy();
+  }
+});
+
+
+test("should return the title localized or not", function() {
+  
+  equals(view.displayTitle(), 'hello world', 'should return an empty string as the title is not localized');
+});
+
+
+
 // ..........................................................
 // updatePropertyFromContent()
 // 
-module("SC.Control#updatePropertyFromContent()", {
+module("SC.ButtonView#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, { content: content });
+    view = SC.ButtonView.create({ content: content });
   },
   teardown: function() {
     content = null ;
@@ -122,13 +145,17 @@ test("should be able to get value from a content object that is not SC.Object", 
   equals(view.get('value'), 'foo', 'should have looked at foo since contentValueKey is set to foo');
 });
 
+
+
+
+
 // ..........................................................
 // updateContentWithValueObserver()
 // 
-module("SC.Control#updatePropertyFromContent()", {
+module("SC.ButtonView#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, { 
+    view = SC.ButtonView.create({ 
       value: "bar",
       content: content,
       contentValueKey: "bar",
@@ -146,13 +173,6 @@ test("if contentValueKey is set, changing value will be pushed to content", func
   equals(content.get('bar'), 'baz', 'should copy from view.value to content');
 });
 
-test("does nothing if content is null", function() {
-  view.set('content', null);
-  view.set('value', 'baz'); // should be no errors here...
-  equals(content.get('bar'), 'bar', 'should not change');
-  equals(content.get('foo'), 'foo', 'should not change');
-});
-
 test("if contentValueKey is undefined, asks display delegate instead", function() {
   delete view.contentValueKey ;
   view.set('value', 'baz');
@@ -163,6 +183,7 @@ test("if contentValueKey is not set & displayDelegate not set, does nothing", fu
   delete view.contentValueKey;
   delete view.displayDelegate;
   view.set('value', 'baz');
-  equals(content.get('bar'), 'bar', 'should not change');
   equals(content.get('foo'), 'foo', 'should not change');
 });
+
+

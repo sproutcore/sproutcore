@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Apple Inc. and contributors.
+// Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -10,11 +10,10 @@
 // contentPropertyDidChange()
 // 
 var view, content ;
-module('SC.Button#contentPropertyDidChange', {
+module('SC.ContentValueSupport#contentPropertyDidChange', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.View.create(SC.Control, SC.Button);
-    view.set('title', 'hello world');
+    view = SC.View.create(SC.ContentValueSupport);
   },
   
   teardown: function() {
@@ -66,7 +65,7 @@ test("should no longer be invoked when a key is changed on a former content obje
 
 test("should fire even on a content object set when the object is created", function() {
   var callCount = 0;
-  var view = SC.View.create(SC.Control, {
+  var view = SC.View.create(SC.ContentValueSupport, {
     contentPropertyDidChange: function() { callCount++; },
     content: content
   });
@@ -77,41 +76,13 @@ test("should fire even on a content object set when the object is created", func
   equals(callCount, 2, 'should call contentPropertyDidChange when changing content.foo');
 });
 
-
-module('SC.Button#titleRendering', {
-  setup: function() {
-    content = SC.Object.create();
-    view = SC.View.create(SC.Control, SC.Button);
-    view.set('title', 'hello world');
-  },
-  
-  teardown: function() {
-    content = null;
-    view.destroy();
-  }
-});
-
-
-test("should return the title localized or not", function() {
-  
-  equals(view.displayTitle(), 'hello world', 'should return an empty string as the title is not localized');
-});
-
-test("should return the button view context with the title set", function() {
-  context = SC.RenderContext();
-  ok((view.renderTitle(context, true).length>0), 'title string were added to the context');
-});
-
-
-
-
 // ..........................................................
 // updatePropertyFromContent()
 // 
-module("SC.Button#updatePropertyFromContent()", {
+module("SC.ContentValueSupport#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, SC.Button, { content: content });
+    view = SC.View.create(SC.ContentValueSupport, { content: content });
   },
   teardown: function() {
     content = null ;
@@ -151,17 +122,13 @@ test("should be able to get value from a content object that is not SC.Object", 
   equals(view.get('value'), 'foo', 'should have looked at foo since contentValueKey is set to foo');
 });
 
-
-
-
-
 // ..........................................................
 // updateContentWithValueObserver()
 // 
-module("SC.Button#updatePropertyFromContent()", {
+module("SC.ContentValueSupport#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.Control, SC.Button, { 
+    view = SC.View.create(SC.ContentValueSupport, { 
       value: "bar",
       content: content,
       contentValueKey: "bar",
@@ -179,6 +146,13 @@ test("if contentValueKey is set, changing value will be pushed to content", func
   equals(content.get('bar'), 'baz', 'should copy from view.value to content');
 });
 
+test("does nothing if content is null", function() {
+  view.set('content', null);
+  view.set('value', 'baz'); // should be no errors here...
+  equals(content.get('bar'), 'bar', 'should not change');
+  equals(content.get('foo'), 'foo', 'should not change');
+});
+
 test("if contentValueKey is undefined, asks display delegate instead", function() {
   delete view.contentValueKey ;
   view.set('value', 'baz');
@@ -189,7 +163,6 @@ test("if contentValueKey is not set & displayDelegate not set, does nothing", fu
   delete view.contentValueKey;
   delete view.displayDelegate;
   view.set('value', 'baz');
+  equals(content.get('bar'), 'bar', 'should not change');
   equals(content.get('foo'), 'foo', 'should not change');
 });
-
-

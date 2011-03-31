@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 require('panes/picker');
@@ -40,7 +40,7 @@ require('views/menu_item');
     var menuItems = [
       { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
       { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
-      { title: 'Selected Menu Item', keyEquivalent: 'backspace' },
+      { title: 'Selected Menu Item', keyEquivalent: ['backspace', 'delete'] },
       { isSeparator: YES },
       { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
       { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: 'ctrl_p' }
@@ -372,7 +372,8 @@ SC.MenuPane = SC.PickerPane.extend(
   itemSeparatorKey: 'separator',
 
   /**
-    The name of the property that contains the target for the action that is triggered when the user clicks the menu item.
+    The name of the property that contains the target for the action that is 
+    triggered when the user clicks the menu item.
 
     Note that this property is ignored if the menu item has a submenu.
 
@@ -624,7 +625,15 @@ SC.MenuPane = SC.PickerPane.extend(
 
       keyEquivalent = item.get(keyEquivalentKey);
       if (keyEquivalent) {
-        this._keyEquivalents[keyEquivalent] = view;
+        // if array, apply each one for this view
+        if(SC.typeOf(keyEquivalent)===SC.T_ARRAY) {
+          keyEquivalent.forEach(function(keyEq) {
+            this._keyEquivalents[keyEq] = view;
+          }, this);
+        }
+        else {
+          this._keyEquivalents[keyEquivalent] = view;
+        }
       }
     }
 

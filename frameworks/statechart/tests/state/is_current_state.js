@@ -5,10 +5,6 @@
 
 var statechart = null;
 
-// ..........................................................
-// CONTENT CHANGING
-// 
-
 module("SC.Statechart: State - isCurrentState Property Tests", {
   setup: function() {
 

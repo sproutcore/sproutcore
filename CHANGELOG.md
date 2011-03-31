@@ -4,6 +4,27 @@ CHANGE LOG FOR 1.5
 
 Upcoming
 -----------
+* Integrated new functionality from the Ki framework into the SC.StateChart framework so that they now have feature-parity
+* The SC.PickerPane was updated to add removeTarget and removeTarget properties
+* Fixed documentation in datastore and view layer
+* Refactored and fixed bugs in the way SproutCore handles AutoResizing.
+* Updated the test_controls application to reflect AutoResize changes
+* Fixed bugs with the selection behavior in lists
+* Fixed bugs with the logic that determines when sproutcore applications are ready to begin execution
+* Improved performance of layout updates
+* Fixed bugs in keyboard behavior of menus
+* Made more views utilize render delegates
+* Updated unit tests for menus to reflect new keyboard behavior
+* Add proper autoresize behavior to buttons
+* Fixed frame calculation bugs in lists
+* Removed redundant bounds checking in scroll
+* Fixed bugs with the localization of titles in segmented views
+* Fixes for formView
+* Added ability to scale apps so that we can visualize them on the iPhone
+* If using StaticLayout in the image, don't use Canvas
+* Fixed firstResponder support in text_field
+* Fixed responder behavior in editable
+* Refactoring for flowed_layout
 * Rewrote the existing inline editing code to make it more generic and integrated it with SC.LabelView, SC.InlineTextFieldView and SC.ListItemView
 * Added a new SC.SplitView class to the experimental framework which is a re-write of the existing SC.SplitView class but with cleaner code and multi-pane support.
 * Introduced a new AlertPane API and backwards compatibility for the existing API. The new API allows us to create an AlertPane by defining a hash of parameters instead of single methods which take 15+ parameters.

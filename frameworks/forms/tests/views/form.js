@@ -1,7 +1,9 @@
 // ==========================================================================
-// Project:   Forms.FormView Unit Test
-// Copyright: ©2009 My Company, Inc.
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 /*globals Forms module test ok equals same stop start */
 
 module("Forms.FormView");

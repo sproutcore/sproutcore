@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            portions copyright @2009 Apple Inc.
+//            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -105,7 +105,6 @@ var pane = SC.ControlTestPane.design()
     itemValueKey: 'value',
     layoutDirection: SC.LAYOUT_HORIZONTAL
   });
-pane.show(); // add a test to show the test pane
 
 pane.verifyButtons = function verifyButtons(view, items) {
   var radioButtons = view.$('.sc-radio-button');
@@ -143,8 +142,10 @@ pane.verifyLabels = function verifyLabels(view, items) {
 module('SC.RadioView UI', {
   setup: function(){
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
   },
   teardown: function(){
+    pane.standardSetup().teardown();
     clearHtmlbody();
   }
 });

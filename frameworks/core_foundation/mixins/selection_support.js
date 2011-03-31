@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /**
@@ -81,11 +81,10 @@ SC.SelectionSupport = {
     @property {SC.SelectionSet}
   */
   selection: function(key, value) {
-
     var old = this._scsel_selection,
     oldlen = old ? old.get('length') : 0,
-    content,
     empty,
+    arrangedObjects = this.get('arrangedObjects'),
     len;
 
     // whenever we have to recompute selection, reapply all the conditions to
@@ -110,9 +109,9 @@ SC.SelectionSupport = {
       }
     }
 
-    // if we don't allow empty selection, block that also.  select first
-    // selectable item if necessary.
-    if ((len === 0) && !this.get('allowsEmptySelection')) {
+    // if we don't allow empty selection, block that also, unless we
+    // have nothing to select.  select first selectable item if necessary.
+    if ((len === 0) && !this.get('allowsEmptySelection') && arrangedObjects && arrangedObjects.get('length') !== 0) {
       if (oldlen === 0) {
         value = this.get('firstSelectableObject');
         if (value) { value = SC.SelectionSet.create().addObject(value).freeze(); }
@@ -129,7 +128,7 @@ SC.SelectionSupport = {
     if (len === 0) { value = SC.SelectionSet.EMPTY; }
 
     // always use a frozen copy...
-    value = value.frozenCopy();
+    if(value !== old) value = value.frozenCopy();
     this._scsel_selection = value;
 
     return value;

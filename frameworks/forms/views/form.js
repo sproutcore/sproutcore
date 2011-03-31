@@ -1,7 +1,10 @@
 // ==========================================================================
-// Project:   SC.FormView
+// Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2009 Alex Iskander and TPSi
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 /*globals Forms */
 
 /** @class
@@ -48,6 +51,7 @@ beginEditing.
 require("mixins/emptiness");
 require("mixins/edit_mode");
 require("views/form_row");
+
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_VERTICAL,
   canWrap: NO,
@@ -132,7 +136,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
       key = cv[idx];
       if (SC.typeOf(key) === SC.T_STRING) {
         v = this.get(key);
-        if (v.isClass && v.prototype.isControl && !v.prototype.contentValueKey && v.prototype.isFormRow) {
+        if (v.isClass && v.prototype.hasContentValueSupport && !v.prototype.contentValueKey && v.prototype.isFormRow) {
           v.prototype.contentValueKey = key ;
         } else {
           v.prototype.formKey = key;
@@ -159,7 +163,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
           if (!v.get("content")) {
             
             // controls can calculate their own value based on the contentValueKey we set earlier
-            if (v.get('isControl')) v.bind('content', '.owner.content');
+            if (v.get('hasContentValueSupport')) v.bind('content', '.owner.content');
             // if it isn't a control then we can't use contentValueKey, so bind the content manually
             else v.bind('content', '.owner.content.' + key);
           }
