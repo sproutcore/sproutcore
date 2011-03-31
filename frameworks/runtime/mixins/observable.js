@@ -438,6 +438,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       var keyChains = chains[key];
 
       if (keyChains) {
+        keyChains = SC.clone(keyChains);
         keyChains.forEach(function(chain) {
           // Invalidate the property that depends on the changed key.
           chain.notifyPropertyDidChange();
