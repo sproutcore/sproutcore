@@ -1,7 +1,10 @@
 // ==========================================================================
-// Project:   Forms.FormRowView
-// Copyright: ©2009 Alex Iskander and TPSi.
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2009 Alex Iskander and TPSi
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 /*globals Forms */
 
 /** @class

@@ -1,4 +1,8 @@
-/*
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================/*
 * @delegate
 *
 * This is the default InlineEditorDelegate for SC.LabelView. The default editor

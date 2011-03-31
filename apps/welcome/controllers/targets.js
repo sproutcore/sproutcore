@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   Welcome.targetsController
-// Copyright: ©2010 Apple Inc.
+// Copyright: ©2011 Apple Inc.
 // ==========================================================================
 /*globals CoreTools Welcome */
 

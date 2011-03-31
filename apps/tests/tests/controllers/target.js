@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   TestRunner.targetController Unit Test
-// Copyright: ©2010 Apple Inc.
+// Copyright: ©2011 Apple Inc.
 // ==========================================================================
 /*globals TestRunner module test ok equals same stop start */
 

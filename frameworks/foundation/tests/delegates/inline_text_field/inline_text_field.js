@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Apple Inc. and contributors.
+// Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*global module test equals context ok same */

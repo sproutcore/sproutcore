@@ -1,6 +1,7 @@
 // ==========================================================================
 // Project:   SC.Statechart - A Statechart Framework for SproutCore
 // Copyright: ©2010, 2011 Michael Cohen, and contributors.
+//            Portions @2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 

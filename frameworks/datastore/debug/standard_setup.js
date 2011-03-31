@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Apple Inc. and contributors.
+// Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*globals module ok equals same test json0_9 json10_19 json20_29 json30_39 json40_49 */
