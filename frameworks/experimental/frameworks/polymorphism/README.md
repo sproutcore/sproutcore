@@ -1,33 +1,45 @@
 Polymorphism Framework
 ======================
  
-This framework adds polymorphism support to SC.Record relationships.
-Right now, only one-to-one polymorphism is supported, but to-many
-support is planned.
+This framework adds subtype polymorphism support to SC.Record relationships and
+SC.Store\#find.
 
 
 ## Using the Framework
 
-In order to use the polymorphic to-one relationship, include this
-framework in your Buildfile. Inside your Records, you can define
-a relationship like this:
+In order to use the polymorphism for your record type, you need to set
+the `isPolymorphic` property:
 
-    MyApp.Child = SC.Record.extend({
-	    parent: SC.Record.toOneOf(['MyApp.Male', 'MyApp.Female'], {typeKey: 'parentType'}),
-	    parentType: SC.Record.attr(String)
-	});
-
-You need to pass in a hash like the following when creating the record:
-
-    {parent: 1, parentType: 'MyApp.Male'}
+    MyApp.SomeRecord = SC.Record.extend({
+      // your code here
+    });
+    MyApp.SomeRecord.isPolymorphic = YES;
 
 
-For other, more flexible, ways of using this polymorphic support,
-see the unit tests or source code.
+## Example
 
-<!--
-	TODO Write more examples
--->
+    YourApp.Person = SC.Record.extend();
+    YourApp.Person.isPolymorphic = YES;
+
+    YourApp.Male = YourApp.Person.extend({
+      isMale: YES
+    });
+
+    YourApp.Female = YourApp.Person.extend({
+      isFemale: YES
+    });
+    
+    YourApp.store.createRecord(YourApp.Male, {
+      guid: '1'
+    });
+    
+    YourApp.store.createRecord(YourApp.Female, {
+      guid: '2'
+    });
+    
+    // SC.Store#find now returns records of the expected type
+    SC.Logger.log(SC.kindOf(YourApp.store.find(YourApp.Person, '1'), YourApp.Male)); // true
+    SC.Logger.log(SC.kindOf(YourApp.store.find(YourApp.Person, '2'), YourApp.Female)); // true
 
 ## Contributors
 
