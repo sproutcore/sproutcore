@@ -379,14 +379,18 @@ SC.View.reopen(
     @returns {Rect} the computed frame
   */
   computeFrameWithParentFrame: function(original, pdim) {
-    var layout = this.get('layout');
+    var f, layout = this.get('layout');
 
+    // We can't predict the frame for static layout, so just return the view's
+    // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
-      var f = original(pdim);
+      f = original();
       return f ? this._adjustForBorder(f, layout) : null;
+    } else {
+      f = {};
     }
 
-    var f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
+    var error, layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
         dH, dW, //shortHand for parentDimensions
         lR = layout.right,
