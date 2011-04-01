@@ -239,7 +239,7 @@ parse: function parse(input) {
                     first_line: lstack[lstack.length-(len||1)].first_line,
                     last_line: lstack[lstack.length-1].last_line,
                     first_column: lstack[lstack.length-(len||1)].first_column,
-                    last_column: lstack[lstack.length-1].last_column,
+                    last_column: lstack[lstack.length-1].last_column
                 };
                 r = this.performAction.call(yyval, yytext, yyleng, yylineno, this.yy, action[1], vstack, lstack);
 
