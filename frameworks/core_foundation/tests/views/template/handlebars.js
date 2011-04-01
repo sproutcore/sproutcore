@@ -74,7 +74,7 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
 
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("#child-view:contains('Goodbye cruel world?')").length === 1, "The child view renders its content once");
-  ok(view.$().html().match(/Hello world!.*<aside.*Goodbye cruel world?/), "parent view should appear before the child view");
+  ok(view.$().text().match(/Hello world!.*Goodbye cruel world\?/), "parent view should appear before the child view");
 
 });
 
@@ -125,11 +125,10 @@ test("child views can be inserted inside a bind block", function() {
 
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("aside:contains('Goodbye wot cruel world?')").length === 1, "The child view renders its content once");
-  ok(view.$().html().match(/Hello world!.*<aside.*Goodbye.*wot.*cruel.*world?/), "parent view should appear before the child view");
-
+  ok(view.$().text().match(/Hello world!.*Goodbye.*wot.*cruel.*world\?/), "parent view should appear before the child view");
 });
 
-test("SC.TemplateView updates when a property changes", function() {
+test("SC.TemplateView should update when a property changes and the bind helper is used", function() {
   var templates = SC.Object.create({
    foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{bind "wham"}}{{/with}}</h1>')
   });
@@ -149,6 +148,58 @@ test("SC.TemplateView updates when a property changes", function() {
   equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
 
   SC.run(function() { view.get('content').set('wham', 'bazam'); });
+
+  equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
+});
+
+test("SC.TemplateView should update when a property changes and no bind helper is used", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{wham}}{{/with}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
+
+  SC.run(function() { view.get('content').set('wham', 'bazam'); });
+
+  equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
+});
+
+test("SC.TemplateView should update when the property used with the #with helper changes", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{wham}}{{/with}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
+
+  SC.run(function() {
+    view.set('content', SC.Object.create({
+      wham: 'bazam'
+    }));
+  });
 
   equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
 });
@@ -311,6 +362,81 @@ test("Template updates correctly if a path is passed to the bind helper and the 
   equals(view.$('h1').text(), "$6", "updates when property is set on object controller");
 });
 
+test("should update the block when object passed to #if helper changes", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{#if inception}}{{INCEPTION}}{{/if}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    INCEPTION: "BOOOOOOOONG doodoodoodoodooodoodoodoo",
+    inception: 'OOOOoooooOOOOOOooooooo'
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "renders block if a string");
+
+  var tests = [false, null, undefined, [], '', 0];
+
+  tests.forEach(function(val) {
+    SC.run(function() {
+      view.set('inception', val);
+    });
+
+    equals(view.$('h1').text(), '', "hides block when conditional is '%@'".fmt(val));
+
+    SC.run(function() {
+      view.set('inception', true);
+    });
+
+    equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "precond - renders block when conditional is true");
+  });
+});
+
+test("should update the block when object passed to #if helper changes and an inverse is supplied", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{#if inception}}{{INCEPTION}}{{else}}{{SAD}}{{/if}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    INCEPTION: "BOOOOOOOONG doodoodoodoodooodoodoodoo",
+    inception: false,
+    SAD: 'BOONG?'
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "BOONG?", "renders alternate if false");
+
+  SC.run(function() { view.set('inception', true); });
+
+  var tests = [false, null, undefined, [], '', 0];
+
+  tests.forEach(function(val) {
+    SC.run(function() {
+      view.set('inception', val);
+    });
+
+    equals(view.$('h1').text(), 'BOONG?', "renders alternate if %@".fmt(val));
+
+    SC.run(function() {
+      view.set('inception', true);
+    });
+
+    equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "precond - renders block when conditional is true");
+  });
+});
+
 test("Should insert a localized string if the {{loc}} helper is used", function() {
   SC.stringsFor('en', {
     'Brazil': 'Brasilia'
@@ -375,7 +501,7 @@ test("Template views can belong to a pane and a parent view", function() {
 
   equals(pane.$().children().length, 1, "pane has one child DOM element");
   equals(pane.$().children().children().length, 2, "container view has two child DOM elements");
-  equals(pane.$().children().children().eq(1).html(), "<h1>Do dishes</h1> (Created at Today)", "renders template to the correct DOM element");
+  equals(pane.$().children().children().eq(1).text(), "Do dishes (Created at Today)", "renders template to the correct DOM element");
   ok(didCreateLayerWasCalled, "didCreateLayer gets called on a template view after it gets rendered");
   pane.remove();
 });
