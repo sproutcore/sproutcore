@@ -225,14 +225,14 @@ SC.View.reopen(
     var layout = this.get('layout'),
         ret;
 
-    // Fixed if has width + height !== SC.LAYOUT_AUTO and left + top
+    // Layout is fixed if it has width + height !== SC.LAYOUT_AUTO and left + top
     ret = (
       ((layout.width !== undefined) && (layout.height !== undefined)) &&
       ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO)) &&
       ((layout.left !== undefined) && (layout.top !== undefined))
     );
 
-    // The layout may appear fixed, but only if none of the values are percentage
+    // The layout may appear fixed, but only if none of the values are percentages
     if (ret) {
       ret = (
         !SC.isPercentage(layout.top) &&
