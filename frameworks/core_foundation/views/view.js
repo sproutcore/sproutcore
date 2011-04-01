@@ -428,6 +428,13 @@ SC.CoreView.reopen(
       // invalidate it.
       childView.notifyPropertyChange('layer');
 
+      // A strange case, that a childView's frame won't be correct before
+      // we have a layer, if the childView doesn't have a fixed layout
+      // and we are using static layout
+      if (this.get('useStaticLayout')) {
+        if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
+      }
+
       childView._notifyDidCreateLayer() ;
     }
   },

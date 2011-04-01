@@ -213,6 +213,39 @@ SC.View.reopen(
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
 
   /**
+    Returns whether the layout is 'fixed' or not.  A fixed layout has a fixed
+    position  within its parent's frame as well as  a fixed width and height.
+    Fixed layouts are therefore unaffected by changes to their parent view's
+    layout.
+
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layoutStyle
+  */
+  isFixedLayout: function() {
+    var layout = this.get('layout'),
+        ret;
+
+    ret = (
+      (layout.left !== undefined) && (layout.top !== undefined) &&
+      (layout.width !== undefined) && (layout.height !== undefined)
+    );
+
+    // The layout may appear fixed, but only if none of the values are percentage
+    if (ret) {
+      ret = (
+        !SC.isPercentage(layout.left) &&
+        !SC.isPercentage(layout.top) &&
+        !SC.isPercentage(layout.width) &&
+        !SC.isPercentage(layout.right) &&
+        !SC.isPercentage(layout.centerX) &&
+        !SC.isPercentage(layout.centerY)
+      );
+    }
+
+    return ret;
+  }.property('layout').cacheable(),
+
+  /**
     Converts a frame from the receiver's offset to the target offset.  Both
     the receiver and the target must belong to the same pane.  If you pass
     null, the conversion will be to the pane level.
@@ -575,36 +608,9 @@ SC.View.reopen(
     var frameMayHaveChanged, layout, isFixed, isPercentageFunc, isPercentage;
 
     // If this view uses static layout, our "do we think the frame changed?"
-    // logic is not applicable and we simply have to assume that the frame may
-    // have changed.
-    if (this.useStaticLayout) {
-      frameMayHaveChanged = YES;
-    }
-    else {
-      layout = this.get('layout');
-
-      // only resizes if the layout does something other than left/top - fixed
-      // size.
-      isFixed = (
-        (layout.left !== undefined) && (layout.top !== undefined) &&
-        (layout.width !== undefined) && (layout.height !== undefined)
-      );
-
-
-      // If it's fixed, our frame still could have changed if it's fixed to a
-      // percentage of the parent.
-      if (isFixed) {
-        isPercentageFunc = SC.isPercentage;
-        isPercentage = (isPercentageFunc(layout.left) ||
-                        isPercentageFunc(layout.top) ||
-                        isPercentageFunc(layout.width) ||
-                        isPercentageFunc(layout.right) ||
-                        isPercentageFunc(layout.centerX) ||
-                        isPercentageFunc(layout.centerY));
-      }
-
-      frameMayHaveChanged = (!isFixed || isPercentage);
-    }
+    // result of isFixedLayout is not applicable and we simply have to assume
+    // that the frame may have changed.
+    frameMayHaveChanged = this.useStaticLayout || !this.get('isFixedLayout');
 
     // Do we think there's a chance our frame will have changed as a result?
     if (frameMayHaveChanged) {
