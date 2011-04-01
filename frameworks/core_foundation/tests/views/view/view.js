@@ -14,7 +14,7 @@ test("setting themeName should trigger a theme observer", function() {
   var view = SC.View.create({
     themeDidChange: function() {
       count++;
-    }.observes('theme'),
+    }.observes('theme')
   });
 
   view.set('themeName', 'hello');
@@ -26,7 +26,7 @@ test("setting themeName should trigger a theme observer when extending", functio
   var View = SC.View.extend({
     themeDidChange: function() {
       count++;
-    }.observes('theme'),
+    }.observes('theme')
   });
 
   View.create().set('themeName', 'hello');
@@ -39,7 +39,7 @@ test("it still works with the backward compatible theme property", function() {
     theme: 'sc-base',
     themeDidChange: function() {
       count++;
-    }.observes('theme'),
+    }.observes('theme')
   });
 
   equals(SC.Theme.find('sc-base'), view.get('theme'));
@@ -53,7 +53,7 @@ test("it still works with the backward compatible theme property when extending"
     theme: 'sc-base',
     themeDidChange: function() {
       count++;
-    }.observes('theme'),
+    }.observes('theme')
   });
 
   view = View.create();
