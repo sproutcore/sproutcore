@@ -214,7 +214,7 @@ SC.View.reopen(
 
   /**
     Returns whether the layout is 'fixed' or not.  A fixed layout has a fixed
-    position within its parent's frame as well as a fixed width and height.
+    left & top position within its parent's frame as well as a fixed width and height.
     Fixed layouts are therefore unaffected by changes to their parent view's
     layout.
 
