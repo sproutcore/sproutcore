@@ -176,7 +176,7 @@ SC.View.reopen(
   },
 
   /**
-    The layout describes how you want your view to be positions on the
+    The layout describes how you want your view to be positioned on the
     screen.  You can define the following properties:
 
     - left: the left edge
@@ -229,7 +229,7 @@ SC.View.reopen(
     @param {Rect} frame the source frame
     @param {SC.View} targetView the target view to convert to
     @returns {Rect} converted frame
-    @test in converFrames
+    @test in convertFrames
   */
   convertFrameToView: function(frame, targetView) {
     var myX=0, myY=0, targetX=0, targetY=0, view = this, f ;
