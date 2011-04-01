@@ -384,7 +384,7 @@ SC.FlowedLayout = {
       // this must be set before we check if the child is included because even
       // if it isn't included, we need to remember that there is a line break
       // for later
-      newRowPending = newRowPending || (idx !== startingAt && child.get('startsNewRow'));
+      newRowPending = newRowPending || (items.length > 0 && child.get('startsNewRow'));
 
       if (!this.shouldIncludeChildInFlow(idx, child)) continue;
       
