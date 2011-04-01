@@ -214,7 +214,7 @@ SC.View.reopen(
 
   /**
     Returns whether the layout is 'fixed' or not.  A fixed layout has a fixed
-    position  within its parent's frame as well as  a fixed width and height.
+    position within its parent's frame as well as a fixed width and height.
     Fixed layouts are therefore unaffected by changes to their parent view's
     layout.
 
@@ -225,20 +225,20 @@ SC.View.reopen(
     var layout = this.get('layout'),
         ret;
 
+    // Fixed if has width + height !== SC.LAYOUT_AUTO and left + top
     ret = (
-      (layout.left !== undefined) && (layout.top !== undefined) &&
-      (layout.width !== undefined) && (layout.height !== undefined)
+      ((layout.width !== undefined) && (layout.height !== undefined)) &&
+      ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO)) &&
+      ((layout.left !== undefined) && (layout.top !== undefined))
     );
 
     // The layout may appear fixed, but only if none of the values are percentage
     if (ret) {
       ret = (
-        !SC.isPercentage(layout.left) &&
         !SC.isPercentage(layout.top) &&
+        !SC.isPercentage(layout.left) &&
         !SC.isPercentage(layout.width) &&
-        !SC.isPercentage(layout.right) &&
-        !SC.isPercentage(layout.centerX) &&
-        !SC.isPercentage(layout.centerY)
+        !SC.isPercentage(layout.height)
       );
     }
 
