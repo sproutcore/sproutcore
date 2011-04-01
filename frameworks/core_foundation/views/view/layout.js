@@ -613,7 +613,7 @@ SC.View.reopen(
     @test in viewDidResize
   */
   parentViewDidResize: function() {
-    var frameMayHaveChanged, layout, isFixed, isPercentageFunc, isPercentage;
+    var frameMayHaveChanged;
 
     // If this view uses static layout, our "do we think the frame changed?"
     // result of isFixedLayout is not applicable and we simply have to assume
