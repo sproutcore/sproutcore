@@ -1074,7 +1074,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     or not. Currently is disabled as in webkit there is a bug where the color 
     of the placeholder doesn't refresh all the time.
   */
-  _supportsPlaceHolder: SC.platform.input.placeholder,
+  _supportsPlaceHolder: function() {
+    
+    // Firefox 4.0 supports placeholder attribute
+    // but doesn't use the default greyish styling for hint
+    // It uses the same style provided for the input field
+    // So the hint looks same as the input value with the same styling.
+    // So even though Firefox 4 supports placeholder attribute 
+    // we will need to treat it similar to Firefox 3
+    
+    return SC.platform.input.placeholder && !SC.browser.mozilla;
+    
+  }.property(),
   
   /** @private
     This observer makes sure to hide the hint when a value is entered, or
