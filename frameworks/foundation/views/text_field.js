@@ -88,7 +88,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   formattedHint: function() {
     var hint = this.get('hint');
 
-    return this.get('localize') ? hint.loc() : hint;
+    return typeof(hint) === 'string' && this.get('localize') ? hint.loc() : hint;
   }.property('hint', 'localize').cacheable(),
 
   /*
