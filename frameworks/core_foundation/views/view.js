@@ -1419,8 +1419,8 @@ SC.CoreView.unload = function() {
   }
 } ;
 
-/** 
-  @class 
+/**
+  @class
 
   Base class for managing a view.  Views provide two functions:
 
