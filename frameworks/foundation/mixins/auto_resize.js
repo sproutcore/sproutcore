@@ -125,6 +125,9 @@ SC.AutoResize = {
       // if so, cancel the old request and make a new one
       SC.AutoResizeManager.cancelMeasurementForView(this, requestedBatchResizeId);
       SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
+
+      // update the requested batchResizeId to the new id
+      this._scar_requestedBatchResizeId = batchResizeId;
     }
   }.observes('batchResizeId'),
 
@@ -309,8 +312,11 @@ SC.AutoResizeManager = {
       if (batches.hasOwnProperty(tag)) {
         views = batches[tag];
 
-        // step through until you find one with a layer
+        // step through until you find one with a layer and also visible
         while ((view = views.pop())) {
+
+          if(!view.get('isVisible')) continue;
+
           layer = view.get('autoResizeLayer');
 
           // use the layer to prepare the measurement
@@ -323,7 +329,7 @@ SC.AutoResizeManager = {
 
         // now measure the rest using the same settings
         while ((view = views.pop())) {
-          view.measureSize(YES);
+          if(view.get('isVisible')) view.measureSize(YES);
         }
 
         SC.teardownStringMeasurement();
