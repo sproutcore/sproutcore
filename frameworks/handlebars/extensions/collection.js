@@ -1,19 +1,12 @@
 sc_require('extensions');
 
-Handlebars.registerHelper('collection', function(path, fn, inverse) {
-  var data = fn.data;
-  var collectionClass;
+Handlebars.registerHelper('collection', function(path, options) {
+  var fn = options.fn;
+  var data = options.data;
+  var inverse = options.inverse;
+  var collectionClass, collectionObject;
 
-  if(!data) {
-    data = fn;
-    fn = null;
-  }
-
-  if(typeof path === "string") {
-    collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
-  } else {
-    collectionClass = path;
-  }
+  collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
 
   var hash = fn.hash, itemHash = {}, match;
 
@@ -29,10 +22,10 @@ Handlebars.registerHelper('collection', function(path, fn, inverse) {
   }
 
   if(fn) {
-    var collectionObject = collectionClass;
-
-    if(collectionObject.isClass) {
-      collectionObject = collectionObject.prototype;
+    if(collectionClass.isClass) {
+      collectionObject = collectionClass.create();
+    } else {
+      collectionObject = collectionClass;
     }
 
     collectionObject.itemViewTemplate = fn;
@@ -40,13 +33,9 @@ Handlebars.registerHelper('collection', function(path, fn, inverse) {
     collectionObject.itemViewOptions = itemHash;
   }
 
-  var noop = function() { return ""; };
+  options.fn = function() { return ""; };
 
-  noop.data = fn.data;
-  noop.hash = fn.hash;
-  noop.fn = noop;
-
-  return Handlebars.helpers.view.call(this, collectionClass, noop);
+  return Handlebars.helpers.view.call(this, collectionObject, options);
 });
 
 Handlebars.registerHelper('bindCollection', function(path, bindingString, fn) {
