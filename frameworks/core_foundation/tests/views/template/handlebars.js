@@ -48,6 +48,24 @@ test("template view should call the function of the associated template with its
   equals("template was called for Tom DAAAALE1. Yea Tom DAAAALE1", view.$('#twas-called').text(), "the named template was called with the view as the data source");
 });
 
+test("should allow values from normal JavaScript hash objects to be used", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#with person}}{{firstName}} {{lastName}} (and {{pet.name}}){{/with}}'),
+
+    person: {
+      firstName: 'Señor',
+      lastName: 'CFC',
+      pet: {
+        name: 'Fido'
+      }
+    }
+  });
+
+  view.createLayer();
+
+  equals(view.$().text(), "Señor CFC (and Fido)", "prints out values from a hash");
+});
+
 TemplateTests = {};
 
 test("child views can be inserted using the {{view}} Handlebars helper", function() {
