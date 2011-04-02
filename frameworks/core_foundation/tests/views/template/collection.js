@@ -159,4 +159,19 @@ test("should work inside a bound {{#if}}", function() {
   equals(view.$('ul li').length, 3, "collection renders when conditional changes to true");
 });
 
+test("should pass content as context when using {{#each}} helper", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#each releases}}Mac OS X {{version}}: {{name}} {{/each}}'),
 
+    releases: [ { version: '10.7',
+                  name: 'Lion' },
+                { version: '10.6',
+                  name: 'Snow Leopard' },
+                { version: '10.5',
+                  name: 'Leopard' } ]
+  });
+
+  view.createLayer();
+
+  equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
+});

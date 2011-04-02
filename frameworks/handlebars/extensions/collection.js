@@ -6,7 +6,12 @@ Handlebars.registerHelper('collection', function(path, options) {
   var inverse = options.inverse;
   var collectionClass, collectionObject;
 
-  collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
+  collectionClass = path ? SC.objectForPropertyPath(path) : SC.TemplateCollectionView;
+  //@ if (debug)
+  if (!collectionClass) {
+    throw "%@ #collection: Could not find %@".fmt(data.view, path);
+  }
+  //@ endif
 
   var hash = fn.hash, itemHash = {}, match;
 
@@ -38,3 +43,8 @@ Handlebars.registerHelper('collection', function(path, options) {
   return Handlebars.helpers.view.call(this, collectionObject, options);
 });
 
+Handlebars.registerHelper('each', function(path, options) {
+  options.hash.content = SC.getPath(this, path);
+  options.hash.itemContextProperty = 'content';
+  return Handlebars.helpers.collection.call(this, null, options);
+});

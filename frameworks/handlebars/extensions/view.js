@@ -6,6 +6,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     var data = options.data;
     var view = data.view;
     var fn = options.fn;
+    var hash = options.hash;
 
     var newView;
     if (path.isClass || path.isObject) {
@@ -22,6 +23,21 @@ SC.Handlebars.ViewHelper = SC.Object.create({
         newView = SC.objectForPropertyPath(path);
       }
       if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+    }
+
+    var contextOptions = {
+      'id': hash.id,
+      'class': hash['class'],
+      'classBinding': hash.classBinding
+    };
+    delete options.id;
+    delete options['class'];
+    delete options.classBinding;
+
+    if (newView.isClass) {
+      SC.mixin(newView.prototype, hash);
+    } else {
+      SC.mixin(newView, hash);
     }
 
     var currentView = data.view;
