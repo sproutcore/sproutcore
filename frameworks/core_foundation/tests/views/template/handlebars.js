@@ -595,6 +595,29 @@ test("Template views set the template of their children to a passed block", func
   ok(view.$().html().match(/<h1>.*<span>.*<\/span>.*<\/h1>/), "renders the passed template inside the parent template");
 });
 
+test("should pass hash arguments to the view object", function() {
+  TemplateTests.bindTestObject = SC.Object.create({
+    bar: 'bat'
+  });
+
+  TemplateTests.HashArgTemplateView = SC.TemplateView.extend({
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#view TemplateTests.HashArgTemplateView fooBinding="TemplateTests.bindTestObject.bar"}}{{foo}}{{/view}}')
+  });
+
+  view.createLayer();
+
+  SC.run();
+
+  equals(view.$().text(), "bat", "prints initial bound value");
+
+  SC.run(function() { TemplateTests.bindTestObject.set('bar', 'brains'); });
+
+  equals(view.$().text(), "brains", "prints updated bound value");
+});
+
 test("Child views created using the view helper should have their parent view set properly", function() {
   TemplateTests = {};
 

@@ -30,12 +30,12 @@ SC.Handlebars.ViewHelper = SC.Object.create({
       'class': hash['class'],
       'classBinding': hash.classBinding
     };
-    delete options.id;
-    delete options['class'];
-    delete options.classBinding;
+    delete hash.id;
+    delete hash['class'];
+    delete hash.classBinding;
 
     if (newView.isClass) {
-      SC.mixin(newView.prototype, hash);
+      newView = newView.extend(hash);
     } else {
       SC.mixin(newView, hash);
     }
@@ -54,7 +54,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     var context = SC.RenderContext(childView.get('tagName'));
 
     // Add id and class names passed to view helper
-    this.applyAttributes(options.hash, childView, context);
+    this.applyAttributes(contextOptions, childView, context);
 
     childView.applyAttributesToContext(context);
     // tomdale wants to make SproutCore slow
