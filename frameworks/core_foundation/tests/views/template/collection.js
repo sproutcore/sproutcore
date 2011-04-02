@@ -138,3 +138,25 @@ test("should give its item views the classBinding specified by itemClassBinding"
   equals(view.$('ul li.is-baz').length, 2, "removes class when property changes");
 });
 
+test("should work inside a bound {{#if}}", function() {
+  var testData = [SC.Object.create({ isBaz: false }), SC.Object.create({ isBaz: true }), SC.Object.create({ isBaz: true })];
+  TemplateTests.ifTestCollectionView = SC.TemplateCollectionView.extend({
+    content: testData
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#if shouldDisplay}}{{#collection "TemplateTests.ifTestCollectionView"}}{{content.isBaz}}{{/collection}}{{/if}}'),
+    shouldDisplay: true
+  });
+
+  view.createLayer();
+  equals(view.$('ul li').length, 3, "renders collection when conditional is true");
+
+  SC.run(function() { view.set('shouldDisplay', NO); });
+  equals(view.$('ul li').length, 0, "removes collection when conditional changes to false");
+
+  SC.run(function() { view.set('shouldDisplay', YES); });
+  equals(view.$('ul li').length, 3, "collection renders when conditional changes to true");
+});
+
+
