@@ -107,6 +107,15 @@ Handlebars.registerHelper('if', function(context, options) {
   return Handlebars.helpers.boundIf.call(options.contexts[0], context, options);
 });
 
+Handlebars.registerHelper('unless', function(context, options) {
+  var fn = options.fn, inverse = options.inverse;
+
+  options.fn = inverse;
+  options.inverse = fn;
+
+  return Handlebars.helpers.boundIf.call(options.contexts[0], context, options);
+});
+
 Handlebars.registerHelper('bindAttr', function(options) {
   var attrs = options.hash;
   var view = options.data.view;

@@ -93,7 +93,6 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("#child-view:contains('Goodbye cruel world?')").length === 1, "The child view renders its content once");
   ok(view.$().text().match(/Hello world!.*Goodbye cruel world\?/), "parent view should appear before the child view");
-
 });
 
 test("should accept relative paths to views", function() {
@@ -412,6 +411,42 @@ test("should update the block when object passed to #if helper changes", functio
     });
 
     equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "precond - renders block when conditional is true");
+  });
+});
+
+test("should update the block when object passed to #unless helper changes", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    advice: SC.Handlebars.compile('<h1>{{#unless onDrugs}}{{doWellInSchool}}{{/unless}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'advice',
+    templates: templates,
+
+    onDrugs: true,
+    doWellInSchool: "Eat your vegetables"
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "", "hides block if true");
+
+  var tests = [false, null, undefined, [], '', 0];
+
+  tests.forEach(function(val) {
+    SC.run(function() {
+      view.set('onDrugs', val);
+    });
+
+    equals(view.$('h1').text(), 'Eat your vegetables', "renders block when conditional is '%@'".fmt(val));
+
+    SC.run(function() {
+      view.set('onDrugs', true);
+    });
+
+    equals(view.$('h1').text(), "", "precond - hides block when conditional is true");
   });
 });
 
