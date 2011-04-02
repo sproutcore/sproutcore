@@ -718,6 +718,20 @@ test("{{view}} class attribute should set class on layer", function() {
   equals(view.$('.bar').text(), 'baz', "emits content");
 });
 
+test("{{view}} should be able to point to a local view", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile("{{view common}}"),
+
+    common: SC.TemplateView.create({
+      template: SC.Handlebars.compile("common")
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$().text(), "common", "tries to look up view name locally");
+});
+
 test("should be able to bind view class names to properties", function() {
   var templates = SC.Object.create({
     template: SC.Handlebars.compile('{{#view "TemplateTests.classBindingView" classBinding="isDone"}}foo{{/view}}')

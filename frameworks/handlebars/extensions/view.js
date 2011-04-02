@@ -20,7 +20,10 @@ SC.Handlebars.ViewHelper = SC.Object.create({
         newView = SC.objectForPropertyPath(path.slice(1), view);
       } else {
         // Path is absolute, look up path on global (window) object
-        newView = SC.objectForPropertyPath(path);
+        newView = SC.getPath(thisContext, path);
+        if (!newView) {
+          newView = SC.getPath(path);
+        }
       }
       if (!newView) { throw "Unable to find view at path '" + path + "'"; }
     }
