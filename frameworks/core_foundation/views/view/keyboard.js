@@ -165,7 +165,7 @@ SC.View.reopen({
       children = this.get('childViews');
       for(i=0, childLen = children.length; i<childLen; i++){
         child = children[i];
-        if(child.get('isVisibleInWindow') && child.get('isVisible')){
+        if(child._computeNextValidKeyView && child.get('isVisibleInWindow') && child.get('isVisible')){
           ret = child._computeNextValidKeyView(currentView, seen);
         }
         if (ret) { return ret; }
@@ -211,7 +211,7 @@ SC.View.reopen({
       children = this.get('childViews');
       for(i=children.length-1; 0<=i; i--){
         child = children[i];
-        if(child.get('isVisibleInWindow') && child.get('isVisible')){
+        if(child._computePreviousValidKeyView && child.get('isVisibleInWindow') && child.get('isVisible')){
           ret = child._computePreviousValidKeyView(currentView, seen);
         }
         if (ret) { return ret; }
