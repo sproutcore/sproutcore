@@ -38,27 +38,3 @@ Handlebars.registerHelper('collection', function(path, options) {
   return Handlebars.helpers.view.call(this, collectionObject, options);
 });
 
-Handlebars.registerHelper('bindCollection', function(path, bindingString, fn) {
-  var data = fn.data;
-  var inverse = fn.data;
-  var collectionClass = SC.objectForPropertyPath(path) || SC.TemplateCollectionView;
-  var binding = SC.Binding.from(bindingString, this);
-
-  if(!data) {
-    data = fn;
-    fn = null;
-  }
-
-  if(fn) {
-    // attach the function to the original class so it can be used recursively
-    collectionClass.prototype.itemViewTemplate = fn;
-  }
-
-  if(collectionClass.isClass) {
-    collectionClass = collectionClass.extend({ contentBinding: binding });
-  } else {
-    collectionClass.bindings.push( binding.to('content', collectionClass) );
-  }
-
-  return Handlebars.helpers.collection.call(this, collectionClass, fn);
-});
