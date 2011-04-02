@@ -1477,6 +1477,21 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       if (key === undefined) return this[object];
       if (object.get) return object.get(key);
       return object[key];
+    },
+
+    /**
+      Retrieves a property from an object at a specified path, using get() if
+      the object implements SC.Observable.
+
+      @param  {Object}  object  the object to query
+      @param  {String}  path the path to the property to retrieve
+    */
+    getPath: function(object, path) {
+      if (path === undefined) {
+        path = object;
+        object = window;
+      }
+      return SC.objectForPropertyPath(path, object);
     }
   });
 

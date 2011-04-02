@@ -138,6 +138,56 @@ test("should work when object is SC (used in SC.objectForPropertyPath)", functio
   equals(SC.get(SC, 'RunLoop'), SC.RunLoop);
 });
 
+module("SC.getPath()");
+
+test("should return a property at a given path relative to the window", function() {
+  window.Foo = SC.Object.create({
+    Bar: SC.Object.create({
+      Baz: function() { return "blargh"; }.property()
+    })
+  });
+
+  try {
+    equals(SC.getPath('Foo.Bar.Baz'), "blargh");
+  } finally {
+    delete window.Foo;
+  }
+});
+
+test("should return a property at a given path relative to the passed object", function() {
+  var foo = SC.Object.create({
+    bar: SC.Object.create({
+      baz: function() { return "blargh"; }.property()
+    })
+  });
+
+  equals(SC.getPath(foo, 'bar.baz'), "blargh");
+});
+
+test("should return a property at a given path relative to the window - JavaScript hash", function() {
+  window.Foo = {
+    Bar: {
+      Baz: "blargh"
+    }
+  };
+
+  try {
+    equals(SC.getPath('Foo.Bar.Baz'), "blargh");
+  } finally {
+    delete window.Foo;
+  }
+});
+
+test("should return a property at a given path relative to the passed object - JavaScript hash", function() {
+  var foo = {
+    bar: {
+      baz: "blargh"
+    }
+  };
+
+  equals(SC.getPath(foo, 'bar.baz'), "blargh");
+});
+
 // ..........................................................
 // SET()
 //
@@ -696,7 +746,7 @@ module("object.removeObserver()", {
         // Just an observer
         console.log("observer!");
       },
-      observer2: function() { 
+      observer2: function() {
         console.log("observer2!");
         this.removeObserver('observableValue', null, 'observer1');
         this.removeObserver('observableValue', null, 'observer2');
@@ -705,7 +755,7 @@ module("object.removeObserver()", {
       },
       observer3: function() {
         // Just an observer
-        console.log("observer3!");        
+        console.log("observer3!");
       }
     });
 
@@ -750,7 +800,7 @@ test("removing an observer inside of an observer shouldn’t cause any problems"
   catch(e) {
     encounteredError = YES;
   }
-  equals(encounteredError, NO);  
+  equals(encounteredError, NO);
 });
 
 
