@@ -97,7 +97,7 @@ test("should accept relative paths to views", function() {
 test("child views can be inserted inside a bind block", function() {
   var templates = SC.Object.create({
     nester: SC.Handlebars.compile("<h1 id='hello-world'>Hello {{world}}</h1>{{view \"TemplateTests.LabelView\"}}"),
-    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#bind \"content\"}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/bind}} {{world}}</div>"),
+    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#with content}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/with}} {{world}}</div>"),
     other: SC.Handlebars.compile("cruel")
   });
 
@@ -253,7 +253,6 @@ test("should not update when a property is removed from the view", function() {
   equals(removeCalled, 1, "does not try to remove observer more than once");
   equals(view.$('#first').text(), "ninjas", "does not update removed object");
 });
-
 
 test("Handlebars templates update properties if a content object changes", function() {
   var templates;
