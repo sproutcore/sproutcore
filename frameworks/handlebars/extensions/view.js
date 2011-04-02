@@ -9,10 +9,10 @@ SC.Handlebars.ViewHelper = SC.Object.create({
 
     var newView;
     if (path.isClass || path.isObject) {
-     newView = path;
-     if (!newView) {
-      throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
-     }
+      newView = path;
+      if (!newView) {
+        throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
+      }
     } else {
       // Path is relative, look it up with this view as the root
       if (path.charAt(0) === '.') {
@@ -41,8 +41,6 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     this.applyAttributes(options.hash, childView, context);
 
     childView.applyAttributesToContext(context);
-
-
     // tomdale wants to make SproutCore slow
     childView.render(context, YES);
 
