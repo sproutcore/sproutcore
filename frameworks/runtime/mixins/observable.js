@@ -438,13 +438,13 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       var keyChains = chains[key];
 
       if (keyChains) {
+        this.beginPropertyChanges();
         keyChains = SC.clone(keyChains);
         keyChains.forEach(function(chain) {
           // Invalidate the property that depends on the changed key.
           chain.notifyPropertyDidChange();
-          // Now that the chain is potentially invalid, rebuild it.
-          chain.rebuildChain();
         });
+        this.endPropertyChanges();
       }
     }
 
@@ -560,9 +560,6 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     registerDependentKeyWithChain: function(property, chain) {
       var chains = this._chainsFor(property), next;
       chains.add(chain);
-
-      next = chain.next;
-      if (next) { next.activate(this); }
     },
 
     /** @private
@@ -578,9 +575,6 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       if (chains.get('length') === 0) {
         delete this._kvo_property_chains[property];
       }
-
-      next = chain.next;
-      if (next) { next.deactivate(); }
     },
 
     /** @private

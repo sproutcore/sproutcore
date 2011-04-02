@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*globals module test ok equals same */
+/*globals module test ok equals same people */
 
 var object ;
 
@@ -108,4 +108,48 @@ test("should invalidate computed property once per changed key", function() {
   SC.run(function() { people.set('fullName', 'foo bar baz'); });
   equals(setCalls, 1, "calls set once");
   equals(getCalls, 3, "calls get three times");
+});
+
+test("should invalidate key when properties higher up in the chain change", function() {
+  var notified = 0;
+  
+  var obj = SC.Object.create({
+    contact: null,
+    
+    fullName: function(key, value) {
+      return [this.getPath('contact.firstName'), this.getPath('contact.lastName')].join(' ');
+    }.property('contact.firstName', 'contact.lastName').cacheable(),
+    
+    fullNameDidChange: function() {
+      notified++;
+    }.observes('fullName')
+  });
+
+  var johnDoe = SC.Object.create({ firstName: 'John', lastName: 'Doe' });
+  var janeDoe = SC.Object.create({ firstName: 'Jane', lastName: 'Doe' });
+  
+  equals(notified, 0, 'should start empty');
+  SC.run(function() {  obj.set('contact', johnDoe);  });
+  equals(notified, 1, 'should notify once after set content=johnDoe');
+  equals(obj.get('fullName'), 'John Doe', 'should get proper name');
+  
+  notified = 0;
+  SC.run(function() { johnDoe.set('firstName', 'JOHNNY'); });
+  equals(notified, 1, 'should notify again after set firstName=JOHNNY');
+  equals(obj.get('fullName'), 'JOHNNY Doe', 'should get proper name');
+  
+  notified = 0;
+  SC.run(function() { obj.set('contact', janeDoe); });
+  equals(notified, 1, 'should notify again after set content=janeDoe');
+  equals(obj.get('fullName'), 'Jane Doe', 'should get proper name');
+
+  notified = 0;
+  SC.run(function() { johnDoe.set('firstName', 'JON'); });
+  equals(notified, 0, 'should NOT notify again after set johnDoe.firstName=JON (johnDoe is not current contact)');
+  equals(obj.get('fullName'), 'Jane Doe', 'should get proper name while janeDoe is current');
+
+  notified = 0;
+  SC.run(function() { janeDoe.set('firstName', 'Janna'); });
+  equals(notified, 1, 'should notify again after set janeDoe.firstName=Janna');
+  equals(obj.get('fullName'), 'Janna Doe', 'should get proper name after firstname=Janna');  
 });
