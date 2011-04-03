@@ -175,3 +175,14 @@ test("should pass content as context when using {{#each}} helper", function() {
 
   equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
 });
+
+test("should add enumerable observer to initial content", function() {
+  var content = ['foo', 'bar'],
+      view = SC.TemplateCollectionView.create({ content: content });
+
+  view.createLayer();
+  equals(view.$('li').length, 2, "initial length of list should be 2");
+  content.pushObject('baz')
+  equals(view.$('li').length, 3, "adding an item to view's content should render new item");
+});
+
