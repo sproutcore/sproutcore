@@ -6,13 +6,22 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   template: SC.Handlebars.compile(''),
   emptyView: null,
 
-  // In case a default content was set, trigger the child view creation
-  // as soon as the empty layer was created
+  // Called when the view is first created and anytime the content object
+  // changes.  Need to remove any existing observers on the old content and add
+  // them to the new content.
   didCreateLayer: function() {
-    if(this.get('content')) {
-      var indexSet = SC.IndexSet.create(0, this.getPath('content.length'));
-      this.arrayContentDidChange(this.get('content'), [], 0);
+    var oldContent = this._content, newContent = this.get('content');
+
+    if (oldContent) {
+      oldContent.removeEnumerableObserver(this, this.arrayContentDidChange);
     }
+
+    if (newContent) {
+      newContent.addEnumerableObserver(this, this.arrayContentDidChange);
+      this.arrayContentDidChange(newContent, [], 0);
+    }
+
+    this._content = newContent;
   },
 
   itemView: 'SC.TemplateView',
@@ -44,8 +53,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     @private
 
     When the content property of the collection changes, remove any existing
-    child views and observers, then set up an observer on the new content, if
-    needed.
+    child views and then call didCreateLayer to setup observers and render
+    the new content.
   */
   _sctcv_contentDidChange: function() {
     this.get('childViews').forEach(function() {
@@ -55,16 +64,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
     this.$().empty();
     this.didCreateLayer();
-
-    var content = this._content;
-    if (content) {
-      content.removeEnumerableObserver(this, this.arrayContentDidChange);
-    }
-
-    content = this._content = this.get('content');
-    if (content) {
-      content.addEnumerableObserver(this, this.arrayContentDidChange);
-    }
   }.observes('content'),
 
   /**
