@@ -239,7 +239,7 @@ test("should invalidate computed property once per changed key", function() {
     // TODO: Figure out what the right number is. Recent optimizations have reduced
     // it significantly, but we can't get it below 7.
   } finally {
-    delete window.peopleController;
+    window.peopleController = undefined;
   }
 
 });

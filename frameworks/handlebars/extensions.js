@@ -54,7 +54,9 @@ SC.Handlebars.Compiler.prototype.mustache = function(mustache) {
 SC.Handlebars.compile = function(string) {
   var ast = Handlebars.parse(string);
   var environment = new SC.Handlebars.Compiler().compile(ast, {data: true, stringParams: true});
-  return new SC.Handlebars.JavaScriptCompiler().compile(environment, {data: true, stringParams: true});
+  var ret = new SC.Handlebars.JavaScriptCompiler().compile(environment, {data: true, stringParams: true});
+  ret.rawTemplate = string;
+  return ret;
 };
 
 /**
