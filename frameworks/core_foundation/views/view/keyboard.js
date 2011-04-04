@@ -248,10 +248,10 @@ SC.View.reopen({
 
   /**
     Computes the next valid key view. This is the next key view that
-    acceptsFirstResponder. If the current view is not valid, it will first traverse
-    its children before trying siblings. If the current view is the only valid view,
-    the current view will be returned. Will return null if no valid view can be
-    found.
+    acceptsFirstResponder. Computed using depth first search. If the current view
+    is not valid, it will first traverse its children before trying siblings. If
+    the current view is the only valid view, the current view will be returned. Will
+    return null if no valid view can be found.
 
     @property
     @type SC.View
@@ -262,7 +262,7 @@ SC.View.reopen({
     while(next !== this) {
       next = null;
 
-      // only bother to check if we are visible
+      // only bother to check children if we are visible
       if(cur.get('isVisibleInWindow')) next = cur._getFirstKeyView();
 
       // if we have no children, check our sibling
@@ -279,6 +279,7 @@ SC.View.reopen({
 
       // if it's a valid firstResponder, we're done!
       if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) return next;
+
       // otherwise keep looking
       cur = next;
     }
@@ -336,9 +337,10 @@ SC.View.reopen({
 
   /**
     Computes the previous valid key view. This is the previous key view that
-    acceptsFirstResponder. If the current view is not valid, it will first traverse
-    its children before trying siblings. If the current view is the only valid view,
-    the current view will be returned. Will return null if no valid view can be
+    acceptsFirstResponder. Traverse views in the opposite order from
+    nextValidKeyView. If the current view is the pane, tries deepest child. If the
+    current view has a previous view, tries its last child. If this view is the
+    first child, tries the parent. Will return null if no valid view can be
     found.
 
     @property
@@ -349,27 +351,37 @@ SC.View.reopen({
     var cur = this, prev;
 
     while(prev !== this) {
+      // normally, just try to get previous view's last child
       if(cur.get('parentView')) prev = cur._getPreviousKeyView();
+
+      // if we are the pane, get our own last child
       else prev = cur;
 
+      // loop down to the last valid child
       if(prev) {
         do {
           cur = prev;
           prev = prev._getLastKeyView();
         } while(prev && prev.get('isVisibleInWindow'));
 
+        // if we ended on a null, unroll to the last one
+        // we don't unroll if we ended on a hidden view because we need
+        // to traverse to its previous view next iteration
         if(!prev) prev = cur;
       }
 
-      else {
-        prev = cur.get('parentView');
-      }
+      // if there is no previous view, traverse to the parent
+      else prev = cur.get('parentView');
 
+      // if the view is valid, return it
       if(prev.get('isVisibleInWindow') && prev.get('acceptsFirstResponder')) return prev;
 
+      // otherwise, try to find its previous valid keyview
       cur = prev;
     }
 
+    // if none of the views accept first responder and we make it back to where
+    // we started, just return null
     return null;
   }.property('previousKeyView')
 });
