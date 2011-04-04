@@ -150,7 +150,7 @@ test("should return a property at a given path relative to the window", function
   try {
     equals(SC.getPath('Foo.Bar.Baz'), "blargh");
   } finally {
-    delete window.Foo;
+    window.Foo = undefined;
   }
 });
 
@@ -174,7 +174,7 @@ test("should return a property at a given path relative to the window - JavaScri
   try {
     equals(SC.getPath('Foo.Bar.Baz'), "blargh");
   } finally {
-    delete window.Foo;
+    window.Foo = undefined;
   }
 });
 
