@@ -64,7 +64,11 @@ module("SC.Statechart: No Concurrent States - Goto State Asynchronous Tests", {
         
         c: SC.State.design(StateMixin, {
           
+          initialSubstate: 'd',
+          
           d: SC.State.design(StateMixin, {
+            
+            initialSubstate: 'e',
             
             e: SC.State.design(StateMixin)
             

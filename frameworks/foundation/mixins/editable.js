@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -40,8 +40,6 @@
   
 */
 SC.Editable = {
-  editorDelegate: null,
-
   /**
     Indicates whether a view is editable or not.  You can optionally 
     implement the methods in this mixin to disallow editing is isEditable is
@@ -85,7 +83,7 @@ SC.Editable = {
     // begin editing
     this.beginPropertyChanges();
     this.set('isEditing', YES) ;
-    this.becomeFirstResponder() ;
+    this.becomeFirstResponder();
     this.endPropertyChanges();
     
     return YES ;
@@ -148,9 +146,7 @@ SC.Editable = {
   commitEditing: function() {
     if (!this.get('isEditing')) return YES;
     this.set('isEditing', NO) ;
-    this.resignFirstResponder() ;
-    
-    this.invokeDelegateMethod(this.get('editorDelegate'), 'inlineEditorShouldCommitEditing', this, this.get('value'));
+    this.resignFirstResponder();
     
     return YES ;
   }

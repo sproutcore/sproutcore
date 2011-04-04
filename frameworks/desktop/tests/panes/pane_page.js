@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            portions copyright @2009 Apple Inc.
+//            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -37,5 +37,6 @@ test("isVisible changes should update views that are instantiated in a page", fu
   SC.RunLoop.begin().end();
   var res = pp.childViews[0].childViews[0].$().hasClass('sc-hidden');
   ok(res, "The view (isVisible) has been properly rerendered even though it was part of a page, the pane was detached and the visibility was changed while detached");
-  
+ 
+  pp.remove(); 
 });

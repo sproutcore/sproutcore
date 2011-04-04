@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -486,12 +486,10 @@ SC.ScrollView = SC.View.extend({
     }
     
     if (!SC.none(x)) {
-      x = Math.max(this.get('minimumHorizontalScrollOffset'),Math.min(this.get('maximumHorizontalScrollOffset'), x)) ;
       this.set('horizontalScrollOffset', x) ;
     }
     
     if (!SC.none(y)) {
-      y = Math.max(this.get('minimumVerticalScrollOffset'),Math.min(this.get('maximumVerticalScrollOffset'), y)) ;
       this.set('verticalScrollOffset', y) ;
     }
     
@@ -1664,16 +1662,18 @@ SC.ScrollView = SC.View.extend({
         scale  = this._scale,
         width  = 0,
         height = 0,
-        dim, dimWidth, dimHeight;
-    
-    if (view) {
-      width = view.get('calculatedWidth') || f.width || 0;
-      height = view.get('calculatedHeight') || f.height || 0;
-    }
-    
+        dim, dimWidth, dimHeight, calculatedWidth, calculatedHeight;
+
+    // If no view has been set yet, or it doesn't have a frame,
+    // we can avoid doing any work.
+    if (!view || !f) { return; }
+
+    width = view.get('calculatedWidth') || f.width || 0;
+    height = view.get('calculatedHeight') || f.height || 0;
+
     width *= scale;
     height *= scale;
-    
+
     // cache out scroll settings...
     if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth  = width;

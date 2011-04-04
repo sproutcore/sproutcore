@@ -1,9 +1,10 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            portions copyright @2009 Apple Inc.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 
 SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
@@ -547,7 +548,7 @@ SC.ListItemView = SC.View.extend(
     v = (labelKey && content) ? (content.get ? content.get(labelKey) : content[labelKey]) : content;
 
     f = this.computeFrameWithParentFrame(null);
-    offset = SC.viewportOffset(el[0]);
+    offset = SC.offset(el[0]);
 
     // if the label has a large line height, try to adjust it to something
     // more reasonable so that it looks right when we show the popup editor.
@@ -568,17 +569,21 @@ SC.ListItemView = SC.View.extend(
       } else oldLineHeight = null ;
     }
 
+    el = el[0];
+
+    offset = SC.viewportOffset(el);
+
     f.x = offset.x;
     f.y = offset.y+top + lineHeightShift ;
-    f.height = el[0].offsetHeight ;
-    f.width = el[0].offsetWidth ;
+    f.height = el.offsetHeight ;
+    f.width = el.offsetWidth ;
 
     escapeHTML = this.get('escapeHTML');
 
     editor.set({
       value: v,
       exampleFrame: f,
-      exampleElement: el[0],
+      exampleElement: el,
       multiline: NO,
       isCollection: YES,
       validator: validator,

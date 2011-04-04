@@ -34,9 +34,9 @@ config :datetime,        :required => [:runtime]
 config :core_foundation, :required => [:runtime, :handlebars]
 config :foundation,      :required => [:core_foundation, :datetime]
 config :datastore,       :required => [:runtime, :datetime]
-config :statechart,      :required => [:core_foundation]
 config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
+config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop]
 
 # APP-LEVEL FRAMEWORKS
 %w(mobile designer).each do |app_framework|

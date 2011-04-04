@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -18,10 +18,10 @@
   to "checkbox", the way the checkbox renders (including DOM) will actually
   be different than SC.ButtonView's.
   
-  @extends SC.FieldView
+  @extends SC.ButtonView
   @since SproutCore 1.0
 */
-SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
+SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   /** @scope SC.CheckboxView.prototype */ {
 
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
@@ -62,8 +62,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout, SC.Button,
     this.set('isActive', NO);
     this._isMouseDown = NO;
 
-    if(!this.get('isEnabled') || 
-      (evt && evt.target && !this.$().within(evt.target))) {
+    if(!this.get('isEnabled')) {
       return YES;
     }
     var val = this.get('value');

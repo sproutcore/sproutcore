@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Mike Ball and contributors.
-//            portions copyright @2009 Apple Inc.
+//            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*global module test htmlbody ok equals same stop start v*/

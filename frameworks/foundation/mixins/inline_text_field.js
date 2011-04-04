@@ -1,7 +1,9 @@
-// ========================================================================
-// SproutCore
-// copyright 2006-2011 Strobe Inc.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 
 sc_require('views/text_field') ;
 sc_require('system/utils/misc') ;
@@ -193,7 +195,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     // the style element is lazily created
     if(!styleElement) {
-      var head = document.getElementsByTagName('head')[0],
+      var head = document.getElementsByTagName('head')[0];
       styleElement = document.createElement('style');
 
       styleElement.type= 'text/css';
@@ -235,7 +237,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     if(!frame) {
       var tempFrame = target.get('frame');
 
-      frame = SC.viewportOffset(elem);
+      frame = SC.offset(elem);
 
       frame.height = tempFrame.height;
       frame.width = tempFrame.width;
@@ -266,14 +268,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     this.set('layout', layout);
 	},
-
-  /*
-  * Flag indicating whether the editor should automatically commit if you click
-  * outside it.
-  *
-  * @type {Boolean}
-  */
-  commitOnBlur: YES,
 
   /*
   * Flag indicating whether the editor is allowed to use multiple lines.
@@ -335,6 +329,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     
     @returns {Boolean}
   */
+  // TODO: this seems to do almost the same thing as fieldDidBlur
   blurEditor: function(evt) {
     if (!this.get('isEditing')) return YES ;
     return this.commitOnBlur ? this.commitEditing() : this.discardEditing();

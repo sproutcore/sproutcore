@@ -1,4 +1,12 @@
-SC.CheckboxSupport = {
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+/** @class */
+
+SC.CheckboxSupport = /** @scope SC.CheckboxSupport.prototype */{
   didCreateLayer: function() {
     this.$('input').change(jQuery.proxy(function() {
       SC.RunLoop.begin();

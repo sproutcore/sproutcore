@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -907,6 +907,16 @@ SC.mixin(Function.prototype,
 
     You should always register dependent keys for computed properties to
     ensure they update.
+
+    Sometimes you may need to depend on keys that are several objects deep. In
+    that case, you can provide a path to property():
+
+        capitalizedName: function() {
+          return this.getPath('person.fullName').toUpper();
+        }.property('person.firstName')
+
+    This will cause observers of +capitalizedName+ to be fired when either
+    +fullName+ _or_ +person+ changes.
 
     Using Computed Properties as Setters
     ---

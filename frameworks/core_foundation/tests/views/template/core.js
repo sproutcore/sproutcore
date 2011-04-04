@@ -1,3 +1,9 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 module("SC.TemplateView", {
   setup: function() {
     // var view = SC.TemplateView.create();
@@ -126,6 +132,26 @@ test("should invalidate frame cache when layer is created", function() {
 
   pane.appendChild(view);
 
+  f = view.get('frame');
+  ok(f, "returns frame object");
+  equals(f.width, view.$().width(), "returns non-zero width");
+  pane.remove();
+});
+
+test("should invalidate frame cache when appended to document", function() {
+  var pane = SC.MainPane.create();
+
+  var view = SC.TemplateView.create({
+    template: function() { return "foo"; }
+  });
+
+  pane.appendChild(view);
+
+  var f = view.get('frame');
+  ok(f, "precond - returns a frame object");
+  equals(f.width, 0, "returns zero width because there is no layer");
+
+  pane.append();
   f = view.get('frame');
   ok(f, "returns frame object");
   equals(f.width, view.$().width(), "returns non-zero width");

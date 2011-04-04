@@ -54,7 +54,11 @@ sc_require('extensions');
 
       if (fn && shouldDisplay(result)) {
         var renderContext = SC.RenderContext('span').id(spanId);
-        renderContext.push(fn(self.get(property)));
+        if (preserveContext) {
+          renderContext.push(fn(this));
+        } else {
+          renderContext.push(fn(self.get(property)));
+        }
         var element = renderContext.element();
         span.replaceWith(element);
       } else if (shouldDisplay(result)) {

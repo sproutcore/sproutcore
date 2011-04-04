@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project: SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Apple Inc. and contributors.
+// Copyright: ©2006-2011 Apple Inc. and contributors.
 // License: Licensed under MIT license (see license.js)
 // ==========================================================================
  
@@ -10,7 +10,7 @@
 // performKeyEquivalent() - verify that return value is correct.
 //
 var pane = SC.ControlTestPane.design()
-  .add("basic", SC.View.extend(SC.Button), { 
+  .add("basic", SC.ButtonView, { 
     triggerAction: function() { return YES; },
     title:'hello world',
     keyEquivalent: 'return'
@@ -20,7 +20,7 @@ pane.show(); // add a test to show the test pane
 
   
  
-module('SC.View#performKeyEquivalent', pane.standardSetup());
+module('SC.ButtonView#performKeyEquivalent', pane.standardSetup());
  
 test("handles matching key equivalent 'return'", function() {
   var view = pane.view('basic');

@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            portions copyright @2009 Apple Inc.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -76,4 +76,36 @@ test("should indicate the registered property changes if the dependent key value
   // again, fullName is 'dependent' on lastName, so observer for  
   // fullName should fire.
   equals(object.get('observedValue'), 'Jane Johnson');
+});
+
+module("object.registerDependentKeys() - @each");
+
+test("should invalidate computed property once per changed key", function() {
+  var setCalls = 0;
+  var getCalls = 0;
+
+  window.people = SC.Object.create({
+    content: [SC.Object.create({name:'Juan'}),
+              SC.Object.create({name:'Camilo'}),
+              SC.Object.create({name:'Pinzon'})],
+
+    fullName: function(key, value) {
+      if (value !== undefined) {
+        setCalls++;
+        this.content.setEach('name', value);
+      } else {
+        getCalls++;
+      }
+
+      return this.content.getEach('name').join(' ');
+    }.property('content.@each.name')
+  });
+
+  var peopleWatcher = SC.Object.create({
+    nameBinding: 'window.people.fullName'
+  });
+
+  SC.run(function() { people.set('fullName', 'foo bar baz'); });
+  equals(setCalls, 1, "calls set once");
+  equals(getCalls, 3, "calls get three times");
 });

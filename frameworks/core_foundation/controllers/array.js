@@ -1,8 +1,9 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2011, Strobe Inc. and contributors.
-// Portions copyright ©2008 Apple Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 
 sc_require('controllers/controller');
 sc_require('mixins/selection_support');
@@ -447,7 +448,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
     this._scac_contentStatusDidChange();
-    this.enumerableContentDidChange(0, newlen, newlen - oldlen, cur, last||[]);
+    this.enumerableContentDidChange(0, newlen, newlen - oldlen, this, last||[]);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
@@ -495,6 +496,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     this._scac_enumerableChanges = enumerableChanges;
     this.invokeOnce(this._scac_propagateEnumerableObservers);
+
+    this.setupPropertyChainsForEnumerableContent(addedObjects, removedObjects);
   },
 
   /**

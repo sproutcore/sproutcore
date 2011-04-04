@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            portions copyright @2009 Apple Inc.
+//            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -31,5 +31,5 @@ test("verify palette pane content container is visible at correct location with 
   equals(ret.width, '400px', 'pane should have width 400px');
   equals(ret.height, '200px', 'pane should have height 200px');
 
-  //pane.remove();
+  pane.remove();
 }) ;

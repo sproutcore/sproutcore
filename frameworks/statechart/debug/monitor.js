@@ -1,12 +1,14 @@
 // ==========================================================================
-// Project:   SC - A Statechart Framework for SproutCore
-// Copyright: ©2010 Michael Cohen, and contributors.
+// Project:   SC.Statechart - A Statechart Framework for SproutCore
+// Copyright: ©2010, 2011 Michael Cohen, and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /*globals SC */
 
 SC.StatechartMonitor = SC.Object.extend({
+  
+  statechart: null,
   
   sequence: null,
   
@@ -43,6 +45,23 @@ SC.StatechartMonitor = SC.Object.extend({
     });
   },
   
+  matchEnteredStates: function() {
+    var expected = SC.A(arguments.length === 1 ? arguments[0] : arguments),
+        actual = this.getPath('statechart.enteredStates'),
+        matched = 0,
+        statechart = this.get('statechart');
+    
+    if (expected.length !== actual.length) return NO;
+    
+    expected.forEach(function(item) {
+      if (SC.typeOf(item) === SC.T_STRING) item = statechart.getState(item);
+      if (!item) return;
+      if (statechart.stateIsEntered(item) && item.get('isEnteredState')) matched += 1;
+    });
+    
+    return matched === actual.length;
+  },
+  
   toString: function() {
     var seq = "",
         i = 0,
@@ -55,10 +74,10 @@ SC.StatechartMonitor = SC.Object.extend({
     for (i = 0; i < len; i += 1) {
       item = this.sequence[i];
       if (item.exited) {
-        seq += "exited %@".fmt(item.exited.get('name'));
+        seq += "exited %@".fmt(item.exited.get('fullPath'));
       } 
       else if (item.entered) {
-        seq += "entered %@".fmt(item.entered.get('name'));
+        seq += "entered %@".fmt(item.entered.get('fullPath'));
       } 
       if (i < len - 1) seq += ", ";
     }

@@ -1,4 +1,13 @@
-SC.TextFieldSupport = {
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+/** @class
+
+*/
+SC.TextFieldSupport = /** @scope SC.TextFieldSupport.prototype */{
   value: function(key, value) {
     if (value !== undefined) {
       this.$('input').val(value);

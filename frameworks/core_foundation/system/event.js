@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            Portions ©2008-2010 Apple Inc. All rights reserved.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -103,7 +103,7 @@ SC.Event = function(originalEvent) {
     // normalize wheelDelta for Firefox
     // note that we multiple the delta on FF to make it's acceleration more 
     // natural.
-    } else if (!SC.none(originalEvent.detail)) {
+    } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
       deltaMultiplier = 10;
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
@@ -503,14 +503,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // invoke all handlers
     for (key in handlers ) {
       handler = handlers[key];
-      method = handler[1] ;
+      // handler = [target, method, context]
+      method = handler[1];
 
       // Pass in a reference to the handler function itself
       // So that we can later remove it
       event.handler = method;
       event.data = event.context = handler[2];
 
-      target = handler[0] || this ;
+      target = handler[0] || this;
       ret = method.apply( target, args );
       
       if (val !== NO) val = ret;
@@ -741,12 +742,19 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 SC.Event.prototype = {
 
   /**
-    Set to YES if you have called either preventDefault() or stopPropagation().  This allows a generic event handler to notice if you want to provide detailed control over how the browser handles the real event.
+    Set to YES if you have called either preventDefault() or stopPropagation().  
+    This allows a generic event handler to notice if you want to provide 
+    detailed control over how the browser handles the real event.
+    
+    @property {Boolean}
   */
   hasCustomEventHandling: NO,
   
   /**
     Returns the touches owned by the supplied view.
+    
+    @param {SC.View}
+    @returns {Array} touches an array of SC.Touch objects
   */
   touchesForView: function(view) {
     if (this.touchContext) return this.touchContext.touchesForView(view);
@@ -754,13 +762,20 @@ SC.Event.prototype = {
   
   /**
     Same as touchesForView, but sounds better for responders.
+    
+    @param {SC.RootResponder}
+    @returns {Array} touches an array of SC.Touch objects
   */
   touchesForResponder: function(responder) {
     if (this.touchContext) return this.touchContext.touchesForView(responder);
   },
   
   /**
-    Returns average data--x, y, and d (distance)--for the touches owned by the supplied view.
+    Returns average data--x, y, and d (distance)--for the touches owned by the 
+    supplied view.
+    
+    @param {SC.View}
+    @returns {Array} touches an array of SC.Touch objects
   */
   averagedTouchesForView: function(view) {
     if (this.touchContext) return this.touchContext.averagedTouchesForView(view);
@@ -819,23 +834,36 @@ SC.Event.prototype = {
     return this.preventDefault().stopPropagation();
   },
   
-  /** Always YES to indicate the event was normalized. */
+  /** 
+    Always YES to indicate the event was normalized. 
+    
+    @property {Boolean}
+  */
   normalized: YES,
 
-  /** Returns the pressed character (found in this.which) as a string. */
+  /** 
+    Returns the pressed character (found in this.which) as a string. 
+  
+    @returns {String}
+  */
   getCharString: function() {
-      if(SC.browser.msie){
-        if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
-          return String.fromCharCode(0);
-        }else{
-          return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;  
-        }
-      }else{
-        return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
+    if(SC.browser.msie){
+      if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
+        return String.fromCharCode(0);
       }
+      else {
+        return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;  
+      }
+    }
+    else {
+      return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
+    }
   },
   
-  /** Returns character codes for the event.  The first value is the normalized code string, with any shift or ctrl characters added to the begining.  The second value is the char string by itself.
+  /** 
+    Returns character codes for the event.  The first value is the normalized 
+    code string, with any shift or ctrl characters added to the begining.  
+    The second value is the char string by itself.
   
     @returns {Array}
   */
