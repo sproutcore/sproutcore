@@ -183,7 +183,7 @@ SC.View.reopen({
     // traversing until we hit the end. this is obviously the least efficient
     // way
     if(prev) {
-      while(view = prev.get('nextKeyView')) {
+      while(view = prev._getNextKeyView()) {
         prev = view;
       }
 
@@ -229,11 +229,17 @@ SC.View.reopen({
     @return {SC.View}
   */
   _getNextKeyView: function() {
-    var nextKeyView = this.get('nextKeyView');
+    var pv = this.get('parentView'),
+    nextKeyView = this.get('nextKeyView');
+
+    // if the parent defines lastKeyView, it takes priority over this views
+    // nextKeyView
+    if(pv && pv.get('lastKeyView') === this) return null;
+
+    // if this view defines a nextKeyView, use it
     if(nextKeyView !== undefined) return nextKeyView;
 
-    var pv = this.get('parentView');
-    
+    // otherwise generate one based on parent view's childViews
     if(pv) {
       var childViews = pv.get('childViews');
       return childViews[childViews.indexOf(this) + 1];
@@ -253,7 +259,7 @@ SC.View.reopen({
   nextValidKeyView: function() {
     var cur = this, next;
 
-    while(YES) {
+    while(next !== this) {
       next = null;
 
       // only bother to check if we are visible
@@ -273,11 +279,12 @@ SC.View.reopen({
 
       // if it's a valid firstResponder, we're done!
       if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) return next;
-      // this will only happen if no views are visible and accept first responder
-      else if(next === this) return null;
       // otherwise keep looking
       cur = next;
     }
+
+    // this will only happen if no views are visible and accept first responder
+    return null;
 
   }.property('nextKeyView'),
 
@@ -310,11 +317,17 @@ SC.View.reopen({
     @return {SC.View}
   */
   _getPreviousKeyView: function() {
-    var previousKeyView = this.get('previousKeyView');
+    var pv = this.get('parentView'),
+    previousKeyView = this.get('previousKeyView');
+
+    // if the parent defines firstKeyView, it takes priority over this views
+    // previousKeyView
+    if(pv && pv.get('firstKeyView') === this) return null;
+
+    // if this view defines a previousKeyView, use it
     if(previousKeyView !== undefined) return previousKeyView;
 
-    var pv = this.get('parentView');
-
+    // otherwise generate one based on parent view's childViews
     if(pv) {
       var childViews = pv.get('childViews');
       return childViews[childViews.indexOf(this) - 1];
@@ -335,7 +348,7 @@ SC.View.reopen({
   previousValidKeyView: function() {
     var cur = this, prev;
 
-    while(YES) {
+    while(prev !== this) {
       if(cur.get('parentView')) prev = cur._getPreviousKeyView();
       else prev = cur;
 
@@ -353,9 +366,11 @@ SC.View.reopen({
       }
 
       if(prev.get('isVisibleInWindow') && prev.get('acceptsFirstResponder')) return prev;
-      else if(prev === this) return null;
+
       cur = prev;
     }
-  }.property('previousKeyView'),
+
+    return null;
+  }.property('previousKeyView')
 });
 
