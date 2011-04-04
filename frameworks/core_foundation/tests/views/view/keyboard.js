@@ -214,3 +214,38 @@ test("nextValidKeyView checks for acceptsFirstResponder", function() {
   ok(pane.view1.get('nextValidKeyView') !== pane.view2, "nextValidKeyView is not nextKeyView because nextKeyView acceptsFirstResponder === NO");
 });
 
+test("nextValidKeyView prioritizes parent's lastKeyView even if nextKeyView is set", function() {
+  var testView = SC.View.extend({acceptsFirstResponder: YES}),
+  pane = SC.Pane.create({
+    childViews: ['view1', 'view2'],
+
+    view1: SC.View.extend({
+      childViews: ['view3', 'view4'],
+
+      lastKeyView: function() {
+        return this.view3;
+      }.property(),
+
+      view3: testView,
+
+      view4: testView
+    }),
+
+    view2: SC.View.extend({
+      childViews: ['view5', 'view6'],
+
+      view5: testView,
+
+      view6: testView
+    })
+  });
+
+  pane.view1.view3.set('nextKeyView', pane.view1.view4);
+
+  // fake the pane being attached
+  pane.set('isPaneAttached', YES);
+  pane.recomputeIsVisibleInWindow();
+
+  equals(pane.view1.view3.get('nextValidKeyView'), pane.view2.view5, "lastKeyView was respected; views after lastKeyView were skipped");
+});
+
