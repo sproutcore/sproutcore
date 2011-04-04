@@ -1497,3 +1497,6 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
   // Make all Array's observable
   SC.mixin(Array.prototype, SC.Observable) ;
+
+// Require at the end to avoid a dependency loop
+sc_require('private/property_chain');
