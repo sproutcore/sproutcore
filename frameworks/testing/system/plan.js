@@ -8,6 +8,7 @@
 /*globals CoreTest Q$ */
 
 sc_require('jquery');
+var QUNIT_BREAK_ON_TEST_FAIL = false;
 
 /** @class
 
@@ -538,6 +539,11 @@ CoreTest.Plan = {
           msg = msg + ", expected: " + CoreTest.dump(expected) + " result: " + CoreTest.dump(actual);
         }
       }
+
+      if (QUNIT_BREAK_ON_TEST_FAIL & !pass) {
+        throw msg;
+      }
+
       return !!pass ? this.pass(msg) : this.fail(msg);
     },
 

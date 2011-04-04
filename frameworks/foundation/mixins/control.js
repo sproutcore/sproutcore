@@ -248,6 +248,6 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
         this.$input().attr('disabled', disabled);
       }
     }
-  },
+  }
 });
 

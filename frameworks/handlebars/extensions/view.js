@@ -6,22 +6,41 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     var data = options.data;
     var view = data.view;
     var fn = options.fn;
+    var hash = options.hash;
 
     var newView;
     if (path.isClass || path.isObject) {
-     newView = path;
-     if (!newView) {
-      throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
-     }
+      newView = path;
+      if (!newView) {
+        throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
+      }
     } else {
       // Path is relative, look it up with this view as the root
       if (path.charAt(0) === '.') {
         newView = SC.objectForPropertyPath(path.slice(1), view);
       } else {
         // Path is absolute, look up path on global (window) object
-        newView = SC.objectForPropertyPath(path);
+        newView = SC.getPath(thisContext, path);
+        if (!newView) {
+          newView = SC.getPath(path);
+        }
       }
       if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+    }
+
+    var contextOptions = {
+      'id': hash.id,
+      'class': hash['class'],
+      'classBinding': hash.classBinding
+    };
+    delete hash.id;
+    delete hash['class'];
+    delete hash.classBinding;
+
+    if (newView.isClass) {
+      newView = newView.extend(hash);
+    } else {
+      SC.mixin(newView, hash);
     }
 
     var currentView = data.view;
@@ -38,11 +57,9 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     var context = SC.RenderContext(childView.get('tagName'));
 
     // Add id and class names passed to view helper
-    this.applyAttributes(options.hash, childView, context);
+    this.applyAttributes(contextOptions, childView, context);
 
     childView.applyAttributesToContext(context);
-
-
     // tomdale wants to make SproutCore slow
     childView.render(context, YES);
 

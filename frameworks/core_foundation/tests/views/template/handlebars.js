@@ -48,6 +48,24 @@ test("template view should call the function of the associated template with its
   equals("template was called for Tom DAAAALE1. Yea Tom DAAAALE1", view.$('#twas-called').text(), "the named template was called with the view as the data source");
 });
 
+test("should allow values from normal JavaScript hash objects to be used", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#with person}}{{firstName}} {{lastName}} (and {{pet.name}}){{/with}}'),
+
+    person: {
+      firstName: 'Señor',
+      lastName: 'CFC',
+      pet: {
+        name: 'Fido'
+      }
+    }
+  });
+
+  view.createLayer();
+
+  equals(view.$().text(), "Señor CFC (and Fido)", "prints out values from a hash");
+});
+
 TemplateTests = {};
 
 test("child views can be inserted using the {{view}} Handlebars helper", function() {
@@ -74,8 +92,7 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
 
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("#child-view:contains('Goodbye cruel world?')").length === 1, "The child view renders its content once");
-  ok(view.$().html().match(/Hello world!.*<aside.*Goodbye cruel world?/), "parent view should appear before the child view");
-
+  ok(view.$().text().match(/Hello world!.*Goodbye cruel world\?/), "parent view should appear before the child view");
 });
 
 test("should accept relative paths to views", function() {
@@ -97,7 +114,7 @@ test("should accept relative paths to views", function() {
 test("child views can be inserted inside a bind block", function() {
   var templates = SC.Object.create({
     nester: SC.Handlebars.compile("<h1 id='hello-world'>Hello {{world}}</h1>{{view \"TemplateTests.LabelView\"}}"),
-    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#bind \"content\"}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/bind}} {{world}}</div>"),
+    nested: SC.Handlebars.compile("<div id='child-view'>Goodbye {{#with content}}{{blah}} {{view \"TemplateTests.OtherView\"}}{{/with}} {{world}}</div>"),
     other: SC.Handlebars.compile("cruel")
   });
 
@@ -125,11 +142,10 @@ test("child views can be inserted inside a bind block", function() {
 
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("aside:contains('Goodbye wot cruel world?')").length === 1, "The child view renders its content once");
-  ok(view.$().html().match(/Hello world!.*<aside.*Goodbye.*wot.*cruel.*world?/), "parent view should appear before the child view");
-
+  ok(view.$().text().match(/Hello world!.*Goodbye.*wot.*cruel.*world\?/), "parent view should appear before the child view");
 });
 
-test("SC.TemplateView updates when a property changes", function() {
+test("SC.TemplateView should update when a property changes and the bind helper is used", function() {
   var templates = SC.Object.create({
    foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{bind "wham"}}{{/with}}</h1>')
   });
@@ -149,6 +165,58 @@ test("SC.TemplateView updates when a property changes", function() {
   equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
 
   SC.run(function() { view.get('content').set('wham', 'bazam'); });
+
+  equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
+});
+
+test("SC.TemplateView should update when a property changes and no bind helper is used", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{wham}}{{/with}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
+
+  SC.run(function() { view.get('content').set('wham', 'bazam'); });
+
+  equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
+});
+
+test("SC.TemplateView should update when the property used with the #with helper changes", function() {
+  var templates = SC.Object.create({
+   foo: SC.Handlebars.compile('<h1 id="first">{{#with content}}{{wham}}{{/with}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'foo',
+    templates: templates,
+
+    content: SC.Object.create({
+      wham: 'bam',
+      thankYou: "ma'am"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
+
+  SC.run(function() {
+    view.set('content', SC.Object.create({
+      wham: 'bazam'
+    }));
+  });
 
   equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
 });
@@ -202,7 +270,6 @@ test("should not update when a property is removed from the view", function() {
   equals(removeCalled, 1, "does not try to remove observer more than once");
   equals(view.$('#first').text(), "ninjas", "does not update removed object");
 });
-
 
 test("Handlebars templates update properties if a content object changes", function() {
   var templates;
@@ -311,6 +378,117 @@ test("Template updates correctly if a path is passed to the bind helper and the 
   equals(view.$('h1').text(), "$6", "updates when property is set on object controller");
 });
 
+test("should update the block when object passed to #if helper changes", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{#if inception}}{{INCEPTION}}{{/if}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    INCEPTION: "BOOOOOOOONG doodoodoodoodooodoodoodoo",
+    inception: 'OOOOoooooOOOOOOooooooo'
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "renders block if a string");
+
+  var tests = [false, null, undefined, [], '', 0];
+
+  tests.forEach(function(val) {
+    SC.run(function() {
+      view.set('inception', val);
+    });
+
+    equals(view.$('h1').text(), '', "hides block when conditional is '%@'".fmt(val));
+
+    SC.run(function() {
+      view.set('inception', true);
+    });
+
+    equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "precond - renders block when conditional is true");
+  });
+});
+
+test("should update the block when object passed to #unless helper changes", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    advice: SC.Handlebars.compile('<h1>{{#unless onDrugs}}{{doWellInSchool}}{{/unless}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'advice',
+    templates: templates,
+
+    onDrugs: true,
+    doWellInSchool: "Eat your vegetables"
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "", "hides block if true");
+
+  var tests = [false, null, undefined, [], '', 0];
+
+  tests.forEach(function(val) {
+    SC.run(function() {
+      view.set('onDrugs', val);
+    });
+
+    equals(view.$('h1').text(), 'Eat your vegetables', "renders block when conditional is '%@'".fmt(val));
+
+    SC.run(function() {
+      view.set('onDrugs', true);
+    });
+
+    equals(view.$('h1').text(), "", "precond - hides block when conditional is true");
+  });
+});
+
+test("should update the block when object passed to #if helper changes and an inverse is supplied", function() {
+  var templates;
+
+  templates = SC.Object.create({
+    menu: SC.Handlebars.compile('<h1>{{#if inception}}{{INCEPTION}}{{else}}{{SAD}}{{/if}}</h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    templateName: 'menu',
+    templates: templates,
+
+    INCEPTION: "BOOOOOOOONG doodoodoodoodooodoodoodoo",
+    inception: false,
+    SAD: 'BOONG?'
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), "BOONG?", "renders alternate if false");
+
+  SC.run(function() { view.set('inception', true); });
+
+  var tests = [false, null, undefined, [], '', 0];
+
+  tests.forEach(function(val) {
+    SC.run(function() {
+      view.set('inception', val);
+    });
+
+    equals(view.$('h1').text(), 'BOONG?', "renders alternate if %@".fmt(val));
+
+    SC.run(function() {
+      view.set('inception', true);
+    });
+
+    equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "precond - renders block when conditional is true");
+  });
+});
+
 test("Should insert a localized string if the {{loc}} helper is used", function() {
   SC.stringsFor('en', {
     'Brazil': 'Brasilia'
@@ -375,7 +553,7 @@ test("Template views can belong to a pane and a parent view", function() {
 
   equals(pane.$().children().length, 1, "pane has one child DOM element");
   equals(pane.$().children().children().length, 2, "container view has two child DOM elements");
-  equals(pane.$().children().children().eq(1).html(), "<h1>Do dishes</h1> (Created at Today)", "renders template to the correct DOM element");
+  equals(pane.$().children().children().eq(1).text(), "Do dishes (Created at Today)", "renders template to the correct DOM element");
   ok(didCreateLayerWasCalled, "didCreateLayer gets called on a template view after it gets rendered");
   pane.remove();
 });
@@ -415,6 +593,29 @@ test("Template views set the template of their children to a passed block", func
 
   view.createLayer();
   ok(view.$().html().match(/<h1>.*<span>.*<\/span>.*<\/h1>/), "renders the passed template inside the parent template");
+});
+
+test("should pass hash arguments to the view object", function() {
+  TemplateTests.bindTestObject = SC.Object.create({
+    bar: 'bat'
+  });
+
+  TemplateTests.HashArgTemplateView = SC.TemplateView.extend({
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#view TemplateTests.HashArgTemplateView fooBinding="TemplateTests.bindTestObject.bar"}}{{foo}}{{/view}}')
+  });
+
+  view.createLayer();
+
+  SC.run();
+
+  equals(view.$().text(), "bat", "prints initial bound value");
+
+  SC.run(function() { TemplateTests.bindTestObject.set('bar', 'brains'); });
+
+  equals(view.$().text(), "brains", "prints updated bound value");
 });
 
 test("Child views created using the view helper should have their parent view set properly", function() {
@@ -517,6 +718,20 @@ test("{{view}} class attribute should set class on layer", function() {
   equals(view.$('.bar').text(), 'baz', "emits content");
 });
 
+test("{{view}} should be able to point to a local view", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile("{{view common}}"),
+
+    common: SC.TemplateView.create({
+      template: SC.Handlebars.compile("common")
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$().text(), "common", "tries to look up view name locally");
+});
+
 test("should be able to bind view class names to properties", function() {
   var templates = SC.Object.create({
     template: SC.Handlebars.compile('{{#view "TemplateTests.classBindingView" classBinding="isDone"}}foo{{/view}}')
@@ -569,7 +784,7 @@ test("should be able to bind boolean element attributes using {{bindAttr}}", fun
   var template = SC.Handlebars.compile('<input type="check" {{bindAttr disabled="content.isDisabled" checked="content.isChecked"}} />');
   var content = SC.Object.create({
     isDisabled: false,
-    isChecked: true,
+    isChecked: true
   });
 
   var view = SC.TemplateView.create({

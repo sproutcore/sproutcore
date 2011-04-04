@@ -17,6 +17,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
   itemView: 'SC.TemplateView',
 
+  itemContext: null,
+
   itemViewClass: function() {
     var itemView = this.get('itemView');
     // hash of properties to override in our
@@ -111,18 +113,34 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     insertAtElement = elem.find('li')[changeIndex-1] || null;
     len = addedObjects.get('length');
 
+    // TODO: This logic is duplicated from the view helper. Refactor
+    // it so we can share logic.
+    var itemAttrs = {
+      "id": itemOptions.id,
+      "class": itemOptions['class'],
+      "classBinding": itemOptions.classBinding
+    };
+
     renderFunc = function(context) {
       sc_super();
-      SC.Handlebars.ViewHelper.applyAttributes(itemOptions, this, context);
+      SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
     };
+
+    delete itemOptions.id;
+    delete itemOptions['class'];
+    delete itemOptions.classBinding;
 
     for (idx = 0; idx < len; idx++) {
       item = addedObjects.objectAt(idx);
-      view = this.createChildView(itemViewClass.extend({
+      view = this.createChildView(itemViewClass.extend(itemOptions, {
         content: item,
         render: renderFunc
       }));
 
+      var contextProperty = view.get('contextProperty');
+      if (contextProperty) {
+        view.set('context', view.get(contextProperty));
+      }
 
       itemElem = view.createLayer().$();
       if (!insertAtElement) {

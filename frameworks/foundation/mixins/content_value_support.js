@@ -212,6 +212,6 @@ SC.ContentValueSupport = {
   _control_contentValueKeyDidChange: function() {
     // notify that value did change.
     this.contentPropertyDidChange(this.get('content'), '*') ;
-  }.observes('contentValueKey'),
+  }.observes('contentValueKey')
 };
 

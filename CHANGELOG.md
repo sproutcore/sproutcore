@@ -2,8 +2,28 @@
 CHANGE LOG FOR 1.5
 ==================
 
-Upcoming
+1.5.0.rc.1
 -----------
+* Removed #bindCollection helper. Instead, use {{#collection
+  PathTo.Collection contentBinding="MyApp.controller.content"}}
+* {{view}} helper looks up views relative to the view, and then the
+  global scope
+* Built-in helpers and mustaches now automatically update. It is no
+  longer necessary to use {{bind}} or {{boundIf}}
+* Adds enumerable observers, which allow you to subscribe to mutations
+  of an enumerable
+* Fixed error reporting when a Handlebars template is unable to find a
+  property
+* Dependent keys that contain paths now invalidate immediately instead
+  of at the end of the run loop, which significantly improves
+  performances, especially when combined with @each
+* SC.offset offers more reliability than the deprecated SC.viewOffset
+* Added SC.getPath(), which is like SC.get() but takes a path instead of
+  just a property
+* Improved compatibility of using SC.CoreViews (such as SC.TemplateView)
+  inside standard SC.Views
+* Tear down SC.TemplateCollectionView child views when no longer needed,
+  which fixes a memory leak issue
 * Integrated new functionality from the Ki framework into the SC.StateChart framework so that they now have feature-parity
 * The SC.PickerPane was updated to add removeTarget and removeTarget properties
 * Fixed documentation in datastore and view layer

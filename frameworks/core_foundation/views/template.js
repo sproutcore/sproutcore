@@ -10,6 +10,13 @@ SC.TEMPLATES = SC.Object.create();
   SC.TemplateView allows you to create a view that uses the Handlebars templating
   engine to generate its HTML representation.
 
+  To use it, create a file in your project called +mytemplate.handlebars+. Then,
+  set the +templateName+ property of your SC.TemplateView to +mytemplate+.
+
+  Alternatively, you can set the +template+ property to any function that
+  returns a string. It is recommended that you use +SC.Handlebars.compile()+ to
+  generate a function from a string containing Handlebars markup.
+
   @extends SC.CoreView
   @since SproutCore 1.5
 */
@@ -17,17 +24,45 @@ SC.TemplateView = SC.CoreView.extend(
 /** @scope SC.TemplateView.prototype */ {
 
   // This makes it easier to build custom views on top of TemplateView without
-  // gotchas, but may have tab navigation reprecussions. The tab navigation
+  // gotchas, but may have tab navigation repercussions. The tab navigation
   // system should be revisited.
   acceptsFirstResponder: YES,
 
+  /**
+    The name of the template to lookup if no template is provided.
+
+    SC.TemplateView will look for a template with this name in the global
+    +SC.TEMPLATES+ hash. Usually this hash will be populated for you
+    automatically when you include +.handlebars+ files in your project.
+
+    @property {String}
+  */
   templateName: null,
 
+  /**
+    The hash in which to look for +templateName+. Defaults to SC.TEMPLATES.
+
+    @property {Object}
+  */
   templates: SC.TEMPLATES,
 
-  template: function() {
-    var templateName = this.get('templateName');
-    var template = this.get('templates').get(templateName);
+  /**
+    The template to use to render the view. This should be a function that
+    accepts an optional context parameter and returns a string of HTML that
+    will be inserted into the DOM relative to its parent view.
+
+    In general, you should set the +templateName+ property instead of setting
+    the template yourself.
+
+    @property {Function}
+  */
+  template: function(key, value) {
+    if (value !== undefined) {
+      return value;
+    }
+
+    var templateName = this.get('templateName'),
+        template = this.get('templates').get(templateName);
 
     if (!template) {
       //@if(debug)
@@ -42,14 +77,29 @@ SC.TemplateView = SC.CoreView.extend(
     return template;
   }.property('templateName').cacheable(),
 
-  context: function() {
+  /**
+    The object from which templates should access properties.
+
+    This object will be passed to the template function each time the render
+    method is called, but it is up to the individual function to decide what
+    to do with it.
+
+    By default, this will be the view itself.
+
+    @property {Object}
+  */
+  context: function(key, value) {
+    if (value !== undefined) {
+      return value;
+    }
+
     return this;
   }.property().cacheable(),
 
   /**
-    When the view is asked to render, we look for the appropriate
-    template and invoke it with this view as the context, as well
-    as a hash that contains a reference to the view.
+    When the view is asked to render, we look for the appropriate template
+    function and invoke it, then push its result onto the passed
+    SC.RenderContext instance.
 
     @param {SC.RenderContext} context the render context
   */
