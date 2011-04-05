@@ -17,15 +17,13 @@
   You can either create a subclass of ScrollerView with the new values, or
   provide your own in your theme:
 
-{{{
-  SC.mixin(SC.ScrollerView.prototype, {
-    scrollbarThickness: 14,
-    capLength: 18,
-    capOverlap: 14,
-    buttonOverlap: 11,
-    buttonLength: 41
-  });
-}}}
+      SC.mixin(SC.ScrollerView.prototype, {
+        scrollbarThickness: 14,
+        capLength: 18,
+        capOverlap: 14,
+        buttonOverlap: 11,
+        buttonLength: 41
+      });
 
   You can change whether scroll buttons are displayed by setting the
   hasButtons property.
@@ -36,15 +34,30 @@
 SC.ScrollerView = SC.View.extend(
 /** @scope SC.ScrollerView.prototype */ {
 
+  /**
+    @type Array
+    @default ['sc-scroller-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-scroller-view'],
 
   /**
-    The WAI-ARIA role for scroller view. This property's value should not be
-    changed.
+    @type Array
+    @default 'thumbPosition thumbLength isEnabled controlsHidden'.w()
+    @see SC.View#displayProperties
+  */
+  displayProperties: 'thumbPosition thumbLength isEnabled controlsHidden'.w(),
 
-    @property {String}
+  /**
+    The WAI-ARIA role for scroller view.
+
+    @type String
+    @default 'scrollbar'
+    @readOnly
   */
   ariaRole: 'scrollbar',
+  
+  
   // ..........................................................
   // PROPERTIES
   //
@@ -54,12 +67,14 @@ SC.ScrollerView = SC.View.extend(
     Otherwise, a click on the track will cause a page down.
     
     In either case, alt-clicks will perform the opposite behavior.
+    
+    @type Boolean
+    @default NO
   */
   shouldScrollToClick: NO,
   
   
-  /**
-    @private
+  /** @private
     The in-touch-scroll value.
   */
   _touchScrollValue: NO,
@@ -68,8 +83,11 @@ SC.ScrollerView = SC.View.extend(
     The value of the scroller.
 
     The value represents the position of the scroller's thumb.
-
-    @property {Number}
+    
+    @field
+    @type Number
+    @observes maximum
+    @observes minimum
   */
   value: function(key, val) {
     var minimum = this.get('minimum');
@@ -81,6 +99,10 @@ SC.ScrollerView = SC.View.extend(
     return Math.max(Math.min(val, this.get('maximum')), minimum) ;
   }.property('maximum', 'minimum').cacheable(),
   
+  /**
+    @type Number
+    @observes value
+  */
   displayValue: function() {
     var ret;
     if (this.get("_touchScrollValue")) ret = this.get("_touchScrollValue");
@@ -97,7 +119,8 @@ SC.ScrollerView = SC.View.extend(
     the slot). Note that if the proportion is 1.0 then the control will be
     disabled.
 
-    @property {Number}
+    @type Number
+    @default 0.0
   */
   proportion: 0,
 
@@ -107,7 +130,8 @@ SC.ScrollerView = SC.View.extend(
 
     When set less than the height of the scroller, the scroller is disabled.
 
-    @property {Number}
+    @type Number
+    @default 100
   */
   maximum: 100,
 
@@ -115,7 +139,8 @@ SC.ScrollerView = SC.View.extend(
     The minimum offset value for the scroller.  This will be used to calculate
     the internal height/width of the scroller itself.
 
-    @property {Number}
+    @type Number
+    @default 0
   */
   minimum: 0,
 
@@ -123,7 +148,10 @@ SC.ScrollerView = SC.View.extend(
     YES to enable scrollbar, NO to disable it.  Scrollbars will automatically
     disable if the maximum scroll width does not exceed their capacity.
 
-    @property
+    @field
+    @type Boolean
+    @default YES
+    @observes proportion
   */
   isEnabled: function(key, value) {
     if (value !== undefined) {
@@ -137,25 +165,31 @@ SC.ScrollerView = SC.View.extend(
     return this.get('proportion') < 1;
   }.property('proportion').cacheable(),
 
-  // to allow setting isEnabled manually
+  /** @private */
   _scsv_isEnabled: undefined,
 
   /**
     Determine the layout direction.  Determines whether the scrollbar should
     appear horizontal or vertical.  This must be set when the view is created.
-    Changing this once the view has been created will have no effect.
+    Changing this once the view has been created will have no effect. Possible
+    values:
+    
+      - SC.LAYOUT_VERTICAL
+      - SC.LAYOUT_HORIZONTAL
 
-    @property
+    @type String
+    @default SC.LAYOUT_VERTICAL
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
 
   /**
     Whether or not the scroller should display scroll buttons
 
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   hasButtons: YES,
+
 
   // ..........................................................
   // DISPLAY METRICS
@@ -165,21 +199,24 @@ SC.ScrollerView = SC.View.extend(
     The width (if vertical scroller) or height (if horizontal scroller) of the 
     scrollbar.
 
-    @property {Number}
+    @type Number
+    @default 14
   */
   scrollbarThickness: 14,
   
   /**
     The width or height of the cap that encloses the track.
 
-    @property {Number}
+    @type Number
+    @default 18
   */
   capLength: 18,
 
   /**
     The amount by which the thumb overlaps the cap.
 
-    @property {Number}
+    @type Number
+    @default 14
   */
   capOverlap: 14,
 
@@ -188,7 +225,8 @@ SC.ScrollerView = SC.View.extend(
     scroller is not displaying arrows, this is the width or height of the end
     cap.
 
-    @property {Number}
+    @type Number
+    @defaut 41
   */
   buttonLength: 41,
 
@@ -197,7 +235,8 @@ SC.ScrollerView = SC.View.extend(
     is not displaying arrows, this is the amount by which the thumb overlaps
     the end cap.
 
-    @property {Number}
+    @type Number
+    @default 11
   */
   buttonOverlap: 11,
   
@@ -205,7 +244,8 @@ SC.ScrollerView = SC.View.extend(
     The minimium length that the thumb will be, regardless of how much content
     is in the scroll view.
 
-    @property {Number}
+    @type Number
+    @default 20
   */
   minimumThumbLength: 20,
 
@@ -213,9 +253,8 @@ SC.ScrollerView = SC.View.extend(
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'thumbPosition thumbLength isEnabled controlsHidden'.w(),
 
-  /**
+  /** @private
     Generates the HTML that gets displayed to the user.
 
     The first time render is called, the HTML will be output to the DOM.
@@ -313,17 +352,17 @@ SC.ScrollerView = SC.View.extend(
     }
   },
 
-  /**
-  @private
-  */
+  /** @private */
   touchScrollDidStart: function(value) {
     this.set("_touchScrollValue", value);
   },
   
+  /** @private */
   touchScrollDidEnd: function(value) {
     this.set("_touchScrollValue", NO);
   },
   
+  /** @private */
   touchScrollDidChange: function(value) {
     this.set("_touchScrollValue", value);
   },
@@ -331,7 +370,8 @@ SC.ScrollerView = SC.View.extend(
   // ..........................................................
   // THUMB MANAGEMENT
   //
-  /**
+  
+  /** @private
     Adjusts the thumb (for backwards-compatibility calls adjustThumbPosition+adjustThumbSize by default)
   */
   adjustThumb: function(thumb, position, length) {
@@ -339,11 +379,10 @@ SC.ScrollerView = SC.View.extend(
     this.adjustThumbSize(thumb, length);
   },
 
-  /**
+  /** @private
     Updates the position of the thumb DOM element.
 
     @param {Number} position the position of the thumb in pixels
-    @private
   */
   adjustThumbPosition: function(thumb, position) {
     // Don't touch the DOM if the position hasn't changed
@@ -361,6 +400,7 @@ SC.ScrollerView = SC.View.extend(
     this._thumbPosition = position;
   },
 
+  /** @private */
   adjustThumbSize: function(thumb, size) {
     // Don't touch the DOM if the size hasn't changed
     if (this._thumbSize === size) return;
@@ -381,7 +421,7 @@ SC.ScrollerView = SC.View.extend(
   // SCROLLER DIMENSION COMPUTED PROPERTIES
   //
 
-  /**
+  /** @private
     Returns the total length of the track in which the thumb sits.
 
     The length of the track is the height or width of the scroller, less the
@@ -389,7 +429,6 @@ SC.ScrollerView = SC.View.extend(
     position of the thumb relative to the view.
 
     @property
-    @private
   */
   trackLength: function() {
     var scrollerLength = this.get('scrollerLength');
@@ -403,13 +442,12 @@ SC.ScrollerView = SC.View.extend(
     return scrollerLength;
   }.property('scrollerLength').cacheable(),
 
-  /**
+  /** @private
     Returns the height of the view if this is a vertical scroller or the width
     of the view if this is a horizontal scroller. This is used when scrolling
     up and down by page, as well as in various layout calculations.
 
-    @property {Number}
-    @private
+    @type Number
   */
   scrollerLength: function() {
     switch (this.get('layoutDirection')) {
@@ -422,12 +460,11 @@ SC.ScrollerView = SC.View.extend(
     return 0;
   }.property('frame').cacheable(),
 
-  /**
+  /** @private
     The total length of the thumb. The size of the thumb is the
     length of the track times the content proportion.
 
     @property
-    @private
   */
   thumbLength: function() {
     var length;
@@ -438,12 +475,11 @@ SC.ScrollerView = SC.View.extend(
     return Math.max(length, this.get('minimumThumbLength'));
   }.property('trackLength', 'proportion').cacheable(),
 
-  /**
+  /** @private
     The position of the thumb in the track.
 
-    @property {Number}
+    @type Number
     @isReadOnly
-    @private
   */
   thumbPosition: function() {
     var value = this.get('displayValue'),
@@ -459,26 +495,24 @@ SC.ScrollerView = SC.View.extend(
     return Math.floor(isNaN(position) ? 0 : position);
   }.property('displayValue', 'maximum', 'trackLength', 'thumbLength').cacheable(),
 
-  /**
+  /** @private
     YES if the maximum value exceeds the frame size of the scroller.  This
     will hide the thumb and buttons.
 
-    @property {Boolean}
+    @type Boolean
     @isReadOnly
-    @private
   */
   controlsHidden: function() {
     return this.get('proportion') >= 1;
   }.property('proportion').cacheable(),
 
+
   // ..........................................................
   // MOUSE EVENTS
   //
   
-  /**
+  /** @private
     Returns the value for a position within the scroller's frame.
-    
-    @private
   */
   valueForPosition: function(pos) {
     var max = this.get('maximum'),
@@ -493,7 +527,7 @@ SC.ScrollerView = SC.View.extend(
     return value;
   },
 
-  /**
+  /** @private
     Handles mouse down events and adjusts the value property depending where
     the user clicked.
 
@@ -512,7 +546,6 @@ SC.ScrollerView = SC.View.extend(
     are repeated until they release the mouse button.
 
     @param evt {SC.Event} the mousedown event
-    @private
   */
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return NO;
@@ -604,13 +637,12 @@ SC.ScrollerView = SC.View.extend(
     return YES;
   },
 
-  /**
+  /** @private
     When the user releases the mouse button, remove any active
     state from the button controls, and cancel any outstanding
     timers.
 
     @param evt {SC.Event} the mousedown event
-    @private
   */
   mouseUp: function(evt) {
     var active = this._scs_buttonActive, ret = NO, timer;
@@ -636,7 +668,7 @@ SC.ScrollerView = SC.View.extend(
     return ret;
   },
 
-  /**
+  /** @private
     If the user began the drag on the thumb, we calculate the difference
     between the mouse position at click and where it is now.  We then
     offset the thumb by that amount, within the bounds of the track.
@@ -645,7 +677,6 @@ SC.ScrollerView = SC.View.extend(
     what component they are currently over, changing the scroll direction.
 
     @param evt {SC.Event} the mousedragged event
-    @private
   */
   mouseDragged: function(evt) {
     var value, length, delta, thumbPosition,
@@ -736,15 +767,13 @@ SC.ScrollerView = SC.View.extend(
     return YES;
   },
 
-  /**
+  /** @private
     Starts a timer that fires after 300ms.  This is called when the user
     clicks a button or inside the track to move a page at a time. If they
     continue holding the mouse button down, we want to repeat that action
     after a small delay.  This timer will be invalidated in mouseUp.
     
     Specify "immediate" as YES if it should not wait.
-
-    @private
   */
   startMouseDownTimer: function(action, immediate) {
     var timer;
@@ -755,11 +784,9 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-  /**
+  /** @private
     Called by the mousedown timer.  This method determines the initial
     user action and repeats it until the timer is invalidated in mouseUp.
-
-    @private
   */
   mouseDownTimerDidFire: function() {
     var scrollerLength = this.get('scrollerLength'),
@@ -798,13 +825,12 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-  /**
+  /** @private
     Given a selector, finds the corresponding DOM element and adds
     the 'active' class name.  Also stores the returned element so that
     the 'active' class name can be removed during mouseup.
 
     @param {String} the selector to find
-    @private
   */
   makeButtonActive: function(selector) {
     this._scs_buttonActive = this.$(selector).addClass('active');
@@ -812,14 +838,52 @@ SC.ScrollerView = SC.View.extend(
 });
 
 // TODO: Use render delegates to handle rendering.
-SC.TouchScrollerView = SC.ScrollerView.extend({
+
+/**
+  @class
+  @extends SC.ScrollerView
+*/
+SC.TouchScrollerView = SC.ScrollerView.extend(
+/** @scope SC.TouchScrollerView.prototype */{
+
+  /**
+    @type Array
+    @default ['sc-touch-scroller-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-touch-scroller-view'],
+  
+  /**
+    @type Number
+    @default 12
+  */
   scrollbarThickness: 12,
+  
+  /**
+    @type Number
+    @default 5
+  */
   capLength: 5,
+  
+  /**
+    @type Number
+    @default 0
+  */
   capOverlap: 0,
+  
+  /**
+    @type Boolean
+    @default NO
+  */
   hasButtons: NO,
+  
+  /**
+    @type Number
+    @default 36
+  */
   buttonOverlap: 36,
   
+  /** @private */
   adjustThumb: function(thumb, position, length) {
     var thumbInner = this.$('.thumb-inner');
     var max = this.get("scrollerLength") - this.capLength, min = this.get("minimum") + this.capLength;
@@ -853,6 +917,7 @@ SC.TouchScrollerView = SC.ScrollerView.extend({
     this._thumbSize = length;
   },
   
+  /** @private */
   render: function(context, firstTime) {
     var classNames = [],
         buttons = '',

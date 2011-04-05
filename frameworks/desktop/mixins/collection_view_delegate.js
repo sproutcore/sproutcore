@@ -29,14 +29,19 @@
 SC.CollectionViewDelegate = {
 
   /**
-    Used to detect the mixin by SC.CollectionView
+    Walk like a duck. Used to detect the mixin by SC.CollectionView.
+    
+    @type Boolean
+    @default YES
+    @constant
   */
   isCollectionViewDelegate: YES,
-  
+
+
   // ..........................................................
   // SELECTION
   // 
-  
+
   /**
     This method will be called anytime the collection view is about to
     change the selection in response to user mouse clicks or keyboard events.
@@ -50,11 +55,11 @@ SC.CollectionViewDelegate = {
     @returns {SC.IndexSet} Actual allow selection index set
   */
   collectionViewSelectionForProposedSelection: function(view, sel) {
-    return sel ;
+    return sel;
   },
 
   /**
-    Called by the collection when attempting to select an item.  Return the 
+    Called by the collection when attempting to select an item.  Return the
     actual indexes you want to allow to be selected.  Return null to disallow
     the change.  The default allows all selection.
     
@@ -63,13 +68,13 @@ SC.CollectionViewDelegate = {
     @param {Boolean} extend YES if the indexes will extend existing sel
     @returns {SC.IndexSet} allowed index set
   */
-  collectionViewShouldSelectIndexes: function (view, indexes, extend) { 
-    return indexes; 
+  collectionViewShouldSelectIndexes: function (view, indexes, extend) {
+    return indexes;
   },
-  
+
   /**
-    Called by the collection when attempting to deselect an item.  Return the 
-    actual indexes you want to allow to be deselected.  Return null to 
+    Called by the collection when attempting to deselect an item.  Return the
+    actual indexes you want to allow to be deselected.  Return null to
     disallow the change.  The default allows all selection.
     
     Note that you should not modify the passed in IndexSet.  clone it instead.
@@ -78,14 +83,15 @@ SC.CollectionViewDelegate = {
     @param {SC.IndexSet} indexes the indexes to be selected
     @returns {SC.IndexSet} allowed index set
   */
-  collectionViewShouldDeselectIndexes: function (view, indexes) { 
-    return indexes; 
+  collectionViewShouldDeselectIndexes: function (view, indexes) {
+    return indexes;
   },
+
 
   // ..........................................................
   // EDIT OPERATIONS
   // 
-  
+
   /**
     Called by the collection view whenever the deleteSelection() method is
     called.  You can implement this method to get fine-grained control over
@@ -98,19 +104,19 @@ SC.CollectionViewDelegate = {
     @param {SC.IndexSet} indexes proposed index set of items to delete.
     @returns {SC.IndexSet} index set allowed to delete or null.
   */
-  collectionViewShouldDeleteIndexes: function(view, indexes) { 
-    return indexes; 
+  collectionViewShouldDeleteIndexes: function(view, indexes) {
+    return indexes;
   },
-  
+
   /**
     Called by the collection view to actually delete the selected items.
     
-    The default behavior will use standard array operators to delete the 
-    indexes from the array.  You can implement this method to provide your own 
+    The default behavior will use standard array operators to delete the
+    indexes from the array. You can implement this method to provide your own
     deletion method.
     
     If you simply want to control the items to be deleted, you should instead
-    implement collectionViewShouldDeleteItems().  This method will only be 
+    implement collectionViewShouldDeleteItems(). This method will only be
     called if canDeleteContent is YES and collectionViewShouldDeleteIndexes()
     returns a non-empty index set
     
@@ -123,39 +129,42 @@ SC.CollectionViewDelegate = {
 
     if (SC.typeOf(content.destroyAt) === SC.T_FUNCTION) {
       content.destroyAt(indexes);
-      view.selectPreviousItem(NO, 1) ;
+      view.selectPreviousItem(NO, 1);
       return YES ;
-      
     } else if (SC.typeOf(content.removeAt) === SC.T_FUNCTION) {
       content.removeAt(indexes);
-      view.selectPreviousItem(NO, 1) ;
+      view.selectPreviousItem(NO, 1);
       return YES;
-      
-    } else return NO ;
+    } else {
+      return NO;
+    }
   },
-  
+
+
   // ..........................................................
   // DRAGGING
   // 
   
   /**
     Called by the collection view just before it starts a drag to give you
-    an opportunity to decide if the drag should be allowed. 
+    an opportunity to decide if the drag should be allowed.
     
-    You can use this method to implement fine-grained control over when a 
-    drag will be allowed and when it will not be allowed.  For example, you
+    You can use this method to implement fine-grained control over when a
+    drag will be allowed and when it will not be allowed. For example, you
     may enable content reordering but then implement this method to prevent
     reordering of certain items in the view.
     
     The default implementation always returns YES.
     
-    @param view {SC.CollectionView} the collection view
+    @param {SC.CollectionView} view the collection view
     @returns {Boolean} YES to alow, NO to prevent it
   */
-  collectionViewShouldBeginDrag: function(view) { return YES; },
-  
+  collectionViewShouldBeginDrag: function(view) {
+    return YES;
+  },
+
   /**
-    Called by the collection view just before it starts a drag so that 
+    Called by the collection view just before it starts a drag so that
     you can provide the data types you would like to support in the data.
     
     You can implement this method to return an array of the data types you
@@ -171,11 +180,13 @@ SC.CollectionViewDelegate = {
     
     The default returns an empty array.
     
-    @param view {SC.CollectionView} the collection view to begin dragging.
+    @param {SC.CollectionView} view the collection view to begin dragging.
     @returns {Array} array of supported data types.
   */
-  collectionViewDragDataTypes: function(view) { return []; },
-  
+  collectionViewDragDataTypes: function(view) {
+    return [];
+  },
+
   /**
     Called by a collection view when a drag concludes to give you the option
     to provide the drag data for the drop.
@@ -186,64 +197,55 @@ SC.CollectionViewDelegate = {
     
     The default implementation returns null.
     
-    @param view {SC.CollectionView} 
-      the collection view that initiated the drag
-
+    @param view {SC.CollectionView} the collection view that initiated the drag
     @param dataType {String} the data type to provide
     @param drag {SC.Drag} the drag object
     @returns {Object} the data object or null if the data could not be provided.
   */
-  collectionViewDragDataForType: function(view, drag, dataType) {  
-    return null ;
+  collectionViewDragDataForType: function(view, drag, dataType) {
+    return null;
   },
-  
+
   /**
-    Called once during a drag the first time view is entered. Return all 
+    Called once during a drag the first time view is entered. Return all
     possible drag operations OR'd together.
     
-    @param {SC.CollectionView} view
-      the collection view that initiated the drag
-
-    @param {SC.Drag} drag
-      the drag object
-    
-    @param {Number} proposedDragOperations
-      proposed logical OR of allowed drag operations.
-
+    @param {SC.CollectionView} view the collection view that initiated the drag
+    @param {SC.Drag} drag the drag object
+    @param {Number} proposedDragOperations proposed logical OR of allowed drag operations.
     @returns {Number} the allowed drag operations. Defaults to op
   */
   collectionViewComputeDragOperations: function(view, drag, proposedDragOperations) {
-    return proposedDragOperations ;
+    return proposedDragOperations;
   },
-  
+
   /**
     Called by the collection view during a drag to let you determine the
     kind and location of a drop you might want to accept.
     
     You can override this method to implement fine-grained control over how
     and when a dragged item is allowed to be dropped into a collection view.
-
-    This method will be called by the collection view both to determine in 
+    
+    This method will be called by the collection view both to determine in
     general which operations you might support and specifically the operations
     you would support if the user dropped an item over a specific location.
     
-    If the proposedDropOperation parameter is SC.DROP_ON or SC.DROP_BEFORE, 
-    then the proposedInsertionPoint will be a non-negative value and you 
-    should determine the specific operations you will support if the user 
+    If the proposedDropOperation parameter is SC.DROP_ON or SC.DROP_BEFORE,
+    then the proposedInsertionPoint will be a non-negative value and you
+    should determine the specific operations you will support if the user
     dropped the drag item at that point.
     
-    If you do not like the proposed drop operation or insertion point, you 
+    If you do not like the proposed drop operation or insertion point, you
     can override these properties as well by setting the proposedDropOperation
     and proposedInsertionIndex properties on the collection view during this
-    method.  These properties are ignored all other times.
+    method. These properties are ignored all other times.
     
-    @param view {SC.CollectionView} the collection view
-    @param drag {SC.Drag} the current drag object
-    @param op {Number} proposed logical OR of allowed drag operations.
-    @param proposedInsertionIndex {Number} an index into the content array 
-      representing the proposed insertion point.
-    @param proposedDropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
-    @returns the allowed drag operation.  Defaults to op
+    @param {SC.CollectionView} view the collection view
+    @param {SC.Drag} drag the current drag object
+    @param {Number} op proposed logical OR of allowed drag operations.
+    @param {Number} proposedInsertionIndex an index into the content array representing the proposed insertion point.
+    @param {String} proposedDropOperation the proposed drop operation. Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
+    @returns the allowed drag operation. Defaults to op
   */
   collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
     // don't allow dropping on by default
@@ -256,24 +258,26 @@ SC.CollectionViewDelegate = {
     determine if you want to even allow the drag operation to go through.
     
     You should actually make changes to the data model if needed here and
-    then return the actual drag operation that was performed.  If you return
+    then return the actual drag operation that was performed. If you return
     SC.DRAG_NONE and the dragOperation was SC.DRAG_REORDER, then the default
     reorder behavior will be provided by the collection view.
     
-    @param view {SC.CollectionView}
-    @param drag {SC.Drag} the current drag object
-    @param op {Number} proposed logical OR of allowed drag operations.
-    @param proposedInsertionIndex {Number} an index into the content array representing the proposed insertion point.
-    @param proposedDropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
-    @returns the allowed drag operation.  Defaults to proposedDragOperation
+    @param {SC.CollectionView} view
+    @param {SC.Drag} drag the current drag object
+    @param {Number} op proposed logical OR of allowed drag operations.
+    @param {Number} proposedInsertionIndex an index into the content array representing the proposed insertion point.
+    @param {String} proposedDropOperation the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
+    @returns the allowed drag operation. Defaults to proposedDragOperation
   */
   collectionViewPerformDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
-    return SC.DRAG_NONE ;
+    return SC.DRAG_NONE;
   },
   
   /**
     Renders a drag view for the passed content indexes. If you return null
     from this, then a default drag view will be generated for you.
+    
+    The default implementation returns null.
     
     @param {SC.CollectionView} view
     @param {SC.IndexSet} dragContent
@@ -288,7 +292,8 @@ SC.CollectionViewDelegate = {
     like a cursor instead of the default implementation. This sets the view 
     origin to be the location of the mouse cursor.
     
-    @property {Boolean} ghost view acts like a cursor
+    @type Boolean
+    @default NO
   */
   ghostActsLikeCursor: NO
   

@@ -5,7 +5,22 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.TO_LEFT = "TOLEFT"; SC.TO_RIGHT = "TORIGHT";
+sc_require("views/workspace");
+
+/**
+  @static
+  @type String
+  @constant
+*/
+SC.TO_LEFT = "TOLEFT";
+
+/**
+  @static
+  @type String
+  @constant
+*/
+SC.TO_RIGHT = "TORIGHT";
+
 
 /** @class
 
@@ -20,26 +35,31 @@ SC.TO_LEFT = "TOLEFT"; SC.TO_RIGHT = "TORIGHT";
   Of course, this process is animated...
   
   @author Alex Iskander
-  @since SproutCore Quilmes
+  @extends SC.WorkspaceView
+  @since SproutCore 1.4
 */
-
-sc_require("views/workspace");
-SC.NavigationView = SC.WorkspaceView.extend({
+SC.NavigationView = SC.WorkspaceView.extend(
+/** @scope SC.NavigationView.prototype */ {
+  
+  /** @private */
   _views: null,
+  
+  /** @private */
   _current: null,
-  navigationContentView: SC.View.extend(),
   
   /**
-    Initializes the NavigationView by creating the view stack.
+    @type SC.View
+    @default SC.View
   */
+  navigationContentView: SC.View,
+  
+  /** @private */
   init: function() {
     sc_super();
     this._views = [];
   },
   
-  /**
-    Creates the navigation content view and places it inside the content view.
-  */
+  /** @private */
   createChildViews: function() {
     sc_super();
     
@@ -56,10 +76,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
     this.contentView.appendChild(content);
   },
   
-  /**
-    @private
-    Changes the content of the navigation, updating toolbars, etc., as needed.
-  */
+  /** @private */
   changeNavigationContent: function(view) {
     var top = null, bottom = null;
     
@@ -97,6 +114,8 @@ SC.NavigationView = SC.WorkspaceView.extend({
   
   /**
     Pushes a view into the navigation view stack. The view may have topToolbar and bottomToolbar properties.
+    
+    @param {SC.View} view The view to display
   */
   push: function(view) {
     this._currentDirection = this._current ? SC.TO_LEFT : null;
@@ -109,7 +128,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
   },
   
   /**
-    Pops a view off the navigation view stack.
+    Pops the current view off the navigation view stack.
   */
   pop: function() {
     this._currentDirection = SC.TO_RIGHT;
@@ -123,6 +142,8 @@ SC.NavigationView = SC.WorkspaceView.extend({
   
   /**
     Pops to the specified view on the navigation view stack; the view you pass will become the current view.
+    
+    @param {SC.View} toView The view to display
   */
   popToView: function(toView) {
     this._currentDirection = SC.TO_RIGHT;
@@ -141,7 +162,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
     this.changeNavigationContent(view);
   },
   
-  
+  /** @private */
   topToolbarDidChange: function() {
     var active = this.activeTopToolbar, replacement = this.get("topToolbar");
     
@@ -170,6 +191,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
     this.invokeOnce("childDidChange");
   }.observes("topToolbar"),
   
+  /** @private */
   bottomToolbarDidChange: function() {
     var active = this.activeBottomToolbar, replacement = this.get("bottomToolbar");
     
@@ -194,6 +216,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
     this.invokeOnce("childDidChange");
   }.observes("topToolbar"),
   
+  /** @private */
   contentViewDidChange: function() {
     var active = this.activeNavigationContentView, replacement = this.get("navigationContentView");
     
@@ -211,6 +234,7 @@ SC.NavigationView = SC.WorkspaceView.extend({
     this.invokeOnce("childDidChange");
   }.observes("navigationContentView"),
   
+  /** @private */
   childDidChange: function() {
     var replacement = this._pendingBuildIn, active = this._pendingBuildOut;
     if (active) {

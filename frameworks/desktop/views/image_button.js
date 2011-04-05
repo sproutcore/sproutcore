@@ -44,9 +44,9 @@ SC.ImageButtonView = SC.ButtonView.extend(
 /** @scope SC.ImageButtonView.prototype */ {
 
   /**
-    Class names that will be applied to this view
-
-    @property {Array}
+    @type Array
+    @default ['sc-image-button-view']
+    @see SC.View#classNames
   */
   classNames: ['sc-image-button-view'],
 
@@ -54,23 +54,29 @@ SC.ImageButtonView = SC.ButtonView.extend(
     Unlike SC.ButtonView, SC.ImageButtonView does not have a default theme
     that needs to be applied for backwards compatibility.
 
-    @property {String}
+    @type String
+    @default null
   */
   themeName: null,
 
   /**
-    The name of the theme's SC.ImageButtonView render delegate.
-
-    @property {String}
+    @type String
+    @default 'imageButtonRenderDelegate'
   */
   renderDelegateName: 'imageButtonRenderDelegate',
   
+  /**
+    @type Array
+    @default ['image']
+  */
   displayProperties: ['image'],
 
   /**
     A class name that will be applied to the img tag of the button.
-
-    @property {String}
+    
+    @type String
+    @default null
   */
   image: null
+
 }) ;

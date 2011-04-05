@@ -6,53 +6,55 @@
 // ==========================================================================
 
 
-
 /** 
   @namespace
   
-  CollectionRowDelegates are consulted by SC.ListView and SC.TableView to 
-  control the height of rows, including specifying custom heights for 
-  specific rows.  
+  CollectionRowDelegates are consulted by SC.ListView and SC.TableView to
+  control the height of rows, including specifying custom heights for
+  specific rows.
   
-  You can implement a custom row height in one of two ways.  
-  
+  You can implement a custom row height in one of two ways.
 */
 SC.CollectionRowDelegate = {
 
-  /** walk like a duck */
+  /**
+    Walk like a duck.
+  
+    @type Boolean
+    @default YES
+  */
   isCollectionRowDelegate: YES,
   
   /**
-    Default item height. Size of an item without spacing or padding. 
-    Unless you implement some custom row height 
+    Size of an item without spacing or padding.
+    Unless you implement some custom row height
     support, this row height will be used for all items.
     
-    @property
     @type Number
+    @default 18
   */
   itemHeight: 18,
   
   /**
-    Default row spacing. This inserts empty space between rows that you can use for borders.
+    This inserts empty space between rows that you can use for borders.
     
-    @property
     @type Number
+    @default 0
   */
   rowSpacing: 0,
   
   /**
-    Default row padding. This is useful if you are using a custom item view that needs to be padded.
+    This is useful if you are using a custom item view that needs to be padded.
     This value is added to the top and bottom of the itemHeight.
     
-    @property
     @type Number
+    @default 0
   */
   rowPadding: 0,
   
   /**
     Total row height used for calculation. Equal to itemHeight + twice rowPadding.
     
-    @property
     @type Number
   */
   rowHeight: function(key, value) {
@@ -68,11 +70,10 @@ SC.CollectionRowDelegate = {
   }.property('itemHeight', 'rowPadding'),
 
   /**
-    Index set of rows that should have a custom row height.  If you need 
-    certains rows to have a custom row height, then set this property to a 
+    Index set of rows that should have a custom row height. If you need
+    certains rows to have a custom row height, then set this property to a
     non-null value.  Otherwise leave it blank to disable custom row heights.
     
-    @property
     @type SC.IndexSet
   */
   customRowHeightIndexes: null,
@@ -90,6 +91,7 @@ SC.CollectionRowDelegate = {
     @returns {Number} row height
   */
   contentIndexRowHeight: function(view, content, contentIndex) {
-    return this.get('rowHeight');    
+    return this.get('rowHeight');
   }
+
 };

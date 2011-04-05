@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
 require('system/drag');
 
 /**
@@ -19,18 +18,18 @@ require('system/drag');
   The general call sequence for all drop targets is (in pseudo-Ragel, regex
   format):
   
-  dragStarted
-  (
-    computeDragOperations+
-    (
-      dragEntered
-      dragUpdated
-      ( computeDragOperations | dragUpdated )*
-      ( acceptDragOperation performDragOperation? )? // mouseUp
-      dragExited
-    )*
-  )*
-  dragEnded
+      dragStarted
+      (
+        computeDragOperations+
+        (
+          dragEntered
+          dragUpdated
+          ( computeDragOperations | dragUpdated )*
+          ( acceptDragOperation performDragOperation? )? // mouseUp
+          dragExited
+        )*
+      )*
+      dragEnded
   
   Thus, every drop target will have its dragStarted and dragEnded methods called 
   once during every drag session. computeDragOperations, if called at all, may be 
@@ -47,6 +46,10 @@ SC.DropTarget = {
     Drop targets must be specially registered in order to receive drop
     events.  SproutCore knows to register your view when this property
     is true on view creation.
+    
+    @type Boolean
+    @default YES
+    @constant
   */  
   isDropTarget: YES,
 
@@ -58,7 +61,7 @@ SC.DropTarget = {
     The default implementation does nothing.
     
     @param {SC.Drag} drag The current drag object.
-    @param {SC.Event}   evt  The most recent mouse move event.  Use to get location 
+    @param {SC.Event} evt The most recent mouse move event.  Use to get location 
   */
   dragStarted: function(drag, evt) {},
   
@@ -134,10 +137,13 @@ SC.DropTarget = {
     @param {SC.Drag} drag The current drag object
     @param {SC.Event} evt The most recent mouse move event.  Use to get 
       location 
+    
     @returns {DragOps} A mask of all the drag operations allowed or 
       SC.DRAG_NONE
   */
-  computeDragOperations: function(drag, evt) { return SC.DRAG_NONE; },
+  computeDragOperations: function(drag, evt) {
+    return SC.DRAG_NONE;
+  },
   
   /**
     Called when the user releases the mouse.
@@ -154,7 +160,9 @@ SC.DropTarget = {
     
     @return {Boolean} YES if operation is OK, NO to cancel.
   */  
-  acceptDragOperation: function(drag, op) { return YES; },
+  acceptDragOperation: function(drag, op) {
+    return YES;
+  },
   
   /**
     Called to actually perform the drag operation.
@@ -172,6 +180,8 @@ SC.DropTarget = {
     
     @return {DragOp} Drag Operation actually performed
   */
-  performDragOperation: function(drag, op) { return SC.DRAG_NONE; }
+  performDragOperation: function(drag, op) {
+    return SC.DRAG_NONE;
+  }
   
 };

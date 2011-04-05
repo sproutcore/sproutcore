@@ -4,27 +4,48 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+/*
+  TODO revisit this to see if these classnames are usable
+*/
+
 /** @class
 
   Implements a customized file input by creating a standard file input in a
   transparent iframe over top of a SC.ButtonView.
   
-  // TODO: revisit this to see if these classnames are usable
   SC.FieldView uses the SC.Control mixin which will apply CSS 
   classnames when the state of the file view changes:
+  
     - active     when button is active
     - sel        when button is toggled to a selected state
   
   @extends SC.FieldView
-  @since SproutCore 1.0 
+  @since SproutCore 1.0
   @author Tyler Keating
 */
 SC.FileView = SC.FieldView.extend(
-/** @scope SC.FileView.prototype */
-{
+/** @scope SC.FileView.prototype */ {
 
-  classNames: 'sc-file-view'.w(),
+  /**
+    @type Array
+    @default ['sc-file-view']
+    @see SC.View#classNames
+  */
+  classNames: ['sc-file-view'],
+  
+  /** @private */
+  childViews: ['button', 'form'],
 
+
+  // ..........................................................
+  // Properties
+  // 
+
+  /**
+    @type Boolean
+    @default YES
+  */
   autoSubmit: YES,
 
   /**
@@ -39,12 +60,13 @@ SC.FileView = SC.FieldView.extend(
     here.  If you set a target, then the button will try to call the method
     on the target itself.
     
-    For legacy support, you can also set the action property to a function.  
+    For legacy support, you can also set the action property to a function.
     Doing so will cause the function itself to be called when the button is
     clicked.  It is generally better to use the target/action approach and 
     to implement your code in a controller of some type.
     
-    @property {String}
+    @type String
+    @default 'uploadImage'
   */
   action: 'uploadImage',
   
@@ -56,20 +78,33 @@ SC.FileView = SC.FieldView.extend(
     null, then the button will search the responder chain for a view that 
     implements the action when the button is pressed instead.
     
-    @property {Object}
+    @type Object
+    @default null
   */
   target: null,
   
-  childViews: 'button form'.w(),
-  
+  /**
+    @type String
+    @default "Choose File"
+  */
+  title: "Choose File",
+
+
+  // ..........................................................
+  // Views
+  // 
+
+  /** @private */
   button: SC.ButtonView.design({
     title: 'Choose File',
     theme: 'capsule'
   }),
 
+  /** @private */
   form: SC.View.design({
     tagName: 'form',
     
+    /** @private */
     render: function(context, firstTime) {
       context.attr('method', 'post').attr('action', "javascript:;").attr('enctype', 'multipart/form-data');
       sc_super();
@@ -80,6 +115,7 @@ SC.FileView = SC.FieldView.extend(
     input: SC.View.design({
       tagName: 'input',
 
+      /** @private */
       render: function(context, firstTime) {
         context.attr('type', 'file').end();
         sc_super();
@@ -87,19 +123,20 @@ SC.FileView = SC.FieldView.extend(
     })
   }),
   
-  title: 'Choose File',
   
-  /** SC.FieldView **/
+  // ..........................................................
+  // FieldView Overrides
+  // 
   
-  /**
+  /** @private
     Since it is impossible to set the value of file inputs, don't attempt it.
-    
   */
   setFieldValue: function(newValue) {
     SC.Logger.log("SC.FileView: setFieldValue: %@ does nothing".fmt(newValue));
     //if (newValue) throw SC.$error('SC.FileView can not set the value of the file field');
   },
   
+  /** @private */
   fieldValueDidChange: function(partialChange) {
     sc_super();
     if (this.get('autoSubmit')) {

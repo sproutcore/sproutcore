@@ -13,7 +13,8 @@
   @extends SC.View
   @since SproutCore 1.5
 */
-SC.SegmentView = SC.View.extend(SC.Control, {
+SC.SegmentView = SC.View.extend(SC.Control,
+/** @scope SC.SegmentView.prototype */{
 
   ariaRole: 'tab',
 

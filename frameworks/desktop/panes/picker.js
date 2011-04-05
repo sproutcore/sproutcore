@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
 sc_require('panes/palette');
 
 /** 
@@ -23,200 +22,246 @@ sc_require('panes/palette');
           perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
           fallback to perfect bottom (3)
 */
+
+/**
+  @type String
+  @constant
+  @static
+*/
 SC.PICKER_MENU = 'menu';
+
+/**
+  @type String
+  @constant
+  @static
+*/
 SC.PICKER_FIXED = 'fixed';
+
+/**
+  @type String
+  @constant
+  @static
+*/
 SC.PICKER_POINTER = 'pointer';
+
+/**
+  @type String
+  @constant
+  @static
+*/
 SC.PICKER_MENU_POINTER = 'menu-pointer';
+
 /** 
-  Pointer layout for perfect right/left/top/bottom
+  Pointer layout for perfect right/left/top/bottom.
+
+  @constant
+  @static
 */
 SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom"];
 
 /**
   @class
   
-  Display a non-modal pane that automatically repositions around a view so as 
-  to remain visible. 
+  Display a non-modal pane that automatically repositions around a view so as
+  to remain visible.
   
-  An `SC.PickerPane` repositions around the view to which it is anchored as the 
-  browser window is resized so as to ensure the pane's content remains visible. 
-  A picker pane is useful for displaying supplementary information and does not 
-  block the user's interaction with other UI elements. Picker panes typically 
+  An `SC.PickerPane` repositions around the view to which it is anchored as the
+  browser window is resized so as to ensure the pane's content remains visible.
+  A picker pane is useful for displaying supplementary information and does not
+  block the user's interaction with other UI elements. Picker panes typically
   provide a better user experience than modal panels.
 
-  An `SC.PickerPane` repositions itself according to the optional `preferMatrix` 
-  argument passed in the `.popup()` method call. The `preferMatrix` either 
-  specifies an offset-based arrangement behavior or a position-based arrangement 
+  An `SC.PickerPane` repositions itself according to the optional `preferMatrix`
+  argument passed in the `.popup()` method call. The `preferMatrix` either
+  specifies an offset-based arrangement behavior or a position-based arrangement
   behavior depending on the `preferType` argument in the `.popup()` call.
-             
+
   The simplest way to create and display a picker pane:
-  
-  {{{
-    SC.PickerPane.create({ 
-        layout: { width: 400, height: 200 }, 
+
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
         contentView: SC.View.extend({})
-    }).popup(someView);
-  }}}
+      }).popup(someView);
   
-  This displays the `SC.PickerPane` anchored to `someView`. 
-      
-  h2. Positioning
+  This displays the `SC.PickerPane` anchored to `someView`.
+
+  ## Positioning
   
-  Picker pane positioning can be classified into two broad categories: 
-  offset-based and position-based. 
-  
-  h3. Offset-based
-    
-  When `preferType` is unspecified, `SC.PICKER_MENU` or `SC.PICKER_FIXED`, then 
-  the `preferMatrix` array describes the offset that is used to position the 
+  Picker pane positioning can be classified into two broad categories:
+  offset-based and position-based.
+
+  ### Offset-based
+
+  When `preferType` is unspecified, `SC.PICKER_MENU` or `SC.PICKER_FIXED`, then
+  the `preferMatrix` array describes the offset that is used to position the
   pane below the anchor. The offset is described by an array of three values,
-  defaulting to `[1, 4, 3]`. The first value controls the x offset and the second 
-  value the y offset. The third value can be `0` (right) or `3` (bottom), 
-  controlling whether the origin of the pane is further offset by the width 
-  (in the case of 0) or the height (in the case of 3) of the anchor.  
+  defaulting to `[1, 4, 3]`. The first value controls the x offset and the second
+  value the y offset. The third value can be `0` (right) or `3` (bottom),
+  controlling whether the origin of the pane is further offset by the width
+  (in the case of 0) or the height (in the case of 3) of the anchor.
   
+  ### Position-based
   
-  h3. Position-based
-  
-  When `preferType` is `SC.PICKER_POINTER` or `SC.PICKER_MENU_POINTER`, then 
-  the `preferMatrix` specifies the sides in the order in which you want the 
-  `SC.PickerPane` to try to arrange itself around the view to which it is 
-  anchored. The fifth element in the `preferMatrix` specifies which side the 
-  `SC.PickerPane` should display on when there isn't enough space around any 
+  When `preferType` is `SC.PICKER_POINTER` or `SC.PICKER_MENU_POINTER`, then
+  the `preferMatrix` specifies the sides in the order in which you want the
+  `SC.PickerPane` to try to arrange itself around the view to which it is
+  anchored. The fifth element in the `preferMatrix` specifies which side the
+  `SC.PickerPane` should display on when there isn't enough space around any
   of the preferred sides.
   
-  Anchor sides are defined by their index in `SC.POINTER_LAYOUT`, where right 
+  Anchor sides are defined by their index in `SC.POINTER_LAYOUT`, where right
   is `0`, left is `1`, top is `2`, and bottom is `3`.
   
-  For example, the `preferMatrix` of `[3, 0, 1, 2, 2]` says: "Display below the 
-  anchor (3); if there isn't enough space then display to the right of the anchor (0). 
-  If there isn't enough space either below or to the right of the anchor, then appear 
-  to the left (1), unless there is also no space on the left, in which case display 
+  For example, the `preferMatrix` of `[3, 0, 1, 2, 2]` says: "Display below the
+  anchor (3); if there isn't enough space then display to the right of the anchor (0).
+  If there isn't enough space either below or to the right of the anchor, then appear
+  to the left (1), unless there is also no space on the left, in which case display
   above the anchor (2)."
   
-  h2. Position Rules
+  ## Position Rules
   
-  When invoking `.popup()` you can optionally specify a picker position rule with 
-  the `preferType` argument. 
+  When invoking `.popup()` you can optionally specify a picker position rule with
+  the `preferType` argument.
   
-  If no `preferType` is specified, the picker pane is displayed just below the anchor. 
-  The pane will reposition automatically for optimal visibility, ensuring the top-left 
+  If no `preferType` is specified, the picker pane is displayed just below the anchor.
+  The pane will reposition automatically for optimal visibility, ensuring the top-left
   corner is visible.
   
   These position rules have the following behaviors:
   
-  h3.  `SC.PICKER_MENU`
+  ### `SC.PICKER_MENU`
   
-  Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]`. 
-  Furthermore, a minimum left and right padding to window, of 7px and 8px, respectively, 
+  Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]`.
+  Furthermore, a minimum left and right padding to window, of 7px and 8px, respectively,
   is enforced.
   
   
-  h3. `SC.PICKER_FIXED`
+  ### `SC.PICKER_FIXED`
   
-  Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]` and 
+  Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]` and
   skipping `fitPositionToScreen`.
   
   
-  h3. `SC.PICKER_POINTER`
+  ### `SC.PICKER_POINTER`
   
-  Positioning is position-based, with `preferMatrix` defaulting to `[0, 1, 2, 3, 2]`, 
+  Positioning is position-based, with `preferMatrix` defaulting to `[0, 1, 2, 3, 2]`,
   i.e. right > left > top > bottom; fallback to top.
   
   
-  h3. `SC.PICKER_MENU_POINTER`
+  ### `SC.PICKER_MENU_POINTER`
   
-  Positioning is position-based, with `preferMatrix` defaulting to `[3, 0, 1, 2, 3]`, 
+  Positioning is position-based, with `preferMatrix` defaulting to `[3, 0, 1, 2, 3]`,
   i.e. bottom, right, left, top; fallback to bottom.
   
   
   
-  h2. Examples
+  ## Examples
   
   Examples for applying popular customized picker position rules:
   
-  1. default:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor);
-  }}}
+  ### default:
 
-  2. menu below the anchor with default `preferMatrix` of `[1,4,3]`:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_MENU);
-  }}}
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor);
 
-  3. menu on the right side of anchor with custom `preferMatrix` of `[2,6,0]`:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
-  }}}
+  ### menu below the anchor with default `preferMatrix` of `[1,4,3]`:
 
-  4. fixed below the anchor with default `preferMatrix` of `[1,4,3]`:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_FIXED);
-  }}}
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_MENU);
 
-  5. fixed on the right side of anchor with `preferMatrix` of `[-22,-17,0]`:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
-  }}}
+  ### menu on the right side of anchor with custom `preferMatrix` of `[2,6,0]`:
 
-  6. pointer with default `preferMatrix` of `[0,1,2,3,2]`:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_POINTER);
-  }}}
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
+
+  ### fixed below the anchor with default `preferMatrix` of `[1,4,3]`:
+
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_FIXED);
+
+  ### fixed on the right side of anchor with `preferMatrix` of `[-22,-17,0]`:
+
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
+
+  ### pointer with default `preferMatrix` of `[0,1,2,3,2]`:
+
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_POINTER);
   
   Positioning: right (0) > left (1) > top (2) > bottom (3). Fallback to top (2).
 
-  7. pointer with custom `preferMatrix` of `[3,0,1,2,2]`:   
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_POINTER, [3,0,1,2,2]);
-  }}}
+  ### pointer with custom `preferMatrix` of `[3,0,1,2,2]`:
+
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_POINTER, [3,0,1,2,2]);
 
   Positioning: bottom (3) > right (0) > left (1) > top (2). Fallback to top (2).
 
-  8. menu-pointer with default `preferMatrix` of `[3,0,1,2,3]`:
-  {{{
-    SC.PickerPane.create({
-      layout: { width: 400, height: 200 },
-      contentView: SC.View.extend({})
-    }).popup(anchor, SC.PICKER_MENU_POINTER);
-  }}}
+  ### menu-pointer with default `preferMatrix` of `[3,0,1,2,3]`:
+
+      SC.PickerPane.create({
+        layout: { width: 400, height: 200 },
+        contentView: SC.View.extend({})
+      }).popup(anchor, SC.PICKER_MENU_POINTER);
   
   Positioning: bottom (3) > right (0) > left (1) > top (2). Fallback to bottom (3).
  
   @extends SC.PalettePane
   @since SproutCore 1.0
 */
-SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
+SC.PickerPane = SC.PalettePane.extend(
+/** @scope SC.PickerPane.prototype */ {
   
-  classNames: 'sc-picker',
+  /**
+    @type Array
+    @default ['sc-picker']
+    @see SC.View#classNames
+  */
+  classNames: ['sc-picker'],
+  
+  /**
+    @type Boolean
+    @default YES
+  */
   isAnchored: YES,
   
+  /**
+    @type Boolean
+    @default YES
+  */
   isModal: YES,
   
+  /**
+    @type String
+    @default 'perfectRight'
+  */
   pointerPos: 'perfectRight',
+
+  /**
+    @type Number
+    @default 0
+  */
   pointerPosX: 0,
+
+  /**
+    @type Number
+    @default 0
+  */
   pointerPosY: 0,
   
   /**
@@ -224,42 +269,48 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     triggered your picker to show.  You can use this to properly position your 
     picker.
     
-    @property {Object}
+    @type HTMLElement
+    @default null
   */
   anchorElement: null,
 
-  /**
+  /** @private
     anchor rect calculated by computeAnchorRect from init popup
 
-    @property {Hash}
+    @type Hash
+    @default null
   */
   anchorCached: null,
   
   /**
     popular customized picker position rule
     
-    @property {String}
+    @type String
+    @default null
   */
   preferType: null,
   
   /**
     default/custom offset or position pref matrix for specific preferType
     
-    @property {String}
+    @type String
+    @default null
   */
   preferMatrix: null,
 
   /**
     default/custom offset of pointer for picker-pointer or pointer-menu
 
-    @property {Array}
+    @type Array
+    @default null
   */
   pointerOffset: null,
 
   /**
     default offset of extra-right pointer for picker-pointer or pointer-menu
 
-    @property Number
+    @type Number
+    @default 0
   */
   extraRightOffset: 0,
   
@@ -272,7 +323,8 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     set to null, then the button will search the responder chain for a view that
     implements the action when the button is pressed instead.
 
-    @property {Object}
+    @type Object
+    @default null
   */
   removeTarget: null,
   
@@ -290,17 +342,18 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     Note that this property is optional. If no explicit value is provided then the 
     picker pane will perform the default action which is to simply remove itself.
 
-    @property {String}
+    @type String
+    @default null
   */
   removeAction: null,
 
   /**
-    Displays a new picker pane according to the passed parameters.
-    Every parameter except for the anchorViewOrElement is optional.
-  
-    @param {Object} anchorViewOrElement view or element to anchor to
-    @param {String} preferType optional apply picker position rule
-    @param {Array} preferMatrix optional apply custom offset or position pref matrix for specific preferType
+    Displays a new picker pane.
+
+    @param {SC.View|HTMLElement} anchorViewOrElement view or element to anchor to
+    @param {String} [preferType] apply picker position rule
+    @param {Array} [preferMatrix] apply custom offset or position pref matrix for specific preferType
+    @param {Number} [pointerOffset]
     @returns {SC.PickerPane} receiver
   */
   popup: function(anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
@@ -731,8 +784,17 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     }
   },
   
+  /**
+    @type Array
+    @default ['preferType','pointerPos','pointerPosY']
+    @see SC.View#displayProperties
+  */
   displayProperties: ['preferType','pointerPos','pointerPosY'],
 
+  /**
+    @type String
+    @default 'pickerRenderDelegate'
+  */
   renderDelegateName: 'pickerRenderDelegate',
 
   /** @private - click away picker. */
@@ -751,6 +813,7 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     return YES ; 
   },
 
+  /** @private */
   mouseDown: function(evt) {
     return this.modalPaneDidClick(evt);
   },
@@ -765,12 +828,11 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
   },
 
   /** 
-    Invoked by the root responder. Re-position picker whenever the window resizes. 
+    Invoked by the root responder. Re-position picker whenever the window resizes.
   */
   windowSizeDidChange: function(oldSize, newSize) {
     this.positionPane();
   },
-  
   
   remove: function(){
     if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._showOverflow();
@@ -790,12 +852,12 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
     if(windowSize.width>=minWidth && windowSize.height>=minHeight){
       SC.PICKERS_OPEN++;
       //console.log(this.toString()+" "+SC.PICKERS_OPEN);
-      if(SC.PICKERS_OPEN > 0) body.css('overflow', 'hidden');           
+      if(SC.PICKERS_OPEN > 0) body.css('overflow', 'hidden');
     }
   },
 
   /** @private
-    Internal method to show the overflow on the body to make sure we don't 
+    Internal method to show the overflow on the body to make sure we don't
     show scrollbars when the picker has shadows, as it's really anoying.
   */
   _showOverflow: function(){
@@ -816,21 +878,67 @@ SC.PickerPane = SC.PalettePane.extend( /** @scope SC.PickerPane.prototype */ {
 // show/hide the body overflow.
 SC.PICKERS_OPEN = 0;
 
+/**
+  @static
+*/
 SC.PickerPane.PICKER_POINTER_OFFSET = [9, -9, -18, 18];
+
+/**
+  @static
+*/
 SC.PickerPane.PICKER_EXTRA_RIGHT_OFFSET = 20;
 
+/**
+  @static
+*/
 SC.PickerPane.TINY_PICKER_MENU_POINTER_OFFSET = [9, -9, -18, 18];
+
+/**
+  @static
+*/
 SC.PickerPane.TINY_PICKER_MENU_EXTRA_RIGHT_OFFSET = 12;
 
+/**
+  @static
+*/
 SC.PickerPane.SMALL_PICKER_MENU_POINTER_OFFSET = [9, -9, -8, 8];
+
+/**
+  @static
+*/
 SC.PickerPane.SMALL_PICKER_MENU_EXTRA_RIGHT_OFFSET = 11;
 
+/**
+  @static
+*/
 SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET = [9, -9, -12, 12];
+
+/**
+  @static
+*/
 SC.PickerPane.REGULAR_PICKER_MENU_EXTRA_RIGHT_OFFSET = 13;
+
+/**
+  @static
+*/
 SC.PickerPane.REGULAR_PICKER_MENU_EXTRA_RIGHT_OFFSET = 12;
 
+/**
+  @static
+*/
 SC.PickerPane.LARGE_PICKER_MENU_POINTER_OFFSET = [9, -9, -16, 16];
+
+/**
+  @static
+*/
 SC.PickerPane.LARGE_PICKER_MENU_EXTRA_RIGHT_OFFSET = 17;
 
+/**
+  @static
+*/
 SC.PickerPane.HUGE_PICKER_MENU_POINTER_OFFSET = [9, -9, -18, 18];
+
+/**
+  @static
+*/
 SC.PickerPane.HUGE_PICKER_MENU_EXTRA_RIGHT_OFFSET = 12;

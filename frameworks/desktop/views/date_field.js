@@ -15,34 +15,25 @@
   
   By default the Date Field View show Date only, but if you need to show the Time do:
   
-  {{{
-    dateAndTime: Shared.DateFieldView.design({
-      showTime: YES,
-      valueBinding: '...'
-    }),
-  }}}
+      dateAndTime: Shared.DateFieldView.design({
+        showTime: YES,
+        valueBinding: '...'
+      }),
   
-  and if you only need to show time: 
+  and if you only need to show time:
   
-  {{{
-    timeOnly: Shared.DateFieldView.design({
-      showTime: YES,
-      showDate: NO,
-      valueBinding: '...'
-    })
-  }}}
-  
-  The default format are:
-  - formatTime: '%I:%M %p',
-  - formatDate: '%d/%m/%Y',
-  - formatDateTime: '%d/%m/%Y %I:%M %p',
+      timeOnly: Shared.DateFieldView.design({
+        showTime: YES,
+        showDate: NO,
+        valueBinding: '...'
+      })
   
   Example usage with special format:
-
-  specialDate: Shared.DateFieldView.design({
-    formatDate: '%d %b of %Y',
-    valueBinding: '...'
-  }),
+  
+      specialDate: Shared.DateFieldView.design({
+        formatDate: '%d %b of %Y',
+        valueBinding: '...'
+      }),
   
   You can override these format as you like, but has some limitations,
   actually only support these KEY from SC.DateTime:
@@ -56,29 +47,57 @@
   @author Juan Pablo Goldfinger
 */
 SC.DateFieldView = SC.TextFieldView.extend(
-/** @scope SC.DateFieldView.prototype */
-{
+/** @scope SC.DateFieldView.prototype */ {
 
+  /**
+    @type String
+    @default null
+  */
   value: null,
   
-  // Default Behaviour
+  /**
+    @type Boolean
+    @default YES
+  */
   showDate: YES,
+  
+  /**
+    @type Boolean
+    @default NO
+  */
   showTime: NO,
   
-  // Default formats to choose depending of the behaviour.
+  /**
+    @type String
+    @default '%I:%M %p'
+  */
   formatTime: '%I:%M %p',
+  
+  /**
+    @type String
+    @default '%d/%m/%Y'
+  */
   formatDate: '%d/%m/%Y',
+  
+  /**
+    @type String
+    @default '%d/%m/%Y %I:%M %p'
+  */
   formatDateTime: '%d/%m/%Y %I:%M %p',
   
   // DateTime constants (with fixed width, like numbers or abbs with fixed length)
   // original: '%a %A %b %B %c %d %h %H %i %I %j %m %M %p %S %U %W %x %X %y %Y %Z %%'.w(),
   // NOTE: I think that %a and %b areb't useful because is more adecuato to represente day
   // with 1..31 without zeros at start, but causes the lenght not to be fixed)
+
+  /** @private*/
   _dtConstants: '%a %b %d %H %I %j %m %M %p %S %U %W %y %Y'.w(),
   // Width constants for each representation %@.
+  
+  /** @private */
   _wtConstants: [3,3,2,2,2,3,2,2,2,2,2,2,2,4],
   
-  // PRIVATE ATTRIBUTES
+  /** @private */
   activeSelection: 0,
 
   /*
@@ -100,8 +119,10 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /**
     The current format to apply for Validator and to show.
     
-    @property
-    @type {String}
+    @field
+    @type String
+    @observes showTime
+    @observes showDate
   */
   format: function() {
     var st = this.get('showTime');
@@ -114,8 +135,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /**
     The current validator to format the Date to the input field and viceversa.
     
-    @property
-    @type {SC.Validator.DateTime}
+    @field
+    @type SC.Validator.DateTime
+    @observes format
   */
   validator: function() {
     return SC.Validator.DateTime.extend({ format: this.get('format') });
@@ -124,8 +146,8 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /**
     Array of Key/TextSelection found for the current format.
     
-    @property
-    @type {SC.Array}
+    @field
+    @type SC.Array
   */  
   tabsSelections: function() {
     var arr = [];
@@ -164,7 +186,6 @@ SC.DateFieldView = SC.TextFieldView.extend(
   
   /** @private
     If the activeSelection changes or the value changes, update the "TextSelection" to show accordingly.
-   
   */
   updateTextSelecitonObserver: function() {
     var as = this.get('activeSelection');
@@ -176,7 +197,6 @@ SC.DateFieldView = SC.TextFieldView.extend(
   
   /** @private
     Updates the value according the key.
-   
   */
   updateValue: function(key, upOrDown) {
     // 0 is DOWN - 1 is UP
@@ -207,19 +227,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
     }*/
   },
 
-  /*_textField_fieldDidFocus: function(evt) {
-    SC.RunLoop.begin();
-    //console.log(evt);
-    //console.log(event);
-    //console.log(evt.originalEvent);
-    this.fieldDidFocus();
-    SC.RunLoop.end();
-  },*/
   
-  /////////////////////////
-  // KEY EVENTS SUPPORTS
-  /////////////////////////
+  // ..........................................................
+  // Key Event Support
+  // 
   
+  /** @private */
   keyDown: function(evt) {
     if (this.interpretKeyEvents(evt)) {
       evt.stop();
@@ -228,10 +241,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return sc_super();
   },
   
+  /** @private */
   ctrl_a: function() {
     return YES;
   },
 
+  /** @private */
   moveUp: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
@@ -239,6 +254,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
+  /** @private */
   moveDown: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
@@ -246,10 +262,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
+  /** @private */
   insertText: function(evt) {
     return YES;
   },
 
+  /** @private */
   moveRight: function(evt) {
     var ts = this.get('tabsSelections');
     var ns = this.get('activeSelection') + 1;
@@ -260,6 +278,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
     
+  /** @private */
   moveLeft: function(evt) {
     var ts = this.get('tabsSelections');
     var ns = this.get('activeSelection') - 1;
@@ -270,6 +289,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
+  /** @private */
   insertTab: function(evt) {
     var ts = this.get('tabsSelections');
     var ns = this.get('activeSelection') + 1;
@@ -280,15 +300,17 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return NO;
   },
 
+  /** @private */
   insertBacktab: function(evt) {
     var ns = this.get('activeSelection') - 1;
     if (ns !== -1) { 
       this.set('activeSelection', ns);
-      return YES;   
+      return YES;
     }
     return NO;
   },
 
+  /** @private */
   mouseUp: function(evt) {
     var ret = sc_super();
     var cs = this.get('selection');
@@ -308,10 +330,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return ret;
   },
 
+  /** @private */
   deleteBackward: function(evt) {
     return YES;
   },
 
+  /** @private */
   deleteForward: function(evt) {
     return YES;
   }

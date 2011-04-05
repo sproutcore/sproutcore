@@ -13,13 +13,13 @@ sc_require("views/toolbar");
   that handle, well, swiping. In short, they are neat.
   
   @extends SC.ToolbarView
+  @extends SC.Gesturable
   @since SproutCore 1.0
 */
-SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
-  gestures: ["swipeGesture"],
-  swipeGesture: SC.SwipeGesture,
+SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable,
+/** @scope SC.NavigationBarView.prototype */{
 
-  
+  /** @private */
   init: function() {
     sc_super();
     
@@ -31,13 +31,10 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     }
   },
 
-  /**
-    @private
-    Mixies in animatable and the navigation bar transitions.
-  */
+  /** @private */
   mixinAnimatable: function() {
     this.mixin(SC.Animatable);
-    this.transitions = this.navigationTransitions;    
+    this.transitions = this.navigationTransitions;
   },
   
   /**
@@ -56,10 +53,18 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     opacity: 1
   },
   
-  //
-  // GESTURE SUPPORT
-  //
+
+  // ..........................................................
+  // Gesture Support
+  // 
   
+  /** @private */
+  gestures: ["swipeGesture"],
+  
+  /** @private */
+  swipeGesture: SC.SwipeGesture,
+
+  /** @private */
   swipe: function(gesture, touch, direction) {
     var lookingFor = (direction === SC.SWIPE_LEFT) ? "isSwipeLeft" : "isSwipeRight",
         cv = this.get("childViews"), 
@@ -80,16 +85,17 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     
   },
   
-  //
-  // BUILD IN/OUT
-  //
   
-  // for various reasons, including the fact that mixing in init  is VERY BAD, we do this lazily.
+  // ..........................................................
+  // View Build Support
+  // 
+  
+  /** @private */
   resetBuild: function() {
     if (!this.isAnimatable) this.mixinAnimatable();
   },
   
-  // callback
+  /** @private */
   didFinishTransition: function() {
     if (this.isBuildingIn) {
       // and please continue
@@ -97,6 +103,7 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     } else if (this.isBuildingOut) this.buildOutDidFinish();
   },
   
+  /** @private */
   preBuildIn: function() {
     // first, fade this view out
     this.disableAnimation();
@@ -121,6 +128,7 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     }
   },
   
+  /** @private */
   buildIn: function() {
     // first, we do the precursor
     this.preBuildIn();
@@ -129,6 +137,7 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     this.invokeLater("startBuildIn", 10);
   },
   
+  /** @private */
   startBuildIn: function() {
     this.adjust("opacity", 1);
 
@@ -141,6 +150,7 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     }
   },
 
+  /** @private */
   buildOut: function() {
     this.adjust("opacity", 0);
     
@@ -153,7 +163,7 @@ SC.NavigationBarView = SC.ToolbarView.extend(SC.Gesturable, {
     }
   },
   
-  /* CHILD VIEWS */
+  /** @private */
   mixinNavigationChild: function(child) {
     if (child.isAnimatable) return;
     
