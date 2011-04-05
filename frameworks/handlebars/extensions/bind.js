@@ -140,13 +140,13 @@ Handlebars.registerHelper('bindAttr', function(options) {
   // current value of the property as an attribute.
   attrKeys.forEach(function(attr) {
     var property = attrs[attr];
-    var value = view.getPath(property);
+    var value = this.getPath(property);
 
     // Add an observer to the view for when the property changes.
     // When the observer fires, find the element using the
     // unique data id and update the attribute to the new value.
-    view.addObserver(property, function observer() {
-      var result = view.getPath(property);
+    this.addObserver(property, function observer() {
+      var result = this.getPath(property);
       var elem = view.$("[data-handlebars-id='" + dataId + "']");
 
       // If we aren't able to find the element, it means the element
@@ -154,7 +154,7 @@ Handlebars.registerHelper('bindAttr', function(options) {
       // In that case, we can assume the template has been re-rendered
       // and we need to clean up the observer.
       if (elem.length === 0) {
-        view.removeObserver(property, observer);
+        this.removeObserver(property, observer);
         return;
       }
 
@@ -182,7 +182,7 @@ Handlebars.registerHelper('bindAttr', function(options) {
       // Return the current value, in the form src="foo.jpg"
       ret.push(attr+'="'+value+'"');
     }
-  });
+  }, this);
 
   // Add the unique identifier
   ret.push('data-handlebars-id="'+dataId+'"');
