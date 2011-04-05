@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require("tasks/task");
+sc_require("tasks/task");
 
 // default callback
 SC.didPreloadBundle = function() {};
