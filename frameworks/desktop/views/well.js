@@ -5,8 +5,13 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-// Constants
-SC.WELL_CONTAINER_PADDING=15;
+/**
+  @static
+  @constant
+  @type Number
+  @default 15
+*/
+SC.WELL_CONTAINER_PADDING = 15;
 
 /** @class
 
@@ -22,22 +27,34 @@ SC.WELL_CONTAINER_PADDING=15;
 SC.WellView = SC.ContainerView.extend(
 /** @scope SC.WellView.prototype */ {
   
+  /**
+    @type Array
+    @default ['sc-well-view']
+    @see SC.View#classNames
+  */
   classNames: 'sc-well-view',
   
   /**
     Layout for the content of the container view.
-    @property {Object}
+    @type Hash
   */
   contentLayout: {
-    top:SC.WELL_CONTAINER_PADDING, bottom:SC.WELL_CONTAINER_PADDING,
-    left:SC.WELL_CONTAINER_PADDING, right:SC.WELL_CONTAINER_PADDING},
-  
+    top: SC.WELL_CONTAINER_PADDING,
+    bottom: SC.WELL_CONTAINER_PADDING,
+    left: SC.WELL_CONTAINER_PADDING,
+    right: SC.WELL_CONTAINER_PADDING
+  },
   
   /**
+    @type String
+    @default 'wellRenderDelegate'
+  */
+  renderDelegateName: 'wellRenderDelegate',
+  
+  /** @private
      Overrides createChildViews and replaces the layout of the contentView
      with the one in contentLayout.
    */
-  
   createChildViews: function() {
     // if contentView is defined, then create the content
     var view = this.get('contentView') ;
@@ -48,8 +65,7 @@ SC.WellView = SC.ContainerView.extend(
     } 
   },
 
-  renderDelegateName: 'wellRenderDelegate',
-  /**
+  /** @private
      Invoked whenever the content property changes.  This method will simply
      call replaceContent and set the contentLayout in the new contentView.
      

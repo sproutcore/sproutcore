@@ -21,7 +21,6 @@
   be surrounded by two other views.
 
   @extends SC.View
-
   @author Charles Jolley
   @author Lawrence Pit
   @author Erich Ocean
@@ -30,20 +29,28 @@
 SC.SplitDividerView = SC.View.extend(
 /** @scope SC.SplitDividerView.prototype */ {
 
+  /**
+    @type Array
+    @default ['sc-split-divider-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-split-divider-view'],
   
   /** @private */
 
+  /** @private */
   mouseDown: function(evt) {
     var splitView = this.get('splitView');
     return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
   },
   
+  /** @private */
   doubleClick: function(evt) {
     var splitView = this.get('splitView');
     return (splitView) ? splitView.doubleClickInThumbView(evt, this) : sc_super();
   },
   
+  /** @private */
   touchStart: function(evt){
     return this.mouseDown(evt);
   }

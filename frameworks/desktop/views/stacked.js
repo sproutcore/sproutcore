@@ -16,7 +16,7 @@ sc_require('views/collection') ;
   collections with complex displays and variable heights such as comments or
   small notification queues.
   
-  h2. Static Layout
+  ## Static Layout
   
   This view makes no attempt to size or position your child views.  It assumes
   you are using StaticLayout for your child views.  If you don't enable static
@@ -29,20 +29,30 @@ sc_require('views/collection') ;
   @extends SC.CollectionView
   @since SproutCore 0.9
 */
-SC.StackedView = SC.CollectionView.extend( 
-/** SC.StackedView.prototype */ {
+SC.StackedView = SC.CollectionView.extend(
+/** @scope SC.StackedView.prototype */ {
   
+  /**
+    @type Array
+    @default ['sc-stacked-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-stacked-view'],
   
   /** 
     Default layout for a stacked view will fill the parent view but auto-
     adjust the height of the view.
+    
+    @type Hash
+    @default `{ top: 0, left: 0, right: 0, height: 1 }`
+    @see SC.View#layout
   */
   layout: { top: 0, left: 0, right: 0, height: 1 },
   
   /**
     Return full range of its indexes for nowShowing
     
+    @param {Rect} rect
     @returns {SC.IndexSet} full range of indexes
   */
   computeNowShowing: function(rect) {
@@ -74,6 +84,7 @@ SC.StackedView = SC.CollectionView.extend(
     return this;
   },
   
+  /** @private */
   _updateHeight: function() {
     
     var childViews = this.get('childViews'),
