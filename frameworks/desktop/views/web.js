@@ -15,14 +15,7 @@
   @extends SC.Control
   @since SproutCore 1.0
 */
-SC.WebView = SC.View.extend(SC.Control,
-/** @scope SC.WebView.prototype */ {
-
-  /**
-    @type Array
-    @default ['sc-web-view']
-    @see SC.View#classNames
-  */
+SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
   classNames: 'sc-web-view',
   
   /**
@@ -44,22 +37,29 @@ SC.WebView = SC.View.extend(SC.Control,
   */
   shouldAutoResize: NO,
 
-  /** @private */
+  /**
+    @param {SC.RenderContext} context
+    @param {Boolean} firstTime
+  */
   render: function(context, firstTime) {
-    var src = this.get('value');
+    var src = this.get('value'), iframe;
+    
     if (firstTime) {
       context.push('<iframe src="' + src + 
       '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0px;"></iframe>');
-    } else {
-      var iframe = this.$('iframe');
+    } 
+    else if(src!==this._lastSrc) {
+      iframe = this.$('iframe');
       // clear out the previous src, to force a reload
       iframe.attr('src', 'javascript:;');
       iframe.attr('src', src);
     }
+    
+    this._lastSrc = src;
   },
 
-  /** @private
-  Called when the layer gets created. 
+  /**
+    Called when the layer gets created. 
   */
   didCreateLayer: function() {
     var f = this.$('iframe');
@@ -78,20 +78,21 @@ SC.WebView = SC.View.extend(SC.Control,
   */
   iframeDidLoad: function() {
     //fit the iframe to size of the contents.
-    if (this.get('shouldAutoResize') === YES){
+    if (this.get('shouldAutoResize') === YES) {
       var contentWindow;
       var iframeElt = this.$('iframe')[0];
-      if(iframeElt && iframeElt.contentWindow){
+      if(iframeElt && iframeElt.contentWindow) {
         contentWindow = iframeElt.contentWindow;
         if(contentWindow && contentWindow.document && contentWindow.document.documentElement){
           var docElement = contentWindow.document.documentElement;
           // setting the width before the height gives more accurate results.. 
           // atleast for the test iframe content i'm using.
           //TODO: try out document flows other than top to bottom.
-          if (!SC.browser.isIE){
+          if (!SC.browser.isIE) {
             this.$().width(docElement.scrollWidth);
-            this.$().height(docElement.scrollHeight);
-          } else {
+            this.$().height(docElement.scrollHeight);          
+          } 
+          else {
             this.$().width(docElement.scrollWidth + 12);
             this.$().height(docElement.scrollHeight + 5);
           }

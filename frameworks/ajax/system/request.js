@@ -353,6 +353,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   _prep: function() {
     var hasContentType = !!this.header('Content-Type');
+    
     if (this.get('isJSON') && !hasContentType) {
       this.header('Content-Type', 'application/json');
     } else if (this.get('isXML') && !hasContentType) {
