@@ -633,6 +633,27 @@ test("Child views created using the view helper should have their parent view se
   equals(childView, childView.childViews[0].parentView, 'parent view is correct');
 });
 
+test("Child views created using the view helper should have their IDs registered for events", function() {
+  TemplateTests = {};
+
+  var template = '{{view "SC.TemplateView"}}{{view "SC.TemplateView" id="templateViewTest"}}';
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile(template)
+  });
+
+  view.createLayer();
+
+  var childView = view.childViews[0];
+  var id = childView.$()[0].id;
+  equals(SC.View.views[id], childView, 'childView without passed ID is registered with SC.View.views so that it can properly receive events from RootResponder');
+
+  childView = view.childViews[1];
+  id = childView.$()[0].id;
+  equals(id, 'templateViewTest', 'precond -- id of childView should be set correctly');
+  equals(SC.View.views[id], childView, 'childView with passed ID is registered with SC.View.views so that it can properly receive events from RootResponder');
+});
+
 test("Collection views that specify an example view class have their children be of that class", function() {
   TemplateTests.ExampleViewCollection = SC.TemplateCollectionView.create({
     itemView: SC.TemplateView.extend({
