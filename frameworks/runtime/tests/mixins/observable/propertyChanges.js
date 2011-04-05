@@ -68,7 +68,7 @@ test("should increment the indicator before begining the changes to the object",
     equals(ObjectA.beginPropertyChanges()._kvo_changeLevel, 1) ;
 });
 
-test("should increment the indicator before begining the changes to the object", function() {
+test("should decrement the indicator after ending the changes to the object", function() {
     equals(ObjectA.endPropertyChanges()._kvo_changeLevel, 0) ;
 });
 
