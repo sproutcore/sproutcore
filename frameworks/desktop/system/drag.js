@@ -44,6 +44,7 @@ SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20;
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
+  /** @private */
   init: function(original) {
     original();
 
@@ -54,6 +55,7 @@ SC.View.reopen(
     if (this.get('isScrollable')) { SC.Drag.addScrollableView(this) ; }
   }.enhance(),
 
+  /** @private */
   destroy: function(original) {
     // unregister for drags
     if (this.get('isDropTarget')) { SC.Drag.removeDropTarget(this) ; }

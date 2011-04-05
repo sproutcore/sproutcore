@@ -291,18 +291,6 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return this.$('label');
   },
 
-  /**
-    Generates the html string used to represent the action item for your
-    list item.  override this to return your own custom HTML
-
-    @param {SC.RenderContext} context the render context
-    @param {String} actionClassName the name of the action item
-    @returns {void}
-  */
-  renderAction: function(context, actionClassName){
-    context.push('<img src="',SC.BLANK_IMAGE_URL,'" class="action" />');
-  },
-
   /** @private
     Determines if the event occured inside an element with the specified
     classname or not.

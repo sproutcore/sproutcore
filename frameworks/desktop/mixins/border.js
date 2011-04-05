@@ -138,6 +138,7 @@ SC.Border = {
     }
   },
 
+  /** @private */
   _sc_border_borderDimensionsDidChange: function(){
     var borderTop     = this.get('borderTop'),
         borderRight   = this.get('borderRight'),

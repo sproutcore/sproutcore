@@ -60,6 +60,17 @@ SC.ButtonView = SC.View.extend(SC.Control,
 /** @scope SC.ButtonView.prototype */ {
 
   /**
+    Tied to the isEnabled state
+    
+    @type Boolean
+    @default YES
+  */
+  acceptsFirstResponder: function() {
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+    else return NO;
+  }.property('isEnabled'),
+
+  /**
     @type Array
     @default ['sc-button-view']
     @see SC.View#classNames
@@ -865,14 +876,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
       this.action(evt);
     }
   },
-
-  /** @private
-    Tied to the isEnabled state
-  */
-  acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
-  }.property('isEnabled'),
 
   /** @private */
   willBecomeKeyResponderFrom: function(keyView) {

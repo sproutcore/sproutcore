@@ -33,12 +33,6 @@ SC.PopupButtonView = SC.ButtonView.extend(
 /** @scope SC.PopupButtonView.prototype */ {
 
   /**
-    @type Boolean
-    @default YES
-  */
-  acceptsFirstResponder: YES,
-
-  /**
     @type Array
     @default ['sc-popup-button']
     @see SC.View#classNames
@@ -292,13 +286,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     var menu = this.get('instantiatedMenu') ;
 
     return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;
-  },
-
-  /** @private */
-  acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
-  }.property('isEnabled')
+  }
 
 });
 
