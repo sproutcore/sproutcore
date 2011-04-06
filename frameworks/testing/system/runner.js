@@ -7,7 +7,6 @@
 
 /*globals CoreTest Q$ */
 
-sc_require('jquery');
 sc_require('system/plan');
 
 /** @static
