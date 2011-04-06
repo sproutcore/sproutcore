@@ -69,7 +69,7 @@ test("element to be added is such that amt + idx > length of array ", function()
 	equals(6, ary.get('length'), "length") ;
 });
 
-test("element to be added is at idx > length of array ", function() {
+test("element to be added is at idx < length of array ", function() {
 	var ary = SC.SparseArray.array(5) ;
 	equals(5, ary.get('length'), "length") ;
 	ary = numbers;

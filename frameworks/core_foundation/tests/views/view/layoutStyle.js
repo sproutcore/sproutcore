@@ -688,28 +688,28 @@
 
   //with percentage
 
-  test("frame does not change with top/left/w/h", function(){
+  test("frame does not change with top/left/w/h - percentage", function(){
     var layout = { top: 0.1, left: 0.1, width: 0.6, height: 0.6 };
     var before = { x: 20, width: 120, y: 20, height: 120 };
     var after =  { x: 30, y: 30, width: 180, height: 180 };
     verifyFrameResize(layout, before, after);
   });
 
-  test("frame shifts down with bottom/right/w/h", function(){
+  test("frame shifts down with bottom/right/w/h - percentage", function(){
     var layout = { bottom: 0.1, right: 0.1, width: 0.6, height: 0.6 };
     var before = { x: 60, y: 60, width: 120, height: 120 };
     var after =  { x: 90, y: 90, width: 180, height: 180 };
     verifyFrameResize(layout, before, after);
   });
 
-  test("frame size shifts with top/left/bottom/right", function(){
+  test("frame size shifts with top/left/bottom/right - percentage", function(){
     var layout = { top: 0.1, left: 0.1, bottom: 0.1, right: 0.1 };
     var before = { x: 20, y: 20, width: 160, height: 160 };
     var after =  { x: 30, y: 30, width: 240, height: 240 };
     verifyFrameResize(layout, before, after);
   });
 
-  test("frame loc shifts with centerX/centerY", function(){
+  test("frame loc shifts with centerX/centerY - percentage", function(){
     var layout = { centerX: 0, centerY: 0, width: 0.6, height: 0.6 };
     var before = { x: 40, y: 40, width: 120, height: 120 };
     var after =  { x: 60, y: 60, width: 180, height: 180 };
