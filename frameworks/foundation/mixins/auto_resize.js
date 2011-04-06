@@ -154,7 +154,8 @@ SC.AutoResize = {
   */
   measureSize: function(batch) {
     var metrics, layer, value = this.get('autoResizeText'),
-        autoSizePadding, paddingHeight, paddingWidth;
+        autoSizePadding, paddingHeight, paddingWidth,
+        ignoreEscape = !this.get('escapeHTML');
 
     // There are two special cases.
     //   - empty: we should do nothing. The metrics are 0.
@@ -166,7 +167,7 @@ SC.AutoResize = {
     if (SC.none(value) || value === "") {
       metrics = { width: 0, height: 0 };
     } else if (batch) {
-      metrics = SC.measureString(value);
+      metrics = SC.measureString(value, ignoreEscape);
     } else {
       // Normal resize pattern: get our own layer, pass it as a template to SC.metricsForString.
       layer = this.get('autoResizeLayer');
@@ -175,7 +176,7 @@ SC.AutoResize = {
         return;
       }
 
-      metrics = SC.metricsForString(value, layer);
+      metrics = SC.metricsForString(value, layer, undefined, ignoreEscape);
     }
 
     // metrics should include padding
