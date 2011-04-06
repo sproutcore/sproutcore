@@ -1402,7 +1402,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     },
 
     /**
-      Notifies all of observers of a property changes.
+      Notifies observers of all possible property changes.
 
       Sometimes when you make a major update to your object, it is cheaper to
       simply notify all observers that their property might have changed than
