@@ -5,12 +5,16 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 (function() {
-  var textFieldView, pane;
+  var textFieldView, pane, controller;
 
   module("Text Field Support", {
     setup: function() {
       textFieldView = SC.TemplateView.create(SC.TextFieldSupport, {
         template: SC.Handlebars.compile('<input type="text">')
+      });
+
+      controller = SC.Object.create({
+        value: null
       });
 
       pane = SC.MainPane.create({
@@ -25,12 +29,58 @@
   });
 
   test("value property mirrors input value", function() {
-    textFieldView.$('input').val('foo bar');
+    var ev,
+        elem;
 
-    equals(textFieldView.get('value'), 'foo bar', "gets value property from DOM");
+    elem = textFieldView.$('input')[0];
+
+    // Change it first time
+    textFieldView.$('input').val('foo bar');
+    equals(textFieldView.get('value'), 'foo bar', "gets value property from DOM on first get");
 
     textFieldView.set('value', "afterlife");
     equals(textFieldView.$('input').val(), "afterlife", "sets value of DOM to value property");
+
+    // Change it again
+    textFieldView.$('input').val('foo bar');
+    equals(textFieldView.get('value'), 'foo bar', "gets value property from DOM on repeated get");
+
+    controller.bind('value', textFieldView, 'value');
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'foo bar', "binding value is correct after bind");
+
+    textFieldView.set('value', "afterlife");
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'afterlife', "binding value is correct after value changes");
+
+    textFieldView.$('input').val('foo bar');
+    pane.sendEvent('keyUp', {}, textFieldView);
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'foo bar', "binding value is correct after DOM value changes with keyUp");
+
+    textFieldView.$('input')[0].value = 'afterlife';
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'foo bar', "binding value is incorrect after value of DOM changes directly");
+
+    textFieldView.$('input').val('afterlife');
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'foo bar', "binding value is incorrect after value of DOM changes directly through jQuery");
+
+    // This test relies on directly setting the value triggering a binding update FAILING. If we are able to
+    // notify the value change on direct setting of the value, then this test will pass incorrectly.
+    textFieldView.$('input').val('afterlife');
+    ev = SC.Event.simulateEvent(elem, 'paste');
+    SC.Event.trigger(elem, 'paste', [ev]);
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'afterlife', "binding value is correct after DOM value changes with paste");
+
+    // This test relies on directly setting the value triggering a binding update FAILING. If we are able to
+    // notify the value change on direct setting of the value, then this test will pass incorrectly.
+    textFieldView.$('input').val('after');
+    ev = SC.Event.simulateEvent(elem, 'cut');
+    SC.Event.trigger(elem, 'cut', [ev]);
+    SC.RunLoop.begin().end();
+    equals(controller.get('value'), 'after', "binding value is correct after DOM value changes with cut");
   });
 
   test("listens for focus and blur events", function() {
@@ -50,7 +100,7 @@
     equals(focusCalled, 1, "focus called after field receives focus");
 
     textFieldView.$('input').blur();
-    equals(blurCalled, 1, "blur alled after field blurs");
+    equals(blurCalled, 1, "blur called after field blurs");
   });
 
   test("calls correct method for key events", function() {
