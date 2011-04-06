@@ -1,4 +1,4 @@
-sc_require('extensions');
+sc_require('ext/handlebars');
 
 Handlebars.registerHelper('collection', function(path, options) {
   var fn = options.fn;

@@ -1,5 +1,3 @@
-sc_require("handlebars");
-
 /**
   Prepares the Handlebars templating library for use inside SproutCore's view
   system.

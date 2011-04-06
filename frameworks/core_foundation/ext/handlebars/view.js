@@ -1,4 +1,4 @@
-sc_require('extensions');
+sc_require('ext/handlebars');
 
 SC.Handlebars.ViewHelper = SC.Object.create({
   helper: function(thisContext, path, options) {

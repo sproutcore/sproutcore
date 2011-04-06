@@ -1,4 +1,4 @@
-sc_require('extensions');
+sc_require('ext/handlebars');
 
 /**
   Adds the `bind`, `bindAttr`, and `boundIf` helpers to Handlebars.
