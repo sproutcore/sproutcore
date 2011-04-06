@@ -844,7 +844,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   /**
     Adds a transform that will return the placeholder value if the value is
-    null.  Otherwise it will passthrough untouched.  See also notEmpty().
+    null or undefined.  Otherwise it will passthrough untouched.  See also notEmpty().
 
     @param {String} fromPath from path or null
     @param {Object} placeholder optional placeholder;
