@@ -528,7 +528,47 @@ SC.StatechartManager = {
   getState: function(value) {
     return this.get('rootState').getSubstate(value);
   },
-  
+
+  /*
+  * Finds the closest state to the goalState in the passed array of states.
+  * Closest is defined as the two states who have the deepest pivot state.
+  * This is used to find which state in the currentStates array should be used
+  * as the from state in a state transition.
+  *
+  * @param goalState {SC.State} the state we are going to
+  * @param fromStates {Array} the array of possible states to come from
+  * @returns {SC.State} the state from fromStates that was closest
+  */
+  // TODO: cache the result enterState, exitState, and pivotState somewhere so
+  // gotoState can use them for its pivot calculation
+  findClosestState: function(goalState, fromStates) {
+    var i, len = fromStates.length,
+    // cache the enterStates because they are the same for each comparison
+    exitStates, enterStates = this._createStateChain(goalState),
+    depth, maxDepth = 0,
+    candidateState, pivotState, closestState;
+
+    for(i = 0; i < len; i++) {
+      candidateState = fromStates[i];
+
+      exitStates = this._createStateChain(candidateState);
+
+      pivotState = this._findPivotState(exitStates, enterStates);
+
+      // if this one is the deepest so far, save it for later
+      if(pivotState) {
+        depth = pivotState.get('depth');
+
+        if(depth > maxDepth) {
+          maxDepth = depth;
+          closestState = candidateState;
+        }
+      }
+    }
+
+    return closestState;
+  },
+
   /**
     When called, the statechart will proceed with making state transitions in the statechart starting from 
     a current state that meet the statechart conditions. When complete, some or all of the statechart's 
@@ -639,9 +679,8 @@ SC.StatechartManager = {
       }
     } 
     else if (this.getPath('currentStates.length') > 0) {
-      // No explicit current state to start from; therefore, just use the first current state as 
-      // a default, if there is a current state.
-      fromCurrentState = this.get('currentStates')[0];
+      // if no from state was given, find the best one
+      fromCurrentState = this.findClosestState(state, this.get('currentStates'));
     }
         
     if (trace) {
