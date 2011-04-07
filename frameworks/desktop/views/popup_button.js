@@ -6,12 +6,6 @@
 // ==========================================================================
 sc_require('views/button');
 
-/**
-  Describes the time after which "click and hold" behavior will replace the
-  standard "click and release" behavior.
-*/
-
-
 /** @class
 
   SC.PopupButtonView displays a pop-up menu when clicked, from which the user
@@ -20,12 +14,10 @@ sc_require('views/button');
   To use, create the SC.PopupButtonView as you would a standard SC.ButtonView,
   then set the menu property to an instance of SC.MenuPane. For example:
 
-{{{
-SC.PopupButtonView.design({
-  layout: { width: 200, height: 18 },
-  menuBinding: 'MyApp.menuController.menuPane'
-});
-}}}
+      SC.PopupButtonView.design({
+        layout: { width: 200, height: 18 },
+        menuBinding: 'MyApp.menuController.menuPane'
+      });
 
   You would then have your MyApp.menuController return an instance of the menu
   to display.
@@ -157,8 +149,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
 
     @param {SC.Event} evt
   */
-  action: function(evt)
-  {
+  action: function(evt) {
     var menu = this.get('instantiatedMenu') ;
 
     if (!menu) {
@@ -278,8 +269,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     alt_shift_z)
     @param {SC.Event} evt
   */
-  performKeyEquivalent: function( charCode, evt )
-  {
+  performKeyEquivalent: function(charCode, evt) {
     if (!this.get('isEnabled')) return NO ;
     var menu = this.get('instantiatedMenu') ;
 
@@ -304,4 +294,3 @@ SC.PopupButtonMenuLoader = SC.Task.extend({
     if (this.popupButton) this.popupButton._instantiateMenu();
   }
 });
-
