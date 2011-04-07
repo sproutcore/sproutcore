@@ -853,6 +853,25 @@ test("should be able to bind element attributes using {{bindAttr}} inside a bloc
   equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
 });
 
+test("should be able to bind class attribute with {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<img {{bindAttr class="foo"}}>');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    foo: 'bar'
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('class'), 'bar', "renders class");
+
+  SC.run(function() {
+    view.set('foo', 'baz');
+  });
+
+  equals(view.$('img').attr('class'), 'baz', "updates class");
+});
+
 test("should be able to bind boolean element attributes using {{bindAttr}}", function() {
   var template = SC.Handlebars.compile('<input type="check" {{bindAttr disabled="content.isDisabled" checked="content.isChecked"}} />');
   var content = SC.Object.create({
