@@ -15,9 +15,7 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
     invoke a method after a period of time.  The method should have the
     signature:
 
-    {{{
-      methodName: function(timer)
-    }}}
+        methodName: function(timer)
 
     If you would prefer to pass your own parameters instead, you can instead
     call invokeLater() directly on the function object itself.
