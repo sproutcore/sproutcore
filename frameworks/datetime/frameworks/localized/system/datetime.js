@@ -10,10 +10,11 @@ SC.DateTime.mixin(
   /** @scope SC.DateTime */ {
   
   /**
-    The localized day names. Add the key '_SC.DateTime.dayNames' and its value
-    to your strings.js file to add support for another language than English.
+    The localized day names. Add the key `'_SC.DateTime.dayNames'` and its
+    value to your `strings.js` file to add support for another language than
+    English.
 
-    Default is evaluated on the document.ready event.
+    Default is evaluated on the `document.ready` event.
 
     @property {Array}
     @default '_SC.DateTime.dayNames'.loc().w()
@@ -22,10 +23,10 @@ SC.DateTime.mixin(
   
   /**
     The localized abbreviated day names. Add the key
-    '_SC.DateTime.abbreviatedDayNames' and its value to your strings.js
+    `'_SC.DateTime.abbreviatedDayNames'` and its value to your `strings.js`
     file to add support for another language than English.
 
-    Default is evaluated on the document.ready event.
+    Default is evaluated on the `document.ready` event.
 
     @property
     @type {Array}
@@ -34,11 +35,11 @@ SC.DateTime.mixin(
   abbreviatedDayNames: null,
 
   /**
-    The localized month names. Add the key '_SC.DateTime.monthNames' and its
-    value to your strings.js file to add support for another language than
+    The localized month names. Add the key `'_SC.DateTime.monthNames'` and its
+    value to your `strings.js` file to add support for another language than
     English.
 
-    Default is evaluated on the document.ready event.
+    Default is evaluated on the `document.ready` event.
 
     @property
     @type {Array}
@@ -48,10 +49,10 @@ SC.DateTime.mixin(
 
   /**
     The localized abbreviated month names. Add the key
-    '_SC.DateTime.abbreviatedMonthNames' and its value to your strings.js
+    `'_SC.DateTime.abbreviatedMonthNames'` and its value to your `strings.js`
     file to add support for another language than English.
 
-    Default is evaluated on the document.ready event.
+    Default is evaluated on the `document.ready` event.
 
     @property
     @type {Array}
@@ -60,7 +61,7 @@ SC.DateTime.mixin(
   abbreviatedMonthNames: null,
 
   /** @private
-    Called on document.ready.
+    Called on `document.ready`.
 
     Because localizations may have been modified by an application developer,
     we need to wait for the ready event to actually evaluate the localizations.
