@@ -387,7 +387,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     Trigger an event execution immediately.  You can use this method to 
     simulate arbitrary events on arbitary elements.
 
-    h2. Limitations
+    ## Limitations
     
     Note that although this is based on the jQuery implementation, it is 
     much simpler.  Notably namespaced events are not supported and you cannot
@@ -396,11 +396,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     If you need more advanced event handling, consider the SC.Responder 
     functionality provided by SproutCore or use your favorite DOM library.
 
-    h2. Example
+    ## Example
     
-    {{{
-      SC.Event.trigger(view.get('layer'), 'mousedown');
-    }}}
+        SC.Event.trigger(view.get('layer'), 'mousedown');
     
     @param elem {Element} the target element
     @param eventType {String} the event type

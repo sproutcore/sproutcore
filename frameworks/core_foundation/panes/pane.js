@@ -29,10 +29,8 @@ SC.MIXED_STATE = '__MIXED__' ;
   To make a pane visible, you need to add it to your HTML document.  The
   simplest way to do this is to call the append() method:
 
-  {{{
-     myPane = SC.Pane.create();
-     myPane.append(); // adds the pane to the document
-  }}}
+      myPane = SC.Pane.create();
+      myPane.append(); // adds the pane to the document
 
   This will insert your pane into the end of your HTML document body, causing
   it to display on screen.  It will also register your pane with the

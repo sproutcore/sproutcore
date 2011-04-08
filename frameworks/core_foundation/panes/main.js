@@ -17,9 +17,7 @@ sc_require('panes/pane');
   will also make itself key automatically.  The default way to use the main 
   pane is to simply add it to your page like this:
   
-  {{{
-    SC.MainPane.create().append();
-  }}}
+      SC.MainPane.create().append();
   
   This will cause your root view to display.  The default layout for a 
   MainPane is to cover the entire document window and to resize with the 

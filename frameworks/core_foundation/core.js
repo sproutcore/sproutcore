@@ -175,9 +175,7 @@ SC.mixin(Function.prototype, /** @scope Function.prototype */ {
     to the function as well.  Otherwise the function should have the 
     signature:
     
-    {{{
-      function functionName(timer)
-    }}}
+        function functionName(timer)
 
     @param target {Object} optional target object to use as this
     @param interval {Number} the time to wait, in msec
