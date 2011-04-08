@@ -23,15 +23,15 @@ Animatable things:
 
 @class SC.Animatable
 @example Example Usage:
-{{{
-aView: SC.LabelView.design(SC.Animatable, {
-  transitions: {
-    left: {duration: .25},
-    top: .25, // only possible during design; otherwise you must use long form.
-    width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
-  }
-})
-}}}
+
+    aView: SC.LabelView.design(SC.Animatable, {
+      transitions: {
+        left: {duration: .25},
+        top: .25, // only possible during design; otherwise you must use long form.
+        width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
+      }
+    })
+
 @extends SC.Object
 */
 SC.Animatable = {
