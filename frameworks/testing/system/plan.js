@@ -7,7 +7,6 @@
 
 /*globals CoreTest Q$ */
 
-sc_require('jquery');
 var QUNIT_BREAK_ON_TEST_FAIL = false;
 
 /** @class

@@ -27,12 +27,14 @@ end
 # CORE FRAMEWORKS
 config :bootstrap,  :required => [], :use_modules => false
 
-config :jquery,          :required => []
+config :jquery,          :required => [], :test_required => [], :debug_required => []
 config :handlebars,      :required => []
 config :runtime,         :required => [:jquery]
-config :datetime,        :required => [:runtime]
+config :'datetime/core', :required => [:runtime]
+config :datetime,        :required => [:'datetime/core']
 config :core_foundation, :required => [:runtime, :handlebars]
-config :foundation,      :required => [:core_foundation, :datetime]
+config :'datetime/localized', :required => [:core_foundation]
+config :foundation,      :required => [:core_foundation, :datetime, :'datetime/localized']
 config :datastore,       :required => [:runtime, :datetime]
 config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
@@ -54,9 +56,12 @@ config :mini, :required => [:runtime, :datastore]
 config :animation, :required => :foundation
 config :forms, :required => :desktop
 
+config :qunit, :required => []
+config :testing, :required => [:jquery], :test_required => [], :debug_required => []
+
 # SPECIAL FRAMEWORKS AND THEMES
 # These do not require any of the built-in SproutCore frameworks
-%w(testing debug legacy_theme empty_theme).each do |target_name|
+%w(debug legacy_theme empty_theme).each do |target_name|
   config target_name, 
     :required => [], :test_required => [], :debug_required => []
 end

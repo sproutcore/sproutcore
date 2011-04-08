@@ -633,6 +633,27 @@ test("Child views created using the view helper should have their parent view se
   equals(childView, childView.childViews[0].parentView, 'parent view is correct');
 });
 
+test("Child views created using the view helper should have their IDs registered for events", function() {
+  TemplateTests = {};
+
+  var template = '{{view "SC.TemplateView"}}{{view "SC.TemplateView" id="templateViewTest"}}';
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile(template)
+  });
+
+  view.createLayer();
+
+  var childView = view.childViews[0];
+  var id = childView.$()[0].id;
+  equals(SC.View.views[id], childView, 'childView without passed ID is registered with SC.View.views so that it can properly receive events from RootResponder');
+
+  childView = view.childViews[1];
+  id = childView.$()[0].id;
+  equals(id, 'templateViewTest', 'precond -- id of childView should be set correctly');
+  equals(SC.View.views[id], childView, 'childView with passed ID is registered with SC.View.views so that it can properly receive events from RootResponder');
+});
+
 test("Collection views that specify an example view class have their children be of that class", function() {
   TemplateTests.ExampleViewCollection = SC.TemplateCollectionView.create({
     itemView: SC.TemplateView.extend({
@@ -778,6 +799,77 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
   });
 
   equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
+
+  SC.run(function() {
+    view.set('content', SC.Object.create({
+      url: "http://www.thegooglez.com/theydonnothing",
+      title: "I CAN HAZ SEARCH"
+    }));
+  });
+
+  equals(view.$('img').attr('alt'), "I CAN HAZ SEARCH", "updates alt attribute when content object changes");
+
+  SC.run(function() {
+    view.set('content', {
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    });
+  });
+
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "updates alt attribute when content object is a hash");
+
+  SC.run(function() {
+    view.set('content', {
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: function() {
+        return "Nanananana SproutCore!";
+      }
+    });
+  });
+
+  equals(view.$('img').attr('alt'), "Nanananana SproutCore!", "updates alt attribute when title property is computed");
+});
+
+test("should be able to bind element attributes using {{bindAttr}} inside a block", function() {
+  var template = SC.Handlebars.compile('{{#with content}}<img {{bindAttr src="url" alt="title"}}>{{/with}}');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: SC.Object.create({
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
+
+  SC.run(function() {
+    view.setPath('content.title', "El logo de Esproutcore");
+  });
+
+  equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
+});
+
+test("should be able to bind class attribute with {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<img {{bindAttr class="foo"}}>');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    foo: 'bar'
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('class'), 'bar', "renders class");
+
+  SC.run(function() {
+    view.set('foo', 'baz');
+  });
+
+  equals(view.$('img').attr('class'), 'baz', "updates class");
 });
 
 test("should be able to bind boolean element attributes using {{bindAttr}}", function() {

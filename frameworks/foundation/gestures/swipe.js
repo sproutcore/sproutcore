@@ -4,33 +4,119 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 sc_require("system/gesture");
 
+/*
+  TODO Document this class
+*/
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_HORIZONTAL = "X";
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_VERTICAL = "Y";
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_ANY = "XY";
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_LEFT = "LEFT";
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_RIGHT = "RIGHT";
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_UP = "UP";
+
+/**
+  @static
+  @type String
+  @constant
+*/
 SC.SWIPE_DOWN = "DOWN";
 
-SC.SwipeGesture = SC.Gesture.extend({
+/**
+  @class
+  @extends SC.Gesture
+*/
+SC.SwipeGesture = SC.Gesture.extend(
+/** @scope SC.SwipeGesture.prototype */ {
+
+  /**
+    @type String
+    @default "swipe"
+    @readOnly
+  */
   name: "swipe",
+
+  /**
+    @type Boolean
+    @default YES
+    @readOnly
+  */
   acceptsMultitouch: YES,
-  
+
+  /**
+    @type String
+    @default SC.SWIPE_HORIZONTAL
+  */
   direction: SC.SWIPE_HORIZONTAL,
 
   /**
     Will be populated with the current direction of the swipe once
     one has been determined.
+    
+    @type String
+    @default null
   */
   currentDirection: null,
 
+  /**
+    @type Number
+    @default 5
+  */
   startDistance: 5,
+
+  /**
+    @type Number
+    @default 40
+  */
   swipeDistance: 40,
   
-  tolerance: 0.5, // we accept .5 the distance in the other direction as a swipe
+  /**
+    Amount of distance in the other direction to consider it a swipe
+    
+    @type Number
+    @default 0.5
+  */
+  tolerance: 0.5,
   
+  /** @private */
   touchIsInGesture: function(touch, status) {
     // if we have not "flunked" the touch before, and it has moved 
     if (!status.flunked) {
@@ -67,6 +153,7 @@ SC.SwipeGesture = SC.Gesture.extend({
     return NO;
   },
   
+  /** @private */
   touchStart: function(touch) {
     var d = this.get("currentDirection"), 
         delta = touch["page" + d] - touch["start" + d],
@@ -79,6 +166,7 @@ SC.SwipeGesture = SC.Gesture.extend({
     return YES;
   },
   
+  /** @private */
   touchesDragged: function(evt, touches) {
     var touch = touches.firstObject();
     var d = this.get("currentDirection"), 
@@ -98,12 +186,13 @@ SC.SwipeGesture = SC.Gesture.extend({
       this.release(touch);
 
       var allTouches = touch.touchesForResponder(this);
-      if (!allTouches || allTouches.length == 0) this.cancel(touch, swipeDirection, delta);
+      if (!allTouches || allTouches.length === 0) this.cancel(touch, swipeDirection, delta);
     } else {
       this.change(touch, swipeDirection, delta);
     }
   },
   
+  /** @private */
   touchEnd: function(touch) {
     var d = this.get("currentDirection"), 
         o = (d === SC.SWIPE_HORIZONTAL ? "Y" : "X"),
@@ -136,6 +225,7 @@ SC.SwipeGesture = SC.Gesture.extend({
     }
   },
 
+  /** @private */
   cancel: function(){
     sc_super();
     this.set('currentDirection', null);

@@ -8,6 +8,7 @@
 sc_require('views/text_field') ;
 sc_require('system/utils/misc') ;
 sc_require('delegates/inline_text_field');
+sc_require('mixins/inline_editor');
 
 /**
   @class

@@ -12,41 +12,35 @@
   builder yourself, but you will often use instances of the Builder object to
   configure parts of the UI such as menus and views.
   
-  h1. Anatomy of a Builder
+  # Anatomy of a Builder
   
   You can create a new Builder much like you would any other class in 
   SproutCore.  For example, you could create a new CoreQuery-type object with
   the following:
   
-  {{{
-    SC.$ = SC.Builder.create({
-      // methods you can call go here.
-    });
-  }}}
+      SC.$ = SC.Builder.create({
+        // methods you can call go here.
+      });
   
   Unlike most classes in SproutCore, Builder objects are actually functions 
   that you can call to create new instances.  In the example above, to use 
   the builder, you must call it like a function:
   
-  {{{
-    buildit = SC.$();
-  }}}
+      buildit = SC.$();
   
   If you define an init() method on a builder, it will be invoked wheneve the
   builder is called as a function, including any passed params.  Your init()
   method MUST return this, unlike regular SC objects.  i.e.
   
-  {{{
-    SC.$ = SC.Builder.create({
-      init: function(args) { 
-        this.args = SC.A(args);
-        return this;
-      }
-    });
-    
-    buildit = SC.$('a', 'b');
-    buildit.args => ['a','b']
-  }}}
+      SC.$ = SC.Builder.create({
+        init: function(args) { 
+          this.args = SC.A(args);
+          return this;
+        }
+      });
+      
+      buildit = SC.$('a', 'b');
+      buildit.args => ['a','b']
   
   In addition to defining a function like this, all builder objects also have
   an 'fn' property that contains a hash of all of the helper methods defined
@@ -54,16 +48,14 @@
   addition "plugins" for the builder by simply adding new methods to the
   fn property.
   
-  h1. Writing Builder Functions
+  # Writing Builder Functions
   
-  All builders share a few things in comming:
+  All builders share a few things in common:
   
-  - when a new builder is created, it's init() method will be called.  The default version of this method simply copies the passed parameters into the builder as content, but you can override this with anything you want.
+   * when a new builder is created, it's init() method will be called.  The default version of this method simply copies the passed parameters into the builder as content, but you can override this with anything you want.
+   * the content the builder works on is stored as indexed properties (i.e. 0,1,2,3, like an array).  The builder should also have a length property if you want it treated like an array.
+   *- Builders also maintain a stack of previous builder instances which you can pop off at any time.
   
-  - the content the builder works on is stored as indexed properties (i.e. 0,1,2,3, like an array).  The builder should also have a length property if you want it treated like an array.
-    
-  - Builders also maintain a stack of previous builder instances which you can pop off at any time.
-    
   To get content back out of a builder once you are ready with it, you can
   call the method done().  This will return an array or a single object, if 
   the builder only works on a single item.
@@ -71,16 +63,16 @@
   You should write your methods using the getEach() iterator to work on your
   member objects.  All builders implement SC.Enumerable in the fn() method.
 
-  CoreQuery = SC.Builder.create({
-    ...
-  }) ;
-  
-  CoreQuery = new SC.Builder(properties) {
-    
-  } ;
-
-  CoreQuery2 = CoreQuery.extend() {
-  }
+      CoreQuery = SC.Builder.create({
+        ...
+      }) ;
+      
+      CoreQuery = new SC.Builder(properties) {
+        ...
+      } ;
+      
+      CoreQuery2 = CoreQuery.extend() {
+      }
   
   @constructor
 */

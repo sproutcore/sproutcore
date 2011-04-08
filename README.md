@@ -33,6 +33,7 @@ code and ideas:
 - Erich Ocean
 - Evin Grano
 - Geoffrey Donaldson
+- James A. Rosen
 - James Austin
 - Jason Ketterman
 - Jonathan Lewis

@@ -22,32 +22,61 @@
   @since SproutCore 1.0
 */
 SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
-  /** @scope SC.CheckboxView.prototype */ {
+/** @scope SC.CheckboxView.prototype */ {
 
+  /**
+    @type Array
+    @default ['sc-checkbox-view', 'sc-checkbox-control']
+    @see SC.View#classNames
+  */
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
+
+  /**
+    @type String
+    @default 'label'
+    @see SC.View#tagName
+  */
   tagName: 'label',
 
   /**
-    The WAI-ARIA role of checkbox. This property's value should not be
-    changed.
+    The WAI-ARIA role of checkbox.
 
-    @property {String}
+    @type String
+    @readOnly
   */
   ariaRole: 'checkbox',
 
   // no special theme for Checkbox; button defaults to 'square', so we have to stop that.
   themeName: null,
+  
+  /**
+    @type String
+    @default 'checkboxRenderDelegate'
+  */
   renderDelegateName: 'checkboxRenderDelegate',
 
-  /* Ellipsis is disabled by default to allow multiline text */
+  /**
+    Ellipsis is disabled by default to allow multiline text
+    
+    @type Boolean
+    @default NO
+  */
   needsEllipsis: NO,
   
+  /**
+    YES if `isEnabled` is YES, NO otherwise
+    
+    @type Boolean
+    @default NO
+    @observes isEnabled
+  */
   acceptsFirstResponder: function() {
     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
     else return NO;
   }.property('isEnabled'),
   
   
+  /** @private */
   mouseDown: function(evt) {
     if(!this.get('isEnabled')) return YES;
     this.set('isActive', YES);
@@ -58,6 +87,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     return YES;
   },
   
+  /** @private */
   mouseUp: function(evt) {
     this.set('isActive', NO);
     this._isMouseDown = NO;
@@ -77,10 +107,12 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   },
   
   
+  /** @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
   
+  /** @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }

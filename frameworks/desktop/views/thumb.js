@@ -24,12 +24,22 @@
 SC.ThumbView = SC.View.extend(
 /** @scope SC.ThumbView.prototype */ {
 
+  /**
+    @type Array
+    @default ['sc-thumb-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-thumb-view'],
   
   /**
     Enable this thumb view to control its parent split view.
+    
+    @type Boolean
+    @default YES
   */
   isEnabled: YES,
+  
+  /** @private */
   isEnabledBindingDefault: SC.Binding.bool(),
   
   /** @private */
@@ -39,6 +49,7 @@ SC.ThumbView = SC.View.extend(
     return sc_super() ;
   },
   
+  /** @private */
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return NO ;
     
@@ -46,8 +57,9 @@ SC.ThumbView = SC.View.extend(
     return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
   },
   
+  /** @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   }
-    
+
 });

@@ -5,21 +5,20 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
 sc_require('panes/panel');
 
 /**
+  @class
+  
   Displays a modal sheet pane that animates from the top of the viewport.
 
   The default way to use the sheet pane is to simply add it to your page like this:
 
-  {{{
-    SC.SheetPane.create({
-      layout: { width: 400, height: 200, centerX: 0 },
-      contentView: SC.View.extend({
-      })
-    }).append();
-  }}}
+      SC.SheetPane.create({
+        layout: { width: 400, height: 200, centerX: 0 },
+        contentView: SC.View.extend({
+        })
+      }).append();
 
   This will cause your sheet panel to display.  The default layout for a Sheet
   is to cover the entire document window with a semi-opaque background, and to
@@ -30,21 +29,33 @@ sc_require('panes/panel');
   @author Evin Grano
   @author Tom Dale
 */
-SC.SheetPane = SC.PanelPane.extend({
-  classNames: 'sc-sheet',
+SC.SheetPane = SC.PanelPane.extend(
+/** @scope SC.SheetPane.prototype */{
+  
+  /**
+    @type Array
+    @default ['sc-sheet']
+    @see SC.View#classNames
+  */
+  classNames: ['sc-sheet'],
 
-  /** Do not show smoke behind palettes */
+  /**
+    @type SC.View
+    @default SC.ModalPane
+  */
   modalPane: SC.ModalPane,
 
   /**
     Speed of transition.  Should be expressed in msec.
 
-    @property {Number}
+    @type Number
+    @default 200
   */
   transitionDuration: 200,
   
   _state: 'NO_VIEW', // no view
   
+  /** @private */
   init: function() {
     sc_super();
     
@@ -102,7 +113,7 @@ SC.SheetPane = SC.PanelPane.extend({
     return this;
   },
 
-  /**
+  /** @private
     Once the pane has been rendered out to the DOM, begin the animation.
   */
   paneDidAttach: function() {
@@ -113,6 +124,7 @@ SC.SheetPane = SC.PanelPane.extend({
     return ret;
   },
 
+  /** @private */
   slideDown: function(){
     // setup other general state
     this._state   = SC.SheetPane.ANIMATING;
@@ -127,6 +139,7 @@ SC.SheetPane = SC.PanelPane.extend({
     }
   },
 
+  /** @private */
   slideUp: function(){
     // setup other general state
     this._state   = SC.SheetPane.ANIMATING;
@@ -142,6 +155,7 @@ SC.SheetPane = SC.PanelPane.extend({
     }
   },
 
+  /** @private */
   _complete: function() {
     var dir = this._direction;
 
@@ -164,11 +178,17 @@ SC.SheetPane = SC.PanelPane.extend({
     this.updateLayout();
   },
   
-  // Needed because of the runLoop and that it is animated...must lose focus because will break if selection is change on text fields that don't move.
+  /** @private
+    Needed because of the runLoop and that it is animated...
+    must lose focus because will break if selection is change
+    on text fields that don't move.
+  */
   blurTo: function(pane) { this.setFirstResponder(''); },
 
-  /** @private - called while the animation runs.  Will move the content view down until it is in position and then set the layout to the content layout
-   */
+  /** @private
+    Called while the animation runs. Will move the content view
+    down until it is in position and then set the layout to the content layout
+  */
   tick: function() {
     this._timer = null ; // clear out
 
@@ -198,9 +218,11 @@ SC.SheetPane = SC.PanelPane.extend({
     target.updateLayout();
     return this;
   }
+
 });
 
-SC.SheetPane.mixin( /** @scope SC.SheetPane */ {
+SC.SheetPane.mixin(
+/** @scope SC.SheetPane */ {
   
   ANIMATABLE_AVAILABLE: NO,
   

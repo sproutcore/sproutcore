@@ -118,7 +118,6 @@ SC._object_extend = function _object_extend(base, ext, proto) {
 
     // Possibly add to a bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
-
       if (!clonedBindings) {
         bindings = (bindings || SC.EMPTY_ARRAY).slice() ;
         clonedBindings = YES ;

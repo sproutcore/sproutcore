@@ -14,11 +14,9 @@ SC.mixin( /** @scope SC */ {
     Takes a URL of any type and normalizes it into a fully qualified URL with
     hostname.  For example:
 
-    {{{
-      "some/path" => "http://localhost:4020/some/path"
-      "/some/path" => "http://localhost:4020/some/path"
-      "http://localhost:4020/some/path" => "http://localhost:4020/some/path"
-    }}}
+        "some/path" => "http://localhost:4020/some/path"
+        "/some/path" => "http://localhost:4020/some/path"
+        "http://localhost:4020/some/path" => "http://localhost:4020/some/path"
 
     @param url {String} the URL
     @returns {String} the normalized URL

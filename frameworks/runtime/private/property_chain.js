@@ -31,7 +31,7 @@ sc_require('system/object');
 */
 
 SC._PropertyChain = SC.Object.extend(
-/** @scope SC.ObjectController.prototype */ {
+/** @scope SC.Object.prototype */ {
 
   /**
     The object represented by this node in the chain.
@@ -80,52 +80,50 @@ SC._PropertyChain = SC.Object.extend(
     assume it is the root node in the chain and treat the target as the previous
     object.
 
-    @param {Object} [prev] The previous object in the chain.
+    @param {Object} [newObject] The object in the chain to hook to.
   */
-  activate: function(prev) {
-    var object   = this.get('object'),
-        property = this.get('property');
+  activate: function(newObject) {
+    var curObject = this.get('object'),
+        property  = this.get('property'),
+        nextObject;
 
     // If no parameter is passed, assume we are the root in the chain
     // and look up property relative to the target, since dependent key
     // paths are always relative.
-    if (!prev) { prev = this.get('target'); }
-
-    // If this node has not yet been associated with an object,
-    // look up the object and associate it.
-    if (!object) {
-      // In the special case of @each, we treat the enumerable as the next
-      // property.
-      if (property === '@each') {
-        object = prev;
-      } else {
-        object = prev.get(property);
-      }
-      this.set('object', object);
+    if (!newObject) { newObject = this.get('target'); }
+    if (curObject && curObject!==newObject) this.deactivate();
+    this.set('object', newObject);
+    
+    // In the special case of @each, we treat the enumerable as the next
+    // property so just skip registering it
+    if (newObject && property!=='@each') {
+      newObject.registerDependentKeyWithChain(property, this);
     }
 
-    // If there is still no object, don't associate any KVO
-    // property chains.
-    if (!object) { return; }
+    // now - lookup the object for the next one...
+    if (this.next) {
+      nextObject = newObject ? newObject.get(property) : undefined;
+      this.next.activate(nextObject);
+    }
 
-    // Register this node with the object, and tell it which key changing should
-    // cause the node to be notified.
-    object.registerDependentKeyWithChain(this.get('nextProperty'), this);
+    return this;
   },
 
   /**
-    Removes this segment of the chain from the object it represents. This is usually
-    called when the object represented by the previous segment in the chain changes.
+    Removes this segment of the chain from the object it represents. This is 
+    usually called when the object represented by the previous segment in the 
+    chain changes.
   */
   deactivate: function() {
-    var object       = this.get('object'),
-        nextProperty = this.get('nextProperty');
+    
+    var object   = this.get('object'),
+        property = this.get('property');
 
     // If the chain element is not associated with an object,
     // we don't need to deactivate anything.
-    if (!object) { return; }
-
-    object.removeDependentKeyWithChain(nextProperty, this);
+    if (object) object.removeDependentKeyWithChain(property, this);
+    if (this.next) this.next.deactivate();
+    return this;
   },
 
   /**
@@ -138,15 +136,7 @@ SC._PropertyChain = SC.Object.extend(
     // Tell the target of the chain to invalidate the property
     // that depends on this element of the chain
     target.propertyDidChange(toInvalidate);
-  },
-
-  /**
-    Deactivates the current chain, then recreates it with the new
-    values.
-  */
-  rebuildChain: function() {
-    this.deactivate();
-    this.activate();
+    this.activate(this.get('object')); // reactivate down the line
   },
 
   /**
@@ -155,14 +145,14 @@ SC._PropertyChain = SC.Object.extend(
     @returns {String}
   */
   toString: function() {
-    return "SC._ChainProperty(target: %@, property: %@)".fmt(
+    return "SC._PropertyChain(target: %@, property: %@)".fmt(
       this.get('target'), this.get('property'));
   }
 });
 
 SC._PropertyChain.createChain = function(path, target, toInvalidate) {
   var parts = path.split('.');
-  var len = parts.length - 1,
+  var len = parts.length,
       i   = 1;
 
   var root = SC._PropertyChain.create({
@@ -172,10 +162,10 @@ SC._PropertyChain.createChain = function(path, target, toInvalidate) {
     nextProperty: parts[1]
   });
 
-  root.set('length', len--);
+  root.set('length', len);
   var tail = root;
 
-  while(len--) {
+  while(--len >= 1) {
     tail = tail.next = SC._PropertyChain.create({
       property:     parts[i],
       target:       target,

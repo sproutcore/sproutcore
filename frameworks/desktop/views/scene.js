@@ -13,7 +13,7 @@
   optionally choose the kind of animation used to transition the two scenes 
   as well if supported on the web browser.
   
-  h1. Using The View
+  # Using SC.SceneView
   
   To setup the scene view, you should define the 'scenes' property with an 
   array of scene names.  These will be the properties on the scene view that
@@ -26,11 +26,11 @@
   is visible on screen.  Otherwise, it will simply make the new scene view 
   the current content view and that's it.
 
-  @extends SC.View
+  @extends SC.ContainerView
   @since SproutCore 1.0
 */
 SC.SceneView = SC.ContainerView.extend(
-  /** @scope SC.SceneView.prototype */ {
+/** @scope SC.SceneView.prototype */ {
 
   /**
     Array of scene names.  Scenes will slide on and off screen in the order
@@ -38,10 +38,8 @@ SC.SceneView = SC.ContainerView.extend(
     2 to a scene at index 1, the scenes will animation backwards.  If you
     shift to a scene at index 3, the scenes will animate forwards.
     
-    The default scenes defined are 'master' and 'detail'.  You can replace or 
-    augment this array as you like.
-    
-    @property {Array}
+    @type Array
+    @default ['master', 'detail']
   */
   scenes: ['master', 'detail'],
 
@@ -50,21 +48,26 @@ SC.SceneView = SC.ContainerView.extend(
     scene view to transition to the new scene.  If you set this property to 
     null, an empty string, or a non-existant scene, then the scene will appear
     empty.
+    
+    @type String
+    @default null
   */
   nowShowing: null,
   
   /**
     Speed of transition.  Should be expressed in msec.
+    
+    @type Number
+    @default 200
   */
   transitionDuration: 200,
   
+  /** @private */
   _state: 'NO_VIEW', // no view
 
   /** @private
-  
     Whenever called to change the content, save the nowShowing state and 
     then animate in by adjusting the layout.
-    
   */
   replaceContent: function(content) {
     if (content && this._state===this.READY) this.animateScene(content);
@@ -73,7 +76,6 @@ SC.SceneView = SC.ContainerView.extend(
   },
 
   /** @private
-  
     Invoked whenever we just need to swap the scenes without playing an
     animation.
   */
@@ -102,7 +104,6 @@ SC.SceneView = SC.ContainerView.extend(
   },
 
   /** @private
-  
     Invoked whenever we need to animate in the new scene.
   */
   animateScene: function(newContent) {
@@ -143,7 +144,8 @@ SC.SceneView = SC.ContainerView.extend(
     this.tick();
   },
 
-  /** @private - called while the animation runs.  Compute the new layout for
+  /** @private
+    Called while the animation runs.  Compute the new layout for
     the left and right views based on the portion completed.  When we finish
     call replaceScene().
   */
@@ -192,13 +194,18 @@ SC.SceneView = SC.ContainerView.extend(
   },
   
 
-  // states for view animation
+  /** @private */
   NO_VIEW: 'NO_VIEW',
+  
+  /** @private */
   ANIMATING: 'ANIMATING',
+  
+  /** @private */
   READY: 'READY',
 
-  /** @private - standard layout assigned to views at rest */
+  /** @private
+    Standard layout assigned to views at rest
+  */
   STANDARD_LAYOUT: { top: 0, left: 0, bottom: 0, right: 0 }
-  
-  
+
 });

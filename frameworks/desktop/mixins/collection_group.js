@@ -8,8 +8,6 @@
 /**
   @namespace
 
-  TODO: Add full description of SC.CollectionGroup
-  
   Any view you want to use as a group view in a collection must include this
   mixin.
   
@@ -17,6 +15,11 @@
 */
 SC.CollectionGroup = {
   
+  /**
+    @type Array
+    @default ['sc-collection-group']
+    @see SC.View#classNames
+  */
   classNames: ['sc-collection-group']
   
 };

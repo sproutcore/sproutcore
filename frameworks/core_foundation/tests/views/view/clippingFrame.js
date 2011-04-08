@@ -84,7 +84,7 @@ test("cuts off left of frame", function() {
   same(result, expected, 'nested child');
 });
 
-test("cuts off bottom of frame", function() {
+test("cuts off right of frame", function() {
   var result, expected;
   
   a.adjust('left', 150);

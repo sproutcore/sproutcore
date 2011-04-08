@@ -19,8 +19,14 @@ sc_require('views/scroll');
   @extends SC.ScrollerView
   @since SproutCore 1.0
 */
+SC.MenuScrollerView = SC.ScrollerView.extend(
+/** @scope SC.MenuScrollerView.prototype */ {
 
-SC.MenuScrollerView = SC.ScrollerView.extend({
+  /**
+    @type Array
+    @default ['sc-menu-scroller-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-menu-scroller-view'],
   
   // ..........................................................
@@ -28,7 +34,10 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   // 
   
   /**
-   Used to set the scrolling direction of the scroller.
+    Used to set the scrolling direction of the scroller.
+    
+    @type Boolean
+    @default NO
   */
   scrollDown: NO,
   
@@ -36,7 +45,9 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     The scroller offset value.  This value will adjust between the minimum
     and maximum values that you set. Default is 0.
     
-    @property
+    @field
+    @type Number
+    @observes maximum
   */
   value: function(key, val) {
     if (val !== undefined) {
@@ -56,7 +67,8 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     
     When set less than the height of the scroller, the scroller is disabled.
     
-    @property {Number}
+    @type Number
+    @default 0
   */
   maximum: 0,
   
@@ -64,22 +76,30 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     YES if enable scrollbar, NO to disable it.  Scrollbars will automatically 
     disable if the maximum scroll width does not exceed their capacity.
     
-    @property
+    @type Boolean
+    @default YES
   */
   isEnabled: YES,
   
   /**
     Determine the layout direction.  Determines whether the scrollbar should 
     appear horizontal or vertical.  This must be set when the view is created.
-    Changing this once the view has been created will have no effect.
+    Changing this once the view has been created will have no effect. Possible
+    values:
     
-    @property
+      - SC.LAYOUT_VERTICAL
+      - SC.LAYOUT_HORIZONTAL
+    
+    @type String
+    @default SC.LAYOUT_VERTICAL
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
   
   /** 
      Amount to scroll one vertical line.
-     Defaults to 20px.
+     
+     @type Number
+     @default 20
   */
   verticalLineScroll: 20,
 
@@ -87,16 +107,20 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     This function overrides the default function in SC.Scroller as 
     menus only have vertical scrolling.
     
-    @property {String}
+    @field
+    @type String
+    @default 'verticalScrollOffset'
   */
   ownerScrollValueKey: function() {
-    return 'verticalScrollOffset' ;  
+    return 'verticalScrollOffset';
   }.property('layoutDirection').cacheable(),
+
 
   // ..........................................................
   // INTERNAL SUPPORT
   //
 
+  /** @private */
   init: function() {
     // Set the scrollerThickness based on controlSize
     switch (this.get('controlSize')) {
@@ -120,6 +144,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     return sc_super();
   },
   
+  /** @private */
   render: function(context, firstTime) {
     context.addClass('sc-vertical') ;
     context.addClass(this.get('controlSize'));
@@ -130,6 +155,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     context.setClass('disabled', !this.get('isEnabled')) ;
   },
   
+  /** @private */
   didCreateLayer: function() {
     // var callback, amt, layer;
     // 
@@ -143,33 +169,32 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     // layer.scrollTop = amt ;
   },
   
+  /** @private */
   willDestroyLayer: function() {
     var callback = this._sc_scroller_scrollDidChange ;
     SC.Event.remove(this.$(), 'scroll', this, callback) ;
   },
   
+  /** @private */
   mouseEntered: function(evt) {
     this.set('isMouseOver', YES);
     this._invokeScrollOnMouseOver();
   },
   
+  /** @private */
   mouseExited: function(evt) {
     this.set('isMouseOver', NO);
   },
   
-  /** @private */
-  
   /**
-    This function overrides the default function in SC.Scroller. 
+    This function overrides the default function in SC.Scroller.
     SC.MenuScroller and SC.MenuScroll use valueBinding so this function is
     not neccesary.
   */
-  _sc_scroller_valueDidChange: function() {
-    
-  }.observes('value'),
+  _sc_scroller_valueDidChange: function() {}.observes('value'),
   
 
-  // after 50msec, fire event again
+  /** @private */
   _sc_scroller_armScrollTimer: function() {
     if (!this._sc_scrollTimer) {
       SC.RunLoop.begin() ;
@@ -179,6 +204,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     }
   },
   
+  /** @private */
   _sc_scroller_scrollDidChange: function() {
     var now = Date.now(), 
         last = this._sc_lastScroll, 
@@ -200,7 +226,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   },
   
   
-  /**
+  /** @private
     Scroll the menu if it is is an up or down arrow. This is called by
     the function that simulates mouseOver.
   */
@@ -223,7 +249,8 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     return YES;
   },
   
-  /**
+  /** @private
+    
     We use this function to simulate mouseOver. It checks for the flag 
     isMouseOver which is turned on when mouseEntered is called and turned off
     when mouseExited is called. 
@@ -238,12 +265,38 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
 });
 
 /**
-  Default metrics for scroller size.
+  @static
+  @type Number
+  @default 18
 */
 SC.MenuScrollerView.REGULAR_SCROLLER_THICKNESS = 18;
+
+/**
+  @static
+  @type Number
+  @default 10
+*/
 SC.MenuScrollerView.TINY_SCROLLER_THICKNESS    = 10;
+
+/**
+  @static
+  @type Number
+  @default 14
+*/
 SC.MenuScrollerView.SMALL_SCROLLER_THICKNESS   = 14;
+
+/**
+  @static
+  @type Number
+  @default 23
+*/
 SC.MenuScrollerView.LARGE_SCROLLER_THICKNESS   = 23;
+
+/**
+  @static
+  @type Number
+  @default 26
+*/
 SC.MenuScrollerView.HUGE_SCROLLER_THICKNESS    = 26;
 
 
@@ -259,9 +312,16 @@ SC.MenuScrollerView.HUGE_SCROLLER_THICKNESS    = 26;
   @extends SC.ScrollView
   @since SproutCore 1.0
 */
-SC.MenuScrollView = SC.ScrollView.extend({
+SC.MenuScrollView = SC.ScrollView.extend(
+/** @scope SC.MenuScrollView.prototype */{
 
+  /**
+    @type Array
+    @default ['sc-menu-scroll-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-menu-scroll-view'],
+  
   
   // ..........................................................
   // PROPERTIES
@@ -273,7 +333,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     size and the size of the scroll view.  If horizontal scrolling is 
     disabled, this will always return 0.
     
-    @property {Number}
+    @type Number
+    @default 0
   */
   maximumHorizontalScrollOffset: 0,
     
@@ -286,7 +347,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     YES if the view should maintain a horizontal scroller.   This property 
     must be set when the view is created.
     
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   hasHorizontalScroller: NO,
   
@@ -295,7 +357,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     instance when the ScrollView is created unless hasHorizontalScroller is 
     NO.
     
-    @property {SC.View}
+    @type SC.View
+    @default SC.MenuScrollerView
   */
   horizontalScrollerView: SC.MenuScrollerView,
   
@@ -306,7 +369,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     hasHorizontalScroller to NO to avoid creating a scroller view in the 
     first place.
     
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   isHorizontalScrollerVisible: NO,
 
@@ -314,14 +378,18 @@ SC.MenuScrollView = SC.ScrollView.extend({
     Returns YES if the view both has a horizontal scroller, the scroller is
     visible.
     
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   canScrollHorizontal: NO,
    
   /**
     If YES, the horizontal scroller will autohide if the contentView is
     smaller than the visible area.  You must set hasHorizontalScroller to YES 
-    for this property to have any effect.  
+    for this property to have any effect.
+    
+    @type Boolean
+    @default NO
   */
   autohidesHorizontalScroller: NO,
   
@@ -329,7 +397,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     YES if the view shuld maintain a vertical scroller.   This property must 
     be set when the view is created.
     
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   hasVerticalScroller: YES,
   
@@ -337,7 +406,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     The vertical scroller view class. This will be replaced with a view 
     instance when the ScrollView is created unless hasVerticalScroller is NO.
     
-    @property {SC.View}
+    @type SC.View
+    @default SC.MenuScrollerView
   */
   verticalScrollerView: SC.MenuScrollerView,
   verticalScrollerView2: SC.MenuScrollerView,
@@ -346,17 +416,24 @@ SC.MenuScrollView = SC.ScrollView.extend({
     YES if the vertical scroller should be visible.  For SC.MenuScroll the
     vertical scroller is always there we just hide the arrows to scroll.
     
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   isVerticalScrollerVisible: YES,
 
-  
+  /**
+    @type Boolean
+    @default YES
+  */
   canScrollVertical: YES,
 
   /**
     If YES, the vertical scroller will autohide if the contentView is
     smaller than the visible area.  You must set hasVerticalScroller to YES 
-    for this property to have any effect.  
+    for this property to have any effect.
+    
+    @type Boolean
+    @default YES
   */
   autohidesVerticalScroller: YES,
   
@@ -364,7 +441,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     Use this property to set the 'bottom' offset of your vertical scroller, 
     to make room for a thumb view or other accessory view. Default is 0.
     
-    @property {Number}
+    @type Number
+    @default 0
   */
   verticalScrollerBottom: 0,
   
@@ -375,6 +453,9 @@ SC.MenuScrollView = SC.ScrollView.extend({
 
   /**
     Control Size for Menu content: change verticalLineScroll
+    
+    @type String
+    @default SC.REGULAR_CONTROL_SIZE
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
@@ -382,13 +463,18 @@ SC.MenuScrollView = SC.ScrollView.extend({
     The container view that will contain your main content view.  You can 
     replace this property with your own custom subclass if you prefer.
     
-    @type {SC.ContainerView}
+    @type SC.ContainerView
+    @default SC.ContainerView
   */
   containerView: SC.ContainerView,
 
   // ..........................................................
   // METHODS
   //
+  
+  /**
+    @param {SC.View} view
+  */
   scrollToVisible: function(view) {
     // if no view is passed, do default
     if (arguments.length === 0) return sc_super();
@@ -418,7 +504,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     return this.scrollToRect(vf);
   },
 
-  /**
+  /** @private
     Adjusts the layout for the various internal views.  This method is called
     once when the scroll view is first configured and then anytime a scroller
     is shown or hidden.  You can call this method yourself as well to retile.
@@ -536,6 +622,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     this.tile() ; // set up initial tiling
   },
   
+  /** @private */
   init: function() {
     sc_super();
     

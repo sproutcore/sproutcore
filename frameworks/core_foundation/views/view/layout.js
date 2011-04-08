@@ -179,23 +179,23 @@ SC.View.reopen(
     The layout describes how you want your view to be positions on the
     screen.  You can define the following properties:
 
-    - left: the left edge
-    - top: the top edge
-    - right: the right edge
-    - bottom: the bottom edge
-    - height: the height
-    - width: the width
-    - centerX: an offset from center X
-    - centerY: an offset from center Y
-    - minWidth: a minimum width
-    - minHeight: a minimum height
-    - maxWidth: a maximum width
-    - maxHeight: a maximum height
-    - border: border on all sides
-    - borderTop: top border
-    - borderRight: right border
-    - borderBottom: bottom border
-    - borderLeft: bottom left
+     - left: the left edge
+     - top: the top edge
+     - right: the right edge
+     - bottom: the bottom edge
+     - height: the height
+     - width: the width
+     - centerX: an offset from center X
+     - centerY: an offset from center Y
+     - minWidth: a minimum width
+     - minHeight: a minimum height
+     - maxWidth: a maximum width
+     - maxHeight: a maximum height
+     - border: border on all sides
+     - borderTop: top border
+     - borderRight: right border
+     - borderBottom: bottom border
+     - borderLeft: bottom left
 
     Note that you can only use certain combinations to set layout.  For
     example, you may set left/right or left/width, but not left/width/right,
@@ -221,10 +221,8 @@ SC.View.reopen(
     other words, if you want to convert the frame of your view to the global
     frame, then you should do:
 
-    {{{
-      var pv = this.get('parentView'), frame = this.get('frame');
-      var newFrame = pv ? pv.convertFrameToView(frame, null) : frame;
-    }}}
+        var pv = this.get('parentView'), frame = this.get('frame');
+        var newFrame = pv ? pv.convertFrameToView(frame, null) : frame;
 
     @param {Rect} frame the source frame
     @param {SC.View} targetView the target view to convert to
@@ -263,10 +261,8 @@ SC.View.reopen(
     parentFrame.  For example, if you want to convert the frame of view that
     belongs to another view to the receiver's frame you would do:
 
-    {{{
-      var frame = view.get('frame');
-      var newFrame = this.convertFrameFromView(frame, view.get('parentView'));
-    }}}
+        var frame = view.get('frame');
+        var newFrame = this.convertFrameFromView(frame, view.get('parentView'));
 
     @param {Rect} frame the source frame
     @param {SC.View} targetView the target view to convert to

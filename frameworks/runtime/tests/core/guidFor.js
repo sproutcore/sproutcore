@@ -50,7 +50,7 @@ test("numbers", function() {
   nanGuid( a );
 });
 
-test("numbers", function() {
+test("booleans", function() {
   var a = true, aprime = true, b = false;
 
   sameGuid( a, a,      "same booleans always yields same guid" );

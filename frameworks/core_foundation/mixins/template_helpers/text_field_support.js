@@ -33,6 +33,17 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport.prototype */{
     this.tryToPerform('blur', event);
   },
 
+  /** @private
+    Make sure our input value is synced with any bindings.
+    In some cases, such as auto-filling, a value can get
+    changed without an event firing. We could do this
+    on focusOut, but blur can potentially get called
+    after other events.
+  */
+  willLoseFirstResponder: function() {
+    this.notifyPropertyChange('value');
+  },
+
   keyUp: function(event) {
     if (event.keyCode === 13) {
       return this.tryToPerform('insertNewline', event);

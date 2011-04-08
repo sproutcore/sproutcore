@@ -1,4 +1,4 @@
-sc_require('extensions');
+sc_require('ext/handlebars');
 
 /**
   Adds the `bind`, `bindAttr`, and `boundIf` helpers to Handlebars.
@@ -129,7 +129,7 @@ Handlebars.registerHelper('bindAttr', function(options) {
   // Handle classes differently, as we can bind multiple classes
   var classBindings = attrs['class'];
   if (classBindings != null) {
-    var classResults = SC.Handlebars.bindClasses(view, classBindings, dataId);
+    var classResults = SC.Handlebars.bindClasses(this, classBindings, view, dataId);
     ret.push('class="'+classResults.join(' ')+'"');
     delete attrs['class'];
   }
@@ -140,13 +140,13 @@ Handlebars.registerHelper('bindAttr', function(options) {
   // current value of the property as an attribute.
   attrKeys.forEach(function(attr) {
     var property = attrs[attr];
-    var value = view.getPath(property);
+    var value = this.getPath(property);
 
     // Add an observer to the view for when the property changes.
     // When the observer fires, find the element using the
     // unique data id and update the attribute to the new value.
-    view.addObserver(property, function observer() {
-      var result = view.getPath(property);
+    this.addObserver(property, function observer() {
+      var result = this.getPath(property);
       var elem = view.$("[data-handlebars-id='" + dataId + "']");
 
       // If we aren't able to find the element, it means the element
@@ -154,7 +154,7 @@ Handlebars.registerHelper('bindAttr', function(options) {
       // In that case, we can assume the template has been re-rendered
       // and we need to clean up the observer.
       if (elem.length === 0) {
-        view.removeObserver(property, observer);
+        this.removeObserver(property, observer);
         return;
       }
 
@@ -182,9 +182,112 @@ Handlebars.registerHelper('bindAttr', function(options) {
       // Return the current value, in the form src="foo.jpg"
       ret.push(attr+'="'+value+'"');
     }
-  });
+  }, this);
 
   // Add the unique identifier
   ret.push('data-handlebars-id="'+dataId+'"');
   return ret.join(' ');
 });
+
+/**
+  Helper that, given a space-separated string of property paths and a context,
+  returns an array of class names. Calling this method also has the side effect
+  of setting up observers at those property paths, such that if they change,
+  the correct class name will be reapplied to the DOM element.
+
+  For example, if you pass the string "fooBar", it will first look up the "fooBar"
+  value of the context. If that value is YES, it will add the "foo-bar" class
+  to the current element (i.e., the dasherized form of "fooBar"). If the value
+  is a string, it will add that string as the class. Otherwise, it will not add
+  any new class name.
+
+  @param {SC.Object} context The context from which to lookup properties
+  @param {String} classBindings A string, space-separated, of class bindings to use
+  @param {SC.View} view The view in which observers should look for the element to update
+  @param {String} id Optional id use to lookup elements
+
+  @returns {Array} An array of class names to add
+*/
+SC.Handlebars.bindClasses = function(context, classBindings, view, id) {
+  var ret = [], newClass, value, elem;
+
+  // Helper method to retrieve the property from the context and
+  // determine which class string to return, based on whether it is
+  // a Boolean or not.
+  var classStringForProperty = function(property) {
+    var val = context.getPath(property);
+
+    // If value is a Boolean and true, return the dasherized property
+    // name.
+    if (val === YES) {
+      // Normalize property path to be suitable for use
+      // as a class name. For exaple, content.foo.barBaz
+      // becomes bar-baz.
+      return property.split('.').get('lastObject').dasherize();
+
+    // If the value is not NO, undefined, or null, return the current
+    // value of the property.
+    } else if (val !== NO && val !== undefined && val !== null) {
+      return val;
+
+    // Nothing to display. Return null so that the old class is removed
+    // but no new class is added.
+    } else {
+      return null;
+    }
+  };
+
+  // For each property passed, loop through and setup
+  // an observer.
+  classBindings.split(' ').forEach(function(property) {
+
+    // Variable in which the old class value is saved. The observer function
+    // closes over this variable, so it knows which string to remove when
+    // the property changes.
+    var oldClass;
+
+    // Set up an observer on the context. If the property changes, toggle the
+    // class name.
+    var observer = function() {
+      // Get the current value of the property
+      newClass = classStringForProperty(property);
+      elem = id ? view.$("[data-handlebars-id='" + id + "']") : view.$();
+
+      // If we can't find the element anymore, a parent template has been
+      // re-rendered and we've been nuked. Remove the observer.
+      if (elem.length === 0) {
+        context.removeObserver(property, observer);
+      } else {
+        // If we had previously added a class to the element, remove it.
+        if (oldClass) {
+          elem.removeClass(oldClass);
+        }
+
+        // If necessary, add a new class. Make sure we keep track of it so
+        // it can be removed in the future.
+        if (newClass) {
+          elem.addClass(newClass);
+          oldClass = newClass;
+        } else {
+          oldClass = null;
+        }
+      }
+    };
+
+    context.addObserver(property, observer);
+
+    // We've already setup the observer; now we just need to figure out the correct
+    // behavior right now on the first pass through.
+    value = classStringForProperty(property);
+
+    if (value) {
+      ret.push(value);
+
+      // Make sure we save the current value so that it can be removed if the observer
+      // fires.
+      oldClass = value;
+    }
+  });
+
+  return ret;
+};

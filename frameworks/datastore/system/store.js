@@ -77,7 +77,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Convenience method.  Sets the current data source to the passed property.
     This will also set the store property on the dataSource to the receiver.
     
-    If you are using this from the core.js method of your app, you may need to
+    If you are using this from the `core.js` method of your app, you may need to
     just pass a string naming your data source class.  If this is the case,
     then your data source will be instantiated the first time it is requested.
     
@@ -101,8 +101,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Convenience method.  Creates a CascadeDataSource with the passed 
-    data source arguments and sets the CascadeDataSource as the data source 
+    Convenience method.  Creates a `CascadeDataSource` with the passed 
+    data source arguments and sets the `CascadeDataSource` as the data source 
     for the receiver.
     
     @param {SC.DataSource...} dataSource one or more data source arguments
@@ -123,12 +123,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**  
     Returns a new nested store instance that can be used to buffer changes
     until you are ready to commit them.  When you are ready to commit your 
-    changes, call commitChanges() or destroyChanges() and then destroy() when
-    you are finished with the chained store altogether.
+    changes, call `commitChanges()` or `destroyChanges()` and then `destroy()`
+    when you are finished with the chained store altogether.
     
-			      store = MyApp.store.chain();
-			      .. edit edit edit
-			      store.commitChanges().destroy();
+        store = MyApp.store.chain();
+        .. edit edit edit
+        store.commitChanges().destroy();
     
     @param {Hash} attrs optional attributes to set on new store
     @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)
@@ -240,7 +240,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
   /**
     A set of storeKeys that need to be committed back to the data source. If
-    you call commitRecords() without passing any other parameters, the keys
+    you call `commitRecords()` without passing any other parameters, the keys
     in this set will be committed instead.
   
     @type SC.Set
@@ -248,7 +248,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   changelog: null,
   
   /**
-    An array of SC.Error objects associated with individual records in the
+    An array of `SC.Error` objects associated with individual records in the
     store (indexed by store keys).
     
     Errors passed form the data source in the call to dataSourceDidError() are
@@ -259,11 +259,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   recordErrors: null,
   
   /**
-    A hash of SC.Error objects associated with queries (indexed by the GUID
+    A hash of `SC.Error` objects associated with queries (indexed by the GUID
     of the query).
     
-    Errors passed from the data source in the call to dataSourceDidErrorQuery()
-    are stored here.
+    Errors passed from the data source in the call to
+    `dataSourceDidErrorQuery()` are stored here.
     
     @type Hash
   */
@@ -287,8 +287,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // to use these methods.
   
   /**
-    Returns the current edit status of a storekey.  May be one of EDITABLE or
-    LOCKED.  Used mostly for unit testing.
+    Returns the current edit status of a storekey.  May be one of
+    `EDITABLE` or `LOCKED`.  Used mostly for unit testing.
     
     @param {Number} storeKey the store key
     @returns {Number} edit status
@@ -299,7 +299,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
    
   /** 
-    Returns the data hash for the given storeKey.  This will also 'lock'
+    Returns the data hash for the given `storeKey`.  This will also 'lock'
     the hash so that further edits to the parent store will no 
     longer be reflected in this store until you reset.
     
@@ -311,12 +311,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /** 
-    Returns the data hash for the storeKey, cloned so that you can edit
+    Returns the data hash for the `storeKey`, cloned so that you can edit
     the contents of the attributes if you like.  This will do the extra work
     to make sure that you only clone the attributes one time.  
     
     If you use this method to modify data hash, be sure to call 
-    dataHashDidChange() when you make edits to record the change.
+    `dataHashDidChange()` when you make edits to record the change.
     
     @param {Number} storeKey the store key to retrieve
     @returns {Hash} the attributes hash
@@ -366,12 +366,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Replaces the data hash for the storeKey.  This will lock the data hash and
-    mark them as cloned.  This will also call dataHashDidChange() for you.
+    Replaces the data hash for the `storeKey`.  This will lock the data hash
+    and mark them as cloned.  This will also call `dataHashDidChange()` for
+    you.
     
     Note that the hash you set here must be a different object from the 
     original data hash.  Once you make a change here, you must also call
-    dataHashDidChange() to register the changes.
+    `dataHashDidChange()` to register the changes.
 
     If the data hash does not yet exist in the store, this method will add it.
     Pass the optional status to edit the status as well.
@@ -402,16 +403,16 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /**
     Removes the data hash from the store.  This does not imply a deletion of
-    the record.  You could be simply unloading the record.  Eitherway, 
+    the record.  You could be simply unloading the record.  Either way, 
     removing the dataHash will be synced back to the parent store but not to 
     the server.
     
     Note that you can optionally pass a new status to go along with this. If
-    you do not pass a status, it will change the status to SC.RECORD_EMPTY
+    you do not pass a status, it will change the status to `SC.RECORD_EMPTY`
     (assuming you just unloaded the record).  If you are deleting the record
-    you may set it to SC.Record.DESTROYED_CLEAN.
+    you may set it to `SC.Record.DESTROYED_CLEAN`.
     
-    Be sure to also call dataHashDidChange() to register this change.
+    Be sure to also call `dataHashDidChange()` to register this change.
     
     @param {Number} storeKey
     @param {String} status optional new status
@@ -431,7 +432,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     Reads the current status for a storeKey.  This will also lock the data 
-    hash.  If no status is found, returns SC.RECORD_EMPTY.
+    hash.  If no status is found, returns `SC.RECORD_EMPTY`.
     
     @param {Number} storeKey the store key
     @returns {Number} status
@@ -457,7 +458,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     Writes the current status for a storeKey.  If the new status is 
-    SC.Record.ERROR, you may also pass an optional error object.  Otherwise 
+    `SC.Record.ERROR`, you may also pass an optional error object.  Otherwise 
     this param is ignored.
     
     @param {Number} storeKey the store key
@@ -515,7 +516,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /** @private 
     Will push all changes to a the recordPropertyChanges property
-    and execute flush() once at the end of the runloop.
+    and execute `flush()` once at the end of the runloop.
   */
   _notifyRecordPropertyChange: function(storeKey, statusOnly, key) {
     
@@ -561,13 +562,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // If there are changes other than just the status we need to record
       // that information so we do the right thing during the next flush.
       // Note that if we're called multiple times before flush and one call
-      // has statusOnly=true and another has statusOnly=false, the flush will
-      // (correctly) operate in statusOnly=false mode.
+      // has `statusOnly=true` and another has `statusOnly=false`, the flush
+      // will (correctly) operate in `statusOnly=false` mode.
       if (!statusOnly) changes.hasDataChanges.push(storeKey);
       
       // If this is a key specific change, make sure that only those
       // properties/keys are notified.  However, if a previous invocation of
-      // _notifyRecordPropertyChange specified that all keys have changed, we
+      // `_notifyRecordPropertyChange` specified that all keys have changed, we
       // need to respect that.
       if (key) {
         if (!(keys = changes.propertyForStoreKeys[storeKey])) {
@@ -774,36 +775,36 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // 
   
   /**
-    Finds a single record instance with the specified recordType and id or an 
-    array of records matching some query conditions.
+    Finds a single record instance with the specified `recordType` and id or
+    an  array of records matching some query conditions.
     
     Finding a Single Record
     ---
     
-    If you pass a single recordType and id, this method will return an actual
-    record instance.  If the record has not been loaded into the store yet,
-    this method will ask the data source to retrieve it.  If no data source
-    indicates that it can retrieve the record, then this method will return
-    null.
+    If you pass a single `recordType` and id, this method will return an
+    actual record instance.  If the record has not been loaded into the store
+    yet, this method will ask the data source to retrieve it.  If no data
+    source indicates that it can retrieve the record, then this method will
+    return `null`.
     
     Note that if the record needs to be retrieved from the server, then the
     record instance returned from this method will not have any data yet. 
-    Instead it will have a status of SC.Record.READY_LOADING.  You can monitor
-    the status property to be notified when the record data is available for 
-    you to use it.
+    Instead it will have a status of `SC.Record.READY_LOADING`.  You can
+    monitor the status property to be notified when the record data is
+    available for you to use it.
     
     Find a Collection of Records
     ---
     
     If you pass only a record type or a query object, you can instead find 
-    all records matching a specified set of conditions.  When you call find()
-    in this way, it will create a query if needed and pass it to the data
-    source to fetch the results.
+    all records matching a specified set of conditions.  When you call
+    `find()` in this way, it will create a query if needed and pass it to the
+    data source to fetch the results.
     
     If this is the first time you have fetched the query, then the store will
     automatically ask the data source to fetch any records related to it as 
     well.  Otherwise you can refresh the query results at anytime by calling
-    refresh() on the returned RecordArray.
+    `refresh()` on the returned `RecordArray`.
 
     You can detect whether a RecordArray is fetching from the server by 
     checking its status.
@@ -813,22 +814,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     Finding a single record:
     
-		      MyApp.store.find(MyApp.Contact, "23"); // returns MyApp.Contact
+        MyApp.store.find(MyApp.Contact, "23"); // returns MyApp.Contact
     
     Finding all records of a particular type:
     
-		      MyApp.store.find(MyApp.Contact); // returns SC.RecordArray of contacts
+        MyApp.store.find(MyApp.Contact); // returns SC.RecordArray of contacts
     
     
     Finding all contacts with first name John:
     
-    		  var query = SC.Query.local(MyApp.Contact, "firstName = %@", "John");
-		      MyApp.store.find(query); // returns SC.RecordArray of contacts
+        var query = SC.Query.local(MyApp.Contact, "firstName = %@", "John");
+        MyApp.store.find(query); // returns SC.RecordArray of contacts
     
     Finding all contacts using a remote query:
     
-    		  var query = SC.Query.remote(MyApp.Contact);
-		      MyApp.store.find(query); // returns SC.RecordArray filled by server
+        var query = SC.Query.remote(MyApp.Contact);
+        MyApp.store.find(query); // returns SC.RecordArray filled by server
     
     @param {SC.Record|String} recordType the expected record type
     @param {String} id the id to load
@@ -860,7 +861,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     This method will accept a record type or query and return a record array
     matching the results.  This method was commonly used prior to SproutCore 
-    1.0.  It has been deprecated in favor of a single find() method instead.
+    1.0.  It has been deprecated in favor of a single `find()` method instead.
     
     For compatibility, this method will continue to work in SproutCore 1.0 but
     it will raise a warning.  It will be removed in a future version of 
@@ -933,8 +934,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Called by the record array just before it is destroyed.  This will 
     de-register it from receiving future notifications.
 
-    You should never call this method yourself.  Instead call destroy() on the
-    RecordArray directly.
+    You should never call this method yourself.  Instead call `destroy()` on
+    the `RecordArray` directly.
     
     @param {SC.RecordArray} recordArray the record array
     @returns {SC.Store} receiver
@@ -951,10 +952,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Called by the record array whenever it needs the data source to refresh
     its contents.  Nested stores will actually just pass this along to the
-    parent store.  The parent store will call fetch() on the data source.
+    parent store.  The parent store will call `fetch()` on the data source.
 
-    You should never call this method yourself.  Instead call refresh() on the
-    RecordArray directly.
+    You should never call this method yourself.  Instead call `refresh()` on
+    the `RecordArray` directly.
     
     @param {SC.Query} query the record array query to refresh
     @returns {SC.Store} receiver
@@ -975,8 +976,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /** @private 
-    Will ask all record arrays that have been returned from findAll
-    with an SC.Query to check their arrays with the new storeKeys
+    Will ask all record arrays that have been returned from `findAll`
+    with an `SC.Query` to check their arrays with the new `storeKey`s
     
     @param {SC.IndexSet} storeKeys set of storeKeys that changed
     @param {SC.Set} recordTypes
@@ -1029,11 +1030,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   _TMP_REC_ATTRS: {},
   
   /** 
-    Given a storeKey, return a materialized record.  You will not usually
+    Given a `storeKey`, return a materialized record.  You will not usually
     call this method yourself.  Instead it will used by other methods when
     you find records by id or perform other searches.
 
-    If a recordType has been mapped to the storeKey, then a record instance
+    If a `recordType` has been mapped to the storeKey, then a record instance
     will be returned even if the data hash has not been requested yet.
     
     Each Store instance returns unique record instances for each storeKey.
@@ -1068,12 +1069,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // actually creating record instances.
   
   /**
-    Creates a new record instance with the passed recordType and dataHash.
+    Creates a new record instance with the passed `recordType` and `dataHash`.
     You can also optionally specify an id or else it will be pulled from the 
     data hash.
 
     Note that the record will not yet be saved back to the server.  To save
-    a record to the server, call commitChanges() on the store.
+    a record to the server, call `commitChanges()` on the store.
 
     @param {SC.Record} recordType the record class to use on creation
     @param {Hash} dataHash the JSON attributes to assign to the hash.
@@ -1140,12 +1141,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },  
   
   /**
-    Creates an array of new records.  You must pass an array of dataHashes 
-    plus a recordType and, optionally, an array of ids.  This will create an
+    Creates an array of new records.  You must pass an array of `dataHash`es 
+    plus a `recordType` and, optionally, an array of ids.  This will create an
     array of record instances with the same record type.
     
     If you need to instead create a bunch of records with different data types
-    you can instead pass an array of recordTypes, one for each data hash.
+    you can instead pass an array of `recordType`s, one for each data hash.
     
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} dataHashes array of data hashes
@@ -1209,12 +1210,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     them this way can be faster than retrieving each record and unloading 
     it individually.
 
-    You can pass either a single recordType or an array of recordTypes.  If
-    you pass a single recordType, then the record type will be used for each
+    You can pass either a single `recordType` or an array of `recordType`s. If
+    you pass a single `recordType`, then the record type will be used for each
     record.  If you pass an array, then each id must have a matching record 
     type in the array.
 
-    You can optionally pass an array of storeKeys instead of the recordType
+    You can optionally pass an array of `storeKey`s instead of the `recordType`
     and ids.  In this case the first two parameters will be ignored.  This
     is usually only used by low-level internal methods.  You will not usually
     unload records this way.
@@ -1319,12 +1320,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     them this way can be faster than retrieving each record and destroying 
     it individually.
     
-    You can pass either a single recordType or an array of recordTypes.  If
-    you pass a single recordType, then the record type will be used for each
+    You can pass either a single `recordType` or an array of `recordType`s. If
+    you pass a single `recordType`, then the record type will be used for each
     record.  If you pass an array, then each id must have a matching record 
     type in the array.
 
-    You can optionally pass an array of storeKeys instead of the recordType
+    You can optionally pass an array of `storeKey`s instead of the `recordType`
     and ids.  In this case the first two parameters will be ignored.  This
     is usually only used by low-level internal methods.  You will not usually
     destroy records this way.
@@ -1472,12 +1473,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     set of record ids, marking them dirty this way can be faster than 
     retrieving each record and destroying it individually.
     
-    You can pass either a single recordType or an array of recordTypes.  If
-    you pass a single recordType, then the record type will be used for each
+    You can pass either a single `recordType` or an array of `recordType`s. If
+    you pass a single `recordType`, then the record type will be used for each
     record.  If you pass an array, then each id must have a matching record 
     type in the array.
 
-    You can optionally pass an array of storeKeys instead of the recordType
+    You can optionally pass an array of `storeKey`s instead of the `recordType`
     and ids.  In this case the first two parameters will be ignored.  This
     is usually only used by low-level internal methods.  
     
@@ -1511,13 +1512,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Retrieves a set of records from the server.  If the records has 
     already been loaded in the store, then this method will simply return.  
-    Otherwise if your store has a dataSource, this will call the 
-    dataSource to retrieve the record.  Generally you will not need to 
-    call this method yourself. Instead you can just use find().
+    Otherwise if your store has a `dataSource`, this will call the 
+    `dataSource` to retrieve the record.  Generally you will not need to 
+    call this method yourself. Instead you can just use `find()`.
     
     This will not actually create a record instance but it will initiate a 
     load of the record from the server.  You can subsequently get a record 
-    instance itself using materializeRecord()
+    instance itself using `materializeRecord()`.
     
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to retrieve
@@ -1625,7 +1626,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   /**
     @private
-    retreives and calls callback for storkey if exists
+    retreives and calls callback for `storkey` if exists
     also handles if a single callback is need for one key
   **/
   _retreiveCallbackForStoreKey: function(storeKey){
@@ -1670,13 +1671,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Retrieves a record from the server.  If the record has already been loaded
     in the store, then this method will simply return.  Otherwise if your 
-    store has a dataSource, this will call the dataSource to retrieve the 
+    store has a `dataSource`, this will call the `dataSource` to retrieve the 
     record.  Generally you will not need to call this method yourself.  
-    Instead you can just use find().
+    Instead you can just use `find()`.
     
     This will not actually create a record instance but it will initiate a 
     load of the record from the server.  You can subsequently get a record 
-    instance itself using materializeRecord()
+    instance itself using `materializeRecord()`.
 
     @param {SC.Record} recordType class
     @param {String} id id to retrieve
@@ -1705,8 +1706,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /**
     Refreshes a record from the server.  If the record has already been loaded
-    in the store, then this method will request a refresh from the dataSource.
-    Otherwise it will attempt to retrieve the record.
+    in the store, then this method will request a refresh from the
+    `dataSource`. Otherwise it will attempt to retrieve the record.
     
     @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
@@ -1720,8 +1721,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /**
     Refreshes a set of records from the server.  If the records has already been loaded
-    in the store, then this method will request a refresh from the dataSource.
-    Otherwise it will attempt to retrieve them.
+    in the store, then this method will request a refresh from the
+    `dataSource`. Otherwise it will attempt to retrieve them.
     
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to destroy
@@ -1735,7 +1736,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
     
   /**
-    Commits the passed store keys or ids. If no storeKeys are given 
+    Commits the passed store keys or ids. If no `storeKey`s are given,
     it will commit any records in the changelog. 
     
     Based on the current state of the record, this will ask the data 
@@ -1943,19 +1944,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     recordType and a data hashes and either add or update the 
     record in the store. 
     
-    The loaded records will be in an SC.Record.READY_CLEAN state, indicating
+    The loaded records will be in an `SC.Record.READY_CLEAN` state, indicating
     they were loaded from the data source and do not need to be committed 
     back before changing.
     
     This method will check the state of the storeKey and call either 
-    pushRetrieve() or dataSourceDidComplete().  The standard state constraints 
+    `pushRetrieve()` or `dataSourceDidComplete()`.  The standard state constraints 
     for these methods apply here.
     
-    The return value will be the storeKey used for the push.  This is often
-    convenient to pass into loadQuery(), if you are fetching a remote query.
+    The return value will be the `storeKey` used for the push.  This is often
+    convenient to pass into `loadQuery()`, if you are fetching a remote query.
     
     If you are upgrading from a pre SproutCore 1.0 application, this method 
-    is the closest to the old updateRecord().
+    is the closest to the old `updateRecord()`.
     
     @param {SC.Record} recordType the record type
     @param {Array} dataHash to update
@@ -1989,19 +1990,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     recordType and an array of data hashes and either add or update the 
     record in the store. 
     
-    The loaded records will be in an SC.Record.READY_CLEAN state, indicating
+    The loaded records will be in an `SC.Record.READY_CLEAN` state, indicating
     they were loaded from the data source and do not need to be committed 
     back before changing.
     
     This method will check the state of each storeKey and call either 
-    pushRetrieve() or dataSourceDidComplete().  The standard state constraints 
-    for these methods apply here.
+    `pushRetrieve()` or `dataSourceDidComplete()`.  The standard state 
+    constraints for these methods apply here.
     
     The return value will be the storeKeys used for each push.  This is often
-    convenient to pass into loadQuery(), if you are fetching a remote query.
+    convenient to pass into `loadQuery()`, if you are fetching a remote query.
     
     If you are upgrading from a pre SproutCore 1.0 application, this method 
-    is the closest to the old updateRecords().
+    is the closest to the old `updateRecords()`.
     
     @param {SC.Record} recordTypes the record type or array of record types
     @param {Array} dataHashes array of data hashes to update
@@ -2038,7 +2039,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
-    Returns the SC.Error object associated with a specific record.
+    Returns the `SC.Error` object associated with a specific record.
 
     @param {Number} storeKey The store key of the record.
  
@@ -2050,7 +2051,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
-    Returns the SC.Error object associated with a specific query.
+    Returns the `SC.Error` object associated with a specific query.
 
     @param {SC.Query} query The SC.Query with which the error is associated.
  
@@ -2067,7 +2068,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // Mathods called by the data source on the store
 
   /**
-    Called by a dataSource when it cancels an inflight operation on a 
+    Called by a `dataSource` when it cancels an inflight operation on a 
     record.  This will transition the record back to it non-inflight state.
     
     @param {Number} storeKey record store key to cancel
@@ -2121,7 +2122,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     Called by a data source when it creates or commits a record.  Passing an
-    optional id will remap the storeKey to the new record id.  This is 
+    optional id will remap the `storeKey` to the new record id.  This is 
     required when you commit a record that does not have an id yet.
     
     @param {Number} storeKey record store key to change to READY_CLEAN state
@@ -2326,21 +2327,21 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // FETCH CALLBACKS
   // 
   
-  // NOTE: although these method works on RecordArray instances right now.
+  // **NOTE**: although these method works on RecordArray instances right now.
   // They could be optimized to actually share query results between nested
   // stores.  This is why these methods are implemented here instead of 
-  // directly on Query or RecordArray objects.
+  // directly on `Query` or `RecordArray` objects.
   
   /**
     Sets the passed array of storeKeys as the new data for the query.  You
     can call this at any time for a remote query to update its content.  If
-    you want to use incremental loading, then pass a SparseArray object.
+    you want to use incremental loading, then pass a `SparseArray` object.
     
     If the query you pass is not a REMOTE query, then this method will raise
     an exception.  This will also implicitly transition the query state to 
-    SC.Record.READY.
+    `SC.Record.READY`.
     
-    If you called loadRecords() before to load the actual content, you can
+    If you called `loadRecords()` before to load the actual content, you can
     call this method with the return value of that method to actually set the
     storeKeys on the result.
     
@@ -2365,7 +2366,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     query.  This will put the query into a READY state if it was loading.
     
     Note that if the query is a REMOTE query, then you must separately load 
-    the results into the query using loadQueryResults().  If the query is 
+    the results into the query using `loadQueryResults()`.  If the query is 
     LOCAL, then the query will update automatically with any new records you 
     added to the store.
     
@@ -2486,7 +2487,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // 
 
   /** 
-    Given a storeKey, return the primaryKey.
+    Given a `storeKey`, return the `primaryKey`.
   
     @param {Number} storeKey the store key
     @returns {String} primaryKey value
@@ -2506,8 +2507,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Given a recordType and primaryKey, find the storeKey. If the primaryKey 
-    has not been assigned a storeKey yet, it will be added.
+    Given a `recordType` and `primaryKey`, find the `storeKey`. If the
+    `primaryKey` has not been assigned a `storeKey` yet, it will be added.
     
     @param {SC.Record} recordType the record type
     @param {String} primaryKey the primary key
@@ -2518,9 +2519,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Given a primaryKey value for the record, returns the associated
-    storeKey.  As opposed to storeKeyFor() however, this method
-    will NOT generate a new storeKey but returned undefined.
+    Given a `primaryKey` value for the record, returns the associated
+    `storeKey`.  As opposed to `storeKeyFor()` however, this method
+    will **NOT** generate a new `storeKey` but returned `undefined`.
     
     @param {SC.Record} recordType the record type
     @param {String} primaryKey the primary key
@@ -2531,7 +2532,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Finds all storeKeys of a certain record type in this store
+    Finds all `storeKey`s of a certain record type in this store
     and returns an array.
     
     @param {SC.Record} recordType
@@ -2557,7 +2558,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Finds all storeKeys in this store
+    Finds all `storeKey`s in this store
     and returns an array.
     
     @returns {Array} set of storeKeys
@@ -2577,7 +2578,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Returns string representation of a storeKey, with status.
+    Returns string representation of a `storeKey`, with status.
     
     @param {Number} storeKey
     @returns {String}
@@ -2648,22 +2649,22 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   
   /** @private
     This array maps all storeKeys to primary keys.  You will not normally
-    access this method directly.  Instead use the idFor() and 
-    storeKeyFor() methods on SC.Record.
+    access this method directly.  Instead use the `idFor()` and 
+    `storeKeyFor()` methods on `SC.Record`.
   */
   idsByStoreKey: [],
   
   /** @private
-    Maps all storeKeys to a recordType.  Once a storeKey is associated with 
-    a primaryKey and recordType that remains constant throughout the lifetime
-    of the application.
+    Maps all `storeKey`s to a `recordType`.  Once a `storeKey` is associated
+    with a `primaryKey` and `recordType` that remains constant throughout the
+    lifetime of the application.
   */
   recordTypesByStoreKey: {},
   
   /** @private
-    Maps some storeKeys to query instance.  Once a storeKey is associated with
-    a query instance, that remains constant through the lifetime of the 
-    application.  If a Query is destroyed, it will remove itself from this 
+    Maps some `storeKeys` to query instance.  Once a `storeKey` is associated
+    with a query instance, that remains constant through the lifetime of the 
+    application.  If a `Query` is destroyed, it will remove itself from this 
     list.
     
     Don't access this directly.  Use queryFor().
@@ -2683,8 +2684,8 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   generateStoreKey: function() { return this.nextStoreKey++; },
   
   /** 
-    Given a storeKey returns the primaryKey associated with the key.
-    If not primaryKey is associated with the storeKey, returns null.
+    Given a `storeKey` returns the `primaryKey` associated with the key.
+    If no `primaryKey` is associated with the `storeKey`, returns `null`.
     
     @param {Number} storeKey the store key
     @returns {String} the primary key or null
@@ -2694,8 +2695,8 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   },
   
   /**
-    Given a storeKey, returns the query object associated with the key.  If
-    no query is associated with the storeKey, returns null.
+    Given a `storeKey`, returns the query object associated with the key.  If
+    no query is associated with the `storeKey`, returns `null`.
     
     @param {Number} storeKey the store key
     @returns {SC.Query} query query object
@@ -2705,8 +2706,8 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   },
   
   /**
-    Given a storeKey returns the SC.Record class associated with the key.
-    If no record type is associated with the store key, returns null.
+    Given a `storeKey` returns the `SC.Record` class associated with the key.
+    If no record type is associated with the store key, returns `null`.
     
     The SC.Record class will only be found if you have already called
     storeKeyFor() on the record.
@@ -2719,8 +2720,8 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   },
   
   /**
-    Swaps the primaryKey mapped to the given storeKey with the new 
-    primaryKey.  If the storeKey is not currently associated with a record
+    Swaps the `primaryKey` mapped to the given storeKey with the new 
+    `primaryKey`.  If the `storeKey` is not currently associated with a record
     this will raise an exception.
     
     @param {Number} storeKey the existing store key
@@ -2751,10 +2752,10 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   },
   
   /**
-    Swaps the recordType recorded for a given storeKey.  Normally you should
-    not call this method directly as it can damage the store behavior.  This
-    method is used by other store methods to set the recordType for a 
-    storeKey.
+    Swaps the `recordType` recorded for a given `storeKey`.  Normally you
+    should not call this method directly as it can damage the store behavior.
+    This method is used by other store methods to set the `recordType` for a 
+    `storeKey`.
     
     @param {Integer} storeKey the store key
     @param {SC.Record} recordType a record class
@@ -2789,11 +2790,11 @@ SC.Store._getDefaultStore = function() {
 
   DEPRECATED
   
-  Included for compatibility, loads data hashes with the named recordType. 
-  If no recordType is passed, expects to find a recordType property in the 
-  data hashes.  dataSource and isLoaded params are ignored.
+  Included for compatibility, loads data hashes with the named `recordType`. 
+  If no `recordType` is passed, expects to find a `recordType` property in the 
+  data hashes.  `dataSource` and `isLoaded` params are ignored.
   
-  Calls SC.Store#loadRecords() on the default store. Do not use this method in 
+  Calls `SC.Store#loadRecords()` on the default store. Do not use this method in 
   new code.  
   
   @param {Array} dataHashes data hashes to import
@@ -2831,8 +2832,8 @@ SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded) 
   DEPRECATED 
 
   Finds a record with the passed guid on the default store.  This is included
-  only for compatibility.  You should use the newer find() method defined on
-  SC.Store instead.
+  only for compatibility.  You should use the newer `find()` method defined on
+  `SC.Store` instead.
   
   @param {String} guid the guid
   @param {SC.Record} recordType expected record type
@@ -2846,8 +2847,8 @@ SC.Store.find = function(guid, recordType) {
 
   DEPRECATED 
 
-  Passes through to findAll on default store.  This is included only for 
-  compatibility.  You should use the newer findAll() defined on SC.Store
+  Passes through to `findAll` on default store.  This is included only for 
+  compatibility.  You should use the newer `findAll()` defined on `SC.Store`
   instead.
   
   @param {Hash} filter search parameters

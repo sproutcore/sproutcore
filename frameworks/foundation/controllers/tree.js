@@ -7,6 +7,10 @@
 
 sc_require('private/tree_item_observer');
 
+/*
+  TODO Document more
+*/
+
 /**
   @class
 
@@ -15,8 +19,6 @@ sc_require('private/tree_item_observer');
   work with a TreeController much like you would an ObjectController, except
   that the TreeController will also provide an arrangedObjects property that
   can be used as the content of a CollectionView.
-
-  TODO: Document More
 
   @extends SC.ObjectController
   @extends SC.SelectionSupport
@@ -33,7 +35,8 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     Set to YES if you want the top-level items in the tree to be displayed as
     group items in the collection view.
 
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   treeItemIsGrouped: NO,
 
@@ -43,7 +46,8 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     determine the expansion state of the item.  The default is
     "treeItemIsExpanded"
 
-    @property {String}
+    @type String
+    @default "treeItemIsExpanded"
   */
   treeItemIsExpandedKey: "treeItemIsExpanded",
 
@@ -51,7 +55,8 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     Set to the name of the property on your content object that holds the
     children array for each tree node.  The default is "treeItemChildren".
 
-    @property {String}
+    @type String
+    @default "treeItemChildren"
   */
   treeItemChildrenKey: "treeItemChildren",
 

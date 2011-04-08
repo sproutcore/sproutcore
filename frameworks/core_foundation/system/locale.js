@@ -15,21 +15,17 @@
   languages and saved at SC.Locale.current.  This locale is used for 
   localization, etc.
   
-  h2. Creating a new locale
+  ## Creating a new locale
   
   You can create a locale by simply extending the SC.Locale class and adding
   it to the locales hash:
   
-  {{{
-    SC.Locale.locales['en'] = SC.Locale.extend({ .. config .. }) ;
-  }}}
+      SC.Locale.locales['en'] = SC.Locale.extend({ .. config .. }) ;
   
   Alternatively, you could choose to base your locale on another locale by
   extending that locale:
   
-  {{{
-    SC.Locale.locales['en-US'] = SC.Locale.locales['en'].extend({ ... }) ;
-  }}}
+      SC.Locale.locales['en-US'] = SC.Locale.locales['en'].extend({ ... }) ;
   
   Note that if you do not define your own strings property, then your locale
   will inherit any strings added to the parent locale.  Otherwise you must

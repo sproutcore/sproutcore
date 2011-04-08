@@ -12,7 +12,23 @@
   
   Usually it is best to leave this property set to NO in order to prever the
   user from inadvertantly losing data by pressing the backspace key.
-  
-  @property {Boolean}
+
+  @static
+  @type Boolean
+  @default NO
 */
 SC.allowsBackspaceToPreviousPage = NO;
+
+/**
+  @type String
+  @static
+  @constant
+*/
+SC.HORIZONTAL_ORIENTATION = 'horizontal';
+
+/**
+  @type String
+  @static
+  @constant
+*/
+SC.VERTICAL_ORIENTATION = 'vertical' ;

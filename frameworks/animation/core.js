@@ -8,31 +8,29 @@
 /*globals */
 
 /** @namespace
-A simple mixin called Animatable is provided. What does it do?
-It makes CSS transitions for you, and if they aren't available,
-implements them in JavaScript.
+  A simple mixin called Animatable is provided. What does it do?
+  It makes CSS transitions for you, and if they aren't available,
+  implements them in JavaScript.
 
-Animatable things:
-- layout. You can animate any layout property, even centerX and centerY
-- opacity.
-- display, in a way. All animating display does is delay setting display:none
-  until <em>after</em> the transition duration has passed. This allows you
-  to set display:none after fading out. If mixing with CSS transitions, you will
-  need to set the delay a tad longer to accomodate any delays in beginning the
-  transition.
+  ## Animatable things:
 
-@class SC.Animatable
-@example Example Usage:
-{{{
-aView: SC.LabelView.design(SC.Animatable, {
-  transitions: {
-    left: {duration: .25},
-    top: .25, // only possible during design; otherwise you must use long form.
-    width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
-  }
-})
-}}}
-@extends SC.Object
+    - layout. You can animate any layout property, even centerX and centerY
+    - opacity.
+    - display, in a way. All animating display does is delay setting display:none
+      until <em>after</em> the transition duration has passed. This allows you
+      to set display:none after fading out. If mixing with CSS transitions, you will
+      need to set the delay a tad longer to accomodate any delays in beginning the
+      transition.
+
+  ## Example Usage:
+
+      aView: SC.LabelView.design(SC.Animatable, {
+        transitions: {
+          left: {duration: .25},
+          top: .25, // only possible during design; otherwise you must use long form.
+          width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
+        }
+      })
 */
 SC.Animatable = {
   /** @scope SC.Animatable.prototype */

@@ -18,13 +18,13 @@ sc_require('mixins/collection_row_delegate');
   also should provide a default rowHeight.  Setting this value will allow 
   the ListView to optimize its rendering.
   
-  h2. Variable Row Heights
+  ## Variable Row Heights
 
   Normally you set the row height through the rowHeight property.  You can 
   also support custom row heights by implementing the 
   contentCustomRowHeightIndexes property to return an index set.
   
-  h2. Using ListView with Very Large Data Sets
+  ## Using ListView with Very Large Data Sets
   
   ListView implements incremental rendering, which means it will only render
   HTML for the items that are current visible on the screen.  You can use it
@@ -54,44 +54,58 @@ sc_require('mixins/collection_row_delegate');
   @extends SC.CollectionRowDelegate
   @since SproutCore 1.0
 */
-SC.ListView = SC.CollectionView.extend(
-  SC.CollectionRowDelegate,
+SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 /** @scope SC.ListView.prototype */ {
-  
+
+  /**
+    @type Array
+    @default ['sc-list-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-list-view'],
 
+  /**
+    @type Boolean
+    @default YES
+  */
   acceptsFirstResponder: YES,
   
   /**
-  * If set to YES, the default theme will show alternating rows
-  * for the views this ListView created through exampleView property.
-  *
-  * @property {Boolean} 
+    If set to YES, the default theme will show alternating rows
+    for the views this ListView created through exampleView property.
+    
+    @type Boolean
+    @default NO
   */
   showAlternatingRows: NO,
+  
   
   // ..........................................................
   // METHODS
   //
   
+  /** @private */
   render: function(context, firstTime) {
     context.setClass('alternating', this.get('showAlternatingRows'));
     
     return sc_super();
   },
 
+
   // ..........................................................
   // COLLECTION ROW DELEGATE SUPPORT
   // 
   
-  
   /**
-    Returns the current collectionRowDelegate.  This property will recompute
-    everytime the content changes.
+    @field
+    @type Object
+    @observes 'delegate'
+    @observes 'content'
   */
   rowDelegate: function() {
-    var del     = this.delegate,
+    var del = this.delegate,
         content = this.get('content');
+
     return this.delegateFor('isCollectionRowDelegate', del, content);
   }.property('delegate', 'content').cacheable(),
   
@@ -186,6 +200,7 @@ SC.ListView = SC.CollectionView.extend(
     this.rowHeightDidChangeForIndexes(changed);
     return this ;
   },
+  
   
   // ..........................................................
   // ROW PROPERTIES
@@ -289,7 +304,7 @@ SC.ListView = SC.CollectionView.extend(
     @returns {SC.ListView} receiver
   */  
   rowHeightDidChangeForIndexes: function(indexes) {
-    var len     = this.get('length');
+    var len = this.get('length');
 
     // clear any cached offsets
     this._sclv_heightCache = this._sclv_offsetCache = null;
@@ -318,19 +333,20 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   /**
-  
     Computes the layout for a specific content index by combining the current
     row heights.
-  
+    
+    @param {Number} contentIndex
+    @returns {Hash} layout hash for the index provided
   */
   layoutForContentIndex: function(contentIndex) {
     var del = this.get('rowDelegate');
     
     return {
-      top:    this.rowOffsetForContentIndex(contentIndex),
+      top: this.rowOffsetForContentIndex(contentIndex),
       height: this.rowHeightForContentIndex(contentIndex) - del.get('rowPadding') * 2,
-      left:   0, 
-      right:  0
+      left: 0,
+      right: 0
     };
   },
   
@@ -412,10 +428,10 @@ SC.ListView = SC.CollectionView.extend(
     return SC.IndexSet.create(start, end-start);
   },
   
+  
   // ..........................................................
   // DRAG AND ROP SUPPORT
   // 
-  
   
   /**
     Default view class used to draw an insertion point.  The default 
@@ -423,20 +439,21 @@ SC.ListView = SC.CollectionView.extend(
     should expect an outlineLevel property set, which should impact your left
     offset.
     
-    @property 
-    @type {SC.View}
+    @field
+    @type SC.View
   */
   insertionPointView: SC.View.extend({
     classNames: 'sc-list-insertion-point',
     
+    /** @private */
     render: function(context, firstTime) {
       if (firstTime) context.push('<div class="anchor"></div>');
     }
-    
   }),
 
   /**
     Default implementation will show an insertion point
+    @see SC.CollectionView#showInsertionPoint
   */
   showInsertionPoint: function(itemView, dropOperation) {
     var view = this._insertionPointView;
@@ -488,6 +505,9 @@ SC.ListView = SC.CollectionView.extend(
     }
   },
   
+  /**
+    @see SC.CollectionView#hideInsertionPoint
+  */
   hideInsertionPoint: function() {
     if (this._lastDropOnView) {
       this._lastDropOnView.set('isSelected', NO);
@@ -504,15 +524,15 @@ SC.ListView = SC.CollectionView.extend(
     a point, relative to the top/left corner of the receiver view.  The return
     value is an index plus a dropOperation, which is computed as such:
     
-    - if outlining is not used and you are within 5px of an edge, DROP_BEFORE
-      the item after the edge.
-      
-    - if outlining is used and you are within 5px of an edge and the previous
-      item has a different outline level then the next item, then DROP_AFTER
-      the previous item if you are closer to that outline level.
-      
-    - if dropOperation = SC.DROP_ON and you are over the middle of a row, then
-      use DROP_ON.
+      - if outlining is not used and you are within 5px of an edge, DROP_BEFORE
+        the item after the edge.
+      - if outlining is used and you are within 5px of an edge and the previous
+        item has a different outline level then the next item, then DROP_AFTER
+        the previous item if you are closer to that outline level.
+      - if dropOperation = SC.DROP_ON and you are over the middle of a row, then
+        use DROP_ON.
+    
+    @see SC.CollectionView.insertionIndexForLocation
   */
   insertionIndexForLocation: function(loc, dropOperation) {
     var locRect = {x:loc.x, y:loc.y, width:1, height:1},
@@ -545,8 +565,6 @@ SC.ListView = SC.CollectionView.extend(
         return [index, SC.DROP_ON];
       }
     }
-    
-    
     
     // ok, now if we are in last 10px, go to next item.
     if ((index<len) && (loc.y >= max-10)) index++;
@@ -613,6 +631,7 @@ SC.ListView = SC.CollectionView.extend(
     return [index, dropOperation];
   },
   
+  /** @private */
   mouseWheel: function(evt) {
     // The following commits changes in a list item that is being edited,
     // if the list is scrolled.
@@ -629,6 +648,7 @@ SC.ListView = SC.CollectionView.extend(
   // INTERNAL SUPPORT
   // 
 
+  /** @private */
   init: function() {
     sc_super();
     this._sclv_rowDelegateDidChange();

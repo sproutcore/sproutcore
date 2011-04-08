@@ -1051,6 +1051,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     return sc_super();
   },
   
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
+  },
+  
   /**
     Adds mouse wheel support for textareas.
   */

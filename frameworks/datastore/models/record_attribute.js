@@ -56,11 +56,12 @@ SC.RecordAttribute = SC.Object.extend(
   isRecordAttribute: YES,
 
   /**
-    The default value.  If attribute is null or undefined, this default value
-    will be substituted instead.  Note that defaultValues are not converted
-    so the value should be in the output type expected by the attribute.
+    The default value.  If attribute is `null` or `undefined`, this default
+    value will be substituted instead.  Note that `defaultValue`s are not
+    converted, so the value should be in the output type expected by the
+    attribute.
     
-    If you use a defaultValue function, the arguments given to it is the
+    If you use a `defaultValue` function, the arguments given to it are the
     record instance and the key.
     
     @type Object|function
@@ -73,7 +74,7 @@ SC.RecordAttribute = SC.Object.extend(
     naming a class.  The built in handler allows all native types to pass 
     through, converts records to ids and dates to UTF strings.
     
-    If you use the attr() helper method to create a RecordAttribute instance,
+    If you use the `attr()` helper method to create a RecordAttribute instance,
     it will set this property to the first parameter you pass.
     
     @type Object|String
@@ -93,7 +94,7 @@ SC.RecordAttribute = SC.Object.extend(
   key: null,
   
   /**
-    If YES, then the attribute is required and will fail validation unless
+    If `YES`, then the attribute is required and will fail validation unless
     the property is set to a non-null or undefined value.
     
     @type Boolean
@@ -102,7 +103,7 @@ SC.RecordAttribute = SC.Object.extend(
   isRequired: NO,
   
   /**
-    If NO then attempts to edit the attribute will be ignored.
+    If `NO` then attempts to edit the attribute will be ignored.
     
     @type Boolean
     @default YES
@@ -183,7 +184,7 @@ SC.RecordAttribute = SC.Object.extend(
   /** 
     Converts the passed value into the core attribute value.  This will apply 
     any format transforms.  You can install standard transforms by adding to
-    the SC.RecordAttribute.transforms hash.  See 
+    the `SC.RecordAttribute.transforms` hash.  See 
     SC.RecordAttribute.registerTransform() for more.
     
     @param {SC.Record} record The record instance
@@ -220,8 +221,8 @@ SC.RecordAttribute = SC.Object.extend(
     
     Shared observer used by any attribute whose transform creates a seperate
     object that needs to write back to the datahash when it changes. For
-    example, when enumerable content changes on a SC.Set attribute, it
-    writes back automatically instead of forcing you to call .set manually.
+    example, when enumerable content changes on a `SC.Set` attribute, it
+    writes back automatically instead of forcing you to call `.set` manually.
     
     This functionality can be used by setting an array named
     observesChildren on your transform containing the names of keys to
@@ -244,8 +245,8 @@ SC.RecordAttribute = SC.Object.extend(
   /** 
     Converts the passed value from the core attribute value.  This will apply 
     any format transforms.  You can install standard transforms by adding to
-    the SC.RecordAttribute.transforms hash.  See 
-    SC.RecordAttribute.registerTransform() for more.
+    the `SC.RecordAttribute.transforms` hash.  See 
+    `SC.RecordAttribute.registerTransform()` for more.
 
     @param {SC.Record} record The record instance
     @param {String} key The key used to access this attribute on the record
@@ -263,8 +264,8 @@ SC.RecordAttribute = SC.Object.extend(
   },
 
   /**
-    The core handler. Called when get() is called on the
-    parent record, since SC.RecordAttribute uses isProperty to masquerade
+    The core handler. Called when `get()` is called on the
+    parent record, since `SC.RecordAttribute` uses `isProperty` to masquerade
     as a computed property. Get expects a property be a function, thus we
     need to implement call.
     
@@ -301,13 +302,13 @@ SC.RecordAttribute = SC.Object.extend(
   // INTERNAL SUPPORT
   // 
   
-  /** @private - Make this look like a property so that get() will call it. */
+  /** @private - Make this look like a property so that `get()` will call it. */
   isProperty: YES,
   
   /** @private - Make this look cacheable */
   isCacheable: YES,
   
-  /** @private - needed for KVO property() support */
+  /** @private - needed for KVO `property()` support */
   dependentKeys: [],
   
   /** @private */
@@ -327,9 +328,9 @@ SC.RecordAttribute.mixin(
   /** @scope SC.RecordAttribute.prototype */{
   /**
     The default method used to create a record attribute instance.  Unlike 
-    create(), takes an attributeType as the first parameter which will be set 
-    on the attribute itself.  You can pass a string naming a class or a class
-    itself.
+    `create()`, takes an `attributeType` as the first parameter which will be
+    set on the attribute itself.  You can pass a string naming a class or a
+    class itself.
 
     @static
     @param {Object|String} attributeType the assumed attribute type
@@ -352,11 +353,15 @@ SC.RecordAttribute.mixin(
     object you pass can be of any type as long as it responds to the following
     methods
     
-    - *to(value, attr, klass, record, key)* converts the passed value (which will be of the class expected by the attribute) into the underlying attribute value
-    - *from(value, attr, klass, record, key)* converts the underyling attribute value into a value of the class
+     - `to(value, attr, klass, record, key)` converts the passed value
+       (which will be of the class expected by the attribute) into the
+       underlying attribute value
+     - `from(value, attr, klass, record, key)` converts the underyling
+       attribute value into a value of the class
     
-    
-    You can also provide an array of keys to observer on the return value. When any of these change, your from method will be called to write the changed object back to the record. For example:
+    You can also provide an array of keys to observer on the return value.
+    When any of these change, your from method will be called to write the
+    changed object back to the record. For example:
 
         {
           to: function(value, attr, type, record, key) {
@@ -548,14 +553,16 @@ SC.RecordAttribute.registerTransform(Date, {
 
 if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
   /**
-    Registers a transform to allow SC.DateTime to be used as a record attribute,
-    ie SC.Record.attr(SC.DateTime);
+    Registers a transform to allow `SC.DateTime` to be used as a record
+    attribute, ie `SC.Record.attr(SC.DateTime);`
   
-    Because SC.RecordAttribute is in the datastore framework and SC.DateTime in
-    the foundation framework, and we don't know which framework is being loaded
-    first, this chunck of code is duplicated in both frameworks.
+    Because `SC.RecordAttribute` is in the datastore framework and
+    `SC.DateTime` in the foundation framework, and we don't know which
+    framework is being loaded first, this chunck of code is duplicated in
+    both frameworks.
   
-    IF YOU EDIT THIS CODE MAKE SURE YOU COPY YOUR CHANGES to record_attribute.js. 
+    IF YOU EDIT THIS CODE MAKE SURE YOU COPY YOUR CHANGES to
+    `record_attribute.js.`
   */
 
   SC.RecordAttribute.registerTransform(SC.DateTime, {

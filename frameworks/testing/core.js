@@ -13,6 +13,9 @@ var require = require || function sc_require() {};
 var sc_require = sc_require || require;
 var sc_resource = sc_resource || function sc_resource() {};
 
+// map used to exist, this is here for backwards compatibility
+var Q$ = jQuery;
+
 /** @namespace
 
   CoreTest is the unit testing library for SproutCore.  It includes a test 

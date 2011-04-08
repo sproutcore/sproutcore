@@ -181,7 +181,7 @@ test("hasContent", function() {
 // SINGLE OBSERVABLE OBJECT IN COLLECTION, ADDED AFTER CONTROLLER CONTENT SET
 // 
 
-module("SC.ObjectController - single_enumerable_case - ALLOWS MULTIPLE", {
+module("SC.ObjectController - single_enumerable_case after content set - ALLOWS MULTIPLE", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
     content    = SC.Set.create(); // use generic enumerable

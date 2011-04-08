@@ -19,23 +19,21 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right';
   optionally, a splitDividerView.  You can also set various other properties
   to control the minimum and maximum thickness allowed for the flexible views.
   
-  h2. Example
+  ## Example
   
-  {{{
-    SC.SplitView.design({
+      SC.SplitView.design({
       
-      // the left view...
-      topLeftView: SC.View.design({
-        // view contents
-      }),
+        // the left view...
+        topLeftView: SC.View.design({
+          // view contents
+        }),
       
-      // the right view
-      bottomRightView: SC.View.design({
-        // view contents
+        // the right view
+        bottomRightView: SC.View.design({
+          // view contents
+        })
+      
       })
-      
-    })
-  }}}
   
   When the user clicks and drags on a split divider view, it will
   automatically resize the views immediately before and after the split
@@ -65,7 +63,6 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right';
   
   @extends SC.View
   @since SproutCore 1.0
-  
   @author Charles Jolley
   @author Lawrence Pit
   @author Erich Ocean
@@ -85,7 +82,7 @@ SC.SplitView = SC.View.extend(
   /**
     Direction of layout.  Must be SC.LAYOUT_HORIZONTAL or SC.LAYOUT_VERTICAL.
     
-    @property {String}
+    @type String
     @default SC.LAYOUT_HORIZONTAL
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
@@ -93,7 +90,7 @@ SC.SplitView = SC.View.extend(
   /**
     Set to NO to disable collapsing for all views.
     
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   canCollapseViews: YES,
@@ -105,7 +102,7 @@ SC.SplitView = SC.View.extend(
     | SC.RESIZE_BOTTOM_RIGHT | (default) resizes bottomRightView |
     | SC.RESIZE_TOP_LEFT | resized topLeftView |
     
-    @property {String}
+    @type String
     @default SC.RESIZE_BOTTOM_RIGHT
   */
   autoresizeBehavior: SC.RESIZE_BOTTOM_RIGHT,
@@ -118,7 +115,7 @@ SC.SplitView = SC.View.extend(
     The thickness will be applied to the opposite view defined by 
     autoresizeBehavior.
     
-    @property {Number}
+    @type Number
     @default 0.5
   */
   defaultThickness: 0.5,
@@ -126,7 +123,7 @@ SC.SplitView = SC.View.extend(
   /**
     Sets minimum thickness of topLeft view.
 
-    @property {Number}
+    @type Number
     @default null
   */
   topLeftMinThickness: null,
@@ -134,7 +131,7 @@ SC.SplitView = SC.View.extend(
   /**
     Sets maximum thickness of topLeft view.
 
-    @property {Number}
+    @type Number
     @default null
   */
   topLeftMaxThickness: null,
@@ -142,7 +139,7 @@ SC.SplitView = SC.View.extend(
   /**
     Sets minimum thickness of bottomRight view.
 
-    @property {Number}
+    @type Number
     @default null
   */
   bottomRightMinThickness: null,
@@ -150,7 +147,7 @@ SC.SplitView = SC.View.extend(
   /**
     Sets maximum thickness of bottomRight view.
 
-    @property {Number}
+    @type Number
     @default null
   */
   bottomRightMaxThickness: null,
@@ -158,7 +155,7 @@ SC.SplitView = SC.View.extend(
   /**
     Sets thickness of divider.
 
-    @property {Number}
+    @type Number
     @default null
   */
   dividerThickness: null,
@@ -166,7 +163,7 @@ SC.SplitView = SC.View.extend(
   /**
     Yes, we're a split view.
     
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   isSplitView: YES,
@@ -174,7 +171,7 @@ SC.SplitView = SC.View.extend(
   /**
     The view to use for the top left
     
-    @property {SC.View}
+    @type SC.View
     @default SC.View
   */
   topLeftView: SC.View,
@@ -182,7 +179,7 @@ SC.SplitView = SC.View.extend(
   /**
     The view to use for the divider
     
-    @property {SC.View}
+    @type SC.View
     @default SC.SplitDividerView
   */
   dividerView: SC.SplitDividerView,
@@ -190,7 +187,7 @@ SC.SplitView = SC.View.extend(
   /**
     The view to use for the bottom right
     
-    @property {SC.View}
+    @type SC.View
     @default SC.View
   */
   bottomRightView: SC.View,
@@ -198,7 +195,7 @@ SC.SplitView = SC.View.extend(
   /**
     The current thickness for the topLeftView
     
-    @property {Number}
+    @type Number
     @isReadOnly
   */
   topLeftThickness: function() {
@@ -209,7 +206,7 @@ SC.SplitView = SC.View.extend(
   /**
     The current thickness for the bottomRightView
     
-    @property {Number}
+    @type Number
     @isReadOnly
   */
   bottomRightThickness: function() {
@@ -220,7 +217,7 @@ SC.SplitView = SC.View.extend(
   /**
     The cursor thumb views should use for themselves
     
-    @property {SC.Cursor}
+    @type SC.Cursor
     @default null
   */
   thumbViewCursor: null,
@@ -228,7 +225,7 @@ SC.SplitView = SC.View.extend(
   /**
     Used by split divider to decide if the view can be collapsed.
     
-    @property {Boolean}
+    @type Boolean
     @isReadOnly
   */
   canCollapseView: function(view) {
@@ -247,7 +244,7 @@ SC.SplitView = SC.View.extend(
     return (direction === SC.LAYOUT_HORIZONTAL) ? ret.width : ret.height;
   },
   
-  /**
+  /** @private
     Creates the topLeftView/dividerView/bottomRightView and adds them to the
     childViews array
     
@@ -273,7 +270,7 @@ SC.SplitView = SC.View.extend(
     return this;
   },
   
-  /**
+  /** @private
     Layout the views.
     
     This method needs to be called anytime you change the view thicknesses
@@ -524,7 +521,7 @@ SC.SplitView = SC.View.extend(
     else context.addClass('sc-vertical');
   },
   
-  /**
+  /** @private
     Update the split view's layout based on mouse movement.
     
     Call this method in the mouseDown: method of your thumb view. The split view
@@ -557,12 +554,14 @@ SC.SplitView = SC.View.extend(
     return YES;
   },
   
+  /** @private */
   mouseDragged: function(evt) {
     var offset = (this._layoutDirection === SC.LAYOUT_HORIZONTAL) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
     this._updateTopLeftThickness(offset);
     return YES;
   },
   
+  /** @private */
   mouseUp: function(evt) {
     if (this._inLiveResize === YES) {
     	this._thumbView = null; // avoid memory leaks
@@ -581,14 +580,17 @@ SC.SplitView = SC.View.extend(
     return NO;
   },
   
+  /** @private */
   touchesDragged: function(evt){
     return this.mouseDragged(evt);
   },
   
+  /** @private */
   touchEnd: function(evt){
     return this.mouseUp(evt);
   },
   
+  /** @private */
   doubleClickInThumbView: function(evt, thumbView) {
     var view = this._topLeftView,
         isCollapsed = view.get('isCollapsed') || NO;
@@ -712,6 +714,7 @@ SC.SplitView = SC.View.extend(
   },
   
   
+  /** @private */
   _updateBottomRightThickness: function(offset) {
     var topLeftView = this._topLeftView ,
         bottomRightView = this._bottomRightView,
@@ -856,11 +859,12 @@ SC.SplitView = SC.View.extend(
   },
   
   /* Force to rendering once the pane is attached */
+  /** @private */
   _forceSplitCalculation: function(){
     this.updateLayout(); 
   }.observes('*pane.isPaneAttached'),
 
-  /**
+  /** @private
     This method is invoked on the split view when the view resizes due to a layout
     change or due to the parent view resizing. It forces an update on topLeft and
     bottomRight thickness.
@@ -877,10 +881,12 @@ SC.SplitView = SC.View.extend(
 });
 
 // TODO: This should be a mixin to the few classes that need it
-SC.mixin(SC.View.prototype, {
+SC.mixin(SC.View.prototype,
+/** @scope SC.View.prototype */ {
+
   /**
     The current split view this view is embedded in (may be null).
-    @property {SC.SplitView}
+    @type SC.SplitView
   */
   splitView: function() {
     var view = this ;

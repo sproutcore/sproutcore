@@ -656,9 +656,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     The callback must have the following signature:
 
-    {{{
-      function callback(object, index, source, indexSet) { ... }
-    }}}
+        function callback(object, index, source, indexSet) { ... }
 
     If you pass a target, it will be used when the callback is called.
 

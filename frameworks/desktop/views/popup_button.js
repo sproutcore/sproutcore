@@ -4,6 +4,10 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+<<<<<<< HEAD
+=======
+
+>>>>>>> public/master
 sc_require('views/button');
 
 /** @class
@@ -30,7 +34,20 @@ sc_require('views/button');
 */
 SC.PopupButtonView = SC.ButtonView.extend(
 /** @scope SC.PopupButtonView.prototype */ {
+
+  /**
+    @type Array
+    @default ['sc-popup-button']
+    @see SC.View#classNames
+  */
   classNames: ['sc-popup-button'],
+
+  /**
+    @type String
+    @default 'popupButtonRenderDelegate'
+  */
+  renderDelegateName: 'popupButtonRenderDelegate',
+
 
   // ..........................................................
   // PROPERTIES
@@ -54,17 +71,17 @@ SC.PopupButtonView = SC.ButtonView.extend(
   /**
     If YES and the menu is a class, this will cause a task that will instantiate the menu
     to be added to SC.backgroundTaskQueue.
+    
+    @type Boolean
+    @default NO
   */
   shouldLoadInBackground: NO,
 
   // ..........................................................
   // INTERNAL SUPPORT
   //
-
-  renderDelegateName: 'popupButtonRenderDelegate',
   
-  /**
-    @private
+  /** @private
     If necessary, adds the loading of the menu to the background task queue.
   */
   init: function() {
@@ -75,8 +92,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     }
   },
   
-  /**
-    @private
+  /** @private
     Sets up binding on the menu, removing any old ones if necessary.
   */
   _setupMenu: function() {
@@ -92,7 +108,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     }
   },
   
-  /**
+  /** @private
     Setup the bindings for menu...
   */
   _popup_menuDidChange: function() {
@@ -104,8 +120,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   */
   isActive: NO,
   
-  /**
-    @private
+  /** @private
     Instantiates the menu if it is not already instantiated.
   */
   _instantiateMenu: function() {
@@ -122,9 +137,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     this._setupMenu();
   },
   
-  acceptsFirstResponder: YES,
-  
-  /**
+  /** @private
     The guaranteed-instantiated menu.
   */
   instantiatedMenu: function() {
@@ -274,13 +287,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     var menu = this.get('instantiatedMenu') ;
 
     return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;
-  },
-
-  /** @private */
-  acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
-  }.property('isEnabled')
+  }
 
 });
 

@@ -79,7 +79,7 @@ SC.Event = function(originalEvent) {
   
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = 1,
+    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER,
         version = parseFloat(SC.browser.version);
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
@@ -88,23 +88,10 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
 
-      // Check Chrome first since it also responds to safari
-      if (!SC.browser.chrome) {
-        // Scrolling in Safari 5.0.1, which is huge for some reason
-        if (version >= 533.17 && version <= 533.19) {
-          deltaMultiplier = 0.004;
-
-        // Scrolling in Safari 5.0
-        } else if (version < 533 || version >= 534) {
-          deltaMultiplier = 40;
-        }
-      }
-
     // normalize wheelDelta for Firefox
     // note that we multiple the delta on FF to make it's acceleration more 
     // natural.
     } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
-      deltaMultiplier = 10;
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
         this.wheelDeltaY = this.wheelDelta = 0;
@@ -119,6 +106,15 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaX = 0 ;
     }
 
+    // we have a value over the limit and it wasn't caught when we generated MOUSE_WHEEL_MULTIPLIER
+    // this will happen as new Webkit-based browsers are released and we haven't covered them off
+    // in our browser detection. It'll scroll too quickly the first time, but we might as well learn
+    // and change our handling for the next scroll
+    if (this.wheelDelta > SC.Event.MOUSE_WHEEL_DELTA_LIMIT && !SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED) {
+      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.004;
+      SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES;
+    }
+
     this.wheelDelta *= deltaMultiplier;
     this.wheelDeltaX *= deltaMultiplier;
     this.wheelDeltaY *= deltaMultiplier;
@@ -128,6 +124,64 @@ SC.Event = function(originalEvent) {
 } ;
 
 SC.mixin(SC.Event, /** @scope SC.Event */ {
+
+  /**
+    We need this because some browsers deliver different values
+    for mouse wheel deltas. Once the first mouse wheel event has
+    been run, this value will get set. Because we don't know the
+    maximum or minimum value ahead of time, if the event's delta
+    exceeds `SC.Event.MOUSE_WHEEL_DELTA_LIMIT`, this value can be
+    invalidated and changed during a later event.
+
+    @field
+    @type Number
+    @default 1
+  */
+  MOUSE_WHEEL_MULTIPLIER: (function() {
+    var deltaMultiplier = 1,
+        version = parseFloat(SC.browser.version),
+        didChange = NO;
+
+    if (SC.browser.webkit) {
+      // Check Chrome first since it also responds to safari
+      if (!SC.browser.chrome) {
+        // Scrolling in Safari 5.0.1, which is huge for some reason
+        if (version >= 533.17 && version <= 533.20) {
+          deltaMultiplier = 0.004;
+          didChange = YES;
+        // Scrolling in Safari 5.0
+        } else if (version < 533 || version >= 534) {
+          deltaMultiplier = 40;
+          didChange = YES;
+        }
+      }
+    } else if (SC.browser.mozilla) {
+      deltaMultiplier = 10;
+      didChange = YES;
+    }
+
+    if (didChange) { SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES; }
+
+    return deltaMultiplier;
+  })(),
+
+  /**
+    This represents the limit in the delta before a different multiplier
+    will be applied. Because we can't generated an accurate mouse
+    wheel event ahead of time, and browsers deliver differing values
+    for mouse wheel deltas, this is necessary to ensure that
+    browsers that scale their values largely are dealt with correctly
+    in the future.
+
+    @type Number
+    @default 1000
+  */
+  MOUSE_WHEEL_DELTA_LIMIT: 1000,
+
+  /** @private
+    We only want to invalidate once
+  */
+  _MOUSE_WHEEL_LIMIT_INVALIDATED: NO,
 
   /** 
     Standard method to create a new event.  Pass the native browser event you
@@ -387,7 +441,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     Trigger an event execution immediately.  You can use this method to 
     simulate arbitrary events on arbitary elements.
 
-    h2. Limitations
+    ## Limitations
     
     Note that although this is based on the jQuery implementation, it is 
     much simpler.  Notably namespaced events are not supported and you cannot
@@ -396,11 +450,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     If you need more advanced event handling, consider the SC.Responder 
     functionality provided by SproutCore or use your favorite DOM library.
 
-    h2. Example
+    ## Example
     
-    {{{
-      SC.Event.trigger(view.get('layer'), 'mousedown');
-    }}}
+        SC.Event.trigger(view.get('layer'), 'mousedown');
     
     @param elem {Element} the target element
     @param eventType {String} the event type

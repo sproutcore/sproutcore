@@ -91,7 +91,7 @@ test("calling sc_super inside a reopened class", function() {
   equals(obj.loudly("foo"), "OHAI: ZOMG HAHA FOO!");
 });
 
-test("calling sc_super inside a reopened class", function() {
+test("calling sc_super inside a reopened class, reverse", function() {
   var Klass = SC.Object.extend();
 
   var object = Klass.create({
