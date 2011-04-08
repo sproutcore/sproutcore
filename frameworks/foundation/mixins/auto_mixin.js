@@ -14,6 +14,7 @@
   @since SproutCore 1.0
 */
 SC.AutoMixin = {
+
   /**
     The mixins to automatically mix in.
     @property
@@ -36,4 +37,5 @@ SC.AutoMixin = {
     v = v.create.apply(v, applyMixins);
     return v;
   }
+
 };

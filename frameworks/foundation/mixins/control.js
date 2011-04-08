@@ -11,48 +11,57 @@ sc_require('mixins/content_value_support');
 /**
   Option for controls to automatically calculate their size (should be default 
   on controls that use renderers).
+  
+  @type String
+  @constant
 */
 SC.AUTO_CONTROL_SIZE = '__AUTO__';
 
 /** 
   Option for HUGE control size.
   
-  @property {String}
+  @type String
+  @constant
 */
 SC.JUMBO_CONTROL_SIZE = 'sc-jumbo-size' ;
 
 /** 
   Option for HUGE control size.
   
-  @property {String}
+  @type String
+  @constant
 */
 SC.HUGE_CONTROL_SIZE = 'sc-huge-size' ;
 
 /** 
   Option for large control size.
   
-  @property {String}
+  @type String
+  @constant
 */
 SC.LARGE_CONTROL_SIZE = 'sc-large-size' ;
 
 /** 
   Option for standard control size.
   
-  @property {String}
+  @type String
+  @constant
 */
 SC.REGULAR_CONTROL_SIZE = 'sc-regular-size' ;
 
 /** 
   Option for small control size.
   
-  @property {String}
+  @type String
+  @constant
 */
 SC.SMALL_CONTROL_SIZE = 'sc-small-size' ;
 
 /** 
   Option for tiny control size
   
-  @property {String}
+  @type String
+  @constant
 */
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 
@@ -64,7 +73,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   functionality including showing a selected state, enabled state, focus
   state, etc.
   
-  h2. About Values and Content
+  ## About Values and Content
   
   Controls typically are used to represent a single value, such as a number,
   boolean or string.  The value a control is managing is typically stored in
@@ -98,7 +107,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   properties you care about on the content object and update your view if 
   anything you care about has changed.
   
-  h2. Delegate Support
+  ## Delegate Support
   
   Controls can optionally get the contentDisplayProperty from a 
   displayDelegate, if it is set.  The displayDelegate is often used to 
@@ -107,16 +116,29 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   collection view will be automatically set as its displayDelegate.
   
   @since SproutCore 1.0
+  @extends SC.ContentValueSupport
 */
-SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
+SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
+/** @scope SC.Control.prototype */{
   
+  /**
+    Walk like a duck
+    
+    @type Boolean
+    @default YES
+    @readOnly
+  */
   isControl: YES,
   
   /** 
-    The selected state of this control.  Possible options are YES, NO or 
-    SC.MIXED_STATE.
+    The selected state of this control. Possible values:
     
-    @property {Boolean}
+      - `YES`
+      - `NO`
+      - SC.MIXED_STATE.
+    
+    @type Boolean
+    @default NO
   */
   isSelected: NO,
   
@@ -131,7 +153,8 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
     Changing this property value by default will cause the Control mixin to
     add/remove an 'active' class name to the root element.
     
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   isActive: NO,
   
@@ -146,7 +169,8 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
     automatically bind the value to the property key you name here on the 
     content object.
     
-    @property {String}
+    @type String
+    @default null
   */
   fieldKey: null,
   
@@ -157,7 +181,8 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
     in the error explanation.  If you do not set this property, then the 
     fieldKey or the class name will be used to generate a human readable name.
     
-    @property {String}
+    @type String
+    @default null
   */
   fieldLabel: null,
   
@@ -173,7 +198,10 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
     Try to localize using the string "ErrorLabel.{ClassName}". Return a 
     humanized form of the class name.
     
-    @property {String}
+    @field
+    @type String
+    @observes 'fieldLabel'
+    @observes 'fieldKey'
   */
   errorLabel: function() {
     var ret, fk, def ;
@@ -197,7 +225,8 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
     a height, performance will be impacted as it must be calculated; if you do
     this, a warning will be issued. If you don't care, use SC.CALCULATED_CONTROL_SIZE.
     
-    @property {String}
+    @type String
+    @default SC.REGULAR_CONTROL_SIZE
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
@@ -249,5 +278,6 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport), {
       }
     }
   }
+
 });
 
