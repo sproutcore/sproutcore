@@ -11,13 +11,13 @@ sc_require('system/store');
   @class
 
   A nested store can buffer changes to a parent store and then commit them
-  all at once.  You usually will use a NestedStore as part of store chaining
+  all at once.  You usually will use a `NestedStore` as part of store chaining
   to stage changes to your object graph before sharing them with the rest of
   the application.
   
   Normally you will not create a nested store directly.  Instead, you can 
-  retrieve a nested store by using the chain() method.  When you are finished
-  working with the nested store, destroy() will dispose of it.
+  retrieve a nested store by using the `chain()` method.  When you are finished
+  working with the nested store, `destroy()` will dispose of it.
   
   @extends SC.Store
   @since SproutCore 1.0
@@ -37,7 +37,7 @@ SC.NestedStore = SC.Store.extend(
   /**
     The parent store this nested store is chained to.  Nested stores must have
     a parent store in order to function properly.  Normally, you create a 
-    nested store using the SC.Store#chain() method and this property will be
+    nested store using the `SC.Store#chain()` method and this property will be
     set for you.
     
     @type SC.Store
@@ -46,7 +46,7 @@ SC.NestedStore = SC.Store.extend(
   parentStore: null,
 
   /**
-    YES if the view is nested. Walk like a duck
+    `YES` if the view is nested. Walk like a duck
     
     @type Boolean
     @default YES
@@ -59,7 +59,7 @@ SC.NestedStore = SC.Store.extend(
     then change the record in the parent store, the changes will not be 
     visible to your nested store until you commit or discard changes.
     
-    If NO, then the attribute hash will lock only when you write data.
+    If `NO`, then the attribute hash will lock only when you write data.
     
     Normally you want to lock your attribute hash the first time you read it.
     This will make your nested store behave most consistently.  However, if
@@ -109,8 +109,8 @@ SC.NestedStore = SC.Store.extend(
   // 
   
   /**
-    find() cannot accept REMOTE queries in a nested store.  This override will
-    verify that condition for you.  See SC.Store#find() for info on using this
+    `find()` cannot accept REMOTE queries in a nested store.  This override will
+    verify that condition for you.  See `SC.Store#find()` for info on using this
     method.
     
     @param {SC.Query} query query object to use.
@@ -223,7 +223,7 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /**
-    Returns the SC.Error object associated with a specific record.
+    Returns the `SC.Error` object associated with a specific record.
 
     Delegates the call to the parent store.
 
@@ -237,7 +237,7 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /**
-    Returns the SC.Error object associated with a specific query.
+    Returns the `SC.Error` object associated with a specific query.
 
     Delegates the call to the parent store.
 
@@ -258,8 +258,8 @@ SC.NestedStore = SC.Store.extend(
   // to use these methods.
   
   /**
-    Returns the current edit status of a storekey.  May be one of INHERITED,
-    EDITABLE, and LOCKED.  Used mostly for unit testing.
+    Returns the current edit status of a storekey.  May be one of `INHERITED`,
+    `EDITABLE`, and `LOCKED`.  Used mostly for unit testing.
     
     @param {Number} storeKey the store key
     @returns {Number} edit status
@@ -399,7 +399,7 @@ SC.NestedStore = SC.Store.extend(
     return sc_super();
   },
   
-  /** @private - book-keeping for a single data hash. */
+  /** @private - bookkeeping for a single data hash. */
   dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
     // update the revision for storeKey.  Use generateStoreKey() because that
     // gaurantees a universally (to this store hierarchy anyway) unique 

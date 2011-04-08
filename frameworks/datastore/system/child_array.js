@@ -8,7 +8,7 @@
 /**
   @class
 
-  A ChildArray is used to map an array of ChildRecord objects.
+  A `ChildArray` is used to map an array of `ChildRecord objects.
   
   @extends SC.Enumerable
   @extends SC.Array
@@ -19,7 +19,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ChildArray.prototype */ {
     
   /**
-    If set, it is the default record recordType
+    If set, it is the default record `recordType`
   
     @default null
     @type String
@@ -37,7 +37,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   /**
     If set will be used by the many array to get an editable version of the
-    storeIds from the owner.
+    `storeId`s from the owner.
     
     @default null
     @type String
@@ -65,7 +65,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   /**
     The storeKey for the parent record of this many array.  Editing this 
-    array will place the parent record into a READY_DIRTY state.
+    array will place the parent record into a `READY_DIRTY state.
 
     @type Number
     @property 
@@ -154,7 +154,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /** 
     Pass through to the underlying array.  The passed in objects must be
-    records, which can be converted to storeIds.
+    records, which can be converted to `storeId`s.
     
     @param {Number} idx index of the object to replace.
     @param {Number} amt number of records to replace starting at idx.

@@ -11,23 +11,21 @@ sc_require('system/many_array');
 
 /** @class
   
-  ManyAttribute is a subclass of RecordAttribute and handles to-many 
+  ManyAttribute is a subclass of `RecordAttribute` and handles to-many 
   relationships.
   
-  When setting ( .set() ) the value of a toMany attribute, make sure
-  to pass in an array of SC.Record objects.
+  When setting ( `.set()` ) the value of a `toMany` attribute, make sure
+  to pass in an array of `SC.Record` objects.
   
-  There are many ways you can configure a ManyAttribute:
+  There are many ways you can configure a `ManyAttribute`:
   
-  {{{
-    contacts: SC.Record.toMany('MyApp.Contact', { 
-      inverse: 'group', // set the key used to represent the inverse 
-      isMaster: YES|NO, // indicate whether changing this should dirty
-      transform: function(), // transforms value <=> storeKey,
-      isEditable: YES|NO, make editable or not,
-      through: 'taggings' // set a relationship this goes through
-    });
-  }}}
+      contacts: SC.Record.toMany('MyApp.Contact', { 
+        inverse: 'group', // set the key used to represent the inverse 
+        isMaster: YES|NO, // indicate whether changing this should dirty
+        transform: function(), // transforms value <=> storeKey,
+        isEditable: YES|NO, make editable or not,
+        through: 'taggings' // set a relationship this goes through
+      });
   
   @extends SC.RecordAttribute
   @since SproutCore 1.0
@@ -37,19 +35,19 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   
   /**
     Set the foreign key on content objects that represent the inversion of
-    this relationship.  The inverse property should be a toOne() or toMany()
-    relationship as well.  Modifying this many array will modify the inverse
-    property as well.
+    this relationship. The inverse property should be a `toOne()` or
+    `toMany()` relationship as well. Modifying this many array will modify
+    the `inverse` property as well.
     
     @property {String}
   */
   inverse: null,
   
   /**
-    If YES then modifying this relationships will mark the owner record 
-    dirty.    If set ot NO, then modifying this relationship will not alter
+    If `YES` then modifying this relationships will mark the owner record 
+    dirty. If set to `NO`, then modifying this relationship will not alter
     this record.  You should use this property only if you have an inverse 
-    property also set.  Only one of the inverse relationships should be marked
+    property also set. Only one of the inverse relationships should be marked
     as master so you can control which record should be committed.
     
     @property {Boolean}
@@ -58,7 +56,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   
   /**
     If set and you have an inverse relationship, will be used to determine the
-    order of an object when it is added to an array.  You can pass a function
+    order of an object when it is added to an array. You can pass a function
     or an array of property keys.
     
     @property {Function|Array}
