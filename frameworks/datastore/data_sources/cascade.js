@@ -16,23 +16,21 @@ sc_require('data_sources/data_source');
   You can use a cascading data source to tie together multiple data sources,
   treating them as a single namespace.
   
-  h2. Configuring a Cascade Data Source
+  ## Configuring a Cascade Data Source
   
   You will usually define your cascading data source in your main method after
   all the classes you have are loaded.
   
-  {{{
-    MyApp.dataSource = SC.CascadeDataSource.create({
-      dataSources: "prefs youtube photos".w(),
+      MyApp.dataSource = SC.CascadeDataSource.create({
+        dataSources: "prefs youtube photos".w(),
+        
+        prefs:   MyApp.PrefsDataSource.create({ root: "/prefs" }),
+        youtube: YouTube.YouTubeDataSource.create({ apiKey: "123456" }),
+        photos:  MyApp.PhotosDataSource.create({ root: "photos" })
+        
+      });
       
-      prefs:   MyApp.PrefsDataSource.create({ root: "/prefs" }),
-      youtube: YouTube.YouTubeDataSource.create({ apiKey: "123456" }),
-      photos:  MyApp.PhotosDataSource.create({ root: "photos" })
-      
-    });
-    
-    MyApp.store.set('dataSource', MyApp.dataSource);
-  }}}
+      MyApp.store.set('dataSource', MyApp.dataSource);
   
   Note that the order you define your dataSources property will determine the
   order in which requests will cascade from the store.
@@ -40,14 +38,12 @@ sc_require('data_sources/data_source');
   Alternatively, you can use a more jQuery-like API for defining your data
   sources:
   
-  {{{
-    MyApp.dataSource = SC.CascadeDataSource.create()
-      .from(MyApp.PrefsDataSource.create({ root: "/prefs" }))
-      .from(YouTube.YouTubeDataSource.create({ apiKey: "123456" }))
-      .from(MyApp.PhotosDataSource.create({ root: "photos" }));
+      MyApp.dataSource = SC.CascadeDataSource.create()
+        .from(MyApp.PrefsDataSource.create({ root: "/prefs" }))
+        .from(YouTube.YouTubeDataSource.create({ apiKey: "123456" }))
+        .from(MyApp.PhotosDataSource.create({ root: "photos" }));
 
-    MyApp.store.set('dataSource', MyApp.dataSource);
-  }}}
+      MyApp.store.set('dataSource', MyApp.dataSource);
 
   In this case, the order you call from() will determine the order the request
   will cascade.

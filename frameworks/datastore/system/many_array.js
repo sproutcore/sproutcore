@@ -8,12 +8,12 @@
 /**
   @class
 
-  A ManyArray is used to map an array of record ids back to their 
+  A `ManyArray` is used to map an array of record ids back to their 
   record objects which will be materialized from the owner store on demand.
   
-  Whenever you create a toMany() relationship, the value returned from the 
-  property will be an instance of ManyArray.  You can generally customize the
-  behavior of ManyArray by passing settings to the toMany() helper.
+  Whenever you create a `toMany()` relationship, the value returned from the 
+  property will be an instance of `ManyArray`.  You can generally customize the
+  behavior of ManyArray by passing settings to the `toMany()` helper.
   
   @extends SC.Enumerable
   @extends SC.Array
@@ -24,7 +24,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ManyArray.prototype */ {
 
   /**
-    recordType will tell what type to transform the record to when
+    `recordType` will tell what type to transform the record to when
     materializing the record.
 
     @default null
@@ -52,7 +52,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   
   /**
-    The ManyAttribute that created this array.
+    The `ManyAttribute` that created this array.
   
     @default null
     @type SC.ManyAttribute
@@ -71,8 +71,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.property('record').cacheable(),
   
   /**
-    The storeKey for the parent record of this many array.  Editing this 
-    array will place the parent record into a READY_DIRTY state.
+    The `storeKey` for the parent record of this many array.  Editing this 
+    array will place the parent record into a `READY_DIRTY` state.
 
     @type Number
     @property
@@ -83,7 +83,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
 
   /**
-    Returns the storeIds in read only mode.  Avoids modifying the record 
+    Returns the `storeId`s in read-only mode.  Avoids modifying the record 
     unnecessarily.
     
     @type SC.Array
@@ -95,7 +95,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   
   /**
-    Returns an editable array of storeIds.  Marks the owner records as 
+    Returns an editable array of `storeId`s.  Marks the owner records as 
     modified. 
     
     @type {SC.Array}
@@ -175,7 +175,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // 
 
   /** @private
-    Returned length is a pass-through to the storeIds array.
+    Returned length is a pass-through to the `storeIds` array.
     
     @type Number
     @property
@@ -219,7 +219,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /** @private
     Pass through to the underlying array.  The passed in objects must be
-    records, which can be converted to storeIds.
+    records, which can be converted to `storeId`s.
   */
   replace: function(idx, amt, recs) {
     
@@ -295,7 +295,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // 
   
   /**
-    Called by the ManyAttribute whenever a record is removed on the inverse
+    Called by the `ManyAttribute` whenever a record is removed on the inverse
     of the relationship.
     
     @param {SC.Record} inverseRecord the record that was removed
@@ -320,7 +320,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /**
-    Called by the ManyAttribute whenever a record is added on the inverse
+    Called by the `ManyAttribute` whenever a record is added on the inverse
     of the relationship.
     
     @param {SC.Record} inverseRecord the record this array is a part of
@@ -387,7 +387,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   //  
 
   /** @private 
-    Invoked whenever the storeIds array changes.  Observes changes.
+    Invoked whenever the `storeIds` array changes.  Observes changes.
   */
   recordPropertyDidChange: function(keys) {
     

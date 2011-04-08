@@ -10,35 +10,36 @@ sc_require('models/record');
 /**
   @class
 
-  A RecordArray wraps an array of storeKeys and, optionally, a Query object.
-  When you access the items of a RecordArray it will automatically convert the
-  storeKeys into actual SC.Record objects that the rest of your application
-  can work with.
+  A `RecordArray` wraps an array of `storeKeys` and, optionally, a `Query`
+  object. When you access the items of a `RecordArray`, it will automatically
+  convert the `storeKeys` into actual `SC.Record` objects that the rest of
+  your application can work with.
   
-  Normally you do not create RecordArray's yourself.  Instead, a RecordArray
-  is returned when you call SC.Store.findAll(), already properly configured.
-  You can usually just work with the RecordArray instance just like another
-  array.
+  Normally you do not create `RecordArray`s yourself.  Instead, a
+  `RecordArray` is returned when you call `SC.Store.findAll()`, already
+  properly configured. You can usually just work with the `RecordArray`
+  instance just like any other array.
   
-  The information below about RecordArray internals is only intended for those
-  who need to override this class for some reason to do something special.
+  The information below about `RecordArray` internals is only intended for
+  those who need to override this class for some reason to do something
+  special.
   
   Internal Notes
   ---
   
-  Normally the RecordArray behavior is very simple.  Any array-like operations
-  will be translated into similar calls onto the underlying array of 
-  storeKeys.  The underlying array can be a real array or it may be a 
-  SparseArray, which is how you implement incremental loading.
+  Normally the `RecordArray` behavior is very simple.  Any array-like
+  operations will be translated into similar calls onto the underlying array
+  of `storeKeys`.  The underlying array can be a real array or it may be a 
+  `SparseArray`, which is how you implement incremental loading.
   
-  If the RecordArray is created with an SC.Query object as well (and it 
-  almost always will have a Query object), then the RecordArray will also 
+  If the `RecordArray` is created with an `SC.Query` object as well (and it 
+  almost always will have a `Query` object), then the `RecordArray` will also 
   consult the query for various delegate operations such as determining if 
   the record array should update automatically whenever records in the store
-  changes. It will also ask the Query to refresh the storeKeys whenever records 
-  change in the store.
+  changes. It will also ask the `Query` to refresh the `storeKeys` whenever
+  records change in the store.
   
-  If the SC.Query object has complex matching rules, it might be 
+  If the `SC.Query` object has complex matching rules, it might be 
   computationally heavy to match a large dataset to a query. To avoid the 
   browser from ever showing a slow script timer in this scenario, the query
   matching is by default paced at 100ms. If query matching takes longer than 
@@ -59,27 +60,27 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     The store that owns this record array.  All record arrays must have a 
     store to function properly. 
     
-    NOTE: You MUST set this property on the RecordArray when creating it or 
-    else it will fail.
+    NOTE: You **MUST** set this property on the `RecordArray` when creating
+    it or else it will fail.
   
     @type SC.Store
   */
   store: null,
 
   /**
-    The Query object this record array is based upon.  All record arrays MUST 
-    have an associated query in order to function correctly.  You cannot 
-    change this property once it has been set.
+    The `Query` object this record array is based upon.  All record arrays
+    **MUST** have an associated query in order to function correctly.  You
+    cannot change this property once it has been set.
 
-    NOTE: You MUST set this property on the RecordArray when creating it or 
-    else it will fail.
+    NOTE: You **MUST** set this property on the `RecordArray` when creating
+    it or else it will fail.
     
     @type SC.Query
   */
   query: null,
 
   /**
-    The array of storeKeys as retrieved from the owner store.
+    The array of `storeKeys` as retrieved from the owner store.
     
     @type SC.Array
   */
@@ -109,7 +110,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // 
 
   /** @private
-    Returned length is a pass-through to the storeKeys array.
+    Returned length is a pass-through to the `storeKeys` array.
 		@property
   */
   length: function() {
@@ -121,7 +122,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   _scra_records: null,
   
   /** @private
-    Looks up the store key in the store keys array and materializes a
+    Looks up the store key in the `storeKeys array and materializes a
     records.
     
     @param {Number} idx index of the object
@@ -181,7 +182,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   /** @private
     Pass through to the underlying array.  The passed in objects must be
-    records, which can be converted to storeKeys.
+    records, which can be converted to `storeKeys`.
     
     @param {Number} idx start index
     @param {Number} amt end index
@@ -267,7 +268,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /** 
     Adds the specified record to the record array if it is not already part 
-    of the array.  Provided for compatibilty with SC.Set.
+    of the array.  Provided for compatibilty with `SC.Set`.
     
     @param {SC.Record} record
     @returns {SC.RecordArray} receiver
@@ -280,7 +281,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   /**
     Removes the specified record from the array if it is not already a part
-    of the array.  Provided for compatibility with SC.Set.
+    of the array.  Provided for compatibility with `SC.Set`.
     
     @param {SC.Record} record
     @returns {SC.RecordArray} receiver
@@ -322,11 +323,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
   
   /**
-    Will recompute the results based on the SC.Query attached to the record
+    Will recompute the results based on the `SC.Query` attached to the record
     array. Useful if your query is based on computed properties that might 
-    have changed. Use refresh() instead of you want to trigger a fetch on your
-    data source since this will purely look at records already loaded into
-    the store.
+    have changed. Use `refresh()` instead of you want to trigger a fetch on
+    your data source since this will purely look at records already loaded
+    into the store.
     
     @returns {SC.RecordArray} receiver
   */
@@ -336,7 +337,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
   
   /**
-    Destroys the record array.  Releases any storeKeys, and deregisters with
+    Destroys the record array.  Releases any `storeKeys`, and deregisters with
     the owner store.
     
     @returns {SC.RecordArray} receiver
@@ -353,11 +354,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // STORE CALLBACKS
   // 
   
-  // NOTE: storeWillFetchQuery(), storeDidFetchQuery(), storeDidCancelQuery(),
-  // and storeDidErrorQuery() are tested implicitly through the related
-  // methods in SC.Store.  We're doing it this way because eventually this 
-  // particular implementation is likely to change; moving some or all of this
-  // code directly into the store. -CAJ
+  // **NOTE**: `storeWillFetchQuery()`, `storeDidFetchQuery()`,
+  // `storeDidCancelQuery()`, and `storeDidErrorQuery()` are tested implicitly
+  // through the related methods in `SC.Store`.  We're doing it this way
+  // because eventually this particular implementation is likely to change;
+  // moving some or all of this code directly into the store. -CAJ
   
   /** @private
     Called whenever the store initiates a refresh of the query.  Sets the 
@@ -457,7 +458,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     update immediately.
     
     Currently this method only has an effect if the query location is 
-    SC.Query.LOCAL.  You can call this method on any RecordArray however,
+    `SC.Query.LOCAL`.  You can call this method on any `RecordArray` however,
     without an error.
     
     @param {Boolean} _flush to force it - use reload() to trigger it
@@ -606,8 +607,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /**
-    Set to YES when the query is dirty and needs to update its storeKeys 
-    before returning any results.  RecordArrays always start dirty and become
+    Set to `YES` when the query is dirty and needs to update its storeKeys 
+    before returning any results.  `RecordArray`s always start dirty and become
     clean the first time you try to access their contents.
     
     @type Boolean
@@ -619,8 +620,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // 
   
   /**
-    Returns YES whenever the status is SC.Record.ERROR.  This will allow you 
-    to put the UI into an error state.
+    Returns `YES` whenever the status is `SC.Record.ERROR`.  This will allow
+    you to put the UI into an error state.
     
 		@property
     @type Boolean
@@ -630,8 +631,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.property('status').cacheable(),
 
   /**
-    Returns the receiver if the record array is in an error state.  Returns null
-    otherwise.
+    Returns the receiver if the record array is in an error state.  Returns
+    `null` otherwise.
     
 		@property
     @type SC.Record
@@ -641,8 +642,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.property('isError').cacheable(),
   
   /**
-    Returns the current error object only if the record array is in an error state.
-    If no explicit error object has been set, returns SC.Record.GENERIC_ERROR.
+    Returns the current error object only if the record array is in an error
+    state. If no explicit error object has been set, returns
+    `SC.Record.GENERIC_ERROR.`
     
 		@property
     @type SC.Error
@@ -659,7 +661,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // 
   
   /** @private 
-    Invoked whenever the storeKeys array changes.  Observes changes.
+    Invoked whenever the `storeKeys` array changes.  Observes changes.
   */
   _storeKeysDidChange: function() {
     var storeKeys = this.get('storeKeys');
@@ -680,7 +682,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.observes('storeKeys'),
   
   /** @private
-    Invoked whenever the content of the storeKeys array changes.  This will
+    Invoked whenever the content of the `storeKeys` array changes.  This will
     dump any cached record lookup and then notify that the enumerable content
     has changed.
   */
