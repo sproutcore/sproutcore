@@ -293,7 +293,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       }
     }
 
-    if (content) content.replace(start, amt, objects);
+    if (content) { content.replace(start, amt, objects); }
+
     for(i=0, objsLen = objsToDestroy.length; i<objsLen; i++){
 
       objsToDestroy[i].destroy();
@@ -392,6 +393,19 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return (this._scac_cached = content.toArray().sort(func)) ;
   },
 
+  propertyWillChange: function(key) {
+    if (key === 'content') {
+      this.arrayContentWillChange(0, this.get('length'), 0);
+    } else {
+      return sc_super();
+    }
+  },
+
+  _scac_arrayContentDidChange: function(start, removed, added) {
+    this.arrayContentDidChange(start, removed, added);
+    this.updateSelectionAfterContentChange();
+  },
+
   /** @private
     Whenever content changes, setup and teardown observers on the content
     as needed.
@@ -400,80 +414,73 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     this._scac_cached = NO; // invalidate observable content
 
-    var cur    = this.get('content'),
-        orders = !!this.get('orderBy'),
-        last   = this._scac_content,
-        oldlen = this._scac_length || 0,
-        func   = this._scac_rangeDidChange,
-        efunc  = this._scac_enumerableDidChange,
-        cfunc  = this._scac_enumerableContentDidChange,
-        sfunc  = this._scac_contentStatusDidChange,
-        ro     = this._scac_rangeObserver,
+    var content     = this.get('content'),
+        orders      = !!this.get('orderBy'),
+        lastContent = this._scac_content,
+        oldlen      = this._scac_length || 0,
+        didChange   = this._scac_arrayContentDidChange,
+        willChange  = this.arrayContentWillChange,
+        sfunc       = this._scac_contentStatusDidChange,
+        efunc       = this._scac_enumerableDidChange,
         newlen;
 
-    if (last === cur) { return this; } // nothing to do
+    if (content === lastContent) { return this; } // nothing to do
 
     // teardown old observer
-    if (last) {
-      if (last.isSCArray) {
-        if (ro) { last.removeRangeObserver(ro); }
-        last.removeEnumerableObserver(this, cfunc);
+    if (lastContent) {
+      if (lastContent.isSCArray) {
+        lastContent.removeArrayObservers({
+          target: this,
+          didChange: didChange,
+          willChange: willChange
+        });
+      } else if (lastContent.isEnumerable) {
+        lastContent.removeObserver('[]', this, efunc);
       }
-      else if (last.isEnumerable) { last.removeObserver('[]', this, efunc); }
-      last.removeObserver('status', this, sfunc);
-    }
 
-    ro = null;
+      lastContent.removeObserver('status', this, sfunc);
+    }
 
     // save new cached values
     this._scac_cached = NO;
-    this._scac_content = cur ;
+    this._scac_content = content ;
 
-    // setup new observers
+    // setup new observer
     // also, calculate new length.  do it manually instead of using
     // get(length) because we want to avoid computed an ordered array.
-    if (cur) {
-      if (!orders && cur.isSCArray) { ro = cur.addRangeObserver(null, this, func); }
-      if (cur.isSCArray) { cur.addEnumerableObserver(this, cfunc); }
-      else if (cur.isEnumerable) { cur.addObserver('[]', this, efunc); }
-      newlen = cur.isEnumerable ? cur.get('length') : 1;
-      cur.addObserver('status', this, sfunc);
+    if (content) {
+      // Content is an enumerable, so listen for changes to its
+      // content, and get its length.
+      if (content.isSCArray) {
+        content.addArrayObservers({
+          target: this,
+          didChange: didChange,
+          willChange: willChange
+        });
 
+        newlen = content.get('length');
+      } else if (content.isEnumerable) {
+        content.addObserver('[]', this, efunc);
+        newlen = content.get('length');
+      } else {
+        // Assume that someone has set a non-enumerable as the content, and
+        // treat it as the sole member of an array.
+        newlen = 1;
+      }
+
+      // Observer for changes to the status property, in case this is an
+      // SC.Record or SC.RecordArray.
+      content.addObserver('status', this, sfunc);
     } else {
-      newlen = SC.none(cur) ? 0 : 1;
+      newlen = SC.none(content) ? 0 : 1;
     }
-
-    this._scac_rangeObserver = ro;
 
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
     this._scac_contentStatusDidChange();
-    this.enumerableContentDidChange(0, newlen, newlen - oldlen, this, last||[]);
+    this.arrayContentDidChange(0, 0, newlen);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
-
-  /** @private
-    Whenever array content changes, need to simply forward notification.
-
-    Assumes that content is not null and is SC.Array.
-  */
-  _scac_rangeDidChange: function(array, objects, key, indexes) {
-    if (key !== '[]') { return ; } // nothing to do
-
-    var content = this.get('content');
-    this._scac_length = content.get('length');
-    this._scac_cached = NO; // invalidate
-
-    // if array length has changed, just notify every index from min up
-    if (indexes) {
-      this.beginPropertyChanges();
-      indexes.forEachRange(function(start, length) {
-        this.enumerableContentDidChange(start, length, 0);
-      }, this);
-      this.endPropertyChanges();
-      this.updateSelectionAfterContentChange();
-    }
-  },
 
   /**
     @private
@@ -500,25 +507,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.setupPropertyChainsForEnumerableContent(addedObjects, removedObjects);
   },
 
-  /**
-    @private
-
-    At the end of the run loop, notifies enumerable observers on this array
-    controller of changes we received from the content object.
-  */
-  _scac_propagateEnumerableObservers: function() {
-    var enumerableChanges = this._scac_enumerableChanges;
-    var idx, len, change;
-
-    len = enumerableChanges.get('length');
-    for (idx = 0; idx < len; idx++) {
-      change = enumerableChanges[idx];
-      this._notifyEnumerableObservers(change[0], change[1], change[2]);
-    }
-
-    this._scac_enumerableChanges = null;
-  },
-
   /** @private
     Whenever enumerable content changes, need to regenerate the
     observableContent and notify that the range has changed.
@@ -534,7 +522,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_length = newlen;
     this.beginPropertyChanges();
     this._scac_cached = NO; // invalidate
-    this.enumerableContentDidChange(0, newlen, newlen-oldlen);
+    // If this is an unordered enumerable, we have no way
+    // of knowing which indices changed. Instead, we just
+    // invalidate the whole array.
+    this.arrayContentDidChange(0, oldlen, newlen);
     this.endPropertyChanges();
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
