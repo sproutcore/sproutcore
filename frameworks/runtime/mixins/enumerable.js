@@ -949,109 +949,6 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Adds an enumerable observer to the enumerable.
-
-    Enumerable observers are called whenever the enumerable's content
-    mutates. For example, adding an object via pushObject(), or replacing
-    objects via replace(), will cause all enumerable observers to be fired.
-
-    Observer methods that you register should have the following signature:
-
-        enumerableDidChange: function(addedObjects, removedObjects, index, source)
-
-    addedObjects will contain an array of the objects added and removedObjects
-    will contain an array of the objects that were removed. The index parameter
-    contains the index at which the mutation occurred.
-
-    The fourth parameter, source, is the enumerable that mutated. This is useful
-    if you register the same observer method on multiple enumerables.
-
-    If you pass a context parameter to addEnumerableObserver(), it will be
-    included when the observer is fired:
-
-        function(addedObjects, removedObjects, sender, context);
-
-    @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke
-    @param {Object} context optional context
-
-    @returns {SC.Object} self
-  */
-  addEnumerableObserver: function(target, method, context) {
-    var observers;
-
-    // Normalize parameters. If a function is passed as
-    // target, make it the method.
-    if (method === undefined) {
-      method = target;
-      target = this;
-    }
-
-    // Call the observer in the context of the enumerable
-    // if no explicit target is given.
-    if (!target) { target = this; }
-
-    // If the method is provided as a string, look it up on
-    // the target.
-    if (typeof method === "string") {
-      method = target[method];
-    }
-
-    if (!method) {
-      throw "You must pass a method to addEnumerableObserver()";
-    }
-
-    observers = this._kvo_for('_kvo_enumerable_observers', SC.ObserverSet);
-    observers.add(target, method, context);
-
-    return this;
-  },
-
-  /**
-    Removes an enumerable observer. Expects the same target and method that
-    were used to register the observer.
-
-    @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke
-
-    @returns {SC.Object} self
-  */
-  removeEnumerableObserver: function(target, method) {
-    var observers;
-
-    // Normalize parameters. If a function is passed as
-    // target, make it the method.
-    if (method === undefined) {
-      method = target;
-      target = this;
-    }
-
-    // Call the observer in the context of the enumerable
-    // if no explicit target is given.
-    if (!target) { target = this; }
-
-    // If the method is provided as a string, look it up on
-    // the target.
-    if (typeof method === "string") {
-      method = target[method];
-    }
-
-    if (!method) {
-      throw "You must pass a method to removeEnumerableObserver()";
-    }
-
-    observers = this._kvo_enumerable_observers;
-
-    if (observers) {
-      observers.remove(target, method);
-    } else {
-      throw "%@: Can't remove observers if no observer has been added.";
-    }
-
-    return this;
-  },
-
-  /**
     @private
 
     Clones a segment of an observer chain and applies it
@@ -1091,26 +988,29 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @param {Array} addedObjects the array of objects that have been added
     @param {Array} removedObjects the array of objects that have been removed
   */
-  _setupContentObservers: function(addedObjects, removedObjects) {
-    if (!addedObjects) { addedObjects = this; }
-    if (!removedObjects) { removedObjects = []; }
+  _setupContentObservers: function(addedObjects) {
+    var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
+    var kvoKey;
 
-    // Check the last values passed and skip this step if they are
-    // the same.
-    //
-    // TODO: This is obviously a suboptimal workaround to the fact that
-    // enumerableContentDidChange can get called twice when implementing
-    // SC.ArrayController. We should revisit how enumerableContentDidChange
-    // works in that context. --TD
-    var lastAdded = this._lastAdded;
-    var lastRemoved = this._lastRemoved;
+    // Only setup and teardown enumerable observers if we have keys to observe
+    if (observedKeys.get('length') > 0) {
 
-    if(lastAdded === addedObjects) { addedObjects = []; }
-    if(lastRemoved === removedObjects) { removedObjects = []; }
+      var self = this;
+      // added and resume the chain observer.
+      observedKeys.forEach(function(key) {
+        kvoKey = SC.keyFor('_kvo_content_observers', key);
 
-    this._lastAdded = addedObjects;
-    this._lastRemoved = removedObjects;
+        // Get all original ChainObservers associated with the key
+        self._kvo_for(kvoKey).forEach(function(observer) {
+          addedObjects.forEach(function(item) {
+            self._resumeChainObservingForItemWithChainObserver(item, observer);
+          });
+        });
+      });
+    }
+  },
 
+  _teardownContentObservers: function(removedObjects) {
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var kvoKey;
 
@@ -1126,29 +1026,9 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
         removedObjects.forEach(function(item) {
           item._kvo_for(kvoKey).forEach(function(observer) {
             observer.destroyChain();
-          }, this);
-        }, this);
-        var lastObserver;
-
-        // Get all original ChainObservers associated with the key
-        this._kvo_for(kvoKey).forEach(function(observer) {
-          // if there are no added objects or removed objects, this
-          // object is a proxy (like ArrayController), which does
-          // not currently receive the added or removed objects.
-          // As a result, walk down to the last element of the
-          // chain and trigger its propertyDidChange, which will
-          // invalidate anything listening.
-          if(!addedObjects.get('length') && !removedObjects.get('length')) {
-            lastObserver = observer;
-            while(lastObserver.next) { lastObserver = lastObserver.next; }
-            lastObserver.propertyDidChange();
-          } else {
-            addedObjects.forEach(function(item) {
-              this._resumeChainObservingForItemWithChainObserver(item, observer);
-            }, this);
-          }
-        }, this);
-      }, this);
+          });
+        });
+      });
     }
   },
 
