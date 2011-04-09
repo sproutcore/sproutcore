@@ -64,10 +64,14 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     This is one of the primitves you must implement to support SC.Array.  You
     should replace amt objects started at idx with the objects in the passed
-    array.  You should also call this.enumerableContentDidChange() ;
+    array.
 
-    NOTE: JavaScript arrays already implement SC.Array and 
-    calls this.enumerableContentDidChange.
+    Before mutating the underlying data structure, you must call
+    this.arrayContentWillChange(). After the mutation is complete, you must
+    call arrayContentDidChange() and enumerableContentDidChange().
+
+    NOTE: JavaScript arrays already implement SC.Array and automatically call
+    the correct callbacks.
 
     @param {Number} idx
       Starting index in the array to replace.  If idx >= length, then append to
@@ -203,9 +207,9 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Push the object onto the end of the array.  Works just like push() but it
     is KVO-compliant.
-    
+
     @param {Object} object the objects to push
-        
+
     @return {Object} The passed object
   */
   pushObject: function(obj) {
@@ -231,7 +235,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Pop object from array or nil if none are left.  Works just like pop() but
     it is KVO-compliant.
-    
+
     @return {Object} The popped object
   */
   popObject: function() {
@@ -246,7 +250,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Shift an object from start of array or nil if none are left.  Works just
     like shift() but it is KVO-compliant.
-        
+
     @return {Object} The shifted object
   */
   shiftObject: function() {
@@ -259,7 +263,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Unshift an object to start of array.  Works just like unshift() but it is
     KVO-compliant.
-        
+
     @param {Object} obj the object to add
     @return {Object} The passed object
   */
@@ -267,7 +271,6 @@ SC.Array = /** @scope SC.Array.prototype */{
     this.insertAt(0, obj) ;
     return obj ;
   },
-
 
   /**
     Adds the named objects to the beginning of the array.  Defers notifying
@@ -284,8 +287,8 @@ SC.Array = /** @scope SC.Array.prototype */{
   },
 
   /**
-    Compares each item in the passed array to this one. 
-    
+    Compares each item in the passed array to this one.
+
     @param {Array} ary The array you want to compare to
     @returns {Boolean} true if they are equal.
   */
@@ -437,7 +440,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   updateRangeObserver: function(rangeObserver, indexes) {
     return rangeObserver.update(this, indexes);
   },
-  
+
   /**
     Removes a range observer from the receiver.  The range observer must
     already be active on the array.
@@ -455,22 +458,55 @@ SC.Array = /** @scope SC.Array.prototype */{
     return ret ;
   },
 
-  /**
-    Updates observers with content change.  To support range observers,
-    you must pass three change parameters to this method.  Otherwise this
-    method will assume the entire range has changed.
+  addArrayObservers: function(options) {
+    this._modifyObserverSet('add', options);
+  },
 
-    This also assumes you have already updated the length property.
-    @param {Number} start the starting index of the change
-    @param {Number} amt the final range of objects changed
-    @param {Number} delta if you added or removed objects, the delta change
-    @param {Array} addedObjects the objects that were added
-    @param {Array} removedObjects the objects that were removed
-    @returns {SC.Array} receiver
-  */
-  enumerableContentDidChange: function(start, amt, delta, addedObjects, removedObjects) {
+  removeArrayObservers: function(options) {
+    this._modifyObserverSet('remove', options);
+  },
+
+  _modifyObserverSet: function(method, options) {
+    var willChangeObservers, didChangeObservers;
+
+    var target     = options.target || this;
+    var willChange = options.willChange || 'arrayWillChange';
+    var didChange  = options.didChange || 'arrayDidChange';
+    var context    = options.context;
+
+    if (typeof willChange === "string") {
+      willChange = target[willChange];
+    }
+
+    if (typeof didChange === "string") {
+      didChange = target[didChange];
+    }
+
+    willChangeObservers = this._kvo_for('_kvo_array_will_change', SC.ObserverSet);
+    didChangeObservers  = this._kvo_for('_kvo_array_did_change', SC.ObserverSet);
+
+    willChangeObservers[method](target, willChange, context);
+    didChangeObservers[method](target, didChange, context);
+  },
+
+  arrayContentWillChange: function(start, removedCount, addedCount) {
+    var contentObservers = this._kvo_content_observed_keys;
+
+    if (contentObservers && contentObservers.get('length') > 0) {
+      var removedObjects = this.slice(start, removedCount);
+      this._teardownContentObservers(removedObjects);
+    }
+
+    var willChangeObservers = this._kvo_array_will_change;
+    if (willChangeObservers) {
+      // TODO: Iterate over and invoke manually since this does
+      // not pass appropriate params.
+      willChangeObservers.invokeMethods();
+    }
+  },
+
+  arrayContentDidChange: function(start, removedCount, addedCount) {
     var rangeob = this._array_rangeObservers,
-        oldlen  = this._array_oldLength,
         newlen, length, changes ;
 
     this.beginPropertyChanges();
@@ -478,36 +514,43 @@ SC.Array = /** @scope SC.Array.prototype */{
 
     // schedule info for range observers
     if (rangeob && rangeob.length>0) {
-
-      // if no oldLength has been cached, just assume 0
-      if (oldlen === undefined) oldlen = 0;
-      this._array_oldLength = newlen = this.get('length');
-
-      // normalize input parameters
-      // if delta was not passed, assume it is the different between the
-      // new and old length.
-      if (start === undefined) start = 0;
-      if (delta === undefined) delta = newlen - oldlen ;
-      if (delta !== 0 || amt === undefined) {
-        length = newlen - start ;
-        if (delta<0) length -= delta; // cover removed range as well
-      } else {
-        length = amt ;
-      }
-
       changes = this._array_rangeChanges;
-      if (!changes) changes = this._array_rangeChanges = SC.IndexSet.create();
+      if (!changes) { changes = this._array_rangeChanges = SC.IndexSet.create(); }
+      if (removedCount === addedCount) {
+        length = removedCount;
+      } else {
+        length = this.get('length') - start;
+
+        if (removedCount > addedCount) {
+          length += (removedCount - addedCount);
+        }
+      }
       changes.add(start, length);
     }
 
-    this._setupContentObservers(addedObjects, removedObjects);
+    var contentObservers = this._kvo_content_observed_keys;
+    if (contentObservers && contentObservers.get('length') > 0) {
+      var addedObjects = this.slice(start, addedCount);
+      this._setupContentObservers(addedObjects);
+    }
+
+    var member, members, membersLen, idx;
+    var target, action;
+    var didChangeObservers = this._kvo_array_did_change;
+    if (didChangeObservers) {
+      members = didChangeObservers.members;
+      membersLen = members.length;
+
+      for (idx = 0; idx < membersLen; idx++) {
+        member = members[idx];
+        target = member[0];
+        action = member[1];
+        action.call(target, start, removedCount, addedCount);
+      }
+    }
+
     this.notifyPropertyChange('[]') ;
     this.endPropertyChanges();
-
-    // Only notify enumerable observers if we have enough information to do so.
-    if (addedObjects && removedObjects) {
-      this._notifyEnumerableObservers(addedObjects, removedObjects, start);
-    }
 
     return this ;
   },
@@ -540,7 +583,7 @@ SC.Array = SC.mixin({}, SC.Enumerable, SC.Array) ;
   Returns a new array that is a slice of the receiver.  This implementation
   uses the observable array methods to retrieve the objects for the new
   slice.
-  
+
   If you don't pass in beginIndex and endIndex, it will act as a copy of the
   array.
 
@@ -615,22 +658,23 @@ if (!Array.prototype.lastIndexOf) {
 
     // primitive for array support.
     replace: function(idx, amt, objects) {
-      var removedObjects;
+      if (this.isFrozen) { throw SC.FROZEN_ERROR ; }
 
-      if (this.isFrozen) throw SC.FROZEN_ERROR ;
-      if (!objects || objects.length === 0) {
-        removedObjects = this.splice(idx, amt) ;
+      var args;
+      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
+
+      // Notify that array content is about to mutate.
+      this.arrayContentWillChange(idx, amt, len);
+
+      if (len === 0) {
+        this.splice(idx, amt) ;
       } else {
-        var args = [idx, amt].concat(objects) ;
-        removedObjects = this.splice.apply(this,args) ;
+        args = [idx, amt].concat(objects) ;
+        this.splice.apply(this,args) ;
       }
 
-      // if we replaced exactly the same number of items, then pass only the
-      // replaced range.  Otherwise, pass the full remaining array length
-      // since everything has shifted
-      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
-      objects = SC.isArray(objects) ? objects : [objects];
-      this.enumerableContentDidChange(idx, amt, len - amt, objects, removedObjects) ;
+      this.arrayContentDidChange(idx, amt, len);
+      this.enumerableContentDidChange(idx, amt, len - amt) ;
       return this ;
     },
 
