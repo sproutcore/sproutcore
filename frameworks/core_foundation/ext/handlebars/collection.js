@@ -27,15 +27,18 @@ Handlebars.registerHelper('collection', function(path, options) {
   }
 
   if(fn) {
+    var extensions = {
+      itemViewTemplate: fn,
+      inverseTemplate: inverse,
+      itemViewOptions: itemHash
+    };
+
     if(collectionClass.isClass) {
-      collectionObject = collectionClass.create();
+      collectionObject = collectionClass.extend(extensions);
     } else {
+      SC.mixin(collectionClass, extensions);
       collectionObject = collectionClass;
     }
-
-    collectionObject.itemViewTemplate = fn;
-    collectionObject.inverseTemplate = inverse;
-    collectionObject.itemViewOptions = itemHash;
   }
 
   options.fn = function() { return ""; };
@@ -44,7 +47,7 @@ Handlebars.registerHelper('collection', function(path, options) {
 });
 
 Handlebars.registerHelper('each', function(path, options) {
-  options.hash.content = SC.getPath(this, path);
+  options.hash.contentBinding = SC.Binding.from('*'+path, this);
   options.hash.itemContextProperty = 'content';
   return Handlebars.helpers.collection.call(this, null, options);
 });
