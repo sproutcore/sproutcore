@@ -14,18 +14,18 @@ module("SC.RecordArray core methods", {
 
     storeKey = SC.Record.storeKeyFor('foo');
     json = {  guid: "foo", foo: "foo" };
-    
-    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN); 
-    
-    
+
+    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+
+
     // get record
     rec = store.materializeRecord(storeKey);
     equals(rec.get('foo'), 'foo', 'record should have json');
-    
+
     // get record array.
     query = SC.Query.create({ recordType: SC.Record });
     recs = SC.RecordArray.create({ store: store, query: query });
-    
+
     recsController = SC.Object.create({
       content: recs,
       bigCost: NO,
@@ -33,10 +33,10 @@ module("SC.RecordArray core methods", {
         this.set('bigCost', YES);
       }.observes('.content.[]')
     });
-    
+
     fooQuery = SC.Query.create({ recordType: SC.Record, conditions: "foo='foo'" });
     fooRecs = SC.RecordArray.create({ store: store, query: fooQuery });
-    
+
     fooRecsController = SC.Object.create({
       content: fooRecs,
       bigCost: NO,
@@ -49,17 +49,17 @@ module("SC.RecordArray core methods", {
 
 // ..........................................................
 // BASIC TESTS
-// 
+//
 
 test("should not initially populate storeKeys array until we flush()", function() {
 
   equals(recs.get('storeKeys'), null, 'should not have storeKeys yet');
-  
+
   recs.flush();
-  
+
   var storeKeys = recs.get('storeKeys');
   same(storeKeys, [storeKey], 'after flush should have initial set of storeKeys');
-  
+
 });
 
 test("length property should flush", function() {
@@ -77,42 +77,42 @@ test("objectAt() should flush", function() {
 
 // ..........................................................
 // storeDidChangeStoreKeys()
-// 
+//
 
 test("calling storeDidChangeStoreKeys() with a matching recordType", function() {
   recs.flush(); // do initial setup
   var orig = recs.get('storeKeys').copy();
-  
-  // do it this way instead of using store.createRecord() to isolate the 
+
+  // do it this way instead of using store.createRecord() to isolate the
   // method call.
   storeKey = SC.Record.storeKeyFor("bar");
   json     = {  guid: "bar", foo: "bar" };
   store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-  
+
   equals(recs.get('needsFlush'), NO, 'PRECOND - should not need flush');
   same(recs.get('storeKeys'), orig, 'PRECOND - storeKeys should not have changed yet');
-  
+
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
-  
+
   orig.unshift(storeKey); // update - must be first b/c id.bar < id.foo
   equals(recs.get('needsFlush'), NO, 'should not need flush anymore');
   same(recs.get('storeKeys'), orig, 'storeKeys should now be updated - rec1[%@]{%@} = %@, rec2[%@]{%@} = %@'.fmt(
-    rec.get('id'), rec.get('storeKey'), rec, 
-    
-    store.materializeRecord(storeKey).get('id'), 
-    storeKey, 
+    rec.get('id'), rec.get('storeKey'), rec,
+
+    store.materializeRecord(storeKey).get('id'),
+    storeKey,
     store.materializeRecord(storeKey)));
-    
+
 });
 
 test("calling storeDidChangeStoreKeys() with a non-matching recordType", function() {
 
   var Foo = SC.Record.extend(),
       Bar = SC.Record.extend();
-      
+
   storeKey = Foo.storeKeyFor('foo2');
   json = { guid: "foo2" };
-  
+
   store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
 
   query = SC.Query.create({ recordType: Foo });
@@ -124,7 +124,7 @@ test("calling storeDidChangeStoreKeys() with a non-matching recordType", functio
   storeKey = Bar.storeKeyFor('bar');
   json = { guid: "bar" };
   store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-  
+
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(Bar));
   equals(recs.get('needsFlush'), NO, 'should not have indicated it needed a flush');
 
@@ -133,34 +133,34 @@ test("calling storeDidChangeStoreKeys() with a non-matching recordType", functio
 test("calling storeDidChangeStoreKeys() to remove a record", function() {
 
   equals(recs.get('length'), 1, 'PRECOND - should have storeKey');
-  
+
   store.writeStatus(storeKey, SC.Record.DESTROYED_CLEAN);
   equals(recs.get('storeKeys').length, 1, 'should still have storeKey');
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
-  
+
   equals(recs.get('length'), 0, 'should remove storeKey on flush()');
 });
 
 test("calling storeDidChangeStoreKeys() with a matching recordType should not unnecessarily call enumerableContentDidChange", function() {
   // do initial setup
-  recs.flush(); 
+  recs.flush();
   fooRecs.flush();
-  
+
   recsController.set('bigCost', NO);
   fooRecsController.set('bigCost', NO);
-  
-  // do it this way instead of using store.createRecord() to isolate the 
+
+  // do it this way instead of using store.createRecord() to isolate the
   // method call.
   storeKey = SC.Record.storeKeyFor("bar");
   json     = {  guid: "bar", foo: "bar" };
   store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-  
+
   equals(recsController.get('bigCost'), NO, 'PRECOND - recsController should not have spent big cost');
   equals(fooRecsController.get('bigCost'), NO, 'PRECOND - fooRecsController should not have spent big cost');
 
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
   fooRecs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
-  
+
   equals(recsController.get('bigCost'), YES, 'recsController should have spent big cost');
   equals(fooRecsController.get('bigCost'), NO, 'fooRecsController should not have spent big cost');
 });
@@ -168,7 +168,7 @@ test("calling storeDidChangeStoreKeys() with a matching recordType should not un
 
 // ..........................................................
 // SPECIAL CASES
-// 
+//
 
 var json2, foo, bar ;
 
@@ -179,16 +179,16 @@ module("SC.RecordArray core methods", {
 
     storeKey = SC.Record.storeKeyFor('foo');
     json = {  guid: "foo", name: "foo" };
-    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN); 
+    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
     foo = store.materializeRecord(storeKey);
     equals(foo.get('name'), 'foo', 'record should have json');
 
     storeKey = SC.Record.storeKeyFor('bar');
     json2 = { guid: "bar", name: "bar" };
-    store.writeDataHash(storeKey, json2, SC.Record.READY_CLEAN); 
+    store.writeDataHash(storeKey, json2, SC.Record.READY_CLEAN);
     bar = store.materializeRecord(storeKey);
     equals(bar.get('name'), 'bar', 'record should have json');
-    
+
     // get record array.
     query = SC.Query.create({ recordType: SC.Record, orderBy: 'name' });
     recs = store.find(query);
@@ -196,18 +196,17 @@ module("SC.RecordArray core methods", {
 });
 
 test("local query should notify changes", function() {
-  
-    // note: important to retrieve records from RecordArray first to prime
-    // any cache
-    same(recs.mapProperty('id'), ['bar', 'foo'], 'PRECOND - bar should appear before foo');
+  // note: important to retrieve records from RecordArray first to prime
+  // any cache
+  same(recs.mapProperty('id'), ['bar', 'foo'], 'PRECOND - bar should appear before foo');
 
-    SC.stopIt = YES;
-    
-    SC.RunLoop.begin();
-    bar.set('name', 'zzbar');
-    SC.RunLoop.end(); // should resort record array
+  SC.stopIt = YES;
 
-    same(recs.mapProperty('id'), ['foo', 'bar'], 'order of records should change');
+  SC.RunLoop.begin();
+  bar.set('name', 'zzbar');
+  SC.RunLoop.end(); // should resort record array
+
+  same(recs.mapProperty('id'), ['foo', 'bar'], 'order of records should change');
 });
 
 
