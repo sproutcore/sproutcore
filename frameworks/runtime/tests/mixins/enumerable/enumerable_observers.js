@@ -15,7 +15,7 @@
       array = [1, 2, 3];
 
       observerObject = SC.Object.create({
-        enumerableContentWillChange: function(start, addedCount, removedCount, source) {
+        arrayContentWillChange: function(start, removedCount, addedCount, source) {
           willChangeStart = start;
           willChangeAdded = addedCount;
           willChangeRemoved = removedCount;
@@ -23,7 +23,7 @@
           willChangeCallCount = willChangeCallCount ? willChangeCallCount++ : 1;
         },
 
-        enumerableContentDidChange: function(start, addedCount, removedCount, source) {
+        arrayContentDidChange: function(start, removedCount, addedCount, source) {
           didChangeStart = start;
           didChangeAdded = addedCount;
           didChangeRemoved = removedCount;
@@ -32,15 +32,19 @@
         }
       });
 
-      array.addEnumerableObservers(observerObject, 'enumerableContentWillChange', 'enumerableContentDidChange');
+      array.addArrayObservers({
+        target: observerObject,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
     }
   });
 
   test("should be called when an object is added to an enumerable", function() {
     array.pushObject(4);
 
-    equals(willChangeCallCount, 1, "calls enumerableContentWillChange once");
-    equals(didChangeCallCount, 1, "calls enumerableContentDidChange once");
+    equals(willChangeCallCount, 1, "calls arrayContentWillChange once");
+    equals(didChangeCallCount, 1, "calls arrayContentDidChange once");
 
     equals(didChangeSource.objectAt(willChangeStart), 4);
     equals(didChangeAdded, 1, "specifies one object added");
@@ -52,7 +56,11 @@
     equals(didChangeCallCount, 1, "precond - observer fires when added");
     didChangeCallCount = 0;
 
-    array.removeEnumerableObservers(observerObject, 'enumerableContentWillChange', 'enumerableContentDidChange');
+    array.removeArrayObservers({
+      target: observerObject,
+      willChange: 'arrayContentWillChange',
+      didChange: 'arrayContentDidChange'
+    });
     array.pushObject(5);
     equals(didChangeCallCount, 0, "observer does not fire after being removed");
   });

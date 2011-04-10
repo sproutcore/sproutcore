@@ -401,8 +401,16 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
   },
 
+  _scac_arrayContentWillChange: function(start, removed, added) {
+    this.arrayContentWillChange(start, removed, added);
+    var removedObjects = this.slice(start, start+removed);
+    this.teardownEnumerablePropertyChains(removedObjects);
+  },
+
   _scac_arrayContentDidChange: function(start, removed, added) {
     this.arrayContentDidChange(start, removed, added);
+    var addedObjects = this.slice(start, start+added);
+    this.setupEnumerablePropertyChains(addedObjects);
     this.updateSelectionAfterContentChange();
   },
 
@@ -419,7 +427,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         lastContent = this._scac_content,
         oldlen      = this._scac_length || 0,
         didChange   = this._scac_arrayContentDidChange,
-        willChange  = this.arrayContentWillChange,
+        willChange  = this._scac_arrayContentWillChange,
         sfunc       = this._scac_contentStatusDidChange,
         efunc       = this._scac_enumerableDidChange,
         newlen;
@@ -497,14 +505,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @param {Number} start the index at which the positions occurred
   */
   _scac_enumerableContentDidChange: function(addedObjects, removedObjects, start) {
-    var enumerableChanges = this._scac_enumerableChanges || [];
-
-    enumerableChanges.push([addedObjects, removedObjects, start]);
-
-    this._scac_enumerableChanges = enumerableChanges;
-    this.invokeOnce(this._scac_propagateEnumerableObservers);
-
-    this.setupPropertyChainsForEnumerableContent(addedObjects, removedObjects);
   },
 
   /** @private
