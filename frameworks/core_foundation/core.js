@@ -198,4 +198,20 @@ SC.mixin(Function.prototype, /** @scope Function.prototype */ {
     return SC.Timer.schedule({ target: target, action: f, interval: interval });
   }    
 
+  SC.extend(Object.prototype, {
+    // Called before a member-of check.
+    willCheckInclusionInCollection: function(collection) {},
+
+    // Called after a member-of check.
+    didCheckInclusionInCollection: function(collection, result) {},
+
+    // Check whether `this` object is a member of `collection`.
+    isInCollection: function(collection) {
+      this.willCheckInclusionInCollection(collection);
+      var result = collection.find(function(x) { return x === this; });
+      this.didCheckInclusionInCollection(collection, result);
+      return result;
+    }
+  });
+
 });
