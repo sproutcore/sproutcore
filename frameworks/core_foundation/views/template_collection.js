@@ -54,19 +54,33 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }, this);
 
     this.$().empty();
-    this.didCreateLayer();
 
-    var content = this._content;
-    if (content) {
-      content.removeArrayObservers(this, 'arrayContentWillChange', 'arrayContentDidChange');
+    var oldContent = this._content, oldLen = 0;
+    var content = this.get('content'), newLen = 0;
+
+    if (oldContent) {
+      oldContent.removeArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+
+      oldLen = oldContent.get('length');
     }
 
-    content = this._content = this.get('content');
     if (content) {
-      content.addArrayObservers(this, 'arrayContentWillChange', 'arrayContentDidChange');
+      content.addArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+
+      newLen = content.get('length');
     }
 
-    this.arrayContentDidChange(0, content.get('length'), 0);
+    this.arrayContentWillChange(0, oldLen, newLen);
+    this._content = this.get('content');
+    this.arrayContentDidChange(0, oldLen, newLen);
   }.observes('content'),
 
   arrayContentWillChange: function(start, removedCount, addedCount) {
@@ -81,7 +95,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     var childViews = this.get('childViews'), childView, idx, len;
 
     len = childViews.get('length');
-    for (idx = start+removedCount; idx >= start; idx--) {
+    for (idx = start+removedCount-1; idx >= start; idx--) {
       childView = childViews[idx];
       childView.$().remove();
       childView.removeFromParent();
@@ -110,7 +124,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         addedViews    = [],
         renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
 
-    var addedObjects = content.slice(start, addedCount);
+    var addedObjects = content.slice(start, start+addedCount);
 
     // If we have content to display, create a view for
     // each item.
