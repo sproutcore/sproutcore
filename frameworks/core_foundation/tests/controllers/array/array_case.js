@@ -193,11 +193,11 @@ test("verify rangeObserver fires when content is deleted", function() {
 
   var cnt = 0,
       observer = SC.Object.create({ method: function() { cnt++; } });
+
   controller.addRangeObserver(SC.IndexSet.create(0,2), observer, observer.method);
 
   SC.RunLoop.begin();
-  content.length = 0 ;
-  content.enumerableContentDidChange();
+  content.replace(0, content.length, []);
   SC.RunLoop.end();
 
   equals(cnt, 1, 'range observer should have fired once');

@@ -9,18 +9,47 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
   didCreateLayer: function() {
-    if(this.get('content')) {
-      var indexSet = SC.IndexSet.create(0, this.getPath('content.length'));
-      this.arrayContentDidChange(this.get('content'), [], 0);
+    var content = this.get('content');
+    if(content) {
+      this.arrayContentDidChange(0, 0, content.get('length'));
     }
   },
 
   itemView: 'SC.TemplateView',
 
+  /**
+    The template used to render each item in the collection.
+
+    This should be a function that takes a content object and returns
+    a string of HTML that will be inserted into the DOM.
+
+    In general, you should set the `itemViewTemplateName` property instead of
+    setting the `itemViewTemplate` property yourself. If you created the
+    SC.TemplateCollectionView using the Handlebars {{#collection}} helper, this
+    will be set for you automatically.
+
+    @type Function
+  */
+  itemViewTemplate: null,
+
+  /**
+    The name of the template to lookup if no item view template is provided.
+
+    The collection will look for a template with this name in the global
+    `SC.TEMPLATES` hash. Usually this hash will be populated for you
+    automatically when you include `.handlebars` files in your project.
+
+    @type String
+  */
+  itemViewTemplateName: null,
+
   itemContext: null,
 
   itemViewClass: function() {
     var itemView = this.get('itemView');
+    var itemViewTemplate = this.get('itemViewTemplate');
+    var itemViewTemplateName = this.get('itemViewTemplateName');
+
     // hash of properties to override in our
     // item view class
     var extensions = {};
@@ -29,8 +58,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       itemView = SC.objectForPropertyPath(itemView);
     }
 
-    if (this.get('itemViewTemplate')) {
-      extensions.template = this.get('itemViewTemplate');
+    if (!itemViewTemplate && itemViewTemplateName) {
+      itemViewTemplate = this.get('templates').get(itemViewTemplateName);
+    }
+
+    if (itemViewTemplate) {
+      extensions.template = itemViewTemplate;
     }
 
     if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {
@@ -54,18 +87,54 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     }, this);
 
     this.$().empty();
-    this.didCreateLayer();
 
-    var content = this._content;
-    if (content) {
-      content.removeEnumerableObserver(this, this.arrayContentDidChange);
+    var oldContent = this._content, oldLen = 0;
+    var content = this.get('content'), newLen = 0;
+
+    if (oldContent) {
+      oldContent.removeArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+
+      oldLen = oldContent.get('length');
     }
 
-    content = this._content = this.get('content');
     if (content) {
-      content.addEnumerableObserver(this, this.arrayContentDidChange);
+      content.addArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+
+      newLen = content.get('length');
     }
+
+    this.arrayContentWillChange(0, oldLen, newLen);
+    this._content = this.get('content');
+    this.arrayContentDidChange(0, oldLen, newLen);
   }.observes('content'),
+
+  arrayContentWillChange: function(start, removedCount, addedCount) {
+    // If the contents were empty before and this template collection has an empty view
+    // remove it now.
+    emptyView = this.get('emptyView');
+    if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
+
+    // Loop through child views that correspond with the removed items.
+    // Note that we loop from the end of the array to the beginning because
+    // we are mutating it as we go.
+    var childViews = this.get('childViews'), childView, idx, len;
+
+    len = childViews.get('length');
+    for (idx = start+removedCount-1; idx >= start; idx--) {
+      childView = childViews[idx];
+      childView.$().remove();
+      childView.removeFromParent();
+      childView.destroy();
+    }
+  },
 
   /**
     Called when a mutation to the underlying content array occurs.
@@ -79,38 +148,23 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     @param {Array} removedObjects the objects that were removed from the content
     @param {Number} changeIndex the index at which the changes occurred
   */
-  arrayContentDidChange: function(addedObjects, removedObjects, changeIndex) {
+  arrayContentDidChange: function(start, removedCount, addedCount) {
+    if (!this.get('layer')) { return; }
+
     var content       = this.get('content'),
         itemViewClass = this.get('itemViewClass'),
         childViews    = this.get('childViews'),
         addedViews    = [],
         renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
 
-    // If the contents were empty before and this template collection has an empty view
-    // remove it now.
-    emptyView = this.get('emptyView');
-    if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
-
-    // For each object removed from the content, remove the corresponding
-    // child view from DOM and the child views array.
-    len = removedObjects.get('length');
-
-    // Loop through child views that correspond with the removed items.
-    // Note that we loop from the end of the array to the beginning because
-    // we are mutating it as we go.
-    for (idx = (changeIndex+len)-1; idx >= changeIndex; idx--) {
-      childView = childViews[idx];
-      childView.$().remove();
-      childView.removeFromParent();
-      childView.destroy();
-    }
+    var addedObjects = content.slice(start, start+addedCount);
 
     // If we have content to display, create a view for
     // each item.
     itemOptions = this.get('itemViewOptions') || {};
 
     elem = this.$();
-    insertAtElement = elem.find('li')[changeIndex-1] || null;
+    insertAtElement = elem.find('li')[start-1] || null;
     len = addedObjects.get('length');
 
     // TODO: This logic is duplicated from the view helper. Refactor
@@ -126,6 +180,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
     };
 
+    itemOptions = SC.clone(itemOptions);
     delete itemOptions.id;
     delete itemOptions['class'];
     delete itemOptions.classBinding;
@@ -153,7 +208,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       addedViews.push(view);
     }
 
-    childViews.replace(changeIndex, 0, addedViews);
+    childViews.replace(start, 0, addedViews);
 
     var inverseTemplate = this.get('inverseTemplate');
     if (childViews.get('length') === 0 && inverseTemplate) {

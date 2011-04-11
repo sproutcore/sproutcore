@@ -25,7 +25,8 @@ SC.Validatable = {
     Set to a validator class or instance.  If this points to a class, it will 
     be instantiated when the validator is first used.
     
-    @property {SC.Validator}
+    @type SC.Validator
+    @default null
   */
   validator: null,
 
@@ -38,7 +39,8 @@ SC.Validatable = {
     You can return a loc string here if you like.  It will be localized when
     it is placed into the error string.
     
-    @property {String}
+    @type String
+    @default null
   */
   errorLabel: null,
 
@@ -49,7 +51,9 @@ SC.Validatable = {
     this property if you want to use some other method to calculate the
     current valid state.
     
-    @property {Boolean}
+    @field
+    @type Boolean
+    @default YES
   */
   isValid: function() { 
     return SC.typeOf(this.get('value')) !== SC.T_ERROR; 
@@ -60,7 +64,8 @@ SC.Validatable = {
     belong to a form.  This property is usually set automatically by an 
     owner form view.
     
-    @property {SC.View}
+    @type SC.View
+    @default null
   */
   ownerForm: null,
   
@@ -122,7 +127,8 @@ SC.Validatable = {
   /**
     Returns the validator object, if one has been created.
     
-    @property {SC.Validator}
+    @field
+    @type SC.Validator
   */
   validatorObject: function() {
     return this._validator;
@@ -135,7 +141,7 @@ SC.Validatable = {
     The default implementation simply calls performValidateSubmit() and 
     returns that value.
     
-    @property {Boolean}
+    @type Boolean
   */
   validateSubmit: function() { return this.performValidateSubmit(); },
   
@@ -164,6 +170,7 @@ SC.Validatable = {
     return this._validator ? this._validator.fieldValueForObject(object, this.get('ownerForm'), this) : object ;
   },
   
+  /** @private */
   _validatable_displayObserver: function() {
     this.displayDidChange();
   }.observes('isValid'),
@@ -173,7 +180,9 @@ SC.Validatable = {
     context.setClass('invalid', !this.get('isValid'));
   },
 
-  // invoked whenever the attached validator changes.
+  /** @private
+    Invoked whenever the attached validator changes.
+  */
   _validatable_validatorDidChange: function() {
     var form = this.get('ownerForm') ;
     var val = SC.Validator.findFor(form, this, this.get('validator')) ;
@@ -185,5 +194,5 @@ SC.Validatable = {
       this.propertyDidChange('validatorObject');
     }  
   }.observes('validator', 'ownerForm')
-      
+
 };

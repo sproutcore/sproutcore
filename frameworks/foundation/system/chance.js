@@ -7,6 +7,7 @@
 
 sc_require("system/task_queue");
 
+/** @ignore */
 SC.chance = {
 
   preload_task: SC.Task.create({

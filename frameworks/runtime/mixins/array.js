@@ -64,10 +64,14 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     This is one of the primitves you must implement to support SC.Array.  You
     should replace amt objects started at idx with the objects in the passed
-    array.  You should also call this.enumerableContentDidChange() ;
+    array.
 
-    NOTE: JavaScript arrays already implement SC.Array and 
-    calls this.enumerableContentDidChange.
+    Before mutating the underlying data structure, you must call
+    this.arrayContentWillChange(). After the mutation is complete, you must
+    call arrayContentDidChange() and enumerableContentDidChange().
+
+    NOTE: JavaScript arrays already implement SC.Array and automatically call
+    the correct callbacks.
 
     @param {Number} idx
       Starting index in the array to replace.  If idx >= length, then append to
@@ -203,9 +207,9 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Push the object onto the end of the array.  Works just like push() but it
     is KVO-compliant.
-    
+
     @param {Object} object the objects to push
-        
+
     @return {Object} The passed object
   */
   pushObject: function(obj) {
@@ -231,7 +235,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Pop object from array or nil if none are left.  Works just like pop() but
     it is KVO-compliant.
-    
+
     @return {Object} The popped object
   */
   popObject: function() {
@@ -246,7 +250,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Shift an object from start of array or nil if none are left.  Works just
     like shift() but it is KVO-compliant.
-        
+
     @return {Object} The shifted object
   */
   shiftObject: function() {
@@ -259,7 +263,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   /**
     Unshift an object to start of array.  Works just like unshift() but it is
     KVO-compliant.
-        
+
     @param {Object} obj the object to add
     @return {Object} The passed object
   */
@@ -267,7 +271,6 @@ SC.Array = /** @scope SC.Array.prototype */{
     this.insertAt(0, obj) ;
     return obj ;
   },
-
 
   /**
     Adds the named objects to the beginning of the array.  Defers notifying
@@ -284,8 +287,8 @@ SC.Array = /** @scope SC.Array.prototype */{
   },
 
   /**
-    Compares each item in the passed array to this one. 
-    
+    Compares each item in the passed array to this one.
+
     @param {Array} ary The array you want to compare to
     @returns {Boolean} true if they are equal.
   */
@@ -437,7 +440,7 @@ SC.Array = /** @scope SC.Array.prototype */{
   updateRangeObserver: function(rangeObserver, indexes) {
     return rangeObserver.update(this, indexes);
   },
-  
+
   /**
     Removes a range observer from the receiver.  The range observer must
     already be active on the array.
@@ -455,22 +458,58 @@ SC.Array = /** @scope SC.Array.prototype */{
     return ret ;
   },
 
-  /**
-    Updates observers with content change.  To support range observers,
-    you must pass three change parameters to this method.  Otherwise this
-    method will assume the entire range has changed.
+  addArrayObservers: function(options) {
+    this._modifyObserverSet('add', options);
+  },
 
-    This also assumes you have already updated the length property.
-    @param {Number} start the starting index of the change
-    @param {Number} amt the final range of objects changed
-    @param {Number} delta if you added or removed objects, the delta change
-    @param {Array} addedObjects the objects that were added
-    @param {Array} removedObjects the objects that were removed
-    @returns {SC.Array} receiver
-  */
-  enumerableContentDidChange: function(start, amt, delta, addedObjects, removedObjects) {
+  removeArrayObservers: function(options) {
+    this._modifyObserverSet('remove', options);
+  },
+
+  _modifyObserverSet: function(method, options) {
+    var willChangeObservers, didChangeObservers;
+
+    var target     = options.target || this;
+    var willChange = options.willChange || 'arrayWillChange';
+    var didChange  = options.didChange || 'arrayDidChange';
+    var context    = options.context;
+
+    if (typeof willChange === "string") {
+      willChange = target[willChange];
+    }
+
+    if (typeof didChange === "string") {
+      didChange = target[didChange];
+    }
+
+    willChangeObservers = this._kvo_for('_kvo_array_will_change', SC.ObserverSet);
+    didChangeObservers  = this._kvo_for('_kvo_array_did_change', SC.ObserverSet);
+
+    willChangeObservers[method](target, willChange, context);
+    didChangeObservers[method](target, didChange, context);
+  },
+
+  arrayContentWillChange: function(start, removedCount, addedCount) {
+    this._teardownContentObservers(start, removedCount);
+
+    var member, members, membersLen, idx;
+    var target, action;
+    var willChangeObservers = this._kvo_array_will_change;
+    if (willChangeObservers) {
+      members = willChangeObservers.members;
+      membersLen = members.length;
+
+      for (idx = 0; idx < membersLen; idx++) {
+        member = members[idx];
+        target = member[0];
+        action = member[1];
+        action.call(target, start, removedCount, addedCount, this);
+      }
+    }
+  },
+
+  arrayContentDidChange: function(start, removedCount, addedCount) {
     var rangeob = this._array_rangeObservers,
-        oldlen  = this._array_oldLength,
         newlen, length, changes ;
 
     this.beginPropertyChanges();
@@ -478,38 +517,307 @@ SC.Array = /** @scope SC.Array.prototype */{
 
     // schedule info for range observers
     if (rangeob && rangeob.length>0) {
-
-      // if no oldLength has been cached, just assume 0
-      if (oldlen === undefined) oldlen = 0;
-      this._array_oldLength = newlen = this.get('length');
-
-      // normalize input parameters
-      // if delta was not passed, assume it is the different between the
-      // new and old length.
-      if (start === undefined) start = 0;
-      if (delta === undefined) delta = newlen - oldlen ;
-      if (delta !== 0 || amt === undefined) {
-        length = newlen - start ;
-        if (delta<0) length -= delta; // cover removed range as well
-      } else {
-        length = amt ;
-      }
-
       changes = this._array_rangeChanges;
-      if (!changes) changes = this._array_rangeChanges = SC.IndexSet.create();
+      if (!changes) { changes = this._array_rangeChanges = SC.IndexSet.create(); }
+      if (removedCount === addedCount) {
+        length = removedCount;
+      } else {
+        length = this.get('length') - start;
+
+        if (removedCount > addedCount) {
+          length += (removedCount - addedCount);
+        }
+      }
       changes.add(start, length);
     }
 
-    this._setupContentObservers(addedObjects, removedObjects);
+    this._setupContentObservers(start, addedCount);
+
+    var member, members, membersLen, idx;
+    var target, action;
+    var didChangeObservers = this._kvo_array_did_change;
+    if (didChangeObservers) {
+      members = didChangeObservers.members;
+      membersLen = members.length;
+
+      for (idx = 0; idx < membersLen; idx++) {
+        member = members[idx];
+        target = member[0];
+        action = member[1];
+        action.call(target, start, removedCount, addedCount, this);
+      }
+    }
+
     this.notifyPropertyChange('[]') ;
     this.endPropertyChanges();
 
-    // Only notify enumerable observers if we have enough information to do so.
-    if (addedObjects && removedObjects) {
-      this._notifyEnumerableObservers(addedObjects, removedObjects, start);
+    return this ;
+  },
+
+  /**
+    @private
+
+    When enumerable content has changed, remove enumerable observers from
+    items that are no longer in the enumerable, and add observers to newly
+    added items.
+
+    @param {Array} addedObjects the array of objects that have been added
+    @param {Array} removedObjects the array of objects that have been removed
+  */
+  _setupContentObservers: function(start, addedCount) {
+    var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
+    var addedObjects;
+    var kvoKey;
+
+    // Only setup and teardown enumerable observers if we have keys to observe
+    if (observedKeys.get('length') > 0) {
+      addedObjects = this.slice(start, start+addedCount);
+
+      var self = this;
+      // added and resume the chain observer.
+      observedKeys.forEach(function(key) {
+        kvoKey = SC.keyFor('_kvo_content_observers', key);
+
+        // Get all original ChainObservers associated with the key
+        self._kvo_for(kvoKey).forEach(function(observer) {
+          addedObjects.forEach(function(item) {
+            self._resumeChainObservingForItemWithChainObserver(item, observer);
+          });
+        });
+      });
+    }
+  },
+
+  _teardownContentObservers: function(start, removedCount) {
+    var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
+    var removedObjects;
+    var kvoKey;
+
+    // Only setup and teardown enumerable observers if we have keys to observe
+    if (observedKeys.get('length') > 0) {
+      removedObjects = this.slice(start, start+removedCount);
+
+      // added and resume the chain observer.
+      observedKeys.forEach(function(key) {
+        kvoKey = SC.keyFor('_kvo_content_observers', key);
+
+        // Loop through removed objects and remove any enumerable observers that
+        // belong to them.
+        removedObjects.forEach(function(item) {
+          item._kvo_for(kvoKey).forEach(function(observer) {
+            observer.destroyChain();
+          });
+        });
+      });
+    }
+  },
+
+  teardownEnumerablePropertyChains: function(removedObjects) {
+    var chains = this._kvo_enumerable_property_chains;
+
+    if (chains) {
+      chains.forEach(function(chain) {
+        var idx, len = removedObjects.get('length'),
+            chainGuid = SC.guidFor(chain),
+            clonedChain, item, kvoChainList = '_kvo_enumerable_property_clones';
+
+        chain.notifyPropertyDidChange();
+
+        for (idx = 0; idx < len; idx++) {
+          item = removedObjects[idx];
+          clonedChain = item[kvoChainList][chainGuid];
+          clonedChain.deactivate();
+          delete item[kvoChainList][chainGuid];
+        }
+      }, this);
+    }
+    return this ;
+  },
+
+  /**
+    For all registered property chains on this object, removed them from objects
+    being removed from the enumerable, and clone them onto newly added objects.
+
+    @param {Object[]} addedObjects the objects being added to the enumerable
+    @param {Object[]} removedObjects the objected being removed from the enumerable
+    @returns {Object} receiver
+  */
+  setupEnumerablePropertyChains: function(addedObjects) {
+    var chains = this._kvo_enumerable_property_chains;
+
+    if (chains) {
+      chains.forEach(function(chain) {
+        var idx, len = addedObjects.get('length');
+
+        chain.notifyPropertyDidChange();
+
+        len = addedObjects.get('length');
+        for (idx = 0; idx < len; idx++) {
+          this._clonePropertyChainToItem(chain, addedObjects[idx]);
+        }
+      }, this);
+    }
+    return this ;
+  },
+
+  /**
+    Register a property chain to propagate to enumerable content.
+
+    This will clone the property chain to each item in the enumerable,
+    then save it so that it is automatically set up and torn down when
+    the enumerable content changes.
+
+    @param {String} property the property being listened for on this object
+    @param {SC._PropertyChain} chain the chain to clone to items
+  */
+  registerDependentKeyWithChain: function(property, chain) {
+    // Get the set of all existing property chains that should
+    // be propagated to enumerable contents. If that set doesn't
+    // exist yet, _kvo_for() will create it.
+    var kvoChainList = '_kvo_enumerable_property_chains',
+        chains, item, clone, cloneList;
+
+    chains = this._kvo_for(kvoChainList, SC.CoreSet);
+
+    // Save a reference to the chain on this object. If new objects
+    // are added to the enumerable, we will clone this chain and add
+    // it to the new object.
+    chains.add(chain);
+
+    this.forEach(function(item) {
+      this._clonePropertyChainToItem(chain, item);
+    }, this);
+  },
+
+  /**
+    Clones an SC._PropertyChain to a content item.
+
+    @param {SC._PropertyChain} chain
+    @param {Object} item
+  */
+  _clonePropertyChainToItem: function(chain, item) {
+    var clone        = SC.clone(chain),
+        kvoCloneList = '_kvo_enumerable_property_clones',
+        cloneList;
+
+    clone.object = item;
+
+    cloneList = item[kvoCloneList] = item[kvoCloneList] || {};
+    cloneList[SC.guidFor(chain)] = clone;
+
+    clone.activate(item);
+  },
+
+  /**
+    Removes a dependent key from the enumerable, and tears it down on
+    all content objects.
+
+    @param {String} property
+    @param {SC._PropertyChain} chain
+  */
+  removeDependentKeyWithChain: function(property, chain) {
+    var kvoChainList = '_kvo_enumerable_property_chains',
+        kvoCloneList = '_kvo_enumerable_property_clones',
+        chains, item, clone, cloneList;
+
+    this.forEach(function(item) {
+      item.removeDependentKeyWithChain(property, chain);
+
+      cloneList = item[kvoCloneList];
+      clone = cloneList[SC.guidFor(chain)];
+
+      clone.deactivate(item);
+    }, this);
+  },
+
+  /**
+    @private
+
+    Clones a segment of an observer chain and applies it
+    to an element of this Enumerable.
+
+    @param {Object} item The element
+    @param {SC._ChainObserver} chainObserver the chain segment to begin from
+  */
+  _resumeChainObservingForItemWithChainObserver: function(item, chainObserver) {
+    var observer = SC.clone(chainObserver.next);
+    var key = observer.property;
+
+    // The chain observer should create new observers on the child object
+    observer.object = item;
+    item.addObserver(key, observer, observer.propertyDidChange);
+
+    // if we're in the initial chained observer setup phase, add the tail
+    // of the current observer segment to the list of tracked tails.
+    if(chainObserver.root.tails) {
+      chainObserver.root.tails.pushObject(observer.tail());
     }
 
-    return this ;
+    observer.propertyDidChange();
+
+    // Maintain a list of observers on the item so we can remove them
+    // if it is removed from the enumerable.
+    item._kvo_for(SC.keyFor('_kvo_content_observers', key)).push(observer);
+  },
+
+  /**
+    @private
+
+    Adds a content observer. Content observers are able to
+    propagate chain observers to each member item in the enumerable,
+    so that the observer is fired whenever a single item changes.
+
+    You should never call this method directly. Instead, you should
+    call addObserver() with the special '@each' property in the path.
+
+    For example, if you wanted to observe changes to each item's isDone
+    property, you could call:
+
+        arrayController.addObserver('@each.isDone');
+
+    @param {SC._ChainObserver} chainObserver the chain observer to propagate
+  */
+  _addContentObserver: function(chainObserver) {
+    var key = chainObserver.next.property;
+
+    // Add the key to a set so we know what we are observing
+    this._kvo_for('_kvo_content_observed_keys', SC.CoreSet).push(key);
+
+    // Add the passed ChainObserver to an ObserverSet for that key
+    var kvoKey = SC.keyFor('_kvo_content_observers', key);
+    this._kvo_for(kvoKey).push(chainObserver);
+
+    // set up chained observers on the initial content
+    this._setupContentObservers(0, chainObserver.object.get('length'));
+  },
+
+  /**
+    @private
+
+    Removes a content observer. Pass the same chain observer
+    that was used to add the content observer.
+
+    @param {SC._ChainObserver} chainObserver the chain observer to propagate
+  */
+
+  _removeContentObserver: function(chainObserver) {
+    var observers, kvoKey;
+    var observedKeys = this._kvo_content_observed_keys;
+    var key = chainObserver.next.property;
+
+    if (observedKeys.contains(key)) {
+
+      kvoKey = SC.keyFor('_kvo_content_observers', key);
+      observers = this._kvo_for(kvoKey);
+
+      observers.removeObject(chainObserver);
+
+      this._teardownContentObservers(0, chainObserver.object.get('length'));
+
+      if (observers.length === 0) {
+        this._kvo_for('_kvo_content_observed_keys').remove(key);
+      }
+    }
   },
 
   /**  @private
@@ -540,7 +848,7 @@ SC.Array = SC.mixin({}, SC.Enumerable, SC.Array) ;
   Returns a new array that is a slice of the receiver.  This implementation
   uses the observable array methods to retrieve the objects for the new
   slice.
-  
+
   If you don't pass in beginIndex and endIndex, it will act as a copy of the
   array.
 
@@ -615,22 +923,23 @@ if (!Array.prototype.lastIndexOf) {
 
     // primitive for array support.
     replace: function(idx, amt, objects) {
-      var removedObjects;
+      if (this.isFrozen) { throw SC.FROZEN_ERROR ; }
 
-      if (this.isFrozen) throw SC.FROZEN_ERROR ;
-      if (!objects || objects.length === 0) {
-        removedObjects = this.splice(idx, amt) ;
+      var args;
+      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
+
+      // Notify that array content is about to mutate.
+      this.arrayContentWillChange(idx, amt, len);
+
+      if (len === 0) {
+        this.splice(idx, amt) ;
       } else {
-        var args = [idx, amt].concat(objects) ;
-        removedObjects = this.splice.apply(this,args) ;
+        args = [idx, amt].concat(objects) ;
+        this.splice.apply(this,args) ;
       }
 
-      // if we replaced exactly the same number of items, then pass only the
-      // replaced range.  Otherwise, pass the full remaining array length
-      // since everything has shifted
-      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
-      objects = SC.isArray(objects) ? objects : [objects];
-      this.enumerableContentDidChange(idx, amt, len - amt, objects, removedObjects) ;
+      this.arrayContentDidChange(idx, amt, len);
+      this.enumerableContentDidChange(idx, amt, len - amt) ;
       return this ;
     },
 
