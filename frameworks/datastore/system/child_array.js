@@ -220,17 +220,36 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   recordPropertyDidChange: function(keys) {
     if (keys && !keys.contains(this.get('propertyName'))) return this;
 
-    var children = this.get('readOnlyChildren');
+    var children = this.get('readOnlyChildren'), oldLen = 0, newLen = 0;
     var prev = this._prevChildren, f = this._childrenContentDidChange;
 
     if (children === prev) return this; // nothing to do
 
-    if (prev) prev.removeObserver('[]', this, f);
-    this._prevChildren = children;
-    if (children) children.addObserver('[]', this, f);
+    if (prev) {
+      prev.removeArrayObservers({
+        target: this,
+        willChange: this.arrayContentWillChange,
+        didChange: f
+      });
 
-    var rev = (children) ? children.propertyRevision : -1 ;
-    this._childrenContentDidChange(children, '[]', children, rev);
+      oldLen = prev.get('length');
+    }
+
+    if (children) {
+      children.addArrayObservers({
+        target: this,
+        willChange: this.arrayContentWillChange,
+        didChange: f
+      });
+
+      newLen = children.get('length');
+    }
+
+
+    this.arrayContentWillChange(0, oldLen, newLen);
+    this._prevChildren = children;
+    this._childrenContentDidChange(0, oldLen, newLen);
+
     return this;
   },
 
@@ -244,9 +263,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Number} value
     @param {Number} rev
   */
-  _childrenContentDidChange: function(target, key, value, rev) {
+  _childrenContentDidChange: function(start, removedCount, addedCount) {
     this._records = null ; // clear cache
-    this.enumerableContentDidChange();
+    this.arrayContentDidChange(start, removedCount, addedCount);
   },
 
   /** @private */
