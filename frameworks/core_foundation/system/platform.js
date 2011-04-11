@@ -77,8 +77,8 @@ SC.platform = SC.Object.create({
     }
 
     return ret;
-  }(('autocomplete readonly list size required multiple maxlength '
-    +'pattern min max step placeholder').w()),
+  }(['autocomplete', 'readonly', 'list', 'size', 'required', 'multiple', 'maxlength',
+      'pattern', 'min', 'max', 'step', 'placeholder']),
 
   /**
     YES if the application is currently running as a standalone application.
@@ -129,7 +129,7 @@ SC.platform = SC.Object.create({
     this._simtouch_counter = 1;
 
     // Remove events that don't exist in touch environments
-    this.removeEvents('click dblclick mouseout mouseover mousewheel'.w());
+    this.removeEvents(['click', 'dblclick', 'mouseout', 'mouseover', 'mousewheel']);
 
     // Replace mouse events with our translation methods
     this.replaceEvent('mousemove', this._simtouch_mousemove);

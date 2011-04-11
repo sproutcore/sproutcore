@@ -8,6 +8,6 @@
 
 SC.Button.Designer = {
 
-  designProperties: 'title'.w()
+  designProperties: ['title']
   
 };

@@ -404,7 +404,7 @@ SC.SelectView = SC.ButtonView.extend(
         object.get(nameKey) : object[nameKey]) : object.toString() ;
 
       // localize name if specified.
-      name = shouldLocalize? name.loc() : name ;
+      name = shouldLocalize? SC.String.loc(name) : name ;
 
       //Get the icon value
       icon = iconKey ? (object.get ?

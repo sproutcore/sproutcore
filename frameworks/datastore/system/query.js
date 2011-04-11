@@ -486,10 +486,10 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   /** @private
     Properties that need to be copied when cloning the query.
   */
-  copyKeys: 'conditions orderBy recordType recordTypes parameters location scope'.w(),
+  copyKeys: ['conditions', 'orderBy', 'recordType', 'recordTypes', 'parameters', 'location', 'scope'],
   
   /** @private */
-  concatenatedProperties: 'copyKeys'.w(),
+  concatenatedProperties: ['copyKeys'],
 
   /** @private 
     Implement the Copyable API to clone a query object once it has been 

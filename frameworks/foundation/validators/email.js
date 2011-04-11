@@ -23,7 +23,7 @@ SC.Validator.Email = SC.Validator.extend(
   
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
-    return SC.$error("Invalid.Email(%@)".loc(label), label) ;
+    return SC.$error(SC.String.loc("Invalid.Email(%@)", label), label) ;
   }  
     
 }) ;

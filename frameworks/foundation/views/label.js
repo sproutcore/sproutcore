@@ -30,7 +30,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   classNames: ['sc-label-view'],
 
-  displayProperties: 'displayTitle textAlign fontWeight icon escapeHTML needsEllipsis hint'.w(),
+  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint'],
 
   /**
     The delegate that gets notified of events related to the editing process. Set
@@ -174,7 +174,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     if (!SC.none(value) && value.toString) value = value.toString() ;
     
     // 4. Localize
-    if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = value.loc() ;
+    if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = SC.String.loc(value) ;
         
     return value ;
   }.property('value', 'localize', 'formatter').cacheable(),

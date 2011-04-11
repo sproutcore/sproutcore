@@ -82,7 +82,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   // INTERNAL PROPERTIES
   // 
   
-  displayProperties: 'displayValue ariaValue minimum maximum step frame'.w(),
+  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'step', 'frame'],
 
   /**
    @property

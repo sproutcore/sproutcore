@@ -46,7 +46,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
     @default 'displayValue ariaValue minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w()
     @see SC.View#displayProperties
   */
-  displayProperties: 'displayValue ariaValue minimum maximum isRunning isEnabled isIndeterminate animatedBackgroundMatrix offsetRange'.w(),
+  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'isRunning', 'isEnabled', 'isIndeterminate', 'animatedBackgroundMatrix', 'offsetRange'],
 
   /**
     @type String

@@ -320,7 +320,7 @@ SC.RadioView = SC.View.extend(SC.Control,
       }
 
       // localize title if needed
-      if (loc) title = title.loc();
+      if (loc) title = SC.String.loc(title);
       ret.push(SC.Object.create({
         title: title,
         icon: icon,

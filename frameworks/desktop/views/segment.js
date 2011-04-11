@@ -145,7 +145,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
   */
   displayTitle: function() {
     var ret = this.get('title');
-    if (this.get('localize')) ret = ret.loc();
+    if (this.get('localize')) ret = SC.String.loc(ret);
     return ret;
   }.property('title', 'localize').cacheable(),
 

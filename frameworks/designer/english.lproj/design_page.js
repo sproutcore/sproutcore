@@ -11,7 +11,7 @@ SC.designPage = SC.Page.create({
   // 
   designMainPane: SC.MainPane.design({
     classNames: ['workspace'],
-    childViews: 'rotated container viewList'.w(),
+    childViews: ['rotated', 'container', 'viewList'],
     
     container: SC.DesignerDropTarget.design({
       layout: {top: 20, left: 20, right: 20, bottom: 83},

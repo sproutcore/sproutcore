@@ -14,7 +14,7 @@ SC.ButtonView.Designer = SC.ViewDesigner.extend( SC.Button.Designer,
   
   encodeChildViews: NO,
   
-  designProperties: 'theme buttonBehavior href isDefault'.w(),
+  designProperties: ['theme', 'buttonBehavior', 'href', 'isDefault'],
   
   canResizeVertical: NO,
   

@@ -450,9 +450,9 @@ SC.Benchmark = {
     // Get the global start of the graph.
 
     this._benchmarkChart = SC.Pane.create({
-      classNames: "sc-benchmark-pane".w(),
+      classNames: ["sc-benchmark-pane"],
       layout: { left: 20, right: 20, bottom: 20, top: 20 },
-      childViews: "title exit".w(),
+      childViews: ["title", "exit"],
       exit: SC.ButtonView.extend({
         layout: { right: 20, top: 20, width: 100, height: 30 },
         title: "Hide Chart",
@@ -461,7 +461,7 @@ SC.Benchmark = {
       }),
 
       title: SC.LabelView.extend({
-        classNames: 'sc-benchmark-title'.w(),
+        classNames: ['sc-benchmark-title'],
         layout: { left: 20, top: 23, right: 200, height: 30 },
         value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + chartCapturedTime +' ms - Points Captured: ' + chartLen),
         fontWeight: 'bold'
@@ -540,7 +540,7 @@ SC.Benchmark = {
     if (!this.globalStartTime) {
       // the potential events representing start time can be either from the browser
       // or our own recordings. We prefer the browser.
-      var globalStartEvents = 'navigation navigationStart headStart'.w();
+      var globalStartEvents = ['navigation', 'navigationStart', 'headStart'];
       len = globalStartEvents.length;
 
       for (idx = 0; idx < len; idx++) {

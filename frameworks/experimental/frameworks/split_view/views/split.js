@@ -83,9 +83,9 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
 SC.SplitView = SC.View.extend({
   /**@scope SC.SplitView.prototype*/
   
-  classNames: 'sc-split-view'.w(),
+  classNames: ['sc-split-view'],
   
-  childViews: 'topLeftView bottomRightView'.w(),
+  childViews: ['topLeftView', 'bottomRightView'],
   
   // used by the splitView computed property to find the nearest SplitView.
   isSplitView: YES,
@@ -154,7 +154,7 @@ SC.SplitView = SC.View.extend({
   // Things like layoutDirection must be rendered as class names.
   // We delegate to a render delegaate.
   //
-  displayProperties: 'layoutDirection'.w(),
+  displayProperties: ['layoutDirection'],
   renderDelegateName: 'splitRenderDelegate',
   
   //

@@ -340,7 +340,7 @@ SC.ViewDesigner = SC.Object.extend(
     
     You can add to this array in your subclasses.
   */
-  designProperties: 'layout isVisible isEnabled styleClass'.w(),
+  designProperties: ['layout', 'isVisible', 'isEnabled', 'styleClass'],
   
   
   /*
@@ -348,7 +348,7 @@ SC.ViewDesigner = SC.Object.extend(
     list
   */
   
-  excludeProperties: 'layout childViews'.w(),
+  excludeProperties: ['layout', 'childViews'],
   
   
   /*

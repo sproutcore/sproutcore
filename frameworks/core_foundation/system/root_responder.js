@@ -610,17 +610,17 @@ SC.RootResponder = SC.Object.extend({
   */
   setup: function() {
     // handle touch events
-    this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel'], document);
 
     // handle basic events
-    this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mousemove selectstart contextmenu'.w(), document)
-        .listenFor('resize'.w(), window);
+    this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
+        .listenFor(['resize'], window);
 
     if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
-    else this.listenFor('focus blur'.w(), window);
+    else this.listenFor(['focus', 'blur'], window);
 
     // handle animation events
-    this.listenFor('webkitAnimationStart webkitAnimationIteration webkitAnimationEnd'.w(), document);
+    this.listenFor(['webkitAnimationStart', 'webkitAnimationIteration', 'webkitAnimationEnd'], document);
 
     // CSS Transitions
     if (SC.platform.supportsCSSTransitions) {
@@ -643,7 +643,7 @@ SC.RootResponder = SC.Object.extend({
     }
 
     // handle these two events specially in IE
-    'drag selectstart'.w().forEach(function(keyName) {
+    ['drag', 'selectstart'].forEach(function(keyName) {
       var method = this[keyName] ;
       if (method) {
         if (SC.browser.msie) {

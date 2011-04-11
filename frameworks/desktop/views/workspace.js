@@ -32,7 +32,7 @@ SC.WorkspaceView = SC.View.extend(
     @default "hasTopToolbar hasBottomToolbar".w()
     @see SC.View#displayProperties
   */
-  displayProperties: "hasTopToolbar hasBottomToolbar".w(),
+  displayProperties: ["hasTopToolbar", "hasBottomToolbar"],
   
   /**
     @type String
