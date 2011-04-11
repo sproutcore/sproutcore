@@ -386,14 +386,6 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
-  propertyWillChange: function(key) {
-    if (key === 'storeKeys') {
-      this.arrayContentWillChange(0, this.get('length'), 0);
-    }
-
-    return sc_super();
-  },
-
   /** @private
     Invoked whenever the `storeIds` array changes.  Observes changes.
   */
