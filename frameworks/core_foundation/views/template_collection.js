@@ -17,10 +17,39 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
   itemView: 'SC.TemplateView',
 
+  /**
+    The template used to render each item in the collection.
+
+    This should be a function that takes a content object and returns
+    a string of HTML that will be inserted into the DOM.
+
+    In general, you should set the `itemViewTemplateName` property instead of
+    setting the `itemViewTemplate` property yourself. If you created the
+    SC.TemplateCollectionView using the Handlebars {{#collection}} helper, this
+    will be set for you automatically.
+
+    @type Function
+  */
+  itemViewTemplate: null,
+
+  /**
+    The name of the template to lookup if no item view template is provided.
+
+    The collection will look for a template with this name in the global
+    `SC.TEMPLATES` hash. Usually this hash will be populated for you
+    automatically when you include `.handlebars` files in your project.
+
+    @type String
+  */
+  itemViewTemplateName: null,
+
   itemContext: null,
 
   itemViewClass: function() {
     var itemView = this.get('itemView');
+    var itemViewTemplate = this.get('itemViewTemplate');
+    var itemViewTemplateName = this.get('itemViewTemplateName');
+
     // hash of properties to override in our
     // item view class
     var extensions = {};
@@ -29,8 +58,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       itemView = SC.objectForPropertyPath(itemView);
     }
 
-    if (this.get('itemViewTemplate')) {
-      extensions.template = this.get('itemViewTemplate');
+    if (!itemViewTemplate && itemViewTemplateName) {
+      itemViewTemplate = this.get('templates').get(itemViewTemplateName);
+    }
+
+    if (itemViewTemplate) {
+      extensions.template = itemViewTemplate;
     }
 
     if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {

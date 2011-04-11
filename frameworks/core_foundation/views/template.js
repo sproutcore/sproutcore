@@ -51,7 +51,7 @@ SC.TemplateView = SC.CoreView.extend(
   templates: SC.TEMPLATES,
 
   /**
-    The template to use to render the view. This should be a function that
+    The template used to render the view. This should be a function that
     accepts an optional context parameter and returns a string of HTML that
     will be inserted into the DOM relative to its parent view.
 
