@@ -6,6 +6,8 @@
 // ==========================================================================
 
 /**
+  @namespace
+
   If an exception is thrown during execution of your SproutCore app, this
   object will be given the opportunity to handle it.
 
@@ -20,9 +22,9 @@
 
   @since SproutCore 1.5
 */
-
 SC.ExceptionHandler = {
 
+  /** @private */
   enabled: (SC.buildMode !== 'debug'),
 
   /**
@@ -82,7 +84,8 @@ SC.ExceptionHandler = {
   /**
     YES if an exception was thrown and the error dialog is visible.
 
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   isShowingErrorDialog: NO
 };

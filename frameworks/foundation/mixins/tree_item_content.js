@@ -13,13 +13,13 @@
   can be applied to tree item model objects to customize the way the tree
   information is extracted from the object.
 
-  h2. Basic Implementation
+  ## Basic Implementation
 
   If you add this mixin, you must implement the treeItemChildren property so
   that it returns the current array of child tree items for the receiver.  If
   you do not implement this property the tree item will not function.
 
-  h2. Optimizing Branches
+  ## Optimizing Branches
 
   The most common use of this mixin is to override the treeItemBranchIndexes
   property to return an index set of child items that are themselves branches
@@ -37,7 +37,8 @@ SC.TreeItemContent = {
   /**
     Walk like a duck.
 
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   isTreeItemContent: YES,
 
@@ -46,7 +47,8 @@ SC.TreeItemContent = {
     returns null.  If you implement this mixin, you MUST implement this
     property to return the actual tree item children for the item.
 
-    @property {SC.Array}
+    @type SC.Array
+    @default null
   */
   treeItemChildren: null,
 
@@ -56,7 +58,8 @@ SC.TreeItemContent = {
     treeItemDisclosureState() to compute the disclosure state however you
     want.
 
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   treeItemIsExpanded: YES,
 
@@ -65,7 +68,8 @@ SC.TreeItemContent = {
     This property is only useful on the root item in your tree.  Setting it to
     YES on any other item will be ignored.
 
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   treeItemIsGrouped: NO,
 
