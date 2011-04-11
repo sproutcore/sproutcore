@@ -301,7 +301,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     var ret = this.getContentProperty('itemTitleKey'),
         localize = this.getPath('parentMenu.localize');
 
-    if (localize && ret) ret = ret.loc();
+    if (localize && ret) ret = SC.String.loc(ret);
 
     return ret||'';
   }.property('content.title').cacheable(),

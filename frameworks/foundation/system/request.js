@@ -204,7 +204,7 @@ isAsynchronous: YES,
 
   concatenatedProperties: 'COPY_KEYS',
 
-  COPY_KEYS: 'isAsynchronous isJSON isXML address type timeout body responseClass willSend didSend willReceive didReceive'.w(),
+  COPY_KEYS: ['isAsynchronous', 'isJSON', 'isXML', 'address', 'type', 'timeout', 'body', 'responseClass', 'willSend', 'didSend', 'willReceive', 'didReceive'],
   
   /**
     Returns a copy of the current request.  This will only copy certain

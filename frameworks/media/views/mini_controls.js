@@ -17,8 +17,8 @@ SC.MiniMediaControlsView = SC.View.extend({
 
   target: null,
   
-  childViews: 'playButton timeView minusLabelView volumeView'.w(),
-  classNames: 'sc-media-controls',
+  childViews: ['playButton', 'timeView', 'minusLabelView', 'volumeView'],
+  classNames: ['sc-media-controls'],
   
   playObserver: function(){
     if(this.getPath('target.paused')){

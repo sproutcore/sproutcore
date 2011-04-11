@@ -722,7 +722,7 @@ SC.AudioView.logFlash = function(message) {
 SC.AudioPlayerView = SC.View.extend({
   classNames: 'sc-audio-view',
   
-  childViews: 'audioView mini'.w(),
+  childViews: ['audioView', 'mini'],
   
   value: null,
   

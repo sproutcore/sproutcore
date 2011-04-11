@@ -357,14 +357,14 @@ SC.mixin(Date,{
   	// first look for natural language
   	d = 0 ; var now = new Date().getTime() ;
   	switch(val.toLowerCase()) {
-  	  case 'yesterday'.loc():
+  	  case SC.String.loc('yesterday'):
   	    d = now - (24*60*60*1000) ;
   	    break ;
-  	  case 'today'.loc():
-  	  case 'now'.loc():
+  	  case SC.String.loc('today'):
+  	  case SC.String.loc('now'):
   	    d = now ;
   	    break ;
-  	  case 'tomorrow'.loc():
+  	  case SC.String.loc('tomorrow'):
   	    d = now + (24*60*60*1000) ;
   	    break;
   	}

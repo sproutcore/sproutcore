@@ -194,7 +194,7 @@ SC.SelectFieldView = SC.FieldView.extend(
       
         var emptyName = this.get('emptyName') ;
         if (emptyName) {
-          if (shouldLocalize) emptyName = emptyName.loc() ;
+          if (shouldLocalize) emptyName = SC.String.loc(emptyName);
           if(firstTime){
             context.push('<option value="***">'+emptyName+'</option>',
                           '<option disabled="disabled"></option>') ;
@@ -218,7 +218,7 @@ SC.SelectFieldView = SC.FieldView.extend(
           // localize name if specified.
           if(shouldLocalize)
           {
-            name = name.loc();
+            name = SC.String.loc(name);
           }
    
           // get the value using the valueKey or the object if no valueKey.

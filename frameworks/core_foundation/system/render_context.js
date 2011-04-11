@@ -17,11 +17,11 @@ SC.MODE_APPEND = 'append';
 SC.MODE_PREPEND = 'prepend';
 
 /** list of numeric properties that should not have 'px' appended */
-SC.NON_PIXEL_PROPERTIES = 'zIndex fontWeight opacity'.w();
+SC.NON_PIXEL_PROPERTIES = ['zIndex', 'fontWeight', 'opacity'];
 
 /** a list of styles that get expanded into multiple properties, add more as you discover them */
 SC.COMBO_STYLES = {
-  WebkitTransition: 'WebkitTransitionProperty WebkitTransitionDuration WebkitTransitionDelay WebkitTransitionTimingFunction'.w()
+  WebkitTransition: ['WebkitTransitionProperty', 'WebkitTransitionDuration', 'WebkitTransitionDelay', 'WebkitTransitionTimingFunction']
 };
 
 /**
@@ -52,7 +52,7 @@ SC.COMBO_STYLES = {
 */
 SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
 
-  SELF_CLOSING: SC.CoreSet.create().addEach('area base basefront br hr input img link meta'.w()),
+  SELF_CLOSING: SC.CoreSet.create().addEach(['area', 'base', 'basefront', 'br', 'hr', 'input', 'img', 'link', 'meta']),
 
   /**
     When you create a context you should pass either a tag name or an element

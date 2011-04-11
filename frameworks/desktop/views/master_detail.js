@@ -73,7 +73,7 @@ SC.MasterDetailView = SC.View.extend(
   */
   detailView: SC.WorkspaceView.extend({
     topToolbar: SC.ToolbarView.extend({
-      childViews: "showHidePicker".w(),
+      childViews: ["showHidePicker"],
       showHidePicker: SC.ButtonView.extend({
         layout: { left: 7, centerY: 0, height: 30, width: 100 },
         controlSize: SC.AUTO_CONTROL_SIZE,

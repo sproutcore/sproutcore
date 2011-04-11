@@ -231,7 +231,7 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
   /** @private */
-  displayProperties: 'isEnabled isSelected isActive controlSize'.w(),
+  displayProperties: ['isEnabled', 'isSelected', 'isActive', 'controlSize'],
   
   /** @private */
   _CONTROL_TMP_CLASSNAMES: {},

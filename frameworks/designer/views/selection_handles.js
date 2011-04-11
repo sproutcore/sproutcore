@@ -34,15 +34,15 @@ SC.SelectionHandlesView = SC.View.extend(
       if (vertical && horizontal) {
         handles = ['top left', 'top right', 'bottom left','bottom right'];
       } else if (vertical) {
-        handles = 'top bottom'.w();
+        handles = ['top', 'bottom'];
       } else if (horizontal) {
-        handles = 'left right'.w();
+        handles = ['left', 'right'];
       } else handles = [];
 
 
       handles.forEach(function(classNames) {
         context.begin('span')
-          .classNames(classNames.w())
+          .classNames(SC.String.w(classNames))
           .addClass('handle')
           .end();
       }, this);

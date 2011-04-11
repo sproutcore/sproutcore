@@ -13,5 +13,5 @@ SC.TextFieldView.Designer = SC.ViewDesigner.extend(
   
   encodeChildViews: NO,
   
-  designProperties: 'isPassword isTextArea hint'.w()
+  designProperties: ['isPassword', 'isTextArea', 'hint']
 });

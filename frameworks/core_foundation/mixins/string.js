@@ -162,8 +162,8 @@ SC.String = {
   }
 };
 
-// Apply SC.String mixin to built-in String object
-SC.supplement(String.prototype, {
+SC.supplement(String.prototype,
+/** @scope String.prototype */ {
 
   capitalize: function() {
     return SC.String.capitalize(this, arguments);
@@ -181,23 +181,25 @@ SC.supplement(String.prototype, {
     return SC.String.dasherize(this, arguments);
   },
 
-  loc: function() {
-    return SC.String.loc(this, arguments);
-  },
-
   locWithDefault: function(def) {
     return SC.String.locWithDefault(this, def, arguments);
   }
 
 });
 
-/** @private
-  Two places define it, and we want the version at SC.String.loc
-*/
-String.prototype.loc = function() {
-  return SC.String.loc(this, arguments);
-};
+// We want the version defined here, not in Runtime
+SC.mixin(String.prototype,
+/** @scope String.prototype */ {
+  
+  loc: function() {
+    return SC.String.loc(this, arguments);
+  }
+
+});
 
 /** @private */
-SC.String.fmt = SC.CoreString.fmt; // copy from runtime
+SC.String.fmt = SC.CoreString.fmt;
+
+/** @private */
+SC.String.w = SC.CoreString.w;
 
