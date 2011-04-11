@@ -339,7 +339,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this.isConnected = YES ;
     this._connectionPending = YES ; // its connected but not really...
     this._syncOnConnect = YES ;
+
     SC.Binding._connectQueue.add(this) ;
+
+    if (!SC.RunLoop.isRunLoopInProgress()) {
+      this._scheduleSync();
+    }
+
     return this;
   },
 
@@ -446,6 +452,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       this._setBindingValue(target, key) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.
+
+      this._scheduleSync();
     }
   },
 
@@ -473,7 +481,18 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       this._setBindingValue(target, key) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.
+
+      this._scheduleSync();
     }
+  },
+
+  _scheduleSync: function() {
+    if (SC.RunLoop.isRunLoopInProgress() || this._syncScheduled) { return; }
+
+    this._syncScheduled = YES;
+    var self = this;
+
+    setTimeout(function() { SC.run(); self._syncScheduled = NO; }, 1);
   },
 
   /** @private
