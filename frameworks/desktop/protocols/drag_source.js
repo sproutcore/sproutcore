@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('system/drag') ;
+sc_require('system/drag') ;
 
 /**
   @namespace

@@ -1,5 +1,5 @@
-require('core');
-require('models/file');
+sc_require('core');
+sc_require('models/file');
 /*
   
 THIS IS DEPRECATED...

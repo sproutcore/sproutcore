@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('views/list') ;
+sc_require('views/list') ;
 
 /** @class
 

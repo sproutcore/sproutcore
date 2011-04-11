@@ -3,8 +3,8 @@
 // Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals Greenhouse */
-require('views/anchor');
-require('views/plist_item');
+sc_require('views/anchor');
+sc_require('views/plist_item');
 //This page contains all the inspectors
 Greenhouse.inspectorsPage = SC.Page.design({
   
