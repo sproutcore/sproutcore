@@ -807,7 +807,7 @@ SC.VideoView.logFlash = function(message) {
 SC.VideoPlayerView = SC.View.extend({
   classNames: 'sc-video-player-view',
   
-  childViews: 'videoView regular'.w(),
+  childViews: ['videoView', 'regular'],
   
   value: null,
   

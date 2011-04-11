@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require('panes/picker');
-require('views/menu_item');
+sc_require('panes/picker');
+sc_require('views/menu_item');
 
 /**
   @class
@@ -468,7 +468,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @isReadOnly
     @property Array
   */
-  menuItemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemHeightKey itemSubMenuKey itemKeyEquivalentKey itemTargetKey'.w(),
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey'],
 
   // ..........................................................
   // INTERNAL PROPERTIES

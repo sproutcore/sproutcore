@@ -14,8 +14,9 @@
 	@extends SC.FormView
 	@author Alex Iskander
 */
-require("mixins/emptiness");
-require("mixins/edit_mode");
+sc_require("mixins/emptiness");
+sc_require("mixins/edit_mode");
+
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
   renderDelegateName: 'formRowRenderDelegate',

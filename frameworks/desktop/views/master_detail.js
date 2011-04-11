@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require("views/workspace");
-require("views/toolbar");
+sc_require("views/workspace");
+sc_require("views/toolbar");
 
 
 /** @class
@@ -73,7 +73,7 @@ SC.MasterDetailView = SC.View.extend(
   */
   detailView: SC.WorkspaceView.extend({
     topToolbar: SC.ToolbarView.extend({
-      childViews: "showHidePicker".w(),
+      childViews: ["showHidePicker"],
       showHidePicker: SC.ButtonView.extend({
         layout: { left: 7, centerY: 0, height: 30, width: 100 },
         controlSize: SC.AUTO_CONTROL_SIZE,

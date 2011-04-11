@@ -25,8 +25,10 @@ SC.STRING_DASHERIZE_CACHE = {};
   1.6.
 
   @since SproutCore 1.0
+  @lends String.prototype
 */
 SC.String = {
+
   /**
     Capitalizes a string.
 
@@ -40,8 +42,8 @@ SC.String = {
 
     @return {String} capitalized string
   */
-  capitalize: function() {
-    return this.charAt(0).toUpperCase() + this.slice(1) ;
+  capitalize: function(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   },
 
   /**
@@ -58,13 +60,15 @@ SC.String = {
 
     @returns {String} camelized string
   */
-  camelize: function() {
-    var ret = this.replace(SC.STRING_TITLEIZE_REGEXP,
-      function(str,separater,character) {
-        return (character) ? character.toUpperCase() : '' ;
-      }) ;
-    var first = ret.charAt(0), lower = first.toLowerCase() ;
-    return (first !== lower) ? (lower + ret.slice(1)) : ret ;
+  camelize: function(str) {
+    var ret = str.replace(SC.STRING_TITLEIZE_REGEXP, function(str, separater, character) {
+      return character ? character.toUpperCase() : '';
+    });
+
+    var first = ret.charAt(0),
+        lower = first.toLowerCase();
+
+    return first !== lower ? lower + ret.slice(1) : ret;
   },
 
   /**
@@ -80,8 +84,8 @@ SC.String = {
 
     @returns {String} the decamelized string.
   */
-  decamelize: function() {
-    return this.replace(SC.STRING_DECAMELIZE_REGEXP,'$1_$2').toLowerCase();
+  decamelize: function(str) {
+    return str.replace(SC.STRING_DECAMELIZE_REGEXP, '$1_$2').toLowerCase();
   },
 
   /**
@@ -98,19 +102,15 @@ SC.String = {
 
     @returns {String} the dasherized string.
   */
-  dasherize: function() {
-    // Do we have the item in our cache?
+  dasherize: function(str) {
     var cache = SC.STRING_DASHERIZE_CACHE,
-        ret   = cache[this];
+        ret   = cache[str];
 
     if (ret) {
       return ret;
-    }
-    else {
-      ret = this.decamelize().replace(SC.STRING_DASHERIZE_REGEXP,'-') ;
-
-      // Add the item to our cache.
-      cache[this] = ret;
+    } else {
+      ret = SC.String.decamelize(str).replace(SC.STRING_DASHERIZE_REGEXP,'-');
+      cache[str] = ret;
     }
 
     return ret;
@@ -125,14 +125,19 @@ SC.String = {
     @param args {Object...} optional arguments to interpolate also
     @returns {String} the localized and formatted string.
   */
-  loc: function() {
+  loc: function(str) {
     // NB: This could be implemented as a wrapper to locWithDefault() but
     // it would add some overhead to deal with the arguments and adds stack
     // frames, so we are keeping the implementation separate.
-    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
-    var str = SC.Locale.currentLocale.locWithDefault(this);
-    if (SC.typeOf(str) !== SC.T_STRING) str = this;
-    return str.fmt.apply(str,arguments) ;
+    if(!SC.Locale.currentLocale) { SC.Locale.createCurrentLocale(); }
+
+    var localized = SC.Locale.currentLocale.locWithDefault(str);
+    if (SC.typeOf(localized) !== SC.T_STRING) { localized = str; }
+
+    var args = SC.$A(arguments);
+    args.shift(); // remove str param
+
+    return SC.String.fmt(localized, arguments);
   },
 
   /**
@@ -143,21 +148,58 @@ SC.String = {
     @param {Object...} args optional formatting arguments
     @returns {String} localized and formatted string
   */
-  locWithDefault: function(def) {
-    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
-    var str = SC.Locale.currentLocale.locWithDefault(this, def);
-    if (SC.typeOf(str) !== SC.T_STRING) str = this;
-    var args = SC.$A(arguments); args.shift(); // remove def param
-    return str.fmt.apply(str,args) ;
+  locWithDefault: function(str, def) {
+    if (!SC.Locale.currentLocale) { SC.Locale.createCurrentLocale(); }
+
+    var localized = SC.Locale.currentLocale.locWithDefault(str, def);
+    if (SC.typeOf(localized) !== SC.T_STRING) { localized = str; }
+
+    var args = SC.$A(arguments);
+    args.shift(); // remove str param
+    args.shift(); // remove def param
+
+    return SC.String.fmt(localized, args);
   }
 };
 
-// Apply SC.String mixin to built-in String object
-SC.supplement(String.prototype, SC.String) ;
+SC.supplement(String.prototype,
+/** @scope String.prototype */ {
+
+  capitalize: function() {
+    return SC.String.capitalize(this, arguments);
+  },
+
+  camelize: function() {
+    return SC.String.camelize(this, arguments);
+  },
+
+  decamelize: function() {
+    return SC.String.decamelize(this, arguments);
+  },
+
+  dasherize: function() {
+    return SC.String.dasherize(this, arguments);
+  },
+
+  locWithDefault: function(def) {
+    return SC.String.locWithDefault(this, def, arguments);
+  }
+
+});
+
+// We want the version defined here, not in Runtime
+SC.mixin(String.prototype,
+/** @scope String.prototype */ {
+  
+  loc: function() {
+    return SC.String.loc(this, arguments);
+  }
+
+});
 
 /** @private */
-String.prototype.loc = SC.String.loc; // Two places define it, and we want the version at SC.String.loc
+SC.String.fmt = SC.CoreString.fmt;
 
 /** @private */
-SC.String.fmt = String.prototype.fmt; // copy from runtime
+SC.String.w = SC.CoreString.w;
 

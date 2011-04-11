@@ -48,9 +48,9 @@ beginEditing.
 @implements SC.Editable
 */
 
-require("mixins/emptiness");
-require("mixins/edit_mode");
-require("views/form_row");
+sc_require("mixins/emptiness");
+sc_require("mixins/edit_mode");
+sc_require("views/form_row");
 
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_VERTICAL,

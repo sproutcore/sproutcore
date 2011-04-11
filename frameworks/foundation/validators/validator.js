@@ -116,7 +116,7 @@ SC.Validator = SC.Object.extend(
   */
   validateError: function(form, field) { 
     return SC.$error(
-      "Invalid.General(%@)".loc(field.get('fieldValue')),
+      SC.String.loc("Invalid.General(%@)", field.get('fieldValue')),
       field.get('fieldKey')) ; 
   },
 

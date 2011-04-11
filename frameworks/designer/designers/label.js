@@ -13,6 +13,6 @@ SC.LabelView.Designer = SC.ViewDesigner.extend(
   
   encodeChildViews: NO,
   
-  designProperties: 'value escapeHTML'.w()
+  designProperties: ['value', 'escapeHTML']
   
 });

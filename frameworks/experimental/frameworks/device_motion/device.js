@@ -80,7 +80,7 @@ SC.mixin(SC.device,
   // 
   
   setupMotion: function() {
-    SC.RootResponder.responder.listenFor('devicemotion deviceorientation'.w(), window, this);
+    SC.RootResponder.responder.listenFor(['devicemotion', 'deviceorientation'], window, this);
   },
   
   

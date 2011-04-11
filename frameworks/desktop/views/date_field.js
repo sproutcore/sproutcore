@@ -91,7 +91,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // with 1..31 without zeros at start, but causes the lenght not to be fixed)
 
   /** @private*/
-  _dtConstants: '%a %b %d %H %I %j %m %M %p %S %U %W %y %Y'.w(),
+  _dtConstants: ['%a', '%b', '%d', '%H', '%I', '%j', '%m', '%M', '%p', '%S', '%U', '%W', '%y', '%Y'],
   // Width constants for each representation %@.
   
   /** @private */

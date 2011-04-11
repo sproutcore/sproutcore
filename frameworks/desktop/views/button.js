@@ -210,7 +210,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   displayTitle: function() {
     var ret = this.get('title');
-    return (ret && this.get('localize')) ? ret.loc() : (ret || '');
+    return (ret && this.get('localize')) ? SC.String.loc(ret) : (ret || '');
   }.property('title','localize').cacheable(),
   
   /**

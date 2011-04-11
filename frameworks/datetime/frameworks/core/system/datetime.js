@@ -437,7 +437,7 @@ SC.DateTime.mixin(SC.Comparable,
     @property
     @type {Array}
   */
-  _englishDayNames: 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.w(),
+  _englishDayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   
   /**
     @property

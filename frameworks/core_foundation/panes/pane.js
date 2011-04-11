@@ -663,7 +663,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  classNames: 'sc-pane'.w()
+  classNames: ['sc-pane']
 
 }) ;
 

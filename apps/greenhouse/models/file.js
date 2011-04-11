@@ -5,7 +5,7 @@
 /*jslint evil: true*/
 /*globals Greenhouse*/
 
-require('core');
+sc_require('core');
 /** @class
 
   file properties

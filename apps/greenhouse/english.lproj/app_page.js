@@ -3,11 +3,11 @@
 // Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals Greenhouse */
-require('views/list_item');
-require('views/web');
-require('views/tear_off_picker');
-require('mixins/drop_down');
-require('views/simple_button');
+sc_require('views/list_item');
+sc_require('views/web');
+sc_require('views/tear_off_picker');
+sc_require('mixins/drop_down');
+sc_require('views/simple_button');
 // This page has the main UI layout
 Greenhouse.appPage = SC.Page.design({
   

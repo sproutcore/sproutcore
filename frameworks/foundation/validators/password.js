@@ -51,7 +51,7 @@ SC.Validator.Password = SC.Validator.extend(
   // update field states
   updateFields: function(form,valid) {
     if (!this.fields || this.fields.length === 0) return true ;
-    var err = "Invalid.Password".loc();
+    var err = SC.String.loc("Invalid.Password");
     var topField = this._field ;
     this.fields.forEach(function(f) {
       var msg = (valid) ? null : ((f == topField) ? err : '') ;

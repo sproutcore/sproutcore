@@ -110,7 +110,7 @@ SC.FileView = SC.FieldView.extend(
       sc_super();
     },
     
-    childViews: 'input'.w(),
+    childViews: ['input'],
     
     input: SC.View.design({
       tagName: 'input',

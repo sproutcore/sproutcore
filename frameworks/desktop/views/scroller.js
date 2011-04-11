@@ -46,7 +46,7 @@ SC.ScrollerView = SC.View.extend(
     @default 'thumbPosition thumbLength isEnabled controlsHidden'.w()
     @see SC.View#displayProperties
   */
-  displayProperties: 'thumbPosition thumbLength isEnabled controlsHidden'.w(),
+  displayProperties: ['thumbPosition', 'thumbLength', 'isEnabled', 'controlsHidden'],
 
   /**
     The WAI-ARIA role for scroller view.

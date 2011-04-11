@@ -11,7 +11,7 @@ module('SC.DesignCoder', {
     basic = SC.Page.design({});
     testView = SC.View.extend({});
     testView.Designer = SC.ViewDesigner.extend({
-      designProperties: 's n b a h valueBinding'.w()
+      designProperties: ['s', 'n', 'b', 'a', 'h', 'valueBinding']
     });
     
     

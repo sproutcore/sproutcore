@@ -42,7 +42,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.CoreView.reopen(
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: 'outlets displayProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin'],
 
   /**
     The current pane.
@@ -776,7 +776,7 @@ SC.CoreView.reopen(
   */
   displayToolTip: function() {
     var ret = this.get('toolTip');
-    return (ret && this.get('localize')) ? ret.loc() : (ret || '');
+    return (ret && this.get('localize')) ? SC.String.loc(ret) : (ret || '');
   }.property('toolTip','localize').cacheable(),
 
   /**

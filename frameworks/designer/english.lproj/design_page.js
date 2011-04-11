@@ -3,15 +3,15 @@
 // Copyright: ©2010 Mike Ball
 // ==========================================================================
 /*globals SC */
-require('views/designer_drop_target');
-require('views/page_item_view');
+sc_require('views/designer_drop_target');
+sc_require('views/page_item_view');
 SC.designPage = SC.Page.create({
   // ..........................................................
   // Views used inside iframe...
   // 
   designMainPane: SC.MainPane.design({
     classNames: ['workspace'],
-    childViews: 'rotated container viewList'.w(),
+    childViews: ['rotated', 'container', 'viewList'],
     
     container: SC.DesignerDropTarget.design({
       layout: {top: 20, left: 20, right: 20, bottom: 83},

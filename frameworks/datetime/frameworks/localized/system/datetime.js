@@ -68,19 +68,19 @@ SC.DateTime.mixin(
   */
   _setup: function() {
     if (!SC.DateTime.dayNames) {
-      SC.DateTime.dayNames = '_SC.DateTime.dayNames'.loc().w();
+      SC.DateTime.dayNames = SC.String.w(SC.String.loc('_SC.DateTime.dayNames'));
     }
 
     if (!SC.DateTime.abbreviatedDayNames) {
-      SC.DateTime.abbreviatedDayNames = '_SC.DateTime.abbreviatedDayNames'.loc().w();
+      SC.DateTime.abbreviatedDayNames = SC.String.w(SC.String.loc('_SC.DateTime.abbreviatedDayNames'));
     }
 
     if (!SC.DateTime.monthNames) {
-      SC.DateTime.monthNames = '_SC.DateTime.monthNames'.loc().w();
+      SC.DateTime.monthNames = SC.String.w(SC.String.loc('_SC.DateTime.monthNames'));
     }
 
     if (!SC.DateTime.abbreviatedMonthNames) {
-      SC.DateTime.abbreviatedMonthNames = '_SC.DateTime.abbreviatedMonthNames'.loc().w();
+      SC.DateTime.abbreviatedMonthNames = SC.String.w(SC.String.loc('_SC.DateTime.abbreviatedMonthNames'));
     }
   }
 

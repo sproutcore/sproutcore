@@ -88,7 +88,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   formattedHint: function() {
     var hint = this.get('hint');
 
-    return typeof(hint) === 'string' && this.get('localize') ? hint.loc() : hint;
+    return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
 
   /*
@@ -357,7 +357,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'formattedHint fieldValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
+  displayProperties: ['formattedHint', 'fieldValue', 'isEditing', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function() {
     sc_super();
