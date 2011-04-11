@@ -7,9 +7,12 @@
 
 /**
   @namespace 
+  @deprecated
 
-  __NOTE:__ SC.StaticLayout is now built in to SC.View.  You do not need to 
+  SC.StaticLayout is now built in to SC.View.  You do not need to 
   apply this mixin to use static layout.  Just set useStaticLayout to YES.
+  
+  
   
   Normally, SproutCore views use absolute positioning to display themselves
   on the screen.  While this is both the fastest and most efficient way to 
@@ -26,7 +29,7 @@
   Normally, if you are allowing the browser to manage the size and positioning
   of your view, these feature will not be useful to your code anyway.
   
-  h2. Using StaticLayout
+  ## Using StaticLayout
   
   To enable static layout on your view, just include this mixin on the view.
   SproutCore's builtin views that are capable of being used in static 
@@ -36,31 +39,26 @@
   You can then use CSS or the render() method on your view to setup the 
   positioning on your view using any browser layout mechanism you want.
   
-  h2. Example
+  ## Example
   
-  {{{
+      // JavaScript
     
-    // JavaScript
+      MyApp.CommentView = SC.View.extend(SC.StaticLayout, {
     
-    MyApp.CommentView = SC.View.extend(SC.StaticLayout, {
-    
-      classNames: ['comment-view'],
+        classNames: ['comment-view'],
       
-      useStaticLayout: YES,
+        useStaticLayout: YES,
 
-      ...
-    });
+        ...
+      });
     
-    // CSS
+      // CSS
     
-    .comment-view {
-      display: block;
-      position: relative;
-    }
-    
-  }}}
+      .comment-view {
+        display: block;
+        position: relative;
+      }
   
-  @deprecated
   @since SproutCore 1.0
 */
 SC.StaticLayout = {
@@ -70,7 +68,8 @@ SC.StaticLayout = {
     Note that a view that hasStaticLayout still may not actually use static
     layout unless useStaticLayout is also set to YES.
     
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   hasStaticLayout: YES
   

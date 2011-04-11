@@ -7,16 +7,29 @@
 
 // These are basic enhancements to the string class used throughout
 // SproutCore.
+
 /** @private */
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
+
+/** @private */
 SC.STRING_HUMANIZE_REGEXP = (/[\-_]/g);
+
+/** @private */
 SC.STRING_TRIM_REGEXP = (/^\s+|\s+$/g);
+
+/** @private */
 SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
+
+/** @private */
 SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
+
+/** @private */
 SC.STRING_REGEXP_ESCAPED_REGEXP = (/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g);
 
-// Since there are many strings that are commonly dasherized(), we'll maintain
-// a cache.  Moreover, we'll pre-add some common ones.
+/** @private
+  Since there are many strings that are commonly dasherized(), we'll maintain
+  // a cache.  Moreover, we'll pre-add some common ones.
+*/
 SC.STRING_DASHERIZE_CACHE = {
   top:      'top',
   left:     'left',
@@ -28,8 +41,11 @@ SC.STRING_DASHERIZE_CACHE = {
   maxWidth: 'max-width'
 };
 
-// Active Support style inflection constants
+/** @private
+  Active Support style inflection constants
+*/
 SC.INFLECTION_CONSTANTS = {
+  /** @private */
   PLURAL: [
       [/(quiz)$/i,               "$1zes"  ],
       [/^(ox)$/i,                "$1en"   ],
@@ -50,6 +66,7 @@ SC.INFLECTION_CONSTANTS = {
       [/$/,                      "s"      ]
   ],
 
+  /** @private */
   SINGULAR: [
       [/(quiz)zes$/i,                                                    "$1"     ],
       [/(matr)ices$/i,                                                   "$1ix"   ],
@@ -77,6 +94,7 @@ SC.INFLECTION_CONSTANTS = {
       [/s$/i,                                                            ""       ]
   ],
 
+  /** @private */
   IRREGULAR: [
       ['move',   'moves'   ],
       ['sex',    'sexes'   ],
@@ -85,6 +103,7 @@ SC.INFLECTION_CONSTANTS = {
       ['person', 'people'  ]
   ],
 
+  /** @private */
   UNCOUNTABLE: [
       "sheep",
       "fish",
@@ -98,18 +117,23 @@ SC.INFLECTION_CONSTANTS = {
   ]
 };
 
+/**
+  @namespace
+  @lends SC.String
+*/
 SC.StringInflections = {
+
   /**
     Capitalizes every word in a string.  Unlike titleize, spaces or dashes
     will remain in-tact.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | My Favorite Items |
-    | css-class-name | Css-Class-Name |
-    | action_name | Action_Name |
-    | innerHTML | InnerHTML |
+      - **Input String** -> **Output String**
+      - my favorite items -> My Favorite Items
+      - css-class-name -> Css-Class-Name
+      - action_name -> Action_Name
+      - innerHTML -> InnerHTML
 
     @returns {String} capitalized string
   */
@@ -124,13 +148,13 @@ SC.StringInflections = {
     Converts a string to a title.  This will decamelize the string, convert
     separators to spaces and capitalize every word.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | My Favorite Items |
-    | css-class-name | Css Class Name |
-    | action_name | Action Name |
-    | innerHTML | Inner HTML |
+      - **Input String** -> **Output String**
+      - my favorite items -> My Favorite Items
+      - css-class-name -> Css Class Name
+      - action_name -> Action Name
+      - innerHTML -> Inner HTML
 
     @return {String} titleized string.
   */
@@ -146,13 +170,13 @@ SC.StringInflections = {
     Converts the string into a class name.  This method will camelize your
     string and then capitalize the first letter.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | MyFavoriteItems |
-    | css-class-name | CssClassName |
-    | action_name | ActionName |
-    | innerHTML | InnerHtml |
+      - **Input String** -> **Output String**
+      - my favorite items -> MyFavoriteItems
+      - css-class-name -> CssClassName
+      - action_name -> ActionName
+      - innerHTML -> InnerHtml
 
     @returns {String}
   */
@@ -169,13 +193,13 @@ SC.StringInflections = {
     Converts a camelized string or a string with dashes or underscores into
     a string with components separated by spaces.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | my favorite items |
-    | css-class-name | css class name |
-    | action_name | action name |
-    | innerHTML | inner html |
+      - **Input String** -> **Output String**
+      - my favorite items -> my favorite items
+      - css-class-name -> css class name
+      - action_name -> action name
+      - innerHTML -> inner html
 
     @returns {String} the humanized string.
   */
@@ -387,7 +411,7 @@ SC.StringInflections = {
       }
   }
 
-}
+};
 
 /** @private */
 SC.String.strip = SC.String.trim; // convenience alias.

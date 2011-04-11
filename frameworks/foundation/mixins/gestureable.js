@@ -6,6 +6,8 @@
 // ==========================================================================
 
 /**
+  @namespace
+  
   You can mix in SC.Gesturable to your views to add some support for recognizing
   gestures.
   
@@ -18,32 +20,29 @@
   that your view should recognize. When a gesture is recognized, methods will be
   called on the view:
   
-  - [gestureName](gesture, args...): called when the gesture has occurred. This is 
-    useful for event-style gestures, where you aren't interested in when it starts or
-    ends, but just that it has occurred. SC.SwipeGesture triggers this after the
-    swipe has moved a minimum amount—40px by default.
-
-  - [gestureName]Start(gesture, args...): called when the gesture is first recognized. 
-    For instance, a swipe gesture may be recognized after the finger has moved a 
-    minimum distance in a horizontal.
-    
-  - [gestureName]Changed(gesture, args...): called when some property of the gesture 
-    has changed. For instance, this may be called continuously as the user swipes as 
-    the swipe's distance changes.
-  
-  - [gestureName]Cancelled(gesture, args...): called when a gesture, for one reason 
-    or another, is no longer recognized. For instance, a horizontal swipe gesture 
-    could cancel if the user moves too far in a vertical direction.
-  
-  - [gestureName]End(gesture, args...): called when a gesture ends. A swipe would end
-    when the user lifts their finger.
+    - [gestureName](gesture, args...): called when the gesture has occurred. This is 
+      useful for event-style gestures, where you aren't interested in when it starts or
+      ends, but just that it has occurred. SC.SwipeGesture triggers this after the
+      swipe has moved a minimum amount—40px by default.
+    - [gestureName]Start(gesture, args...): called when the gesture is first recognized. 
+      For instance, a swipe gesture may be recognized after the finger has moved a 
+      minimum distance in a horizontal.
+    - [gestureName]Changed(gesture, args...): called when some property of the gesture 
+      has changed. For instance, this may be called continuously as the user swipes as 
+      the swipe's distance changes.
+    - [gestureName]Cancelled(gesture, args...): called when a gesture, for one reason 
+      or another, is no longer recognized. For instance, a horizontal swipe gesture 
+      could cancel if the user moves too far in a vertical direction.
+    - [gestureName]End(gesture, args...): called when a gesture ends. A swipe would end
+      when the user lifts their finger.
   
   Each of these methods is passed the gesture instance, in addition to any arguments
   the gesture sends for your convenience. The default swipe gesture sends an SC.Touch
   instance, the swipe direction, and the distance the swipe has moved in that direction.
   
   Using SC.Gesturable
-  ------------------------
+  -------------------
+  
   To make your view recognize gestures, mix in Gesturable and add items to the 'gestures'
   property:
   
@@ -78,6 +77,7 @@
   
 */
 SC.Gesturable = {
+
   concatenatedProperties: ["gestures"],
   gestures: [],
   
