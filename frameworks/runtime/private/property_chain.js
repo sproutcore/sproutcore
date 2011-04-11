@@ -32,7 +32,6 @@ sc_require('system/object');
 
 SC._PropertyChain = SC.Object.extend(
 /** @scope SC.Object.prototype */ {
-
   /**
     The object represented by this node in the chain.
 
@@ -91,9 +90,12 @@ SC._PropertyChain = SC.Object.extend(
     // and look up property relative to the target, since dependent key
     // paths are always relative.
     if (!newObject) { newObject = this.get('target'); }
-    if (curObject && curObject!==newObject) this.deactivate();
+
+    if (curObject && curObject!==newObject) {
+      this.deactivate();
+    }
     this.set('object', newObject);
-    
+
     // In the special case of @each, we treat the enumerable as the next
     // property so just skip registering it
     if (newObject && property!=='@each') {
@@ -115,7 +117,6 @@ SC._PropertyChain = SC.Object.extend(
     chain changes.
   */
   deactivate: function() {
-    
     var object   = this.get('object'),
         property = this.get('property');
 
@@ -131,14 +132,26 @@ SC._PropertyChain = SC.Object.extend(
   */
   notifyPropertyDidChange: function() {
     var target       = this.get('target'),
-        toInvalidate = this.get('toInvalidate');
+        toInvalidate = this.get('toInvalidate'),
+        curObj, newObj;
 
     // Tell the target of the chain to invalidate the property
     // that depends on this element of the chain
     target.propertyDidChange(toInvalidate);
-    this.activate(this.get('object')); // reactivate down the line
+
+    // If there are more dependent keys in the chain, we need
+    // to invalidate them and set them up again.
+    if (this.next) {
+      // Get the new value of the object associated with this node to pass to
+      // activate().
+      curObj = this.get('object');
+      newObj = curObj.get(this.get('property'));
+
+      this.next.activate(newObj); // reactivate down the line
+    }
   },
 
+  //@ if (debug)
   /**
     Returns a string representation of the chain segment.
 
@@ -148,6 +161,7 @@ SC._PropertyChain = SC.Object.extend(
     return "SC._PropertyChain(target: %@, property: %@)".fmt(
       this.get('target'), this.get('property'));
   }
+  //@ endif
 });
 
 SC._PropertyChain.createChain = function(path, target, toInvalidate) {
@@ -161,6 +175,7 @@ SC._PropertyChain.createChain = function(path, target, toInvalidate) {
     toInvalidate: toInvalidate,
     nextProperty: parts[1]
   });
+
 
   root.set('length', len);
   var tail = root;
