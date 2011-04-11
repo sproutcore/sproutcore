@@ -57,7 +57,7 @@ if (typeof console === 'undefined') {
 window.SC = window.SC || {} ;
 window.SproutCore = window.SproutCore || SC ;
 
-SC.VERSION = '1.5.0.pre.4';
+SC.VERSION = '1.5.0.rc.2';
 
 /**
   @private
