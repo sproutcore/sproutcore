@@ -223,7 +223,7 @@ SC.Handlebars.bindClasses = function(context, classBindings, view, id) {
       // Normalize property path to be suitable for use
       // as a class name. For exaple, content.foo.barBaz
       // becomes bar-baz.
-      return property.split('.').get('lastObject').dasherize();
+      return SC.String.dasherize(property.split('.').get('lastObject'));
 
     // If the value is not NO, undefined, or null, return the current
     // value of the property.

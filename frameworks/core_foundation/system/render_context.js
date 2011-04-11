@@ -1009,7 +1009,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     Converts camelCased style names to dasherized forms
   */
   _dasherizeStyleName: function(name) {
-    var dasherized = name.dasherize();
+    var dasherized = SC.String.dasherize(name);
     if (dasherized.match(/^(webkit|moz|ms|o)-/)) { dasherized = '-'+dasherized; }
     return dasherized;
   }
