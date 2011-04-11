@@ -180,6 +180,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
     };
 
+    itemOptions = SC.clone(itemOptions);
     delete itemOptions.id;
     delete itemOptions['class'];
     delete itemOptions.classBinding;
