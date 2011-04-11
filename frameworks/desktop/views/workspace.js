@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require("views/toolbar");
+sc_require("views/toolbar");
 
 /** @class
   WorkspaceView manages a content view and two optional toolbars (top and bottom).

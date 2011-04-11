@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-require("views/workspace");
-require("views/toolbar");
+sc_require("views/workspace");
+sc_require("views/toolbar");
 
 
 /** @class
