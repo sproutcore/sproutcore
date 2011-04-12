@@ -62,7 +62,7 @@ test("Check that didAppendToDocument gets called at the right moment", function(
 // Test for bug: when a childView has a non-fixed layout and we request its frame before the parentView has
 // a layer and the parentView uses static layout, then the frame returned will be {x: 0, y:0, width: 0, height: 0}
 // and any further requests for the childView's frame will not return a new value unless the parentViewDidChange
-// or parentViewDidResize.  A weird case, but we prevent it from failing by checking if we don't have
+// or parentViewDidResize.  A weird case, but we prevent it from failing anyhow.
 test("Check that childView is updated if we have static layout and they don't have a fixed layout", function() {
   var childFrame,
       wrongFrame = {x:0, y:0, width: 0, height: 0},
@@ -79,5 +79,5 @@ test("Check that childView is updated if we have static layout and they don't ha
   childFrame = view.get('frame');
   correctFrame = pane.get('frame');
 
-  same(childFrame, correctFrame, 'getting frame before layer exists on non-fixed layout childView should return an empty frame');
+  same(childFrame, correctFrame, 'getting frame after layer exists on non-fixed layout childView should return actual frame');
 });
