@@ -176,8 +176,8 @@ SC.String = {
 
    @returns {String} the trimmed string
   */
-  trimLeft: function () {
-    return this.replace(SC.STRING_TRIM_LEFT_REGEXP,"");
+  trimLeft: function (str) {
+    return str.replace(SC.STRING_TRIM_LEFT_REGEXP,"");
   },
 
   /**
@@ -185,8 +185,8 @@ SC.String = {
 
    @returns {String} the trimmed string
   */
-  trimRight: function () {
-    return this.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
+  trimRight: function (str) {
+    return str.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
   }
 };
 
