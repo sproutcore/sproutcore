@@ -43,8 +43,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     When applyImmediately is turned on, every keystroke will set the value
     of the underlying object. Turning it off will only set the value on blur.
     
-    @property
     @type String
+    @default YES
   */
   applyImmediately: YES,
 
@@ -122,15 +122,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isContextMenuEnabled: YES,
 
   /**
+    @deprecated
+    
     If true, every change to the text in the text field updates 'value'.
     If false, 'value' is only updated when commitEditing() is called (this
     is called automatically when the text field loses focus), or whenever
     the return key is pressed while editing the field.
     
-    @property
     @type Boolean
+    @default null
   */
-  continuouslyUpdatesValue: YES,
+  continuouslyUpdatesValue: null,
 
   /**
     If no, will not allow transform or validation errors (SC.Error objects)
@@ -238,6 +240,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   init: function() {
     var val = this.get('value');
     this._hintON = (!val || val && val.length===0) ? YES : NO;
+    
+    var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
+    if (continuouslyUpdatesValue !== null || continuouslyUpdatesValue !== undefined) {
+      this.set('applyImmediately',  continuouslyUpdatesValue);
+
+      //@ if (debug)
+      SC.Logger.warn("SC.TextFieldView#continuouslyUpdatesValue is deprecated. Please use #applyImmediately instead.");
+      //@ endif
+    }
+    
     return sc_super();
   },
 
@@ -954,69 +966,61 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
-    var value, view;
+    var which = evt.which,
+        keyCode = evt.keyCode,
+        maxLengthReached = false,
+        value, view;
+
     // Handle return and escape.  this way they can be passed on to the
     // responder chain.
     // If the event is triggered by a return while entering IME input,
     // don't got through this path.
-    var which = evt.which, maxLengthReached = false;
-    if ((which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) {
-
-      // If we're not continuously updating 'value' as we type, force an update
-      // if return is pressed.
-      if (!this.get('continuouslyUpdatesValue')) {
-        value = this.getValidatedValueFromFieldValue(NO);
-        
-        if ((SC.typeOf(value) !== SC.T_ERROR) || this.get('allowsErrorAsValue')) {
-          this.setIfChanged('value', value);
-          this.applyValueToField(value); // sync text in the text field
-        }
-      }
-
-      return NO;
-    }
-
-    if (which === 27) return NO ;
+    if ((which === SC.Event.KEY_ENTER && !evt.isIMEInput) && !this.get('isTextArea')) { return NO; }
+    if (which === SC.Event.KEY_ESC) { return NO; }
 
     // handle tab key
-    if ((which === 9 || evt.keyCode===9) && this.get('defaultTabbingEnabled')) {
+    if ((which === SC.Event.KEY_TAB || keyCode === SC.Event.KEY_TAB) && this.get('defaultTabbingEnabled')) {
       view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if (view) view.becomeFirstResponder();
       else evt.allowDefault();
       return YES ; // handled
     }
+    
     // maxlength for textareas
     if(!SC.browser.webkit && this.get('isTextArea')){
-      var val = this.get('value'),
-          code = evt.which;
-    // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
-      if(val && ((!SC.browser.mozilla && code>47) || 
-        (SC.browser.mozilla && ((code>32 && code<43) || code>47) && !(evt.keyCode>36 && evt.keyCode<41))) &&
+      var val = this.get('value');
+
+      // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
+      if(val && ((!SC.browser.mozilla && which>47) || 
+        (SC.browser.mozilla && ((which>32 && which<43) || which>47) && !(keyCode>36 && keyCode<41))) &&
         (val.length >= this.get('maxLength'))) {
         maxLengthReached = true;
       }
     }
+
     // validate keyDown...
     // do not validate on touch, as it prevents return.
     if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
-      this._isKeyDown = YES ;
+      this._isKeyDown = YES;
       evt.allowDefault();
     } else {
       evt.stop();
     }
-    
+
     if (this.get('applyImmediately')) {
       // We need this invokeLater as we need to get the value of the field
       // once the event has been processed. I tried with invokeLast , but
       // I guess the field doesn't repaint until js execution finishes and 
       // therefore the field value doesn't update if we don't give it a break.
-      this.invokeLater(this.fieldValueDidChange,1); // notify change
+      this.invokeLater(this.fieldValueDidChange, 1);
     }
+
     return YES;
   },
   
   keyUp: function(evt) {
-    if(SC.browser.mozilla && evt.keyCode===13) this.fieldValueDidChange(); 
+    if (SC.browser.mozilla && evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
+
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
