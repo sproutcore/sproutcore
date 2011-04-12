@@ -14,6 +14,8 @@ SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
 SC.STRING_DECAMELIZE_REGEXP = (/([a-z])([A-Z])/g);
 SC.STRING_DASHERIZE_REGEXP = (/[ _]/g);
 SC.STRING_DASHERIZE_CACHE = {};
+SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
+SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
 
 /**
   @namespace
