@@ -5,6 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('ext/function');
 sc_require('private/observer_set');
 sc_require('private/chain_observer');
 

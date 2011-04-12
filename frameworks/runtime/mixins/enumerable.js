@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('core') ;
+sc_require('ext/function');
 sc_require('system/enumerator');
 
 /*globals Prototype */
