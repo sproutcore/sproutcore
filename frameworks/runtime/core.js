@@ -734,33 +734,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     }
 
     return root ;
-  },
-
-
-  // ..........................................................
-  // LOCALIZATION SUPPORT
-  //
-
-  /**
-    Known loc strings
-
-    @type Hash
-  */
-  STRINGS: {},
-
-  /**
-    This is a simplified handler for installing a bunch of strings.  This
-    ignores the language name and simply applies the passed strings hash.
-
-    @param {String} lang the language the strings are for
-    @param {Hash} strings hash of strings
-    @returns {SC} The receiver, useful for chaining calls to the same object.
-  */
-  stringsFor: function(lang, strings) {
-    SC.mixin(SC.STRINGS, strings);
-    return this ;
   }
-
 
 }); // end mixin
 
