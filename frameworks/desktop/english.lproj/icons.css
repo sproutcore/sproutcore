@@ -1,916 +1,214 @@
 /*
-  These built-in icons are available for use in your own application free of charge.  Just pass one of these CSS classnames as an image.
+  These built-in images/icons are available for use in your own application free of charge.  Just pass one of these CSS classnames as an image.
 */
 
-/* @group 48-Pixel Icons */
+/* @group 48-Pixel images/icons */
 
 .sc-icon-alert-48 {
 	width: 48px;
 	height: 48px;
-	background: no-repeat sc_static('icons/shared') left top;
+	@include slice("images/icons/sc-icon-alert-48.png");
 }
 
 .sc-icon-info-48 {
 	width: 48px;
 	height: 48px;
-	background: no-repeat sc_static('icons/shared') left -48px;
+	@include slice("images/icons/sc-icon-info-48.png");
 }
 
 .sc-icon-error-48 {
 	width: 48px;
 	height: 48px;
-	background: no-repeat sc_static('icons/shared') left -96px;
+	@include slice("images/icons/sc-icon-error-48.png");
 }
 
 
 /* @end */
 
-/* @group 24-Pixel Icons */
+/* @group 24-Pixel images/icons */
 
 .sc-icon-tools-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -144px;
+	@include slice("images/icons/sc-icon-tools-24.png");
 }
 
 .sc-icon-bookmark-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -144px;
+	@include slice("images/icons/sc-icon-bookmark-24.png");
 }
 
 .sc-icon-info-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -168px;
+	@include slice("images/icons/sc-icon-info-24.png");
 }
 
 .sc-icon-help-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -0px -192px;
+	@include slice("images/icons/sc-icon-help-24.png");
 }
 
 .sc-icon-alert-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -192px;
+	@include slice("images/icons/sc-icon-alert-24.png");
 }
 
 .sc-icon-left-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -216px;
+	@include slice("images/icons/sc-icon-left-24.png");
 }
 
 .sc-icon-right-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -216px;
+	@include slice("images/icons/sc-icon-right-24.png");
 }
 
 .sc-icon-up-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -240px;
+	@include slice("images/icons/sc-icon-up-24.png");
 }
 
 .sc-icon-down-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -240px;
+	@include slice("images/icons/sc-icon-down-24.png");
 }
 
 .sc-icon-undo-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -264px;
+	@include slice("images/icons/sc-icon-undo-24.png");
 }
 
 .sc-icon-redo-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -264px;
+	@include slice("images/icons/sc-icon-redo-24.png");
 }
 
 .sc-icon-group-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -288px;
+	@include slice("images/icons/sc-icon-group-24.png");
 }
 
 .sc-icon-user-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -288px;
+	@include slice("images/icons/sc-icon-user-24.png");
 }
 
 .sc-icon-cancel-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -312px;
+	@include slice("images/icons/sc-icon-cancel-24.png");
 }
 
 .sc-icon-options-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -312px;
+	@include slice("images/icons/sc-icon-options-24.png");
 }
 
 .sc-icon-folder-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -336px;
+	@include slice("images/icons/sc-icon-folder-24.png");
 }
 
 .sc-icon-trash-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -336px;
+	@include slice("images/icons/sc-icon-trash-24.png");
 }
 
 .sc-icon-document-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') 0px -360px;
+	@include slice("images/icons/sc-icon-document-24.png");
 }
 
 .sc-icon-favorite-24 {
 	width: 24px;
 	height: 24px;
-	background: no-repeat sc_static('icons/shared') -24px -360px;
+	@include slice("images/icons/sc-icon-favorite-24.png");
 }
 
 /* @end */
 
-/* @group 16-Pixel Icons */
+/* @group 16-Pixel images/icons */
 
 .sc-icon-bookmark-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -16px -384px;
+	@include slice("images/icons/sc-icon-bookmark-16.png");
 }
 
 .sc-icon-info-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -32px -384px;
+	@include slice("images/icons/sc-icon-info-16.png");
 }
 
 .sc-icon-help-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -16px -400px;
+	@include slice("images/icons/sc-icon-help-16.png");
 }
 
 .sc-icon-alert-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -32px -400px;
+	@include slice("images/icons/sc-icon-alert-16.png");
 }
 
 .sc-icon-group-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -0px -448px;
+	@include slice("images/icons/sc-icon-group-16.png");
 }
 
 .sc-icon-user-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -16px -448px;
+	@include slice("images/icons/sc-icon-user-16.png");
 }
 
 .sc-icon-options-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -0px -464px;
+	@include slice("images/icons/sc-icon-options-16.png");
 }
 
 .sc-icon-folder-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -16px -464px;
+	@include slice("images/icons/sc-icon-folder-16.png");
 }
 
 .sc-icon-trash-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -32px -464px;
+	@include slice("images/icons/sc-icon-trash-16.png");
 }
 
 .sc-icon-document-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -0px -480px;
+	@include slice("images/icons/sc-icon-document-16.png");
 }
 
 .sc-icon-favorite-16 {
 	width: 16px;
 	height: 16px;
-	background: no-repeat sc_static('icons/shared') -16px -480px;
+	@include slice("images/icons/sc-icon-favorite-16.png");
 }
 
 /* @end */
-
-/* @group Mini-Icons */
-
-.sc-mini-icon.carat-1-n {
-	background-position: 0 0;
-}
-
-.sc-mini-icon.carat-1-ne {
-	background-position: -16px 0;
-}
-
-.sc-mini-icon.carat-1-e {
-	background-position: -32px 0;
-}
-
-.sc-mini-icon.carat-1-se {
-	background-position: -48px 0;
-}
-
-.sc-mini-icon.carat-1-s {
-	background-position: -64px 0;
-}
-
-.sc-mini-icon.carat-1-sw {
-	background-position: -80px 0;
-}
-
-.sc-mini-icon.carat-1-w {
-	background-position: -96px 0;
-}
-
-.sc-mini-icon.carat-1-nw {
-	background-position: -112px 0;
-}
-
-.sc-mini-icon.carat-2-n-s {
-	background-position: -128px 0;
-}
-
-.sc-mini-icon.carat-2-e-w {
-	background-position: -144px 0;
-}
-
-.sc-mini-icon.triangle-1-n {
-	background-position: 0 -16px;
-}
-
-.sc-mini-icon.triangle-1-ne {
-	background-position: -16px -16px;
-}
-
-.sc-mini-icon.triangle-1-e {
-	background-position: -32px -16px;
-}
-
-.sc-mini-icon.triangle-1-se {
-	background-position: -48px -16px;
-}
-
-.sc-mini-icon.triangle-1-s {
-	background-position: -64px -16px;
-}
-
-.sc-mini-icon.triangle-1-sw {
-	background-position: -80px -16px;
-}
-
-.sc-mini-icon.triangle-1-w {
-	background-position: -96px -16px;
-}
-
-.sc-mini-icon.triangle-1-nw {
-	background-position: -112px -16px;
-}
-
-.sc-mini-icon.triangle-2-n-s {
-	background-position: -128px -16px;
-}
-
-.sc-mini-icon.triangle-2-e-w {
-	background-position: -144px -16px;
-}
-
-.sc-mini-icon.arrow-1-n {
-	background-position: 0 -32px;
-}
-
-.sc-mini-icon.arrow-1-ne {
-	background-position: -16px -32px;
-}
-
-.sc-mini-icon.arrow-1-e {
-	background-position: -32px -32px;
-}
-
-.sc-mini-icon.arrow-1-se {
-	background-position: -48px -32px;
-}
-
-.sc-mini-icon.arrow-1-s {
-	background-position: -64px -32px;
-}
-
-.sc-mini-icon.arrow-1-sw {
-	background-position: -80px -32px;
-}
-
-.sc-mini-icon.arrow-1-w {
-	background-position: -96px -32px;
-}
-
-.sc-mini-icon.arrow-1-nw {
-	background-position: -112px -32px;
-}
-
-.sc-mini-icon.arrow-2-n-s {
-	background-position: -128px -32px;
-}
-
-.sc-mini-icon.arrow-2-ne-sw {
-	background-position: -144px -32px;
-}
-
-.sc-mini-icon.arrow-2-e-w {
-	background-position: -160px -32px;
-}
-
-.sc-mini-icon.arrow-2-se-nw {
-	background-position: -176px -32px;
-}
-
-.sc-mini-icon.arrowstop-1-n {
-	background-position: -192px -32px;
-}
-
-.sc-mini-icon.arrowstop-1-e {
-	background-position: -208px -32px;
-}
-
-.sc-mini-icon.arrowstop-1-s {
-	background-position: -224px -32px;
-}
-
-.sc-mini-icon.arrowstop-1-w {
-	background-position: -240px -32px;
-}
-
-.sc-mini-icon.arrowthick-1-n {
-	background-position: 0 -48px;
-}
-
-.sc-mini-icon.arrowthick-1-ne {
-	background-position: -16px -48px;
-}
-
-.sc-mini-icon.arrowthick-1-e {
-	background-position: -32px -48px;
-}
-
-.sc-mini-icon.arrowthick-1-se {
-	background-position: -48px -48px;
-}
-
-.sc-mini-icon.arrowthick-1-s {
-	background-position: -64px -48px;
-}
-
-.sc-mini-icon.arrowthick-1-sw {
-	background-position: -80px -48px;
-}
-
-.sc-mini-icon.arrowthick-1-w {
-	background-position: -96px -48px;
-}
-
-.sc-mini-icon.arrowthick-1-nw {
-	background-position: -112px -48px;
-}
-
-.sc-mini-icon.arrowthick-2-n-s {
-	background-position: -128px -48px;
-}
-
-.sc-mini-icon.arrowthick-2-ne-sw {
-	background-position: -144px -48px;
-}
-
-.sc-mini-icon.arrowthick-2-e-w {
-	background-position: -160px -48px;
-}
-
-.sc-mini-icon.arrowthick-2-se-nw {
-	background-position: -176px -48px;
-}
-
-.sc-mini-icon.arrowthickstop-1-n {
-	background-position: -192px -48px;
-}
-
-.sc-mini-icon.arrowthickstop-1-e {
-	background-position: -208px -48px;
-}
-
-.sc-mini-icon.arrowthickstop-1-s {
-	background-position: -224px -48px;
-}
-
-.sc-mini-icon.arrowthickstop-1-w {
-	background-position: -240px -48px;
-}
-
-.sc-mini-icon.arrowreturnthick-1-w {
-	background-position: 0 -64px;
-}
-
-.sc-mini-icon.arrowreturnthick-1-n {
-	background-position: -16px -64px;
-}
-
-.sc-mini-icon.arrowreturnthick-1-e {
-	background-position: -32px -64px;
-}
-
-.sc-mini-icon.arrowreturnthick-1-s {
-	background-position: -48px -64px;
-}
-
-.sc-mini-icon.arrowreturn-1-w {
-	background-position: -64px -64px;
-}
-
-.sc-mini-icon.arrowreturn-1-n {
-	background-position: -80px -64px;
-}
-
-.sc-mini-icon.arrowreturn-1-e {
-	background-position: -96px -64px;
-}
-
-.sc-mini-icon.arrowreturn-1-s {
-	background-position: -112px -64px;
-}
-
-.sc-mini-icon.arrowrefresh-1-w {
-	background-position: -128px -64px;
-}
-
-.sc-mini-icon.arrowrefresh-1-n {
-	background-position: -144px -64px;
-}
-
-.sc-mini-icon.arrowrefresh-1-e {
-	background-position: -160px -64px;
-}
-
-.sc-mini-icon.arrowrefresh-1-s {
-	background-position: -176px -64px;
-}
-
-.sc-mini-icon.arrow-4 {
-	background-position: 0 -80px;
-}
-
-.sc-mini-icon.arrow-4-diag {
-	background-position: -16px -80px;
-}
-
-.sc-mini-icon.extlink {
-	background-position: -32px -80px;
-}
-
-.sc-mini-icon.newwin {
-	background-position: -48px -80px;
-}
-
-.sc-mini-icon.refresh {
-	background-position: -64px -80px;
-}
-
-.sc-mini-icon.shuffle {
-	background-position: -80px -80px;
-}
-
-.sc-mini-icon.transfer-e-w {
-	background-position: -96px -80px;
-}
-
-.sc-mini-icon.transferthick-e-w {
-	background-position: -112px -80px;
-}
-
-.sc-mini-icon.folder-collapsed {
-	background-position: 0 -96px;
-}
-
-.sc-mini-icon.folder-open {
-	background-position: -16px -96px;
-}
-
-.sc-mini-icon.document {
-	background-position: -32px -96px;
-}
-
-.sc-mini-icon.document-b {
-	background-position: -48px -96px;
-}
-
-.sc-mini-icon.note {
-	background-position: -64px -96px;
-}
-
-.sc-mini-icon.mail-closed {
-	background-position: -80px -96px;
-}
-
-.sc-mini-icon.mail-open {
-	background-position: -96px -96px;
-}
-
-.sc-mini-icon.suitcase {
-	background-position: -112px -96px;
-}
-
-.sc-mini-icon.comment {
-	background-position: -128px -96px;
-}
-
-.sc-mini-icon.person {
-	background-position: -144px -96px;
-}
-
-.sc-mini-icon.print {
-	background-position: -160px -96px;
-}
-
-.sc-mini-icon.trash {
-	background-position: -176px -96px;
-}
-
-.sc-mini-icon.locked {
-	background-position: -192px -96px;
-}
-
-.sc-mini-icon.unlocked {
-	background-position: -208px -96px;
-}
-
-.sc-mini-icon.bookmark {
-	background-position: -224px -96px;
-}
-
-.sc-mini-icon.tag {
-	background-position: -240px -96px;
-}
-
-.sc-mini-icon.home {
-	background-position: 0 -112px;
-}
-
-.sc-mini-icon.flag {
-	background-position: -16px -112px;
-}
-
-.sc-mini-icon.calendar {
-	background-position: -32px -112px;
-}
-
-.sc-mini-icon.cart {
-	background-position: -48px -112px;
-}
-
-.sc-mini-icon.pencil {
-	background-position: -64px -112px;
-}
-
-.sc-mini-icon.clock {
-	background-position: -80px -112px;
-}
-
-.sc-mini-icon.disk {
-	background-position: -96px -112px;
-}
-
-.sc-mini-icon.calculator {
-	background-position: -112px -112px;
-}
-
-.sc-mini-icon.zoomin {
-	background-position: -128px -112px;
-}
-
-.sc-mini-icon.zoomout {
-	background-position: -144px -112px;
-}
-
-.sc-mini-icon.search {
-	background-position: -160px -112px;
-}
-
-.sc-mini-icon.wrench {
-	background-position: -176px -112px;
-}
-
-.sc-mini-icon.gear {
-	background-position: -192px -112px;
-}
-
-.sc-mini-icon.heart {
-	background-position: -208px -112px;
-}
-
-.sc-mini-icon.star {
-	background-position: -224px -112px;
-}
-
-.sc-mini-icon.link {
-	background-position: -240px -112px;
-}
-
-.sc-mini-icon.cancel {
-	background-position: 0 -128px;
-}
-
-.sc-mini-icon.plus {
-	background-position: -16px -128px;
-}
-
-.sc-mini-icon.plusthick {
-	background-position: -32px -128px;
-}
-
-.sc-mini-icon.minus {
-	background-position: -48px -128px;
-}
-
-.sc-mini-icon.minusthick {
-	background-position: -64px -128px;
-}
-
-.sc-mini-icon.close {
-	background-position: -80px -128px;
-}
-
-.sc-mini-icon.closethick {
-	background-position: -96px -128px;
-}
-
-.sc-mini-icon.key {
-	background-position: -112px -128px;
-}
-
-.sc-mini-icon.lightbulb {
-	background-position: -128px -128px;
-}
-
-.sc-mini-icon.scissors {
-	background-position: -144px -128px;
-}
-
-.sc-mini-icon.clipboard {
-	background-position: -160px -128px;
-}
-
-.sc-mini-icon.copy {
-	background-position: -176px -128px;
-}
-
-.sc-mini-icon.contact {
-	background-position: -192px -128px;
-}
-
-.sc-mini-icon.image {
-	background-position: -208px -128px;
-}
-
-.sc-mini-icon.video {
-	background-position: -224px -128px;
-}
-
-.sc-mini-icon.script {
-	background-position: -240px -128px;
-}
-
-.sc-mini-icon.alert {
-	background-position: 0 -144px;
-}
-
-.sc-mini-icon.info {
-	background-position: -16px -144px;
-}
-
-.sc-mini-icon.notice {
-	background-position: -32px -144px;
-}
-
-.sc-mini-icon.help {
-	background-position: -48px -144px;
-}
-
-.sc-mini-icon.check {
-	background-position: -64px -144px;
-}
-
-.sc-mini-icon.bullet {
-	background-position: -80px -144px;
-}
-
-.sc-mini-icon.radio-off {
-	background-position: -96px -144px;
-}
-
-.sc-mini-icon.radio-on {
-	background-position: -112px -144px;
-}
-
-.sc-mini-icon.pin-w {
-	background-position: -128px -144px;
-}
-
-.sc-mini-icon.pin-s {
-	background-position: -144px -144px;
-}
-
-.sc-mini-icon.play {
-	background-position: 0 -160px;
-}
-
-.sc-mini-icon.pause {
-	background-position: -16px -160px;
-}
-
-.sc-mini-icon.seek-next {
-	background-position: -32px -160px;
-}
-
-.sc-mini-icon.seek-prev {
-	background-position: -48px -160px;
-}
-
-.sc-mini-icon.seek-end {
-	background-position: -64px -160px;
-}
-
-.sc-mini-icon.seek-first {
-	background-position: -80px -160px;
-}
-
-.sc-mini-icon.stop {
-	background-position: -96px -160px;
-}
-
-.sc-mini-icon.eject {
-	background-position: -112px -160px;
-}
-
-.sc-mini-icon.volume-off {
-	background-position: -128px -160px;
-}
-
-.sc-mini-icon.volume-on {
-	background-position: -144px -160px;
-}
-
-.sc-mini-icon.power {
-	background-position: 0 -176px;
-}
-
-.sc-mini-icon.signal-diag {
-	background-position: -16px -176px;
-}
-
-.sc-mini-icon.signal {
-	background-position: -32px -176px;
-}
-
-.sc-mini-icon.battery-0 {
-	background-position: -48px -176px;
-}
-
-.sc-mini-icon.battery-1 {
-	background-position: -64px -176px;
-}
-
-.sc-mini-icon.battery-2 {
-	background-position: -80px -176px;
-}
-
-.sc-mini-icon.battery-3 {
-	background-position: -96px -176px;
-}
-
-.sc-mini-icon.circle-plus {
-	background-position: 0 -192px;
-}
-
-.sc-mini-icon.circle-minus {
-	background-position: -16px -192px;
-}
-
-.sc-mini-icon.circle-close {
-	background-position: -32px -192px;
-}
-
-.sc-mini-icon.circle-triangle-e {
-	background-position: -48px -192px;
-}
-
-.sc-mini-icon.circle-triangle-s {
-	background-position: -64px -192px;
-}
-
-.sc-mini-icon.circle-triangle-w {
-	background-position: -80px -192px;
-}
-
-.sc-mini-icon.circle-triangle-n {
-	background-position: -96px -192px;
-}
-
-.sc-mini-icon.circle-arrow-e {
-	background-position: -112px -192px;
-}
-
-.sc-mini-icon.circle-arrow-s {
-	background-position: -128px -192px;
-}
-
-.sc-mini-icon.circle-arrow-w {
-	background-position: -144px -192px;
-}
-
-.sc-mini-icon.circle-arrow-n {
-	background-position: -160px -192px;
-}
-
-.sc-mini-icon.circle-zoomin {
-	background-position: -176px -192px;
-}
-
-.sc-mini-icon.circle-zoomout {
-	background-position: -192px -192px;
-}
-
-.sc-mini-icon.circle-check {
-	background-position: -208px -192px;
-}
-
-.sc-mini-icon.circlesmall-plus {
-	background-position: 0 -208px;
-}
-
-.sc-mini-icon.circlesmall-minus {
-	background-position: -16px -208px;
-}
-
-.sc-mini-icon.circlesmall-close {
-	background-position: -32px -208px;
-}
-
-.sc-mini-icon.squaresmall-plus {
-	background-position: -48px -208px;
-}
-
-.sc-mini-icon.squaresmall-minus {
-	background-position: -64px -208px;
-}
-
-.sc-mini-icon.squaresmall-close {
-	background-position: -80px -208px;
-}
-
-.sc-mini-icon.grip-dotted-vertical {
-	background-position: 0 -224px;
-}
-
-.sc-mini-icon.grip-dotted-horizontal {
-	background-position: -16px -224px;
-}
-
-.sc-mini-icon.grip-solid-vertical {
-	background-position: -32px -224px;
-}
-
-.sc-mini-icon.grip-solid-horizontal {
-	background-position: -48px -224px;
-}
-
-.sc-mini-icon.gripsmall-diagonal-se {
-	background-position: -64px -224px;
-}
-
-.sc-mini-icon.grip-diagonal-se {
-	background-position: -80px -224px;
-}
-
-
-
-/* @end */
-
-
-
-

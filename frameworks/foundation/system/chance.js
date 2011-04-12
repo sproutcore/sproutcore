@@ -62,4 +62,4 @@ SC.chance = {
   }
 };
 
-SC.ready(SC.chance, 'preloadImages');
+//SC.ready(SC.chance, 'preloadImages');

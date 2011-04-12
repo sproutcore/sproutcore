@@ -1,9 +1,10 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+/*globals TemplateTests module */
 /**
   This module specifically tests integration with Handlebars and SproutCore-specific
   Handlebars extensions.
@@ -494,7 +495,7 @@ test("Should insert a localized string if the {{loc}} helper is used", function(
     'Brazil': 'Brasilia'
   });
 
-  templates = SC.Object.create({
+  var templates = SC.Object.create({
     'loc': SC.Handlebars.compile('<h1>Country: {{loc "Brazil"}}')
   });
 

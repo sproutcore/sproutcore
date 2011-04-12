@@ -159,6 +159,32 @@ SC.String = {
     args.shift(); // remove def param
 
     return SC.String.fmt(localized, args);
+  },
+  
+  /**
+   Removes any extra whitespace from the edges of the string. This method is
+   also aliased as strip().
+
+   @returns {String} the trimmed string
+  */
+  trim: jQuery.trim,
+
+  /**
+   Removes any extra whitespace from the left edge of the string.
+
+   @returns {String} the trimmed string
+  */
+  trimLeft: function () {
+    return this.replace(SC.STRING_TRIM_LEFT_REGEXP,"");
+  },
+
+  /**
+   Removes any extra whitespace from the right edge of the string.
+
+   @returns {String} the trimmed string
+  */
+  trimRight: function () {
+    return this.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
   }
 };
 
@@ -186,6 +212,26 @@ SC.supplement(String.prototype,
   }
 
 });
+
+
+// IE doesn't support string trimming
+if(String.prototype.trim) {
+  SC.supplement(String.prototype,
+  /** @scope String.prototype */ {
+
+    trim: function() {
+      return SC.String.trim(this, arguments);
+    },
+
+    trimLeft: function() {
+      return SC.String.trimLeft(this, arguments);
+    },
+
+    trimRight: function() {
+      return SC.String.trimRight(this, arguments);
+    }
+  });
+}
 
 // We want the version defined here, not in Runtime
 SC.mixin(String.prototype,
