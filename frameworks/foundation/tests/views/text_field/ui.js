@@ -18,6 +18,12 @@
     value: 'John Doe'
   })
   
+  .add("password", SC.TextFieldView, {
+    hint: "Passwerd",
+    isPassword: YES,
+    value: "I'm so secret"
+  })
+  
   .add("disabled - empty", SC.TextFieldView, { 
     hint: "Full Name", 
     value: null,
@@ -157,6 +163,12 @@ test("with value", function() {
   pane.verifyDisabled(view, NO);
 });
 
+test("password", function() {
+  var view = pane.view('password');
+  pane.verifyNotEmpty(view, 'I\'m so secret', 'Passwerd');
+  pane.verifyDisabled(view, NO);
+});
+
 test("disabled - empty", function() {
   var view = pane.view('disabled - empty');
   pane.verifyEmpty(view, 'Full Name');
@@ -237,6 +249,20 @@ test("enabling disabled view", function() {
   SC.RunLoop.end();
   pane.verifyDisabled(view, NO);
 });
+
+if (!SC.browser.isIE && !SC.platform.input.placeholder) {
+  test("Changing value to null -- password field", function() {
+    var view = pane.view('password'),
+        input = view.$('input');
+
+    SC.run(function() {
+      view.set('value', null);
+    });
+
+    equals(input.attr('type'), 'text', "When nulled out, field was converted to type text");
+    equals(input.val(), view.get('hint'), "When nulled out, field was given value equal to hint");
+  });
+}
 
 // ..........................................................
 // TEST SELECTION SUPPORT
