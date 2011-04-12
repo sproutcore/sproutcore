@@ -1,101 +1,88 @@
-.sc-button-view.sc-menu-item {
+.sc-menu-item {
   background-color: #ffffff none repeat scroll 0 0;
   border: none;
+  
+  a {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    line-height: 22px;
+    text-decoration: none ;
+    text-align: left;
+    color: black;
+    outline: none ;
+    span.shortcut {
+      position:absolute;
+      right:5px;
+      margin-right:15px;
+      text-align:center;
+      font-size: 12px;
+    }
+    &.has-icon span.value {
+      margin-left: 44px;
+    }
+    &.shortcutkey span.value {
+      right: 55px;
+    }
+  }
+  &.disabled{
+    border:none;
+    color:#A0A0A0;
+    a{
+      color:#A0A0A0;
+    }
+    a:hover {
+      background-color: transparent;
+      color:#A0A0A0;
+    }
+    .checkbox{
+      background-image: url(data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==) top left no-repeat; 
+      *background-image: sc_static('foundation:blank.gif') top left no-repeat; /* IE < 8 */
+    }
+    
+  }
+  span.separator{
+    display: block;
+    height: 1px;
+    border-bottom: 1px #cccccc solid;
+  }
+  img {
+    left: 24px;
+    top: 3px;
+    display: block;
+    position: absolute;
+  }
+  &.checkbox {
+    position: absolute;
+    display: block;
+    width: 12px;
+    height: 12px;
+    left: 6px;
+    top: 5px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    &.inactive {
+      background-image: url(data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==) top left no-repeat; 
+      *background-image: sc_static('foundation:blank.gif') top left no-repeat; /* IE < 8 */
+    }
+  }
+  
+  .value {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 5px;
+    display: inline-block;
+    text-align:left;
+    margin-left:25px;
+  }
+  
+  &.sc-small-size a {
+    line-height: 11px;
+    font-size: 11px;
+  }
 }
-
-.sc-button-view.sc-menu-item.sc-small-size a {
-  line-height: 11px;
-  font-size: 11px;
-}
-
-.sc-menu-item.sc-small-size a{
-  line-height: 11px;
-}
-
-.sc-menu-item a {
-  position: absolute;
-  display: block;
-  top: 0;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  line-height: 22px;
-  text-decoration: none ;
-  text-align: left;
-  color: black;
-  outline: none ;
-}
-
-.sc-menu-item.disabled a{
-  color:#A0A0A0;
-}
-
-.sc-menu-item.disabled{
-  border:none;
-  color:#A0A0A0;
-}
-
-.sc-menu-item span.separator{
-  display: block;
-  height: 1px;
-  border-bottom: 1px #cccccc solid;
-}
-
-.sc-menu-item img {
-  left: 24px;
-  top: 3px;
-  display: block;
-  position: absolute;
-}
-
-/*for the shortcut keys*/
-.sc-menu-item a span.shortcut {
-  position:absolute;
-  right:5px;
-  margin-right:15px;
-  text-align:center;
-  font-size: 12px;
-}
-
-.sc-menu-item.disabled a:hover {
-  background-color: transparent;
-  color:#A0A0A0;
-}
-/* @end */
-
-.sc-menu-item div.checkbox {
-  position: absolute;
-  display: block;
-  width: 12px;
-  height: 12px;
-  left: 6px;
-  top: 5px;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-}
-
-.sc-menu-item.disabled div.checkbox,
-.sc-menu-item div.checkbox.inactive {
-  background-image: url(data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==) top left no-repeat; 
-  *background-image: sc_static('foundation:blank.gif') top left no-repeat; /* IE < 8 */
-}
-
-.sc-menu-item span.value {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 5px;
-  display: inline-block;
-  text-align:left;
-  margin-left:25px;
-}
-
-.sc-menu-item a.has-icon span.value {
-  margin-left: 44px;
-}
-
-.sc-menu-item a.shortcutkey span.value {
-  right: 55px;
-}
-

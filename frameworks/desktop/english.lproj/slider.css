@@ -1,66 +1,34 @@
-/* @override http://localhost:4020/static/sproutcore/en/desktop/_cache/sc.theme/1228020574/slider.css */
-
 /* @group SC.SliderView */
 
 .sc-slider-view {
 	height: 21px;
+	.sc-inner {
+  	position: absolute;
+  	left: 8px;
+  	right: 8px;
+  	height: 5px;
+  	top: 6px;
+  	background: gray ;
+  	-webkit-border-radius: 3px;
+  	-moz-border-radius: 3px;
+  	border-radius: 3px;
+    .sc-leftcap{
+      display: none;
+    }
+    .sc-righcap {
+      display: none;
+    }
+  }
+  .sc-handle {
+  	height: 12px;
+  	width: 12px;
+  	margin-left: -9px;
+  	top: -4px;
+  	position: absolute ;
+  	background: black;
+  	border-radius:6px;
+  	-moz-border-radius:6px;
+  	-webkit-transform: translate3d(0,0,0);
+  	-webkit-transition: left 0.01s ease-in-out;
+  }
 }
-
-.blur .sc-slider-view,
-.focus .sc-slider-view.disabled {
-}
-
-.focus .sc-slider-view {
-}
-
-/* sc-inner is the slider bar */
- .sc-slider-view .sc-inner {
-	position: absolute;
-	left: 8px;
-	right: 8px;
-	height: 5px;
-	top: 6px;
-	background: gray ;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-}
-
-.sc-slider-view .sc-inner .sc-leftcap,
-.sc-slider-view .sc-inner .sc-righcap {
-  display: none;
-}
-
-.blur .sc-slider-view .sc-inner,
-.focus .sc-slider-view.disabled .sc-inner {
-	border: 1px #ccc solid;
-}
-
-.focus .sc-slider-view .sc-inner {
-	border: 1px #999 solid;
-}
-
- .sc-slider-view .sc-handle {
-	height: 12px;
-	width: 12px;
-	margin-left: -9px;
-	top: -4px;
-	position: absolute ;
-	background: black;
-	border-radius:6px;
-	-moz-border-radius:6px;
-	-webkit-transform: translate3d(0,0,0);
-	-webkit-transition: left 0.01s ease-in-out;
-}
-
-.focus .sc-slider-view .sc-handle {
-}
-
-.blur .sc-slider-view .sc-handle,
-.focus .sc-slider-view.disabled .sc-handle {
-}
-
-.focus .sc-slider-view.active .sc-handle {
-}
-
-/* @end */

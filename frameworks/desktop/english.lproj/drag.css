@@ -1,4 +1,4 @@
-.sc-view.sc-ghost-view {
+.sc-ghost-view {
   opacity: 0.5;
 	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 

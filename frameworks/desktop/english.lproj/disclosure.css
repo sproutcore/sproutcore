@@ -1,73 +1,20 @@
 /* SC.DisclosureView - sc-theme */
 
-/* @group disclosure */
-
-/* @group basic */
-
 .sc-button-view.sc-disclosure-view {
   background: transparent;
+  .button {
+  	width: 16px;
+  	height: 16px;
+  	position: absolute;
+  	left: 0px;
+  	top: 0px;
+  }
+  .sc-button-label {
+  	position: absolute;
+  	left: 16px;
+  	top: 0;
+  	bottom: 0;
+  	right: 0;
+  	text-align: left;
+  }
 }
-
-.sc-button-view.sc-disclosure-view .button {
-	width: 16px;
-	height: 16px;
-	position: absolute;
-	left: 0px;
-	top: 0px;
-} 
-
-.sc-button-view.sc-disclosure-view .sc-button-label {
-	position: absolute;
-	left: 16px;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	text-align: left;
-}
-
-
-/* SC.DisclosureView - sc-theme */
-
-/* @group disclosure */
-
-/* @group basic */
-
-
-
-.sc-button-view.sc-disclosure-view.sel .button {
-	background-position: 32px 16px ;
-}
-
-.sc-button-view.sc-disclosure-view .button {
-	background-position: 64px 16px ;
-}
-
-
-
-/* @end */
-
-/* @group disabled */
-
-.sc-button-view.sc-disclosure-view.sel.disabled .button {
-	background-position: 32px 16px ;
-}
-
-.sc-button-view.sc-disclosure-view.disabled .button {
-	background-position: 64px 16px ;
-}
-
-/* @end */
-
-/* @group active */
-
-.sc-button-view.sc-disclosure-view.sel.active .button {
-	background-position: 32px 16px ;
-}
-
-.sc-theme .sc-button-view.sc-disclosure-view.active .button {
-	background-position: 64px 16px ;
-}
-
-/* @end */
-
-

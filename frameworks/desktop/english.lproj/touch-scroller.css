@@ -1,40 +1,40 @@
 /* Track */
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .track {
+.sc-view.sc-touch-scroller-view.sc-vertical .track {
   background: none;
   display: none;
 }
 
 /* Cap */
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .cap,
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .endcap {
+.sc-view.sc-touch-scroller-view.sc-vertical .cap,
+.sc-view.sc-touch-scroller-view.sc-vertical .endcap {
   background: none;
   display: none;
 }
 
 /* Buttons */
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .button-top {
+.sc-view.sc-touch-scroller-view.sc-vertical .button-top {
   background: none;
   display: none;
 }
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .button-bottom {
+.sc-view.sc-touch-scroller-view.sc-vertical .button-bottom {
   background: none;
   display: none;
 }
 
 /* Active */
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .button-top:active {
+.sc-view.sc-touch-scroller-view.sc-vertical .button-top:active {
   background: none;
   display: none;
 }
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .button-bottom:active {
+.sc-view.sc-touch-scroller-view.sc-vertical .button-bottom:active {
   background: none;
   display: none;
 }
 
 /* Thumb */
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb {
+.sc-view.sc-touch-scroller-view.sc-vertical .thumb {
   position: absolute;
   opacity: 0.5;
   -webkit-transform: translateZ(0px);
@@ -45,7 +45,7 @@
 
 
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb-top {
+.sc-view.sc-touch-scroller-view.sc-vertical .thumb-top {
   -webkit-border-top-left-radius: 4px;
   -webkit-border-top-right-radius: 4px;
   position: absolute;
@@ -56,7 +56,7 @@
   background: black;
 }
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb-clip {
+.sc-view.sc-touch-scroller-view.sc-vertical .thumb-clip {
   position: absolute;
   overflow:hidden;
   height: 1034px;
@@ -65,7 +65,7 @@
   left: 5px;
 }
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb-inner {
+.sc-view.sc-touch-scroller-view.sc-vertical .thumb-inner {
   -webkit-transform: translate3d(0px,0px,0px);
   position: absolute;
   left: 0px;
@@ -74,7 +74,7 @@
   height: 1034px;
 }
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb-center {
+.sc-view.sc-touch-scroller-view.sc-vertical .thumb-center {
   position: absolute;
   width: 5px;
   left: 0px;
@@ -83,7 +83,7 @@
   background: black;
 }
 
-.sc-theme .sc-view.sc-touch-scroller-view.sc-vertical .thumb-bottom {
+.sc-view.sc-touch-scroller-view.sc-vertical .thumb-bottom {
   -webkit-border-bottom-left-radius: 4px;
   -webkit-border-bottom-right-radius: 4px;
   position: absolute;
