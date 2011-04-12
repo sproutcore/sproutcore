@@ -52,9 +52,11 @@ test("extracts styles from element on first retrieval", function() {
   
   var result = context.styles();
   
-  
-  same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink', WebkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
-  
+  if(SC.browser.msie){
+    same(result, { color: 'black', height: '20px', borderTop: 'hotpink 1px solid', WebkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
+  }else{
+    same(result, { color: 'black', height: '20px', borderTop: '1px solid hotpink', WebkitColumnCount: '3' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
+  }
   equals(context.styles(), result, "should reuse same instance thereafter");
 });
 
