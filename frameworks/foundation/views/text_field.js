@@ -987,7 +987,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     
     // maxlength for textareas
-    if(!SC.browser.webkit && this.get('isTextArea')){
+    if(!SC.platform.input.maxlength && this.get('isTextArea')){
       var val = this.get('value');
 
       // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
@@ -1089,12 +1089,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var val = this.get('value'), max;
     if (val && val.length>0) {
       this._hintON = NO;
+
       max = this.get('maxLength');
-      if(!SC.browser.webkit && val.length>max){
+      if (!SC.platform.input.maxlength && val.length > max) {
         this.set('value', val.substr(0, max));
       }
-    } 
-    else {
+    } else {
       this._hintON = YES;
     }
   }.observes('value')
