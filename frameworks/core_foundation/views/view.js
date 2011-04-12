@@ -1379,7 +1379,7 @@ SC.CoreView.mixin(/** @scope SC.View.prototype */ {
     while(--idx>=0) {
       viewClass = childViews[idx];
       loc = childLocs[idx];
-      if (loc && viewClass && viewClass.loc) viewClass.loc(loc) ;
+      if (loc && viewClass && typeof viewClass === SC.T_STRING) SC.String.loc(viewClass, loc);
     }
 
     return this; // done!
