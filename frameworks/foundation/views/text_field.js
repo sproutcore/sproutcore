@@ -242,7 +242,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     this._hintON = (!val || val && val.length===0) ? YES : NO;
     
     var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
-    if (continuouslyUpdatesValue !== null || continuouslyUpdatesValue !== undefined) {
+    if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
       this.set('applyImmediately',  continuouslyUpdatesValue);
 
       //@ if (debug)
