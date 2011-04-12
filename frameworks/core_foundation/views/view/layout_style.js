@@ -1,3 +1,5 @@
+
+sc_require('ext/string');
 sc_require('views/view');
 sc_require('views/view/animation');
 
@@ -576,11 +578,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     if (propertyName === '-'+SC.platform.cssPrefix+'-transform' && this._animatedTransforms && this._animatedTransforms.length > 0) {
       for(idx=0; idx < this._animatedTransforms.length; idx++) {
-        delete layout['animate'+this._animatedTransforms[idx].capitalize()];
+        delete layout['animate' + SC.String.capitalize(this._animatedTransforms[idx])];
       }
       this._animatedTransforms = null;
     }
-    delete layout['animate'+propertyName.capitalize()];
+    delete layout['animate' + SC.String.capitalize(propertyName)];
 
     if (!isPending) { delete this._activeAnimations[propertyName]; }
   }
