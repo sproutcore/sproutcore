@@ -7,6 +7,7 @@
 
 // note: SC.Observable also enhances array.  make sure we are called after
 // SC.Observable so our version of unknownProperty wins.
+sc_require('ext/function');
 sc_require('mixins/observable');
 sc_require('mixins/enumerable');
 sc_require('system/range_observer');

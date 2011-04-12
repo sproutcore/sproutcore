@@ -5,6 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('ext/function');
 
 // ..........................................................
 // CONSTANTS

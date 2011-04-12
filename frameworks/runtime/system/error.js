@@ -5,6 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 // @global SC
+
+sc_require('ext/function');
+
 /**
   @class
 
