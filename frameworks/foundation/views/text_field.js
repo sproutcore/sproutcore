@@ -537,7 +537,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       context.push('<span class="padding" '+adjustmentStyle+'>');
                   
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if(!this.get('_supportsPlaceHolder') && (!value || (value && value.length===0))) {
+      if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
       } 
@@ -567,7 +567,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     else {
       var input= this.$input();
-      if(!this.get('_supportsPlaceHolder')){
+      if(!SC.platform.input.placeholder){
         var val = this.get('value');
         if((!val || (val && val.length===0))){
           if(this._hintON && !this.get('isFirstResponder')){
@@ -661,7 +661,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // For some strange reason if we add focus/blur events to textarea
     // inmediately they won't work. However if I add them at the end of the
     // runLoop it works fine.
-    if(!this.get('_supportsPlaceHolder') && this._hintON){
+    if(!SC.platform.input.placeholder && this._hintON){
       var currentValue = this.$input().val();
       if(!currentValue || (currentValue && currentValue.length===0)){
         this.$input().val(this.get('formattedHint'));
@@ -733,7 +733,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.set('focused',YES);
       this.fieldDidFocus(evt);
       var val = this.get('value');
-      if(!this.get('_supportsPlaceHolder') && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = NO;
       }
     }, this);
@@ -750,7 +750,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent);
       var val = this.get('value');
-      if(!this.get('_supportsPlaceHolder') && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
       }
     }, this);
@@ -1076,13 +1076,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   selectStart: function(evt) {
     return YES;
   },
-  
-  /** @private
-    This function is to notify if the browser supports the placeholder attribute
-    or not. Currently is disabled as in webkit there is a bug where the color 
-    of the placeholder doesn't refresh all the time.
-  */
-  _supportsPlaceHolder: SC.platform.input.placeholder,
   
   /** @private
     This observer makes sure to hide the hint when a value is entered, or
