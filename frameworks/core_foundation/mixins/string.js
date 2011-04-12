@@ -27,7 +27,7 @@ SC.STRING_DASHERIZE_CACHE = {};
   @since SproutCore 1.0
   @lends String.prototype
 */
-SC.String = {
+SC.mixin(SC.String, {
 
   /**
     Capitalizes a string.
@@ -160,7 +160,7 @@ SC.String = {
 
     return SC.String.fmt(localized, args);
   }
-};
+});
 
 SC.supplement(String.prototype,
 /** @scope String.prototype */ {
@@ -181,25 +181,13 @@ SC.supplement(String.prototype,
     return SC.String.dasherize(this, arguments);
   },
 
+  loc: function() {
+    return SC.String.loc(this, arguments);
+  },
+
   locWithDefault: function(def) {
     return SC.String.locWithDefault(this, def, arguments);
   }
 
 });
-
-// We want the version defined here, not in Runtime
-SC.mixin(String.prototype,
-/** @scope String.prototype */ {
-  
-  loc: function() {
-    return SC.String.loc(this, arguments);
-  }
-
-});
-
-/** @private */
-SC.String.fmt = SC.CoreString.fmt;
-
-/** @private */
-SC.String.w = SC.CoreString.w;
 
