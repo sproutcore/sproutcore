@@ -12,41 +12,9 @@ sc_require('mixins/observable');
 sc_require('mixins/enumerable');
 sc_require('system/range_observer');
 
-SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
+SC.OUT_OF_RANGE_EXCEPTION = "Index out of range";
 
-/**
-  @namespace
-
-  This module implements Observer-friendly Array-like behavior.  This mixin is
-  picked up by the Array class as well as other controllers, etc. that want to
-  appear to be arrays.
-
-  Unlike SC.Enumerable, this mixin defines methods specifically for
-  collections that provide index-ordered access to their contents.  When you
-  are designing code that needs to accept any kind of Array-like object, you
-  should use these methods instead of Array primitives because these will
-  properly notify observers of changes to the array.
-
-  Although these methods are efficient, they do add a layer of indirection to
-  your application so it is a good idea to use them only when you need the
-  flexibility of using both true JavaScript arrays and "virtual" arrays such
-  as controllers and collections.
-
-  You can use the methods defined in this module to access and modify array
-  contents in a KVO-friendly way.  You can also be notified whenever the
-  membership if an array changes by changing the syntax of the property to
-  .observes('*myProperty.[]') .
-
-  To support SC.Array in your own class, you must override two
-  primitives to use it: replace() and objectAt().
-
-  Note that the SC.Array mixin also incorporates the SC.Enumerable mixin.  All
-  SC.Array-like objects are also enumerable.
-
-  @extends SC.Enumerable
-  @since SproutCore 0.9.0
-*/
-SC.Array = /** @scope SC.Array.prototype */{
+SC.CoreArray = /** @lends SC.Array.prototype */ {
 
   /**
     Walk like a duck - use isSCArray to avoid conflicts
@@ -88,6 +56,46 @@ SC.Array = /** @scope SC.Array.prototype */{
   */
   replace: function(idx, amt, objects) {
     throw "replace() must be implemented to support SC.Array" ;
+  },
+
+  /**
+    Returns the index for a particular object in the index.
+
+    @param {Object} object the item to search for
+    @param {NUmber} startAt optional starting location to search, default 0
+    @returns {Number} index of -1 if not found
+  */
+  indexOf: function(object, startAt) {
+    var idx, len = this.get('length');
+
+    if (startAt === undefined) startAt = 0;
+    else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
+    if (startAt < 0) startAt += len;
+
+    for(idx=startAt;idx<len;idx++) {
+      if (this.objectAt(idx, YES) === object) return idx ;
+    }
+    return -1;
+  },
+
+  /**
+    Returns the last index for a particular object in the index.
+
+    @param {Object} object the item to search for
+    @param {NUmber} startAt optional starting location to search, default 0
+    @returns {Number} index of -1 if not found
+  */
+  lastIndexOf: function(object, startAt) {
+    var idx, len = this.get('length');
+
+    if (startAt === undefined) startAt = len-1;
+    else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
+    if (startAt < 0) startAt += len;
+
+    for(idx=startAt;idx>=0;idx--) {
+      if (this.objectAt(idx) === object) return idx ;
+    }
+    return -1;
   },
 
   /**
@@ -203,6 +211,27 @@ SC.Array = /** @scope SC.Array.prototype */{
     objects.forEach(function(obj) { this.removeObject(obj); }, this);
     this.endPropertyChanges();
     return this;
+  },
+
+  /**
+    Returns a new array that is a slice of the receiver.  This implementation
+    uses the observable array methods to retrieve the objects for the new
+    slice.
+
+    If you don't pass in beginIndex and endIndex, it will act as a copy of the
+    array.
+
+    @param beginIndex {Integer} (Optional) index to begin slicing from.
+    @param endIndex {Integer} (Optional) index to end the slice at.
+    @returns {Array} New array with specified slice
+  */
+  slice: function(beginIndex, endIndex) {
+    var ret = [];
+    var length = this.get('length') ;
+    if (SC.none(beginIndex)) beginIndex = 0 ;
+    if (SC.none(endIndex) || (endIndex > length)) endIndex = length ;
+    while(beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++) ;
+    return ret ;
   },
 
   /**
@@ -839,167 +868,36 @@ SC.Array = /** @scope SC.Array.prototype */{
 
 } ;
 
-// Add SC.Array to the built-in array before we add SC.Enumerable to SC.Array
-// since built-in Array's are already enumerable.
-SC.mixin(Array.prototype, SC.Array) ;
-SC.Array = SC.mixin({}, SC.Enumerable, SC.Array) ;
-
-// Add any extra methods to SC.Array that are native to the built-in Array.
 /**
-  Returns a new array that is a slice of the receiver.  This implementation
-  uses the observable array methods to retrieve the objects for the new
-  slice.
+  @namespace
 
-  If you don't pass in beginIndex and endIndex, it will act as a copy of the
-  array.
+  This module implements Observer-friendly Array-like behavior.  This mixin is
+  picked up by the Array class as well as other controllers, etc. that want to
+  appear to be arrays.
 
-  @param beginIndex {Integer} (Optional) index to begin slicing from.
-  @param endIndex {Integer} (Optional) index to end the slice at.
-  @returns {Array} New array with specified slice
+  Unlike SC.Enumerable, this mixin defines methods specifically for
+  collections that provide index-ordered access to their contents.  When you
+  are designing code that needs to accept any kind of Array-like object, you
+  should use these methods instead of Array primitives because these will
+  properly notify observers of changes to the array.
+
+  Although these methods are efficient, they do add a layer of indirection to
+  your application so it is a good idea to use them only when you need the
+  flexibility of using both true JavaScript arrays and "virtual" arrays such
+  as controllers and collections.
+
+  You can use the methods defined in this module to access and modify array
+  contents in a KVO-friendly way.  You can also be notified whenever the
+  membership if an array changes by changing the syntax of the property to
+  .observes('*myProperty.[]') .
+
+  To support SC.Array in your own class, you must override two
+  primitives to use it: replace() and objectAt().
+
+  Note that the SC.Array mixin also incorporates the SC.Enumerable mixin.  All
+  SC.Array-like objects are also enumerable.
+
+  @extends SC.Enumerable
+  @since SproutCore 0.9.0
 */
-SC.Array.slice = function(beginIndex, endIndex) {
-  var ret = [];
-  var length = this.get('length') ;
-  if (SC.none(beginIndex)) beginIndex = 0 ;
-  if (SC.none(endIndex) || (endIndex > length)) endIndex = length ;
-  while(beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++) ;
-  return ret ;
-}  ;
-
-/**
-  Returns the index for a particular object in the index.
-
-  @param {Object} object the item to search for
-  @param {NUmber} startAt optional starting location to search, default 0
-  @returns {Number} index of -1 if not found
-*/
-SC.Array.indexOf = function(object, startAt) {
-  var idx, len = this.get('length');
-
-  if (startAt === undefined) startAt = 0;
-  else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
-  if (startAt < 0) startAt += len;
-
-  for(idx=startAt;idx<len;idx++) {
-    if (this.objectAt(idx, YES) === object) return idx ;
-  }
-  return -1;
-};
-
-// Some browsers do not support indexOf natively.  Patch if needed
-if (!Array.prototype.indexOf) Array.prototype.indexOf = SC.Array.indexOf;
-
-/**
-  Returns the last index for a particular object in the index.
-
-  @param {Object} object the item to search for
-  @param {NUmber} startAt optional starting location to search, default 0
-  @returns {Number} index of -1 if not found
-*/
-SC.Array.lastIndexOf = function(object, startAt) {
-  var idx, len = this.get('length');
-
-  if (startAt === undefined) startAt = len-1;
-  else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
-  if (startAt < 0) startAt += len;
-
-  for(idx=startAt;idx>=0;idx--) {
-    if (this.objectAt(idx) === object) return idx ;
-  }
-  return -1;
-};
-
-// Some browsers do not support lastIndexOf natively.  Patch if needed
-if (!Array.prototype.lastIndexOf) {
-  Array.prototype.lastIndexOf = SC.Array.lastIndexOf;
-}
-
-// ......................................................
-// ARRAY SUPPORT
-//
-// Implement the same enhancements on Array.  We use specialized methods
-// because working with arrays are so common.
-(function() {
-  SC.mixin(Array.prototype, {
-
-    // primitive for array support.
-    replace: function(idx, amt, objects) {
-      if (this.isFrozen) { throw SC.FROZEN_ERROR ; }
-
-      var args;
-      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
-
-      // Notify that array content is about to mutate.
-      this.arrayContentWillChange(idx, amt, len);
-
-      if (len === 0) {
-        this.splice(idx, amt) ;
-      } else {
-        args = [idx, amt].concat(objects) ;
-        this.splice.apply(this,args) ;
-      }
-
-      this.arrayContentDidChange(idx, amt, len);
-      this.enumerableContentDidChange(idx, amt, len - amt) ;
-      return this ;
-    },
-
-    // If you ask for an unknown property, then try to collect the value
-    // from member items.
-    unknownProperty: function(key, value) {
-      var ret = this.reducedProperty(key, value) ;
-      if ((value !== undefined) && ret === undefined) {
-        ret = this[key] = value;
-      }
-      return ret ;
-    }
-
-  });
-
-  var indexOf = Array.prototype.indexOf;
-  if (!indexOf || (indexOf === SC.Array.indexOf)) {
-    /**
-      Returns the index for a particular object in the index.
-
-      @param {Object} object the item to search for
-      @param {NUmber} startAt optional starting location to search, default 0
-      @returns {Number} index of -1 if not found
-    */
-    Array.prototype.indexOf = function(object, startAt) {
-      var idx, len = this.length;
-
-      if (startAt === undefined) startAt = 0;
-      else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
-      if (startAt < 0) startAt += len;
-
-      for(idx=startAt;idx<len;idx++) {
-        if (this[idx] === object) return idx ;
-      }
-      return -1;
-    } ;
-  }
-
-  var lastIndexOf = Array.prototype.lastIndexOf ;
-  if (!lastIndexOf || (lastIndexOf === SC.Array.lastIndexOf)) {
-    /**
-      Returns the last index for a particular object in the index.
-
-      @param {Object} object the item to search for
-      @param {NUmber} startAt optional starting location to search, default 0
-      @returns {Number} index of -1 if not found
-    */
-    Array.prototype.lastIndexOf = function(object, startAt) {
-      var idx, len = this.length;
-
-      if (startAt === undefined) startAt = len-1;
-      else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
-      if (startAt < 0) startAt += len;
-
-      for(idx=startAt;idx>=0;idx--) {
-        if (this[idx] === object) return idx ;
-      }
-      return -1;
-    };
-  }
-
-})();
+SC.Array = SC.mixin({}, SC.Enumerable, SC.CoreArray);
