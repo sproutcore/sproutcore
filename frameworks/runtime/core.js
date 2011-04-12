@@ -249,13 +249,10 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Boolean}
   */
   isArray: function(obj) {
-    if ( !obj || obj.setInterval ) {
-      return false;
-    } else if ( obj.objectAt ) {
-      return true ;
-    } else if ( obj.length !== undefined && jQuery.type(obj) === "object" ) {
-      return true;
-    }
+    if (!obj || obj.setInterval) { return false; }
+    if (Array.isArray && Array.isArray(obj)) { return true; }
+    if (obj.objectAt) { return true; }
+    if (obj.length !== undefined && jQuery.type(obj) === "object") { return true; }
 
     return false;
   },
