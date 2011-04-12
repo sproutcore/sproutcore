@@ -569,7 +569,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
                       value, '</textarea></span>') ;
       }
       else {
-        type = this.get('isPassword') ? 'password' : 'text' ;
+        type = 'text';
+        
+        // Internet Explorer won't let us change the type attribute later
+        // so we force it to password if needed now, or if the value is not the hint
+        if (this.get('isPassword') && (value !== hint || SC.browser.isIE)) { type = 'password'; }
+        
         context.push('<input class="',fieldClassNames,'" type="', type,
                       '" name="', name, '" ', disabled, ' value="', value,
                       '" placeholder="',hint,'"', spellCheckString, 
@@ -578,15 +583,25 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     }
     else {
-      var input= this.$input();
+      var input= this.$input(),
+          elem = input[0];
+
       if(!SC.platform.input.placeholder){
         var val = this.get('value');
         if((!val || (val && val.length===0))){
           if(this._hintON && !this.get('isFirstResponder')){
             context.setClass('sc-hint', YES);
+            
+            // Internet Explorer doesn't allow you to modify the type afterwards
+            // jQuery throws an exception as well, so set attribute directly
+            if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
+            
             input.val(hint);
-          } 
-          else {
+          } else {
+            // Internet Explorer doesn't allow you to modify the type afterwards
+            // jQuery throws an exception as well, so set attribute directly
+            if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
+
             context.setClass('sc-hint', NO);
             input.val('');
           }
