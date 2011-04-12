@@ -362,7 +362,7 @@ SC.Response = SC.Object.extend(
     
     handled = this._notifyListeners(listeners, status);
     if (!handled && baseStat !== status) handled = this._notifyListeners(listeners, baseStat);
-    if (!handled) handled = this._notifyListeners(listeners, 0);
+    if (!handled && status !== 0) handled = this._notifyListeners(listeners, 0);
     
     return this ;
   },
