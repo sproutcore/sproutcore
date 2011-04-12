@@ -9,7 +9,7 @@
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
 if (!window.require) { window.require = function require(){}; }
-if (!window.sc_require) { window.sc_require = require };
+if (!window.sc_require) { window.sc_require = require; }
 if (!window.sc_resource) {window.sc_resource = function sc_resource(){}; }
 sc_require('license') ;
 
@@ -1028,9 +1028,9 @@ SC.mixin(Function.prototype,
   
   Implements support methods useful when working with strings in SproutCore
   applications.
-  */
-SC.CoreString = /** @scope SC.CoreString.prototype */{
-  
+*/
+SC.String = /** @scope SC.String.prototype */ {
+
   // Interpolate string. looks for %@ or %@1; to control the order of params.
   /**
     Apply formatting options to the string.  This will look for occurrences
@@ -1062,20 +1062,6 @@ SC.CoreString = /** @scope SC.CoreString.prototype */{
   },
   
   /**
-    Localizes the string.  This will look up the reciever string as a key
-    in the current Strings hash.  If the key matches, the loc'd value will be
-    used.  The resulting string will also be passed through fmt() to insert
-    any variables.
-
-    @param {Object...} args optional arguments to interpolate also
-    @returns {String} the localized and formatted string.
-  */
-  loc: function(str, formats) {
-    str = SC.STRINGS[str] || str;
-    return SC.CoreString.fmt(str, arguments) ;
-  },
-  
-  /**
     Splits the string into words, separated by spaces. Empty strings are
     removed from the results.
 
@@ -1091,29 +1077,29 @@ SC.CoreString = /** @scope SC.CoreString.prototype */{
   }
 };
 
+// ..........................................................
+// STRING ENHANCEMENT
+//
+
 /** 
   @namespace
-
   Extends the String class by adding a few helpful methods.
+*/
+SC.mixin(String.prototype,
+/** @scope String.prototype */{
 
+  /**
+    @see SC.String.fmt
   */
-SC.mixin(String.prototype,{
-
-  // ..........................................................
-  // STRING ENHANCEMENT
-  //
-
   fmt: function() {
-    return SC.CoreString.fmt(this, arguments);
+    return SC.String.fmt(this, arguments);
   },
 
-
-  loc: function() {
-    return SC.CoreString.loc(this, arguments);
-  },
-
+  /**
+    @see SC.String.w
+  */
   w: function() {
-    return SC.CoreString.w(this);
+    return SC.String.w(this);
   }
 });
 
