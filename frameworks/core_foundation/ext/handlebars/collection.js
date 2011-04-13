@@ -27,11 +27,13 @@ Handlebars.registerHelper('collection', function(path, options) {
   }
 
   if(fn) {
-    var extensions = {
+    var extensions = SC.clone(hash);
+
+    SC.mixin(extensions, {
       itemViewTemplate: fn,
       inverseTemplate: inverse,
       itemViewOptions: itemHash
-    };
+    });
 
     if(collectionClass.isClass) {
       collectionObject = collectionClass.extend(extensions);
