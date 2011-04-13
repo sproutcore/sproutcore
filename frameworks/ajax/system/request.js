@@ -517,7 +517,7 @@ SC.Request.mixin(/** @scope SC.Request */ {
 
   @since SproutCore 1.0
 */
-SC.Request.manager = SC.Object.create( SC.DelegateSupport, 
+SC.Request.manager = SC.Object.create(
 	/** @scope SC.Request.manager */{
 
   /**

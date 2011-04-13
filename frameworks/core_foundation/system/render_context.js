@@ -996,7 +996,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   _camelizeStyleName: function(name) {
     // IE wants the first letter lowercase so we can allow normal behavior
     var needsCap = name.match(/^-(webkit|moz|o)-/),
-        camelized = name.camelize();
+        camelized = SC.String.camelize(name);
 
     if (needsCap) {
       return camelized.substr(0,1).toUpperCase() + camelized.substr(1);

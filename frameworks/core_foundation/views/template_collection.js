@@ -81,10 +81,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     needed.
   */
   _sctcv_contentDidChange: function() {
-    this.get('childViews').forEach(function() {
-      this.removeChild(view);
-      view.destroy();
-    }, this);
 
     this.$().empty();
 

@@ -8,7 +8,7 @@
 /*global module test htmlbody ok equals same */
 
 (function() {
-  var logoURL = "http://www.sproutcore.com/assets/images/logo.png";
+  var logoURL = sc_static('images/sproutcore.png');
   var sampleURLs = [ "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/zion-hiker-the-sweetie-hiking-in-zion-narrows_w725_h544.jpg",
 "http://www.public-domain-image.com/cache/people-public-domain-images-pictures/children-kids-public-domain-images-pictures/children-playing_w562_h725.jpg",
 "http://www.public-domain-image.com/cache/architecture-public-domain-images-pictures/fountain-public-domain-images-pictures/water-fountain-in-park_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/winter-at-bryce-canyon_w725_h544.jpg", "http://www.public-domain-image.com/cache/fauna-animals-public-domain-images-pictures/prairie-dog-public-domain-images-pictures/prairie-dog-pups_w725_h483.jpg", "http://www.public-domain-image.com/cache/fauna-animals-public-domain-images-pictures/prairie-dog-public-domain-images-pictures/prairie-rattlesnake-crotalus-viridis_w725_h484.jpg", "http://www.public-domain-image.com/cache/fauna-animals-public-domain-images-pictures/tigers-public-domain-images-pictures/bengal-tiger_w725_h486.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/field-public-domain-images-pictures/wooden-logs-in-field_w725_h483.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/field-public-domain-images-pictures/wheat-yellow-in-field_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/field-public-domain-images-pictures/vineyards_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/autumn-public-domain-images-pictures/old-trees-with-leaves-on-ground-in-autumn_w725_h484.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/yaki-point-at-the-grand-canyon_w725_h547.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/grand-canyons-overlook-railings-pointing_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/coast-public-domain-images-pictures/sand-ocean-tidepools-sea-swimming-swimmers-waves_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/coast-public-domain-images-pictures/waves-breaking-rocks_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/sand-public-domain-images-pictures/sand-footstep_w725_h482.jpg"];
@@ -67,7 +67,7 @@
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
       setTimeout(function() {
         imgEl = imageView.$('img');
-        equals(logoURL, imgEl.attr('src'), "img src should be set to logoURL");
+        ok(imgEl.attr('src').indexOf(logoURL) !== 0, "img src should be set to logoURL");
 
         window.start(); // continue the tests
         }, 100);
@@ -176,10 +176,10 @@
         SC.RunLoop.end();
 
         innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 294, "SC.SCALE_NONE width");
+        equals(innerFrame.width, 271, "SC.SCALE_NONE width");
         equals(innerFrame.height, 60, "SC.SCALE_NONE height");
         if (testImg) {
-          equals(imgEl.css('width'), "294px", "SC.SCALE_NONE width");
+          equals(imgEl.css('width'), "271px", "SC.SCALE_NONE width");
           equals(imgEl.css('height'), "60px", "SC.SCALE_NONE height");
         }
 
@@ -189,10 +189,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 588, "SC.FILL_PROPORTIONALLY width");
-        equals(innerFrame.height, 120, "SC.FILL_PROPORTIONALLY height");
+        equals(innerFrame.height, 130, "SC.FILL_PROPORTIONALLY height");
         if (testImg) {
           equals(imgEl.css('width'), "588px", "SC.FILL_PROPORTIONALLY width");
-          equals(imgEl.css('height'), "120px", "SC.FILL_PROPORTIONALLY height");
+          equals(imgEl.css('height'), "130px", "SC.FILL_PROPORTIONALLY height");
         }
 
         SC.RunLoop.begin();
@@ -200,10 +200,10 @@
         SC.RunLoop.end();
 
         innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 441, "SC.BEST_FIT width");
+        equals(innerFrame.width, 407, "SC.BEST_FIT width");
         equals(innerFrame.height, 90, "SC.BEST_FIT height");
         if (testImg) {
-          equals(imgEl.css('width'), "441px", "SC.BEST_FIT width");
+          equals(imgEl.css('width'), "407px", "SC.BEST_FIT width");
           equals(imgEl.css('height'), "90px", "SC.BEST_FIT height");
         }
 
@@ -212,10 +212,10 @@
         SC.RunLoop.end();
 
         innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 294, "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
+        equals(innerFrame.width, 271, "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
         equals(innerFrame.height, 60, "SC.BEST_FIT_DOWN_ONLY height (larger frame)");
         if (testImg) {
-          equals(imgEl.css('width'), "294px", "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
+          equals(imgEl.css('width'), "271px", "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
           equals(imgEl.css('height'), "60px", "SC.BEST_FIT_DOWN_ONLY height (larger frame)");
         }
 
@@ -225,10 +225,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 147, "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-        equals(innerFrame.height, 30, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+        equals(innerFrame.height, 33, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
         if (testImg) {
           equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-          equals(imgEl.css('height'), "30px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+          equals(imgEl.css('height'), "33px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
         }
 
         window.start(); // starts the test runner
@@ -240,7 +240,7 @@
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
       layout: { top: 0, left: 0, width: 588, height: 90 },
@@ -314,11 +314,11 @@
         // Default is SC.ALIGN_CENTER
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.y, 30, "SC.ALIGN_CENTER top");
-        equals(innerFrame.x, 147, "SC.ALIGN_CENTER left");
+        equals(innerFrame.x, 158.5, "SC.ALIGN_CENTER left");
         if (testImg) {
           imgEl = imageView.$('img');
           equals(imgEl.css('top'), "30px", "SC.ALIGN_CENTER top");
-          equals(imgEl.css('left'), "147px", "SC.ALIGN_CENTER left");
+          equals(imgEl.css('left'), "159px", "SC.ALIGN_CENTER left");
         }
 
         SC.RunLoop.begin();
@@ -339,10 +339,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.y, 0, "SC.ALIGN_TOP top");
-        equals(innerFrame.x, 147, "SC.ALIGN_TOP left");
+        equals(innerFrame.x, 158.5, "SC.ALIGN_TOP left");
         if (testImg) {
           equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP top");
-          equals(imgEl.css('left'), "147px", "SC.ALIGN_TOP left");
+          equals(imgEl.css('left'), "159px", "SC.ALIGN_TOP left");
         }
 
         SC.RunLoop.begin();
@@ -351,10 +351,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.y, 0, "SC.ALIGN_TOP_RIGHT top");
-        equals(innerFrame.x, 294, "SC.ALIGN_TOP_RIGHT left");
+        equals(innerFrame.x, 317, "SC.ALIGN_TOP_RIGHT left");
         if (testImg) {
           equals(imgEl.css('top'), "0px", "SC.ALIGN_TOP_RIGHT top");
-          equals(imgEl.css('left'), "294px", "SC.ALIGN_TOP_RIGHT left");
+          equals(imgEl.css('left'), "317px", "SC.ALIGN_TOP_RIGHT left");
         }
         SC.RunLoop.begin();
         imageView.set('align', SC.ALIGN_RIGHT);
@@ -362,10 +362,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.y, 30, "SC.ALIGN_RIGHT top");
-        equals(innerFrame.x, 294, "SC.ALIGN_RIGHT left");
+        equals(innerFrame.x, 317, "SC.ALIGN_RIGHT left");
         if (testImg) {
           equals(imgEl.css('top'), "30px", "SC.ALIGN_RIGHT top");
-          equals(imgEl.css('left'), "294px", "SC.ALIGN_RIGHT left");
+          equals(imgEl.css('left'), "317px", "SC.ALIGN_RIGHT left");
         }
 
         SC.RunLoop.begin();
@@ -374,10 +374,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM_RIGHT top");
-        equals(innerFrame.x, 294, "SC.ALIGN_BOTTOM_RIGHT left");
+        equals(innerFrame.x, 317, "SC.ALIGN_BOTTOM_RIGHT left");
         if (testImg) {
           equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM_RIGHT top");
-          equals(imgEl.css('left'), "294px", "SC.ALIGN_BOTTOM_RIGHT left");
+          equals(imgEl.css('left'), "317px", "SC.ALIGN_BOTTOM_RIGHT left");
         }
 
         SC.RunLoop.begin();
@@ -386,10 +386,10 @@
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.y, 60, "SC.ALIGN_BOTTOM top");
-        equals(innerFrame.x, 147, "SC.ALIGN_BOTTOM left");
+        equals(innerFrame.x, 158.5, "SC.ALIGN_BOTTOM left");
         if (testImg) {
           equals(imgEl.css('top'), "60px", "SC.ALIGN_BOTTOM top");
-          equals(imgEl.css('left'), "147px", "SC.ALIGN_BOTTOM left");
+          equals(imgEl.css('left'), "159px", "SC.ALIGN_BOTTOM left");
         }
 
         SC.RunLoop.begin();

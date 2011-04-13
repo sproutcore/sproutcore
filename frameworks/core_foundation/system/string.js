@@ -29,7 +29,7 @@ SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
   @since SproutCore 1.0
   @lends String.prototype
 */
-SC.String = {
+SC.mixin(SC.String, {
 
   /**
     Capitalizes a string.
@@ -188,31 +188,6 @@ SC.String = {
   trimRight: function (str) {
     return str.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
   }
-};
-
-SC.supplement(String.prototype,
-/** @scope String.prototype */ {
-
-  capitalize: function() {
-    return SC.String.capitalize(this, arguments);
-  },
-
-  camelize: function() {
-    return SC.String.camelize(this, arguments);
-  },
-
-  decamelize: function() {
-    return SC.String.decamelize(this, arguments);
-  },
-
-  dasherize: function() {
-    return SC.String.dasherize(this, arguments);
-  },
-
-  locWithDefault: function(def) {
-    return SC.String.locWithDefault(this, def, arguments);
-  }
-
 });
 
 
