@@ -696,6 +696,8 @@ SC.CoreView.reopen(
       view.renderToContext(context, firstTime);
       context = context.end() ;
     }
+    this._didRenderChildViews = YES;
+
     return context;
   },
 
