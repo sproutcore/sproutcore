@@ -2382,12 +2382,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private */
   touchEnd: function(touch) {
-    var itemView = this.itemViewForEvent(touch),
+    /*
+      TODO [CC] We should be using itemViewForEvent here, but because
+            ListItemView re-renders itself once isSelected is called
+            in touchStart, the elements attached to this event are
+            getting orphaned and this event is basically a complete
+            fail when using touch events.
+    */
+    // var itemView = this.itemViewForEvent(touch),
+    var itemView = this._touchSelectedView,
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
         isSelected = NO;
 
     // Remove fake selection in case our contentIndex is -1, a select event will add it back
-    if (this._touchSelectedView) { this._touchSelectedView.set('isSelected', NO); }
+    if (itemView) { itemView.set('isSelected', NO); }
 
     if (this.get('useToggleSelection')) {
       var sel = this.get('selection');
@@ -2402,12 +2410,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       // If actOnSelect is implemented, the action will be fired.
       this._cv_performSelectAction(itemView, touch, 0);
     }
+
+    this._touchSelectedView = null;
   },
 
   /** @private */
   touchCancelled: function(evt) {
     // Remove fake selection
-    if (this._touchSelectedView) { this._touchSelectedView.set('isSelected', NO); }
+    if (this._touchSelectedView) {
+      this._touchSelectedView.set('isSelected', NO);
+      this._touchSelectedView = null;
+    }
   },
 
   /** @private */
