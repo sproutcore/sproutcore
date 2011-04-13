@@ -49,6 +49,46 @@ test("default implementation invokes renderChildViews if firstTime = YES", funct
 
 });
 
+test("default implementation does not invoke renderChildViews if explicitly rendered in render method", function() {
+
+  var rendered = 0, updated = 0, parentRendered = 0, parentUpdated = 0 ;
+  var view = SC.View.create({
+    displayProperties: ["triggerRenderProperty"],
+    childViews: ["child"],
+
+    render: function(context) {
+      this.renderChildViews(context);
+      parentRendered++;
+    },
+
+    update: function(jquery) {
+      parentUpdated++;
+    },
+
+    child: SC.View.create({
+      render: function(context) {
+        rendered++;
+      },
+
+      update: function(jquery) {
+        updated++;
+      }
+    })
+  });
+
+  view.createLayer();
+  equals(rendered, 1, 'rendered the child once');
+  equals(parentRendered, 1);
+  equals(view.$('div').length, 1);
+
+  view.updateLayer();
+  equals(rendered, 1, 'didn\'t call render again');
+  equals(parentRendered, 1, 'didn\'t call the parent\'s render again');
+  equals(parentUpdated, 1, 'called the parent\'t update');
+  equals(updated, 0, 'didn\'t call the child\'s update');
+
+});
+
 // .......................................................
 // renderChildViews()
 //
