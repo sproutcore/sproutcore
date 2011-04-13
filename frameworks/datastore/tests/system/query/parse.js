@@ -195,12 +195,20 @@ test("should recognize all primitives", function() {
   equals(q._tokenList[2].tokenValue, 'NOT', 'value should be NOT');
   
 }); 
-  
-  
-  // ..........................................................
-  // TREE-BUILDING 
-  // 
 
+// ..........................................................
+// COMPOUND
+//
+
+test("negative numbers with equals", function(){
+  q.conditions = "-1=-1";
+  q.parse();
+  equals(q._tokenList.length, 3, "should have 3 tokens");
+});
+
+// ..........................................................
+// TREE-BUILDING
+//
 
 test("token tree should build", function() {  
   // Just some examples
