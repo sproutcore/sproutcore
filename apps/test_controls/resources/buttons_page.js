@@ -15,7 +15,7 @@ TestControls.buttonsPage = SC.View.design({
       labelWidth: 100,
       flowPadding: { left: 20, top: 30, bottom: 40, right: 20 },
       classNames: ["sample_controls"],
-      childViews: "header style flags small normal huge jumbo space disclosureHeader disclosureClosed disclosureOpen".w(),
+      childViews: "header style flags small normal huge jumbo icon space disclosureHeader disclosureClosed disclosureOpen".w(),
       header: SC.LabelView.design({
         fillWidth: YES,
         layout: {width: 200, height: 24 },
@@ -114,6 +114,18 @@ TestControls.buttonsPage = SC.View.design({
         layout: { height: 44, width: 100 },
         title: "Click Me",
         
+        themeNameBinding: 'TestControls.buttonsController.theme',
+        buttonBehaviorBinding: 'TestControls.buttonsController.buttonBehavior',
+        isEnabledBinding: SC.Binding.not('TestControls.buttonsController.disabled'),
+        isDefaultBinding: 'TestControls.buttonsController.default',
+        isCancelBinding: 'TestControls.buttonsController.cancel'
+      })),
+
+      icon: SC.FormView.row(SC.ButtonView.design({
+        layout: { height: 24, width: 100 },
+        title: "Click Me",
+        icon: "sc-icon-info-16",
+
         themeNameBinding: 'TestControls.buttonsController.theme',
         buttonBehaviorBinding: 'TestControls.buttonsController.buttonBehavior',
         isEnabledBinding: SC.Binding.not('TestControls.buttonsController.disabled'),
