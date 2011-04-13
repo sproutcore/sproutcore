@@ -981,7 +981,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that will return YES if the value is null, NO otherwise.
+    Adds a transform that will return YES if the value is null or undefined, NO otherwise.
     
     @param {String} fromPath optional from path
     @returns {SC.Binding} this
