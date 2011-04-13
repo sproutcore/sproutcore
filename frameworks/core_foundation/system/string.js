@@ -220,9 +220,3 @@ SC.mixin(String.prototype,
 
 });
 
-/** @private */
-SC.String.fmt = SC.CoreString.fmt;
-
-/** @private */
-SC.String.w = SC.CoreString.w;
-
