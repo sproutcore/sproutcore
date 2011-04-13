@@ -187,7 +187,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private
     If the activeSelection changes or the value changes, update the "TextSelection" to show accordingly.
   */
-  updateTextSelecitonObserver: function() {
+  updateTextSelectionObserver: function() {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
     if (this.get('isEditing')) {
