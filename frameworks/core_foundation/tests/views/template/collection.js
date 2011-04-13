@@ -175,3 +175,25 @@ test("should pass content as context when using {{#each}} helper", function() {
 
   equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
 });
+
+test("should re-render when the content object changes", function() {
+  TemplateTests.RerenderTest = SC.TemplateCollectionView.extend({
+    content: ['foo', 'bar', 'baz']
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection TemplateTests.RerenderTest}}{{content}}{{/collection}}')
+  });
+
+  view.createLayer();
+
+  equals(view.$('li').length, 3, "precond - renders three items");
+
+  SC.run(function() {
+    view.childViews[0].set('content', ['bing', 'bat', 'bong', 'ramalamadingdong']);
+  });
+
+  equals(view.$('li').length, 4, "rerenders with correct number of items");
+  equals(view.$('li:eq(3)').text(), "ramalamadingdong");
+
+});
