@@ -1936,13 +1936,13 @@ SC.ScrollView = SC.View.extend({
     // before we actually update the scrollTop/scrollLeft properties.
     // This gives views that use incremental rendering a chance to render
     // newly-appearing elements before they come into view.
-    if (content && content._viewFrameDidChange) {
-      content._viewFrameDidChange();
-    }
+    if (content) {
+      // Use accelerated drawing if the browser supports it
+      if (SC.platform.supportsAcceleratedLayers) {
+        this._applyCSSTransforms(content.get('layer'));
+      }
 
-    // Use accelerated drawing if the browser supports it
-    if (SC.platform.supportsAcceleratedLayers) {
-      this._applyCSSTransforms(content.get('layer'));
+      if (content._viewFrameDidChange) { content._viewFrameDidChange(); }
     }
 
     if (container && !SC.platform.supportsAcceleratedLayers) {
