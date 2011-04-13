@@ -122,8 +122,8 @@ TestControls.buttonsPage = SC.View.design({
       })),
       
       space: SC.View.design({
-        isSpacer: YES,
-        fillWidth: YES
+        fillWidth: YES,
+        layout: { width: 400, height: 20 }
       }),
       disclosureHeader: SC.LabelView.design({
         fillWidth: YES,
