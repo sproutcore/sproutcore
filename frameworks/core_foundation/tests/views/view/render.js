@@ -89,6 +89,44 @@ test("default implementation does not invoke renderChildViews if explicitly rend
 
 });
 
+test("should invoke renderChildViews if layer is destroyed then re-rendered", function() {
+
+  var rendered = 0, updated = 0, parentRendered = 0, parentUpdated = 0 ;
+  var view = SC.View.create({
+    displayProperties: ["triggerRenderProperty"],
+    childViews: ["child"],
+
+    render: function(context) {
+      parentRendered++;
+    },
+
+    update: function(jquery) {
+      parentUpdated++;
+    },
+
+    child: SC.View.create({
+      render: function(context) {
+        rendered++;
+      },
+
+      update: function(jquery) {
+        updated++;
+      }
+    })
+  });
+
+  view.createLayer();
+  equals(rendered, 1, 'rendered the child once');
+  equals(parentRendered, 1);
+  equals(view.$('div').length, 1);
+
+  view.destroyLayer();
+  view.createLayer();
+  equals(rendered, 2, 'rendered the child twice');
+  equals(parentRendered, 2);
+  equals(view.$('div').length, 1);
+
+});
 // .......................................................
 // renderChildViews()
 //
