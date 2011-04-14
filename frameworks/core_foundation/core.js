@@ -88,10 +88,6 @@ SC.ALIGN_BOTTOM_LEFT = 'bottom-left';
 */
 SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
 
-/**
-  This variable is here to make the tab focus behavior work like safari's.
-*/
-SC.SAFARI_FOCUS_BEHAVIOR = YES;
 
 SC.mixin(/** @lends SC */ {
   

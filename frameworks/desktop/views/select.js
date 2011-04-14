@@ -493,7 +493,7 @@ SC.SelectView = SC.ButtonView.extend(
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
-      customMenuView, menu, itemsLength;
+      menu, itemsLength, itemIdx;
     
     buttonLabel = this.$('.sc-button-label')[0] ;
     
@@ -572,8 +572,7 @@ SC.SelectView = SC.ButtonView.extend(
     menuHeightPadding = this.get('menuPaneHeightPadding') ;
 
     // get the user defined custom view
-    customView = this.get('exampleView') ;
-    customMenuView = customView ? customView : SC.MenuItemView ;
+    customView = this.get('exampleView') || SC.MenuItemView;
 
     menu  = SC.MenuPane.create({
 
@@ -595,7 +594,7 @@ SC.SelectView = SC.ButtonView.extend(
         @default SC.MenuItemView
         @type SC.View
       */
-      exampleView: customMenuView,
+      exampleView: customView,
 
       /**
         This property enables all the items and makes them selectable.
@@ -618,8 +617,11 @@ SC.SelectView = SC.ButtonView.extend(
     menu.popup(this, this.preferMatrix) ;
     this.set('menu', menu);
 
-    customView = menu.menuItemViewForContentIndex(this.get('_itemIdx'));
-    customView.becomeFirstResponder();
+    itemIdx = this._itemIdx;
+    if (itemIdx && itemIdx > -1) {
+      customView = menu.menuItemViewForContentIndex(itemIdx);
+      if (customView) { customView.becomeFirstResponder(); }
+    }
 
     this.set('isActive', YES);
     return YES ;

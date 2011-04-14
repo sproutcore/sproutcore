@@ -51,7 +51,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
   ariaRole: 'img',
 
-  displayProperties: 'frame image innerFrame toolTip imageValue type'.w(),
+  displayProperties: ['frame', 'image', 'innerFrame', 'toolTip', 'imageValue', 'type'],
 
   renderDelegateName: function() {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";

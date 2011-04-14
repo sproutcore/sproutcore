@@ -285,8 +285,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   /** tied to the isEnabled state */
   acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    return NO;
   }.property('isEnabled'),
   
   willBecomeKeyResponderFrom: function(keyView) {
