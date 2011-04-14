@@ -41,15 +41,6 @@ config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop]
 config :ajax,            :required => [:runtime, :core_foundation]
 
-# APP-LEVEL FRAMEWORKS
-%w(mobile).each do |app_framework|
-  config app_framework, :required => [:runtime, :datastore, :foundation]
-end
-
-config :mobile, 
-  :layout         => 'sproutcore/mobile:lib/index.rhtml',
-  :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
-
 # WRAPPER FRAMEWORKS
 config :sproutcore, :required => [:desktop, :datastore]
 config :mini, :required => [:runtime, :datastore]
