@@ -88,7 +88,7 @@ function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
       if (ctrlKey) modifiers.push('ctrl');
       modifiers = modifiers.length > 0 ? modifiers.join('+') : 'no modifiers';
       
-      ok(expected.isEqual(sel), 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
+      ok(expected ? expected.isEqual(sel) : expected === sel, 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
       SC.RunLoop.end();
       if (delay) window.start() ; // starts the test runner
     };
@@ -249,4 +249,14 @@ test("clicking on an unselected item should fire action when useToggleSelection 
   equals(actionCalled, 0, "precond - action hasn't been called");
   clickOn(view, 1, NO, NO);
   equals(actionCalled, 1, "Action called when item is selected");
+});
+
+test("click on an item when isSelectable is false doesn't do anything", function() {
+  view.set('isSelectable', NO);
+  clickOn(view, 1, NO, NO, null);
+});
+
+test("click on an item when isEnabled is false doesn't do anything", function() {
+  view.set('isEnabled', NO);
+  clickOn(view, 1, NO, NO, null);
 });
