@@ -2135,7 +2135,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var itemView      = this.itemViewForEvent(ev),
         content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1, 
-        info, anchor, sel, isSelected, modifierKeyPressed,
+        info, anchor, sel, isSelected, modifierKeyPressed, didSelect = NO,
         allowsMultipleSel = content.get('allowsMultipleSelection');
         
     info = this.mouseDownInfo = {
@@ -2158,11 +2158,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         isSelected = sel && sel.containsObject(itemView.get('content')) ;
 
         if (isSelected) {
-          this.deselect(contentIndex) ;
+          this.deselect(contentIndex);
         } else if (!allowsMultipleSel) {
-          this.select(contentIndex, NO) ;
+          this.select(contentIndex, NO);
+          didSelect = YES;
         } else {
-          this.select(contentIndex, YES) ;
+          this.select(contentIndex, YES);
+          didSelect = YES;
+        }
+        
+        if (didSelect && this.get('actOnSelect')) {
+          // handle actions on editing
+          this._cv_performSelectAction(itemView, ev);
         }
       }
       
