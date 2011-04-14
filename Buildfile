@@ -42,7 +42,7 @@ config :statechart,      :required => [:core_foundation], :test_required => [:co
 config :ajax,            :required => [:runtime, :core_foundation]
 
 # APP-LEVEL FRAMEWORKS
-%w(mobile designer).each do |app_framework|
+%w(mobile).each do |app_framework|
   config app_framework, :required => [:runtime, :datastore, :foundation]
 end
 
@@ -51,7 +51,6 @@ config :mobile,
   :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
 
 # WRAPPER FRAMEWORKS
-config :designer, :required => [:runtime, :foundation, :desktop]
 config :sproutcore, :required => [:desktop, :datastore]
 config :mini, :required => [:runtime, :datastore]
 config :animation, :required => :foundation
@@ -112,8 +111,3 @@ config :core_tools, :required => [
   # end
 
 end
-
-config :greenhouse, 
-  :required => [:sproutcore, :'sproutcore/designer', :statechart],
-  :theme => :ace,
-  :css_theme    => 'ace.greenhouse'
