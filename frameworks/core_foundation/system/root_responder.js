@@ -1026,7 +1026,7 @@ SC.RootResponder = SC.Object.extend({
         }
       } else {
 
-        if ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch) {
+        if (responder && ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch)) {
           if (!responder.touchStart(touch)) responder = null;
         } else {
           // do nothing; the responder is the responder, and may stay the responder, and all will be fine
