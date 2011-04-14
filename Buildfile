@@ -102,7 +102,7 @@ config :core_tools, :required => [
 #   config :core_tools, :combine_javascript => false
 # end
 
-%w(tests test_controls docs welcome).each do |app_target|
+%w(tests test_controls welcome).each do |app_target|
   config app_target, 
     :required => [:desktop, :datastore, :core_tools],
     :theme => :ace
