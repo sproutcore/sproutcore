@@ -8,19 +8,17 @@
 
 module("SC.Validator.Date");
 
-test("Converts into date if a value is given",function(){
-    var date = new Date(1234947136000),
-        utcDate = new Date(Number(date) + (date.getTimezoneOffset() * 60000)); // Adjust for timezone offset
+test("Converts into String if a number is given",function() {
+  var date = SC.DateTime.create({milliseconds: 1234947136000 + (new Date().getTimezoneOffset() * 60000)});
 
-    var c = SC.Validator.Date.fieldValueForObject(Number(utcDate),'','');
-    var expected = "Feb 18, 2009 8:52:16 AM";
-    ok(c === expected, "Number converted to date format. Expected: (%@) but got (%@)".fmt(expected, c));
+  var c = SC.Validator.Date.fieldValueForObject(date._ms, '', '');
+  var expected = "Feb 18, 2009 8:52:16 AM";
+  equals(c, expected, "Number converted to date format");
 });
 
-test("Converts into number when date string is given", function(){
-    var expected = 1234918336000;
-    var date = new Date(expected);
-    var d = SC.Validator.Date.objectForFieldValue(date.format('NNN d, yyyy h:mm:ss a'),'','');
-    ok(d === expected, "Date String compared with value in seconds. Expected: (%@) but got (%@)".fmt(expected, d));
-    ok(SC.typeOf(d) == "number", "Number is obtained");
+test("Converts into number when date string is given", function() {
+  var expected = 1234918336000;
+  var date = SC.DateTime.create(expected);
+  var d = SC.Validator.Date.objectForFieldValue(date.toFormattedString('%b %d, %Y %i:%M:%S %p'),'','');
+  equals(d, expected, "Number of milliseconds returned is correct");
 });
