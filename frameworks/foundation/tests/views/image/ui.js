@@ -488,5 +488,25 @@
 
     imageHolder.appendChild(imageView);
   });
+
+  test("CSS class is applied for ImageView using a sprite for value", function() {
+    var view = pane.view('sprite_image'),
+        viewElem = view.$('img');
+
+    ok(viewElem.hasClass('sprite-class'), "element given correct class");
+
+    SC.run(function() {
+      view.set('value', 'another-sprite');
+    });
+
+    ok(!viewElem.hasClass('sprite-class'), "When value changed, element has old class removed");
+    ok(viewElem.hasClass('another-sprite'), "When value changed, element has new class added");
+
+    SC.run(function() {
+      view.set('value', null);
+    });
+
+    ok(!viewElem.hasClass('another-sprite'), "When value removed, element has old class removed");
+  });
 })();
 

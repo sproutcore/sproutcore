@@ -71,8 +71,10 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     jquery.attr('src', image.src);
 
     if (imageValue !== this._last_class) jquery.setClass(this._last_class, NO);
-    jquery.addClass(imageValue);
-    this._last_class = imageValue;
+    if (imageValue) {
+      jquery.addClass(imageValue);
+      this._last_class = imageValue;
+    }
 
     if (toolTip) {
       jquery.attr('title', toolTip);
