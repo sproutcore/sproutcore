@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-var view, content, contentController, pane ;
+var view, content, contentController, pane, actionCalled = 0;
 
 module("SC.CollectionView Mouse Events", {
   setup: function() {
@@ -31,7 +31,10 @@ module("SC.CollectionView Mouse Events", {
       },
       
       isVisibleInWindow: YES,
-      acceptsFirstResponder: YES
+      acceptsFirstResponder: YES,
+      action: function() {
+        actionCalled++;
+      }
     });
     
     pane = SC.MainPane.create();
@@ -44,6 +47,7 @@ module("SC.CollectionView Mouse Events", {
   teardown: function() {
     SC.RunLoop.begin();
     pane.remove();
+    actionCalled = 0;
     SC.RunLoop.end();
   }
 });
@@ -84,7 +88,7 @@ function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
       if (ctrlKey) modifiers.push('ctrl');
       modifiers = modifiers.length > 0 ? modifiers.join('+') : 'no modifiers';
       
-      ok(expected.isEqual(sel), 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
+      ok(expected ? expected.isEqual(sel) : expected === sel, 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
       SC.RunLoop.end();
       if (delay) window.start() ; // starts the test runner
     };
@@ -231,10 +235,28 @@ test("clicking on a selected item should remove it from the selection when useTo
   clickOn(view, 5, NO, NO, selectionFromIndexSet(SC.IndexSet.create(1,4)));
 });
 
-
 test("clicking on an unselected item should select it and clear the previous selection when useToggleSelection is true and allowsMultipleSelection is not", function() {
   view.set('useToggleSelection', YES);
   contentController.set('allowsMultipleSelection', NO);
   clickOn(view, 1, NO, NO, selectionFromIndex(1));
   clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
+
+test("clicking on an unselected item should fire action when useToggleSelection is true and actOnSelect is true", function() {
+  view.set('useToggleSelection', YES);
+  view.set('actOnSelect', YES);
+
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item is selected");
+});
+
+test("click on an item when isSelectable is false doesn't do anything", function() {
+  view.set('isSelectable', NO);
+  clickOn(view, 1, NO, NO, null);
+});
+
+test("click on an item when isEnabled is false doesn't do anything", function() {
+  view.set('isEnabled', NO);
+  clickOn(view, 1, NO, NO, null);
 });

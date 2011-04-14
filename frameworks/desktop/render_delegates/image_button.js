@@ -8,27 +8,42 @@
 
 SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
   name: 'image-button',
+
   render: function(dataSource, context) {
+    var image = dataSource.get('image'),
+        toolTip = dataSource.get('toolTip');
+
     // render controlSize
     this.addSizeClassName(dataSource, context);
 
-    var image = dataSource.get('image');
-
     context.addClass('no-min-width');
-    if (image) {
-      context.push("<div class='img "+image+"'></div>");
+
+    if (toolTip) {
+      context.attr('title', toolTip);
+      context.attr('alt', toolTip);
     }
 
-    else {
+    if (image) {
+      context.push("<div class='img "+image+"'></div>");
+    } else {
       context.push("<div class='img'></div>");
     }
   },
 
   update: function(dataSource, $) {
+    var image, toolTip;
+
     this.updateSizeClassName(dataSource, $);
 
+    if (dataSource.didChangeFor('imageButtonRenderDelegate', 'toolTip')) {
+      toolTip = dataSource.get('toolTip');
+
+      $.attr('title', toolTip);
+      $.attr('alt', toolTip);
+    }
+
     if (dataSource.didChangeFor('imageButtonRenderDelegate', 'image')) {
-      var image = dataSource.get('image');
+      image = dataSource.get('image');
 
       $.children()[0].className = 'img '+image;
     }

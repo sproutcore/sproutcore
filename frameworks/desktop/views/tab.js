@@ -204,7 +204,7 @@ SC.TabView = SC.View.extend(
     } else if (tabLocation === SC.TOP_TOOLBAR_LOCATION) {
       layout = { top: tabHeight+1, left: 0, right: 0, bottom: 0, border: 1 };
     } else {
-      layout = { top: 0, left: 0, right: 0, bottom: tabHeight-1, border: 1 };
+      layout = { top: 0, left: 0, right: 0, bottom: (tabHeight/2) - 1, border: 1 };
     }
 
     containerView = this.containerView.extend({

@@ -181,7 +181,9 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     var start, finish, size, maxSize, margin,
         hasStart, hasFinish, hasSize, hasMaxSize,
-        startBorderVal, finishBorder, sizeNum;
+        startBorder, startBorderVal,
+        finishBorder, finishBorderVal,
+        sizeNum;
 
     if (direction === 'x') {
       start      = 'left';
@@ -246,7 +248,9 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   _calculateCenter: function(direction) {
     var ret = this.ret,
-        size, center, start, finish, margin, startBorderVal, finishBorderVal;
+        size, center, start, finish, margin,
+        startBorder, startBorderVal,
+        finishBorder, finishBorderVal;
 
     if (direction === 'x') {
         size   = 'width';

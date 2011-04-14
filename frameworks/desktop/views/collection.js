@@ -1513,7 +1513,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         groupIndexes = this.get('_contentGroupIndexes'),
         sel;
         
-    if(!this.get('isSelectable')) return this;
+    if(!this.get('isSelectable') || !this.get('isEnabled')) return this;
 
     // normalize
     if (SC.typeOf(indexes) === SC.T_NUMBER) {
@@ -1566,12 +1566,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {SC.CollectionView} receiver
   */
   deselect: function(indexes) {
-
     var sel     = this.get('selection'),
         content = this.get('content'),
         del     = this.get('selectionDelegate');
         
-    if(!this.get('isSelectable')) return this;
+    if(!this.get('isSelectable') || !this.get('isEnabled')) return this;
     if (!sel || sel.get('length')===0) return this; // nothing to do
         
     // normalize
@@ -2124,20 +2123,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {Boolean} Usually YES.
   */
   mouseDown: function(ev) {
-    // When the user presses the mouse down, we don't do much just yet.
-    // Instead, we just need to save a bunch of state about the mouse down
-    // so we can choose the right thing to do later.
-    
-    
-    // find the actual view the mouse was pressed down on.  This will call
-    // hitTest() on item views so they can implement non-square detection
-    // modes. -- once we have an item view, get its content object as well.
     var itemView      = this.itemViewForEvent(ev),
         content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1, 
-        info, anchor, sel, isSelected, modifierKeyPressed,
+        info, anchor, sel, isSelected, modifierKeyPressed, didSelect = NO,
         allowsMultipleSel = content.get('allowsMultipleSelection');
-        
+
+    if (!this.get('isEnabled')) return contentIndex > -1;
+
     info = this.mouseDownInfo = {
       event:        ev,  
       itemView:     itemView,
@@ -2158,11 +2151,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         isSelected = sel && sel.containsObject(itemView.get('content')) ;
 
         if (isSelected) {
-          this.deselect(contentIndex) ;
+          this.deselect(contentIndex);
         } else if (!allowsMultipleSel) {
-          this.select(contentIndex, NO) ;
+          this.select(contentIndex, NO);
+          didSelect = YES;
         } else {
-          this.select(contentIndex, YES) ;
+          this.select(contentIndex, YES);
+          didSelect = YES;
+        }
+        
+        if (didSelect && this.get('actOnSelect')) {
+          // handle actions on editing
+          this._cv_performSelectAction(itemView, ev);
         }
       }
       
@@ -2225,20 +2225,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   
   /** @private */
   mouseUp: function(ev) {
-    
-    var view   = this.itemViewForEvent(ev),
-        info   = this.mouseDownInfo,
-        content       = this.get('content'),
-        contentIndex, sel, isSelected, canEdit, itemView, idx,
+    var view = this.itemViewForEvent(ev),
+        info = this.mouseDownInfo,
+        content = this.get('content'),
+        contentIndex = view ? view.get('contentIndex') : -1,
+        sel, isSelected, canEdit, itemView, idx,
         allowsMultipleSel = content.get('allowsMultipleSelection');
-        
+
+    if (!this.get('isEnabled')) return contentIndex > -1;
+
     if (this.get('useToggleSelection')) {
       // Return if clicked outside of elements or if toggle was handled by mouseDown
       if (!view || this.get('selectOnMouseDown')) return NO;
       
       // determine if item is selected. If so, then go on.
       sel = this.get('selection') ;
-      contentIndex = (view) ? view.get('contentIndex') : -1 ;
       isSelected = sel && sel.containsObject(view.get('content')) ;
       
       if (isSelected) {
@@ -2347,12 +2348,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   
   /** @private */
   touchStart: function(touch, evt) {
+    var itemView = this.itemViewForEvent(touch),
+        contentIndex = itemView ? itemView.get('contentIndex') : -1;
+
+    if (!this.get('isEnabled')) return contentIndex > -1;
+
     // become first responder if possible.
     this.becomeFirstResponder() ;
 
     if (!this.get('useToggleSelection')) {
-      var itemView = this.itemViewForEvent(touch);
-
       // We're faking the selection visually here
       // Only track this if we added a selection so we can remove it later
       if (itemView && !itemView.get('isSelected')) {
@@ -2382,32 +2386,49 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private */
   touchEnd: function(touch) {
-    var itemView = this.itemViewForEvent(touch),
+    /*
+      TODO [CC] We should be using itemViewForEvent here, but because
+            ListItemView re-renders itself once isSelected is called
+            in touchStart, the elements attached to this event are
+            getting orphaned and this event is basically a complete
+            fail when using touch events.
+    */
+    // var itemView = this.itemViewForEvent(touch),
+    var itemView = this._touchSelectedView,
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
-        isSelected = NO;
+        isSelected = NO, sel;
+
+    if (!this.get('isEnabled')) return contentIndex > -1;
 
     // Remove fake selection in case our contentIndex is -1, a select event will add it back
-    if (this._touchSelectedView) { this._touchSelectedView.set('isSelected', NO); }
+    if (itemView) { itemView.set('isSelected', NO); }
 
-    if (this.get('useToggleSelection')) {
-      var sel = this.get('selection');
-      isSelected = sel && sel.containsObject(itemView.get('content'));
+    if (contentIndex > -1) {
+      if (this.get('useToggleSelection')) {
+        sel = this.get('selection');
+        isSelected = sel && sel.containsObject(itemView.get('content'));
+      }
+
+      if (isSelected) {
+        this.deselect(contentIndex);
+      } else {
+        this.select(contentIndex, NO);
+
+        // If actOnSelect is implemented, the action will be fired.
+        this._cv_performSelectAction(itemView, touch, 0);
+      }
     }
 
-    if (isSelected) {
-      this.deselect(contentIndex);
-    } else {
-      this.select(contentIndex, NO);
-
-      // If actOnSelect is implemented, the action will be fired.
-      this._cv_performSelectAction(itemView, touch, 0);
-    }
+    this._touchSelectedView = null;
   },
 
   /** @private */
   touchCancelled: function(evt) {
     // Remove fake selection
-    if (this._touchSelectedView) { this._touchSelectedView.set('isSelected', NO); }
+    if (this._touchSelectedView) {
+      this._touchSelectedView.set('isSelected', NO);
+      this._touchSelectedView = null;
+    }
   },
 
   /** @private */
