@@ -154,7 +154,7 @@ SC.AutoResize = {
 
     this._scar_measurementPending = YES;
     this._scar_requestedBatchResizeId = batchResizeId;
-  },
+  }.observes('isVisible'),
 
   /**
     Measures the size of the view.
