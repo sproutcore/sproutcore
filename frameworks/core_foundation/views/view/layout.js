@@ -196,6 +196,7 @@ SC.View.reopen(
      - borderRight: right border
      - borderBottom: bottom border
      - borderLeft: bottom left
+     - zIndex: position above or below other views
 
     Note that you can only use certain combinations to set layout.  For
     example, you may set left/right or left/width, but not left/width/right,
