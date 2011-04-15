@@ -607,6 +607,9 @@ SC.MenuPane = SC.PickerPane.extend(
     This calls createMenuItemViews. If you want to override this property, override
     that method.
 
+    This calls createMenuItemViews. If you want to override this property, override
+    that method.
+
     @property
     @type Array
     @readOnly
