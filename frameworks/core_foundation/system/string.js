@@ -122,6 +122,7 @@ SC.mixin(SC.String, {
     used.  The resulting string will also be passed through fmt() to insert
     any variables.
 
+    @param str {String} String to localize
     @param args {Object...} optional arguments to interpolate also
     @returns {String} the localized and formatted string.
   */
@@ -137,13 +138,14 @@ SC.mixin(SC.String, {
     var args = SC.$A(arguments);
     args.shift(); // remove str param
 
-    return SC.String.fmt(localized, arguments);
+    return SC.String.fmt(localized, args);
   },
 
   /**
     Works just like loc() except that it will return the passed default
     string if a matching key is not found.
 
+    @param {String} str the string to localize
     @param {String} def the default to return
     @param {Object...} args optional formatting arguments
     @returns {String} localized and formatted string

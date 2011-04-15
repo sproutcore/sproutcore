@@ -21,6 +21,11 @@ module('SC.Object', {
       }
     });
     this.currentLocale = LocaleObject;
+    
+    SC.stringsFor('English', {
+      'Test': '%@',
+      'Test.Multiple': '%@ %@'
+    });
   }
 });
 
@@ -54,6 +59,14 @@ test("Localize a string", function() {
 
   equals('deflang'.loc(), "dl", "Using String.prototype.loc") ;
   equals(SC.String.loc('deflang'), "dl", "Using SC.String.loc") ;
+});
+
+test("Localize a string with mutliple parameters", function() {
+  equals("Test".loc('parameter1'), 'parameter1', "Localizing with one parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test", 'parameter1'), 'parameter1', "Localizing with one parameter - using SC.String.loc");
+
+  equals("Test.Multiple".loc('parameter1', 'parameter2'), 'parameter1 parameter2', "Localizing with multiple parameters - using String.prototype.loc");
+  equals(SC.String.loc("Test.Multiple", 'parameter1', 'parameter2'), 'parameter1 parameter2', "Localizing with multiple parameters - using SC.String.loc");
 });
 
 test("Localize a string even if localized version is empty", function() {
