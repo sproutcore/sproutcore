@@ -17,6 +17,8 @@ SC.MenuItemView.reopen(
   //
   // For automatic resizing, if enabled (to be enabled by parent menu)
   //
+  supportsAutoResize: YES,
+
   shouldAutoResize: NO,
   shouldMeasureSize: NO,
 
@@ -48,8 +50,8 @@ SC.MenuItemView.reopen(
   */
   didUpdateLayer: function() {
     this.notifyPropertyChange('autoResizeLayer');
-    this.measureSizeLater();
-  }
+    this.scheduleMeasurement();
+  }.enhance();
 
 }) ;
 
