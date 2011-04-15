@@ -14,7 +14,7 @@ SC.FOCUS_ALL_CONTROLS = YES;
 */
 SC.ready(function() {
   var focus = SC.SAFARI_FOCUS_BEHAVIOR;
-  if (focus !== null || focus !== undefined) {
+  if (focus !== null && focus !== undefined) {
     //@ if (debug)
     SC.Logger.warn("SC.SAFARI_FOCUS_BEHAVIOR is deprecated. Please use SC.FOCUS_ALL_CONTROLS instead");
     //@ endif
