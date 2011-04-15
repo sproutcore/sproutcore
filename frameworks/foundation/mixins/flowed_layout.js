@@ -280,19 +280,22 @@ SC.FlowedLayout = {
     // if it is a spacer, we must set the dimension that it
     // expands in to 0.
     if (view.get('isSpacer')) {
-      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) calc.width = 0;
-      else calc.height = 0;
+      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
+        calc.width = view.get('layout').minWidth || 0;
+      } else {
+        calc.height = view.get('layout').minHeight || 0;
+      }
     }
     
     // if it has a fillWidth/Height, clear it for later
     if (
       this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')
     ) {
-      calc.height = 0;
+      calc.height = view.get('layout').minHeight || 0;
     } else if (
       this.get('layoutDirection') === SC.LAYOUT_VERTICAL && view.get('fillWidth')
     ) {
-      calc.width = 0;
+      calc.width = view.get('layout').minWidth || 0;
     }
     
     // return
@@ -305,12 +308,34 @@ SC.FlowedLayout = {
   }.property('calculatedWidth', 'calculatedHeight'),
   
   /** @private */
+
+  // the maximum row length when all flexible items are collapsed.
+  _scfl_maxCollapsedRowLength: 0,
+
+  // the total row size when all flexible rows are collapsed.
+  _scfl_totalCollapsedRowSize: 0,
+
+
   _scfl_calculatedSizeDidChange: function() {
     if(this.get('autoResize')) {
-      if(this.get('shouldResizeWidth')) this.adjust('minWidth', this.get('calculatedWidth'));
-      if(this.get('shouldResizeHeight')) this.adjust('minHeight', this.get('calculatedHeight'));
+      if (this.get('layoutDirection') == SC.LAYOUT_VERTICAL) {
+        if (this.get('shouldResizeHeight')) {
+          this.adjust('minHeight', this.get('_scfl_maximumCollapsedRowLength'));
+        }
+
+        if (this.get('shouldResizeWidth')) {
+          this.adjust('minWidth', this.get('_scfl_totalCollapsedRowSize'));
+        }
+      } else {
+        if (this.get('shouldResizeWidth')) {
+          this.adjust('minWidth', this.get('_scfl_maximumCollapsedRowLength'));
+        }
+        if (this.get('shouldResizeHeight')) {
+          this.adjust('minHeight', this.get('_scfl_totalCollapsedRowSize'));
+        }
+      }
     }
-  }.observes('autoResize', 'shouldResizeWidth', 'calculatedWidth', 'shouldResizeHeight', 'calculatedHeight'),
+  }.observes('autoResize', 'shouldResizeWidth', '_scfl_maximumCollapsedRowLength', '_scfl_totalCollapsedRowSize', 'shouldResizeHeight'),
   
   /**
     @private
@@ -344,6 +369,14 @@ SC.FlowedLayout = {
       // The rows array starts empty. It will get filled out by the method
       // _scfl_distributeChildrenIntoRows.
       rows: undefined,
+
+
+      // the maximum row length where all collapsible items are collapsed.
+      maximumCollapsedRowLength: 0,
+
+      // the total sizes of all rows when collapsed (With flex-height rows
+      // at minimum size)
+      totalCollapsedRowSize: 0,
       
       // These properties are calculated once here, but later used by
       // the various methods.
@@ -444,6 +477,7 @@ SC.FlowedLayout = {
       
       childSize = this.flowSizeForChild(idx, child);
       spacing = this.flowSpacingForChild(idx, child);
+
       childSpacedSize = {
         width: childSize.width + spacing.left + spacing.right,
         height: childSize.height + spacing.top + spacing.bottom
@@ -490,6 +524,7 @@ SC.FlowedLayout = {
     }
     
     row.rowLength = itemOffset;
+    row.plan.maximumCollapsedRowLength = Math.max(row.rowLength, row.plan.maximumCollapsedRowLength);
     row.items = items;
     return idx;
   },
@@ -569,6 +604,8 @@ SC.FlowedLayout = {
     row.shouldExpand = shouldExpand;
     row.rowLength = position - row.plan.rowStartPadding; // row length does not include padding
     row.rowSize = rowSize;
+
+    row.plan.totalCollapsedRowSize += row.rowSize;
     
   },
 
@@ -658,8 +695,9 @@ SC.FlowedLayout = {
     this.beginPropertyChanges();
 
     this.set('calculatedHeight', isVertical ? longestRow : totalSize);
-
     this.set('calculatedWidth', isVertical ? totalSize : longestRow);
+    this.set('_scfl_maximumCollapsedRowLength', plan.maximumCollapsedRowLength);
+    this.set('_scfl_totalCollapsedRowSize', plan.totalCollapsedRowSize);
 
     this.endPropertyChanges();
   },
@@ -699,11 +737,15 @@ SC.FlowedLayout = {
   
   /** @private */
   _scfl_frameDidChange: function() {
-    var frame = this.get("frame"), lf = this._scfl_lastFrameSize;
-    this._scfl_lastFrameSize = frame;
+    if (this._scfl_isChangingSize) return;
 
-    if (lf && lf.width == frame.width && lf.height == frame.height) return;
-    
+    var frame = this.get("frame"), lf = this._scfl_lastFrameSize || {};
+    this._scfl_lastFrameSize = SC.clone(frame);
+
+    if (lf.width == frame.width && lf.height == frame.height) {
+      return;
+    }
+
     this.invokeOnce("_scfl_tile");
   }.observes("frame"),
   
