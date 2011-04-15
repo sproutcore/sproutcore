@@ -13,21 +13,32 @@
   var pane = SC.ControlTestPane.design({ height: 100 });
   
   pane.add("basic", SC.ContainerView, {
-      isEnabled: YES
-    });
+    isEnabled: YES
+  });
     
   pane.add("disabled", SC.ContainerView, {
-      isEnabled: NO
-    });
+    isEnabled: NO
+  });
 
   pane.add("nowShowingDefault", SC.ContainerView, {
-      nowShowing: 'start',
+    nowShowing: 'start',
 
-      start: SC.LabelView.design({
-        value: 'Start'
-      })
+    start: SC.LabelView.design({
+      value: 'Start'
+    })
 
-    });
+  });
+
+  pane.add("has-templates", SC.ContainerView, {
+    nowShowing: 'template',
+
+    template: SC.TemplateView.design({
+      isTemplate1: YES
+    }),
+    template2: SC.TemplateView.design({
+      isTemplate2: YES
+    })
+  });
 
     // .add("disabled - single selection", SC.ListView, {
     //   isEnabled: NO,
@@ -140,6 +151,30 @@
     ok(contentView, "should have contentView");
     equals(contentView.get('value'), 'Start', 'contentView value should be "Start"');
 
+  });
+
+  test("Works with TemplateViews", function() {
+    var view = pane.view("has-templates");
+    view.awake();
+
+    var contentView = view.get('contentView');
+
+    equals(view.get('nowShowing'), 'template', "precond - should have correct nowShowing");
+    ok(contentView, "precond - should have contentView");
+    ok(contentView.isTemplate1, "precond - should have correct contentView");
+
+    SC.run(function() { view.set('nowShowing', 'template2'); });
+
+    contentView = view.get('contentView');
+
+    ok(contentView, "should still have contentView");
+    ok(contentView.isTemplate2, "should have switched contentView");
+
+    SC.run(function() { view.set('nowShowing', null); });
+
+    contentView = view.get('contentView');
+
+    ok(!contentView, "should have removed contentView");
   });
 
 })();
