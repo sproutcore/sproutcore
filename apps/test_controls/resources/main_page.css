@@ -1,0 +1,60 @@
+/* @group Welcome */
+.sc-view {
+  
+}
+.sc-theme .sc-view.sc-toolbar-view.ace.light {
+  -webkit-transform: translate3d(0px, 0px, 10px);
+  -webkit-box-shadow: none;
+}
+
+.sc-theme .sc-view.sc-label-view.list-item {
+	font-size: 32px;
+	font-weight: bold;
+	border-bottom: 1px solid #999;
+}
+
+.sc-toolbar-view .embossed {
+  font-size: 22px;
+}
+
+.sample_controls .sc-form-row-view .sc-form-label {
+  -webkit-transform: translate3d(0px, 0px, 1px);
+  font-weight: bold;
+  color: #555;
+  text-shadow: 0px 1px 1px white;
+}
+
+.sc-label-view.header {
+  font-size: 24px;
+  color:#555;
+  text-shadow:0px 1px 1px white;
+  padding-bottom:10px;
+}
+
+.sc-label-view.welcome-tab {
+ padding: 30px;
+ background-color: white ;
+}
+
+.welcome-tab h1 {
+ font-size: 48px;
+ line-height: 1;
+ margin-top: 30px;
+ font-weight: normal ;
+ letter-spacing: -2px;
+ color: black;
+}
+
+.welcome-tab p {
+ color: #333;
+ font-size: 14px;
+}
+
+@theme(dark) {
+  $theme.workspace {
+    background: black;
+  }
+}
+
+/* @end */
+
