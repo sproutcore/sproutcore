@@ -201,7 +201,11 @@ CoreTest.Runner = {
   
   // called when the plan takes a break.  Good time to flush HTML output.
   planDidPause: function(plan) {
-    if(navigator.userAgent.indexOf('MSIE')==-1) this.flush();  
+    var resultStr = this.resultStr,
+        result = this.report.find('.testresult .status');
+        
+    if (resultStr) result.html(resultStr);
+    this.resultStr = null ;
   },
   
   // flush any pending HTML changes...
