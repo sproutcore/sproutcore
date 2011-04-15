@@ -62,7 +62,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
   /**
     Implement this method to make your class enumerable.
 
-    This method will be call repeatedly during enumeration.  The index value
+    This method will be called repeatedly during enumeration.  The index value
     will always begin with 0 and increment monotonically.  You don't have to
     rely on the index value to determine what object to return, but you should
     always check the value and start from the beginning when you see the
@@ -72,7 +72,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     to nextObject for the current iteration.  This is a useful way to
     manage iteration if you are tracing a linked list, for example.
 
-    Finally the context paramter will always contain a hash you can use as
+    Finally the context parameter will always contain a hash you can use as
     a "scratchpad" to maintain any other state you need in order to iterate
     properly.  The context object is reused and is not reset between
     iterations so make sure you setup the context with a fresh state whenever
@@ -82,7 +82,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     reaches the your current length-1.  If you run out of data before this
     time for some reason, you should simply return undefined.
 
-    The default impementation of this method simply looks up the index.
+    The default implementation of this method simply looks up the index.
     This works great on any Array-like objects.
 
     @param {Number} index the current index of the iteration
