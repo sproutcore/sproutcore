@@ -21,7 +21,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 /** @scope Forms.FormRowView.prototype */ {
   renderDelegateName: 'formRowRenderDelegate',
   
-  layout: {left: 0, width: 0},
+  layout: {left: 0, width: 0, height: 0},
 
   rowFlowSpacing: undefined,
   rowFlowPadding: undefined,
