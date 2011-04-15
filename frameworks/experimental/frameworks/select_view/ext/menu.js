@@ -52,7 +52,7 @@ SC.MenuPane.reopen(
     @type Array
     @readOnly
   */
-  menuItemViews: function(orig) {
+  createMenuItemViews: function(orig) {
     // EXTENDED to set shouldMeasureSize to its initial value and to
     // observe the measured size.
     var views = orig();
