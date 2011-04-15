@@ -1168,14 +1168,19 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       // normalize...
       if (method !== undefined) target = [target, method];
 
-      // if a string or array (i.e. tuple) is passed, convert this into a
-      // binding.  If a binding default was provided, use that.
       pathType = typeof target;
 
+      // if a string or array (i.e. tuple) is passed, convert this into a
+      // binding.  If a binding default was provided, use that.
       if (pathType === "string" || (pathType === "object" && (target instanceof Array))) {
         binding = this[toKey + 'BindingDefault'] || SC.Binding;
         binding = binding.beget().from(target) ;
-      } else binding = target ;
+      } else {
+        // If a binding object was provided, clone it so that it gets
+        // connected again if the original example binding was already
+        // connected.
+        binding = target.beget() ;
+      }
 
       // finish configuring the binding and then connect it.
       binding = binding.to(toKey, this).connect() ;
