@@ -148,7 +148,7 @@ SC.Cookie.mixin(
     if (document.cookie && document.cookie !== '') {
       var cookies = document.cookie.split(';');
       for (var i = 0; i < cookies.length; i++) {
-        var cookie = String(cookies[i]).trim();
+        var cookie = SC.String.trim(String(cookies[i]));
         if (cookie.substring(0, name.length + 1) === (name + "=")) {
           return SC.Cookie.create({
             name: name,
