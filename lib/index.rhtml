@@ -21,10 +21,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="<%= config.status_bar_style || 'default' %>" />
     <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <% if config.touch_enabled %>
     <link rel="apple-touch-icon<%= '-precomposed' if config.precomposed_icon %>" href="<%= sc_static(config.icon || 'sproutcore-logo.png') %>" />
-	  <link rel="apple-touch-startup-image" media="screen and (orientation:portrait)" href="<%= sc_static(config.startup_image_portrait || 'sproutcore-startup-portrait.png') %>" /> 
-	  <link rel="apple-touch-startup-image" media="screen and (orientation:landscape)" href="<%= sc_static(config.startup_image_landscape || 'sproutcore-startup-landscape.png') %>" />
-	  <link rel="shortcut icon" href="<%= sc_static(config.favicon || 'favicon.ico') %>" type="image/x-icon" />
+    <link rel="apple-touch-startup-image" media="screen and (orientation:portrait)" href="<%= sc_static(config.startup_image_portrait || 'sproutcore-startup-portrait.png') %>" /> 
+    <link rel="apple-touch-startup-image" media="screen and (orientation:landscape)" href="<%= sc_static(config.startup_image_landscape || 'sproutcore-startup-landscape.png') %>" />
+    <% end %>
+    <link rel="shortcut icon" href="<%= sc_static(config.favicon || 'favicon.ico') %>" type="image/x-icon" />
     
 <% # Set the 'title' in your config to alter this setting %>
     <title><%= title %></title>
