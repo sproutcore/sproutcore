@@ -1,4 +1,4 @@
-$theme.sc-collection-view {
+$theme.collection {
   background: white;
   border-right: 1px #A8B0BA solid;
 
@@ -6,7 +6,7 @@ $theme.sc-collection-view {
     background: #eef3f6;
   }
   
-  .sc-view.sc-collection-item.sel {
+  .sc-collection-item.sel {
     color: white;
     background: #608AB9;
   }
