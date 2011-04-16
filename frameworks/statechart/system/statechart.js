@@ -601,7 +601,8 @@ SC.StatechartManager = {
         trace = this.get('allowStatechartTracing'),
         rootState = this.get('rootState'),
         paramState = state,
-        paramFromCurrentState = fromCurrentState;
+        paramFromCurrentState = fromCurrentState,
+        msg;
     
     state = rootState.getSubstate(state);
     
@@ -632,7 +633,7 @@ SC.StatechartManager = {
       // Check to make sure the current state given is actually a current state of this statechart
       fromCurrentState = rootState.getSubstate(fromCurrentState);
       if (SC.none(fromCurrentState) || !fromCurrentState.get('isCurrentState')) {
-        var msg = "Can not to goto state %@. %@ is not a recognized current state in statechart";
+        msg = "Can not to goto state %@. %@ is not a recognized current state in statechart";
         this.statechartLogError(msg.fmt(paramState, paramFromCurrentState));
         this._gotoStateLocked = NO;
         return;
@@ -646,8 +647,12 @@ SC.StatechartManager = {
         
     if (trace) {
       this.statechartLogTrace("BEGIN gotoState: %@".fmt(state));
-      this.statechartLogTrace("starting from current state: %@".fmt(fromCurrentState));
-      this.statechartLogTrace("current states before: %@".fmt(this.get('currentStates')));
+      msg = "starting from current state: %@";
+      msg = msg.fmt(fromCurrentState ? fromCurrentState : '---');
+      this.statechartLogTrace(msg);
+      msg = "current states before: %@";
+      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates') : '---');
+      this.statechartLogTrace(msg);
     }
 
     // If there is a current state to start the transition process from, then determine what
@@ -793,7 +798,7 @@ SC.StatechartManager = {
       parentState = parentState.get('parentState');
     }
       
-    if (this.get('allowStatechartTracing')) this.statechartLogTrace("exiting state: %@".fmt(state));
+    if (this.get('allowStatechartTracing')) this.statechartLogTrace("<-- exiting state: %@".fmt(state));
     
     state.set('currentSubstates', []);
     state.notifyPropertyChange('isCurrentState');
@@ -841,7 +846,7 @@ SC.StatechartManager = {
       parentState = parentState.get('parentState');
     }
     
-    if (this.get('allowStatechartTracing')) this.statechartLogTrace("entering state: %@".fmt(state));
+    if (this.get('allowStatechartTracing')) this.statechartLogTrace("--> entering state: %@".fmt(state));
     
     state.notifyPropertyChange('isCurrentState');
   
