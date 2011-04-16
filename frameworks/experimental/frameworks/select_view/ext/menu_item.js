@@ -22,8 +22,10 @@ SC.MenuItemView.reopen(
   shouldAutoResize: NO,
   shouldMeasureSize: NO,
 
-  autoSizePadding: 100, // TODO: SHOULD COME FROM THEME.
-  autoResizeField: 'title',
+  autoResizePadding: 0, // TODO: SHOULD COME FROM THEME.
+  autoResizeText: function() {
+    return this.get('title');
+  }.property('title'),
 
   autoResizeLayer: function() {
     return this.$('.value')[0];
@@ -51,7 +53,7 @@ SC.MenuItemView.reopen(
   didUpdateLayer: function() {
     this.notifyPropertyChange('autoResizeLayer');
     this.scheduleMeasurement();
-  }.enhance();
+  }.enhance()
 
 }) ;
 
