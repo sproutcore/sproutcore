@@ -199,3 +199,17 @@ test("should re-render when the content object changes", function() {
   equals(view.$('li:eq(0)').text(), "ramalamadingdong");
 
 });
+
+test("#collection helper should allow relative paths for the collection view class", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection "myCollectionView"}}{{content}}{{/collection}}'),
+    myCollectionView: SC.TemplateCollectionView.create({
+      content: ['foo', 'bar', 'baz']
+    })
+  });
+
+  SC.run(function() { view.createLayer(); });
+
+  equals(view.$('li').length, 3, '#collection should find relative collection view path');
+});
+
