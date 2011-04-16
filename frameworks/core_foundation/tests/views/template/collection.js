@@ -171,14 +171,14 @@ test("should pass content as context when using {{#each}} helper", function() {
                   name: 'Leopard' } ]
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
 });
 
 test("should re-render when the content object changes", function() {
   TemplateTests.RerenderTest = SC.TemplateCollectionView.extend({
-    content: ['foo', 'bar', 'baz']
+    content: []
   });
 
   var view = SC.TemplateView.create({
@@ -187,13 +187,15 @@ test("should re-render when the content object changes", function() {
 
   view.createLayer();
 
-  equals(view.$('li').length, 3, "precond - renders three items");
-
   SC.run(function() {
-    view.childViews[0].set('content', ['bing', 'bat', 'bong', 'ramalamadingdong']);
+    view.childViews[0].set('content', ['bing', 'bat', 'bang']);
   });
 
-  equals(view.$('li').length, 4, "rerenders with correct number of items");
-  equals(view.$('li:eq(3)').text(), "ramalamadingdong");
+  SC.run(function() {
+    view.childViews[0].set('content', ['ramalamadingdong']);
+  });
+
+  equals(view.$('li').length, 1, "rerenders with correct number of items");
+  equals(view.$('li:eq(0)').text(), "ramalamadingdong");
 
 });

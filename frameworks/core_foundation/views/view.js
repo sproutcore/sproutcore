@@ -11,7 +11,7 @@ sc_require('system/cursor');
 sc_require('system/responder') ;
 sc_require('system/theme');
 
-sc_require('mixins/string') ;
+sc_require('system/string') ;
 sc_require('views/view/base') ;
 
 
@@ -622,7 +622,12 @@ SC.CoreView.reopen(
       }
     }
 
+    // If we've made it this far and renderChildViews() was never called,
+    // render any child views now.
     if (firstTime && !this._didRenderChildViews) { this.renderChildViews(context, firstTime); }
+    // Reset the flag so that if the layer is recreated we re-render the child views
+    this._didRenderChildViews = NO;
+
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
@@ -696,6 +701,8 @@ SC.CoreView.reopen(
       view.renderToContext(context, firstTime);
       context = context.end() ;
     }
+    this._didRenderChildViews = YES;
+
     return context;
   },
 

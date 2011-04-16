@@ -71,8 +71,8 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     @observes isEnabled
   */
   acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    return NO;
   }.property('isEnabled'),
   
   

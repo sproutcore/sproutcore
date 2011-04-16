@@ -525,7 +525,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     
     'UNKNOWN': {
       firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
-      notAllowed:       /[\s'"\w\d\(\)\{\}]/
+      notAllowed:       /[\-\s'"\w\d\(\)\{\}]/
     },
 
     'PROPERTY': {

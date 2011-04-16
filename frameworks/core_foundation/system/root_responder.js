@@ -60,6 +60,7 @@ SC.RootResponder = SC.Object.extend({
 
     if (SC.platform.supportsCSSTransitions) {
       this[SC.platform.cssPrefix+'TransitionEnd'] = this.transitionEnd;
+      this['transitionend'] = this.transitionEnd;
     }
   },
 
@@ -624,7 +625,7 @@ SC.RootResponder = SC.Object.extend({
 
     // CSS Transitions
     if (SC.platform.supportsCSSTransitions) {
-      this.listenFor(['transitionEnd', SC.platform.cssPrefix+'TransitionEnd'], document);
+      this.listenFor(['transitionend', SC.platform.cssPrefix+'TransitionEnd'], document);
     }
 
     // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
@@ -1026,7 +1027,7 @@ SC.RootResponder = SC.Object.extend({
         }
       } else {
 
-        if ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch) {
+        if (responder && ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch)) {
           if (!responder.touchStart(touch)) responder = null;
         } else {
           // do nothing; the responder is the responder, and may stay the responder, and all will be fine

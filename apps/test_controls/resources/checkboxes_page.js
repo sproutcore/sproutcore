@@ -11,7 +11,7 @@ TestControls.checkboxesPage = SC.View.design({
   form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    childViews: "header small normal disabled multiple".w(),
+    childViews: "header small normal disabled multiple icon".w(),
     
     header: SC.LabelView.design({
       fillWidth: YES,
@@ -41,6 +41,13 @@ TestControls.checkboxesPage = SC.View.design({
       layout: { width: 150, height: 24 },
       value: [YES, NO],
       title: "Multiple? Really?"
+    })),
+
+    icon: SC.FormView.row(SC.CheckboxView.design({
+      layout: { width: 150, height: 24 },
+      value: [YES, NO],
+      title: "Icon",
+      icon: "sc-icon-info-16"
     }))
   })
 });
