@@ -1045,7 +1045,7 @@ SC.State = SC.Object.extend({
     var sc = this.get('statechart');
     sc.statechartLogError(msg);
   }
-  
+
 });
 
 /**
@@ -1091,6 +1091,10 @@ SC.State.plugin = function(value) {
   var args = SC.A(arguments); args.shift();
   var func = function() {
     var klass = SC.objectForPropertyPath(value);
+    if (!klass) {
+      console.error('SC.State.plugin: Unable to determine path %@'.fmt(value));
+      return undefined;
+    }
     return klass.extend.apply(klass, args);
   };
   func.statePlugin = YES;
