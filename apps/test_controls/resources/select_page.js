@@ -34,7 +34,10 @@ TestControls.selectPage = SC.View.design({
 
         {"separator": YES, name: "none" },
         {"name": "MICR 1", "value": "printer:m1"},
-        {"name": "MICR 2", "value": "printer:m2"}
+        {"name": "MICR 2", "value": "printer:m2"},
+
+        {"separator": YES, name: "Hi" },
+        {"name": "This name is Really Really Long, OK?", "value": "LONG" }
       ],
       itemTitleKey: "name", itemValueKey: "value", itemSeparatorKey: "separator",
       value: 'printer:a'
