@@ -4,7 +4,7 @@
 // ==========================================================================
 
 /**
- * Binds a menu view to an owning SC.SelectView.
+ * Binds a menu view to an owning SC.SelectView, and checks selected items.
  *
  * @mixin
  *
