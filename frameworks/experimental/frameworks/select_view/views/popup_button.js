@@ -8,21 +8,33 @@ sc_require('views/button');
 
 /**
  * @extends SC.ButtonView
- * @version 2.0
+ * @version 1.6
  * @author Alex Iskander
  */
 SC.PopupButtonView = SC.ButtonView.extend({
   /** @scope SC.PopupButtonView.prototype */
 
+
+  /**
+    @type String
+    @default 'popupButtonRenderDelegate'
+  */
+  renderDelegateName: 'popupButtonRenderDelegate',
+
   /**
     The menu that will pop up when this button is clicked.
+    @type {SC.MenuPane}
+    @default SC.MenuPane
   */
   menu: SC.MenuPane.extend(),
 
   /**
-   * If YES, a menu instantiation task will be placed in SproutCore's
-   * `SC.backgroundTaskQueue` so the menu will be instantiated before 
-   * the user taps the button; this should improve response time.
+    If YES, a menu instantiation task will be placed in SproutCore's
+    `SC.backgroundTaskQueue` so the menu will be instantiated before 
+    the user taps the button; this should improve response time.
+
+    @type Boolean
+    @default NO
   */
   shouldLoadInBackground: NO,
 
@@ -52,7 +64,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     // changes, and to track if the property change was initiated by
     // us (since we set `menu` to the instantiated menu).
     this._currentMenu = null;
-    this.invokeOnce('setupMenuIfNeeded');
+    this.invokeOnce('scheduleMenuSetupIfNeeded');
   },
 
   /**
@@ -61,11 +73,11 @@ SC.PopupButtonView = SC.ButtonView.extend({
     *
     * @method
    */
-  setupMenuIfNeeded: function() {
+  scheduleMenuSetupIfNeeded: function() {
     var menu = this.get('menu');
 
     if (menu && menu.isClass && this.get('shouldLoadInBackground')) {
-      SC.backgroundTaskQueue.push(SC.PopupButtonView.InstantiateMenu.create());
+      SC.backgroundTaskQueue.push(SC.PopupButtonView.InstantiateMenuTask.create({ popupButton: this }));
     }
   },
 
@@ -78,7 +90,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
       return;
     }
 
-    this.invokeOnce('setupMenuIfNeeded');
+    this.invokeOnce('scheduleMenuSetupIfNeeded');
   }.observes('menu'),
 
   /**
@@ -118,7 +130,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
 
   /**
-    * Shows the PopupButton's menu.
+    Shows the PopupButton's menu. You can call this to show it manually.
   */
   showMenu: function() {
     // problem: menu's bindings may not flush
@@ -126,6 +138,16 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
     // solution: pop up the menu later. Ugly-ish, but not too bad:
     this.invokeLast('_showMenu');
+  },
+
+  /**
+    Hides the PopupButton's menu if it is currently showing.
+  */
+  hideMenu: function() {
+    var menu = this.get('menu');
+    if (menu && !menu.isClass) {
+      menu.remove();
+    }
   },
 
   /**
@@ -191,6 +213,12 @@ SC.PopupButtonView = SC.ButtonView.extend({
     }
 
     return sc_super();
+  }
+});
+
+SC.PopupButtonView.InstantiateMenuTask = SC.Task.extend({
+  run: function(queue) {
+    this.popupButton.setupMenu();
   }
 });
 
