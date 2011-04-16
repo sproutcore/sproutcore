@@ -21,11 +21,21 @@ SC.BaseTheme.menuRenderDelegate = SC.BaseTheme.pickerRenderDelegate.create({
     orig(dataSource, jquery);
   }.enhance(),
 
+  // height for items in this menu size
   itemHeight: 20,
-  itemSeparatorHeight: 9,
-  menuHeightPadding: 6,
-  submenuOffsetX: 2,
 
+  // height of separator items
+  itemSeparatorHeight: 9,
+
+  // amount to add to the calculated menu height
+  menuHeightPadding: 6,
+
+  // amount to add to any calculated menu width to determine the actual width
+  menuWidthPadding: 50,
+
+  minimumMenuWidth: 50,
+
+  submenuOffsetX: 2,
   verticalOffset: 23,
 
   'sc-tiny-size': {

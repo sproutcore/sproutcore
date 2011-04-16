@@ -30,10 +30,15 @@ SC.MenuPane.reopen(
   /**
     The minimum width for this menu if it is to be automatically resized.
   */
-  minimumMenuWidth: 50,
+  minimumMenuWidth: SC.propertyFromRenderDelegate('minimumMenuWidth'),
 
   /**
-    In addition to the normal in
+    The amount to add to any calculated width.
+  */
+  menuWidthPadding: SC.propertyFromRenderDelegate('menuWidthPadding'),
+
+  /**
+    In addition to the normal init, we need to schedule an automatic resize.
   */
   init: function(orig) {
     orig();
@@ -88,7 +93,7 @@ SC.MenuPane.reopen(
 
     for (idx = 0; idx < len; idx++) {
       view = menuItemViews[idx];
-      width = Math.max(width, view.get('measuredSize').width + 50);
+      width = Math.max(width, view.get('measuredSize').width + this.get('menuWidthPadding'));
     }
 
     this.adjust('width', width);
