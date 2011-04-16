@@ -369,3 +369,16 @@ test("should render inverse template name when its present and there is no conte
   equals(view.$('h1').text(), 'inverse template from file', 'collection view with no content and inverse template name should render template')
 });
 
+test("#collection helper should allow relative paths for the collection view class", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection "myCollectionView"}}{{content}}{{/collection}}'),
+    myCollectionView: SC.TemplateCollectionView.create({
+      content: ['foo', 'bar', 'baz']
+    })
+  });
+
+  SC.run(function() { view.createLayer(); });
+
+  equals(view.$('li').length, 3, '#collection should find relative collection view path');
+});
+
