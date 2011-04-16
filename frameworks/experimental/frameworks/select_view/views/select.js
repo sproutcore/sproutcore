@@ -278,9 +278,6 @@ SC.SelectView = SC.PopupButtonView.extend({
     orig();
 
     var menu = this.get('menu'), itemViews = menu.get('menuItemViews');
-
-    // HACK: currentMenuItem is not a documented property.
-    menu.set('currentMenuItem', itemViews[this.get('_selectedItemIndex')]);
   }.enhance(),
 
   minimumMenuWidth: function() {
