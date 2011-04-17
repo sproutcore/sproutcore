@@ -327,20 +327,22 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     @returns {Boolean} YES if data source can handle keys
   */
   commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys, params) {
-    var cret, uret, dret;
+    var uret, dret, ret;
     if (createStoreKeys.length>0) {
-      cret = this.createRecords.call(this, store, createStoreKeys, params);
+      ret = this.createRecords.call(this, store, createStoreKeys, params);
     }
         
     if (updateStoreKeys.length>0) {
       uret = this.updateRecords.call(this, store, updateStoreKeys, params); 
+      ret = SC.none(ret) ? uret : (ret === uret) ? ret : SC.MIXED_STATE;
     }
        
     if (destroyStoreKeys.length>0) {
       dret = this.destroyRecords.call(this, store, destroyStoreKeys, params);
+      ret = SC.none(ret) ? dret : (ret === dret) ? ret : SC.MIXED_STATE;
     }
-     
-    return ((cret === uret) && (cret === dret)) ? cret : SC.MIXED_STATE;
+
+    return ret || NO;
   },
   
   /**
