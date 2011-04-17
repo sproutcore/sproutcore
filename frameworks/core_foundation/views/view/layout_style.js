@@ -51,12 +51,15 @@ SC.View.reopen(
   layoutStyle: function() {
     var props = {
       layout:       this.get('layout'),
+      border:       this.get('border'),
       turbo:        this.get('hasAcceleratedLayer'),
       staticLayout: this.get('useStaticLayout')
     };
 
     var calculator = this.get('layoutStyleCalculator');
+    calculator.propertyWillChange('layout');
     calculator.set(props);
+    calculator.propertyDidChange('layout');
 
     return calculator.calculate();
   }.property().cacheable()
@@ -64,9 +67,42 @@ SC.View.reopen(
 
 SC.View.LayoutStyleCalculator = SC.Object.extend({
 
+  /**
+    Only notify that `layout` changed when both `border`
+    and `layout` have changed.
+
+    This way, style calculation isn't done twice.
+   */
+  automaticallyNotifiesObserversFor: function (key) {
+    return (key === 'layout' || key === 'border') ? NO : arguments.callee.base.apply(this,arguments);
+  },
+
+  /**
+    Transforms a border hash or number into a hash
+    appropriate layout.
+
+    @returns {Hash}
+   */
+  _borderHashToLayoutBorderHash: function (hash) {
+    if (hash == null) return hash;
+
+    var layout = {}, k;
+    if (SC.typeOf(hash) === SC.T_HASH) {
+      for (k in hash) {
+        layout["border" + k.capitalize()] = hash[k];
+      }
+    } else {
+      layout.border = hash;
+    }
+    return layout;
+  },
+
   _layoutDidUpdate: function(){
-    var layout = this.get('layout');
-    if (!layout) { return; }
+    var layout = this.get('layout'),
+        border = this.get('border');
+    if (layout == null && border == null) { return; }
+    // user-defined border should override the layout's border properties.
+    layout = SC.supplement(this._borderHashToLayoutBorderHash(border), layout);
 
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;

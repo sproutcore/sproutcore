@@ -34,9 +34,10 @@
     @param {Hash} with_f expected frame for view with parent
     @param {Hash} with_s expected layoutStyle for view with parent
     @param {Boolean} isFixedShouldBe expected value for view.get('isFixedLayout')
+    @param {Number|Hash} border border hash to test
     @returns {void}
   */
-  function performLayoutTest(layout, no_f, no_s, with_f, with_s, isFixedShouldBe) {
+  function performLayoutTest(layout, no_f, no_s, with_f, with_s, isFixedShouldBe, border) {
     if (SC.platform.supportsCSSTransforms) { layoutKeys.push('transform'); }
 
     // make sure we add null properties and convert numbers to 'XXpx' to style layout.
@@ -51,6 +52,9 @@
 
     // set layout
     child.set('layout', layout) ;
+
+    // set border
+    child.set('border', border) ;
 
     var layoutStyle = child.get('layoutStyle'),
         frame = child.get('frame'),
@@ -131,6 +135,16 @@
     child.addObserver('layoutStyle', this, function() { didNotifyStyle = YES; });
 
     child.set('layout', { left: 0, top: 10, bottom: 20, right: 50 }) ;
+    ok(didNotify, "didNotify");
+    ok(didNotifyStyle, 'didNotifyStyle');
+  }) ;
+
+  test("Setting border will notify frame observers", function() {
+    var didNotify = NO, didNotifyStyle = NO;
+    child.addObserver('frame', this, function() { didNotify = YES; }) ;
+    child.addObserver('layoutStyle', this, function() { didNotifyStyle = YES; });
+
+    child.set('border', { left: 0, top: 10, bottom: 20, right: 50 }) ;
     ok(didNotify, "didNotify");
     ok(didNotifyStyle, 'didNotifyStyle');
   }) ;
@@ -647,6 +661,110 @@
               borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
+
+    layer.parentNode.removeChild(layer);
+  });
+
+  test("layout {top, left, width, height, border}", function() {
+    var layout = { top: 10, left: 10, width: 50, height: 50 };
+    var border = 2;
+    var s = { top: 10, left: 10, width: 46, height: 46,
+              borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 } ;
+    var no_f = { x: 12, y: 12, width: 46, height: 46 } ;
+    var with_f = { x: 12, y: 12, width: 46, height: 46 } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, YES, border) ;
+  }) ;
+
+  test("layout {top, left, bottom, right}, border", function() {
+    var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+    var border = 2;
+    var no_f = { x: 12, y: 12, width: 0, height: 0 } ;
+    var with_f = { x: 12, y: 12, width: 176, height: 176 } ;
+    var s = { top: 10, left: 10, bottom: 10, right: 10,
+               borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border) ;
+  }) ;
+
+  test("layout {top, left, bottom, right, borderTop, borderLeft, borderRight, borderBottom}", function() {
+    var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+    var border = { top: 1, right: 2, bottom: 3, left: 4 };
+    var no_f = { x: 14, y: 11, width: 0, height: 0 } ;
+    var with_f = { x: 14, y: 11, width: 174, height: 176 } ;
+    var s = { top: 10, left: 10, bottom: 10, right: 10,
+               borderTopWidth: 1, borderRightWidth: 2, borderBottomWidth: 3, borderLeftWidth: 4 } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border) ;
+  }) ;
+
+  test("layout {top, left, bottom, right, border} border {top, right}", function() {
+    var layout = { top: 10, left: 10, bottom: 10, right: 10, border: 5 };
+    var border = { top: 1, right: 2 };
+    var no_f = { x: 15, y: 11, width: 0, height: 0 } ;
+    var with_f = { x: 15, y: 11, width: 173, height: 174 } ;
+    var s = { top: 10, left: 10, bottom: 10, right: 10,
+               borderTopWidth: 1, borderRightWidth: 2, borderBottomWidth: 5, borderLeftWidth: 5 } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border) ;
+  }) ;
+
+  test("layout {top, left, bottom, right, borderLeft, borderRight} border {top, right}", function() {
+    var layout = { top: 10, left: 10, bottom: 10, right: 10, borderLeft: 5, borderRight: 7 };
+    var border = { top: 1, right: 2 };
+    var no_f = { x: 15, y: 11, width: 0, height: 0 } ;
+    var with_f = { x: 15, y: 11, width: 173, height: 179 } ;
+    var s = { top: 10, left: 10, bottom: 10, right: 10,
+               borderTopWidth: 1, borderRightWidth: 2, borderLeftWidth: 5 } ;
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border) ;
+  }) ;
+
+  test("layout {bottom, right, width, height } border", function() {
+
+    var layout = { bottom: 10, right: 10, width: 50, height: 50 };
+    var border = 2;
+    var no_f = { x: 2, y: 2, width: 46, height: 46 } ;
+    var with_f = { x: 142, y: 142, width: 46, height: 46 } ;
+    var s = { bottom: 10, right: 10, width: 46, height: 46,
+              borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border) ;
+  }) ;
+
+  test("layout {centerX, centerY, width, height} border", function() {
+
+    var layout = { centerX: 10, centerY: 10, width: 60, height: 60 };
+    var border = 2;
+    var no_f = { x: 12, y: 12, width: 56, height: 56 } ;
+    var with_f = { x: 82, y: 82, width: 56, height: 56 } ;
+    var s = { marginLeft: -18, marginTop: -18, width: 56, height: 56, top: "50%", left: "50%",
+              borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border) ;
+  }) ;
+
+  test("layout {top, left, width: auto, height: auto} border", function() {
+    child = SC.View.create({
+      useStaticLayout: YES,
+      render: function(context) {
+        // needed for auto
+        context.push('<div style="padding: 10px"></div>');
+      }
+    });
+
+    // parent MUST have a layer.
+    parent.createLayer();
+    var layer = parent.get('layer');
+    document.body.appendChild(layer);
+
+    var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
+    var border = 2;
+    var no_f = null;
+    var with_f = undefined; //{ x: 2, y: 2, width: 196, height: 196 };
+    var s = { top: 0, left: 0, width: 'auto', height: 'auto',
+              borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 };
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO, border);
 
     layer.parentNode.removeChild(layer);
   });

@@ -99,9 +99,9 @@ SC.View.reopen(
       var dependents = this._kvo_dependents[key];
       if(dependents && dependents.indexOf('layout')!=-1) { layoutChange = true; }
     }
-    if(key==='layout' || layoutChange) { this.layoutDidChange(); }
+    if(key==='layout' || key==='border' || layoutChange) { this.layoutDidChange(); }
     // Resume notification as usual.
-    sc_super();
+    arguments.callee.base.apply(this,arguments);
   },
 
 
@@ -212,6 +212,23 @@ SC.View.reopen(
     @test in layoutStyle
   */
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
+
+   /**
+    The border hash will override any border attributes set on layout.
+
+    If you set the border property to a number, it will set all border
+    styles to that value. From there, there is only control of each
+    side's individual border:
+    
+    - top: top border
+    - right: right border
+    - bottom: bottom border
+    - left: bottom left
+
+    @type Number|Hash
+    @test in layoutStyle
+  */
+  border: null,
 
   /**
     Returns whether the layout is 'fixed' or not.  A fixed layout has a fixed
@@ -350,11 +367,22 @@ SC.View.reopen(
     }
   },
 
-  _adjustForBorder: function(frame, layout){
+  _adjustForBorder: function(frame, layout, border){
     var borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0,
         borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0,
         borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0,
         borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0;
+
+    if (border !== undefined) {
+      if (SC.typeOf(border) === SC.T_HASH) {
+        borderTop = (border.top !== undefined) ? border.top : borderTop;
+        borderLeft = (border.left !== undefined) ? border.left : borderLeft;
+        borderRight = (border.right !== undefined) ? border.right : borderRight;
+        borderBottom = (border.bottom !== undefined) ? border.bottom : borderBottom;
+      } else {
+        borderTop = borderLeft = borderRight = borderBottom = border;
+      }
+    }
 
     frame.x += borderLeft; // The border on the left pushes the frame to the right
     frame.y += borderTop; // The border on the top pushes the frame down
@@ -380,13 +408,14 @@ SC.View.reopen(
     @returns {Rect} the computed frame
   */
   computeFrameWithParentFrame: function(original, pdim) {
-    var f, layout = this.get('layout');
+    var layout = this.get('layout'),
+        border = this.get('border');
 
     // We can't predict the frame for static layout, so just return the view's
     // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
       f = original();
-      return f ? this._adjustForBorder(f, layout) : null;
+      return f ? this._adjustForBorder(f, layout, border) : null;
     } else {
       f = {};
     }
@@ -530,7 +559,7 @@ SC.View.reopen(
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
 
-    f = this._adjustForBorder(f, layout);
+    f = this._adjustForBorder(f, layout, border);
 
     // Account for special cases inside ScrollView, where we adjust the
     // element's scrollTop/scrollLeft property for performance reasons.
