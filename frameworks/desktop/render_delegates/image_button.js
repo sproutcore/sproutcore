@@ -11,7 +11,8 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
 
   render: function(dataSource, context) {
     var image = dataSource.get('image'),
-        toolTip = dataSource.get('toolTip');
+        toolTip = dataSource.get('toolTip'),
+        classNames = ['img'];
 
     // render controlSize
     this.addSizeClassName(dataSource, context);
@@ -24,14 +25,14 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
     }
 
     if (image) {
-      context.push("<div class='img "+image+"'></div>");
-    } else {
-      context.push("<div class='img'></div>");
+      classNames.push(image);
     }
+    context.addClass(classNames);
   },
 
   update: function(dataSource, $) {
-    var image, toolTip;
+    var image = dataSource.get('image'),
+        toolTip, classNames = ['img'];
 
     this.updateSizeClassName(dataSource, $);
 
@@ -42,10 +43,10 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
       $.attr('alt', toolTip);
     }
 
-    if (dataSource.didChangeFor('imageButtonRenderDelegate', 'image')) {
-      image = dataSource.get('image');
-
-      $.children()[0].className = 'img '+image;
+    if (image) {
+      classNames.push(image);
     }
+
+    $.addClass(classNames);
   }
 });
