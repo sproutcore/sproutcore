@@ -9,7 +9,8 @@
 /* Set here so when we set a border-width we'll see something
  * Only set on div, since occasionally we rely on native styling */
 div.sc-view {
-  border: solid 0 black;
+  border-width: 0;
+  border-style: solid;
 }
 
 .ellipsis {
