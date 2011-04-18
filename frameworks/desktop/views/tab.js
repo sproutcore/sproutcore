@@ -28,13 +28,13 @@ SC.TOP_TOOLBAR_LOCATION = 'top-toolbar';
 */
 SC.BOTTOM_LOCATION = 'bottom';
 
-/** 
+/**
   @class
 
   Incorporates a segmented view and a container view to display the selected
   tab.  Provide an array of items, which will be passed onto the segmented
   view.
-  
+
   @extends SC.View
   @since SproutCore 1.0
 */
@@ -47,7 +47,7 @@ SC.TabView = SC.View.extend(
     @see SC.View#classNames
   */
   classNames: ['sc-tab-view'],
-  
+
   /**
     @type Array
     @default ['nowShowing']
@@ -57,97 +57,97 @@ SC.TabView = SC.View.extend(
 
   // ..........................................................
   // PROPERTIES
-  // 
+  //
 
- /** 
+ /**
     Set nowShowing with the page you want to display.
-    
+
     @type String
     @default null
   */
   nowShowing: null,
-  
+
   /**
     @type Array
     @default []
   */
   items: [],
-  
+
   /**
     @type Boolean
     @default YES
   */
   isEnabled: YES,
-  
+
   /**
     @type String
     @default null
   */
   itemTitleKey: null,
-  
+
   /**
     @type String
     @default null
   */
   itemValueKey: null,
-  
+
   /**
     @type String
     @default null
   */
   itemIsEnabledKey: null,
-  
+
   /**
     @type String
     @default null
   */
   itemIconKey: null,
-  
+
   /**
     @type String
     @default null
   */
   itemWidthKey: null,
-  
+
   /**
     @type String
     @default null
   */
   itemToolTipKey: null,
-  
+
   /**
     @type Number
     @default SC.REGULAR_BUTTON_HEIGHT
   */
   tabHeight: SC.REGULAR_BUTTON_HEIGHT,
-  
+
   /**
     Possible values:
-    
+
       - SC.TOP_LOCATION
       - SC.TOP_TOOLBAR_LOCATION
       - SC.BOTTOM_LOCATION
-    
+
     @type String
     @default SC.TOP_LOCATION
   */
   tabLocation: SC.TOP_LOCATION,
-  
-  /** 
+
+  /**
     If set, then the tab location will be automatically saved in the user
     defaults.  Browsers that support localStorage will automatically store
     this information locally.
-    
+
     @type String
     @default null
   */
   userDefaultKey: null,
-  
-  
+
+
   // ..........................................................
   // FORWARDING PROPERTIES
-  // 
-  
+  //
+
   // forward important changes on to child views
   /** @private */
   _tab_nowShowingDidChange: function() {
@@ -166,11 +166,11 @@ SC.TabView = SC.View.extend(
       SC.userDefaults.set([defaultKey,'nowShowing'].join(':'), v);
     }
   }.observes('nowShowing'),
-  
+
   /** @private */
   _tab_itemsDidChange: function() {
     this.get('segmentedView').set('items', this.get('items'));
-    return this ;    
+    return this ;
   }.observes('items'),
 
   /** @private
@@ -183,7 +183,7 @@ SC.TabView = SC.View.extend(
 
   /** @private */
   awake: function() {
-    sc_super();  
+    sc_super();
     var defaultKey = this.get('userDefaultKey');
     if (defaultKey) {
       defaultKey = [defaultKey,'nowShowing'].join(':');
@@ -192,12 +192,13 @@ SC.TabView = SC.View.extend(
     }
 
   },
-  
+
   /** @private */
   createChildViews: function() {
     var childViews  = [], view, containerView, layout,
         tabLocation = this.get('tabLocation'),
-        tabHeight   = this.get('tabHeight');
+        tabHeight   = this.get('tabHeight'),
+        controlSize = this.get('controlSize');
 
     if (tabLocation === SC.TOP_LOCATION) {
       layout = { top: tabHeight/2+1, left: 0, right: 0, bottom: 0, border: 1 };
@@ -215,11 +216,11 @@ SC.TabView = SC.View.extend(
 
     view = this.containerView = this.createChildView(containerView) ;
     childViews.push(view);
-    
+
     //  The segmentedView managed by this tab view.  Note that this TabView uses
     //  a custom segmented view.  You can access this view but you cannot change
     // it.
-    layout = (tabLocation === SC.TOP_LOCATION || 
+    layout = (tabLocation === SC.TOP_LOCATION ||
               tabLocation === SC.TOP_TOOLBAR_LOCATION) ?
              { height: tabHeight, left: 0, right: 0, top: 0 } :
              { height: tabHeight, left: 0, right: 0, bottom: 0 } ;
@@ -227,23 +228,19 @@ SC.TabView = SC.View.extend(
     this.segmentedView = this.get('segmentedView').extend({
       layout: layout,
 
+      controlSize: controlSize,
+
       /** @private
         When the value changes, update the parentView's value as well.
       */
       _sc_tab_segmented_valueDidChange: function() {
         var pv = this.get('parentView');
         if (pv) pv.set('nowShowing', this.get('value'));
-
-        // FIXME: why is this necessary? 'value' is a displayProperty and should
-        // automatically cause displayDidChange() to fire, which should cause 
-        // the two lines below to execute in the normal course of things...
-        this.set('layerNeedsUpdate', YES) ;
-        this.invokeOnce(this.updateLayerIfNeeded) ;
       }.observes('value'),
 
       /** @private */
       init: function() {
-        // before we setup the rest of the view, copy key config properties 
+        // before we setup the rest of the view, copy key config properties
         // from the owner view...
         var pv = this.get('parentView');
         if (pv) {
@@ -252,35 +249,35 @@ SC.TabView = SC.View.extend(
         return sc_super();
       }
     });
-    
+
     view = this.segmentedView = this.createChildView(this.segmentedView) ;
     childViews.push(view);
-    
+
     this.set('childViews', childViews);
-    return this; 
+    return this;
   },
-  
+
   // ..........................................................
   // COMPONENT VIEWS
-  // 
+  //
 
   /**
-    The containerView managed by this tab view.  Note that TabView uses a 
-    custom container view.  You can access this view but you cannot change 
+    The containerView managed by this tab view.  Note that TabView uses a
+    custom container view.  You can access this view but you cannot change
     it.
-    
+
     @type SC.View
     @default SC.ContainerView
     @readOnly
   */
   containerView: SC.ContainerView.extend({ renderDelegateName: 'wellRenderDelegate' }),
-  
+
   /**
     @type SC.View
     @default SC.SegmentedView
   */
   segmentedView: SC.SegmentedView
-  
+
 }) ;
 
 SC._TAB_ITEM_KEYS = ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey', 'itemActionKey', 'itemTargetKey'];
