@@ -4,53 +4,54 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 /*globals Forms */
-
-/** @class
-FormView
-FormView is a lot like a normal view. However, in addition to the childViews
-collection, it has a fields collection. The items referenced here are NOT
-just children; they are explicity stated in the array fields, which works
-just like childViews, but marks fields to be laid out automatically.
-
-Usually, you will place rows into the FormView:
-{{{
-childViews: "fullName gender".w(),
-contentBinding: 'MyApp.personController',
-
-fullName: SC.FormView.row("Name:", SC.TextFieldView.extend({
-  layout: {height: 20, width: 150}
-})),
-
-gender: SC.FormView.row("Gender:", SC.RadioView.design({
-  layout: {width: 150, height: 40, centerY: 0},
-  items: ["male", "female"]
-}))
-}}}
-
-The name of the row (ie. 'fullName'), is passed down to the *FieldView, and used as the key
-to bind the value property to the content. In this case it will bind content.fullName to the
-value property of the textFieldView. Easy!
-
-One important thing about the field collection: It can contain any type of
-view, including other FormViews or subclasses of FormView.
-
-This is important, because this is how you make nice rows that have a
-label and a field: these rows are actually subclasses of FormView itself.
-
-h2. Editing
-The form does not allow editing by default; editing must be started by calling
-beginEditing.
-
-
-@extends SC.View
-@implements SC.Editable
-*/
 
 sc_require("mixins/emptiness");
 sc_require("mixins/edit_mode");
 sc_require("views/form_row");
+
+/** 
+  @class
+
+  FormView is a lot like a normal view. However, in addition to the childViews
+  collection, it has a fields collection. The items referenced here are NOT
+  just children; they are explicity stated in the array fields, which works
+  just like childViews, but marks fields to be laid out automatically.
+
+  Usually, you will place rows into the FormView:
+  
+      childViews: "fullName gender".w(),
+      contentBinding: 'MyApp.personController',
+
+      fullName: SC.FormView.row("Name:", SC.TextFieldView.extend({
+        layout: {height: 20, width: 150}
+      })),
+
+      gender: SC.FormView.row("Gender:", SC.RadioView.design({
+        layout: {width: 150, height: 40, centerY: 0},
+        items: ["male", "female"]
+      }))
+
+  The name of the row (ie. 'fullName'), is passed down to the *FieldView, and used as the key
+  to bind the value property to the content. In this case it will bind content.fullName to the
+  value property of the textFieldView. Easy!
+
+  One important thing about the field collection: It can contain any type of
+  view, including other FormViews or subclasses of FormView.
+
+  This is important, because this is how you make nice rows that have a
+  label and a field: these rows are actually subclasses of FormView itself.
+
+  Editing
+  -------
+  
+  The form does not allow editing by default; editing must be started by calling
+  beginEditing.
+
+
+  @extends SC.View
+  @implements SC.Editable
+*/
 
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
   layoutDirection: SC.LAYOUT_VERTICAL,
