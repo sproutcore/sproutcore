@@ -666,8 +666,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
         this.set('value', null) ;
         this.set('title', emptyName) ;
         this.set('itemIdx', 0) ;
-
-        this.invokeLast('valueHaveChanged');
         
         return YES;
       }
@@ -677,8 +675,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
       this.set('value', currentItem.get('value')) ;
       this.set('title', currentItem.get('title')) ;
       this.set('itemIdx', currentItem.get('contentIndex')) ;
-
-      this.invokeLast('valueHaveChanged');
 
       return YES;
     }
