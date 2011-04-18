@@ -990,7 +990,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // responder chain.
     // If the event is triggered by a return while entering IME input,
     // don't got through this path.
-    if ((which === SC.Event.KEY_ENTER && !evt.isIMEInput) && !this.get('isTextArea')) { return NO; }
+    if ((which === SC.Event.KEY_RETURN && !evt.isIMEInput) && !this.get('isTextArea')) { return NO; }
     if (which === SC.Event.KEY_ESC) { return NO; }
 
     // handle tab key
