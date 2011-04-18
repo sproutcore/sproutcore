@@ -573,7 +573,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         
         // Internet Explorer won't let us change the type attribute later
         // so we force it to password if needed now, or if the value is not the hint
-        if (this.get('isPassword') && (value !== hint || SC.browser.isIE)) { type = 'password'; }
+        if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
         
         context.push('<input class="',fieldClassNames,'" type="', type,
                       '" name="', name, '" ', disabled, ' value="', value,
@@ -584,32 +584,32 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     else {
       var input= this.$input(),
-          elem = input[0];
+          elem = input[0],
+          val = this.get('value');
 
-      if(!SC.platform.input.placeholder){
-        var val = this.get('value');
-        if((!val || (val && val.length===0))){
-          if(this._hintON && !this.get('isFirstResponder')){
+      if (!val || (val && val.length === 0)) {
+        if (this._hintON && !this.get('isFirstResponder')) {
+          // Internet Explorer doesn't allow you to modify the type afterwards
+          // jQuery throws an exception as well, so set attribute directly
+          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
+
+          if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', YES);
-            
-            // Internet Explorer doesn't allow you to modify the type afterwards
-            // jQuery throws an exception as well, so set attribute directly
-            if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
-            
-            input.val(hint);
-          } else {
-            // Internet Explorer doesn't allow you to modify the type afterwards
-            // jQuery throws an exception as well, so set attribute directly
-            if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
+          }
+        } else {
+          // Internet Explorer doesn't allow you to modify the type afterwards
+          // jQuery throws an exception as well, so set attribute directly
+          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
 
+          if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', NO);
             input.val('');
           }
         }
-      }else{
-        input.attr('placeholder', hint);
       }
-      
+
+      if (SC.platform.input.placeholder) input.attr('placeholder', hint);
+
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
       if (element) {

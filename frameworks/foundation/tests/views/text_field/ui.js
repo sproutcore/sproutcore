@@ -19,6 +19,11 @@
   })
   
   .add("password", SC.TextFieldView, {
+    isPassword: YES,
+    value: "I'm so secret"
+  })
+  
+  .add("password-hint", SC.TextFieldView, {
     hint: "Passwerd",
     isPassword: YES,
     value: "I'm so secret"
@@ -165,6 +170,12 @@ test("with value", function() {
 
 test("password", function() {
   var view = pane.view('password');
+  pane.verifyNotEmpty(view, 'I\'m so secret');
+  pane.verifyDisabled(view, NO);
+});
+
+test("password with hint", function() {
+  var view = pane.view('password-hint');
   pane.verifyNotEmpty(view, 'I\'m so secret', 'Passwerd');
   pane.verifyDisabled(view, NO);
 });
@@ -252,7 +263,7 @@ test("enabling disabled view", function() {
 
 if (!SC.browser.isIE && !SC.platform.input.placeholder) {
   test("Changing value to null -- password field", function() {
-    var view = pane.view('password'),
+    var view = pane.view('password-hint'),
         input = view.$('input');
 
     SC.run(function() {
