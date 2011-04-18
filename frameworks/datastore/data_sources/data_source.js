@@ -458,7 +458,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
         ret = (cur === NO) ? NO : SC.MIXED_STATE ;
       }
     }
-    return ret ? ret : null ;
+    return !SC.none(ret) ? ret : null ;
   },
   
 
