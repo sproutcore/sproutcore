@@ -18,7 +18,8 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   RootResponder directly.  Instead you will work with Pane objects, which
   register themselves with the RootResponder as needed to receive events.
 
-  h1. RootResponder and Platforms
+  RootResponder and Platforms
+  ---
 
   RootResponder contains core functionality common among the different web
   platforms. You will likely be working with a subclass of RootResponder that
@@ -27,7 +28,8 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   The correct instance of RootResponder is detected at runtime and loaded
   transparently.
 
-  h1. Event Types
+  Event Types
+  ---
 
   RootResponders can route four types of events:
 
@@ -46,7 +48,8 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
     explicit target, or allow the action to traverse the hierarchy until a
     view is found that handles it.
 */
-SC.RootResponder = SC.Object.extend({
+SC.RootResponder = SC.Object.extend(
+  /** @scope SC.RootResponder.prototype */{
 
   /**
     Contains a list of all panes currently visible on screen.  Everytime a
@@ -68,7 +71,7 @@ SC.RootResponder = SC.Object.extend({
   // MAIN PANE
   //
 
-  /** @property
+  /**
     The main pane.  This pane receives shortcuts and actions if the
     focusedPane does not respond to them.  There can be only one main pane.
     You can swap main panes by calling makeMainPane() here.
@@ -76,6 +79,8 @@ SC.RootResponder = SC.Object.extend({
     Usually you will not need to edit the main pane directly.  Instead, you
     should use a MainPane subclass, which will automatically make itself main
     when you append it to the document.
+    
+    @type SC.MainPane
   */
   mainPane: null,
 
@@ -89,7 +94,7 @@ SC.RootResponder = SC.Object.extend({
     document body.  That will be handled by the Pane itself.
 
     @param {SC.Pane} pane
-    @returns {SC.RootResponder} receiver
+    @returns {SC.RootResponder}
   */
   makeMainPane: function(pane) {
     var currentMain = this.get('mainPane') ;
