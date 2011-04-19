@@ -29,16 +29,6 @@ SC.SelectFieldView = SC.FieldView.extend(
   */
   displayProperties: ['objects','nameKey','valueKey','isEnabled'],
 
-  /**
-    Reflects the value of `isEnabled`.
-    
-    @field
-    @type Boolean
-    @default YES
-  */
-  acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
 
   /**
     @type String
