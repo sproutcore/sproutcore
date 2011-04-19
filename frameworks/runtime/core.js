@@ -36,7 +36,7 @@ if (typeof console === 'undefined') {
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.5.0.pre.4
+  @version 1.5.0
   @namespace
 
   All SproutCore methods and functions are defined
@@ -57,7 +57,7 @@ if (typeof console === 'undefined') {
 window.SC = window.SC || {} ;
 window.SproutCore = window.SproutCore || SC ;
 
-SC.VERSION = '1.5.0.rc.2';
+SC.VERSION = '1.5.0';
 
 /**
   @private
