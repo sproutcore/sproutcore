@@ -74,7 +74,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     This way, style calculation isn't done twice.
    */
   automaticallyNotifiesObserversFor: function (key) {
-    return (key === 'layout' || key === 'border') ? NO : arguments.callee.base.apply(this,arguments);
+    return (key === 'layout' || key === 'border') ? NO : sc_super();
   },
 
   /**

@@ -101,7 +101,7 @@ SC.View.reopen(
     }
     if(key==='layout' || key==='border' || layoutChange) { this.layoutDidChange(); }
     // Resume notification as usual.
-    arguments.callee.base.apply(this,arguments);
+    sc_super();
   },
 
 
