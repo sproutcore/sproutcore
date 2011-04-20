@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('system/string');
+
 SC.VALIDATE_OK = YES;
 SC.VALIDATE_NO_CHANGE = NO;
 
@@ -279,7 +281,7 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
       }
       
       // convert the validatorKey name into a class.
-      validatorKey = validatorKey.classify() ;
+      validatorKey = SC.String.classify(validatorKey);
       var validatorClass = SC.Validator[validatorKey] ;
       if (SC.none(validatorClass)) {
         throw "validator %@ not found for %@".fmt(validatorKey, field) ;

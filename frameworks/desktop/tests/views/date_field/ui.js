@@ -70,7 +70,7 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   var layer = view.$();
   
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-  if(SC.browser.webkit) equals(input.val(), '', 'input should have empty value');
+  if(SC.browser.webkit || parseInt(SC.browser.mozilla) >= 2.0) equals(input.val(), '', 'input should have empty value');
   else equals(input.val(), expectedHint, 'input should have empty value');
   
   if (expectedHint) {

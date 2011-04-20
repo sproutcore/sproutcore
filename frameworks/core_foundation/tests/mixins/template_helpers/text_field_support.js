@@ -5,10 +5,14 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 (function() {
-  var textFieldView, pane;
+  var TestObject, textFieldView, pane;
 
   module("Text Field Support", {
     setup: function() {
+      TestObject = window.TestObject = SC.Object.create({
+        value: null
+      });
+
       textFieldView = SC.TemplateView.create(SC.TextFieldSupport, {
         template: SC.Handlebars.compile('<input type="text">')
       });
@@ -21,6 +25,7 @@
 
     teardown: function() {
       pane.remove();
+      TestObject = window.TestObject = textFieldView = pane = null;
     }
   });
 
@@ -31,6 +36,25 @@
 
     textFieldView.set('value', "afterlife");
     equals(textFieldView.$('input').val(), "afterlife", "sets value of DOM to value property");
+  });
+
+  test("value binding works properly for inputs that haven't been created", function() {
+    var view = SC.TemplateView.create(SC.TextFieldSupport, {
+      template: SC.Handlebars.compile('<input type="text">'),
+      valueBinding: 'TestObject.value'
+    });
+
+    equals(view.get('value'), null, "precond - default value is null");
+    equals(view.$('input').length, 0, "precond - view doesn't have its layer created yet, thus no input element");
+
+    SC.run(function() { TestObject.set('value', 'ohai'); });
+
+    equals(view.get('value'), 'ohai', "value property was properly updated");
+
+    SC.run(function() { pane.appendChild(view); });
+
+    equals(view.get('value'), 'ohai', "value property remains the same once the view has been appended");
+    equals(view.$('input').val(), 'ohai', "value is reflected in the input element once it is created");
   });
 
   test("listens for focus and blur events", function() {

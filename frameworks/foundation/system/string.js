@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-// These are basic enhancements to the string class used throughout
-// SproutCore.
 
 /** @private */
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
@@ -108,7 +106,7 @@ SC.INFLECTION_CONSTANTS = {
   @namespace
   @lends SC.String
 */
-SC.StringInflections = {
+SC.mixin(SC.String, {
 
   /**
     Capitalizes every word in a string.  Unlike titleize, spaces or dashes
@@ -122,13 +120,14 @@ SC.StringInflections = {
       - action_name -> Action_Name
       - innerHTML -> InnerHTML
 
+    @param {String} str String to capitalize each letter2
     @returns {String} capitalized string
   */
-  capitalizeEach: function() {
-    return this.replace(SC.STRING_TITLEIZE_REGEXP,
-      function(str,sep,character) {
+  capitalizeEach: function(str) {
+    return str.replace(SC.STRING_TITLEIZE_REGEXP,
+      function(subStr, sep, character) {
         return (character) ? (sep + character.toUpperCase()) : sep;
-      }).capitalize() ;
+      }).capitalize();
   },
 
   /**
@@ -143,14 +142,15 @@ SC.StringInflections = {
       - action_name -> Action Name
       - innerHTML -> Inner HTML
 
+    @param {String} str String to titleize
     @return {String} titleized string.
   */
-  titleize: function() {
-    var ret = this.replace(SC.STRING_DECAMELIZE_REGEXP,'$1_$2'); // decamelize
+  titleize: function(str) {
+    var ret = str.replace(SC.STRING_DECAMELIZE_REGEXP,'$1_$2'); // decamelize
     return ret.replace(SC.STRING_TITLEIZE_REGEXP,
-      function(str,separater,character) {
-        return (character) ? (' ' + character.toUpperCase()) : ' ';
-      }).capitalize() ;
+      function(subStr, separater, character) {
+        return character ? ' ' + character.toUpperCase() : ' ';
+      }).capitalize();
   },
 
   /**
@@ -165,15 +165,16 @@ SC.StringInflections = {
       - action_name -> ActionName
       - innerHTML -> InnerHtml
 
+    @param {String} str String to classify
     @returns {String}
   */
-  classify: function() {
-    var ret = this.replace(SC.STRING_TITLEIZE_REGEXP,
-      function(str,separater,character) {
-        return (character) ? character.toUpperCase() : '' ;
-      }) ;
-    var first = ret.charAt(0), upper = first.toUpperCase() ;
-    return (first !== upper) ? (upper + ret.slice(1)) : ret ;
+  classify: function(str) {
+    var ret = str.replace(SC.STRING_TITLEIZE_REGEXP,
+      function(subStr, separater, character) {
+        return character ? character.toUpperCase() : '';
+      });
+    var first = ret.charAt(0), upper = first.toUpperCase();
+    return first !== upper ? upper + ret.slice(1) : ret;
   },
 
   /**
@@ -188,10 +189,11 @@ SC.StringInflections = {
       - action_name -> action name
       - innerHTML -> inner html
 
+    @param {String} str String to humanize
     @returns {String} the humanized string.
   */
-  humanize: function() {
-    return this.decamelize().replace(SC.STRING_HUMANIZE_REGEXP,' ') ;
+  humanize: function(str) {
+    return SC.String.decamelize(str).replace(SC.STRING_HUMANIZE_REGEXP,' ');
   },
 
   /**
@@ -201,19 +203,21 @@ SC.StringInflections = {
     having to worry about it breaking code if any reserved regular expression
     characters are used.
 
+    @param {String} str String to escape for regex
     @returns {String} the string properly escaped for use in a regexp.
   */
-  escapeForRegExp: function() {
-    return this.replace(SC.STRING_REGEXP_ESCAPED_REGEXP, "\\$1");
+  escapeForRegExp: function(str) {
+    return str.replace(SC.STRING_REGEXP_ESCAPED_REGEXP, "\\$1");
   },
 
   /**
     Removes any standard diacritic characters from the string. So, for
     example, all instances of 'Á' will become 'A'.
 
+    @param {String} str String to remove diacritics from
     @returns {String} the modified string
   */
-  removeDiacritics: function() {
+  removeDiacritics: function(str) {
     // Lazily create the SC.diacriticMappingTable object.
     var diacriticMappingTable = SC.diacriticMappingTable;
     if (!diacriticMappingTable) {
@@ -286,16 +290,12 @@ SC.StringInflections = {
     }
 
     var original, replacement, ret = "",
-        length = this.length;
+        length = str.length;
+
     for (var i = 0; i <= length; ++i) {
-      original = this.charAt(i);
+      original = str.charAt(i);
       replacement = diacriticMappingTable[original];
-      if (replacement) {
-        ret += replacement;
-      }
-      else {
-        ret += original;
-      }
+      ret += replacement || original;
     }
     return ret;
   },
@@ -304,19 +304,20 @@ SC.StringInflections = {
   /**
     Converts a word into its plural form.
 
+    @param {String} str String to pluralize
     @returns {String} the plural form of the string
   */
-  pluralize: function() {
+  pluralize: function(str) {
       var idx, len,
-           compare = this.split(/\s/).pop(), //check only the last word of a string
-          restOfString = this.replace(compare,''),
+          compare = str.split(/\s/).pop(), //check only the last word of a string
+          restOfString = str.replace(compare,''),
           isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
 
       compare = compare.toLowerCase();
       for (idx=0, len=SC.INFLECTION_CONSTANTS.UNCOUNTABLE.length; idx < len; idx++) {
           var uncountable = SC.INFLECTION_CONSTANTS.UNCOUNTABLE[idx];
           if (compare == uncountable) {
-              return this.toString();
+              return str.toString();
           }
       }
       for (idx=0, len=SC.INFLECTION_CONSTANTS.IRREGULAR.length; idx < len; idx++) {
@@ -331,7 +332,7 @@ SC.StringInflections = {
           var regex          = SC.INFLECTION_CONSTANTS.PLURAL[idx][0],
               replace_string = SC.INFLECTION_CONSTANTS.PLURAL[idx][1];
           if (regex.test(compare)) {
-              return this.replace(regex, replace_string);
+              return str.replace(regex, replace_string);
           }
       }
   },
@@ -339,19 +340,20 @@ SC.StringInflections = {
   /**
     Converts a word into its singular form.
 
+    @param {String} str String to singularize
     @returns {String} the singular form of the string
   */
-  singularize: function() {
+  singularize: function(str) {
       var idx, len,
-          compare = this.split(/\s/).pop(), //check only the last word of a string
-          restOfString = this.replace(compare,''),
+          compare = str.split(/\s/).pop(), //check only the last word of a string
+          restOfString = str.replace(compare,''),
           isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
 
       compare = compare.toLowerCase();
       for (idx=0, len=SC.INFLECTION_CONSTANTS.UNCOUNTABLE.length; idx < len; idx++) {
           var uncountable = SC.INFLECTION_CONSTANTS.UNCOUNTABLE[idx];
           if (compare == uncountable) {
-              return this.toString();
+              return str.toString();
           }
       }
       for (idx=0, len=SC.INFLECTION_CONSTANTS.IRREGULAR.length; idx < len; idx++) {
@@ -366,17 +368,12 @@ SC.StringInflections = {
           var regex          = SC.INFLECTION_CONSTANTS.SINGULAR[idx][0],
               replace_string = SC.INFLECTION_CONSTANTS.SINGULAR[idx][1];
           if (regex.test(compare)) {
-              return this.replace(regex, replace_string);
+              return str.replace(regex, replace_string);
           }
       }
   }
 
-};
+});
 
 /** @private */
-SC.String.strip = SC.String.trim; // convenience alias.
-SC.supplement(SC.String, SC.StringInflections);
-
-// Apply SC.String mixin to built-in String object
-SC.supplement(String.prototype, SC.StringInflections) ;
-
+SC.String.strip = SC.String.trim;

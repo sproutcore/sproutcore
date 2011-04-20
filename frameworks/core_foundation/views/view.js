@@ -494,6 +494,31 @@ SC.CoreView.reopen(
   },
 
   /**
+    Set to YES when the view's layer location is dirty.  You can call
+    updateLayerLocationIfNeeded() to clear this flag if it is set.
+
+    @property {Boolean}
+  */
+  layerLocationNeedsUpdate: NO,
+
+  /**
+    Calls updateLayerLocation(), but only if the view's layer location
+    currently needs to be updated.  This method is called automatically at
+    the end of a run loop if you have called parentViewDidChange() at some
+    point.
+
+    @property {Boolean} force This property is ignored.
+    @returns {SC.View} receiver
+    @test in updateLayerLocation
+  */
+  updateLayerLocationIfNeeded: function(force) {
+    if (this.get('layerLocationNeedsUpdate')) {
+      this.updateLayerLocation() ;
+    }
+    return this ;
+  },
+
+  /**
     This method is called when a view changes its location in the view
     hierarchy.  This method will update the underlying DOM-location of the
     layer so that it reflects the new location.
@@ -1159,14 +1184,17 @@ SC.CoreView.reopen(
     }
 
     attrs.owner = attrs.parentView = this ;
+
+    // We need to set isVisibleInWindow before the init method is called on the view
+    // The prototype check is a bit hackish and should be revisited - PDW
+    if (view.isClass && view.prototype.hasVisibility) {
+      attrs.isVisibleInWindow = this.get('isVisibleInWindow');
+    }
+
     if (!attrs.page) { attrs.page = this.page ; }
 
     // Now add this to the attributes and create.
     if (view.isClass) { view = view.create(attrs); }
-
-    if (view.hasVisibility) {
-      view.set('isVisibleInWindow', this.get('isVisibleInWindow'));
-    }
 
     return view ;
   },

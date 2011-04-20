@@ -62,7 +62,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     Returns the index for a particular object in the index.
 
     @param {Object} object the item to search for
-    @param {NUmber} startAt optional starting location to search, default 0
+    @param {Number} startAt optional starting location to search, default 0
     @returns {Number} index of -1 if not found
   */
   indexOf: function(object, startAt) {
@@ -82,7 +82,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     Returns the last index for a particular object in the index.
 
     @param {Object} object the item to search for
-    @param {NUmber} startAt optional starting location to search, default 0
+    @param {Number} startAt optional starting location to search, default 0
     @returns {Number} index of -1 if not found
   */
   lastIndexOf: function(object, startAt) {

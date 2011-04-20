@@ -211,8 +211,9 @@ test("set styles handle custom browser attributes", function() {
   // sometimes, without one. Normalize it here.
   var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
-  //Gecko completely ignores css attributes that it doesn't understand.
-  if(SC.browser.mozilla) equals(style, "-moz-column-count: 3;");
+
+  // Older Gecko completely ignores css attributes that it doesn't understand.
+  if(SC.browser.mozilla && parseInt(SC.browser.mozilla) < 2.0) equals(style, "-moz-column-count: 3;");
   else if (SC.browser.msie) equals(style, "-webkit-column-count: 3; -moz-column-count: 3; -o-column-count: 3; -ms-column-count: 3;");
   else equals(style, "-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3;");
 });
