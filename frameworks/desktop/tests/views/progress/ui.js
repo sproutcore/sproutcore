@@ -356,7 +356,7 @@ test("basic", function() {
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
-  equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
+  equals(view.$('.sc-handle')[0].style.left, '50%', 'left of sc-handle should be 50%');
 });
 
 test("disabled", function() {
@@ -365,7 +365,7 @@ test("disabled", function() {
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
-  equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
+  equals(view.$('.sc-handle')[0].style.left, '50%', 'left of sc-handle should be 50%');
 });
 
 test("basic value 100", function() {
@@ -374,7 +374,7 @@ test("basic value 100", function() {
   ok(!view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
-  equals(view.$('.sc-handle').css('left'), '100%', 'left of sc-handle should be 100%');
+  equals(view.$('.sc-handle')[0].style.left, '100%', 'left of sc-handle should be 100%');
 });
 
 test("basic step 20", function() {
@@ -383,7 +383,7 @@ test("basic step 20", function() {
   ok(!view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
-  equals(view.$('.sc-handle').css('left'), '60%', 'left of sc-handle should be 60%');
+  equals(view.$('.sc-handle')[0].style.left, '60%', 'left of sc-handle should be 60%');
 });
 
 test("Check if aria role is set to slider view", function() {
