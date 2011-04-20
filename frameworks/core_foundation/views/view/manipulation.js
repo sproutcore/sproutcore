@@ -88,31 +88,6 @@ SC.View.reopen({
   //
 
   /**
-    Set to YES when the view's layer location is dirty.  You can call
-    updateLayerLocationIfNeeded() to clear this flag if it is set.
-
-    @property {Boolean}
-  */
-  layerLocationNeedsUpdate: NO,
-
-  /**
-    Calls updateLayerLocation(), but only if the view's layer location
-    currently needs to be updated.  This method is called automatically at
-    the end of a run loop if you have called parentViewDidChange() at some
-    point.
-
-    @property {Boolean} force This property is ignored.
-    @returns {SC.View} receiver
-    @test in updateLayerLocation
-  */
-  updateLayerLocationIfNeeded: function(force) {
-    if (this.get('layerLocationNeedsUpdate')) {
-      this.updateLayerLocation() ;
-    }
-    return this ;
-  },
-
-  /**
     Insert the view into the the receiver's childNodes array.
 
     The view will be added to the childNodes array before the beforeView.  If

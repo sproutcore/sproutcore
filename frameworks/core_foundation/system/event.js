@@ -142,18 +142,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         version = parseFloat(SC.browser.version),
         didChange = NO;
 
-    if (SC.browser.webkit) {
-      // Check Chrome first since it also responds to safari
-      if (!SC.browser.chrome) {
-        // Scrolling in Safari 5.0.1, which is huge for some reason
-        if (version >= 533.17 && version <= 533.20) {
-          deltaMultiplier = 0.004;
-          didChange = YES;
+    if (SC.browser.safari) {
+      // Safari 5.0.1 and up
+      if (version >= 533.17) {
+        deltaMultiplier = 0.004;
+        didChange = YES;
+      } else if (version < 533) {
         // Scrolling in Safari 5.0
-        } else if (version < 533 || version >= 534) {
-          deltaMultiplier = 40;
-          didChange = YES;
-        }
+        deltaMultiplier = 40;
+        didChange = YES;
       }
     } else if (SC.browser.mozilla) {
       deltaMultiplier = 10;

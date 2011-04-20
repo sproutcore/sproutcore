@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/string');
 sc_require('mixins/content_value_support');
+sc_require('system/string');
 
 /**
   Option for controls to automatically calculate their size (should be default 
@@ -204,15 +204,14 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
     @observes 'fieldKey'
   */
   errorLabel: function() {
-    var ret, fk, def ;
-    if (ret = this.get('fieldLabel')) return ret ;
+    var ret, fk, def, locFK;
+    if (ret = this.get('fieldLabel')) return ret;
     
     // if field label is not provided, compute something...
-    fk = this.get('fieldKey') || this.constructor.toString() ;
-    def = (fk || '').humanize().capitalize() ;
-    return "ErrorLabel."+fk
-      .locWithDefault(("FieldKey."+fk).locWithDefault(def)) ;
-      
+    fk = this.get('fieldKey') || this.constructor.toString();
+    def = fk ? SC.String.capitalize(SC.String.humanize(fk)) : '';
+    locFK = SC.String.locWithDefault("FieldKey." + fk, def);
+    return SC.String.locWithDefault("ErrorLabel." + fk, locFK);
   }.property('fieldLabel','fieldKey').cacheable(),
 
   /**

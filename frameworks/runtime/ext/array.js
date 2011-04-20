@@ -52,7 +52,7 @@ if (Array.prototype.indexOf === SC.CoreArray.indexOf) {
     Returns the index for a particular object in the index.
 
     @param {Object} object the item to search for
-    @param {NUmber} startAt optional starting location to search, default 0
+    @param {Number} startAt optional starting location to search, default 0
     @returns {Number} index of -1 if not found
   */
   Array.prototype.indexOf = function(object, startAt) {
@@ -74,7 +74,7 @@ if (Array.prototype.lastIndexOf === SC.CoreArray.lastIndexOf) {
     Returns the last index for a particular object in the index.
 
     @param {Object} object the item to search for
-    @param {NUmber} startAt optional starting location to search, default 0
+    @param {Number} startAt optional starting location to search, default 0
     @returns {Number} index of -1 if not found
   */
   Array.prototype.lastIndexOf = function(object, startAt) {

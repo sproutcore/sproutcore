@@ -356,7 +356,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
         delta = newlen - oldlen ;
       }
 
-      this.enumerableContentDidChange(start, amt, delta);
+      var removedCount = amt;
+      var addedCount = delta + removedCount;
+      this.arrayContentDidChange(start, removedCount, addedCount);
     }
   },
 

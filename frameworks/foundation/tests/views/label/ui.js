@@ -148,7 +148,7 @@ test("Check that all labels have the right classes and styles set", function() {
   ok(viewElem.hasClass('sc-label-view'), 'title,icon,selected.hasClass(sc-label-view) should be YES');
   ok(!viewElem.hasClass('icon'), 'title,icon,selected.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
-  ok(viewElem.css('fontWeight') === 'bold', 'bold view should have bold fontWeight');
+  ok(viewElem[0].style.fontWeight === 'bold', 'bold view should have bold fontWeight');
    
 });
 
