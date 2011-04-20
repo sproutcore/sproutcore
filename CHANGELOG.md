@@ -2,6 +2,132 @@
 CHANGE LOG FOR 1.5
 ==================
 
+1.5.0
+-----
+
+* Fix range observer support in SC.TreeItemObserver.
+* Fixed issue with isVisibleInWindow not getting passed to childViews
+* Fix problem with SC.TextFieldView not properly setting input type to password when SC.platform.input.placeholder is true.
+* Change SC.View default border color to transparent
+* SC.Event.KEY_ENTER updated to SC.Event.KEY_RETURN.  SC.Event.KEY_ENTER is no longer defined.
+* Fix bug in SC.ContainerView where it was checking for SC.View instead of SC.CoreView, and add unit test for using SC.TemplateView in SC.ContainerView
+* Move some necessary updateLayerLocation code from SC.View to SC.CoreView
+* Fix SC.Event mouse handling for Safari 5.0.5, and trust that Apple will continue using extremely huge mouse wheel values
+* Fix problem with localizing strings via SC.String.loc, and add unit tests for localizing with multiple parameters.
+* Change Foundation String mixin to work standalone with SC.String and mix in mapping to String.prototype. Framework code updated to use SC.String instead of relying on prototype.
+* Fixed issue in SC.FormRowView that could cause an infinite loop
+* Fixes a bug where bindings would not work when specified in a class definition as an SC.Binding object (as opposed to a property path).
+* Fix SC.SAFARI_FOCUS_BEHAVIOR check.
+* Don't show experimental apps in welcome list
+* Removed mobile references from Buildfile
+* Moved Greenhouse and Designer Framework to Experimental
+* Remove Docs app since it is worthless
+* Remove time.js, update Date validator and tests so that it works with SC.DateTime, and provide warning for backwards compatibility.
+* Updates template collection unit test to fail when we were removing child views twice. Also fixes a bug where SC.TemplateCollectionView would not add array observers if the content property was present at initialization time.
+* fix firefox 4 transitionEnd case - should be transitionend
+* Added back commented out LabelView CSS tests so we know to make them work later
+* Remove unused SC.StaticQueue
+* Remove CSS tests for LabelView while I figure out how to get document.defaultView.getComputedStyle to return the correct results for framework-level tests.
+* Make sure content is defined before trying to access its layer in SC.ScrollView
+* Use local image for testing the image view scaling to avoid epic fails
+* No longer need to teardown child views when content changes on an SC.TemplateCollectionView.
+* Preserve options hash passed to {{#collection}} helper.
+* In SC.ScrollView, apply 3D translations even if view does not implement _viewFrameDidChange.
+* Split up SC.String and extending String.prototype, change more framework code over to using SC.String.
+* Use SC.supplement when mixing into Array.prototype. Create SC.CoreArray which doesn't have SC.Enumerable mixing in to avoid hackiness of old Array handling.
+* Added tests for querying nested records by property path
+* Added support for quering within SC.Objects or hashes. E.g. "foo.baz = 'bar'". Inspired by an old mailing list post by Thomas Lang.
+* Experimental polymorphism: Add ability to pass isPolymorphic in SC.Record.extend hash instead of needing it set it afterwards, with unit test.
+* move SC.Request/Response to new framework
+* Improved isFixedLayout property plus unit tests.
+* jslint cleanup, plus original computeFrameWithParentFrame doesn't use pdim, so don't pass it.
+* Fix for potential bug determining frame for non-fixed layout view within static layout parent View.
+* Add failing test to illustrate potential bug if a non-fixed layout view is embedded within a static layout view.  Found the bug by accident, but the fix is straightforward so added it (in next commit)
+* Require Function.prototype extension in runtime files
+* Use Array.isArray in SC.isArray if its available. This is 50% faster when checking arrays and 10% slower when checking objects that aren't arrays, but we're checking arrays 10 times more often than non arrays in SC.isArray, so this is a net win. Unit tests for SC.isArray added.
+* Unit test handling of hints on password fields when placeholder is not supported
+* Fix hint handling for SC.TextFieldView when isPassword is true
+* Fix check for continuouslyUpdatesValue
+* Use feature detection instead of browser detection when handling SC.TextFiledView#maxLength
+* Deprecate SC.TextFieldView#continuouslyUpdatesValue as its completely broken, use applyImmediately instead.
+* Remove SC.TextFieldView#_supportsPlaceHolder and use SC.platform.input.placeholder
+* Move SC string localization support to Core Foundation (where it belongs) and small code shuffle in CF
+* Reorganize String, Function and Date enhancements in Runtime framework
+* Make our String extension handling more sane. SC.CoreString is now SC.String, and Core Foundation additions are now mixed into SC.String. Handlebars loc helper now uses SC.String.loc.
+* Add empty SC.ChildRecord object with warning of deprecated to improve 1.4.x backwards compatibility
+* Initial work at making framework code prototype-safe. We shouldn't be using helpers attached to native object prototypes in framework code as they can fail on some platforms
+* Change instance so "".dasherize to SC.String.dasherize to safeguard against platforms that mix dasherize into String.prototype (I'm looking at you, WebOS)
+* Change SC.String functions so they can run standalone as well as when mixed into String.prototype
+* More work on documenting Foundation framework
+* Add unit tests for Store.loadRecords.
+* Ensure that SelectView works with custom views.
+* SC.SAFARI_FOCUS_BEHAVIOR is deprecated in favour of SC.FOCUS_ALL_CONTROLS, update docs and unit tests.
+* SC.RootResponder now properly checks that responder is defined in makeTouchResponder by accessing properties.
+* ContainerView now properly replaces its children. Still need to write a unit test.
+* CollectionView should enable or disable the ability to select when isEnabled is true or false.
+* Fixed SC.Menu icons in Ace
+* Update ImageView so that CSS classes for values are rendered and updated correctly. Unit tests provided.
+* CollectionView now calls actions when useToggleSelection and actOnSelect are true
+* CollectionView was wiping selections when it was touched but an item wasn't being selected. Behaviour now same as mouse.
+* Added toolTip support for imageButtonRenderDelegate
+* SC.TabView with tabLocation bottom is positioned correctly.
+* Re-render child views if the layer is destroyed then re-created.
+* Fix global variable leakage in SC.View layout style code
+* Fix problem in CollectionView where using a ListItemView on touch would cause epic fails in the touchEnd event.
+* Some styling fixes for Checkbox and Radio icons
+* Fixed SC.Query to handle negative numbers
+* Now that {{#each}} uses bindings, we have to invoke a run loop in the unit test for it to pass.
+* Don't automatically render child views if the view's render method renders them explicitly.
+* Added icon examples to TestControls
+* Proper location for form render_delegates
+
+
+1.5.0.rc.2
+----------
+
+* Clone itemOptions so that we don't nuke classBindings after the first round trip
+* Update SC.ChildArray to use array observers.
+* Remove unnecessary invalidation when storeKeys changes in SC.ManyArray.
+* When a property observed by a binding is changed outside a run loop, schedule a run loop automatically.
+* Remove trailing white space in child array.
+* Fixes bug where property chains were being activated even when the associated property had not changed.
+* Add support for setting itemViewTemplateName in SC.TemplateCollectionView, plus documentation.
+* {{#each}} helper should bind relative to the current context.
+* Fix array arithmetic used by SC.TemplateCollectionView when calculating changes.
+* Update SC.ManyArray and SC.RecordArray to use array observers.
+* Make the test for a simple implementation of SC.Array reflect the API changes.
+* Revert changes to SC.Enumerable, move new functionality into SC.Array. Update to use array observer API.
+* Update SC.TemplateCollectionView to use new array observer functionality.
+* Make sparse arrays support the new Array observer API
+* Remove enumerable observers
+* Update array controller unit test to use public API when resetting an array.
+* Update SC.ArrayController to use array observers.
+* Implement array observers. Remove enumerable observers.
+* Make our mouse wheel delta detection intelligent about when it sucks. If our browser detection fails and the delta exceeds a specified limit, we readjust so future scrolls aren't Crazy Fast™.
+* Initial work on fixing documentation in Foundation framework
+* Document SC.browser
+* Docs: Markdown-ified Datetime docs
+* Docs: Markdown-ified Datastore docs
+* Docs: Markdown-ified CoreFoundation docs
+* Docs: Markdown-ified Animation docs
+* Support the class attribute in {{bindAttr}}.
+* SC.TextFieldSupport should notify value change when its loses first responder to support autofill
+* Move SproutCore's Handlebars extensions into core_foundation,
+* Update testing framework to use new version of qunit, change testing framework to depend on jQuery instead of having its own version
+* Remove warning for when a binding connects to an undefined property. This bug has been fixed.
+* Ensure that TemplateViews created with an ID by the Handlebars view helper are added to view cache, unit test included
+* Add 'datetime/localized' to the Buildfile configs so it doesn't bust for Some Folks. Apologies to Some Folks.
+* bindAttr should look up properties relative to its current context, not the view.
+* Completed initial audit of Desktop framework documentation
+* First stab at fixing the inline documentation in the Desktop framework.
+* Separate core DateTime code from localization-specific code as core DateTime code depends only on Runtime
+* Unit test and fixes for chained property observers that would cause them to fail if all objects in the chain did not exist at the time the property chain is setup.
+* Use touch events for TextField. Required for certain Android platforms
+* Fix more unit tests in core_foundation that were trying to delete window properties.
+* Internet Explorer does not support deleting properties from the window object.
+* Remove trailing commas for IE7 compatibility
+
+
 1.5.0.rc.1
 -----------
 * Removed #bindCollection helper. Instead, use {{#collection
