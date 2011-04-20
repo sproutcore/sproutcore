@@ -1,3 +1,5 @@
+/*globals Handlebars */
+
 sc_require('ext/handlebars');
 
 Handlebars.registerHelper('collection', function(path, options) {
@@ -13,34 +15,35 @@ Handlebars.registerHelper('collection', function(path, options) {
   }
   //@ endif
 
-  var hash = fn.hash, itemHash = {}, match;
+  var extensions = {};
 
-  for (var prop in hash) {
-    if (fn.hash.hasOwnProperty(prop)) {
-      match = prop.match(/^item(.)(.*)$/);
+  if (fn) {
+    var hash = fn.hash, itemHash = {}, match;
 
-      if(match) {
-        itemHash[match[1].toLowerCase() + match[2]] = hash[prop];
-        delete hash[prop];
+    for (var prop in hash) {
+      if (fn.hash.hasOwnProperty(prop)) {
+        match = prop.match(/^item(.)(.*)$/);
+
+        if(match) {
+          itemHash[match[1].toLowerCase() + match[2]] = hash[prop];
+          delete hash[prop];
+        }
       }
     }
-  }
 
-  if(fn) {
-    var extensions = SC.clone(hash);
+    extensions = SC.clone(hash);
 
     SC.mixin(extensions, {
       itemViewTemplate: fn,
       inverseTemplate: inverse,
       itemViewOptions: itemHash
     });
+  }
 
-    if(collectionClass.isClass) {
-      collectionObject = collectionClass.extend(extensions);
-    } else {
-      SC.mixin(collectionClass, extensions);
-      collectionObject = collectionClass;
-    }
+  if(collectionClass.isClass) {
+    collectionObject = collectionClass.extend(extensions);
+  } else {
+    collectionObject = SC.mixin(collectionClass, extensions);
   }
 
   options.fn = function() { return ""; };
