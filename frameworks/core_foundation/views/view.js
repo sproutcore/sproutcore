@@ -1472,7 +1472,8 @@ SC.CoreView.unload = function() {
   2. They act as first responders for incoming keyboard, mouse, and
      touch events.
 
-  h2. View Initialization
+  View Initialization
+  ====
 
   When a view is setup, there are several methods you can override that
   will be called at different times depending on how your view is created.
