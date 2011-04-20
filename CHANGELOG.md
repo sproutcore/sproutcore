@@ -5,6 +5,7 @@ CHANGE LOG FOR 1.5
 1.5.0
 -----
 
+* Fix problem in SC.TextFieldSupport where binding to its value when its layer hasn't been created could potentially start an infinite loop
 * Fix range observer support in SC.TreeItemObserver.
 * Fixed issue with isVisibleInWindow not getting passed to childViews
 * Fix problem with SC.TextFieldView not properly setting input type to password when SC.platform.input.placeholder is true.
