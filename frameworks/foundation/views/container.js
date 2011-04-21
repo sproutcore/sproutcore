@@ -110,7 +110,7 @@ SC.ContainerView = SC.View.extend(
         content = SC.objectForPropertyPath(content);
       } else {
         var tempContent = this.getPath(content);
-        content = SC.kindOf(tempContent, SC.View) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
+        content = SC.kindOf(tempContent, SC.CoreView) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
       }
     }
     

@@ -42,14 +42,18 @@ SC.supplement(String.prototype,
     @see SC.String.loc
   */
   loc: function() {
-    return SC.String.loc(this, arguments);
+    var args = SC.$A(arguments);
+    args.unshift(this);
+    return SC.String.loc.apply(SC.String, args);
   },
 
   /**
     @see SC.String.locWithDefault
   */
   locWithDefault: function(def) {
-    return SC.String.locWithDefault(this, def, arguments);
+    var args = SC.$A(arguments);
+    args.unshift(this);
+    return SC.String.locWithDefault.apply(SC.String, args);
   }
 
 });

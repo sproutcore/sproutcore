@@ -8,19 +8,40 @@
 
 */
 SC.TextFieldSupport = /** @scope SC.TextFieldSupport.prototype */{
+  
+  /** @private
+    Used internally to store value because the layer may not exist
+  */
+  _value: null,
+  
+  /**
+    @type String
+    @default null
+  */
   value: function(key, value) {
+    var input = this.$('input');
+
     if (value !== undefined) {
-      this.$('input').val(value);
+      this._value = value;
+      input.val(value);
     } else {
-      value = this.$('input').val();
+      if (input.length > 0) {
+        value = this._value = input.val();
+      } else {
+        value = this._value;
+      }
     }
 
     return value;
   }.property().idempotent(),
 
   didCreateLayer: function() {
-    SC.Event.add(this.$('input'), 'focus', this, this.focusIn);
-    SC.Event.add(this.$('input'), 'blur', this, this.focusOut);
+    var input = this.$('input');
+
+    input.val(this._value);
+
+    SC.Event.add(input, 'focus', this, this.focusIn);
+    SC.Event.add(input, 'blur', this, this.focusOut);
   },
 
   focusIn: function(event) {

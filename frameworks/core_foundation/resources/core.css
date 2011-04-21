@@ -6,10 +6,11 @@
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
-/* Set here so when we set a border-width we'll see something
- * Only set on div, since occasionally we rely on native styling */
+/* Set here so when we set a border-width it will actually take up space
+ * Color should be changed with CSS for that view
+ * Only set on div, since occasionally we rely on native styling for other tags */
 div.sc-view {
-  border: solid 0 black;
+  border: 0 solid transparent;
 }
 
 .ellipsis {
