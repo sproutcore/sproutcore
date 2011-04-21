@@ -36,7 +36,7 @@ if (typeof console === 'undefined') {
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.5.0
+  @version 1.6.0.pre
   @namespace
 
   All SproutCore methods and functions are defined
