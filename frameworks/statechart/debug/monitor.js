@@ -30,13 +30,13 @@ SC.StatechartMonitor = SC.Object.extend({
   
   pushEnteredState: function(state) {
     this.propertyWillChange('length');
-    this.sequence.push({ entered: state });
+    this.sequence.push({ action: 'entered', state: state });
     this.propertyDidChange('length'); 
   },
   
   pushExitedState: function(state) {
     this.propertyWillChange('length');
-    this.sequence.push({ exited: state });
+    this.sequence.push({ action: 'exited', state: state });
     this.propertyDidChange('length');
   },
   
@@ -74,12 +74,7 @@ SC.StatechartMonitor = SC.Object.extend({
     len = this.sequence.length;
     for (i = 0; i < len; i += 1) {
       item = this.sequence[i];
-      if (item.exited) {
-        seq += "exited %@".fmt(item.exited.get('fullPath'));
-      } 
-      else if (item.entered) {
-        seq += "entered %@".fmt(item.entered.get('fullPath'));
-      } 
+      seq += "%@ %@".fmt(item.action, item.state.get('fullPath'));
       if (i < len - 1) seq += ", ";
     }
 
