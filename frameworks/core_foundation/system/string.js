@@ -128,7 +128,7 @@ SC.mixin(SC.String, {
     @param args {Object...} optional arguments to interpolate also
     @returns {String} the localized and formatted string.
   */
-  loc: function(str, arguments) {
+  loc: function(str) {
     // NB: This could be implemented as a wrapper to locWithDefault() but
     // it would add some overhead to deal with the arguments and adds stack
     // frames, so we are keeping the implementation separate.
@@ -139,6 +139,8 @@ SC.mixin(SC.String, {
 
     var args = SC.$A(arguments);
     args.shift(); // remove str param
+    //to extend String.prototype 
+    if(args.length>0 && args[0].isSCArray) args=args[0];
 
     return SC.String.fmt(localized, args);
   },
@@ -217,7 +219,7 @@ SC.mixin(String.prototype,
 /** @scope String.prototype */ {
   
   loc: function() {
-    return SC.String.loc(this, arguments);
+    return SC.String.loc(this.toString(), SC.$A(arguments));
   }
 
 });
