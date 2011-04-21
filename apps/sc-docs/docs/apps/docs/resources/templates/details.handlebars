@@ -1,0 +1,81 @@
+<div id="class-details">
+  {{#if content.extendsFrom}}
+    <div class="extends">
+      <span class="name">Extends:</span>
+      <span class="value">{{extends content.extendsFrom}}</span>
+    </div>
+  {{/if}}
+  {{#if content.since}}
+    <div class="since">
+      <span class="name">Since:</span>
+      <span class="value">{{content.since}}</span>
+    </div>
+  {{/if}}
+</div>
+
+<div id="class-info">
+
+  {{#if content.formattedOverview}}
+    <h2> Overview </h2>
+    <div class="overview">
+      {{{content.formattedOverview}}}
+    </div>
+  {{/if}}
+
+  {{#if content.hasProperties}}
+    <h2> Properties </h2>
+    {{#collection Docs.PropertiesCollectionView itemClassNames="symbol"}}
+
+      <div {{bindAttr name="content.name"}}>
+        <div class="header">
+          {{content.name}}
+        </div>
+
+        <div class="subtitles">
+          {{#if content.propertyType}}
+            <span class="type">
+              <span class="name">Type: </span>
+              <span class="data-type" {{bindAttr name="content.propertyType"}}>
+                {{content.propertyType}}
+              </span>
+            </span>
+          {{/if}}
+          {{#if content.default}}
+          <span class="default">
+            <span class="name">Default</span>: 
+            <span class="value">{{content.default}}</span>
+          </span>
+          {{/if}}
+        </div>
+
+        <div class="overview">
+          {{content.formattedOverview}}
+        </div>
+      </div>
+
+      <hr>
+
+    {{/collection}}
+  {{/if}}
+
+  {{#if content.hasMethods}}
+    <h2> Methods </h2>
+    {{#collection Docs.MethodsCollectionView itemClassNames="symbol"}}
+
+      <div {{bindAttr name="content.name"}}>
+        <div class="header">
+          {{signature content}}
+        </div>
+
+        <div class="overview">
+          {{content.formattedOverview}}
+        </div>
+
+        {{returns content}}
+      </div>
+
+      <hr>
+
+    {{/collection}}
+  {{/if}}
+</div>
