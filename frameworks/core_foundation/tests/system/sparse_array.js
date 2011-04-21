@@ -199,3 +199,34 @@ SC.ArraySuite.generate("SC.SparseArray", {
     return SC.SparseArray.create({ delegate: del });
   }
 });
+
+test("should notify enumerable property", function() {
+    var arr = SC.SparseArray.create();
+    var count = 0;
+    function counter() {
+        count++;
+    }
+
+    arr.provideLength(1);
+    arr.addObserver('[]', this, counter);
+    arr.provideObjectAtIndex(0, 'one');
+    equals(count, 1, "observer should have fired once");
+});
+
+test("should notify range observers", function() {
+    var arr = SC.SparseArray.create();
+    var count = 0;
+    function counter(arr, objects, key, indexes) {
+        count++;
+    }
+
+    arr.provideLength(4);
+    var is = SC.IndexSet.create(0,1).add(2,1);
+    arr.addRangeObserver(is, this, counter);
+    arr.provideObjectAtIndex(0, 'one');
+    arr.provideObjectAtIndex(1, 'two');
+    arr.provideObjectAtIndex(2, 'three');
+    arr.provideObjectAtIndex(3, 'four');
+    equals(2, count, "observer should have fired twice");
+});
+
