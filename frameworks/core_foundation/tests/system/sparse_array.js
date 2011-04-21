@@ -230,3 +230,27 @@ test("should notify range observers", function() {
     equals(2, count, "observer should have fired twice");
 });
 
+test("test updating SparseArray length via delegate", function() {
+    var delegate = SC.Object.create({
+        arrlen: null,
+        sparseArrayDidRequestLength: function(arr) {
+            arr.provideLength(this.arrlen);
+        }
+    });
+
+    var arr = SC.SparseArray.create({delegate: delegate});
+    delegate.arrlen = 5;
+    equals(arr.get('length'), 5)
+    arr.provideLength(null);
+    delegate.arrlen = 50;
+    equals(arr.get('length'), 50)
+});
+
+test("test updating SparseArray length explictly", function() {
+    var arr = SC.SparseArray.create();
+    arr.provideLength(5);
+    equals(arr.get('length'), 5)
+    arr.provideLength(50);
+    equals(arr.get('length'), 50)
+});
+
