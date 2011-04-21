@@ -12,3 +12,4 @@ bin
 Gemfile*
 *.orig
 .sass-cache/
+.strobe/
