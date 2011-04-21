@@ -11,7 +11,8 @@ sc_require('views/template');
   set up. When the associated property changes, just the template for this view
   will re-render.
 */
-SC._BindableSpan = SC.TemplateView.extend({
+SC._BindableSpan = SC.TemplateView.extend(
+  /** @scope SC._BindableSpan.prototype */{
   /**
    The type of HTML tag to use. To ensure compatibility with
    Internet Explorer 7, a <span> tag is used to ensure that inline elements are

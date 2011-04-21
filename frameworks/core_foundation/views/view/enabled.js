@@ -1,6 +1,7 @@
 sc_require("views/view");
 
-SC.View.reopen({
+SC.View.reopen(
+  /** @scope SC.View.prototype */ {
   // ..........................................................
   // IS ENABLED SUPPORT
   //

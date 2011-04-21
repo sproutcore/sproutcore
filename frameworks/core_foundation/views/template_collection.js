@@ -1,6 +1,15 @@
 sc_require('views/template');
 
-SC.TemplateCollectionView = SC.TemplateView.extend({
+/** @class
+
+  @author Tom Dale
+  @author Yehuda Katz
+  @extends SC.TemplateView
+  @since SproutCore 1.5
+*/
+SC.TemplateCollectionView = SC.TemplateView.extend(
+  /** @scope SC.TemplateCollectionView.prototype */{
+
   tagName: 'ul',
   content: null,
   template: SC.Handlebars.compile(''),
