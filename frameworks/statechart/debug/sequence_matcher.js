@@ -11,63 +11,179 @@ SC.StatechartSequenceMatcher = SC.Object.extend({
   
   statechartMonitor: null,
   
-  position: 0,
+  match: null,
   
-  match: YES,
+  MISMATCH: {},
   
   begin: function() {
-    this.position = -1;
-    this.match = YES;
+    this._stack = [];
+    this.beginSequence();
+    this._start = this._stack[0];
     return this;
   },
   
   end: function() {
-    return this.match;
+    this.endSequence();
+    
+    if (this._stack.length > 0) {
+      throw "can not match sequence. sequence matcher has been left in an invalid state";
+    }
+    
+    var monitor = this.statechartMonitor,
+        result = this._matchSequence(this._start, 0) === monitor.sequence.length;
+
+    this.set('match', result);
+    
+    return result;
   },
   
   entered: function() {
-    return this._doCheck('entered', arguments);
+    this._addStatesToCurrentGroup('entered', arguments);
+    return this;
   },
   
   exited: function() {
-    return this._doCheck('exited', arguments);
+    this._addStatesToCurrentGroup('exited', arguments);
+    return this;
   },
   
-  _doCheck: function(event, args) {
-    var i = 0,
-        len = args.length,
-        seqItem = null,
-        arg = null,
-        seq = this.statechartMonitor.sequence;
+  beginConcurrent: function() {
+    var group = {
+      type: 'concurrent',
+      values: []
+    };
+    if (this._peek()) this._peek().values.push(group);
+    this._stack.push(group);
+    return this;
+  },
+  
+  endConcurrent: function() {
+    this._stack.pop();
+    return this;
+  },
+  
+  beginSequence: function() {
+    var group = {
+      type: 'sequence',
+      values: []
+    };
+    if (this._peek()) this._peek().values.push(group);
+    this._stack.push(group);
+    return this;
+  },
+  
+  endSequence: function() {
+    this._stack.pop();
+    return this;
+  },
+  
+  _peek: function() {
+    var len = this._stack.length;
+    return len === 0 ? null : this._stack[len - 1];
+  },
+  
+  _addStatesToCurrentGroup: function(action, states) {
+    var group = this._peek(), len = states.length, i = 0;
+    for (; i < len; i += 1) {
+      group.values.push({ action: action, state: states[i] });
+    }
+  },
+  
+  _matchSequence: function(sequence, marker) {
+    var values = sequence.values, 
+        len = values.length, 
+        i = 0, val,
+        monitor = this.statechartMonitor;
+        
+    if (len === 0) return marker;
+    if (marker > monitor.sequence.length) return this.MISMATCH;
         
     for (; i < len; i += 1) {
-      this.position += 1;
+      val = values[i];
+      
+      if (val.type === 'sequence') {
+        marker = this._matchSequence(val, marker);
+      } else if (val.type === 'concurrent') {
+        marker = this._matchConcurrent(val, marker);
+      } else if (!this._matchItems(val, monitor.sequence[marker])){
+        return this.MISMATCH;
+      } else {
+        marker += 1;
+      }
+      
+      if (marker === this.MISMATCH) return this.MISMATCH;
+    }
+    
+    return marker;
+  },
+
+  // A
+  // B (concurrent [X, Y])
+  //   X
+  //     M
+  //     N
+  //   Y
+  //     O
+  //     P
+  // C
+  // 
+  // 0 1  2 3 4   5 6 7  8
+  //      ^       ^
+  // A B (X M N) (Y O P) C
+  //      ^       ^
+  // A B (Y O P) (X M N) C
   
-      if (this.position >= seq.length) {
-        this.match = NO;
-        return this;
-      }
+  _matchConcurrent: function(concurrent, marker) {
+    var values = SC.clone(concurrent.values), 
+        len = values.length, 
+        i = 0, val, tempMarker = marker, match = false,
+        monitor = this.statechartMonitor;
+        
+    if (len === 0) return marker;
+    if (marker > monitor.sequence.length) return this.MISMATCH;
+    
+    while (values.length > 0) {
+      for (i = 0; i < len; i += 1) {
+        val = values[i];
       
-      seqItem = seq[this.position];
-      if (!seqItem[event]) {
-        this.match = NO;
-        return this;
-      }
-      
-      arg = args[i];
-      if (SC.typeOf(arg) === SC.T_OBJECT) {
-        if (seqItem[event] !== arg) {
-          this.match = NO;
-          return this;
+        if (val.type === 'sequence') {
+          tempMarker = this._matchSequence(val, marker);
+        } else if (val.type === 'concurrent') {
+          tempMarker = this._matchConcurrent(val, marker);
+        } else if (!this._matchItems(val, monitor.sequence[marker])){
+          tempMarker = this.MISMATCH;
+        } else {
+          tempMarker = marker + 1;
         }
-      } 
-      else if (seqItem[event].get('name') !== arg) {
-        this.match = NO;
-        return this;
+      
+        if (tempMarker !== this.MISMATCH) break;
       }
+      
+      if (tempMarker === this.MISMATCH) return this.MISMATCH;
+      values.removeAt(i);
+      len = values.length;
+      marker = tempMarker;
+    }
+    
+    return marker;
+  },
+  
+  _matchItems: function(matcherItem, monitorItem) {
+    if (!matcherItem || !monitorItem) return false;
+  
+    if (matcherItem.action !== monitorItem.action) {
+      return false;
+    }
+    
+    if (SC.typeOf(matcherItem.state) === SC.T_OBJECT && matcherItem.state === monitorItem.state) {
+      return true;      
+    }
+    
+    if (matcherItem.state === monitorItem.state.get('name')) {
+      return true;
     }
   
-    return this;
+    return false;
   }
   
 });
