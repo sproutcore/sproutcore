@@ -95,11 +95,6 @@ SC.SelectView = SC.PopupButtonView.extend({
   menu: SC.MenuPane.extend(SC.SelectViewMenu),
 
   /**
-    * If YES, the menu width will be automatically calculated based on its items.
-  */
-  shouldCalculateMenuWidth: YES,
-
-  /**
     * The currently selected item. If no item is selected, `null`.
    */
   selectedItem: null,
@@ -175,10 +170,12 @@ SC.SelectView = SC.PopupButtonView.extend({
   }.observes('value'),
 
   /**
-    * SelectView calculates its menu width (if shouldCalculateMenuWidth is set to YES),
-    * and also needs to set the initial selected item. While both of these happen in
-    * observers, createMenu is the natural point at which to set them initially.
-    * @private
+    SelectView must set the selectView property on the menu so that the menu's
+    properties get bound to the SelectView's. The bindings get set up by 
+    the SelectViewMenu mixin, which should be mixed in to any SelectView menu.
+
+    In addition, the initial selected item and the initial minimum menu width are set.
+    @private
   */
   createMenu: function(klass) {
     var attrs = {
@@ -209,6 +206,9 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     By default, this comes from the render delegate's menuTopOffset property.
     If you are writing a theme, you should set the value there.
+
+    @property
+    @default (from render delegate)
   */
   menuTopOffset: SC.propertyFromRenderDelegate('menuTopOffset', 0),
 
@@ -218,12 +218,15 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     By default, this comes from the render delegate's menuMinimumWidthOffset property.
     If you are writing a theme, you should set the value there.
+
+    @property
+    @default (from render delegate)
   */
   menuMinimumWidthOffset: SC.propertyFromRenderDelegate('menuMinimumWidthOffset', 0),
 
   /**
-    Calculates the prefer matrix so that the selected menu item is positioned
-    directly over the SelectView.
+    The prefer matrix for menu positioning. It is calculated so that the selected
+    menu item is positioned directly over the SelectView.
   */
   menuPreferMatrix: function() {
     var menu = this.get('menu'),
