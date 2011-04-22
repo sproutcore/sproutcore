@@ -8,7 +8,7 @@
 sc_require("system/utils/string_measurement");
 
 /**
-  @mixin
+  @class
   Use this mixin to make your view automatically resize based upon its value,
   title, or other string property. Only works for views that support automatic
   resizing.
