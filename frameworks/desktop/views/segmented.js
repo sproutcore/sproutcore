@@ -289,7 +289,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   itemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey', 'itemKeyEquivalentKey', 'itemLayerIdKey'],
   
   /** @private */
-  viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent'],
+  viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent', 'layerId'],
 
   /** @private
     Call itemsDidChange once to initialize segment child views for the items that exist at
