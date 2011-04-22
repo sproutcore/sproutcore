@@ -638,18 +638,16 @@ SC.MenuPane = SC.PickerPane.extend(
       if (!height) {
         height = item.get(separatorKey) ? separatorHeight : defaultHeight;
       }
-      view = this._menuView.createChildView(exampleView, {
+      propertiesHash = {
         layout: { height: height, top: menuHeight },
-        init :function() {
-          sc_super();
-          if(item.get(layerIdKey)) {
-            this.set('layerId',item.get(layerIdKey));
-          }
-        },
         contentDisplayProperties: keyArray,
         content: item,
         parentMenu: this
-      });
+      }
+      if(item.get(layerIdKey)) {
+        propertiesHash.layerId = item.get(layerIdKey);
+      }
+      view = this._menuView.createChildView(exampleView, propertiesHash);
       views[idx] = view;
       menuHeight += height;
       keyEquivalent = item.get(keyEquivalentKey);
