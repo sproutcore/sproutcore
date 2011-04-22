@@ -616,7 +616,7 @@ SC.MenuPane = SC.PickerPane.extend(
         exampleView = this.get('exampleView'), item, view,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
-        keyArray, idx, layerIdKey,
+        keyArray, idx, layerIdKey, propertiesHash,
         len;
 
     if (!items) return views; // return an empty array
@@ -643,7 +643,7 @@ SC.MenuPane = SC.PickerPane.extend(
         contentDisplayProperties: keyArray,
         content: item,
         parentMenu: this
-      }
+      };
       if(item.get(layerIdKey)) {
         propertiesHash.layerId = item.get(layerIdKey);
       }
