@@ -710,7 +710,7 @@ SC.Logger = SC.Object.create(
         type         = entry.type;
 
         if (includeTimestamps) {
-          timestampStr = timestampFormat.fmt(entry.timestamp.utcFormat());
+          timestampStr = timestampFormat.fmt(entry.timestamp.toUTCString());
         }
 
         // Is this a message or a group directive?
@@ -797,7 +797,7 @@ SC.Logger = SC.Object.create(
         type  = entry.type;
 
         // First determine the prefix.
-        prefix = timestampFormat.fmt(entry.timestamp.utcFormat());
+        prefix = timestampFormat.fmt(entry.timestamp.toUTCString());
         prefix += prefixMapping[type] || "";
 
         // Is this a message or a group directive?
