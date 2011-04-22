@@ -113,10 +113,17 @@ test("send event eventB", function() {
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');
   
   equals(monitor.get('length'), 4, 'state sequence should be of length 4');
-  equals(monitor.matchSequence()
-                .begin()
-                .exited('c').entered('d')
-                .exited('e').entered('f')
+  equals(monitor.matchSequence().begin()
+                  .beginConcurrent()
+                    .beginSequence()
+                      .exited('c')
+                      .entered('d')
+                    .endSequence()
+                    .beginSequence()
+                      .exited('e')
+                      .entered('f')
+                    .endSequence()
+                  .endConcurrent()
                 .end(), 
           true, 'sequence should be exited[c], entered[d], exited[e], entered[f]');
 });
@@ -137,10 +144,15 @@ test("send event eventB then eventC", function() {
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
 
   equals(monitor.get('length'), 4, 'state sequence should be of length 4');
-  equals(monitor.matchSequence()
-                .begin()
-                .exited('d').entered('c')
-                .exited('f').entered('e')
+  equals(monitor.matchSequence().begin()
+                  .beginConcurrent()
+                    .beginSequence()
+                      .exited('d').entered('c')
+                    .endSequence()
+                    .beginSequence()
+                      .exited('f').entered('e')
+                    .endSequence()
+                  .endConcurrent()
                 .end(), 
           true, 'sequence should be exited[d], entered[c], exited[f], entered[e]');
 });
@@ -156,9 +168,17 @@ test("send event eventD", function() {
   statechart.sendEvent('eventD');
   
   equals(monitor.get('length'), 6, 'state sequence should be of length 6');
-  equals(monitor.matchSequence()
-                .begin()
-                .exited('c', 'a', 'e', 'b', 'x').entered('y')
+  equals(monitor.matchSequence().begin()
+                  .beginConcurrent()
+                    .beginSequence()
+                      .exited('c', 'a')
+                    .endSequence()
+                    .beginSequence()
+                      .exited('e', 'b')
+                    .endSequence()
+                  .endConcurrent()
+                  .exited('x')
+                  .entered('y')
                 .end(), 
           true, 'sequence should be exited[c, a, e, b, x], entered[y]');
           
