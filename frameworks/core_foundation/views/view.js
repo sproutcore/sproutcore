@@ -856,7 +856,7 @@ SC.CoreView.reopen(
     @property {Array}
     @readOnly
   */
-  displayProperties: ['isFirstResponder'],
+  displayProperties: [],
 
   // .......................................................
   // SC.RESPONDER SUPPORT
@@ -1515,7 +1515,9 @@ SC.CoreView.unload = function() {
 
 */
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
-  classNames: ['sc-view']
+  classNames: ['sc-view'],
+  
+  displayProperties: ['isFirstResponder']
 });
 
 //unload views for IE, trying to collect memory.
