@@ -32,13 +32,12 @@ SC.mixin(SC.String, {
   /**
     Capitalizes a string.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | My favorite items |
-    | css-class-name | Css-class-name |
-    | action_name | Action_name |
-    | innerHTML | InnerHTML |
+        capitalize('my favorite items') // 'My favorite items'
+        capitalize('css-class-name')    // 'Css-class-name'
+        capitalize('action_name')       // 'Action_name'
+        capitalize('innerHTML')         // 'InnerHTML'
 
     @return {String} capitalized string
   */
@@ -50,13 +49,12 @@ SC.mixin(SC.String, {
     Camelizes a string.  This will take any words separated by spaces, dashes
     or underscores and convert them into camelCase.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | myFavoriteItems |
-    | css-class-name | cssClassName |
-    | action_name | actionName |
-    | innerHTML | innerHTML |
+        camelize('my favorite items') // 'myFavoriteItems'
+        camelize('css-class-name')    // 'cssClassName'
+        camelize('action_name')       // 'actionName'
+        camelize('innerHTML')         // 'innerHTML'
 
     @returns {String} camelized string
   */
@@ -74,13 +72,12 @@ SC.mixin(SC.String, {
   /**
     Converts a camelized string into all lower case separated by underscores.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | my favorite items |
-    | css-class-name | css-class-name |
-    | action_name | action_name |
-    | innerHTML | inner_html |
+    decamelize('my favorite items') // 'my favorite items'
+    decamelize('css-class-name')    // 'css-class-name'
+    decamelize('action_name')       // 'action_name'
+    decamelize('innerHTML')         // 'inner_html'
 
     @returns {String} the decamelized string.
   */
@@ -92,13 +89,13 @@ SC.mixin(SC.String, {
     Converts a camelized string or a string with spaces or underscores into
     a string with components separated by dashes.
 
-    h2. Examples
+    ## Examples
 
     | *Input String* | *Output String* |
-    | my favorite items | my-favorite-items |
-    | css-class-name | css-class-name |
-    | action_name | action-name |
-    | innerHTML | inner-html |
+    dasherize('my favorite items') // 'my-favorite-items'
+    dasherize('css-class-name')    // 'css-class-name'
+    dasherize('action_name')       // 'action-name'
+    dasherize('innerHTML')         // 'inner-html'
 
     @returns {String} the dasherized string.
   */
