@@ -7,7 +7,7 @@
 
 // When in debug mode, it’s useful for our observer sets (which are used by
 // invokeOnce and invokeLast) to record which code scheduled the
-// invokeOnce/invokeLast targets/methods.
+// `invokeOnce`/`invokeLast` targets/methods.
 
 window.SC = window.SC || {};
 
