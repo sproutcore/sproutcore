@@ -8,10 +8,10 @@
 /*global SC */
 
 /** @class
-  This is a basic designer used for all SC.Objects that are created in design
-  mode.
+  This is a basic designer used for all `SC.Object`s that are created in
+  design mode.
   
-  FIXME: have SC.ViewDesigner subclass this designer.....
+  FIXME: have `SC.ViewDesigner` subclass this designer.....
 
   @extends SC.Object
   @since SproutCore 1.0
@@ -25,10 +25,10 @@ SC.ObjectDesigner = SC.Object.extend(
   /** The class for the design.  Set when the object is created. */
   objectClass: null,
   
-  /** Set to YES if the object is currently selected for editing. */
+  /** Set to `YES` if the object is currently selected for editing. */
   designIsSelected: NO,
 
-  /** Set to YES if this particular designer should not be enabled. */
+  /** Set to `YES` if this particular designer should not be enabled. */
   designIsEnabled: YES,
   
   /**
@@ -84,7 +84,7 @@ SC.ObjectDesigner = SC.Object.extend(
     Array of properties that can be encoded directly.  This is an easy way to
     add support for simple properties that need to be written to the design
     without added code.  These properties will be encoded by 
-    encodeDesignProperties().
+    `encodeDesignProperties()`.
     
     You can add to this array in your subclasses.
   */
@@ -126,8 +126,8 @@ SC.ObjectDesigner = SC.Object.extend(
   
   /** 
     Invoked by a design coder to encode design properties.  The default 
-    implementation invoked encodeDesignProperties() and 
-    encodeChildViewsDesign().  You can override this method with your own 
+    implementation invoked `encodeDesignProperties()` and
+    `encodeChildViewsDesign()`.  You can override this method with your own
     additional encoding if you like.
   */
   encodeDesign: function(coder) {
@@ -150,7 +150,7 @@ SC.ObjectDesigner = SC.Object.extend(
     Array of localized that can be encoded directly.  This is an easy way to
     add support for simple properties that need to be written to the 
     localization without added code.  These properties will be encoded by 
-    encodeLocalizedProperties().
+    `encodeLocalizedProperties()`.
     
     You can add to this array in your subclasses.
   */
@@ -158,8 +158,8 @@ SC.ObjectDesigner = SC.Object.extend(
   
   /** 
     Invoked by a localization coder to encode design properties.  The default 
-    implementation invoked encodeLocalizedProperties() and 
-    encodeChildViewsLoc().  You can override this method with your own 
+    implementation invoked `encodeLocalizedProperties()` and
+    `encodeChildViewsLoc()`.  You can override this method with your own
     additional encoding if you like.
   */
   encodeLoc: function(coder) {
@@ -187,7 +187,7 @@ SC.ObjectDesigner = SC.Object.extend(
   awakeDesign: function() {},
   
   /**
-    The unknownProperty handler will pass through to the object by default. 
+    The `unknownProperty` handler will pass through to the object by default.
     This will often provide you the support you need without needing to 
     customize the Designer.  Just make sure you don't define a conflicting
     property name on the designer itself!
