@@ -11,9 +11,9 @@ sc_require('views/high_light');
 /** @class
 
   A Designer class provides the core editing functionality you need to edit
-  a view in the UI.  When your app loads in design.mode, a peer Designer 
+  a view in the UI.  When your app loads in `design.mode`, a peer Designer 
   instance is created for every view using the class method Designer or
-  SC.ViewDesigner if the view class does not define a Designer class.
+  `SC.ViewDesigner` if the view class does not define a Designer class.
   
   Whenever you put your app into design mode, all events will be routed first
   to the peer designer for an object, which will have an opportunity to 
@@ -22,12 +22,12 @@ sc_require('views/high_light');
   Likewise, the designer palettes provided by the view builder will focus on 
   the designer instead of the view itself.
   
-  h2. Designer UI
+  ## Designer UI
   
   The basic ViewDesigner class automatically handles the UI interaction for
   layout.  You can also double click on the view to perform a default action.
   
-  For views with isContainerView set to YES, double clicking on the view will
+  For views with `isContainerView` set to `YES`, double clicking on the view will
   automatically "focus" the view.  This allows you to select the view's 
   children instead of the view itself.
 
@@ -73,8 +73,8 @@ SC.ViewDesigner = SC.Object.extend(
     If set to NO, the default childView encoding will not run.  You can use
     this option, for example, if your view creates its own childViews.
     
-    Alternatively, you can override the encodeChildViewsDesign() and 
-    encodeChildViewsLoc() methods.
+    Alternatively, you can override the `encodeChildViewsDesign()` and 
+    `encodeChildViewsLoc()` methods.
     
     @property {Boolean}
   */
@@ -88,12 +88,12 @@ SC.ViewDesigner = SC.Object.extend(
   // 
   
   /**
-    Set to NO to hide horizontal resize handles
+    Set to `NO` to hide horizontal resize handles
   */
   canResizeHorizontal: YES,
   
   /**
-    Set to NO to resize vertical handles
+    Set to `NO` to resize vertical handles
   */
   canResizeVertical: YES,
   
@@ -113,12 +113,12 @@ SC.ViewDesigner = SC.Object.extend(
   minHeight: 10,
   
   /**
-    Determines maximum allowed width.  null means no limit
+    Determines maximum allowed width.  `null` means no limit
   */
   maxWidth: 100000000,
   
   /**
-    Determines maximum allowed height.  null means no limit
+    Determines maximum allowed height.  `null` means no limit
   */
   maxHeight: 100000000,
   
@@ -142,11 +142,11 @@ SC.ViewDesigner = SC.Object.extend(
     The current anchor location.  This determines which of the other dimension 
     metrics are actually used to compute the layout.  The value may be one of:
     
-     TOP_LEFT, TOP_CENTER, TOP_RIGHT, TOP_HEIGHT,
-     CENTER_LEFT, CENTER_CENTER, CENTER_RIGHT, CENTER_HEIGHT
-     BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_HEIGHT,
-     WIDTH_LEFT, WIDTH_CENTER, WIDTH_RIGHT, WIDTH_HEIGHT,
-     null
+       TOP_LEFT, TOP_CENTER, TOP_RIGHT, TOP_HEIGHT,
+       CENTER_LEFT, CENTER_CENTER, CENTER_RIGHT, CENTER_HEIGHT
+       BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_HEIGHT,
+       WIDTH_LEFT, WIDTH_CENTER, WIDTH_RIGHT, WIDTH_HEIGHT,
+       null
   
     @property
     @type {Number}
@@ -237,21 +237,21 @@ SC.ViewDesigner = SC.Object.extend(
   },
   
   /**
-    Returns the top offset of the current layout or null if not defined
+    Returns the top offset of the current layout or `null` if not defined
   */
   layoutTop: function(key, value) {
     return this._layoutProperty('top', value);
   }.property('layout').cacheable(),
 
   /**
-    Returns the bottom offset of the current layout or null if not defined
+    Returns the bottom offset of the current layout or `null` if not defined
   */
   layoutBottom: function(key, value) {
     return this._layoutProperty('bottom', value);
   }.property('layout').cacheable(),
 
   /**
-    Returns the centerY offset of the current layout or null if not defined
+    Returns the centerY offset of the current layout or `null` if not defined
   */
   layoutCenterY: function(key, value) {
     return this._layoutProperty('centerY', value);
@@ -265,35 +265,35 @@ SC.ViewDesigner = SC.Object.extend(
   }.property('layout').cacheable(),
 
   /**
-    Returns the top offset of the current layout or null if not defined
+    Returns the top offset of the current layout or `null` if not defined
   */
   layoutTop: function(key, value) {
     return this._layoutProperty('top', value);
   }.property('layout').cacheable(),
 
   /**
-    Returns the left offset of the current layout or null if not defined
+    Returns the left offset of the current layout or `null` if not defined
   */
   layoutLeft: function(key, value) {
     return this._layoutProperty('left', value);
   }.property('layout').cacheable(),
   
   /**
-    Returns the right offset of the current layout or null if not defined
+    Returns the right offset of the current layout or `null` if not defined
   */
   layoutRight: function(key, value) {
     return this._layoutProperty('right', value);
   }.property('layout').cacheable(),
   
   /**
-    Returns the centerX offset of the current layout or null if not defined
+    Returns the centerX offset of the current layout or `null` if not defined
   */
   layoutCenterX: function(key, value) {
     return this._layoutProperty('centerX', value);
   }.property('layout').cacheable(),
   
   /**
-    Returns the width offset of the current layout or null if not defined
+    Returns the width offset of the current layout or `null` if not defined
   */
   layoutWidth: function(key, value) {
     return this._layoutProperty('width', value);
@@ -311,8 +311,8 @@ SC.ViewDesigner = SC.Object.extend(
 
   /**
     Encodes any simple properties that can just be copied from the view onto
-    the coder.  This is used by encodeDesignProperties() and 
-    encodeLocalizedProperties().
+    the coder.  This is used by `encodeDesignProperties()` and 
+    `encodeLocalizedProperties()`.
   */
   encodeSimpleProperties: function(props, coder) {    
     var view = this.get('view'), proto = this.get('viewClass').prototype ;
@@ -336,7 +336,7 @@ SC.ViewDesigner = SC.Object.extend(
     Array of properties that can be encoded directly.  This is an easy way to
     add support for simple properties that need to be written to the design
     without added code.  These properties will be encoded by 
-    encodeDesignProperties().
+    `encodeDesignProperties()`.
     
     You can add to this array in your subclasses.
   */
@@ -380,8 +380,8 @@ SC.ViewDesigner = SC.Object.extend(
   
   /** 
     Invoked by a design coder to encode design properties.  The default 
-    implementation invoked encodeDesignProperties() and 
-    encodeChildViewsDesign().  You can override this method with your own 
+    implementation invoked `encodeDesignProperties()` and 
+    `encodeChildViewsDesign()`.  You can override this method with your own 
     additional encoding if you like.
   */
   encodeDesign: function(coder) {
@@ -434,7 +434,7 @@ SC.ViewDesigner = SC.Object.extend(
     Array of localized that can be encoded directly.  This is an easy way to
     add support for simple properties that need to be written to the 
     localization without added code.  These properties will be encoded by 
-    encodeLocalizedProperties().
+    `encodeLocalizedProperties()`.
     
     You can add to this array in your subclasses.
   */
@@ -442,8 +442,8 @@ SC.ViewDesigner = SC.Object.extend(
   
   /** 
     Invoked by a localization coder to encode design properties.  The default 
-    implementation invoked encodeLocalizedProperties() and 
-    encodeChildViewsLoc().  You can override this method with your own 
+    implementation invoked `encodeLocalizedProperties()` and 
+    `encodeChildViewsLoc()`.  You can override this method with your own 
     additional encoding if you like.
   */
   encodeLoc: function(coder) {
@@ -535,7 +535,7 @@ SC.ViewDesigner = SC.Object.extend(
   },
   
   /**
-    The unknownProperty handler will pass through to the view by default. 
+    The `unknownProperty` handler will pass through to the view by default. 
     This will often provide you the support you need without needing to 
     customize the Designer.  Just make sure you don't define a conflicting
     property name on the designer itself!
@@ -638,7 +638,7 @@ SC.ViewDesigner = SC.Object.extend(
   }.property(),
   
   /**
-    set this property to YES if you want your designer to become Root
+    set this property to `YES` if you want your designer to become Root
   */
   acceptRootDesigner: NO,
   
@@ -691,7 +691,7 @@ SC.ViewDesigner = SC.Object.extend(
   HANDLE_MARGIN: 10,
   
   /**
-    Select on mouseDown.  If metaKey or shiftKey is pressed, add to
+    Select on `mouseDown`.  If `metaKey` or `shiftKey` is pressed, add to
     selection.  Otherwise just save starting info for dragging
   */
   mouseDown: function(evt) {
@@ -859,7 +859,7 @@ SC.ViewDesigner = SC.Object.extend(
   },
   
   /**
-    On mouseUp potentially change selection and cleanup.
+    On `mouseUp` potentially change selection and cleanup.
   */
   mouseUp: function(evt) {
     if (!this.get('designIsEnabled') || !this.get('parentDesignerIsRoot')) return NO ;
@@ -900,7 +900,7 @@ SC.ViewDesigner = SC.Object.extend(
   },
   
   /**
-    Called by designerController to reposition the view
+    Called by `designerController` to reposition the view
   */
   mouseReposition: function(evt, info) {
     var layout = SC.copy(this.get('layout'));
@@ -1074,7 +1074,7 @@ SC.ViewDesigner = SC.Object.extend(
   
   /**
     This method is called whenever the drag image is moved.  This is
-    similar to the dragUpdated() method called on drop targets.
+    similar to the `dragUpdated()` method called on drop targets.
 
     @param {SC.Drag} drag The Drag instance managing this drag.
 

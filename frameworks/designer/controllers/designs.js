@@ -68,10 +68,10 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
     general which operations you might support and specifically the operations
     you would support if the user dropped an item over a specific location.
     
-    If the proposedDropOperation parameter is SC.DROP_ON or SC.DROP_BEFORE, 
-    then the proposedInsertionPoint will be a non-negative value and you 
-    should determine the specific operations you will support if the user 
-    dropped the drag item at that point.
+    If the `proposedDropOperation` parameter is `SC.DROP_ON` or
+    `SC.DROP_BEFORE`, then the `proposedInsertionPoint` will be a
+    non-negative value and you should determine the specific operations you
+    will support if the user dropped the drag item at that point.
     
     If you do not like the proposed drop operation or insertion point, you 
     can override these properties as well by setting the proposedDropOperation
@@ -99,12 +99,12 @@ SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
   
   /**
     Called by the collection view to actually accept a drop.  This method will
-    only be invoked AFTER your validateDrop method has been called to
+    only be invoked *AFTER* your `validateDrop` method has been called to
     determine if you want to even allow the drag operation to go through.
     
     You should actually make changes to the data model if needed here and
     then return the actual drag operation that was performed.  If you return
-    SC.DRAG_NONE and the dragOperation was SC.DRAG_REORDER, then the default
+    SC.DRAG_NONE and the dragOperation was `SC.DRAG_REORDER`, then the default
     reorder behavior will be provided by the collection view.
     
     @param view {SC.CollectionView}

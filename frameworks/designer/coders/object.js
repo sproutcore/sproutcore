@@ -8,21 +8,21 @@
 
 /**
 
-  Generic base class to encode a view hierarchy.  ViewCoders are used to 
+  Generic base class to encode a view hierarchy.  `ViewCoder`s are used to 
   collect the properties that may be included in a view design and then to 
   serialize that design to a JavaScript string that can be evaled.  
   
-  To encode a view with a ViewCoder, simply call SC.ViewCoder.encode(view).
+  To encode a view with a `ViewCoder`, simply call `SC.ViewCoder.encode(view)`.
   Most of the time, however, you will not initiate coding directly but instead
-  work with the coder while designing an SC.DesignerView subclass.
+  work with the coder while designing an `SC.DesignerView` subclass.
 
-  h2. Using a Coder
+  ## Using a Coder
 
   When you are passed an instance of a coder, you can simply write attributes
   into the coder using one of the many encoding methods defined on the view.
   Encoding methods are defined for most primitive view types.
   
-    coder.string("firstName" , "Charles").string('lastName', 'Jolley');
+      coder.string("firstName" , "Charles").string('lastName', 'Jolley');
   
   @extends SC.Object
 */
@@ -32,7 +32,7 @@ SC.ObjectCoder = SC.Object.extend({
   // PROPERTIES
   // 
   
-  /** The className used to emit the design. */
+  /** The `className` used to emit the design. */
   className: 'SC.Object',
   
   /** 
@@ -130,7 +130,7 @@ SC.ObjectCoder = SC.Object.extend({
   },
   
   /**
-    Encodes a bool, mapped as YES or NO
+    Encodes a bool, mapped as `YES` or `NO`
     
     @param key {String} the key to set
     @param val {Boolean} the value
@@ -146,8 +146,8 @@ SC.ObjectCoder = SC.Object.extend({
     on object members before processing to allow you to normalize.  The 
     method signature must be:
     
-      function convert(value, rootObject, key);
-      
+        function convert(value, rootObject, key);
+    
     The rootObject and key will be set to give you the context in the 
     hierarchy.
     
@@ -202,7 +202,7 @@ SC.ObjectCoder = SC.Object.extend({
     Encodes a hash of objects.  The object values must be simple objects for
     this method to work.  You can also optionally pass a processing function
     that will be invoked for each value, giving you a chance to convert the
-    value first.  The signature must be (key, value, rootObject).
+    value first.  The signature must be `(key, value, rootObject)`.
     
     @param key {String} the key to set
     @param val {Object} the value
@@ -230,7 +230,7 @@ SC.ObjectCoder = SC.Object.extend({
     Encodes a array of objects.  The object values must be simple objects for
     this method to work.  You can also optionally pass a processing function
     that will be invoked for each value, giving you a chance to convert the
-    value first.  The signature must be (index, value, rootObject).
+    value first.  The signature must be `(index, value, rootObject)`.
     
     @param key {String} the key to set
     @param val {Object} the value
@@ -304,7 +304,7 @@ SC.ObjectCoder = SC.Object.extend({
   
   /**
     Begins encoding with a particular object, setting the className to the 
-    object's className.  This is used internally by the encode() method.
+    object's `className`.  This is used internally by the `encode()` method.
   */
   begin: function(object) {
     var methodName = this.get('encodeMethodName');

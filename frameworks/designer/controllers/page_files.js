@@ -11,7 +11,7 @@
 
 /** @class
 
-  in suppressMain mode all page files register with this array controller
+  in `suppressMain` mode all page files register with this array controller
 
   @extends SC.Object
 */

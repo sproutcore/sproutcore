@@ -4,7 +4,7 @@
 
 /**
   This View is used by Greenhouse when application is in design mode
-  It darkens the area around the rootDesigner
+  It darkens the area around the `rootDesigner`
 */
 SC.RootDesignerHighLightView = SC.View.extend(
 /** @scope SC.RootDesignerHighLight.prototype */ {
