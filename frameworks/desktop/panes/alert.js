@@ -43,33 +43,33 @@ SC.BUTTON3_STATUS = 'button3';
   useful for showing important error messages and confirmation dialogs. They
   provide a better user experience than using the OS-level alert dialogs.
   
-  # Displaying an Alert Pane
+  ## Displaying an Alert Pane
   
   The easiest way to display an alert pane is to use one of the various
-  class methods defined on SC.AlertPane, passing the message and an optional
+  class methods defined on `SC.AlertPane`, passing the message and an optional
   detailed description and caption.
   
   There are four variations of this method can you can invoke:
   
-    - *warn()* - displays an alert pane with a warning icon to the left.
-    - *error()* - displays an alert with an error icon to the left
-    - *info()* - displays an alert with an info icon to the left
-    - *plain()* - displays an alert w/o any icon
-    - *show()* - displays an alert with a customizable icon to the left
+   - `warn()` -- displays an alert pane with a warning icon to the left.
+   - `error()` -- displays an alert with an error icon to the left
+   - `info()` -- displays an alert with an info icon to the left
+   - `plain()` -- displays an alert w/o any icon
+   - `show()` -- displays an alert with a customizable icon to the left
   
   In addition to passing a message, description and caption, you can also customize
   the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).
   
-    - button1 - 1st button from the right. default:OK
-    - button2 - 2nd button from the right. Optional. Could be Cancel or 2nd action.
-    - button3 - 1st button from the left. Optional. Could be Cancel or alternative option.
+   - button1 -- 1st button from the right. default:OK
+   - button2 -- 2nd button from the right. Optional. Could be Cancel or 2nd action.
+   - button3 -- 1st button from the left. Optional. Could be Cancel or alternative option.
   
   Additionally, you can define a delegate object.  This delegate's 
-  'alertPaneDidDismiss()' method will be called when the pane
+  `alertPaneDidDismiss()` method will be called when the pane
   is dismissed, passing the pane instance and a key indicating which 
   button was pressed.
   
-  # Examples
+  ## Examples
   
   Show a simple AlertPane with an OK button:
   
@@ -178,7 +178,7 @@ SC.AlertPane = SC.PanelPane.extend(
     
         alertPaneDidDismiss: function(pane, status) {}
     
-    The status will be one of SC.BUTTON1_STATUS, SC.BUTTON2_STATUS or SC.BUTTON3_STATUS
+    The status will be one of `SC.BUTTON1_STATUS`, `SC.BUTTON2_STATUS` or `SC.BUTTON3_STATUS`
     depending on which button was clicked.
     
     @type Object
@@ -373,11 +373,12 @@ SC.AlertPane = SC.PanelPane.extend(
     alertpane itself.
     
     This will trigger the following chain of events:
-    1. If a delegate was given, and it has alertPaneDidDismiss it will be called
-    2. Otherwise it will look for the action of the button and call:
-       a) The action function reference if one was given
-       b) The action method on the target if one was given
-       c) If both a and b are missing, call the action on the rootResponder
+
+     1. If a delegate was given, and it has alertPaneDidDismiss it will be called
+     2. Otherwise it will look for the action of the button and call:
+      a) The action function reference if one was given
+      b) The action method on the target if one was given
+      c) If both a and b are missing, call the action on the rootResponder
     
     @param {SC.View} sender - the button view that was clicked
   */
@@ -431,7 +432,7 @@ SC.AlertPane.mixin(
         });
     
     See more examples for how to configure buttons and individual actions in the 
-    documentation for the SC.AlertPane class.
+    documentation for the `SC.AlertPane` class.
     
     @param {Hash} args
     @return {SC.AlertPane} the pane shown
@@ -474,7 +475,7 @@ SC.AlertPane.mixin(
   },
   
   /**
-    Same as show() just that it uses sc-icon-alert-48 CSS classname
+    Same as `show()` just that it uses sc-icon-alert-48 CSS classname
     as the dialog icon
     
     @param {Hash} args
@@ -489,7 +490,7 @@ SC.AlertPane.mixin(
   },
   
   /**
-    Same as show() just that it uses sc-icon-info-48 CSS classname
+    Same as `show()` just that it uses sc-icon-info-48 CSS classname
     as the dialog icon
     
     @param {Hash} args
@@ -504,7 +505,7 @@ SC.AlertPane.mixin(
   },
   
   /**
-    Same as show() just that it uses sc-icon-error-48 CSS classname
+    Same as `show()` just that it uses sc-icon-error-48 CSS classname
     as the dialog icon
     
     @param {Hash} args
@@ -519,7 +520,7 @@ SC.AlertPane.mixin(
   },
   
   /**
-    Same as show() just that it uses blank CSS classname
+    Same as `show()` just that it uses blank CSS classname
     as the dialog icon
     
     @param {Hash} args

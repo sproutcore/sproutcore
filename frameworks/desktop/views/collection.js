@@ -33,12 +33,12 @@ SC.BENCHMARK_RELOAD = NO;
 
   Renders a collection of views from a source array of model objects.
    
-  The CollectionView is the root view class for rendering collections of 
+  The `CollectionView` is the root view class for rendering collections of
   views based on a source array of objects.  It can automatically create the
   and layout the views, including displaying them in groups.  It also 
   handles event input for the entire collection.
   
-  To use CollectionView, just create the view and set the 'content' property
+  To use `CollectionView`, just create the view and set the 'content' property
   to an array of objects.  (Note that if you setup a binding, it will 
   always transform content to an array.)  The view will create instances of
   exampleView to render the array.  You can also bind to the selection 
@@ -83,7 +83,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   //
   
   /**
-    If YES, uses the experimental fast CollectionView path.
+    If `YES`, uses the experimental fast `CollectionView` path.
     
     @type Boolean
     @default NO
@@ -94,12 +94,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     An array of content objects
     
     This array should contain the content objects you want the collection view 
-    to display.  An item view (based on the exampleView view class) will be 
+    to display.  An item view (based on the `exampleView` view class) will be
     created for each content object, in the order the content objects appear 
     in this array.
     
     If you make the collection editable, the collection view will also modify 
-    this array using the observable array methods of SC.Array.
+    this array using the observable array methods of `SC.Array`.
     
     Usually you will want to bind this property to a controller property 
     that actually contains the array of objects you to display.
@@ -143,12 +143,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   }.property('length', 'clippingFrame').cacheable(),
   
   /**
-    Indexes of selected content objects.  This SC.SelectionSet is modified 
+    Indexes of selected content objects.  This `SC.SelectionSet` is modified
     automatically by the collection view when the user changes the selection 
     on the collection.
     
     Any item views representing content objects in this set will have their 
-    isSelected property set to YES automatically.
+    isSelected property set to `YES` automatically.
     
     @type SC.SelectionSet
     @default null
@@ -158,8 +158,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** 
     Allow user to select content using the mouse and keyboard.
     
-    Set this property to NO to disallow the user from selecting items. If you 
-    have items in your selectedIndexes property, they will still be reflected
+    Set this property to `NO` to disallow the user from selecting items. If you
+    have items in your `selectedIndexes property, they will still be reflected
     visually.
     
     @type Boolean
@@ -173,10 +173,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Enable or disable the view.
     
-    The collection view will set the isEnabled property of its item views to
-    reflect the same view of this property.  Whenever isEnabled is false,
+    The collection view will set the `isEnabled` property of its item views to
+    reflect the same view of this property.  Whenever ``isEnabled` is false,
     the collection view will also be not selectable or editable, regardless of 
-    the settings for isEditable & isSelectable.
+    the settings for isEditable` & `isSelectable`.
     
     @type Boolean
     @default YES
@@ -189,10 +189,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Allow user to edit content views.
     
-    The collection view will set the isEditable property on its item views to
-    reflect the same value of this property.  Whenever isEditable is false, 
+    The collection view will set the `isEditable` property on its item views to
+    reflect the same value of this property.  Whenever `isEditable` is false,
     the user will not be able to reorder, add, or delete items regardless of 
-    the canReorderContent and canDeleteContent and isDropTarget properties.
+    the `canReorderContent` and `canDeleteContent` and `isDropTarget`
+    properties.
     
     @type Boolean
     @default YES
@@ -233,8 +234,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   
   /**
     Allow user to edit the content by double clicking on it or hitting return.
-    This will only work if isEditable is YES and the item view implements 
-    the beginEditing() method.
+    This will only work if isEditable is `YES` and the item view implements
+    the `beginEditing()` method.
     
     @type Boolean
   */
@@ -274,8 +275,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     object and double clicking will trigger the action method on the 
     collection view.
     
-    If you set this property to YES, then clicking on a view will both select 
-    it (if isSelected is true) and trigger the action method.  
+    If you set this property to `YES`, then clicking on a view will both select
+    it (if `isSelected` is true) and trigger the action method.
     
     Use this if you are using the collection view as a menu of items.
     
@@ -310,9 +311,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     For best results, the view you set here should understand the following 
     properties:
     
-      - *content* The content object from the content array your view should display
-      - *isEnabled* True if the view should appear enabled
-      - *isSelected* True if the view should appear selected
+     - `content` -- The content object from the content array your view should display
+     - `isEnabled` -- True if the view should appear enabled
+     - `isSelected` -- True if the view should appear selected
     
     In general you do not want your child views to actually respond to mouse 
     and keyboard events themselves.  It is better to let the collection view 
@@ -354,7 +355,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   
   /**
     If set, this key will be used to get the example view for a given
-    content object.  The groupExampleView property will be ignored.
+    content object.  The `groupExampleView` property will be ignored.
     
     @type String
     @default null
@@ -367,7 +368,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     
     Set this to the name of the action you want to send down the
     responder chain when the user double clicks on an item (or single clicks 
-    if actOnSelect is true).  You can optionally specify a specific target as 
+    if `actOnSelect` is true).  You can optionally specify a specific target as
     well using the target property.
     
     If you do not specify an action, then the collection view will also try to 
@@ -402,12 +403,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** 
     Property on content items to use for display.
     
-    Built-in item views such as the LabelViews and ImageViews will use the
+    Built-in item views such as the `LabelView`s and `ImageView`s will use the
     value of this property as a key on the content object to determine the
     value they should display.
     
-    For example, if you set contentValueKey to 'name' and set the 
-    exampleView to an SC.LabelView, then the label views created by the 
+    For example, if you set `contentValueKey` to 'name' and set the 
+    exampleView to an `SC.LabelView`, then the label views created by the
     colleciton view will display the value of the content.name.
     
     If you are writing your own custom item view for a collection, you can
@@ -429,7 +430,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   acceptsFirstResponder: NO,
   
   /**
-    Changing this property value by default will cause the CollectionView to
+    Changing this property value by default will cause the `CollectionView` to
     add/remove an 'active' class name to the root element.
     
     @type Boolean
@@ -441,7 +442,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** 
     This property is used to store the calculated height to have 
     a consistent scrolling behavior due to the issues generated by using top
-    instead of scrollTop. We could look at the min-height set in the view, but
+    instead of `scrollTop`. We could look at the min-height set in the view, but
     to avoid perf hits we simply store it and the scrollView will use it if 
     different than 0.
     
@@ -453,7 +454,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** 
     This property is used to store the calculated width to have 
     a consistent scrolling behavior due to the issues generated by using left
-    instead of scrollLeft. We could look at the min-width set in the view, but
+    instead of `scrollLeft`. We could look at the min-width set in the view, but
     to avoid perf hits we simply store it and the scrollView will use it if 
     different than 0.
     
@@ -499,7 +500,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     This computed property returns an index set selecting all content indexes.
     It will recompute anytime the length of the collection view changes.
     
-    This is used by the default contentIndexesInRect() implementation.
+    This is used by the default `contentIndexesInRect()` implementation.
     
     @field
     @type SC.IndexSet
@@ -512,8 +513,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Override to return an IndexSet with the indexes that are at least 
     partially visible in the passed rectangle.  This method is used by the 
-    default implementation of computeNowShowing() to determine the new 
-    nowShowing range after a scroll.
+    default implementation of `computeNowShowing()` to determine the new
+    `nowShowing` range after a scroll.
     
     Override this method to implement incremental rendering.
     
@@ -553,11 +554,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     
     Called during a drag to show the insertion point.  Passed value is the
     item view that you should display the insertion point before.  If the
-    passed value is null, then you should show the insertion point AFTER that
+    passed value is `null`, then you should show the insertion point *AFTER* that
     last item view returned by the itemViews property.
     
     Once this method is called, you are guaranteed to also recieve a call to
-    hideInsertionPoint() at some point in the future.
+    `hideInsertionPoint()` at some point in the future.
     
     The default implementation of this method does nothing.
     
@@ -576,7 +577,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     will not be called when the insertion point changes during a drag.
     
     You should expect to receive one or more calls to 
-    showInsertionPointBefore() during a drag followed by at least one call to 
+    `showInsertionPointBefore()` during a drag followed by at least one call to
     this method at the end.  Your method should not raise an error if it is 
     called more than once.
     
@@ -597,12 +598,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     You can assign a delegate object to this property that will be consulted
     for various decisions regarding drag and drop, selection behavior, and
     even rendering.  The object you place here must implement some or all of
-    the SC.CollectionViewDelegate mixin.
+    the `SC.CollectionViewDelegate` mixin.
     
     If you do not supply a delegate but the content object you set implements 
-    the SC.CollectionViewDelegate mixin, then the content will be 
+    the `SC.CollectionViewDelegate` mixin, then the content will be
     automatically set as the delegate.  Usually you will work with a 
-    CollectionView in this way rather than setting a delegate explicitly.
+    `CollectionView` in this way rather than setting a delegate explicitly.
     
     @type SC.CollectionViewDelegate
     @default null
@@ -612,7 +613,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     The delegate responsible for handling selection changes.  This property
     will be either the delegate, content, or the collection view itself, 
-    whichever implements the SC.CollectionViewDelegate mixin.
+    whichever implements the `SC.CollectionViewDelegate` mixin.
     
     @field
     @type Object
@@ -638,8 +639,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   
   
   /** @private
-    A cache of the contentGroupIndexes value returned by the delegate.  This
-    is frequently accessed and usually involves creating an SC.IndexSet
+    A cache of the `contentGroupIndexes` value returned by the delegate.  This
+    is frequently accessed and usually involves creating an `SC.IndexSet`
     object, so it's worthwhile to cache.
   */
   _contentGroupIndexes: function() {
@@ -655,7 +656,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Called whenever the content array or an item in the content array or a
     property on an item in the content array changes.  Reloads the appropriate
     item view when the content array itself changes or calls 
-    contentPropertyDidChange() if a property changes.
+    `contentPropertyDidChange()` if a property changes.
     
     Normally you will not call this method directly though you may override
     it if you need to change the way changes to observed ranges are handled.
@@ -677,7 +678,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     Called whenever a property on an item in the content array changes.  This
-    is only called if you have set observesContentProperties to YES.
+    is only called if you have set `observesContentProperties` to `YES`.
     
     Override this property if you want to do some custom work whenever a 
     property on a content object changes.
@@ -692,7 +693,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   contentPropertyDidChange: function(target, key, indexes) {},
   
   /**
-    Called whenever the view needs to updates it's contentRangeObserver to 
+    Called whenever the view needs to updates its `contentRangeObserver` to
     reflect the current nowShowing index set.  You will not usually call this
     method yourself but you may override it if you need to provide some 
     custom range observer behavior.
@@ -703,10 +704,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     this method should udpate it.
     
     When you create a new range observer, the oberver must eventually call
-    contentRangeDidChange() for the collection view to function properly.
+    `contentRangeDidChange()` for the collection view to function properly.
     
     If you override this method you probably also need to override 
-    destroyRangeObserver() to cleanup any existing range observer.
+    `destroyRangeObserver()` to cleanup any existing range observer.
     
     @returns {void}
   */
@@ -734,7 +735,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     provide your own range observer behavior.
     
     Note that if you override this method you should probably also override
-    updateRangeObserver() to create or update a range oberver as needed.
+    `updateRangeObserver()` to create or update a range oberver as needed.
     
     @returns {void}
   */

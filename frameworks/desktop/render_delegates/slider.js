@@ -12,8 +12,8 @@
   -------------------------
   Requires the following parameters:
   
-  - value: a value from 0 to 1.
-  - frame: containing the frame in which the slider is being drawn.
+   - `value` -- a value from 0 to 1.
+   - `frame` -- containing the frame in which the slider is being drawn.
 */
 
 SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({

@@ -17,8 +17,8 @@ SC.BORDER_NONE   = null ;
   @namespace
   @deprecated
 
-  The SC.Border mixin has be deprecated in favour of applying border properties
-  to an SC.View's layout object. See {@link SC.View#layout}.
+  The `SC.Border` mixin has be deprecated in favour of applying border properties
+  to an `SC.View`'s layout object. See {@link SC.View#layout}.
 
   The Border mixin can be applied to any view to give it a visual border.
   In addition to specifying the mixin itself, you should specify the border
@@ -27,17 +27,18 @@ SC.BORDER_NONE   = null ;
   Border style can be any predefined CSS class name or a border color.
 
   If you specify a CSS class name, it must end in "-border". Additionally,
-  you should set the borderTop, borderRight, borderBottom, and borderLeft
-  properties so SproutCore can accurately account for the size of your view.
+  you should set the `borderTop`, `borderRight`, `borderBottom`, and
+  `borderLeft` properties so SproutCore can accurately account for the size
+  of your view.
 
   SproutCore pre-defines several useful border styles including:
 
-    - SC.BORDER_BEZEL  - displays an inlaid bezel
-    - SC.BORDER_BLACK  - displays a black border
-    - SC.BORDER_GRAY   - displays a gray border
-    - SC.BORDER_TOP    - displays a border on the top only
-    - SC.BORDER_BOTTOM - displays a border on the bottom only
-    - SC.BORDER_NONE   - disables the border
+   - `SC.BORDER_BEZEL`  -- displays an inlaid bezel
+   - `SC.BORDER_BLACK`  -- displays a black border
+   - `SC.BORDER_GRAY`   -- displays a gray border
+   - `SC.BORDER_TOP`    -- displays a border on the top only
+   - `SC.BORDER_BOTTOM` -- displays a border on the bottom only
+   - `SC.BORDER_NONE`   -- disables the border
 
   @since SproutCore 1.0
 */
@@ -98,7 +99,7 @@ SC.Border = {
   hasBorder: YES,
 
   /**
-    Make sure we re-render if the borderStyle property changes.
+    Make sure we re-render if the `borderStyle` property changes.
     @private
   */
   displayProperties: ['borderStyle'],
