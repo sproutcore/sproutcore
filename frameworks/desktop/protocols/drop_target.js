@@ -67,7 +67,7 @@ SC.DropTarget = {
   
   /**
     Called when the drag first enters the droppable area, if it returns a
-    drag operations other than SC.DRAG_NONE.
+    drag operations other than `SC.DRAG_NONE`.
     
     The default implementation does nothing.
     
@@ -132,7 +132,7 @@ SC.DropTarget = {
     droppable area, the drag will latch onto the deepest view that returns one 
     or more available operations.
     
-    The default implementation returns SC.DRAG_NONE
+    The default implementation returns `SC.DRAG_NONE`
     
     @param {SC.Drag} drag The current drag object
     @param {SC.Event} evt The most recent mouse move event.  Use to get 
@@ -153,7 +153,7 @@ SC.DropTarget = {
     perform fine-grained checks on the drop location, for example.
     Return true to accept the drop operation.
     
-    The default implementation returns YES.
+    The default implementation returns `YES`.
     
     @param {SC.Drag} drag The drag instance managing this drag
     @param {DragOp} op The proposed drag operation. A drag constant
@@ -168,12 +168,12 @@ SC.DropTarget = {
     Called to actually perform the drag operation.
     
     Overide this method to actually perform the drag operation.  This method
-    is only called if you returned YES in acceptDragOperation(). 
+    is only called if you returned `YES` in `acceptDragOperation()`. 
     
-    Return the operation that was actually performed or SC.DRAG_NONE if the 
+    Return the operation that was actually performed or `SC.DRAG_NONE` if the 
     operation was aborted.
     
-    The default implementation returns SC.DRAG_NONE
+    The default implementation returns `SC.DRAG_NONE`
     
     @param {SC.Drag} drag The drag instance managing this drag
     @param {DragOp} op The proposed drag operation. A drag constant.

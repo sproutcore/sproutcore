@@ -8,7 +8,7 @@
 /** 
   @namespace
   
-  An experimental CollectionView mixin that makes it extremely fast under
+  An experimental `CollectionView` mixin that makes it extremely fast under
   certain circumstances, including for mobile devices.
 */
 SC.CollectionFastPath = {
@@ -80,7 +80,7 @@ SC.CollectionFastPath = {
   },
   
   /**
-    Configures a pooled view, calling .awakeFromPool if it is defined.
+    Configures a pooled view, calling `.awakeFromPool` if it is defined.
 
     @param {SC.View} itemView
     @param {Hash} attrs
@@ -123,7 +123,7 @@ SC.CollectionFastPath = {
   
   /**
     Releases an item view. If the item view is pooled, it puts it into the pool;
-    otherwise, this calls .destroy().
+    otherwise, this calls `.destroy()`.
     
     This is called for one of two purposes: to release a view that is no longer displaying,
     or to release an older cached version of a view that needed to be replaced because the
@@ -163,7 +163,7 @@ SC.CollectionFastPath = {
   
   /** @private
     Determines the example view for a content index. There are two optional parameters that will
-    speed things up: contentObject and isGroupView. If you don't supply them, they must be computed.
+    speed things up: `contentObject` and `isGroupView`. If you don't supply them, they must be computed.
   */
   exampleViewForItem: function(item, index) {
     var del = this.get('contentDelegate'),
@@ -190,7 +190,7 @@ SC.CollectionFastPath = {
     This may seem somewhat awkward, but it is for memory performance: this fills in a hash
     YOU provide with the properties for the given content index.
     
-    Properties include both the attributes given to the view and some CollectionView tracking
+    Properties include both the attributes given to the view and some `CollectionView` tracking
     properties, most importantly the exampleView.
   */
   setAttributesForItem: function(item, index, attrs) {
@@ -563,7 +563,7 @@ SC.CollectionFastPath = {
   
   /** @private
     Tries to find an item for the given example view in a dom pool.
-    If one could not be found, returns null.
+    If one could not be found, returns `null`.
   */
   itemFromDOMPool: function(exampleView) {
     var pool = this.domPoolForExampleView(exampleView);
@@ -663,7 +663,7 @@ SC.CollectionFastPath = {
   
   
   /** @private
-    Tells ScrollView that this should receive live updates during touch scrolling.
+    Tells `ScrollView` that this should receive live updates during touch scrolling.
     We are so fast, aren't we?
   */
   _lastTopUpdate: 0,

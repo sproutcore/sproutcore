@@ -139,7 +139,7 @@ SC.UndoManager = SC.Object.extend(
     automatically bundled into this one action.
     
     When you are finished performing the action, balance this with a call to
-    endUndoGroup().
+    `endUndoGroup()`.
     
     @param {String} name
   */

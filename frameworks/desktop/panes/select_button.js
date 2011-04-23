@@ -10,7 +10,7 @@ sc_require('views/button');
 /**
   @class
 
-  SelectButtonView has a functionality similar to that of SelectField
+  SelectButtonView has a functionality similar to that of `SelectField`
 
   Clicking the SelectButtonView button displays a menu pane with a
   list of items. The selected item will be displayed on the button.
@@ -43,7 +43,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   /**
     If you set this to a non-null value, then the name shown for each
     menu item will be pulled from the object using the named property.
-    if this is null, the collection objects themselves will be used.
+    if this is `null`, the collection objects themselves will be used.
 
     @type String
     @default: null
@@ -52,7 +52,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     If you set this to a non-null value, then the value of this key will
-    be used to sort the objects.  If this is not set, then nameKey will
+    be used to sort the objects.  If this is not set, then `nameKey` will
     be used.
 
     @property String}
@@ -111,7 +111,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   classNames: ['select-button'],
 
   /**
-    Menu attached to the selectButton
+    Menu attached to the `selectButton`
     
     @type SC.View
     @default SC.MenuView
@@ -128,7 +128,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     Property to set the index of the selected menu item. This in turn
-    is used to calculate the preferMatrix.
+    is used to calculate the `preferMatrix`.
 
     @type Number
     @default null
@@ -144,7 +144,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   value: null,
 
   /**
-    if this property is set to 'YES', a checbox is shown next to the
+    if this property is set to `YES`, a checbox is shown next to the
     selected menu item.
 
     @type Boolean
@@ -161,19 +161,19 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /** @private
     Default value of the select button.
-     This will be the first item from the menu item list.
+    This will be the first item from the menu item list.
   */
   _defaultVal: null,
 
   /** @private
     Default title of the select button.
-     This will be the title corresponding to the _defaultVal.
+    This will be the title corresponding to the _defaultVal.
   */
   _defaultTitle: null,
 
   /** @private
     Default icon of the select button.
-     This will be the icon corresponding to the _defaultVal.
+    This will be the icon corresponding to the _defaultVal.
   */
   _defaultIcon: null,
 
@@ -194,8 +194,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
   /**
     Prefer matrix to position the select button menu such that the
     selected item for the menu item will appear aligned to the
-    the button. The value at the second index(0) changes based on the
-    postion(index) of the menu item in the menu pane.
+    the button. The value at the second `index(0)` changes based on the
+    `postion(index)` of the menu item in the menu pane.
 
     @type Array
     @default null
@@ -204,8 +204,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     Width of the sprite image that gets applied due to the theme.
-     This has to be accounted for while calculating the actual
-     width of the button
+    This has to be accounted for while calculating the actual
+    width of the button
 
     @type Number
     @default 28
@@ -218,7 +218,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   isActiveBinding: '*menu.isVisibleInWindow',
 
   /** @private
-    If this property is set to 'YES', the menu pane will be positioned
+    If this property is set to `YES`, the menu pane will be positioned
     below the anchor.
   */
   isDefaultPosition: NO,
@@ -270,7 +270,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     This is a property to enable/disable focus rings in buttons.
-    For select_button we are making it a default.
+    For `select_button` we are making it a default.
     
     @type Boolean
     @default YES
@@ -305,7 +305,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     override this method to implement your own sorting of the menu. By
-    default, menu items are sorted using the value shown or the sortKey
+    default, menu items are sorted using the value shown or the `sortKey`
 
     @param {SC.Array} objects the unsorted array of objects to display.
     @returns sorted array of objects
@@ -735,8 +735,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
   },
 
   /** @private
-    Because we responded YES to the mouseDown event, we have responsibility
-    for handling the corresponding mouseUp event.
+    Because we responded `YES` to the mouseDown event, we have responsibility
+    for handling the corresponding `mouseUp` event.
 
     However, the user may click on this button, then drag the mouse down to a
     menu item, and release the mouse over the menu item. We therefore need to
@@ -762,7 +762,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
       if (targetMenuItem && targetMenuItem.get('mouseHasEntered')) {
         // Have the menu item perform its action.
-        // If the menu returns NO, it had no action to
+        // If the menu returns `NO`, it had no action to
         // perform, so we should close the menu immediately.
         if (!targetMenuItem.performAction()) menu.remove();
       } else if (!touch && (timestamp - previousTimestamp > SC.ButtonView.CLICK_AND_HOLD_DELAY)) {

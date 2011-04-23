@@ -104,7 +104,7 @@ SC.SheetPane = SC.PanelPane.extend(
     @returns {SC.SheetPane} receiver
   */
   remove: function() {
-    // We want the functionality of SC.PanelPane.remove(), but we only want it once the animation is complete.
+    // We want the functionality of `SC.PanelPane.remove()`, but we only want it once the animation is complete.
     // Store the reference to the superclass function, and it call it after the transition is complete.
     var that = this, args = arguments;
     this.invokeLater(function() { args.callee.base.apply(that, args) ;}, this.transitionDuration);

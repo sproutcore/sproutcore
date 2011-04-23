@@ -14,8 +14,8 @@
   provide basic support for scrolling actions.  You can also override any 
   of these methods as needed for your own specific behaviors.
   
-  Often times instead of adding SC.Scrollable to your view, you should
-  place your view inside of an SC.ScrollView.  See that class for more 
+  Often times instead of adding `SC.Scrollable` to your view, you should
+  place your view inside of an `SC.ScrollView`.  See that class for more 
   info.
   
   Note that isScrollable must always be true.
@@ -30,7 +30,7 @@ SC.Scrollable = {
 
   /** Informs the view system that the receiver is scrollable.
 
-    Must always be true.
+    Must always be `true.
 
     @property {Boolean}
     @default YES
@@ -41,7 +41,7 @@ SC.Scrollable = {
   /** 
     Amount to scroll one vertical line.
   
-    Used by the default implementation of scrollDownLine() and scrollUpLine().
+    Used by the default implementation of `scrollDownLine()` and `scrollUpLine()`.
     
     @property {Number}
     @default 20
@@ -51,7 +51,7 @@ SC.Scrollable = {
   /**
     Amount to scroll one horizontal line.
   
-    Used by the default implementation of scrollLeftLine() and scrollRightLine().
+    Used by the default implementation of `scrollLeftLine()` and `scrollRightLine()`.
     
     @property {Number}
     @default 20
@@ -61,8 +61,8 @@ SC.Scrollable = {
   /**
     Amount to scroll one vertical page.
     
-    Used by the default implementation of scrollUpPage() and scrollDownPage(). Defaults to
-    current innerFrame height.
+    Used by the default implementation of `scrollUpPage()` and `scrollDownPage()`. Defaults to
+    current `innerFrame` height.
   */
   verticalPageScroll: function() {
     return this.get('innerFrame').height;
@@ -71,8 +71,8 @@ SC.Scrollable = {
   /**
     Amount to scroll one horizontal page.
     
-    Used by the default implementation of scrollLeftPage() and scrollRightPage().  Defaults
-    to current innerFrame width.
+    Used by the default implementation of `scrollLeftPage()` and `scrollRightPage()`.  Defaults
+    to current `innerFrame` width.
   */
   horizontalPageScroll: function() {
     return this.get('innerFrame').width ;
@@ -142,7 +142,7 @@ SC.Scrollable = {
   /**
     Scroll the view to make the passed frame visible.
     
-    Frame must be relative to the receiver's offsetParent.
+    Frame must be relative to the receiver's `offsetParent`.
     
     @param {SC.View} view the view you want to make visible
   */

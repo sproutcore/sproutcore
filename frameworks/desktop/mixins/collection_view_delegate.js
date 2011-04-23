@@ -8,10 +8,10 @@
 /**
   @namespace
 
-  A Collection View Delegate is consulted by a SC.CollectionView to make
+  A Collection View Delegate is consulted by a `SC.CollectionView` to make
   policy decisions about certain behaviors such as selection control and
   drag and drop.  If you need to control other aspects of your data, you may
-  also want to add the SC.CollectionContent mixin.
+  also want to add the `SC.CollectionContent` mixin.
   
   To act as a Collection Delegate, just apply this mixin to your class.  You
   must then set the "delegate" property on the CollectionView to your object.
@@ -74,7 +74,7 @@ SC.CollectionViewDelegate = {
 
   /**
     Called by the collection when attempting to deselect an item.  Return the
-    actual indexes you want to allow to be deselected.  Return null to
+    actual indexes you want to allow to be deselected.  Return `null` to
     disallow the change.  The default allows all selection.
     
     Note that you should not modify the passed in IndexSet.  clone it instead.
@@ -93,11 +93,11 @@ SC.CollectionViewDelegate = {
   // 
 
   /**
-    Called by the collection view whenever the deleteSelection() method is
+    Called by the collection view whenever the `deleteSelection()` method is
     called.  You can implement this method to get fine-grained control over
     which items can be deleted.  To prevent deletion, return null.
     
-    This method is only called if canDeleteContent is YES on the collection
+    This method is only called if canDeleteContent is `YES` on the collection
     view.
     
     @param {SC.CollectionView} view the collection view
@@ -116,8 +116,8 @@ SC.CollectionViewDelegate = {
     deletion method.
     
     If you simply want to control the items to be deleted, you should instead
-    implement collectionViewShouldDeleteItems(). This method will only be
-    called if canDeleteContent is YES and collectionViewShouldDeleteIndexes()
+    implement `collectionViewShouldDeleteItems()`. This method will only be
+    called if canDeleteContent is `YES` and `collectionViewShouldDeleteIndexes()`
     returns a non-empty index set
     
     @param {SC.CollectionView} view collection view
@@ -154,7 +154,7 @@ SC.CollectionViewDelegate = {
     may enable content reordering but then implement this method to prevent
     reordering of certain items in the view.
     
-    The default implementation always returns YES.
+    The default implementation always returns `YES`.
     
     @param {SC.CollectionView} view the collection view
     @returns {Boolean} YES to alow, NO to prevent it
@@ -170,13 +170,13 @@ SC.CollectionViewDelegate = {
     You can implement this method to return an array of the data types you
     will provide for the drag data.
     
-    If you return null or an empty array, can you have set canReorderContent
-    to YES on the CollectionView, then the drag will go ahead but only 
-    reordering will be allowed.  If canReorderContent is NO, then the drag
+    If you return `null` or an empty array, can you have set `canReorderContent`
+    to `YES` on the CollectionView, then the drag will go ahead but only 
+    reordering will be allowed.  If `canReorderContent` is `NO`, then the drag
     will not be allowed to start.
     
     If you simply want to control whether a drag is allowed or not, you
-    should instead implement collectionViewShouldBeginDrag().
+    should instead implement `collectionViewShouldBeginDrag()`.
     
     The default returns an empty array.
     
@@ -192,7 +192,7 @@ SC.CollectionViewDelegate = {
     to provide the drag data for the drop.
     
     This method should be implemented essentially as you would implement the
-    dragDataForType() if you were a drag data source.  You will never be asked
+    `dragDataForType()` if you were a drag data source.  You will never be asked
     to provide drag data for a reorder event, only for other types of data.
     
     The default implementation returns null.
@@ -230,14 +230,14 @@ SC.CollectionViewDelegate = {
     general which operations you might support and specifically the operations
     you would support if the user dropped an item over a specific location.
     
-    If the proposedDropOperation parameter is SC.DROP_ON or SC.DROP_BEFORE,
-    then the proposedInsertionPoint will be a non-negative value and you
+    If the `proposedDropOperation` parameter is `SC.DROP_ON` or `SC.DROP_BEFORE`,
+    then the `proposedInsertionPoint` will be a non-negative value and you
     should determine the specific operations you will support if the user
     dropped the drag item at that point.
     
     If you do not like the proposed drop operation or insertion point, you
-    can override these properties as well by setting the proposedDropOperation
-    and proposedInsertionIndex properties on the collection view during this
+    can override these properties as well by setting the `proposedDropOperation`
+    and `proposedInsertionIndex` properties on the collection view during this
     method. These properties are ignored all other times.
     
     @param {SC.CollectionView} view the collection view
@@ -254,12 +254,12 @@ SC.CollectionViewDelegate = {
   
   /**
     Called by the collection view to actually accept a drop.  This method will
-    only be invoked AFTER your validateDrop method has been called to
+    only be invoked AFTER your `validateDrop method has been called to
     determine if you want to even allow the drag operation to go through.
     
     You should actually make changes to the data model if needed here and
     then return the actual drag operation that was performed. If you return
-    SC.DRAG_NONE and the dragOperation was SC.DRAG_REORDER, then the default
+    `SC.DRAG_NONE` and the dragOperation was `SC.DRAG_REORDER`, then the default
     reorder behavior will be provided by the collection view.
     
     @param {SC.CollectionView} view
@@ -288,7 +288,7 @@ SC.CollectionViewDelegate = {
   },
 
   /**
-    Allows the ghost view created in collectionViewDragViewFor to be displayed
+    Allows the ghost view created in `collectionViewDragViewFor` to be displayed
     like a cursor instead of the default implementation. This sets the view 
     origin to be the location of the mouse cursor.
     

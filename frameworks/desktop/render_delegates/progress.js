@@ -12,14 +12,14 @@
   --------------------------
   Expects these properties on the data source:
   
-  - isIndeterminate
-  - isRunning
-  - isEnabled
-  - value
+   - `isIndeterminate`
+   - `isRunning`
+   - `isEnabled`
+   - `value`
   
   Theme Constants
   -------------------------------------
-  Ace's progressRenderDelegate's rendering process is not affected by 
+  Ace's `progressRenderDelegate`'s rendering process is not affected by 
   any theme constants.
 */
 SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({

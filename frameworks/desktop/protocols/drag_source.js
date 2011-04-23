@@ -22,7 +22,7 @@ SC.DragSource = {
     specified target.  If you don't care about the target, just return a
     constant value.
     
-    The default implementation returns SC.DRAG_NONE
+    The default implementation returns `SC.DRAG_NONE`
     
     @param {SC.View} dropTarget The proposed target of the drop.
     @param {SC.Drag} drag The SC.Drag instance managing this drag.
@@ -32,7 +32,7 @@ SC.DragSource = {
   },
   
   /**
-    If this property is set to NO or is not implemented, then the user may
+    If this property is set to `NO` or is not implemented, then the user may
     modify the drag operation by changing the modifier keys they have 
     pressed.
     
@@ -55,7 +55,7 @@ SC.DragSource = {
   
   /**
     This method is called whenever the drag image is moved.  This is
-    similar to the dragUpdated() method called on drop targets.
+    similar to the `dragUpdated()` method called on drop targets.
     
     @param {SC.Drag} drag The Drag instance managing this drag.
     @param {Point} loc  The point in *window* coordinates where the drag 
