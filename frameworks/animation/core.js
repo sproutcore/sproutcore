@@ -13,13 +13,14 @@ It makes CSS transitions for you, and if they aren't available,
 implements them in JavaScript.
 
 Animatable things:
-- layout. You can animate any layout property, even centerX and centerY
-- opacity.
-- display, in a way. All animating display does is delay setting display:none
-  until <em>after</em> the transition duration has passed. This allows you
-  to set display:none after fading out. If mixing with CSS transitions, you will
-  need to set the delay a tad longer to accomodate any delays in beginning the
-  transition.
+
+ - layout. You can animate any layout property, even centerX and centerY
+ - opacity.
+ - display, in a way. All animating display does is delay setting display:none
+   until <em>after</em> the transition duration has passed. This allows you
+   to set display:none after fading out. If mixing with CSS transitions, you will
+   need to set the delay a tad longer to accomodate any delays in beginning the
+   transition.
 
 @class SC.Animatable
 @example Example Usage:
@@ -190,8 +191,9 @@ SC.Animatable = {
   Adds support for some style properties to adjust.
 
   These added properties are currently:
-  - opacity.
-  - display.
+
+   - opacity.
+   - display.
 
   This is a complete rewrite of adjust. Its performance can probably be boosted. Do it!
   */

@@ -13,13 +13,13 @@
   can be applied to tree item model objects to customize the way the tree
   information is extracted from the object.
 
-  h2. Basic Implementation
+  ## Basic Implementation
 
   If you add this mixin, you must implement the treeItemChildren property so
   that it returns the current array of child tree items for the receiver.  If
   you do not implement this property the tree item will not function.
 
-  h2. Optimizing Branches
+  ## Optimizing Branches
 
   The most common use of this mixin is to override the treeItemBranchIndexes
   property to return an index set of child items that are themselves branches

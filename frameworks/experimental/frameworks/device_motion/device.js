@@ -8,7 +8,7 @@
 sc_require('platform');
 
 /**
-  h1. Device Motion
+  ## Device Motion
   
   When a device is moved, some platforms will inform us of its movement
   (accelerometer) and angle (gyroscope). 

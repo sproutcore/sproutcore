@@ -18,11 +18,9 @@
 * your view. You may define your own SC.InlineEditorDelegate to further
 * customize editing behavior.
 *
-* {{{
-*   MyProject.MyView = SC.View.extend(SC.InlineEditable, {
-*     inlineEditorDelegate: myDelegate
-*   });
-* }}}
+*       MyProject.MyView = SC.View.extend(SC.InlineEditable, {
+*         inlineEditorDelegate: myDelegate
+*       });
 *
 * The delegate methods will default to your view unless the
 * inlineEditorDelegate implements them. Simple views do not require a
@@ -37,19 +35,15 @@
 *
 * Your view can now be edited by calling beginEditing() on it.
 *
-* {{{
-*   myView.beginEditing();
-* }}}
+*     myView.beginEditing();
 *
 * This will create an editor for the view. You can then end the editing process
 * by calling commitEditing() or discardEditing() on either the view or the
 * editor. commitEditing() will save the value and discard will revert to the
 * original value.
 *
-* {{{
-*   myView.commitEditing();
-*   myView.discardEditing();
-* }}}
+*     myView.commitEditing();
+*     myView.discardEditing();
 *
 * Note that the editor is a private property of the view, so the only views that
 * should be able to access the methods on it are the editor itself, the view it

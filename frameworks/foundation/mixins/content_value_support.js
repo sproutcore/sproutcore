@@ -11,15 +11,13 @@
 * This mixin allows a view to get its value from a content object based
 * on the value of its contentValueKey.
 *
-* {{{
-* myView = SC.View.create({
-*   content: {prop: "abc123"},
+*     myView = SC.View.create({
+*       content: {prop: "abc123"},
 *
-*   contentValueKey: 'prop'
-* });
+*       contentValueKey: 'prop'
+*     });
 *
 * // myView.get('value') will be "abc123"
-* }}}
 *
 * This is useful if you have a nested record structure and want to have
 * it be reflected in a nested view structure. If your data structures

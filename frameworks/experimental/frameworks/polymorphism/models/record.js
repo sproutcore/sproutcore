@@ -16,13 +16,11 @@ SC.mixin(SC.Record,
     If YES, then searches for records of this type will return
     subclass instances. For example:
 
-    {{{
-      Person = SC.Record.extend();
-      Person.isPolymorphic = YES;
+        Person = SC.Record.extend();
+        Person.isPolymorphic = YES;
 
-      Male = Person.extend();
-      Female = Person.extend();
-    }}}
+        Male = Person.extend();
+        Female = Person.extend();
 
     Using SC.Store#find, or a toOne or toMany relationship on
     Person will then return records of type Male and Female.

@@ -64,7 +64,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   functionality including showing a selected state, enabled state, focus
   state, etc.
   
-  h2. About Values and Content
+  ## About Values and Content
   
   Controls typically are used to represent a single value, such as a number,
   boolean or string.  The value a control is managing is typically stored in
@@ -98,7 +98,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   properties you care about on the content object and update your view if 
   anything you care about has changed.
   
-  h2. Delegate Support
+  ## Delegate Support
   
   Controls can optionally get the contentDisplayProperty from a 
   displayDelegate, if it is set.  The displayDelegate is often used to 

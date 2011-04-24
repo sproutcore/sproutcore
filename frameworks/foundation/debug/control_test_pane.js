@@ -16,22 +16,20 @@
   You can use this class in test mode to easily create a palette with views
   configured in different ways.
   
-  h1. Example
+  ## Example
   
-  {{{
-    var pane = SC.ControlTestPane.design()
-      .add('basic', SC.CheckboxView.design({ title: "Hello World" }))
-      .add('disabled', SC.CheckboxView.design({
-        title: "Hello World", isEnabled: NO
-      }));
+      var pane = SC.ControlTestPane.design()
+        .add('basic', SC.CheckboxView.design({ title: "Hello World" }))
+        .add('disabled', SC.CheckboxView.design({
+          title: "Hello World", isEnabled: NO
+        }));
       
-    module("CheckboxView UI", pane);
+      module("CheckboxView UI", pane);
     
-    test("basic", function() {
-      var view = pane.view('basic');
-      ok(view.get('isEnabled'), 'should be enabled');
-    });
-  }}}
+      test("basic", function() {
+        var view = pane.view('basic');
+        ok(view.get('isEnabled'), 'should be enabled');
+      });
   
   @extends SC.Pane
   @since SproutCore 1.0

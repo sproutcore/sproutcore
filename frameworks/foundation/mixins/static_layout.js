@@ -26,7 +26,7 @@
   Normally, if you are allowing the browser to manage the size and positioning
   of your view, these feature will not be useful to your code anyway.
   
-  h2. Using StaticLayout
+  ## Using StaticLayout
   
   To enable static layout on your view, just include this mixin on the view.
   SproutCore's builtin views that are capable of being used in static 
@@ -36,29 +36,20 @@
   You can then use CSS or the render() method on your view to setup the 
   positioning on your view using any browser layout mechanism you want.
   
-  h2. Example
+  ## Example
   
-  {{{
-    
-    // JavaScript
-    
-    MyApp.CommentView = SC.View.extend(SC.StaticLayout, {
-    
-      classNames: ['comment-view'],
-      
-      useStaticLayout: YES,
+      // JavaScript
+      MyApp.CommentView = SC.View.extend(SC.StaticLayout, {
+        classNames: ['comment-view'],
+        useStaticLayout: YES,
+        ...
+      });
 
-      ...
-    });
-    
-    // CSS
-    
-    .comment-view {
-      display: block;
-      position: relative;
-    }
-    
-  }}}
+      // CSS
+      .comment-view {
+        display: block;
+        position: relative;
+      }
   
   @deprecated
   @since SproutCore 1.0

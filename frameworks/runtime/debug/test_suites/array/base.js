@@ -17,11 +17,9 @@
   instance of the object you want to have tested.  You can also implement the
   destroyObject() method, which should destroy a passed object.
   
-  {{{
-    SC.ArrayTests.generate("Array", {
-      newObject:  function() { return []; }
-    });
-  }}}
+      SC.ArrayTests.generate("Array", {
+        newObject:  function() { return []; }
+      });
   
   newObject must accept an optional array indicating the number of items
   that should be in the array.  You should initialize the the item with 
@@ -31,16 +29,14 @@
   function you pass will be invoked whenever the ArrayTests are generated. The
   parameter passed will be the instance of ArrayTests you should work with.
   
-  {{{
-    SC.ArrayTests.define(function(T) {
-      T.module("length");
+      SC.ArrayTests.define(function(T) {
+        T.module("length");
       
-      test("verify length", function() {
-        var ary = T.newObject();
-        equals(ary.get('length'), 0, 'should have 0 initial length');
-      });
-    }
-  }}}
+        test("verify length", function() {
+          var ary = T.newObject();
+          equals(ary.get('length'), 0, 'should have 0 initial length');
+        });
+      }
 */
 
 SC.TestSuite = /** @scope SC.TestSuite.prototype */ {
@@ -182,13 +178,11 @@ SC.TestSuite = /** @scope SC.TestSuite.prototype */ {
     a convenience function for use inside of a definition function.  You could
     do the same thing by calling:
     
-    {{{
-      var T = this ;
-      module(T.desc(description), {
-        setup: function() { T.setup(); },
-        teardown: function() { T.teardown(); }
-      }
-    }}}
+        var T = this ;
+        module(T.desc(description), {
+          setup: function() { T.setup(); },
+          teardown: function() { T.teardown(); }
+        }
     
     @param {String} desc detailed descrition
     @returns {SC.TestSuite} receiver

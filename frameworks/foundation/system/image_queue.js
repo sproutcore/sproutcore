@@ -23,17 +23,15 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   Note that if you use the SC.ImageView class, it will use this image queue 
   for you automatically.
   
-  h1. Loading Images
+  ## Loading Images
   
   When you need to display an image, simply call the loadImage() method with 
   the URL of the image, along with a target/method callback. The signature of 
   your callback should be:
   
-  {{{
-    imageDidLoad: function(imageUrl, imageOrError) {
-      //...
-    }
-  }}}
+      imageDidLoad: function(imageUrl, imageOrError) {
+        //...
+      }
 
   The "imageOrError" parameter will contain either an image object or an error 
   object if the image could not be loaded for some reason.  If you receive an 
@@ -44,7 +42,7 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   background.  Background images are loaded with a lower priority than 
   foreground images.
   
-  h1. Aborting Image Loads
+  ## Aborting Image Loads
   
   If you request an image load but then no longer require the image for some 
   reason, you should notify the imageQueue by calling the releaseImage() 
@@ -59,7 +57,7 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   or it may abort an image load in progress to make room for other images.  If 
   the image is already loaded, this method will have no effect.
   
-  h1. Reloading an Image
+  ## Reloading an Image
   
   If you have already loaded an image, the imageQueue will avoid loading the 
   image again.  However, if you need to force the imageQueue to reload the 
@@ -95,10 +93,8 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     notified when the image has loaded.  Your callback should have a signature 
     like:
 
-    {{{
-      imageDidLoad: function(imageUrl, imageOrError) { .. }
-    }}}
-    
+        imageDidLoad: function(imageUrl, imageOrError) { .. }
+
     If you do pass a target/method you can optionally also choose to load the 
     image either in the foreground or in the background.  The imageQueue 
     prioritizes foreground images over background images.  This does not impact 

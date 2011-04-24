@@ -103,13 +103,12 @@ SC.StringInflections = {
     Capitalizes every word in a string.  Unlike titleize, spaces or dashes
     will remain in-tact.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | My Favorite Items |
-    | css-class-name | Css-Class-Name |
-    | action_name | Action_Name |
-    | innerHTML | InnerHTML |
+        capitalizeEach('my favorite items') // 'My Favorite Items'
+        capitalizeEach('css-class-name')    // 'Css-Class-Name'
+        capitalizeEach('action_name')       // 'Action_Name'
+        capitalizeEach('innerHTML')         // 'InnerHTML'
 
     @returns {String} capitalized string
   */
@@ -124,13 +123,12 @@ SC.StringInflections = {
     Converts a string to a title.  This will decamelize the string, convert
     separators to spaces and capitalize every word.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | My Favorite Items |
-    | css-class-name | Css Class Name |
-    | action_name | Action Name |
-    | innerHTML | Inner HTML |
+        titleize('my favorite items') // 'My Favorite Items'
+        titleize('css-class-name')    // 'Css Class Name'
+        titleize('action_name')       // 'Action Name'
+        titleize('innerHTML')         // 'Inner HTML'
 
     @return {String} titleized string.
   */
@@ -146,13 +144,12 @@ SC.StringInflections = {
     Converts the string into a class name.  This method will camelize your
     string and then capitalize the first letter.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | MyFavoriteItems |
-    | css-class-name | CssClassName |
-    | action_name | ActionName |
-    | innerHTML | InnerHtml |
+        classify('my favorite items') // 'MyFavoriteItems'
+        classify('css-class-name')    // 'CssClassName'
+        classify('action_name')       // 'ActionName'
+        classify('innerHTML')         // 'InnerHtml'
 
     @returns {String}
   */
@@ -169,13 +166,12 @@ SC.StringInflections = {
     Converts a camelized string or a string with dashes or underscores into
     a string with components separated by spaces.
 
-    h2. Examples
+    ## Examples
 
-    | *Input String* | *Output String* |
-    | my favorite items | my favorite items |
-    | css-class-name | css class name |
-    | action_name | action name |
-    | innerHTML | inner html |
+        humanize('my favorite items') // 'my favorite items'
+        humanize('css-class-name')    // 'css class name'
+        humanize('action_name')       // 'action name'
+        humanize('innerHTML')         // 'inner html'
 
     @returns {String} the humanized string.
   */

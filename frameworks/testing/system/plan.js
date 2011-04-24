@@ -25,25 +25,25 @@ var QUNIT_BREAK_ON_TEST_FAIL = false;
   wrapper methods.  The methods must accept a Plan object as their first 
   parameter.
   
-  h2. Results 
+  ## Results 
   
   The results hash contains a summary of the results of running the test 
   plan.  It includes the following properties:
   
-  - *assertions* - the total number of assertions
-  - *tests* - the total number of tests
-  - *passed* - number of assertions that passed
-  - *failed* - number of assertions that failed
-  - *errors* - number of assertions with errors
-  - *warnings* - number of assertions with warnings
+   - *assertions* -- the total number of assertions
+   - *tests* -- the total number of tests
+   - *passed* -- number of assertions that passed
+   - *failed* -- number of assertions that failed
+   - *errors* -- number of assertions with errors
+   - *warnings* -- number of assertions with warnings
   
   You can also consult the log property, which contains an array of hashes -
   one for each assertion - with the following properties:
   
-  - *module* - module descriptions
-  - *test* - test description
-  - *message* - assertion description
-  - *result* - CoreTest.OK, CoreTest.FAILED, CoreTest.ERROR, CoreTest.WARN
+   - *module* -- module descriptions
+   - *test* -- test description
+   - *message* -- assertion description
+   - *result* -- CoreTest.OK, CoreTest.FAILED, CoreTest.ERROR, CoreTest.WARN
   
   @since SproutCore 1.0
 */
