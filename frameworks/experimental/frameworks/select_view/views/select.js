@@ -313,21 +313,30 @@ SC.SelectView = SC.PopupButtonView.extend({
     return -1;
   }.property('value', 'menu').cacheable(),
 
+  /**
+    Shows the SelectView's menu. You can call this to show it manually.
+  */ 
   showMenu: function(orig) {
     orig();
 
     var menu = this.get('menu'), itemViews = menu.get('menuItemViews');
   }.enhance(),
 
+  /**
+    The minimum width for the child menu. For instance, this property can make the
+    menu always cover the entire SelectView--or, alternatively, cover all but the
+    arrows on the side.
+
+    By default, it is calculated by adding the menuMinimumWidthOffset to the view's 
+    width. If you are writing a theme and want to change the width so the menu covers
+    a specific part of the select view, change your render delegate's menuMinimumWidthOffset
+    property.
+
+    @property
+  */
   minimumMenuWidth: function() {
     return this.get('frame').width + this.get('menuMinimumWidthOffset');
   }.property('frame', 'menuMinimumWidthOffset').cacheable(),
-
-  minimumMenuWidthDidChange: function() {
-    if (this.get('menu') && !this.get('menu').isClass) {
-      menu.set('minimumMenuWidth', this.get('minimumMenuWidth'));
-    }
-  },
 
   //
   // KEY HANDLING
