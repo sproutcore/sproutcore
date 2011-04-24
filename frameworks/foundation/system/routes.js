@@ -9,24 +9,18 @@
   SC.routes manages the browser location. You can change the hash part of the
   current location. The following code
   
-  {{{
-    SC.routes.set('location', 'notes/edit/4');
-  }}}
+      SC.routes.set('location', 'notes/edit/4');
   
   will change the location to http://domain.tld/my_app#notes/edit/4. Adding
   routes will register a handler that will be called whenever the location
   changes and matches the route:
   
-  {{{
-    SC.routes.add(':controller/:action/:id', MyApp, MyApp.route);
-  }}}
+      SC.routes.add(':controller/:action/:id', MyApp, MyApp.route);
   
   You can pass additional parameters in the location hash that will be relayed
   to the route handler:
   
-  {{{
-    SC.routes.set('location', 'notes/show/4?format=xml&language=fr');
-  }}}
+      SC.routes.set('location', 'notes/show/4?format=xml&language=fr');
   
   The syntax for the location hash is described in the location property
   documentation, and the syntax for adding handlers is described in the
@@ -51,15 +45,13 @@ SC.routes = SC.Object.create({
     event.
     
     By default it is NO, so your URLs will look like:
-    {{{
-      http://domain.tld/my_app#notes/edit/4
-    }}}
+
+        http://domain.tld/my_app#notes/edit/4
     
     If set to YES and the browser supports pushState(), your URLs will look
     like:
-    {{{
-      http://domain.tld/my_app/notes/edit/4
-    }}}
+
+        http://domain.tld/my_app/notes/edit/4
     
     You will also need to make sure that baseURI is properly configured, as
     well as your server so that your routes are properly pointing to your
@@ -87,15 +79,13 @@ SC.routes = SC.Object.create({
     
     The build tools automatically configure this value if you have the
     html5_history option activated in the Buildfile:
-    {{{
-      config :my_app, :html5_history => true
-    }}}
+
+        config :my_app, :html5_history => true
     
     Alternatively, it uses by default the value of the href attribute of the
     <base> tag of the HTML document. For example:
-    {{{
-      <base href="http://domain.tld/my_app">
-    }}}
+
+        <base href="http://domain.tld/my_app">
     
     The value can also be customized before or during the exectution of the
     main() method.
@@ -183,9 +173,7 @@ SC.routes = SC.Object.create({
     
     The following code
     
-    {{{
-      SC.routes.set('location', 'notes/edit/4');
-    }}}
+        SC.routes.set('location', 'notes/edit/4');
     
     will change the location to http://domain.tld/my_app#notes/edit/4 and call
     the correct route handler if it has been registered with the add method.
@@ -193,31 +181,25 @@ SC.routes = SC.Object.create({
     You can also pass additional parameters. They will be relayed to the route
     handler. For example, the following code
     
-    {{{
-      SC.routes.add(':controller/:action/:id', MyApp, MyApp.route);
-      SC.routes.set('location', 'notes/show/4?format=xml&language=fr');
-    }}}
+        SC.routes.add(':controller/:action/:id', MyApp, MyApp.route);
+        SC.routes.set('location', 'notes/show/4?format=xml&language=fr');
     
     will change the location to 
     http://domain.tld/my_app#notes/show/4?format=xml&language=fr and call the
     MyApp.route method with the following argument:
     
-    {{{
-      { route: 'notes/show/4',
-        params: '?format=xml&language=fr',
-        controller: 'notes',
-        action: 'show',
-        id: '4',
-        format: 'xml',
-        language: 'fr' }
-    }}}
+        { route: 'notes/show/4',
+          params: '?format=xml&language=fr',
+          controller: 'notes',
+          action: 'show',
+          id: '4',
+          format: 'xml',
+          language: 'fr' }
     
     The location can also be set with a hash, the following code
     
-    {{{
-      SC.routes.set('location',
-        { route: 'notes/edit/4', format: 'xml', language: 'fr' });
-    }}}
+        SC.routes.set('location',
+          { route: 'notes/edit/4', format: 'xml', language: 'fr' });
     
     will change the location to
     http://domain.tld/my_app#notes/show/4?format=xml&language=fr.
@@ -341,17 +323,19 @@ SC.routes = SC.Object.create({
   
   /**
     Adds a route handler. Routes have the following format:
-      - 'users/show/5' is a static route and only matches this exact string,
-      - ':action/:controller/:id' is a dynamic route and the handler will be
+
+     - 'users/show/5' is a static route and only matches this exact string,
+     - ':action/:controller/:id' is a dynamic route and the handler will be
         called with the 'action', 'controller' and 'id' parameters passed in a
         hash,
-      - '*url' is a wildcard route, it matches the whole route and the handler
+     - '*url' is a wildcard route, it matches the whole route and the handler
         will be called with the 'url' parameter passed in a hash.
     
     Route types can be combined, the following are valid routes:
-      - 'users/:action/:id'
-      - ':controller/show/:id'
-      - ':controller/ *url' (ignore the space, because of jslint)
+
+     - 'users/:action/:id'
+     - ':controller/show/:id'
+     - ':controller/ *url' (ignore the space, because of jslint)
     
     @param {String} route the route to be registered
     @param {Object} target the object on which the method will be called, or

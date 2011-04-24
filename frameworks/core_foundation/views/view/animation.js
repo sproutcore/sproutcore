@@ -35,9 +35,10 @@ SC.View.reopen(
 
     Takes a key, value and either a duration, or a hash of options.
     The options hash has the following parameters
-      - duration: Duration of animation in seconds
-      - callback: Callback method to run when animation completes
-      - timing: Animation timing function
+
+     - duration: Duration of animation in seconds
+     - callback: Callback method to run when animation completes
+     - timing: Animation timing function
 
     @param {String|Hash} key
     @param {Object} value

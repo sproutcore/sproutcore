@@ -21,62 +21,58 @@ sc_require('mixins/inline_editor');
   editing. If you would like to use the inline editor for your own views, 
   you can do that also by using the editing API described here.
   
-  h2. Using the Inline Editor in Your Own Views
+  ## Using the Inline Editor in Your Own Views
 
   To use the inlineEditor on a custom view you should mixin SC.InlineEditable on
   it. SC.InlineTextFieldView is the default editor so you do not need to do any
   other setup. The class methods beginEditing, commitEditing, and discardEditing
   still exist for backwards compatibility but should not be used on new views.
 
-  {{{
-    MyProject.MyView = SC.View.extend(SC.InlineEditable, {
-    });
-  }}}
+      MyProject.MyView = SC.View.extend(SC.InlineEditable, {
+      });
   
-  h3. Starting the Editor
+  ### Starting the Editor
   
   The inline editor works by positioning itself over the top of your view 
   with the same offset, width, and font information.
 
   To start it simply call beginEditing on your view.
 
-  {{{
-    myView.beginEditing();
-  }}}
+      myView.beginEditing();
   
   By default, if the inline editor is currently in use elsewhere, it will automatically
   close itself over there and begin editing for your view instead. This behavior
   is defined by the inlineEditorDelegate of your view, and can be changed by using
   one other than the default.
 
-  h2. Customizing the editor
+  ## Customizing the editor
 
   The editor has several parameters that can be used to customize it to your
   needs. These options should be set on the editor passed to your delegate's (or
   view's) inlineEditorWillBeginEditing method:
 
-  - *exampleFrame* The editors initial frame in viewport coordinates.
-  - *value* Initial value of the edit field.
-  - *exampleElement* A DOM element to use when copying styles.
-  - *multiline* If YES then the hitting return will add to the value instead of exiting the inline editor.
-  - *commitOnBlur* If YES then blurring will commit the value, otherwise it will discard the current value.  Defaults to YES.
-  - *validator* Validator to be attached to the field.
+   - `exampleFrame` -- The editors initial frame in viewport coordinates.
+   - `value` -- Initial value of the edit field.
+   - `exampleElement` -- A DOM element to use when copying styles.
+   - `multiline` -- If YES then the hitting return will add to the value instead
+     of exiting the inline editor.
+   - `commitOnBlur` -- If YES then blurring will commit the value, otherwise it
+     will discard the current value.  Defaults to YES.
+   - `validator` -- Validator to be attached to the field.
 
   For backwards compatibility, calling the class method beginEditing with an
   options hash will translate the values in the hash to the correct settings on
   the editor.
 
-  h2. Committing or Discarding Changes
+  ## Committing or Discarding Changes
   
   Normally the editor will automatically commit or discard its changes 
   whenever the user exits the edit mode by pressing enter, escape, or clicking
   elsewhere on the page. If you need to force the editor to end editing, you can
   do so by calling commitEditing() or discardEditing():
   
-  {{{
-    myView.commitEditing();
-    myView.discardEditing();
-  }}}
+      myView.commitEditing();
+      myView.discardEditing();
   
   Both methods will try to end the editing context and will call the 
   relevant delegate methods on the inlineEditorDelegate set on your view.
@@ -515,23 +511,21 @@ SC.mixin(SC.InlineTextFieldView, {
   * To trigger compatibility mode, call this method with a hash of options. The
   * required options are:
   *
-    {{{
-      SC.InlineTextFieldView.beginEditing({
-        delegate: myView,
-        frame: myView.get('frame'),
-        exampleElement: myView.$()
-      }) ;
-    }}}
+        SC.InlineTextFieldView.beginEditing({
+          delegate: myView,
+          frame: myView.get('frame'),
+          exampleElement: myView.$()
+        }) ;
   *
-    - *delegate* The view that should be notified of events on the editor.
-    - *frame* The frame of the view that you want the editor to position itself over.
-    - *exampleElement* A DOM element to use when copying styles.
+     - `delegate` -- The view that should be notified of events on the editor.
+     - `frame` -- The frame of the view that you want the editor to position itself over.
+     - `exampleElement` -- A DOM element to use when copying styles.
 
   * Other options may be passed to further customize the editor:
   *
-    - *multiline* If YES then the hitting return will add to the value instead of exiting the inline editor.
-    - *commitOnBlur* If YES then blurring will commit the value, otherwise it will discard the current value.  Defaults to YES.
-    - *validator* Validator to be attached to the field.
+     - `multiline` -- If YES then the hitting return will add to the value instead of exiting the inline editor.
+     - `commitOnBlur` -- If YES then blurring will commit the value, otherwise it will discard the current value.  Defaults to YES.
+     - `validator` -- Validator to be attached to the field.
 
     The editor expects your source view to implement the InlineTextFieldViewDelegate protocol.
 
