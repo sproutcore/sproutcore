@@ -54,7 +54,7 @@ SC.SelectViewMenu = {
     'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
     'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 'itemTargetKey',
     'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
-    'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 
+    'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'minimumMenuWidth',
     
     'preferType', 'preferMatrix'
   ],
