@@ -125,15 +125,47 @@ SC.SelectView = SC.PopupButtonView.extend({
     * @private
   */
   _scsv_selectedItemDidChange: function() {
-    var sel = this.get('selectedItem');
+    var sel = this.get('selectedItem'),
+        last = this._scsv_lastSelection,
+        titleKey = this.get('itemTitleKey'),
+        valueKey = this.get('itemValueKey');
 
     if (!sel) {
       this.setIfChanged('value', null);
+    } else if (sel.get) {
+      this.setIfChanged('value', sel.get(valueKey));
     } else {
-      this.setIfChanged('value', sel[this.get('itemValueKey')]);
+      this.setIfChanged('value', sel[valueKey]);
     }
 
+    // add/remove observers for the title and value so we can invalidate
+    if (last && last.addObserver && sel !== last) {
+      last.removeObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
+      last.removeObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
+    }
+    
+    if (sel && sel.addObserver && sel !== last) {
+      sel.addObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
+      sel.addObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
+    }
+
+    this._scsv_lastSelection = sel;
   }.observes('selectedItem'),
+
+  // called when either title or value changes on the selected item
+  _scsv_selectedItemPropertyDidChange: function(item) {
+    this.notifyPropertyChange('title');
+    this.set('value', item.get('value'));
+  },
+
+  /**
+    The title to show when no item is selected.
+
+    @property
+    @type String
+    @default ""
+  */
+  defaultTitle: "",
 
   /**
     The title of the button, derived from the selected item.
@@ -148,7 +180,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     } else {
       return sel[this.get('itemTitleKey')];
     }
-  }.property('selectedItem'),
+  }.property('selectedItem').cacheable(),
 
   /**
     * When the value changes, we need to update selectedItem.
@@ -165,8 +197,12 @@ SC.SelectView = SC.PopupButtonView.extend({
     for (idx = 0; idx < len; idx++) {
       if (items[idx][this.get('itemValueKey')] === value) {
         this.setIfChanged('selectedItem', items[idx]);
+        return;
       }
     }
+
+    // if we got here, this means no item is selected
+    this.setIfChanged('selectedItem', null);
   }.observes('value'),
 
   /**
