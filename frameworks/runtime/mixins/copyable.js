@@ -77,4 +77,4 @@ Array.prototype.copy = function(deep) {
 	  while (idx--) ret[idx] = SC.copy(ret[idx], true);
 	}
 	return ret;
-}
+};
