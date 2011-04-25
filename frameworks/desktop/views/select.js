@@ -759,7 +759,7 @@ SC.SelectView = SC.ButtonView.extend(
       return YES;
     }
     else {
-      arguments.callee.base.apply(this,arguments);
+      return arguments.callee.base.apply(this,arguments);
     }
   },
 
