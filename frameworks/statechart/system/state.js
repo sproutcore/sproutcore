@@ -1062,6 +1062,10 @@ SC.State.plugin = function(value) {
       console.error('SC.State.plugin: Unable to determine path %@'.fmt(value));
       return undefined;
     }
+    if (!klass.isClass || !klass.kindOf(SC.State)) {
+      console.error('SC.State.plugin: Unable to extend. %@ must be a class extending from SC.State'.fmt(value));
+      return undefined;
+    }
     return klass.extend.apply(klass, args);
   };
   func.statePlugin = YES;
