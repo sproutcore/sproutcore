@@ -4,6 +4,8 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*globals TemplateTests */
+
 module("SC.TemplateCollectionView");
 
 TemplateTests = {};
@@ -24,7 +26,7 @@ test("creating a collection view works", function() {
   var ulCollectionView  = CollectionView.create({ tagName: "ul" });
   var olCollectionView  = CollectionView.create({ tagName: "ol" });
   var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
-  var customTagCollectionView = CollectionView.create({ tagName: "p" })
+  var customTagCollectionView = CollectionView.create({ tagName: "p" });
   
   defaultCollectionView.createLayer();
   ulCollectionView.createLayer();
@@ -46,6 +48,22 @@ test("creating a collection view works", function() {
   
   ok(customTagCollectionView.$().is("p"), "Paragraph collection view was rendered");
   equals(customTagCollectionView.$('div').length, 1, "Child view was rendered");
+});
+
+test("not passing a block to the collection helper creates a collection", function() {
+  TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
+    content: ['foo', 'bar', 'baz'],
+    itemView: SC.TemplateView.design({
+      template: SC.Handlebars.compile('<aside></aside>')
+    })
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
+  });
+
+  view.createLayer();
+  equals(view.$('aside').length, 3, 'one aside element is created for each content item');
 });
 
 test("passing a block to the collection helper sets it as the template for example views", function() {

@@ -7,7 +7,6 @@
 
 /**
   @namespace 
-  @deprecated
 
   SC.StaticLayout is now built in to SC.View.  You do not need to 
   apply this mixin to use static layout.  Just set useStaticLayout to YES.

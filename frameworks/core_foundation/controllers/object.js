@@ -18,15 +18,15 @@ sc_require('controllers/controller') ;
   object controller one time for all of your views and then swap out the 
   content as needed.
   
-  h2. Working with Arrays
+  ## Working with Arrays
   
   An ObjectController can accept both arrays and single objects as content.  
   If the content is an array, the ObjectController will do its best to treat 
   the array as a single object.  For example, if you set the content of an
   ObjectController to an array of Contact records and then call:
   
-    contactController.get('name');
-    
+      contactController.get('name');
+
   The controller will check the name property of each Contact in the array.  
   If the value of the property for each Contact is the same, that value will 
   be returned.  If the any values are different, then an array will be 
@@ -41,7 +41,7 @@ sc_require('controllers/controller') ;
   setup your bindings so that they will convert the content to a single object 
   like so:
   
-    contentBinding: SC.Binding.single('MyApp.listController.selection') ;
+      contentBinding: SC.Binding.single('MyApp.listController.selection') ;
 
   This will ensure that your content property is always a single object 
   instead of an array.

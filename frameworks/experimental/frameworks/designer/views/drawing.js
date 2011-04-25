@@ -3,55 +3,62 @@
   This is a Drawing View:
   If you want to draw a new shape you can pass in the information:
   For a Line:
-    {
-      +shape: SC.LINE,
-      +start: {x: 0, y: 0},
-      +end: {x: 100, y: 100},
-      ?style: {
-        ?width: 5,
-        ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
-        ?transparency: 0.2
+
+      {
+        +shape: SC.LINE,
+        +start: {x: 0, y: 0},
+        +end: {x: 100, y: 100},
+        ?style: {
+          ?width: 5,
+          ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
+          ?transparency: 0.2
+        }
       }
-    }
+
   For a Rectangle:
-    {
-      +shape: SC.RECT,
-      +start: {x: 0, y: 0},
-      +size: {width: 100, height: 100},
-      ?type: SC.FILL | SC.STROKE
-      ?style: {
-        ?width: 5,
-        ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
-        ?transparency: 0.2
+
+      {
+        +shape: SC.RECT,
+        +start: {x: 0, y: 0},
+        +size: {width: 100, height: 100},
+        ?type: SC.FILL | SC.STROKE
+        ?style: {
+          ?width: 5,
+          ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
+          ?transparency: 0.2
+        }
       }
-    }
+
   For a Circle:
-    {
-      +shape: SC.CIRCLE,
-      +center: {x: 0, y: 0},
-      +radius: 20,
-      ?type: SC.FILL | SC.STROKE
-      ?style: {
-        ?width: 5,
-        ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
-        ?transparency: 0.2
+
+      {
+        +shape: SC.CIRCLE,
+        +center: {x: 0, y: 0},
+        +radius: 20,
+        ?type: SC.FILL | SC.STROKE
+        ?style: {
+          ?width: 5,
+          ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
+          ?transparency: 0.2
+        }
       }
-    }
+
   For a Polygon:
-    {
-      +shape: SC.POLY
-      +path: [
-        +{x: 0, y: 0},
-        +{x: 10, y: 10},
-        ?{x: 0, y: 50}
-      ],
-      ?type: SC.FILL | SC.STROKE
-      ?style: {
-        ?width: 5,
-        ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
-        ?transparency: 0.2
+
+      {
+        +shape: SC.POLY
+        +path: [
+          +{x: 0, y: 0},
+          +{x: 10, y: 10},
+          ?{x: 0, y: 50}
+        ],
+        ?type: SC.FILL | SC.STROKE
+        ?style: {
+          ?width: 5,
+          ?color: 'orange' | '#FFA500' | 'rgb(255,165,0)' | 'rgba(255,165,0,1)'
+          ?transparency: 0.2
+        }
       }
-    }
   
   @author Evin Grano 
   @extends SC.View

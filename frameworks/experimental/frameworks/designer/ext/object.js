@@ -20,8 +20,9 @@ SC.Object.prototype.emitDesign = function() {
 
 
 /** 
-  Patch SC.Object to respond to encodeDesign().  This will proxy to the paired
-  designer, if there is one.  If there is no paired designer, returns NO.
+  Patch `SC.Object` to respond to `encodeDesign()`.  This will proxy to the
+  paired designer, if there is one.  If there is no paired designer, returns
+  `NO`.
 */
 SC.Object.prototype.encodeDesign = function(coder) {
   return this.designer ? this.designer.encodeDesign(coder) : NO ;

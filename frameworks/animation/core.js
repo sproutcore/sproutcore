@@ -188,8 +188,9 @@ SC.Animatable = {
   Adds support for some style properties to adjust.
 
   These added properties are currently:
-  - opacity.
-  - display.
+
+   - opacity.
+   - display.
 
   This is a complete rewrite of adjust. Its performance can probably be boosted. Do it!
   */

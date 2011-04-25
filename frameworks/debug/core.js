@@ -19,7 +19,7 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
   // Lazily instantiate the hash of types we'll use a hash for the "have we
   // seen this before?" structure.  (Some types are not safe to put in a hash
   // in this manner, so we'll use the hash for its algorithmic advantage when
-  // possible, but fall back to an array using indexOf() when necessary.)
+  // possible, but fall back to an array using `indexOf()` when necessary.)
   if (!SC._mapDisplayNamesUseHashForSeenTypesHash) {
     var types = SC._mapDisplayNamesUseHashForSeenTypes ;
     var typesHash = {} ;
