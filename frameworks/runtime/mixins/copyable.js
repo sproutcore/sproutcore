@@ -36,7 +36,8 @@ SC.Copyable = /** @scope SC.Copyable.prototype */{
     @returns {Object} copy of receiver
   */
   copy: function(deep) {
-    throw "%@.copy() is not implemented";
+    var className = SC._object_className(this.constructor);
+    throw "%@.copy() is not implemented".fmt(className);
   },
 
   /**
