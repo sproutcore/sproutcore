@@ -590,6 +590,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       // No explicit current state to start from; therefore, just use the first current state as 
       // a default, if there is a current state.
       fromCurrentState = this.get('currentStates')[0];
+      msg = "gotoState: fromCurrentState not explicitly provided. Using a default current state to transition from: %@";
+      this.statechartLogWarning(msg.fmt(fromCurrentState));
     }
         
     if (trace) {
