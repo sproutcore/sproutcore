@@ -63,7 +63,8 @@ SC.ContainerView = SC.View.extend(
     @param {SC.View} newContent the new content view or null.
   */
   replaceContent: function(newContent) {
-    this.replaceAllChildren(newContent ? [newContent] : []);
+    this.removeAllChildren() ;
+    if (newContent) this.appendChild(newContent) ;
   },
 
   /** @private */
@@ -83,9 +84,7 @@ SC.ContainerView = SC.View.extend(
   awake: function() {
     sc_super();
     var nowShowing = this.get('nowShowing') ;
-    if (nowShowing && nowShowing.length>0) {
-      this.nowShowingDidChange();
-    }
+    if (nowShowing && nowShowing.length>0) this.nowShowingDidChange();
   },
   
   /**
