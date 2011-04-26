@@ -219,8 +219,11 @@ SC.mixin( /** @scope SC */ {
       throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
     }
 
+    // since the string has already been escaped (if the user wants it to be),
+    // we should set the innerHTML instead of innertext
+    if(ignoreEscape) element.innerHTML = string;
     // the conclusion of which to use (innerText or textContent) should be cached
-    if (typeof element.innerText != "undefined") element.innerText = string;
+    else if (typeof element.innerText != "undefined") element.innerText = string;
     else element.textContent = string;
 
     // generate result
