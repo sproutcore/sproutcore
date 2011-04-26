@@ -79,6 +79,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
   iconKey: null,
 
   /**
+     Set this to non-null to place an empty option at the top of the menu.   
+     
+     @type String
+     @default null
+  */
+  emptyName: null,
+
+  /**
     Key used to indicate if the item is to be enabled
     
     @type String
@@ -329,7 +337,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     sc_super();
     var layoutWidth, objects, len, nameKey, iconKey, valueKey, checkboxEnabled,
       currentSelectedVal, shouldLocalize, separatorPosition, itemList, isChecked,
-      idx, name, icon, value, item, itemEnabled, isEnabledKey ;
+      idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName;
     layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.SELECT_BUTTON_SPRITE_WIDTH }) ;
@@ -345,6 +353,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     valueKey = this.get('valueKey') ;
     isEnabledKey = this.get('isEnabledKey') ;
     checkboxEnabled = this.get('checkboxEnabled') ;
+    emptyName = this.get('emptyName') ;
 
     //get the current selected value
     currentSelectedVal = this.get('value') ;
@@ -363,6 +372,34 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     //index for finding the first item in the list
     idx = 0 ;
+
+    // Add the emptyName item if set
+    if (emptyName) {
+      itemList.push(SC.Object.create({
+        title: emptyName,
+        icon: null,
+        value: null,
+        isEnabled: YES,
+        checkbox: NO,
+        target: this,
+        action: 'displaySelectedItem'
+      }));
+      
+      // Add a seperator after the emptyName
+      itemList.push(SC.Object.create({
+        separator: YES
+      })); 
+      
+      //Set default with the emptyName
+      this._defaultVal = null ;
+      this._defaultTitle = emptyName ;
+      this._defaultIcon = null ;
+
+      // If no value set be sure to set title to emptyName
+      if (!this.get('value')) this.set('title', this._defaultTitle); 
+
+      idx++;
+    }
 
     objects.forEach(function(object) {
     if (object) {
@@ -413,13 +450,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
       object.get(isEnabledKey) : object[isEnabledKey]) : object ;
       
       if(NO !== itemEnabled) itemEnabled = YES ;
-
-      //Set the first item from the list as default selected item
-      if (idx === 0) {
-        this._defaultVal = value ;
-        this._defaultTitle = name ;
-        this._defaultIcon = icon ;
-      }
 
       var item = SC.Object.create({
         title: name,
@@ -628,14 +658,26 @@ SC.SelectButtonView = SC.ButtonView.extend(
      Action method for the select button menu items
   */
   displaySelectedItem: function(menuView) {
-    var currentItem = this.getPath('menu.selectedItem');
-    if (!currentItem) return NO;
+    var currentItem = this.getPath('menu.selectedItem'),
+        emptyName = this.get('emptyName');
+    
+    if (!currentItem || !currentItem.get('value')) {
+      if (emptyName) {
+        this.set('value', null) ;
+        this.set('title', emptyName) ;
+        this.set('itemIdx', 0) ;
+        
+        return YES;
+      }
+      else return NO;
+    }
+    else {
+      this.set('value', currentItem.get('value')) ;
+      this.set('title', currentItem.get('title')) ;
+      this.set('itemIdx', currentItem.get('contentIndex')) ;
 
-    this.set('value', currentItem.get('value')) ;
-    this.set('title', currentItem.get('title')) ;
-    this.set('itemIdx', currentItem.get('contentIndex')) ;
-
-    return YES;
+      return YES;
+    }
   },
 
   /**
@@ -648,31 +690,31 @@ SC.SelectButtonView = SC.ButtonView.extend(
         customSeparatorHeight = 0, separatorHeightTuning = 0,
         pos, len;
     switch (this.get('controlSize')) {
-      case SC.TINY_CONTROL_SIZE:
-        controlSizeTuning = SC.SelectButtonView.TINY_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT;
-        break;
-      case SC.SMALL_CONTROL_SIZE:
-        controlSizeTuning = SC.SelectButtonView.SMALL_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT;
-        break;
-      case SC.REGULAR_CONTROL_SIZE:
-        controlSizeTuning = SC.SelectButtonView.REGULAR_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT;
-        break;
-      case SC.LARGE_CONTROL_SIZE:
-        controlSizeTuning = SC.SelectButtonView.LARGE_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT;
-        break;
-      case SC.HUGE_CONTROL_SIZE:
-        controlSizeTuning = SC.SelectButtonView.HUGE_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT;
-        break;
+     case SC.TINY_CONTROL_SIZE:
+      controlSizeTuning = SC.SelectButtonView.TINY_OFFSET_Y;
+      customMenuItemHeight = SC.SelectButtonView.TINY_OFFSET_Y;
+      customSeparatorHeight = SC.SelectButtonView.TINY_POPUP_MENU_WIDTH_OFFSET;
+      break;
+    case SC.SMALL_CONTROL_SIZE:
+      controlSizeTuning = SC.SelectButtonView.SMALL_OFFSET_Y;
+      customMenuItemHeight = SC.SelectButtonView.SMALL_OFFSET_Y;
+      customSeparatorHeight = SC.SelectButtonView.SMALL_POPUP_MENU_WIDTH_OFFSET;
+      break;
+    case SC.REGULAR_CONTROL_SIZE:
+      controlSizeTuning = SC.SelectButtonView.REGULAR_OFFSET_Y;
+      customMenuItemHeight = SC.SelectButtonView.REGULAR_OFFSET_Y;
+      customSeparatorHeight = SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET;
+      break;
+    case SC.LARGE_CONTROL_SIZE:
+      controlSizeTuning = SC.SelectButtonView.LARGE_OFFSET_Y;
+      customMenuItemHeight = SC.SelectButtonView.LARGE_OFFSET_Y;
+      customSeparatorHeight = SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET;
+      break;
+    case SC.HUGE_CONTROL_SIZE:
+      controlSizeTuning = SC.SelectButtonView.HUGE_OFFSET_Y;
+      customMenuItemHeight = SC.SelectButtonView.HUGE_OFFSET_Y;
+      customSeparatorHeight = SC.SelectButtonView.HUGE_POPUP_MENU_WIDTH_OFFSET;
+       break;
     }
 
     var preferMatrixAttributeTop = controlSizeTuning ,
