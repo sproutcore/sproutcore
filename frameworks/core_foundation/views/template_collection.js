@@ -80,6 +80,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
     if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {
       extensions.tagName = 'li';
+    } else if (this.get('tagName') === 'table' || this.get('tagName') === 'thead' || this.get('tagName') === 'tbody') {
+      extensions.tagName = 'tr';
     }
 
     return itemView.extend(extensions);
