@@ -7,9 +7,12 @@
 sc_require('views/button') ;
 sc_require('views/separator') ;
 
-/*
-  Extends SC.MenuItemView to support auto resize.
+/**
+  @class
+  Enhances SC.MenuItemView to support auto resize.
 */
+SC.MenuItemView = SC.MenuItemView; // for docs
+
 SC.MenuItemView.reopen(SC.AutoResize);
 SC.MenuItemView.reopen(
 /** @scope SC.MenuItemView.prototype */{
@@ -17,16 +20,45 @@ SC.MenuItemView.reopen(
   //
   // For automatic resizing, if enabled (to be enabled by parent menu)
   //
+  /**
+    The item view is capable of automatic resizing.
+    
+    @private
+    @property
+    @type {Boolean}
+  */
   supportsAutoResize: YES,
 
+  /**
+    The menu item should NOT change its own width and height.
+    
+    @private
+    @property
+    @type {Boolean}
+  */
   shouldAutoResize: NO,
+  
+  /**
+    If YES, the menu item will measure its width and height so that the menu
+    can automatically resize itself. This is usually set by the parent menu.
+    
+    @property
+    @type {Boolean}
+    @default NO
+  */
   shouldMeasureSize: NO,
 
-  autoResizePadding: 0, // TODO: SHOULD COME FROM THEME.
+  // NOTE: this property could come from the theme at some point, but MenuItemView
+  // would have to be migrated to render delegates first. MenuPane adds the
+  // necessary padding for now.
+  autoResizePadding: 0,
+  
+  /** @private */
   autoResizeText: function() {
     return this.get('title');
   }.property('title'),
 
+  /** @private */
   autoResizeLayer: function() {
     return this.$('.value')[0];
   }.property('layer').cacheable(),

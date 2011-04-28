@@ -10,15 +10,33 @@
  *
  */
 SC.SelectViewMenu = {
+  /**
+    The SelectView to bind to.
+    
+    @property
+    @type {SC.SelectView}
+    @default null
+  */
   selectView: null,
 
   //
   // CODE TO MAKE ITEMS BE CHECKED WHEN SELECTED:
   //
+  
+  /**
+    The current value of the SelectView.
+    
+    @property
+    @default null
+  */
   value: null,
   valueBinding: '.selectView.value',
 
-  // make sure to invalidate menu items when selection changes
+
+  /** 
+    @private 
+    Invalidates menu items' isChecked property when the selectView's value changes.
+  */
   valueDidChange: function() {
     var items = this.get('menuItemViews'), idx, len = items.length, item;
     for (idx = 0; idx < len; idx++) {
@@ -35,6 +53,14 @@ SC.SelectViewMenu = {
     }
   }.observes('value'),
 
+  /**
+    An overridden MenuItemView to create for each menu item that makes itself checked if
+    it is selected.
+    
+    @property
+    @type {SC.MenuItemView}
+    @default SC.MenuItemView subclass
+  */
   exampleView: SC.MenuItemView.extend({
     isChecked: function() {
       // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
@@ -49,6 +75,8 @@ SC.SelectViewMenu = {
   //
   // CODE TO BIND TO SELECTVIEW PROPERTIES
   //
+  
+  /** @private */
   _svm_bindToProperties: [
     'items',
     'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
@@ -59,6 +87,7 @@ SC.SelectViewMenu = {
     'preferType', 'preferMatrix'
   ],
 
+  /** @private */
   _svm_setupBindings: function() {
     var bindTo = this.get('selectView');
     if (!bindTo) {
@@ -75,6 +104,7 @@ SC.SelectViewMenu = {
     this._svm_isBoundTo = bindTo;
   },
 
+  /** @private */
   _svm_clearBindings: function() {
     var boundTo = this._svm_isBoundTo;
     if (!boundTo) {
@@ -89,15 +119,18 @@ SC.SelectViewMenu = {
     }
   },
 
+  /** @private */
   _svm_selectViewDidChange: function() {
     this._svm_clearBindings();
     this._svm_setupBindings();
   }.observes('selectView'),
 
+  /** @private */
   initMixin: function() {
     this._svm_setupBindings();
   },
 
+  /** @private */
   destroyMixin: function() {
     this._svm_clearBindings();
   }

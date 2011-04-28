@@ -8,9 +8,12 @@ require('panes/picker');
 require('views/menu_item');
 
 
-/*
- * Extends SC.MenuPane to add support for automatic resizing.
- */
+/**
+  @class
+  Enhances SC.MenuPane to add support for automatic resizing.
+*/
+SC.MenuPane = SC.MenuPane; // for docs
+
 SC.MenuPane.reopen(
 /** @scope SC.MenuPane.prototype */ {
 
@@ -24,20 +27,35 @@ SC.MenuPane.reopen(
 
     This property must be set before instantiation; any changes after instantiation
     will not function properly.
+    
+    @property
+    @type {Boolean}
+    @default YES
   */
   shouldAutoResize: YES,
 
   /**
     The minimum width for this menu if it is to be automatically resized.
+    
+    If no value is specified, it will be determined from the controlSize.
+    
+    @property {Number}
+    @default minimumMenuWidth from render delegate, or 0.
   */
   minimumMenuWidth: SC.propertyFromRenderDelegate('minimumMenuWidth', 0),
 
   /**
     The amount to add to any calculated width.
+    
+    If no value is specified, it will be determined from the controlSize.
+    
+    @property {Number}
+    @default menuWidthPadding from render delegate, or 0
   */
   menuWidthPadding: SC.propertyFromRenderDelegate('menuWidthPadding', 0),
 
   /**
+    @private
     In addition to the normal init, we need to schedule an automatic resize.
   */
   init: function(orig) {
@@ -56,6 +74,7 @@ SC.MenuPane.reopen(
     @property
     @type Array
     @readOnly
+    @private
   */
   createMenuItemViews: function(orig) {
     // EXTENDED to set shouldMeasureSize to its initial value and to
