@@ -6,6 +6,7 @@ Handlebars.registerHelper('collection', function(path, options) {
   var fn = options.fn;
   var data = options.data;
   var inverse = options.inverse;
+  var hash = options.hash;
   var collectionClass, collectionObject;
 
   collectionClass = path ? SC.objectForPropertyPath(path) : SC.TemplateCollectionView;
@@ -17,11 +18,11 @@ Handlebars.registerHelper('collection', function(path, options) {
 
   var extensions = {};
 
-  if (fn) {
-    var hash = fn.hash, itemHash = {}, match;
+  if (hash) {
+    var itemHash = {}, match;
 
     for (var prop in hash) {
-      if (fn.hash.hasOwnProperty(prop)) {
+      if (hash.hasOwnProperty(prop)) {
         match = prop.match(/^item(.)(.*)$/);
 
         if(match) {
@@ -32,13 +33,11 @@ Handlebars.registerHelper('collection', function(path, options) {
     }
 
     extensions = SC.clone(hash);
-
-    SC.mixin(extensions, {
-      itemViewTemplate: fn,
-      inverseTemplate: inverse,
-      itemViewOptions: itemHash
-    });
+    extensions.itemViewOptions = itemHash;
   }
+
+  if (fn) { extensions.itemViewTemplate = fn; }
+  if (inverse) { extensions.inverseTemplate = inverse; }
 
   if(collectionClass.isClass) {
     collectionObject = collectionClass.extend(extensions);

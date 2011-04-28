@@ -650,28 +650,28 @@ SC.SelectButtonView = SC.ButtonView.extend(
     switch (this.get('controlSize')) {
       case SC.TINY_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.TINY_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT;
+        customMenuItemHeight = SC.SelectButtonView.TINY_OFFSET_Y;
+        customSeparatorHeight = SC.SelectButtonView.TINY_POPUP_MENU_WIDTH_OFFSET;
         break;
       case SC.SMALL_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.SMALL_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT;
+        customMenuItemHeight = SC.SelectButtonView.SMALL_OFFSET_Y;
+        customSeparatorHeight = SC.SelectButtonView.SMALL_POPUP_MENU_WIDTH_OFFSET;
         break;
       case SC.REGULAR_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.REGULAR_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT;
+        customMenuItemHeight = SC.SelectButtonView.REGULAR_OFFSET_Y;
+        customSeparatorHeight = SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET;
         break;
       case SC.LARGE_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.LARGE_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT;
+        customMenuItemHeight = SC.SelectButtonView.LARGE_OFFSET_Y;
+        customSeparatorHeight = SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET;
         break;
       case SC.HUGE_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.HUGE_OFFSET_Y;
-        customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
-        customSeparatorHeight = SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT;
+        customMenuItemHeight = SC.SelectButtonView.HUGE_OFFSET_Y;
+        customSeparatorHeight = SC.SelectButtonView.HUGE_POPUP_MENU_WIDTH_OFFSET;
         break;
     }
 

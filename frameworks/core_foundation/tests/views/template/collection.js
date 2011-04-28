@@ -156,6 +156,36 @@ test("should give its item views the classBinding specified by itemClassBinding"
   equals(view.$('ul li.is-baz').length, 2, "removes class when property changes");
 });
 
+test("should pass item* property when created with a block", function() {
+  TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
+    content: ['foo', 'bar', 'baz']
+  });
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection TemplateTests.CollectionTestView itemFoo="bar"}}baz{{/collection}}')
+  });
+  view.createLayer();
+
+  var childViews = view.getPath('childViews.firstObject.childViews');
+  childViews.forEach(function(childView, index) {
+    equals(childView.get('foo'), 'bar', "Child view #%@ has correct value for property set in template".fmt(index));
+  });
+});
+
+test("should pass item* property when created without a block", function() {
+  TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
+    content: ['foo', 'bar', 'baz']
+  });
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{collection TemplateTests.CollectionTestView itemFoo="bar"}}')
+  });
+  view.createLayer();
+
+  var childViews = view.getPath('childViews.firstObject.childViews');
+  childViews.forEach(function(childView, index) {
+    equals(childView.get('foo'), 'bar', "Child view #%@ has correct value for property set in template".fmt(index));
+  });
+});
+
 test("should work inside a bound {{#if}}", function() {
   var testData = [SC.Object.create({ isBaz: false }), SC.Object.create({ isBaz: true }), SC.Object.create({ isBaz: true })];
   TemplateTests.ifTestCollectionView = SC.TemplateCollectionView.extend({

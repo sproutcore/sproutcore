@@ -284,7 +284,12 @@ SC.SelectFieldView = SC.FieldView.extend(
   _valueKeyObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('valueKey'),
-   
+
+  /** @private */
+  _isEnabledObserver: function() {
+    this.set('cpDidChange', YES);
+  }.observes('isEnabled'),
+
   // .......................................
   // PRIVATE
   //
