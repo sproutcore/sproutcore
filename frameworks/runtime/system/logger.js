@@ -423,11 +423,11 @@ SC.Logger = SC.Object.create({
     @param {Array} arguments The arguments property of a function
     @returns {Array} An array containing the elements of arguments parameter
   */
-  _argumentsToArray: function(arguments) {
-    if (!arguments) return [];
+  _argumentsToArray: function(args) {
+    if (!args) return [];
     var a = [];
-    for (var i = 0; i < arguments.length; i++) {
-      a[i] = arguments[i];
+    for (var i = 0; i < args.length; i++) {
+      a[i] = args[i];
     }
     return a;
   },
