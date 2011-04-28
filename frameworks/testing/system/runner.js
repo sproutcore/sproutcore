@@ -128,9 +128,11 @@ CoreTest.Runner = {
     if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
     
+    CoreTest.finished = true;
+    
     if (this.errors) CoreTest.errors=this.errors.join('');
 
-
+    
     // Unload the SproutCore event system so that the user can select the text
     // of the various events.  (It is handy when looking at failed tests.)
     if (SC  &&  SC.Event  &&  SC.Event.unload) {
