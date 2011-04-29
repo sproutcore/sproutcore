@@ -567,6 +567,14 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var target, action;
     var didChangeObservers = this._kvo_array_did_change;
     if (didChangeObservers) {
+      // If arrayContentDidChange is called with no parameters, assume the
+      // entire array has changed.
+      if (start === undefined) {
+        start = 0;
+        removedCount = this.get('length');
+        addedCount = 0;
+      }
+
       members = didChangeObservers.members;
       membersLen = members.length;
 
