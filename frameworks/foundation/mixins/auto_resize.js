@@ -185,7 +185,7 @@ SC.AutoResize = {
         return;
       }
 
-      metrics = SC.metricsForString(value, layer, undefined, ignoreEscape);
+      metrics = SC.metricsForString(value, layer, this.get('classNames'), ignoreEscape);
     }
 
     // metrics should include padding
@@ -331,7 +331,7 @@ SC.AutoResizeManager = {
 
           // use the layer to prepare the measurement
           if(layer) {
-            SC.prepareStringMeasurement(layer);
+            SC.prepareStringMeasurement(layer, view.get('classNames'));
             view.measureSize(YES);
             break;
           }
