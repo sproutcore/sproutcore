@@ -259,7 +259,7 @@ SC.FlowedLayout = {
   flowSizeForChild: function(idx, view) {
     var cw = view.get('calculatedWidth'), ch = view.get('calculatedHeight');
     
-    var calc = {}, f = view.get('frame');
+    var calc = {}, f = view.get('frame'), l = view.get('layout');
     view._scfl_lastFrame = f;
     
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
@@ -281,9 +281,9 @@ SC.FlowedLayout = {
     // expands in to 0.
     if (view.get('isSpacer')) {
       if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
-        calc.width = view.get('layout').minWidth || 0;
+        calc.width = l.minWidth || 0;
       } else {
-        calc.height = view.get('layout').minHeight || 0;
+        calc.height = l.minHeight || 0;
       }
     }
     
@@ -291,11 +291,20 @@ SC.FlowedLayout = {
     if (
       this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')
     ) {
-      calc.height = view.get('layout').minHeight || 0;
+      calc.height = l.minHeight || 0;
     } else if (
       this.get('layoutDirection') === SC.LAYOUT_VERTICAL && view.get('fillWidth')
     ) {
-      calc.width = view.get('layout').minWidth || 0;
+      calc.width = l.minWidth || 0;
+    }
+
+    // finally, RECREATE the view's layout if it is invalid (lacks a width or a height)
+    if (l.width == undefined) {
+      view.adjust('width', f.width);
+    }
+
+    if (l.height == undefined) {
+      view.adjust('height', f.height);
     }
     
     // return
