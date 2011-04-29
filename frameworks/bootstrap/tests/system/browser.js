@@ -179,7 +179,7 @@ test("Mac - using Chrome 9.0.572.1 with Webkit v534.12", function(){
 
 test("Android - using Samsung Galaxy S on Android 2.1", function() {
   var userAgent = "Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; SCH-I500 Build/ECLAIR) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17";
-  testUserAgent(userAgent, {android: true, version: '530.17', webkit: '530.17'});
+  testUserAgent(userAgent, {android: true, version: '530.17', webkit: '530.17', current: 'android' });
 });
 
 test("Language", function(){
