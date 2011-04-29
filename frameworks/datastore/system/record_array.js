@@ -438,13 +438,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     this.set('needsFlush', YES);
 
-    // if we have storeKeys already, then flush immediately because
-    // it will not be as expensive as if we are starting from scratch
     if (this.get('storeKeys')) {
       this.flush();
-    }
-    else {
-      this.enumerableContentDidChange();
+    } else {
+      this.arrayContentDidChange();
     }
 
     return this;
