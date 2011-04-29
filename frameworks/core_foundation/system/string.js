@@ -74,10 +74,10 @@ SC.mixin(SC.String, {
 
     ## Examples
 
-    decamelize('my favorite items') // 'my favorite items'
-    decamelize('css-class-name')    // 'css-class-name'
-    decamelize('action_name')       // 'action_name'
-    decamelize('innerHTML')         // 'inner_html'
+        decamelize('my favorite items') // 'my favorite items'
+        decamelize('css-class-name')    // 'css-class-name'
+        decamelize('action_name')       // 'action_name'
+        decamelize('innerHTML')         // 'inner_html'
 
     @returns {String} the decamelized string.
   */
@@ -91,11 +91,10 @@ SC.mixin(SC.String, {
 
     ## Examples
 
-    | *Input String* | *Output String* |
-    dasherize('my favorite items') // 'my-favorite-items'
-    dasherize('css-class-name')    // 'css-class-name'
-    dasherize('action_name')       // 'action-name'
-    dasherize('innerHTML')         // 'inner-html'
+        dasherize('my favorite items') // 'my-favorite-items'
+        dasherize('css-class-name')    // 'css-class-name'
+        dasherize('action_name')       // 'action-name'
+        dasherize('innerHTML')         // 'inner-html'
 
     @returns {String} the dasherized string.
   */
