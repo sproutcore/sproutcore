@@ -462,7 +462,8 @@ SC.FlowedLayout = {
         items = [], itemOffset = 0, isVertical = plan.isVertical, itemSize, itemLength,
         canWrap = this.get('canWrap'),
         newRowPending = NO;
-    
+
+    var maxItemLength = 0;
     var max = row.plan.maximumRowLength;
     
     for (idx = startingAt; idx < len; idx++) {
@@ -521,10 +522,18 @@ SC.FlowedLayout = {
       
       items.push(item);
       itemOffset += itemLength;
+      maxItemLength = Math.max(itemLength, maxItemLength);
     }
     
     row.rowLength = itemOffset;
-    row.plan.maximumCollapsedRowLength = Math.max(row.rowLength, row.plan.maximumCollapsedRowLength);
+
+    // if the row cannot wrap, then the minimum size for the row (and therefore collapsed size)
+    // is the same as the current row length: it consists of the minimum size of all items.
+    //
+    // If the row can wrap, then the longest item will determine the size of a fully 
+    // collapsed (one item per row) layout.
+    var minRowLength = canWrap ? maxItemLength : row.rowLength;
+    row.plan.maximumCollapsedRowLength = Math.max(minRowLength, row.plan.maximumCollapsedRowLength);
     row.items = items;
     return idx;
   },
