@@ -710,6 +710,16 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.observes('storeKeys'),
 
   /** @private
+    If anyone adds an array observer on to the record array, make sure
+    we flush so that the observers don't fire the first time length is
+    calculated.
+  */
+  addArrayObservers: function() {
+    this.flush();
+    return SC.Array.addArrayObservers.apply(this, arguments);
+  },
+
+  /** @private
     Invoked whenever the content of the `storeKeys` array changes.  This will
     dump any cached record lookup and then notify that the enumerable content
     has changed.
