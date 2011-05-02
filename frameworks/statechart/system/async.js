@@ -8,11 +8,17 @@
 /*globals SC */
 
 /**
+  @class
+
   Represents a call that is intended to be asynchronous. This is
   used during a state transition process when either entering or
   exiting a state.
+
+  @extends SC.Object
+  @author Michael Cohen
 */
-SC.Async = SC.Object.extend({
+SC.Async = SC.Object.extend(
+  /** @scope SC.Async.prototype */{
   
   func: null,
   
@@ -42,7 +48,7 @@ SC.Async = SC.Object.extend({
 /**
   Singleton
 */
-SC.Async.mixin({
+SC.Async.mixin(/** @scope SC.Async */{
   
   /**
     Call in either a state's enterState or exitState method when you

@@ -10,6 +10,8 @@
 sc_require('system/state');
 
 /**
+  @class
+
   The startchart manager mixin allows an object to be a statechart. By becoming a statechart, the
   object can then be manage a set of its own states.
   
@@ -25,8 +27,6 @@ sc_require('system/state');
   
   The following example shows how states are nested within a statechart:
   
-    {{{
-    
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
       
         rootState: SC.State.design({
@@ -43,8 +43,6 @@ sc_require('system/state');
         })
       
       })
-    
-    }}}
   
   Note how in the example above, the root state as an explicit initial substate to enter into. If no
   initial substate is provided, then the statechart will default to the the state's first substate.
@@ -52,8 +50,6 @@ sc_require('system/state');
   You can also defined states without explicitly defining the root state. To do so, simply create properties
   on your object that represents states. Upon initialization, a root state will be constructed automatically
   by the mixin and make the states on the object substates of the root state. As an example:
-  
-    {{{
   
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
     
@@ -69,8 +65,6 @@ sc_require('system/state');
     
       })
   
-    }}} 
-  
   If you liked to specify a class that should be used as the root state but using the above method to defined
   states, you can set the rootStateExample property with a class that extends from SC.State. If the 
   rootStateExaple property is not explicitly assigned the then default class used will be SC.State.
@@ -80,8 +74,6 @@ sc_require('system/state');
   independent state structure from other concurrent states. The following example shows how to provide your
   statechart with concurrent states:
   
-    {{{
-    
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
       
         rootState: SC.State.design({
@@ -98,8 +90,6 @@ sc_require('system/state');
         })
       
       })
-    
-    }}}
   
   Above, to indicate that a state's substates are concurrent, you just have to set the substatesAreConcurrent to 
   YES. Once done, then stateA and stateB will be independent of each other and each will manage their
@@ -108,8 +98,6 @@ sc_require('system/state');
   To define concurrent states directly on the object without explicitly defining a root, you can do the 
   following:
   
-    {{{
-
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
   
         statesAreConcurrent: YES,
@@ -123,14 +111,10 @@ sc_require('system/state');
         })
   
       })
-
-    }}}
   
   Remember that a startchart can have a mixture of nested and concurrent states in order for you to 
   create as complex of statecharts that suite your needs. Here is an example of a mixed state structure:
   
-    {{{
-    
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
       
         rootState: SC.State.design({
@@ -158,15 +142,12 @@ sc_require('system/state');
         })
       
       })
-    
-    }}}
   
   Depending on your needs, a statechart can have lots of states, which can become hard to manage all within
   one file. To modularize your states and make them easier to manage and maintain, you can plug-in states
   into other states. Let's say we are using the statechart in the last example above, and all the code is 
   within one file. We could update the code and split the logic across two or more files like so:
   
-    {{{
       ---- state_a.js
   
       MyApp.StateA = SC.State.extend({
@@ -206,17 +187,14 @@ sc_require('system/state');
         })
     
       })
-  
-    }}}
     
   Using state plug-in functionality is optional. If you use the plug-in feature you can break up your statechart
   into as many files as you see fit.
 
   @author Michael Cohen
-
 */
 
-SC.StatechartManager = {
+SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   
   // Walk like a duck
   isResponderContext: YES,

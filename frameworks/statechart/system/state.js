@@ -8,6 +8,7 @@
 /*globals SC */
 
 /**
+  @class
 
   Represents a state within a statechart. 
   
@@ -18,7 +19,7 @@
   state heirarchy and create the states itself.
 
   @author Michael Cohen
-
+  @extends SC.Object
 */
 SC.State = SC.Object.extend({
   

@@ -10,6 +10,8 @@
 sc_require('system/state');
 
 /**
+  @class
+
   Represents a history state that can be assigned to a SC.State object's
   initialSubstate property. 
   
@@ -20,8 +22,6 @@ sc_require('system/state');
   otherwise the default state assigned to history state object will be entered.
   
   An example of how to use:
-  
-  {{{
   
     stateA: SC.State.design({
     
@@ -35,12 +35,11 @@ sc_require('system/state');
     
     })
   
-  }}}
-  
   @author Michael Cohen
-  
+  @extends SC.Object
 */
-SC.HistoryState = SC.Object.extend({
+SC.HistoryState = SC.Object.extend(
+  /** @scope SC.HistoryState.prototype */{
 
   /**
     Used to indicate if the statechart should recurse the 
