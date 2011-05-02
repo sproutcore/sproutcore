@@ -2113,7 +2113,7 @@ SC.CollectionView = SC.View.extend(
         content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1, 
         info, anchor, sel, isSelected, modifierKeyPressed,
-        allowsMultipleSel = content.get('allowsMultipleSelection');
+        allowsMultipleSel = content ? content.get('allowsMultipleSelection') : NO;
         
     info = this.mouseDownInfo = {
       event:        ev,  
