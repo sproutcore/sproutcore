@@ -134,38 +134,32 @@ module Docs
 
     def help
       shell.say <<-EOS.gsub(/^      /, '')
-        USAGE: ./sc-docs [-h] [-v] [--input_dir] [--deploy]
+        USAGE: ./sc-docs [-h] [-v] --input_dir INPUT_DIRECTORY_PATH [--deploy] [-p PROJECT_NAME] [--ouput_dir] [--dont_update]
 
         sc-docs uses jsdoc-toolkit to parse a list of javascript files and generates 
         a fixtures file which can be dropped into the documentation viewer as-is. 
 
-        The defaults provided for all these options are designed to make it easy to 
-        generate the documentation when you are within the sc_docs.git repository.
-        However, it provides hooks for you to override all of the paths as you see
-        necessary.
+        sc-docs has built-in support for updating a git repository. If the input directory is
+        a git repo, it will attempt to fetch, and then rebase against origin/master. If you would
+        rather not do that, then specify --dont_update
 
-        After running sc-docs to generate the documentation, you can also deploy 
-        the documentation using the deploy command (see example below).
+        By only specifying an input_dir, sc-docs will start an instance of the doc viewer
+        at port 4021. If you would rather generate a build and deploy it, then you need
+        to specify the -d (deploy) and the -p (project name) options as well (see example)
 
-        Options:
-
-          --input_dir       -i
-
-                  Default: ./jsdoc
-
-                  The path to either a single javascript file or a directory of files 
-                  which will be scanned for documentation. If you pass in a directory,
-                  it will be recursively scanned for all javascript files.
+        By default, sc-docs plays nicely with OS X and deploys to /Library/WebServer/Documents. If you
+        would rather deploy to another location, you can specify that with the --output_dir or -o flag.
 
         Example:
 
-          ./sc-docs --jsdoc_path ~/work/docs/jsdoc 
-                    --input_dir ~/work/cloudkit/frameworks/debug/ 
-                    -f=simulator.js 
-                    -l=NavTest.Simulator 
+          This example starts the doc viewer at port 4021
 
-          ./sc-docs deploy --output=/Library/WebServer/Documents/docs
-                           --project_name=sproutcore
+          ./sc-docs --input_dir ~/github/sproutcore/ 
+
+          This example generates a build of the doc viewer and deploys it to /Library/WebServer/Documents
+
+          ./sc-docs --input_dir ~/github/sproutcore/ 
+                     -d -p sproutcore
 
         Author: Majd Taby
       EOS
