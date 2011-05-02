@@ -9,7 +9,7 @@
 // ========================================================================
 /*globals module test ok isObj equals expects Namespace */
 
-var object, ObjectC, ObjectD, objectA, objectB;
+var object, ObjectC, ObjectD, objectA, objectB ;
 
 // ..........................................................
 // GET()
@@ -144,13 +144,11 @@ test("should return a property at a given path relative to the window", function
   window.Foo = SC.Object.create({
     Bar: SC.Object.create({
       Baz: function() { return "blargh"; }.property()
-    }),
-    Soylent: ['soylent', 'green', ['is', ['people']]]
+    })
   });
 
   try {
     equals(SC.getPath('Foo.Bar.Baz'), "blargh");
-    equals(SC.getPath('Foo.Soylent.2.1.0'), "people");
   } finally {
     window.Foo = undefined;
   }
@@ -160,25 +158,21 @@ test("should return a property at a given path relative to the passed object", f
   var foo = SC.Object.create({
     bar: SC.Object.create({
       baz: function() { return "blargh"; }.property()
-    }),
-    soylent: ['soylent', 'green', ['is', ['people']]] 
+    })
   });
 
   equals(SC.getPath(foo, 'bar.baz'), "blargh");
-  equals(SC.getPath(foo, 'soylent.2.1.0'), "people");
 });
 
 test("should return a property at a given path relative to the window - JavaScript hash", function() {
   window.Foo = {
     Bar: {
       Baz: "blargh"
-    },
-    Soylent: ['soylent', 'green', ['is', ['people']]] 
+    }
   };
 
   try {
     equals(SC.getPath('Foo.Bar.Baz'), "blargh");
-    equals(SC.getPath('Foo.Soylent.2.1.0'), "people");
   } finally {
     window.Foo = undefined;
   }
@@ -188,12 +182,10 @@ test("should return a property at a given path relative to the passed object - J
   var foo = {
     bar: {
       baz: "blargh"
-    },
-    soylent: ['soylent', 'green', ['is', ['people']]] 
+    }
   };
 
   equals(SC.getPath(foo, 'bar.baz'), "blargh");
-  equals(SC.getPath(foo, 'soylent.2.1.0'), "people");
 });
 
 // ..........................................................
