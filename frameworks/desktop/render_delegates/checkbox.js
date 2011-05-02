@@ -18,12 +18,12 @@
   --------------------------
   Expects these properties on the data source:
   
-  - isSelected
-  - isActive
-  - isEnabled
-  - title
+   - `isSelected`
+   - `isActive`
+   - `isEnabled`
+   - `title`
   
-  Optional parameters include all parameters for the labelRenderDelegate.
+  Optional parameters include all parameters for the `labelRenderDelegate`.
   
 */
 SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({

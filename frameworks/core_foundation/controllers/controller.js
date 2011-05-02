@@ -15,7 +15,7 @@
   In general you will not use this class, but you can use a subclass such
   as ObjectController, TreeController, or ArrayController.
   
-  h2. EDITING CONTEXTS
+  ## EDITING CONTEXTS
   
   One major function of a controller is to mediate between changes in the
   UI and changes in the model.  In particular, you usually do not want 

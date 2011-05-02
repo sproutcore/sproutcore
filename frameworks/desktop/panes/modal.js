@@ -14,8 +14,8 @@
   panes.
   
   A modal pane is automatically appended when a pane with isModal set to
-  YES is made visible and removed when the same pane is hidden.  The only
-  purpose of the ModalPane is to absorb mouse events so that they cannot
+  `YES` is made visible and removed when the same pane is hidden.  The only
+  purpose of the `ModalPane` is to absorb mouse events so that they cannot
   filter through to the underlying content.
   
   @extends SC.Pane
@@ -50,7 +50,7 @@ SC.ModalPane = SC.Pane.extend(
   /** @private
     Called by a pane just after it removes itself.  The modal pane can remove
     itself if needed.   Modal panes only remove themselves when an equal 
-    number of paneWillAppend() and paneDidRemove() calls are received.
+    number of `paneWillAppend()` and `paneDidRemove()` calls are received.
   
     @param {SC.Pane} pane the pane
     @returns {SC.ModalPane} receiver

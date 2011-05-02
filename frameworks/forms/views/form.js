@@ -259,9 +259,9 @@ SC.mixin(SC.FormView, {
   /**
   Creates a form row.
 
-  Can be called in two ways: row(optionalClass, properties), which creates
+  Can be called in two ways: `row(optionalClass, properties)`, which creates
   a field with the properties, and puts it in a new row;
-  and row(properties), which creates a new row—and it is up to you to add
+  and `row(properties)`, which creates a new row—and it is up to you to add
   any fields you want in the row.
   
   You can also supply some properties to extend the row itself with.

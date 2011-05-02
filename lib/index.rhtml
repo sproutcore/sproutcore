@@ -130,9 +130,12 @@
    # set.
 -%>
 <% if config.html5_history %>
+<%# TODO: Can we check for the framework in Ruby instead? %>
 <script>
-  SC.routes.wantsHistory = true;
-  SC.routes.baseURI = <%= "#{@bundle.index_root}/#{language}".to_json %>;
+  if (SC.routes) {
+    SC.routes.wantsHistory = true;
+    SC.routes.baseURI = <%= "#{@bundle.index_root}/#{language}".to_json %>;
+  }
 </script>
 <% end %>
 <% #

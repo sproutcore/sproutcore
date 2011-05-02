@@ -92,12 +92,12 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
     Called to actually perform the drag operation.
     
     Overide this method to actually perform the drag operation.  This method
-    is only called if you returned YES in acceptDragOperation(). 
+    is only called if you returned `YES` in `acceptDragOperation()`.
     
-    Return the operation that was actually performed or SC.DRAG_NONE if the 
+    Return the operation that was actually performed or `SC.DRAG_NONE` if the
     operation was aborted.
     
-    The default implementation returns SC.DRAG_NONE
+    The default implementation returns `SC.DRAG_NONE`
     
     @param {SC.Drag} drag The drag instance managing this drag
     @param {DragOp} op The proposed drag operation. A drag constant.

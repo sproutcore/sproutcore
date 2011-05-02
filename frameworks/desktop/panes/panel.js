@@ -124,7 +124,7 @@ SC.PanelPane = SC.Pane.extend(
   //
 
   /**
-    The name of the theme's SC.PanelPane render delegate.
+    The name of the theme's `SC.PanelPane` render delegate.
 
     @type String
     @default 'panelRenderDelegate'

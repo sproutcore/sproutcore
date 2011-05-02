@@ -509,15 +509,11 @@ SC.State = SC.Object.extend({
     
     Method can be called in the following ways: 
     
-    {{{
-    
-      // With one argument
-      gotoState(<state>)
+        // With one argument
+        gotoState(<state>)
       
-      // With two arguments
-      gotoState(<state>, <hash>)
-    
-    }}}
+        // With two arguments
+        gotoState(<state>, <hash>)
     
     Where <state> is either a string or a SC.State object and <hash> is a regular JS hash object.
     
@@ -546,18 +542,14 @@ SC.State = SC.Object.extend({
     
     Method can be called in the following ways:
     
-    {{{
+        // With one argument
+        gotoHistoryState(<state>)
     
-      // With one argument
-      gotoHistoryState(<state>)
-      
-      // With two arguments
-      gotoHistoryState(<state>, <boolean | hash>)
-      
-      // With three arguments
-      gotoHistoryState(<state>, <boolean>, <hash>)
+        // With two arguments
+        gotoHistoryState(<state>, <boolean | hash>)
     
-    }}}
+        // With three arguments
+        gotoHistoryState(<state>, <boolean>, <hash>)
     
     Where <state> is either a string or a SC.State object and <hash> is a regular JS hash object.
     
@@ -693,10 +685,10 @@ SC.State = SC.Object.extend({
     
     There is a particular order in how an event is handled by a state:
     
-      1) Basic function whose name matches the event
-      2) Registered event handler that is associated with an event represented as a string
-      3) Registered event handler that is associated with events matching a regular expression
-      4) The unknownEvent function
+     1. Basic function whose name matches the event
+     2. Registered event handler that is associated with an event represented as a string
+     3. Registered event handler that is associated with events matching a regular expression
+     4. The unknownEvent function
       
     Use of event handlers that are associated with events matching a regular expression may
     incur a performance hit, so they should be used sparingly.
@@ -707,33 +699,29 @@ SC.State = SC.Object.extend({
     
     Example of a state using all four event handling techniques:
     
-    {{{
-    
-      SC.State.extend({
+        SC.State.extend({
       
-        // Basic function handling event 'foo'
-        foo: function(arg1, arg2) { ... },
+          // Basic function handling event 'foo'
+          foo: function(arg1, arg2) { ... },
         
-        // event handler that handles 'frozen' and 'canuck'
-        eventHandlerA: function(event, arg1, arg2) {
-          ...
-        }.handleEvent('frozen', 'canuck'),
+          // event handler that handles 'frozen' and 'canuck'
+          eventHandlerA: function(event, arg1, arg2) {
+            ...
+          }.handleEvent('frozen', 'canuck'),
         
-        // event handler that handles events matching the regular expression /num\d/
-        //   ex. num1, num2
-        eventHandlerB: function(event, arg1, arg2) {
-          ...
-        }.handleEvent(/num\d/),
+          // event handler that handles events matching the regular expression /num\d/
+          //   ex. num1, num2
+          eventHandlerB: function(event, arg1, arg2) {
+            ...
+          }.handleEvent(/num\d/),
         
-        // Handle any event that was not handled by some other
-        // method on the state
-        unknownEvent: function(event, arg1, arg2) {
+          // Handle any event that was not handled by some other
+          // method on the state
+          unknownEvent: function(event, arg1, arg2) {
         
-        }
+          }
       
-      })
-    
-    }}}
+        });
   */
   tryToHandleEvent: function(event, arg1, arg2) {
 
@@ -796,13 +784,9 @@ SC.State = SC.Object.extend({
     as an animation or fetching remote data, then you need to return an asynchronous 
     action, which is done like so:
     
-    {{{
-    
-      enterState: function() {
-        return this.performAsync('foo');
-      }
-    
-    }}}
+        enterState: function() {
+          return this.performAsync('foo');
+        }
     
     After returning an action to be performed asynchronously, the statechart will suspend
     the active state transition process. In order to resume the process, you must call
@@ -846,13 +830,9 @@ SC.State = SC.Object.extend({
     as an animation or fetching remote data, then you need to return an asynchronous 
     action, which is done like so:
     
-    {{{
-    
-      exitState: function() {
-        return this.performAsync('foo');
-      }
-    
-    }}}
+        exitState: function() {
+          return this.performAsync('foo');
+        }
     
     After returning an action to be performed asynchronously, the statechart will suspend
     the active state transition process. In order to resume the process, you must call
@@ -1056,35 +1036,21 @@ SC.State = SC.Object.extend({
   
   Example:
   
-    {{{
-    
       MyApp.statechart = SC.Statechart.create({
-      
         rootState: SC.State.design({
-        
           initialSubstate: 'a',
-          
           a: SC.State.plugin('path.to.a.state.class'),
-          
           b: SC.State.plugin('path.to.another.state.class')
-        
         })
-      
-      })
-    
-    }}}
+      });
     
   You can also supply hashes the plugin feature in order to enhance a state or
   implement required functionality:
-  
-    {{{
-    
+
       SomeMixin = { ... };
-    
+
       stateA: SC.State.plugin('path.to.state', SomeMixin, { ... })
-    
-    }}}
-  
+
   @param value {String} property path to a state class
   @param args {Hash,...} Optional. Hash objects to be added to the created state
 */

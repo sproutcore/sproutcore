@@ -7,10 +7,10 @@
 
 
 /**
-  If set to NO, then pressing backspace will NOT navigate to the previous 
+  If set to `NO`, then pressing backspace will NOT navigate to the previous
   page in the browser history, which is the default behavior in most browsers.
   
-  Usually it is best to leave this property set to NO in order to prever the
+  Usually it is best to leave this property set to `NO` in order to prevent the
   user from inadvertantly losing data by pressing the backspace key.
 
   @static

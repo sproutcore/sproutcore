@@ -9,7 +9,7 @@
 /** 
   @namespace
   
-  CollectionRowDelegates are consulted by SC.ListView and SC.TableView to
+  `CollectionRowDelegate`s are consulted by `SC.ListView` and `SC.TableView` to
   control the height of rows, including specifying custom heights for
   specific rows.
   
@@ -45,7 +45,7 @@ SC.CollectionRowDelegate = {
   
   /**
     This is useful if you are using a custom item view that needs to be padded.
-    This value is added to the top and bottom of the itemHeight.
+    This value is added to the top and bottom of the `itemHeight`.
     
     @type Number
     @default 0
@@ -53,7 +53,7 @@ SC.CollectionRowDelegate = {
   rowPadding: 0,
   
   /**
-    Total row height used for calculation. Equal to itemHeight + twice rowPadding.
+    Total row height used for calculation. Equal to `itemHeight + (2 * rowPadding)`.
     
     @type Number
   */
@@ -79,7 +79,7 @@ SC.CollectionRowDelegate = {
   customRowHeightIndexes: null,
   
   /**
-    Called for each index in the customRowHeightIndexes set to get the 
+    Called for each index in the `customRowHeightIndexes` set to get the
     actual row height for the index.  This method should return the default
     rowHeight if you don't want the row to have a custom height.
     

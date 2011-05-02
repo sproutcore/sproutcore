@@ -19,7 +19,7 @@
 
   This class is most useful when placed inside a ScrollView.
 
-  To use it, simply set the @content@ property to a string of the HTML you
+  To use it, simply set the `content` property to a string of the HTML you
   would like to display.
 
   @extends SC.View

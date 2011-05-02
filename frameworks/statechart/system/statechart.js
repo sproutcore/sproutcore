@@ -28,11 +28,9 @@ sc_require('system/state');
   The following example shows how states are nested within a statechart:
   
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-      
         rootState: SC.State.design({
-      
           initialSubstate: 'stateA',
-        
+
           stateA: SC.State.design({
             // ... can continue to nest further states
           }),
@@ -41,8 +39,7 @@ sc_require('system/state');
             // ... can continue to nest further states
           })
         })
-      
-      })
+      });
   
   Note how in the example above, the root state as an explicit initial substate to enter into. If no
   initial substate is provided, then the statechart will default to the the state's first substate.
@@ -52,9 +49,8 @@ sc_require('system/state');
   by the mixin and make the states on the object substates of the root state. As an example:
   
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-    
         initialState: 'stateA',
-      
+
         stateA: SC.State.design({
           // ... can continue to nest further states
         }),
@@ -62,8 +58,7 @@ sc_require('system/state');
         stateB: SC.State.design({
           // ... can continue to nest further states
         })
-    
-      })
+      });
   
   If you liked to specify a class that should be used as the root state but using the above method to defined
   states, you can set the rootStateExample property with a class that extends from SC.State. If the 
@@ -75,11 +70,9 @@ sc_require('system/state');
   statechart with concurrent states:
   
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-      
         rootState: SC.State.design({
-      
           substatesAreConcurrent: YES,
-        
+
           stateA: SC.State.design({
             // ... can continue to nest further states
           }),
@@ -88,8 +81,7 @@ sc_require('system/state');
             // ... can continue to nest further states
           })
         })
-      
-      })
+      });
   
   Above, to indicate that a state's substates are concurrent, you just have to set the substatesAreConcurrent to 
   YES. Once done, then stateA and stateB will be independent of each other and each will manage their
@@ -99,9 +91,8 @@ sc_require('system/state');
   following:
   
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-  
         statesAreConcurrent: YES,
-    
+
         stateA: SC.State.design({
           // ... can continue to nest further states
         }),
@@ -109,85 +100,67 @@ sc_require('system/state');
         stateB: SC.State.design({
           // ... can continue to nest further states
         })
-  
-      })
+      });
   
   Remember that a startchart can have a mixture of nested and concurrent states in order for you to 
   create as complex of statecharts that suite your needs. Here is an example of a mixed state structure:
   
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-      
         rootState: SC.State.design({
-      
           initialSubstate: 'stateA',
-        
+
           stateA: SC.State.design({
-          
             substatesAreConcurrent: YES,
-          
+
             stateM: SC.State.design({ ... })
             stateN: SC.State.design({ ... })
             stateO: SC.State.design({ ... })
-          
           }),
         
           stateB: SC.State.design({
-          
             initialSubstate: 'stateX',
-          
+
             stateX: SC.State.design({ ... })
             stateY: SC.State.desgin({ ... })
-          
           })
         })
-      
-      })
+      });
   
   Depending on your needs, a statechart can have lots of states, which can become hard to manage all within
   one file. To modularize your states and make them easier to manage and maintain, you can plug-in states
   into other states. Let's say we are using the statechart in the last example above, and all the code is 
   within one file. We could update the code and split the logic across two or more files like so:
-  
-      ---- state_a.js
-  
+
+      // state_a.js
+
       MyApp.StateA = SC.State.extend({
-    
         substatesAreConcurrent: YES,
-    
+
         stateM: SC.State.design({ ... })
         stateN: SC.State.design({ ... })
         stateO: SC.State.design({ ... })
-    
       });
-    
-      ---- state_b.js
-    
+
+      // state_b.js
+
       MyApp.StateB = SC.State.extend({
-    
         substatesAreConcurrent: YES,
-    
+
         stateM: SC.State.design({ ... })
         stateN: SC.State.design({ ... })
         stateO: SC.State.design({ ... })
-    
       });
-    
-      ---- statechart.js
-    
+
+      // statechart.js
+
       MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-    
         rootState: SC.State.design({
-    
           initialSubstate: 'stateA',
-      
           stateA: SC.State.plugin('MyApp.StateA'),
-      
           stateB: SC.State.plugin('MyApp.StateB')
-        
         })
-    
-      })
-    
+      });
+
   Using state plug-in functionality is optional. If you use the plug-in feature you can break up your statechart
   into as many files as you see fit.
 
@@ -530,22 +503,18 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     Method can be called in the following ways:
     
-    {{{
-    
-      // With one argument. 
-      gotoState(<state>)
+        // With one argument. 
+        gotoState(<state>)
       
-      // With two argument.
-      gotoState(<state>, <state | boolean | hash>)
+        // With two argument.
+        gotoState(<state>, <state | boolean | hash>)
       
-      // With three argument.
-      gotoState(<state>, <state>, <boolean | hash>)
-      gotoState(<state>, <boolean>, <hash>)
+        // With three argument.
+        gotoState(<state>, <state>, <boolean | hash>)
+        gotoState(<state>, <boolean>, <hash>)
       
-      // With four argument.
-      gotoState(<state>, <state>, <boolean>, <hash>)
-    
-    }}}
+        // With four argument.
+        gotoState(<state>, <state>, <boolean>, <hash>)
     
     where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
     
@@ -868,22 +837,18 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     Method can be called in the following ways:
     
-    {{{
-    
-      // With one arguments. 
-      gotoHistorytate(<state>)
+        // With one arguments. 
+        gotoHistorytate(<state>)
       
-      // With two arguments. 
-      gotoHistorytate(<state>, <state | boolean | hash>)
+        // With two arguments. 
+        gotoHistorytate(<state>, <state | boolean | hash>)
       
-      // With three arguments.
-      gotoHistorytate(<state>, <state>, <boolean | hash>)
-      gotoHistorytate(<state>, <boolean>, <hash>)
+        // With three arguments.
+        gotoHistorytate(<state>, <state>, <boolean | hash>)
+        gotoHistorytate(<state>, <boolean>, <hash>)
       
-      // With four argumetns
-      gotoHistorytate(<state>, <state>, <boolean>, <hash>)
-    
-    }}}
+        // With four argumetns
+        gotoHistorytate(<state>, <state>, <boolean>, <hash>)
     
     where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
     
@@ -1191,23 +1156,18 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     A few notes: 
     
-      1) Calling this is not the same as calling sendEvent or sendAction.
-         Rather, this should be seen as calling normal methods on a state that 
-         will *not* call gotoState or gotoHistoryState. 
-      
-      2) A state will only ever be invoked once per call. So if there are two 
-         or more current states that have the same parent state, then that parent 
-         state will only be invoked once if none of the current states are able
-         to invoke the given method.
+     1. Calling this is not the same as calling sendEvent or sendAction.
+        Rather, this should be seen as calling normal methods on a state that 
+        will *not* call gotoState or gotoHistoryState.
+     2. A state will only ever be invoked once per call. So if there are two 
+        or more current states that have the same parent state, then that parent 
+        state will only be invoked once if none of the current states are able
+        to invoke the given method.
     
     When calling this method, you are able to supply zero ore more arguments
     that can be pass onto the method called on the states. As an example
     
-    {{{
-    
-      invokeStateMethod('render', context, firstTime);
-    
-    }}}
+        invokeStateMethod('render', context, firstTime);
     
     The above call will invoke the render method on the current states
     and supply the context and firstTime arguments to the method. 
@@ -1218,14 +1178,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     we want to call a calculate method on the current states where the method
     will return a value when invoked. We can handle the returned values like so:
     
-    {{{
-    
-      invokeStateMethod('calculate', value, function(state, result) {
-        // .. handle the result returned from calculate that was invoked
-        //    on the given state
-      })
-    
-    }}}
+        invokeStateMethod('calculate', value, function(state, result) {
+          // .. handle the result returned from calculate that was invoked
+          //    on the given state
+        })
     
     If the method invoked does not return a value and a callback function is
     supplied, then result value will simply be undefined. In all cases, if
@@ -1397,9 +1353,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     it based on properties found on this state that derive from a SC.State class. For the
     root state to be successfully built, the following much be met:
     
-      - The rootStateExample property must be defined with a class that derives from SC.State
-      - Either the initialState or statesAreConcurrent property must be set, but not both
-      - There must be one or more states that can be added to the root state
+     - The rootStateExample property must be defined with a class that derives from SC.State
+     - Either the initialState or statesAreConcurrent property must be set, but not both
+     - There must be one or more states that can be added to the root state
       
   */
   _constructRootStateClass: function() {

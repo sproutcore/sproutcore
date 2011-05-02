@@ -1,9 +1,12 @@
+/*globals Handlebars */
+
 sc_require('ext/handlebars');
 
 Handlebars.registerHelper('collection', function(path, options) {
   var fn = options.fn;
   var data = options.data;
   var inverse = options.inverse;
+  var hash = options.hash;
   var collectionClass, collectionObject;
 
   collectionClass = path ? SC.objectForPropertyPath(path) : SC.TemplateCollectionView;
@@ -13,34 +16,33 @@ Handlebars.registerHelper('collection', function(path, options) {
   }
   //@ endif
 
-  var hash = fn.hash, itemHash = {}, match;
+  var extensions = {};
 
-  for (var prop in hash) {
-    if (fn.hash.hasOwnProperty(prop)) {
-      match = prop.match(/^item(.)(.*)$/);
+  if (hash) {
+    var itemHash = {}, match;
 
-      if(match) {
-        itemHash[match[1].toLowerCase() + match[2]] = hash[prop];
-        delete hash[prop];
+    for (var prop in hash) {
+      if (hash.hasOwnProperty(prop)) {
+        match = prop.match(/^item(.)(.*)$/);
+
+        if(match) {
+          itemHash[match[1].toLowerCase() + match[2]] = hash[prop];
+          delete hash[prop];
+        }
       }
     }
+
+    extensions = SC.clone(hash);
+    extensions.itemViewOptions = itemHash;
   }
 
-  if(fn) {
-    var extensions = SC.clone(hash);
+  if (fn) { extensions.itemViewTemplate = fn; }
+  if (inverse) { extensions.inverseTemplate = inverse; }
 
-    SC.mixin(extensions, {
-      itemViewTemplate: fn,
-      inverseTemplate: inverse,
-      itemViewOptions: itemHash
-    });
-
-    if(collectionClass.isClass) {
-      collectionObject = collectionClass.extend(extensions);
-    } else {
-      SC.mixin(collectionClass, extensions);
-      collectionObject = collectionClass;
-    }
+  if(collectionClass.isClass) {
+    collectionObject = collectionClass.extend(extensions);
+  } else {
+    collectionObject = SC.mixin(collectionClass, extensions);
   }
 
   options.fn = function() { return ""; };

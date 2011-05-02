@@ -1406,7 +1406,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    function that propigates a function all to all children
+    function that propagates a function call to all children
   */
   _propagateToChildren: function(storeKey, func){
     // Handle all the child Records

@@ -12,17 +12,17 @@
   Expected Properties
   -----------------------------------
   
-  - isSelected
-  - isActive
-  - isMixed
-  - isEnabled
-  - title
+   - `isSelected`
+   - `isActive`
+   - `isMixed`
+   - `isEnabled`
+   - `title`
   
   Optional Properties
   -----------------------------------
   
-  - width: an optional width of the radio button
-  - labelRenderDelegate properties
+   - `width` -- an optional width of the radio button
+   - `labelRenderDelegate` properties
   
 */
 SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({

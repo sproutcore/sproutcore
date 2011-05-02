@@ -9,7 +9,7 @@
 
   Represents a Checkbox Button.
   
-  The view is an SC.ButtonView put into toggle mode and with the 'theme' property
+  The view is an `SC.ButtonView` put into toggle mode and with the 'theme' property
   set to "checkbox".
   
   Rendering
@@ -64,7 +64,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   needsEllipsis: NO,
   
   /**
-    YES if `isEnabled` is YES, NO otherwise
+    `YES` if `isEnabled` is `YES`, `NO` otherwise
     
     @type Boolean
     @default NO

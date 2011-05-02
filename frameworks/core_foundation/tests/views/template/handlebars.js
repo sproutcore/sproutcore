@@ -777,6 +777,24 @@ test("should be able to bind view class names to properties", function() {
   });
 
   equals(view.$('.is-done').length, 0, "removes class name if bound property is set to false");
+
+  // There is a bug that if the view becomes first responder, its class bindings get wiped out.
+  // This test illustrates the bug, by adding the view to a pane and making it firstResponder
+
+  var pane = SC.MainPane.design();
+  pane = pane.create().append();
+
+  SC.run(function() {
+    pane.appendChild(view);
+  });
+
+  TemplateTests.classBindingView.becomeFirstResponder();
+
+  SC.run(function() {
+    TemplateTests.classBindingView.set('isDone', YES);
+  });
+
+  equals(view.$('.is-done').length, 1, "dasherizes property and sets class name after becoming first responder");
 });
 
 test("should be able to bind element attributes using {{bindAttr}}", function() {

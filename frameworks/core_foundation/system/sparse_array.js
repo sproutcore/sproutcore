@@ -73,10 +73,12 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     @returns {SC.SparseArray} receiver
   */
   provideLength: function(length) {
+    var oldLength;
     if (SC.none(length)) this._sa_content = null ;
     if (length !== this._length) {
+      oldLength = this._length;
       this._length = length ;
-      if (this._requestingLength <= 0) this.enumerableContentDidChange() ;
+      if (this._requestingLength <= 0) { this.arrayContentDidChange(0, oldLength||0, length||0) ; }
     }
     return this ;
   },
@@ -256,7 +258,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     if (!content) content = this._sa_content = [] ;
     var start = range.start, len = range.length;
     while(--len >= 0) content[start+len] = array.objectAt(len);
-    if (this._requestingIndex <= 0) this.enumerableContentDidChange(range.start, range.length);
+    if (this._requestingIndex <= 0) this.arrayContentDidChange(range.start, range.length, range.length);
     return this ;
   },
 
@@ -299,7 +301,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
         while (--loc>=start) content[loc] = undefined;
       }
     }    
-    this.enumerableContentDidChange(range.start, range.length) ; // notify
+    this.arrayContentDidChange(range.start, range.length, range.length) ; // notify
     return this ;
   },
 
@@ -376,9 +378,11 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     @returns {SC.SparseArray} receiver
   */
   reset: function() {
+    var oldLength;
     this._sa_content = null ;
+    oldLength = this._length;
     this._length = null ;
-    this.enumerableContentDidChange() ;
+    this.arrayContentDidChange(0, oldLength, 0);
     this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReset', this);
     return this ;
   }
