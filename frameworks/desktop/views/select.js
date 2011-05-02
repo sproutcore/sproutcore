@@ -759,7 +759,7 @@ SC.SelectView = SC.ButtonView.extend(
       return YES;
     }
     else {
-      arguments.callee.base.apply(this,arguments);
+      return sc_super();
     }
   },
 
@@ -776,7 +776,7 @@ SC.SelectView = SC.ButtonView.extend(
         this.resignFirstResponder() ;
       }
     }
-    return arguments.callee.base.apply(this,arguments);
+    return sc_super();
   },
   
   /** @private

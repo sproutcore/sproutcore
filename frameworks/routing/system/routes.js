@@ -48,10 +48,12 @@ SC.routes = SC.Object.create(
     event.
     
     By default it is NO, so your URLs will look like:
+
         http://domain.tld/my_app#notes/edit/4
     
     If set to YES and the browser supports pushState(), your URLs will look
     like:
+
         http://domain.tld/my_app/notes/edit/4
     
     You will also need to make sure that baseURI is properly configured, as
@@ -80,10 +82,12 @@ SC.routes = SC.Object.create(
     
     The build tools automatically configure this value if you have the
     html5_history option activated in the Buildfile:
+
         config :my_app, :html5_history => true
     
     Alternatively, it uses by default the value of the href attribute of the
     <base> tag of the HTML document. For example:
+
         <base href="http://domain.tld/my_app">
     
     The value can also be customized before or during the exectution of the
@@ -322,17 +326,19 @@ SC.routes = SC.Object.create(
   
   /**
     Adds a route handler. Routes have the following format:
-      - 'users/show/5' is a static route and only matches this exact string,
-      - ':action/:controller/:id' is a dynamic route and the handler will be
+
+     - 'users/show/5' is a static route and only matches this exact string,
+     - ':action/:controller/:id' is a dynamic route and the handler will be
         called with the 'action', 'controller' and 'id' parameters passed in a
         hash,
-      - '*url' is a wildcard route, it matches the whole route and the handler
+     - '*url' is a wildcard route, it matches the whole route and the handler
         will be called with the 'url' parameter passed in a hash.
     
     Route types can be combined, the following are valid routes:
-      - 'users/:action/:id'
-      - ':controller/show/:id'
-      - ':controller/ *url' (ignore the space, because of jslint)
+
+     - 'users/:action/:id'
+     - ':controller/show/:id'
+     - ':controller/ *url' (ignore the space, because of jslint)
     
     @param {String} route the route to be registered
     @param {Object} target the object on which the method will be called, or

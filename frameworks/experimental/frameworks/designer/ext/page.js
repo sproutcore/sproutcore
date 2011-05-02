@@ -7,7 +7,7 @@
 
 
 /** 
-  Extend SC.Page to emit a design document for the entire page.
+  Extend `SC.Page` to emit a design document for the entire page.
 */
 SC.Page.prototype.emitDesign = function() {
 
@@ -30,7 +30,7 @@ SC.Page.prototype.emitDesign = function() {
 };
 
 /**
-  Extend SC.Page to create a PageDesignController on demand.
+  Extend `SC.Page` to create a `PageDesignController` on demand.
   
   @property {SC.PageDesignController}
 */

@@ -49,8 +49,9 @@ SC.HOLD_BEHAVIOR = 'hold';
 
   By default, a button uses the SC.Control mixin which will apply CSS
   classnames when the state of the button changes:
-    - active     when button is active
-    - sel        when button is toggled to a selected state
+
+   - `active` -- when button is active
+   - `sel` -- when button is toggled to a selected state
 
   @extends SC.View
   @extends SC.Control
@@ -95,17 +96,17 @@ SC.ButtonView = SC.View.extend(SC.Control,
     Used to automatically update the state of the button view for toggle style
     buttons.
 
-    for toggle style buttons, you can set the value and it will be used to
+    For toggle style buttons, you can set the value and it will be used to
     update the isSelected state of the button view.  The value will also
     change as the user selects or deselects.  You can control which values
-    the button will treat as isSelected by setting the toggleOnValue and 
-    toggleOffValue.  Alternatively, if you leave these properties set to
-    YES or NO, the button will do its best to convert a value to an 
+    the button will treat as `isSelected` by setting the `toggleOnValue` and
+    `toggleOffValue`.  Alternatively, if you leave these properties set to
+    `YES` or `NO`, the button will do its best to convert a value to an
     appropriate state:
   
-      - null, false, 0  -> isSelected = false
-      - any other single value -> isSelected = true
-      - array -> if all values are the same state: that state.  otherwise MIXED.
+     - `null`, `false`, `0` -- `isSelected = false`
+     - any other single value -- `isSelected = true`
+     - array -- if all values are the same state, that state; otherwise `MIXED`.
     
     @type Object
     @default null
@@ -156,7 +157,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
   localizeBindingDefault: SC.Binding.bool(),
 
   /**
-    The button title.  If localize is YES, then this should be the localization key to display.  Otherwise, this will be the actual string displayed in the title.  This property is observable and bindable.
+    The button title.  If localize is `YES`, then this should be the
+    localization key to display.  Otherwise, this will be the actual string
+    displayed in the title.  This property is observable and bindable.
     
     @type String
     @default ""
@@ -231,16 +234,16 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
     Possible values are:
 
-      - *SC.PUSH_BEHAVIOR* Pressing the button will trigger an action tied to the
-        button. Does not change the value of the button.
-      - *SC.TOGGLE_BEHAVIOR* Pressing the button will invert the current value of
-        the button. If the button has a mixed value, it will be set to true.
-      - *SC.TOGGLE_ON_BEHAVIOR* Pressing the button will set the current state to
-        true no matter the previous value.
-      - *SC.TOGGLE_OFF_BEHAVIOR* Pressing the button will set the current state to
-        false no matter the previous value.
-      - *SC.HOLD_BEHAVIOR* Pressing the button will cause the action to repeat at a
-        regular interval specifed by 'holdInterval'
+     - `SC.PUSH_BEHAVIOR` -- Pressing the button will trigger an action tied to the
+       button. Does not change the value of the button.
+     - `SC.TOGGLE_BEHAVIOR` -- Pressing the button will invert the current value of
+       the button. If the button has a mixed value, it will be set to true.
+     - `SC.TOGGLE_ON_BEHAVIOR` -- Pressing the button will set the current state to
+       true no matter the previous value.
+     - `SC.TOGGLE_OFF_BEHAVIOR` -- Pressing the button will set the current state to
+       false no matter the previous value.
+     - `SC.HOLD_BEHAVIOR` -- Pressing the button will cause the action to repeat at a
+       regular interval specifed by 'holdInterval'
 
     @type String
     @default SC.PUSH_BEHAVIOR
@@ -248,7 +251,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   buttonBehavior: SC.PUSH_BEHAVIOR,
 
   /*
-    If buttonBehavior is SC.HOLD_BEHAVIOR, this specifies, in milliseconds,
+    If buttonBehavior is `SC.HOLD_BEHAVIOR`, this specifies, in milliseconds,
     how often to trigger the action. Ignored for other behaviors.
 
     @type Number
@@ -259,7 +262,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   /**
     If YES, then this button will be triggered when you hit return.
 
-    This is the same as setting the keyEquivalent to 'return'.  This will also
+    This is the same as setting the `keyEquivalent` to 'return'.  This will also
     apply the "def" classname to the button.
 
     @type Boolean
@@ -354,7 +357,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     The padding to add to the measured size of the text to arrive at the measured
     size for the view.
 
-    SC.ButtonView gets this from its render delegate, but if not supplied, defaults
+    `SC.ButtonView` gets this from its render delegate, but if not supplied, defaults
     to 10.
 
     @default 10
@@ -465,7 +468,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   // a separate observer (see below)
 
   /**
-    The following properties affect how SC.ButtonView is rendered, and will
+    The following properties affect how `SC.ButtonView` is rendered, and will
     cause the view to be rerendered if they change.
     
     @type Array
@@ -564,8 +567,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
   /**
     This is the standard logic to compute a proposed isSelected state for a
-    new value.  This takes into account the toggleOnValue/toggleOffValue 
-    properties, among other things.  It may return YES, NO, or SC.MIXED_STATE.
+    new value.  This takes into account the `toggleOnValue`/`toggleOffValue`
+    properties, among other things.  It may return `YES`, `NO`, or
+    `SC.MIXED_STATE`.
     
     @param {Object} value
     @returns {Boolean} return state
@@ -609,7 +613,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
   }.observes('value'),
   
   /** @private
-    Whenever the selected state is changed, make sure the button value is also updated.  Note that this may be called because the value has just changed.  In that case this should do nothing.
+    Whenever the selected state is changed, make sure the button value is
+    also updated.  Note that this may be called because the value has just
+    changed.  In that case this should do nothing.
   */
   _button_isSelectedDidChange: function() {
     var newState = this.get('isSelected'),
@@ -629,8 +635,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
     Used to store the keyboard equivalent.
     
     Setting the isDefault property to YES, for example, will cause the
-    keyEquivalent property to 'return'. This cached value is used to restore
-    the keyEquivalent property if isDefault is set back to NO.
+    `keyEquivalent` property to 'return'. This cached value is used to restore
+    the `keyEquivalent` property if isDefault is set back to NO.
     
     @type String
   */

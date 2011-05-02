@@ -13,9 +13,9 @@
   Expects Properties
   -------------------------------
   
-  - items: a collection of data sources for radioRenderDelegates
-  - layoutDirection
-  - isEnabled
+   - `items` -- a collection of data sources for radioRenderDelegates
+   - `layoutDirection`
+   - `isEnabled`
   
   Extended API
   --------------------------------

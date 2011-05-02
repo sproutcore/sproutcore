@@ -37,8 +37,8 @@ SC.platform = SC.Object.create({
 
   /*
     NOTES
-      - A development version of Chrome 9 incorrectly reported supporting touch
-      - Android is assumed to support touch, but incorrectly reports that it does not
+     - A development version of Chrome 9 incorrectly reported supporting touch
+     - Android is assumed to support touch, but incorrectly reports that it does not
   */
   /**
     YES if the current device supports touch events, NO otherwise.

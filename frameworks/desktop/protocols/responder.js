@@ -12,7 +12,7 @@
   specific responder method, and a method with the correct signature to your
   class.
   
-  DO NOT INCLUDE THIS MIXIN.
+  **DO NOT INCLUDE THIS MIXIN**.
   
   If you try and include this mixin, an error will be raised on startup.
   
@@ -26,7 +26,7 @@ SC.ResponderProtocol = {
   //
   
   /**
-    Called when the mouse is pressed. You must return YES to recieve 
+    Called when the mouse is pressed. You must return `YES` to recieve
     mouseDragged and mouseUp in the future.
     
     @param evt {SC.Event} the mousedown event
@@ -43,7 +43,7 @@ SC.ResponderProtocol = {
   mouseUp: function(evt) {},
   
   /**
-    Called when the mouse is dragged, after responding YES to a previous mouseDown:
+    Called when the mouse is dragged, after responding `YES` to a previous `mouseDown`:
     call.
     
     @param evt {SC.Event} the mousemove event
@@ -80,7 +80,7 @@ SC.ResponderProtocol = {
   
   
   /**
-    Called when a selectstart event in IE is triggered. ONLY IE
+    Called when a selectstart event in IE is triggered. **ONLY IE**
     We use it to disable IE accelerators and text selection
     
     @param evt {SC.Event} the selectstart event

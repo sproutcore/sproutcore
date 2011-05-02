@@ -9,7 +9,7 @@
 /**
   @namespace
   NavigationBuilder is an implementation of the Builder protocol. It implements
-  buildIn/Out (though these only relay to buildIn/OutNavigation, so feel free to
+  `buildIn`/`Out` (though these only relay to `buildIn`/`OutNavigation, so feel free to
   override if needed; the navigation builders will still be accessible).
   
   Building in and out animates the view in and out to and from the left and right.
@@ -101,16 +101,16 @@ SC.NavigationBuilder = {
   },
   
   /**
-    You may override this. If you do, call buildInNavigation to call the original functionality.
-    You may need to override navigationBuildDidFinish as well if you call buildInNavigation.
+    You may override this. If you do, call `buildInNavigation` to call the original functionality.
+    You may need to override `navigationBuildDidFinish` as well if you call `buildInNavigation`.
   */
   buildIn: function() {
     this.buildInNavigation();
   },
   
   /**
-    You may override this. If you do, call buildOutNavigation to call the original functionality.
-    You may need to override navigationBuildDidFinish as well if you call buildOutNavigation.
+    You may override this. If you do, call `buildOutNavigation` to call the original functionality.
+    You may need to override `navigationBuildDidFinish`as well if you call `buildOutNavigation`.
   */
   buildOut: function() {
     this.buildOutNavigation();

@@ -297,7 +297,7 @@ test("two bindings to the same value should sync in the order they are initializ
   
   var b = window.b;
 
-  SC.LOG_BINDINGS = YES;
+  SC.LOG_BINDINGS = NO;
     
   SC.RunLoop.end();
   

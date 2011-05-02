@@ -39,8 +39,8 @@ SC.SnapLines = {
   
   /*
     This method will setup the datastructure required to draw snap lines
-    it should be called in dragStarted if using with an SC.Drag or on mouseDown
-    if using it with a move
+    it should be called in dragStarted if using with an `SC.Drag` or on
+    `mouseDown` if using it with a move
   
     @param {Array} ignoreViews array of views to not include
     sets up the data structure used for the line drawing
@@ -121,9 +121,9 @@ SC.SnapLines = {
   
   /**
     This method will check the passed views position with the other child views
-    and draw any lines.  It should be called in dragUpdated if using SC.Drag
-    or in mouseMoved if using a move.  it will also return a hash of the snapped coords
-    in local and global coodinates
+    and draw any lines.  It should be called in `dragUpdated` if using `SC.Drag`
+    or in `mouseMoved` if using a move.  it will also return a hash of the
+    snapped coords in local and global coodinates
     
   */
   drawLines: function(view, eventX, eventY, mouseDownX, mouseDownY){
@@ -200,7 +200,8 @@ SC.SnapLines = {
   
   /*
     called to cleanup the lines...
-    This method should be called in mouseUp if doing a move and in dragEnded if using a SC.Drag
+    This method should be called in `mouseUp` if doing a move and in
+    `dragEnded` if using a `SC.Drag`.
   */
   removeLines: function() {
     this._xPositions = null;

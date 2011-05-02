@@ -438,13 +438,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     this.set('needsFlush', YES);
 
-    // if we have storeKeys already, then flush immediately because
-    // it will not be as expensive as if we are starting from scratch
     if (this.get('storeKeys')) {
       this.flush();
-    }
-    else {
-      this.enumerableContentDidChange();
+    } else {
+      this.arrayContentDidChange();
     }
 
     return this;
@@ -711,6 +708,16 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this._storeKeysContentDidChange(0, oldLen, newLen);
 
   }.observes('storeKeys'),
+
+  /** @private
+    If anyone adds an array observer on to the record array, make sure
+    we flush so that the observers don't fire the first time length is
+    calculated.
+  */
+  addArrayObservers: function() {
+    this.flush();
+    return SC.Array.addArrayObservers.apply(this, arguments);
+  },
 
   /** @private
     Invoked whenever the content of the `storeKeys` array changes.  This will

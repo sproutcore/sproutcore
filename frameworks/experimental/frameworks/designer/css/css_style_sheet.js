@@ -10,8 +10,8 @@ sc_require('css/css_rule') ;
 /**
   @class SC.CSSStyleSheet
 
-  A style sheet object wraps a document style sheet object. SC.CSSStyleSheet will
-  re-use stylesheet objects as needed.
+  A style sheet object wraps a document style sheet object. `C.CSSStyleSheet`
+  will re-use stylesheet objects as needed.
   
   @extends SC.Object
 */
@@ -57,7 +57,7 @@ SC.CSSStyleSheet = SC.Object.extend(
   isEnabledBindingDefault: SC.Binding.bool(),
   
   /**
-    DO NOT MODIFY THIS OBJECT DIRECTLY!!!! Use the methods defined on this
+    **DO NOT MODIFY THIS OBJECT DIRECTLY!!!!** Use the methods defined on this
     object to update properties of the style sheet; otherwise, your changes 
     will not be reflected.
     
@@ -137,14 +137,12 @@ SC.mixin(SC.CSSStyleSheet,
 /** SC.CSSStyleSheet */{
   
   /**
-    Find a stylesheet object by name or href. If by name, .css will be 
+    Find a stylesheet object by name or href. If by name, `.css` will be
     appended automatically.
     
-    {{{
-      var ss = SC.CSSStyleSheet.find('style.css') ;
-      var ss2 = SC.CSSStyleSheet.find('style') ; // same thing
-      sc_assert(ss === ss2) ; // SC.CSSStyleSheet objects are stable
-    }}}
+        var ss = SC.CSSStyleSheet.find('style.css') ;
+        var ss2 = SC.CSSStyleSheet.find('style') ; // same thing
+        sc_assert(ss === ss2) ; // SC.CSSStyleSheet objects are stable
     
     @param {String} nameOrUrl a stylsheet name or href to find
     @returns {SC.CSSStyleSheet} null if not found

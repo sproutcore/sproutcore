@@ -195,10 +195,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     relevant event occurs on the named element.  This method supports a
     variety of handler types, depending on the kind of support you need.
     
-    h2. Simple Function Handlers
+    ## Simple Function Handlers
+
+        SC.Event.add(anElement, "click", myClickHandler) ;
     
-      SC.Event.add(anElement, "click", myClickHandler) ;
-      
     The most basic type of handler you can pass is a function.  This function
     will be executed everytime an event of the type you specify occurs on the
     named element.  You can optionally pass an additional context object which
@@ -209,24 +209,24 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     
     The click handler for this method must have a method signature like:
     
-      function(event) { return YES|NO; }
-      
-    h2. Method Invocations
+        function(event) { return YES|NO; }
     
-      SC.Event.add(anElement, "click", myObject, myObject.aMethod) ;
-      
+    ## Method Invocations
+
+        SC.Event.add(anElement, "click", myObject, myObject.aMethod) ;
+
     Optionally you can specify a target object and a method on the object to 
     be invoked when the event occurs.  This will invoke the method function
     with the target object you pass as "this".  The method should have a 
     signature like:
     
-      function(event, targetElement) { return YES|NO; }
-      
+        function(event, targetElement) { return YES|NO; }
+
     Like function handlers, you can pass an additional context data paramater
     that will be included on the event in the event.data property.
-      
-    h2. Handler Return Values
     
+    ## Handler Return Values
+
     Both handler functions should return YES if you want the event to 
     continue to propagate and NO if you want it to stop.  Returning NO will
     both stop bubbling of the event and will prevent any default action 
@@ -234,7 +234,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     by calling the stopPropagation() or preventDefault() methods on the event
     itself, returning YES from your method.
     
-    h2. Limitations
+    ## Limitations
     
     Although SproutCore's event implementation is based on jQuery, it is 
     much simpler in design.  Notably, it does not support namespaced events
@@ -315,7 +315,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     and element, then all handlers for all events on that element will be
     removed.
     
-    h2. Limitations
+    ## Limitations
     
     Although SproutCore's event implementation is based on jQuery, it is 
     much simpler in design.  Notably, it does not support namespaced events
@@ -523,8 +523,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     be the element the event occurred on, so you should always call this 
     method like:
     
-      SC.Event.handle.call(element, event) ;
-      
+        SC.Event.handle.call(element, event) ;
+
     Note that like other parts of this library, the handle function does not
     support namespaces.
     

@@ -18,7 +18,7 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   RootResponder directly.  Instead you will work with Pane objects, which
   register themselves with the RootResponder as needed to receive events.
 
-  h1. RootResponder and Platforms
+  ## RootResponder and Platforms
 
   RootResponder contains core functionality common among the different web
   platforms. You will likely be working with a subclass of RootResponder that
@@ -27,24 +27,24 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   The correct instance of RootResponder is detected at runtime and loaded
   transparently.
 
-  h1. Event Types
+  ## Event Types
 
   RootResponders can route four types of events:
 
-  - Direct events, such as mouse and touch events.  These are routed to the
-    nearest view managing the target DOM elment. RootResponder also handles
-    multitouch events so that they are delegated to the correct views.
-  - Keyboard events. These are sent to the keyPane, which will then send the
-    event to the current firstResponder and up the responder chain.
-  - Resize events. When the viewport resizes, these events will be sent to all
-    panes.
-  - Keyboard shortcuts. Shortcuts are sent to the keyPane first, which
-    will go down its view hierarchy. Then they go to the mainPane, which will
-    go down its view hierarchy.
-  - Actions. Actions are generic messages that your application can send in
-    response to user action or other events. You can either specify an
-    explicit target, or allow the action to traverse the hierarchy until a
-    view is found that handles it.
+   - Direct events, such as mouse and touch events.  These are routed to the
+     nearest view managing the target DOM elment. RootResponder also handles
+     multitouch events so that they are delegated to the correct views.
+   - Keyboard events. These are sent to the keyPane, which will then send the
+     event to the current firstResponder and up the responder chain.
+   - Resize events. When the viewport resizes, these events will be sent to all
+     panes.
+   - Keyboard shortcuts. Shortcuts are sent to the keyPane first, which
+     will go down its view hierarchy. Then they go to the mainPane, which will
+     go down its view hierarchy.
+   - Actions. Actions are generic messages that your application can send in
+     response to user action or other events. You can either specify an
+     explicit target, or allow the action to traverse the hierarchy until a
+     view is found that handles it.
 */
 SC.RootResponder = SC.Object.extend({
 
@@ -406,7 +406,7 @@ SC.RootResponder = SC.Object.extend({
     the action name you pass to this method.  Set 'target' to null to search
     the responder chain.
 
-    IMPORTANT: This method's API and implementation will likely change
+    **IMPORTANT**: This method's API and implementation will likely change
     significantly after SproutCore 1.0 to match the version found in
     SC.ResponderContext.
 
@@ -959,7 +959,8 @@ SC.RootResponder = SC.Object.extend({
     for instance, prevent scrolling in a ScrollView, you need to make sure to transfer control
     back to the previous responder:
 
-    if (Math.abs(touch.pageY - touch.startY) > this.MAX_SWIPE) touch.restoreLastTouchResponder();
+        if (Math.abs(touch.pageY - touch.startY) > this.MAX_SWIPE)
+          touch.restoreLastTouchResponder();
 
     You don't call makeTouchResponder on RootResponder directly. Instead, it gets called for you
     when you return YES to captureTouch or touchStart.
@@ -968,14 +969,19 @@ SC.RootResponder = SC.Object.extend({
     a button view inside a ScrollView: if the touch moves too much, the button should give control back
     to the scroll view.
 
-    if (Math.abs(touch.pageX - touch.startX) > 4) {
-      if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
-    }
+        if (Math.abs(touch.pageX - touch.startX) > 4) {
+          if (touch.nextTouchResponder)
+            touch.makeTouchResponder(touch.nextTouchResponder);
+        }
 
     This will give control back to the containing view. Maybe you only want to do it if it is a ScrollView?
 
-    if (Math.abs(touch.pageX - touch.startX) > 4 && touch.nextTouchResponder && touch.nextTouchResponder.isScrollable)
-      touch.makeTouchResponder(touch.nextTouchResponder);
+        if (
+          Math.abs(touch.pageX - touch.startX) > 4 &&
+          touch.nextTouchResponder &&
+          touch.nextTouchResponder.isScrollable
+        )
+          touch.makeTouchResponder(touch.nextTouchResponder);
 
     Possible gotcha: while you can do touch.nextTouchResponder, the responders are not chained in a linked list like
     normal responders, because each touch has its own responder stack. To navigate through the stack (or, though
