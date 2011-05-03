@@ -126,7 +126,7 @@ module Docs
         puts "Starting sc-server at port 4021..."
 
         Dir.chdir File.expand_path("#{base_path}docs")
-        puts `./bin/sc-server --port 4021`
+        puts `sc-server --port 4021`
 
       end
     end
