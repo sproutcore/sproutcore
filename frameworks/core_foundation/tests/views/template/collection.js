@@ -307,3 +307,40 @@ test("collection view within a collection view should have the right childViews"
   ok(secondInner.kindOf(TemplateTests.InnerCollectionView), 'second child view of outer should be instance of inner');
   ok(thirdInner.kindOf(TemplateTests.InnerCollectionView), 'third child view of outer should be instance of inner');
 });
+
+test("should render inverse template when its present and there is no content", function() {
+  TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
+    content: [],
+    inverseTemplate: SC.Handlebars.compile('<h1>inverse<h1>')
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), 'inverse', 'collection view with no content and inverse template should render inverse template')
+});
+
+test("should render inverse template name when its present and there is no content", function() {
+  TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
+    content: [],
+    inverseTemplateName: 'inverse_template',
+
+    templates: SC.Object.create({
+      inverse_template: function(dataSource) {
+        return "<h1>inverse template from file</h1>";
+      }
+    })
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
+  });
+
+  view.createLayer();
+
+  equals(view.$('h1').text(), 'inverse template from file', 'collection view with no content and inverse template name should render template')
+});
+
