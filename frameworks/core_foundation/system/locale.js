@@ -66,6 +66,9 @@ SC.Locale = SC.Object.extend({
   /** The strings hash for this locale. */
   strings: {},
   
+  /** The layout hash for this locale. */
+  layoutHash: {},
+
   toString: function() {
     if (!this.language) SC.Locale._assignLocales() ;
     return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
@@ -86,9 +89,56 @@ SC.Locale = SC.Object.extend({
     if (SC.typeOf(ret) === SC.T_STRING) return ret;
     else if (SC.typeOf(def) === SC.T_STRING) return def;
     return string;
+  },
+
+  /**
+    Fetch the layout value for a single style attribute from layoutHash
+
+    @param {String} key
+    @returns {String} ret The matched value from layoutHash{}
+  */
+  getLocMetric: function(key) {
+    var ret = this.layoutHash[key];
+    if (SC.typeOf(ret) === SC.T_NUMBER) return ret;
+    else {
+      console.error("No layout value found for '%@' key".fmt(key));
+      return undefined;
+    }
+  },
+
+  /**
+    Compiles a new localized layout hash, by looking up the layoutHash{} for
+    all possible combinations of attributes with the key passed. Also, it
+    allows user to pass a predefined attribute hash and merges it at the top
+    of the compiled hash
+
+    @param {String} key The group identifier
+    @returns {Hash} ret The layout hash
+  */
+  getLocLayout: function(key) {
+    var i, attr, value, ret = {},
+        styleAttributes = arguments[1],
+        styleArray      = SC.Locale.styleArray,
+        hash            = this.layoutHash;
+
+    // add the attribute hash, in case it is passed into this api
+    if(styleAttributes.length !== 0) {
+      ret = styleAttributes[0];
+    }
+
+    for(i=0; i<styleArray.length; i++) {
+      attr = styleArray[i];
+      // append an attribute only if its not already present
+      if(ret[attr] === undefined) {
+        value = hash[key+'.'+attr];
+        if(SC.typeOf(value) === SC.T_NUMBER)
+          ret[attr] = value;
+      }
+    }
+
+    return ret;
   }
-  
-  
+
 }) ;
 
 SC.Locale.mixin(/** @scope SC.Locale */ {
@@ -103,7 +153,14 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     This property is set by the build tools to the current build language.
   */
   preferredLanguage: null,
-  
+
+  /**
+    This property holds all attributes name which can be used for SC.View's
+    layout property
+  */
+  styleArray: ['left', 'top', 'right', 'bottom', 'width', 'height', 'centerX',
+  'centerY', 'minWidth', 'minHeight'],
+
   /** 
     Invoked at the start of SproutCore's document onready handler to setup 
     the currentLocale.  This will use the language properties you have set on
@@ -211,7 +268,29 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     this.prototype.hasStrings = YES ;
     return this;
   },
-  
+
+  /**
+    Similar to the addStrings method
+    Adds the passed hash of localized layout values to the the locale's
+    layout table
+
+    @returns {Object} receiver
+  */
+  appendLayoutHash: function(stringsHash) {
+    // make sure the target layoutHash hash exists and belongs to the locale
+    var layoutHash = this.prototype.layoutHash ;
+    if(layoutHash) {
+      if(!this.prototype.hasOwnProperty('layoutHash')) {
+        this.prototype.layoutHash = SC.clone(layoutHash) ;
+      }
+    } else layoutHash = this.prototype.layoutHash = {} ;
+    // add layout hash
+    if (stringsHash)
+      this.prototype.layoutHash = SC.mixin(layoutHash, stringsHash);
+
+    return this;
+  },
+
   _map: { english: 'en', french: 'fr', german: 'de', japanese: 'ja', jp: 'ja', spanish: 'es' },
   
   /**
@@ -286,4 +365,16 @@ SC.stringsFor = function(languageCode, strings) {
   return this ;
 } ;
 
+/**
+  Similar to the SC.stringFor method
+  Adds the localized layout values to the current locale
 
+  @param {String} languageCode
+  @param {Hash} layoutHash
+  @returns {Object} receiver
+*/
+SC.layoutFor = function(languageCode, layoutHash) {
+  var locale = SC.Locale.localeClassFor(languageCode);
+  locale.appendLayoutHash(layoutHash);
+  return this;
+};

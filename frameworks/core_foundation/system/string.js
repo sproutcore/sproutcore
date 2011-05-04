@@ -143,6 +143,26 @@ SC.mixin(SC.String, {
   },
 
   /**
+    Fetch the layout value for a single style attribute from layoutHash
+
+    @returns {Number} the localized value
+  */
+  locMetric: function() {
+    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
+    return SC.Locale.currentLocale.getLocMetric(this);
+  },
+
+  /**
+    Fetch the localized layout hash, under the current locale
+
+    @returns {Hash} the localized hash
+  */
+  locLayout: function() {
+    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
+    return SC.Locale.currentLocale.getLocLayout(this, arguments);
+  },
+
+  /**
     Works just like loc() except that it will return the passed default
     string if a matching key is not found.
 
