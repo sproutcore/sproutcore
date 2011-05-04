@@ -197,17 +197,17 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
 
     for (idx = 0; idx < len; idx++) {
       item = addedObjects.objectAt(idx);
-      view = this.createChildView(itemViewClass.extend(itemOptions, {
+      childView = this.createChildView(itemViewClass.extend(itemOptions, {
         content: item,
         render: renderFunc
       }));
 
-      var contextProperty = view.get('contextProperty');
+      var contextProperty = childView.get('contextProperty');
       if (contextProperty) {
-        view.set('context', view.get(contextProperty));
+        childView.set('context', childView.get(contextProperty));
       }
 
-      itemElem = view.createLayer().$();
+      itemElem = childView.createLayer().$();
       if (!insertAtElement) {
         elem.append(itemElem);
       } else {
@@ -215,20 +215,20 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       }
       insertAtElement = itemElem;
 
-      addedViews.push(view);
+      addedViews.push(childView);
     }
 
     childViews.replace(start, 0, addedViews);
 
     var inverseTemplate = this.get('inverseTemplate');
     if (childViews.get('length') === 0 && inverseTemplate) {
-      view = this.createChildView(SC.TemplateView.extend({
+      childView = this.createChildView(SC.TemplateView.extend({
         template: inverseTemplate,
         content: this
       }));
-      this.set('emptyView', view);
-      view.createLayer().$().appendTo(elem);
-      this.childViews = [view];
+      this.set('emptyView', childView);
+      childView.createLayer().$().appendTo(elem);
+      this.childViews = [childView];
     }
 
     // Because the layer has been modified, we need to invalidate the frame
