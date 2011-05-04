@@ -55,6 +55,37 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   */
   itemViewTemplateName: null,
 
+  /**
+    A template to render when there is no content or the content length is 0.
+  */
+  inverseTemplate: function(key, value) {
+    if (value !== undefined) {
+      return value;
+    }
+
+    var templateName = this.get('inverseTemplateName'),
+        template = this.get('templates').get(templateName);
+
+    if (!template) {
+      //@if(debug)
+      if (templateName) {
+        SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
+      }
+      //@endif
+
+      return function() { return ''; };
+    }
+
+    return template;
+  }.property('inverseTemplateName').cacheable(),
+
+  /**
+    The name of a template to lookup if no inverse template is provided.
+
+    @property {String}
+  */
+  inverseTemplateName: null,
+
   itemContext: null,
 
   itemViewClass: function() {
