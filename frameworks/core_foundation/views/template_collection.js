@@ -21,6 +21,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
   didCreateLayer: function() {
+    // FIXME: didCreateLayer gets called multiple times when template collection
+    // views are nested - this is a hack to avoid rendering the content more
+    // than once.
+    if (this._sctcv_layerCreated) { return; }
+    this._sctcv_layerCreated = true;
+
     var content = this.get('content');
     if(content) {
       this.arrayContentDidChange(0, 0, content.get('length'));
