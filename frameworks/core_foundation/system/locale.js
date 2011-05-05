@@ -66,8 +66,11 @@ SC.Locale = SC.Object.extend({
   /** The strings hash for this locale. */
   strings: {},
   
-  /** The layout hash for this locale. */
-  layoutHash: {},
+  /**
+    The metrics for this locale.  A metric is a singular value that is usually
+    used in a user interface layout, such as "width of the OK button".
+  */
+  metrics: {},
 
   toString: function() {
     if (!this.language) SC.Locale._assignLocales() ;
@@ -92,47 +95,98 @@ SC.Locale = SC.Object.extend({
   },
 
   /**
-    Fetch the layout value for a single style attribute from layoutHash
+    Returns the localized value of the metric for the specified key, or
+    undefined if no match is found.
 
     @param {String} key
-    @returns {String} ret The matched value from layoutHash{}
+    @returns {Number} ret
   */
-  getLocMetric: function(key) {
-    var ret = this.layoutHash[key];
-    if (SC.typeOf(ret) === SC.T_NUMBER) return ret;
+  locMetric: function(key) {
+    var ret = this.metrics[key];
+    if (SC.typeOf(ret) === SC.T_NUMBER) {
+      return ret;
+    }
+    else if (ret === undefined) {
+      SC.warn("No localized metric found for key \"" + key + "\"");
+      return undefined;
+    }
     else {
-      console.error("No layout value found for '%@' key".fmt(key));
+      SC.warn("Unexpected metric type for key \"" + key + "\"");
       return undefined;
     }
   },
 
   /**
-    Compiles a new localized layout hash, by looking up the layoutHash{} for
-    all possible combinations of attributes with the key passed. Also, it
-    allows user to pass a predefined attribute hash and merges it at the top
-    of the compiled hash
+    Creates and returns a new hash suitable for use as an SC.View’s 'layout'
+    hash.  This hash will be created by looking for localized metrics following
+    a pattern based on the “base key” you specify.
 
-    @param {String} key The group identifier
-    @returns {Hash} ret The layout hash
+    For example, if you specify "Button.Confirm", the following metrics will be
+    used if they are defined:
+
+      Button.Confirm.left
+      Button.Confirm.top
+      Button.Confirm.right
+      Button.Confirm.bottom
+      Button.Confirm.width
+      Button.Confirm.height
+      Button.Confirm.midWidth
+      Button.Confirm.minHeight
+      Button.Confirm.centerX
+      Button.Confirm.centerY
+
+    Additionally, you can optionally specify a hash which will be merged on top
+    of the returned hash.  For example, if you wish to allow a button’s width
+    to be configurable per-locale, but always wish for it to be centered
+    vertically and horizontally, you can call:
+
+      locLayout("Button.Confirm", {centerX:0, centerY:0})
+
+    …so that you can combine both localized and non-localized elements in the
+    returned hash.  (An exception will be thrown if there is a locale-specific
+    key that matches a key specific in this hash.)
+
+    @param {String} baseKey
+    @param {String} (optional) additionalHash
+    @returns {Hash}
   */
-  getLocLayout: function(key) {
-    var i, attr, value, ret = {},
-        styleAttributes = arguments[1],
-        styleArray      = SC.Locale.styleArray,
-        hash            = this.layoutHash;
+  locLayout: function(baseKey, additionalHash) {
+    // Note:  In this method we'll directly access this.metrics rather than
+    //        going through locMetric() for performance and to avoid
+    //        locMetric()'s sanity checks.
 
-    // add the attribute hash, in case it is passed into this api
-    if(styleAttributes.length !== 0) {
-      ret = styleAttributes[0];
-    }
+    var i, len, layoutKey, key, value,
+        layoutKeys = SC.Locale.layoutKeys,
+        metrics    = this.metrics,
 
-    for(i=0; i<styleArray.length; i++) {
-      attr = styleArray[i];
-      // append an attribute only if its not already present
-      if(ret[attr] === undefined) {
-        value = hash[key+'.'+attr];
-        if(SC.typeOf(value) === SC.T_NUMBER)
-          ret[attr] = value;
+        // Cache, to avoid repeated lookups
+        typeOfFunc = SC.typeOf,
+        numberType = SC.T_NUMBER,
+
+        ret        = {};
+
+
+    // Start off by mixing in the additionalHash; we'll look for collisions with
+    // the localized values in the loop below.
+    if (additionalHash) SC.mixin(ret, additionalHash);
+
+
+    // For each possible key that can be included in a layout hash, see whether
+    // we have a localized value.
+    for (i = 0, len = layoutKeys.length;  i < len;  ++i) {
+      layoutKey = layoutKeys[i];
+      key       = baseKey + "." + layoutKey;
+      value     = metrics[key];
+
+      if (typeOfFunc(value) === numberType) {
+        // We have a localized value!  As a sanity check, if the caller
+        // specified an additional hash and it has the same key, we'll throw an
+        // error.
+        if (additionalHash  &&  additionalHash[layoutKey]) {
+          throw "locLayout():  There is a localized value for the key '" + key + "' but a value for '" + layoutKey + "' was also specified in the non-localized hash";
+        }
+
+        ret[layoutKey] = value;
       }
     }
 
@@ -148,18 +202,18 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     preferred one.
   */
   useAutodetectedLanguage: NO,
-  
+
   /**
     This property is set by the build tools to the current build language.
   */
   preferredLanguage: null,
 
   /**
-    This property holds all attributes name which can be used for SC.View's
-    layout property
+    This property holds all attributes name which can be used for a layout hash
+    (for an SC.View).  These are what we support inside the layoutFor() method.
   */
-  styleArray: ['left', 'top', 'right', 'bottom', 'width', 'height', 'centerX',
-  'centerY', 'minWidth', 'minHeight'],
+  layoutKeys: ['left', 'top', 'right', 'bottom', 'width', 'height',
+               'minWidth', 'minHeight', 'centerX', 'centerY'],
 
   /** 
     Invoked at the start of SproutCore's document onready handler to setup 
@@ -270,23 +324,31 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   },
 
   /**
-    Similar to the addStrings method
-    Adds the passed hash of localized layout values to the the locale's
-    layout table
+    Adds the passed hash of metrics to the locale's metrics table, much as
+    addStrings() is used to add in strings.   Note that if the receiver locale
+    inherits its metrics from its parent, then the metrics table will be cloned
+    first.
 
     @returns {Object} receiver
   */
-  appendLayoutHash: function(stringsHash) {
-    // make sure the target layoutHash hash exists and belongs to the locale
-    var layoutHash = this.prototype.layoutHash ;
-    if(layoutHash) {
-      if(!this.prototype.hasOwnProperty('layoutHash')) {
-        this.prototype.layoutHash = SC.clone(layoutHash) ;
+  addMetrics: function(metricsHash) {
+    // make sure the target metrics hash exists and belongs to the locale
+    var metrics = this.prototype.metrics;
+    if (metrics) {
+      if (!this.prototype.hasOwnProperty(metrics)) {
+        this.prototype.metrics = SC.clone(metrics) ;
       }
-    } else layoutHash = this.prototype.layoutHash = {} ;
-    // add layout hash
-    if (stringsHash)
-      this.prototype.layoutHash = SC.mixin(layoutHash, stringsHash);
+    }
+    else {
+      metrics = this.prototype.metrics = {} ;
+    }
+
+    // add metrics hash
+    if (metricsHash) this.prototype.metrics = SC.mixin(metrics, metricsHash);
+
+    // Note:  We don't need the equivalent of this.hasStrings here, because we
+    //        are not burdened by an older API to look for like the strings
+    //        support is.
 
     return this;
   },
@@ -366,15 +428,14 @@ SC.stringsFor = function(languageCode, strings) {
 } ;
 
 /**
-  Similar to the SC.stringFor method
-  Adds the localized layout values to the current locale
+  Just like SC.stringsFor, but for metrics.
 
   @param {String} languageCode
-  @param {Hash} layoutHash
+  @param {Hash} metrics
   @returns {Object} receiver
 */
-SC.layoutFor = function(languageCode, layoutHash) {
+SC.metricsFor = function(languageCode, metrics) {
   var locale = SC.Locale.localeClassFor(languageCode);
-  locale.appendLayoutHash(layoutHash);
+  locale.addMetrics(metrics);
   return this;
 };

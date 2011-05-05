@@ -143,23 +143,95 @@ SC.mixin(SC.String, {
   },
 
   /**
-    Fetch the layout value for a single style attribute from layoutHash
+    Returns the localized metric value for the specified key.  A metric is a
+    single value intended to be used in your interface’s layout, such as
+    "Button.Confirm.Width" = 100.
 
-    @returns {Number} the localized value
+    If you would like to return a set of metrics for use in a layout hash, you
+    may prefer to use the locLayout() method instead.
+
+    @param str {String} key
+    @returns {Number} the localized metric
   */
-  locMetric: function() {
-    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
-    return SC.Locale.currentLocale.getLocMetric(this);
+  locMetric: function(key) {
+    var K             = SC.Locale,
+        currentLocale = K.currentLocale;
+
+    if (!currentLocale) {
+      K.createCurrentLocale();
+      currentLocale = K.currentLocale;
+    }
+    return currentLocale.locMetric(key);
   },
 
   /**
-    Fetch the localized layout hash, under the current locale
+    Creates and returns a new hash suitable for use as an SC.View’s 'layout'
+    hash.  This hash will be created by looking for localized metrics following
+    a pattern based on the “base key” you specify.
 
-    @returns {Hash} the localized hash
+    For example, if you specify "Button.Confirm", the following metrics will be
+    used if they are defined:
+
+      Button.Confirm.left
+      Button.Confirm.top
+      Button.Confirm.right
+      Button.Confirm.bottom
+      Button.Confirm.width
+      Button.Confirm.height
+      Button.Confirm.midWidth
+      Button.Confirm.minHeight
+      Button.Confirm.centerX
+      Button.Confirm.centerY
+
+    Additionally, you can optionally specify a hash which will be merged on top
+    of the returned hash.  For example, if you wish to allow a button’s width
+    to be configurable per-locale, but always wish for it to be centered
+    vertically and horizontally, you can call:
+
+      locLayout("Button.Confirm", {centerX:0, centerY:0})
+
+    …so that you can combine both localized and non-localized elements in the
+    returned hash.  (An exception will be thrown if there is a locale-specific
+    key that matches a key specific in this hash.)
+
+
+    For example, if your locale defines:
+
+      Button.Confirm.left
+      Button.Confirm.top
+      Button.Confirm.right
+      Button.Confirm.bottom
+
+
+    …then these two code snippets will produce the same result:
+
+      layout: {
+        left:   "Button.Confirm.left".locMetric(),
+        top:    "Button.Confirm.top".locMetric(),
+        right:  "Button.Confirm.right".locMetric(),
+        bottom: "Button.Confirm.bottom".locMetric()
+      }
+
+      layout: "Button.Confirm".locLayout()
+
+    The former is slightly more efficient because it doesn’t have to iterate
+    through the possible localized layout keys, but in virtually all situations
+    you will likely wish to use the latter.
+
+    @param str {String} key
+    @param {str} (optional) additionalHash
+    @param {String} (optional) additionalHash
+    @returns {Number} the localized metric
   */
-  locLayout: function() {
-    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
-    return SC.Locale.currentLocale.getLocLayout(this, arguments);
+  locLayout: function(key, additionalHash) {
+    var K             = SC.Locale,
+        currentLocale = K.currentLocale;
+
+    if (!currentLocale) {
+      K.createCurrentLocale();
+      currentLocale = K.currentLocale;
+    }
+    return currentLocale.locLayout(key, additionalHash);
   },
 
   /**
@@ -237,6 +309,14 @@ SC.mixin(String.prototype,
   
   loc: function() {
     return SC.String.loc(this.toString(), SC.$A(arguments));
+  },
+
+  locMetric: function() {
+    return SC.String.locMetric(this.toString());
+  },
+
+  locLayout: function(additionalHash) {
+    return SC.String.locLayout(this.toString(), additionalHash);
   }
 
 });
