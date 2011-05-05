@@ -2367,14 +2367,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // become first responder if possible.
     this.becomeFirstResponder() ;
 
+    this._touchSelectedView = itemView;
+
     if (!this.get('useToggleSelection')) {
       // We're faking the selection visually here
       // Only track this if we added a selection so we can remove it later
       if (itemView && !itemView.get('isSelected')) {
         itemView.set('isSelected', YES);
-        this._touchSelectedView = itemView;
-      } else {
-        this._touchSelectedView = null;
       }
     }
 
@@ -2407,6 +2406,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // var itemView = this.itemViewForEvent(touch),
     var itemView = this._touchSelectedView,
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
+        useToggleSelection = this.get('useToggleSelection'),
         isSelected = NO, sel;
 
     if (!this.get('isEnabled')) return contentIndex > -1;
@@ -2415,7 +2415,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (itemView) { itemView.set('isSelected', NO); }
 
     if (contentIndex > -1) {
-      if (this.get('useToggleSelection')) {
+      if (useToggleSelection) {
         sel = this.get('selection');
         isSelected = sel && sel.containsObject(itemView.get('content'));
       }
@@ -2423,7 +2423,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       if (isSelected) {
         this.deselect(contentIndex);
       } else {
-        this.select(contentIndex, NO);
+        this.select(contentIndex, useToggleSelection);
 
         // If actOnSelect is implemented, the action will be fired.
         this._cv_performSelectAction(itemView, touch, 0);
