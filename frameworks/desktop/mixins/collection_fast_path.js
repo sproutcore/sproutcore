@@ -630,7 +630,7 @@ SC.CollectionFastPath = {
     Removes an item view.
   */
   removeItemView: function(current) {
-    if (current.get("isPoolable")) {
+    if (current.get("layerIsCacheable")) {
       this.sendToDOMPool(current);
     } else {
       this.removeChild(current);
@@ -645,7 +645,7 @@ SC.CollectionFastPath = {
     Otherwise, nothing will happen.
   */
   updateItemView: function(current, exampleView, object, index) {
-    if (!current.get("isPoolable") || current.createdFromExampleView !== exampleView) {
+    if (!current.get("layerIsCacheable") || current.createdFromExampleView !== exampleView) {
       // unmap old and remove
       this.unmapView(current, index);
       delete this._indexMap[index];
