@@ -41,7 +41,7 @@ CoreTools.DataSource = SC.DataSource.extend({
     
     if (!query.get('isRemote')) return NO ; 
     
-    SC.Request.getUrl('/sc/targets.json')
+    SC.Request.getUrl(CoreTools.attachUrlPrefix('/sc/targets.json'))
       .set('isJSON', YES)
       .notify(this, 'fetchTargetsDidComplete', { query: query, store: store })
       .send();

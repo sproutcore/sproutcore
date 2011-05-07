@@ -15,6 +15,12 @@
 CoreTools = SC.Object.create( /** @scope CoreTools.prototype */ {
 
   NAMESPACE: 'CoreTools',
-  VERSION: '1.0.0'
-  
+  VERSION: '1.0.0',
+
+  attachUrlPrefix: function(url) {
+    if(url && SC.urlPrefix) {
+      url = SC.urlPrefix + url;
+    }
+    return url;
+  }
 }) ;
