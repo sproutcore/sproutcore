@@ -167,7 +167,7 @@ SC.ResponderContext = {
     if (responder) responder.set('isFirstResponder', YES);
 
     this._notifyDidBecomeFirstResponder(responder, responder, common);
-
+    
     // now, tell everyone the good news!
     this.endPropertyChanges();
 
@@ -199,6 +199,7 @@ SC.ResponderContext = {
     if (next) this._notifyDidBecomeFirstResponder(responder, next, root);
 
     cur.set('hasFirstResponder', YES);
+    cur.$().focus();
     cur.didBecomeFirstResponder(responder);
   },
 
@@ -209,6 +210,7 @@ SC.ResponderContext = {
     var current = this.get('firstResponder');
     if (!current) return;
     current.willLoseFirstResponder();
+    cur.$().focus();
     current.didBecomeFirstResponder();
   },
 
