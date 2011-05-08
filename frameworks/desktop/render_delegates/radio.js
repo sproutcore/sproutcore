@@ -26,7 +26,7 @@
   
 */
 SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
-  name: 'radio',
+  className: 'radio',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);

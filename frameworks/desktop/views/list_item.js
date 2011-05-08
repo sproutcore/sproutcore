@@ -826,7 +826,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       .addClass('sc-disclosure-view')
       .addClass('sc-regular-size')
       .addClass(this.get('theme').classNames)
-      .addClass(renderer.get('name'));
+      .addClass(renderer.get('className'));
 
     var source = this._disclosureRenderSource;
     if (!source) {
@@ -863,7 +863,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       .addClass('sc-checkbox-view')
       .addClass('sc-regular-size')
       .addClass(this.get('theme').classNames)
-      .addClass(renderer.get('name'));
+      .addClass(renderer.get('className'));
 
     var source = this._checkboxRenderSource;
     if (!source) {

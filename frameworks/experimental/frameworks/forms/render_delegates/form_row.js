@@ -5,7 +5,7 @@
 // ==========================================================================
 
 SC.BaseTheme.formRowRenderDelegate = SC.RenderDelegate.create({
-  name: 'form-row',
+  className: 'form-row',
   flowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
   flowPadding: 0
 });

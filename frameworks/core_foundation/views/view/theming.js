@@ -236,9 +236,16 @@ SC.View.reopen(
     original(context);
 
     var renderDelegate = this.get('renderDelegate');
-    if (renderDelegate && renderDelegate.name) {
-      context.addClass(renderDelegate.name);
+    if (renderDelegate && renderDelegate.className) {
+      context.addClass(renderDelegate.className);
     }
+    
+    // @if(debug)
+    if (renderDelegate && renderDelegate.name) {
+      SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
+      SC.Logger.error("%s will not render properly; name '%s' will be ignored.", renderDelegate, renderDelegate.name);
+    }
+    // @endif
   }.enhance()
 });
 

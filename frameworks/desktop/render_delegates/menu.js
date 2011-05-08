@@ -9,7 +9,7 @@ sc_require('render_delegates/picker');
 
 // This is the same as a pickerRenderDelegate, but is named 'menu' instead.
 SC.BaseTheme.menuRenderDelegate = SC.BaseTheme.pickerRenderDelegate.create({
-  name: 'menu',
+  className: 'menu',
 
   render: function(orig, dataSource, context) {
     this.addSizeClassName(dataSource, context);

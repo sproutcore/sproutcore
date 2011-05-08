@@ -7,7 +7,7 @@
 sc_require("theme");
 // the 'well'-styled container
 SC.BaseTheme.wellRenderDelegate = SC.Object.create({
-  name: 'well',
+  className: 'well',
   
   render: function(dataSource, context) {
     context.push("<div class='top-left-edge'></div>",

@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.AceTheme.Popover.workspaceRenderDelegate = SC.RenderDelegate.create({
-  name: 'workspace',
+  className: 'workspace',
   render: function(dataSource, context) {
     context.setClass({
       'top-toolbar': dataSource.get('hasTopToolbar'),

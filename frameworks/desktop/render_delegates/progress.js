@@ -23,7 +23,7 @@
   any theme constants.
 */
 SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
-  name: 'progress',
+  className: 'progress',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);

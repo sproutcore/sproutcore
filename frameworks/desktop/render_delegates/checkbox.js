@@ -27,7 +27,7 @@
   
 */
 SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
-  name: 'checkbox',
+  className: 'checkbox',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);

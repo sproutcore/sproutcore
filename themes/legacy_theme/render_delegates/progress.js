@@ -41,6 +41,8 @@ SC.LegacyTheme.PROGRESS_OFFSET_RANGE = 24;
   
 */
 SC.LegacyTheme.progressRenderDelegate = SC.RenderDelegate.create({
+  className: 'progress',
+  
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 

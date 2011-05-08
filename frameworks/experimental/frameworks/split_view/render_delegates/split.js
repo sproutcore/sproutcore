@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.BaseTheme.splitRenderDelegate = SC.RenderDelegate.create({
-  name: 'split',
+  className: 'split',
 
   render: function(dataSource, context) {
     context.addClass(dataSource.get('layoutDirection'));

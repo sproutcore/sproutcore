@@ -7,7 +7,7 @@
 sc_require("resources/picker/popover/popover");
 
 SC.AceTheme.Popover.pickerRenderDelegate = SC.RenderDelegate.create({
-  name: 'picker',
+  className: 'picker',
   
   render: function(dataSource, context) {
     var preferType = dataSource.get('preferType');

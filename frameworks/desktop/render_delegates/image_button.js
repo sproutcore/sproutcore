@@ -7,7 +7,7 @@
 
 
 SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
-  name: 'image-button',
+  className: 'image-button',
 
   render: function(dataSource, context) {
     var image = dataSource.get('image'),

@@ -7,7 +7,7 @@
 
 
 SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
-  name: 'disclosure',
+  className: 'disclosure',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);

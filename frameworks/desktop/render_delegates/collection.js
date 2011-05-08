@@ -9,7 +9,7 @@
 // collections don't need their own rendering; however, in future, constants
 // like the row height will likely be specified on the render delegate.
 SC.BaseTheme.collectionRenderDelegate = SC.RenderDelegate.create({
-  name: 'collection',
+  className: 'collection',
   
   render: function(dataSource, context) {
     context.setClass('focus', dataSource.get('isFirstResponder'));

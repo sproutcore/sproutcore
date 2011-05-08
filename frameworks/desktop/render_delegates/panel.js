@@ -7,7 +7,7 @@
 
 
 SC.BaseTheme.panelRenderDelegate = SC.RenderDelegate.create({
-  name: 'panel',
+  className: 'panel',
   
   render: function(dataSource, context) {
     context = context.begin('div').addClass('panel-background');
