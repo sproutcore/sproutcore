@@ -32,13 +32,6 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   classNames: ['sc-checkbox-view', 'sc-checkbox-control'],
 
   /**
-    @type String
-    @default 'label'
-    @see SC.View#tagName
-  */
-  tagName: 'label',
-
-  /**
     The WAI-ARIA role of checkbox.
 
     @type String
@@ -75,6 +68,17 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     return NO;
   }.property('isEnabled'),
   
+  /** @private */
+  _toggleValue: function(){
+    var val = this.get('value');
+    if (val === this.get('toggleOnValue')) {
+      this.set('value', this.get('toggleOffValue'));
+    }
+    else {
+      this.set('value', this.get('toggleOnValue'));
+    }
+    return YES;
+  },
   
   /** @private */
   mouseDown: function(evt) {
@@ -89,22 +93,36 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   
   /** @private */
   mouseUp: function(evt) {
+    if(!this.get('isEnabled')) return YES;
+
     this.set('isActive', NO);
     this._isMouseDown = NO;
 
-    if(!this.get('isEnabled')) {
-      return YES;
-    }
-    var val = this.get('value');
-    if (val === this.get('toggleOnValue')) {
-
-      this.set('value', this.get('toggleOffValue'));
-    }
-    else {
-      this.set('value', this.get('toggleOnValue'));
-    }
+    this._toggleValue();
     return YES;
   },
+  
+  /** @private */
+   keyDown: function(evt) {
+     // handle tab key
+     if(!this.get('isEnabled')) return YES;
+     if (evt.which === 9 || evt.keyCode === 9) {
+       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+       if(view) view.becomeFirstResponder();
+       else evt.allowDefault();
+       return YES ; // handled
+     }
+     if (evt.which === 13 || evt.which === 32) {
+       this._toggleValue();
+       return YES ; // handled
+     }
+
+     // let other keys through to browser
+     evt.allowDefault();
+
+     return NO;
+   },
+  
   
   
   /** @private */
