@@ -24,7 +24,7 @@ SC.CONTEXT_MENU_ENABLED = YES;
   Default property to disable or enable if the focus can jump to the address
   bar or not.
 */
-SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
+SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
 
 /**
   Tells the property (when fetched with themed()) to get its value from the renderer (if any).
@@ -674,7 +674,12 @@ SC.CoreView.reopen(
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
     if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
-    if (this.get('isFirstResponder')) { context.addClass('focus'); }
+    if (this.get('isFirstResponder')) { 
+      context.addClass('focus');
+      context.attr('tabindex', '0'); 
+    }else{
+      context.attr('tabindex', '-1');
+    }
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));

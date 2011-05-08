@@ -276,7 +276,16 @@ SC.View.reopen(
       }
 
       // if no parents have a next sibling, start over from the beginning
-      if(!next) next = this.get('pane');
+      if(!next) {
+        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT) {
+          debugger;
+          console.log('should go to addressbar '+this.toString());
+          
+          break;
+        }else{
+          next = this.get('pane');
+        }
+      }
 
       // if it's a valid firstResponder, we're done!
       if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) return next;

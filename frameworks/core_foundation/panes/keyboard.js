@@ -52,6 +52,8 @@ SC.Pane.reopen(
       if (nextValidKeyView) {
         this.makeFirstResponder(nextValidKeyView);
         return YES;
+      }else if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+        evt.allowDefault();
       }
     }
 
