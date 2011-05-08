@@ -1,4 +1,17 @@
 
+CHANGE LOG FOR 1.6
+==================
+
+1.6.0.beta.1
+------------
+* Bugfixes to synchronization between SproutCore RecordArray/ManyArray/ChildArray and TemplateCollectionView
+* Moved forms to experimental framework
+* Moved routing into its own framework
+* Improved ability to use table elements in Handlebars templates
+* CSS and cross-browser fixes for built-in controls
+* Significantly cleaned up in-line documentation
+
+
 CHANGE LOG FOR 1.5
 ==================
 
