@@ -225,7 +225,7 @@ SC.SliderView = SC.View.extend(SC.Control,
        return YES ; // handled
      }
      
-     if (evt.which === 37 || evt.which === 38 || evt.which === 39 || evt.which === 40){
+     if (evt.which >= 37 && evt.which <= 40){
        var min = this.get('minimum'),max=this.get('maximum'),
           step = this.get('step'),
           size = max-min, val=0, calculateStep;
