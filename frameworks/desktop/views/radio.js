@@ -414,13 +414,14 @@ SC.RadioView = SC.View.extend(SC.Control,
       for(var i= 0, iLen = displayItems.length; i<iLen; i++){
         if(val === displayItems[i].value) break;
       }
+      
      
       if (evt.which === 37 || evt.which === 38 ){
-        if(i===0) i = displayItems.length-1;
+        if(i<=0) i = displayItems.length-1;
         else i--;
       }
       if (evt.which === 39 || evt.which === 40 ){
-        if(i===displayItems.length-1) i = 0;
+        if(i>=displayItems.length-1) i = 0;
         else i++;
       }
       delegate.updateRadioAtIndex(proxy, elem, i);
