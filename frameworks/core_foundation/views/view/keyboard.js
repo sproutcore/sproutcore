@@ -277,14 +277,8 @@ SC.View.reopen(
 
       // if no parents have a next sibling, start over from the beginning
       if(!next) {
-        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT) {
-          debugger;
-          console.log('should go to addressbar '+this.toString());
-          
-          break;
-        }else{
-          next = this.get('pane');
-        }
+        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT) break;
+        else next = this.get('pane');
       }
 
       // if it's a valid firstResponder, we're done!
@@ -295,7 +289,7 @@ SC.View.reopen(
     }
 
     // this will only happen if no views are visible and accept first responder
-    return null;
+    return;
 
   }.property('nextKeyView'),
 
