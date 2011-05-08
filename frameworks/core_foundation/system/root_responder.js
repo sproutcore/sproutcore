@@ -696,7 +696,6 @@ SC.RootResponder = SC.Object.extend(
 
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
-    this.focus(); // assume the window is focused when you load.
 
     if (SC.browser.mobileSafari) {
       // Monkey patch RunLoop if we're in MobileSafari
@@ -1714,8 +1713,6 @@ SC.RootResponder = SC.Object.extend(
       evt.allowDefault();
       return YES;
     }
-
-    if(!SC.browser.msie) window.focus();
 
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
