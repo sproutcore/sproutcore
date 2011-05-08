@@ -215,21 +215,6 @@ SC.SliderView = SC.View.extend(SC.Control,
     return NO;
   }.property('isEnabled'),
   
-  willBecomeKeyResponderFrom: function(keyView) {
-    // focus the text field.
-    if (!this._isFocused) {
-      this._isFocused = YES ;
-      this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.$().focus();
-      }
-    }
-  },
-  
-  willLoseKeyResponderTo: function(responder) {
-    if (this._isFocused) this._isFocused = NO ;
-  },
-  
   keyDown: function(evt) {
 
      // handle tab key
@@ -272,17 +257,10 @@ SC.SliderView = SC.View.extend(SC.Control,
             }       
        }
        if(val>=min && val<=max) this.set('value', val);
+     }else{
+       evt.allowDefault();
+       return NO;
      }
-     //handle arrows
-
-     // validate keyDown...
-     // if (this.performValidateKeyDown(evt)) {
-     //    this._isKeyDown = YES ;
-     //    evt.allowDefault(); 
-     //  } else {
-     //    evt.stop();
-     //  }
-     SC.RunLoop.begin().end();
      return YES; 
    },
 
