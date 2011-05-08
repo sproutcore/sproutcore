@@ -35,7 +35,9 @@ SC.View.reopen(
 
     @param {SC.Responder} responder
   */
-  willBecomeKeyResponderFrom: function(responder) {},
+  willBecomeKeyResponderFrom: function(responder) {
+    this.$().focus();
+  },
 
   /**
     Invokved just after the responder loses key responder status.
