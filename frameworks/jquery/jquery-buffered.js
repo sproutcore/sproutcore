@@ -9,35 +9,7 @@
 
 (function() {
 
-// Create Buffer Constructor
-jQuery.buffer = jQuery.bufferedJQuery = function(selector, context) {
-  return new jQuery.bufferedJQuery.prototype.init(selector, context);
-};
-
-// Base it on jquery
-var T = function() { };
-T.prototype = jQuery.fn;
-jQuery.bufferedJQuery.prototype = new T();
-
-// keep track of whether buffering is active
-jQuery._isBuffering = 0;
-
-// relay init properly
-jQuery.bufferedJQuery.prototype.init = function(selector, context) {
-  jQuery._isBuffering++;
-  var ret = jQuery.fn.init.call(this, selector, context);
-  ret.isBuffered = true;
-  jQuery._isBuffering--;
-  return ret;
-};
-
-// set prototype of init to the buffer prototype.
-jQuery.bufferedJQuery.prototype.init.prototype = jQuery.bufferedJQuery.prototype;
-
-/**
-  Actually subclass jQuery now.
-*/
-var base = jQuery.fn;
+jQuery.buffer = jQuery.bufferedJQuery = jQuery.sub();
 
 jQuery.fn.extend({
 
@@ -85,7 +57,7 @@ jQuery.fn.find = function(selector) {
 	return ret;
 };
 
-jQuery.extend(jQuery.bufferedJQuery.prototype, {
+jQuery.bufferedJQuery.fn.extend({
 
   html: function(value) {
     // if there is no value, we don't handle it.
