@@ -199,22 +199,7 @@ SC.TabView = SC.View.extend(
         tabLocation = this.get('tabLocation'),
         tabHeight   = this.get('tabHeight');
 
-    if (tabLocation === SC.TOP_LOCATION) {
-      layout = { top: tabHeight/2+1, left: 0, right: 0, bottom: 0, border: 1 };
-    } else if (tabLocation === SC.TOP_TOOLBAR_LOCATION) {
-      layout = { top: tabHeight+1, left: 0, right: 0, bottom: 0, border: 1 };
-    } else {
-      layout = { top: 0, left: 0, right: 0, bottom: (tabHeight/2) - 1, border: 1 };
-    }
-
-    containerView = this.containerView.extend({
-      layout: layout,
-      //adding the role
-      ariaRole: 'tabpanel'
-    });
-
-    view = this.containerView = this.createChildView(containerView) ;
-    childViews.push(view);
+   
     
     //  The segmentedView managed by this tab view.  Note that this TabView uses
     //  a custom segmented view.  You can access this view but you cannot change
@@ -255,6 +240,23 @@ SC.TabView = SC.View.extend(
     
     view = this.segmentedView = this.createChildView(this.segmentedView) ;
     childViews.push(view);
+    
+     if (tabLocation === SC.TOP_LOCATION) {
+        layout = { top: tabHeight/2+1, left: 0, right: 0, bottom: 0, border: 1 };
+      } else if (tabLocation === SC.TOP_TOOLBAR_LOCATION) {
+        layout = { top: tabHeight+1, left: 0, right: 0, bottom: 0, border: 1 };
+      } else {
+        layout = { top: 0, left: 0, right: 0, bottom: (tabHeight/2) - 1, border: 1 };
+      }
+
+      containerView = this.containerView.extend({
+        layout: layout,
+        //adding the role
+        ariaRole: 'tabpanel'
+      });
+
+      view = this.containerView = this.createChildView(containerView) ;
+      childViews.push(view);
     
     this.set('childViews', childViews);
     return this; 
