@@ -789,3 +789,71 @@ test("fillHeight", function() {
   checkPositions(view, expect);
 
 });
+
+
+test("isSpacer", function() {
+  var view = SC.View.create(SC.FlowedLayout, {
+    align: SC.ALIGN_LEFT,
+
+    childViews: 'a b c'.w(),
+
+    a: SC.View.create({
+      layout: { width: 100, height: 100 }
+    }),
+
+    b: SC.View.create({
+      layout: { width: 200, height: 100 }
+    }),
+
+    c: SC.View.create({
+      layout: { width: 200, height: 100 }
+    })
+  });
+
+  var expect = {
+    wrap: {
+      400: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 200, height: 100 },
+        { left: 0, top: 100, width: 200, height: 100 }
+      ],
+      600: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 200, height: 100 },
+        { left: 300, top: 0, width: 200, height: 100 }
+      ]
+    },
+
+    noWrap: {
+      400: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 200, height: 100 },
+        { left: 300, top: 0, width: 200, height: 100 }
+      ],
+      600: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 200, height: 100 },
+        { left: 300, top: 0, width: 200, height: 100 }
+      ]
+    }
+  };
+
+  checkPositions(view, expect);
+
+  SC.RunLoop.begin();
+  view.childViews[1].set('isSpacer', YES);
+  SC.RunLoop.end();
+
+  expect.wrap[400][1].width = 100;
+  expect.wrap[400][2].top = 0;
+  expect.wrap[400][2].left = 200;
+
+  expect.wrap[600][1].width = 300;
+  expect.wrap[600][2].left = 400;
+  expect.noWrap[400] = expect.wrap[400];
+  expect.noWrap[600] = expect.wrap[600];
+
+  checkPositions(view, expect);
+
+});
+
