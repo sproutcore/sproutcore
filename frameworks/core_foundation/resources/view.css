@@ -52,7 +52,6 @@ div.sc-view {
 }
 
 /* Make sure focus outlines do not appear.  These don't look good. */
-/*.sc-view:focus, a.sc-view:focus{
+.sc-view:focus{
   outline: none;
 }
-*/
