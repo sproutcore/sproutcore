@@ -1,6 +1,7 @@
 .sc-segmented-view {
   display: block;
   white-space: nowrap;
+  z-index: 1;
   img.icon {
     position: relative;
     vertical-align: middle;
