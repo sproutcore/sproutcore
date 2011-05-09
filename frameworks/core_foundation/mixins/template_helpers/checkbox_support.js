@@ -4,9 +4,44 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+sc_require('views/template');
+
 /** @class */
 
-SC.CheckboxSupport = /** @scope SC.CheckboxSupport.prototype */{
+SC.Checkbox = SC.TemplateView.extend(
+  /** @scope SC.Checkbox.prototype */ {
+
+  title: null,
+  value: null,
+
+  classNames: ['sc-checkbox'],
+  template: SC.Handlebars.compile('<label><input type="checkbox">{{title}}</label>'),
+
+  didCreateLayer: function() {
+    var self = this;
+
+    this.$('input').bind('change', function() {
+      self.domValueDidChange(this);
+    });
+  },
+
+  domValueDidChange: function(node) {
+    this.set('value', !!$(node).attr('checked'));
+  },
+
+  value: function(key, value) {
+    if (value !== undefined) {
+      this.$('input').attr('checked', value);
+    } else {
+      value = this.$('input').attr('checked');
+    }
+
+    return value;
+  }.property()
+});
+
+SC.CheckboxSupport = /** @scope SC.CheckboxSupport */{
   didCreateLayer: function() {
     this.$('input').change(jQuery.proxy(function() {
       SC.RunLoop.begin();
