@@ -150,7 +150,7 @@ SC.FlowedLayout = {
   /** @private */
   _scfl_layoutPropertyDidChange: function(){
     this.invokeOnce("_scfl_tile");
-  },
+  }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing'),
   
   /** @private
     Overriden to only update if it is a view we do not manage, or the width or height has changed
@@ -192,11 +192,15 @@ SC.FlowedLayout = {
   observeChildLayout: function(c) {
     if (c._scfl_isBeingObserved) return;
     c._scfl_isBeingObserved = YES;
+    c.addObserver('flowSpacing', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('isSpacer', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('fillWidth', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('fillHeight', this, '_scfl_layoutPropertyDidChange');
   },
   
   /** @private
@@ -204,11 +208,15 @@ SC.FlowedLayout = {
   */
   unobserveChildLayout: function(c) {
     c._scfl_isBeingObserved = NO;
+    c.removeObserver('flowSpacing', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('isSpacer', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('fillWidth', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('fillHeight', this, '_scfl_layoutPropertyDidChange');
   },
   
   /**
