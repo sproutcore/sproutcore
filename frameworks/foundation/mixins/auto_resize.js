@@ -314,7 +314,7 @@ SC.AutoResizeManager = {
       return SC.AutoResizeManager.doBatchResize();
     }
 
-    var tag, views, view, layer, batches;
+    var tag, views, view, layer, batches, prepared;
 
     // first measure all the batched views
     batches = this.viewsNeedingResize;
@@ -322,28 +322,18 @@ SC.AutoResizeManager = {
       if (batches.hasOwnProperty(tag)) {
         views = batches[tag];
 
-        // step through until you find one with a layer and also visible
+        // now measure the rest using the same settings
         while ((view = views.pop())) {
+          if(view.get('isVisible') && (layer = view.get('autoResizeLayer'))) {
+            if(!prepared) SC.prepareStringMeasurement(layer);
 
-          if(!view.get('isVisible')) continue;
-
-          layer = view.get('autoResizeLayer');
-
-          // use the layer to prepare the measurement
-          if(layer) {
-            SC.prepareStringMeasurement(layer, view.get('classNames'));
             view.measureSize(YES);
-            break;
           }
         }
 
-        // now measure the rest using the same settings
-        while ((view = views.pop())) {
-          if(view.get('isVisible')) view.measureSize(YES);
-        }
-
-        SC.teardownStringMeasurement();
-
+        // if they were all isVisible:NO, then prepare was never called
+        // so dont call teardown
+        if(prepared) SC.teardownStringMeasurement();
       }
     }
 
