@@ -2,6 +2,13 @@
 CHANGE LOG FOR 1.6
 ==================
 
+1.6.0.beta.2
+------------
+* Allow native touch scrolling inside an SC.TemplatePane.
+* Add SC.Button template control.
+* Created SC.TextField and SC.Checkbox views to eventually replace the *Support mixins.
+
+
 1.6.0.beta.1
 ------------
 * Bugfixes to synchronization between SproutCore RecordArray/ManyArray/ChildArray and TemplateCollectionView
