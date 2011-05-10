@@ -2,6 +2,11 @@
 CHANGE LOG FOR 1.6
 ==================
 
+1.6.0.beta.3
+------------
+* Removed stray debugger statement that broke sc-build
+
+
 1.6.0.beta.2
 ------------
 * Allow native touch scrolling inside an SC.TemplatePane.
