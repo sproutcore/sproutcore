@@ -572,6 +572,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
     */
     to: function(str, attr) {
       if (SC.none(str) || SC.instanceOf(str, SC.DateTime)) return str;
+      if (SC.none(str) || SC.instanceOf(str, Date)) return SC.DateTime.create(str.getTime());
       var format = attr.get('format');
       return SC.DateTime.parse(str, format ? format : SC.DateTime.recordFormat);
     },
