@@ -64,10 +64,8 @@ SC.TextField = SC.TemplateView.extend(
       this._value = value;
       input.val(value);
     } else if (input.length) {
-      if(window.billy) { debugger; }
       this._value = value = input.val();
     } else {
-      if(window.billy) { debugger; }
       value = this._value;
     }
 
