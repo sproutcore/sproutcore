@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for RecordArray with RecordAttribute
-var storeKeys, rec, rec2, bar, MyApp;
+var storeKeys, rec, rec2, rec3, bar, MyApp;
 
 module("SC.RecordAttribute core methods", {
   setup: function() {
@@ -29,6 +29,9 @@ module("SC.RecordAttribute core methods", {
       // test mapping Date
       date: SC.Record.attr(Date),
       nonIsoDate: SC.Record.attr(Date, { useIsoDate: false }),
+
+      // test SC.DateTimes
+      dateTime: SC.Record.attr(SC.DateTime),
       
       // test Array
       anArray: SC.Record.attr(Array),
@@ -78,6 +81,7 @@ module("SC.RecordAttribute core methods", {
         firstName: "John", 
         lastName: "Doe", 
         date: "2009-03-01T20:30-08:00",
+        dateTime: new Date(1235939425000),
         anArray: ['one', 'two', 'three'],
         anObject: { 'key1': 'value1', 'key2': 'value2' },
         aNumber: '123',
@@ -90,6 +94,7 @@ module("SC.RecordAttribute core methods", {
         lastName: "Doe", 
         relatedTo: 'foo1',
         relatedToAggregate: 'bar1',
+        dateTime: "2009-03-01T20:30:25Z",
         anArray: 'notAnArray',
         anObject: 'notAnObject',
         aNumber: '123',
@@ -101,6 +106,7 @@ module("SC.RecordAttribute core methods", {
         firstName: "Alex", 
         lastName: "Doe", 
         relatedToComputed: 'bar1',
+        dateTime: SC.DateTime.create(1235939425000),
         anArray: ['one', 'two', 'three'],
         anObject: { 'key1': 'value1', 'key2': 'value2' },
         aNumber: '123'
@@ -116,6 +122,7 @@ module("SC.RecordAttribute core methods", {
     
     rec = MyApp.store.find(MyApp.Foo, 'foo1');
     rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
+    rec3 = MyApp.store.find(MyApp.Foo, 'foo3');
     
     bar = MyApp.store.find(MyApp.Bar, 'bar1');
     equals(rec.storeKey, storeKeys[0], 'should find record');
@@ -156,6 +163,13 @@ test("getting an array and object attributes where underlying value is not", fun
 test("reading date should parse ISO date", function() {
   var d = new Date(1235968200000); // should be proper date
   equals(rec.get('date').toString(), d.toString(), 'should have matched date');
+});
+
+test("reading dateTime should parse ISO date", function() {
+  var ms = 1235939425000;
+  equals(rec.getPath('dateTime.milliseconds'), ms, 'should have parsed Date properly');
+  equals(rec2.getPath('dateTime.milliseconds'), ms, 'should have parsed String properly');
+  equals(rec3.getPath('dateTime.milliseconds'), ms, 'should have parsed SC.DateTime properly');
 });
 
 test("reading date should parse non-ISO date", function() {
