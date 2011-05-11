@@ -16,7 +16,19 @@
     })
   }
 */
-SC.TemplatePane = SC.Object.extend({});
+SC.TemplatePane = SC.Object.extend({
+  touchStart: function(touch) {
+    touch.allowDefault();
+  },
+
+  touchesDragged: function(evt, touches) {
+    evt.allowDefault();
+  },
+
+  touchEnd: function(touch) {
+    touch.allowDefault();
+  }
+});
 
 SC.mixin(SC.TemplatePane, {
   append: function(attrs) {

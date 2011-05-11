@@ -3,6 +3,7 @@ sc_require("ext/handlebars/bind");
 sc_require("ext/handlebars/collection");
 sc_require("ext/handlebars/localization");
 sc_require("ext/handlebars/view");
+sc_require("views/view");
 
 // Global hash of shared templates. This will automatically be populated
 // by the build tools so that you can store your Handlebars templates in
