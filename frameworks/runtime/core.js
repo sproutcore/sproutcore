@@ -187,7 +187,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
             SC.T_ARRAY: An instance of Array,<br>
             SC.T_CLASS: A SproutCore class (created using SC.Object.extend()),<br>
             SC.T_OBJECT: A SproutCore object instance,<br>
-            SC.T_HASH: A JavaScript object not inheriting from SC.Object
+            SC.T_HASH: A JavaScript object not inheriting from SC.Object, <br>
+            SC.T_ERROR: A SproutCore SC.Error object <br>
   */
   typeOf: function(item) {
     if (item === undefined) return SC.T_UNDEFINED ;
@@ -198,16 +199,21 @@ SC.mixin(/** @scope window.SC.prototype */ {
     if (nativeType === "function") {
       return item.isClass ? SC.T_CLASS : SC.T_FUNCTION;
     } else if (nativeType === "object") {
-      if (item.isError) {
-        return SC.T_ERROR ;
-      } else if (item.isObject) {
-        return SC.T_OBJECT ;
+      
+      // Note: typeOf() may be called before SC.Error has had a chance to load
+      // so this code checks for the presence of SC.Error first just to make
+      // sure.  No error instance can exist before the class loads anyway so
+      // this is safe.
+      if (SC.Error && (item instanceof SC.Error)) {
+        return SC.T_ERROR;
+      } else if (item instanceof SC.Object) {
+        return SC.T_OBJECT;
       } else {
-        return SC.T_HASH ;
+        return SC.T_HASH;
       }
     }
 
-    return nativeType ;
+    return nativeType;
   },
 
   /**
