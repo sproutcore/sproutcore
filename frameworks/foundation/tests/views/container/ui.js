@@ -197,6 +197,7 @@
     
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
-    equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");  });
+    equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");
+  });
 
 })();
