@@ -119,6 +119,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.get('length') : 0;
   }.property('storeKeys').cacheable(),
 
+  /** @private
+    A cache of materialized records. The first time an instance of SC.Record is
+    created for a store key at a given index, it will be saved to this array.
+
+    Whenever the `storeKeys` property is reset, this cache is also reset.
+
+    @type Array
+  */
   _scra_records: null,
 
   /** @private
