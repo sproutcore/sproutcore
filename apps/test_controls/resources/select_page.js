@@ -11,7 +11,7 @@ TestControls.selectPage = SC.View.design({
   form: SC.FormView.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    childViews: "header normal disabled".w(),
+    childViews: "header normal strings disabled".w(),
     
     // Plain Views
     header: SC.LabelView.design({
@@ -40,8 +40,17 @@ TestControls.selectPage = SC.View.design({
         {"name": "This name is Really Really Long, OK?", "value": "LONG" }
       ],
       itemTitleKey: "name", itemValueKey: "value", itemSeparatorKey: "separator",
-      value: 'printer:a'
+      value: 'printer:a',
+      valueBinding: 'TestControls.buttonsController.selectedValue'
     })),
+
+    strings: SC.FormView.row(SC.SelectView.design({
+      layout: { width: 150, height: 24 },
+      items: ["printer:a", "printer:b", "printer:c", "printer:d", "printer:e", "printer:f", "printer:m1", "printer:m2", "LONG"],
+      value: 'printer:a',
+      valueBinding: 'TestControls.buttonsController.selectedValue'
+    })),
+
     disabled: SC.FormView.row(SC.SelectView.design({
       layout: { width: 150, height: 24 },
       
