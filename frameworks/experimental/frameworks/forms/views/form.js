@@ -142,9 +142,9 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
       key = cv[idx];
       if (SC.typeOf(key) === SC.T_STRING) {
         v = this.get(key);
-        if (v.isClass && v.prototype.hasContentValueSupport && !v.prototype.contentValueKey && v.prototype.isFormRow) {
+        if (v.isClass && v.prototype.hasContentValueSupport && !v.prototype.contentValueKey){
           v.prototype.contentValueKey = key ;
-        } else {
+        } else if(v.isClass) {
           v.prototype.formKey = key;
         }
       }
@@ -163,7 +163,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         v = this.get(key);
 
         // see if it does indeed exist, and if it doesn't have a value already
-        if (v && !v.isClass && v.isFormRow) {
+        if (v && !v.isClass && v.hasContentValueSupport) {
           // set content
           if (!v.get("content")) {
 
