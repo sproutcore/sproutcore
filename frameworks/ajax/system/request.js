@@ -31,15 +31,15 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PROPERTIES
   // 
   
-/**
-  Sends the request asynchronously instead of blocking the browser.  You
-  should almost always make requests asynchronous.  You can change this 
-  options with the async() helper option (or simply set it directly).
+  /**
+    Sends the request asynchronously instead of blocking the browser.  You
+    should almost always make requests asynchronous.  You can change this 
+    options with the async() helper option (or simply set it directly).
 
-	@default YES
-  @property {Boolean}
-*/
-isAsynchronous: YES,
+    @default YES
+    @property {Boolean}
+  */
+  isAsynchronous: YES,
 
   /**
     Processes the request and response as JSON if possible.  You can change

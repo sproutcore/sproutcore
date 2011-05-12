@@ -60,7 +60,20 @@ module("SC.Statechart: With Concurrent States - Goto State Intermediate Tests", 
 
 test("check statechart initialization", function() {  
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 5');
-  equals(monitor.matchSequence().begin().entered(root, 'a', 'b', 'd', 'c', 'f').end(), true, 'initial sequence should be entered[ROOT, a, b, d, c, f]');
+  
+  equals(monitor.matchSequence().begin()
+                                  .entered(root, 'a')
+                                  .beginConcurrent()
+                                    .beginSequence()
+                                      .entered('b', 'd')
+                                    .endSequence()
+                                    .beginSequence()
+                                      .entered('c', 'f')
+                                    .endSequence()
+                                  .endConcurrent()
+                                .end(), 
+    true, 'initial sequence should be entered[ROOT, a, b, d, c, f]');
+  
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 2');
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');
@@ -98,7 +111,21 @@ test("from state a, go to state z and then back to state a", function() {
   stateA.gotoState('z');
 
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 6');
-  equals(monitor.matchSequence().begin().exited('d', 'b', 'f', 'c', 'a').entered('z').end(), true, 'sequence should be exited[d, b, f, c, a], entered[z]');
+  
+  equals(monitor.matchSequence().begin()
+                                  .beginConcurrent()
+                                    .beginSequence()
+                                      .exited('d', 'b')
+                                    .endSequence()
+                                    .beginSequence()
+                                      .exited('f', 'c')
+                                    .endSequence()
+                                  .endConcurrent()
+                                  .exited('a')
+                                  .entered('z')
+                                .end(), 
+    true, 'sequence should be exited[d, b, f, c, a], entered[z]');
+  
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('z'), true, 'current state should be z');
   
@@ -106,7 +133,21 @@ test("from state a, go to state z and then back to state a", function() {
   stateZ.gotoState('a');
   
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 6');
-  equals(monitor.matchSequence().begin().exited('z').entered('a', 'b', 'd', 'c', 'f').end(), true, 'sequence should be exited[z], entered[a, b, d, c, f]');
+  
+  equals(monitor.matchSequence().begin()
+                                  .exited('z')
+                                  .entered('a')
+                                  .beginConcurrent()
+                                    .beginSequence()
+                                      .entered('b', 'd')
+                                    .endSequence()
+                                    .beginSequence()
+                                      .entered('c', 'f')
+                                    .endSequence()
+                                  .endConcurrent()
+                                .end(), 
+    true, 'sequence should be exited[z], entered[a, b, d, c, f]');
+  
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');

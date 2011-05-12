@@ -39,8 +39,10 @@ Docs.Property = SC.Record.extend(
   formattedOverview: function() {
     var overview = this.get('overview');
 
+    var trimmedOverview = Docs.trimCommonLeadingWhitespace(overview);
+
     var converter = new Showdown.converter();
-    var html = converter.makeHtml(overview);
+    var html = converter.makeHtml(trimmedOverview);
 
     return html;
   }.property('overview').cacheable()

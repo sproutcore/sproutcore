@@ -63,7 +63,8 @@ SC.ContainerView = SC.View.extend(
     @param {SC.View} newContent the new content view or null.
   */
   replaceContent: function(newContent) {
-    this.replaceAllChildren(newContent ? [newContent] : []);
+    this.removeAllChildren() ;
+    if (newContent) this.appendChild(newContent) ;
   },
 
   /** @private */
@@ -83,9 +84,7 @@ SC.ContainerView = SC.View.extend(
   awake: function() {
     sc_super();
     var nowShowing = this.get('nowShowing') ;
-    if (nowShowing && nowShowing.length>0) {
-      this.nowShowingDidChange();
-    }
+    if (nowShowing && nowShowing.length>0) this.nowShowingDidChange();
   },
   
   /**
@@ -117,7 +116,7 @@ SC.ContainerView = SC.View.extend(
     // If it's an uninstantiated view, then attempt to instantiate it.
     // (Uninstantiated views have a create() method; instantiated ones do not.)
     if (SC.typeOf(content) === SC.T_CLASS) {
-      if (content.kindOf(SC.CoreView)) content = content.create();
+      if (content.kindOf(SC.CoreView)) content = this.createChildView(content);
       else content = null;
     } 
     

@@ -235,7 +235,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @default YES
   */
   localize: YES,
-  
+
   /**
     Whether or not this menu pane should accept the “current menu pane”
     designation when visible, which is the highest-priority pane when routing
@@ -246,7 +246,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @default YES
   */
   acceptsMenuPane: YES,
-  
+
   /**
     Disable context menu.
     
@@ -383,7 +383,7 @@ SC.MenuPane = SC.PickerPane.extend(
   itemSeparatorKey: 'separator',
 
   /**
-    The name of the property that contains the target for the action that is 
+    The name of the property that contains the target for the action that is
     triggered when the user clicks the menu item.
 
     Note that this property is ignored if the menu item has a submenu.
@@ -457,14 +457,23 @@ SC.MenuPane = SC.PickerPane.extend(
   itemDisableMenuFlashKey: 'disableMenuFlash',
 
   /**
-    The array of keys used by `SC.MenuItemView` when inspecting your menu items
+    The name of the property that determines whether layerID should be applied to the item .
+
+    @type String
+    @default "layerId"
+    @commonTask Menu Item Properties
+  */
+  itemLayerIdKey: 'layerId',
+
+  /**
+    The array of keys used by SC.MenuItemView when inspecting your menu items
     for display properties.
 
     @private
     @isReadOnly
     @property Array
   */
-  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey'],
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
   // INTERNAL PROPERTIES
@@ -604,7 +613,7 @@ SC.MenuPane = SC.PickerPane.extend(
         exampleView = this.get('exampleView'), item, view,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
-        keyArray, idx,
+        keyArray, idx, layerIdKey, propertiesHash,
         len;
 
     if (!items) return views; // return an empty array
@@ -613,7 +622,7 @@ SC.MenuPane = SC.PickerPane.extend(
     defaultHeight = this.get('itemHeight');
     keyEquivalentKey = this.get('itemKeyEquivalentKey');
     separatorHeight = this.get('itemSeparatorHeight');
-
+    layerIdKey = this.get('itemLayerIdKey');
     menuHeightPadding = Math.floor(this.get('menuHeightPadding')/2);
     menuHeight = menuHeightPadding;
 
@@ -626,15 +635,18 @@ SC.MenuPane = SC.PickerPane.extend(
       if (!height) {
         height = item.get(separatorKey) ? separatorHeight : defaultHeight;
       }
-      view = this._menuView.createChildView(exampleView, {
+      propertiesHash = {
         layout: { height: height, top: menuHeight },
         contentDisplayProperties: keyArray,
         content: item,
         parentMenu: this
-      });
+      };
+      if(item.get(layerIdKey)) {
+        propertiesHash.layerId = item.get(layerIdKey);
+      }
+      view = this._menuView.createChildView(exampleView, propertiesHash);
       views[idx] = view;
       menuHeight += height;
-
       keyEquivalent = item.get(keyEquivalentKey);
       if (keyEquivalent) {
         // if array, apply each one for this view
@@ -997,7 +1009,7 @@ SC.MenuPane = SC.PickerPane.extend(
   performKeyEquivalent: function(keyEquivalent, evt, fromVisibleControl) {
     //If menu is not visible
     if (!fromVisibleControl && !this.get('isVisibleInWindow')) return NO;
-    
+
     // Look for menu item that has this key equivalent
     var menuItem = this._keyEquivalents[keyEquivalent];
 

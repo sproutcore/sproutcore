@@ -33,6 +33,31 @@ Docs = SC.Application.create(
   NAMESPACE: 'Docs',
   VERSION: '0.1.0',
 
+  trimCommonLeadingWhitespace: function(string) {
+
+    var splitString = string.split('\n');
+    var len = splitString.length;
+    var min = Infinity;
+
+    for (var i = 0; i<len; i++) {
+      var line = splitString[i];
+      var matches = line.match(/^\s+/);
+
+      if(matches && matches[0].length < min) {
+        min = matches[0].length;
+      }
+    } 
+
+    if (min === Infinity || min === 0) return string;
+
+    // The first line is always free of any leading whitespace
+    for (i = 1; i<len; i++) {
+      splitString[i] = splitString[i].substr(min);
+    }
+
+    return splitString.join('\n');
+  },
+
   /**
     A hash used to quickly inspect all the data associated with the doc viewer.
 

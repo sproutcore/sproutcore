@@ -1,8 +1,6 @@
 
 /**
  * @Constructor
- * @desc рпоЫ
- * @class Яабвгдежзизмлкноп °±ІіґµЎ¶·ё№
  */
 function Test(conf) {
     // do something;

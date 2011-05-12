@@ -43,10 +43,9 @@ config :statechart,      :required => [:core_foundation], :test_required => [:co
 config :ajax,            :required => [:runtime, :core_foundation]
 
 # WRAPPER FRAMEWORKS
-config :sproutcore, :required => [:desktop, :datastore]
+config :sproutcore, :required => [:desktop, :datastore, :statechart]
 config :mini, :required => [:runtime, :datastore]
 config :animation, :required => :foundation
-config :forms, :required => :desktop
 
 config :qunit, :required => []
 config :testing, :required => [:jquery], :test_required => [], :debug_required => []
@@ -85,7 +84,7 @@ config :ace,
 
 # CONFIGURE APPS
 config :core_tools, :required => [
-  :desktop, :datastore, :animation, :forms,
+  :desktop, :datastore, :animation, "sproutcore/experimental/forms",
   "sproutcore/ace", "sproutcore/experimental/split_view"
 ]
 

@@ -16,14 +16,14 @@
 <div id="class-info">
 
   {{#if content.formattedOverview}}
-    <h2> Overview </h2>
+    <h2 class="section-header"> Overview </h2>
     <div class="overview">
       {{{content.formattedOverview}}}
     </div>
   {{/if}}
 
   {{#if content.hasProperties}}
-    <h2> Properties </h2>
+    <h2 class="section-header"> Properties </h2>
     {{#collection Docs.PropertiesCollectionView itemClassNames="symbol"}}
 
       <div {{bindAttr name="content.name"}}>
@@ -59,7 +59,7 @@
   {{/if}}
 
   {{#if content.hasMethods}}
-    <h2> Methods </h2>
+    <h2 class="section-header"> Methods </h2>
     {{#collection Docs.MethodsCollectionView itemClassNames="symbol"}}
 
       <div {{bindAttr name="content.name"}}>

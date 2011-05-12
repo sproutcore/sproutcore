@@ -42,6 +42,7 @@ Docs.selectedClassController = SC.ObjectController.create(
         that.set('methods',methods);
 
       that.invokeLater(function(){
+        that._resolveLinkTags();
         that._updateDataTypeButtons();
       });
     //});
@@ -99,6 +100,22 @@ Docs.selectedClassController = SC.ObjectController.create(
     }
 
     return {left: curleft, top: curtop};
+  },
+
+  _resolveLinkTags: function() {
+    var overviews = SC.$('.class-detail .overview');
+
+    overviews.each(function() {
+      var regex = /{\@link\s+([\w.]+)}/g;
+
+      this.innerHTML = this.innerHTML.replace(regex,function(str, p1){ return '<span name="'+p1+'" class="data-type">'+p1+'</span>'; });
+    })
+
+    //overviews.each(function() {
+      //var regex = /\b(\w+\.\w+)\b/g;
+
+      //this.innerHTML = this.innerHTML.replace(regex,function(str, p1){ return '<span name="'+p1+'" class="data-type">'+p1+'</span>'; });
+    //})
   },
 
   _updateDataTypeButtons: function() {
