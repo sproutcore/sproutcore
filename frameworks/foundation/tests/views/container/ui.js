@@ -39,6 +39,12 @@
       isTemplate2: YES
     })
   });
+  
+  pane.add("cleans-up-views", SC.ContainerView, {
+    nowShowing: 'uninstantiatedView',
+    
+    uninstantiatedView: SC.View.design({})
+  });
 
     // .add("disabled - single selection", SC.ListView, {
     //   isEnabled: NO,
@@ -176,5 +182,21 @@
 
     ok(!contentView, "should have removed contentView");
   });
+  
+  test("Cleans up instantiated views", function() {
+    var view = pane.view("cleans-up-views");
+    view.awake();
+    
+    var contentView = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from path)");
+    
+    contentView = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.design()); });
+    equals(contentView.isDestroyed, NO, "should not have destroyed the view because it was already instantiated");
+    
+    contentView = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', null); });
+    equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");  });
 
 })();
