@@ -16,26 +16,26 @@
     })
   }
 */
-SC.TemplatePane = SC.Object.extend({
-  touchStart: function(touch) {
-    touch.allowDefault();
-  },
-
-  touchesDragged: function(evt, touches) {
-    evt.allowDefault();
-  },
-
-  touchEnd: function(touch) {
-    touch.allowDefault();
-  }
-});
+SC.TemplatePane = SC.Object.extend({});
 
 SC.mixin(SC.TemplatePane, {
   append: function(attrs) {
     var pane = SC.MainPane.extend({
       childViews: ['contentView'],
 
-      contentView: SC.TemplateView.design(attrs)
+      contentView: SC.TemplateView.design(attrs),
+
+      touchStart: function(touch) {
+        touch.allowDefault();
+      },
+
+      touchesDragged: function(evt, touches) {
+        evt.allowDefault();
+      },
+
+      touchEnd: function(touch) {
+        touch.allowDefault();
+      }
     });
 
     return pane.create().append();

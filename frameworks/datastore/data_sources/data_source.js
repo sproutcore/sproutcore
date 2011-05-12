@@ -5,6 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+/**
+  Indicates a value has a mixed state of both on and off.
+
+  @property {String}
+*/
+SC.MIXED_STATE = '__MIXED__';
 
 /** @class
 
@@ -327,20 +333,22 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     @returns {Boolean} YES if data source can handle keys
   */
   commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys, params) {
-    var cret, uret, dret;
+    var uret, dret, ret;
     if (createStoreKeys.length>0) {
-      cret = this.createRecords.call(this, store, createStoreKeys, params);
+      ret = this.createRecords.call(this, store, createStoreKeys, params);
     }
 
     if (updateStoreKeys.length>0) {
       uret = this.updateRecords.call(this, store, updateStoreKeys, params);
+      ret = SC.none(ret) ? uret : (ret === uret) ? ret : SC.MIXED_STATE;
     }
 
     if (destroyStoreKeys.length>0) {
       dret = this.destroyRecords.call(this, store, destroyStoreKeys, params);
+      ret = SC.none(ret) ? dret : (ret === dret) ? ret : SC.MIXED_STATE;
     }
 
-    return ((cret === uret) && (cret === dret)) ? cret : SC.MIXED_STATE;
+    return ret || NO;
   },
 
   /**
@@ -441,13 +449,12 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     invokes the named action for each store key.  returns proper value
   */
   _handleEach: function(store, storeKeys, action, ids, params) {
-    var len = storeKeys.length, idx, ret, cur, lastArg;
-    if(!ids) ids = [];
+    var len = storeKeys.length, idx, ret, cur, idOrParams;
 
     for(idx=0;idx<len;idx++) {
-      lastArg = ids[idx] ? ids[idx] : params;
+      idOrParams = ids ? ids[idx] : params;
 
-      cur = action.call(this, store, storeKeys[idx], lastArg, params);
+      cur = action.call(this, store, storeKeys[idx], idOrParams);
       if (ret === undefined) {
         ret = cur ;
       } else if (ret === YES) {
@@ -456,7 +463,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
         ret = (cur === NO) ? NO : SC.MIXED_STATE ;
       }
     }
-    return ret ? ret : null ;
+    return !SC.none(ret) ? ret : null ;
   },
 
 

@@ -696,17 +696,18 @@ SC.RootResponder = SC.Object.extend(
     }
     SC.Event.add(document, mousewheel, this, this.mousewheel);
 
-    // If the browser is identifying itself as a touch-enabled browser, but
-    // touch events are not present, assume this is a desktop browser doing
-    // user agent spoofing and simulate touch events automatically.
-    if (SC.browser && SC.platform && SC.browser.mobileSafari && !SC.platform.touch) {
-      SC.platform.simulateTouchEvents();
-    }
-
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
 
     if (SC.browser.mobileSafari) {
+
+      // If the browser is identifying itself as a touch-enabled browser, but
+      // touch events are not present, assume this is a desktop browser doing
+      // user agent spoofing and simulate touch events automatically.
+      if (SC.platform && !SC.platform.touch) {
+        SC.platform.simulateTouchEvents();
+      }
+
       // Monkey patch RunLoop if we're in MobileSafari
       var f = SC.RunLoop.prototype.endRunLoop, patch;
 
