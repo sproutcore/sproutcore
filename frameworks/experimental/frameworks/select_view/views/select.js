@@ -41,15 +41,14 @@ SC.SelectView = SC.PopupButtonView.extend({
   itemsBindingDefault: SC.Binding.multiple(),
 
   /**
-    If you set this to a non-null value, then the name shown for each
-    menu item will be pulled from the object using the named property.
-    if this is null, the collection items themselves will be used.
+    They key in the items which maps to the title.
+    This only applies for items that are hashes or SC.Objects.
 
     @property
     @type {String}
-    @default null
+    @default 'title'
   */
-  itemTitleKey: null,
+  itemTitleKey: 'title',
 
   /**
     If you set this to a non-null value, then the value of this key will
@@ -63,15 +62,14 @@ SC.SelectView = SC.PopupButtonView.extend({
   itemSortKey: null,
 
   /**
-     Set this to a non-null value to use a key from the passed set of items
-     as the value for the options popup.  If you don't set this, then the
-     items themselves will be used as the value.
+    They key in the items which maps to the value.
+    This only applies for items that are hashes or SC.Objects.
 
      @property
      @type {String}
-     @default null
+     @default 'value'
   */
-  itemValueKey: null,
+  itemValueKey: 'value',
 
   /**
      Key used to extract icons from the items array.
@@ -152,24 +150,49 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /**
+    @private
+
+    This gets the value for a specific menu item. This function allows a few different
+    forms of input:
+
+    - A string: returns the string.
+    - A hash: returns hash[itemValueKey], using 'value' for the key if necessary.
+    - An SC.Object: returns object.get(itemValueKey), using 'value' for the key if needed.
+
+    This method therefore accepts both the menu items as created for the menupane's displayItems
+    AND the raw items provided by the developer in `items`.
+  */
+  _scsv_getValueForMenuItem: function(item) {
+    var valueKey = this.get('itemValueKey') || 'value';
+
+    if (SC.typeOf(item) === SC.T_STRING) {
+      return item;
+    } else if (item.get) {
+      return item.get(valueKey);
+    } else {
+      return item[valueKey];
+    }
+  },
+
+  /**
     * When the selected item changes, we need to update our value.
     * @private
   */
   _scsv_selectedItemDidChange: function() {
     var sel = this.get('selectedItem'),
         last = this._scsv_lastSelection,
-        titleKey = this.get('itemTitleKey'),
-        valueKey = this.get('itemValueKey');
+        titleKey = this.get('itemTitleKey') || 'title',
+        valueKey = this.get('itemValueKey') || 'value';
 
+    // selected item could be a menu item from SC.MenuPane's displayItems, or it could
+    // be a raw item. So, we have to use _scsv_getValueForMenuItem to resolve it.
     if (!sel) {
       this.setIfChanged('value', null);
-    } else if (sel.get) {
-      this.setIfChanged('value', sel.get(valueKey));
     } else {
-      this.setIfChanged('value', sel[valueKey]);
+      this.setIfChanged('value', this._scsv_getValueForMenuItem(sel));
     }
 
-    // add/remove observers for the title and value so we can invalidate
+    // add/remove observers for the title and value so we can invalidate.
     if (last && last.addObserver && sel !== last) {
       last.removeObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
       last.removeObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
@@ -186,7 +209,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   // called when either title or value changes on the selected item
   _scsv_selectedItemPropertyDidChange: function(item) {
     this.notifyPropertyChange('title');
-    this.set('value', item.get('value'));
+    this.set('value', item.get(this.get('itemValueKey') || 'value'));
   },
 
   /**
@@ -207,9 +230,11 @@ SC.SelectView = SC.PopupButtonView.extend({
     if (!sel) {
       return this.get('defaultTitle');
     } else if (sel.get) {
-      return sel.get(this.get('itemTitleKey'));
+      return sel.get(this.get('itemTitleKey') || 'title');
+    } else if (SC.typeOf(sel) == SC.T_HASH) {
+      return sel[this.get('itemTitleKey') || 'title'];
     } else {
-      return sel[this.get('itemTitleKey')];
+      return sel;
     }
   }.property('selectedItem').cacheable(),
 
@@ -226,7 +251,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     var items = this.get('items'), len = items.length, idx;
     for (idx = 0; idx < len; idx++) {
-      if (items[idx][this.get('itemValueKey')] === value) {
+      if (this._scsv_getValueForMenuItem(items[idx]) === value) {
         this.setIfChanged('selectedItem', items[idx]);
         return;
       }
