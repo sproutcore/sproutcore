@@ -95,14 +95,15 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   status: SC.Record.EMPTY,
 
   /**
-    The current editable state based on the query.
+    The current editable state based on the query. If this record array is not
+    backed by an SC.Query, it is assumed to be editable.
 
     @property
     @type Boolean
   */
   isEditable: function() {
     var query = this.get('query');
-    return query ? query.get('isEditable') : NO;
+    return query ? query.get('isEditable') : YES;
   }.property('query').cacheable(),
 
   // ..........................................................
