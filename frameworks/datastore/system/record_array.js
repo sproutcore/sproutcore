@@ -95,7 +95,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   status: SC.Record.EMPTY,
 
   /**
-    The current editabile state based on the query.
+    The current editable state based on the query.
 
     @property
     @type Boolean
