@@ -1,0 +1,15 @@
+# ==========================================================================
+# Project:   SproutCore - JavaScript Application Framework
+# Copyright: ©2008-2011 Apple Inc. All rights reserved.
+# License:   Licensed under MIT license (see license.js)
+# ==========================================================================
+
+
+# This is your Buildfile, which sets build settings for your project.
+# For example, this tells SproutCore's build tools that your requires
+# the SproutCore framework.
+config :all, :required => :sproutcore, :url_prefix => "sc_docs", :load_fixtures => true
+#config :all, :required => :sproutcore, :load_fixtures => true
+
+# In addition to this Buildfile, which gives settings for your entire project,
+# each of your apps has its own Buildfile with settings specific to that app.

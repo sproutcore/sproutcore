@@ -6,6 +6,8 @@
 // ==========================================================================
 
 /**
+  @class
+
   SC.routes manages the browser location. You can change the hash part of the
   current location. The following code
   
@@ -35,7 +37,8 @@
   SC.routes also supports HTML5 history, which uses a '/' instead of a '#'
   in the URLs, so that all your website's URLs are consistent.
 */
-SC.routes = SC.Object.create({
+SC.routes = SC.Object.create(
+  /** @scope SC.routes.prototype */{
   
   /**
     Set this property to YES if you want to use HTML5 history, if available on

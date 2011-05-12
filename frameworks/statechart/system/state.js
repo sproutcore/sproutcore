@@ -8,6 +8,7 @@
 /*globals SC */
 
 /**
+  @class
 
   Represents a state within a statechart. 
   
@@ -18,7 +19,7 @@
   state heirarchy and create the states itself.
 
   @author Michael Cohen
-
+  @extends SC.Object
 */
 SC.State = SC.Object.extend({
   
@@ -1025,7 +1026,7 @@ SC.State = SC.Object.extend({
     var sc = this.get('statechart');
     sc.statechartLogError(msg);
   }
-  
+
 });
 
 /**
@@ -1057,6 +1058,10 @@ SC.State.plugin = function(value) {
   var args = SC.A(arguments); args.shift();
   var func = function() {
     var klass = SC.objectForPropertyPath(value);
+    if (!klass) {
+      console.error('SC.State.plugin: Unable to determine path %@'.fmt(value));
+      return undefined;
+    }
     return klass.extend.apply(klass, args);
   };
   func.statePlugin = YES;
@@ -1064,190 +1069,3 @@ SC.State.plugin = function(value) {
 };
 
 SC.State.design = SC.State.extend;
-
-/**
-  Extends the JS Function object with the handleEvents method that
-  will provide more advanced event handling capabilities when constructing
-  your statechart's states.
-  
-  By default, when you add a method to a state, the state will react to 
-  events that matches a method's name, like so:
-  
-      state = SC.State.extend({
-        // Will be invoked when a event named "foo" is sent to this state
-        foo: function(event, sender, context) { ... }
-      });
-  
-  In some situations, it may be advantageous to use one method that can react to 
-  multiple events instead of having multiple methods that essentially all do the
-  same thing. In order to set a method to handle more than one event you use
-  the handleEvents method which can be supplied a list of string and/or regular
-  expressions. The following example demonstrates the use of handleEvents:
-
-      state = SC.State.extend({
-        eventHandlerA: function(event, sender, context) {
-        }.handleEvents('foo', 'bar'),
-
-        eventHandlerB: function(event, sender, context) {
-        }.handleEvents(/num\d/, 'decimal')
-      });
-
-  Whenever events 'foo' and 'bar' are sent to the state, the method eventHandlerA
-  will be invoked. When there is an event that matches the regular expression
-  /num\d/ or the event is 'decimal' then eventHandlerB is invoked. In both 
-  cases, the name of the event will be supplied to the event handler. 
-  
-  It should be noted that the use of regular expressions may impact performance
-  since that statechart will not be able to fully optimize the event handling logic based
-  on its use. Therefore the use of regular expression should be used sparingly. 
-  
-  @param {(String|RegExp)...} args
-*/
-Function.prototype.handleEvents = function() {
-  this.isEventHandler = YES;
-  this.events = arguments;
-  return this;
-};
-
-/**
-  Extends the JS Function object with the stateObserves method that will
-  create a state observe handler on a given state object. 
-  
-  Use a stateObserves() instead of the common observes() method when you want a 
-  state to observer changes to some property on the state itself or some other 
-  object. 
-  
-  Any method on the state that has stateObserves is considered a state observe
-  handler and behaves just like when you use observes() on a method, but with an
-  important difference. When you apply stateObserves to a method on a state, those
-  methods will be active *only* when the state is entered, otherwise those methods
-  will be inactive. This removes the need for you having to explicitly call
-  addObserver and removeObserver. As an example:
-  
-      state = SC.State.extend({
-        foo: null,
-        user: null,
-        observeHandlerA: function(target, key) {        
-        }.stateObserves('MyApp.someController.status'),
-
-        observeHandlerB: function(target, key) {
-        }.stateObserves('foo'),
-
-        observeHandlerC: function(target, key) {
-        }.stateObserves('.user.name', '.user.salary')
-      });
-  
-  Above, state has three state observe handlers: observeHandlerA, observeHandlerB, and
-  observeHandlerC. When state is entered, the state will automatically add itself as
-  an observer for all of its registered state observe handlers. Therefore when
-  foo changes, observeHandlerB will be invoked, and when MyApp.someController's status
-  changes then observeHandlerA will be invoked. The moment that state is exited then
-  the state will automatically remove itself as an observer for all of its registered
-  state observe handlers. Therefore none of the state observe handlers will be
-  invoked until the next time the state is entered. 
-  
-  @param {String...} args
-*/
-Function.prototype.stateObserves = function() {
-  this.isStateObserveHandler = YES;
-  this.args = SC.A(arguments);
-  return this;
-};
-
-/**
-  Represents a history state that can be assigned to a SC.State object's
-  initialSubstate property. 
-  
-  If a SC.HistoryState object is assigned to a state's initial substate, 
-  then after a state is entered the statechart will refer to the history 
-  state object to determine the next course of action. If the state has 
-  its historyState property assigned then the that state will be entered, 
-  otherwise the default state assigned to history state object will be entered.
-  
-  An example of how to use:
-  
-    stateA: SC.State.design({
-      initialSubstate: SC.HistoryState({
-        defaultState: 'stateB'
-      }),
-      
-      stateB: SC.State.design({ ... }),
-      
-      stateC: SC.State.design({ ... })
-    })
-*/
-SC.HistoryState = SC.Object.extend({
-
-  /**
-    Used to indicate if the statechart should recurse the 
-    history states after entering the this object's parent state
-    
-    @property {Boolean}
-  */
-  isRecursive: NO,
-  
-  /**
-    The default state to enter if the parent state does not
-    yet have its historyState property assigned to something 
-    other than null.
-    
-    The value assigned to this property must be the name of an
-    immediate substate that belongs to the parent state. The
-    statechart will manage the property upon initialization.
-    
-    @property {String}
-  */
-  defaultState: null,
-  
-  /** @private
-    Managed by the statechart 
-    
-    The statechart that owns this object.
-  */
-  statechart: null,
-  
-  /** @private
-    Managed by the statechart 
-  
-    The state that owns this object
-  */
-  parentState: null,
-  
-  /**
-    Used by the statechart during a state transition process. 
-    
-    Returns a state to enter based on whether the parent state has
-    its historyState property assigned. If not then this object's
-    assigned default state is returned.
-  */
-  state: function() {
-    var defaultState = this.get('defaultState'),
-        historyState = this.getPath('parentState.historyState');
-    return !!historyState ? historyState : defaultState;
-  }.property().cacheable(),
-  
-  /** @private */
-  parentHistoryStateDidChange: function() {
-    this.notifyPropertyChange('state');
-  }.observes('*parentState.historyState')
-  
-});
-
-/** 
-  The default name given to an empty state
-*/
-SC.EMPTY_STATE_NAME = "__EMPTY_STATE__";
-
-/**
-  Represents an empty state that gets assigned as a state's initial substate 
-  if the state does not have an initial substate defined.
-*/
-SC.EmptyState = SC.State.extend({
-  
-  name: SC.EMPTY_STATE_NAME,
-  
-  enterState: function() {
-    this.stateLogWarning("No initial substate was defined for state %@. Entering default empty state".fmt(this.get('parentState')));
-  }
-  
-});

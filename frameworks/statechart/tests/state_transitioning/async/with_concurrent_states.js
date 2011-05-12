@@ -79,10 +79,12 @@ test("go to state b", function() {
   equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
   equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
   
-  equals(monitor.matchSequence()
-                .begin()
-                .exited('a')
-                .entered('b', 'c', 'd')
+  equals(monitor.matchSequence().begin()
+                  .exited('a')
+                  .entered('b')
+                  .beginConcurrent()
+                    .entered('c', 'd')
+                  .endConcurrent()
                 .end(), 
           true, 'sequence should be exited[a], entered[b, c, d]');
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 2');

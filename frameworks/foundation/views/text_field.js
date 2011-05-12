@@ -526,7 +526,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed 
-    isOldSafari= (parseInt(SC.browser.webkit,0)<532);
+    isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
     spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
@@ -775,14 +775,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // passing the original event here instead that was potentially set from
       // loosing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
-      this.fieldDidBlur(this._origEvent);
+      this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
       if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
       }
     }, this);
   },
-  
+
   fieldDidFocus: function(evt) {
     this.becomeFirstResponder();
 

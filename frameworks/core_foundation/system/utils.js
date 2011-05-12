@@ -117,21 +117,35 @@ SC.mixin( /** @scope SC */ {
         mobileBuildNumber = userAgent.substring(index + 7, index + 9);
 
         if (parseInt(SC.browser.mobileSafari, 0) <= 532 || (mobileBuildNumber <= "8A")) {
-          result.left = result.left - window.pageXOffset;
-          result.top = result.top - window.pageYOffset;
+          result.left -= window.pageXOffset;
+          result.top -= window.pageYOffset;
         }
       }
 
       // Subtract the scroll offset for viewport coordinates
       if (relativeToFlag === 'viewport') {
-        result.left = result.left - window.pageXOffset;
-        result.top = result.top - window.pageYOffset;
+        
+        if(SC.browser.isIE8OrLower){
+          result.left -= $(window).scrollLeft();
+          result.top -= $(window).scrollTop();
+        }else{
+          result.left -= window.pageXOffset;
+          result.top -= window.pageYOffset;
+        }
       }
     }
 
     // Translate 'left', 'top' to 'x', 'y'
-    result.x = result.left;
-    result.y = result.top;
+    
+    try{
+      result.x = result.left;
+      result.y = result.top;
+    } catch (e) {
+      // We need this for IE, when the element is detached, for some strange 
+      // reason the object returned by element.getBoundingClientRect() 
+      // is read-only
+      result = {x:result.left, y:result.top};
+    }
     delete result.left;
     delete result.top;
 

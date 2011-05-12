@@ -274,3 +274,32 @@ test("Timeouts - Status listener callback", function() {
   }, 500);
 });
 
+test("Test Multiple listeners per single status response", function() {
+
+
+  var numResponses = 0;
+  var response;
+
+  expect(4);
+
+  request.notify(200, this, function(response) {
+    numResponses++;
+    ok(true, "Receieved a response");
+
+    if (numResponses === 2) window.start();
+  });
+
+  request.notify(200, this, function(response) {
+    numResponses++;
+    ok(true, "Receieved a response");
+
+    if (numResponses === 2) window.start();
+  });
+
+  response = request.send();
+  ok(response !== null, 'request.send() should return a response object');
+  ok(response.get('status')<0, 'response should still not have a return code since this should be async');
+
+  stop() ; // stops the test runner - wait for response
+});
+

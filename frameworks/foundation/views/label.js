@@ -112,7 +112,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   /**
     Set the alignment of the label view.
     
-    @property {String} SC.ALIGN_LEFT|SC.ALIGN_MIDDLE|SC.ALIGN_RIGHT
+    @property {String} SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT
     @default null
     @deprecated
   */

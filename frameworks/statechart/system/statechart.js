@@ -10,6 +10,8 @@
 sc_require('system/state');
 
 /**
+  @class
+
   The startchart manager mixin allows an object to be a statechart. By becoming a statechart, the
   object can then be manage a set of its own states.
   
@@ -163,10 +165,9 @@ sc_require('system/state');
   into as many files as you see fit.
 
   @author Michael Cohen
-
 */
 
-SC.StatechartManager = {
+SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   
   // Walk like a duck
   isResponderContext: YES,
@@ -547,7 +548,8 @@ SC.StatechartManager = {
         trace = this.get('allowStatechartTracing'),
         rootState = this.get('rootState'),
         paramState = state,
-        paramFromCurrentState = fromCurrentState;
+        paramFromCurrentState = fromCurrentState,
+        msg;
     
     state = rootState.getSubstate(state);
     
@@ -578,7 +580,7 @@ SC.StatechartManager = {
       // Check to make sure the current state given is actually a current state of this statechart
       fromCurrentState = rootState.getSubstate(fromCurrentState);
       if (SC.none(fromCurrentState) || !fromCurrentState.get('isCurrentState')) {
-        var msg = "Can not to goto state %@. %@ is not a recognized current state in statechart";
+        msg = "Can not to goto state %@. %@ is not a recognized current state in statechart";
         this.statechartLogError(msg.fmt(paramState, paramFromCurrentState));
         this._gotoStateLocked = NO;
         return;
@@ -592,8 +594,12 @@ SC.StatechartManager = {
         
     if (trace) {
       this.statechartLogTrace("BEGIN gotoState: %@".fmt(state));
-      this.statechartLogTrace("starting from current state: %@".fmt(fromCurrentState));
-      this.statechartLogTrace("current states before: %@".fmt(this.get('currentStates')));
+      msg = "starting from current state: %@";
+      msg = msg.fmt(fromCurrentState ? fromCurrentState : '---');
+      this.statechartLogTrace(msg);
+      msg = "current states before: %@";
+      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates') : '---');
+      this.statechartLogTrace(msg);
     }
 
     // If there is a current state to start the transition process from, then determine what
@@ -739,7 +745,7 @@ SC.StatechartManager = {
       parentState = parentState.get('parentState');
     }
       
-    if (this.get('allowStatechartTracing')) this.statechartLogTrace("exiting state: %@".fmt(state));
+    if (this.get('allowStatechartTracing')) this.statechartLogTrace("<-- exiting state: %@".fmt(state));
     
     state.set('currentSubstates', []);
     state.notifyPropertyChange('isCurrentState');
@@ -787,7 +793,7 @@ SC.StatechartManager = {
       parentState = parentState.get('parentState');
     }
     
-    if (this.get('allowStatechartTracing')) this.statechartLogTrace("entering state: %@".fmt(state));
+    if (this.get('allowStatechartTracing')) this.statechartLogTrace("--> entering state: %@".fmt(state));
     
     state.notifyPropertyChange('isCurrentState');
   
@@ -1474,73 +1480,3 @@ SC.Statechart = SC.Object.extend(SC.StatechartManager, {
 });
 
 SC.Statechart.design = SC.Statechart.extend;
-
-/**
-  Represents a call that is intended to be asynchronous. This is
-  used during a state transition process when either entering or
-  exiting a state.
-*/
-SC.Async = SC.Object.extend({
-  
-  func: null,
-  
-  arg1: null,
-  
-  arg2: null,
-  
-  /** @private
-    Called by the statechart
-  */
-  tryToPerform: function(state) {
-    var func = this.get('func'),
-        arg1 = this.get('arg1'),
-        arg2 = this.get('arg2'),
-        funcType = SC.typeOf(func);
-      
-    if (funcType === SC.T_STRING) {
-      state.tryToPerform(func, arg1, arg2);
-    } 
-    else if (funcType === SC.T_FUNCTION) {
-      func.apply(state, [arg1, arg2]);
-    }
-  }
-  
-});
-
-/**
-  Singleton
-*/
-SC.Async.mixin({
-  
-  /**
-    Call in either a state's enterState or exitState method when you
-    want a state to perform an asynchronous action, such as an animation.
-    
-    Examples:
-    
-        SC.State.extend({
-    
-          enterState: function() {
-            return SC.Async.perform('foo');
-          },
-      
-          exitState: function() {
-            return SC.Async.perform('bar', 100);
-          }
-      
-          foo: function() { ... },
-      
-          bar: function(arg) { ... }
-    
-        });
-    
-    @param func {String|Function} the functio to be invoked on a state
-    @param arg1 Optional. An argument to pass to the given function
-    @param arg2 Optional. An argument to pass to the given function
-    @return {SC.Async} a new instance of a SC.Async
-  */
-  perform: function(func, arg1, arg2) {
-    return SC.Async.create({ func: func, arg1: arg1, arg2: arg2 });
-  }
-  
-});

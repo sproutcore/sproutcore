@@ -21,7 +21,6 @@ test("Frame Recalculation", function() {
           callCount += 1;
         }.observes('frame')
       });
-
    pane.setPath('contentView.contentView', view);
    pane.append();
    baseCount = callCount;
@@ -38,7 +37,9 @@ test("Frame Recalculation", function() {
    callCount = 0;
 
    SC.RunLoop.begin().end();
-   ok(view.get('layer').textContent.indexOf(content) > -1, 'view should rerender when content changes');
+   var layer = view.get('layer');
+
+   ok(layer.innerHTML.indexOf(content) > -1, 'view should rerender when content changes');
    view.contentLayoutDidChange();
    ok(callCount > 0, 'frame should recompute after calling contentLayoutDidChange()');
 

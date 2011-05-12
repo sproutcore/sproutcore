@@ -31,15 +31,15 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PROPERTIES
   // 
   
-/**
-  Sends the request asynchronously instead of blocking the browser.  You
-  should almost always make requests asynchronous.  You can change this 
-  options with the async() helper option (or simply set it directly).
+  /**
+    Sends the request asynchronously instead of blocking the browser.  You
+    should almost always make requests asynchronous.  You can change this 
+    options with the async() helper option (or simply set it directly).
 
-	@default YES
-  @property {Boolean}
-*/
-isAsynchronous: YES,
+    @default YES
+    @property {Boolean}
+  */
+  isAsynchronous: YES,
 
   /**
     Processes the request and response as JSON if possible.  You can change
@@ -59,11 +59,28 @@ isAsynchronous: YES,
   */
   isXML: NO,
   
+  /**
+    Specifies whether or not the request will have custom headers attached
+    to it. By default, SC.Request attaches X-Requested-With and
+    X-SproutCore-Version headers to all outgoing requests. This allows
+    you to override that behavior.
+    
+    TODO: Add unit tests for this feature
+
+    @default YES
+    @type Boolean
+  */
+  attachIdentifyingHeaders: YES,
   
   init: function() {
     sc_super();
-    this.header('X-Requested-With', 'XMLHttpRequest');
-    this.header('X-SproutCore-Version', SC.VERSION);
+
+    if(this.get('attachIdentifyingHeaders') !== NO) {
+      this.header('X-Requested-With', 'XMLHttpRequest');
+      //TODO: we need to have the SC version in a SC variable.
+      //For now I'm harcoding the variable.
+      this.header('X-SproutCore-Version', SC.VERSION);
+    }
   },
   
   /**
@@ -202,7 +219,7 @@ isAsynchronous: YES,
 
   concatenatedProperties: 'COPY_KEYS',
 
-  COPY_KEYS: ['isAsynchronous', 'isJSON', 'isXML', 'address', 'type', 'timeout', 'body', 'responseClass', 'willSend', 'didSend', 'willReceive', 'didReceive'],
+  COPY_KEYS: ['attachIdentifyingHeaders', 'isAsynchronous', 'isJSON', 'isXML', 'address', 'type', 'timeout', 'body', 'responseClass', 'willSend', 'didSend', 'willReceive', 'didReceive'],
   
   /**
     Returns a copy of the current request.  This will only copy certain
@@ -272,6 +289,17 @@ isAsynchronous: YES,
     }
 
     return this ;
+  },
+
+  /**
+    Clears the list of headers that were set on this request.
+    This could be used by a subclass to blow-away any custom
+    headers that were added by the super class.
+  */
+  clearHeaders: function() {
+    this.propertyWillChange('headers');
+    this._headers = {};
+    this.propertyDidChange('headers');
   },
 
   /**
@@ -417,7 +445,9 @@ isAsynchronous: YES,
     
     var listeners = this.get('listeners');
     if (!listeners) this.set('listeners', listeners = {});
-    listeners[status] = { target: target, action: action, params: params };
+    if(!listeners[status]) listeners[status] = [];
+    
+    listeners[status].push({ target: target, action: action, params: params });
 
     return this;
   }
@@ -430,10 +460,11 @@ SC.Request.mixin(/** @scope SC.Request */ {
     Helper method for quickly setting up a GET request.
 
     @param {String} address url of request
+    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  getUrl: function(address) {
-    return this.create().set('address', address).set('type', 'GET');
+  getUrl: function(address, attachHeaders) {
+    return this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'GET');
   },
 
   /**
@@ -441,10 +472,11 @@ SC.Request.mixin(/** @scope SC.Request */ {
 
     @param {String} address url of request
     @param {String} body
+    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  postUrl: function(address, body) {
-    var req = this.create().set('address', address).set('type', 'POST');
+  postUrl: function(address, body, attachHeaders) {
+    var req = this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'POST');
     if(body) req.set('body', body) ;
     return req ;
   },
@@ -453,10 +485,11 @@ SC.Request.mixin(/** @scope SC.Request */ {
     Helper method for quickly setting up a DELETE request.
 
     @param {String} address url of request
+    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  deleteUrl: function(address) {
-    return this.create().set('address', address).set('type', 'DELETE');
+  deleteUrl: function(address, attachHeaders) {
+    return this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'DELETE');
   },
 
   /**
@@ -464,10 +497,11 @@ SC.Request.mixin(/** @scope SC.Request */ {
 
     @param {String} address url of request
     @param {String} body
+    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  putUrl: function(address, body) {
-    var req = this.create().set('address', address).set('type', 'PUT');
+  putUrl: function(address, body, attachHeaders) {
+    var req = this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'PUT');
     if(body) req.set('body', body) ;
     return req ;
   }

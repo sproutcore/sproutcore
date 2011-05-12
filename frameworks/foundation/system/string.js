@@ -8,20 +8,7 @@
 
 /** @private */
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
-
-/** @private */
 SC.STRING_HUMANIZE_REGEXP = (/[\-_]/g);
-
-/** @private */
-SC.STRING_TRIM_REGEXP = (/^\s+|\s+$/g);
-
-/** @private */
-SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
-
-/** @private */
-SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
-
-/** @private */
 SC.STRING_REGEXP_ESCAPED_REGEXP = (/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g);
 
 /** @private
@@ -313,36 +300,6 @@ SC.mixin(SC.String, {
     return ret;
   },
 
-  /**
-    Removes any extra whitespace from the edges of the string. This method is
-    also aliased as strip().
-
-    @param {String} str String to trim
-    @returns {String} the trimmed string
-  */
-  trim: function(str) {
-    return str.replace(SC.STRING_TRIM_REGEXP, "");
-  },
-
-  /**
-    Removes any extra whitespace from the left edge of the string.
-
-    @param {String} str String to left trim
-    @returns {String} the trimmed string
-  */
-  trimLeft: function (str) {
-    return str.replace(SC.STRING_TRIM_LEFT_REGEXP, "");
-  },
-
-  /**
-    Removes any extra whitespace from the right edge of the string.
-
-    @param {String} str String to right trim
-    @returns {String} the trimmed string
-  */
-  trimRight: function (str) {
-    return str.replace(SC.STRING_TRIM_RIGHT_REGEXP, "");
-  },
 
   /**
     Converts a word into its plural form.

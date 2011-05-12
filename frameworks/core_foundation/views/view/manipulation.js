@@ -1,6 +1,8 @@
 sc_require("views/view");
 
-SC.View.reopen({
+SC.View.reopen(
+  /** @scope SC.View.prototype */{
+
   /**
     This code exists to make it possible to pool SC.Views. We are not going to pool SC.Views in Amber
     */

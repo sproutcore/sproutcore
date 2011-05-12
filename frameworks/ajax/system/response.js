@@ -320,20 +320,31 @@ SC.Response = SC.Object.extend(
   cancelTransport: function() {},
   
   /** @private
-    Will notify each listener.
+    Will notify each listener. Returns true if any of the listeners handle.
   */
-  _notifyListener: function(listeners, status) {
-    var info = listeners[status], params, target, action;
-    if (!info) return NO ;
+  _notifyListeners: function(listeners, status) {
+    var notifiers = listeners[status], params, target, action;
+    if (!notifiers) return NO ;
+
+    var handled = NO;
+    var len = notifiers.length;
+
+    for (var i = 0; i < len; i++) {
+
+      var notifier = notifiers[i];
+      
+      params = (notifier.params || []).copy();
+      params.unshift(this);
+      
+      target = notifier.target;
+      action = notifier.action;
+      if (SC.typeOf(action) === SC.T_STRING) action = target[action];
+
+      handled = action.apply(target, params);
+      
+    }
     
-    params = (info.params || []).copy();
-    params.unshift(this);
-    
-    target = info.target;
-    action = info.action;
-    if (SC.typeOf(action) === SC.T_STRING) action = target[action];
-    
-    return action.apply(target, params);
+    return handled;
   },
   
   /**
@@ -349,9 +360,9 @@ SC.Response = SC.Object.extend(
         
     if (!listeners) return this ; // nothing to do
     
-    handled = this._notifyListener(listeners, status);
-    if (!handled) handled = this._notifyListener(listeners, baseStat);
-    if (!handled) handled = this._notifyListener(listeners, 0);
+    handled = this._notifyListeners(listeners, status);
+    if (!handled && baseStat !== status) handled = this._notifyListeners(listeners, baseStat);
+    if (!handled && status !== 0) handled = this._notifyListeners(listeners, 0);
     
     return this ;
   },

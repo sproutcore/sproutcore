@@ -52,8 +52,28 @@ module("SC.Statechart: With Concurrent States - Goto State Basic Tests", {
 
 test("check statechart initialization", function() {
   equals(monitor.get('length'), 5, 'initial state sequence should be of length 5');
-  equals(monitor.matchSequence().begin().entered(root, 'a', 'c', 'b', 'e').end(), true, 'initial sequence should be entered[ROOT, a, c, b, e]');
-  equals(monitor.matchSequence().begin().entered(root, 'a', 'b', 'c', 'e').end(), false, 'initial sequence should not be entered[ROOT, a, b, c, e]');
+  equals(monitor.matchSequence().begin()
+                                  .entered(root)
+                                  .beginConcurrent()
+                                    .beginSequence()
+                                      .entered('a', 'c')
+                                    .endSequence()
+                                    .beginSequence()
+                                      .entered('b', 'e')
+                                    .endSequence()
+                                  .endConcurrent()
+                                .end(), 
+    true, 'initial sequence should be entered[ROOT, a, c, b, e]');
+  equals(monitor.matchSequence().begin()
+                                  .entered(root)
+                                  .beginConcurrent()
+                                    .entered('a', 'b')
+                                  .endConcurrent()
+                                  .beginConcurrent()
+                                    .entered('c', 'e')
+                                  .endConcurrent()
+                                .end(), 
+    false, 'initial sequence should not be entered[ROOT, a, b, c, e]');
   
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 2');
   

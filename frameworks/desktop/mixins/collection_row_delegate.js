@@ -33,7 +33,7 @@ SC.CollectionRowDelegate = {
     @type Number
     @default 18
   */
-  itemHeight: 18,
+  itemHeight: 24,
   
   /**
     This inserts empty space between rows that you can use for borders.

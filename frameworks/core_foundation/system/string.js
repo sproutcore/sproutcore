@@ -14,6 +14,8 @@ SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
 SC.STRING_DECAMELIZE_REGEXP = (/([a-z])([A-Z])/g);
 SC.STRING_DASHERIZE_REGEXP = (/[ _]/g);
 SC.STRING_DASHERIZE_CACHE = {};
+SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
+SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
 
 /**
   @namespace
@@ -134,6 +136,8 @@ SC.mixin(SC.String, {
 
     var args = SC.$A(arguments);
     args.shift(); // remove str param
+    //to extend String.prototype 
+    if(args.length>0 && args[0].isSCArray) args=args[0];
 
     return SC.String.fmt(localized, args);
   },
@@ -158,5 +162,62 @@ SC.mixin(SC.String, {
     args.shift(); // remove def param
 
     return SC.String.fmt(localized, args);
+  },
+  
+  /**
+   Removes any extra whitespace from the edges of the string. This method is
+   also aliased as strip().
+
+   @returns {String} the trimmed string
+  */
+  trim: jQuery.trim,
+
+  /**
+   Removes any extra whitespace from the left edge of the string.
+
+   @returns {String} the trimmed string
+  */
+  trimLeft: function (str) {
+    return str.replace(SC.STRING_TRIM_LEFT_REGEXP,"");
+  },
+
+  /**
+   Removes any extra whitespace from the right edge of the string.
+
+   @returns {String} the trimmed string
+  */
+  trimRight: function (str) {
+    return str.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
   }
 });
+
+
+// IE doesn't support string trimming
+if(String.prototype.trim) {
+  SC.supplement(String.prototype,
+  /** @scope String.prototype */ {
+
+    trim: function() {
+      return SC.String.trim(this, arguments);
+    },
+
+    trimLeft: function() {
+      return SC.String.trimLeft(this, arguments);
+    },
+
+    trimRight: function() {
+      return SC.String.trimRight(this, arguments);
+    }
+  });
+}
+
+// We want the version defined here, not in Runtime
+SC.mixin(String.prototype,
+/** @scope String.prototype */ {
+  
+  loc: function() {
+    return SC.String.loc(this.toString(), SC.$A(arguments));
+  }
+
+});
+

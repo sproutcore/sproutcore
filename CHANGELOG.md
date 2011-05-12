@@ -27,6 +27,26 @@ CHANGE LOG FOR 1.6
 CHANGE LOG FOR 1.5
 ==================
 
+Upcoming
+-----
+
+* Added ability to opt out of custom headers when making AJAX requests
+* Allow multiple listeners per single response status
+* Fixes for making panes properly handle first responder
+* General CSS Cleanup throughout
+* Add support for trim and loc back to string.js
+* Bug fixes for IE7/8/9 support 
+* Fixed unit tests for IE
+* Added unit tests for keyboard focus functionality
+* Fix keyboard focus issues in the view layer
+* Updated the styling of list views
+* Fixed bugs with flowed_layout and auto_resize
+* Small documentation fixes throughout
+* Bug fixes for statecharts for IE support
+* Improving the performance of the unit test runner
+* Updated index.html for the latest versions of IE
+
+
 1.5.0
 -----
 

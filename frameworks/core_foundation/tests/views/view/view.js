@@ -56,7 +56,7 @@ test("it still works with the backward compatible theme property when extending"
     }.observes('theme')
   });
 
-  view = View.create();
+  var view = View.create();
   equals(SC.Theme.find('sc-base'), view.get('theme'));
   view.set('themeName', 'hello');
   equals(1, count, "theme observers should get called");

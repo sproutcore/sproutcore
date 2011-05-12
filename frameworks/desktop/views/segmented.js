@@ -36,6 +36,7 @@ sc_require('views/segment');
     - *itemIconKey*  - an icon
     - *itemActionKey* - an optional action to fire when pressed
     - *itemTargetKey* - an optional target for the action
+    - *itemLayerIdKey* - an optional target for the action 
     - *segmentViewClass* - class to be used for creating segments
 
   @extends SC.View
@@ -236,6 +237,12 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   itemTargetKey: null,
 
   /**
+    The key that contains the layerId for each item.
+    @property {String}
+  */
+  itemLayerIdKey: null,
+
+  /**
     The key that contains the key equivalent for each item.  If defined then
     pressing that key equivalent will be like selecting the tab.  Also,
     pressing the Alt or Option key for 3 seconds will display the key
@@ -287,10 +294,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     @type Array
   */
-  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey'.w(),
+  itemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey', 'itemKeyEquivalentKey', 'itemLayerIdKey'],
   
   /** @private */
-  viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent'],
+  viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent', 'layerId'],
 
   /** @private
     Call itemsDidChange once to initialize segment child views for the items that exist at
