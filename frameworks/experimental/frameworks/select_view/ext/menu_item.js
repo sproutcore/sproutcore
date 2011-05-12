@@ -4,8 +4,6 @@
 //            Portions ©2008-2010 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-sc_require('views/button') ;
-sc_require('views/separator') ;
 
 /**
   @class
