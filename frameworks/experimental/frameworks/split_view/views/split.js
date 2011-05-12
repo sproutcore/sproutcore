@@ -291,6 +291,15 @@ SC.SplitView = SC.View.extend({
     // as we loop using the lastChild variable.
     for (idx = 0; idx < len; idx++) {
       child = children[idx];
+
+      // do initial setup of things like autoResizeStyle:
+      if (!child.get('autoResizeStyle')) {
+        if (child.get('size') !== undefined) {
+          child.set('autoResizeStyle', SC.RESIZE_MANUAL);
+        } else {
+          child.set('autoResizeStyle', SC.RESIZE_AUTOMATIC);
+        }
+      }
       
       // we initialize the size first thing in case the size is empty (fill)
       // if it is empty, the way we position the views would lead to inconsistent
