@@ -449,13 +449,12 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     invokes the named action for each store key.  returns proper value
   */
   _handleEach: function(store, storeKeys, action, ids, params) {
-    var len = storeKeys.length, idx, ret, cur, lastArg;
-    if(!ids) ids = [];
+    var len = storeKeys.length, idx, ret, cur, idOrParams;
 
     for(idx=0;idx<len;idx++) {
-      lastArg = ids[idx] ? ids[idx] : params;
+      idOrParams = ids ? ids[idx] : params;
 
-      cur = action.call(this, store, storeKeys[idx], lastArg, params);
+      cur = action.call(this, store, storeKeys[idx], idOrParams);
       if (ret === undefined) {
         ret = cur ;
       } else if (ret === YES) {
