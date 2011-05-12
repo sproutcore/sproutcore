@@ -207,12 +207,13 @@ SC.PopupButtonView = SC.ButtonView.extend({
         // we can assume that they are clicking and dragging to the menu item,
         // and we should close the menu if they mouseup anywhere not inside
         // the menu.
-        if (evt.timeStamp - this._mouseDownTimestamp > 400) {
+        if (this._mouseDownTimestamp && evt.timeStamp - this._mouseDownTimestamp > 400) {
           menu.remove();
         }
       }
     }
 
+    this._mouseDownTimestamp = undefined;
     return YES;
   },
 
