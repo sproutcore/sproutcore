@@ -59,7 +59,8 @@ SC.ScrollView = SC.View.extend({
   isScrollable: YES,
 
   /**
-    The content view you want the scroll view to manage. This will be assigned to the contentView of the clipView also.
+    The content view you want the scroll view to manage.
+    This will be assigned to the `contentView` of the `clipView` also.
 
     @type SC.View
     @default null
@@ -67,11 +68,12 @@ SC.ScrollView = SC.View.extend({
   contentView: null,
 
   /**
-    The horizontal alignment for non-filling content inside of the ScrollView. Possible values:
+    The horizontal alignment for non-filling content inside of the `ScrollView`.
+    Possible values are:
 
-      - SC.ALIGN_LEFT
-      - SC.ALIGN_RIGHT
-      - SC.ALIGN_CENTER
+      - `SC.ALIGN_LEFT`
+      - `SC.ALIGN_RIGHT`
+      - `SC.ALIGN_CENTER`
 
     @type String
     @default SC.ALIGN_LEFT
@@ -79,11 +81,12 @@ SC.ScrollView = SC.View.extend({
   horizontalAlign: SC.ALIGN_LEFT,
 
   /**
-    The vertical alignment for non-filling content inside of the ScrollView. Possible values:
+    The vertical alignment for non-filling content inside of the `ScrollView`.
+    Possible values are:
 
-      - SC.ALIGN_TOP
-      - SC.ALIGN_BOTTOM
-      - SC.ALIGN_MIDDLE
+      - `SC.ALIGN_TOP`
+      - `SC.ALIGN_BOTTOM`
+      - `SC.ALIGN_MIDDLE`
 
     @type String
     @default SC.ALIGN_TOP
@@ -91,7 +94,8 @@ SC.ScrollView = SC.View.extend({
   verticalAlign: SC.ALIGN_TOP,
 
   /**
-    The current horizontal scroll offset. Changing this value will update both the contentView and the horizontal scroller, if there is one.
+    The current horizontal scroll offset. Changing this value will update both
+    the `contentView` and the horizontal scroller, if there is one.
 
     @field
     @type Number
@@ -101,14 +105,15 @@ SC.ScrollView = SC.View.extend({
     if (value !== undefined) {
       var minOffset = this.minimumHorizontalScrollOffset(),
           maxOffset = this.get('maximumHorizontalScrollOffset');
-      this._scroll_horizontalScrollOffset = Math.max(minOffset,Math.min(maxOffset, value)) ;
+      this._scroll_horizontalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
     }
 
-    return this._scroll_horizontalScrollOffset||0;
+    return this._scroll_horizontalScrollOffset || 0;
   }.property().cacheable(),
 
   /**
-    The current vertical scroll offset.  Changing this value will update both the contentView and the vertical scroller, if there is one.
+    The current vertical scroll offset. Changing this value will update both
+    the `contentView` and the vertical scroller, if there is one.
 
     @field
     @type Number
@@ -118,57 +123,40 @@ SC.ScrollView = SC.View.extend({
     if (value !== undefined) {
       var minOffset = this.get('minimumVerticalScrollOffset'),
           maxOffset = this.get('maximumVerticalScrollOffset');
-      this._scroll_verticalScrollOffset = Math.max(minOffset,Math.min(maxOffset, value)) ;
+      this._scroll_verticalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
     }
 
-    return this._scroll_verticalScrollOffset||0;
+    return this._scroll_verticalScrollOffset || 0;
   }.property().cacheable(),
 
   /** @private
     Calculates the maximum offset given content and container sizes, and the
     alignment.
   */
-  maximumScrollOffset: function(contentSize, containerSize, align) {
-    // if our content size is larger than or the same size as the container, it's quite
-    // simple to calculate the answer. Otherwise, we need to do some fancy-pants
-    // alignment logic (read: simple math)
-    if (contentSize >= containerSize) return contentSize - containerSize;
+  maximumScrollOffset: function (contentSize, containerSize, align) {
+    // If the content is larger than the container, the maximum offset is
+    // the location of the `contentView` when scrolled all the way down.
+    var delta = contentSize - containerSize;
+    if (contentSize >= containerSize) return delta;
 
-    // alignment, yeah
-    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
-      // if we left-align something, and it is smaller than the view, does that not mean
-      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
-      return 0;
-    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
-      // middle align means the difference divided by two, because we want equal parts on each side.
-      return 0 - Math.round((containerSize - contentSize) / 2);
-    } else {
-      // right align means the entire difference, because we want all that space on the left
-      return 0 - (containerSize - contentSize);
-    }
+    return (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) ? 0 : // top-left aligned
+           (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) ?
+             Math.round(delta / 2) : // center aligned
+             delta;                  // right aligned
   },
 
   /** @private
     Calculates the minimum offset given content and container sizes, and the
     alignment.
   */
-  minimumScrollOffset: function(contentSize, containerSize, align) {
-    // if the content is larger than the container, we have no need to change the minimum
-    // away from the natural 0 position.
-    if (contentSize > containerSize) return 0;
+  minimumScrollOffset: function (contentSize, containerSize, align) {
+    var delta = contentSize - containerSize;
 
-    // alignment, yeah
-    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
-      // if we left-align something, and it is smaller than the view, does that not mean
-      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
-      return 0;
-    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
-      // middle align means the difference divided by two, because we want equal parts on each side.
-      return 0 - Math.round((containerSize - contentSize) / 2);
-    } else {
-      // right align means the entire difference, because we want all that space on the left
-      return 0 - (containerSize - contentSize);
-    }
+    return (contentSize > containerSize || align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) ?
+             0 : // top-left aligned or larger than the container.
+           (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) ?
+             Math.round(delta / 2) : // center aligned
+             delta;                  // right aligned
   },
 
   /**
@@ -181,9 +169,10 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   maximumHorizontalScrollOffset: function() {
-    var view = this.get('contentView') ;
-    var contentWidth = view ? view.get('frame').width : 0,
-        calculatedWidth = view ? view.get('calculatedWidth') : 0;
+    var view = this.get('contentView'),
+        contentWidth = view ? view.get('frame').width : 0,
+        calculatedWidth = view ? view.get('calculatedWidth') : 0,
+        containerWidth = this.get('containerView').get('frame').width;
 
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
@@ -191,8 +180,6 @@ SC.ScrollView = SC.View.extend({
       contentWidth = view.calculatedWidth;
     }
     contentWidth *= this._scale;
-
-    var containerWidth = this.get('containerView').get('frame').width ;
 
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
@@ -212,7 +199,9 @@ SC.ScrollView = SC.View.extend({
   maximumVerticalScrollOffset: function() {
     var view = this.get('contentView'),
         contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
-        calculatedHeight = view ? view.get('calculatedHeight') : 0;
+        calculatedHeight = view ? view.get('calculatedHeight') : 0,
+        containerHeight = this.get('containerView').get('frame').height;
+
 
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
@@ -220,8 +209,6 @@ SC.ScrollView = SC.View.extend({
       contentHeight = calculatedHeight;
     }
     contentHeight *= this._scale;
-
-    var containerHeight = this.get('containerView').get('frame').height ;
 
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
@@ -240,17 +227,17 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   minimumHorizontalScrollOffset: function() {
-    var view = this.get('contentView') ;
-    var contentWidth = view ? view.get('frame').width : 0,
-        calculatedWidth = view ? view.get('calculatedWidth') : 0;
+    var view = this.get('contentView'),
+        contentWidth = view ? view.get('frame').width : 0,
+        calculatedWidth = view ? view.get('calculatedWidth') : 0,
+        containerWidth = this.get('containerView').get('frame').width;
+
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(calculatedWidth){
+    if (calculatedWidth) {
       contentWidth = calculatedWidth;
     }
     contentWidth *= this._scale;
-
-    var containerWidth = this.get('containerView').get('frame').width ;
 
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
@@ -268,18 +255,17 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   minimumVerticalScrollOffset: function() {
-    var view = this.get('contentView') ;
-    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
-        calculatedHeight = view ? view.get('calculatedHeight') : 0;
+    var view = this.get('contentView'),
+        contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
+        calculatedHeight = view ? view.get('calculatedHeight') : 0,
+        containerHeight = this.get('containerView').get('frame').height;
 
     // The following code checks if there is a calculatedWidth (collections)
     // to avoid looking at the incorrect value calculated by frame.
-    if(calculatedHeight){
+    if (calculatedHeight) {
       contentHeight = view.calculatedHeight;
     }
     contentHeight *= this._scale;
-
-    var containerHeight = this.get('containerView').get('frame').height ;
 
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
@@ -344,8 +330,18 @@ SC.ScrollView = SC.View.extend({
   //
 
   /**
-    YES if the view should maintain a horizontal scroller.   This property
-    must be set when the view is created.
+    YES if native scrollers should be used.
+    This means native scrollers will be used in place of
+    the `SC.Scroller` views.
+
+    @type Boolean
+    @default NO
+   */
+  wantsNativeScrollers: NO,
+
+  /**
+    YES if the view should maintain a horizontal scroller.
+    This property must be set when the view is created.
 
     @type Boolean
     @default YES
@@ -353,9 +349,10 @@ SC.ScrollView = SC.View.extend({
   hasHorizontalScroller: YES,
 
   /**
-    The horizontal scroller view class. This will be replaced with a view
-    instance when the ScrollView is created unless hasHorizontalScroller is
-    NO.
+    The horizontal scroller view class.
+
+    This will be replaced with a view instance when the
+    ScrollView is created unless hasHorizontalScroller is NO.
 
     @type SC.View
     @default SC.ScrollerView
@@ -363,8 +360,10 @@ SC.ScrollView = SC.View.extend({
   horizontalScrollerView: SC.ScrollerView,
 
   /**
-    The horizontal scroller view for touch. This will be replaced with a view
-    instance when touch is enabled when the ScrollView is created unless
+    The horizontal scroller view for touch.
+
+    This will be replaced with a view instance when touch
+    is enabled when the ScrollView is created unless
     hasHorizontalScroller is NO.
 
     @type SC.View
@@ -394,8 +393,8 @@ SC.ScrollView = SC.View.extend({
   */
   canScrollHorizontal: function() {
     return !!(this.get('hasHorizontalScroller') &&
-      this.get('horizontalScrollerView') &&
-      this.get('isHorizontalScrollerVisible')) ;
+              this.get('horizontalScrollerView') &&
+              this.get('isHorizontalScrollerVisible'));
   }.property('isHorizontalScrollerVisible').cacheable(),
 
   /**
@@ -457,8 +456,8 @@ SC.ScrollView = SC.View.extend({
   */
   canScrollVertical: function() {
     return !!(this.get('hasVerticalScroller') &&
-      this.get('verticalScrollerView') &&
-      this.get('isVerticalScrollerVisible')) ;
+              this.get('verticalScrollerView') &&
+              this.get('isVerticalScrollerVisible'));
   }.property('isVerticalScrollerVisible').cacheable(),
 
   /**
@@ -492,8 +491,7 @@ SC.ScrollView = SC.View.extend({
     @default NO
   */
   verticalOverlay: function() {
-    if (SC.platform.touch) return YES;
-    return NO;
+    return !!SC.platform.touch;
   }.property().cacheable(),
 
   /**
@@ -508,8 +506,7 @@ SC.ScrollView = SC.View.extend({
     @default NO
   */
   horizontalOverlay: function() {
-    if (SC.platform.touch) return YES;
-    return NO;
+    return !!SC.platform.touch;
   }.property().cacheable(),
 
   /**
@@ -580,21 +577,21 @@ SC.ScrollView = SC.View.extend({
     @param {Number} y the y scroll location
     @returns {SC.ScrollView} receiver
   */
-  scrollTo: function(x,y) {
+  scrollTo: function (x, y) {
     // normalize params
-    if (y===undefined && SC.typeOf(x) === SC.T_HASH) {
+    if (arguments.length === 1 && SC.typeOf(x) === SC.T_HASH) {
       y = x.y; x = x.x;
     }
 
     if (!SC.none(x)) {
-      this.set('horizontalScrollOffset', x) ;
+      this.set('horizontalScrollOffset', x);
     }
 
     if (!SC.none(y)) {
-      this.set('verticalScrollOffset', y) ;
+      this.set('verticalScrollOffset', y);
     }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -610,16 +607,17 @@ SC.ScrollView = SC.View.extend({
     @param {Number} y change in the y direction
     @returns {SC.ScrollView} receiver
   */
-  scrollBy: function(x , y) {
+  scrollBy: function (x, y) {
     // normalize params
-    if (y===undefined && SC.typeOf(x) === SC.T_HASH) {
-      y = x.y; x = x.x;
+    if (arguments.length === 1 && SC.typeOf(x) === SC.T_HASH) {
+      y = x.y;
+      x = x.x;
     }
 
     // if null, undefined, or 0, pass null; otherwise just add current offset
-    x = (x) ? this.get('horizontalScrollOffset')+x : null ;
-    y = (y) ? this.get('verticalScrollOffset')+y : null ;
-    return this.scrollTo(x,y) ;
+    x = (x) ? this.get('horizontalScrollOffset') + x : null;
+    y = (y) ? this.get('verticalScrollOffset') + y : null;
+    return this.scrollTo(x, y);
   },
 
   /**
@@ -630,12 +628,11 @@ SC.ScrollView = SC.View.extend({
     @param {SC.View} view view to scroll or null to scroll receiver visible
     @returns {Boolean} YES if scroll position was changed
   */
-  scrollToVisible: function(view) {
-
+  scrollToVisible: function (view) {
     // if no view is passed, do default
     if (arguments.length === 0) return sc_super();
 
-    var contentView = this.get('contentView') ;
+    var contentView = this.get('contentView');
     if (!contentView) return NO; // nothing to do if no contentView.
 
     // get the frame for the view - should work even for views with static
@@ -645,7 +642,7 @@ SC.ScrollView = SC.View.extend({
 
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
-    vf = contentView.convertFrameFromView(vf, view.get('parentView')) ;
+    vf = contentView.convertFrameFromView(vf, view.get('parentView'));
 
     return this.scrollToRect(vf);
   },
@@ -655,27 +652,27 @@ SC.ScrollView = SC.View.extend({
     @param {Rect} rect Rectangle to scroll to.
     @returns {Boolean} YES if scroll position was changed.
   */
-  scrollToRect: function(rect) {
+  scrollToRect: function (rect) {
     // find current visible frame.
-    var vo = SC.cloneRect(this.get('containerView').get('frame')) ;
+    var vo = SC.cloneRect(this.get('containerView').get('frame')),
+        origX = this.get('horizontalScrollOffset'),
+        origY = this.get('verticalScrollOffset');
 
-    vo.x = this.get('horizontalScrollOffset') ;
-    vo.y = this.get('verticalScrollOffset') ;
-
-    var origX = vo.x, origY = vo.y;
+    vo.x = origX;
+    vo.y = origY;
 
     // if top edge is not visible, shift origin
-    vo.y -= Math.max(0, SC.minY(vo) - SC.minY(rect)) ;
-    vo.x -= Math.max(0, SC.minX(vo) - SC.minX(rect)) ;
+    vo.y -= Math.max(0, SC.minY(vo) - SC.minY(rect));
+    vo.x -= Math.max(0, SC.minX(vo) - SC.minX(rect));
 
     // if bottom edge is not visible, shift origin
-    vo.y += Math.max(0, SC.maxY(rect) - SC.maxY(vo)) ;
-    vo.x += Math.max(0, SC.maxX(rect) - SC.maxX(vo)) ;
+    vo.y += Math.max(0, SC.maxY(rect) - SC.maxY(vo));
+    vo.x += Math.max(0, SC.maxX(rect) - SC.maxX(vo));
 
     // scroll to that origin.
     if ((origX !== vo.x) || (origY !== vo.y)) {
       this.scrollTo(vo.x, vo.y);
-      return YES ;
+      return YES;
     } else return NO;
   },
 
@@ -687,9 +684,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollDownLine: function(lines) {
-    if (lines === undefined) lines = 1 ;
-    return this.scrollBy(null, this.get('verticalLineScroll')*lines) ;
+  scrollDownLine: function (lines) {
+    if (arguments.length === 0) lines = 1;
+    return this.scrollBy(null, this.get('verticalLineScroll') * lines);
   },
 
   /**
@@ -699,9 +696,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollUpLine: function(lines) {
-    if (lines === undefined) lines = 1 ;
-    return this.scrollBy(null, 0-this.get('verticalLineScroll')*lines) ;
+  scrollUpLine: function (lines) {
+    if (arguments.length === 0) lines = 1;
+    return this.scrollBy(null, -1 * this.get('verticalLineScroll') * lines);
   },
 
   /**
@@ -712,8 +709,8 @@ SC.ScrollView = SC.View.extend({
     @returns {SC.ScrollView} receiver
   */
   scrollRightLine: function(lines) {
-    if (lines === undefined) lines = 1 ;
-    return this.scrollTo(this.get('horizontalLineScroll')*lines, null) ;
+    if (arguments.length === 0) lines = 1;
+    return this.scrollTo(this.get('horizontalLineScroll') * lines, null);
   },
 
   /**
@@ -723,9 +720,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollLeftLine: function(lines) {
-    if (lines === undefined) lines = 1 ;
-    return this.scrollTo(0-this.get('horizontalLineScroll')*lines, null) ;
+  scrollLeftLine: function (lines) {
+    if (arguments.length === 0) lines = 1;
+    return this.scrollTo(-1 * this.get('horizontalLineScroll') * lines, null);
   },
 
   /**
@@ -737,9 +734,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollDownPage: function(pages) {
-    if (pages === undefined) pages = 1 ;
-    return this.scrollBy(null, this.get('verticalPageScroll')*pages) ;
+  scrollDownPage: function (pages) {
+    if (arguments.length === 0) pages = 1;
+    return this.scrollBy(null, this.get('verticalPageScroll') * pages);
   },
 
   /**
@@ -751,9 +748,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollUpPage: function(pages) {
-    if (pages === undefined) pages = 1 ;
-    return this.scrollBy(null, 0-(this.get('verticalPageScroll')*pages)) ;
+  scrollUpPage: function (pages) {
+    if (arguments.length === 0) pages = 1;
+    return this.scrollBy(null, -1 * this.get('verticalPageScroll' * pages));
   },
 
   /**
@@ -765,9 +762,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollRightPage: function(pages) {
-    if (pages === undefined) pages = 1 ;
-    return this.scrollBy(this.get('horizontalPageScroll')*pages, null) ;
+  scrollRightPage: function (pages) {
+    if (arguments.length === 0) pages = 1;
+    return this.scrollBy(this.get('horizontalPageScroll') * pages, null);
   },
 
   /**
@@ -779,9 +776,9 @@ SC.ScrollView = SC.View.extend({
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
   */
-  scrollLeftPage: function(pages) {
-    if (pages === undefined) pages = 1 ;
-    return this.scrollBy(0-(this.get('horizontalPageScroll')*pages), null) ;
+  scrollLeftPage: function (pages) {
+    if (arguments.length === 0) pages = 1;
+    return this.scrollBy(-1 * this.get('horizontalPageScroll') * pages, null);
   },
 
   /** @private
@@ -792,22 +789,22 @@ SC.ScrollView = SC.View.extend({
     You may also want to override this method to handle layout for any
     additional controls you have added to the view.
   */
-  tile: function() {
+  tile: function () {
     // get horizontal scroller/determine if we should have a scroller
-    var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null ;
+    var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
     var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
 
     // get vertical scroller/determine if we should have a scroller
-    var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null ;
-    var hasVertical = vscroll && this.get('isVerticalScrollerVisible') ;
+    var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null;
+    var hasVertical = vscroll && this.get('isVerticalScrollerVisible');
 
     // get the containerView
-    var clip = this.get('containerView') ;
-    var clipLayout = { left: 0, top: 0 } ;
+    var clip = this.get('containerView');
+    var clipLayout = { left: 0, top: 0 };
     var t, layout, vo, ho, vl, hl;
 
-    var ht = ((hasHorizontal) ? hscroll.get('scrollbarThickness') : 0) ;
-    var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0 ;
+    var ht = hasHorizontal ? hscroll.get('scrollbarThickness') : 0;
+    var vt = hasVertical ? vscroll.get('scrollbarThickness') : 0;
 
     if (hasHorizontal) {
       hl     = this.get('horizontalScrollerLayout');
@@ -817,16 +814,16 @@ SC.ScrollView = SC.View.extend({
         right: (hl ? hl.right + vt-1 : vt-1),
         height: ht
       };
-      hscroll.set('layout', layout) ;
+      hscroll.set('layout', layout);
       ho = this.get('horizontalOverlay');
-      clipLayout.bottom = ho ? 0 : (layout.bottom + ht) ;
+      clipLayout.bottom = ho ? 0 : (layout.bottom + ht);
     } else {
-      clipLayout.bottom = 0 ;
+      clipLayout.bottom = 0;
     }
-    if (hscroll) hscroll.set('isVisible', hasHorizontal) ;
+    if (hscroll) hscroll.set('isVisible', hasHorizontal);
 
     if (hasVertical) {
-      ht     = ht + this.get('verticalScrollerBottom') ;
+      ht     = ht + this.get('verticalScrollerBottom');
       vl     = this.get('verticalScrollerLayout');
       layout = {
         top: (vl ? vl.top : 0),
@@ -834,15 +831,15 @@ SC.ScrollView = SC.View.extend({
         right: (vl ? vl.right : 0),
         width: vt
       };
-      vscroll.set('layout', layout) ;
+      vscroll.set('layout', layout);
       vo = this.get('verticalOverlay');
-      clipLayout.right = vo ? 0 : (layout.right + vt) ;
+      clipLayout.right = vo ? 0 : (layout.right + vt);
     } else {
-      clipLayout.right = 0 ;
+      clipLayout.right = 0;
     }
-    if (vscroll) vscroll.set('isVisible', hasVertical) ;
+    if (vscroll) vscroll.set('isVisible', hasVertical);
 
-    clip.adjust(clipLayout) ;
+    clip.adjust(clipLayout);
   },
 
   /** @private
@@ -868,8 +865,8 @@ SC.ScrollView = SC.View.extend({
 
     this._scroll_wheelDeltaX += evt.wheelDeltaX / deltaAdjust;
     this._scroll_wheelDeltaY += evt.wheelDeltaY / deltaAdjust;
-    this.invokeLater(this._scroll_mouseWheel, 10) ;
-    return this.get('canScrollHorizontal') || this.get('canScrollVertical') ;
+    this.invokeLater(this._scroll_mouseWheel, 10);
+    return this.get('canScrollHorizontal') || this.get('canScrollVertical');
   },
 
   /** @private */
@@ -878,20 +875,20 @@ SC.ScrollView = SC.View.extend({
     if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY > 0) {
       this._scroll_wheelDeltaY = Math.floor(this._scroll_wheelDeltaY*0.950);
       this._scroll_wheelDeltaY = Math.max(this._scroll_wheelDeltaY, 0);
-      this.invokeLater(this._scroll_mouseWheel, 10) ;
+      this.invokeLater(this._scroll_mouseWheel, 10);
     } else if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY < 0){
       this._scroll_wheelDeltaY = Math.ceil(this._scroll_wheelDeltaY*0.950);
       this._scroll_wheelDeltaY = Math.min(this._scroll_wheelDeltaY, 0);
-      this.invokeLater(this._scroll_mouseWheel, 10) ;
+      this.invokeLater(this._scroll_mouseWheel, 10);
     } else {
       this._scroll_wheelDeltaY = 0;
       this._scroll_wheelDeltaX = 0;
     }
   },
 
-  /*..............................................
-    SCALING SUPPORT
-  */
+  // ..............................................
+  // SCALING SUPPORT
+  //
 
   /**
     Determines whether scaling is allowed.
@@ -911,8 +908,8 @@ SC.ScrollView = SC.View.extend({
     @type Number
     @default 1.0
   */
-  scale: function(key, value) {
-    if (value !== undefined) {
+  scale: function (key, value) {
+    if (arguments.length === 2) {
       this._scale = Math.min(Math.max(this.get("minimumScale"), value), this.get("maximumScale"));
     }
     return this._scale;
@@ -1141,7 +1138,7 @@ SC.ScrollView = SC.View.extend({
     }
 
     // calculate container+content width/height
-    var view = this.get('contentView') ;
+    var view = this.get('contentView');
     var contentWidth = view ? view.get('frame').width : 0,
         contentHeight = view ? view.get('frame').height : 0;
 
@@ -1700,9 +1697,9 @@ SC.ScrollView = SC.View.extend({
         view = this.horizontalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_HORIZONTAL,
           valueBinding: '*owner.horizontalScrollOffset'
-        }) ;
+        });
         childViews.push(view);
-      } else this.horizontalScrollerView = null ;
+      } else this.horizontalScrollerView = null;
     }
 
     // create a vertical scroller view if needed...
@@ -1712,16 +1709,16 @@ SC.ScrollView = SC.View.extend({
         view = this.verticalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_VERTICAL,
           valueBinding: '*owner.verticalScrollOffset'
-        }) ;
+        });
         childViews.push(view);
-      } else this.verticalScrollerView = null ;
+      } else this.verticalScrollerView = null;
     }
 
     // set childViews array.
-    this.childViews = childViews ;
+    this.childViews = childViews;
 
-    this.contentViewDidChange() ; // setup initial display...
-    this.tile() ; // set up initial tiling
+    this.contentViewDidChange(); // setup initial display...
+    this.tile(); // set up initial tiling
   },
 
   /** @private */
@@ -1731,8 +1728,8 @@ SC.ScrollView = SC.View.extend({
     // start observing initial content view.  The content view's frame has
     // already been setup in prepareDisplay so we don't need to call
     // viewFrameDidChange...
-    this._scroll_contentView = this.get('contentView') ;
-    var contentView = this._scroll_contentView ;
+    this._scroll_contentView = this.get('contentView');
+    var contentView = this._scroll_contentView;
 
     if (contentView) {
       contentView.addObserver('frame', this, this.contentViewFrameDidChange);
@@ -1740,7 +1737,7 @@ SC.ScrollView = SC.View.extend({
       contentView.addObserver('calculatedHeight', this, this.contentViewFrameDidChange);
     }
 
-    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll() ;
+    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
   },
 
   /** @private
@@ -1835,7 +1832,7 @@ SC.ScrollView = SC.View.extend({
     height *= scale;
 
     // cache out scroll settings...
-    if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
+    if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return;
     this._scroll_contentWidth  = width;
     this._scroll_contentHeight = height;
 
@@ -1848,7 +1845,7 @@ SC.ScrollView = SC.View.extend({
       if (this.get('autohidesHorizontalScroller')) {
         this.set('isHorizontalScrollerVisible', width > dimWidth);
       }
-      view.setIfChanged('maximum', width-dimWidth) ;
+      view.setIfChanged('maximum', width-dimWidth);
       view.setIfChanged('proportion', dimWidth/width);
     }
 
@@ -1857,7 +1854,7 @@ SC.ScrollView = SC.View.extend({
       if (this.get('autohidesVerticalScroller')) {
         this.set('isVerticalScrollerVisible', height > dimHeight);
       }
-      view.setIfChanged('maximum', height-dimHeight) ;
+      view.setIfChanged('maximum', height-dimHeight);
       view.setIfChanged('proportion', dimHeight/height);
     }
 
