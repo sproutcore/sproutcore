@@ -7,6 +7,7 @@
 
 SC.BaseTheme.formRenderDelegate = SC.RenderDelegate.create({
   name: 'form',
+  flowSpacing: { left: 5, top: 5, bottom: 5, right: 5 },
 
   render: function() {
   },

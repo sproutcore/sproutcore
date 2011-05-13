@@ -58,14 +58,18 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   canWrap: NO,
   
   renderDelegateName: 'formRenderDelegate',
-  
-  formFlowSpacing: undefined,
-  formFlowSpacingDefault: { left: 5, top: 5, bottom: 5, right: 5 },
-  
-  defaultFlowSpacing: function() {
-    return this.getThemedProperty('formFlowSpacing', 'FORM_FLOW_SPACING');
-  }.property('formFlowSpacing', 'theme'),
-  
+
+  /**
+    The default padding around items in the form. By default, this comes from the theme.
+    You can supply your own directly, or override the formRenderDelegate:
+
+        // base it on the existing render delegate
+        MyTheme.formRenderDelegate = SC.AceTheme.formRenderDelegate.create({
+          flowSpacing: { left: 5, top: 5, right: 5, bottom: 5 }
+        });
+  */
+  defaultFlowSpacing: SC.propertyFromRenderDelegate('flowSpacing', {}),
+
   classNames: ["sc-form-view"],
 
   /**

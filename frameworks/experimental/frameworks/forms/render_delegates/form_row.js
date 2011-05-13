@@ -6,15 +6,7 @@
 
 SC.BaseTheme.formRowRenderDelegate = SC.RenderDelegate.create({
   name: 'form-row',
-
-  render: function(context) {
-    
-  },
-  
-  update: function() {
-    
-  }
+  flowSpacing: { right: 15, left: 0, top: 0, bottom: 0 },
+  flowPadding: 0
 });
 
-SC.BaseTheme.FORM_ROW_FLOW_SPACING = { right: 15, left: 0, top: 0, bottom: 0 };
-SC.BaseTheme.FORM_ROW_FLOW_PADDING = { left: 0, right: 0, bottom: 0, top: 0 };

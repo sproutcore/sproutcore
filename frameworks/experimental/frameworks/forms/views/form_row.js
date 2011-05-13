@@ -28,14 +28,9 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   
   fillWidth: YES,
   
-  defaultFlowSpacing: function() {
-    return this.getThemedProperty("rowFlowSpacing", 'FORM_ROW_FLOW_SPACING');
-  }.property("rowFlowSpacing", "theme"),
-  
-  flowPadding: function() {
-    return this.getThemedProperty("rowFlowPadding", 'FORM_ROW_FLOW_PADDING');
-  }.property("rowFlowPadding", "theme"),
-  
+  defaultFlowSpacing: SC.propertyFromRenderDelegate('flowSpacing'),
+  flowPaddingg: SC.propertyFromRenderDelegate('flowPadding'),
+
   classNames: ["sc-form-row-view"],
   
   /**

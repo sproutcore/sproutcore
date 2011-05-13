@@ -117,23 +117,6 @@ SC.View.reopen(
   }.property('baseThemeName', 'parentView').cacheable(),
 
   /**
-   * Returns the named property if it is specified on the view, and
-   * otherwise returns the named constant from the view's theme.
-   *
-   * @param {String} property The property on the view.
-   * @param {String} constantName The name of the constant on the theme.
-  */
-  getThemedProperty: function(property, constantName){
-    var value = this.get(property);
-    if (value !== undefined) { return value; }
-
-    var theme = this.get('theme');
-    if (!theme) { return undefined; }
-
-    return theme[constantName];
-  },
-
-  /**
     The object to which rendering and updating the HTML representation of this
     view should be delegated.
 
