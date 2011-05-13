@@ -50,13 +50,15 @@ sc_require("views/form_row");
 
 
   @extends SC.View
-  @implements SC.Editable
+  @implements SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode
 */
 
 SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
+  // We lay out forms vertically. Each item gets its own "row". Wrapping makes
+  // no sense, as the FormView should grow with each row.
   layoutDirection: SC.LAYOUT_VERTICAL,
   canWrap: NO,
-  
+
   renderDelegateName: 'formRenderDelegate',
 
   /**
@@ -73,42 +75,41 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   classNames: ["sc-form-view"],
 
   /**
-  Whether to automatically start editing.
+    Whether to automatically start editing.
   */
   editsByDefault: YES,
 
   /**
-  The input key view (to set previousKeyView for the first row, field, or sub-form).
+    The input key view (to set previousKeyView for the first row, field, or sub-form).
 
-  For fields, this will likely be the field itself.
+    For fields, this will likely be the field itself.
   */
   firstKeyView: null,
 
   /**
-  The output key view.
+    The output key view.
   */
   lastKeyView: null,
 
   /**
-  The content to bind the form to. This content object is passed to all children.
+    The content to bind the form to. This content object is passed to all children.
   
-  All child views, if added at design time via string-based childViews array, will get their
-  contentValueKey set to their string. Note that SC.RowView passes on its contentValueKey to its
-  child field if it doesn't have its own, and if its isNested property is YES, uses it to find its
-  own content object.
+    All child views, if added at design time via string-based childViews array, will get their
+    contentValueKey set to their own key. Note that SC.RowView passes on its contentValueKey to its
+    child field, and if its isNested property is YES, uses it to find its own content object.
   */
   content: null,
   
   /**
-    Rows in the form do not have to be full objects at load time. They can also be simple hashes
-    which are then passed to exampleRow.extend.
+    Rows in the form do not have to be full SC.FormRowView at design time. They can also be hashes
+    that get loaded into rows.
   */
   exampleRow: SC.FormRowView.extend({
     labelView: SC.FormRowView.LabelView.extend({ textAlign: SC.ALIGN_RIGHT })
   }),
 
   /**
-  Init function.
+     @private
   */
   init: function()
   {
@@ -117,15 +118,14 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   },
 
   /**
-  Calls _updateFields to load the fields.
   */
   createChildViews: function()
   {
-    // keep array of keys so we can pass on key to child.
     var cv = SC.clone(this.get("childViews"));
     var idx, len = cv.length, key, v, exampleRow = this.get("exampleRow");
-    
-    // preprocess to handle templated rows (rows that use exampleRow to initialize)
+
+    // rows that are provided as plain hashes need to be created by passing them into
+    // exampleRow.extend.
     for (idx = 0; idx < len; idx++) {
       key = cv[idx];
       if (SC.typeOf(key) === SC.T_STRING) {
@@ -135,8 +135,9 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         }
       }
     }
-    
-    // We need to add in contentValueKey before we call sc_super
+
+    // a childView named 'myField' will want a contentValueKey 'myField' so it knows what
+    // property to grab from its content.
     for (idx = 0; idx < len; idx++) {
       key = cv[idx];
       if (SC.typeOf(key) === SC.T_STRING) {
@@ -148,34 +149,39 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         }
       }
     }
-    
-    // get content for further ops
+
+    // we will be initializing the 'content' property for all child views
     var content = this.get("content");
     sc_super();
-    
-    // now, do the actual passing it
+
     for (idx = 0; idx < len; idx++) {
       key = cv[idx];
-      
+
       // if the view was originally declared as a string, then we have something to give it
       if (SC.typeOf(key) === SC.T_STRING) {
         // try to get the actual view
         v = this.get(key);
-        
+
         // see if it does indeed exist, and if it doesn't have a value already
         if (v && !v.isClass && v.isFormRow) {
           // set content
           if (!v.get("content")) {
-            
-            // controls can calculate their own value based on the contentValueKey we set earlier
-            if (v.get('hasContentValueSupport')) v.bind('content', '.owner.content');
-            // if it isn't a control then we can't use contentValueKey, so bind the content manually
-            else v.bind('content', '.owner.content.' + key);
+
+            if (v.get('hasContentValueSupport')) {
+              // controls can calculate their own value based on the contentValueKey we set earlier
+              v.bind('content', '.owner.content');
+
+            } else {
+              // if it isn't a control then we can't use contentValueKey, so bind the content manually
+              v.bind('content', '.owner.content.' + key);
+            }
           }
-          
+
           // set the label size measuring stuff
-          if (this.get('labelWidth') !== null) v.set("shouldMeasureLabel", NO);
-          
+          if (this.get('labelWidth') !== null) {
+            v.set("shouldMeasureLabel", NO);
+          }
+
           // set label (if possible)
           if (v.get("isFormRow") && SC.none(v.get("label"))) {
             v.set("label", key.humanize().titleize());
@@ -183,8 +189,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         }
       }
     }
-    
-    // our internal bookeeping to prevent .
+
     this._hasCreatedRows = YES;
     this.recalculateLabelWidth();
   },
@@ -196,10 +201,18 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   isRowDelegate: YES,
   
   /**
-    The manually specified label width (null to automatically calculate, which is the default).
+    Supply a label width to avoid automatically calculating the widths of the labels
+    in the form. Leave null to let SproutCore automatically determine the proper width
+    for the label.
+
+    @type Number
+    @default null
   */
   labelWidth: null,
   
+  /**
+    Tells the child rows whether they should measure their labels or not.
+  */
   labelWidthDidChange: function() {
     var childViews = this.get('childViews'), i, len = childViews.length,
     shouldMeasure = SC.none(this.get('labelWidth'));
@@ -212,14 +225,17 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   }.observes('labelWidth'),
   
   /**
-    Calculates the current label width (if labelWidth is not null, it sets using the label width)
+    Propagates the label width to the child rows, finding the measured size if necessary.
   */
   recalculateLabelWidth: function() {
-    if (!this._hasCreatedRows) return;
+    if (!this._hasCreatedRows) {
+      return;
+    }
     
     var ret = this.get("labelWidth"), children = this.get("childViews"), idx, len = children.length, child;
     
-    // calculate by looping through child views and getting size (if possible)
+    // calculate by looping through child views and getting size (if possible and if
+    // no label width is explicitly set)
     if (ret === null) {
       ret = 0;
       for (idx = 0; idx < len; idx++) {
@@ -273,19 +289,5 @@ SC.mixin(SC.FormView, {
   row: function(optionalClass, properties, rowExt)
   {
     return SC.FormRowView.row(optionalClass, properties, rowExt);
-  },
-
-  /**
-  Creates a field.
-
-  Behind the scenes, this wraps the fieldClass in a FormFieldView—usually a
-  specialized variant of FormFieldView meant specifically to wrap that class.
-
-  You can add your own special variants of FormFieldView if you want to expose
-  special features of your own view by calling FormFieldView.registerWrapper.
-  */
-  field: function(fieldClass, properties)
-  {
-    return SC.FormFieldView.field(fieldClass, properties);
   }
 });

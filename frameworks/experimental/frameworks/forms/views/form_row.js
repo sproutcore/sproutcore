@@ -39,12 +39,12 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 	isFormRow: YES,
 	
 	/**
-	  The label for the row (string label)
+	  The text to display next to the row.
 	*/
 	label: "",
 	
 	/**
-	  The current size of the labels.
+	  The amount of size to give the label.
 	*/
 	rowLabelSize: 0,
 	
@@ -54,7 +54,9 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 	rowLabelMeasuredSize: 0,
 	
 	/**
-	  If NO, the label will not automatically measure itself.
+	  If NO, the label will not automatically measure itself. Note that
+    FormRowView never changes its own label size: it only measures it.
+    The measurement is placed into rowLabelMeasuredSize.
 	*/
 	shouldMeasureLabel: YES,
 	
@@ -69,12 +71,12 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 	labelView: null,
 	
 	/**
-	  Direction of the flow.
+	  Direction of the flow. Form Rows layout from left to right, up to down.
 	*/
 	layoutDirection: SC.LAYOUT_HORIZONTAL,
 	
   /**
-  Updates keys, content, etc. on fields. Also, handles our "special" field (only-one case)
+    Updates keys, content, etc. on fields. Also, handles our "special" field (only-one case)
   */
   createChildViews: function()
   {
