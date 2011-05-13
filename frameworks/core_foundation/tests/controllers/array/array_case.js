@@ -287,6 +287,48 @@ test("should invalidate property when property on any enumerable changes", funct
   equals(recomputed, 0, "does not recalculate after changing key on removed item");
 });
 
+test("should invalidate property when property of array item changes after content has changed", function() {
+  var inventory = [];
+  var recomputed = 0;
+
+  for (var idx = 0; idx < 20; idx++) {
+    inventory.pushObject(SC.Object.create({
+      price: 5
+    }));
+  }
+  var restaurant = SC.ArrayController.create({
+    content: [],
+
+    totalCost: function() {
+      recomputed++;
+      return inventory.reduce(function(prev, item) {
+        return prev+item.get('price');
+      }, 0);
+    }.property('@each.price').cacheable()
+  });
+
+  restaurant.set('content', inventory);
+
+  equals(restaurant.get('totalCost'), 100, "precond - computes cost of all items");
+  inventory[0].set('price', 6);
+
+  equals(restaurant.get('totalCost'), 101, "recalculates after dependent key on an enumerable item changes");
+  inventory[19].set('price', 6);
+
+  equals(restaurant.get('totalCost'), 102, "recalculates after dependent key on a different item changes");
+  inventory.pushObject(SC.Object.create({
+    price: 5
+  }));
+  equals(restaurant.get('totalCost'), 107, "recalculates after adding an item to the enumerable");
+
+  var item = inventory.popObject();
+  equals(restaurant.get('totalCost'), 102, "recalculates after removing an item from the enumerable");
+
+  recomputed = 0;
+  item.set('price', 0);
+  equals(recomputed, 0, "does not recalculate after changing key on removed item");
+});
+
 // ..........................................................
 // VERIFY SC.ARRAY COMPLIANCE
 //
