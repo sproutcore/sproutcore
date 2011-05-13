@@ -241,6 +241,7 @@ SC.FlowedLayout = {
   flowSpacingForChild: function(idx, view) {
     var spacing = view.get("flowSpacing");
     if (SC.none(spacing)) spacing = this.get("defaultFlowSpacing");
+    if (SC.none(spacing)) spacing = 0;
     
     if (SC.typeOf(spacing) === SC.T_NUMBER) {
       spacing = { left: spacing, right: spacing, bottom: spacing, top: spacing };

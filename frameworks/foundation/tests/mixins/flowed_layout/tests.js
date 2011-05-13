@@ -857,3 +857,56 @@ test("isSpacer", function() {
 
 });
 
+test("undefined and null can be passed for both defaultFlowSpacing and child's flowSpacing", function() {
+  var view = SC.View.create(SC.FlowedLayout, {
+    childViews: 'a b c'.w(),
+
+    a: SC.View.create({
+      layout: { width: 100, height: 100 }
+    }),
+
+    b: SC.View.create({
+      layout: { width: 300, height: 100 }
+    }),
+
+    c: SC.View.create({
+      layout: { width: 200, height: 100 }
+    })
+  });
+
+  var expect = {
+    wrap: {
+      400: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 300, height: 100 },
+        { left: 0, top: 100, width: 200, height: 100 }
+      ],
+      600: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 300, height: 100 },
+        { left: 400, top: 0, width: 200, height: 100 }
+      ]
+    },
+
+    noWrap: {
+      400: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 300, height: 100 },
+        { left: 400, top: 0, width: 200, height: 100 }
+      ],
+      600: [
+        { left: 0, top: 0, width: 100, height: 100 },
+        { left: 100, top: 0, width: 300, height: 100 },
+        { left: 400, top: 0, width: 200, height: 100 }
+      ]
+    }
+  };
+
+  checkPositions(view, expect);
+
+  view.set('defaultFlowSpacing', undefined);
+
+  checkPositions(view, expect);
+
+});
+
