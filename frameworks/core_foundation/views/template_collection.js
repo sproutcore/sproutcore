@@ -138,7 +138,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   arrayContentWillChange: function(start, removedCount, addedCount) {
     // If the contents were empty before and this template collection has an empty view
     // remove it now.
-    emptyView = this.get('emptyView');
+    var emptyView = this.get('emptyView');
     if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
 
     // Loop through child views that correspond with the removed items.
@@ -149,9 +149,11 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     len = childViews.get('length');
     for (idx = start+removedCount-1; idx >= start; idx--) {
       childView = childViews[idx];
-      childView.$().remove();
-      childView.removeFromParent();
-      childView.destroy();
+      if (childView) {
+        childView.$().remove();
+        childView.removeFromParent();
+        childView.destroy();
+      }
     }
   },
 
@@ -174,7 +176,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         itemViewClass = this.get('itemViewClass'),
         childViews    = this.get('childViews'),
         addedViews    = [],
-        renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
+        renderFunc, childView, itemOptions, elem, insertAtElement, item,
+        itemElem, idx, len, view;
 
     var addedObjects = content.slice(start, start+addedCount);
 
