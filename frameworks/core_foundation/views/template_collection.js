@@ -149,9 +149,11 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     len = childViews.get('length');
     for (idx = start+removedCount-1; idx >= start; idx--) {
       childView = childViews[idx];
-      childView.$().remove();
-      childView.removeFromParent();
-      childView.destroy();
+      if (childView) {
+        childView.$().remove();
+        childView.removeFromParent();
+        childView.destroy();
+      }
     }
   },
 
@@ -174,7 +176,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         itemViewClass = this.get('itemViewClass'),
         childViews    = this.get('childViews'),
         addedViews    = [],
-        renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
+        renderFunc, childView, itemOptions, elem, insertAtElement, item,
+        itemElem, idx, len, view;
 
     var addedObjects = content.slice(start, start+addedCount);
 
