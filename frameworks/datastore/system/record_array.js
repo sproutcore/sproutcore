@@ -427,10 +427,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /** @private
-    Called by the store whenever it changes the state of certain store keys.
-    If the receiver cares about these changes, it will mark itself as dirty.
-    The next time you try to access the record array it will update any
-    pending changes.
+    Called by the store whenever it changes the state of certain store keys. If
+    the receiver cares about these changes, it will mark itself as dirty and add
+    the changed store keys to the _scq_changedStoreKeys index set.
+
+    The next time you try to access the record array, it will call `flush()` and
+    add the changed keys to the underlying `storeKeys` array if the new records
+    match the conditions of the record array's query.
 
     @param {SC.Array} storeKeys the effected store keys
     @param {SC.Set} recordTypes the record types for the storeKeys.
@@ -448,11 +451,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     changed.addEach(storeKeys);
 
     this.set('needsFlush', YES);
-
     if (this.get('storeKeys')) {
       this.flush();
-    } else {
-      this.arrayContentDidChange();
     }
 
     return this;
