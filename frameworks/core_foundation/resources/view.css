@@ -39,9 +39,10 @@
     border: none ;
   }
   /* Images by default do not have a border inside of an image */
-  &.sc-hidden {
-    display: none !important;
-  }
+}
+
+.sc-hidden {
+  display: none !important;
 }
 
 /* Set here so when we set a border-width we'll see something
