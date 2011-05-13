@@ -6,6 +6,6 @@
 // ==========================================================================
 
 SC.Button.initMixin = function(){
-  SC.Logger.warn("SC.Button is deprecated and does nothing. Subclass SC.ButtonView instead.");
+  throw "SC.Button is deprecated as a mixin and is now a subclass of SC.TemplateView. Subclass SC.ButtonView instead.";
 };
 
