@@ -30,6 +30,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
   didCreateLayer: function() {
+    // FIXME: didCreateLayer gets called multiple times when template collection
+    // views are nested - this is a hack to avoid rendering the content more
+    // than once.
+    if (this._sctcv_layerCreated) { return; }
+    this._sctcv_layerCreated = true;
+
     var content = this.get('content');
     if(content) {
       this.arrayContentDidChange(0, 0, content.get('length'));
@@ -63,6 +69,37 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     @type String
   */
   itemViewTemplateName: null,
+
+  /**
+    A template to render when there is no content or the content length is 0.
+  */
+  inverseTemplate: function(key, value) {
+    if (value !== undefined) {
+      return value;
+    }
+
+    var templateName = this.get('inverseTemplateName'),
+        template = this.get('templates').get(templateName);
+
+    if (!template) {
+      //@if(debug)
+      if (templateName) {
+        SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
+      }
+      //@endif
+
+      return function() { return ''; };
+    }
+
+    return template;
+  }.property('inverseTemplateName').cacheable(),
+
+  /**
+    The name of a template to lookup if no inverse template is provided.
+
+    @property {String}
+  */
+  inverseTemplateName: null,
 
   itemContext: null,
 
@@ -206,17 +243,17 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
 
     for (idx = 0; idx < len; idx++) {
       item = addedObjects.objectAt(idx);
-      view = this.createChildView(itemViewClass.extend(itemOptions, {
+      childView = this.createChildView(itemViewClass.extend(itemOptions, {
         content: item,
         render: renderFunc
       }));
 
-      var contextProperty = view.get('contextProperty');
+      var contextProperty = childView.get('contextProperty');
       if (contextProperty) {
-        view.set('context', view.get(contextProperty));
+        childView.set('context', childView.get(contextProperty));
       }
 
-      itemElem = view.createLayer().$();
+      itemElem = childView.createLayer().$();
       if (!insertAtElement) {
         elem.append(itemElem);
       } else {
@@ -224,20 +261,20 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       }
       insertAtElement = itemElem;
 
-      addedViews.push(view);
+      addedViews.push(childView);
     }
 
     childViews.replace(start, 0, addedViews);
 
     var inverseTemplate = this.get('inverseTemplate');
     if (childViews.get('length') === 0 && inverseTemplate) {
-      view = this.createChildView(SC.TemplateView.extend({
+      childView = this.createChildView(SC.TemplateView.extend({
         template: inverseTemplate,
         content: this
       }));
-      this.set('emptyView', view);
-      view.createLayer().$().appendTo(elem);
-      this.childViews = [view];
+      this.set('emptyView', childView);
+      childView.createLayer().$().appendTo(elem);
+      this.childViews = [childView];
     }
 
     // Because the layer has been modified, we need to invalidate the frame
