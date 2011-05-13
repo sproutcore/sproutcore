@@ -87,9 +87,7 @@ test("should work with @each dependent keys", function() {
 
   var obj = SC.Object.create({
     total: function() {
-      debugger;
       return this.get('content').reduce(function(prev, item) {
-        debugger;
         return prev + item.get('value');
       }, 0);
     }.property('content.@each.value'),
