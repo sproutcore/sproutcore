@@ -29,7 +29,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   fillWidth: YES,
   
   defaultFlowSpacing: SC.propertyFromRenderDelegate('flowSpacing'),
-  flowPaddingg: SC.propertyFromRenderDelegate('flowPadding'),
+  flowPadding: SC.propertyFromRenderDelegate('flowPadding'),
 
   classNames: ["sc-form-row-view"],
   
@@ -78,8 +78,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   /**
     Updates keys, content, etc. on fields. Also, handles our "special" field (only-one case)
   */
-  createChildViews: function()
-  {
+  createChildViews: function() {
     // keep array of keys so we can pass on key to child.
     var cv = SC.clone(this.get("childViews"));
     
@@ -153,8 +152,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 });
 
 SC.FormRowView.mixin({
-	row: function(label, fieldType, ext)
-	{
+	row: function(label, fieldType, ext) {
 	  if (label.isClass) {
 	    ext = fieldType;
 	    fieldType = label;
