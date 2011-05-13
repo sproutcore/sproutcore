@@ -111,16 +111,14 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   /**
      @private
   */
-  init: function()
-  {
+  init: function() {
     if (this.get("editsByDefault")) this.set("isEditing", YES);
     sc_super();
   },
 
   /**
   */
-  createChildViews: function()
-  {
+  createChildViews: function() {
     var cv = SC.clone(this.get("childViews"));
     var idx, len = cv.length, key, v, exampleRow = this.get("exampleRow");
 
@@ -162,9 +160,10 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         // try to get the actual view
         v = this.get(key);
 
-        // see if it does indeed exist, and if it doesn't have a value already
-        if (v && !v.isClass && v.hasContentValueSupport) {
-          // set content
+        if (v && !v.isClass) {
+          // we set 'content' on any object. If the object has contentValueSupport, we bind
+          // content directly; otherwise, we bind it directly to the corresponding property
+          // on content.
           if (!v.get("content")) {
 
             if (v.get('hasContentValueSupport')) {
@@ -172,20 +171,24 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
               v.bind('content', '.owner.content');
 
             } else {
-              // if it isn't a control then we can't use contentValueKey, so bind the content manually
+              // if it isn't a control then we can't set contentValueKey, so bind the content manually
               v.bind('content', '.owner.content.' + key);
             }
           }
 
-          // set the label size measuring stuff
-          if (this.get('labelWidth') !== null) {
-            v.set("shouldMeasureLabel", NO);
+          // for form rows, set up label measuring and the label itself.
+          if (v.isFormRow) {
+            // set label (if possible).
+            if (SC.none(v.get('label'))) {
+                v.set("label", key.humanize().titleize());
+            }
+
+            // set the label size measuring stuff
+            if (this.get('labelWidth') !== null) {
+              v.set("shouldMeasureLabel", NO);
+            }
           }
 
-          // set label (if possible)
-          if (v.get("isFormRow") && SC.none(v.get("label"))) {
-            v.set("label", key.humanize().titleize());
-          }
         }
       }
     }
