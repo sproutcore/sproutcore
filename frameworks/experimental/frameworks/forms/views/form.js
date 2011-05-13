@@ -12,11 +12,8 @@ sc_require("views/form_row");
 
 /** 
   @class
-
-  FormView is a lot like a normal view. However, in addition to the childViews
-  collection, it has a fields collection. The items referenced here are NOT
-  just children; they are explicity stated in the array fields, which works
-  just like childViews, but marks fields to be laid out automatically.
+  FormView lays out rows, manages their label widths, binds their
+  content properties, and sets up their contentValueKeys as needed.
 
   Usually, you will place rows into the FormView:
   
@@ -32,21 +29,9 @@ sc_require("views/form_row");
         items: ["male", "female"]
       }))
 
-  The name of the row (ie. 'fullName'), is passed down to the *FieldView, and used as the key
+  The name of the row (ie. 'fullName'), is passed down to the fields, and used as the key
   to bind the value property to the content. In this case it will bind content.fullName to the
-  value property of the textFieldView. Easy!
-
-  One important thing about the field collection: It can contain any type of
-  view, including other FormViews or subclasses of FormView.
-
-  This is important, because this is how you make nice rows that have a
-  label and a field: these rows are actually subclasses of FormView itself.
-
-  Editing
-  -------
-  
-  The form does not allow editing by default; editing must be started by calling
-  beginEditing.
+  value property of the textFieldView.
 
 
   @extends SC.View
@@ -78,18 +63,6 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
     Whether to automatically start editing.
   */
   editsByDefault: YES,
-
-  /**
-    The input key view (to set previousKeyView for the first row, field, or sub-form).
-
-    For fields, this will likely be the field itself.
-  */
-  firstKeyView: null,
-
-  /**
-    The output key view.
-  */
-  lastKeyView: null,
 
   /**
     The content to bind the form to. This content object is passed to all children.
@@ -134,20 +107,6 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
       }
     }
 
-    // a childView named 'myField' will want a contentValueKey 'myField' so it knows what
-    // property to grab from its content.
-    for (idx = 0; idx < len; idx++) {
-      key = cv[idx];
-      if (SC.typeOf(key) === SC.T_STRING) {
-        v = this.get(key);
-        if (v.isClass && v.prototype.hasContentValueSupport && !v.prototype.contentValueKey){
-          v.prototype.contentValueKey = key ;
-        } else if(v.isClass) {
-          v.prototype.formKey = key;
-        }
-      }
-    }
-
     // we will be initializing the 'content' property for all child views
     var content = this.get("content");
     sc_super();
@@ -161,19 +120,24 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         v = this.get(key);
 
         if (v && !v.isClass) {
-          // we set 'content' on any object. If the object has contentValueSupport, we bind
-          // content directly; otherwise, we bind it directly to the corresponding property
-          // on content.
+          // we set 'contentValueKey' on any object that has ContentValueSupport.
+          // Note that FormRowViews typically do NOT have content value support.
+          // They just pass on 'content' and their own formKey.
+          if (v.hasContentValueSupport && !v.get('contentValueKey')) {
+            v.set('contentValueKey', key);
+          }
+
+          // we give ALL views a formKey for their convenience.
+          v.set('formKey', key);
+
+          // We used to try to be clever and bind child views' 'content' to 
+          // individual properties if the views didn't have content value support.
+          // For instance, a plain view named 'myView' would get bound to content.myView.
+          //
+          // Cleverness is evil, so, we have dropped this. Instead, we always bind content,
+          // and always do so directly.
           if (!v.get("content")) {
-
-            if (v.get('hasContentValueSupport')) {
-              // controls can calculate their own value based on the contentValueKey we set earlier
-              v.bind('content', '.owner.content');
-
-            } else {
-              // if it isn't a control then we can't set contentValueKey, so bind the content manually
-              v.bind('content', '.owner.content.' + key);
-            }
+            v.bind('content', this, 'content');
           }
 
           // for form rows, set up label measuring and the label itself.
