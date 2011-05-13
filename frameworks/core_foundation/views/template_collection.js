@@ -138,7 +138,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   arrayContentWillChange: function(start, removedCount, addedCount) {
     // If the contents were empty before and this template collection has an empty view
     // remove it now.
-    emptyView = this.get('emptyView');
+    var emptyView = this.get('emptyView');
     if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
 
     // Loop through child views that correspond with the removed items.
