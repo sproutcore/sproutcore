@@ -19,24 +19,27 @@ sc_require("mixins/edit_mode");
 
 SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode,
 /** @scope Forms.FormRowView.prototype */ {
+  classNames: ["sc-form-row-view"],
   renderDelegateName: 'formRowRenderDelegate',
-  
+
+  flowPadding: SC.propertyFromRenderDelegate('flowPadding'),
+  defaultFlowSpacing: SC.propertyFromRenderDelegate('flowSpacing'),
+
+  fillWidth: YES,
+  layoutDirection: SC.LAYOUT_HORIZONTAL,
+
   layout: {left: 0, width: 0, height: 0},
 
-  rowFlowSpacing: undefined,
-  rowFlowPadding: undefined,
-  
-  fillWidth: YES,
-  
-  defaultFlowSpacing: SC.propertyFromRenderDelegate('flowSpacing'),
-  flowPadding: SC.propertyFromRenderDelegate('flowPadding'),
-
-  classNames: ["sc-form-row-view"],
-  
   /**
     Walks like a duck.
   */
   isFormRow: YES,
+
+  /**
+    A value set so that FormView knows to tell us about the row label size change.
+  */
+  hasRowLabel: YES,
+
   
   /**
     The text to display next to the row. If undefined, SproutCore will try
@@ -45,55 +48,53 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   label: undefined,
   
   /**
-    The amount of size to give the label.
+    The actual size for the label, as assigned by the parent FormView.
   */
   rowLabelSize: 0,
   
   /**
-    The current measured size of the label.
+    The measured size of the label. The parent FormView may use this to
+    determine the proper rowLabelSize.
   */
   rowLabelMeasuredSize: 0,
   
   /**
-    If NO, the label will not automatically measure itself. Note that
-    FormRowView never changes its own label size: it only measures it.
-    The measurement is placed into rowLabelMeasuredSize.
+    If NO, the label will not automatically measure itself. The parent
+    FormView normally manages this property for FormRowView.
+
+    Note that FormRowView never changes its own rowLabelSize: it only 
+    measures it. The measurement is placed into rowLabelMeasuredSize.
+
+    The FormView then sets the rowLabelSize, which is used to set the
+    width of the LabelView.
   */
   shouldMeasureLabel: YES,
-  
+
   /**
-    A value set so that FormView knows to tell us about the row label size change.
+    The label view. The default is an SC.FormRowView.LabelView, which is
+    configured to handle resizing.
   */
-  hasRowLabel: YES,
-  
-  /**
-    The label view.
-  */
-  labelView: null,
-  
-  /**
-    Direction of the flow. Form Rows layout from left to right, up to down.
-  */
-  layoutDirection: SC.LAYOUT_HORIZONTAL,
-  
+  labelView: null, // NOTE: gets set at end of file.
+
   /**
     Updates keys, content, etc. on fields. Also, handles our "special" field (only-one case)
   */
   createChildViews: function() {
     // keep array of keys so we can pass on key to child.
-    var cv = SC.clone(this.get("childViews"));
+    var cv = SC.clone(this.get('childViews'));
     
     // add label
     if (this.labelView.isClass) {
       this.labelView = this.createChildView(this.labelView, {
-        value: this.get("label")
+        value: this.get('label')
       });
-      this.labelView.addObserver("measuredSize", this, "labelSizeDidChange");
-      this.labelView.bind("shouldMeasureSize", this, "shouldMeasureLabel");
-      this.get("childViews").unshift(this.labelView);
+
+      this.labelView.addObserver('measuredSize', this, 'labelSizeDidChange');
+      this.labelView.bind('shouldMeasureSize', this, 'shouldMeasureLabel');
+      this.get('childViews').unshift(this.labelView);
     }
     
-    var content = this.get("content");
+    var content = this.get('content');
     
     sc_super();
     
@@ -107,27 +108,29 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
       if (SC.typeOf(key) === SC.T_STRING) {
         // try to get the actual view
         v = this.get(key);
-        
+
         // see if it does indeed exist, and if it doesn't have a value already
         if (v && !v.isClass) {
-          if (!v.get("contentValueKey")) {
+          if (!v.get('contentValueKey')) {
             //
             // NOTE: WE HAVE A SPECIAL CASE
-            //       If this is the single field, pass through our contentValueKey
+            //       If this is the single field, pass through our formKey
+            //       Single-field rows are created by the SC.FormView.row helper.
             if (key === "_singleField")  {
-              v.set("contentValueKey", this.get("contentValueKey"));
+              v.set('contentValueKey', this.get('formKey'));
             } else {
-              v.set("contentValueKey", key);
+              v.set('contentValueKey', key);
             }
           }
-          if (!v.get("content")) {
-            v.bind('content', '.owner.content') ;
+
+          if (!v.get('content')) {
+            v.bind('content', this, 'content') ;
           }
         }
-        
+
       }
     }
-    
+
     this.rowLabelSizeDidChange();
   },
   
