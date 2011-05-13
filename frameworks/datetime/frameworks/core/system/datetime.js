@@ -7,43 +7,58 @@
 
 /**
   Standard error thrown by `SC.Scanner` when it runs out of bounds
-  
-  @property {Error}
+
+  @static
+  @constant
+  @type Error
 */
 SC.SCANNER_OUT_OF_BOUNDS_ERROR = new Error("Out of bounds.");
 
 /**
   Standard error thrown by `SC.Scanner` when  you pass a value not an integer.
   
-  @property {Error}
+  @static
+  @constant
+  @type Error
 */
 SC.SCANNER_INT_ERROR = new Error("Not an int.");
 
 /**
   Standard error thrown by `SC.SCanner` when it cannot find a string to skip.
   
-  @property {Error}
+  @static
+  @constant
+  @type Error
 */
 SC.SCANNER_SKIP_ERROR = new Error("Did not find the string to skip.");
 
 /** 
   Standard error thrown by `SC.Scanner` when it can any kind a string in the 
   matching array.
+
+  @static
+  @constant
+  @type Error
 */
 SC.SCANNER_SCAN_ARRAY_ERROR = new Error("Did not find any string of the given array to scan.");
 
 /**
   Standard error thrown when trying to compare two dates in different 
   timezones.
-  
-  @property {Error}
+
+  @static
+  @constant
+  @type Error
 */
 SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
 
 /**
   Standard ISO8601 date format
-  
-  @property {String}
+
+  @static
+  @type String
+  @default '%Y-%m-%dT%H:%M:%S%Z'
+  @constant
 */
 SC.DATETIME_ISO8601 = '%Y-%m-%dT%H:%M:%S%Z';
 
@@ -69,8 +84,7 @@ SC.Scanner = SC.Object.extend(
     
         SC.Scanner.create({string: 'May, 8th'});
     
-    @property
-    @type {String}
+    @type String
   */
   string: null,
   
@@ -79,8 +93,7 @@ SC.Scanner = SC.Object.extend(
     characters are processed.
     The default is 0: the beginning of the string.
     
-    @property
-    @type {integer}
+    @type Integer
   */
   scanLocation: 0,
   
@@ -88,9 +101,9 @@ SC.Scanner = SC.Object.extend(
     Reads some characters from the string, and increments the scan location
     accordingly. 
     
-    @param {integer} len the amount of characters to read
-    @throws {SC.SCANNER_OUT_OF_BOUNDS_ERROR} if asked to read too many characters
-    @returns {String} the characters
+    @param {Integer} len The amount of characters to read
+    @throws {SC.SCANNER_OUT_OF_BOUNDS_ERROR} If asked to read too many characters
+    @returns {String} The characters
   */
   scan: function(len) {
     if (this.scanLocation + len > this.length) throw SC.SCANNER_OUT_OF_BOUNDS_ERROR;
@@ -102,10 +115,10 @@ SC.Scanner = SC.Object.extend(
   /**
     Reads some characters from the string and interprets it as an integer.
     
-    @param {integer} min_len the minimum amount of characters to read
-    @param {integer} max_len optionally the maximum amount of characters to read (defaults to the minimum)
-    @throws {SC.SCANNER_INT_ERROR} if asked to read non numeric characters
-    @returns {integer} the scanned integer
+    @param {Integer} min_len The minimum amount of characters to read
+    @param {Integer} [max_len] The maximum amount of characters to read (defaults to the minimum)
+    @throws {SC.SCANNER_INT_ERROR} If asked to read non numeric characters
+    @returns {Integer} The scanned integer
   */
   scanInt: function(min_len, max_len) {
     if (max_len === undefined) max_len = min_len;
@@ -122,9 +135,9 @@ SC.Scanner = SC.Object.extend(
   /**
     Attempts to skip a given string.
     
-    @param {String} str the string to skip
-    @throws {SC.SCANNER_SKIP_ERROR} if the given string could not be scanned
-    @returns {Boolean} YES if the given string was successfully scanned
+    @param {String} str The string to skip
+    @throws {SC.SCANNER_SKIP_ERROR} If the given string could not be scanned
+    @returns {Boolean} YES if the given string was successfully scanned, NO otherwise
   */
   skipString: function(str) {
     if (this.scan(str.length) !== str) throw SC.SCANNER_SKIP_ERROR;
@@ -135,8 +148,8 @@ SC.Scanner = SC.Object.extend(
     Attempts to scan any string in a given array.
     
     @param {Array} ary the array of strings to scan
-    @throws {SC.SCANNER_SCAN_ARRAY_ERROR} if no string of the given array is found
-    @returns {integer} the index of the scanned string of the given array
+    @throws {SC.SCANNER_SCAN_ARRAY_ERROR} If no string of the given array is found
+    @returns {Integer} The index of the scanned string of the given array
   */
   scanArray: function(ary) {
     for (var i = 0, len = ary.length; i < len; i++) {
@@ -189,9 +202,11 @@ SC.Scanner = SC.Object.extend(
   @since SproutCore 1.0
 */
 SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
-  /** @scope SC.DateTime.prototype */ {
+/** @scope SC.DateTime.prototype */ {
   
-  /** @private
+  /**
+    @private
+
     Internal representation of a date: the number of milliseconds
     since January, 1st 1970 00:00:00.0 UTC.
     
@@ -199,57 +214,53 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     @type {Integer}
   */
   _ms: 0,
-  
+
   /** @read-only
     The offset, in minutes, between UTC and the object's timezone.
     All calls to `get()` will use this time zone to translate date/time
     values into the zone specified here.
-    
-    @property
-    @type {Integer}
+
+    @type Integer
   */
   timezone: 0,
   
   /**
-    A `DateTime` instance is frozen by default for better performance.
-    
-    @property
-    @type {Boolean}
+    A `SC.DateTime` instance is frozen by default for better performance.
+
+    @type Boolean
   */
   isFrozen: YES,
-  
+
   /**
-    Returns a new `DateTime` object where one or more of the elements have been
+    Returns a new `SC.DateTime` object where one or more of the elements have been
     changed according to the options parameter. The time options (hour,
     minute, sec, usec) reset cascadingly, so if only the hour is passed, then
     minute, sec, and usec is set to 0. If the hour and minute is passed, then
     sec and usec is set to 0.
-    
-    (Parts copied from the Ruby On Rails documentation)
-    
+
     If a time zone is passed in the options hash, all dates and times are assumed
-    to be local to it, and the returned `DateTime` instance has that time zone.  If
+    to be local to it, and the returned `SC.DateTime` instance has that time zone. If
     none is passed, it defaults to `SC.DateTime.timezone`.
 
     Note that passing only a time zone does not affect the actual milliseconds since
     Jan 1, 1970, only the time zone in which it is expressed when displayed.
-    
+
     @see SC.DateTime#create for the list of options you can pass
-    @returns {DateTime} copy of receiver
+    @returns {SC.DateTime} copy of receiver
   */
   adjust: function(options, resetCascadingly) {
     var timezone;
-    
+
     options = options ? SC.clone(options) : {};
     timezone = (options.timezone !== undefined) ? options.timezone : (this.timezone !== undefined) ? this.timezone : 0;
-    
+
     return this.constructor._adjust(options, this._ms, timezone, resetCascadingly)._createFromCurrentState();
   },
-  
+
   /**
-    Returns a new `DateTime` object advanced according the the given parameters.
+    Returns a new `SC.DateTime` object advanced according the the given parameters.
     Don't use floating point values, it might give unpredicatble results.
-    
+
     @see SC.DateTime#create for the list of options you can pass
     @param {Hash} options the amount of date/time to advance the receiver
     @returns {DateTime} copy of the receiver
@@ -257,44 +268,44 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   advance: function(options) {
     return this.constructor._advance(options, this._ms, this.timezone)._createFromCurrentState();
   },
-  
+
   /**
     Generic getter.
-    
+
     The properties you can get are:
-      - `'year'`
-      - `'month'` (January is 1, contrary to JavaScript Dates for which January is 0)
-      - `'day'`
-      - `'dayOfWeek'` (Sunday is 0)
-      - `'hour'`
-      - `'minute'`
-      - `'second'`
-      - `'millisecond'`
-      - `'milliseconds'`, the number of milliseconds since
+      - `year`
+      - `month` (January is 1, contrary to JavaScript Dates for which January is 0)
+      - `day`
+      - `dayOfWeek` (Sunday is 0)
+      - `hour`
+      - `minute`
+      - `second`
+      - `millisecond`
+      - `milliseconds`, the number of milliseconds since
         January, 1st 1970 00:00:00.0 UTC
-      - `'isLeapYear'`, a boolean value indicating whether the receiver's year
+      - `isLeapYear`, a boolean value indicating whether the receiver's year
         is a leap year
-      - `'daysInMonth'`, the number of days of the receiver's current month
-      - `'dayOfYear'`, January 1st is 1, December 31th is 365 for a common year
-      - `'week'` or `'week1'`, the week number of the current year, starting with
+      - `daysInMonth`, the number of days of the receiver's current month
+      - `dayOfYear`, January 1st is 1, December 31th is 365 for a common year
+      - `week` or `week1`, the week number of the current year, starting with
         the first Sunday as the first day of the first week (00..53)
-      - `'week0'`, the week number of the current year, starting with
+      - `week0`, the week number of the current year, starting with
         the first Monday as the first day of the first week (00..53)
-      - `'lastMonday'`, `'lastTuesday'`, etc., `'nextMonday'`,
-        `'nextTuesday'`, etc., the date of the last or next weekday in
+      - `lastMonday`, `lastTuesday`, etc., `nextMonday`,
+        `nextTuesday`, etc., the date of the last or next weekday in
         comparison to the receiver.
-    
+
     @param {String} key the property name to get
     @return the value asked for
   */
   unknownProperty: function(key) {
     return this.constructor._get(key, this._ms, this.timezone);
   },
-  
+
   /**
     Formats the receiver according to the given format string. Should behave
     like the C strftime function.
-  
+
     The format parameter can contain the following characters:
       - %a -- The abbreviated weekday name (``Sun'')
       - %A -- The full weekday name (``Sunday'')
@@ -326,28 +337,31 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - %Y -- Year with century
       - %Z -- Time zone (ISO 8601 formatted)
       - %% -- Literal ``%'' character
-    
+
     @param {String} format the format string
     @return {String} the formatted string
   */
   toFormattedString: function(fmt) {
     return this.constructor._toFormattedString(fmt, this._ms, this.timezone);
   },
-  
+
   /**
     Formats the receiver according ISO 8601 standard. It is equivalent to
     calling toFormattedString with the `'%Y-%m-%dT%H:%M:%S%Z'` format string.
-    
+
     @return {String} the formatted string
   */
   toISO8601: function(){
     return this.constructor._toFormattedString(SC.DATETIME_ISO8601, this._ms, this.timezone);
   },
-  
-  /** @private
+
+  /**
+    @private
+
     Creates a string representation of the receiver.
+
     (Debuggers often call the `toString` method. Because of the way
-    `DateTime` is designed, calling `SC.DateTime._toFormattedString` would
+    `SC.DateTime` is designed, calling `SC.DateTime._toFormattedString` would
     have a nasty side effect. We shouldn't therefore call any of
     `SC.DateTime`'s methods from `toString`)
     
@@ -361,10 +375,10 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   },
   
   /**
-    Returns `YES` if the passed `DateTime` is equal to the receiver, ie: if their
+    Returns `YES` if the passed `SC.DateTime` is equal to the receiver, ie: if their
     number of milliseconds since January, 1st 1970 00:00:00.0 UTC are equal.
     This is the preferred method for testing equality.
-  
+
     @see SC.DateTime#compare
     @param {SC.DateTime} aDateTime the DateTime to compare to
     @returns {Boolean}
@@ -372,12 +386,12 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   isEqual: function(aDateTime) {
     return SC.DateTime.compare(this, aDateTime) === 0;
   },
-  
+
   /**
-    Returns a copy of the receiver. Because of the way `DateTime` is designed,
+    Returns a copy of the receiver. Because of the way `SC.DateTime` is designed,
     it just returns the receiver.
-    
-    @returns {DateTime}
+
+    @returns {SC.DateTime}
   */
   copy: function() {
     return this;
@@ -387,15 +401,15 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     Returns a copy of the receiver with the timezone set to the passed
     timezone. The returned value is equal to the receiver (ie `SC.Compare`
     returns 0), it is just the timezone representation that changes.
-    
+
     If you don't pass any argument, the target timezone is assumed to be 0,
     ie UTC.
 
     Note that this method does not change the underlying position in time,
-    but only the time zone in which it is displayed.  In other words, the underlying
+    but only the time zone in which it is displayed. In other words, the underlying
     number of milliseconds since Jan 1, 1970 does not change.
-    
-    @return {DateTime}
+
+    @return {SC.DateTime}
   */
   toTimezone: function(timezone) {
     if (timezone === undefined) timezone = 0;
@@ -404,127 +418,130 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   
 });
 
-// Class Methods
 SC.DateTime.mixin(SC.Comparable,
-  /** @scope SC.DateTime */ {
-  
+/** @scope SC.DateTime */ {
+
   /**
     The default format (ISO 8601) in which DateTimes are stored in a record.
     Change this value if your backend sends and receives dates in another
     format.
-    
+
     This value can also be customized on a per-attribute basis with the format
     property. For example:
-    
+
         SC.Record.attr(SC.DateTime, { format: '%d/%m/%Y %H:%M:%S' })
-    
-    @property
-    @type {String}
+
+    @type String
+    @default SC.DATETIME_ISO8601
   */
   recordFormat: SC.DATETIME_ISO8601,
-  
+
   /**
-    @property
-    @type {Array}
+    @type Array
     @default ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   */
   dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   
-  /** @private
-    The English day names used for the 'lastMonday',
-    'nextTuesday', etc., getters.
+  /**
+    @private
 
-    @property
-    @type {Array}
+    The English day names used for the 'lastMonday', 'nextTuesday', etc., getters.
+
+    @type Array
   */
   _englishDayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   
   /**
-    @property
-    @type {Array}
+    @type Array
     @default ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   */
   abbreviatedDayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 
   /**
-    @property
-    @type {Array}
+    @type Array
     @default ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
   */
   monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 
   /**
-    @property
-    @type {Array}
+    @type Array
     @default ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   */
   abbreviatedMonthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   
-  /** @private
+  /**
+    @private
+
     The unique internal `Date` object used to make computations. Better
     performance is obtained by having only one Date object for the whole
     application and manipulating it with `setTime()` and `getTime()`.
-    
+
     Note that since this is used for internal calculations across many
-    `DateTime` instances, it is not guaranteed to store the date/time that
-    any one `DateTime` instance represents.  So it might be that
+    `SC.DateTime` instances, it is not guaranteed to store the date/time that
+    any one `SC.DateTime` instance represents.  So it might be that
 
         this._date.getTime() !== this._ms
 
     Be sure to set it before using for internal calculations if necessary.
 
-    @property
-    @type {Date}
+    @type Date
   */
   _date: new Date(),
-  
-  /** @private
+
+  /**
+    @private
+
     The offset, in minutes, between UTC and the currently manipulated
-    DateTime instance.
-    
-    @property
-    @type {Integer}
+    `SC.DateTime` instance.
+
+    @type Integer
   */
   _tz: 0,
   
   /**
     The offset, in minutes, between UTC and the local system time. This
     property is computed at loading time and should never be changed.
-    
-    @property
-    @type {Integer}
+
+    @type Integer
+    @default new Date().getTimezoneOffset()
+    @constant
   */
   timezone: new Date().getTimezoneOffset(),
   
-  /** @private
-    A cache of `SC.DateTime` instances. If you attempt to create a SC.DateTime
+  /**
+    @private
+
+    A cache of `SC.DateTime` instances. If you attempt to create a `SC.DateTime`
     instance that has already been created, then it will return the cached
     value.
 
-    @property
-    @type {Array}
+    @type Array
   */
   _dt_cache: {},
   
-  /** @private
+  /**
+    @private
+
     The index of the lastest cached value. Used with `_DT_CACHE_MAX_LENGTH` to
     limit the size of the cache.
 
-    @property
-    @type {Integer}
+    @type Integer
   */
   _dt_cache_index: -1,
-  
-  /** @private
+
+  /**
+    @private
+
     The maximum length of `_dt_cache`. If this limit is reached, then the cache
     is overwritten, starting with the oldest element.
 
-    @property
-    @type {Integer}
+    @type Integer
   */
   _DT_CACHE_MAX_LENGTH: 1000,
 
-  /** @private
+  /**
+    @private
+
     Both args are optional, but will only overwrite `_date` and `_tz` if
     defined. This method does not affect the DateTime instance's actual time,
     but simply initializes the one `_date` instance to a time relevant for a
@@ -552,6 +569,8 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
+    @private
+
     By this time, any time zone setting on 'hash' will be ignored.
     'timezone' will be used, or the last this._tz.
   */
@@ -561,7 +580,8 @@ SC.DateTime.mixin(SC.Comparable,
     return this._setCalcState(ms, tz); // now call the one we really wanted
   },
 
-  /** @private
+  /**
+    @private
     @see SC.DateTime#unknownProperty
   */
   _get: function(key, start, timezone) {
@@ -588,7 +608,7 @@ SC.DateTime.mixin(SC.Comparable,
     else if (key === 'timezone') {
       v = this._tz;
     }
-    
+
     // 'nextWeekday' or 'lastWeekday'.
     // We want to do this calculation in local time, before shifting UTC below.
     if (v === null) {
@@ -606,7 +626,7 @@ SC.DateTime.mixin(SC.Comparable,
         }
       }
     }
-    
+
     if (v === null) {
       // need to adjust for alternate display time zone.
       // Before calculating, we need to get everything into a common time zone to
@@ -614,7 +634,7 @@ SC.DateTime.mixin(SC.Comparable,
       if (timezone !== undefined) {
         this._setCalcState(d.getTime() - (timezone * 60000), 0); // make this instance's time zone the new UTC temporarily
       }
-    
+
       // simple keys
       switch (key) {
         case 'year':
@@ -642,7 +662,7 @@ SC.DateTime.mixin(SC.Comparable,
           v = d.getUTCMilliseconds();
           break;
       }
-      
+
       // isLeapYear
       if ((v === null) && (key === 'isLeapYear')) {
         y = this._get('year');
@@ -666,7 +686,7 @@ SC.DateTime.mixin(SC.Comparable,
             break;
         }
       }
-    
+
       // dayOfYear
       if ((v === null) && (key === 'dayOfYear')) {
         ms = d.getTime(); // save time
@@ -703,6 +723,8 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
+    @private
+
     Sets the internal calculation state to something specified.
   */
   _adjust: function(options, start, timezone, resetCascadingly) {
@@ -712,7 +734,8 @@ SC.DateTime.mixin(SC.Comparable,
     return this; // for chaining
   },
   
-  /** @private
+  /**
+    @private
     @see SC.DateTime#advance
   */
   _advance: function(options, start, timezone) {
@@ -722,7 +745,7 @@ SC.DateTime.mixin(SC.Comparable,
     for (var key in opts) {
       opts[key] += this._get(key, start, timezone);
     }
-    
+
     // The time zone can be advanced by a delta as well, so try to use the
     // new value if there is one.
     tz = (opts.timezone !== undefined) ? opts.timezone : timezone; // watch out for zero, which is acceptable as a time zone
@@ -730,7 +753,9 @@ SC.DateTime.mixin(SC.Comparable,
     return this._adjust(opts, start, tz, NO);
   },
   
-  /* @private
+  /*
+    @private
+
     Converts a standard date/time options hash to an integer representing that position
     in time relative to Jan 1, 1970
   */
@@ -747,18 +772,18 @@ SC.DateTime.mixin(SC.Comparable,
     if (!SC.none(start)) {
       d.setTime(start); // using milliseconds here specifies an absolute location in time, regardless of time zone, so that's nice
     }
-    
+
     // We have to get all time expressions, both in 'options' (assume to be in time zone 'timezone')
     // and in 'd', to the same time zone before we can any calculations correctly.  So because the Date object provides
     // a suite of UTC getters and setters, we'll temporarily redefine 'timezone' as our new
     // 'UTC', so we don't have to worry about local machine time.  We do this by subtracting
     // milliseconds for the time zone offset.  Then we'll do all our calculations, then convert
     // it back to real UTC.
-    
+
     // (Zero time zone is considered a valid value.)
     tz = (timezone !== undefined) ? timezone : (this.timezone !== undefined) ? this.timezone : 0;
     d.setTime(d.getTime() - (tz * 60000)); // redefine 'UTC' to establish a new local absolute so we can use all the 'getUTC...()' Date methods
-    
+
     // the time options (hour, minute, sec, millisecond)
     // reset cascadingly (see documentation)
     if (resetCascadingly === undefined || resetCascadingly === YES) {
@@ -774,7 +799,7 @@ SC.DateTime.mixin(SC.Comparable,
         opts.millisecond = 0;
       }
     }
-    
+
     // Get the current values for any not provided in the options hash.
     // Since everything is in 'UTC' now, use the UTC accessors.  We do this because,
     // according to javascript Date spec, you have to set year, month, and day together
@@ -805,35 +830,35 @@ SC.DateTime.mixin(SC.Comparable,
 
     return ms;
   },
-  
+
   /**
-    Returns a new DateTime object advanced according the the given parameters.
+    Returns a new `SC.DateTime` object advanced according the the given parameters.
     The parameters can be:
-    
-     - none, to create a DateTime instance initialized to the current
+
+     - none, to create a `SC.DateTime` instance initialized to the current
        date and time in the local timezone,
      - a integer, the number of milliseconds since
        January, 1st 1970 00:00:00.0 UTC
      - a options hash that can contain any of the following properties: year,
        month, day, hour, minute, second, millisecond, timezone
-      
+
     Note that if you attempt to create a `SC.DateTime` instance that has already
     been created, then, for performance reasons, a cached value may be
     returned.
-    
+
     The timezone option is the offset, in minutes, between UTC and local time.
     If you don't pass a timezone option, the date object is created in the
     local timezone. If you want to create a UTC+2 (CEST) date, for example,
     then you should pass a timezone of -120.
-    
+
     @param options one of the three kind of parameters descibed above
-    @returns {DateTime} the DateTime instance that corresponds to the
+    @returns {SC.DateTime} the SC.DateTime instance that corresponds to the
       passed parameters, possibly fetched from cache
   */
   create: function() {
     var arg = arguments.length === 0 ? {} : arguments[0];
     var timezone;
-    
+
     // if simply milliseconds since Jan 1, 1970 are given, just use those
     if (SC.typeOf(arg) === SC.T_NUMBER) {
       arg = { milliseconds: arg };
@@ -871,10 +896,12 @@ SC.DateTime.mixin(SC.Comparable,
     }
   },
   
-  /** @private
+  /**
+    @private
+
     Calls the `create()` method with the current internal `_date` value.
-    
-    @return {DateTime} the DateTime instance returned by create()
+
+    @return {SC.DateTime} the SC.DateTime instance returned by create()
   */
   _createFromCurrentState: function() {
     return this.create({
@@ -884,7 +911,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
   
   /**
-    Returns a `DateTime` object created from a given string parsed with a given
+    Returns a `SC.DateTime` object created from a given string parsed with a given
     format. Returns `null` if the parsing fails.
 
     @see SC.DateTime#toFormattedString for a description of the format parameter
@@ -897,9 +924,9 @@ SC.DateTime.mixin(SC.Comparable,
     // retains state across function calls
     var re = new RegExp('(?:%([aAbBcdDhHiIjmMpsSUWwxXyYZ%])|(.))', "g");
     var d, parts, opts = {}, check = {}, scanner = SC.Scanner.create({string: str});
-    
+
     if (SC.none(fmt)) fmt = SC.DATETIME_ISO8601;
-    
+
     try {
       while ((parts = re.exec(fmt)) !== null) {
         switch(parts[1]) {
@@ -946,37 +973,40 @@ SC.DateTime.mixin(SC.Comparable,
       SC.Logger.log('SC.DateTime.createFromString ' + e.toString());
       return null;
     }
-    
+
     if (!SC.none(opts.meridian) && !SC.none(opts.hour)) {
       if (opts.meridian === 1) opts.hour = (opts.hour + 12) % 24;
       delete opts.meridian;
     }
-    
+
     d = SC.DateTime.create(opts);
-    
+
     if (!SC.none(check.dayOfWeek) && d.get('dayOfWeek') !== check.dayOfWeek) {
       return null;
     }
-    
+
     return d;
   },
-  
-  /** @private
+
+  /**
+    @private
+
     Converts the x parameter into a string padded with 0s so that the string’s
     length is at least equal to the len parameter.
     
-    @param x the object to convert to a string
+    @param {Object} x the object to convert to a string
     @param {Integer} the minimum length of the returned string
     @returns {String} the padded string
   */
   _pad: function(x, len) {
-  	var str = '' + x;
-  	if (len === undefined) len = 2;
+    var str = '' + x;
+    if (len === undefined) len = 2;
     while (str.length < len) str = '0' + str;
     return str;
   },
-  
-  /** @private
+
+  /**
+    @private
     @see SC.DateTime#_toFormattedString
   */
   __toFormattedString: function(part, start, timezone) {
@@ -989,7 +1019,7 @@ SC.DateTime.mixin(SC.Comparable,
     // This method is simply a helper for this._toFormattedString() (one underscore);
     // this is only called from there, and _toFormattedString() has already
     // set up the appropriate internal date/time/timezone state for it.
-    
+
     switch(part[1]) {
       case 'a': return this.abbreviatedDayNames[this._get('dayOfWeek')];
       case 'A': return this.dayNames[this._get('dayOfWeek')];
@@ -1029,8 +1059,9 @@ SC.DateTime.mixin(SC.Comparable,
       case '%': return '%';
     }
   },
-  
-  /** @private
+
+  /**
+    @private
     @see SC.DateTime#toFormattedString
   */
   _toFormattedString: function(format, start, timezone) {
@@ -1045,12 +1076,12 @@ SC.DateTime.mixin(SC.Comparable,
       return v;
     });
   },
-  
+
   /**
     This will tell you which of the two passed `DateTime` is greater by
     comparing their number of milliseconds since
     January, 1st 1970 00:00:00.0 UTC.
- 
+
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance
     @returns {Integer} -1 if a < b, 
@@ -1062,12 +1093,12 @@ SC.DateTime.mixin(SC.Comparable,
     var mb = b.get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
   },
-  
+
   /**
     This will tell you which of the two passed DateTime is greater
     by only comparing the date parts of the passed objects. Only dates
     with the same timezone can be compared.
- 
+
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance
     @returns {Integer} -1 if a < b,
@@ -1082,13 +1113,12 @@ SC.DateTime.mixin(SC.Comparable,
     var mb = b.adjust({hour: 0}).get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
   }
-  
+
 });
 
 /**
   Adds a transform to format the DateTime value to a String value according
-  to the passed format string. 
-  
+  to the passed format string.
 
       valueBinding: SC.Binding.dateTime('%Y-%m-%d %H:%M:%S')
                               .from('MyApp.myController.myDateTime');
