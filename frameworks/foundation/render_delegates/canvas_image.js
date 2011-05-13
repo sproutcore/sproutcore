@@ -78,10 +78,11 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
 
     // We only care about specific values, check specifically for what matters
     var innerFrameDidChange = ![innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height].isEqual(renderState._lastInnerFrameValues),
+        elemSizeDidChange = ![elem.width, elem.height].isEqual(renderState._lastElemSizeValues),
         backgroundDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'backgroundColor'),
         imageDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'image') || (image && image.complete) !== renderState._lastImageComplete;
 
-    if (innerFrameDidChange || backgroundDidChange || imageDidChange) {
+    if (elemSizeDidChange || innerFrameDidChange || backgroundDidChange || imageDidChange) {
 
       if (elem && elem.getContext) {
         elem.height = frameHeight;
@@ -103,6 +104,7 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
 
       // Update caches
       renderState._lastInnerFrameValues = [innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height];
+      renderState._lastElemSizeValues = [elem.width, elem.height];
       renderState._lastImageComplete = image && image.complete;
     }
   }

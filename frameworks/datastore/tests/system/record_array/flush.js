@@ -167,7 +167,6 @@ test("calling storeDidChangeStoreKeys() with a matching recordType should not un
 
 test("adding an array observer to a SC.RecordArray should cause the array to flush", function() {
   var callCount = 0;
-  debugger;
 
   recs.addArrayObservers({
     didChange: function() {

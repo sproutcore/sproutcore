@@ -662,7 +662,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
         chain.notifyPropertyDidChange();
 
         for (idx = 0; idx < len; idx++) {
-          item = removedObjects[idx];
+          item = removedObjects.objectAt(idx);
           clonedChain = item[kvoChainList][chainGuid];
           clonedChain.deactivate();
           delete item[kvoChainList][chainGuid];
@@ -691,7 +691,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
         len = addedObjects.get('length');
         for (idx = 0; idx < len; idx++) {
-          this._clonePropertyChainToItem(chain, addedObjects[idx]);
+          this._clonePropertyChainToItem(chain, addedObjects.objectAt(idx));
         }
       }, this);
     }

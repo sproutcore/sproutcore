@@ -169,6 +169,17 @@ module('SC.routes defined routes', {
   
 });
 
+test('setting location triggers function when only passed function', function() {
+  var barred = false;
+
+  SC.routes.add('bar', function(params) {
+    barred = true;
+  });
+  SC.routes.set('location', 'bar');
+
+  ok(barred, 'Function was called');
+});
+
 test('setting location simply triggers route', function() {
   SC.routes.add("foo", router, "triggerRoute");
   SC.routes.set('location', 'bar');

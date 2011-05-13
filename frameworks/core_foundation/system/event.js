@@ -76,14 +76,14 @@ SC.Event = function(originalEvent) {
   if (!this.which && this.button) {
     this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
   }
-  
+
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
     var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER,
         version = parseFloat(SC.browser.version);
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.webkit && originalEvent.wheelDelta!==undefined) {
+    if (SC.browser.webkit && originalEvent.wheelDelta !== undefined) {
       this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
@@ -102,7 +102,7 @@ SC.Event = function(originalEvent) {
 
     // handle all other legacy browser
     } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+      this.wheelDelta = this.wheelDeltaY = SC.browser.msie || SC.browser.opera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
     }
 

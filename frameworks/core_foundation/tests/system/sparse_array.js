@@ -77,6 +77,38 @@ test("element to be added is at idx < length of array ", function() {
 	equals(5, ary.get('length'), "length") ;
 });
 
+test("should work with @each dependent keys", function() {
+  var array = SC.SparseArray.create();
+
+  array.pushObject(SC.Object.create({
+    value: 5
+  }));
+  array.provideLength(1);
+
+  var obj = SC.Object.create({
+    total: function() {
+      return this.get('content').reduce(function(prev, item) {
+        return prev + item.get('value');
+      }, 0);
+    }.property('content.@each.value'),
+
+    content: array
+  });
+
+  equals(obj.get('total'), 5, "precond - computes total of all objects");
+
+  array.pushObject(SC.Object.create({
+    value: 10
+  }));
+
+  equals(obj.get('total'), 15, "recomputes when a new object is added");
+
+  array.objectAt(1).set('value', 15);
+
+  equals(obj.get('total'), 20, "recomputes when value property on child object changes");
+
+});
+
 
 test("modifying a range should not require the rest of the array to refetch", function() {
   var del = {

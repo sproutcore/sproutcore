@@ -127,7 +127,7 @@ SC.$error = function(description, label, value, c) {
 } ;
 
 /**
-  Returns YES if the passed value is an error object or false.
+  Returns NO if the passed value is an error object or false.
 
   @param {Object} ret object value
   @returns {Boolean}

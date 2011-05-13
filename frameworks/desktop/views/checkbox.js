@@ -70,12 +70,16 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   
   /** @private */
   _toggleValue: function(){
-    var val = this.get('value');
-    if (val === this.get('toggleOnValue')) {
-      this.set('value', this.get('toggleOffValue'));
+    if(!this.get('isEnabled')) {
+      return YES;
     }
-    else {
-      this.set('value', this.get('toggleOnValue'));
+
+    var isOn = this.get('value') === this.get('toggleOnValue');
+    this.set('value', isOn ? this.get('toggleOffValue') : this.get('toggleOnValue'));
+
+    // fire action
+    if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
+      if (this.$().within(evt.target)) { this._action(evt); }
     }
     return YES;
   },
