@@ -390,8 +390,8 @@ SC.routes = SC.Object.create(
       delete params.route;
       delete params.params;
       route = firstRoute.routeForParts(location.split('/'), params);
-      if (route && route.target && route.method) {
-        route.method.call(route.target, params);
+      if (route && route.method) {
+        route.method.call(route.target || this, params);
       }
     }
   },
