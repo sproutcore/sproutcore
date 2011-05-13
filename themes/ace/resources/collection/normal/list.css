@@ -6,6 +6,7 @@ $theme.collection {
     background: #eef3f6;
   }
   
+  &.alternating .sc-collection-item.even.sel, 
   .sc-collection-item.sel {
     color: white;
     background: #608AB9;
