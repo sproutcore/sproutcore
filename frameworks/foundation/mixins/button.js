@@ -5,10 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.Button = {
-  
-  initMixin: function(){
-    SC.Logger.warn("SC.Button is deprecated and does nothing. Subclass SC.ButtonView instead.");
-  }
-  
-} ;
+SC.Button.initMixin = function(){
+  SC.Logger.warn("SC.Button is deprecated and does nothing. Subclass SC.ButtonView instead.");
+};
+
