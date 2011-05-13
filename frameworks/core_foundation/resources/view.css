@@ -38,10 +38,6 @@
   img {
     border: none ;
   }
-  /* Images by default do not have a border inside of an image */
-  &.sc-hidden {
-    display: none !important;
-  }
 }
 
 /* Set here so when we set a border-width we'll see something
@@ -54,4 +50,8 @@ div.sc-view {
 /* Make sure focus outlines do not appear.  These don't look good. */
 .sc-view:focus{
   outline: none;
+}
+
+.sc-hidden {
+  display: none !important;
 }
