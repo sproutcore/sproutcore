@@ -24,10 +24,10 @@
     cursor:  text;
   }
   /*Use the following to know what view has the focus in webkit*/
-  /*.focus {
-      outline: auto 5px -webkit-focus-ring-color; 
-      outline-offset: -2px;
-    }*/
+ /* &.focus {
+         outline: auto 5px solid; 
+         outline-offset: -2px;
+       }*/
   /* This className is useful when aligning buttons to the right */
   &.text-align-right{
     text-align:right;
@@ -38,11 +38,6 @@
   img {
     border: none ;
   }
-  /* Images by default do not have a border inside of an image */
-}
-
-.sc-hidden {
-  display: none !important;
 }
 
 /* Set here so when we set a border-width we'll see something
@@ -53,7 +48,10 @@ div.sc-view {
 }
 
 /* Make sure focus outlines do not appear.  These don't look good. */
-.sc-view:focus, a.sc-view:focus,
-.sc-view:active, a.sc-view:active {
+.sc-view:focus{
   outline: none;
+}
+
+.sc-hidden {
+  display: none !important;
 }
