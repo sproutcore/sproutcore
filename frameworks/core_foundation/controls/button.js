@@ -20,13 +20,18 @@ SC.Button = SC.TemplateView.extend({
     }
   },
 
+  rootResponder: function() {
+    var pane = this.get('pane');
+    return pane.get('rootResponder');
+  }.property('pane').cacheable(),
+
   // Setting isActive to false will remove 'is-active' from our
   // layer's class names.
   mouseUp: function(event) {
     if (this.get('isActive')) {
       var action = this.get('action'),
           target = this.get('target') || null,
-          rootResponder = this.getPath('pane.rootResponder');
+          rootResponder = this.get('rootResponder');
 
       if (action && rootResponder) {
         rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
@@ -46,4 +51,3 @@ SC.Button = SC.TemplateView.extend({
     this.mouseUp(touch);
   }
 });
-

@@ -178,22 +178,74 @@ CoreTest = {
     
     return ret ;
   },
-  
 
   /** Test is OK */
   OK: 'passed',
-  
+
   /** Test failed */
   FAIL: 'failed',
-  
+
   /** Test raised exception */
   ERROR: 'errors',
-  
+
   /** Test raised warning */
   WARN: 'warnings',
-  
-  showUI : false
-  
-  
-  
+
+  showUI : false,
+
+  spyOn: function(object, method) {
+    if(!object) throw new Error('ERROR: Attempted to spy upon an invalid object');
+    if(!object[method]) throw new Error('ERROR: The requested method does not exist on the given object');
+
+    var spy = new CoreTest.Spy;
+    object[method] = function() { spy.call(CoreTest.argumentsArray(arguments)) };
+    return spy;
+  },
+
+  stubMethod: function(object, method) {
+    if(!object) throw new Error('ERROR: Attempted to spy upon an invalid object');
+    if(!object[method]) throw new Error('ERROR: The requested method does not exist on the given object');
+
+    var stub = new CoreTest.Stub;
+    object[method] = function() { return stub.call() };
+    return stub;
+  }
+};
+
+CoreTest.Spy = function() {
+  this.wasCalled = false;
+};
+
+CoreTest.Spy.prototype.call = function(args) {
+  this.wasCalledWithArguments = args;
+  this.wasCalled = true;
+};
+
+CoreTest.Spy.prototype.wasCalledWith = function() {
+  return CoreTest._isIdenticalArray(this.wasCalledWithArguments,CoreTest.argumentsArray(arguments));
+};
+
+CoreTest.Stub = function() {
+};
+
+CoreTest.Stub.prototype.andReturn = function(value) {
+  this.stubbedValue = value;
+};
+
+CoreTest.Stub.prototype.call = function() {
+  if(this.stubbedValue === undefined) throw new Error('ERROR: You never specified what value the stub should return');
+  return this.stubbedValue;
+};
+
+CoreTest.argumentsArray = function(args) {
+  var arrayOfArgs = [];
+  for (var i = 0; i < args.length; i++) arrayOfArgs.push(args[i]);
+  return arrayOfArgs;
+};
+
+CoreTest._isIdenticalArray = function(array1, array2) {
+  if(array1.length !== array2.length) return false;
+  for(var i = 0; i < array1.length; i++)
+    if(array1[i] !== array2[i]) return false;
+  return true;
 };
