@@ -70,18 +70,8 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
   
   /** @private */
   _toggleValue: function(){
-    if(!this.get('isEnabled')) {
-      return YES;
-    }
-
     var isOn = this.get('value') === this.get('toggleOnValue');
     this.set('value', isOn ? this.get('toggleOffValue') : this.get('toggleOnValue'));
-
-    // fire action
-    if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      if (this.$().within(evt.target)) { this._action(evt); }
-    }
-    return YES;
   },
   
   /** @private */
@@ -103,29 +93,44 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     this._isMouseDown = NO;
 
     this._toggleValue();
+
+    // fire action
+    if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
+      if (this.$().within(evt.target)) { this._action(evt); }
+    }
+
     return YES;
+
   },
   
   /** @private */
-   keyDown: function(evt) {
-     // handle tab key
-     if(!this.get('isEnabled')) return YES;
-     if (evt.which === 9 || evt.keyCode === 9) {
-       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-       if(view) view.becomeFirstResponder();
-       else evt.allowDefault();
-       return YES ; // handled
-     }
-     if (evt.which === 13 || evt.which === 32) {
-       this._toggleValue();
-       return YES ; // handled
-     }
+  keyDown: function(evt) {
+    // handle tab key
+    if(!this.get('isEnabled')) return YES;
 
-     // let other keys through to browser
-     evt.allowDefault();
+    if (evt.which === 9 || evt.keyCode === 9) {
+      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      if(view) view.becomeFirstResponder();
+      else evt.allowDefault();
+      return YES ; // handled
+    }
 
-     return NO;
-   },
+    if (evt.which === 13 || evt.which === 32) {
+      this._toggleValue();
+
+      // fire action
+      if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
+        if (this.$().within(evt.target)) { this._action(evt); }
+      }
+
+      return YES ; // handled
+    }
+
+    // let other keys through to browser
+    evt.allowDefault();
+
+    return NO;
+  },
   
   
   
@@ -139,4 +144,4 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     return this.mouseUp(evt);
   }
     
-}) ;
+});
