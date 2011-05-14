@@ -136,6 +136,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   }.observes('content'),
 
   arrayContentWillChange: function(start, removedCount, addedCount) {
+    if (!this.get('layer')) return;
+
     // If the contents were empty before and this template collection has an empty view
     // remove it now.
     var emptyView = this.get('emptyView');
@@ -174,7 +176,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         itemViewClass = this.get('itemViewClass'),
         childViews    = this.get('childViews'),
         addedViews    = [],
-        renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
+        renderFunc, childView, itemOptions, elem, insertAtElement,
+        view, item, itemElem, idx, len;
 
     var addedObjects = content.slice(start, start+addedCount);
 
