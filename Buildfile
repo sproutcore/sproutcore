@@ -28,11 +28,12 @@ end
 config :bootstrap,  :required => [], :use_modules => false
 
 config :jquery,          :required => [], :test_required => [], :debug_required => []
+config :yuireset,        :required => [], :test_required => [], :debug_required => []
 config :handlebars,      :required => []
 config :runtime,         :required => [:jquery]
 config :'datetime/core', :required => [:runtime]
 config :datetime,        :required => [:'datetime/core']
-config :core_foundation, :required => [:runtime, :handlebars]
+config :core_foundation, :required => [:runtime, :handlebars, :yuireset]
 config :'datetime/localized', :required => [:core_foundation]
 config :routing,         :required => [:core_foundation]
 config :foundation,      :required => [:routing, :core_foundation, :datetime, :'datetime/localized', :ajax]
