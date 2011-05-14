@@ -13,15 +13,22 @@
   module("SC.Checkbox", {
     setup: function() {
       SC.RunLoop.begin();
+
+      // actions must be strings, and there must be a target. So, we need this dummy.
+      var act = SC.Object.create({
+        action: function() {
+          triggered = true;
+        }
+      });
+
       pane = SC.MainPane.create({
         childViews: [
           SC.CheckboxView.extend({
             layout: { right: 20, bottom: 20, width: 100, height: 23 },
             title: "First Name",
             value: YES,
-            action: function() {
-              triggered = true;
-            }
+            target: act,
+            action: 'action'
           })]
       });
       pane.append(); // make sure there is a layer...
