@@ -1713,6 +1713,7 @@ SC.RootResponder = SC.Object.extend(
   mousedown: function(evt) {
     if (SC.platform.touch) {
       evt.allowDefault();
+      this._lastMouseDownCustomHandling = YES;
       return YES;
     }
 
@@ -1770,6 +1771,7 @@ SC.RootResponder = SC.Object.extend(
   mouseup: function(evt) {
     if (SC.platform.touch) {
       evt.allowDefault();
+      this._lastMouseUpCustomHandling = YES;
       return YES;
     }
 
