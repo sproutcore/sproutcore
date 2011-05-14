@@ -142,9 +142,17 @@ test("FormView - contentValueKey", function() {
 
   // Form rows don't have contentValue support.
   equals(form.row.get('formKey'), 'row', "Row's formKey is set automatically.");
-  equals(form.rowWithContent.get('contentValueKey'), 'rowWithContent', "Row with content value support gets 'contentValueKey' set");
+
+  // implicit setting of contentValueKey on just any view is a bad idea... so we check that
+  // it is NOT set implicitly.
+  equals(form.rowWithContent.get('contentValueKey'), undefined, "Row with content value support does not get 'contentValueKey' set");
+
+  // but if it is set directly, that should still work
   equals(form.rowWithContentValueKey.get('contentValueKey'), 'hello', "Row with existing contentValueKey keeps its original one");
-  equals(form.viewWithContentValueSupport.get('contentValueKey'), 'viewWithContentValueSupport', "View with content value support gets key set");
+
+  // views with content value support likewise should not get the key set directly;
+  // so many views can have contentValueSupport, and that behavior may not be what we want
+  equals(form.viewWithContentValueSupport.get('contentValueKey'), undefined, "View with content value support gets left alone");
   equals(form.viewWithContentValueKey.get('contentValueKey'), 'hello', "View with existing contentValueKey keeps original");
   equals(form.plainView.get('contentValueKey'), undefined, "contentValueKey not set on plain view");
   equals(form.plainView.get('formKey'), 'plainView', "formKey is set on plain view");

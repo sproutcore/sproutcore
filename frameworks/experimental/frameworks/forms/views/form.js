@@ -120,14 +120,11 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
         v = this.get(key);
 
         if (v && !v.isClass) {
-          // we set 'contentValueKey' on any object that has ContentValueSupport.
-          // Note that FormRowViews typically do NOT have content value support.
-          // They just pass on 'content' and their own formKey.
-          if (v.hasContentValueSupport && !v.get('contentValueKey')) {
-            v.set('contentValueKey', key);
-          }
-
-          // we give ALL views a formKey for their convenience.
+          // we used to set contentValueKey on applicable children, but given that was too
+          // implicit: any LabelView child of the form view would get the contentValueKey.
+          // 
+          // instead, we give ALL views a formKey for their convenience; if they want to
+          // use contentValue support they should do so directly.
           v.set('formKey', key);
 
           // We used to try to be clever and bind child views' 'content' to 
