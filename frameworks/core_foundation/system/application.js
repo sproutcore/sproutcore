@@ -7,8 +7,8 @@
 
 /** @class
 
-  The root object for a SproutCore application.  Usually you will create a
-  single SC.Application instance as your root namespace.  SC.Application is
+  The root object for a SproutCore application. Usually you will create a
+  single SC.Application instance as your root namespace. SC.Application is
   required if you intend to use SC.Responder to route events.
 
   ## Example
@@ -18,11 +18,6 @@
 
         // add other useful properties here
       });
-
-  ## Sending Events
-
-  You can send actions and events down an application-level responder chain
-  by
 
   @extends SC.ResponderContext
   @since SproutCore 1.0
