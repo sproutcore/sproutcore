@@ -247,3 +247,16 @@ test("should re-render when the content object changes", function() {
   equals(view.$('li:eq(0)').text(), "ramalamadingdong");
 
 });
+
+test("should allow changes to content object before layer is created", function() {
+  var view = SC.TemplateCollectionView.create({
+    content: null
+  });
+
+  view.set('content', []);
+  view.set('content', [1, 2, 3]);
+  view.set('content', [1, 2]);
+
+  view.createLayer();
+  ok(view.$('li').length);
+});
