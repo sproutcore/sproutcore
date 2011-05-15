@@ -186,9 +186,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // selected item could be a menu item from SC.MenuPane's displayItems, or it could
     // be a raw item. So, we have to use _scsv_getValueForMenuItem to resolve it.
-    if (!sel) {
-      this.setIfChanged('value', null);
-    } else {
+    if(sel) {
       this.setIfChanged('value', this._scsv_getValueForMenuItem(sel));
     }
 
