@@ -260,3 +260,15 @@ test("should allow changes to content object before layer is created", function(
   view.createLayer();
   ok(view.$('li').length);
 });
+
+test("should allow changing content property to be null", function() {
+  var view = SC.TemplateCollectionView.create({
+    content: [1, 2, 3]
+  });
+
+  view.createLayer();
+  equals(view.$('li').length, 3, "precond - creates three elements");
+
+  view.set('content', null);
+  equals(view.$('li').length, 0, "should not create any li elements");
+});

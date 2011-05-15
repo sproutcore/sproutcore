@@ -178,58 +178,61 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         addedViews    = [],
         renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
 
-    var addedObjects = content.slice(start, start+addedCount);
+    if (content) {
+      var addedObjects = content.slice(start, start+addedCount);
 
-    // If we have content to display, create a view for
-    // each item.
-    itemOptions = this.get('itemViewOptions') || {};
+      // If we have content to display, create a view for
+      // each item.
+      itemOptions = this.get('itemViewOptions') || {};
 
-    elem = this.$();
-    insertAtElement = elem.find('li')[start-1] || null;
-    len = addedObjects.get('length');
+      elem = this.$();
+      insertAtElement = elem.find('li')[start-1] || null;
+      len = addedObjects.get('length');
 
-    // TODO: This logic is duplicated from the view helper. Refactor
-    // it so we can share logic.
-    var itemAttrs = {
-      "id": itemOptions.id,
-      "class": itemOptions['class'],
-      "classBinding": itemOptions.classBinding
-    };
+      // TODO: This logic is duplicated from the view helper. Refactor
+      // it so we can share logic.
+      var itemAttrs = {
+        "id": itemOptions.id,
+        "class": itemOptions['class'],
+        "classBinding": itemOptions.classBinding
+      };
 
-    renderFunc = function(context) {
-      sc_super();
-      SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
-    };
+      renderFunc = function(context) {
+        sc_super();
+        SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
+      };
 
-    itemOptions = SC.clone(itemOptions);
-    delete itemOptions.id;
-    delete itemOptions['class'];
-    delete itemOptions.classBinding;
+      itemOptions = SC.clone(itemOptions);
+      delete itemOptions.id;
+      delete itemOptions['class'];
+      delete itemOptions.classBinding;
 
-    for (idx = 0; idx < len; idx++) {
-      item = addedObjects.objectAt(idx);
-      view = this.createChildView(itemViewClass.extend(itemOptions, {
-        content: item,
-        render: renderFunc
-      }));
+      for (idx = 0; idx < len; idx++) {
+        item = addedObjects.objectAt(idx);
+        view = this.createChildView(itemViewClass.extend(itemOptions, {
+          content: item,
+          render: renderFunc,
+          tagName: itemViewClass.prototype.tagName || this.get('itemTagName')
+        }));
 
-      var contextProperty = view.get('contextProperty');
-      if (contextProperty) {
-        view.set('context', view.get(contextProperty));
+        var contextProperty = view.get('contextProperty');
+        if (contextProperty) {
+          view.set('context', view.get(contextProperty));
+        }
+
+        itemElem = view.createLayer().$();
+        if (!insertAtElement) {
+          elem.append(itemElem);
+        } else {
+          itemElem.insertAfter(insertAtElement);
+        }
+        insertAtElement = itemElem;
+
+        addedViews.push(view);
       }
 
-      itemElem = view.createLayer().$();
-      if (!insertAtElement) {
-        elem.append(itemElem);
-      } else {
-        itemElem.insertAfter(insertAtElement);
-      }
-      insertAtElement = itemElem;
-
-      addedViews.push(view);
+      childViews.replace(start, 0, addedViews);
     }
-
-    childViews.replace(start, 0, addedViews);
 
     var inverseTemplate = this.get('inverseTemplate');
     if (childViews.get('length') === 0 && inverseTemplate) {
@@ -247,6 +250,19 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     // be used inside of SC.ScrollView.
     this.invokeLast('invalidateFrame');
   },
+
+  itemTagName: function() {
+    switch(this.get('tagName')) {
+      case 'ul':
+      case 'ol':
+        return 'li';
+      case 'table':
+      case 'thead':
+      case 'tbody':
+      case 'tfoot':
+        return 'tr'
+    }
+  }.property('tagName'),
 
   invalidateFrame: function() {
     this.notifyPropertyChange('frame');
