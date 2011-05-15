@@ -51,7 +51,7 @@ Handlebars.registerHelper('collection', function(path, options) {
 });
 
 Handlebars.registerHelper('each', function(path, options) {
-  options.hash.contentBinding = SC.Binding.from('*'+path, this);
+  options.hash.contentBinding = SC.Binding.from('*'+path, this).oneWay();
   options.hash.itemContextProperty = 'content';
   return Handlebars.helpers.collection.call(this, null, options);
 });
