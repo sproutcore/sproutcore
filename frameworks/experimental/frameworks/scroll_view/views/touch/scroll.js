@@ -98,58 +98,6 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
   */
   delaysContentTouches: YES,
 
-  /** @private
-    If the view supports it, this
-  */
-  _touchScrollDidChange: function () {
-    if (this.get("contentView").touchScrollDidChange) {
-      this.get("contentView").touchScrollDidChange(
-        this._scroll_horizontalScrollOffset,
-        this._scroll_verticalScrollOffset
-      );
-    }
-
-    // tell scrollers
-    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidChange) {
-      this.verticalScrollerView.touchScrollDidChange(this._scroll_verticalScrollOffset);
-    }
-
-    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidChange) {
-      this.horizontalScrollerView.touchScrollDidChange(this._scroll_horizontalScrollOffset);
-    }
-  },
-
-  /** @private */
-  _touchScrollDidStart: function () {
-    if (this.get("contentView").touchScrollDidStart) {
-      this.get("contentView").touchScrollDidStart(this._scroll_horizontalScrollOffset, this._scroll_verticalScrollOffset);
-    }
-
-    // tell scrollers
-    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidStart) {
-      this.verticalScrollerView.touchScrollDidStart(this._touch_verticalScrollOffset);
-    }
-    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidStart) {
-      this.horizontalScrollerView.touchScrollDidStart(this._touch_horizontalScrollOffset);
-    }
-  },
-
-  /** @private */
-  _touchScrollDidEnd: function () {
-    if (this.get("contentView").touchScrollDidEnd) {
-      this.get("contentView").touchScrollDidEnd(this._scroll_horizontalScrollOffset, this._scroll_verticalScrollOffset);
-    }
-
-    // tell scrollers
-    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidEnd) {
-      this.verticalScrollerView.touchScrollDidEnd(this._touch_verticalScrollOffset);
-    }
-
-    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidEnd) {
-      this.horizontalScrollerView.touchScrollDidEnd(this._touch_horizontalScrollOffset);
-    }
-  },
-
   /** @private */
   _applyCSSTransforms: function (layer) {
     var transform = "";
@@ -783,6 +731,34 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
       this._applyCSSTransforms(content.get('layer'));
     }
     return sc_super();
+  },
+
+  /** @private */
+  _touchScrollDidChange: function () {
+    var contentView = this.get('contentView'),
+        horizontalScrollOffset = this._scroll_horizontalScrollOffset,
+        verticalScrollOffset = this._scroll_verticalScrollOffset;
+    if (contentView.touchScrollDidChange) {
+      contentView.touchScrollDidChange(horizontalScrollOffset, verticalScrollOffset);
+    }
+
+    // tell scrollers
+    if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidChange) {
+      this.verticalScrollerView.touchScrollDidChange(verticalScrollOffset);
+    }
+
+    if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidChange) {
+      this.horizontalScrollerView.touchScrollDidChange(horizontalScrollOffset);
+    }
   }
+});
+
+SC.TouchScrollView.prototype.mixin({
+
+  /** @private */
+  _touchScrollDidStart: SC.TouchScrollView.prototype._touchScrollDidChange,
+
+  /** @private */
+  _touchScrollDidEnd: SC.TouchScrollView.prototype._touchScrollDidChange
 
 });
