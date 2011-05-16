@@ -1,3 +1,7 @@
-.sc-scroll-container-view {
+.sc-scrollable {
   overflow: auto;
+
+  &.sc-view {
+    margin-right: -15px;
+  }
 }
