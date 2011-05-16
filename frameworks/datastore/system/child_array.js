@@ -104,7 +104,6 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       ret = hash[pname] = [];
     }
 
-    if (ret !== this._prevChildren) this.recordPropertyDidChange();
     return ret ;
   }.property(),
 
@@ -169,9 +168,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
         pname    = this.get('propertyName'),
         cr, recordType;
+    
     newRecs = this._processRecordsToHashes(recs);
     children.replace(idx, amt, newRecs);
     // notify that the record did change...
+    if (newRecs !== this._prevChildren) this.recordPropertyDidChange();
     record.recordDidChange(pname);
 
     return this;
@@ -245,7 +246,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       newLen = children.get('length');
     }
 
-
+    
     this.arrayContentWillChange(0, oldLen, newLen);
     this._prevChildren = children;
     this._childrenContentDidChange(0, oldLen, newLen);

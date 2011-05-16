@@ -366,7 +366,7 @@ test("pushObject should trigger an arrayContentDidChange with only 1 added item"
   target = SC.Object.create({
     willChange: function() {},
     didChange: function() {
-      didChangeCalls.push(arguments)
+      didChangeCalls.push(arguments);
     }
   });
 
@@ -374,12 +374,11 @@ test("pushObject should trigger an arrayContentDidChange with only 1 added item"
     target: target,
     willChange: 'willChange',
     didChange: 'didChange'
-  })
-
+  });
   testParent.get('elements').pushObject({});
 
   equals(didChangeCalls.length, 1, 'didChange should only be called once');
-  equals(didChangeCalls[0][0], 4, 'didChange should be called with a start index of 4');
-  equals(didChangeCalls[0][1], 0, 'didChange should be called with a removed count of 0');
-  equals(didChangeCalls[0][2], 1, 'didChange should be called with an added count of 1');
+  equals(didChangeCalls[0][0], 0, 'didChange should be called with a start index of 0 because we can\'t be sure about the order from the server');
+  equals(didChangeCalls[0][1], 4, 'didChange should be called with a removed count of 4');
+  equals(didChangeCalls[0][2], 5, 'didChange should be called with an added count of 5 because the items could have changed order on the server');
 });
