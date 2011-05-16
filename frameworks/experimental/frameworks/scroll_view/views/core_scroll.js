@@ -798,43 +798,6 @@ SC.CoreScrollView = SC.View.extend(
     this.tile();
   }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible'),
 
-  // ..........................................................
-  // SCROLL WHEEL SUPPORT
-  //
-
-  /** @private */
-  _scroll_wheelDeltaX: 0,
-
-  /** @private */
-  _scroll_wheelDeltaY: 0,
-
-  /** @private */
-  mouseWheel: function(evt) {
-    var deltaAdjust = (SC.browser.webkit && SC.browser.version > 533.0) ? 120 : 1;
-
-    this._scroll_wheelDeltaX += evt.wheelDeltaX / deltaAdjust;
-    this._scroll_wheelDeltaY += evt.wheelDeltaY / deltaAdjust;
-    this.invokeLater(this._scroll_mouseWheel, 10);
-    return this.get('canScrollHorizontal') || this.get('canScrollVertical');
-  },
-
-  /** @private */
-  _scroll_mouseWheel: function() {
-    this.scrollBy(this._scroll_wheelDeltaX, this._scroll_wheelDeltaY);
-    if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY > 0) {
-      this._scroll_wheelDeltaY = Math.floor(this._scroll_wheelDeltaY*0.950);
-      this._scroll_wheelDeltaY = Math.max(this._scroll_wheelDeltaY, 0);
-      this.invokeLater(this._scroll_mouseWheel, 10);
-    } else if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY < 0){
-      this._scroll_wheelDeltaY = Math.ceil(this._scroll_wheelDeltaY*0.950);
-      this._scroll_wheelDeltaY = Math.min(this._scroll_wheelDeltaY, 0);
-      this.invokeLater(this._scroll_mouseWheel, 10);
-    } else {
-      this._scroll_wheelDeltaY = 0;
-      this._scroll_wheelDeltaX = 0;
-    }
-  },
-
   // ..............................................
   // SCALING SUPPORT
   //
@@ -911,7 +874,7 @@ SC.CoreScrollView = SC.View.extend(
   /** @private
     Instantiate scrollers & container views as needed.  Replace their classes
     in the regular properties.
-  */
+   */
   createChildViews: function() {
     var childViews = [] , view;
 

@@ -32,38 +32,27 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
   // SCROLL WHEEL SUPPORT
   //
 
-  /** @private */
-  _scroll_wheelDeltaX: 0,
+  containerView: SC.ContainerView.extend({
+    classNames: ['sc-scrollable'],
 
-  /** @private */
-  _scroll_wheelDeltaY: 0,
+    willDestroyLayer: function () {
+      SC.Event.remove(this.get('layer'), 'scroll', this, this.scroll);
+    },
 
-  /** @private */
-  mouseWheel: function(evt) {
-    var deltaAdjust = (SC.browser.webkit && SC.browser.version > 533.0) ? 120 : 1;
-    
-    this._scroll_wheelDeltaX += evt.wheelDeltaX / deltaAdjust;
-    this._scroll_wheelDeltaY += evt.wheelDeltaY / deltaAdjust;
-    this.invokeLater(this._scroll_mouseWheel, 10) ;
-    return this.get('canScrollHorizontal') || this.get('canScrollVertical') ;  
-  },
+    didCreateLayer: function () {
+      SC.Event.add(this.get('layer'), 'scroll', this, this.scroll);
+    },
 
-  /** @private */
-  _scroll_mouseWheel: function() {
-    this.scrollBy(this._scroll_wheelDeltaX, this._scroll_wheelDeltaY);
-    if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY > 0) {
-      this._scroll_wheelDeltaY = Math.floor(this._scroll_wheelDeltaY*0.950);
-      this._scroll_wheelDeltaY = Math.max(this._scroll_wheelDeltaY, 0);
-      this.invokeLater(this._scroll_mouseWheel, 10) ;
-    } else if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY < 0){
-      this._scroll_wheelDeltaY = Math.ceil(this._scroll_wheelDeltaY*0.950);
-      this._scroll_wheelDeltaY = Math.min(this._scroll_wheelDeltaY, 0);
-      this.invokeLater(this._scroll_mouseWheel, 10) ;
-    } else {
-      this._scroll_wheelDeltaY = 0;
-      this._scroll_wheelDeltaX = 0;
+    scroll: function (evt) {
+      var layer = this.get('layer'),
+          scrollTop = layer.scrollTop,
+          scrollLeft = layer.scrollLeft,
+          parentView = this.get('parentView');
+
+      parentView.scrollTo(scrollLeft, scrollTop);
+      return parentView.get('canScrollHorizontal') || parentView.get('canScrollVertical');
     }
-  },
+  }),
 
   adjustElementScroll: function() {
     var container = this.get('containerView'),
