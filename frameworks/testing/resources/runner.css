@@ -27,7 +27,7 @@
   position: relative;
 }
 
-.testresult label.hide-passed {
+.testresult label.hide-passed, .testresult label.show-progress {
   position: absolute;
   display: block;
   margin: 0;
@@ -38,8 +38,12 @@
   margin-top: -8px;
 }
 
-.testresult label.hide-passed.disabled {
+.testresult label.hide-passed.disabled, .testresult label.show-progress.disabled  {
   color: #aaa;
+}
+
+.testresult label.show-progress {
+  left: 200px;
 }
 
 .testresult em {
