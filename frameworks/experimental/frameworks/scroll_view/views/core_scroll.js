@@ -16,19 +16,18 @@ sc_require('views/scroller');
     - contentView frame size changes (to autoshow/hide scrollbar - adjust scrollbar size)
     - horizontalScrollOffset change
     - verticalScrollOffsetChanges
-    - scroll wheel events
 
   @extends SC.View
-  @since SproutCore 1.0
-*/
+  @since SproutCore 1.6
+ */
 SC.CoreScrollView = SC.View.extend(
-  /** @scope SC.ScrollView.prototype */{
+  /** @scope SC.ScrollView.prototype  */{
 
   /**
     @type Array
     @default ['sc-scroll-view']
     @see SC.View#classNames
-  */
+   */
   classNames: ['sc-scroll-view'],
 
   // ..........................................................
@@ -41,7 +40,7 @@ SC.CoreScrollView = SC.View.extend(
     @type Boolean
     @default YES
     @readOnly
-  */
+   */
   isScrollable: YES,
 
   /**
@@ -50,7 +49,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type SC.View
     @default null
-  */
+   */
   contentView: null,
 
   /**
@@ -63,7 +62,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type String
     @default SC.ALIGN_LEFT
-  */
+   */
   horizontalAlign: SC.ALIGN_LEFT,
 
   /**
@@ -76,7 +75,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type String
     @default SC.ALIGN_TOP
-  */
+   */
   verticalAlign: SC.ALIGN_TOP,
 
   /**
@@ -238,7 +237,7 @@ SC.CoreScrollView = SC.View.extend(
     @field
     @type Number
     @default 0
-  */
+   */
   minimumVerticalScrollOffset: function () {
     var view = this.get('contentView'),
         contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
@@ -266,7 +265,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Number
     @default 20
-  */
+   */
   verticalLineScroll: 20,
 
   /**
@@ -277,7 +276,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Number
     @default 20
-  */
+   */
   horizontalLineScroll: 20,
 
   /**
@@ -289,7 +288,7 @@ SC.CoreScrollView = SC.View.extend(
     @type Number
     @default value of frame.height
     @observes frame
-  */
+   */
   verticalPageScroll: function () {
     return this.get('frame').height;
   }.property('frame'),
@@ -304,7 +303,7 @@ SC.CoreScrollView = SC.View.extend(
     @type Number
     @default value of frame.width
     @observes frame
-  */
+   */
   horizontalPageScroll: function () {
     return this.get('frame').width;
   }.property('frame'),
@@ -320,7 +319,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default YES
-  */
+   */
   hasHorizontalScroller: YES,
 
   /**
@@ -331,7 +330,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type SC.View
     @default null
-  */
+   */
   horizontalScrollerView: null,
 
   /**
@@ -343,7 +342,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default YES
-  */
+   */
   isHorizontalScrollerVisible: YES,
 
   /**
@@ -353,7 +352,7 @@ SC.CoreScrollView = SC.View.extend(
     @field
     @type Boolean
     @default YES
-  */
+   */
   canScrollHorizontal: function () {
     return !!(this.get('hasHorizontalScroller') &&
               this.get('horizontalScrollerView') &&
@@ -367,7 +366,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default YES
-  */
+   */
   autohidesHorizontalScroller: YES,
 
   /**
@@ -376,7 +375,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default YES
-  */
+   */
   hasVerticalScroller: YES,
 
   /**
@@ -385,7 +384,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type SC.View
     @default null
-  */
+   */
   verticalScrollerView: null,
 
   /**
@@ -397,7 +396,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default YES
-  */
+   */
   isVerticalScrollerVisible: YES,
 
   /**
@@ -407,7 +406,7 @@ SC.CoreScrollView = SC.View.extend(
     @field
     @type Boolean
     @default YES
-  */
+   */
   canScrollVertical: function () {
     return !!(this.get('hasVerticalScroller') &&
               this.get('verticalScrollerView') &&
@@ -421,7 +420,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default YES
-  */
+   */
   autohidesVerticalScroller: YES,
 
   /**
@@ -430,7 +429,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Number
     @default 0
-  */
+   */
   verticalScrollerBottom: 0,
 
   /**
@@ -442,7 +441,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default NO
-  */
+   */
   verticalOverlay: NO,
 
   /**
@@ -454,7 +453,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default NO
-  */
+   */
   horizontalOverlay: NO,
 
   /**
@@ -471,7 +470,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Hash
     @default null
-  */
+   */
   verticalScrollerLayout: null,
 
   /**
@@ -487,7 +486,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Hash
     @default null
-  */
+   */
   horizontalScrollerLayout: null,
 
   // ..........................................................
@@ -500,7 +499,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type SC.ContainerView
     @default SC.ConainerView
-  */
+   */
   containerView: SC.ContainerView.extend({}),
 
 
@@ -524,7 +523,7 @@ SC.CoreScrollView = SC.View.extend(
     @param {Number} x the x scroll location
     @param {Number} y the y scroll location
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollTo: function (x, y) {
     // normalize params
     if (arguments.length === 1 && SC.typeOf(x) === SC.T_HASH) {
@@ -554,7 +553,7 @@ SC.CoreScrollView = SC.View.extend(
     @param {Number} x change in the x direction (or hash)
     @param {Number} y change in the y direction
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollBy: function (x, y) {
     // normalize params
     if (arguments.length === 1 && SC.typeOf(x) === SC.T_HASH) {
@@ -575,7 +574,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {SC.View} view view to scroll or null to scroll receiver visible
     @returns {Boolean} YES if scroll position was changed
-  */
+   */
   scrollToVisible: function (view) {
     // if no view is passed, do default
     if (arguments.length === 0) return sc_super();
@@ -599,7 +598,7 @@ SC.CoreScrollView = SC.View.extend(
     Scroll to the supplied rectangle.
     @param {Rect} rect Rectangle to scroll to.
     @returns {Boolean} YES if scroll position was changed.
-  */
+   */
   scrollToRect: function (rect) {
     // find current visible frame.
     var vo = SC.cloneRect(this.get('containerView').get('frame')),
@@ -631,7 +630,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollDownLine: function (lines) {
     if (arguments.length === 0) lines = 1;
     return this.scrollBy(null, this.get('verticalLineScroll') * lines);
@@ -643,7 +642,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollUpLine: function (lines) {
     if (arguments.length === 0) lines = 1;
     return this.scrollBy(null, -1 * this.get('verticalLineScroll') * lines);
@@ -655,7 +654,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollRightLine: function (lines) {
     if (arguments.length === 0) lines = 1;
     return this.scrollTo(this.get('horizontalLineScroll') * lines, null);
@@ -667,7 +666,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} lines number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollLeftLine: function (lines) {
     if (arguments.length === 0) lines = 1;
     return this.scrollTo(-1 * this.get('horizontalLineScroll') * lines, null);
@@ -681,7 +680,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollDownPage: function (pages) {
     if (arguments.length === 0) pages = 1;
     return this.scrollBy(null, this.get('verticalPageScroll') * pages);
@@ -695,7 +694,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollUpPage: function (pages) {
     if (arguments.length === 0) pages = 1;
     return this.scrollBy(null, -1 * this.get('verticalPageScroll' * pages));
@@ -709,7 +708,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollRightPage: function (pages) {
     if (arguments.length === 0) pages = 1;
     return this.scrollBy(this.get('horizontalPageScroll') * pages, null);
@@ -723,7 +722,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @param {Number} pages number of lines
     @returns {SC.ScrollView} receiver
-  */
+   */
   scrollLeftPage: function (pages) {
     if (arguments.length === 0) pages = 1;
     return this.scrollBy(-1 * this.get('horizontalPageScroll') * pages, null);
@@ -736,7 +735,7 @@ SC.CoreScrollView = SC.View.extend(
 
     You may also want to override this method to handle layout for any
     additional controls you have added to the view.
-  */
+   */
   tile: function () {
     // get horizontal scroller/determine if we should have a scroller
     var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
@@ -792,7 +791,7 @@ SC.CoreScrollView = SC.View.extend(
 
   /** @private
     Called whenever a scroller visibility changes.  Calls the tile() method.
-  */
+   */
   scrollerVisibilityDidChange: function () {
     this.tile();
   }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible'),
@@ -806,19 +805,19 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default NO
-  */
+   */
   canScale: NO,
 
   /** @private
     The current scale.
-  */
+   */
   _scale: 1.0,
 
   /**
     @field
     @type Number
     @default 1.0
-  */
+   */
   scale: function (key, value) {
     if (arguments.length === 2) {
       this._scale = Math.min(Math.max(this.get("minimumScale"), value), this.get("maximumScale"));
@@ -831,7 +830,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Number
     @default 0.25
-  */
+   */
   minimumScale: 0.25,
 
   /**
@@ -839,7 +838,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Number
     @default 2.0
-  */
+   */
   maximumScale: 2.0,
 
   /**
@@ -847,7 +846,7 @@ SC.CoreScrollView = SC.View.extend(
 
     @type Boolean
     @default NO
-  */
+   */
   autoScaleRange: NO,
 
   /** @private */
@@ -988,7 +987,7 @@ SC.CoreScrollView = SC.View.extend(
     the scrollTop/scrollLeft properties on the content view.  This ensures
     that, for example, the scroll views displays correctly when switching
     views out in a ContainerView.
-  */
+   */
   render: function (context, firstTime) {
     this.invokeLast(this.adjustElementScroll);
 
@@ -1011,7 +1010,7 @@ SC.CoreScrollView = SC.View.extend(
     that is tracked separately from the offset values.
 
     @param {Boolean} [force] Re-calculate everything even if the contentView’s frame didn’t change size
-  */
+   */
   contentViewFrameDidChange: function (force) {
     var view   = this.get('contentView'),
         f      = (view) ? view.get('frame') : null,
@@ -1078,6 +1077,7 @@ SC.CoreScrollView = SC.View.extend(
         hOffSet     = this.get('horizontalScrollOffset'),
         forceHeight = mxVOffSet < vOffSet,
         forceWidth  = mxHOffSet < hOffSet;
+
     if (forceHeight || forceWidth) {
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     }
@@ -1086,7 +1086,7 @@ SC.CoreScrollView = SC.View.extend(
   /** @private
     If our frame changes, then we need to re-calculate the visiblility of our
     scrollers, etc.
-  */
+   */
   frameDidChange: function () {
     this.contentViewFrameDidChange(YES);
   }.observes('frame'),
@@ -1094,7 +1094,7 @@ SC.CoreScrollView = SC.View.extend(
   /** @private
     If the layer of the content view changes, we need to readjust the
     scrollTop and scrollLeft properties on the new DOM element.
-  */
+   */
   contentViewLayerDidChange: function () {
     // Invalidate these cached values, as they're no longer valid
     if (this._verticalScrollOffset !== 0) this._verticalScrollOffset = -1;
@@ -1105,7 +1105,7 @@ SC.CoreScrollView = SC.View.extend(
   /** @private
     Whenever the horizontal scroll offset changes, update the scrollers and
     edit the location of the contentView.
-  */
+   */
   _scroll_horizontalScrollOffsetDidChange: function () {
     this.invokeLast(this.adjustElementScroll);
   }.observes('horizontalScrollOffset'),
@@ -1113,7 +1113,7 @@ SC.CoreScrollView = SC.View.extend(
   /** @private
     Whenever the vertical scroll offset changes, update the scrollers and
     edit the location of the contentView.
-  */
+   */
   _scroll_verticalScrollOffsetDidChange: function () {
     this.invokeLast(this.adjustElementScroll);
   }.observes('verticalScrollOffset'),
@@ -1121,7 +1121,7 @@ SC.CoreScrollView = SC.View.extend(
   /** @private
     Called at the end of the run loop to actually adjust the scrollTop
     and scrollLeft properties of the container view.
-  */
+   */
   adjustElementScroll: function () {
     var content = this.get('contentView');
 
