@@ -259,7 +259,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     The returned instance will also have its parentBinding property set to the
     receiver.
 
-    @param {String} fromPath optional from path.
+    @param {String} [fromPath]
     @returns {SC.Binding} new binding instance
   */
   beget: function(fromPath) {
@@ -291,7 +291,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     behavior is used to support the high-level API provided by SC.Object.
 
     @param {String|Tuple} propertyPath A property path or tuple
-    @param {Object} root optional root object to use when resolving the path.
+    @param {Object} [root] root object to use when resolving the path.
     @returns {SC.Binding} this
   */
   from: function(propertyPath, root) {
@@ -315,7 +315,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
    until you connect the binding.
 
     @param {String|Tuple} propertyPath A property path or tuple
-    @param {Object} root optional root object to use when resolving the path.
+    @param {Object} [root] root object to use when resolving the path.
     @returns {SC.Binding} this
   */
   to: function(propertyPath, root) {
@@ -724,8 +724,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     means that if you change the "to" side directly, the "from" side may have
     a different value.
 
-    @param {String} fromPath optional from path to connect.
-    @param {Boolean} aFlag Optionally pass NO to set the binding back to two-way
+    @param {String} [fromPath] from path to connect.
+    @param {Boolean} [aFlag] Pass NO to set the binding back to two-way
     @returns {SC.Binding} this
   */
   oneWay: function(fromPath, aFlag) {
@@ -795,8 +795,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     Note that this is not a transform function since it will be called at the
     end of the transform chain.
 
-    @param {String} fromPath optional from path to connect.
-    @param {Boolean} aFlag optionally pass NO to allow error objects again.
+    @param {String} [fromPath] from path to connect.
+    @param {Boolean} [aFlag] Pass NO to allow error objects again.
     @returns {SC.Binding} this
   */
   noError: function(fromPath, aFlag) {
@@ -828,7 +828,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     values are send unchanged.
 
     @param {String} fromPath from path or null
-    @param {Object} placeholder optional placeholder value.
+    @param {Object} [placeholder] placeholder value.
     @returns {SC.Binding} this
   */
   single: function(fromPath, placeholder) {
@@ -849,7 +849,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     null, undefined, an empty array or an empty string.  See also notNull().
 
     @param {String} fromPath from path or null
-    @param {Object} placeholder optional placeholder.
+    @param {Object} [placeholder]
     @returns {SC.Binding} this
   */
   notEmpty: function(fromPath, placeholder) {
@@ -867,7 +867,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     null or undefined.  Otherwise it will passthrough untouched.  See also notEmpty().
 
     @param {String} fromPath from path or null
-    @param {Object} placeholder optional placeholder;
+    @param {Object} [placeholder]
     @returns {SC.Binding} this
   */
   notNull: function(fromPath, placeholder) {
@@ -882,7 +882,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     Adds a transform that will convert the passed value to an array.  If
     the value is null or undefined, it will be converted to an empty array.
 
-    @param {String} fromPath optional from path
+    @param {String} [fromPath]
     @returns {SC.Binding} this
   */
   multiple: function(fromPath) {
@@ -897,7 +897,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     an array it will return YES if array is not empty.  If the value is a string
     it will return YES if the string is not empty.
 
-    @param {String} fromPath optional from path
+    @param {String} [fromPath]
     @returns {SC.Binding} this
   */
   bool: function(fromPath) {
@@ -970,7 +970,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     Adds a transform to convert the value to the inverse of a bool value.  This
     uses the same transform as bool() but inverts it.
 
-    @param {String} fromPath optional from path
+    @param {String} [fromPath]
     @returns {SC.Binding} this
   */
   not: function(fromPath) {
@@ -984,7 +984,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   /**
     Adds a transform that will return YES if the value is null or undefined, NO otherwise.
     
-    @param {String} fromPath optional from path
+    @param {String} [fromPath]
     @returns {SC.Binding} this
   */
   isNull: function(fromPath) {
