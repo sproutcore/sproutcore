@@ -9,11 +9,14 @@
 /**
   @class
 
+  DEPRECATED. Use SelectView instead.
+
   SelectFieldView displays browser-native popup menu.  To use this view,
   you should either bake into the HTML the preset list of options, or 
   you can set the -objects property to an array of items to show.  The
   value is current value of the select.
-  
+
+  @deprecated
   @extends SC.FieldView
   @author Charles Jolley
   @author Mike Ball
