@@ -245,9 +245,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
       this.set('applyImmediately',  continuouslyUpdatesValue);
 
-      //@ if (debug)
+      // @if (debug)
       SC.Logger.warn("SC.TextFieldView#continuouslyUpdatesValue is deprecated. Please use #applyImmediately instead.");
-      //@ endif
+      // @endif
     }
     
     return sc_super();

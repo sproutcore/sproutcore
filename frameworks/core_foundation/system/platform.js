@@ -109,9 +109,9 @@ SC.platform = SC.Object.create({
   simulateTouchEvents: function() {
     // Touch events are supported natively, no need for this.
     if (this.touch) {
-      //@ if (debug)
+      // @if (debug)
       SC.Logger.info("Can't simulate touch events in an environment that supports them.");
-      //@ endif
+      // @endif
       return;
     }
     

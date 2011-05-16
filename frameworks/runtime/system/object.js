@@ -456,9 +456,9 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   */
   design: function() {
     if (this.isDesign) {
-      //@ if (debug)
+      // @if (debug)
       SC.Logger.warn("SC.Object#design called twice for %@.".fmt(this));
-      //@ endif
+      // @endif
       return this;
     }
 
