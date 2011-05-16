@@ -180,6 +180,11 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
   /** @private */
   mouseDown: function(evt) {
+    // If disabled, handle mouse down but ignore it.
+    if (!this.get('isEnabled')) return YES ;
+
+    this.set('_mouseDown', YES);
+
     this.showMenu();
 
     this._mouseDownTimestamp = new Date().getTime();
@@ -192,7 +197,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   mouseUp: function(evt) {
     var menu = this.get('menu'), targetMenuItem, success;
 
-    if (menu) {
+    if (menu && this.get('_mouseDown')) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
 
       if (targetMenuItem && menu.get('mouseHasEntered')) {
