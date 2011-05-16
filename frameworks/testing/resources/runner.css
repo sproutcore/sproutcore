@@ -67,6 +67,7 @@
 .core-test table {
   background: #000;
   border-spacing: 1px;
+  border-collapse: separate;
   width: 100%;
 }
 
@@ -79,6 +80,10 @@
     background: #fff;
     padding: 4px;
   }
+
+.core-test table th {
+  font-weight: bold;
+}
 
 .core-test tbody td {
   text-align: center;
