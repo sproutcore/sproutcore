@@ -2770,7 +2770,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       var existingIDs, inverseIDs;
 
       this._pushIterator(recordType, id, storeKey,
-        /**
+        /** @ignore
           @param {SC.Record} inverseType - in a Master-Slave
           relationship when pushing master, Slave is the inverse type
           @param {Object} currentHash - the hash in the data store (data to be replaced by `dataHash`)
@@ -2794,18 +2794,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
 
     storeKey = storeKey || recordType.storeKeyFor(id);
-
-    var K = SC.Record,
-      validStates = [K.EMPTY, K.READY_CLEAN, K.DESTROYED_CLEAN, K.ERROR],
-      status = this.readStatus(storeKey), // wtf!? someone made 'status' a global
-      changeStatus = !!(validStates.indexOf(status) < 0),
-      ret;
-
-    if (changeStatus) this.writeStatus(storeKey, K.READY_CLEAN);
-    ret = original(recordType, id, dataHash, storeKey);
-    if (changeStatus) this.writeStatus(storeKey, status);
-
-    return ret;
+    return original(recordType, id, dataHash, storeKey);
   }.enhance()
 }) ;
 
