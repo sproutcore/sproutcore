@@ -352,8 +352,8 @@ SC.RootResponder = SC.Object.extend(
       // valid firstResponder view in the view's tree
       if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
         var mainPane = this.get('mainPane'),
-        nextValidKeyView = mainPane.get('nextValidKeyView');
-        if (nextValidKeyView && mainPane) mainPane.makeFirstResponder(nextValidKeyView);
+            nextValidKeyView = mainPane ? mainPane.get('nextValidKeyView') : null;
+        if (nextValidKeyView) mainPane.makeFirstResponder(nextValidKeyView);
       }
       
       SC.run(function() {
