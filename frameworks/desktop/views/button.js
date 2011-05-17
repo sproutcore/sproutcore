@@ -845,10 +845,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
         }
       }
     }    
-    
-    if (action && rootResponder) {
-      rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
-    }
   },
 
   /** @private */
