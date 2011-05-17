@@ -833,6 +833,18 @@ SC.ButtonView = SC.View.extend(SC.Control,
     var action = this.get('action'),
         target = this.get('target') || null,
         rootResponder = this.getPath('pane.rootResponder');
+        
+    if (action) {
+      if (this._hasLegacyActionHandler()) {
+        // old school... V
+        this._triggerLegacyActionHandler(evt);
+      } else {
+        if (rootResponder) {
+          // newer action method + optional target syntax...
+          rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
+        }
+      }
+    }    
     
     if (action && rootResponder) {
       rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
@@ -853,6 +865,44 @@ SC.ButtonView = SC.View.extend(SC.Control,
     }
   },
 
+  /** @private */
+  _hasLegacyActionHandler: function() {
+    var action = this.get('action');
+    if (action && (SC.typeOf(action) === SC.T_FUNCTION)) return true;
+    if (action && (SC.typeOf(action) === SC.T_STRING) && (action.indexOf('.') != -1)) return true;
+    return false;
+  },
+  
+  /** @private */
+  _triggerLegacyActionHandler: function( evt )
+  {
+    if (!this._hasLegacyActionHandler()) return false;
+  
+    var action = this.get('action');
+    if (SC.typeOf(action) === SC.T_FUNCTION) this.action(evt);
+    if (SC.typeOf(action) === SC.T_STRING) {
+      eval("this.action = function(e) { return "+ action +"(this, e); };");
+      this.action(evt);
+    }
+  },
+  
+  /** @private */
+  willBecomeKeyResponderFrom: function(keyView) {
+    // focus the text field.
+    if (!this._isFocused) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$().focus();
+      }
+    }
+  },
+  
+  /** @private */
+  willLoseKeyResponderTo: function(responder) {
+    if (this._isFocused) this._isFocused = NO ;
+  },
+  
   /** @private */
   didAppendToDocument: function() {
     if(parseInt(SC.browser.msie, 0)===7 && this.get('useStaticLayout')){
