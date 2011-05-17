@@ -27,16 +27,37 @@ SC.TextField = SC.TemplateView.extend(
   // the property: a chicken-and-egg problem.
   template: SC.Handlebars.compile('<input type="text">'),
 
+  /**
+    If set to `YES` uses textarea tag instead of input to
+    accommodate multi-line strings.
+
+    @type Boolean
+    @default NO
+  */
+  isMultiline: NO,
+
+  init: function() {
+    sc_super();
+    if (this.get('isMultiline')) {
+      this.template = SC.Handlebars.compile('<textarea></textarea>');
+    }
+  },
+
+  $input: function() {
+    tagName = this.get('isMultiline') ? 'textarea' : 'input';
+    return this.$(tagName);
+  },
+
   didCreateLayer: function() {
     var self = this;
 
-    var input = this.$('input');
+    var input = this.$input();
     input.val(this._value);
 
     SC.Event.add(input, 'focus', this, this.focusIn);
     SC.Event.add(input, 'blur', this, this.focusOut);
 
-    this.$('input').bind('change', function() {
+    input.bind('change', function() {
       self.domValueDidChange(SC.$(this));
     });
   },
@@ -58,7 +79,7 @@ SC.TextField = SC.TemplateView.extend(
     the underlying DOM element is created.
   */
   value: function(key, value) {
-    var input = this.$('input');
+    var input = this.$input();
 
     if (value !== undefined) {
       this._value = value;
@@ -91,7 +112,7 @@ SC.TextField = SC.TemplateView.extend(
   },
 
   keyUp: function(evt) {
-    this.domValueDidChange(this.$('input'));
+    this.domValueDidChange(this.$input());
 
     if (evt.keyCode === SC.Event.KEY_RETURN) {
       return this.tryToPerform('insertNewline', evt);
@@ -101,6 +122,7 @@ SC.TextField = SC.TemplateView.extend(
 
     return true;
   }
+
 });
 
 SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
@@ -109,7 +131,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     Used internally to store value because the layer may not exist
   */
   _value: null,
-  
+
   /**
     @type String
     @default null
