@@ -353,7 +353,7 @@ SC.RootResponder = SC.Object.extend(
       if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
         var mainPane = this.get('mainPane'),
         nextValidKeyView = mainPane.get('nextValidKeyView');
-        if (nextValidKeyView) mainPane.makeFirstResponder(nextValidKeyView);
+        if (nextValidKeyView && mainPane) mainPane.makeFirstResponder(nextValidKeyView);
       }
       
       SC.run(function() {
