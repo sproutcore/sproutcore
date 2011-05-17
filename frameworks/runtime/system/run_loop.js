@@ -291,12 +291,12 @@ SC.run = function(callback, target, forceNested) {
       if (callback) callback.call(target);
       if(forceNested || !alreadyRunning) SC.RunLoop.end();
     } catch (e) {
-      SC.ExceptionHandler.handleException(e);
+      var handled = SC.ExceptionHandler.handleException(e);
 
-      // Now that we've handled the exception, throw it again so the browser
+      // If the exception was not handled, throw it again so the browser
       // can deal with it (and potentially use it for debugging).
       // (We don't throw it in IE because the user will see two errors)
-      if (!SC.browser.msie) {
+      if (!handled && !SC.browser.msie) {
         throw e;
       }
     }
