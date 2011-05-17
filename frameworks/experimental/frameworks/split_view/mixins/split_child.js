@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @mixin
+  @class
   Child views of SplitViews should use this mixin to get their positioning
   logic and default settings.
   
@@ -14,7 +14,8 @@
   child views. This mixin observes the position and size properties and 
   calls adjust().
 */
-SC.SplitChild = {
+SC.SplitChild = 
+  /** @scope SC.SplitChild.prototype */{
   /**
    * Set to YES if your Split Child is a divider view.
    *
