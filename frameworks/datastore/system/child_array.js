@@ -172,7 +172,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     newRecs = this._processRecordsToHashes(recs);
     children.replace(idx, amt, newRecs);
     // notify that the record did change...
-    if (newRecs !== this._prevChildren) this.recordPropertyDidChange();
+    if (newRecs !== this._prevChildren){
+      this._performRecordPropertyChange(null, false);
+      this.arrayContentWillChange(idx, amt, len);
+      this._childrenContentDidChange(idx, amt, len);
+    } 
     record.recordDidChange(pname);
 
     return this;
@@ -219,10 +223,25 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.ChildArray} itself.
   */
   recordPropertyDidChange: function(keys) {
+    this._performRecordPropertyChange(keys, true);
+    return this;
+  },
+  
+  /** @private
+    Invoked when the object is changed from the parent or an outside source
+    
+    will cause the entire array to reset
+    
+    @param {SC.Array} keys optional
+    @param {Boolean} doReset optional
+    @returns {SC.ChildArray} itself.
+  */
+  _performRecordPropertyChange: function(keys, doReset){
     if (keys && !keys.contains(this.get('propertyName'))) return this;
 
     var children = this.get('readOnlyChildren'), oldLen = 0, newLen = 0;
     var prev = this._prevChildren, f = this._childrenContentDidChange;
+    doReset = SC.none(doReset) ? true : doReset;
 
     if (children === prev) return this; // nothing to do
 
@@ -245,11 +264,12 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
       newLen = children.get('length');
     }
-
-    
-    this.arrayContentWillChange(0, oldLen, newLen);
     this._prevChildren = children;
-    this._childrenContentDidChange(0, oldLen, newLen);
+    
+    if (doReset){
+      this.arrayContentWillChange(0, oldLen, newLen);
+      this._childrenContentDidChange(0, oldLen, newLen);      
+    }
 
     return this;
   },
