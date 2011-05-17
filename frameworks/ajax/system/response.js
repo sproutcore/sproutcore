@@ -19,6 +19,13 @@ SC.Response = SC.Object.extend(
 /** @scope SC.Response.prototype */ {
   
   /**
+    Walk like a duck
+    
+    @type Boolean
+  */
+  isResponse: YES,
+  
+  /**
     Becomes true if there was a failure.  Makes this into an error object.
     
     @property {Boolean}
