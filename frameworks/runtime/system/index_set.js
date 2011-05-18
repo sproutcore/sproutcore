@@ -28,9 +28,6 @@ sc_require('mixins/copyable');
         // uses a backing SC.Array object to return each index
         set.forEach(function(object) { .. })
 
-        // returns the index
-        set.forEachIndex(function(index) { ... });
-
         // returns ranges
         set.forEachRange(function(start, length) { .. });
 
