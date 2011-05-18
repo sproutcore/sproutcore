@@ -78,6 +78,13 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
     return this._scroll_verticalScrollOffset || 0;
   }.property().cacheable(),
 
+  /** @private
+    Push the corner of the view (the empty space where scrollers intersect).
+   */
+  render: function (context) {
+    context.push('<div class="corner"></div>');
+  },
+
   // ..........................................................
   // SCROLL WHEEL SUPPORT
   //

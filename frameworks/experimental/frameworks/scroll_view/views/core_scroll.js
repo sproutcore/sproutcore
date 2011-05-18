@@ -697,7 +697,7 @@ SC.CoreScrollView = SC.View.extend(
    */
   scrollUpPage: function (pages) {
     if (arguments.length === 0) pages = 1;
-    return this.scrollBy(null, -1 * this.get('verticalPageScroll' * pages));
+    return this.scrollBy(null, -1 * this.get('verticalPageScroll') * pages);
   },
 
   /**
@@ -984,16 +984,13 @@ SC.CoreScrollView = SC.View.extend(
 
   /** @private
     If we redraw after the initial render, we need to make sure that we reset
-    the scrollTop/scrollLeft properties on the content view.  This ensures
-    that, for example, the scroll views displays correctly when switching
-    views out in a ContainerView.
-   */
-  render: function (context, firstTime) {
-    this.invokeLast(this.adjustElementScroll);
+    the scrollTop / scrollLeft properties on the content view.
 
-    if (firstTime) {
-      context.push('<div class="corner"></div>');
-    }
+    This ensures that, for example, the scroll views displays correctly when
+    switching views out in a ContainerView.
+   */
+  update: function () {
+    this.invokeLast(this.adjustElementScroll);
     return sc_super();
   },
 
