@@ -29,6 +29,9 @@ if (typeof console === 'undefined') {
   console.log = console.info = console.warn = console.error = function(){};
 }
 
+window.SC = window.SC || {} ;
+window.SproutCore = window.SproutCore || SC ;
+
 // ........................................
 // BOOTSTRAP
 //
@@ -54,8 +57,7 @@ if (typeof console === 'undefined') {
   The core Base framework is based on the jQuery API with a number of
   performance optimizations.
 */
-window.SC = window.SC || {} ;
-window.SproutCore = window.SproutCore || SC ;
+SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
 SC.VERSION = '1.6.0.rc.1';
 
