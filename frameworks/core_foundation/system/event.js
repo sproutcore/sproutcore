@@ -287,7 +287,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Get the handlers queue for this element/eventType.  If the queue does
     // not exist yet, create it and also setup the shared listener for this
     // eventType.
-    var events = SC.data(elem, "events") || SC.data(elem, "events", {}) ,
+    var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}) ,
         handlers = events[eventType]; 
     if (!handlers) {
       handlers = events[eventType] = {} ;
@@ -351,7 +351,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // around, causing it to be cloned in the process
     if (SC.browser.msie && elem.setInterval) elem = window;
 
-    var handlers, key, events = SC.data(elem, "events") ;
+    var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
 
     // if no type is provided, remove all types for this element.
@@ -396,7 +396,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       key = null ;
       for(key in events) break;
       if(!key) {
-        SC.removeData(elem, "events") ;
+        SC.removeData(elem, "sc_events") ;
         delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
       }
       
@@ -546,7 +546,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     args[0] = event = SC.Event.normalizeEvent(event || window.event);
 
     // get the handlers for this event type
-    handlers = (SC.data(this, "events") || {})[event.type];
+    handlers = (SC.data(this, "sc_events") || {})[event.type];
     if (!handlers) return NO ; // nothing to do
     
     // invoke all handlers
