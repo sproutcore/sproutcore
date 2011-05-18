@@ -25,6 +25,7 @@
       itemTitleKey: 'title',
       itemValueKey: 'value',
       itemIconKey: 'icon',
+      controlSize: SC.LARGE_CONTROL_SIZE,
       layout: { left:12, height: 200, right:12, top:12 }
 
   })
@@ -40,9 +41,11 @@
 
     itemTitleKey: 'title',
     itemValueKey: 'value',
+    controlSize: SC.SMALL_CONTROL_SIZE,
     layout: { left:12, height: 200, right:12, top:12 }
 
     })
+
     .add("tabView3", SC.TabView, {
 
       items: [
@@ -81,11 +84,27 @@
 
    test("Check that the tabView has the right classes set", function() {
      var view = pane.view('tabView1');
-     var viewElem = view.$();
+     var viewElem = view.$(),
+         segmentedView;
+     
+     segmentedView = view.get('segmentedView');
+     
      ok(viewElem.hasClass('sc-view'), 'tabView1.hasClass(sc-view) should be YES');
      ok(viewElem.hasClass('sc-tab-view'), 'tabView1.hasClass(sc-tab-view) should be YES');
      ok(view.$('.sc-segmented-view').length, 'tabView1 should contain a segmented view');
      ok(view.$('.sc-container-view').length, 'tabView1 should contain a container view');
+     ok(view.$('.sc-segmented-view').hasClass('sc-large-size'), 'tabView1 should contain a segmented view with sc-large-size class');
+     equals(SC.LARGE_CONTROL_SIZE, segmentedView.get('controlSize'), "tabView1's segmentedView's controlSize");
+
+     view = pane.view('tabView2');
+     segmentedView = view.get('segmentedView');
+     ok(view.$('.sc-segmented-view').hasClass('sc-small-size'), 'tabView2 should contain a segmented view with sc-small-size class');
+     equals(SC.SMALL_CONTROL_SIZE, segmentedView.get('controlSize'), "tabView2's segmentedView's controlSize");
+
+     view = pane.view('tabView3');
+     segmentedView = view.get('segmentedView');
+     ok(view.$('.sc-segmented-view').hasClass('sc-regular-size'), 'tabView3 should contain a segmented view with sc-regular-size class');
+     equals(undefined, segmentedView.get('controlSize'), "tabView3's segmentedView's controlSize");
    });
 
 
