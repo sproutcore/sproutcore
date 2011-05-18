@@ -333,7 +333,6 @@ SC.AlertPane = SC.PanelPane.extend(
           localize: YES,
           titleMinWidth: 64,
           layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
-          theme: 'capsule',
           isCancel: YES,
           action: "dismiss",
           isVisible: NO
@@ -345,7 +344,6 @@ SC.AlertPane = SC.PanelPane.extend(
           localize: YES,
           titleMinWidth: 64,
           layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
-          theme: 'capsule',
           isDefault: YES,
           action: "dismiss",
           isVisible: NO
@@ -361,7 +359,6 @@ SC.AlertPane = SC.PanelPane.extend(
             localize: YES,
             titleMinWidth: 64,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
-            theme: 'capsule',
             action: "dismiss",
             isVisible: NO
           })]
@@ -444,7 +441,7 @@ SC.AlertPane.mixin(
     var pane = this.create(args), 
         idx = 0, 
         buttons = args.buttons,
-        buttonView, title, action, target;
+        buttonView, title, action, target, themeName;
     
     if(buttons) {
       buttons.forEach(function(button) {
@@ -454,14 +451,15 @@ SC.AlertPane.mixin(
         title = button.title;
         action = button.action;
         target = button.target;
+        themeName = args.themeName || 'capsule';
         
         buttonView.set('title'.fmt(idx), title);
         if(action) buttonView.set('customAction'.fmt(idx), action);
         if(target) buttonView.set('target'.fmt(idx), target);
         buttonView.set('isVisible', !!title);
+        buttonView.set('themeName', themeName);
       });
-    }
-    else {
+    } else {
       // if there are no buttons defined, just add the standard OK button
       buttonView = pane.get('button1');
       buttonView.set('title', "OK");
@@ -556,7 +554,8 @@ SC.AlertPane.mixin(
         description: normalizedArgs[1],
         caption: normalizedArgs[2],
         delegate: normalizedArgs[7],
-        icon: (normalizedArgs[6] || 'sc-icon-alert-48')
+        icon: (normalizedArgs[6] || 'sc-icon-alert-48'),
+        themeName: 'capsule'
       };
       
       // set buttons if there are any (and check if it's a string, since last
