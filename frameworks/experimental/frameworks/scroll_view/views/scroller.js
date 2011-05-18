@@ -100,12 +100,12 @@ SC.ScrollerView = SC.View.extend(
    */
   value: function (key, val) {
     var minimum = this.get('minimum');
-    if (val !== undefined) {
+    if (arguments.length === 2) {
       this._scs_value = val;
     }
 
     val = this._scs_value || minimum; // default value is at top/left
-    return Math.max(Math.min(val, this.get('maximum')), minimum) ;
+    return Math.max(Math.min(val, this.get('maximum')), minimum);
   }.property('maximum', 'minimum').cacheable(),
 
   /**
@@ -161,15 +161,13 @@ SC.ScrollerView = SC.View.extend(
     @observes proportion
    */
   isEnabled: function (key, value) {
-    if (value !== undefined) {
+    var enabled;
+    if (arguments.length === 2) {
       this._scsv_isEnabled = value;
     }
+    enabled = this._scsv_isEnabled;
 
-    if (this._scsv_isEnabled !== undefined) {
-      return this._scsv_isEnabled;
-    }
-
-    return this.get('proportion') < 1;
+    return !SC.none(enabled) ? enabled : this.get('proportion') < 1;
   }.property('proportion').cacheable(),
 
   /** @private */
@@ -303,16 +301,11 @@ SC.ScrollerView = SC.View.extend(
     @type Number
    */
   scrollerLength: function () {
-    var length = 0;
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        length = this.get('frame').height;
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        length = this.get('frame').width;
-    }
+    var frame = this.get('frame'),
+        layoutDirection = this.get('layoutDirection');
 
-    return length;
+    return layoutDirection === SC.LAYOUT_VERTICAL ? frame.height :
+           layoutDirection === SC.LAYOUT_HORIZONTAL ? frame.width : 0;
   }.property('frame').cacheable(),
 
   /** @private
@@ -323,9 +316,8 @@ SC.ScrollerView = SC.View.extend(
    */
   thumbLength: function () {
     var length = Math.floor(this.get('trackLength') * this.get('proportion'));
-    length = isNaN(length) ? 0 : length;
 
-    return Math.max(length, this.get('minimumThumbLength'));
+    return Math.max(isNaN(length) ? 0 : length, this.get('minimumThumbLength'));
   }.property('trackLength', 'proportion').cacheable(),
 
   /** @private
@@ -335,15 +327,9 @@ SC.ScrollerView = SC.View.extend(
     @isReadOnly
    */
   thumbPosition: function () {
-    var value = this.get('displayValue'),
-        max = this.get('maximum'),
-        trackLength = this.get('trackLength'),
-        thumbLength = this.get('thumbLength'),
-        capLength = this.get('capLength'),
-        capOverlap = this.get('capOverlap'), position;
-
-    position = (value / max) * (trackLength - thumbLength);
-    position += capLength - capOverlap; // account for the top / left cap
+    var position = (this.get('displayValue') / this.get('maximum')) *
+                    (this.get('trackLength') - this.get('thumbLength')) +
+                    this.get('capLength') - this.get('capOverlap'); // account for the top / left cap
 
     return Math.floor(isNaN(position) ? 0 : position);
   }.property('displayValue', 'maximum', 'trackLength', 'thumbLength').cacheable(),
@@ -368,14 +354,8 @@ SC.ScrollerView = SC.View.extend(
     Returns the value for a position within the scroller's frame.
    */
   valueForPosition: function (pos) {
-    var max = this.get('maximum'),
-        trackLength = this.get('trackLength'),
-        thumbLength = this.get('thumbLength'),
-        capLength = this.get('capLength'),
-        capOverlap = this.get('capOverlap');
-
-    return ((pos - (capLength - capOverlap)) /
-            (trackLength - thumbLength)) * max;
+    return ((pos - (this.get('capLength') - this.get('capOverlap'))) /
+            (this.get('trackLength') - this.get('thumbLength'))) * this.get('maximum');
   },
 
   /** @private
@@ -401,10 +381,6 @@ SC.ScrollerView = SC.View.extend(
   mouseDown: function (evt) {
     if (!this.get('isEnabled')) return NO;
 
-    // keep note of altIsDown for later.
-    this._altIsDown = evt.altKey;
-    this._shiftIsDown = evt.shiftKey;
-
     var target = evt.target,
         thumbPosition = this.get('thumbPosition'),
         value, clickLocation, clickOffset,
@@ -413,7 +389,8 @@ SC.ScrollerView = SC.View.extend(
     // Determine the subcontrol that was clicked
     if (target.className.indexOf('thumb') >= 0) {
       // Convert the mouseDown coordinates to the view's coordinates
-      clickLocation = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
+      clickLocation = this.convertFrameFromView({ x: evt.pageX,
+                                                  y: evt.pageY });
 
       clickLocation.x -= thumbPosition;
       clickLocation.y -= thumbPosition;
@@ -422,42 +399,46 @@ SC.ScrollerView = SC.View.extend(
       // thumb when the user drags
       this._thumbDragging = YES;
       this._thumbOffset = clickLocation;
-      this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
+      this._mouseDownLocation = { x: evt.pageX,
+                                  y: evt.pageY };
       this._thumbPositionAtDragStart = this.get('thumbPosition');
       this._valueAtDragStart = this.get("value");
+
+    // User clicked the up/left button; decrement the value by a fixed amount or page size
     } else if (target.className.indexOf('button-top') >= 0) {
-      // User clicked the up/left button
-      // Decrement the value by a fixed amount or page size
-      this.decrementProperty('value', (this._altIsDown ? scrollerLength : 30));
+      this.decrementProperty('value', 30);
       this.makeButtonActive('.button-top');
+
       // start a timer that will continue to fire until mouseUp is called
       this.startMouseDownTimer('scrollUp');
       this._isScrollingUp = YES;
+
+    // User clicked the down/right button; increment the value by a fixed amount
     } else if (target.className.indexOf('button-bottom') >= 0) {
-      // User clicked the down/right button
-      // Increment the value by a fixed amount
-      this.incrementProperty('value', (this._altIsDown ? scrollerLength : 30));
+      this.incrementProperty('value', 30);
       this.makeButtonActive('.button-bottom');
+
       // start a timer that will continue to fire until mouseUp is called
       this.startMouseDownTimer('scrollDown');
       this._isScrollingDown = YES;
-    } else {
-      // User clicked in the track
-      var scrollToClick = this.get("shouldScrollToClick");
-      if (evt.altKey) scrollToClick = !scrollToClick;
 
-      var trackLength = this.get('trackLength'),
+    // User clicked in the track
+    } else {
+      var scrollToClick = this.get("shouldScrollToClick"),
+          trackLength = this.get('trackLength'),
           thumbLength = this.get('thumbLength'),
           frame = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY }),
           mousePosition;
 
+      if (evt.altKey) scrollToClick = !scrollToClick;
+
       switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-          this._mouseDownLocation = mousePosition = frame.y;
-          break;
-        case SC.LAYOUT_HORIZONTAL:
-          this._mouseDownLocation = mousePosition = frame.x;
-          break;
+      case SC.LAYOUT_VERTICAL:
+        this._mouseDownLocation = mousePosition = frame.y;
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        this._mouseDownLocation = mousePosition = frame.x;
+        break;
       }
 
       if (scrollToClick) {
@@ -467,17 +448,19 @@ SC.ScrollerView = SC.View.extend(
         thumbPosition = this.get('thumbPosition');
 
         this._thumbDragging = YES;
-        this._thumbOffset = {x: frame.x - thumbPosition, y: frame.y - thumbPosition };
-        this._mouseDownLocation = {x:evt.pageX, y:evt.pageY};
+        this._thumbOffset = { x: frame.x - thumbPosition,
+                              y: frame.y - thumbPosition };
+        this._mouseDownLocation = { x: evt.pageX,
+                                    y: evt.pageY };
         this._thumbPositionAtDragStart = thumbPosition;
         this._valueAtDragStart = this.get("value");
-
 
       // Move the thumb up or down a page depending on whether the click
       // was above or below the thumb
       } else if (mousePosition < thumbPosition) {
         this.decrementProperty('value', scrollerLength);
         this.startMouseDownTimer('page');
+
       } else {
         this.incrementProperty('value', scrollerLength);
         this.startMouseDownTimer('page');
@@ -495,7 +478,8 @@ SC.ScrollerView = SC.View.extend(
     @param evt {SC.Event} the mousedown event
    */
   mouseUp: function (evt) {
-    var active = this._scs_buttonActive, ret = NO, timer;
+    var active = this._scs_buttonActive,
+        ret = NO, timer;
 
     // If we have an element that was set as active in mouseDown,
     // remove its active state
@@ -539,31 +523,18 @@ SC.ScrollerView = SC.View.extend(
 
     // Only move the thumb if the user clicked on the thumb during mouseDown
     if (this._thumbDragging) {
-
       switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-          delta = (evt.pageY - this._mouseDownLocation.y);
-          break;
-        case SC.LAYOUT_HORIZONTAL:
-          delta = (evt.pageX - this._mouseDownLocation.x);
-          break;
+      case SC.LAYOUT_VERTICAL:
+        delta = (evt.pageY - this._mouseDownLocation.y);
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        delta = (evt.pageX - this._mouseDownLocation.x);
+        break;
       }
 
-      // if we are in alt now, but were not before, update the old thumb position to the new one
-      if (evt.altKey) {
-        if (!this._altIsDown || (this._shiftIsDown !== evt.shiftKey)) {
-          thumbPositionAtDragStart = this._thumbPositionAtDragStart = thumbPositionAtDragStart+delta;
-          delta = 0;
-          this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
-          this._valueAtDragStart = this.get("value");
-        }
-
-        this.set('value', Math.round(this._valueAtDragStart + delta * 2));
-      } else {
-        thumbPosition = thumbPositionAtDragStart + delta;
-        length = this.get('trackLength') - this.get('thumbLength');
-        this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
-      }
+      thumbPosition = thumbPositionAtDragStart + delta;
+      length = this.get('trackLength') - this.get('thumbLength');
+      this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
 
     } else if (isScrollingUp || isScrollingDown) {
       var nowScrollingUp = NO, nowScrollingDown = NO;
@@ -572,26 +543,19 @@ SC.ScrollerView = SC.View.extend(
       var bottomButtonRect = this.$('.button-bottom')[0].getBoundingClientRect();
 
       switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-          if (evt.clientY < topButtonRect.bottom) nowScrollingUp = YES;
-          else nowScrollingDown = YES;
-          break;
-        case SC.LAYOUT_HORIZONTAL:
-          if (evt.clientX < topButtonRect.right) nowScrollingUp = YES;
-          else nowScrollingDown = YES;
-          break;
+      case SC.LAYOUT_VERTICAL:
+        nowScrollingUp = (evt.clientY < topButtonRect.bottom);
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        nowScrollingUp = (evt.clientX < topButtonRect.right);
+        break;
       }
+      nowScrollingDown = !nowScrollingUp;
 
       if ((nowScrollingUp || nowScrollingDown) && nowScrollingUp !== isScrollingUp) {
-        //
-        // STOP OLD
-        //
-
         // If we have an element that was set as active in mouseDown,
         // remove its active state
-        if (active) {
-         active.removeClass('active');
-        }
+        if (active) active.removeClass('active');
 
         // Stop firing repeating events after mouseup
         this._mouseDownTimerAction = nowScrollingUp ? "scrollUp" : "scrollDown";
@@ -602,14 +566,11 @@ SC.ScrollerView = SC.View.extend(
           this.makeButtonActive('.button-bottom');
         }
 
-         this._isScrollingUp = nowScrollingUp;
-         this._isScrollingDown = nowScrollingDown;
+        this._isScrollingUp = nowScrollingUp;
+        this._isScrollingDown = nowScrollingDown;
       }
     }
 
-
-    this._altIsDown = evt.altKey;
-    this._shiftIsDown = evt.shiftKey;
     return YES;
   },
 
@@ -622,11 +583,11 @@ SC.ScrollerView = SC.View.extend(
     Specify "immediate" as YES if it should not wait.
    */
   startMouseDownTimer: function (action, immediate) {
-    var timer;
-
     this._mouseDownTimerAction = action;
     this._mouseDownTimer = SC.Timer.schedule({
-      target: this, action: this.mouseDownTimerDidFire, interval: immediate ? 0 : 300
+      target: this,
+      action: this.mouseDownTimerDidFire,
+      interval: immediate ? 0 : 300
     });
   },
 
@@ -642,32 +603,34 @@ SC.ScrollerView = SC.View.extend(
         timerInterval = 50;
 
     switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        mouseLocation = this.convertFrameFromView(mouseLocation).y;
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        mouseLocation = this.convertFrameFromView(mouseLocation).x;
-        break;
+    case SC.LAYOUT_VERTICAL:
+      mouseLocation = this.convertFrameFromView(mouseLocation).y;
+      break;
+    case SC.LAYOUT_HORIZONTAL:
+      mouseLocation = this.convertFrameFromView(mouseLocation).x;
+      break;
     }
 
     switch (this._mouseDownTimerAction) {
-      case 'scrollDown':
-        this.incrementProperty('value', this._altIsDown ? scrollerLength : 30);
-        break;
-      case 'scrollUp':
-        this.decrementProperty('value', this._altIsDown ? scrollerLength : 30);
-        break;
-      case 'page':
-        timerInterval = 150;
-        if (mouseLocation < thumbPosition) {
-          this.decrementProperty('value', scrollerLength);
-        } else if (mouseLocation > thumbPosition+thumbLength) {
-          this.incrementProperty('value', scrollerLength);
-        }
+    case 'scrollDown':
+      this.incrementProperty('value', 30);
+      break;
+    case 'scrollUp':
+      this.decrementProperty('value', 30);
+      break;
+    case 'page':
+      timerInterval = 150;
+      if (mouseLocation < thumbPosition) {
+        this.decrementProperty('value', scrollerLength);
+      } else if (mouseLocation > thumbPosition+thumbLength) {
+        this.incrementProperty('value', scrollerLength);
+      }
     }
 
     this._mouseDownTimer = SC.Timer.schedule({
-      target: this, action: this.mouseDownTimerDidFire, interval: timerInterval
+      target: this,
+      action: this.mouseDownTimerDidFire,
+      interval: timerInterval
     });
   },
 
