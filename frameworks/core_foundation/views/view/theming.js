@@ -243,7 +243,7 @@ SC.View.reopen(
     // @if(debug)
     if (renderDelegate && renderDelegate.name) {
       SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
-      SC.Logger.error("%s will not render properly; name '%s' will be ignored.", renderDelegate, renderDelegate.name);
+      SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
     }
     // @endif
   }.enhance()
