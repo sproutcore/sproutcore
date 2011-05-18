@@ -31,7 +31,7 @@ SC.BaseTheme.touchScrollerRenderDelegate = SC.RenderDelegate.create({
         '<div class="thumb-clip">',
           ('<div class="thumb-inner" style="-webkit-transform: ' +
              'translate%@(' + (dataSource.get('thumbLength') - 1044) + 'px);').
-               fmt(isVertical ? 'Y' : 'X') + '>',
+               fmt(isVertical ? 'Y' : 'X') + '">',
              '<div class="thumb-center"></div>',
              '<div class="thumb-bottom"></div>',
            '</div>',
@@ -44,7 +44,7 @@ SC.BaseTheme.touchScrollerRenderDelegate = SC.RenderDelegate.create({
         isVertical = layoutDirection === SC.LAYOUT_VERTICAL,
         isHorizontal = layoutDirection === SC.LAYOUT_HORIZONTAL,
         controlsAreHidden = dataSource.get('controlsHidden'),
-        thumb, K = 'touchScrollerRenderDelegate';
+        K = 'touchScrollerRenderDelegate';
 
     context.setClass({
       'sc-vertical': isVertical,
@@ -54,36 +54,21 @@ SC.BaseTheme.touchScrollerRenderDelegate = SC.RenderDelegate.create({
     });
 
     if (!controlsAreHidden) {
-      thumb = context.find('.thumb-inner');
-
-      var max = dataSource.get("scrollerLength") - dataSource.get('capLength'),
-          min = dataSource.get("minimum") + dataSource.get('capLength'),
-          length = dataSource.get('thumbLength'),
-          position = dataSource.get('thumbPosition');
-    
-      if (position + length > max) {
-        position = Math.min(max - 20, position);
-        length = max - position;
-      }
-    
-      if (position < min) {
-        length -= min - position;
-        position = min;
-      }
+      var length = dataSource.get('thumbLength'),
+          position = dataSource.get('thumbPosition'),
+          T = 'translate3d(%@px,%@px,%@px)';
 
       if (dataSource.didChangeFor(K, 'thumbPosition')) {
-        thumb.css('-webkit-transform',
-                  'translate3d(' +
-                    (layoutDirection === SC.LAYOUT_VERTICAL ?
-                      '0px,' + position : position + 'px,0') + 'px,0px)');
+        context.find('.thumb').css('-webkit-transform', isVertical ?
+                                   T.fmt(0, position, 0) :
+                                   T.fmt(position, 0, 0));
       }
 
       if (dataSource.didChangeFor(K, 'thumbLength')) {
-        var len = Math.round(dataSource.get('thumbLength') - 1044);
-        thumb.css('-webkit-transform',
-                  'translate3d(' +
-                    (layoutDirection === SC.LAYOUT_VERTICAL ?
-                      '0px,' + length : length + 'px,0') + 'px,0px)');
+        context.find('.thumb-inner').css('-webkit-transform', isVertical ?
+                                         T.fmt(0, length, 0) :
+                                         T.fmt(length, 0, 0));
+
       }
     }
   }

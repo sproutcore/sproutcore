@@ -6,8 +6,8 @@
 // ==========================================================================
 
 
-SC.BaseTheme.scrollerRenderDelegate = SC.RenderDelegate.create({
-  name: 'scroller',
+SC.BaseTheme.desktopScrollerRenderDelegate = SC.RenderDelegate.create({
+  name: 'desktop-scroller',
 
   render: function (dataSource, context) {
     var layoutDirection = dataSource.get('layoutDirection'),
@@ -49,7 +49,7 @@ SC.BaseTheme.scrollerRenderDelegate = SC.RenderDelegate.create({
         isVertical = layoutDirection === SC.LAYOUT_VERTICAL,
         isHorizontal = layoutDirection === SC.LAYOUT_HORIZONTAL,
         controlsAreHidden = dataSource.get('controlsHidden'),
-        thumb, K = 'scrollerRenderDelegate';
+        thumb, K = 'desktopScrollerRenderDelegate';
 
     context.setClass({
       'sc-vertical': isVertical,

@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('views/core_scroll');
+sc_require('views/desktop/scroller');
 
 /** @class
   Implements a complete scroll view.  This class uses a manual implementation
@@ -24,9 +25,9 @@ sc_require('views/core_scroll');
 SC.DesktopScrollView = SC.CoreScrollView.extend(
   /** @scope SC.DesktopScrollView.prototype */{
 
-  horizontalScrollerView: SC.ScrollerView,
+  horizontalScrollerView: SC.DesktopScrollerView,
 
-  verticalScrollerView: SC.ScrollerView,
+  verticalScrollerView: SC.DesktopScrollerView,
 
   /**
     The current horizontal scroll offset.
