@@ -46,7 +46,9 @@ SC.ScrollerView = SC.View.extend(
     @default 'thumbPosition thumbLength isEnabled controlsHidden'.w()
     @see SC.View#displayProperties
    */
-  displayProperties: ['thumbPosition', 'thumbLength', 'isEnabled', 'controlsHidden'],
+  displayProperties: ['thumbPosition', 'thumbLength', 'isEnabled', 'controlsHidden',
+                      'layoutDirection', 'hasButtons',
+                      'displayValue', 'controlsId', 'maximum', 'minimum'], // WAI-ARIA attrs
 
   /**
     The WAI-ARIA role for scroller view.
@@ -56,6 +58,12 @@ SC.ScrollerView = SC.View.extend(
     @readOnly
    */
   ariaRole: 'scrollbar',
+
+  /**
+    @type String
+    @default 'scrollerRenderDelegate'
+  */
+  renderDelegateName: 'scrollerRenderDelegate',
 
 
   // ..........................................................
@@ -73,11 +81,12 @@ SC.ScrollerView = SC.View.extend(
    */
   shouldScrollToClick: NO,
 
-
   /** @private
     The in-touch-scroll value.
    */
   _touchScrollValue: NO,
+
+  controlsIdBinding: SC.Binding.oneWay('*parentView.contentView.layerId'),
 
   /**
     The value of the scroller.
@@ -104,10 +113,8 @@ SC.ScrollerView = SC.View.extend(
     @observes value
    */
   displayValue: function () {
-    var ret;
-    if (this.get("_touchScrollValue")) ret = this.get("_touchScrollValue");
-    else ret = this.get("value");
-    return ret;
+    return this.get("_touchScrollValue") ?
+      this.get("_touchScrollValue") : this.get("value");
   }.property("value", "_touchScrollValue").cacheable(),
 
   /**
@@ -253,105 +260,6 @@ SC.ScrollerView = SC.View.extend(
   // INTERNAL SUPPORT
   //
 
-
-  /** @private
-    Generates the HTML that gets displayed to the user.
-
-    The first time render is called, the HTML will be output to the DOM.
-    Successive calls will reposition the thumb based on the value property.
-
-    @param {SC.RenderContext} context the render context
-    @param {Boolean} firstTime YES if this is creating a layer
-    @private
-   */
-  render: function (context, firstTime) {
-    var classNames = {},
-        buttons = '',
-        parentView = this.get('parentView'),
-        thumbPosition, thumbLength, thumbCenterLength, thumbElement,
-        value, max, scrollerLength, length, pct;
-
-    // We set a class name depending on the layout direction so that we can
-    // style them differently using CSS.
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        classNames['sc-vertical'] = YES;
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        classNames['sc-horizontal'] = YES;
-        break;
-    }
-
-    // The appearance of the scroller changes if disabled
-    classNames['disabled'] = !this.get('isEnabled');
-    // Whether to hide the thumb and buttons
-    classNames['controls-hidden'] = this.get('controlsHidden');
-
-    // Change the class names of the DOM element all at once to improve
-    // performance
-    context.setClass(classNames);
-
-    // Calculate the position and size of the thumb
-    thumbLength = this.get('thumbLength');
-    thumbPosition = this.get('thumbPosition');
-
-    // If this is the first time, generate the actual HTML
-    if (firstTime) {
-      if (this.get('hasButtons')) {
-        buttons = '<div class="button-bottom"></div><div class="button-top"></div>';
-      } else {
-        buttons = '<div class="endcap"></div>';
-      }
-
-      switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-        context.push('<div class="track"></div>',
-                      '<div class="cap"></div>',
-                      buttons,
-                      '<div class="thumb" style="height: '+thumbLength+'px; top: ' + thumbPosition + 'px;">',
-                      '<div class="thumb-center"></div>',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-bottom"></div></div>');
-
-        //addressing accessibility
-        context.attr('aria-orientation', 'vertical');
-        break;
-        case SC.LAYOUT_HORIZONTAL:
-        context.push('<div class="track"></div>',
-                      '<div class="cap"></div>',
-                      buttons,
-                      '<div class="thumb" style="width: '+thumbLength+'px; left: ' + thumbPosition + 'px;">',
-                      '<div class="thumb-center"></div>',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-bottom"></div></div>');
-
-        //addressing accessibility
-        context.attr('aria-orientation', 'horizontal');
-      }
-
-      //addressing accessibility
-      context.attr('aria-valuemax', this.get('maximum'));
-      context.attr('aria-valuemin', this.get('minimum'));
-      context.attr('aria-valuenow', this.get('value'));
-      context.attr('aria-controls' , parentView.getPath('contentView.layerId'));
-
-    } else {
-      // The HTML has already been generated, so all we have to do is
-      // reposition and resize the thumb
-
-      // If we aren't displaying controls don't bother
-      if (this.get('controlsHidden')) return;
-
-      thumbElement = this.$('.thumb');
-
-      this.adjustThumb(thumbElement, thumbPosition, thumbLength);
-
-      //addressing accessibility
-      context.attr('aria-valuenow', this.get('value'));
-
-    }
-  },
-
   /** @private */
   touchScrollDidStart: function (value) {
     this.set("_touchScrollValue", value);
@@ -368,56 +276,6 @@ SC.ScrollerView = SC.View.extend(
   },
 
   // ..........................................................
-  // THUMB MANAGEMENT
-  //
-
-  /** @private
-    Adjusts the thumb (for backwards-compatibility calls adjustThumbPosition+adjustThumbSize by default)
-  */
-  adjustThumb: function (thumb, position, length) {
-    this.adjustThumbPosition(thumb, position);
-    this.adjustThumbSize(thumb, length);
-  },
-
-  /** @private
-    Updates the position of the thumb DOM element.
-
-    @param {Number} position the position of the thumb in pixels
-   */
-  adjustThumbPosition: function (thumb, position) {
-    // Don't touch the DOM if the position hasn't changed
-    if (this._thumbPosition === position) return;
-
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        thumb.css('top', position);
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        thumb.css('left', position);
-        break;
-    }
-
-    this._thumbPosition = position;
-  },
-
-  /** @private */
-  adjustThumbSize: function (thumb, size) {
-    // Don't touch the DOM if the size hasn't changed
-    if (this._thumbSize === size) return;
-
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        thumb.css('height', Math.max(size, this.get('minimumThumbLength')));
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        thumb.css('width', Math.max(size, this.get('minimumThumbLength')));
-        break;
-    }
-
-    this._thumbSize = size;
-  },
-
-  // ..........................................................
   // SCROLLER DIMENSION COMPUTED PROPERTIES
   //
 
@@ -431,15 +289,10 @@ SC.ScrollerView = SC.View.extend(
     @property
    */
   trackLength: function () {
-    var scrollerLength = this.get('scrollerLength');
-
-    // Subtract the size of the top/left cap
-    scrollerLength -= this.capLength - this.capOverlap;
-    // Subtract the size of the scroll buttons, or the end cap if they are
-    // not shown.
-    scrollerLength -= this.buttonLength - this.buttonOverlap;
-
-    return scrollerLength;
+    return this.get('scrollerLength') -
+      (this.capLength - this.capOverlap) -      // Subtract the size of the top/left cap
+      (this.buttonLength - this.buttonOverlap); // Subtract the size of the scroll buttons,
+                                                // or the end cap if they are not shown.
   }.property('scrollerLength').cacheable(),
 
   /** @private
@@ -450,14 +303,16 @@ SC.ScrollerView = SC.View.extend(
     @type Number
    */
   scrollerLength: function () {
+    var length = 0;
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        return this.get('frame').height;
+        length = this.get('frame').height;
+        break;
       case SC.LAYOUT_HORIZONTAL:
-        return this.get('frame').width;
+        length = this.get('frame').width;
     }
 
-    return 0;
+    return length;
   }.property('frame').cacheable(),
 
   /** @private
@@ -467,9 +322,7 @@ SC.ScrollerView = SC.View.extend(
     @property
    */
   thumbLength: function () {
-    var length;
-
-    length = Math.floor(this.get('trackLength') * this.get('proportion'));
+    var length = Math.floor(this.get('trackLength') * this.get('proportion'));
     length = isNaN(length) ? 0 : length;
 
     return Math.max(length, this.get('minimumThumbLength'));
@@ -489,8 +342,8 @@ SC.ScrollerView = SC.View.extend(
         capLength = this.get('capLength'),
         capOverlap = this.get('capOverlap'), position;
 
-    position = (value/max)*(trackLength-thumbLength);
-    position += capLength - capOverlap; // account for the top/left cap
+    position = (value / max) * (trackLength - thumbLength);
+    position += capLength - capOverlap; // account for the top / left cap
 
     return Math.floor(isNaN(position) ? 0 : position);
   }.property('displayValue', 'maximum', 'trackLength', 'thumbLength').cacheable(),
@@ -519,12 +372,10 @@ SC.ScrollerView = SC.View.extend(
         trackLength = this.get('trackLength'),
         thumbLength = this.get('thumbLength'),
         capLength = this.get('capLength'),
-        capOverlap = this.get('capOverlap'), value;
+        capOverlap = this.get('capOverlap');
 
-    value = pos - (capLength - capOverlap);
-    value = value / (trackLength - thumbLength);
-    value = value * max;
-    return value;
+    return ((pos - (capLength - capOverlap)) /
+            (trackLength - thumbLength)) * max;
   },
 
   /** @private
@@ -620,18 +471,17 @@ SC.ScrollerView = SC.View.extend(
         this._mouseDownLocation = {x:evt.pageX, y:evt.pageY};
         this._thumbPositionAtDragStart = thumbPosition;
         this._valueAtDragStart = this.get("value");
-      } else {
-        // Move the thumb up or down a page depending on whether the click
-        // was above or below the thumb
-        if (mousePosition < thumbPosition) {
-          this.decrementProperty('value',scrollerLength);
-          this.startMouseDownTimer('page');
-        } else {
-          this.incrementProperty('value', scrollerLength);
-          this.startMouseDownTimer('page');
-        }
-      }
 
+
+      // Move the thumb up or down a page depending on whether the click
+      // was above or below the thumb
+      } else if (mousePosition < thumbPosition) {
+        this.decrementProperty('value', scrollerLength);
+        this.startMouseDownTimer('page');
+      } else {
+        this.incrementProperty('value', scrollerLength);
+        this.startMouseDownTimer('page');
+      }
     }
 
     return YES;
@@ -707,10 +557,6 @@ SC.ScrollerView = SC.View.extend(
           this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
           this._valueAtDragStart = this.get("value");
         }
-
-        // because I feel like it. Probably almost no one will find this tiny, buried feature.
-        // Too bad.
-        if (evt.shiftKey) delta = -delta;
 
         this.set('value', Math.round(this._valueAtDragStart + delta * 2));
       } else {
