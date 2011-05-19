@@ -152,42 +152,17 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
     }
   },
 
-  /**
-    Tells the scroll view to notify of clipping frame size
-    changes every `incrementalRenderingDelta` pixels. This
-    allows incremental rendering to happen while doing
-    scrolling without firing off too many observers at once.
-   */
-  incrementalRenderingDelta: 15,
-
-  /** @private */
-  _lastCapturedX: -1,
-
-  /** @private */
-  _lastCapturedY: -1,
-
   /** @private
     This will notify anything that's incrementally rendering while
     scrolling, instead of having unrendered views.
    */
   _sctsv_setOffset: function (x, y) {
-    var delta = this.get('incrementalRenderingDelta');
     if (!SC.none(x)) {
       this._scroll_horizontalScrollOffset = x;
-      if (x > 0 && x < this.get('maximumHorizontalScrollOffset') &&
-          Math.abs(this._lastCapturedX - x) > delta) {
-        this._lastCapturedX = x;
-        this.propertyDidChange('horizontalScrollOffset');
-      }
     }
 
     if (!SC.none(y)) {
       this._scroll_verticalScrollOffset = y;
-      if (y > 0 && y < this.get('maximumVerticalScrollOffset') &&
-          Math.abs(this._lastCapturedY - y) > delta) {
-        this._lastCapturedY = y;
-        this.propertyDidChange('verticalScrollOffset');
-      }
     }
   },
 
