@@ -20,14 +20,16 @@ SC.platform = SC.Object.create({
     @property
   */
   scrollbarSize: function() {
-    var tester = document.createElement("DIV");
+    var tester = document.createElement("DIV"),
+        child;
     tester.innerHTML = "<div style='height:1px;'></div>";
     tester.style.cssText="position:absolute;width:100px;height:100px;overflow-y:visible;";
 
+    child = tester.childNodes[0];
     document.body.appendChild(tester);
-    var noScroller = tester.childNodes[0].innerWidth;
+    var noScroller = child.innerWidth || child.clientWidth;
     tester.style.overflowY = 'scroll';
-    var withScroller = tester.childNodes[0].innerWidth;
+    var withScroller = child.innerWidth || child.clientWidth;
     document.body.removeChild(tester);
 
     return noScroller-withScroller;
