@@ -107,23 +107,7 @@ SC.mixin(/** @lends SC */ {
     @param data {Object} Optional data.  If passed, write.
     @returns {Object} the value of the named data
   */
-  data: function(elem, name, data) {
-    elem = (elem === window) ? "@window" : elem ;
-    var hash = SC.hashFor(elem) ; // get the hash key
-    
-    // Generate the data cache if needed
-    var cache = SC._data_cache ;
-    if (!cache) SC._data_cache = cache = {} ;
-    
-    // Now get cache for element
-    var elemCache = cache[hash] ;
-    if (name && !elemCache) cache[hash] = elemCache = {} ;
-    
-    // Write data if provided 
-    if (elemCache && (data !== undefined)) elemCache[name] = data ;
-    
-    return (name) ? elemCache[name] : elemCache ;
-  },
+  data: $.data,
   
   /**
     Removes data from the global cache.  This is used throughout the
@@ -136,31 +120,7 @@ SC.mixin(/** @lends SC */ {
     @param name {String} optional name to remove. 
     @returns {Object} the value or cache that was removed
   */
-  removeData: function(elem, name) {
-    elem = (elem === window) ? "@window" : elem ;
-    var hash = SC.hashFor(elem) ;
-    
-    // return undefined if no cache is defined
-    var cache = SC._data_cache ;
-    if (!cache) return undefined ;
-    
-    // return undefined if the elem cache is undefined
-    var elemCache = cache[hash] ;
-    if (!elemCache) return undefined;
-    
-    // get the return value
-    var ret = (name) ? elemCache[name] : elemCache ;
-    
-    // and delete as appropriate
-    if (name) {
-      delete elemCache[name] ;
-    } else {
-      delete cache[hash] ;
-    }
-    
-    return ret ;
-  },
-
+  removeData: $.removeData,
 
   // ..........................................................
   // LOCALIZATION SUPPORT

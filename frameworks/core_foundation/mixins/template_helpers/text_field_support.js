@@ -93,10 +93,10 @@ SC.TextField = SC.TemplateView.extend(
   keyUp: function(evt) {
     this.domValueDidChange(this.$('input'));
 
-    if (evt.keyCode === 13) {
-      return this.insertNewline(evt);
-    } else if (evt.keyCode === 27) {
-      return this.cancel(evt);
+    if (evt.keyCode === SC.Event.KEY_RETURN) {
+      return this.tryToPerform('insertNewline', evt);
+    } else if (evt.keyCode === SC.Event.KEY_ESC) {
+      return this.tryToPerform('cancel', evt);
     }
 
     return true;
@@ -162,9 +162,9 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
   },
 
   keyUp: function(event) {
-    if (event.keyCode === 13) {
+    if (event.keyCode === SC.Event.KEY_RETURN) {
       return this.tryToPerform('insertNewline', event);
-    } else if (event.keyCode === 27) {
+    } else if (event.keyCode === SC.Event.KEY_ESC) {
       return this.tryToPerform('cancel', event);
     }
   }
