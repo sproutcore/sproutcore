@@ -14,6 +14,15 @@ SC.TextField = SC.TemplateView.extend(
 
   classNames: ['sc-text-field'],
 
+  /**
+    If set to `YES` uses textarea tag instead of input to
+    accommodate multi-line strings.
+
+    @type Boolean
+    @default NO
+  */
+  isMultiline: NO,
+
   // we can't use bindAttr because of a race condition:
   //
   // when `value` is set, the bindAttr observer immediately calls
@@ -25,23 +34,9 @@ SC.TextField = SC.TemplateView.extend(
   // In short, because we need to be able to catch changes to the
   // DOM made directly, we cannot also rely on bindAttr to update
   // the property: a chicken-and-egg problem.
-  template: SC.Handlebars.compile('<input type="text">'),
-
-  /**
-    If set to `YES` uses textarea tag instead of input to
-    accommodate multi-line strings.
-
-    @type Boolean
-    @default NO
-  */
-  isMultiline: NO,
-
-  init: function() {
-    sc_super();
-    if (this.get('isMultiline')) {
-      this.template = SC.Handlebars.compile('<textarea></textarea>');
-    }
-  },
+  template: function(){
+    return SC.Handlebars.compile(this.get('isMultiline') ? '<textarea></textarea>' : '<input type="text">');
+  }.property('isMultiline').cacheable(),
 
   $input: function() {
     tagName = this.get('isMultiline') ? 'textarea' : 'input';
