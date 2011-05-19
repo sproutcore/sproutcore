@@ -18,7 +18,3 @@ body {
  	line-height: 1.4;
 }
 
-/* 3D-accelerate panes in MobileSafari */
-.mobile-safari .sc-pane {
-  -webkit-transform: translate3d(0,0,0);
-}
