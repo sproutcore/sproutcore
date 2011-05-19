@@ -9,83 +9,9 @@
 
 (function() {
 
-// Create Buffer Constructor
-jQuery.buffer = jQuery.bufferedJQuery = function(selector, context) {
-  return new jQuery.bufferedJQuery.prototype.init(selector, context);
-};
+jQuery.buffer = jQuery.bufferedJQuery = jQuery.sub();
 
-// Base it on jquery
-var T = function() { };
-T.prototype = jQuery.fn;
-jQuery.bufferedJQuery.prototype = new T();
-
-// keep track of whether buffering is active
-jQuery._isBuffering = 0;
-
-// relay init properly
-jQuery.bufferedJQuery.prototype.init = function(selector, context) {
-  jQuery._isBuffering++;
-  var ret = jQuery.fn.init.call(this, selector, context);
-  ret.isBuffered = true;
-  jQuery._isBuffering--;
-  return ret;
-};
-
-// set prototype of init to the buffer prototype.
-jQuery.bufferedJQuery.prototype.init.prototype = jQuery.bufferedJQuery.prototype;
-
-/**
-  Actually subclass jQuery now.
-*/
-var base = jQuery.fn;
-
-jQuery.fn.extend({
-
-  /**
-    Returns an array of buffers for the elements. This is mostly here for illustration; the
-    built-in buffered commands inline the logic for performance.
-  */
-  buffers: function() {
-    var len = this.length, i, r = [];
-    for (i = 0; i < len; i++) {
-      r.push(jQuery.Buffer.bufferForElement(this[i]));
-    }
-    return r;
-  }
-
-});
-
-/*
-  Replace jQuery's find() to make the results buffered.
-*/
-jQuery.fn._jqb_originalFind = jQuery.fn.find;
-jQuery.fn.find = function(selector) {
-  // if we are not currently buffering, don't bother with this crap.
-  if (jQuery._isBuffering <= 0 && !this.isBuffered) return jQuery.fn._jqb_originalFind.call(this, selector);
-
-	var ret = jQuery.buffer(), length = 0;
-
-	for ( var i = 0, l = this.length; i < l; i++ ) {
-		length = ret.length;
-		jQuery.find( selector, this[i], ret );
-
-		if ( i > 0 ) {
-			// Make sure that the results are unique
-			for ( var n = length; n < ret.length; n++ ) {
-				for ( var r = 0; r < length; r++ ) {
-					if ( ret[r] === ret[n] ) {
-						ret.splice(n--, 1);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	return ret;
-};
-
-jQuery.extend(jQuery.bufferedJQuery.prototype, {
+jQuery.bufferedJQuery.fn.extend({
 
   html: function(value) {
     // if there is no value, we don't handle it.
