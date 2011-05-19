@@ -260,7 +260,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
       if (current) { current.tryToPerform('willLoseKeyResponderTo', view); }
-      if (view) { view.tryToPerform('willBecomeKeyResponderFrom', current); }
+      if (view) { 
+        view.tryToPerform('willBecomeKeyResponderFrom', current); 
+      }
     }
 
     if (current) {
@@ -280,8 +282,12 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // and notify again if needed.
     if (isKeyPane) {
-      if (view) { view.tryToPerform('didBecomeKeyResponderFrom', current); }
-      if (current) { current.tryToPerform('didLoseKeyResponderTo', view); }
+      if (view) { 
+        console.log(view.toString());
+        view.tryToPerform('didBecomeKeyResponderFrom', current); }
+      if (current) { 
+        current.tryToPerform('didLoseKeyResponderTo', view); 
+      }
     }
 
     return this ;
@@ -314,6 +320,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     return this ;
   },
 
+
+  didBecomeKeyResponderFrom: function(responder) {},
 
   /**
     Called just after the pane has lost its keyPane status.  Notifies the

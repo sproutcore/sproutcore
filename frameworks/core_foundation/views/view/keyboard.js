@@ -35,19 +35,24 @@ SC.View.reopen(
 
     @param {SC.Responder} responder
   */
-  willBecomeKeyResponderFrom: function(responder) {
-    this.$().focus();
-  },
+  willBecomeKeyResponderFrom: function(responder) {},
 
   /**
     Invokved just after the responder loses key responder status.
+    @param {SC.Responder} responder
   */
   didLoseKeyResponderTo: function(responder) {},
 
   /**
     Invoked just after the responder gains key responder status.
+    By default, it calls focus on the view root element. For accessibility 
+    purposes.
+  
+    @param {SC.Responder} responder
   */
-  didBecomeKeyResponderFrom: function(responder) {},
+  didBecomeKeyResponderFrom: function(responder) {
+    this.$().focus();
+  },
 
   /**
     This method will process a key input event, attempting to convert it to

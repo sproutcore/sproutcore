@@ -883,7 +883,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   },
   
   /** @private */
-  willBecomeKeyResponderFrom: function(keyView) {
+  didBecomeKeyResponderFrom: function(keyView) {
     // focus the text field.
     if (!this._isFocused) {
       this._isFocused = YES ;

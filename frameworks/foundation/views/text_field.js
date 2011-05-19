@@ -920,7 +920,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     When we become first responder, focus the text field if needed and
     hide the hint text.
   */
-  willBecomeKeyResponderFrom: function(keyView) {
+  didBecomeKeyResponderFrom: function(keyView) {
     if(this.get('isVisibleInWindow')) {
       var inp = this.$input()[0];
       try{ 
