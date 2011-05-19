@@ -25,9 +25,36 @@ sc_require('views/desktop/scroller');
 SC.DesktopScrollView = SC.CoreScrollView.extend(
   /** @scope SC.DesktopScrollView.prototype */{
 
+  /**
+    @type SC.CoreScrollerView
+    @default SC.DesktopScrollerView
+   */
   horizontalScrollerView: SC.DesktopScrollerView,
 
+  /**
+    @type SC.CoreScrollerView
+    @default SC.DesktopScrollerView
+   */
   verticalScrollerView: SC.DesktopScrollerView,
+
+  /**
+    Dynamically compute the renderDelegate name off of
+    the property `wantsNativeScrollbars`, which will flip
+    the render delegate between custom scrollbars and
+    native ones.
+    @field
+    @type String
+    @default scrollRenderDelegate
+   */
+  renderDelegateName: function () {
+    return this.get('wantsNativeScrollbars') ? 'nativeScrollRenderDelegate' : 'scrollRenderDelegate';
+  }.property('wantsNativeScrollbars').cacheable(),
+
+  /**
+    @type Array
+    @default ['canScrollVertical', 'canScrollHorizontal', 'nativeScrollbarThickness']
+   */
+  displayProperties: ['canScrollVertical', 'canScrollHorizontal', 'nativeScrollbarThickness'],
 
   /**
     The current horizontal scroll offset.
@@ -79,13 +106,6 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
     return this._scroll_verticalScrollOffset || 0;
   }.property().cacheable(),
 
-  /** @private
-    Push the corner of the view (the empty space where scrollers intersect).
-   */
-  render: function (context) {
-    context.push('<div class="corner"></div>');
-  },
-
   /**
     Tells the scroll view to notify of clipping frame size
     changes every `incrementalRenderingDelta` pixels. This
@@ -100,6 +120,8 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
 
   containerView: SC.ContainerView.extend({
 
+    classNames: ['sc-scroll-container-view'],
+
     /** @private
       Remove the "scroll" event handler for the layer.
      */
@@ -112,7 +134,7 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
      */
     didCreateLayer: function () {
       SC.Event.add(this.get('layer'), 'scroll', this, this.scroll);
-      this.get('parentView')._scdsv_adjustScrollbars();
+      this.get('parentView').displayDidChange();
     },
 
     /** @private */
@@ -165,41 +187,12 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
     }
   }),
 
-  /** @private
+  /**
     The native scrollbar thickness.
     @type Number
+    @default 15
    */
-  _scdsv_scrollbarThickness: null,
-
-  /** @private
-    Adjust the native scrollbars so they are not visible on screen.
-    This allows skinning of the scroll view using custom scrollers.
-   */
-  _scdsv_adjustScrollbars: function () {
-    var scroll = this.get('containerView').$(),
-        thickness = this.get('_scdsv_scrollbarThickness');
-
-    scroll.css('margin-bottom', this.get('canScrollHorizontal') ?
-               -1 * thickness : 0);
-    scroll.css('margin-right', this.get('canScrollVertical') ?
-               -1 * thickness : 0);
-  }.observes('_scdsv_scrollbarThickness', 'canScrollHorizontal', 'canScrollVertical'),
-
-  /** @private
-    Makes sure that the horizontal scroll view is unscrollable when SC says so.
-   */
-  _scdsv_horizontalScrollerVisibilityDidChange: function () {
-    var scroll = this.get('containerView').$();
-    scroll.css('overflow-x', this.get('canScrollHorizontal') ? 'scroll' : 'hidden');
-  }.observes('canScrollHorizontal'),
-
-  /** @private
-    Makes sure that the vertical scroll view is unscrollable when SC says so.
-   */
-  _scdsv_verticalScrollerVisibilityDidChange: function () {
-    var scroll = this.get('containerView').$();
-    scroll.css('overflow-y', this.get('canScrollVertical') ? 'scroll' : 'hidden');
-  }.observes('canScrollVertical'),
+  nativeScrollbarThickness: 15,
 
   /** @private
     Check to see if the native scrollbarSize changed due to scaling on the part
@@ -207,7 +200,7 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
    */
   viewDidResize: function () {
     SC.platform.propertyDidChange('scrollbarSize'); // invalidate the cache.
-    this.set('_scdsv_scrollbarThickness', SC.platform.get('scrollbarSize'));
+    this.set('nativeScrollbarThickness', SC.platform.get('scrollbarSize'));
     return sc_super();
   }
 

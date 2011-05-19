@@ -308,6 +308,13 @@ SC.CoreScrollView = SC.View.extend(
     return this.get('frame').width;
   }.property('frame'),
 
+  /**
+    Whether or not native scrollbars are wanted.
+
+    @type Boolean
+    @default NO
+   */
+  wantsNativeScrollbars: NO,
 
   // ..........................................................
   // SCROLLERS
@@ -737,56 +744,56 @@ SC.CoreScrollView = SC.View.extend(
     additional controls you have added to the view.
    */
   tile: function () {
-    // get horizontal scroller/determine if we should have a scroller
-    var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
-    var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
+    if (this.get('wantsNativeScrollbars')) return; // Let the browser retile
 
-    // get vertical scroller/determine if we should have a scroller
-    var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null;
-    var hasVertical = vscroll && this.get('isVerticalScrollerVisible');
+    var hasHorizontal = this.get('canScrollHorizontal'),
+        hasVertical = this.get('canScrollVertical'),
+        hScroll = hasHorizontal ? this.get('horizontalScrollerView') : null,
+        vScroll = hasVertical ? this.get('verticalScrollerView') : null,
+        clipView = this.get('containerView'),
+        clipLayout = { left: 0, top: 0 }, layout;
 
-    // get the containerView
-    var clip = this.get('containerView');
-    var clipLayout = { left: 0, top: 0 };
-    var t, layout, vo, ho, vl, hl;
-
-    var ht = hasHorizontal ? hscroll.get('scrollbarThickness') : 0;
-    var vt = hasVertical ? vscroll.get('scrollbarThickness') : 0;
+    var ht = hasHorizontal ? hScroll.get('scrollbarThickness') : 0;
+    var vt = hasVertical ? vScroll.get('scrollbarThickness') : 0;
 
     if (hasHorizontal) {
-      hl     = this.get('horizontalScrollerLayout');
+      layout = this.get('horizontalScrollerLayout');
       layout = {
-        left: (hl ? hl.left : 0),
-        bottom: (hl ? hl.bottom : 0),
-        right: (hl ? hl.right + vt-1 : vt-1),
+        left:   layout ? layout.left : 0,
+        bottom: layout ? layout.bottom : 0,
+        right:  layout ? layout.right + vt-1 : vt-1,
         height: ht
       };
-      hscroll.set('layout', layout);
-      ho = this.get('horizontalOverlay');
-      clipLayout.bottom = ho ? 0 : (layout.bottom + ht);
-    } else {
+      hScroll.set('layout', layout);
+      clipLayout.bottom = layout.bottom + layout.height;
+    }
+
+    if ((hasHorizontal && this.get('horizontalOverlay')) || !hasHorizontal) {
       clipLayout.bottom = 0;
     }
-    if (hscroll) hscroll.set('isVisible', hasHorizontal);
+
+    if (hScroll) hScroll.set('isVisible', hasHorizontal);
 
     if (hasVertical) {
       ht     = ht + this.get('verticalScrollerBottom');
-      vl     = this.get('verticalScrollerLayout');
+      layout = this.get('verticalScrollerLayout');
       layout = {
-        top: (vl ? vl.top : 0),
-        bottom: (vl ? vl.bottom + ht : ht),
-        right: (vl ? vl.right : 0),
-        width: vt
+        top:    layout ? layout.top : 0,
+        bottom: layout ? layout.bottom + ht : ht,
+        right:  layout ? layout.right : 0,
+        width:  vt
       };
-      vscroll.set('layout', layout);
-      vo = this.get('verticalOverlay');
-      clipLayout.right = vo ? 0 : (layout.right + vt);
-    } else {
+      vScroll.set('layout', layout);
+      clipLayout.right = layout.right + layout.width;
+    }
+
+    if ((hasVertical && this.get('verticalOverlay')) || !hasVertical) {
       clipLayout.right = 0;
     }
-    if (vscroll) vscroll.set('isVisible', hasVertical);
 
-    clip.adjust(clipLayout);
+    if (vScroll) vScroll.set('isVisible', hasVertical);
+
+    clipView.adjust(clipLayout);
   },
 
   /** @private
@@ -888,28 +895,30 @@ SC.CoreScrollView = SC.View.extend(
     // and replace our own contentView...
     this.contentView = this.containerView.get('contentView');
 
-    // create a horizontal scroller view if needed...
-    view = this.get("horizontalScrollerView");
-    if (view) {
-      if (this.get('hasHorizontalScroller')) {
-        view = this.horizontalScrollerView = this.createChildView(view, {
-          layoutDirection: SC.LAYOUT_HORIZONTAL,
-          valueBinding: '*owner.horizontalScrollOffset'
-        });
-        childViews.push(view);
-      } else this.horizontalScrollerView = null;
-    }
+    if (!this.get('wantsNativeScrollbars')) {
+      // create a horizontal scroller view if needed...
+      view = this.get("horizontalScrollerView");
+      if (view) {
+        if (this.get('hasHorizontalScroller')) {
+          view = this.horizontalScrollerView = this.createChildView(view, {
+            layoutDirection: SC.LAYOUT_HORIZONTAL,
+            valueBinding: '*owner.horizontalScrollOffset'
+          });
+          childViews.push(view);
+        } else this.horizontalScrollerView = null;
+      }
 
-    // create a vertical scroller view if needed...
-    view = this.get("verticalScrollerView");
-    if (view) {
-      if (this.get('hasVerticalScroller')) {
-        view = this.verticalScrollerView = this.createChildView(view, {
-          layoutDirection: SC.LAYOUT_VERTICAL,
-          valueBinding: '*owner.verticalScrollOffset'
-        });
-        childViews.push(view);
-      } else this.verticalScrollerView = null;
+      // create a vertical scroller view if needed...
+      view = this.get("verticalScrollerView");
+      if (view) {
+        if (this.get('hasVerticalScroller')) {
+          view = this.verticalScrollerView = this.createChildView(view, {
+            layoutDirection: SC.LAYOUT_VERTICAL,
+            valueBinding: '*owner.verticalScrollOffset'
+          });
+          childViews.push(view);
+        } else this.verticalScrollerView = null;
+      }
     }
 
     // set childViews array.
@@ -982,18 +991,6 @@ SC.CoreScrollView = SC.View.extend(
     }
   }.observes('contentView'),
 
-  /** @private
-    If we redraw after the initial render, we need to make sure that we reset
-    the scrollTop / scrollLeft properties on the content view.
-
-    This ensures that, for example, the scroll views displays correctly when
-    switching views out in a ContainerView.
-   */
-  update: function () {
-    this.invokeLast(this.adjustElementScroll);
-    return sc_super();
-  },
-
   /** @private */
   oldMaxHOffset: 0,
 
@@ -1040,8 +1037,10 @@ SC.CoreScrollView = SC.View.extend(
       if (this.get('autohidesHorizontalScroller')) {
         this.set('isHorizontalScrollerVisible', width > dimWidth);
       }
-      view.setIfChanged('maximum', width-dimWidth);
-      view.setIfChanged('proportion', dimWidth/width);
+      if (!this.get('wantsNativeScrollbars')) {
+        view.setIfChanged('maximum', width-dimWidth);
+        view.setIfChanged('proportion', dimWidth/width);
+      }
     }
 
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
@@ -1049,8 +1048,10 @@ SC.CoreScrollView = SC.View.extend(
       if (this.get('autohidesVerticalScroller')) {
         this.set('isVerticalScrollerVisible', height > dimHeight);
       }
-      view.setIfChanged('maximum', height - dimHeight);
-      view.setIfChanged('proportion', dimHeight / height);
+      if (!this.get('wantsNativeScrollbars')) {
+        view.setIfChanged('maximum', height - dimHeight);
+        view.setIfChanged('proportion', dimHeight / height);
+      }
     }
 
     // If there is no vertical scroller and auto hiding is on, make
