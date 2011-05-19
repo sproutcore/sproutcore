@@ -22,6 +22,23 @@ SC.NORMAL_SCROLL_DECELERATION = 0.95;
 */
 SC.FAST_SCROLL_DECELERATION = 0.85;
 
+
+/** @class
+  Implements touch events for a scroll view
+
+  Since the iPad doesn't allow native one-finger scrolling,
+  this has to do all of the work of implementing the solution
+  over again.
+
+  In addition to the one-finger scrolling, this view implements
+  edge-resistance.
+
+  Note that incremental rendering is done after the scrolling
+  has completely finished, which makes for a wait-and-see
+  experience.
+
+  @extends SC.CoreScrollerView
+ */
 SC.TouchScrollView = SC.CoreScrollView.extend(
   /** @scope SC.TouchScrollView.prototype */{
 
@@ -49,8 +66,16 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
   */
   horizontalOverlay: YES,
 
+  /**
+    @type SC.CoreScrollerView
+    @default SC.TouchScrollerView
+   */
   horizontalScrollerView: SC.TouchScrollerView,
 
+  /**
+    @type SC.CoreScrollerView
+    @default SC.TouchScrollerView
+   */
   verticalScrollerView: SC.TouchScrollerView,
 
   // ..........................................................

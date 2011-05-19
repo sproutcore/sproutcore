@@ -7,9 +7,10 @@
 
 /** @class
 
-  Displays a horizontal or vertical scroller.  You will not usually need to
-  work with scroller views directly, but you may override this class to
-  implement your own custom scrollers.
+  Displays a horizontal or vertical scroller.
+
+  You will not usually need to work with scroller views directly,
+  but you may override this class to implement your own custom scrollers.
 
   Because the scroller uses the dimensions of its constituent elements to
   calculate layout, you may need to override the default display metrics.
@@ -29,7 +30,7 @@
   hasButtons property.
 
   @extends SC.View
-  @since SproutCore 1.0
+  @since SproutCore 1.6
  */
 SC.CoreScrollerView = SC.View.extend(
   /** @scope SC.CoreScrollerView.prototype */{
@@ -101,10 +102,10 @@ SC.CoreScrollerView = SC.View.extend(
     @observes maximum
     @observes minimum
    */
-  value: function (key, val) {
+  value: function (key, value) {
     var minimum = this.get('minimum');
-    if (arguments.length === 2) {
-      this._scs_value = val;
+    if (typeof value !== "undefined") {
+      this._scs_value = value;
     }
 
     val = this._scs_value || minimum; // default value is at top / left
@@ -156,7 +157,7 @@ SC.CoreScrollerView = SC.View.extend(
    */
   isEnabled: function (key, value) {
     var enabled;
-    if (arguments.length === 2) {
+    if (typeof value !== "undefined") {
       this._scsv_isEnabled = value;
     }
     enabled = this._scsv_isEnabled;

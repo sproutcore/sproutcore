@@ -9,18 +9,23 @@ sc_require('views/core_scroll');
 sc_require('views/desktop/scroller');
 
 /** @class
-  Implements a complete scroll view.  This class uses a manual implementation
-  of scrollers in order to properly support clipping frames.
+  Implements a desktop scroll view using mouse events.
+
+  This class uses native scroll events, inverting the control
+  of `horizontalScrollOffset` and `verticalScrollOffset` to
+  properly proxy the scroll offset values to and from SC.
+
+  When you set these, SC gets notified _after_ the scroll
+  offset gets set in the DOM.
 
   Important Events:
 
-    - contentView frame size changes (to autoshow/hide scrollbar - adjust scrollbar size)
+    - contentView frame size changes (to autoshow/hide scrollbar- adjust scrollbar size)
     - horizontalScrollOffset change
     - verticalScrollOffsetChanges
-    - scroll wheel events
 
   @extends SC.View
-  @since SproutCore 1.0
+  @since SproutCore 1.6
 */
 SC.DesktopScrollView = SC.CoreScrollView.extend(
   /** @scope SC.DesktopScrollView.prototype */{

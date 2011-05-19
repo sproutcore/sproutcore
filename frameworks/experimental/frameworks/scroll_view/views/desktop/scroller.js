@@ -1,15 +1,25 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 sc_require('views/core_scroller');
 
-/**
-  @class
-  @extends SC.DesktopScrollerView
+/** @class
+  Implements a custom desktop-like scroller view that handles
+  your basic scrollbar events:
+
+   - Arrow buttons for incremental scrolling in either direction.
+   - Clicking in the track to incrementally jump to a location.
+   - CTL+Click to jump immediately to a location.
+   - A draggable scroll thumb.
+
+  @extends SC.CoreScrollerView
+  @since SproutCore 1.6
 */
-SC.DesktopScrollerView = SC.ScrollerView.extend(
+SC.DesktopScrollerView = SC.CoreScrollerView.extend(
   /** @scope SC.DesktopScrollerView.prototype */{
 
   /**

@@ -8,8 +8,9 @@
 sc_require('views/scroller');
 
 /** @class
-  Implements a complete scroll view.  This class uses a manual implementation
-  of scrollers in order to properly support clipping frames.
+  The core scroll view component.
+
+  This class is an input-agnostic scroll view implementation.
 
   Important Events:
 
@@ -87,7 +88,7 @@ SC.CoreScrollView = SC.View.extend(
     @default 0
    */
   horizontalScrollOffset: function (key, value) {
-    if (arguments.length === 2) {
+    if (typeof value !== "undefined") {
       var minOffset = this.minimumHorizontalScrollOffset(),
           maxOffset = this.get('maximumHorizontalScrollOffset');
       this._scroll_horizontalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
@@ -105,7 +106,7 @@ SC.CoreScrollView = SC.View.extend(
     @default 0
    */
   verticalScrollOffset: function (key, value) {
-    if (arguments.length === 2) {
+    if (typeof value !== "undefined") {
       var minOffset = this.get('minimumVerticalScrollOffset'),
           maxOffset = this.get('maximumVerticalScrollOffset');
       this._scroll_verticalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
@@ -533,7 +534,7 @@ SC.CoreScrollView = SC.View.extend(
    */
   scrollTo: function (x, y) {
     // normalize params
-    if (arguments.length === 1 && SC.typeOf(x) === SC.T_HASH) {
+    if (typeof y === "undefined" && SC.typeOf(x) === SC.T_HASH) {
       y = x.y; x = x.x;
     }
 
@@ -563,7 +564,7 @@ SC.CoreScrollView = SC.View.extend(
    */
   scrollBy: function (x, y) {
     // normalize params
-    if (arguments.length === 1 && SC.typeOf(x) === SC.T_HASH) {
+    if (typeof y === "undefined" && SC.typeOf(x) === SC.T_HASH) {
       y = x.y;
       x = x.x;
     }
@@ -584,7 +585,7 @@ SC.CoreScrollView = SC.View.extend(
    */
   scrollToVisible: function (view) {
     // if no view is passed, do default
-    if (arguments.length === 0) return sc_super();
+    if (typeof view === "undefined") return sc_super();
 
     var contentView = this.get('contentView');
     if (!contentView) return NO; // nothing to do if no contentView.
@@ -639,7 +640,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollDownLine: function (lines) {
-    if (arguments.length === 0) lines = 1;
+    if (typeof lines === "undefined") lines = 1;
     return this.scrollBy(null, this.get('verticalLineScroll') * lines);
   },
 
@@ -651,7 +652,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollUpLine: function (lines) {
-    if (arguments.length === 0) lines = 1;
+    if (typeof lines === "undefined") lines = 1;
     return this.scrollBy(null, -1 * this.get('verticalLineScroll') * lines);
   },
 
@@ -663,7 +664,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollRightLine: function (lines) {
-    if (arguments.length === 0) lines = 1;
+    if (typeof lines === "undefined") lines = 1;
     return this.scrollTo(this.get('horizontalLineScroll') * lines, null);
   },
 
@@ -675,7 +676,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollLeftLine: function (lines) {
-    if (arguments.length === 0) lines = 1;
+    if (typeof lines === "undefined") lines = 1;
     return this.scrollTo(-1 * this.get('horizontalLineScroll') * lines, null);
   },
 
@@ -689,7 +690,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollDownPage: function (pages) {
-    if (arguments.length === 0) pages = 1;
+    if (typeof pages === "undefined") pages = 1;
     return this.scrollBy(null, this.get('verticalPageScroll') * pages);
   },
 
@@ -703,7 +704,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollUpPage: function (pages) {
-    if (arguments.length === 0) pages = 1;
+    if (typeof pages === "undefined") pages = 1;
     return this.scrollBy(null, -1 * this.get('verticalPageScroll') * pages);
   },
 
@@ -717,7 +718,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollRightPage: function (pages) {
-    if (arguments.length === 0) pages = 1;
+    if (typeof pages === "undefined") pages = 1;
     return this.scrollBy(this.get('horizontalPageScroll') * pages, null);
   },
 
@@ -731,7 +732,7 @@ SC.CoreScrollView = SC.View.extend(
     @returns {SC.ScrollView} receiver
    */
   scrollLeftPage: function (pages) {
-    if (arguments.length === 0) pages = 1;
+    if (typeof pages === "undefined") pages = 1;
     return this.scrollBy(-1 * this.get('horizontalPageScroll') * pages, null);
   },
 
@@ -826,7 +827,7 @@ SC.CoreScrollView = SC.View.extend(
     @default 1.0
    */
   scale: function (key, value) {
-    if (arguments.length === 2) {
+    if (typeof value !== "undefined") {
       this._scale = Math.min(Math.max(this.get("minimumScale"), value), this.get("maximumScale"));
     }
     return this._scale;
