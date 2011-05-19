@@ -364,7 +364,7 @@ SC.CoreScrollView = SC.View.extend(
     return !!(this.get('hasHorizontalScroller') &&
               this.get('horizontalScrollerView') &&
               this.get('isHorizontalScrollerVisible'));
-  }.property('isHorizontalScrollerVisible').cacheable(),
+  }.property('isHorizontalScrollerVisible', 'horizontalScrollerView').cacheable(),
 
   /**
     If YES, the horizontal scroller will autohide if the contentView is
@@ -418,7 +418,7 @@ SC.CoreScrollView = SC.View.extend(
     return !!(this.get('hasVerticalScroller') &&
               this.get('verticalScrollerView') &&
               this.get('isVerticalScrollerVisible'));
-  }.property('isVerticalScrollerVisible').cacheable(),
+  }.property('isVerticalScrollerVisible', 'verticalScrollerView').cacheable(),
 
   /**
     If YES, the vertical scroller will autohide if the contentView is
@@ -748,8 +748,8 @@ SC.CoreScrollView = SC.View.extend(
 
     var hasHorizontal = this.get('canScrollHorizontal'),
         hasVertical = this.get('canScrollVertical'),
-        hScroll = hasHorizontal ? this.get('horizontalScrollerView') : null,
-        vScroll = hasVertical ? this.get('verticalScrollerView') : null,
+        hScroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null,
+        vScroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null,
         clipView = this.get('containerView'),
         clipLayout = { left: 0, top: 0 }, layout;
 
@@ -881,7 +881,7 @@ SC.CoreScrollView = SC.View.extend(
     in the regular properties.
    */
   createChildViews: function () {
-    var childViews = [] , view;
+    var childViews = [], view;
 
     // create the containerView.  We must always have a container view.
     // also, setup the contentView as the child of the containerView...
@@ -900,10 +900,11 @@ SC.CoreScrollView = SC.View.extend(
       view = this.get("horizontalScrollerView");
       if (view) {
         if (this.get('hasHorizontalScroller')) {
-          view = this.horizontalScrollerView = this.createChildView(view, {
+          view = this.createChildView(view, {
             layoutDirection: SC.LAYOUT_HORIZONTAL,
             valueBinding: '*owner.horizontalScrollOffset'
           });
+          this.set('horizontalScrollerView', view);
           childViews.push(view);
         } else this.horizontalScrollerView = null;
       }
@@ -912,10 +913,11 @@ SC.CoreScrollView = SC.View.extend(
       view = this.get("verticalScrollerView");
       if (view) {
         if (this.get('hasVerticalScroller')) {
-          view = this.verticalScrollerView = this.createChildView(view, {
+          view = this.createChildView(view, {
             layoutDirection: SC.LAYOUT_VERTICAL,
             valueBinding: '*owner.verticalScrollOffset'
           });
+          this.set('verticalScrollerView', view);
           childViews.push(view);
         } else this.verticalScrollerView = null;
       }
@@ -1057,7 +1059,7 @@ SC.CoreScrollView = SC.View.extend(
     // If there is no vertical scroller and auto hiding is on, make
     // sure we are at the top if not already there
     if (!this.get('isVerticalScrollerVisible') && (this.get('verticalScrollOffset') !== 0) &&
-       this.get('autohidesVerticalScroller')) {
+        this.get('autohidesVerticalScroller')) {
       this.set('verticalScrollOffset', 0);
     }
 
