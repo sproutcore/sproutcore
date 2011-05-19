@@ -92,70 +92,76 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   /**
   */
   createChildViews: function() {
-    var cv = SC.clone(this.get("childViews"));
-    var idx, len = cv.length, key, v, exampleRow = this.get("exampleRow");
+    var childViews = this.get('childViews'),
+        len        = childViews.length,
+        idx, key, views, view,
+        attrs, exampleRow = this.get('exampleRow');
 
-    // rows that are provided as plain hashes need to be created by passing them into
-    // exampleRow.extend.
-    for (idx = 0; idx < len; idx++) {
-      key = cv[idx];
-      if (SC.typeOf(key) === SC.T_STRING) {
-        v = this.get(key);
-        if (v && !v.isClass && SC.typeOf(v) === SC.T_HASH) {
-          this[key] = exampleRow.extend(v);
+    this.beginPropertyChanges() ;
+
+    // swap the array
+    for (idx=0; idx<len; ++idx) {
+      if (key = (view = childViews[idx])) {
+
+        // is this is a key name, lookup view class
+        if (typeof key === SC.T_STRING) {
+          view = this[key];
+        } else {
+          key = null ;
         }
-      }
-    }
 
-    // we will be initializing the 'content' property for all child views
-    var content = this.get("content");
-    sc_super();
+        if (!view) {
+          SC.Logger.error ("No view with name "+key+" has been found in "+this.toString());
+          // skip this one.
+          continue;
+        }
 
-    for (idx = 0; idx < len; idx++) {
-      key = cv[idx];
+        if(!view.isClass && SC.typeOf(view) === SC.T_HASH) {
+          attrs = view;
+          view = exampleRow;
+        }
+        else {
+          attrs = {};
+        }
 
-      // if the view was originally declared as a string, then we have something to give it
-      if (SC.typeOf(key) === SC.T_STRING) {
-        // try to get the actual view
-        v = this.get(key);
+        if((attrs.isFormField || view.prototype.isFormField) && (attrs.hasContentValueSupport || view.prototype.hasContentValueSupport)) {
+          attrs.contentValueKey = key;
+        }
 
-        if (v && !v.isClass) {
-          // we used to set contentValueKey on applicable children, but given that was too
-          // implicit: any LabelView child of the form view would get the contentValueKey.
-          // 
-          // instead, we give ALL views a formKey for their convenience; if they want to
-          // use contentValue support they should do so directly.
-          v.set('formKey', key);
+        attrs.formKey = key;
 
-          // We used to try to be clever and bind child views' 'content' to 
-          // individual properties if the views didn't have content value support.
-          // For instance, a plain view named 'myView' would get bound to content.myView.
-          //
-          // Cleverness is evil, so, we have dropped this. Instead, we always bind content,
-          // and always do so directly.
-          if (!v.get("content")) {
-            v.bind('content', this, 'content');
+        // createChildView creates the view if necessary, but also sets
+        // important properties, such as parentView
+        view = this.createChildView(view, attrs) ;
+
+        if(!view.get('content')) {
+          view.bind('content', this, 'content');
+        }
+
+        // for form rows, set up label measuring and the label itself.
+        if (view.isFormRow) {
+          // set label (if possible).
+          if (SC.none(view.get('label'))) {
+              view.set("label", key.humanize().titleize());
           }
 
-          // for form rows, set up label measuring and the label itself.
-          if (v.isFormRow) {
-            // set label (if possible).
-            if (SC.none(v.get('label'))) {
-                v.set("label", key.humanize().titleize());
-            }
-
-            // set the label size measuring stuff
-            if (this.get('labelWidth') !== null) {
-              v.set("shouldMeasureLabel", NO);
-            }
+          // set the label size measuring stuff
+          if (this.get('labelWidth') !== null) {
+            view.set("shouldMeasureLabel", NO);
           }
-
         }
+
+        if (key) { this[key] = view ; } // save on key name if passed
       }
+      childViews[idx] = view;
     }
+
+    this.endPropertyChanges() ;
 
     this._hasCreatedRows = YES;
     this.recalculateLabelWidth();
+
+    return this ;
   },
 
   
