@@ -306,7 +306,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
   // GUIDS & HASHES
   //
 
-  guidKey: jQuery.expando || ("SproutCore" + ( SC.VERSION + Math.random() ).replace( /\D/g, "" )),
+  // Like jQuery.expando but without any risk of conflict
+  guidKey: "SproutCore" + ( SC.VERSION + Math.random() ).replace( /\D/g, "" ),
 
   // Used for guid generation...
   _guidPrefixes: {"number": "nu", "string": "st"},
