@@ -205,6 +205,15 @@ SC.CoreScrollerView = SC.View.extend(
   scrollbarThickness: 14,
 
   /**
+    Whether or not the scrollbar is translucent.
+    This effectively means you would like the scroller to be overlaid.
+
+    @type Boolean
+    @default NO
+   */
+  isTranslucent: NO,
+
+  /**
     The width or height of the cap that encloses the track.
 
     @type Number

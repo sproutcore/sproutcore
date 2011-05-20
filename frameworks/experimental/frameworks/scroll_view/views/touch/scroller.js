@@ -36,6 +36,12 @@ SC.TouchScrollerView = SC.CoreScrollerView.extend(
     @default 12
    */
   scrollbarThickness: 12,
+
+  /**
+    @type Boolean
+    @default YES
+   */
+  isTranslucent: YES,
   
   /**
     @type Number

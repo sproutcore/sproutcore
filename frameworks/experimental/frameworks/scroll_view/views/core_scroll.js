@@ -766,7 +766,7 @@ SC.CoreScrollView = SC.View.extend(
         height: ht
       };
       hScroll.set('layout', layout);
-      clipLayout.bottom = layout.bottom + layout.height;
+      clipLayout.bottom = layout.bottom + (hScroll.get('isTranslucent') ? 0 : layout.height);
     }
 
     if ((hasHorizontal && this.get('horizontalOverlay')) || !hasHorizontal) {
@@ -785,7 +785,8 @@ SC.CoreScrollView = SC.View.extend(
         width:  vt
       };
       vScroll.set('layout', layout);
-      clipLayout.right = layout.right + layout.width;
+      console.error(vScroll.get('isTranslucent'));
+      clipLayout.right = layout.right + (vScroll.get('isTranslucent') ? 0 : layout.width);
     }
 
     if ((hasVertical && this.get('verticalOverlay')) || !hasVertical) {
@@ -798,7 +799,8 @@ SC.CoreScrollView = SC.View.extend(
   },
 
   /** @private
-    Called whenever a scroller visibility changes.  Calls the tile() method.
+    Called whenever a scroller visibility changes.
+    Calls the tile() method.
    */
   scrollerVisibilityDidChange: function () {
     this.tile();
