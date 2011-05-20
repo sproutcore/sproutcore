@@ -27,7 +27,7 @@
   position: relative;
 }
 
-.testresult label.hide-passed {
+.testresult label.hide-passed, .testresult label.show-progress {
   position: absolute;
   display: block;
   margin: 0;
@@ -38,8 +38,12 @@
   margin-top: -8px;
 }
 
-.testresult label.hide-passed.disabled {
+.testresult label.hide-passed.disabled, .testresult label.show-progress.disabled  {
   color: #aaa;
+}
+
+.testresult label.show-progress {
+  left: 200px;
 }
 
 .testresult em {
@@ -67,6 +71,7 @@
 .core-test table {
   background: #000;
   border-spacing: 1px;
+  border-collapse: separate;
   width: 100%;
 }
 
@@ -79,6 +84,10 @@
     background: #fff;
     padding: 4px;
   }
+
+.core-test table th {
+  font-weight: bold;
+}
 
 .core-test tbody td {
   text-align: center;

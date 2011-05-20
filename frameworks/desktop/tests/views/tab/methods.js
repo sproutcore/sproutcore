@@ -42,9 +42,7 @@ module("SC.TabView", {
   }
 });
 
-test("Check that all segmentedViews are visible", function() {
-   ok(true, 'hello');
- });
+test("Methods of TabView are untested");
 
 
 //_tab_nowShowingDidChange: function() {

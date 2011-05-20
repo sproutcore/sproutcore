@@ -190,4 +190,13 @@
     SC.RootResponder.responder.keyup(new SC.Event({ type: 'keyup', keyCode: 27 }));
     equals(cancelCalled, 1, "calls cancel after pressing escape key");
   });
+
+  test("creates textarea tag if isMultiline", function() {
+    var view = SC.TextField.create({
+      isMultiline: YES
+    });
+    SC.run(function() { pane.appendChild(view); });
+    equals(view.$('textarea').length, 1, "view creates textarea tag instead of input");
+  });
+
 })();

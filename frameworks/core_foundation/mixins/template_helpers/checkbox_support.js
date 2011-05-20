@@ -27,14 +27,14 @@ SC.Checkbox = SC.TemplateView.extend(
   },
 
   domValueDidChange: function(node) {
-    this.set('value', !!$(node).attr('checked'));
+    this.set('value', $(node).prop('checked'));
   },
 
   value: function(key, value) {
     if (value !== undefined) {
-      this.$('input').attr('checked', value);
+      this.$('input').prop('checked', value);
     } else {
-      value = this.$('input').attr('checked');
+      value = this.$('input').prop('checked');
     }
 
     return value;
@@ -52,9 +52,9 @@ SC.CheckboxSupport = /** @scope SC.CheckboxSupport */{
 
   value: function(key, value) {
     if (value !== undefined) {
-      this.$('input').attr('checked', value);
+      this.$('input').prop('checked', value);
     } else {
-      value = this.$('input').attr('checked');
+      value = this.$('input').prop('checked');
     }
 
     return value;

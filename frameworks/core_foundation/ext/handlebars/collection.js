@@ -9,12 +9,14 @@ Handlebars.registerHelper('collection', function(path, options) {
   var hash = options.hash;
   var collectionClass, collectionObject;
 
-  collectionClass = path ? SC.objectForPropertyPath(path) : SC.TemplateCollectionView;
-  //@ if (debug)
+  collectionClass = path ? SC.getPath(this, path) || SC.getPath(path) :
+    SC.TemplateCollectionView;
+
+  // @if (debug)
   if (!collectionClass) {
     throw "%@ #collection: Could not find %@".fmt(data.view, path);
   }
-  //@ endif
+  // @endif
 
   var extensions = {};
 
@@ -51,7 +53,7 @@ Handlebars.registerHelper('collection', function(path, options) {
 });
 
 Handlebars.registerHelper('each', function(path, options) {
-  options.hash.contentBinding = SC.Binding.from('*'+path, this);
+  options.hash.contentBinding = SC.Binding.from('*'+path, this).oneWay();
   options.hash.itemContextProperty = 'content';
   return Handlebars.helpers.collection.call(this, null, options);
 });

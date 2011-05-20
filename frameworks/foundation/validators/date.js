@@ -33,12 +33,12 @@ SC.Validator.Date = SC.Validator.extend(
     /*
       TODO [CC] deprecated warning, we should remove this in a future release
     */
-    //@ if (debug)
+    // @if (debug)
     if (format.indexOf('%') === -1) {
       SC.Logger.warn("You're using a Date validator with a format (%@) for time.js, which has been deprecated. Please change your format to something compatible with SC.DateTime".fmt(format));
       format = this.constructor.prototype.format;
     }
-    //@ endif
+    // @endif
 
     if (SC.typeOf(object) === SC.T_NUMBER) {
       dateTime = SC.DateTime.create(object);
@@ -62,12 +62,12 @@ SC.Validator.Date = SC.Validator.extend(
     /*
       TODO [CC] deprecated warning, we should remove this in a future release
     */
-    //@ if (debug)
+    // @if (debug)
     if (format.indexOf('%') === -1) {
       SC.Logger.warn("You're using a Date validator with a format (%@) for time.js, which has been deprecated. Please change your format to something compatible with SC.DateTime".fmt(format));
       format = this.constructor.prototype.format;
     }
-    //@ endif
+    // @endif
 
     if (value) {
       dateTime = SC.DateTime.parse(value, format);

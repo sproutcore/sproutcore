@@ -14,6 +14,15 @@ SC.TextField = SC.TemplateView.extend(
 
   classNames: ['sc-text-field'],
 
+  /**
+    If set to `YES` uses textarea tag instead of input to
+    accommodate multi-line strings.
+
+    @type Boolean
+    @default NO
+  */
+  isMultiline: NO,
+
   // we can't use bindAttr because of a race condition:
   //
   // when `value` is set, the bindAttr observer immediately calls
@@ -25,18 +34,25 @@ SC.TextField = SC.TemplateView.extend(
   // In short, because we need to be able to catch changes to the
   // DOM made directly, we cannot also rely on bindAttr to update
   // the property: a chicken-and-egg problem.
-  template: SC.Handlebars.compile('<input type="text">'),
+  template: function(){
+    return SC.Handlebars.compile(this.get('isMultiline') ? '<textarea></textarea>' : '<input type="text">');
+  }.property('isMultiline').cacheable(),
+
+  $input: function() {
+    tagName = this.get('isMultiline') ? 'textarea' : 'input';
+    return this.$(tagName);
+  },
 
   didCreateLayer: function() {
     var self = this;
 
-    var input = this.$('input');
+    var input = this.$input();
     input.val(this._value);
 
     SC.Event.add(input, 'focus', this, this.focusIn);
     SC.Event.add(input, 'blur', this, this.focusOut);
 
-    this.$('input').bind('change', function() {
+    input.bind('change', function() {
       self.domValueDidChange(SC.$(this));
     });
   },
@@ -58,7 +74,7 @@ SC.TextField = SC.TemplateView.extend(
     the underlying DOM element is created.
   */
   value: function(key, value) {
-    var input = this.$('input');
+    var input = this.$input();
 
     if (value !== undefined) {
       this._value = value;
@@ -91,16 +107,17 @@ SC.TextField = SC.TemplateView.extend(
   },
 
   keyUp: function(evt) {
-    this.domValueDidChange(this.$('input'));
+    this.domValueDidChange(this.$input());
 
-    if (evt.keyCode === 13) {
-      return this.insertNewline(evt);
-    } else if (evt.keyCode === 27) {
-      return this.cancel(evt);
+    if (evt.keyCode === SC.Event.KEY_RETURN) {
+      return this.tryToPerform('insertNewline', evt);
+    } else if (evt.keyCode === SC.Event.KEY_ESC) {
+      return this.tryToPerform('cancel', evt);
     }
 
     return true;
   }
+
 });
 
 SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
@@ -109,7 +126,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     Used internally to store value because the layer may not exist
   */
   _value: null,
-  
+
   /**
     @type String
     @default null
@@ -162,9 +179,9 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
   },
 
   keyUp: function(event) {
-    if (event.keyCode === 13) {
+    if (event.keyCode === SC.Event.KEY_RETURN) {
       return this.tryToPerform('insertNewline', event);
-    } else if (event.keyCode === 27) {
+    } else if (event.keyCode === SC.Event.KEY_ESC) {
       return this.tryToPerform('cancel', event);
     }
   }

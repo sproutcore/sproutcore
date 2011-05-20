@@ -5,62 +5,60 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
 SC.DateTime.mixin(
-  /** @scope SC.DateTime */ {
-  
+/** @scope SC.DateTime */ {
+
   /**
-    The localized day names. Add the key `'_SC.DateTime.dayNames'` and its
+    The localized day names. Add the key `_SC.DateTime.dayNames` and its
     value to your `strings.js` file to add support for another language than
     English.
 
     Default is evaluated on the `document.ready` event.
 
-    @property {Array}
+    @type Array
     @default '_SC.DateTime.dayNames'.loc().w()
   */
   dayNames: null,
-  
+
   /**
     The localized abbreviated day names. Add the key
-    `'_SC.DateTime.abbreviatedDayNames'` and its value to your `strings.js`
+    `_SC.DateTime.abbreviatedDayNames` and its value to your `strings.js`
     file to add support for another language than English.
 
     Default is evaluated on the `document.ready` event.
 
-    @property
-    @type {Array}
+    @type Array
     @default '_SC.DateTime.abbreviatedDayNames'.loc().w()
   */
   abbreviatedDayNames: null,
 
   /**
-    The localized month names. Add the key `'_SC.DateTime.monthNames'` and its
+    The localized month names. Add the key `_SC.DateTime.monthNames` and its
     value to your `strings.js` file to add support for another language than
     English.
 
     Default is evaluated on the `document.ready` event.
 
-    @property
-    @type {Array}
+    @type Array
     @default '_SC.DateTime.monthNames'.loc().w()
   */
   monthNames: null,
 
   /**
     The localized abbreviated month names. Add the key
-    `'_SC.DateTime.abbreviatedMonthNames'` and its value to your `strings.js`
+    `_SC.DateTime.abbreviatedMonthNames` and its value to your `strings.js`
     file to add support for another language than English.
 
     Default is evaluated on the `document.ready` event.
 
-    @property
-    @type {Array}
+    @type Array
     @default '_SC.DateTime.abbreviatedMonthNames'.loc().w()
   */
   abbreviatedMonthNames: null,
 
-  /** @private
+  /**
+    @private
+
     Called on `document.ready`.
 
     Because localizations may have been modified by an application developer,

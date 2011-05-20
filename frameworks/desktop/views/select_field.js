@@ -263,7 +263,7 @@ SC.SelectFieldView = SC.FieldView.extend(
         this.set('value',null);
       }
     } else {
-      this.$().attr('disabled', this.get('isEnabled') ? null : 'disabled');
+      this.$().prop('disabled', !this.get('isEnabled'));
     }
   },
 

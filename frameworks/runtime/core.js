@@ -29,6 +29,9 @@ if (typeof console === 'undefined') {
   console.log = console.info = console.warn = console.error = function(){};
 }
 
+window.SC = window.SC || {} ;
+window.SproutCore = window.SproutCore || SC ;
+
 // ........................................
 // BOOTSTRAP
 //
@@ -36,7 +39,7 @@ if (typeof console === 'undefined') {
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.6.0.beta.3
+  @version 1.6.0.rc.1
   @namespace
 
   All SproutCore methods and functions are defined
@@ -54,10 +57,9 @@ if (typeof console === 'undefined') {
   The core Base framework is based on the jQuery API with a number of
   performance optimizations.
 */
-window.SC = window.SC || {} ;
-window.SproutCore = window.SproutCore || SC ;
+SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = '1.6.0.beta.3';
+SC.VERSION = '1.6.0.rc.1';
 
 /**
   @private
@@ -310,7 +312,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
   // GUIDS & HASHES
   //
 
-  guidKey: jQuery.expando || ("SproutCore" + ( SC.VERSION + Math.random() ).replace( /\D/g, "" )),
+  // Like jQuery.expando but without any risk of conflict
+  guidKey: "SproutCore" + ( SC.VERSION + Math.random() ).replace( /\D/g, "" ),
 
   // Used for guid generation...
   _guidPrefixes: {"number": "nu", "string": "st"},

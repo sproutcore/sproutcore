@@ -294,23 +294,29 @@ test("Handlebars templates update properties if a content object changes", funct
   equals(view.$('h2').text(), "brown coffee", "precond - renders color correctly");
   equals(view.$('#price').text(), '$4', "precond - renders price correctly");
 
-  view.set('coffee', SC.Object.create({
-    color: "mauve",
-    price: "$4.50"
-  }));
+  SC.run(function() {
+    view.set('coffee', SC.Object.create({
+      color: "mauve",
+      price: "$4.50"
+    }));
+  });
 
   equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
   equals(view.$('#price').text(), "$4.50", "should update price field when content changes");
 
-  view.set('coffee', SC.Object.create({
-    color: "mauve",
-    price: "$5.50"
-  }));
+  SC.run(function() {
+    view.set('coffee', SC.Object.create({
+      color: "mauve",
+      price: "$5.50"
+    }));
+  });
 
   equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
   equals(view.$('#price').text(), "$5.50", "should update price field when content changes");
 
-  view.setPath('coffee.price', "$5");
+  SC.run(function() {
+    view.setPath('coffee.price', "$5");
+  });
 
   equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
 });
@@ -335,11 +341,11 @@ test("Template updates correctly if a path is passed to the bind helper", functi
 
   equals(view.$('h1').text(), "$4", "precond - renders price");
 
-  view.setPath('coffee.price', "$5");
+  SC.run(function() { view.setPath('coffee.price', "$5"); });
 
   equals(view.$('h1').text(), "$5", "updates when property changes");
 
-  view.set('coffee', { price: "$6" });
+  SC.run(function() { view.set('coffee', { price: "$6" }); });
   equals(view.$('h1').text(), "$6", "updates when parent property changes");
 });
 
@@ -355,7 +361,7 @@ test("Template updates correctly if a path is passed to the bind helper and the 
     price: "$4"
   });
 
-  controller.set('content', realObject);
+  SC.run(function() { controller.set('content', realObject); });
 
   var view = SC.TemplateView.create({
     templateName: 'menu',
@@ -368,7 +374,7 @@ test("Template updates correctly if a path is passed to the bind helper and the 
 
   equals(view.$('h1').text(), "$4", "precond - renders price");
 
-  realObject.set('price', "$5");
+  SC.run(function() { realObject.set('price', "$5"); });
 
   equals(view.$('h1').text(), "$5", "updates when property is set on real object");
 
@@ -908,8 +914,10 @@ test("should be able to bind boolean element attributes using {{bindAttr}}", fun
   ok(!view.$('input').attr('disabled'), 'attribute does not exist upon initial render');
   ok(view.$('input').attr('checked'), 'attribute is present upon initial render');
 
-  content.set('isDisabled', true);
-  content.set('isChecked', false);
+  SC.run(function() {
+    content.set('isDisabled', true);
+    content.set('isChecked', false);
+  });
 
   ok(view.$('input').attr('disabled'), 'attribute exists after update');
   ok(!view.$('input').attr('checked'), 'attribute is not present after update');
@@ -932,7 +940,9 @@ test("should be able to add multiple classes using {{bindAttr class}}", function
   ok(view.$('div').hasClass('is-awesome-sauce'), "dasherizes first property and sets classname");
   ok(view.$('div').hasClass('is-also-cool'), "dasherizes second property and sets classname");
 
-  content.set('isAwesomeSauce', false);
+  SC.run(function() {
+    content.set('isAwesomeSauce', false);
+  });
 
   ok(!view.$('div').hasClass('is-awesome-sauce'), "removes dasherized class when property is set to false");
 });

@@ -12,7 +12,7 @@ module("SC.AlertPane UI");
 
 var pane ;
 
-function evaluatePane(pane, message, description, caption, button1Title, button2Title, button3Title, iconClass) {
+function evaluatePane(pane, message, description, caption, button1Title, button2Title, button3Title, iconClass, themeName) {
   // wrapper
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
   ok(pane.$().hasClass('sc-alert'), 'pane should have sc-alert class');
@@ -67,6 +67,11 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   } else {
     ok(button3.$().hasClass('sc-hidden'), 'pane.div button3 should be hidden');
   }
+  
+  if (!themeName) themeName = 'capsule';
+  ok(button1.$().hasClass(themeName), 'pane.div.div button1 shoud have class ' + themeName);
+  ok(button2.$().hasClass(themeName), 'pane.div.div button2 shoud have class ' + themeName);
+  ok(button3.$().hasClass(themeName), 'pane.div.div button3 shoud have class ' + themeName);
 }
 
 test("AlertPane.show with icon, message, description, caption and 3 buttons", function() {
@@ -318,3 +323,22 @@ test("users interaction with mutiple alert panes with 1-3 buttons - old style", 
 
   ok(didDismiss, "should dismiss all buttons");
 }) ;
+
+
+test("AlertPane.show with custom themeName", function() {
+  pane = SC.AlertPane.show({
+    themeName: 'AlertPane.themeName',
+    message: 'AlertPane.message',
+    description: 'AlertPane.description',
+    caption: 'AlertPane.caption',
+    icon: 'sc-icon-tools-24',
+    delegate: this,
+    buttons: [
+      { title: 'okButtonTitle' },
+      { title: 'cancelButtonTitle' },
+      { title: 'extraButtonTitle' }
+    ]
+  });
+  evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', 'AlertPane.themeName');
+  pane.dismiss();
+});
