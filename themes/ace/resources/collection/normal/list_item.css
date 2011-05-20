@@ -9,9 +9,9 @@ $theme.sc-list-item-view {
 
  .disclosure {
     position: absolute;
-    left: -12px;
+    left: -6px;
     top: 50%;
-    margin-top: -6px;
+    margin-top: -8px;
     
     width: 18px;
     height: 18px;
