@@ -364,6 +364,9 @@ SC.View.reopen(
       // normally, just try to get previous view's last child
       if(cur.get('parentView')) prev = cur._getPreviousKeyView();
 
+      // if we are the pane and address bar tabbing is enabled, trigger it now
+      else if(!SC.TABBING_ONLY_INSIDE_DOCUMENT) break;
+
       // if we are the pane, get our own last child
       else prev = cur;
 
