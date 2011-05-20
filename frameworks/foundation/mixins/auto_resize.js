@@ -324,7 +324,7 @@ SC.AutoResizeManager = {
 
         // now measure the rest using the same settings
         while ((view = views.pop())) {
-          if(view.get('isVisible') && (layer = view.get('autoResizeLayer'))) {
+          if(view.get('isVisibleInWindow') && (layer = view.get('autoResizeLayer'))) {
             if(!prepared) SC.prepareStringMeasurement(layer);
 
             view.measureSize(YES);
