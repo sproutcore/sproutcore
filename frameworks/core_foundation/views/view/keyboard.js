@@ -296,8 +296,7 @@ SC.View.reopen(
     }
 
     // this will only happen if no views are visible and accept first responder
-    return;
-
+    return null;
   }.property('nextKeyView'),
 
   /**
