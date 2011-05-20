@@ -47,7 +47,7 @@ SC.Observers = {
     }
 
     // if a tuple was found, add the observer immediately...
-    if (tuple) {
+    if (tuple && !tuple[0].isClass) {
       tuple[0].addObserver(tuple[1],target, method) ;
       
     // otherwise, save this in the queue.
@@ -107,7 +107,7 @@ SC.Observers = {
         if (!item) continue ;
 
         var tuple = SC.tupleForPropertyPath(item[0], item[3]);
-        if (tuple) {
+        if (tuple && !tuple[0].isClass) {
           tuple[0].addObserver(tuple[1], item[1], item[2]) ;
         } else newQueue.push(item) ;
       }
