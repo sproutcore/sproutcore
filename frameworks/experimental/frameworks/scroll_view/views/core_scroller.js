@@ -108,8 +108,8 @@ SC.CoreScrollerView = SC.View.extend(
       this._scs_value = value;
     }
 
-    val = this._scs_value || minimum; // default value is at top / left
-    return Math.max(Math.min(val, this.get('maximum')), minimum);
+    value = this._scs_value || minimum; // default value is at top / left
+    return Math.max(Math.min(value, this.get('maximum')), minimum);
   }.property('maximum', 'minimum').cacheable(),
 
   /**

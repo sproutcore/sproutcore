@@ -785,7 +785,6 @@ SC.CoreScrollView = SC.View.extend(
         width:  vt
       };
       vScroll.set('layout', layout);
-      console.error(vScroll.get('isTranslucent'));
       clipLayout.right = layout.right + (vScroll.get('isTranslucent') ? 0 : layout.width);
     }
 
