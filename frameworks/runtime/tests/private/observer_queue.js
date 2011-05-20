@@ -58,7 +58,7 @@ test("suspended notifications should work when nesting property change groups", 
 module("SC.Observers.addObserver");
 
 test("Object not yet instantiated", function() {
-  var garage, car, observer, queueLength;
+  var garage, car, observer;
   
   garage = SC.Object.create({
     car: SC.Object.extend({
@@ -77,14 +77,20 @@ test("Object not yet instantiated", function() {
   
   ok(car.isClass, "The car object is not yet an instance, it's a class for now.");
   
-  queueLength = SC.Observers.queue.length;
+  // 1. SC.Observers.addObserver should queue the class, waiting for it to be an instance
   SC.Observers.addObserver('car.make', observer, 'makeDidChange', garage);
-  equals(SC.Observers.queue.length, queueLength + 1, "The observer should have been queued because the car object is a class, not an instance.");
+  ok(SC.Observers.queue.some(function(el) { return el[1] === observer; }), "The observer should have been queued because the car object is a class, not an instance.");
   
-  car = garage.car = car.create({ make: 'Renault' });
-  
+  // 2. A call to SC.Observers.flush should leave the class in the queue because it's not yet an instance 
   SC.Observers.flush(garage);
+  ok(SC.Observers.queue.some(function(el) { return el[1] === observer; }), "The observer should still be in the queue.");
   
+  // 3. After we instantiate the class, a call to SC.Observers.flush shoud remove the object from the queue...
+  car = garage.car = car.create({ make: 'Renault' });
+  SC.Observers.flush(garage);
+  ok(!SC.Observers.queue.some(function(el) { return el[1] === observer; }), "The observer should have been removed from the queue.");
+  
+  // 4. ...and the observer should work
   car.set('make', 'Ferrari');
   equals(observer.callCount, 1, "The observer should have been called once.");
 });
