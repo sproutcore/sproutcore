@@ -442,6 +442,9 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     ret.opacity    = this.opacity;
     ret.mozOpacity = this.opacity;
 
+    // for ie
+    if(!SC.none(this.opacity)) ret.filter = "alpha(opacity=%@)".fmt(this.opacity * 100);
+
     ret.backgroundPosition = this.backgroundPosition;
 
     this._calculateTransforms(translateLeft, translateTop);
