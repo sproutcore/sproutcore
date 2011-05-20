@@ -1,4 +1,4 @@
-/* TODO: when new SplitView lands, do this proper ($theme.split-divider) */
+/* TODO: when new SplitView lands, do this proper (\$theme.split-divider) */
 $theme.split-divider {
   background: transparent;
   border: 0px none;
