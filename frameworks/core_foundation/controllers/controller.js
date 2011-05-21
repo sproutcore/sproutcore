@@ -39,6 +39,26 @@ SC.Controller = SC.Object.extend(
     
     @property {Boolean}
   */
-  isEditable: YES
+  isEditable: YES,
+  
+  /**
+   * Set this to YES if you are setting the controller content to a recordArray
+   * or other content that needs to be cleaned up (with `.destroy()`) when
+   * new content is set.
+   */
+  destroyContentOnReplace: NO,
+
+  contentObjectDidChanged: function() {
+    var oldContent, newContent;
+
+    if (!this.get('destroyContentOnReplace')) return;
+
+    oldContent = this._oldContent,
+    newContent = this.get('content');
+    if (oldContent && newContent !== oldContent && oldContent.destroy) {
+      oldContent.destroy();
+    }
+    this._oldContent = newContent;
+  }.observes('content')
 
 });
