@@ -37,7 +37,15 @@
    # JS targets that you would like to load at the top of the page.  Specify
    # these in your Buildfile with the 'bootstrap' config. 
 -%>    
-  <%= bootstrap %>
+
+    <script>
+      window.SC = window.SC || { MODULE_INFO: {}, LAZY_INSTANTIATION: {} };
+    
+      SC.buildMode = '<%=SC.build_mode%>';
+      SC.buildNumber = '<%=target[:build_number]%>';
+    </script>
+
+    <%= bootstrap %>
 
     <% # 
        # This line should appear in your head area to include the stylesheets
