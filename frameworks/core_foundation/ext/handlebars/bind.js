@@ -51,7 +51,8 @@ sc_require('ext/handlebars');
         displayTemplate: fn,
         inverseTemplate: inverse,
         property: property,
-        previousContext: this
+        previousContext: this,
+        tagName: (options.hash.tagName || "span")
       });
 
       var observer, invoker;
