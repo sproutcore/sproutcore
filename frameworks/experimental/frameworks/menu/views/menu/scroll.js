@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/menu_scroller');
+sc_require('views/menu/scroller');
 
 /** @class
 
@@ -133,7 +133,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   controlSize: SC.REGULAR_CONTROL_SIZE,
 
   /**
-    Incremental rendering should happen all the time.
+    Wants scroll notifications all the time.
     @type Number
     @default 0
    */
@@ -186,8 +186,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
         scrollerThickness, vScrollerIsVisible,
         cFrame = this.getPath('contentView.frame'),
         view = this.get('containerView'),
-        frame = view.get('frame'),
-        offset = this._scmsv_lastVerticalScrollOffset;
+        frame = view.get('frame');
 
     // Fast path when the scrollers shouldn't be automatically hidden.
     if (hasScroller && !this.get('autohidesVerticalScrollers')) {
@@ -201,9 +200,11 @@ SC.MenuScrollView = SC.ScrollView.extend(
 
     // Automatically hide scrollers.
     } else {
+
       // Top scrollbar calculations.
       vScroller = hasScroller ? this.get('verticalScrollerView') : null;
-      vScroller.set('isVisible', (vScrollerIsVisible = vScroller && isVisible));
+      vScrollerIsVisible = vScroller && isVisible;
+      vScroller.set('isVisible', vScrollerIsVisible);
       if (vScrollerIsVisible) {
         scrollerThickness = vScroller.get('scrollerThickness');
         layout.top = (vOffset === 0) ? 0 : scrollerThickness; // Scrolled; show the scrollbar.
@@ -329,6 +330,8 @@ SC.MenuScrollView = SC.ScrollView.extend(
       height = height - viewportHeight;
       view.setIfChanged('maximum', height);
       view2.setIfChanged('maximum', height);
+
+      this.tile(); // Retile to make sure scrollers become invisible / visible
     }
   },
 

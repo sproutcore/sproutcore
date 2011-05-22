@@ -7,11 +7,11 @@
 
 /** @class
 
-  Implements a complete scroller view for menus.  This class implements the
-  arrows displayed in a menu to scroll.
+  Implements a complete scroller view for menus.
+  This class implements the arrows displayed in a menu to scroll.
 
-  The main difference with SC.ScrollerView is that there is only vertical
-  scrollers. Value Syncing between SC.MenuScrollView and SC.MenuScrollerView
+  The main difference with `SC.ScrollerView` is that there is only vertical
+  scrollers. Value Syncing between `SC.MenuScrollView` and `SC.MenuScrollerView`
   is done using valueBinding.
 
   @extends SC.CoreScrollerView
@@ -115,12 +115,6 @@ SC.MenuScrollerView = SC.CoreScrollerView.extend(
   },
 
   /** @private */
-  willDestroyLayer: function() {
-    var callback = this._sc_scroller_scrollDidChange ;
-    SC.Event.remove(this.$(), 'scroll', this, callback) ;
-  },
-
-  /** @private */
   mouseEntered: function(evt) {
     this.set('isMouseOver', YES);
     this._invokeScrollOnMouseOver();
@@ -143,7 +137,7 @@ SC.MenuScrollerView = SC.CoreScrollerView.extend(
 
   /** @private */
   _sc_scroller_scrollDidChange: function() {
-    var now = Date.now(),
+    var now = (new Date()).getTime(),
         last = this._sc_lastScroll,
         layer = this.get('layer'),
         scroll = 0;
