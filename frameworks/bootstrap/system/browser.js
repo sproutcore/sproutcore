@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+window.SC = window.SC || { MODULE_INFO: {}, LAZY_INSTANTIATION: {} };
+
 SC._detectBrowser = function(userAgent, language) {
   var version, webkitVersion, browser = {};
 
