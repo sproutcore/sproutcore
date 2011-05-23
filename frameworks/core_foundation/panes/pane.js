@@ -283,7 +283,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // and notify again if needed.
     if (isKeyPane) {
       if (view) { 
-        console.log(view.toString());
         view.tryToPerform('didBecomeKeyResponderFrom', current); }
       if (current) { 
         current.tryToPerform('didLoseKeyResponderTo', view); 
