@@ -24,11 +24,6 @@ test("should be able to resolve an object on the window", function() {
 });
 
 test("should throw error when object can't be found", function() {
-  expect(1);
-
-  try {
-    SC.requiredObjectForPropertyPath('notExistingObject');
-  } catch (x) {
-    same(x, "notExistingObject could not be found");
-  }
+  should_throw(function(){ SC.requiredObjectForPropertyPath('notExistingObject'); },
+                  Error, "notExistingObject could not be found");
 });
