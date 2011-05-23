@@ -1,6 +1,42 @@
 CHANGE LOG FOR 1.6
 ==================
 
+1.6.0.rc.2
+----------
+* Fixed SC.PickerPane#modalPaneDidClick return values - Fixes #339
+* Fixed SC.Enumerable fallback for SC.RecordArray#find - Fixes #363
+* Added SC.requiredObjectForPropertyPath that throws an error when object can't be found
+* Make it possible for the handlebars helpers to generate tags other than <span>
+* Improved Observer Tests with better location (thx martoche)
+* Fixed disclosure positioning in Ace, fixes #457
+* Added backslash to prevent SASS comment interpolation warning
+* Allow for passing relative paths to #collection helper.
+* Further cleanup to TextField template multiline
+* Added isMultiline property to SC.TextField.
+* jQuery is now smart enough to take booleans for certain attributes
+* Stop using jQuery expando
+* Added unit tests for SC.ContainerView to verify it cleans up views that it instantiates.
+* SC.ContainerView will instantiate it's contentView if nowShowing is set with a string or class, however it was not cleaning up views when it was finished. Now it keeps track and cleans up when necessary.
+* Unit test for previous commit checking that the themeName got passed through to the buttons.
+* Allow you to set themeName on the AlertPane to also set the themeName on the buttons (which were previously stuck as 'capsule')
+* Unit test for previous commit adding controlSize to TabView + removed useless TabView methods test and left a warning unit test instead.
+* Whitespace + allow setting of controlSize
+* Comment typo forEachIndex is not a function in IndexSet
+* fix jQuery/SC conflict for events handeling add tryToPerform on SC.TextField
+* use prop instead of attr in SC.Checkbox replace SC.data with jQuery.data
+* remove more code : passing unit tests but fail in real app
+* upgrade to jquery 1.6 use jQuery.sub()
+* Minor adjustments for docs
+* fixed so that replace on ChildArray only notifies the part of the array that has actually changed
+* remove more code : passing unit tests but fail in real app
+* upgrade to jquery 1.6 use jQuery.sub()
+* Hacky solution to the issue where template collection views render their item views multiple times when they are nested inside another template collection view.
+* Adds support for specifying an inverse template name to template collection view.
+* Adds unit tests for using an inverse template in template collection views.
+* Fixes issue with nested template collection views causing childViews array to get messed up.
+* Adds failing unit test for childView structure of nested collection views.
+* Adds unit tests for checking the number of items rendered in nested collection views with default content.
+
 1.6.0.rc.1
 ----------
 * Added 'Show Progress' checkbox to Test Runner
