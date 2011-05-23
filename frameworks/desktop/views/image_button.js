@@ -23,7 +23,7 @@
 
   You could then add some CSS rule for a normal state:
 
-      $theme.image-button .my-image-button-icon {
+      $theme.image-button.my-image-button-icon {
         @include slice('my-image-button-image.png');
 
         // and an active state:
