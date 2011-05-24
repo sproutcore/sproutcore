@@ -16,6 +16,7 @@ SC.json = {
     @returns {String} encode JSON
   */
   encode: function(root) {
+    if(root.isRecord) root = root.get('attributes');
     return JSON.stringify(root) ;
   },
   

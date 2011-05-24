@@ -53,3 +53,12 @@ test("Can commitRecord() specific SC.Record instance", function() {
   equals(dataSource.gotParams, YES, 'Params were properly passed through commitRecord');
   
 });
+
+test("If passed in an SC.Record, then encode the datahash instead", function(){
+  
+  var str = SC.json.encode(MyApp.foo);
+  var result = SC.json.decode(str);
+	
+	same(MyApp.json,result, "original = encoded record");
+	
+});
