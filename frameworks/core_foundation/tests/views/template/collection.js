@@ -224,6 +224,58 @@ test("should pass content as context when using {{#each}} helper", function() {
   equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
 });
 
+test("should re-render when the content object's nested objects change when using tbody as a tagName", function() {
+  TemplateTests.RerenderNestedTBodyTest = SC.TemplateCollectionView.extend({
+    content: []
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('<table><thead><tr><th>Title</th><th>Name</th></tr></thead>{{#collection TemplateTests.RerenderNestedTBodyTest tagName="tbody"}}{{#with content}}<td>{{title}}</td><td>{{user.name}}</td>{{/with}}{{/collection}}</table>')
+  });
+
+  view.createLayer();
+
+  var user = SC.Object.create({ name: 'Murphy' }),
+      content = [SC.Object.create({user: user, title: 'SproutCore'})];
+
+  SC.run(function() {
+    view.childViews[0].set('content', content);
+  });
+
+  SC.run(function() {
+    content[0].set('title', 'Rails');
+    user.set('name', 'Paul');
+  });
+
+  equals(view.$('td:eq(0)').text(), "Rails");
+  equals(view.$('td:eq(1)').text(), "Paul");
+});
+
+test("should re-render when the content object's nested objects change", function() {
+  TemplateTests.RerenderNestedTest = SC.TemplateCollectionView.extend({
+    content: []
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection TemplateTests.RerenderNestedTest}}{{content.user.name}}{{/collection}}')
+  });
+
+  view.createLayer();
+
+  var user = SC.Object.create({ name: 'Murphy' }),
+      content = [SC.Object.create({user: user})];
+
+  SC.run(function() {
+    view.childViews[0].set('content', content);
+  });
+
+  SC.run(function() {
+    user.set('name', 'Paul');
+  });
+
+  equals(view.$('li:eq(0)').text(), "Paul");
+});
+
 test("should re-render when the content object changes", function() {
   TemplateTests.RerenderTest = SC.TemplateCollectionView.extend({
     content: []
