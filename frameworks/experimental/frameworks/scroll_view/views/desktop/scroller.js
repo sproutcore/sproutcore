@@ -256,6 +256,10 @@ SC.DesktopScrollerView = SC.CoreScrollerView.extend(
     return YES;
   },
 
+  mouseWheel: function (evt) {
+    this.getPath('parentView.containerView.layer').dispatchEvent(evt.originalEvent);
+  },
+
   /** @private
     Starts a timer that fires after 300ms.  This is called when the user
     clicks a button or inside the track to move a page at a time. If they
