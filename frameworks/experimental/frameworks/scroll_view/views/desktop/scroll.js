@@ -116,8 +116,11 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
     changes every `incrementalRenderingDelta` pixels. This
     allows incremental rendering to happen while doing
     scrolling without firing off too many observers at once.
+
+    @type Number
+    @default 0
    */
-  incrementalRenderingDelta: 5,
+  incrementalRenderingDelta: 0,
 
   // ..........................................................
   // SCROLL WHEEL SUPPORT
