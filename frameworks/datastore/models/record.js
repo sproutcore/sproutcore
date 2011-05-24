@@ -950,7 +950,7 @@ SC.Record = SC.Object.extend(
 }) ;
 
 // Class Methods
-SC.Record.mixin( /** @scope SC.Record.prototype */ {
+SC.Record.mixin( /** @scope SC.Record */ {
 
   /**
     Whether to ignore unknown properties when they are being set on the record

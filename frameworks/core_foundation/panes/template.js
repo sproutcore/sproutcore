@@ -5,20 +5,31 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/**
+/** @class
+
   SC.TemplatePane is a helper that will create a new pane based on
   a single root TemplateView.
 
-  function main() {
-    MyApp.mainPane = SC.TemplatePane.append({
-      layerId: 'my-root-id',
-      templateName: 'app'
-    })
-  }
+      function main() {
+        MyApp.mainPane = SC.TemplatePane.append({
+          layerId: 'my-root-id',
+          templateName: 'app'
+        })
+      }
+
+  @extends SC.Object
+  @since SproutCore 1.5
 */
 SC.TemplatePane = SC.Object.extend({});
 
-SC.mixin(SC.TemplatePane, {
+SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
+
+  /**
+    Creates a new pane with a single TemplateView.
+
+    @param {Object} attrs describes the pane to create
+    @returns {SC.MainPane} the created pane
+  */
   append: function(attrs) {
     var pane = SC.MainPane.extend({
       childViews: ['contentView'],
