@@ -257,7 +257,20 @@ SC.DesktopScrollerView = SC.CoreScrollerView.extend(
   },
 
   mouseWheel: function (evt) {
-    this.getPath('parentView.containerView.layer').dispatchEvent(evt.originalEvent);
+    var el = this.getPath('parentView.containerView.layer'),
+        rawEvent = evt.originalEvent;
+
+    if (el && rawEvent) {
+      try {
+        if (SC.typeOf(el.fireEvent) === SC.T_FUNCTION) { // IE
+          el.fireEvent(rawEvent.type, rawEvent);
+        } else { // W3C
+          el.dispatchEvent(rawEvent);
+        }
+      } catch (x) {
+        // Can't dispatch the event; give up.
+      }
+    }
   },
 
   /** @private
