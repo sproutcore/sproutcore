@@ -114,10 +114,3 @@ test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute"
 //   ok(view1.get('value') === 'SproutCore', 'value cannot be changed');
 //   });
 
-// test("isEnabled and isEditable mapping", function() {
-//   var obj= SC.TextFieldView.create();
-//   obj.set('isEnabled',false);
-//   equals(obj.get('isEditable'),false);
-//   obj.set('isEnabled',true);
-//   equals(obj.get('isEditable'),true);
-// });
