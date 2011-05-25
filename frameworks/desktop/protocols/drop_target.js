@@ -10,8 +10,8 @@ sc_require('system/drag');
 /**
   @namespace
   
-  Add the DropTarget mixin to your view to be able to accept drop events. You 
-  should also override the methods below as needed to handle accepting of events.
+  Implement the DropTarget protocol in your view to be able to accept drop events. You 
+  should define the methods below as needed to handle accepting of events.
   
   See the method descriptions for more information on what you need to implement.
   
