@@ -254,6 +254,15 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   itemKeyEquivalentKey: null,
 
   /**
+    If YES, overflowing items are placed into a menu and an overflow segment is
+    added to popup that menu.
+
+    @type Boolean
+    @default YES
+  */
+  shouldHandleOverflow: YES,
+
+  /**
     The title to use for the overflow segment if it appears.
 
     @type String
@@ -318,13 +327,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       toolTip: toolTip,
       icon: icon,
       isLastSegment: YES,
-      isOverflowSegment: YES
+      isOverflowSegment: YES,
+      isVisible: this.get('shouldHandleOverflow')
     });
+    this.set('overflowView', overflowView);
 
     this.appendChild(overflowView);
 
     this.itemsDidChange();
   },
+
+  shouldHandleOverflowDidChange: function() {
+    if (this.get('shouldHandleOverflow')) {
+      // remeasure should show/hide it as needed
+      this.invokeLast(this.remeasure);
+    } else {
+      this.get('overflowView').set('isVisible', NO);
+    }
+  }.observes('shouldHandleOverflow'),
 
   /** @private
     Called whenever the number of items changes.  This method populates SegmentedView's childViews, taking
@@ -441,7 +461,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
 
     // Force a segment remeasure to check overflow
-    this.invokeLast(this.remeasure);
+    if (this.get('shouldHandleOverflow')) {
+      this.invokeLast(this.remeasure);
+    }
   }.observes('*items.[]'),
 
   /** @private
@@ -463,7 +485,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
 
     // Reset our measurements (which depend on width or title) and adjust visible views
-    this.invokeLast(this.remeasure);
+    if (this.get('shouldHandleOverflow')) {
+      this.invokeLast(this.remeasure);
+    }
   },
 
   /** @private
@@ -473,14 +497,18 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var visibleWidth = this.$().width();
 
     // Only overflow if we've gone below the minimum width required to fit all the segments
-    if (this.isOverflowing || visibleWidth <= this.cachedMinimumWidth) this.adjustOverflow();
+    if (this.get('shouldHandleOverflow') && (this.isOverflowing || visibleWidth <= this.cachedMinimumWidth)) {
+      this.adjustOverflow();
+    }
   },
 
   /** @private
     Whenever visibility changes, we need to check to see if we're overflowing.
   */
   isVisibleInWindowDidChange: function() {
-    this.invokeLast(this.remeasure);
+    if (this.get('shouldHandleOverflow')) {
+      this.invokeLast(this.remeasure);
+    }
   }.observes('isVisibleInWindow'),
 
   /** @private
@@ -488,6 +516,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     segments for overflow if necessary.
   */
   remeasure: function() {
+    if (!this.get('shouldHandleOverflow')) { return; }
     var renderDelegate = this.get('renderDelegate'),
         childViews = this.get('childViews'),
         overflowView;
@@ -512,6 +541,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     This method is called to adjust the segment views for overflow.
    */
   adjustOverflow: function() {
+    if (!this.get('shouldHandleOverflow')) { return; }
+
     var childViews = this.get('childViews'),
         childView,
         value = this.get('value'),
