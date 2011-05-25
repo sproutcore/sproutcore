@@ -30,7 +30,7 @@ SC.MOVES_PREVIOUS_CHILD = 'moves-previous-child';
 SC.MOVES_NEXT_CHILD = 'moves-next-child';
 
 /**
-  @mixin
+  @namespace
   A SplitThumb may be placed inside any view in a SplitView, and can even
   be a direct child of the SplitView. It forwards its events to the SplitView
   to control the movement of a divider or another child of the SplitView.

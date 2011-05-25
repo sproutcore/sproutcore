@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @mixin
+  @namespace
 
   This mixin is for a view that is editable but is acting as a proxy to
   edit another view. For example, a calendar picker that pops up over

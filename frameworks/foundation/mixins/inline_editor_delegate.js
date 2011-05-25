@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @mixin
+  @namespace
   
   This delegate is consulted by view implementing SC.InlineEditable and
   SC.InlineEditor and controls the lifecycle of the editor as well as begin

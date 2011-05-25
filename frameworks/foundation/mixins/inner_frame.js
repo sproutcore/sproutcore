@@ -49,7 +49,7 @@ SC.BEST_FIT = "fitBest";
 SC.BEST_FIT_DOWN_ONLY = "fitBestDown";
 
 /**
-  @mixin
+  @namespace
 
   InnerFrame provides the innerFrameForSize function, which will return a frame for the given size adjusted
   to fit within the given outer size, according to the align and scale properties.
