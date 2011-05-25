@@ -350,11 +350,9 @@ SC.RootResponder = SC.Object.extend(
 
       // If the app is getting focus again set the first responder to the first
       // valid firstResponder view in the view's tree
-      var mainPane = this.get('mainPane');
-
-      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && mainPane){
-        var nextValidKeyView = mainPane.get('nextValidKeyView');
-
+      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+        var mainPane = this.get('mainPane'),
+        nextValidKeyView = mainPane.get('nextValidKeyView');
         if (nextValidKeyView) mainPane.makeFirstResponder(nextValidKeyView);
       }
       
