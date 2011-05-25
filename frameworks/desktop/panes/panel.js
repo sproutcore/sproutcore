@@ -30,6 +30,12 @@ SC.PanelPane = SC.Pane.extend(
 /** @scope SC.PanelPane.prototype */ {
 
   /**
+    Walk like a duck.
+    @type {Boolean}
+  */
+  isPanelPane: YES,
+
+  /**
     @type Array
     @default ['sc-panel']
     @see SC.View#classNames
