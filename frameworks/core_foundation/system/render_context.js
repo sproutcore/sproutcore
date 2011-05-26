@@ -50,7 +50,8 @@ SC.COMBO_STYLES = {
   context.begin() <-- begins a new tag context
   context.end() <-- ends the tag context...
 */
-SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
+SC.RenderContext = SC.Builder.create(
+  /** @lends SC.RenderContext */ {
 
   SELF_CLOSING: SC.CoreSet.create().addEach(['area', 'base', 'basefront', 'br', 'hr', 'input', 'img', 'link', 'meta']),
 

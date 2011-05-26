@@ -177,9 +177,9 @@ SC.Response = SC.Object.extend(
 
   /**
     @private
-    @deprecated
+    @deprecated Use body instead.
 
-    Alias for body. Provides compatibility with older code.
+    Alias for body.
 
     @type Hash|String
     @see #body

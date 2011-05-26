@@ -122,8 +122,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isContextMenuEnabled: YES,
 
   /**
-    @deprecated
-    
+    @deprecated Use #applyImmediately instead.
+
     If true, every change to the text in the text field updates 'value'.
     If false, 'value' is only updated when commitEditing() is called (this
     is called automatically when the text field loses focus), or whenever

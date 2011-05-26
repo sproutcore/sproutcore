@@ -8,7 +8,7 @@
 
 /**
   @namespace
-  @deprecated
+  @deprecated Use SC.ScrollView instead.
 
   Any views you implement that are scrollable should include this mixin to
   provide basic support for scrolling actions.  You can also override any 

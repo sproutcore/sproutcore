@@ -152,7 +152,6 @@ SC.ProgressView = SC.View.extend(SC.Control,
     
     @deprecated This should now be changed in themes.
     @type Integer
-    @deprecated
   */
   offsetRange: undefined,
 

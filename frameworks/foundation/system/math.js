@@ -14,7 +14,8 @@
   @since SproutCore 1.0
   @author Colin Campbell
 */
-SC.Math = SC.Object.create({
+SC.Math = SC.Object.create(
+/** @lends SC.Math.prototype */, {
   
   /**
     Checks to see if the number is near the supplied parameter to a certain lambda.
