@@ -125,6 +125,23 @@ SC.MenuScrollerView = SC.CoreScrollerView.extend(
     this.set('isMouseOver', NO);
   },
 
+  mouseWheel: function (evt) {
+    var el = this.getPath('parentView.containerView.layer'),
+        rawEvent = evt.originalEvent;
+
+    if (el && rawEvent) {
+      try {
+        if (SC.typeOf(el.fireEvent) === SC.T_FUNCTION) { // IE
+          el.fireEvent(rawEvent.type, rawEvent);
+        } else { // W3C
+          el.dispatchEvent(rawEvent);
+        }
+      } catch (x) {
+        // Can't dispatch the event; give up.
+      }
+    }
+  },
+
   /** @private */
   _sc_scroller_armScrollTimer: function() {
     if (!this._sc_scrollTimer) {
