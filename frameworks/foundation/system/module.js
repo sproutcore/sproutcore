@@ -78,7 +78,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     // If the module is already loaded, execute the callback immediately if SproutCore is loaded,
     // or else as soon as SC has finished loading.
-    if (module.isLoaded) {
+    if (module.isLoaded && !module.isWaitingForRunLoop) {
       if (log) SC.Logger.log("SC.Module: Module '%@' already loaded.".fmt(moduleName));
 
       // If the module has finished loading and we have the string
@@ -86,6 +86,17 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if (module.source) {
         if (log) SC.Logger.log("SC.Module: Evaluating JavaScript for module '%@'.".fmt(moduleName));
         this._evaluateStringLoadedModule(module);
+
+        // we can't let it return normally here, because we need the module to wait until the end of the run loop.
+        // This is because the module may set up bindings.
+        this._addCallbackForModule(moduleName, target, method, args);
+
+        this.invokeLast(function() {
+          module.isReady = YES;
+          this._moduleDidBecomeReady(moduleName);
+        });
+
+        return NO;
       }
 
       if (method) {
@@ -101,6 +112,12 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
       return YES;
     }
+
+    // The module has loaded, but is waiting for the end of the run loop before it is "ready";
+    // we just need to add the callback.
+    else if (module.isWaitingForRunLoop) {
+      this._addCallbackForModule(moduleName, target, method, args);
+    }
     // The module is not yet loaded, so register the callback and, if necessary, begin loading
     // the code.
     else {
@@ -108,17 +125,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
       // If this method is called more than once for the same module before it is finished
       // loading, we might have multiple callbacks that need to be executed once it loads.
-
-      // Retrieve array of callbacks from MODULE_INFO hash.
-      callbacks = module.callbacks || [] ;
-
-      if (method) {
-        callbacks.push(function() {
-          SC.Module._invokeCallback(moduleName, target, method, args);
-        });
-      }
-
-      module.callbacks = callbacks;
+      this._addCallbackForModule(moduleName, target, method, args);
 
       // If this is the first time the module has been requested, determine its dependencies
       // and begin loading them as well as the JavaScript for this module.
@@ -131,6 +138,21 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
       return NO;
     }
+  },
+
+  _addCallbackForModule: function(moduleName, target, method, args) {
+    var module = SC.MODULE_INFO[moduleName];
+
+    // Retrieve array of callbacks from MODULE_INFO hash.
+    callbacks = module.callbacks || [] ;
+
+    if (method) {
+      callbacks.push(function() {
+        SC.Module._invokeCallback(moduleName, target, method, args);
+      });
+    }
+
+    module.callbacks = callbacks;
   },
 
   /**
@@ -208,7 +230,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   _evaluateStringLoadedModule: function(module) {
     var moduleSource = module.source;
 
+    // so, force a run loop.
     jQuery.globalEval(moduleSource);
+
     delete module.source;
 
     if (module.cssSource) {
@@ -467,7 +491,24 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if (module.source) {
         this._evaluateStringLoadedModule(module);
       }
-      module.isReady = YES;
+
+      // this is ugly, but a module evaluated late like this won't be done instantiating
+      // until the end of a run loop. Also, the code here is not structured in a way that makes
+      // it easy to "add a step" before saying a module is ready. And finally, invokeLater doesn't
+      // accept arguments; hence, the closure.
+      module.isWaitingForRunLoop = YES;
+      this.invokeLast(function() {
+        module.isReady = YES;
+        this._moduleDidBecomeReady(moduleName);
+      });
+    },
+
+    _moduleDidBecomeReady: function(moduleName) {
+      var moduleInfo = SC.MODULE_INFO;
+      var module = moduleInfo[moduleName];
+      var log = SC.LOG_MODULE_LOADING;
+
+      module.isWaitingForRunLoop = NO;
 
       if (SC.isReady) {
         SC.Module._invokeCallbacksForModule(moduleName) ;
@@ -491,6 +532,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
           this._evaluateAndInvokeCallbacks(dependentName);
         }
       }
+
     },
 
   /** @private
