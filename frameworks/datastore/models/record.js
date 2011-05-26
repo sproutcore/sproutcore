@@ -364,6 +364,10 @@ SC.Record = SC.Object.extend(
     return this ;
   },
 
+  toJSON: function(){
+    return this.get('attributes');
+  },
+
   // ...............................
   // ATTRIBUTES
   //
