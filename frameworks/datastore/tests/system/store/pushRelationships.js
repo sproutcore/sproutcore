@@ -3,7 +3,7 @@
 module("Propogating relationships with Store#pushRetrieve and Store#pushDestroy", {
   setup: function () {
     var MyApp = window.MyApp = SC.Object.create({
-      store: SC.Store.create()
+      store: SC.Store.create(SC.RelationshipSupport)
     });
   }
 });
@@ -1011,14 +1011,14 @@ test("Record property does change on linkage", function () {
 //
 
 /**
-  createIfEmpty RecordAttribute flag tests.
+  lazilyInstantiate RecordAttribute flag tests.
  */
-test("RecordAttribute flag 'createIfEmpty' tests", function () {
+test("RecordAttribute flag 'lazilyInstantiate' tests", function () {
   MyApp.Master = SC.Record.extend({
     slave: SC.Record.toOne('MyApp.Slave', {
       inverse: 'master',
       isMaster: YES,
-      createIfEmpty: YES
+      lazilyInstantiate: YES
     })
   });
 
@@ -1026,7 +1026,7 @@ test("RecordAttribute flag 'createIfEmpty' tests", function () {
     master: SC.Record.toOne('MyApp.Master', {
       inverse: 'slave',
       isMaster: NO,
-      createIfEmpty: YES // should be a noop
+      lazilyInstantiate: YES // should be a noop
     })
   });
 
@@ -1056,14 +1056,14 @@ test("RecordAttribute flag 'createIfEmpty' tests", function () {
 });
 
 /**
-  createIfEmpty RecordAttribute flag can be a function.
+  lazilyInstantiate RecordAttribute flag can be a function.
  */
-test("RecordAttribute flag 'createIfEmpty' can be a function", function () {
+test("RecordAttribute flag 'lazilyInstantiate' can be a function", function () {
   MyApp.Master = SC.Record.extend({
     slave: SC.Record.toOne('MyApp.Slave', {
       inverse: 'master',
       isMaster: YES,
-      createIfEmpty: function () {
+      lazilyInstantiate: function () {
         return NO;
       }
     })
@@ -1073,7 +1073,7 @@ test("RecordAttribute flag 'createIfEmpty' can be a function", function () {
     master: SC.Record.toOne('MyApp.Master', {
       inverse: 'slave',
       isMaster: NO,
-      createIfEmpty: YES // should be a noop
+      lazilyInstantiate: YES // should be a noop
     })
   });
 
@@ -1103,18 +1103,18 @@ test("RecordAttribute flag 'createIfEmpty' can be a function", function () {
 
 
 /**
-   createIfEmpty should ride the chain all the way to the top.
+   lazilyInstantiate should ride the chain all the way to the top.
 
    That is, if a record's primaryKey is a record that has the
-   flag 'createIfEmpty' on it, it should lazily create that one,
+   flag 'lazilyInstantiate' on it, it should lazily create that one,
    and so on.
  */
-test("RecordAttribute flag 'createIfEmpty' will create chains of records properly", function () {
+test("RecordAttribute flag 'lazilyInstantiate' will create chains of records properly", function () {
   MyApp.SuperMaster = SC.Record.extend({
     master: SC.Record.toOne('MyApp.Master', {
       inverse: 'superMaster',
       isMaster: YES,
-      createIfEmpty: YES
+      lazilyInstantiate: YES
     })
   });
 
@@ -1129,7 +1129,7 @@ test("RecordAttribute flag 'createIfEmpty' will create chains of records properl
     slave: SC.Record.toOne('MyApp.Slave', {
       inverse: 'master',
       isMaster: YES,
-      createIfEmpty: YES
+      lazilyInstantiate: YES
     })
   });
 
@@ -1144,7 +1144,7 @@ test("RecordAttribute flag 'createIfEmpty' will create chains of records properl
     subSlave: SC.Record.toOne('MyApp.SubSlave', {
       inverse: 'slave',
       isMaster: YES,
-      createIfEmpty: YES
+      lazilyInstantiate: YES
     })
   });
 

@@ -151,8 +151,9 @@ SC.RecordAttribute = SC.Object.extend(
     once all relationships are removed from it.
 
     @property {Boolean}
+    @default NO
    */
-  createIfEmpty: NO,
+  lazilyInstantiate: NO,
   
   // ..........................................................
   // HELPER PROPERTIES
