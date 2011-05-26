@@ -15,7 +15,7 @@
   @author Colin Campbell
 */
 SC.Math = SC.Object.create(
-/** @lends SC.Math.prototype */, {
+/** @lends SC.Math.prototype */ {
   
   /**
     Checks to see if the number is near the supplied parameter to a certain lambda.
