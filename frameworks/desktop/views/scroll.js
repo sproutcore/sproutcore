@@ -866,7 +866,6 @@ SC.ScrollView = SC.View.extend({
   mouseWheel: function(evt) {
     this._scroll_wheelDeltaX += evt.wheelDeltaX;
     this._scroll_wheelDeltaY += evt.wheelDeltaY;
-    console.log(this._scroll_wheelDeltaX+","+this._scroll_wheelDeltaY);
     this.invokeLater(this._scroll_mouseWheel, 10) ;
     return this.get('canScrollHorizontal') || this.get('canScrollVertical') ;  
   },
