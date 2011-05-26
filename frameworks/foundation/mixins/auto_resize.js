@@ -88,6 +88,40 @@ SC.AutoResize = {
   measuredSize: { width: 0, height: 0 },
 
   /**
+    Observes the measured size and actually performs the resize if necessary.
+  */
+  measuredSizeDidChange: function() {
+    var measuredSize = this.get('measuredSize'),
+    calculatedWidth = measuredSize.width, calculatedHeight = measuredSize.height,
+    paddingHeight, paddingWidth,
+    autoResizePadding = this.get('autoResizePadding') || 0;
+
+    if(SC.typeOf(autoResizePadding) === SC.T_NUMBER) {
+      paddingHeight = paddingWidth = autoResizePadding;
+    } else {
+      paddingHeight = autoResizePadding.height;
+      paddingWidth = autoResizePadding.width;
+    }
+
+    calculatedHeight += paddingHeight;
+    calculatedWidth += paddingWidth;
+
+    if(this.get('shouldAutoResize')) {
+      // if we are allowed to autoresize, adjust the layout
+      if (this.get('shouldResizeWidth')) {
+        this.set('calculatedWidth', calculatedWidth);
+        this.adjust('width', calculatedWidth);
+      }
+
+      if (this.get('shouldResizeHeight')) {
+        this.set('calculatedHeight', calculatedHeight);
+        this.adjust('height', calculatedHeight);
+      }
+    }
+
+  }.observes('shouldAutoResize', 'measuredSize', 'autoResizePadding'),
+
+  /**
     @private
     Begins observing the auto resize field.
   */
@@ -98,16 +132,6 @@ SC.AutoResize = {
     }
     // @endif
   },
-
-  /**
-    Observe the autoResizePadding so we can update our measurements if it changes.
-
-    @private
-  */
-  _scar_autoResizePaddingDidChange: function() {
-    this.invokeOnce('measureSize');
-  }.observes('autoResizePadding'),
-
 
   /**
     If this property is provided, all views that share the same value for this property will be resized as a batch for increased performance.
@@ -122,39 +146,32 @@ SC.AutoResize = {
   /** @private */
   _scar_requestedBatchResizeId: null,
 
-  /** @private
-    If the batch id changed while a request is out, we have to fix it
+  /**
+    Schedules a measurement to happen later.
   */
-  _scar_batchResizeIdDidChange: function() {
-    var batchResizeId = this.get('batchResizeId'),
-    requestedBatchResizeId = this._scar_requestedBatchResizeId;
+  scheduleMeasurement: function() {
+    var batchResizeId = this.get('batchResizeId');
+
+    // only measure if we are visible, active, and the text or style actually changed
+    if (!this.get('shouldMeasureSize') || !this.get('isVisibleInWindow') || (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId)) return;
+
+    var requestedBatchResizeId = this._scar_requestedBatchResizeId;
 
     // check if a request is out and the id changed
     if(this._scar_measurementPending && this._scar_requestedBatchResizeId !== batchResizeId) {
-      // if so, cancel the old request and make a new one
+      // if so, cancel the old request
       SC.AutoResizeManager.cancelMeasurementForView(this, requestedBatchResizeId);
-      SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
-
-      // update the requested batchResizeId to the new id
-      this._scar_requestedBatchResizeId = batchResizeId;
-    }
-  }.observes('batchResizeId'),
-
-  /**
-    Schedules a measurement to happen later, in batch mode. Only valid when the view
-    has a `batchResizeId`.
-  */
-  scheduleMeasurement: function() {
-    if (!this.get('shouldMeasureSize')) {
-      return;
     }
 
-    var batchResizeId = this.get('batchResizeId');
+    // batchResizeId is allowed to be undefined; views without an id will just
+    // get measured one at a time
     SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
 
     this._scar_measurementPending = YES;
     this._scar_requestedBatchResizeId = batchResizeId;
-  }.observes('isVisible'),
+  }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId'),
+
+  _lastMeasuredText: null,
 
   /**
     Measures the size of the view.
@@ -188,44 +205,17 @@ SC.AutoResize = {
       metrics = SC.metricsForString(value, layer, this.get('classNames'), ignoreEscape);
     }
 
-    // metrics should include padding
-    autoSizePadding = this.get('autoResizePadding') || 0;
-    if(SC.typeOf(autoSizePadding) === SC.T_NUMBER) {
-      paddingHeight = paddingWidth = autoSizePadding;
-    } else {
-      paddingHeight = autoSizePadding.height;
-      paddingWidth = autoSizePadding.width;
-    }
-
-    metrics.width += paddingWidth;
-    metrics.height += paddingHeight;
-
     // In any case, we set measuredSize.
     this.set('measuredSize', metrics);
 
-    if (this.get('shouldAutoResize')) {
-      // if we are allowed to autoresize, adjust the layout
-      if (this.get('shouldResizeWidth')) {
-        this.adjust('width', metrics.width);
-      }
-
-      if (this.get('shouldResizeHeight')) {
-        this.adjust('height', metrics.height);
-      }
-
-    }
+    // set the measured value so we can avoid extra measurements in the future
+    this._lastMeasuredText = value;
+    this._lastMeasuredId = this.get('batchResizeId');
 
     this._scar_measurementPending = NO;
 
     return metrics;
   },
-
-  /**
-    @private
-  */
-  _scar_valueDidChange: function() {
-    this.scheduleMeasurement();
-  }.observes('autoResizeText'),
 
   /**
     @private
@@ -314,26 +304,33 @@ SC.AutoResizeManager = {
       return SC.AutoResizeManager.doBatchResize();
     }
 
-    var tag, views, view, layer, batches, prepared;
+    var tag, views, view, layer, batches, prepared, autoResizeText;
 
     // first measure all the batched views
     batches = this.viewsNeedingResize;
     for(tag in batches) {
       if (batches.hasOwnProperty(tag)) {
         views = batches[tag];
+        prepared = NO;
 
-        // now measure the rest using the same settings
         while ((view = views.pop())) {
-          if(view.get('isVisibleInWindow') && (layer = view.get('autoResizeLayer'))) {
-            if(!prepared) SC.prepareStringMeasurement(layer);
+          if(view.get('isVisibleInWindow') && view.get('shouldMeasureSize') && (layer = view.get('autoResizeLayer'))) {
+            autoResizeText = view.get('autoResizeText');
+
+            // if the text is empty don't bother preparing
+            if(!SC.none(autoResizeText) && autoResizeText !== "" && !prepared) {
+              SC.prepareStringMeasurement(layer);
+              prepared = YES;
+            }
 
             view.measureSize(YES);
           }
         }
 
-        // if they were all isVisible:NO, then prepare was never called
-        // so dont call teardown
-        if(prepared) SC.teardownStringMeasurement();
+        // don't call teardown if prepare was never called either
+        if(prepared) {
+          SC.teardownStringMeasurement();
+        }
       }
     }
 
