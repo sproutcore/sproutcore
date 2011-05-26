@@ -79,8 +79,7 @@ SC.Event = function(originalEvent) {
 
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER,
-        version = parseFloat(SC.browser.version);
+    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
     if (SC.browser.webkit && originalEvent.wheelDelta !== undefined) {
@@ -137,14 +136,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @type Number
     @default 1
   */
-  MOUSE_WHEEL_MULTIPLIER: (function() {
+  MOUSE_WHEEL_MULTIPLIER: function() {
     var deltaMultiplier = 1,
         version = parseFloat(SC.browser.version),
         didChange = NO;
 
     if (SC.browser.safari) {
       // Safari 5.0.1 and up
-      if (version >= 533.17) {
+      if (version >= 533.17 && version<534) {
         deltaMultiplier = 0.004;
         didChange = YES;
       } else if (version < 533) {
@@ -160,7 +159,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (didChange) { SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES; }
 
     return deltaMultiplier;
-  })(),
+  }(),
 
   /**
     This represents the limit in the delta before a different multiplier
