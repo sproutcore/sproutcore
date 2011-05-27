@@ -662,6 +662,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.recordErrors = null;
     this.queryErrors = null;
 
+    var dataSource = this.get('dataSource');
+    if (dataSource && dataSource.reset) { dataSource.reset(); }
+
     var records = this.records, storeKey;
     if (records) {
       for(storeKey in records) {

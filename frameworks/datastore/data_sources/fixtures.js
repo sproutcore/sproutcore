@@ -344,7 +344,17 @@ SC.FixturesDataSource = SC.DataSource.extend(
     var ret = [], fixtures = this._fixtures[SC.guidFor(recordType)];
     return fixtures ? YES: NO;
   },
-  
+
+  /**
+    Resets the fixtures to their original values.
+
+    @returns {SC.FixturesDataSource} receiver
+  */
+  reset: function(){
+    this._fixtures = null;
+    return this;
+  },
+
   /**
     Returns YES or SC.MIXED_STATE if one or more of the storeKeys can be 
     handled by the fixture data source.
