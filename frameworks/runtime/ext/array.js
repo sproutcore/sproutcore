@@ -11,7 +11,8 @@ SC.supplement(Array.prototype, SC.CoreArray);
 
 // Because Arrays are dealt with so much, we add specialized functions.
 
-SC.mixin(Array.prototype, {
+SC.mixin(Array.prototype,
+  /** @lends Array.prototype */ {
 
   // primitive for array support.
   replace: function(idx, amt, objects) {
