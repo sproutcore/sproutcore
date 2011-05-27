@@ -150,6 +150,15 @@ SC.Logger = SC.Object.create(
   //
 
   /**
+    An optional prefix that will be prepended to all log messages, but not any
+    group titles.
+
+    @property {String}
+  */
+  messagePrefix: null,
+
+
+  /**
     The current log level determining what is output to the reporter object
     (usually your browser’s console).  Valid values are:
 
@@ -181,7 +190,7 @@ SC.Logger = SC.Object.create(
 
     If you do not specify this value, it will default to SC.LOGGER_LEVEL_NONE.
 
-    @property: {Constant}
+    @property {Constant}
   */
   logRecordingLevel: SC.LOGGER_LEVEL_NONE,
 
@@ -1106,7 +1115,7 @@ SC.Logger = SC.Object.create(
     // Are we configured to show this type?
     var shouldOutput = this._shouldOutputType(type),
         shouldRecord = this._shouldRecordType(type),
-        hasOtherArguments, i, len, args, output, entry;
+        hasOtherArguments, i, len, args, output, entry, prefix;
 
     // If we're neither going to output nor record the message, then stop now.
     if (!(shouldOutput || shouldRecord)) return;
@@ -1133,6 +1142,10 @@ SC.Logger = SC.Object.create(
         message = message.fmt.apply(message, args);
       }
     }
+
+    // If a message prefix was specified, use it.
+    prefix = this.get('messagePrefix');
+    if (prefix) message = prefix + message;
 
     if (shouldOutput) {
       // We only want to pass the original arguments to _outputMessage() if we
