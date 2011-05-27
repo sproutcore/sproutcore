@@ -42,6 +42,7 @@ module("Basic SC.Record Functions w/ a Parent > Child > Child", {
     NestedRecord = SC.Object.create({
       store: SC.Store.create()
     });
+    window.NestedRecord = NestedRecord;
     store = NestedRecord.store;
     initModels();
     SC.RunLoop.begin();
@@ -65,6 +66,7 @@ module("Basic SC.Record Functions w/ a Parent > Child > Child", {
     delete NestedRecord.ParentRecordTest;
     delete NestedRecord.Person;
     delete NestedRecord.Address;
+    delete window.NestedRecord;
     NestedRecord = null;
     testParent = null;
     store = null;
