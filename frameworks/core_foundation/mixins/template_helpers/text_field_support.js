@@ -77,8 +77,12 @@ SC.TextField = SC.TemplateView.extend(
     var input = this.$input();
 
     if (value !== undefined) {
-      this._value = value;
-      input.val(value);
+      // We don't want to unnecessarily set the value.
+      // Doing that could cause the selection to be lost.
+      if (this._value !== value || input.val() !== value) {
+        this._value = value;
+        input.val(value);
+      }
     } else if (input.length) {
       this._value = value = input.val();
     } else {
@@ -135,8 +139,12 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     var input = this.$('input');
 
     if (value !== undefined) {
-      this._value = value;
-      input.val(value);
+      // We don't want to unnecessarily set the value.
+      // Doing that could cause the selection to be lost.
+      if (this._value !== value || input.val() !== value) {
+        this._value = value;
+        input.val(value);
+      }
     } else {
       if (input.length > 0) {
         value = this._value = input.val();
