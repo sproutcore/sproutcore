@@ -74,7 +74,9 @@ SC.Observers = {
     idx = this.queue.length; queue = this.queue ;
     while(--idx >= 0) {
       item = queue[idx] ;
-      if ((item[0] === propertyPath) && (item[1] === target) && (item[2] == method) && (item[3] === pathRoot)) queue[idx] = null ;
+      if ((item[0] === propertyPath) && (item[1] === target) && (item[2] == method) && (item[3] === pathRoot)) {
+        queue.removeAt(idx);
+      }
     }
   },
 
