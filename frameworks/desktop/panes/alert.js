@@ -386,17 +386,15 @@ SC.AlertPane = SC.PanelPane.extend(
     if (del && del.alertPaneDidDismiss) {
       del.alertPaneDidDismiss(this, sender.get('actionKey'));
     }
-    else if(action = (sender && sender.get('customAction'))) {
-      if(SC.typeOf(action)===SC.T_FUNCTION) {
+
+    if (action = (sender && sender.get('customAction'))) {
+      if (SC.typeOf(action) === SC.T_FUNCTION) {
         action.call(action);
-      }
-      else if(target = sender.get('target')) {
-        target.tryToPerform(action);
-      }
-      else {
+      } else {
         rootResponder = this.getPath('pane.rootResponder');
         if(rootResponder) {
-          rootResponder.sendAction(action, del, this);
+          target = sender.get('target');
+          rootResponder.sendAction(action, target || del, this, this, null, this);
         }
       }
     }
