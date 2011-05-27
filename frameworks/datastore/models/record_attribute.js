@@ -170,7 +170,7 @@ SC.RecordAttribute = SC.Object.extend(
   */
   typeClass: function() {
     var ret = this.get('type');
-    if (SC.typeOf(ret) === SC.T_STRING) ret = SC.objectForPropertyPath(ret);
+    if (SC.typeOf(ret) === SC.T_STRING) ret = SC.requiredObjectForPropertyPath(ret);
     return ret ;
   }.property('type').cacheable(),
   
