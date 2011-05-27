@@ -21,6 +21,7 @@ module("SC.View#didAppendToDocument", {
             context.push('new string');
           },
           didAppendToDocument: function(){
+            ok(document.getElementById(this.get('layerId')), "layer should exist");
             counter++;
           }
         })
