@@ -9,7 +9,7 @@
 // 
 var NestedRecord, store, testParent, testParent2, childData1; 
 
-var initModels = function(){
+var initModels = function() {
   NestedRecord.ParentRecordTest = SC.Record.extend({
     /** Child Record Namespace */
     nestedRecordNamespace: NestedRecord,
@@ -34,6 +34,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
     NestedRecord = SC.Object.create({
       store: SC.Store.create()
     });
+    window.NestedRecord = NestedRecord;
     store = NestedRecord.store;
     initModels();
     SC.RunLoop.begin();
@@ -79,6 +80,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
     store = null;
     childData1 = null;
     NestedRecord = null;
+    delete(window.NestedRecord);
   }
 });
 

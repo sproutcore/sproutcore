@@ -42,6 +42,7 @@ module("Complex SC.Record: Parent > Array of Children > Array of Children", {
     NestedRecord = SC.Object.create({
       store: SC.Store.create()
     });
+    window.NestedRecord = NestedRecord;
     store = NestedRecord.store;
     initModels();
     SC.RunLoop.begin();
@@ -117,6 +118,7 @@ module("Complex SC.Record: Parent > Array of Children > Array of Children", {
     delete NestedRecord.Group;
     delete NestedRecord.Person;
     delete NestedRecord.Address;
+    delete window.NestedRecord;
     NestedRecord = null;
     testParent = null;
     peopleData1 = null;
