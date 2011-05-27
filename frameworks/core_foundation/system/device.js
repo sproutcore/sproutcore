@@ -19,11 +19,11 @@ SC.NO_ORIENTATION = 'desktop'; // value 'desktop' for backwards compatibility
   orientation and if the device is offline, as well as observe when they change 
   state.
   
-  h1. Orientation
+  ## Orientation
   When a touch device changes orientation, the orientation property will be
   set accordingly which you can observe
   
-  h1. Offline support
+  ## Offline support
   In order to build a good offline-capable web application, you need to know 
   when your app has gone offline so you can for instance queue your server 
   requests for a later time or provide a specific UI/message.
@@ -97,7 +97,7 @@ SC.device = SC.Object.create({
   */
   setup: function() {
     var responder = SC.RootResponder.responder;
-    responder.listenFor('online offline'.w(), window, this);
+    responder.listenFor(['online', 'offline'], window, this);
     
     this.orientationHandlingShouldChange();
   },

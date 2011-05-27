@@ -5,32 +5,31 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
-require('system/drag');
+sc_require('system/drag');
 
 /**
-  @mixin
+  @namespace
   
-  Add the DropTarget mixin to your view to be able to accept drop events. You 
-  should also override the methods below as needed to handle accepting of events.
+  Implement the DropTarget protocol in your view to be able to accept drop events. You 
+  should define the methods below as needed to handle accepting of events.
   
   See the method descriptions for more information on what you need to implement.
   
   The general call sequence for all drop targets is (in pseudo-Ragel, regex
   format):
   
-  dragStarted
-  (
-    computeDragOperations+
-    (
-      dragEntered
-      dragUpdated
-      ( computeDragOperations | dragUpdated )*
-      ( acceptDragOperation performDragOperation? )? // mouseUp
-      dragExited
-    )*
-  )*
-  dragEnded
+      dragStarted
+      (
+        computeDragOperations+
+        (
+          dragEntered
+          dragUpdated
+          ( computeDragOperations | dragUpdated )*
+          ( acceptDragOperation performDragOperation? )? // mouseUp
+          dragExited
+        )*
+      )*
+      dragEnded
   
   Thus, every drop target will have its dragStarted and dragEnded methods called 
   once during every drag session. computeDragOperations, if called at all, may be 
@@ -47,6 +46,10 @@ SC.DropTarget = {
     Drop targets must be specially registered in order to receive drop
     events.  SproutCore knows to register your view when this property
     is true on view creation.
+    
+    @type Boolean
+    @default YES
+    @constant
   */  
   isDropTarget: YES,
 
@@ -58,13 +61,13 @@ SC.DropTarget = {
     The default implementation does nothing.
     
     @param {SC.Drag} drag The current drag object.
-    @param {SC.Event}   evt  The most recent mouse move event.  Use to get location 
+    @param {SC.Event} evt The most recent mouse move event.  Use to get location 
   */
   dragStarted: function(drag, evt) {},
   
   /**
     Called when the drag first enters the droppable area, if it returns a
-    drag operations other than SC.DRAG_NONE.
+    drag operations other than `SC.DRAG_NONE`.
     
     The default implementation does nothing.
     
@@ -129,15 +132,18 @@ SC.DropTarget = {
     droppable area, the drag will latch onto the deepest view that returns one 
     or more available operations.
     
-    The default implementation returns SC.DRAG_NONE
+    The default implementation returns `SC.DRAG_NONE`
     
     @param {SC.Drag} drag The current drag object
     @param {SC.Event} evt The most recent mouse move event.  Use to get 
       location 
+    
     @returns {DragOps} A mask of all the drag operations allowed or 
       SC.DRAG_NONE
   */
-  computeDragOperations: function(drag, evt) { return SC.DRAG_NONE; },
+  computeDragOperations: function(drag, evt) {
+    return SC.DRAG_NONE;
+  },
   
   /**
     Called when the user releases the mouse.
@@ -147,31 +153,35 @@ SC.DropTarget = {
     perform fine-grained checks on the drop location, for example.
     Return true to accept the drop operation.
     
-    The default implementation returns YES.
+    The default implementation returns `YES`.
     
     @param {SC.Drag} drag The drag instance managing this drag
     @param {DragOp} op The proposed drag operation. A drag constant
     
     @return {Boolean} YES if operation is OK, NO to cancel.
   */  
-  acceptDragOperation: function(drag, op) { return YES; },
+  acceptDragOperation: function(drag, op) {
+    return YES;
+  },
   
   /**
     Called to actually perform the drag operation.
     
     Overide this method to actually perform the drag operation.  This method
-    is only called if you returned YES in acceptDragOperation(). 
+    is only called if you returned `YES` in `acceptDragOperation()`. 
     
-    Return the operation that was actually performed or SC.DRAG_NONE if the 
+    Return the operation that was actually performed or `SC.DRAG_NONE` if the 
     operation was aborted.
     
-    The default implementation returns SC.DRAG_NONE
+    The default implementation returns `SC.DRAG_NONE`
     
     @param {SC.Drag} drag The drag instance managing this drag
     @param {DragOp} op The proposed drag operation. A drag constant.
     
     @return {DragOp} Drag Operation actually performed
   */
-  performDragOperation: function(drag, op) { return SC.DRAG_NONE; }
+  performDragOperation: function(drag, op) {
+    return SC.DRAG_NONE;
+  }
   
 };

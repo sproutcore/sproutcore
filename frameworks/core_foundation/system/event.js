@@ -76,35 +76,22 @@ SC.Event = function(originalEvent) {
   if (!this.which && this.button) {
     this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
   }
-  
+
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = 1,
+    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER,
         version = parseFloat(SC.browser.version);
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.webkit && originalEvent.wheelDelta!==undefined) {
+    if (SC.browser.webkit && originalEvent.wheelDelta !== undefined) {
       this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
-
-      // Check Chrome first since it also responds to safari
-      if (!SC.browser.chrome) {
-        // Scrolling in Safari 5.0.1, which is huge for some reason
-        if (version >= 533.17 && version <= 533.19) {
-          deltaMultiplier = 0.004;
-
-        // Scrolling in Safari 5.0
-        } else if (version < 533 || version >= 534) {
-          deltaMultiplier = 40;
-        }
-      }
 
     // normalize wheelDelta for Firefox
     // note that we multiple the delta on FF to make it's acceleration more 
     // natural.
     } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
-      deltaMultiplier = 10;
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
         this.wheelDeltaY = this.wheelDelta = 0;
@@ -115,8 +102,17 @@ SC.Event = function(originalEvent) {
 
     // handle all other legacy browser
     } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+      this.wheelDelta = this.wheelDeltaY = SC.browser.msie || SC.browser.opera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
+    }
+
+    // we have a value over the limit and it wasn't caught when we generated MOUSE_WHEEL_MULTIPLIER
+    // this will happen as new Webkit-based browsers are released and we haven't covered them off
+    // in our browser detection. It'll scroll too quickly the first time, but we might as well learn
+    // and change our handling for the next scroll
+    if (this.wheelDelta > SC.Event.MOUSE_WHEEL_DELTA_LIMIT && !SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED) {
+      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.004;
+      SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES;
     }
 
     this.wheelDelta *= deltaMultiplier;
@@ -128,6 +124,61 @@ SC.Event = function(originalEvent) {
 } ;
 
 SC.mixin(SC.Event, /** @scope SC.Event */ {
+
+  /**
+    We need this because some browsers deliver different values
+    for mouse wheel deltas. Once the first mouse wheel event has
+    been run, this value will get set. Because we don't know the
+    maximum or minimum value ahead of time, if the event's delta
+    exceeds `SC.Event.MOUSE_WHEEL_DELTA_LIMIT`, this value can be
+    invalidated and changed during a later event.
+
+    @field
+    @type Number
+    @default 1
+  */
+  MOUSE_WHEEL_MULTIPLIER: (function() {
+    var deltaMultiplier = 1,
+        version = parseFloat(SC.browser.version),
+        didChange = NO;
+
+    if (SC.browser.safari) {
+      // Safari 5.0.1 and up
+      if (version >= 533.17) {
+        deltaMultiplier = 0.004;
+        didChange = YES;
+      } else if (version < 533) {
+        // Scrolling in Safari 5.0
+        deltaMultiplier = 40;
+        didChange = YES;
+      }
+    } else if (SC.browser.mozilla) {
+      deltaMultiplier = 10;
+      didChange = YES;
+    }
+
+    if (didChange) { SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES; }
+
+    return deltaMultiplier;
+  })(),
+
+  /**
+    This represents the limit in the delta before a different multiplier
+    will be applied. Because we can't generated an accurate mouse
+    wheel event ahead of time, and browsers deliver differing values
+    for mouse wheel deltas, this is necessary to ensure that
+    browsers that scale their values largely are dealt with correctly
+    in the future.
+
+    @type Number
+    @default 1000
+  */
+  MOUSE_WHEEL_DELTA_LIMIT: 1000,
+
+  /** @private
+    We only want to invalidate once
+  */
+  _MOUSE_WHEEL_LIMIT_INVALIDATED: NO,
 
   /** 
     Standard method to create a new event.  Pass the native browser event you
@@ -144,10 +195,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     relevant event occurs on the named element.  This method supports a
     variety of handler types, depending on the kind of support you need.
     
-    h2. Simple Function Handlers
+    ## Simple Function Handlers
+
+        SC.Event.add(anElement, "click", myClickHandler) ;
     
-      SC.Event.add(anElement, "click", myClickHandler) ;
-      
     The most basic type of handler you can pass is a function.  This function
     will be executed everytime an event of the type you specify occurs on the
     named element.  You can optionally pass an additional context object which
@@ -158,24 +209,24 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     
     The click handler for this method must have a method signature like:
     
-      function(event) { return YES|NO; }
-      
-    h2. Method Invocations
+        function(event) { return YES|NO; }
     
-      SC.Event.add(anElement, "click", myObject, myObject.aMethod) ;
-      
+    ## Method Invocations
+
+        SC.Event.add(anElement, "click", myObject, myObject.aMethod) ;
+
     Optionally you can specify a target object and a method on the object to 
     be invoked when the event occurs.  This will invoke the method function
     with the target object you pass as "this".  The method should have a 
     signature like:
     
-      function(event, targetElement) { return YES|NO; }
-      
+        function(event, targetElement) { return YES|NO; }
+
     Like function handlers, you can pass an additional context data paramater
     that will be included on the event in the event.data property.
-      
-    h2. Handler Return Values
     
+    ## Handler Return Values
+
     Both handler functions should return YES if you want the event to 
     continue to propagate and NO if you want it to stop.  Returning NO will
     both stop bubbling of the event and will prevent any default action 
@@ -183,7 +234,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     by calling the stopPropagation() or preventDefault() methods on the event
     itself, returning YES from your method.
     
-    h2. Limitations
+    ## Limitations
     
     Although SproutCore's event implementation is based on jQuery, it is 
     much simpler in design.  Notably, it does not support namespaced events
@@ -236,7 +287,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Get the handlers queue for this element/eventType.  If the queue does
     // not exist yet, create it and also setup the shared listener for this
     // eventType.
-    var events = SC.data(elem, "events") || SC.data(elem, "events", {}) ,
+    var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}) ,
         handlers = events[eventType]; 
     if (!handlers) {
       handlers = events[eventType] = {} ;
@@ -264,7 +315,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     and element, then all handlers for all events on that element will be
     removed.
     
-    h2. Limitations
+    ## Limitations
     
     Although SproutCore's event implementation is based on jQuery, it is 
     much simpler in design.  Notably, it does not support namespaced events
@@ -300,7 +351,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // around, causing it to be cloned in the process
     if (SC.browser.msie && elem.setInterval) elem = window;
 
-    var handlers, key, events = SC.data(elem, "events") ;
+    var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
 
     // if no type is provided, remove all types for this element.
@@ -345,7 +396,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       key = null ;
       for(key in events) break;
       if(!key) {
-        SC.removeData(elem, "events") ;
+        SC.removeData(elem, "sc_events") ;
         delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
       }
       
@@ -387,7 +438,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     Trigger an event execution immediately.  You can use this method to 
     simulate arbitrary events on arbitary elements.
 
-    h2. Limitations
+    ## Limitations
     
     Note that although this is based on the jQuery implementation, it is 
     much simpler.  Notably namespaced events are not supported and you cannot
@@ -396,11 +447,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     If you need more advanced event handling, consider the SC.Responder 
     functionality provided by SproutCore or use your favorite DOM library.
 
-    h2. Example
+    ## Example
     
-    {{{
-      SC.Event.trigger(view.get('layer'), 'mousedown');
-    }}}
+        SC.Event.trigger(view.get('layer'), 'mousedown');
     
     @param elem {Element} the target element
     @param eventType {String} the event type
@@ -474,8 +523,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     be the element the event occurred on, so you should always call this 
     method like:
     
-      SC.Event.handle.call(element, event) ;
-      
+        SC.Event.handle.call(element, event) ;
+
     Note that like other parts of this library, the handle function does not
     support namespaces.
     
@@ -497,7 +546,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     args[0] = event = SC.Event.normalizeEvent(event || window.event);
 
     // get the handlers for this event type
-    handlers = (SC.data(this, "events") || {})[event.type];
+    handlers = (SC.data(this, "sc_events") || {})[event.type];
     if (!handlers) return NO ; // nothing to do
     
     // invoke all handlers

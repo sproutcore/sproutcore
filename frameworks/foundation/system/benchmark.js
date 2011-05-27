@@ -27,17 +27,17 @@ sc_require('core') ;
 
   The benchmark has three types of reports.
 
-  report(): Returns an abbreviated list with just the durations of the bench.
-            Also, it averages multiple runs. Everything is reported on the top
-            level only.
+    - report(): Returns an abbreviated list with just the durations of the bench.
+              Also, it averages multiple runs. Everything is reported on the top
+              level only.
+    - timelineReport(): Returns an list of benchmarks and sub-benchmarks. If the
+                      the globalStartTime is set, then it will show relative
+                      time from that time.
+    - timelineChart(): Displays a chart of all the benchmarks (not sub-benchmarks)
+                     relative to the first time capture or to the globalStartTime.
+                     Hide this by calling hideChart()
 
-  timelineReport(): Returns an list of benchmarks and sub-benchmarks. If the
-                    the globalStartTime is set, then it will show relative
-                    time from that time.
-
-  timelineChart(): Displays a chart of all the benchmarks (not sub-benchmarks)
-                   relative to the first time capture or to the globalStartTime.
-                   Hide this by calling hideChart()
+  @since SproutCore 1.0
 */
 SC.Benchmark = {
 
@@ -45,7 +45,8 @@ SC.Benchmark = {
     If true, then benchmarks will be logged to the console as they are
     recorded.
 
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   verbose: NO,
 
@@ -53,7 +54,8 @@ SC.Benchmark = {
     If false, benchmarking will be disabled.  You might want to disable this
     during production to maximize performance.
 
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   enabled: YES,
 
@@ -81,20 +83,22 @@ SC.Benchmark = {
     This is useful when adding preload events to SC.benchmarkPreloadEvents; as SC.Benchmark
     does not yet exist, you cannot call .start() and .end(), but adding the items to
     SC.benchmarkPreloadEvents will ensure they are included.
+
+    @type Hash
+    @default {}
   */
   events: {},
 
   /**
-     This hash stores collected stats.  It contains key value pairs.  The value
-     will be a hash with the following properties:
+    This hash stores collected stats.  It contains key value pairs.  The value
+    will be a hash with the following properties:
 
-    * * *runs*: the number of times this stat has run
-    * * *amt*: the total time consumed by this (divide by runs to get avg)
-    * * *name*: an optional longer name you assigned to the stat key.  Set this  using name().
-    * * *_starts*: this array is used internally.
-    * * *_times*: this array is used internally.
+      - *runs*: the number of times this stat has run
+      - *amt*: the total time consumed by this (divide by runs to get avg)
+      - *name*: an optional longer name you assigned to the stat key.  Set this  using name().
 
-    @property {Object}
+    @type Hash
+    @default {}
   */
   stats: {},
 
@@ -104,7 +108,8 @@ SC.Benchmark = {
     This property is set to a default automatically (from HTML5 NavigationTiming if possible,
     otherwise the SC bootstrap).
 
-    @property {Number}
+    @type Number
+    @default null
   */
   globalStartTime: null,
 
@@ -119,7 +124,6 @@ SC.Benchmark = {
     @param {String} name
       A name that identifies the event. If addEvent is called again with the same name,
       the previous call's timestamp will be overwritten.
-
     @param {Timestamp} time
       Optional. The timestamp to record for the event.
   */
@@ -138,19 +142,15 @@ SC.Benchmark = {
     @param {String} key
       A unique key that identifies this benchmark.  All calls to start/end
       with the same key will be groups together.
-
     @param {String} parentKey
       A unique key that identifies the parent benchmark.  All calls to
       start/end with the same key will be groups together.
-
     @param {Boolean} topLevelOnly
       If true then recursive calls to this method with the same key will be
       ignored.
-
     @param {Number} time
       Only pass if you want to explicitly set the start time.  Otherwise the
       start time is now.
-
     @returns {String} the passed key
   */
   start: function(key, parentKey, time, topLevelOnly) {
@@ -174,10 +174,8 @@ SC.Benchmark = {
 
     @param {String} key
       The benchmark key you used when you called start()
-
     @param {String} parentKey
       The benchmark parent key you used when you called start()
-
     @param {Number} time
       Only pass if you want to explicitly set the end time.  Otherwise start
       time is now.
@@ -246,7 +244,6 @@ SC.Benchmark = {
     benchmark it whenever it is run.
   */
   install: function(object,method, topLevelOnly) {
-
     // vae the original method.
     object['b__' + method] = object[method] ;
     var __func = object['b__' + method];
@@ -264,9 +261,8 @@ SC.Benchmark = {
   /**
     Restore the original method, deactivating the benchmark.
 
-    @param {object} object the object to change
-    @param {string} method the method name as a string.
-
+    @param {Object} object the object to change
+    @param {String} method the method name as a string.
   */
   restore: function(object,method) {
     object[method] = object['b__' + method] ;
@@ -290,10 +286,9 @@ SC.Benchmark = {
   /**
     Generate a human readable benchmark report. Pass in appName if you desire.
 
-    @param {string} application name.
+    @param {String} application name.
   */
-  timelineReport: function(appName)
-  {
+  timelineReport: function(appName) {
     appName = (appName) ? 'SproutCore Application' : appName;
     var ret = [appName, 'User-Agent: %@'.fmt(navigator.userAgent), 'Report Generated: %@ (%@)'.fmt(new Date().toString(), Date.now()), ''] ;
 
@@ -316,8 +311,13 @@ SC.Benchmark = {
     Returns a hash containing the HTML representing the timeline chart, and
     various metrics and information about the chart:
 
-        html, totalWidth, totalHeight, totalCapturedTime, pointsCaptured
+        - html
+        - totalWidth
+        - totalHeight
+        - totalCapturedTime
+        - pointsCaptured
 
+    @returns {Hash}
   */
   getTimelineChartContent: function() {
     // Compile the data.
@@ -402,6 +402,8 @@ SC.Benchmark = {
   /**
     Returns a view with the timeline chart. The view has a 'reload' method to
     refresh its data.
+
+    @returns {SC.View}
   */
   getTimelineChartView: function() {
     var view = SC.ScrollView.create({
@@ -448,9 +450,9 @@ SC.Benchmark = {
     // Get the global start of the graph.
 
     this._benchmarkChart = SC.Pane.create({
-      classNames: "sc-benchmark-pane".w(),
+      classNames: ["sc-benchmark-pane"],
       layout: { left: 20, right: 20, bottom: 20, top: 20 },
-      childViews: "title exit".w(),
+      childViews: ["title", "exit"],
       exit: SC.ButtonView.extend({
         layout: { right: 20, top: 20, width: 100, height: 30 },
         title: "Hide Chart",
@@ -459,7 +461,7 @@ SC.Benchmark = {
       }),
 
       title: SC.LabelView.extend({
-        classNames: 'sc-benchmark-title'.w(),
+        classNames: ['sc-benchmark-title'],
         layout: { left: 20, top: 23, right: 200, height: 30 },
         value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + chartCapturedTime +' ms - Points Captured: ' + chartLen),
         fontWeight: 'bold'
@@ -475,11 +477,9 @@ SC.Benchmark = {
 
   /*
     Hide chart.
-
   */
-  hideChart: function()
-  {
-    if(this._benchmarkChart) {
+  hideChart: function() {
+    if (this._benchmarkChart) {
       this._benchmarkChart.remove();
       this._benchmarkChart = null;
     }
@@ -487,7 +487,7 @@ SC.Benchmark = {
     return YES;
   },
 
-  /**
+  /** @private
     Because we show a pane to display the chart...
   */
   tryToPerform: function(action, sender) {
@@ -520,12 +520,12 @@ SC.Benchmark = {
     SC.Logger.profileEnd(key) ;
   },
 
-  // PRIVATE METHODS
 
-  // @private
+  // ..........................................................
+  // Internal Support
+  // 
 
-
-  /**
+  /** @private
     Loads data from both the browser's own event hash and SC's pre-load event hash.
   */
   loadPreloadEvents: function() {
@@ -540,7 +540,7 @@ SC.Benchmark = {
     if (!this.globalStartTime) {
       // the potential events representing start time can be either from the browser
       // or our own recordings. We prefer the browser.
-      var globalStartEvents = 'navigation navigationStart headStart'.w();
+      var globalStartEvents = ['navigation', 'navigationStart', 'headStart'];
       len = globalStartEvents.length;
 
       for (idx = 0; idx < len; idx++) {
@@ -561,7 +561,7 @@ SC.Benchmark = {
     this._hasLoadedPreloadEvents = true;
   },
 
-  /**
+  /** @private
     Some events represent a beginning and end. While this is not common for events
     that take place after the app loads (as they can just use SC.Benchmark.start/end),
     SC.Benchmark.start/end is not available before load—as such, code will add
@@ -588,9 +588,10 @@ SC.Benchmark = {
     }
   },
 
-  // Generates, sorts, and returns the array of all the data that has been captured.
-  _compileChartData: function(showSub)
-  {
+  /** @private
+    Generates, sorts, and returns the array of all the data that has been captured.
+  */
+  _compileChartData: function(showSub) {
     this._loadBenchmarksFromEvents();
 
     var chart = [], dispKey;
@@ -640,6 +641,7 @@ SC.Benchmark = {
   },
 
   // Generate the traditional report show multiple runs averaged.
+  /** @private */
   _genReport: function(key) {
     var stat = this._statFor(key) ;
     var avg = (stat.runs > 0) ? (Math.floor(stat.amt * 1000 / stat.runs) / 1000) : 0 ;
@@ -649,6 +651,7 @@ SC.Benchmark = {
   },
 
   // Generate the report in the form of at time line. This returns the parent.
+  /** @private */
   _timelineGenReport: function(val)
   {
     if(this.globalStartTime)
@@ -662,6 +665,7 @@ SC.Benchmark = {
   },
 
   // Generate the report in the form of at time line. This returns the children.
+  /** @private */
   _timelineGenSubReport: function(val)
   {
     if(this.globalStartTime)
@@ -676,6 +680,7 @@ SC.Benchmark = {
 
   // returns a stats hash for the named key and parent key.  If the hash does not exist yet,
   // creates it.
+  /** @private */
   _subStatFor: function(key, parentKey) {
     var parentTimeLen = this.stats[parentKey]._times.length;
     if(parentTimeLen === 0) return;
@@ -692,6 +697,7 @@ SC.Benchmark = {
 
   // returns a stats hash for the named key.  If the hash does not exist yet,
   // creates it.
+  /** @private */
   _statFor: function(key) {
     var ret = this.stats[key] ;
     if (!ret) {
@@ -703,14 +709,17 @@ SC.Benchmark = {
     return ret ;
   },
 
+  /** @private */
   reset: function() { this.stats = {} ; },
 
   // This is private, but it is used in some places, so we are keeping this for
   // compatibility.
+  /** @private */
   _bench: function(func, name) {
     SC.Benchmark.bench(func, name, 1) ;
   },
 
+  /** @private */
   _benchCount: 1
 
 } ;

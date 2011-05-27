@@ -6,7 +6,8 @@
 // ==========================================================================
 /*global module test equals context ok same */
 var LocaleObject;
-module('String.prototype.w()', {
+
+module('SC.Object', {
   setup: function() {
 
     LocaleObject = SC.Locale.create({
@@ -20,6 +21,11 @@ module('String.prototype.w()', {
       }
     });
     this.currentLocale = LocaleObject;
+    
+    SC.stringsFor('English', {
+      'Test': '%@',
+      'Test.Multiple': '%@ %@'
+    });
   }
 });
 
@@ -45,12 +51,28 @@ test("Trim ' spaces on both sides ' on right only", function() {
 
 test("Localize a string", function() {
   //Based on the input passed it should return the default locale
-  equals("en".loc(), "en") ;
-  equals("jp".locWithDefault("Japanese"), "Japanese") ;
-  equals('deflang'.loc(), "dl") ;
+  equals("en".loc(), "en", "Using String.prototype.loc") ;
+  equals(SC.String.loc("en"), "en", "Using SC.String.loc");
+
+  equals("jp".locWithDefault("Japanese"), "Japanese", "Using String.prototype.locWithDefault") ;
+  equals(SC.String.locWithDefault("jp", "Japanese"), "Japanese", "Using SC.String.locWithDefault") ;
+
+  equals('deflang'.loc(), "dl", "Using String.prototype.loc") ;
+  equals(SC.String.loc('deflang'), "dl", "Using SC.String.loc") ;
+});
+
+test("Localize a string with mutliple parameters", function() {
+  equals("Test".loc('parameter1'), 'parameter1', "Localizing with one parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test", 'parameter1'), 'parameter1', "Localizing with one parameter - using SC.String.loc");
+
+  equals("Test.Multiple".loc('parameter1', 'parameter2'), 'parameter1 parameter2', "Localizing with multiple parameters - using String.prototype.loc");
+  equals(SC.String.loc("Test.Multiple", 'parameter1', 'parameter2'), 'parameter1 parameter2', "Localizing with multiple parameters - using SC.String.loc");
 });
 
 test("Localize a string even if localized version is empty", function() {
-  equals("empty".loc(), "");
-  equals("empty".locWithDefault("Empty"), "");
+  equals("empty".loc(), "", "Using String.prototype.loc");
+  equals(SC.String.loc("empty"), "", "Using SC.String.loc");
+
+  equals("empty".locWithDefault("Empty"), "", "Using String.prototype.locWithDefault");
+  equals(SC.String.locWithDefault("empty", "Empty"), "", "Using SC.String.locWithDefault");
 });

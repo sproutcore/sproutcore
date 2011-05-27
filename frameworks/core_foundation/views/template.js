@@ -1,4 +1,9 @@
-sc_require("views/view/base");
+sc_require("ext/handlebars");
+sc_require("ext/handlebars/bind");
+sc_require("ext/handlebars/collection");
+sc_require("ext/handlebars/localization");
+sc_require("ext/handlebars/view");
+sc_require("views/view");
 
 // Global hash of shared templates. This will automatically be populated
 // by the build tools so that you can store your Handlebars templates in
@@ -47,7 +52,7 @@ SC.TemplateView = SC.CoreView.extend(
   templates: SC.TEMPLATES,
 
   /**
-    The template to use to render the view. This should be a function that
+    The template used to render the view. This should be a function that
     accepts an optional context parameter and returns a string of HTML that
     will be inserted into the DOM relative to its parent view.
 

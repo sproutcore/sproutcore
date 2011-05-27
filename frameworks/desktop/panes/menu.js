@@ -4,23 +4,24 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-require('panes/picker');
-require('views/menu_item');
+
+sc_require('panes/picker');
+sc_require('views/menu_item');
 
 /**
   @class
 
-  SC.MenuPane allows you to display a standard menu. Menus appear over other
+  `SC.MenuPane` allows you to display a standard menu. Menus appear over other
   panes, and block input to other views until a selection is made or the pane
   is dismissed by clicking outside of its bounds.
 
   You can create a menu pane and manage it yourself, or you can use the
-  SC.SelectButtonView and SC.PopupButtonView controls to manage the menu for
+  `SC.SelectButtonView` and `SC.PopupButtonView` controls to manage the menu for
   you.
 
-  h2. Specifying Menu Items
+  ## Specifying Menu Items
 
-  The menu pane examines the @items@ property to determine what menu items
+  The menu pane examines the `items` property to determine what menu items
   should be presented to the user.
 
   In its most simple form, you can provide an array of strings. Every item
@@ -32,46 +33,50 @@ require('views/menu_item');
 
   Out of the box, the menu pane has some default keys it uses to get
   information from the objects. For example, to find out the title of the menu
-  item, the menu pane will ask your object for its @title@ property. If you
-  need to change this key, you can set the @itemTitleKey@ property on the pane
+  item, the menu pane will ask your object for its `title` property. If you
+  need to change this key, you can set the `itemTitleKey` property on the pane
   itself.
 
-  {{{
-    var menuItems = [
-      { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
-      { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
-      { title: 'Selected Menu Item', keyEquivalent: ['backspace', 'delete'] },
-      { isSeparator: YES },
-      { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
-      { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: 'ctrl_p' }
-    ];
+      var menuItems = [
+        { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
+        { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
+        { title: 'Selected Menu Item', keyEquivalent: ['backspace', 'delete'] },
+        { isSeparator: YES },
+        { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
+        { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: 'ctrl_p' }
+      ];
 
-    var menu = SC.MenuPane.create({
-      items: menuItems
-    });
-  }}}
+      var menu = SC.MenuPane.create({
+        items: menuItems
+      });
 
-  h2. Observing User Selections
+  ## Observing User Selections
 
   To determine when a user clicks on a menu item, you can observe the
-  @selectedItem@ property for changes.
+  `selectedItem` property for changes.
 
   @extends SC.PickerPane
   @since SproutCore 1.0
 */
-
 SC.MenuPane = SC.PickerPane.extend(
 /** @scope SC.MenuPane.prototype */ {
 
+  /**
+    @property {Array}
+    @default ['sc-menu']
+    @see SC.View#classNames
+  */
   classNames: ['sc-menu'],
 
   /**
-    The WAI-ARIA role for menu pane. This property's value should not be
-    changed.
+    The WAI-ARIA role for menu pane.
 
     @property {String}
+    @default 'menu'
+    @constant
   */
   ariaRole: 'menu',
+
 
   // ..........................................................
   // PROPERTIES
@@ -83,15 +88,16 @@ SC.MenuPane = SC.PickerPane.extend(
     various itemKey properties to tell the menu how to extract the information
     it needs.
 
-    @type String
+    @property {Array}
+    @default []
   */
   items: [],
 
   /**
     The size of the menu. This will set a CSS style on the menu that can be
     used by the current theme to style the appearance of the control. This
-    value will also determine the default itemHeight, itemSeparatorHeight,
-    menuHeightPadding, and submenuOffsetX if you don't explicitly set these
+    value will also determine the default `itemHeight`, `itemSeparatorHeight`,
+    `menuHeightPadding`, and `submenuOffsetX` if you don't explicitly set these
     properties.
 
     Your theme can override the default values for each control size by specifying
@@ -108,7 +114,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     Changing the controlSize once the menu is instantiated has no effect.
 
-    @type String
+    @property {String}
     @default SC.REGULAR_CONTROL_SIZE
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
@@ -117,12 +123,12 @@ SC.MenuPane = SC.PickerPane.extend(
     The height of each menu item, in pixels.
 
     You can override this on a per-item basis by setting the (by default)
-    @height@ property on your object.
+    `height` property on your object.
 
     If you don't specify a value, the item height will be inferred from
-    controlSize.
+    `controlSize`.
 
-    @type Number
+    @property {Number}
     @default itemHeight from theme if present, or 20.
   */
   itemHeight: SC.propertyFromRenderDelegate('itemHeight', 20),
@@ -131,21 +137,22 @@ SC.MenuPane = SC.PickerPane.extend(
     The height of separator menu items.
 
     You can override this on a per-item basis by setting the (by default)
-    @height@ property on your object.
+    `height` property on your object.
 
     If you don't specify a value, the height of the separator menu items will
-    be inferred from controlSize.
+    be inferred from `controlSize`.
 
-    @type Number
+    @property {Number}
     @default itemSeparatorHeight from theme, or 9.
   */
   itemSeparatorHeight: SC.propertyFromRenderDelegate('itemSeparatorHeight', 9),
 
   /**
-    The height of the menu pane.  This is updated every time menuItemViews
+    The height of the menu pane. This is updated every time menuItemViews
     is recalculated.
 
-    @type Number
+    @property {Number}
+    @default 0
     @isReadOnly
   */
   menuHeight: 0,
@@ -160,7 +167,7 @@ SC.MenuPane = SC.PickerPane.extend(
     If you don't specify a value, the padding will be inferred from the
     controlSize.
 
-    @type Number
+    @property {Number}
     @default menuHeightPadding from theme, or 6
   */
   menuHeightPadding: SC.propertyFromRenderDelegate('menuHeightPadding', 6),
@@ -171,7 +178,7 @@ SC.MenuPane = SC.PickerPane.extend(
     If you don't specify a value, the padding will be inferred from the
     controlSize.
 
-    @type Number
+    @property {Number}
     @default submenuOffsetX from theme, or 2
   */
   submenuOffsetX: SC.propertyFromRenderDelegate('submenuOffsetX', 2),
@@ -182,7 +189,7 @@ SC.MenuPane = SC.PickerPane.extend(
     You can place an observer on this property to be notified when the user
     makes a selection.
 
-    @type SC.Object
+    @property {SC.Object}
     @default null
     @isReadOnly
   */
@@ -192,11 +199,11 @@ SC.MenuPane = SC.PickerPane.extend(
     The view class to use when creating new menu item views.
 
     The menu pane will automatically create an instance of the view class you
-    set here for each item in the @items@ array. You may provide your own
+    set here for each item in the `items` array. You may provide your own
     subclass for this property to display the customized content.
 
+    @property {SC.View}
     @default SC.MenuItemView
-    @type SC.View
   */
   exampleView: SC.MenuItemView,
 
@@ -205,7 +212,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     When the menu pane is shown, it will remain anchored to the view you
     specify, even if the window is resized. You should specify the anchor as a
-    parameter when calling @popup()@, rather than setting it directly.
+    parameter when calling `popup()`, rather than setting it directly.
 
     @type SC.View
     @isReadOnly
@@ -213,9 +220,10 @@ SC.MenuPane = SC.PickerPane.extend(
   anchor: null,
 
   /**
-    YES if this menu pane was generated by a parent SC.MenuPane.
+    `YES` if this menu pane was generated by a parent `SC.MenuPane`.
 
     @type Boolean
+    @default NO
     @isReadOnly
   */
   isSubMenu: NO,
@@ -227,22 +235,26 @@ SC.MenuPane = SC.PickerPane.extend(
     @default YES
   */
   localize: YES,
-  
+
   /**
     Whether or not this menu pane should accept the “current menu pane”
     designation when visible, which is the highest-priority pane when routing
-    events.  Generally you want this set to YES so that your menu pane can
+    events.  Generally you want this set to `YES` so that your menu pane can
     intercept keyboard events.
 
     @type Boolean
     @default YES
   */
   acceptsMenuPane: YES,
-  
+
   /**
     Disable context menu.
+    
+    @property {Boolean}
+    @default NO
   */
   isContextMenuEnabled: NO,
+
 
   // ..........................................................
   // METHODS
@@ -255,10 +267,9 @@ SC.MenuPane = SC.PickerPane.extend(
     anchor itself to the view, and intelligently reposition itself if the
     contents of the menu exceed the available space.
 
-    @param SC.View anchorViewOrElement the view or element to which the menu
+    @param {SC.View} anchorViewOrElement the view or element to which the menu
     should anchor.
-    @param preferMatrix The prefer matrix used to position the pane.
-    (optional)
+    @param {Array} (preferMatrix) The prefer matrix used to position the pane.
   */
   popup: function(anchorViewOrElement, preferMatrix) {
     var anchor;
@@ -372,7 +383,7 @@ SC.MenuPane = SC.PickerPane.extend(
   itemSeparatorKey: 'separator',
 
   /**
-    The name of the property that contains the target for the action that is 
+    The name of the property that contains the target for the action that is
     triggered when the user clicks the menu item.
 
     Note that this property is ignored if the menu item has a submenu.
@@ -421,7 +432,7 @@ SC.MenuPane = SC.PickerPane.extend(
     item.
 
     The action of the menu item will be fired, and the menu pane's
-    @selectedItem@ property set to the menu item, if the user presses this
+    `selectedItem` property set to the menu item, if the user presses this
     key combination on the keyboard.
 
     @type String
@@ -446,6 +457,15 @@ SC.MenuPane = SC.PickerPane.extend(
   itemDisableMenuFlashKey: 'disableMenuFlash',
 
   /**
+    The name of the property that determines whether layerID should be applied to the item .
+
+    @type String
+    @default "layerId"
+    @commonTask Menu Item Properties
+  */
+  itemLayerIdKey: 'layerId',
+
+  /**
     The array of keys used by SC.MenuItemView when inspecting your menu items
     for display properties.
 
@@ -453,7 +473,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @isReadOnly
     @property Array
   */
-  menuItemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemHeightKey itemSubMenuKey itemKeyEquivalentKey itemTargetKey'.w(),
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
   // INTERNAL PROPERTIES
@@ -472,9 +492,9 @@ SC.MenuPane = SC.PickerPane.extend(
   isModal: YES,
 
   /**
-    The view that contains the MenuItemViews that are visible on screen.
+    The view that contains the `MenuItemView`s that are visible on screen.
 
-    This is created and set in createChildViews.
+    This is created and set in `createChildViews`.
 
     @property SC.View
     @private
@@ -486,8 +506,8 @@ SC.MenuPane = SC.PickerPane.extend(
   //
 
   /**
-    If an itemHeight, itemSeparatorHeight, or menuHeightPadding have not been
-    explicitly set, we set them here based on the controlSize.
+    If an `itemHeight`, `itemSeparatorHeight`, or `menuHeightPadding` have not been
+    explicitly set, we set them here based on the `controlSize`.
 
     @returns {SC.MenuPane} the newly instantiated menu pane
     @private
@@ -500,8 +520,8 @@ SC.MenuPane = SC.PickerPane.extend(
   renderDelegateName: 'menuRenderDelegate',
 
   /**
-    Creates the child scroll view, and sets its contentView to a new
-    view.  This new view is saved and managed by the SC.MenuPane,
+    Creates the child scroll view, and sets its `contentView` to a new
+    view.  This new view is saved and managed by the `SC.MenuPane`,
     and contains the visible menu items.
 
     @private
@@ -528,9 +548,9 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /**
     When the pane is attached to a DOM element in the window, set up the
-    view to be visible in the window and register with the RootResponder.
+    view to be visible in the window and register with the `RootResponder`.
 
-    We don't call sc_super() here because PanelPane sets the current pane to
+    We don't call `sc_super()` here because `PanelPane` sets the current pane to
     be the key pane when attached.
 
     @returns {SC.MenuPane} receiver
@@ -569,7 +589,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /**
     Remove the menu pane status from the pane.  This will simply set the 
-    menuPane on the rootResponder to null.
+    `menuPane` on the `rootResponder` to `null.
 
     @returns {SC.Pane} receiver
   */
@@ -581,7 +601,8 @@ SC.MenuPane = SC.PickerPane.extend(
   /**
     The array of child menu item views that compose the menu.
 
-    This computed property parses @displayItems@ and constructs an SC.MenuItemView (or whatever class you have set as the @exampleView@) for every item.
+    This computed property parses `displayItems` and constructs an
+    `SC.MenuItemView` (or whatever class you have set as the `exampleView`) for every item.
 
     @property
     @type Array
@@ -592,7 +613,7 @@ SC.MenuPane = SC.PickerPane.extend(
         exampleView = this.get('exampleView'), item, view,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
-        keyArray, idx,
+        keyArray, idx, layerIdKey, propertiesHash,
         len;
 
     if (!items) return views; // return an empty array
@@ -601,7 +622,7 @@ SC.MenuPane = SC.PickerPane.extend(
     defaultHeight = this.get('itemHeight');
     keyEquivalentKey = this.get('itemKeyEquivalentKey');
     separatorHeight = this.get('itemSeparatorHeight');
-
+    layerIdKey = this.get('itemLayerIdKey');
     menuHeightPadding = Math.floor(this.get('menuHeightPadding')/2);
     menuHeight = menuHeightPadding;
 
@@ -614,15 +635,18 @@ SC.MenuPane = SC.PickerPane.extend(
       if (!height) {
         height = item.get(separatorKey) ? separatorHeight : defaultHeight;
       }
-      view = this._menuView.createChildView(exampleView, {
+      propertiesHash = {
         layout: { height: height, top: menuHeight },
         contentDisplayProperties: keyArray,
         content: item,
         parentMenu: this
-      });
+      };
+      if(item.get(layerIdKey)) {
+        propertiesHash.layerId = item.get(layerIdKey);
+      }
+      view = this._menuView.createChildView(exampleView, propertiesHash);
       views[idx] = view;
       menuHeight += height;
-
       keyEquivalent = item.get(keyEquivalentKey);
       if (keyEquivalent) {
         // if array, apply each one for this view
@@ -693,21 +717,21 @@ SC.MenuPane = SC.PickerPane.extend(
     or an object with key-value pairs, or an exotic mish-mash of both, we need
     to normalize it for our display logic.
 
-    If an @items@ member is an object, we can assume it is formatted properly
+    If an `items` member is an object, we can assume it is formatted properly
     and leave it as-is.
 
-    If an @items@ member is a string, we create a hash with the title value
+    If an `items` member is a string, we create a hash with the title value
     set to that string, and some sensible defaults for the other properties.
 
-    As a last resort, if an @items@ member is an array, we have a legacy
+    As a last resort, if an `items` member is an array, we have a legacy
     handler that converts the array into a hash. This behavior is deprecated
     and is not guaranteed to be supported in the future.
 
     A side effect of running this computed property is that the menuHeight
     property is updated.
 
-    @displayItems@ should never be set directly; instead, set @items@ and
-    @displayItems@ will update automatically.
+    `displayItems` should never be set directly; instead, set `items` and
+    `displayItems` will update automatically.
 
     @property
     @type Array
@@ -832,7 +856,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     // Scroll to the selected menu item if it's not visible on screen.
     // This is useful for keyboard navigation and programmaticaly selecting
-    // the selected menu item, as in SelectButtonView.
+    // the selected menu item, as in `SelectButtonView`.
     if (currentMenuItem && currentMenuItem.get('isEnabled')) {
       currentMenuItem.scrollToVisible();
     }
@@ -975,7 +999,7 @@ SC.MenuPane = SC.PickerPane.extend(
     However, when the menu is part of another control, such as an
     SC.PopupButtonView, the menu should still respond if it is hidden but its
     parent control is visible. In those cases, the parameter
-    fromVisibleControl will be set to YES.
+    fromVisibleControl will be set to `YES`.
 
     @param keyEquivalent {String} the shortcut key sequence that was pressed
     @param fromVisibleControl {Boolean} if the shortcut key press was proxied
@@ -985,7 +1009,7 @@ SC.MenuPane = SC.PickerPane.extend(
   performKeyEquivalent: function(keyEquivalent, evt, fromVisibleControl) {
     //If menu is not visible
     if (!fromVisibleControl && !this.get('isVisibleInWindow')) return NO;
-    
+
     // Look for menu item that has this key equivalent
     var menuItem = this._keyEquivalents[keyEquivalent];
 
@@ -1031,7 +1055,7 @@ SC.MenuPane = SC.PickerPane.extend(
     Clear the key buffer if the user does not enter any text after a certain
     amount of time.
 
-    This is called by the timer created in the insertText method.
+    This is called by the timer created in the `insertText` method.
 
     @private
   */

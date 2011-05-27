@@ -5,7 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/object') ;
+sc_require('ext/function');
+sc_require('system/object');
 
 /**
   Debug parameter you can turn on.  This will log all bindings that fire to
@@ -339,7 +340,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this.isConnected = YES ;
     this._connectionPending = YES ; // its connected but not really...
     this._syncOnConnect = YES ;
+
     SC.Binding._connectQueue.add(this) ;
+
+    if (!SC.RunLoop.isRunLoopInProgress()) {
+      this._scheduleSync();
+    }
+
     return this;
   },
 
@@ -446,6 +453,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       this._setBindingValue(target, key) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.
+
+      this._scheduleSync();
     }
   },
 
@@ -473,7 +482,18 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       this._setBindingValue(target, key) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.
+
+      this._scheduleSync();
     }
+  },
+
+  _scheduleSync: function() {
+    if (SC.RunLoop.isRunLoopInProgress() || this._syncScheduled) { return; }
+
+    this._syncScheduled = YES;
+    var self = this;
+
+    setTimeout(function() { SC.run(); self._syncScheduled = NO; }, 1);
   },
 
   /** @private
@@ -844,7 +864,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   /**
     Adds a transform that will return the placeholder value if the value is
-    null.  Otherwise it will passthrough untouched.  See also notEmpty().
+    null or undefined.  Otherwise it will passthrough untouched.  See also notEmpty().
 
     @param {String} fromPath from path or null
     @param {Object} placeholder optional placeholder;
@@ -962,7 +982,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that will return YES if the value is null, NO otherwise.
+    Adds a transform that will return YES if the value is null or undefined, NO otherwise.
     
     @param {String} fromPath optional from path
     @returns {SC.Binding} this

@@ -8,7 +8,7 @@
 sc_require('platform');
 
 /**
-  h1. Device Motion
+  ## Device Motion
   
   When a device is moved, some platforms will inform us of its movement
   (accelerometer) and angle (gyroscope). 
@@ -80,7 +80,7 @@ SC.mixin(SC.device,
   // 
   
   setupMotion: function() {
-    SC.RootResponder.responder.listenFor('devicemotion deviceorientation'.w(), window, this);
+    SC.RootResponder.responder.listenFor(['devicemotion', 'deviceorientation'], window, this);
   },
   
   

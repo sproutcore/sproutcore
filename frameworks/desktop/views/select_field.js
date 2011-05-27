@@ -22,15 +22,47 @@
 SC.SelectFieldView = SC.FieldView.extend(
 /** @scope SC.SelectFieldView.prototype */ {
 
+  /**
+    @type Array
+    @default ['objects','nameKey','valueKey','isEnabled']
+    @see SC.View#displayProperties
+  */
+  displayProperties: ['objects','nameKey','valueKey','isEnabled'],
+
+  /**
+    Reflects the value of `isEnabled`.
+    
+    @field
+    @type Boolean
+    @default YES
+  */
+  acceptsFirstResponder: function() {
+    return this.get('isEnabled');
+  }.property('isEnabled'),
+
+  /**
+    @type String
+    @default 'select'
+    @see SC.View#tagName
+  */
   tagName: 'select',
+  
+  /**
+    @type Array
+    @default ['sc-select-field-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-select-field-view'],
  
   /**
     An array of items that will form the menu you want to show.
+    
+    @type Array
+    @default []
   */ 
   objects: [],
   
-  /**
+  /** @private
     Binding default for an array of objects
   */ 
   objectsBindingDefault: SC.Binding.multiple(),
@@ -39,13 +71,19 @@ SC.SelectFieldView = SC.FieldView.extend(
     If you set this to a non-null value, then the name shown for each 
     menu item will be pulled from the object using the named property.
     if this is null, the collection objects themselves will be used.
+    
+    @type String
+    @default null
   */
   nameKey: null,
 
   /**
-   If you set this to a non-null value, then the value of this key will
-   be used to sort the objects.  If this is not set, then nameKey will
-   be used.
+    If you set this to a non-null value, then the value of this key will
+    be used to sort the objects.  If this is not set, then nameKey will
+    be used.
+
+    @type String
+    @default null
   */ 
   sortKey: null,
 
@@ -53,20 +91,29 @@ SC.SelectFieldView = SC.FieldView.extend(
      Set this to a non-null value to use a key from the passed set of objects
      as the value for the options popup.  If you don't set this, then the
      objects themselves will be used as the value.
+
+     @type String
+     @default null
   */ 
   valueKey: null,
 
   /**
     set this to non-null to place an empty option at the top of the menu.   
+    
+    @type String
+    @default null
   */
   emptyName: null,
 
   /**
     if true, the empty name will be localized.
+    
+    @type Boolean
+    @default NO
   */
-  localize: false,
+  localize: NO,
   
-  /**
+  /** @private
     if true, it means that the nameKey, valueKey or objects changed
   */
   cpDidChange: YES,
@@ -74,10 +121,11 @@ SC.SelectFieldView = SC.FieldView.extend(
   /**
     if true, it means that no sorting will occur, objects will appear 
     in the same order as in the array
+    
+    @type Boolean
+    @default NO
   */
   disableSort: NO,
-  
-  
   
   /**
     override this to change the enabled/disabled state of menu items as they
@@ -88,7 +136,7 @@ SC.SelectFieldView = SC.FieldView.extend(
     @returns YES if the item should be enabled, NO otherwise
   */  
   validateMenuItem: function(itemValue, itemName) {
-    return true ;
+    return YES;
   },
 
   /**
@@ -115,8 +163,10 @@ SC.SelectFieldView = SC.FieldView.extend(
     return objects ;
   },
 
+  /** @private */
   render: function(context, firstTime) {
-    if (this.get('cpDidChange')) {
+    // Only re-render if it's the firstTime or if a change is required
+    if (firstTime || this.get('cpDidChange')) {
       this.set('cpDidChange', NO);
       // get list of objects.
       var nameKey = this.get('nameKey') ;
@@ -145,7 +195,7 @@ SC.SelectFieldView = SC.FieldView.extend(
       
         var emptyName = this.get('emptyName') ;
         if (emptyName) {
-          if (shouldLocalize) emptyName = emptyName.loc() ;
+          if (shouldLocalize) emptyName = SC.String.loc(emptyName);
           if(firstTime){
             context.push('<option value="***">'+emptyName+'</option>',
                           '<option disabled="disabled"></option>') ;
@@ -169,7 +219,7 @@ SC.SelectFieldView = SC.FieldView.extend(
           // localize name if specified.
           if(shouldLocalize)
           {
-            name = name.loc();
+            name = SC.String.loc(name);
           }
    
           // get the value using the valueKey or the object if no valueKey.
@@ -211,52 +261,57 @@ SC.SelectFieldView = SC.FieldView.extend(
         this.set('value',null);
       }
     } else {
-      this.$().attr('disabled', this.get('isEnabled') ? null : 'disabled');
+      this.$().prop('disabled', !this.get('isEnabled'));
     }
   },
-  
-  displayProperties: ['objects','nameKey','valueKey','isEnabled'],
 
+  /** @private */
   _objectsObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('objects'),
 
+  /** @private */
   _objectArrayObserver: function() {
     this.set('cpDidChange', YES);
     this.propertyDidChange('objects');
   }.observes('*objects.[]'),
     
+  /** @private */
   _nameKeyObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('nameKey'),
    
+  /** @private */
   _valueKeyObserver: function() {
     this.set('cpDidChange', YES);
   }.observes('valueKey'),
-    
-  acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
-   
+
+  /** @private */
+  _isEnabledObserver: function() {
+    this.set('cpDidChange', YES);
+  }.observes('isEnabled'),
+
   // .......................................
   // PRIVATE
   //
    
+  /** @private */
   $input: function() { return this.$(); },
    
-  /* @private */
+  /** @private */
   mouseDown: function(evt) {
-    
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
     } else return sc_super();
   },
    
+  /** @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
   
+  /** @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   },
@@ -298,6 +353,7 @@ SC.SelectFieldView = SC.FieldView.extend(
     return (valueKey || found) ? found : value;
   },
   
+  /** @private */
   setFieldValue: function(newValue) {
     if (SC.none(newValue)) { 
       newValue = '***' ; 
@@ -308,26 +364,24 @@ SC.SelectFieldView = SC.FieldView.extend(
     return this ;
   },
   
-  
-  
- 
-  
+  /** @private */
   fieldDidFocus: function() {
     var isFocused = this.get('isFocused');
     if (!isFocused) this.set('isFocused', true);
   },
 
+  /** @private */
   fieldDidBlur: function() {
     var isFocused = this.get('isFocused');
     if (isFocused) this.set('isFocused', false);
   },
-
-
   
+  /** @private */
   _isFocusedObserver: function() {
     this.$().setClass('focus', this.get('isFocused'));
   }.observes('isFocused'),
 
+  /** @private */
   didCreateLayer: function() {
     var input = this.$input();
     if (this.get('isEnabled') === false) this.$()[0].disabled = true;
@@ -336,11 +390,12 @@ SC.SelectFieldView = SC.FieldView.extend(
     SC.Event.add(input, 'change',this, this._field_fieldValueDidChange);
   },
   
+  /** @private */
   willDestroyLayer: function() {
     var input = this.$input();
     SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
     SC.Event.remove(input, 'blur', this, this.fieldDidBlur);
     SC.Event.remove(input, 'change',this, this._field_fieldValueDidChange);
   }
- 
+
 });

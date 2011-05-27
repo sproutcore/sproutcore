@@ -18,6 +18,10 @@ $theme.menu {
       margin-left: 20px;
       line-height: 20px;
     }
+
+    .has-icon .value {
+      margin-left: 44px;
+    }
     
     &.focus, a:hover {
       span { color: white; }

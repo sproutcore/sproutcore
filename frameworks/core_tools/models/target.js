@@ -34,7 +34,7 @@ CoreTools.Target = SC.Record.extend(
     URL to use to load the app.  If no an app, returns null
   */
   appUrl: function() {
-    return (this.get('kind') === 'app') ? this.get('name') : null;
+    return (this.get('kind') === 'app') ? CoreTools.attachUrlPrefix(this.get('name')) : null;
   }.property('kind', 'name').cacheable(),
   
   /**

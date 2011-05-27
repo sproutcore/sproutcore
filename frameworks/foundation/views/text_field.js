@@ -43,8 +43,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     When applyImmediately is turned on, every keystroke will set the value
     of the underlying object. Turning it off will only set the value on blur.
     
-    @property
     @type String
+    @default YES
   */
   applyImmediately: YES,
 
@@ -88,7 +88,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   formattedHint: function() {
     var hint = this.get('hint');
 
-    return typeof(hint) === 'string' && this.get('localize') ? hint.loc() : hint;
+    return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
 
   /*
@@ -122,15 +122,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isContextMenuEnabled: YES,
 
   /**
+    @deprecated Use #applyImmediately instead.
+
     If true, every change to the text in the text field updates 'value'.
     If false, 'value' is only updated when commitEditing() is called (this
     is called automatically when the text field loses focus), or whenever
     the return key is pressed while editing the field.
     
-    @property
     @type Boolean
+    @default null
   */
-  continuouslyUpdatesValue: YES,
+  continuouslyUpdatesValue: null,
 
   /**
     If no, will not allow transform or validation errors (SC.Error objects)
@@ -238,13 +240,29 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   init: function() {
     var val = this.get('value');
     this._hintON = (!val || val && val.length===0) ? YES : NO;
+    
+    var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
+    if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
+      this.set('applyImmediately',  continuouslyUpdatesValue);
+
+      // @if (debug)
+      SC.Logger.warn("SC.TextFieldView#continuouslyUpdatesValue is deprecated. Please use #applyImmediately instead.");
+      // @endif
+    }
+    
     return sc_super();
   },
 
-  /** isEditable maps to isEnabled with a TextField. */
-  isEditable: function() {
-    return this.get('isEnabled') ;
-  }.property('isEnabled').cacheable(),
+  /** 
+    This property indicates if the value in the text field can be changed.
+    If set to NO, a readOnly attribute will be added to the DOM Element.
+    
+    Note if isEnabled is NO this property will have no effect.
+  
+    @property
+    @type Boolean
+  */
+  isEditable: YES,
 
   /**
     The current selection of the text field, returned as an SC.TextSelection
@@ -357,7 +375,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'formattedHint fieldValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
+  displayProperties: ['formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function() {
     sc_super();
@@ -466,6 +484,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if(firstTime) {
       context.attr('aria-multiline', this.get('isTextArea'));
       context.attr('aria-disabled', !this.get('isEnabled'));
+      context.attr('aria-readonly', this.get('isEnabled') && !this.get('isEditable'));
     }
     if(!SC.ok(this.get('value'))) {
       context.attr('aria-invalid', YES);
@@ -505,7 +524,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('formattedHint'), disabled, name, adjustmentStyle, type, 
+    var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
         maxLength = this.get('maxLength'), isOldSafari;
@@ -514,13 +533,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed 
-    isOldSafari= (parseInt(SC.browser.webkit,0)<532);
+    isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
     spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
+      activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
       name = this.get('layerId');
       
       if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
@@ -537,7 +556,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       context.push('<span class="padding" '+adjustmentStyle+'>');
                   
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if(!this.get('_supportsPlaceHolder') && (!value || (value && value.length===0))) {
+      if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
       } 
@@ -552,45 +571,64 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea class="',fieldClassNames,'" name="', name, 
-                      '" ', disabled, ' placeholder="',hint, '"',
+                      '" ', activeState, ' placeholder="',hint, '"',
                       spellCheckString,' maxlength="', maxLength, '">', 
                       value, '</textarea></span>') ;
       }
       else {
-        type = this.get('isPassword') ? 'password' : 'text' ;
+        type = 'text';
+        
+        // Internet Explorer won't let us change the type attribute later
+        // so we force it to password if needed now, or if the value is not the hint
+        if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
+        
         context.push('<input class="',fieldClassNames,'" type="', type,
-                      '" name="', name, '" ', disabled, ' value="', value,
+                      '" name="', name, '" ', activeState, ' value="', value,
                       '" placeholder="',hint,'"', spellCheckString, 
                       ' maxlength="', maxLength, '" /></span>') ;
       }
 
     }
     else {
-      var input= this.$input();
-      if(!this.get('_supportsPlaceHolder')){
-        var val = this.get('value');
-        if((!val || (val && val.length===0))){
-          if(this._hintON && !this.get('isFirstResponder')){
+      var input= this.$input(),
+          elem = input[0],
+          val = this.get('value');
+
+      if (!val || (val && val.length === 0)) {
+        if (this._hintON && !this.get('isFirstResponder')) {
+          // Internet Explorer doesn't allow you to modify the type afterwards
+          // jQuery throws an exception as well, so set attribute directly
+          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
+
+          if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', YES);
-            input.val(hint);
-          } 
-          else {
+          }
+        } else {
+          // Internet Explorer doesn't allow you to modify the type afterwards
+          // jQuery throws an exception as well, so set attribute directly
+          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
+
+          if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', NO);
             input.val('');
           }
         }
-      }else{
-        input.attr('placeholder', hint);
       }
-      
+
+      if (SC.platform.input.placeholder) input.attr('placeholder', hint);
+
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
       if (element) {
         if (!this.get('isEnabled')) {
           element.disabled = 'true' ;
-        }
-        else {
+          element.readOnly = null ;
+        } else if(!this.get('isEditable')) {
           element.disabled = null ;
+          element.readOnly = 'true' ;
+        } else {
+          element.disabled = null ;
+          element.readOnly = null ;
         }
 
         // Adjust the padding element to accommodate any accessory views.
@@ -661,7 +699,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // For some strange reason if we add focus/blur events to textarea
     // inmediately they won't work. However if I add them at the end of the
     // runLoop it works fine.
-    if(!this.get('_supportsPlaceHolder') && this._hintON){
+    if(!SC.platform.input.placeholder && this._hintON){
       var currentValue = this.$input().val();
       if(!currentValue || (currentValue && currentValue.length===0)){
         this.$input().val(this.get('formattedHint'));
@@ -733,7 +771,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.set('focused',YES);
       this.fieldDidFocus(evt);
       var val = this.get('value');
-      if(!this.get('_supportsPlaceHolder') && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = NO;
       }
     }, this);
@@ -748,14 +786,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // passing the original event here instead that was potentially set from
       // loosing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
-      this.fieldDidBlur(this._origEvent);
+      this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
-      if(!this.get('_supportsPlaceHolder') && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
       }
     }, this);
   },
-  
+
   fieldDidFocus: function(evt) {
     this.becomeFirstResponder();
 
@@ -954,69 +992,61 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
-    var value, view;
+    var which = evt.which,
+        keyCode = evt.keyCode,
+        maxLengthReached = false,
+        value, view;
+
     // Handle return and escape.  this way they can be passed on to the
     // responder chain.
     // If the event is triggered by a return while entering IME input,
     // don't got through this path.
-    var which = evt.which, maxLengthReached = false;
-    if ((which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) {
-
-      // If we're not continuously updating 'value' as we type, force an update
-      // if return is pressed.
-      if (!this.get('continuouslyUpdatesValue')) {
-        value = this.getValidatedValueFromFieldValue(NO);
-        
-        if ((SC.typeOf(value) !== SC.T_ERROR) || this.get('allowsErrorAsValue')) {
-          this.setIfChanged('value', value);
-          this.applyValueToField(value); // sync text in the text field
-        }
-      }
-
-      return NO;
-    }
-
-    if (which === 27) return NO ;
+    if ((which === SC.Event.KEY_RETURN && !evt.isIMEInput) && !this.get('isTextArea')) { return NO; }
+    if (which === SC.Event.KEY_ESC) { return NO; }
 
     // handle tab key
-    if ((which === 9 || evt.keyCode===9) && this.get('defaultTabbingEnabled')) {
+    if ((which === SC.Event.KEY_TAB || keyCode === SC.Event.KEY_TAB) && this.get('defaultTabbingEnabled')) {
       view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if (view) view.becomeFirstResponder();
       else evt.allowDefault();
       return YES ; // handled
     }
+    
     // maxlength for textareas
-    if(!SC.browser.webkit && this.get('isTextArea')){
-      var val = this.get('value'),
-          code = evt.which;
-    // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
-      if(val && ((!SC.browser.mozilla && code>47) || 
-        (SC.browser.mozilla && ((code>32 && code<43) || code>47) && !(evt.keyCode>36 && evt.keyCode<41))) &&
+    if(!SC.platform.input.maxlength && this.get('isTextArea')){
+      var val = this.get('value');
+
+      // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
+      if(val && ((!SC.browser.mozilla && which>47) || 
+        (SC.browser.mozilla && ((which>32 && which<43) || which>47) && !(keyCode>36 && keyCode<41))) &&
         (val.length >= this.get('maxLength'))) {
         maxLengthReached = true;
       }
     }
+
     // validate keyDown...
     // do not validate on touch, as it prevents return.
     if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
-      this._isKeyDown = YES ;
+      this._isKeyDown = YES;
       evt.allowDefault();
     } else {
       evt.stop();
     }
-    
+
     if (this.get('applyImmediately')) {
       // We need this invokeLater as we need to get the value of the field
       // once the event has been processed. I tried with invokeLast , but
       // I guess the field doesn't repaint until js execution finishes and 
       // therefore the field value doesn't update if we don't give it a break.
-      this.invokeLater(this.fieldValueDidChange,1); // notify change
+      this.invokeLater(this.fieldValueDidChange, 1);
     }
+
     return YES;
   },
   
   keyUp: function(evt) {
-    if(SC.browser.mozilla && evt.keyCode===13) this.fieldValueDidChange(); 
+    if (SC.browser.mozilla && evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
+
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
@@ -1051,6 +1081,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     return sc_super();
   },
   
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
+  },
+  
   /**
     Adds mouse wheel support for textareas.
   */
@@ -1070,13 +1108,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   /** @private
-    This function is to notify if the browser supports the placeholder attribute
-    or not. Currently is disabled as in webkit there is a bug where the color 
-    of the placeholder doesn't refresh all the time.
-  */
-  _supportsPlaceHolder: SC.platform.input.placeholder,
-  
-  /** @private
     This observer makes sure to hide the hint when a value is entered, or
     show it if it becomes empty.
   */
@@ -1084,12 +1115,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var val = this.get('value'), max;
     if (val && val.length>0) {
       this._hintON = NO;
+
       max = this.get('maxLength');
-      if(!SC.browser.webkit && val.length>max){
+      if (!SC.platform.input.maxlength && val.length > max) {
         this.set('value', val.substr(0, max));
       }
-    } 
-    else {
+    } else {
       this._hintON = YES;
     }
   }.observes('value')

@@ -30,7 +30,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   classNames: ['sc-label-view'],
 
-  displayProperties: 'displayTitle textAlign fontWeight icon escapeHTML needsEllipsis hint'.w(),
+  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint'],
 
   /**
     The delegate that gets notified of events related to the editing process. Set
@@ -59,7 +59,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     
     @property {String} SC.REGULAR_WEIGHT|SC.BOLD_WEIGHT
     @default null
-    @deprecated
+    @deprecated Use CSS instead.
   */
   fontWeight: null,
   
@@ -112,9 +112,9 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   /**
     Set the alignment of the label view.
     
-    @property {String} SC.ALIGN_LEFT|SC.ALIGN_MIDDLE|SC.ALIGN_RIGHT
+    @property {String} SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT
     @default null
-    @deprecated
+    @deprecated Use CSS instead.
   */
   textAlign: null,
 
@@ -174,7 +174,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     if (!SC.none(value) && value.toString) value = value.toString() ;
     
     // 4. Localize
-    if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = value.loc() ;
+    if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = SC.String.loc(value) ;
         
     return value ;
   }.property('value', 'localize', 'formatter').cacheable(),

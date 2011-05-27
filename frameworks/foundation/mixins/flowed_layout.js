@@ -5,7 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+/**
+  @type String
+  @constant
+*/
 SC.ALIGN_JUSTIFY = "justify";
+
 /**
   @namespace 
 
@@ -36,27 +41,56 @@ SC.ALIGN_JUSTIFY = "justify";
   @since SproutCore 1.0
 */
 SC.FlowedLayout = {
+
   /**
-    The direction of flow.
+    The direction of flow. Possible values:
+    
+      - SC.LAYOUT_HORIZONTAL
+      - SC.LAYOUT_VERTICAL
+    
+    @type String
+    @default SC.LAYOUT_HORIZONTAL
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
   /**
     Whether the view should automatically resize (to allow scrolling, for instance)
+    
+    @type Boolean
+    @default YES
   */
   autoResize: YES,
   
+  /**
+    @type Boolean
+    @default YES
+  */
   shouldResizeWidth: YES,
   
+  /**
+    @type Boolean
+    @default YES
+  */
   shouldResizeHeight: YES,
   
   /**
-    The alignment of items within rows or columns.
+    The alignment of items within rows or columns. Possible values:
+    
+      - SC.ALIGN_LEFT
+      - SC.ALIGN_CENTER
+      - SC.ALIGN_RIGHT
+      - SC.ALIGN_JUSTIFY
+    
+    @type String
+    @default SC.ALIGN_LEFT
   */
   align: SC.ALIGN_LEFT,
   
   /**
     If YES, flowing child views are allowed to wrap to new rows or columns.
+    
+    @type Boolean
+    @default YES
   */
   canWrap: YES,
   
@@ -66,6 +100,9 @@ SC.FlowedLayout = {
     spacings do not collapse into each other.
     
     You can also set flowSpacing on any child view, or implement flowSpacingForView.
+    
+    @type Hash
+    @default `{ left: 0, bottom: 0, top: 0, right: 0 }`
   */
   defaultFlowSpacing: { left: 0, bottom: 0, top: 0, right: 0 },
   
@@ -75,6 +112,9 @@ SC.FlowedLayout = {
     Padding around the edges of this flow layout view. This is useful for
     situations where you don't control the layout of the FlowedLayout view;
     for instance, when the view is the contentView for a SC.ScrollView.
+    
+    @type Hash
+    @default `{ left: 0, bottom: 0, top: 0, right: 0 }`
   */
   flowPadding: { left: 0, bottom: 0, right: 0, top: 0 },
 
@@ -95,22 +135,24 @@ SC.FlowedLayout = {
   
   concatenatedProperties: ["childMixins"],
   
+  /** @private */
   initMixin: function() {
     this.invokeOnce("_scfl_tile");
   },
   
-  /**
+  /** @private
     Detects when the child views change.
   */
   _scfl_childViewsDidChange: function(c) {
     this.invokeOnce("_scfl_tile");
   }.observes("childViews"),
   
+  /** @private */
   _scfl_layoutPropertyDidChange: function(){
     this.invokeOnce("_scfl_tile");
   },
   
-  /**
+  /** @private
     Overriden to only update if it is a view we do not manage, or the width or height has changed
     since our last record of it.
   */
@@ -139,7 +181,7 @@ SC.FlowedLayout = {
     sc_super();
   },
   
-  /**
+  /** @private
     Sets up layout observers on child view. We observe three things:
     - isVisible
     - calculatedWidth
@@ -157,7 +199,7 @@ SC.FlowedLayout = {
     c.addObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
   },
   
-  /**
+  /** @private
     Removes observers on child view.
   */
   unobserveChildLayout: function(c) {
@@ -172,6 +214,10 @@ SC.FlowedLayout = {
   /**
     Determines whether the specified child view should be included in the flow layout.
     By default, if it has isVisible: NO or useAbsoluteLayout: YES, it will not be included.
+    
+    @field
+    @type Boolean
+    @default NO
   */
   shouldIncludeChildInFlow: function(idx, c) {
     return c.get('isVisible') && !c.get('useAbsoluteLayout');
@@ -180,6 +226,9 @@ SC.FlowedLayout = {
   /**
     Returns the flow spacings for a given view. By default, returns the view's flowSpacing,
     and if they don't exist, the defaultFlowSpacing for this view.
+    
+    @field
+    @type Hash
   */
   flowSpacingForChild: function(idx, view) {
     var spacing = view.get("flowSpacing");
@@ -203,7 +252,9 @@ SC.FlowedLayout = {
     
     For spacers, this returns an empty size.
     
-    This should return a structure like: { width: whatever, height: whatever }
+    @field
+    @type Hash
+    @default {width: 0, height: 0}
   */
   flowSizeForChild: function(idx, view) {
     var cw = view.get('calculatedWidth'), ch = view.get('calculatedHeight');
@@ -229,35 +280,62 @@ SC.FlowedLayout = {
     // if it is a spacer, we must set the dimension that it
     // expands in to 0.
     if (view.get('isSpacer')) {
-      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) calc.width = 0;
-      else calc.height = 0;
+      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
+        calc.width = view.get('layout').minWidth || 0;
+      } else {
+        calc.height = view.get('layout').minHeight || 0;
+      }
     }
     
     // if it has a fillWidth/Height, clear it for later
     if (
       this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')
     ) {
-      calc.height = 0;
+      calc.height = view.get('layout').minHeight || 0;
     } else if (
       this.get('layoutDirection') === SC.LAYOUT_VERTICAL && view.get('fillWidth')
     ) {
-      calc.width = 0;
+      calc.width = view.get('layout').minWidth || 0;
     }
     
     // return
     return calc;
   },
   
+  /** @private */
   clippingFrame: function() {
     return { left: 0, top: 0, width: this.get('calculatedWidth'), height: this.get('calculatedHeight') };
   }.property('calculatedWidth', 'calculatedHeight'),
   
+  /** @private */
+
+  // the maximum row length when all flexible items are collapsed.
+  _scfl_maxCollapsedRowLength: 0,
+
+  // the total row size when all flexible rows are collapsed.
+  _scfl_totalCollapsedRowSize: 0,
+
+
   _scfl_calculatedSizeDidChange: function() {
     if(this.get('autoResize')) {
-      if(this.get('shouldResizeWidth')) this.adjust('minWidth', this.get('calculatedWidth'));
-      if(this.get('shouldResizeHeight')) this.adjust('minHeight', this.get('calculatedHeight'));
+      if (this.get('layoutDirection') == SC.LAYOUT_VERTICAL) {
+        if (this.get('shouldResizeHeight')) {
+          this.adjust('minHeight', this.get('_scfl_maximumCollapsedRowLength'));
+        }
+
+        if (this.get('shouldResizeWidth')) {
+          this.adjust('minWidth', this.get('_scfl_totalCollapsedRowSize'));
+        }
+      } else {
+        if (this.get('shouldResizeWidth')) {
+          this.adjust('minWidth', this.get('_scfl_maximumCollapsedRowLength'));
+        }
+        if (this.get('shouldResizeHeight')) {
+          this.adjust('minHeight', this.get('_scfl_totalCollapsedRowSize'));
+        }
+      }
     }
-  }.observes('autoResize', 'shouldResizeWidth', 'calculatedWidth', 'shouldResizeHeight', 'calculatedHeight'),
+  }.observes('autoResize', 'shouldResizeWidth', '_scfl_maximumCollapsedRowLength', '_scfl_totalCollapsedRowSize', 'shouldResizeHeight'),
   
   /**
     @private
@@ -291,6 +369,14 @@ SC.FlowedLayout = {
       // The rows array starts empty. It will get filled out by the method
       // _scfl_distributeChildrenIntoRows.
       rows: undefined,
+
+
+      // the maximum row length where all collapsible items are collapsed.
+      maximumCollapsedRowLength: 0,
+
+      // the total sizes of all rows when collapsed (With flex-height rows
+      // at minimum size)
+      totalCollapsedRowSize: 0,
       
       // These properties are calculated once here, but later used by
       // the various methods.
@@ -325,6 +411,7 @@ SC.FlowedLayout = {
     return plan;
   },
   
+  /** @private */
   _scfl_distributeChildrenIntoRows: function(plan) {
     var children = this.get('childViews'), child, idx, len = children.length,
         isVertical = plan.isVertical, rows = [], lastIdx;
@@ -384,12 +471,13 @@ SC.FlowedLayout = {
       // this must be set before we check if the child is included because even
       // if it isn't included, we need to remember that there is a line break
       // for later
-      newRowPending = newRowPending || (idx !== startingAt && child.get('startsNewRow'));
+      newRowPending = newRowPending || (items.length > 0 && child.get('startsNewRow'));
 
       if (!this.shouldIncludeChildInFlow(idx, child)) continue;
       
       childSize = this.flowSizeForChild(idx, child);
       spacing = this.flowSpacingForChild(idx, child);
+
       childSpacedSize = {
         width: childSize.width + spacing.left + spacing.right,
         height: childSize.height + spacing.top + spacing.bottom
@@ -436,10 +524,12 @@ SC.FlowedLayout = {
     }
     
     row.rowLength = itemOffset;
+    row.plan.maximumCollapsedRowLength = Math.max(row.rowLength, row.plan.maximumCollapsedRowLength);
     row.items = items;
     return idx;
   },
   
+  /** @private */
   _scfl_positionChildrenInRows: function(plan) {
     var rows = plan.rows, len = rows.length, idx;
     
@@ -514,9 +604,12 @@ SC.FlowedLayout = {
     row.shouldExpand = shouldExpand;
     row.rowLength = position - row.plan.rowStartPadding; // row length does not include padding
     row.rowSize = rowSize;
+
+    row.plan.totalCollapsedRowSize += row.rowSize;
     
   },
 
+  /** @private */
   _scfl_positionRows: function(plan) {
     var rows = plan.rows, len = rows.length, idx, row, position,
         fillRowCount = 0, planSize = 0, fillSpace;
@@ -602,12 +695,14 @@ SC.FlowedLayout = {
     this.beginPropertyChanges();
 
     this.set('calculatedHeight', isVertical ? longestRow : totalSize);
-
     this.set('calculatedWidth', isVertical ? totalSize : longestRow);
+    this.set('_scfl_maximumCollapsedRowLength', plan.maximumCollapsedRowLength);
+    this.set('_scfl_totalCollapsedRowSize', plan.totalCollapsedRowSize);
 
     this.endPropertyChanges();
   },
   
+  /** @private */
   _scfl_tile: function() {
     // first, do the plan
     var plan = this._scfl_createPlan();
@@ -640,15 +735,21 @@ SC.FlowedLayout = {
     }
   },
   
+  /** @private */
   _scfl_frameDidChange: function() {
-    var frame = this.get("frame"), lf = this._scfl_lastFrameSize;
-    this._scfl_lastFrameSize = frame;
+    if (this._scfl_isChangingSize) return;
 
-    if (lf && lf.width == frame.width && lf.height == frame.height) return;
-    
+    var frame = this.get("frame"), lf = this._scfl_lastFrameSize || {};
+    this._scfl_lastFrameSize = SC.clone(frame);
+
+    if (lf.width == frame.width && lf.height == frame.height) {
+      return;
+    }
+
     this.invokeOnce("_scfl_tile");
   }.observes("frame"),
   
+  /** @private */
   destroyMixin: function() {
     var isObserving = this._scfl_isObserving;
     if (!isObserving) return;
@@ -659,7 +760,7 @@ SC.FlowedLayout = {
     }
   },
   
-  /*
+  /** @private
     Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are layed out in the order they appear in childViews.
   */
   reorder: function(views) {

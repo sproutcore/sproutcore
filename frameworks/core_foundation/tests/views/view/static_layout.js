@@ -24,5 +24,5 @@ test("Background color", function() {
 
   view.createLayer();
 
-  ok(view.$().css('background-color') == "red", "backgroundColor sets the CSS background-color class");
+  equals(view.get('layer').style.backgroundColor, "red", "backgroundColor sets the CSS background-color class");
 });

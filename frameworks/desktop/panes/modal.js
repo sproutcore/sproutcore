@@ -14,26 +14,30 @@
   panes.
   
   A modal pane is automatically appended when a pane with isModal set to
-  YES is made visible and removed when the same pane is hidden.  The only 
-  purpose of the ModalPane is to absorb mouse events so that they cannot 
-  filter through to the underlying content. 
+  `YES` is made visible and removed when the same pane is hidden.  The only
+  purpose of the `ModalPane` is to absorb mouse events so that they cannot
+  filter through to the underlying content.
   
   @extends SC.Pane
   @since SproutCore 1.0
 */
-SC.ModalPane = SC.Pane.extend({
+SC.ModalPane = SC.Pane.extend(
+/** @scope SC.ModalPane.prototype */{
   
+  /**
+    @type Array
+    @default ['sc-modal']
+    @see SC.View#classNames
+  */
   classNames: 'sc-modal',
   
-  /** @private cover the entire screen */
-  layout: { top: 0, left: 0, bottom: 0, right: 0 },
-
+  /** @private */
   _openPaneCount: 0,
   
-  /** 
+  /** @private
     Called by a pane just before it appends itself.   The modal pane can
     make itself visible first if needed.
-
+    
     @param {SC.Pane} pane the pane
     @returns {SC.ModalPane} receiver
   */
@@ -43,10 +47,10 @@ SC.ModalPane = SC.Pane.extend({
     return this ;    
   },
   
-  /**
+  /** @private
     Called by a pane just after it removes itself.  The modal pane can remove
     itself if needed.   Modal panes only remove themselves when an equal 
-    number of paneWillAppend() and paneDidRemove() calls are received.
+    number of `paneWillAppend()` and `paneDidRemove()` calls are received.
   
     @param {SC.Pane} pane the pane
     @returns {SC.ModalPane} receiver
@@ -59,14 +63,13 @@ SC.ModalPane = SC.Pane.extend({
     }
   },
   
-  /** 
-    If owner pane implements modalPaneDidClick(), call it on mouse down.
-  */
+  /** @private */
   mouseDown: function(evt) {
     var owner = this.get('owner');
     if (owner && owner.modalPaneDidClick) owner.modalPaneDidClick(evt);
   },
   
+  /** @private */
   touchStart: function(evt) {
     this.mouseDown(evt);
   }

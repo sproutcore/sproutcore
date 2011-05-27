@@ -9,7 +9,7 @@
 
 // ..........................................................
 // BUILT-IN ARRAY
-// 
+//
 
 sc_require('debug/test_suites/array');
 
@@ -17,41 +17,63 @@ SC.ArraySuite.generate("built-in Array");
 
 // ..........................................................
 // DUMMY ARRAY (BASIC FAKE IMPLEMENTATION)
-// 
+//
 
-// Test the SproutCore Array interface on a custom object.
+// Test that illustrates how to build a SproutCore Array-like
+// that correctly participates in KVO.
 var DummyArray = SC.Object.extend(SC.Array, {
-  
-  length: 0,
-  
-  content: null,
-  
-  replace: function(idx, amt, objects) {
-    if (!this.content) this.content = [] ;
 
+  // The SC.Array Interface requires a length property
+  length: 0,
+
+  content: null,
+
+  // The SC.Array mixin sends all mutations through replace.
+  // As a result, we can implement KVO notification in
+  // replace.
+  replace: function(idx, amt, objects) {
+    if (!this.content) { this.content = [] ; }
+
+    var len = objects ? objects.get('length') : 0;
+
+    // SC.Array implementations must call arrayContentWillChange
+    // before making mutations. This allows observers to perform
+    // operations based on the state of the Array before the
+    // change, such as reflecting removals.
+    this.arrayContentWillChange(idx, amt, len);
     this.beginPropertyChanges() ;
+
+    // Mutate the underlying Array
     this.content.replace(idx,amt,objects) ;
 
+    // Update the length property
     this.set('length', this.content.length) ;
 
-    // figure out the range that changed.  If amt + objects are the same, use
-    // amt.  Otherwise use total length.
-    var len = objects ? objects.get('length') : 0;
+    // Call the general-purpose enumerableContentDidChange
+    // Enumerable method.
     this.enumerableContentDidChange(idx, amt, len - amt) ;
     this.endPropertyChanges() ;
+
+    // SC.Array implementations must call arrayContentDidChange
+    // after making mutations. This allows observers to perform
+    // operations based on the mutation. For instance, a listener
+    // might want to reflect additions onto itself.
+    this.arrayContentDidChange(idx, amt, len);
   },
-  
+
+  // SC.Arrays must implement objectAt, which returns an object
+  // for a given index.
   objectAt: function(idx) {
-    if (!this.content) this.content = [] ;
+    if (!this.content) { this.content = [] ; }
     return this.content[idx] ;
   }
-  
+
 });
 
 SC.ArraySuite.generate("DummyArray", {
   newObject: function(expected) {
     if (!expected || typeof expected === SC.T_NUMBER) {
-      expected = this.expected(expected); 
+      expected = this.expected(expected);
     }
     return DummyArray.create({ content: expected, length: expected.length }) ;
   }

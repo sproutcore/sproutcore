@@ -1,0 +1,47 @@
+/* SC.LabelView */
+
+.sc-label-view {
+  font-weight: normal;
+  text-align: left;
+  
+  &.icon {
+  	position: relative;
+  	vertical-align: middle;
+  }
+  
+  &.sc-hint {
+  	position: absolute;
+  	top: 3px;
+  	left: 1px;
+  	right: 1px;
+  	bottom: 3px;
+  	padding: 0px;
+  	color: #aaa ;
+  	font-size: 12px;
+  }
+  
+  &.disabled {
+  	color: #999;
+  	color: rgba(50,50,50,0.5);
+  }
+  
+  &.sc-large-size {
+  	font-size: 18px;
+  	line-height: 24px;
+  }
+  
+  &.sc-regular-size {
+  	font-size: 12px;
+  	line-height: 19px;
+  }
+  
+  &.sc-small-size {
+  	font-size: 11px;
+  	line-height: 14px;
+  }
+  
+  &.sc-tiny-size {
+  	font-size: 9px;
+  	line-height: 12px;
+  }
+}

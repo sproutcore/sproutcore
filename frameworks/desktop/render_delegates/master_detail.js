@@ -9,7 +9,7 @@
 /**
   Border between the two panes of the MasterDetail.
 
-  Note that the border does NOT include any space on the sides. Space
+  Note that the border does *NOT* include any space on the sides. Space
   on left or right sides of MasterDetail, if any, should be handled by
   its layout.
  */

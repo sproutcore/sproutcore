@@ -18,7 +18,7 @@
   The methods provided by this mixin make it easier to implement this pattern
   but they are not required to support delegates.
 
-  h2. The Pattern
+  ## The Pattern
 
   The delegate design pattern typically means that you provide a property,
   usually ending in "delegate", that can be set to another object in the

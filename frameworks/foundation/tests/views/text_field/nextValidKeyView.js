@@ -48,11 +48,11 @@ module("SC.View#nextValidKeyView", {
     view5 = pane.childViews[7];
     
     OLD = {
-      SAFARI_FOCUS_BEHAVIOR: SC.SAFARI_FOCUS_BEHAVIOR,
+      FOCUS_ALL_CONTROLS: SC.FOCUS_ALL_CONTROLS,
       TABBING_ONLY_INSIDE_DOCUMENT: SC.TABBING_ONLY_INSIDE_DOCUMENT
     };
 
-    SC.SAFARI_FOCUS_BEHAVIOR = YES;
+    SC.FOCUS_ALL_CONTROLS = SC.FOCUS_ALL_CONTROLS;
     SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
     
   },
@@ -61,7 +61,7 @@ module("SC.View#nextValidKeyView", {
   teardown: function() { 
     
     // restore old settings
-    SC.SAFARI_FOCUS_BEHAVIOR = OLD.SAFARI_FOCUS_BEHAVIOR;
+    SC.FOCUS_ALL_CONTROLS = OLD.FOCUS_ALL_CONTROLS;
     SC.TABBING_ONLY_INSIDE_DOCUMENT = OLD.TABBING_ONLY_INSIDE_DOCUMENT;
 
     SC.RunLoop.begin();
@@ -72,7 +72,7 @@ module("SC.View#nextValidKeyView", {
 });
 
 test("Navigate between textfields- going forward", function() {
-  SC.SAFARI_FOCUS_BEHAVIOR = YES;
+  SC.FOCUS_ALL_CONTROLS = YES;
   SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
   
   var v = view2.nextValidKeyView();
@@ -83,7 +83,7 @@ test("Navigate between textfields- going forward", function() {
 });
 
 test("Navigate between textfields- going backwards", function() {
-  SC.SAFARI_FOCUS_BEHAVIOR = YES;
+  SC.FOCUS_ALL_CONTROLS = YES;
   var v = view2.previousValidKeyView();
   same(v, textfield_view2, "The previous key view should be " + textfield_view2.toString());
 
@@ -91,7 +91,7 @@ test("Navigate between textfields- going backwards", function() {
 
 
 test("Navigate forward with view that have a nextKeyView set", function() {
-  SC.SAFARI_FOCUS_BEHAVIOR = YES;
+  SC.FOCUS_ALL_CONTROLS = YES;
   var v = view2.nextValidKeyView();
   same(v, textfield_view3, "The next view should be " + textfield_view3.toString());
   view3.set('nextKeyView', textfield_view1);
@@ -101,7 +101,7 @@ test("Navigate forward with view that have a nextKeyView set", function() {
 
 
 test("Navigate backwards with view that have a previousKeyView set", function() {
-  SC.SAFARI_FOCUS_BEHAVIOR = YES;
+  SC.FOCUS_ALL_CONTROLS = YES;
   var v = view2.previousValidKeyView();
   same(v, textfield_view2, "The next view should be " + textfield_view2.toString());
   view4.set('previousKeyView', textfield_view1);

@@ -1,26 +1,113 @@
 sc_require('views/template');
 
-SC.TemplateCollectionView = SC.TemplateView.extend({
+/** @class
+
+  @author Tom Dale
+  @author Yehuda Katz
+  @extends SC.TemplateView
+  @since SproutCore 1.5
+*/
+SC.TemplateCollectionView = SC.TemplateView.extend(
+  /** @scope SC.TemplateCollectionView.prototype */{
+
   tagName: 'ul',
   content: null,
   template: SC.Handlebars.compile(''),
   emptyView: null,
 
+  /**
+    @private
+    When the view is initialized, set up array observers on the content array.
+
+    @returns SC.TemplateCollectionView
+  */
+  init: function() {
+    var templateCollectionView = sc_super();
+    this._sctcv_contentDidChange();
+    return templateCollectionView;
+  },
+
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
   didCreateLayer: function() {
-    if(this.get('content')) {
-      var indexSet = SC.IndexSet.create(0, this.getPath('content.length'));
-      this.arrayContentDidChange(this.get('content'), [], 0);
+    // FIXME: didCreateLayer gets called multiple times when template collection
+    // views are nested - this is a hack to avoid rendering the content more
+    // than once.
+    if (this._sctcv_layerCreated) { return; }
+    this._sctcv_layerCreated = true;
+
+    var content = this.get('content');
+    if(content) {
+      this.arrayContentDidChange(0, 0, content.get('length'));
     }
   },
 
   itemView: 'SC.TemplateView',
 
+  /**
+    The template used to render each item in the collection.
+
+    This should be a function that takes a content object and returns
+    a string of HTML that will be inserted into the DOM.
+
+    In general, you should set the `itemViewTemplateName` property instead of
+    setting the `itemViewTemplate` property yourself. If you created the
+    SC.TemplateCollectionView using the Handlebars {{#collection}} helper, this
+    will be set for you automatically.
+
+    @type Function
+  */
+  itemViewTemplate: null,
+
+  /**
+    The name of the template to lookup if no item view template is provided.
+
+    The collection will look for a template with this name in the global
+    `SC.TEMPLATES` hash. Usually this hash will be populated for you
+    automatically when you include `.handlebars` files in your project.
+
+    @type String
+  */
+  itemViewTemplateName: null,
+
+  /**
+    A template to render when there is no content or the content length is 0.
+  */
+  inverseTemplate: function(key, value) {
+    if (value !== undefined) {
+      return value;
+    }
+
+    var templateName = this.get('inverseTemplateName'),
+        template = this.get('templates').get(templateName);
+
+    if (!template) {
+      //@if(debug)
+      if (templateName) {
+        SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
+      }
+      //@endif
+
+      return function() { return ''; };
+    }
+
+    return template;
+  }.property('inverseTemplateName').cacheable(),
+
+  /**
+    The name of a template to lookup if no inverse template is provided.
+
+    @property {String}
+  */
+  inverseTemplateName: null,
+
   itemContext: null,
 
   itemViewClass: function() {
     var itemView = this.get('itemView');
+    var itemViewTemplate = this.get('itemViewTemplate');
+    var itemViewTemplateName = this.get('itemViewTemplateName');
+
     // hash of properties to override in our
     // item view class
     var extensions = {};
@@ -29,12 +116,18 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       itemView = SC.objectForPropertyPath(itemView);
     }
 
-    if (this.get('itemViewTemplate')) {
-      extensions.template = this.get('itemViewTemplate');
+    if (!itemViewTemplate && itemViewTemplateName) {
+      itemViewTemplate = this.get('templates').get(itemViewTemplateName);
+    }
+
+    if (itemViewTemplate) {
+      extensions.template = itemViewTemplate;
     }
 
     if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {
       extensions.tagName = 'li';
+    } else if (this.get('tagName') === 'table' || this.get('tagName') === 'thead' || this.get('tagName') === 'tbody') {
+      extensions.tagName = 'tr';
     }
 
     return itemView.extend(extensions);
@@ -48,24 +141,58 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     needed.
   */
   _sctcv_contentDidChange: function() {
-    this.get('childViews').forEach(function() {
-      this.removeChild(view);
-      view.destroy();
-    }, this);
 
     this.$().empty();
-    this.didCreateLayer();
 
-    var content = this._content;
-    if (content) {
-      content.removeEnumerableObserver(this, this.arrayContentDidChange);
+    var oldContent = this._content, oldLen = 0;
+    var content = this.get('content'), newLen = 0;
+
+    if (oldContent) {
+      oldContent.removeArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+
+      oldLen = oldContent.get('length');
     }
 
-    content = this._content = this.get('content');
     if (content) {
-      content.addEnumerableObserver(this, this.arrayContentDidChange);
+      content.addArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+
+      newLen = content.get('length');
     }
+
+    this.arrayContentWillChange(0, oldLen, newLen);
+    this._content = this.get('content');
+    this.arrayContentDidChange(0, oldLen, newLen);
   }.observes('content'),
+
+  arrayContentWillChange: function(start, removedCount, addedCount) {
+    if (!this.get('layer')) { return; }
+
+    // If the contents were empty before and this template collection has an empty view
+    // remove it now.
+    var emptyView = this.get('emptyView');
+    if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
+
+    // Loop through child views that correspond with the removed items.
+    // Note that we loop from the end of the array to the beginning because
+    // we are mutating it as we go.
+    var childViews = this.get('childViews'), childView, idx, len;
+
+    len = childViews.get('length');
+    for (idx = start+removedCount-1; idx >= start; idx--) {
+      childView = childViews[idx];
+      childView.$().remove();
+      childView.removeFromParent();
+      childView.destroy();
+    }
+  },
 
   /**
     Called when a mutation to the underlying content array occurs.
@@ -79,70 +206,58 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     @param {Array} removedObjects the objects that were removed from the content
     @param {Number} changeIndex the index at which the changes occurred
   */
-  arrayContentDidChange: function(addedObjects, removedObjects, changeIndex) {
+  arrayContentDidChange: function(start, removedCount, addedCount) {
+    if (!this.get('layer')) { return; }
+
     var content       = this.get('content'),
         itemViewClass = this.get('itemViewClass'),
         childViews    = this.get('childViews'),
         addedViews    = [],
         renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
 
-    // If the contents were empty before and this template collection has an empty view
-    // remove it now.
-    emptyView = this.get('emptyView');
-    if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
+    if (content) {
+      var addedObjects = content.slice(start, start+addedCount);
 
-    // For each object removed from the content, remove the corresponding
-    // child view from DOM and the child views array.
-    len = removedObjects.get('length');
+      // If we have content to display, create a view for
+      // each item.
+      itemOptions = this.get('itemViewOptions') || {};
 
-    // Loop through child views that correspond with the removed items.
-    // Note that we loop from the end of the array to the beginning because
-    // we are mutating it as we go.
-    for (idx = (changeIndex+len)-1; idx >= changeIndex; idx--) {
-      childView = childViews[idx];
-      childView.$().remove();
-      childView.removeFromParent();
-      childView.destroy();
-    }
+      elem = this.$();
+      insertAtElement = elem.find('li')[start-1] || null;
+      len = addedObjects.get('length');
 
-    // If we have content to display, create a view for
-    // each item.
-    itemOptions = this.get('itemViewOptions') || {};
+      // TODO: This logic is duplicated from the view helper. Refactor
+      // it so we can share logic.
+      var itemAttrs = {
+        "id": itemOptions.id,
+        "class": itemOptions['class'],
+        "classBinding": itemOptions.classBinding
+      };
 
-    elem = this.$();
-    insertAtElement = elem.find('li')[changeIndex-1] || null;
-    len = addedObjects.get('length');
+      renderFunc = function(context) {
+        sc_super();
+        SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
+      };
 
-    // TODO: This logic is duplicated from the view helper. Refactor
-    // it so we can share logic.
-    var itemAttrs = {
-      "id": itemOptions.id,
-      "class": itemOptions['class'],
-      "classBinding": itemOptions.classBinding
-    };
-
-    renderFunc = function(context) {
-      sc_super();
-      SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
-    };
-
-    delete itemOptions.id;
-    delete itemOptions['class'];
-    delete itemOptions.classBinding;
+      itemOptions = SC.clone(itemOptions);
+      delete itemOptions.id;
+      delete itemOptions['class'];
+      delete itemOptions.classBinding;
 
     for (idx = 0; idx < len; idx++) {
       item = addedObjects.objectAt(idx);
-      view = this.createChildView(itemViewClass.extend(itemOptions, {
+      childView = this.createChildView(itemViewClass.extend(itemOptions, {
         content: item,
-        render: renderFunc
+        render: renderFunc,
+        tagName: itemViewClass.prototype.tagName || this.get('itemTagName')
       }));
 
-      var contextProperty = view.get('contextProperty');
+      var contextProperty = childView.get('contextProperty');
       if (contextProperty) {
-        view.set('context', view.get(contextProperty));
+        childView.set('context', childView.get(contextProperty));
       }
 
-      itemElem = view.createLayer().$();
+      itemElem = childView.createLayer().$();
       if (!insertAtElement) {
         elem.append(itemElem);
       } else {
@@ -150,20 +265,21 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
       }
       insertAtElement = itemElem;
 
-      addedViews.push(view);
+      addedViews.push(childView);
     }
 
-    childViews.replace(changeIndex, 0, addedViews);
+      childViews.replace(start, 0, addedViews);
+    }
 
     var inverseTemplate = this.get('inverseTemplate');
     if (childViews.get('length') === 0 && inverseTemplate) {
-      view = this.createChildView(SC.TemplateView.extend({
+      childView = this.createChildView(SC.TemplateView.extend({
         template: inverseTemplate,
         content: this
       }));
-      this.set('emptyView', view);
-      view.createLayer().$().appendTo(elem);
-      this.childViews = [view];
+      this.set('emptyView', childView);
+      childView.createLayer().$().appendTo(elem);
+      this.childViews = [childView];
     }
 
     // Because the layer has been modified, we need to invalidate the frame
@@ -171,6 +287,19 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     // be used inside of SC.ScrollView.
     this.invokeLast('invalidateFrame');
   },
+
+  itemTagName: function() {
+    switch(this.get('tagName')) {
+      case 'ul':
+      case 'ol':
+        return 'li';
+      case 'table':
+      case 'thead':
+      case 'tbody':
+      case 'tfoot':
+        return 'tr'
+    }
+  }.property('tagName'),
 
   invalidateFrame: function() {
     this.notifyPropertyChange('frame');

@@ -16,15 +16,20 @@ sc_require('views/disclosure');
   
   @extends SC.View
   @extends SC.Control
+  @extends SC.CollectionGroup
   @author Charles Jolley
   @author Erich Ocean
   @version 1.0
   @since 0.9
 */
-
 SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
-/** @scope SC.SourceListGroupView.prototoype */ {
+/** @scope SC.SourceListGroupView.prototype */ {
   
+  /**
+    @type Array
+    @default ['sc-source-list-group']
+    @see SC.View#classNames
+  */
   classNames: ['sc-source-list-group'],
   
   // ..........................................................
@@ -35,6 +40,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     The content object the source list group will display.
     
     @type SC.Object
+    @default null
   */
   content: null,
   
@@ -43,6 +49,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     layout size of the group.
     
     @type Boolean
+    @default YES
   */
   isGroupVisible: YES,
   
@@ -54,6 +61,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     you want and the SourceListView will not leave room for it.
     
     @type Boolean
+    @default YES
   */
   hasGroupTitle: YES,
   
@@ -61,6 +69,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     The content property key to use as the group view's title.
     
     @type String
+    @default null
   */
   groupTitleKey: null,
   
@@ -69,9 +78,11 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     visible or not.
     
     @type String
+    @default null
   */
   groupVisibleKey: null,
   
+  /** @private */
   render: function(context, firstTime) {
     context.push('<div role="button" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure no-disclosure">',
               '<img src="'+SC.BLANK_IMAGE_URL+'" class="button" />',
@@ -148,11 +159,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
   /** @private */
   labelView: SC.DisclosureView.extend({
     
-    /** 
-      Always default to open disclosures.
-      
-      @type Boolean
-    */
+    /** @private */
     value: YES,
     
     /** @private

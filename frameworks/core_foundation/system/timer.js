@@ -14,7 +14,7 @@
   also gauranteed to fire at the same time, making it far easier to keep
   multiple timers in sync.
 
-  h2. Overview
+  ## Overview
 
   Timers were created for SproutCore as a way to efficiently defer execution
   of code fragments for use in Animations, event handling, and other tasks.
@@ -32,44 +32,40 @@
   to execute at the same time generally will do so, keeping animations and
   other operations in sync.
 
-  h2. Scheduling a Timer
+  ## Scheduling a Timer
 
   To schedule a basic timer, you can simply call SC.Timer.schedule() with
   a target and action you wish to have invoked:
 
-  {{{
-    var timer = SC.Timer.schedule({
-      target: myObject, action: 'timerFired', interval: 100
-    });
-  }}}
+      var timer = SC.Timer.schedule({
+        target: myObject, action: 'timerFired', interval: 100
+      });
 
   When this timer fires, it will call the timerFired() method on myObject.
 
   In addition to calling a method on a particular object, you can also use
   a timer to execute a variety of other types of code:
 
-  - If you include an action name, but not a target object, then the action will be passed down the responder chain.
-  - If you include a property path for the action property (e.g. 'MyApp.someController.someMethod'), then the method you name will be executed.
-  - If you include a function in the action property, then the function will be executed.  If you also include a target object, the function will be called with this set to the target object.
+   - If you include an action name, but not a target object, then the action will be passed down the responder chain.
+   - If you include a property path for the action property (e.g. 'MyApp.someController.someMethod'), then the method you name will be executed.
+   - If you include a function in the action property, then the function will be executed.  If you also include a target object, the function will be called with this set to the target object.
 
   In general these properties are read-only.  Changing an interval, target,
   or action after creating a timer will have an unknown effect.
 
-  h2. Scheduling Repeating Timers
+  ## Scheduling Repeating Timers
 
   In addition to scheduling one time timers, you can also schedule timers to
   execute periodically until some termination date.  You make a timer
   repeating by adding the repeats: YES property:
 
-  {{{
-    var timer = SC.Timer.schedule({
-      target: myObject,
-      action: 'updateAnimation',
-      interval: 100,
-      repeats: YES,
-      until: Time.now() + 1000
-    }) ;
-  }}}
+      var timer = SC.Timer.schedule({
+        target: myObject,
+        action: 'updateAnimation',
+        interval: 100,
+        repeats: YES,
+        until: Time.now() + 1000
+      }) ;
 
   The above example will execute the myObject.updateAnimation() every 100msec
   for 1 second from the current time.
@@ -77,7 +73,7 @@
   If you want a timer to repeat without expiration, you can simply omit the
   until: property.  The timer will then repeat until you invalidate it.
 
-  h2. Pausing and Invalidating Timers
+  ## Pausing and Invalidating Timers
 
   If you have created a timer but you no longer want it to execute, you can
   call the invalidate() method on it.  This will remove the timer from the
@@ -89,11 +85,9 @@
   stop the timer from execution temporarily, you can alternatively set the
   isPaused property to YES:
 
-  {{{
-    timer.set('isPaused', YES) ;
-    // Perform some critical function; timer will not execute
-    timer.set('isPaused', NO) ;
-  }}}
+      timer.set('isPaused', YES) ;
+      // Perform some critical function; timer will not execute
+      timer.set('isPaused', NO) ;
 
   When a timer is paused, it will be scheduled and will fire like normal,
   but it will not actually execute the action method when it fires.  For a
@@ -102,7 +96,7 @@
   this means the timer will remain scheduled but simply will not execute its
   action while the timer is paused.
 
-  h2. Firing Timers
+  ## Firing Timers
 
   If you need a timer to execute immediately, you can always call the fire()
   method yourself.  This will execute the timer action, if the timer is not

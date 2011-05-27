@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('system/string');
+
 SC.VALIDATE_OK = YES;
 SC.VALIDATE_NO_CHANGE = NO;
 
@@ -16,7 +18,7 @@ SC.VALIDATE_NO_CHANGE = NO;
   "validate" attribute in your text field.  For example, if you want to
   validate a field using the PhoneNumberValidator use this:
 
-  <input value="1234567890" validate="phone-number" />
+      <input value="1234567890" validate="phone-number" />
 
   Validators get notified at three points.  You can implement one or all
   of these methods to support validation.  All of the validate methods except
@@ -26,10 +28,8 @@ SC.VALIDATE_NO_CHANGE = NO;
   following:
 
   1. You can simply validate the field value and return OK or an error str
-  
   2. You can modify the field value (for example, you could format the
      string to match some predefined format).
-     
   3. If you need to roundtrip the server first to perform validation, you can
      return Validator.OK, then save the form and field info until after the
      roundtrip.  On return, if there is a problem, first verify the field
@@ -116,7 +116,7 @@ SC.Validator = SC.Object.extend(
   */
   validateError: function(form, field) { 
     return SC.$error(
-      "Invalid.General(%@)".loc(field.get('fieldValue')),
+      SC.String.loc("Invalid.General(%@)", field.get('fieldValue')),
       field.get('fieldKey')) ; 
   },
 
@@ -279,7 +279,7 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
       }
       
       // convert the validatorKey name into a class.
-      validatorKey = validatorKey.classify() ;
+      validatorKey = SC.String.classify(validatorKey);
       var validatorClass = SC.Validator[validatorKey] ;
       if (SC.none(validatorClass)) {
         throw "validator %@ not found for %@".fmt(validatorKey, field) ;

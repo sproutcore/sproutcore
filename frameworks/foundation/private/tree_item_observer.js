@@ -213,7 +213,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     range you replace must lie entirely within the same parent item, otherwise
     this will raise an exception.
 
-    h3. The Operation Parameter
+    ### The Operation Parameter
 
     Note that this replace method accepts an additional parameter "operation"
     which is used when you try to insert an item on a boundary between
@@ -225,9 +225,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     index where you expect the item to be inserted.  For example, if you want
     to insert AFTER the last index of an 3-item array, you would still call:
 
-    {{{
-      observer.replace(3, 0, [object1 .. objectN], SC.DROP_AFTER)
-    }}}
+        observer.replace(3, 0, [object1 .. objectN], SC.DROP_AFTER)
 
     The operation is simply used to disambiguate whether the insertion is
     intended to be AFTER the previous item or BEFORE the items you are
@@ -356,7 +354,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
         delta = newlen - oldlen ;
       }
 
-      this.enumerableContentDidChange(start, amt, delta);
+      var removedCount = amt;
+      var addedCount = delta + removedCount;
+      this.arrayContentDidChange(start, removedCount, addedCount);
     }
   },
 

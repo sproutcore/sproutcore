@@ -112,8 +112,27 @@ module("SC.Statechart: With Concurrent States - Goto State Advanced Tests", {
 
 test("check statechart initialization", function() {
   equals(monitor.get('length'), 10, 'initial state sequence should be of length 10');
-  equals(monitor.matchSequence().begin().entered(root, 'a', 'b', 'd', 'c', 'f', 'h', 'l', 'i', 'n').end(), true, 
-         'initial sequence should be entered[ROOT, a, b, d, c, f, h, l, i, n]');
+  equals(monitor.matchSequence().begin()
+                                  .entered(root, 'a')
+                                  .beginConcurrent()
+                                    .beginSequence()
+                                      .entered('b', 'd')
+                                    .endSequence()
+                                    .beginSequence()
+                                      .entered('c', 'f')
+                                      .beginConcurrent()
+                                        .beginSequence()
+                                          .entered('h', 'l')
+                                        .endSequence()
+                                        .beginSequence()
+                                          .entered('i', 'n')
+                                        .endSequence()
+                                      .endConcurrent()
+                                    .endSequence()
+                                  .endConcurrent()
+                                  .entered()
+                                .end(), 
+    true, 'initial sequence should be entered[ROOT, a, b, d, c, f, h, l, i, n]');
   
   equals(statechart.get('currentStateCount'), 3, 'current state count should be 3');
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
@@ -150,10 +169,25 @@ test("from state l, go to state g", function() {
   stateL.gotoState('g');
   
   equals(monitor.get('length'), 10, 'initial state sequence should be of length 10');
-  equals(monitor.matchSequence()
-                .begin()
-                .exited('l', 'h', 'n', 'i', 'f')
-                .entered('g', 'j', 'p', 'k', 'r')
+  equals(monitor.matchSequence().begin()
+                  .beginConcurrent()
+                    .beginSequence()
+                      .exited('l', 'h')
+                    .endSequence()
+                    .beginSequence()
+                      .exited('n', 'i')
+                    .endSequence()
+                  .endConcurrent()
+                  .exited('f')
+                  .entered('g')
+                  .beginConcurrent()
+                    .beginSequence()
+                      .entered('j', 'p')
+                    .endSequence()
+                    .beginSequence()
+                      .entered('k', 'r')
+                    .endSequence()
+                  .endConcurrent()
                 .end(), 
          true, 'initial sequence should be exited[l, h, n, i, f], entered[g, j, p, k, r]');
   

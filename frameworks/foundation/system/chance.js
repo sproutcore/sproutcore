@@ -7,6 +7,7 @@
 
 sc_require("system/task_queue");
 
+/** @ignore */
 SC.chance = {
 
   preload_task: SC.Task.create({
@@ -61,4 +62,8 @@ SC.chance = {
   }
 };
 
-SC.ready(SC.chance, 'preloadImages');
+
+// Disabling image proloading in the mean time temporarly. 
+// If you want to enable it in your
+// app add the following line.
+//SC.ready(SC.chance, 'preloadImages');

@@ -18,7 +18,8 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   RootResponder directly.  Instead you will work with Pane objects, which
   register themselves with the RootResponder as needed to receive events.
 
-  h1. RootResponder and Platforms
+  RootResponder and Platforms
+  ---
 
   RootResponder contains core functionality common among the different web
   platforms. You will likely be working with a subclass of RootResponder that
@@ -27,26 +28,28 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   The correct instance of RootResponder is detected at runtime and loaded
   transparently.
 
-  h1. Event Types
+  Event Types
+  ---
 
   RootResponders can route four types of events:
 
-  - Direct events, such as mouse and touch events.  These are routed to the
-    nearest view managing the target DOM elment. RootResponder also handles
-    multitouch events so that they are delegated to the correct views.
-  - Keyboard events. These are sent to the keyPane, which will then send the
-    event to the current firstResponder and up the responder chain.
-  - Resize events. When the viewport resizes, these events will be sent to all
-    panes.
-  - Keyboard shortcuts. Shortcuts are sent to the keyPane first, which
-    will go down its view hierarchy. Then they go to the mainPane, which will
-    go down its view hierarchy.
-  - Actions. Actions are generic messages that your application can send in
-    response to user action or other events. You can either specify an
-    explicit target, or allow the action to traverse the hierarchy until a
-    view is found that handles it.
+   - Direct events, such as mouse and touch events.  These are routed to the
+     nearest view managing the target DOM elment. RootResponder also handles
+     multitouch events so that they are delegated to the correct views.
+   - Keyboard events. These are sent to the keyPane, which will then send the
+     event to the current firstResponder and up the responder chain.
+   - Resize events. When the viewport resizes, these events will be sent to all
+     panes.
+   - Keyboard shortcuts. Shortcuts are sent to the keyPane first, which
+     will go down its view hierarchy. Then they go to the mainPane, which will
+     go down its view hierarchy.
+   - Actions. Actions are generic messages that your application can send in
+     response to user action or other events. You can either specify an
+     explicit target, or allow the action to traverse the hierarchy until a
+     view is found that handles it.
 */
-SC.RootResponder = SC.Object.extend({
+SC.RootResponder = SC.Object.extend(
+  /** @scope SC.RootResponder.prototype */{
 
   /**
     Contains a list of all panes currently visible on screen.  Everytime a
@@ -60,6 +63,7 @@ SC.RootResponder = SC.Object.extend({
 
     if (SC.platform.supportsCSSTransitions) {
       this[SC.platform.cssPrefix+'TransitionEnd'] = this.transitionEnd;
+      this['transitionend'] = this.transitionEnd;
     }
   },
 
@@ -67,7 +71,7 @@ SC.RootResponder = SC.Object.extend({
   // MAIN PANE
   //
 
-  /** @property
+  /**
     The main pane.  This pane receives shortcuts and actions if the
     focusedPane does not respond to them.  There can be only one main pane.
     You can swap main panes by calling makeMainPane() here.
@@ -75,6 +79,8 @@ SC.RootResponder = SC.Object.extend({
     Usually you will not need to edit the main pane directly.  Instead, you
     should use a MainPane subclass, which will automatically make itself main
     when you append it to the document.
+    
+    @type SC.MainPane
   */
   mainPane: null,
 
@@ -88,7 +94,7 @@ SC.RootResponder = SC.Object.extend({
     document body.  That will be handled by the Pane itself.
 
     @param {SC.Pane} pane
-    @returns {SC.RootResponder} receiver
+    @returns {SC.RootResponder}
   */
   makeMainPane: function(pane) {
     var currentMain = this.get('mainPane') ;
@@ -405,7 +411,7 @@ SC.RootResponder = SC.Object.extend({
     the action name you pass to this method.  Set 'target' to null to search
     the responder chain.
 
-    IMPORTANT: This method's API and implementation will likely change
+    **IMPORTANT**: This method's API and implementation will likely change
     significantly after SproutCore 1.0 to match the version found in
     SC.ResponderContext.
 
@@ -610,21 +616,21 @@ SC.RootResponder = SC.Object.extend({
   */
   setup: function() {
     // handle touch events
-    this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel'], document);
 
     // handle basic events
-    this.listenFor('keydown keyup beforedeactivate mousedown mouseup click dblclick mousemove selectstart contextmenu'.w(), document)
-        .listenFor('resize'.w(), window);
+    this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
+        .listenFor(['resize'], window);
 
     if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
-    else this.listenFor('focus blur'.w(), window);
+    else this.listenFor(['focus', 'blur'], window);
 
     // handle animation events
-    this.listenFor('webkitAnimationStart webkitAnimationIteration webkitAnimationEnd'.w(), document);
+    this.listenFor(['webkitAnimationStart', 'webkitAnimationIteration', 'webkitAnimationEnd'], document);
 
     // CSS Transitions
     if (SC.platform.supportsCSSTransitions) {
-      this.listenFor(['transitionEnd', SC.platform.cssPrefix+'TransitionEnd'], document);
+      this.listenFor(['transitionend', SC.platform.cssPrefix+'TransitionEnd'], document);
     }
 
     // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
@@ -643,7 +649,7 @@ SC.RootResponder = SC.Object.extend({
     }
 
     // handle these two events specially in IE
-    'drag selectstart'.w().forEach(function(keyName) {
+    ['drag', 'selectstart'].forEach(function(keyName) {
       var method = this[keyName] ;
       if (method) {
         if (SC.browser.msie) {
@@ -681,18 +687,19 @@ SC.RootResponder = SC.Object.extend({
     }
     SC.Event.add(document, mousewheel, this, this.mousewheel);
 
-    // If the browser is identifying itself as a touch-enabled browser, but
-    // touch events are not present, assume this is a desktop browser doing
-    // user agent spoofing and simulate touch events automatically.
-    if (SC.browser && SC.platform && SC.browser.mobileSafari && !SC.platform.touch) {
-      SC.platform.simulateTouchEvents();
-    }
-
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
     this.focus(); // assume the window is focused when you load.
 
     if (SC.browser.mobileSafari) {
+
+      // If the browser is identifying itself as a touch-enabled browser, but
+      // touch events are not present, assume this is a desktop browser doing
+      // user agent spoofing and simulate touch events automatically.
+      if (SC.platform && !SC.platform.touch) {
+        SC.platform.simulateTouchEvents();
+      }
+
       // Monkey patch RunLoop if we're in MobileSafari
       var f = SC.RunLoop.prototype.endRunLoop, patch;
 
@@ -958,7 +965,8 @@ SC.RootResponder = SC.Object.extend({
     for instance, prevent scrolling in a ScrollView, you need to make sure to transfer control
     back to the previous responder:
 
-    if (Math.abs(touch.pageY - touch.startY) > this.MAX_SWIPE) touch.restoreLastTouchResponder();
+        if (Math.abs(touch.pageY - touch.startY) > this.MAX_SWIPE)
+          touch.restoreLastTouchResponder();
 
     You don't call makeTouchResponder on RootResponder directly. Instead, it gets called for you
     when you return YES to captureTouch or touchStart.
@@ -967,14 +975,19 @@ SC.RootResponder = SC.Object.extend({
     a button view inside a ScrollView: if the touch moves too much, the button should give control back
     to the scroll view.
 
-    if (Math.abs(touch.pageX - touch.startX) > 4) {
-      if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
-    }
+        if (Math.abs(touch.pageX - touch.startX) > 4) {
+          if (touch.nextTouchResponder)
+            touch.makeTouchResponder(touch.nextTouchResponder);
+        }
 
     This will give control back to the containing view. Maybe you only want to do it if it is a ScrollView?
 
-    if (Math.abs(touch.pageX - touch.startX) > 4 && touch.nextTouchResponder && touch.nextTouchResponder.isScrollable)
-      touch.makeTouchResponder(touch.nextTouchResponder);
+        if (
+          Math.abs(touch.pageX - touch.startX) > 4 &&
+          touch.nextTouchResponder &&
+          touch.nextTouchResponder.isScrollable
+        )
+          touch.makeTouchResponder(touch.nextTouchResponder);
 
     Possible gotcha: while you can do touch.nextTouchResponder, the responders are not chained in a linked list like
     normal responders, because each touch has its own responder stack. To navigate through the stack (or, though
@@ -1026,7 +1039,7 @@ SC.RootResponder = SC.Object.extend({
         }
       } else {
 
-        if ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch) {
+        if (responder && ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch)) {
           if (!responder.touchStart(touch)) responder = null;
         } else {
           // do nothing; the responder is the responder, and may stay the responder, and all will be fine
@@ -1700,6 +1713,7 @@ SC.RootResponder = SC.Object.extend({
   mousedown: function(evt) {
     if (SC.platform.touch) {
       evt.allowDefault();
+      this._lastMouseDownCustomHandling = YES;
       return YES;
     }
 
@@ -1757,6 +1771,7 @@ SC.RootResponder = SC.Object.extend({
   mouseup: function(evt) {
     if (SC.platform.touch) {
       evt.allowDefault();
+      this._lastMouseUpCustomHandling = YES;
       return YES;
     }
 

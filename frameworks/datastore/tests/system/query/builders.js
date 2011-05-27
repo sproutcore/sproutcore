@@ -10,7 +10,7 @@
 
 // ..........................................................
 // UTILITIES
-// 
+//
 
 var TestRecord = SC.Record.extend();
 var TestRecord2 = SC.Record.extend();
@@ -20,23 +20,23 @@ function queryEquals(q, location, recordType, conditions, extra, desc) {
     desc = extra;  extra = undefined ;
   }
   if (!desc) desc = '';
-  
+
   ok(!!q, desc + ': should have a query');
   equals(q.get('isFrozen'), YES, desc + ": should be frozen");
-  
+
   if (q) {
     if (location) {
       equals(q.get('location'), location, desc + ": should have location");
     }
-    
+
     if (recordType && recordType.isEnumerable) {
       same(q.get('recordTypes'), recordType, desc + ': should have recordTypes (plural)');
     } else {
       equals(q.get('recordType'), recordType, desc + ': should have recordType (singular)');
     }
-    
+
     equals(q.get('conditions'), conditions, desc + ': should have conditions');
-        
+
     if (extra) {
       for (var key in extra) {
         if (!extra.hasOwnProperty(key)) continue;
@@ -44,13 +44,13 @@ function queryEquals(q, location, recordType, conditions, extra, desc) {
       }
     }
   }
-} 
+}
 
 // ..........................................................
 // BASIC TESTS
-// 
+//
 
-// The local() and remote() builder methods are very similar.  This will 
+// The local() and remote() builder methods are very similar.  This will
 // perform the same basic tests on both of them.  If you add a builder for a
 // new type of location, you can just call this function again with your new
 // location
@@ -70,7 +70,7 @@ function performBasicTests(methodName, loc) {
   function invokeWith() {
     return SC.Query[methodName].apply(SC.Query, arguments);
   }
-  
+
   test("basic query with just record type", function() {
     var q, q1, q2, q3, q4;
 
@@ -94,7 +94,7 @@ function performBasicTests(methodName, loc) {
     equals(q4, q, 'queryFor(["TestRecord"]) with string should return cached value');
 
   });
-  
+
   test("query with multiple recordtypes", function() {
 
     var types = [TestRecord, TestRecord2],
@@ -121,11 +121,11 @@ function performBasicTests(methodName, loc) {
     q5 = invokeWith('TestRecord TestRecord2'.w());
     equals(q5, q1, 'should return cached query even if string record names are used');
   });
-  
+
   test("query with record type and conditions", function() {
 
     var q1, q2, q3, q4, q5, q6, q7;
-    
+
     q1 = invokeWith(TestRecord, 'foobar');
     queryEquals(q1, loc, TestRecord, 'foobar', 'first query');
 
@@ -143,7 +143,7 @@ function performBasicTests(methodName, loc) {
     q5 = invokeWith(TestRecord, 'baz');
     equals(q5, q4, 'second call for different conditions should return cache');
   });
-  
+
   test("query with no record type and with conditions", function() {
     var q1, q2;
 
@@ -183,13 +183,13 @@ function performBasicTests(methodName, loc) {
     var local = SC.Query.local(TestRecord),
         remote = SC.Query.remote(TestRecord),
         q;
-        
+
     q = invokeWith(local);
     if (loc === SC.Query.LOCAL) {
       equals(q, local, 'invoking with local query should return same query');
     } else {
       ok(q !== local, 'invoke with local query should return new instance');
-    }    
+    }
     equals(q.get('location'), loc, 'query should have expected location');
 
     q = invokeWith(remote);
@@ -197,14 +197,14 @@ function performBasicTests(methodName, loc) {
       equals(q, remote, 'invoking with remote query should return same query');
     } else {
       ok(q !== remote, 'invoke with remote query should return new instance');
-    }    
+    }
     equals(q.get('location'), loc, 'query should have expected location');
   });
-  
+
   test("no options (matches everything)", function() {
     var q1, q2;
-    
-    q1 = invokeWith(); 
+
+    q1 = invokeWith();
     queryEquals(q1, loc, SC.Record, null, 'first query - matches everything');
 
     q2 = invokeWith();
@@ -212,7 +212,7 @@ function performBasicTests(methodName, loc) {
 
   });
 
-  
+
 }
 
 performBasicTests('local', SC.Query.LOCAL);

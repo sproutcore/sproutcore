@@ -17,11 +17,11 @@ SC.MODE_APPEND = 'append';
 SC.MODE_PREPEND = 'prepend';
 
 /** list of numeric properties that should not have 'px' appended */
-SC.NON_PIXEL_PROPERTIES = 'zIndex fontWeight opacity'.w();
+SC.NON_PIXEL_PROPERTIES = ['zIndex', 'fontWeight', 'opacity'];
 
 /** a list of styles that get expanded into multiple properties, add more as you discover them */
 SC.COMBO_STYLES = {
-  WebkitTransition: 'WebkitTransitionProperty WebkitTransitionDuration WebkitTransitionDelay WebkitTransitionTimingFunction'.w()
+  WebkitTransition: ['WebkitTransitionProperty', 'WebkitTransitionDuration', 'WebkitTransitionDelay', 'WebkitTransitionTimingFunction']
 };
 
 /**
@@ -50,9 +50,10 @@ SC.COMBO_STYLES = {
   context.begin() <-- begins a new tag context
   context.end() <-- ends the tag context...
 */
-SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
+SC.RenderContext = SC.Builder.create(
+  /** @lends SC.RenderContext */ {
 
-  SELF_CLOSING: SC.CoreSet.create().addEach('area base basefront br hr input img link meta'.w()),
+  SELF_CLOSING: SC.CoreSet.create().addEach(['area', 'base', 'basefront', 'br', 'hr', 'input', 'img', 'link', 'meta']),
 
   /**
     When you create a context you should pass either a tag name or an element
@@ -259,40 +260,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {DOMElement} the element
   */
   element: function() {
-    if (this._elem) return this._elem;
-
-    // create factory div if needed
-    var K       = SC.RenderContext,
-        factory = K.factory,
-        ret, child;
-
-    if (!factory) {
-      factory = K.factory = document.createElement('div');
-    }
-    factory.innerHTML = this.join();
-
-    // In IE something weird happens when reusing the same element.
-    // After setting innerHTML, the innerHTML of the element in the previous
-    // view turns blank.  It seems that there is something weird with their
-    // garbage  collection algorithm. I tried just removing the nodes after
-    // keeping a  reference to the first child, but it didn't work.  I ended
-    // up cloning the first child.
-    if (SC.browser.msie) {
-      if (factory.innerHTML.length > 0) {
-        child = factory.firstChild.cloneNode(true);
-        factory.innerHTML = '';
-      }
-      else {
-        child = null;
-      }
-    }
-    else {
-      // Faster path (avoiding the unnecessary node clone) for non-IE
-      // browsers.
-      child = factory.firstChild;
-    }
-
-    return child ;
+    return this._elem ? this._elem : SC.$(this.join())[0]
   },
 
   /**
@@ -996,7 +964,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   _camelizeStyleName: function(name) {
     // IE wants the first letter lowercase so we can allow normal behavior
     var needsCap = name.match(/^-(webkit|moz|o)-/),
-        camelized = name.camelize();
+        camelized = SC.String.camelize(name);
 
     if (needsCap) {
       return camelized.substr(0,1).toUpperCase() + camelized.substr(1);
@@ -1009,7 +977,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     Converts camelCased style names to dasherized forms
   */
   _dasherizeStyleName: function(name) {
-    var dasherized = name.dasherize();
+    var dasherized = SC.String.dasherize(name);
     if (dasherized.match(/^(webkit|moz|ms|o)-/)) { dasherized = '-'+dasherized; }
     return dasherized;
   }

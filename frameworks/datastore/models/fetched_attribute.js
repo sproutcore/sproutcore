@@ -12,14 +12,14 @@ sc_require('models/record_attribute');
 
   Describes a single attribute that is fetched dynamically from the server
   when you request it.  Normally getting a property value with this attribute
-  applied will cause call the find() method on the record store passing
+  applied will cause call the `find()` method on the record store passing
   the attribute record type as the query key along with the property value,
   owner record, and property key name as parameters. 
   
   The DataSource you hook up to your store must know how to load this kind 
   of relationship for this fetched property to work properly.
   
-  The return value is usually an SC.RecordArray that will populate with the
+  The return value is usually an `SC.RecordArray` that will populate with the
   record data so that you can display it.
   
   @extends SC.RecordAttribute
@@ -29,16 +29,16 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
   /** @scope SC.FetchedAttribute.prototype */ {
 
   /**
-    Define the param key that will be passed to the findAll method on the
-    store.  If null, the param will not be send.  Defaults to 'link'
+    Define the param key that will be passed to the `findAll` method on the
+    store.  If `null`, the param will not be sent.  Defaults to `'link'`
     
     @property {String}
   */
   paramValueKey: 'link',
 
   /**
-    Define the param key used to send the parent record.  If null the param
-    will not be sent.  Defaults to 'owner'.
+    Define the param key used to send the parent record.  If `null`, the param
+    will not be sent.  Defaults to '`owner'`.
     
     @property {String}
   */
@@ -46,7 +46,7 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
   
   /**
     Define the param key used to send the key name used to reference this 
-    attribute.  If null, the param will not be sent.  Defaults to "rel"
+    attribute.  If `null`, the param will not be sent.  Defaults to `"rel"`
     
     @property {String}
   */

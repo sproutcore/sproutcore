@@ -10,17 +10,15 @@ sc_require('models/record_attribute');
 
 /** @class
   
-  ChildAttribute is a subclass of RecordAttribute and handles to-one 
+  ChildAttribute is a subclass of `RecordAttribute` and handles to-one 
   relationships for child records.
   
-  When setting ( .set() ) the value of a toMany attribute, make sure
-  to pass in an array of SC.Record objects.
+  When setting ( `.set()` ) the value of a toMany attribute, make sure
+  to pass in an array of `SC.Record` objects.
   
   There are many ways you can configure a ManyAttribute:
   
-  {{{
-    contacts: SC.ChildAttribute.attr('SC.Child');
-  }}}
+      contacts: SC.ChildAttribute.attr('SC.Child');
   
   @extends SC.RecordAttribute
   @since SproutCore 1.0

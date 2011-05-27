@@ -21,20 +21,34 @@ SC.Validator.Date = SC.Validator.extend(
   /**
     The standard format you want the validator to convert dates to.
   */
-  format: 'NNN d, yyyy h:mm:ss a',
+  format: '%b %d, %Y %i:%M:%S %p',
   
   /**
     if we have a number, then convert to a date object.
   */
   fieldValueForObject: function(object, form, field) {
-    var date ;
-    if (typeof(object) === "number") {
-      date = new Date(object) ;
-    } else if (object instanceof Date) { date = object; }
-      
-    if (date) object = date.format(this.get('format')) ;
-    
-    return object ;
+    var format = this.get('format'),
+        dateTime;
+
+    /*
+      TODO [CC] deprecated warning, we should remove this in a future release
+    */
+    // @if (debug)
+    if (format.indexOf('%') === -1) {
+      SC.Logger.warn("You're using a Date validator with a format (%@) for time.js, which has been deprecated. Please change your format to something compatible with SC.DateTime".fmt(format));
+      format = this.constructor.prototype.format;
+    }
+    // @endif
+
+    if (SC.typeOf(object) === SC.T_NUMBER) {
+      dateTime = SC.DateTime.create(object);
+    } else if (object instanceof Date) {
+      dateTime = object.getTime();
+    }
+
+    if (dateTime) { object = dateTime.toFormattedString(format); }
+
+    return object;
   },
 
   /**
@@ -42,9 +56,22 @@ SC.Validator.Date = SC.Validator.extend(
     it could not be parsed.
   */
   objectForFieldValue: function(value, form, field) {
+    var format = this.get('format'),
+        dateTime;
+
+    /*
+      TODO [CC] deprecated warning, we should remove this in a future release
+    */
+    // @if (debug)
+    if (format.indexOf('%') === -1) {
+      SC.Logger.warn("You're using a Date validator with a format (%@) for time.js, which has been deprecated. Please change your format to something compatible with SC.DateTime".fmt(format));
+      format = this.constructor.prototype.format;
+    }
+    // @endif
+
     if (value) {
-      var date = Date.parseDate(value) ;
-      value = (date) ? date.getTime() : null ;
+      dateTime = SC.DateTime.parse(value, format);
+      value = dateTime ? dateTime._ms : null;
     }
     return value ;
   }

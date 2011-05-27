@@ -10,10 +10,10 @@ sc_require('models/record_attribute');
 
 /** @class
   
-  SingleAttribute is a subclass of RecordAttribute and handles to-one
+  `SingleAttribute` is a subclass of `RecordAttribute` and handles to-one
   relationships.
 
-  There are many ways you can configure a SingleAttribute:
+  There are many ways you can configure a `SingleAttribute`:
   
       group: SC.Record.toOne('MyApp.Group', { 
         inverse: 'contacts', // set the key used to represent the inverse 

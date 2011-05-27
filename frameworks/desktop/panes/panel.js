@@ -7,22 +7,16 @@
 
 sc_require('panes/modal');
 
-/** 
-  Shadow views from top-left corner clockwise
-*/
-
 /** @class
 
   Most SproutCore applications need modal panels. The default way to use the 
   panel pane is to simply add it to your page like this:
   
-  {{{
-    SC.PanelPane.create({
-      layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
-      contentView: SC.View.extend({
-      })
-    }).append();
-  }}}
+      SC.PanelPane.create({
+        layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
+        contentView: SC.View.extend({
+        })
+      }).append();
   
   This will cause your panel to display.  The default layout for a Panel 
   is to cover the entire document window with a semi-opaque background, and to 
@@ -32,17 +26,29 @@ sc_require('panes/modal');
   @author Erich Ocean
   @since SproutCore 1.0
 */
-SC.PanelPane = SC.Pane.extend({
+SC.PanelPane = SC.Pane.extend(
+/** @scope SC.PanelPane.prototype */ {
 
-  layout: { left:0, right:0, top:0, bottom:0 },
+  /**
+    @type Array
+    @default ['sc-panel']
+    @see SC.View#classNames
+  */
   classNames: ['sc-panel'],
+  
+  /**
+    @type Boolean
+    @default YES
+    @see SC.Pane#acceptsKeyPane
+  */
   acceptsKeyPane: YES,
 
   /**
-    The WAI-ARIA role for panel pane. This property's value should not be
-    changed.
+    The WAI-ARIA role for panel pane.
 
-    @property {String}
+    @type String
+    @default 'dialog'
+    @constant
   */
   ariaRole: 'dialog',
 
@@ -50,21 +56,22 @@ SC.PanelPane = SC.Pane.extend({
     The WAI-ARIA label for the panel. Screen readers will use this to tell
     the user a name for the panel.
 
-    @property {String}
+    @type String
   */
   ariaLabel: null,
 
   /**
     Indicates that a pane is modal and should not allow clicks to pass
-    though to panes underneath it.  This will usually cause the pane to show
+    though to panes underneath it. This will usually cause the pane to show
     the modalPane underneath it.
     
-    @property {Boolean}
+    @type Boolean
+    @default YES
   */
   isModal: YES,
 
   /**
-    The modal pane to place behind this pane if this pane is modal.  This 
+    The modal pane to place behind this pane if this pane is modal. This
     must be a subclass or an instance of SC.ModalPane.
   */
   modalPane: SC.ModalPane.extend({
@@ -78,14 +85,18 @@ SC.PanelPane = SC.Pane.extend({
   /**
     Set this to the view you want to act as the content within the panel.
     
-    @property {SC.View}
+    @type SC.View
+    @default null
   */
   contentView: null,
   contentViewBindingDefault: SC.Binding.single(),
   
+  /**
+    @param {SC.View} newContent
+  */
   replaceContent: function(newContent) {
     this.removeAllChildren() ;
-    if (newContent) this.appendChild(newContent) ;
+    if (newContent) this.appendChild(newContent);
   },
 
   /** @private */
@@ -100,8 +111,8 @@ SC.PanelPane = SC.Pane.extend({
 
   
   /**
-    Invoked whenever the content property changes.  This method will simply
-    call replaceContent.  Override replaceContent to change how the view is
+    Invoked whenever the content property changes. This method will simply
+    call replaceContent. Override replaceContent to change how the view is
     swapped out.
   */
   contentViewDidChange: function() {
@@ -113,9 +124,10 @@ SC.PanelPane = SC.Pane.extend({
   //
 
   /**
-    The name of the theme's SC.PanelPane render delegate.
+    The name of the theme's `SC.PanelPane` render delegate.
 
-    @property {String}
+    @type String
+    @default 'panelRenderDelegate'
   */
   renderDelegateName: 'panelRenderDelegate',
 

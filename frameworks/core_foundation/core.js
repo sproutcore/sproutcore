@@ -88,10 +88,6 @@ SC.ALIGN_BOTTOM_LEFT = 'bottom-left';
 */
 SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
 
-/**
-  This variable is here to make the tab focus behavior work like safari's.
-*/
-SC.SAFARI_FOCUS_BEHAVIOR = YES;
 
 SC.mixin(/** @lends SC */ {
   
@@ -111,23 +107,7 @@ SC.mixin(/** @lends SC */ {
     @param data {Object} Optional data.  If passed, write.
     @returns {Object} the value of the named data
   */
-  data: function(elem, name, data) {
-    elem = (elem === window) ? "@window" : elem ;
-    var hash = SC.hashFor(elem) ; // get the hash key
-    
-    // Generate the data cache if needed
-    var cache = SC._data_cache ;
-    if (!cache) SC._data_cache = cache = {} ;
-    
-    // Now get cache for element
-    var elemCache = cache[hash] ;
-    if (name && !elemCache) cache[hash] = elemCache = {} ;
-    
-    // Write data if provided 
-    if (elemCache && (data !== undefined)) elemCache[name] = data ;
-    
-    return (name) ? elemCache[name] : elemCache ;
-  },
+  data: $.data,
   
   /**
     Removes data from the global cache.  This is used throughout the
@@ -140,62 +120,30 @@ SC.mixin(/** @lends SC */ {
     @param name {String} optional name to remove. 
     @returns {Object} the value or cache that was removed
   */
-  removeData: function(elem, name) {
-    elem = (elem === window) ? "@window" : elem ;
-    var hash = SC.hashFor(elem) ;
-    
-    // return undefined if no cache is defined
-    var cache = SC._data_cache ;
-    if (!cache) return undefined ;
-    
-    // return undefined if the elem cache is undefined
-    var elemCache = cache[hash] ;
-    if (!elemCache) return undefined;
-    
-    // get the return value
-    var ret = (name) ? elemCache[name] : elemCache ;
-    
-    // and delete as appropriate
-    if (name) {
-      delete elemCache[name] ;
-    } else {
-      delete cache[hash] ;
-    }
-    
-    return ret ;
-  }
-}) ;
+  removeData: $.removeData,
 
-SC.mixin(Function.prototype, /** @scope Function.prototype */ {
+  // ..........................................................
+  // LOCALIZATION SUPPORT
+  //
+
   /**
-    Creates a timer that will execute the function after a specified 
-    period of time.
-    
-    If you pass an optional set of arguments, the arguments will be passed
-    to the function as well.  Otherwise the function should have the 
-    signature:
-    
-    {{{
-      function functionName(timer)
-    }}}
+    Known loc strings
 
-    @param target {Object} optional target object to use as this
-    @param interval {Number} the time to wait, in msec
-    @returns {SC.Timer} scheduled timer
+    @type Hash
   */
-  invokeLater: function(target, interval) {
-    if (interval === undefined) interval = 1 ;
-    var f = this;
-    if (arguments.length > 2) {
-      var args = SC.$A(arguments).slice(2,arguments.length);
-      args.unshift(target);
-      // f = f.bind.apply(f, args) ;
-      var func = f ;
-      // Use "this" in inner func because it get its scope by 
-      // outer func f (=target). Could replace "this" with target for clarity.
-      f = function() { return func.apply(this, args.slice(1)); } ;
-    }
-    return SC.Timer.schedule({ target: target, action: f, interval: interval });
-  }    
+  STRINGS: {},
 
-});
+  /**
+    This is a simplified handler for installing a bunch of strings.  This
+    ignores the language name and simply applies the passed strings hash.
+
+    @param {String} lang the language the strings are for
+    @param {Hash} strings hash of strings
+    @returns {SC} The receiver, useful for chaining calls to the same object.
+  */
+  stringsFor: function(lang, strings) {
+    SC.mixin(SC.STRINGS, strings);
+    return this ;
+  }
+
+}) ;

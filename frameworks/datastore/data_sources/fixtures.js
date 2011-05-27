@@ -39,10 +39,10 @@ SC.FixturesDataSource = SC.DataSource.extend(
     here.  You should tune this to simulate latency based on the expected 
     performance of your server network.  Here are some good guidelines:
     
-    - 500: Simulates a basic server written in PHP, Ruby, or Python (not twisted) without a CDN in front for caching.
-    - 250: (Default) simulates the average latency needed to go back to your origin server from anywhere in the world.  assumes your servers itself will respond to requests < 50 msec
-    - 100: simulates the latency to a "nearby" server (i.e. same part of the world).  Suitable for simulating locally hosted servers or servers with multiple data centers around the world.
-    - 50: simulates the latency to an edge cache node when using a CDN.  Life is really good if you can afford this kind of setup.
+     - 500: Simulates a basic server written in PHP, Ruby, or Python (not twisted) without a CDN in front for caching.
+     - 250: (Default) simulates the average latency needed to go back to your origin server from anywhere in the world.  assumes your servers itself will respond to requests < 50 msec
+     - 100: simulates the latency to a "nearby" server (i.e. same part of the world).  Suitable for simulating locally hosted servers or servers with multiple data centers around the world.
+     - 50: simulates the latency to an edge cache node when using a CDN.  Life is really good if you can afford this kind of setup.
     
     @property {Number}
   */

@@ -4,6 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 /** @class
 
   Used to display an iframe. The source, (specified by the value property) of 
@@ -14,21 +15,36 @@
   @extends SC.Control
   @since SproutCore 1.0
 */
-SC.WebView = SC.View.extend(SC.Control, {
-/** @scope SC.WebView.prototype */
+SC.WebView = SC.View.extend(SC.Control,
+/** @scope SC.WebView.prototype */ {
+
+  /**
+    @type Array
+    @default ['sc-web-view']
+    @see SC.View#classNames
+  */
   classNames: 'sc-web-view',
+  
+  /**
+    @type Array
+    @default ['value', 'shouldAutoResize']
+    @see SC.View#displayProperties
+  */
   displayProperties: ['value', 'shouldAutoResize'],
 
   /**
-  The content of the iframe can be bigger than the size specifed when creating
-  the view. If you want the view to be auto-resized to the dimensions of the 
-  iframe, then set the value of this property to YES.
-  The web view can be auto resized only if the contents are from the same
-  domain as the parent domain.
-  @property{Boolean}
+    The content of the iframe can be bigger than the size specifed when creating
+    the view. If you want the view to be auto-resized to the dimensions of the 
+    iframe, then set the value of this property to YES.
+    The web view can be auto resized only if the contents are from the same
+    domain as the parent domain.
+
+    @type Boolean
+    @default NO
   */
   shouldAutoResize: NO,
 
+  /** @private */
   render: function(context, firstTime) {
     var src = this.get('value');
     if (firstTime) {
@@ -42,7 +58,7 @@ SC.WebView = SC.View.extend(SC.Control, {
     }
   },
 
-  /**
+  /** @private
   Called when the layer gets created. 
   */
   didCreateLayer: function() {
@@ -52,14 +68,13 @@ SC.WebView = SC.View.extend(SC.Control, {
   },
 
 
-  /** 
-  Called when iframe onload event is fired.
-  1. Resizes the view to fit the contents of the iframe using the 
-  scroll width and scroll height of the contents of the iframe
+  /**  @private
+    Called when iframe onload event is fired.
+    1. Resizes the view to fit the contents of the iframe using the 
+    scroll width and scroll height of the contents of the iframe
   
-  The iframe contents can be accessed only when the src is from the same
-  domain as the parent document
-  @returns {void}
+    The iframe contents can be accessed only when the src is from the same
+    domain as the parent document
   */
   iframeDidLoad: function() {
     //fit the iframe to size of the contents.
@@ -75,13 +90,14 @@ SC.WebView = SC.View.extend(SC.Control, {
           //TODO: try out document flows other than top to bottom.
           if (!SC.browser.isIE){
             this.$().width(docElement.scrollWidth);
-            this.$().height(docElement.scrollHeight);          
+            this.$().height(docElement.scrollHeight);
           } else {
             this.$().width(docElement.scrollWidth + 12);
-            this.$().height(docElement.scrollHeight + 5);          
+            this.$().height(docElement.scrollHeight + 5);
           }
         }
       }
     }
   }
+
 });

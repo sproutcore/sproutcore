@@ -23,13 +23,11 @@ SC.Page = SC.Object.extend(
     to use the owner object as a target, (as well as other objects
     accessible through the owner object). E.g.
     
-    {{{
-      myButton: SC.ButtonView.design({
-        title: 'Click me',
-        target: SC.outlet('page.owner'),
-        action: 'buttonClicked'
-      })
-    }}}
+        myButton: SC.ButtonView.design({
+          title: 'Click me',
+          target: SC.outlet('page.owner'),
+          action: 'buttonClicked'
+        })
     
     Usually, you'll set 'owner' to the object defined in core.js.
   */

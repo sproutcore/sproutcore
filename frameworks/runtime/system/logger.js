@@ -5,6 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('ext/function');
 
 // ..........................................................
 // CONSTANTS
@@ -257,7 +258,7 @@ SC.Logger = SC.Object.create(
     If this property is set to YES, it will set 'logOutputLevel' to
     SC.LOGGER_LEVEL_DEBUG.  Otherwise, it will have no effect.
 
-    @deprecated
+    @deprecated Set the log level instead.
     @property: {Boolean}
   */
   debugEnabled: NO,
@@ -709,7 +710,7 @@ SC.Logger = SC.Object.create(
         type         = entry.type;
 
         if (includeTimestamps) {
-          timestampStr = timestampFormat.fmt(entry.timestamp.utcFormat());
+          timestampStr = timestampFormat.fmt(entry.timestamp.toUTCString());
         }
 
         // Is this a message or a group directive?
@@ -796,7 +797,7 @@ SC.Logger = SC.Object.create(
         type  = entry.type;
 
         // First determine the prefix.
-        prefix = timestampFormat.fmt(entry.timestamp.utcFormat());
+        prefix = timestampFormat.fmt(entry.timestamp.toUTCString());
         prefix += prefixMapping[type] || "";
 
         // Is this a message or a group directive?

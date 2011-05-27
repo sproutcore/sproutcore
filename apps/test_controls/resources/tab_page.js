@@ -10,7 +10,7 @@ TestControls.tabPage = SC.View.design({
   childViews: "form".w(),
   form: SC.FormView.design({
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
-    childViews: "header top topToolbar bottom overflow".w(),
+    childViews: "header top topToolbar bottom overflow icon".w(),
     
     header: SC.LabelView.design({
       layout: {width:300, height:24},
@@ -40,6 +40,14 @@ TestControls.tabPage = SC.View.design({
     overflow: SC.FormView.row(SC.TabView.design({
       layout: { width: 300, height: 100, centerY: 0 },
       items: ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7"]
+    })),
+
+    icon: SC.FormView.row(SC.TabView.design({
+      layout: { width: 300, height: 100, centerY: 0 },
+      items: [{ title: "Item 1", icon: "sc-icon-info-16" }, { title: "Item 2" }, { title: "Item 3" }],
+      itemTitleKey: 'title',
+      itemIconKey: 'icon',
+      tabLocation: SC.TOP_LOCATION
     }))
   })
 });

@@ -14,6 +14,7 @@ module("SC.View#themes");
 //var t1 = SC.Theme.addTheme("sc-test-1", SC.BaseTheme.extend({name: 'test-1' }));
 //var t2 = SC.Theme.addTheme("sc-test-2", SC.BaseTheme.extend({name: 'test-2' }));
 
+test("changing themes propagates to child view.");
 //test("changing themes propagates to child view.", function() {
   //var view = SC.View.create({
     //"childViews": "child".w(),
@@ -30,6 +31,7 @@ module("SC.View#themes");
   //ok(t2 === view.child.get("theme"), "view's child's theme should be sc-test-2");
 //});
 
+test("adding child to parent propagates theme to child view.");
 //test("adding child to parent propagates theme to child view.", function() {
   //var child = SC.View.create({});
   //var view = SC.View.create({

@@ -5,6 +5,10 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require("views/workspace");
+sc_require("views/toolbar");
+
+
 /** @class
   Master/Detail view is a simple view which manages a master view and a detail view.
   This is not all that different from a SplitView, except that, for the moment (this
@@ -25,18 +29,33 @@
   
   @since SproutCore 1.2
 */
-require("views/workspace");
-require("views/toolbar");
+SC.MasterDetailView = SC.View.extend(
+/** @scope SC.MasterDetailView.prototype */ {
 
-SC.VERTICAL_ORIENTATION = "vertical";
-SC.HORIZONTAL_ORIENTATION = "horizontal";
-
-SC.MasterDetailView = SC.View.extend({
+  /**
+    @type Array
+    @default ['sc-master-detail-view']
+    @see SC.View#classNames
+  */
   classNames: ["sc-master-detail-view"],
+  
+  /**
+    @type String
+    @default 'masterDetailRenderDelegate'
+  */
+  renderDelegateName: 'masterDetailRenderDelegate',
+  
+  
+  // ..........................................................
+  // Properties
+  // 
   
   /**
     The master view. For your development pleasure, it defaults to a
     WorkspaceView with a top toolbar.
+    
+    @type SC.View
+    @default SC.WorkspaceView
   */
   masterView: SC.WorkspaceView.extend({
     topToolbar: SC.ToolbarView.extend({
@@ -48,10 +67,13 @@ SC.MasterDetailView = SC.View.extend({
     The detail view. For your development experience, it defaults to holding
     a top toolbar view with a button that closes/shows master. Come take a peek at
     the code to see what it looks like--it is so simple.
+    
+    @type SC.View
+    @default SC.WorkspaceView
   */
   detailView: SC.WorkspaceView.extend({
     topToolbar: SC.ToolbarView.extend({
-      childViews: "showHidePicker".w(),
+      childViews: ["showHidePicker"],
       showHidePicker: SC.ButtonView.extend({
         layout: { left: 7, centerY: 0, height: 30, width: 100 },
         controlSize: SC.AUTO_CONTROL_SIZE,
@@ -70,6 +92,10 @@ SC.MasterDetailView = SC.View.extend({
     browser. Your purpose in overriding it is either to disable it from automatically
     disappearing on iPad and other touch devices, or force it to appear when a desktop
     browser changes.
+    
+    @field
+    @type Boolean
+    @default NO
   */
   autoHideMaster: function() {
     if (SC.platform.touch) return YES;
@@ -77,13 +103,19 @@ SC.MasterDetailView = SC.View.extend({
   }.property().cacheable(),
   
   /**
-    The width of the master view.
+    @type Number
     @default 250
   */
   masterWidth: 250,
   
   /**
     A property (computed) that says whether the master view is hidden.
+    
+    @field
+    @type Boolean
+    @default NO
+    @observes autoHideMaster
+    @observes orientation
   */
   masterIsHidden: function() {
     if (!this.get("autoHideMaster")) return NO;
@@ -92,10 +124,17 @@ SC.MasterDetailView = SC.View.extend({
   }.property("autoHideMaster", "orientation"),
   
   /**
-    Tracks the orientation of the view.
+    Tracks the orientation of the view. Possible values:
+    
+      - SC.VERTICAL_ORIENTATION
+      - SC.HORIZONTAL_ORIENTATION
+    
+    @type String
+    @default SC.VERTICAL_ORIENTATION
   */
   orientation: SC.VERTICAL_ORIENTATION,
   
+  /** @private */
   _scmd_frameDidChange: function() {
     var f = this.get("frame"), ret;
     if (f.width > f.height) ret = SC.HORIZONTAL_ORIENTATION;
@@ -104,8 +143,7 @@ SC.MasterDetailView = SC.View.extend({
     this.setIfChanged('orientation', ret);
   }.observes('frame'),
   
-  // have to calculate the initial orientation when added to parent at
-  // startup (frame doesn't invalidate in this case)
+  /** @private */
   init: function() {
     sc_super();
     this._scmd_frameDidChange();
@@ -114,8 +152,9 @@ SC.MasterDetailView = SC.View.extend({
   
   /**
     If the master is hidden, this toggles the master picker pane.
-    
     Of course, since pickers are modal, this actually only needs to handle showing.
+    
+    @param {SC.View} view The view to anchor the picker to
   */
   toggleMasterPicker: function(view) {
     if (!this.get("masterIsHidden")) return;
@@ -126,6 +165,9 @@ SC.MasterDetailView = SC.View.extend({
     }
   },
   
+  /**
+    @param {SC.View} view The view to anchor the picker to
+  */
   showMasterPicker: function(view) {
     if (this._picker && this._picker.get("isVisibleInWindow")) return;
     if (!this._picker) {
@@ -145,33 +187,46 @@ SC.MasterDetailView = SC.View.extend({
     }
   },
   
-  showPicker: function(p, view) {
-    p.popup(view, SC.PICKER_POINTER, [3, 0, 1, 2, 3], [9, -9, -18, 18]);
+  /**
+    @param {SC.PickerPane} picker The picker to popup
+    @param {SC.View} view The view to anchor the picker to
+  */
+  showPicker: function(picker, view) {
+    picker.popup(view, SC.PICKER_POINTER, [3, 0, 1, 2, 3], [9, -9, -18, 18]);
   },
   
-  hidePicker: function(p) {
-    p.remove();
+  /**
+    @param {SC.PickerPane} picker The picker to popup
+  */
+  hidePicker: function(picker) {
+    picker.remove();
   },
   
   /**
     The picker pane class from which to create a picker pane.
     
     This defaults to one with a special theme.
+    
+    @type SC.PickerPane
+    @default SC.PickerPane
   */
   pickerPane: SC.PickerPane.extend({
     layout: { width: 250, height: 480 },
     themeName: 'popover'
   }),
   
-  /// INTERNAL CODE. HERE, THERE BE MONSTERS!
+  
+  // ..........................................................
+  // Internal Support
+  // 
+  
+  /** @private */
   _picker: null,
+  
+  /** @private */
   pointerDistanceFromEdge: 46,
   
-  
-  renderDelegateName: 'masterDetailRenderDelegate',
-  
-  /**
-    @private
+  /** @private
     Updates masterIsHidden in child views.
   */
   _scmd_masterIsHiddenDidChange: function() {
@@ -180,8 +235,7 @@ SC.MasterDetailView = SC.View.extend({
     this.get("detailView").set("masterIsHidden", mih);
   }.observes("masterIsHidden"),
   
-  /**
-    @private
+  /** @private
     When the frame changes, we don't need to do anything. We use smart positioning.
     However, if the orientation were to change, well, then we might need to do something.
   */
@@ -189,15 +243,15 @@ SC.MasterDetailView = SC.View.extend({
     this.invokeOnce("_scmd_tile");
   }.observes("orientation"),
   
-  /**
+  /** @private
     Observes properties which require retiling.
   */
   _scmd_retileProperties: function() {
     this.invokeOnce("_scmd_tile");
   }.observes("masterIsHidden", "masterWidth"),
   
-  /**
-    Creates the child views. Specifically, instantiates master and detail views.
+  /** @private
+    Instantiates master and detail views.
   */
   createChildViews: function() {
     var master = this.get("masterView");
@@ -210,9 +264,10 @@ SC.MasterDetailView = SC.View.extend({
     this.invokeOnce("_scmd_tile");
   },
   
+  /** @private */
   _masterIsDrawn: NO, // whether the master is in the view
-  /**
-    @private
+  
+  /** @private
     Tiles the views as necessary.
   */
   _scmd_tile: function() {
@@ -254,4 +309,5 @@ SC.MasterDetailView = SC.View.extend({
       detail.set('layout', { left: 0, right: 0, top: 0, bottom: 0 });
     }
   }
+
 });

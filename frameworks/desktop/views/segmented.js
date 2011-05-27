@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('views/segment');
+
 /**
   @class
 
@@ -18,7 +20,7 @@
   some action depending on the new value.  (of course, you can always bind to
   the value as well, which is generally the preferred approach.)
 
-  h1. Defining Your Segments
+  # Defining Your Segments
 
   You define your segments by providing a items array, much like you provide
   to a RadioView.  Your items array can be as simple as an array of strings
@@ -28,24 +30,51 @@
 
   You can define the following properties on objects you pass in:
 
-  | *itemTitleKey* | the title of the button |
-  | *itemValueKey* | the value of the button |
-  | *itemWidthKey* | the preferred width. if omitted, it autodetects |
-  | *itemIconKey*  | an icon |
-  | *itemActionKey* | an optional action to fire when pressed |
-  | *itemTargetKey* | an optional target for the action |
-  | *segmentViewClass* | class to be used for creating segments |
+    - *itemTitleKey* - the title of the button
+    - *itemValueKey* - the value of the button
+    - *itemWidthKey* - the preferred width. if omitted, it autodetects
+    - *itemIconKey*  - an icon
+    - *itemActionKey* - an optional action to fire when pressed
+    - *itemTargetKey* - an optional target for the action
+    - *itemLayerIdKey* - an optional target for the action 
+    - *segmentViewClass* - class to be used for creating segments
 
   @extends SC.View
+  @extends SC.Control
   @since SproutCore 1.0
 */
 SC.SegmentedView = SC.View.extend(SC.Control,
 /** @scope SC.SegmentedView.prototype */ {
 
+  /**
+    @ field
+    @type Boolean
+    @default YES
+  */
+  acceptsFirstResponder: function() {
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    return NO;
+  }.property('isEnabled').cacheable(),
+
+  /**
+    @type String
+    @default 'tablist'
+    @readOnly
+  */
   ariaRole: 'tablist',
 
+  /**
+    @type Array
+    @default ['sc-segmented-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-segmented-view'],
 
+  /**
+    @type String
+    @default 'square'
+    @see SC.ButtonView#theme
+  */
   theme: 'square',
 
   /**
@@ -56,42 +85,74 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     If you set this value to something that has no matching button, then
     no buttons will be selected.
 
-    @field {Object}
+    @type Object
+    @default null
   */
   value: null,
 
   /**
-    Set to YES to enabled the segmented view, NO to disabled it.
+    @type Boolean
+    @default YES
   */
   isEnabled: YES,
 
   /**
     If YES, clicking a selected button again will deselect it, setting the
-    segmented views value to null.  Defaults to NO.
+    segmented views value to null.
+    
+    @type Boolean
+    @default NO
   */
   allowsEmptySelection: NO,
 
   /**
     If YES, then clicking on a tab will not deselect the other segments, it
     will simply add or remove it from the selection.
+    
+    @type Boolean
+    @default NO
   */
   allowsMultipleSelection: NO,
 
   /**
-    If YES, titles will be localized before display.
+    If YES, it will set the segment value even if an action is defined.
+
+    @type Boolean
+    @default NO
+  */
+  selectSegmentWhenTriggeringAction: NO,
+
+  /**
+    @type Boolean
+    @default YES
   */
   localize: YES,
 
   /**
     Aligns the segments of the segmented view within its frame horizontally.
+    Possible values:
+    
+      - SC.ALIGN_LEFT
+      - SC.ALIGN_RIGHT
+      - SC.ALIGN_CENTER
+    
+    @type String
+    @default SC.ALIGN_CENTER
   */
   align: SC.ALIGN_CENTER,
 
   /**
     Change the layout direction to make this a vertical set of tabs instead
-    of horizontal ones.
+    of horizontal ones. Possible values:
+    
+      - SC.LAYOUT_HORIZONTAL
+      - SC.LAYOUT_VERTICAL
+    
+    @type String
+    @default SC.LAYOUT_HORIZONTAL
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
+
 
   // ..........................................................
   // SEGMENT DEFINITION
@@ -107,21 +168,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     observed by the view for changes to titles, values, icons, widths,
     isEnabled values & tooltips.
 
-    @property {Array}
+    @type Array
+    @default null
   */
   items: null,
 
   /**
     The key that contains the title for each item.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemTitleKey: null,
 
   /**
     The key that contains the value for each item.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemValueKey: null,
 
@@ -130,7 +194,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     control in general is not enabled, no items will be enabled, even if the
     item's enabled property returns YES.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemIsEnabledKey: null,
 
@@ -138,7 +203,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     The key that contains the icon for each item.  If omitted, no icons will
     be displayed.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemIconKey: null,
 
@@ -146,7 +212,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     The key that contains the desired width for each item.  If omitted, the
     width will autosize.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemWidthKey: null,
 
@@ -155,7 +222,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     selecting this item will fire the action in addition to changing the
     value.  See also itemTargetKey.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemActionKey: null,
 
@@ -163,43 +231,57 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     The key that contains the target for this item.  If this and itemActionKey
     are defined, then this will be the target of the action fired.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemTargetKey: null,
+
+  /**
+    The key that contains the layerId for each item.
+    @property {String}
+  */
+  itemLayerIdKey: null,
 
   /**
     The key that contains the key equivalent for each item.  If defined then
     pressing that key equivalent will be like selecting the tab.  Also,
     pressing the Alt or Option key for 3 seconds will display the key
     equivalent in the tab.
+
+    @type String
+    @default null
   */
   itemKeyEquivalentKey: null,
 
   /**
     The title to use for the overflow segment if it appears.
 
-    @property {String}
+    @type String
+    @default '&raquo;'
   */
   overflowTitle: '&raquo;',
 
   /**
     The toolTip to use for the overflow segment if it appears.
 
-    @property {String}
+    @type String
+    @default 'More&hellip;'
   */
   overflowToolTip: 'More&hellip;',
 
   /**
     The icon to use for the overflow segment if it appears.
 
-    @property {String}
+    @type String
+    @default null
   */
   overflowIcon: null,
 
   /**
     The view class used when creating segments.
 
-    @property {SC.View}
+    @type SC.View
+    @default SC.SegmentView
   */
   segmentViewClass: SC.SegmentView,
 
@@ -210,12 +292,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     If a value in the item is found, then that value is mapped to a child
     view using the matching viewKey.
 
-    @property {Array}
+    @type Array
   */
-  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey itemKeyEquivalentKey'.w(),
-  viewKeys: 'title value isEnabled icon width toolTip keyEquivalent'.w(),
+  itemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey', 'itemKeyEquivalentKey', 'itemLayerIdKey'],
+  
+  /** @private */
+  viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent', 'layerId'],
 
-  /**
+  /** @private
     Call itemsDidChange once to initialize segment child views for the items that exist at
     creation time.
   */
@@ -242,11 +326,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.itemsDidChange();
   },
 
-  /**
+  /** @private
     Called whenever the number of items changes.  This method populates SegmentedView's childViews, taking
     care to re-use existing childViews if possible.
-
-    */
+  */
   itemsDidChange: function() {
     var items = this.get('items') || [],
         item,
@@ -361,10 +444,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.invokeLast(this.remeasure);
   }.observes('*items.[]'),
 
-  /**
+  /** @private
     This observer method is called whenever any of the relevant properties of an item change.  This only applies
     to SC.Object based items that may be observed.
-
   */
   itemContentDidChange: function(item, key, alwaysNull, index) {
     var items = this.get('items'),
@@ -384,9 +466,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.invokeLast(this.remeasure);
   },
 
-  /**
+  /** @private
     Whenever the view resizes, we need to check to see if we're overflowing.
-
   */
   viewDidResize: function() {
     var visibleWidth = this.$().width();
@@ -395,10 +476,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this.isOverflowing || visibleWidth <= this.cachedMinimumWidth) this.adjustOverflow();
   },
 
-  /**
+  /** @private
     Whenever visibility changes, we need to check to see if we're overflowing.
-
-   */
+  */
   isVisibleInWindowDidChange: function() {
     this.invokeLast(this.remeasure);
   }.observes('isVisibleInWindow'),
@@ -406,7 +486,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   /** @private
     Calling this method forces the segments to be remeasured and will also adjust the
     segments for overflow if necessary.
-
   */
   remeasure: function() {
     var renderDelegate = this.get('renderDelegate'),
@@ -431,7 +510,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
   /** @private
     This method is called to adjust the segment views for overflow.
-
    */
   adjustOverflow: function() {
     var childViews = this.get('childViews'),
@@ -494,15 +572,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   // RENDERING/DISPLAY SUPPORT
   //
 
+  /**
+    @type Array
+    @default ['align']
+    @see SC.View#displayProperties
+  */
   displayProperties: ['align'],
 
+  /**
+    @type String
+    @default 'segmentedRenderDelegate'
+  */
   renderDelegateName: 'segmentedRenderDelegate',
 
   // ..........................................................
   // EVENT HANDLING
   //
 
-  /**
+  /** @private
     Determines the index into the displayItems array where the passed mouse
     event occurred.
   */
@@ -514,6 +601,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
+  /** @private */
   keyDown: function(evt) {
     var childViews,
         childView,
@@ -572,6 +660,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return NO;
   },
 
+  /** @private */
   mouseDown: function(evt) {
     var childViews = this.get('childViews'),
         childView,
@@ -595,6 +684,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   mouseUp: function(evt) {
     var activeChildView,
         index;
@@ -616,6 +706,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   mouseMoved: function(evt) {
     var childViews = this.get('childViews'),
         overflowIndex = childViews.get('length') - 1,
@@ -646,6 +737,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   mouseEntered: function(evt) {
     var childViews = this.get('childViews'),
         childView,
@@ -670,6 +762,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   mouseExited: function(evt) {
     var activeChildView;
 
@@ -684,6 +777,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   touchStart: function(touch) {
     var childViews = this.get('childViews'),
         childView,
@@ -707,6 +801,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES ;
   },
 
+  /** @private */
   touchEnd: function(touch) {
     var activeChildView,
         index;
@@ -727,6 +822,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   touchesDragged: function(evt, touches) {
     var isTouching = this.touchIsInBoundary(evt),
         childViews = this.get('childViews'),
@@ -765,6 +861,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   _touchDidExit: function(evt) {
     var activeChildView;
 
@@ -777,6 +874,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
+  /** @private */
   _touchDidEnter: function(evt) {
     var childViews = this.get('childViews'),
         childView,
@@ -797,7 +895,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /**
+  /** @private
     Simulates the user clicking on the segment at the specified index. This
     will update the value if possible and fire the action.
   */
@@ -871,8 +969,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (resp) resp.sendAction(action, target, this, this.get('pane'));
     }
 
-    // Only set value if there is no action and a value is defined.
-    if(!action && val !== undefined) {
+    if(val !== undefined && (!action || this.get('selectSegmentWhenTriggeringAction'))) {
       this.set('value', value);
     }
 
@@ -993,12 +1090,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         childView.set('isSelected', NO);
       }
     }
-  }.observes('value'),
-
-  /** tied to the isEnabled state */
-   acceptsFirstResponder: function() {
-     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-     else return NO;
-   }.property('isEnabled').cacheable()
+  }.observes('value')
 
 });

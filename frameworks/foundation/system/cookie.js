@@ -4,9 +4,7 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-// ==========================================================================
-// SC.Cookie
-// ==========================================================================
+
 
 /** @class
 
@@ -23,23 +21,22 @@
   @author Colin Campbell
 */
 
-SC.Cookie = SC.Object.extend({
+SC.Cookie = SC.Object.extend(
+/** @scope SC.Cookie.prototype */{
 
   // ..........................................................
   // PROPERTIES
   //
 
   /**
-    The name of the cookie
-
-    @property {String}
+    @type String
+    @default null
   */
   name: null,
 
   /**
-    The value of the cookie
-
-    @property {String}
+    @type String
+    @default ''
   */
   value: '',
 
@@ -48,21 +45,20 @@ SC.Cookie = SC.Object.extend({
 
     If passing an Integer, it is interpreted as a number of days.
 
-    @property {Integer|SC.DateTime|Date}
+    @type Integer|SC.DateTime|Date
+    @default null
   */
   expires: null,
 
   /**
-    The value of the path atribute of the cookie (default: path of page that created the cookie).
-
-    @property {String}
+    @type String
+    @deafult null
   */
   path: null,
 
   /**
-    The value of the domain attribute of the cookie (default: domain of page that created the cookie).
-
-    @property {String}
+    @type String
+    @default null
   */
   domain: null,
 
@@ -70,17 +66,20 @@ SC.Cookie = SC.Object.extend({
     If true, the secure attribute of the cookie will be set and the cookie transmission will
     require a secure protocol (like HTTPS).
 
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   secure: NO,
 
   /**
     Walk like a duck
 
-    @property {Boolean}
-    @isReadOnly
+    @type Boolean
+    @default YES
+    @readOnly
   */
   isCookie: YES,
+
 
   // ..........................................................
   // METHODS
@@ -149,7 +148,7 @@ SC.Cookie.mixin(
     if (document.cookie && document.cookie !== '') {
       var cookies = document.cookie.split(';');
       for (var i = 0; i < cookies.length; i++) {
-        var cookie = String(cookies[i]).trim();
+        var cookie = SC.String.trim(String(cookies[i]));
         if (cookie.substring(0, name.length + 1) === (name + "=")) {
           return SC.Cookie.create({
             name: name,

@@ -7,7 +7,6 @@
 
 /*globals CoreTest Q$ */
 
-sc_require('jquery');
 sc_require('system/plan');
 
 /** @static
@@ -26,7 +25,9 @@ CoreTest.Runner = {
   */
   plan: null,
   errors: null,
-  
+
+  showProgress: false,
+
   create: function() {
     var len = arguments.length,
         ret = CoreTest.beget(this),
@@ -47,41 +48,63 @@ CoreTest.Runner = {
   
   planDidBegin: function(plan) {
     // setup the report DOM element.
-    this.report = Q$(['<div class="core-test">',
-      '<div class="useragent">UserAgent</div>',
-      '<div class="testresult">',
-        '<label class="hide-passed">',
-          '<input type="checkbox" checked="checked" /> Hide passed tests',
-        '</label>',
-        '<span class="status">Running...</span>',
-      '</div>',
-      '<div class="detail">',
-        '<table>',
-          '<thead><tr>',
-            '<th class="desc">Test</th><th>Result</th>',
-          '</tr></thead>',
-          '<tbody><tr></tr></tbody>',
-        '</table>',
-      '</div>',
-    '</div>'].join(''));
+    var str = [
+      '<div class="core-test">',
+        '<div class="useragent">UserAgent</div>',
+        '<div class="testresult">',
+          '<label class="hide-passed">',
+            '<input type="checkbox" checked="checked" /> Hide passed tests',
+          '</label>'
+    ];
 
-      
+    if (navigator.userAgent.indexOf('MSIE')==-1) {
+      str.push(
+          '<label class="show-progress">',
+            '<input type="checkbox"'+(this.showProgress?' checked="checked"':'')+'" /> Show progess (slower)',
+          '</label>'
+      );
+    }
+
+    str.push(
+          '<label class="show-progress">',
+            '<input type="checkbox"'+(this.showProgress?' checked="checked"':'')+'" /> Show progess (slower)',
+          '</label>',
+          '<span class="status">Running...</span>',
+        '</div>',
+        '<div class="detail">',
+          '<table>',
+            '<thead><tr>',
+              '<th class="desc">Test</th><th>Result</th>',
+            '</tr></thead>',
+            '<tbody><tr></tr></tbody>',
+          '</table>',
+        '</div>',
+      '</div>'
+    );
+
+    this.report = Q$(str.join(''));
+
     this.report.find('.useragent').html(navigator.userAgent);
     this.logq = this.report.find('tbody');
     this.testCount = 0 ;
     
     // listen to change event
     var runner = this;
-    this.checkbox = this.report.find('.hide-passed input'); 
-    this.checkbox.change(function() {
+    this.hidePassedCheckbox = this.report.find('.hide-passed input');
+    this.hidePassedCheckbox.change(function() {
       runner.hidePassedTestsDidChange();
     });
-    
+
+    this.showProgressCheckbox = this.report.find('.show-progress input');
+    this.showProgressCheckbox.change(function() {
+      runner.showProgressCheckboxDidChange();
+    });
+
     Q$('body').append(this.report);
   },
   
   hidePassedTestsDidChange: function() {
-    var checked = !!this.checkbox.val();
+    var checked = this.hidePassedCheckbox.is(':checked');
         
     if (checked) {
       this.logq.addClass('hide-clean');
@@ -89,7 +112,12 @@ CoreTest.Runner = {
       this.logq.removeClass('hide-clean');
     }
   },
-  
+
+  showProgressCheckboxDidChange: function(){
+    this.showProgress = this.showProgressCheckbox.is(':checked');
+    if (this.showProgress) { this.flush(); }
+  },
+
   planDidFinish: function(plan, r) {
     this.flush();
     
@@ -129,9 +157,11 @@ CoreTest.Runner = {
     if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
     
+    CoreTest.finished = true;
+    
     if (this.errors) CoreTest.errors=this.errors.join('');
 
-
+    
     // Unload the SproutCore event system so that the user can select the text
     // of the various events.  (It is handy when looking at failed tests.)
     if (SC  &&  SC.Event  &&  SC.Event.unload) {
@@ -202,7 +232,15 @@ CoreTest.Runner = {
   
   // called when the plan takes a break.  Good time to flush HTML output.
   planDidPause: function(plan) {
-    if(navigator.userAgent.indexOf('MSIE')==-1) this.flush();  
+    if(!this._cacheResultSelector){
+      this._cacheResultSelector = this.report.find('.testresult .status');
+    }
+    var result = this._cacheResultSelector;
+
+    if (this.resultStr && navigator.userAgent.indexOf('MSIE')==-1) result.html(this.resultStr);
+    this.resultStr = null ;
+
+    if (this.showProgress) { this.flush(); }
   },
   
   // flush any pending HTML changes...

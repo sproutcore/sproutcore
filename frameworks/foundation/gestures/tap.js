@@ -4,23 +4,57 @@
 // Author:    Peter Wagenet
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 sc_require("system/gesture");
 
-SC.TapGesture = SC.Gesture.extend({
+/**
+  @class
+  @extends SC.Gesture
+*/
+SC.TapGesture = SC.Gesture.extend(
+/** @scope SC.TapGesture.prototype */{
+
+  /**
+    @type String
+    @default "tap"
+    @readOnly
+  */
   name: "tap",
+
+  /**
+    @type Boolean
+    @default NO
+    @readOnly
+  */
   acceptsMultitouch: NO,
 
+  /** @private */
   _tapCount: null,
+  
+  /** @private */
   _candidateTouch: null,
+  
+  /** @private */
   _eventTimer: null,
 
+  /**
+    @type Number
+    @default 20
+  */
   tapWiggle: 10,
+
+  /**
+    @type Number
+    @default 200
+  */
   tapDelay: 200,
 
+  /** @private */
   touchIsInGesture: function(touch, status) {
     return !touch.tapFlunked;
   },
 
+  /** @private */
   touchStart: function(touch) {
     // We don't want events triggering during a touch, will be reset when touch is over if it's a candidate
     if (this._eventTimer) this._eventTimer.invalidate();
@@ -42,6 +76,7 @@ SC.TapGesture = SC.Gesture.extend({
     return YES;
   },
 
+  /** @private */
   touchesDragged: function(evt, touches) {
     var touch = touches[0];
 
@@ -58,6 +93,7 @@ SC.TapGesture = SC.Gesture.extend({
     if (tooManyTouches || touchMoved) this._cancelTap(touch);
   },
 
+  /** @private */
   touchEnd: function(touch){
     if (this._calculateDragDistance(touch) > this.get('tapWiggle') || Date.now() - this._candidateTouch.startTime > this.get('tapDelay') ) {
       // Touch moved too much or took too long
@@ -67,6 +103,7 @@ SC.TapGesture = SC.Gesture.extend({
     }
   },
 
+  /** @private */
   _addTap: function(touch){
     var self = this;
 
@@ -85,6 +122,7 @@ SC.TapGesture = SC.Gesture.extend({
 
   },
 
+  /** @private */
   _cancelTap: function(touch){
     // We don't set this on the touchStatus because the status is
     // linked to an individual view/gesture and we want this to be
@@ -101,6 +139,7 @@ SC.TapGesture = SC.Gesture.extend({
 
   },
 
+  /** @private */
   _triggerTap: function(touch){
     this.end(touch, this._tapCount);
 
@@ -109,6 +148,7 @@ SC.TapGesture = SC.Gesture.extend({
     this._eventTimer = null;
   },
 
+  /** @private */
   _calculateDragDistance: function(touch) {
     return Math.sqrt(Math.pow(touch.pageX - touch.startX, 2) + Math.pow(touch.pageY - touch.startY, 2));
   }

@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('core') ;
+sc_require('ext/function');
 sc_require('system/enumerator');
 
 /*globals Prototype */
@@ -32,7 +33,7 @@ sc_require('system/enumerator');
      with an SC.Object subclass, you should be sure to change the length
      property using set().
 
-  2. If you must implement nextObject().  See documentation.
+  2. You must implement nextObject().  See documentation.
 
   Once you have these two methods implemented, apply the SC.Enumerable mixin
   to your class and you will be able to enumerate the contents of your object
@@ -61,7 +62,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
   /**
     Implement this method to make your class enumerable.
 
-    This method will be call repeatedly during enumeration.  The index value
+    This method will be called repeatedly during enumeration.  The index value
     will always begin with 0 and increment monotonically.  You don't have to
     rely on the index value to determine what object to return, but you should
     always check the value and start from the beginning when you see the
@@ -71,7 +72,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     to nextObject for the current iteration.  This is a useful way to
     manage iteration if you are tracing a linked list, for example.
 
-    Finally the context paramter will always contain a hash you can use as
+    Finally the context parameter will always contain a hash you can use as
     a "scratchpad" to maintain any other state you need in order to iterate
     properly.  The context object is reused and is not reset between
     iterations so make sure you setup the context with a fresh state whenever
@@ -81,7 +82,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     reaches the your current length-1.  If you run out of data before this
     time for some reason, you should simply return undefined.
 
-    The default impementation of this method simply looks up the index.
+    The default implementation of this method simply looks up the index.
     This works great on any Array-like objects.
 
     @param {Number} index the current index of the iteration
@@ -805,411 +806,8 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @param {Array} removedObjects the objects that were removed
     @returns {Object} receiver
   */
-  enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
-    this._setupContentObservers(addedObjects, removedObjects);
+  enumerableContentDidChange: function(start, length, deltas) {
     this.notifyPropertyChange('[]') ;
-    this._notifyEnumerableObservers(addedObjects, removedObjects, start);
-  },
-
-  /**
-    For all registered property chains on this object, removed them from objects
-    being removed from the enumerable, and clone them onto newly added objects.
-
-    @param {Object[]} addedObjects the objects being added to the enumerable
-    @param {Object[]} removedObjects the objected being removed from the enumerable
-    @returns {Object} receiver
-  */
-  setupPropertyChainsForEnumerableContent: function(addedObjects, removedObjects) {
-    var chains = this._kvo_enumerable_property_chains;
-
-    if (chains) {
-      chains.forEach(function(chain) {
-        var idx, len = removedObjects.get('length'),
-            chainGuid = SC.guidFor(chain),
-            clonedChain, item, kvoChainList = '_kvo_enumerable_property_clones';
-
-        chain.notifyPropertyDidChange();
-
-        for (idx = 0; idx < len; idx++) {
-          item = removedObjects[idx];
-          clonedChain = item[kvoChainList][chainGuid];
-          clonedChain.deactivate();
-          delete item[kvoChainList][chainGuid];
-        }
-
-        len = addedObjects.get('length');
-        for (idx = 0; idx < len; idx++) {
-          this._clonePropertyChainToItem(chain, addedObjects[idx]);
-        }
-      }, this);
-    }
-    return this ;
-  },
-
-  /**
-    Register a property chain to propagate to enumerable content.
-
-    This will clone the property chain to each item in the enumerable,
-    then save it so that it is automatically set up and torn down when
-    the enumerable content changes.
-
-    @param {String} property the property being listened for on this object
-    @param {SC._PropertyChain} chain the chain to clone to items
-  */
-  registerDependentKeyWithChain: function(property, chain) {
-    // Get the set of all existing property chains that should
-    // be propagated to enumerable contents. If that set doesn't
-    // exist yet, _kvo_for() will create it.
-    var kvoChainList = '_kvo_enumerable_property_chains',
-        chains, item, clone, cloneList;
-
-    chains = this._kvo_for(kvoChainList, SC.CoreSet);
-
-    // Save a reference to the chain on this object. If new objects
-    // are added to the enumerable, we will clone this chain and add
-    // it to the new object.
-    chains.add(chain);
-
-    this.forEach(function(item) {
-      this._clonePropertyChainToItem(chain, item);
-    }, this);
-  },
-
-  /**
-    Clones an SC._PropertyChain to a content item.
-
-    @param {SC._PropertyChain} chain
-    @param {Object} item
-  */
-  _clonePropertyChainToItem: function(chain, item) {
-    var clone        = SC.clone(chain),
-        kvoCloneList = '_kvo_enumerable_property_clones',
-        cloneList;
-
-    clone.object = item;
-
-    cloneList = item[kvoCloneList] = item[kvoCloneList] || {};
-    cloneList[SC.guidFor(chain)] = clone;
-
-    clone.activate(item);
-  },
-
-  /**
-    Removes a dependent key from the enumerable, and tears it down on
-    all content objects.
-
-    @param {String} property
-    @param {SC._PropertyChain} chain
-  */
-  removeDependentKeyWithChain: function(property, chain) {
-    var kvoChainList = '_kvo_enumerable_property_chains',
-        kvoCloneList = '_kvo_enumerable_property_clones',
-        chains, item, clone, cloneList;
-
-    this.forEach(function(item) {
-      item.removeDependentKeyWithChain(property, chain);
-
-      cloneList = item[kvoCloneList];
-      clone = cloneList[SC.guidFor(chain)];
-
-      clone.deactivate(item);
-    }, this);
-  },
-
-  /**
-    Called when the contents of the enumerable mutates.
-
-    Implementers of classes that mixin SC.Enumerable should ensure that they
-    call enumerableContentDidChange(), which invokes this method automatically.
-
-    @param {Array} addedObjects the array of objects that were added to the enumerable
-    @param {Array} removedObjects the array of objects that were removed from the enumerable
-    @param {Number} index the index at which the mutation occurred
-  */
-  _notifyEnumerableObservers: function(addedObjects, removedObjects, index) {
-    var observers, members, member, memberLoc, membersLength;
-    var target, method, context;
-
-    observers = this._kvo_enumerable_observers;
-
-    if (observers) {
-      members = SC.clone(observers.getMembers());
-      membersLength = members.length;
-
-      for(memberLoc=0; memberLoc < membersLength; memberLoc++) {
-        member = members[memberLoc];
-
-        target = member[0];
-        method = member[1];
-        context = member[2];
-
-        method.call(target, addedObjects, removedObjects, index, this, context);
-      }
-    }
-  },
-
-  /**
-    Adds an enumerable observer to the enumerable.
-
-    Enumerable observers are called whenever the enumerable's content
-    mutates. For example, adding an object via pushObject(), or replacing
-    objects via replace(), will cause all enumerable observers to be fired.
-
-    Observer methods that you register should have the following signature:
-
-        enumerableDidChange: function(addedObjects, removedObjects, index, source)
-
-    addedObjects will contain an array of the objects added and removedObjects
-    will contain an array of the objects that were removed. The index parameter
-    contains the index at which the mutation occurred.
-
-    The fourth parameter, source, is the enumerable that mutated. This is useful
-    if you register the same observer method on multiple enumerables.
-
-    If you pass a context parameter to addEnumerableObserver(), it will be
-    included when the observer is fired:
-
-        function(addedObjects, removedObjects, sender, context);
-
-    @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke
-    @param {Object} context optional context
-
-    @returns {SC.Object} self
-  */
-  addEnumerableObserver: function(target, method, context) {
-    var observers;
-
-    // Normalize parameters. If a function is passed as
-    // target, make it the method.
-    if (method === undefined) {
-      method = target;
-      target = this;
-    }
-
-    // Call the observer in the context of the enumerable
-    // if no explicit target is given.
-    if (!target) { target = this; }
-
-    // If the method is provided as a string, look it up on
-    // the target.
-    if (typeof method === "string") {
-      method = target[method];
-    }
-
-    if (!method) {
-      throw "You must pass a method to addEnumerableObserver()";
-    }
-
-    observers = this._kvo_for('_kvo_enumerable_observers', SC.ObserverSet);
-    observers.add(target, method, context);
-
-    return this;
-  },
-
-  /**
-    Removes an enumerable observer. Expects the same target and method that
-    were used to register the observer.
-
-    @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke
-
-    @returns {SC.Object} self
-  */
-  removeEnumerableObserver: function(target, method) {
-    var observers;
-
-    // Normalize parameters. If a function is passed as
-    // target, make it the method.
-    if (method === undefined) {
-      method = target;
-      target = this;
-    }
-
-    // Call the observer in the context of the enumerable
-    // if no explicit target is given.
-    if (!target) { target = this; }
-
-    // If the method is provided as a string, look it up on
-    // the target.
-    if (typeof method === "string") {
-      method = target[method];
-    }
-
-    if (!method) {
-      throw "You must pass a method to removeEnumerableObserver()";
-    }
-
-    observers = this._kvo_enumerable_observers;
-
-    if (observers) {
-      observers.remove(target, method);
-    } else {
-      throw "%@: Can't remove observers if no observer has been added.";
-    }
-
-    return this;
-  },
-
-  /**
-    @private
-
-    Clones a segment of an observer chain and applies it
-    to an element of this Enumerable.
-
-    @param {Object} item The element
-    @param {SC._ChainObserver} chainObserver the chain segment to begin from
-  */
-  _resumeChainObservingForItemWithChainObserver: function(item, chainObserver) {
-    var observer = SC.clone(chainObserver.next);
-    var key = observer.property;
-
-    // The chain observer should create new observers on the child object
-    observer.object = item;
-    item.addObserver(key, observer, observer.propertyDidChange);
-
-    // if we're in the initial chained observer setup phase, add the tail
-    // of the current observer segment to the list of tracked tails.
-    if(chainObserver.root.tails) {
-      chainObserver.root.tails.pushObject(observer.tail());
-    }
-
-    observer.propertyDidChange();
-
-    // Maintain a list of observers on the item so we can remove them
-    // if it is removed from the enumerable.
-    item._kvo_for(SC.keyFor('_kvo_content_observers', key)).push(observer);
-  },
-
-  /**
-    @private
-
-    When enumerable content has changed, remove enumerable observers from
-    items that are no longer in the enumerable, and add observers to newly
-    added items.
-
-    @param {Array} addedObjects the array of objects that have been added
-    @param {Array} removedObjects the array of objects that have been removed
-  */
-  _setupContentObservers: function(addedObjects, removedObjects) {
-    if (!addedObjects) { addedObjects = this; }
-    if (!removedObjects) { removedObjects = []; }
-
-    // Check the last values passed and skip this step if they are
-    // the same.
-    //
-    // TODO: This is obviously a suboptimal workaround to the fact that
-    // enumerableContentDidChange can get called twice when implementing
-    // SC.ArrayController. We should revisit how enumerableContentDidChange
-    // works in that context. --TD
-    var lastAdded = this._lastAdded;
-    var lastRemoved = this._lastRemoved;
-
-    if(lastAdded === addedObjects) { addedObjects = []; }
-    if(lastRemoved === removedObjects) { removedObjects = []; }
-
-    this._lastAdded = addedObjects;
-    this._lastRemoved = removedObjects;
-
-    var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
-    var kvoKey;
-
-    // Only setup and teardown enumerable observers if we have keys to observe
-    if (observedKeys.get('length') > 0) {
-
-      // added and resume the chain observer.
-      observedKeys.forEach(function(key) {
-        kvoKey = SC.keyFor('_kvo_content_observers', key);
-
-        // Loop through removed objects and remove any enumerable observers that
-        // belong to them.
-        removedObjects.forEach(function(item) {
-          item._kvo_for(kvoKey).forEach(function(observer) {
-            observer.destroyChain();
-          }, this);
-        }, this);
-        var lastObserver;
-
-        // Get all original ChainObservers associated with the key
-        this._kvo_for(kvoKey).forEach(function(observer) {
-          // if there are no added objects or removed objects, this
-          // object is a proxy (like ArrayController), which does
-          // not currently receive the added or removed objects.
-          // As a result, walk down to the last element of the
-          // chain and trigger its propertyDidChange, which will
-          // invalidate anything listening.
-          if(!addedObjects.get('length') && !removedObjects.get('length')) {
-            lastObserver = observer;
-            while(lastObserver.next) { lastObserver = lastObserver.next; }
-            lastObserver.propertyDidChange();
-          } else {
-            addedObjects.forEach(function(item) {
-              this._resumeChainObservingForItemWithChainObserver(item, observer);
-            }, this);
-          }
-        }, this);
-      }, this);
-    }
-  },
-
-  /**
-    @private
-
-    Adds a content observer. Content observers are able to
-    propagate chain observers to each member item in the enumerable,
-    so that the observer is fired whenever a single item changes.
-
-    You should never call this method directly. Instead, you should
-    call addObserver() with the special '@each' property in the path.
-
-    For example, if you wanted to observe changes to each item's isDone
-    property, you could call:
-
-        arrayController.addObserver('@each.isDone');
-
-    @param {SC._ChainObserver} chainObserver the chain observer to propagate
-  */
-  _addContentObserver: function(chainObserver) {
-    var key = chainObserver.next.property;
-
-    // Add the key to a set so we know what we are observing
-    this._kvo_for('_kvo_content_observed_keys', SC.CoreSet).push(key);
-
-    // Add the passed ChainObserver to an ObserverSet for that key
-    var kvoKey = SC.keyFor('_kvo_content_observers', key);
-    this._kvo_for(kvoKey).push(chainObserver);
-
-    // set up chained observers on the initial content
-    this._setupContentObservers(this);
-  },
-
-  /**
-    @private
-
-    Removes a content observer. Pass the same chain observer
-    that was used to add the content observer.
-
-    @param {SC._ChainObserver} chainObserver the chain observer to propagate
-  */
-
-  _removeContentObserver: function(chainObserver) {
-    var observers, kvoKey;
-    var observedKeys = this._kvo_content_observed_keys;
-    var key = chainObserver.next.property;
-
-    if (observedKeys.contains(key)) {
-
-      kvoKey = SC.keyFor('_kvo_content_observers', key);
-      observers = this._kvo_for(kvoKey);
-
-      observers.removeObject(chainObserver);
-
-      this._setupContentObservers([], this);
-
-      if (observers.length === 0) {
-        this._kvo_for('_kvo_content_observed_keys').remove(key);
-      }
-    }
   },
 
   /**

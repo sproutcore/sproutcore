@@ -16,7 +16,7 @@
   types of objects to ensure that both the mixin and the object implementing
   the mixin use the API properly.
   
-  h1. Using a Suite
+  ## Using a Suite
   
   To use a Suite, call the generate() method on the suite inside on of your
   unit test files.  This will generate new modules and tests in the suite
@@ -27,16 +27,14 @@
   generate() method.  See the documentation on the specific test suite for
   information on the kind of customizations you may need to provide.
   
-  h2. Example
+  ### Example
   
-  {{{
-    // generates the SC.ArrayTestSuite tests for a built-in array.
-    SC.ArrayTests.generate('Array', {
-      newObject: function() { return []; }
-    });
-  }}}
+      // generates the SC.ArrayTestSuite tests for a built-in array.
+      SC.ArrayTests.generate('Array', {
+        newObject: function() { return []; }
+      });
   
-  h1. Defining a Suite
+  ## Defining a Suite
   
   To define a test suite, simply call the extend() method, passing any 
   attributs you want to define on the stuie along with this method.  You can
@@ -45,24 +43,22 @@
   Functions you pass to define will have an instance of the test suite passed
   as their first parameter when invoked.
 
-  h2. Example 
+  ### Example 
   
-  {{{
-    SC.ArrayTests = CoreTest.Suite.create("Verify SC.Array compliance", {
+      SC.ArrayTests = CoreTest.Suite.create("Verify SC.Array compliance", {
       
-      // override to generate a new object that implements SC.Array
-      newObject: function() { return null; }
-    });
-    
-    SC.ArrayTests.define(function(T) {
-      T.module("length tests");
-      
-      test("new length", function() {
-        equals(T.object.get('length'), 0, 'array length');
+        // override to generate a new object that implements SC.Array
+        newObject: function() { return null; }
       });
+    
+      SC.ArrayTests.define(function(T) {
+        T.module("length tests");
       
-    });
-  }}}
+        test("new length", function() {
+          equals(T.object.get('length'), 0, 'array length');
+        });
+      
+      });
   
   @since SproutCore 1.0
   
@@ -206,13 +202,11 @@ CoreTest.Suite = /** @scope CoreTest.Suite.prototype */ {
     a convenience function for use inside of a definition function.  You could
     do the same thing by calling:
     
-    {{{
-      var T = this ;
-      module(T.desc(description), {
-        setup: function() { T.setup(); },
-        teardown: function() { T.teardown(); }
-      }
-    }}}
+        var T = this ;
+        module(T.desc(description), {
+          setup: function() { T.setup(); },
+          teardown: function() { T.teardown(); }
+        }
     
     @param {String} desc detailed descrition
     @returns {CoreTest.Suite} receiver

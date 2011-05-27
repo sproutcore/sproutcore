@@ -5,31 +5,73 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+/**
+  @type String
+  @constant
+*/
 SC.SCALE_NONE = "none";
+
+/**
+  Stretch/shrink the shape to fill the frame
+
+  @type String
+  @constant
+*/
 SC.FILL = "fill";
+
+/**
+  Stretch/shrink the shape to fill the frame while maintaining aspect ratio, such
+  that the shortest dimension will just fit within the frame and the longest dimension will
+  overflow and be cropped.
+
+  @type String
+  @constant
+*/
 SC.FILL_PROPORTIONALLY = "fillProportionally";
+
+/**
+  Stretch/shrink the shape to fit the frame while maintaining aspect ratio, such that the
+  longest dimension will just fit within the frame
+
+  @type String
+  @constant
+*/
 SC.BEST_FIT = "fitBest";
+
+/**
+  Shrink the shape to fit the frame while maintaining aspect ratio, such that
+  the longest dimension will just fit within the frame.  Do not stretch the shape if the shape's
+  width is less than the frame's width.
+
+  @type String
+  @constant
+*/
 SC.BEST_FIT_DOWN_ONLY = "fitBestDown";
 
 /**
+  @namespace
+
   InnerFrame provides the innerFrameForSize function, which will return a frame for the given size adjusted
   to fit within the given outer size, according to the align and scale properties.
 
   View's that render images will find this mixin particularly useful for fitting their images.
-
  */
 SC.InnerFrame = {
 
   /**
-    Align the shape within its frame.
+    Align the shape within its frame. Possible values:
 
-    <table>
-    <tr><td>SC.ALIGN_TOP_LEFT</td><td>SC.ALIGN_TOP</td><td>SC.ALIGN_TOP_RIGHT</td></tr>
-    <tr><td>SC.ALIGN_LEFT</td><td>SC.ALIGN_CENTER/td><td>SC.ALIGN_RIGHT</td></tr>
-    <tr><td>SC.ALIGN_BOTTOM_LEFT</td><td>SC.ALIGN_BOTTOM</td><td>SC.ALIGN_BOTTOM_RIGHT</td></tr>
-    </table>
+      - SC.ALIGN_TOP_LEFT
+      - SC.ALIGN_TOP
+      - SC.ALIGN_TOP_RIGHT
+      - SC.ALIGN_LEFT
+      - SC.ALIGN_CENTER
+      - SC.ALIGN_RIGHT
+      - SC.ALIGN_BOTTOM_LEFT
+      - SC.ALIGN_BOTTOM
+      - SC.ALIGN_BOTTOM_RIGHT
 
-    @property {SC.ALIGN_CENTER|SC.ALIGN_TOP_LEFT|SC.ALIGN_TOP|SC.ALIGN_TOP_RIGHT|SC.ALIGN_RIGHT|SC.ALIGN_BOTTOM_RIGHT|SC.BOTTOM|SC.BOTTOM_LEFT|SC.LEFT}
+    @type String
     @default SC.ALIGN_CENTER
   */
   align: SC.ALIGN_CENTER,
@@ -39,37 +81,12 @@ SC.InnerFrame = {
     destination size (destWidth & destHeight) according to the align and scale properties.  This is essential to
     positioning child views or elements within parent views or elements in elegant ways.
 
-    Examples using 'align' on a 10x10px inner size within a 20x20px outer size ('scale' = SC.SCALE_NONE):
-
-    <table>
-    <tr><th>'align'</th><th>innerFrameForSize(10, 10, 20, 20)</th></tr>
-    <tr><td>SC.ALIGN_TOP_LEFT</td><td>{x: 0, y: 0, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_TOP</td><td>{x: 5, y: 0, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_TOP_RIGHT</td><td>{x: 10, y: 0, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_LEFT</td><td>{x: 0, y: 5, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_CENTER</td><td>{x: 5, y: 5, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_RIGHT</td><td>{x: 10, y: 5, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_BOTTOM_LEFT</td><td>{x: 0, y: 10, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_BOTTOM</td><td>{x: 5, y: 10, width: 10, height: 10}</td></tr>
-    <tr><td>SC.ALIGN_BOTTOM_RIGHT</td><td>{x: 10, y: 10, width: 10, height: 10}</td></tr>
-    </table>
-
-
-    Examples using 'scale' on a 10x15px inner size within a 20x20px outer size ('align' = SC.ALIGN_CENTER):
-
-    <table>
-    <tr><th>'scale'</th><th>innerFrameForSize(10, 15, 20, 20)</th></tr>
-    <tr><td>SC.SCALE_NONE</td><td>{x: 5, y: 5, width: 10, height: 10}</td></tr>
-    <tr><td>SC.FILL</td><td>{x: 0, y: 0, width: 20, height: 20}</td></tr>
-    <tr><td>SC.FILL_PROPORTIONALLY</td><td>{x: 0, y: -5, width: 20, height: 30}</td></tr>
-    <tr><td>SC.BEST_FIT</td><td>{x: 3, y: 0, width: 13, height: 20}</td></tr>
-    <tr><td>SC.BEST_FIT_DOWN_ONLY</td><td>{x: 5, y: 3, width: 10, height: 15}</td></tr>
-    <tr><td>2.0</td><td>{x: 0, y: -5, width: 20, height: 30}</td></tr>
-    </table>
-
+    @param {Number} sourceWidth
+    @param {Number} sourceHeight
+    @param {Number} destWidth
+    @param {Number} destHeight
     @returns {Object} the inner frame with properties: {x: value, y: value, width: value, height: value }
-   */
-
+  */
   innerFrameForSize: function(sourceWidth, sourceHeight, destWidth, destHeight) {
     var align = this.get('align'),
         scale = this.get('scale'),
@@ -162,22 +179,15 @@ SC.InnerFrame = {
   },
 
   /**
-    Determines how the shape will scale to fit within its containing space.
+    Determines how the shape will scale to fit within its containing space. Possible values:
+    
+      - SC.SCALE_NONE
+      - SC.FILL
+      - SC.FILL_PROPORTIONALLY
+      - SC.BEST_FIT
+      - SC.BEST_FIT_DOWN_ONLY
 
-    Examples:
-
-      SC.SCALE_NONE - don't scale
-      SC.FILL - stretch/shrink the shape to fill the frame
-      SC.FILL_PROPORTIONALLY - stretch/shrink the shape to fill the frame while maintaining aspect ratio, such
-        that the shortest dimension will just fit within the frame and the longest dimension will
-        overflow and be cropped
-      SC.BEST_FIT - stretch/shrink the shape to fit the frame while maintaining aspect ratio, such that the
-        longest dimension will just fit within the frame
-      SC.BEST_FIT_DOWN_ONLY - shrink the shape to fit the frame while maintaining aspect ratio, such that
-        the longest dimension will just fit within the frame.  Do not stretch the shape if the shape's
-        width is less than the frame's width.
-
-    @property {SC.SCALE_NONE|SC.FILL|SC.FILL_PROPORTIONALLY|SC.BEST_FIT|SC.BEST_FIT_DOWN_ONLY|Number}
+    @type String
     @default SC.FILL
   */
   scale: SC.FILL

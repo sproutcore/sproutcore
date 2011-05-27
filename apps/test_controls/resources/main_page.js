@@ -6,20 +6,20 @@
 // ==========================================================================
 /*global TestControls tile Forms */
 
-require("resources/progress_page");
-require("resources/buttons_page");
-require("resources/checkboxes_page");
-require("resources/radio_page");
-require("resources/select_page");
-require("resources/segmented_page");
-require("resources/sliders_page");
-require("resources/text_field_page");
-require("resources/flow_layout_page");
-require("resources/scroll_page");
-require("resources/split_page");
-require("resources/list_page");
-require("resources/tab_page");
-require("resources/panels_page");
+sc_require("resources/progress_page");
+sc_require("resources/buttons_page");
+sc_require("resources/checkboxes_page");
+sc_require("resources/radio_page");
+sc_require("resources/select_page");
+sc_require("resources/segmented_page");
+sc_require("resources/sliders_page");
+sc_require("resources/text_field_page");
+sc_require("resources/flow_layout_page");
+sc_require("resources/scroll_page");
+sc_require("resources/split_page");
+sc_require("resources/list_page");
+sc_require("resources/tab_page");
+sc_require("resources/panels_page");
 
 TestControls.mainPage = SC.Page.create({
   

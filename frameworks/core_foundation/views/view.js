@@ -11,7 +11,7 @@ sc_require('system/cursor');
 sc_require('system/responder') ;
 sc_require('system/theme');
 
-sc_require('mixins/string') ;
+sc_require('system/string') ;
 sc_require('views/view/base') ;
 
 
@@ -42,7 +42,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.CoreView.reopen(
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: 'outlets displayProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin'],
 
   /**
     The current pane.
@@ -428,6 +428,13 @@ SC.CoreView.reopen(
       // invalidate it.
       childView.notifyPropertyChange('layer');
 
+      // A strange case, that a childView's frame won't be correct before
+      // we have a layer, if the childView doesn't have a fixed layout
+      // and we are using static layout
+      if (this.get('useStaticLayout')) {
+        if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
+      }
+
       childView._notifyDidCreateLayer() ;
     }
   },
@@ -484,6 +491,31 @@ SC.CoreView.reopen(
   parentViewDidChange: function() {
     this.parentViewDidResize();
     this.updateLayerLocation();
+  },
+
+  /**
+    Set to YES when the view's layer location is dirty.  You can call
+    updateLayerLocationIfNeeded() to clear this flag if it is set.
+
+    @property {Boolean}
+  */
+  layerLocationNeedsUpdate: NO,
+
+  /**
+    Calls updateLayerLocation(), but only if the view's layer location
+    currently needs to be updated.  This method is called automatically at
+    the end of a run loop if you have called parentViewDidChange() at some
+    point.
+
+    @property {Boolean} force This property is ignored.
+    @returns {SC.View} receiver
+    @test in updateLayerLocation
+  */
+  updateLayerLocationIfNeeded: function(force) {
+    if (this.get('layerLocationNeedsUpdate')) {
+      this.updateLayerLocation() ;
+    }
+    return this ;
   },
 
   /**
@@ -615,7 +647,12 @@ SC.CoreView.reopen(
       }
     }
 
+    // If we've made it this far and renderChildViews() was never called,
+    // render any child views now.
     if (firstTime && !this._didRenderChildViews) { this.renderChildViews(context, firstTime); }
+    // Reset the flag so that if the layer is recreated we re-render the child views
+    this._didRenderChildViews = NO;
+
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
@@ -689,6 +726,8 @@ SC.CoreView.reopen(
       view.renderToContext(context, firstTime);
       context = context.end() ;
     }
+    this._didRenderChildViews = YES;
+
     return context;
   },
 
@@ -776,7 +815,7 @@ SC.CoreView.reopen(
   */
   displayToolTip: function() {
     var ret = this.get('toolTip');
-    return (ret && this.get('localize')) ? ret.loc() : (ret || '');
+    return (ret && this.get('localize')) ? SC.String.loc(ret) : (ret || '');
   }.property('toolTip','localize').cacheable(),
 
   /**
@@ -817,7 +856,7 @@ SC.CoreView.reopen(
     @property {Array}
     @readOnly
   */
-  displayProperties: ['isFirstResponder'],
+  displayProperties: [],
 
   // .......................................................
   // SC.RESPONDER SUPPORT
@@ -843,11 +882,12 @@ SC.CoreView.reopen(
 
   /** @private
     Setup a view, but do not finish waking it up.
-    - configure childViews
-    - Determine the view's theme
-    - Fetch a render delegate from the theme, if necessary
-    - register the view with the global views hash, which is used for event
-      dispatch
+
+     - configure childViews
+     - Determine the view's theme
+     - Fetch a render delegate from the theme, if necessary
+     - register the view with the global views hash, which is used for event
+       dispatch
   */
   init: function() {
     var parentView = this.get('parentView'),
@@ -1145,14 +1185,17 @@ SC.CoreView.reopen(
     }
 
     attrs.owner = attrs.parentView = this ;
+
+    // We need to set isVisibleInWindow before the init method is called on the view
+    // The prototype check is a bit hackish and should be revisited - PDW
+    if (view.isClass && view.prototype.hasVisibility) {
+      attrs.isVisibleInWindow = this.get('isVisibleInWindow');
+    }
+
     if (!attrs.page) { attrs.page = this.page ; }
 
     // Now add this to the attributes and create.
     if (view.isClass) { view = view.create(attrs); }
-
-    if (view.hasVisibility) {
-      view.set('isVisibleInWindow', this.get('isVisibleInWindow'));
-    }
 
     return view ;
   },
@@ -1193,7 +1236,7 @@ SC.CoreView.reopen(
 
 });
 
-SC.CoreView.mixin(/** @scope SC.View.prototype */ {
+SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
 
   /** @private walk like a duck -- used by SC.Page */
   isViewClass: YES,
@@ -1209,9 +1252,9 @@ SC.CoreView.mixin(/** @scope SC.View.prototype */ {
   */
   design: function() {
     if (this.isDesign) {
-      //@ if (debug)
+      // @if (debug)
       SC.Logger.warn("SC.View#design called twice for %@.".fmt(this));
-      //@ endif
+      // @endif
       return this;
     }
 
@@ -1372,7 +1415,7 @@ SC.CoreView.mixin(/** @scope SC.View.prototype */ {
     while(--idx>=0) {
       viewClass = childViews[idx];
       loc = childLocs[idx];
-      if (loc && viewClass && viewClass.loc) viewClass.loc(loc) ;
+      if (loc && viewClass && typeof viewClass === SC.T_STRING) SC.String.loc(viewClass, loc);
     }
 
     return this; // done!
@@ -1419,53 +1462,48 @@ SC.CoreView.unload = function() {
   }
 } ;
 
-/** 
-  @class 
+/**
+  @class
 
   Base class for managing a view.  Views provide two functions:
 
-  1. They translate state and events into drawing instructions for the
+   1. They translate state and events into drawing instructions for the
      web browser and
-
-  2. They act as first responders for incoming keyboard, mouse, and
+   2. They act as first responders for incoming keyboard, mouse, and
      touch events.
 
-  h2. View Initialization
+  View Initialization
+  ====
 
   When a view is setup, there are several methods you can override that
   will be called at different times depending on how your view is created.
   Here is a guide to which method you want to override and when:
 
-  - *init:* override this method for any general object setup (such as
-    observers, starting timers and animations, etc) that you need to happen
-    everytime the view is created, regardless of whether or not its layer
-    exists yet.
-
-  - *render:* override this method to generate or update your HTML to reflect
-    the current state of your view.  This method is called both when your view
-    is first created and later anytime it needs to be updated.
-
-  - *didCreateLayer:* the render() method is used to generate new HTML.
-    Override this method to perform any additional setup on the DOM you might
-    need to do after creating the view.  For example, if you need to listen
-    for events.
-
-  - *willDestroyLayer:* if you implement didCreateLayer() to setup event
-    listeners, you should implement this method as well to remove the same
-    just before the DOM for your view is destroyed.
-
-  - *updateLayer:* Normally, when a view needs to update its content, it will
-    re-render the view using the render() method.  If you would like to
-    override this behavior with your own custom updating code, you can
-    replace updateLayer() with your own implementation instead.
-
-  - *didAppendToDocument:* in theory all DOM setup could be done
-    in didCreateLayer() as you already have a DOM element instantiated.
-    However there is cases where the element has to be first appended to the
-    Document because there is either a bug on the browser or you are using
-    plugins which objects are not instantiated until you actually append the
-    element to the DOM. This will allow you to do things like registering
-    DOM events on flash or quicktime objects.
+   - `init` -- override this method for any general object setup (such as
+     observers, starting timers and animations, etc) that you need to happen
+     everytime the view is created, regardless of whether or not its layer
+     exists yet.
+   - `render` -- override this method to generate or update your HTML to reflect
+     the current state of your view.  This method is called both when your view
+     is first created and later anytime it needs to be updated.
+   - `didCreateLayer` -- the render() method is used to generate new HTML.
+     Override this method to perform any additional setup on the DOM you might
+     need to do after creating the view.  For example, if you need to listen
+     for events.
+   - `willDestroyLayer` -- if you implement didCreateLayer() to setup event
+     listeners, you should implement this method as well to remove the same
+     just before the DOM for your view is destroyed.
+   - `updateLayer` -- Normally, when a view needs to update its content, it will
+     re-render the view using the render() method.  If you would like to
+     override this behavior with your own custom updating code, you can
+     replace updateLayer() with your own implementation instead.
+   - `didAppendToDocument` -- in theory all DOM setup could be done
+     in didCreateLayer() as you already have a DOM element instantiated.
+     However there is cases where the element has to be first appended to the
+     Document because there is either a bug on the browser or you are using
+     plugins which objects are not instantiated until you actually append the
+     element to the DOM. This will allow you to do things like registering
+     DOM events on flash or quicktime objects.
 
   @extends SC.Responder
   @extends SC.DelegateSupport
@@ -1473,7 +1511,9 @@ SC.CoreView.unload = function() {
 
 */
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
-  classNames: ['sc-view']
+  classNames: ['sc-view'],
+  
+  displayProperties: ['isFirstResponder']
 });
 
 //unload views for IE, trying to collect memory.

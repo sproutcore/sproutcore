@@ -1,0 +1,34 @@
+/* @group SC.SliderView */
+
+.sc-slider-view {
+	height: 21px;
+	.sc-inner {
+  	position: absolute;
+  	left: 8px;
+  	right: 8px;
+  	height: 5px;
+  	top: 6px;
+  	background: gray ;
+  	-webkit-border-radius: 3px;
+  	-moz-border-radius: 3px;
+  	border-radius: 3px;
+    .sc-leftcap{
+      display: none;
+    }
+    .sc-righcap {
+      display: none;
+    }
+  }
+  .sc-handle {
+  	height: 12px;
+  	width: 12px;
+  	margin-left: -9px;
+  	top: -4px;
+  	position: absolute ;
+  	background: black;
+  	border-radius:6px;
+  	-moz-border-radius:6px;
+  	-webkit-transform: translate3d(0,0,0);
+  	-webkit-transition: left 0.01s ease-in-out;
+  }
+}

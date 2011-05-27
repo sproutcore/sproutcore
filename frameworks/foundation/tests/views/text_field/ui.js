@@ -18,16 +18,36 @@
     value: 'John Doe'
   })
   
+  .add("password", SC.TextFieldView, {
+    isPassword: YES,
+    value: "I'm so secret"
+  })
+  
+  .add("password-hint", SC.TextFieldView, {
+    hint: "Passwerd",
+    isPassword: YES,
+    value: "I'm so secret"
+  })
+  
   .add("disabled - empty", SC.TextFieldView, { 
     hint: "Full Name", 
     value: null,
-    isEnabled: NO
+    isEnabled: NO,
+    isEditable: NO
   })
   
   .add("disabled - with value", SC.TextFieldView, { 
     hint: "Full Name", 
     value: 'John Doe',
-    isEnabled: NO
+    isEnabled: NO,
+    isEditable: NO
+  })
+
+  .add("enabled - not editable - with value", SC.TextFieldView, { 
+    hint: "Full Name", 
+    value: 'John Doe',
+    isEnabled: YES,
+    isEditable: NO
   })
   
   .add("textarea - empty", SC.TextFieldView, { 
@@ -70,13 +90,21 @@
     isEnabled: YES
   })
   
-  .add("aria-disabled",SC.TextFieldView, {
+  .add("aria-disabled", SC.TextFieldView, {
     hint: "Full Name", 
     value: 'John Doe',
     isTextArea: YES,
     isEnabled: NO
   })
 
+  .add("aria-readonly", SC.TextFieldView, {
+    hint: "Full Name", 
+    value: 'John Doe',
+    isTextArea: YES,
+    isEnabled: YES,
+    isEditable: NO
+  })
+  
   .add("aria-invalid", SC.TextFieldView, {
       value: SC.Error.create({errorValue:'Error Message'}),
       isEnabled: YES
@@ -92,7 +120,7 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   var layer = view.$();
   
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-  if(SC.browser.webkit) equals(input.val(), '', 'input should have empty value');
+  if(SC.browser.webkit || parseInt(SC.browser.mozilla) >= 2.0) equals(input.val(), '', 'input should have empty value');
   else equals(input.val(), expectedHint, 'input should have empty value');
   if (expectedHint) {
     var hint = view.$('.sc-hint');
@@ -138,6 +166,15 @@ pane.verifyDisabled = function verifyDisabled(view, isDisabled) {
   }
 };
 
+pane.verifyReadOnly = function verifyReadonly(view, isReadOnly) {
+  var input = view.$('input');
+  
+  if(isReadOnly) {
+    ok(input.attr('readOnly'), 'input should have readOnly attr');
+  } else {
+    ok(!input.attr('readOnly'), 'input should not have readOnly attr');
+  }
+};
 
 // ..........................................................
 // TEST INITIAL STATES
@@ -157,6 +194,18 @@ test("with value", function() {
   pane.verifyDisabled(view, NO);
 });
 
+test("password", function() {
+  var view = pane.view('password');
+  pane.verifyNotEmpty(view, 'I\'m so secret');
+  pane.verifyDisabled(view, NO);
+});
+
+test("password with hint", function() {
+  var view = pane.view('password-hint');
+  pane.verifyNotEmpty(view, 'I\'m so secret', 'Passwerd');
+  pane.verifyDisabled(view, NO);
+});
+
 test("disabled - empty", function() {
   var view = pane.view('disabled - empty');
   pane.verifyEmpty(view, 'Full Name');
@@ -167,6 +216,12 @@ test("disabled - with value", function() {
   var view = pane.view('disabled - with value');
   pane.verifyNotEmpty(view, 'John Doe', 'Full Name');
   pane.verifyDisabled(view, YES);
+});
+
+test("enabled - not editable - with value", function() {
+  var view = pane.view('enabled - not editable - with value');
+  pane.verifyNotEmpty(view, 'John Doe', 'Full Name');
+  pane.verifyReadOnly(view, YES);
 });
 
 test("textarea - empty", function() {
@@ -237,6 +292,36 @@ test("enabling disabled view", function() {
   SC.RunLoop.end();
   pane.verifyDisabled(view, NO);
 });
+
+test("changing isEditable", function() {
+  var view = pane.view('enabled - not editable - with value');
+
+  // test changing isEditable state updates like it should
+  SC.RunLoop.begin();
+  view.set('isEditable', YES);
+  SC.RunLoop.end();
+  pane.verifyReadOnly(view, NO);
+
+  // test changing isEditable state updates like it should
+  SC.RunLoop.begin();
+  view.set('isEditable', NO);
+  SC.RunLoop.end();
+  pane.verifyReadOnly(view, YES);
+});
+
+if (!SC.browser.isIE && !SC.platform.input.placeholder) {
+  test("Changing value to null -- password field", function() {
+    var view = pane.view('password-hint'),
+        input = view.$('input');
+
+    SC.run(function() {
+      view.set('value', null);
+    });
+
+    equals(input.attr('type'), 'text', "When nulled out, field was converted to type text");
+    equals(input.val(), view.get('hint'), "When nulled out, field was given value equal to hint");
+  });
+}
 
 // ..........................................................
 // TEST SELECTION SUPPORT
@@ -567,6 +652,12 @@ test("should have aria-disabled as YES", function() {
   var view = pane.view('aria-disabled');
   var label = view.$();  
   equals(label.attr('aria-disabled'), 'true', 'aria-disabled should be true');
+});
+
+test("should have aria-readonly as YES", function() {
+  var view = pane.view('aria-readonly');
+  var label = view.$();  
+  equals(label.attr('aria-readonly'), 'true', 'aria-readonly should be true');
 });
 
 test("should have aria-invalid as YES", function() {

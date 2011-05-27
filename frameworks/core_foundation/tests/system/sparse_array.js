@@ -69,12 +69,44 @@ test("element to be added is such that amt + idx > length of array ", function()
 	equals(6, ary.get('length'), "length") ;
 });
 
-test("element to be added is at idx > length of array ", function() {
+test("element to be added is at idx < length of array ", function() {
 	var ary = SC.SparseArray.array(5) ;
 	equals(5, ary.get('length'), "length") ;
 	ary = numbers;
 	ary.replace(2,3,new_numbers,"put the new number overlapping existing numbers ");
 	equals(5, ary.get('length'), "length") ;
+});
+
+test("should work with @each dependent keys", function() {
+  var array = SC.SparseArray.create();
+
+  array.pushObject(SC.Object.create({
+    value: 5
+  }));
+  array.provideLength(1);
+
+  var obj = SC.Object.create({
+    total: function() {
+      return this.get('content').reduce(function(prev, item) {
+        return prev + item.get('value');
+      }, 0);
+    }.property('content.@each.value'),
+
+    content: array
+  });
+
+  equals(obj.get('total'), 5, "precond - computes total of all objects");
+
+  array.pushObject(SC.Object.create({
+    value: 10
+  }));
+
+  equals(obj.get('total'), 15, "recomputes when a new object is added");
+
+  array.objectAt(1).set('value', 15);
+
+  equals(obj.get('total'), 20, "recomputes when value property on child object changes");
+
 });
 
 
@@ -199,3 +231,58 @@ SC.ArraySuite.generate("SC.SparseArray", {
     return SC.SparseArray.create({ delegate: del });
   }
 });
+
+test("should notify enumerable property", function() {
+    var arr = SC.SparseArray.create();
+    var count = 0;
+    function counter() {
+        count++;
+    }
+
+    arr.provideLength(1);
+    arr.addObserver('[]', this, counter);
+    arr.provideObjectAtIndex(0, 'one');
+    equals(count, 1, "observer should have fired once");
+});
+
+test("should notify range observers", function() {
+    var arr = SC.SparseArray.create();
+    var count = 0;
+    function counter(arr, objects, key, indexes) {
+        count++;
+    }
+
+    arr.provideLength(4);
+    var is = SC.IndexSet.create(0,1).add(2,1);
+    arr.addRangeObserver(is, this, counter);
+    arr.provideObjectAtIndex(0, 'one');
+    arr.provideObjectAtIndex(1, 'two');
+    arr.provideObjectAtIndex(2, 'three');
+    arr.provideObjectAtIndex(3, 'four');
+    equals(2, count, "observer should have fired twice");
+});
+
+test("test updating SparseArray length via delegate", function() {
+    var delegate = SC.Object.create({
+        arrlen: null,
+        sparseArrayDidRequestLength: function(arr) {
+            arr.provideLength(this.arrlen);
+        }
+    });
+
+    var arr = SC.SparseArray.create({delegate: delegate});
+    delegate.arrlen = 5;
+    equals(arr.get('length'), 5)
+    arr.provideLength(null);
+    delegate.arrlen = 50;
+    equals(arr.get('length'), 50)
+});
+
+test("test updating SparseArray length explictly", function() {
+    var arr = SC.SparseArray.create();
+    arr.provideLength(5);
+    equals(arr.get('length'), 5)
+    arr.provideLength(50);
+    equals(arr.get('length'), 50)
+});
+

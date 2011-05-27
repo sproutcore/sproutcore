@@ -17,8 +17,8 @@ SC.MediaControlsView = SC.View.extend({
 
   target: null,
   
-  childViews: 'playButton progressView timeView minusLabelView volumeView plusLabelView theaterButton'.w(),
-  classNames: 'sc-media-controls',
+  childViews: ['playButton', 'progressView', 'timeView', 'minusLabelView', 'volumeView', 'plusLabelView', 'theaterButton'],
+  classNames: ['sc-media-controls'],
   
   leftHandleInset:null,   //until a bug in the way bindings are handled is fixed, these have to be defined
   rightHandleInset:null,  //for the slider to be able to have its notEmpty bindings function and drop in

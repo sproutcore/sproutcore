@@ -4,30 +4,41 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-// ==========================================================================
-// SC.GridView
-// ==========================================================================
 
-require('views/list') ;
+sc_require('views/list') ;
 
 /** @class
 
   A grid view renders a collection of items in a grid of rows and columns.
 
-  @extends SC.CollectionView
-  @author    Charles Jolley  
+  @extends SC.ListView
+  @author Charles Jolley
   @version 1.0
 */
 SC.GridView = SC.ListView.extend(
 /** @scope SC.GridView.prototype */ {
-    classNames: ['sc-grid-view'],
+
+  /**
+    @type Array
+    @default ['sc-grid-view']
+    @see SC.View#classNames
+  */
+  classNames: ['sc-grid-view'],
   
+  /**
+    @type Hash
+    @default { left:0, right:0, top:0, bottom:0 }
+    @see SC.View#layout
+  */
   layout: { left:0, right:0, top:0, bottom:0 },
 
   /** 
     The common row height for grid items.
     
     The value should be an integer expressed in pixels.
+    
+    @type Number
+    @default 48
   */
   rowHeight: 48,
   
@@ -35,6 +46,9 @@ SC.GridView = SC.ListView.extend(
     The minimum column width for grid items.  Items will actually
     be laid out as needed to completely fill the space, but the minimum
     width of each item will be this value.
+    
+    @type Number
+    @default 64
   */
   columnWidth: 64,
 
@@ -42,9 +56,21 @@ SC.GridView = SC.ListView.extend(
     The default example item view will render text-based items.
     
     You can override this as you wish.
+    
+    @type SC.View
+    @default SC.LabelView
   */
   exampleView: SC.LabelView,
   
+  /**
+    Possible values:
+    
+      - SC.HORIZONTAL_ORIENTATION
+      - SC.VERTICAL_ORIENTATION
+    
+    @type String
+    @default SC.HORIZONTAL_ORIENTATION
+  */
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
   
   /** @private */
@@ -105,15 +131,18 @@ SC.GridView = SC.ListView.extend(
     return ret; 
   },
   
+  /**
+    @type SC.View
+  */
   insertionPointClass: SC.View.extend({
     classNames: ['grid-insertion-point'],
     
     render: function(context, firstTime) {
       if (firstTime) context.push('<span class="anchor"></span>') ;
     }
-
   }),
   
+  /** @private */
   showInsertionPoint: function(itemView, dropOperation) {
     if (!itemView) return ;
     
@@ -155,6 +184,7 @@ SC.GridView = SC.ListView.extend(
     
   },
     
+  /** @private */
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
     if (insertionPoint) insertionPoint.removeFromParent() ;
@@ -165,7 +195,7 @@ SC.GridView = SC.ListView.extend(
     }
   },
   
-  // // We can do this much faster programatically using the rowHeight
+  /** @private */
   insertionIndexForLocation: function(loc, dropOperation) {  
     var f = this.get('frame'),
         sf = this.get('clippingFrame'),

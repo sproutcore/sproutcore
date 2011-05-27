@@ -53,17 +53,17 @@ test("handle range partially inside set", function() {
 // INDEX SET
 // 
 
-test("handle set inside set", function() {
+test("handle set inside IndexSet", function() {
   var test = SC.IndexSet.create().add(1001,4).add(1005,2);
   equals(set.intersects(test), YES, '%@ should be in %@'.fmt(test, set));
 });
 
-test("handle range outside of set", function() {
+test("handle range outside of IndexSet", function() {
   var test = SC.IndexSet.create().add(100,4).add(105,2);
   equals(set.intersects(test), NO, '%@ should be in %@'.fmt(test, set));
 });
 
-test("handle range partially inside set", function() {
+test("handle range partially inside IndexSet", function() {
   var test = SC.IndexSet.create().add(1001,4).add(100,2);
   equals(set.intersects(test), YES, '%@ should be in %@'.fmt(test, set));
 });

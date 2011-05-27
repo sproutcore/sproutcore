@@ -105,17 +105,6 @@ module("Test the beginEditing() function of SC.InlineTextFieldView", {
   }
 });
 
-test("fails when options missing",
-function() {
-
-  try {
-    SC.InlineTextFieldView.beginEditing();
-    ok(NO, "should fail if parameters missing");
-  } catch(e) {
-    ok(YES, "should fail if parameters missing");
-  }
-});
-
 test("fails when required options are missing",
 function() {
   try {

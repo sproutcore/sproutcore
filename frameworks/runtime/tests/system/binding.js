@@ -101,8 +101,33 @@ test("binding disconnection actually works", function() {
   equals(toObject.get('value'), 'start');
 });
 
+module("bindings on classes");
+
+test("should connect when multiple instances of class are created", function() {
+  window.TestNamespace = {};
+  window.TestNamespace.stubController = SC.Object.create({
+    name: 'How to Be Happy'
+  });
+
+  try {
+    var myClass = SC.Object.extend({
+      fooBinding: SC.Binding.from('TestNamespace.stubController.name')
+    });
+
+    var myFirstObj;
+
+    SC.run(function() { myFirstObj = myClass.create(); });
+    equals(myFirstObj.get('foo'), "How to Be Happy");
+
+    var mySecondObj;
+    SC.run(function() { mySecondObj = myClass.create() });
+    equals(mySecondObj.get('foo'), "How to Be Happy");
+  } finally {
+    window.TestNamespace = undefined;
+  }
+});
+
 module("one way binding", {
-  
   setup: function() {
     fromObject = SC.Object.create({ value: 'start' }) ;
     toObject = SC.Object.create({ value: 'end' }) ;
@@ -272,7 +297,7 @@ test("two bindings to the same value should sync in the order they are initializ
   
   var b = window.b;
 
-  SC.LOG_BINDINGS = YES;
+  SC.LOG_BINDINGS = NO;
     
   SC.RunLoop.end();
   

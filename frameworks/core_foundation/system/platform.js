@@ -37,8 +37,8 @@ SC.platform = SC.Object.create({
 
   /*
     NOTES
-      - A development version of Chrome 9 incorrectly reported supporting touch
-      - Android is assumed to support touch, but incorrectly reports that it does not
+     - A development version of Chrome 9 incorrectly reported supporting touch
+     - Android is assumed to support touch, but incorrectly reports that it does not
   */
   /**
     YES if the current device supports touch events, NO otherwise.
@@ -77,8 +77,8 @@ SC.platform = SC.Object.create({
     }
 
     return ret;
-  }(('autocomplete readonly list size required multiple maxlength '
-    +'pattern min max step placeholder').w()),
+  }(['autocomplete', 'readonly', 'list', 'size', 'required', 'multiple', 'maxlength',
+      'pattern', 'min', 'max', 'step', 'placeholder']),
 
   /**
     YES if the application is currently running as a standalone application.
@@ -109,9 +109,9 @@ SC.platform = SC.Object.create({
   simulateTouchEvents: function() {
     // Touch events are supported natively, no need for this.
     if (this.touch) {
-      //@ if (debug)
+      // @if (debug)
       SC.Logger.info("Can't simulate touch events in an environment that supports them.");
-      //@ endif
+      // @endif
       return;
     }
     
@@ -129,7 +129,7 @@ SC.platform = SC.Object.create({
     this._simtouch_counter = 1;
 
     // Remove events that don't exist in touch environments
-    this.removeEvents('click dblclick mouseout mouseover mousewheel'.w());
+    this.removeEvents(['click', 'dblclick', 'mouseout', 'mouseover', 'mousewheel']);
 
     // Replace mouse events with our translation methods
     this.replaceEvent('mousemove', this._simtouch_mousemove);

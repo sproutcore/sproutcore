@@ -15,19 +15,16 @@
   designing an item view for a collection and you want to automatically
   trigger editing.
   
-  h2. Using Editable Views
+  ## Using Editable Views
   
   To use a view that includes the Editable mixin, you simply call three
   methods on the view:
   
-  - To begin editing, call beginEditing().  This will make the view first responder and allow the user to make changes to it.  If the view cannot begin editing for some reason, it will return NO.
+    - To begin editing, call beginEditing().  This will make the view first responder and allow the user to make changes to it.  If the view cannot begin editing for some reason, it will return NO.
+    - If you want to cancel editing, you should try calling discardEditing().  This will cause the editor to discard its changed value and resign first responder.  Some editors do not support cancelling editing and will return NO.  If this is the case, you may optionally try calling commitEditing() instead to force the view to resign first responder, even though this will commit the changes.
+    - If you want to end editing, while saving any changes that were made, try calling commitEditing().  This will cause the editor to validate and apply its changed value and resign first responder.  If the editor cannot validate its contents for some reason, it will return NO.  In this case you may optionally try calling discardEditing() instead to force the view to resign first responder, even though this will discard the changes.
   
-  - If you want to cancel editing, you should try calling discardEditing().  This will cause the editor to discard its changed value and resign first responder.  Some editors do not support cancelling editing and will return NO.  If this is the case, you may optionally try calling commitEditing() instead to force the view to resign first responder, even though this will commit the changes.
-  
-  - If you want to end editing, while saving any changes that were made, try calling commitEditing().  This will cause the editor to validate and apply its changed value and resign first responder.  If the editor cannot validate its contents for some reason, it will return NO.  In this case you may optionally try calling discardEditing() instead to force the view to resign first responder, even though this will discard the changes.
-  
-  
-  h2. Implementing an Editable View
+  ## Implementing an Editable View
   
   To implement a new view that is editable, you should implement the three
   methods defined below: beginEditing(), discardEditing(), and
@@ -37,15 +34,16 @@
   
   
   @since SproutCore 1.0
-  
 */
 SC.Editable = {
+
   /**
     Indicates whether a view is editable or not.  You can optionally 
     implement the methods in this mixin to disallow editing is isEditable is
     NO.
     
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   isEditable: NO,
   
@@ -54,7 +52,8 @@ SC.Editable = {
     implement should generally up this property as appropriate when you 
     begin and end editing.
     
-    @property {Boolean}
+    @type Boolean
+    @default NO
   */
   isEditing: NO,
   

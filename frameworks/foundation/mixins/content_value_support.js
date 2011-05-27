@@ -5,27 +5,32 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*
-* @mixin
-*
-* This mixin allows a view to get its value from a content object based
-* on the value of its contentValueKey.
-*
-* {{{
-* myView = SC.View.create({
-*   content: {prop: "abc123"},
-*
-*   contentValueKey: 'prop'
-* });
-*
-* // myView.get('value') will be "abc123"
-* }}}
-*
-* This is useful if you have a nested record structure and want to have
-* it be reflected in a nested view structure. If your data structures
-* only have primitive values, consider using SC.Control instead.
+/**
+  @namespace
+
+  This mixin allows a view to get its value from a content object based
+  on the value of its contentValueKey.
+
+      myView = SC.View.create({
+        content: {prop: "abc123"},
+
+        contentValueKey: 'prop'
+      });
+
+      // myView.get('value') will be "abc123"
+
+  This is useful if you have a nested record structure and want to have
+  it be reflected in a nested view structure. If your data structures
+  only have primitive values, consider using SC.Control instead.
 */
 SC.ContentValueSupport = {
+
+  /**
+    Walk like a duck.
+
+    @type Boolean
+    @default YES
+  */
   hasContentValueSupport: YES,
 
   /** @private */
@@ -46,7 +51,8 @@ SC.ContentValueSupport = {
     set a content object and have the control display a single property
     of that control, then you should use the content property instead.
 
-    @property {Object}
+    @type Object
+    @default null
   */
   value: null,
   
@@ -66,7 +72,8 @@ SC.ContentValueSupport = {
     collection view, then it would be better to instead bind the value of
     the control directly to a controller property.
     
-    @property {SC.Object}
+    @type SC.Object
+    @default null
   */
   content: null,
   
@@ -76,7 +83,8 @@ SC.ContentValueSupport = {
     content object is first set.  If you have a displayDelegate, then
     you can also use the contentValueKey of the displayDelegate.
     
-    @property {String}
+    @type String
+    @default null
   */
   contentValueKey: null,
   
@@ -208,7 +216,9 @@ SC.ContentValueSupport = {
     
   }.observes('content'),
   
-  // since we always observe *, just call the update function
+  /** @private
+    Since we always observe *, just call the update function
+  */
   _control_contentValueKeyDidChange: function() {
     // notify that value did change.
     this.contentPropertyDidChange(this.get('content'), '*') ;

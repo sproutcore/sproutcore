@@ -22,9 +22,8 @@ Welcome.targetsController = SC.ArrayController.create(
   },
   
   appsOnly: function() {
-    return this.filter(function(t) { 
-      return (t.get('kind') === 'app') && 
-             (t.get('name') !== '/sproutcore/welcome'); 
+    return this.filter(function(t) {
+      return t.get('kind') === 'app' && !t.get('name').match(/sproutcore\/(welcome|experimental)/);
     });
   }.property('[]').cacheable(),
   

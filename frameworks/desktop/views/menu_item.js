@@ -4,6 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
 sc_require('views/button') ;
 sc_require('views/separator') ;
 
@@ -16,26 +17,41 @@ sc_require('views/separator') ;
   @since SproutCore 1.0
 */
 SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
-/** @scope SC.MenuItemView.prototype */{
+/** @scope SC.MenuItemView.prototype */ {
 
-  displayProperties: ['title', 'isEnabled', 'isSeparator'],
-
+  /**
+    @type Array
+    @default ['sc-menu-item']
+    @see SC.View#classNames
+  */
   classNames: ['sc-menu-item'],
 
   /**
-    The WAI-ARIA role for menu items. This property's value should not be
-    changed.
+    @type Array
+    @default ['title', 'isEnabled', 'isSeparator']
+    @see SC.View#displayProperties
+  */
+  displayProperties: ['title', 'isEnabled', 'isSeparator'],
 
-    @property {String}
+
+  /**
+    The WAI-ARIA role for menu items.
+
+    @type String
+    @default 'menuitem'
+    @readOnly
   */
   ariaRole: 'menuitem',
 
+  /**
+    @type Boolean
+    @default YES
+  */
   escapeHTML: YES,
 
   /**
-    @private
-    @property
-    @type {Boolean}
+    @type Boolean
+    @default YES
   */
   acceptsFirstResponder: YES,
   
@@ -43,13 +59,16 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     IE only attribute to block bluring of other controls
 
     @type Boolean
+    @default YES
   */
   blocksIEDeactivate: YES,
 
   /**
-    Disable context menu.
+    @type Boolean
+    @default NO
   */
   isContextMenuEnabled: NO,
+
 
   // ..........................................................
   // KEY PROPERTIES
@@ -59,22 +78,25 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     The content object the menu view will display.
 
     @type Object
+    @default null
   */
   content: null,
 
   /**
-    YES if this menu item represents a separator.
+    YES if this menu item represents a separator, NO otherwise.
 
-    @property {Boolean}
+    @field
+    @type Boolean
+    @observes content
   */
   isSeparator: function() {
     return this.getContentProperty('itemSeparatorKey') === YES;
   }.property('content').cacheable(),
 
   /**
-    Whether the menu item is enabled.
-
-    @property {Boolean}
+    @field
+    @type Boolean
+    @observes content.isEnabled
   */
   isEnabled: function() {
     return this.getContentProperty('itemIsEnabledKey') !== NO &&
@@ -84,7 +106,9 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   /**
     This menu item's submenu, if it exists.
 
-    @property {SC.MenuView}
+    @field
+    @type SC.MenuView
+    @observes content
   */
   subMenu: function() {
     var content = this.get('content'), menuItems, parentMenu;
@@ -115,23 +139,21 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   }.property('content').cacheable(),
 
   /**
-    Whether or not this menu item has a submenu.
-
-    @property {Boolean}
+    @type Boolean
+    @default NO
+    @observes subMenu
   */
   hasSubMenu: function() {
     return !!this.get('subMenu');
   }.property('subMenu').cacheable(),
 
-  /**
-    @private
-  */
+  /** @private */
   init: function() {
     sc_super();
     this.contentDidChange();
   },
 
-  /**
+  /** @private
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
     to set on the outer element.
@@ -192,7 +214,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context = context.end();
   },
 
-  /**
+  /** @private
    Generates the image used to represent the image icon. override this to
    return your own custom HTML
 
@@ -215,7 +237,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context.begin('img').addClass('image').addClass(className).attr('src', url).end() ;
   },
 
-  /**
+  /** @private
    Generates the label used to represent the menu item. override this to
    return your own custom HTML
 
@@ -231,19 +253,18 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context.push("<span class='value ellipsis'>"+label+"</span>") ;
   },
 
-  /**
+  /** @private
    Generates the string used to represent the branch arrow. override this to
    return your own custom HTML
 
    @param {SC.RenderContext} context the render context
    @returns {void}
   */
-
   renderBranch: function(context) {
     context.push('<span class="has-branch"></span>') ;
   },
 
-  /**
+  /** @private
    Generates the string used to represent the short cut keys. override this to
    return your own custom HTML
 
@@ -258,9 +279,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   /**
     This method will check whether the current Menu Item is still
     selected and then create a submenu accordignly.
-
-    @param {}
-    @returns void
   */
   showSubMenu: function() {
     var subMenu = this.get('subMenu') ;
@@ -272,15 +290,23 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     this._subMenuTimer = null;
   },
 
+  /**
+    The title from the content property.
+    
+    @field
+    @type String
+    @observes content.title
+  */
   title: function() {
     var ret = this.getContentProperty('itemTitleKey'),
         localize = this.getPath('parentMenu.localize');
 
-    if (localize && ret) ret = ret.loc();
+    if (localize && ret) ret = SC.String.loc(ret);
 
     return ret||'';
   }.property('content.title').cacheable(),
 
+  /** @private */
   getContentProperty: function(property) {
     var content = this.get('content'),
         menu = this.get('parentMenu');
@@ -290,10 +316,12 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     }
   },
 
+
   //..........................................
   // Mouse Events Handling
   //
 
+  /** @private */
   mouseUp: function(evt) {
     // SproutCore's event system will deliver the mouseUp event to the view
     // that got the mouseDown event, but for menus we want to track the mouse,
@@ -349,9 +377,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /**
+  /** @private
     Actually sends the action of the menu item to the target.
-    @private
   */
   sendAction: function() {
     var action = this.getContentProperty('itemActionKey'),
@@ -387,15 +414,13 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   },
 
-  /**
+  /** @private
     Toggles the focus class name on the menu item layer to quickly flash the
     highlight. This indicates to the user that a selection has been made.
 
     This is initially called by performAction(). flashHighlight then keeps
     track of how many flashes have occurred, and calls itself until a maximum
     has been reached.
-
-    @private
   */
   flashHighlight: function() {
     var flashCounter = this._flashCounter, layer = this.$();
@@ -442,8 +467,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /** @private
     Set the focus based on whether the current menu item is selected or not.
-
-    @returns Boolean
   */
   mouseExited: function(evt) {
     var parentMenu, timer;
@@ -470,23 +493,28 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES ;
   },
 
+  /** @private */
   touchStart: function(evt){
     this.mouseEntered(evt);
     return YES;
   },
 
+  /** @private */
   touchEnd: function(evt){
     return this.mouseUp(evt);
   },
 
+  /** @private */
   touchEntered: function(evt){
     return this.mouseEntered(evt);
   },
 
+  /** @private */
   touchExited: function(evt){
     return this.mouseExited(evt);
   },
 
+  /** @private */
   checkMouseLocation: function() {
     var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu'),
         currentMenuItem, previousMenuItem;
@@ -507,8 +535,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /** @private
     Call the moveUp function on the parent Menu
-
-    @returns Boolean
   */
   moveUp: function(sender,evt) {
     var menu = this.get('parentMenu') ;
@@ -520,8 +546,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /** @private
     Call the moveDown function on the parent Menu
-
-    @returns Boolean
   */
   moveDown: function(sender,evt) {
     var menu = this.get('parentMenu') ;
@@ -533,8 +557,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /** @private
     Call the function to create a branch
-
-    @returns Boolean
   */
   moveRight: function(sender,evt) {
     this.showSubMenu() ;
@@ -595,8 +617,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   /**
     Close the parent Menu and remove the focus of the current Selected
     Menu Item
-
-    @returns void
   */
   closeParent: function() {
     this.$().removeClass('focus') ;
@@ -616,9 +636,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   // CONTENT OBSERVING
   //
 
-  /**
-    @private
-
+  /** @private
     Add an observer to ensure that we invalidate our cached properties
     whenever the content object’s associated property changes.
   */
@@ -641,9 +659,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   }.observes('content'),
 
 
-  /**
-    @private
-
+  /** @private
     Invalidate our cached property whenever the content object’s associated
     property changes.
   */

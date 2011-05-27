@@ -14,43 +14,43 @@ sc_require('models/record');
   This permits you to perform queries on your data store,
   written in a SQL-like language. Here is a simple example:
     
-		    q = SC.Query.create({
-		      conditions: "firstName = 'Jonny' AND lastName = 'Cash'"
-		    })
+      q = SC.Query.create({
+        conditions: "firstName = 'Jonny' AND lastName = 'Cash'"
+      })
     
-  You can check if a certain record matches the query by calling:
+  You can check if a certain record matches the query by calling
 
-		    q.contains(record)
+      q.contains(record)
   
   To find all records of your store, that match query q, use findAll with
   query q as argument:
   
-		    r = MyApp.store.findAll(q)
+      r = MyApp.store.findAll(q)
   
-  r will be a record array containing all matching records.
-  To limit the query to a record type of MyApp.MyModel,
+  `r` will be a record array containing all matching records.
+  To limit the query to a record type of `MyApp.MyModel`,
   you can specify the type as a property of the query like this:
   
-		    q = SC.Query.create({ 
-		      conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
-		      recordType: MyApp.MyModel 
-		    })
+      q = SC.Query.create({ 
+        conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
+        recordType: MyApp.MyModel 
+      })
   
-  Calling find() like above will now return only records of type t.
+  Calling `find()` like above will now return only records of type t.
   It is recommended to limit your query to a record type, since the query will
   have to look for matching records in the whole store, if no record type
   is given.
   
   You can give an order, which the resulting records should follow, like this:
   
-		    q = SC.Query.create({ 
-		      conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
-		      recordType: MyApp.MyModel,
-		      orderBy: "lastName, year DESC" 
-		    });
+      q = SC.Query.create({ 
+        conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
+        recordType: MyApp.MyModel,
+        orderBy: "lastName, year DESC" 
+      });
   
   The default order direction is ascending. You can change it to descending
-  by writing DESC behind the property name like in the example above.
+  by writing `'DESC'` behind the property name like in the example above.
   If no order is given, or records are equal in respect to a given order,
   records will be ordered by guid.
 
@@ -61,60 +61,61 @@ sc_require('models/record');
   
   Primitives:
 
-  - record properties
-  - null, undefined
-  - true, false
-  - numbers (integers and floats)
-  - strings (double or single quoted)
+   - record properties
+   - `null`, `undefined`
+   - `true`, `false`
+   - numbers (integers and floats)
+   - strings (double or single quoted)
   
   Parameters:
 
-  - %@ (wild card)
-  - {parameterName} (named parameter)
+   - `%@` (wild card)
+   - `{parameterName}` (named parameter)
 
   Wild cards are used to identify parameters by the order in which they appear 
   in the query string. Named parameters can be used when tracking the order 
   becomes difficult. Both types of parameters can be used by giving the 
   parameters as a property to your query object:
   
-		    yourQuery.parameters = yourParameters
+      yourQuery.parameters = yourParameters
   
   where yourParameters should have one of the following formats:
 
-    for wild cards: [firstParam, secondParam, thirdParam]
-    for named params: {name1: param1, mane2: parma2}
+   * for wild cards: `[firstParam, secondParam, thirdParam]`
+   * for named params: `{name1: param1, mane2: parma2}`
 
   You cannot use both types of parameters in a single query!
   
   Operators:
   
-  - =
-  - !=
-  - <
-  - <=
-  - >
-  - >=
-  - BEGINS_WITH (checks if a string starts with another one)
-  - ENDS_WITH   (checks if a string ends with another one)
-  - CONTAINS    (checks if a string contains another one, or if an object is in an array)
-  - MATCHES     (checks if a string is matched by a regexp,
-                you will have to use a parameter to insert the regexp)
-  - ANY         (checks if the thing on its left is contained in the array
-                on its right, you will have to use a parameter
-                to insert the array)
-  - TYPE_IS     (unary operator expecting a string containing the name 
-                of a Model class on its right side, only records of this type
-                will match)
+   - `=`
+   - `!=`
+   - `<`
+   - `<=`
+   - `>`
+   - `>=`
+   - `BEGINS_WITH` -- (checks if a string starts with another one)
+   - `ENDS_WITH` --   (checks if a string ends with another one)
+   - `CONTAINS` --    (checks if a string contains another one, or if an
+                      object is in an array)
+   - `MATCHES` --     (checks if a string is matched by a regexp,
+                      you will have to use a parameter to insert the regexp)
+   - `ANY` --         (checks if the thing on its left is contained in the array
+                      on its right, you will have to use a parameter
+                      to insert the array)
+   - `TYPE_IS` --     (unary operator expecting a string containing the name 
+                      of a Model class on its right side, only records of this
+                      type will match)
     
   Boolean Operators:
   
-  - AND
-  - OR
-  - NOT
+   - `AND`
+   - `OR`
+   - `NOT`
   
   Parenthesis for grouping:
   
-  - ( and )
+   - `(` and `)`
 
 
   Adding Your Own Query Handlers
@@ -122,12 +123,12 @@ sc_require('models/record');
 
   You can extend the query language with your own operators by calling:
 
-			    SC.Query.registerQueryExtension('your_operator', your_operator_definition);
+      SC.Query.registerQueryExtension('your_operator', your_operator_definition);
 
   See details below. As well you can provide your own comparison functions
   to control ordering of specific record properties like this:
 
-			    SC.Query.registerComparison(property_name, comparison_for_this_property);
+      SC.Query.registerComparison(property_name, comparison_for_this_property);
   
   Examples
   
@@ -165,7 +166,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   /**
     Optional orderBy parameters.  This can be a string of keys, optionally
-    beginning with the strings "DESC " or "ASC " to select descending or 
+    beginning with the strings `"DESC "` or `"ASC "` to select descending or 
     ascending order.
     
     Alternatively, you can specify a comparison function, in which case the
@@ -194,8 +195,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   recordTypes: null,
   
   /**
-    Returns the complete set of recordTypes matched by this query.  Includes
-    any named recordTypes plus their subclasses.
+    Returns the complete set of `recordType`s matched by this query.  Includes
+    any named `recordType`s plus their subclasses.
     
     @property
     @type SC.Enumerable
@@ -247,20 +248,22 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Indicates the location where the result set for this query is stored.  
     Currently the available options are:
     
-    - SC.Query.LOCAL: indicates that the query results will be automatically computed from the in-memory store.
-    - SC.Query.REMOTE: indicates that the query results are kept on a remote server and hence must be loaded from the DataSource.
+     - `SC.Query.LOCAL` -- indicates that the query results will be
+       automatically computed from the in-memory store.
+     - `SC.Query.REMOTE` -- indicates that the query results are kept on a
+       remote server and hence must be loaded from the `DataSource`.
     
-    The default setting for this property is SC.Query.LOCAL.  
+    The default setting for this property is `SC.Query.LOCAL`.  
     
-    Note that even if a query location is LOCAL, your DataSource will still
-    have its fetch() method called for the query.  For LOCAL queries, you 
-    won't need to explicitly provide the query result set; you can just load
-    records into the in-memory store as needed and let the query recompute 
-    automatically.
+    Note that even if a query location is `LOCAL`, your `DataSource` will
+    still have its `fetch()` method called for the query.  For `LOCAL`
+    queries, you  won't need to explicitly provide the query result set; you
+    can just load records into the in-memory store as needed and let the query
+    recompute automatically.
     
-    If your query location is REMOTE, then your DataSource will need to 
+    If your query location is `REMOTE`, then your `DataSource` will need to 
     provide the actual set of query results manually.  Usually you will only 
-    need to use a REMOTE query if you are retrieving a large data set and you
+    need to use a `REMOTE` query if you are retrieving a large data set and you
     don't want to pay the cost of computing the result set client side.
     
     @type String
@@ -269,7 +272,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   /**
     Another query that will optionally limit the search of records.  This is 
-    usually configured for you when you do find() from another record array.
+    usually configured for you when you do `find()` from another record array.
     
     @type SC.Query
   */
@@ -277,7 +280,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   
   /**
-    Returns YES if query location is Remote.  This is sometimes more 
+    Returns `YES` if query location is Remote.  This is sometimes more 
     convenient than checking the location.
     
 		@property
@@ -288,7 +291,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   }.property('location').cacheable(),
 
   /**
-    Returns YES if query location is Local.  This is sometimes more 
+    Returns `YES` if query location is Local.  This is sometimes more 
     convenient than checking the location.
     
 		@property
@@ -299,7 +302,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   }.property('location').cacheable(),
   
   /**
-    Indicates whether a record is editable or not.  Defaults to NO.  Local
+    Indicates whether a record is editable or not.  Defaults to `NO`.  Local
     queries should never be made editable.  Remote queries may be editable or
     not depending on the data source.
   */
@@ -310,7 +313,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   // 
   
   /** 
-    Returns YES if record is matched by the query, NO otherwise.  This is 
+    Returns `YES` if record is matched by the query, `NO` otherwise.  This is 
     used when computing a query locally.  
  
     @param {SC.Record} record the record to check
@@ -344,7 +347,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   },
   
   /**
-    Returns YES if the query matches one or more of the record types in the
+    Returns `YES` if the query matches one or more of the record types in the
     passed set.
     
     @param {SC.Set} types set of record types
@@ -367,7 +370,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns the sort order of the two passed records, taking into account the
     orderBy property set on this query.  This method does not verify that the
     two records actually belong in the query set or not; this is checked using
-    contains().
+    `contains()`.
  
     @param {SC.Record} record1 the first record
     @param {SC.Record} record2 the second record
@@ -434,9 +437,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   /**
     This method has to be called before the query object can be used.
-    You will normaly not have to do this, it will be called automatically
+    You will normaly not have to do this; it will be called automatically
     if you try to evaluate a query.
-    You can however use this function for testing your queries.
+    You can, however, use this function for testing your queries.
  
     @returns {Boolean} true if parsing succeeded, false otherwise
   */
@@ -483,10 +486,10 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   /** @private
     Properties that need to be copied when cloning the query.
   */
-  copyKeys: 'conditions orderBy recordType recordTypes parameters location scope'.w(),
+  copyKeys: ['conditions', 'orderBy', 'recordType', 'recordTypes', 'parameters', 'location', 'scope'],
   
   /** @private */
-  concatenatedProperties: 'copyKeys'.w(),
+  concatenatedProperties: ['copyKeys'],
 
   /** @private 
     Implement the Copyable API to clone a query object once it has been 
@@ -516,22 +519,38 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   /**
     This is the definition of the query language. You can extend it
-    by using SC.Query.registerQueryExtension().
+    by using `SC.Query.registerQueryExtension()`.
   */
   queryLanguage: {
     
     'UNKNOWN': {
       firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
-      notAllowed:       /[\s'"\w\d\(\)\{\}]/
+      notAllowed:       /[\-\s'"\w\d\(\)\{\}]/
     },
 
     'PROPERTY': {
       firstCharacter:   /[a-zA-Z_]/,
-      notAllowed:       /[^a-zA-Z_0-9]/,
+      notAllowed:       /[^a-zA-Z_0-9\.]/,
       evalType:         'PRIMITIVE',
       
       /** @ignore */
-      evaluate:         function (r,w) { return r.get(this.tokenValue); }
+      evaluate:         function (r,w) {
+                          var tokens = this.tokenValue.split('.');
+
+                          var len = tokens.length;
+                          if (len < 2) return r.get(this.tokenValue);
+
+                          var ret = r;
+                          for (var i = 0; i < len; i++) {
+                            if (!ret) return;
+                            if (ret.get) {
+                              ret = ret.get(tokens[i]);
+                            } else {
+                              ret = ret[tokens[i]];
+                            }
+                          }
+                          return ret;
+                        }
     },
 
     'NUMBER': {
@@ -867,7 +886,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   /**
     Takes a string and tokenizes it based on the grammar definition
-    provided. Called by parse().
+    provided. Called by `parse()`.
     
     @param {String} inputString the string to tokenize
     @param {Object} grammar the grammar definition (normally queryLanguage)
@@ -1015,11 +1034,11 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     specified tree logic. The returned object will have an error property
     if building of the tree failed. Check it to get some information
     about what happend.
-    If everything worked the tree can be evaluated by calling:
+    If everything worked, the tree can be evaluated by calling
     
-      tree.evaluate(record, parameters)
+        tree.evaluate(record, parameters)
     
-    If tokenList is empty, a single token will be returned which will
+    If `tokenList` is empty, a single token will be returned which will
     evaluate to true for all records.
     
     @param {Array} tokenList the list of tokens
@@ -1180,7 +1199,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**
     Takes a string containing an order statement and returns an array
     describing this order for easier processing.
-    Called by parse().
+    Called by `parse()`.
     
     @param {String | Function} orderOp the string containing the order statement, or a comparison function
     @returns {Array | Function} array of order statement, or a function if a function was specified
@@ -1215,22 +1234,22 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 SC.Query.mixin( /** @scope SC.Query */ {
 
   /** 
-    Constant used for SC.Query#location
+    Constant used for `SC.Query#location`
   
     @type String
   */
   LOCAL: 'local',
   
   /** 
-    Constant used for SC.Query#location 
+    Constant used for `SC.Query#location`
     
     @type String
   */
   REMOTE: 'remote',
   
   /**
-    Given a query, returns the associated storeKey.  For the inverse of this 
-    method see SC.Store.queryFor().
+    Given a query, returns the associated `storeKey`.  For the inverse of this 
+    method see `SC.Store.queryFor()`.
     
     @param {SC.Query} query the query
     @returns {Number} a storeKey.
@@ -1240,7 +1259,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   },
   
   /**
-    Will find which records match a give SC.Query and return an array of 
+    Will find which records match a give `SC.Query` and return an array of 
     store keys. This will also apply the sorting for the query.
     
     @param {SC.Query} query to apply
@@ -1264,7 +1283,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   
   /** 
     Sorts a set of store keys according to the orderBy property
-    of the SC.Query.
+    of the `SC.Query`.
     
     @param {Array} storeKeys to sort
     @param {SC.Query} query to use for sorting
@@ -1274,114 +1293,39 @@ SC.Query.mixin( /** @scope SC.Query */ {
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
     if (storeKeys) {
-      
-      // Set tmp variable because we can't pass variables to sort function.
-      // Do this instead of generating a temporary closure function for perf.
-      // We'll use a stack-based approach in case our sort routine ends up
-      // calling code that triggers a recursive invocation of orderStoreKeys.
-      var K           = SC.Query,
-          tempStores  = K._TMP_STORES,
-          tempQueries = K._TMP_QUERIES;
-      if (!tempStores)  tempStores  = K._TMP_STORES = [];
-      if (!tempQueries) tempQueries = K._TMP_QUERIES = [];
-      
-      tempStores.push(store);
-      tempQueries.push(query);
-        
-      var res = storeKeys.sort(SC.Query.compareStoreKeys);
-      
-      K._TMP_STORES.pop();
-      K._TMP_QUERIES.pop();
+      var res = storeKeys.sort(function(a, b) {
+        return SC.Query.compareStoreKeys(query, store, a, b);
+      });
     }
 
     return storeKeys;
   },
-  
+
   /** 
-    Default sort method that is used when calling containsStoreKeys()
-    or containsRecords() on this query. Simply materializes two records based 
-    on storekeys before passing on to compare() .
+    Default sort method that is used when calling `containsStoreKeys()`
+    or `containsRecords()` on this query. Simply materializes two records
+    based on `storekey`s before passing on to `compare()`.
  
     @param {Number} storeKey1 a store key
     @param {Number} storeKey2 a store key
     @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
   */
-  compareStoreKeys: function(storeKey1, storeKey2) {
-    var K           = SC.Query,
-        tempStores  = K._TMP_STORES,
-        tempQueries = K._TMP_QUERIES,
-        store       = tempStores[tempStores.length - 1],
-        query       = tempQueries[tempQueries.length - 1],
-        compareFunc = query.compare,
-        record1     = store.materializeRecord(storeKey1),
+  compareStoreKeys: function(query, store, storeKey1, storeKey2) {
+    var record1     = store.materializeRecord(storeKey1),
         record2     = store.materializeRecord(storeKey2);
 
-    // If the query implements a custom 'compare' function, then use it.
-    // Otherwise, we have the logic from the standard version inlined here.
-    if (compareFunc !== K.prototype.compare) {
-      return compareFunc.call(query, record1, record2);
-    }
-    else {
-      // THIS CODE IS THE SAME AS THE 'compare' METHOD, EXCEPT THAT 'this' HAS
-      // BEEN CHANGED TO 'query'.
-      //
-      // It is inlined here to avoid the extra method invocation in the
-      // typical case where the client does not supply a custom 'compare'
-      // function.
-      
-      var result = 0, 
-          propertyName, order, len, i;
-
-      // fast cases go here
-      if (record1 === record2) return 0;
-    
-      // if called for the first time we have to build the order array
-      if (!query._isReady) query.parse();
-      if (!query._isReady) { // can't parse. guid is wrong but consistent
-        return SC.compare(record1.get('id'),record2.get('id'));
-      }
-    
-      // For every property specified in orderBy until non-eql result is found.
-      // Or, if orderBy is a comparison function, simply invoke it with the
-      // records.
-      order = query._order;
-      if (SC.typeOf(order) === SC.T_FUNCTION) {
-        result = order.call(null, record1, record2);
-      }
-      else {
-        len   = order ? order.length : 0;
-        for (i=0; result===0 && (i < len); i++) {
-          propertyName = order[i].propertyName;
-          // if query property has a registered comparison use that
-          if (SC.Query.comparisons[propertyName]) {
-            result = SC.Query.comparisons[propertyName](
-                      record1.get(propertyName),record2.get(propertyName));
-                  
-          // if not use default SC.compare()
-          } else {
-            result = SC.compare(
-                      record1.get(propertyName), record2.get(propertyName) );
-          }
-      
-          if ((result!==0) && order[i].descending) result = (-1) * result;
-        }
-      }
-
-      // return result or compare by guid
-      if (result !== 0) return result ;
-      else return SC.compare(record1.get('id'),record2.get('id'));
-    }
+    return query.compare(record1, record2);
   },
   
   /**
-    Returns a SC.Query instance reflecting the passed properties.  Where 
+    Returns a `SC.Query` instance reflecting the passed properties.  Where 
     possible this method will return cached query instances so that multiple 
     calls to this method will return the same instance.  This is not possible 
     however, when you pass custom parameters or set ordering. All returned 
     queries are frozen.
     
     Usually you will not call this method directly.  Instead use the more
-    convenient SC.Query.local() and SC.Query.remote().
+    convenient `SC.Query.local()` and `SC.Query.remote()`.
     
     Examples
     
@@ -1390,26 +1334,26 @@ SC.Query.mixin( /** @scope SC.Query */ {
     The following return local queries selecting all records of a particular 
     type or types, including any subclasses:
     
-    		  var people = SC.Query.local(Ab.Person);
-		      var peopleAndCompanies = SC.Query.local([Ab.Person, Ab.Company]);
+        var people = SC.Query.local(Ab.Person);
+        var peopleAndCompanies = SC.Query.local([Ab.Person, Ab.Company]);
       
-		      var people = SC.Query.local('Ab.Person');
-		      var peopleAndCompanies = SC.Query.local('Ab.Person Ab.Company'.w());
+        var people = SC.Query.local('Ab.Person');
+        var peopleAndCompanies = SC.Query.local('Ab.Person Ab.Company'.w());
       
-		      var allRecords = SC.Query.local(SC.Record);
+        var allRecords = SC.Query.local(SC.Record);
     
     The following will match a particular type of condition:
     
-    		  var married = SC.Query.local(Ab.Person, "isMarried=YES");
-		      var married = SC.Query.local(Ab.Person, "isMarried=%@", [YES]);
-		      var married = SC.Query.local(Ab.Person, "isMarried={married}", {
-		        married: YES
-		      });
+        var married = SC.Query.local(Ab.Person, "isMarried=YES");
+        var married = SC.Query.local(Ab.Person, "isMarried=%@", [YES]);
+        var married = SC.Query.local(Ab.Person, "isMarried={married}", {
+          married: YES
+        });
     
     You can also pass a hash of options as the second parameter.  This is 
     how you specify an order, for example:
     
-		      var orderedPeople = SC.Query.local(Ab.Person, { orderBy: "firstName" });
+        var orderedPeople = SC.Query.local(Ab.Person, { orderBy: "firstName" });
     
     @param {String} location the query location.
     @param {SC.Record|Array} recordType the record type or types.
@@ -1499,8 +1443,8 @@ SC.Query.mixin( /** @scope SC.Query */ {
   },
   
   /**
-    Returns a LOCAL query with the passed options.  For a full description of
-    the parameters you can pass to this method, see SC.Query.build().
+    Returns a `LOCAL` query with the passed options.  For a full description of
+    the parameters you can pass to this method, see `SC.Query.build()`.
   
     @param {SC.Record|Array} recordType the record type or types.
     @param {String} conditions optional conditions
@@ -1512,8 +1456,8 @@ SC.Query.mixin( /** @scope SC.Query */ {
   },
   
   /**
-    Returns a REMOTE query with the passed options.  For a full description of
-    the parameters you can pass to this method, see SC.Query.build().
+    Returns a `REMOTE` query with the passed options.  For a full description of
+    the parameters you can pass to this method, see `SC.Query.build()`.
     
     @param {SC.Record|Array} recordType the record type or types.
     @param {String} conditions optional conditions
@@ -1525,7 +1469,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   },
   
   /** @private 
-    called by SC.Record.extend(). invalided expandedRecordTypes
+    called by `SC.Record.extend()`. invalidates `expandedRecordTypes`
   */
   _scq_didDefineRecordType: function() {
     var q = SC.Query._scq_queriesWithExpandedRecordTypes;
@@ -1565,7 +1509,7 @@ SC.Query.registerComparison = function(propertyName, comparison) {
   You shoud provide a name for your extension and a definition
   specifying how it should be parsed and evaluated.
   
-  Have a look at queryLanguage for examples of definitions.
+  Have a look at `queryLanguage` for examples of definitions.
   
   TODO add better documentation here
   

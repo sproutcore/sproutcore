@@ -1,9 +1,10 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
-//            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+/*globals TemplateTests module */
 /**
   This module specifically tests integration with Handlebars and SproutCore-specific
   Handlebars extensions.
@@ -293,23 +294,29 @@ test("Handlebars templates update properties if a content object changes", funct
   equals(view.$('h2').text(), "brown coffee", "precond - renders color correctly");
   equals(view.$('#price').text(), '$4', "precond - renders price correctly");
 
-  view.set('coffee', SC.Object.create({
-    color: "mauve",
-    price: "$4.50"
-  }));
+  SC.run(function() {
+    view.set('coffee', SC.Object.create({
+      color: "mauve",
+      price: "$4.50"
+    }));
+  });
 
   equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
   equals(view.$('#price').text(), "$4.50", "should update price field when content changes");
 
-  view.set('coffee', SC.Object.create({
-    color: "mauve",
-    price: "$5.50"
-  }));
+  SC.run(function() {
+    view.set('coffee', SC.Object.create({
+      color: "mauve",
+      price: "$5.50"
+    }));
+  });
 
   equals(view.$('h2').text(), "mauve coffee", "should update name field when content changes");
   equals(view.$('#price').text(), "$5.50", "should update price field when content changes");
 
-  view.setPath('coffee.price', "$5");
+  SC.run(function() {
+    view.setPath('coffee.price', "$5");
+  });
 
   equals(view.$('#price').text(), "$5", "should update price field when price property is changed");
 });
@@ -334,11 +341,11 @@ test("Template updates correctly if a path is passed to the bind helper", functi
 
   equals(view.$('h1').text(), "$4", "precond - renders price");
 
-  view.setPath('coffee.price', "$5");
+  SC.run(function() { view.setPath('coffee.price', "$5"); });
 
   equals(view.$('h1').text(), "$5", "updates when property changes");
 
-  view.set('coffee', { price: "$6" });
+  SC.run(function() { view.set('coffee', { price: "$6" }); });
   equals(view.$('h1').text(), "$6", "updates when parent property changes");
 });
 
@@ -354,7 +361,7 @@ test("Template updates correctly if a path is passed to the bind helper and the 
     price: "$4"
   });
 
-  controller.set('content', realObject);
+  SC.run(function() { controller.set('content', realObject); });
 
   var view = SC.TemplateView.create({
     templateName: 'menu',
@@ -367,7 +374,7 @@ test("Template updates correctly if a path is passed to the bind helper and the 
 
   equals(view.$('h1').text(), "$4", "precond - renders price");
 
-  realObject.set('price', "$5");
+  SC.run(function() { realObject.set('price', "$5"); });
 
   equals(view.$('h1').text(), "$5", "updates when property is set on real object");
 
@@ -494,7 +501,7 @@ test("Should insert a localized string if the {{loc}} helper is used", function(
     'Brazil': 'Brasilia'
   });
 
-  templates = SC.Object.create({
+  var templates = SC.Object.create({
     'loc': SC.Handlebars.compile('<h1>Country: {{loc "Brazil"}}')
   });
 
@@ -633,6 +640,27 @@ test("Child views created using the view helper should have their parent view se
   equals(childView, childView.childViews[0].parentView, 'parent view is correct');
 });
 
+test("Child views created using the view helper should have their IDs registered for events", function() {
+  TemplateTests = {};
+
+  var template = '{{view "SC.TemplateView"}}{{view "SC.TemplateView" id="templateViewTest"}}';
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile(template)
+  });
+
+  view.createLayer();
+
+  var childView = view.childViews[0];
+  var id = childView.$()[0].id;
+  equals(SC.View.views[id], childView, 'childView without passed ID is registered with SC.View.views so that it can properly receive events from RootResponder');
+
+  childView = view.childViews[1];
+  id = childView.$()[0].id;
+  equals(id, 'templateViewTest', 'precond -- id of childView should be set correctly');
+  equals(SC.View.views[id], childView, 'childView with passed ID is registered with SC.View.views so that it can properly receive events from RootResponder');
+});
+
 test("Collection views that specify an example view class have their children be of that class", function() {
   TemplateTests.ExampleViewCollection = SC.TemplateCollectionView.create({
     itemView: SC.TemplateView.extend({
@@ -755,6 +783,24 @@ test("should be able to bind view class names to properties", function() {
   });
 
   equals(view.$('.is-done').length, 0, "removes class name if bound property is set to false");
+
+  // There is a bug that if the view becomes first responder, its class bindings get wiped out.
+  // This test illustrates the bug, by adding the view to a pane and making it firstResponder
+
+  var pane = SC.MainPane.design();
+  pane = pane.create().append();
+
+  SC.run(function() {
+    pane.appendChild(view);
+  });
+
+  TemplateTests.classBindingView.becomeFirstResponder();
+
+  SC.run(function() {
+    TemplateTests.classBindingView.set('isDone', YES);
+  });
+
+  equals(view.$('.is-done').length, 1, "dasherizes property and sets class name after becoming first responder");
 });
 
 test("should be able to bind element attributes using {{bindAttr}}", function() {
@@ -778,6 +824,77 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
   });
 
   equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
+
+  SC.run(function() {
+    view.set('content', SC.Object.create({
+      url: "http://www.thegooglez.com/theydonnothing",
+      title: "I CAN HAZ SEARCH"
+    }));
+  });
+
+  equals(view.$('img').attr('alt'), "I CAN HAZ SEARCH", "updates alt attribute when content object changes");
+
+  SC.run(function() {
+    view.set('content', {
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    });
+  });
+
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "updates alt attribute when content object is a hash");
+
+  SC.run(function() {
+    view.set('content', {
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: function() {
+        return "Nanananana SproutCore!";
+      }
+    });
+  });
+
+  equals(view.$('img').attr('alt'), "Nanananana SproutCore!", "updates alt attribute when title property is computed");
+});
+
+test("should be able to bind element attributes using {{bindAttr}} inside a block", function() {
+  var template = SC.Handlebars.compile('{{#with content}}<img {{bindAttr src="url" alt="title"}}>{{/with}}');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    content: SC.Object.create({
+      url: "http://www.sproutcore.com/assets/images/logo.png",
+      title: "The SproutCore Logo"
+    })
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
+
+  SC.run(function() {
+    view.setPath('content.title', "El logo de Esproutcore");
+  });
+
+  equals(view.$('img').attr('alt'), "El logo de Esproutcore", "updates alt attribute when content's title attribute changes");
+});
+
+test("should be able to bind class attribute with {{bindAttr}}", function() {
+  var template = SC.Handlebars.compile('<img {{bindAttr class="foo"}}>');
+
+  var view = SC.TemplateView.create({
+    template: template,
+    foo: 'bar'
+  });
+
+  view.createLayer();
+
+  equals(view.$('img').attr('class'), 'bar', "renders class");
+
+  SC.run(function() {
+    view.set('foo', 'baz');
+  });
+
+  equals(view.$('img').attr('class'), 'baz', "updates class");
 });
 
 test("should be able to bind boolean element attributes using {{bindAttr}}", function() {
@@ -797,8 +914,10 @@ test("should be able to bind boolean element attributes using {{bindAttr}}", fun
   ok(!view.$('input').attr('disabled'), 'attribute does not exist upon initial render');
   ok(view.$('input').attr('checked'), 'attribute is present upon initial render');
 
-  content.set('isDisabled', true);
-  content.set('isChecked', false);
+  SC.run(function() {
+    content.set('isDisabled', true);
+    content.set('isChecked', false);
+  });
 
   ok(view.$('input').attr('disabled'), 'attribute exists after update');
   ok(!view.$('input').attr('checked'), 'attribute is not present after update');
@@ -821,7 +940,9 @@ test("should be able to add multiple classes using {{bindAttr class}}", function
   ok(view.$('div').hasClass('is-awesome-sauce'), "dasherizes first property and sets classname");
   ok(view.$('div').hasClass('is-also-cool'), "dasherizes second property and sets classname");
 
-  content.set('isAwesomeSauce', false);
+  SC.run(function() {
+    content.set('isAwesomeSauce', false);
+  });
 
   ok(!view.$('div').hasClass('is-awesome-sauce'), "removes dasherized class when property is set to false");
 });

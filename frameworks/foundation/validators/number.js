@@ -77,7 +77,7 @@ SC.Validator.Number = SC.Validator.extend(
   
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
-    return SC.$error("Invalid.Number(%@)".loc(label), label) ;
+    return SC.$error(SC.String.loc("Invalid.Number(%@)", label), label) ;
   },
   
   /** 

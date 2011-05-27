@@ -8,31 +8,29 @@
 /*globals */
 
 /** @namespace
-A simple mixin called Animatable is provided. What does it do?
-It makes CSS transitions for you, and if they aren't available,
-implements them in JavaScript.
+  A simple mixin called Animatable is provided. What does it do?
+  It makes CSS transitions for you, and if they aren't available,
+  implements them in JavaScript.
 
-Animatable things:
-- layout. You can animate any layout property, even centerX and centerY
-- opacity.
-- display, in a way. All animating display does is delay setting display:none
-  until <em>after</em> the transition duration has passed. This allows you
-  to set display:none after fading out. If mixing with CSS transitions, you will
-  need to set the delay a tad longer to accomodate any delays in beginning the
-  transition.
+  ## Animatable things:
 
-@class SC.Animatable
-@example Example Usage:
-{{{
-aView: SC.LabelView.design(SC.Animatable, {
-  transitions: {
-    left: {duration: .25},
-    top: .25, // only possible during design; otherwise you must use long form.
-    width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
-  }
-})
-}}}
-@extends SC.Object
+    - layout. You can animate any layout property, even centerX and centerY
+    - opacity.
+    - display, in a way. All animating display does is delay setting display:none
+      until <em>after</em> the transition duration has passed. This allows you
+      to set display:none after fading out. If mixing with CSS transitions, you will
+      need to set the delay a tad longer to accomodate any delays in beginning the
+      transition.
+
+  ## Example Usage:
+
+      aView: SC.LabelView.design(SC.Animatable, {
+        transitions: {
+          left: {duration: .25},
+          top: .25, // only possible during design; otherwise you must use long form.
+          width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
+        }
+      })
 */
 SC.Animatable = {
   /** @scope SC.Animatable.prototype */
@@ -62,7 +60,7 @@ SC.Animatable = {
 
   // properties that adjust should relay to style
   _styleProperties: [ "display", "transform" ],
-  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY opacity border borderTop borderRight borderBottom borderLeft'.w(),
+  _layoutStyles: SC.String.w('width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY opacity border borderTop borderRight borderBottom borderLeft'),
 
   // we cache this dictionary so we don't generate a new one each time we make
   // a new animation. It is used so we can start the animations in order—
@@ -139,13 +137,13 @@ SC.Animatable = {
   _animatable_didCreateLayer: function(){
     this.resetAnimation();
     SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
-    SC.Event.add(this.get('layer'), "transitionEnd", this, this.transitionEnd);
+    SC.Event.add(this.get('layer'), "transitionend", this, this.transitionEnd);
     return this._animatable_original_didCreateLayer();
   },
 
   _animatable_willDestroyLayer: function(){
     SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
-    SC.Event.remove(this.get('layer'), "transitionEnd", this, this.transitionEnd);
+    SC.Event.remove(this.get('layer'), "transitionend", this, this.transitionEnd);
     return this._animatable_original_willDestroyLayer();
   },
 
@@ -190,8 +188,9 @@ SC.Animatable = {
   Adds support for some style properties to adjust.
 
   These added properties are currently:
-  - opacity.
-  - display.
+
+   - opacity.
+   - display.
 
   This is a complete rewrite of adjust. Its performance can probably be boosted. Do it!
   */

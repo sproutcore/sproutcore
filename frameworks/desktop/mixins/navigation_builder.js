@@ -9,15 +9,20 @@
 /**
   @namespace
   NavigationBuilder is an implementation of the Builder protocol. It implements
-  buildIn/Out (though these only relay to buildIn/OutNavigation, so feel free to
+  `buildIn`/`Out` (though these only relay to `buildIn`/`OutNavigation, so feel free to
   override if needed; the navigation builders will still be accessible).
   
   Building in and out animates the view in and out to and from the left and right.
 */
-
 SC.NavigationBuilder = {
-  /*@scope SC.NavigationBuilder.prototype */ // YOU LIE! But it helps docs.
-  
+
+  /**
+    Walk like a duck.
+    
+    @type Boolean
+    @default YES
+    @constant
+  */
   isNavigationBuilder: YES,
   
   /**
@@ -25,6 +30,9 @@ SC.NavigationBuilder = {
     transitions hash if one exists, or become the transitions hash otherwise.
     
     If NO, it uses the (hard-coded) defaults.
+    
+    @type Boolean
+    @default NO
   */
   navigationTransitions: NO,
   
@@ -56,8 +64,7 @@ SC.NavigationBuilder = {
     if (SC.Animatable) SC.mixin(this.transitions, navigationTransitions);
   },
   
-  /**
-    @private
+  /** @private
     Determines metrics of the view. This may be adapted to work with non-CSS transforms in future...
   */
   metrics: function() {
@@ -65,8 +72,7 @@ SC.NavigationBuilder = {
     return f;
   },
   
-  /**
-    @private
+  /** @private
     Applies the supplied CSS transform.
   */
   transform: function(pos) {
@@ -77,9 +83,6 @@ SC.NavigationBuilder = {
     }
   },
   
-  /**
-    Builds in the navigation.
-  */
   buildInNavigation: function() {
     // set initial state
     var metrics = this.metrics();
@@ -98,16 +101,16 @@ SC.NavigationBuilder = {
   },
   
   /**
-    You may override this. If you do, call buildInNavigation to call the original functionality.
-    You may need to override navigationBuildDidFinish as well if you call buildInNavigation.
+    You may override this. If you do, call `buildInNavigation` to call the original functionality.
+    You may need to override `navigationBuildDidFinish` as well if you call `buildInNavigation`.
   */
   buildIn: function() {
     this.buildInNavigation();
   },
   
   /**
-    You may override this. If you do, call buildOutNavigation to call the original functionality.
-    You may need to override navigationBuildDidFinish as well if you call buildOutNavigation.
+    You may override this. If you do, call `buildOutNavigation` to call the original functionality.
+    You may need to override `navigationBuildDidFinish`as well if you call `buildOutNavigation`.
   */
   buildOut: function() {
     this.buildOutNavigation();
@@ -124,8 +127,11 @@ SC.NavigationBuilder = {
     Called when the transitions finish.
   */
   navigationBuildDidFinish: function() {
-    if (this.isBuildingIn) this.buildInDidFinish();
-    else if (this.isBuildingOut) this.buildOutDidFinish();
+    if (this.isBuildingIn) {
+      this.buildInDidFinish();
+    } else if (this.isBuildingOut) {
+      this.buildOutDidFinish();
+    }
   }
   
 } ;

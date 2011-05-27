@@ -40,6 +40,16 @@
     }
   });
 
+  test("Adding isPolymorphic to extend() hash applies it to record class", function() {
+    var Test = SC.Record.extend({
+      isPolymorphic: YES
+    });
+    var test = store.createRecord(Test, {});
+
+    ok(Test.isPolymorphic, "Record class should have gotten passed isPolymorphic value");
+    ok(test.isPolymorphic === null || test.isPolymorphic === undefined, "Created record instance should not have isPolymorphic property");
+  });
+
   test("SC.Store#find works with abstract record type", function() {
     var person1 = store.find(Person, '1'),
         person2 = store.find(Person, '2');

@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('views/button');
+
 /**
   @class
 
@@ -13,33 +15,32 @@
   Clicking the SelectView button displays a menu pane with a
   list of items. The selected item will be displayed on the button.
   User has the option of enabling checkbox for the selected menu item.
-
-  I AM CHANGING THIS AND BREAKING APIs, so I have renamed it (and put it in a more
-  logical place) so that I don't break anyone else's current use of SelectButtonView...
-  even though I have a suspiscion that no one uses it.
   
   @extends SC.ButtonView
   @version 1.0
   @author Alex Iskander, Mohammed Ashik
 */
-sc_require('views/button');
-
 SC.SelectView = SC.ButtonView.extend(
 /** @scope SC.SelectView.prototype */ {
+
+  /**
+    @field
+    @type Boolean
+    @default YES
+  */
+  acceptsFirstResponder: function() {
+    return this.get('isEnabled');
+  }.property('isEnabled'),
+
   /**
     An array of items that will be form the menu you want to show.
 
-    @property
-    @type {Array}
+    @type Array
+    @default []
   */
   items: [],
 
-  /**
-    Binding default for an array of items
-
-    @property
-    @default SC.Binding.multiple()
-  */
+  /** @private */
   itemsBindingDefault: SC.Binding.multiple(),
 
   /**
@@ -47,9 +48,8 @@ SC.SelectView = SC.ButtonView.extend(
     menu item will be pulled from the object using the named property.
     if this is null, the collection items themselves will be used.
 
-    @property
-    @type {String}
-    @default: null
+    @type String
+    @default null
   */
   itemTitleKey: null,
 
@@ -58,9 +58,8 @@ SC.SelectView = SC.ButtonView.extend(
     be used to sort the items.  If this is not set, then itemTitleKey will
     be used.
 
-    @property
-    @type: {String}
-    @default: null
+    @type String
+    @default null
   */
   itemSortKey: null,
 
@@ -69,32 +68,37 @@ SC.SelectView = SC.ButtonView.extend(
      as the value for the options popup.  If you don't set this, then the
      items themselves will be used as the value.
 
-     @property
-     @type {String}
+     @type String
      @default null
   */
   itemValueKey: null,
 
   /**
      Key used to extract icons from the items array
+
+     @type String
+     @default null
   */
   itemIconKey: null,
   
   /**
     Key to use to identify separators.
+
+    @type String
+    @default "separator"
   */
   itemSeparatorKey: "separator",
   
   /**
     Key used to indicate if the item is to be enabled.
+
+    @type String
+    @default "isEnabled"
   */
   itemIsEnabledKey: "isEnabled",
 
   /**
-    If true, the empty name will be localized.
-
-    @property
-    @type {Boolean}
+    @type Boolean
     @default YES
   */
   localize: YES,
@@ -103,21 +107,22 @@ SC.SelectView = SC.ButtonView.extend(
     if true, it means that no sorting will occur, items will appear
     in the same order as in the array
 
-    @property
-    @type {Boolean}
+    @type Boolean
     @default YES
   */
   disableSort: YES,
 
   /**
-
-    @property
+    @type Array
     @default ['sc-select-button']
+    @see SC.View#classNames
   */
   classNames: ['sc-select-view'],
 
   /**
     Menu attached to the SelectView.
+    
+    @type SC.View
     @default SC.MenuView
   */
   menu: null,
@@ -136,7 +141,7 @@ SC.SelectView = SC.ButtonView.extend(
     is used to calculate the preferMatrix.
 
     @property
-    @type {Number}
+    @type Number
     @default null
     @private
   */
@@ -145,16 +150,16 @@ SC.SelectView = SC.ButtonView.extend(
   /**
      Current Value of the SelectView
 
-     @property
+     @type Object
      @default null
   */
-  value: null ,
+  value: null,
 
   /**
     if this property is set to 'YES', a checbox is shown next to the
     selected menu item.
 
-    @private
+    @type Boolean
     @default YES
   */
   checkboxEnabled: YES,
@@ -163,7 +168,7 @@ SC.SelectView = SC.ButtonView.extend(
     if this property is set to 'YES', a checbox is shown next to the
     selected menu item.
 
-    @private
+    @type Boolean
     @default YES
   */
   showCheckbox: YES,
@@ -193,17 +198,18 @@ SC.SelectView = SC.ButtonView.extend(
   _defaultIcon: null,
 
   /**
-    @private
-
     The button theme will be popup
+    
+    @type String
+    @default 'popup'
+    @readOnly
   */
   theme: 'popup',
 
   /**
-    Render method gets triggered when these properties change
-
-    @property
-    @type{SC.Array}
+    @type SC.Array
+    @default ['icon', 'value','controlSize','items']
+    @see SC.View#displayProperties
   */
   displayProperties: ['icon', 'value','controlSize','items'],
 
@@ -213,10 +219,8 @@ SC.SelectView = SC.ButtonView.extend(
     the button. The value at the second index(0) changes based on the
     postion(index) of the menu item in the menu pane.
 
-    @property
-    @type {Array}
+    @type Array
     @default null
-
   */
   preferMatrix: null,
 
@@ -224,8 +228,7 @@ SC.SelectView = SC.ButtonView.extend(
     Property to set the menu item height. This in turn is used for
     the calculation of prefMatrix.
 
-    @property
-    @type {Number}
+    @type Number
     @default 20
   */
   CUSTOM_MENU_ITEM_HEIGHT: 20,
@@ -241,7 +244,7 @@ SC.SelectView = SC.ButtonView.extend(
     If this property is set to 'YES', the menu pane will be positioned
     below the anchor.
 
-    @private
+    @type Boolean
     @default NO
   */
   isDefaultPosition: NO,
@@ -256,18 +259,24 @@ SC.SelectView = SC.ButtonView.extend(
 
   /**
     Example view used for menu items.
+    
+    @type SC.View
+    @default null
   */
   exampleView: null,
   
   /**
     customView menu offset width
+    
+    @type Number
+    @default 0
   */
   customViewMenuOffsetWidth: 0,
 
   /**
     This is a property for enabling/disabling ellipsis
 
-    @private
+    @type Boolean
     @default YES
   */
   needsEllipsis: YES,
@@ -276,19 +285,23 @@ SC.SelectView = SC.ButtonView.extend(
     This property allows you at add extra padding to the height
     of the menu pane.
 
+    @type Number
     @default 0
-    @property {Number} heightPadding for menu pane.
   */
   menuPaneHeightPadding: 0,
   
   /**
-  The amount of space to add to the calculated width of the menu item strings to
-  determine the width of the menu pane.
+    The amount of space to add to the calculated width of the menu item strings to
+    determine the width of the menu pane.
+    
+    @type Number
+    @default 35
   */
   menuItemPadding: 35,
   
   /**
-    Disable context menu.
+    @type Boolean
+    @default NO
   */
   isContextMenuEnabled: NO,
   
@@ -296,7 +309,9 @@ SC.SelectView = SC.ButtonView.extend(
     This is a property to enable/disable focus rings in buttons. 
     For select_button, we are making it a default.
     
+    @type Boolean
     @default YES
+    @see SC.ButtonView#supportFocusRing
   */
   supportFocusRing: YES,
 
@@ -325,8 +340,8 @@ SC.SelectView = SC.ButtonView.extend(
     override this method to implement your own sorting of the menu. By
     default, menu items are sorted using the value shown or the sortKey
 
-    @param{SC.Array} objects the unsorted array of objects to display.
-    @returns sorted array of objects
+    @param {SC.Array} objects the unsorted array of objects to display.
+    @returns {SC.Array} sorted array of objects
   */
   sortObjects: function(objects) {
     if(!this.get('disableSort')){
@@ -389,7 +404,7 @@ SC.SelectView = SC.ButtonView.extend(
         object.get(nameKey) : object[nameKey]) : object.toString() ;
 
       // localize name if specified.
-      name = shouldLocalize? name.loc() : name ;
+      name = shouldLocalize? SC.String.loc(name) : name ;
 
       //Get the icon value
       icon = iconKey ? (object.get ?
@@ -470,8 +485,6 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    Button action handler
-
     @private
     @param {DOMMouseEvent} evt mouseup event that triggered the action
   */
@@ -480,7 +493,7 @@ SC.SelectView = SC.ButtonView.extend(
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
-      customMenuView, menu, itemsLength;
+      menu, itemsLength, itemIdx;
     
     buttonLabel = this.$('.sc-button-label')[0] ;
     
@@ -559,8 +572,7 @@ SC.SelectView = SC.ButtonView.extend(
     menuHeightPadding = this.get('menuPaneHeightPadding') ;
 
     // get the user defined custom view
-    customView = this.get('exampleView') ;
-    customMenuView = customView ? customView : SC.MenuItemView ;
+    customView = this.get('exampleView') || SC.MenuItemView;
 
     menu  = SC.MenuPane.create({
 
@@ -582,7 +594,7 @@ SC.SelectView = SC.ButtonView.extend(
         @default SC.MenuItemView
         @type SC.View
       */
-      exampleView: customMenuView,
+      exampleView: customView,
 
       /**
         This property enables all the items and makes them selectable.
@@ -605,16 +617,18 @@ SC.SelectView = SC.ButtonView.extend(
     menu.popup(this, this.preferMatrix) ;
     this.set('menu', menu);
 
-    customView = menu.menuItemViewForContentIndex(this.get('_itemIdx'));
-    customView.becomeFirstResponder();
+    itemIdx = this._itemIdx;
+    if (itemIdx && itemIdx > -1) {
+      customView = menu.menuItemViewForContentIndex(itemIdx);
+      if (customView) { customView.becomeFirstResponder(); }
+    }
 
     this.set('isActive', YES);
     return YES ;
   },
 
-  /**
+  /** @private
      Action method for the select button menu items
-
   */
   displaySelectedItem: function(menuView) {
     var currentItem = menuView.get("selectedItem");
@@ -624,7 +638,7 @@ SC.SelectView = SC.ButtonView.extend(
     this.set("_itemIdx", currentItem.get("contentIndex"));
   },
 
-  /**
+  /** @private
      Set the "top" attribute in the prefer matrix property which will
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
@@ -674,7 +688,6 @@ SC.SelectView = SC.ButtonView.extend(
 
   /**
     @private
-
     Holding down the button should display the menu pane.
   */
   mouseDown: function(evt) {
@@ -730,7 +743,7 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /**
+  /** @private
     Override mouseExited to not remove the active state on mouseexit.
   */
   mouseExited: function() {
@@ -739,7 +752,6 @@ SC.SelectView = SC.ButtonView.extend(
   
   /**
     @private
-
     Handle Key event - Down arrow key
   */
   keyDown: function(event) {
@@ -747,13 +759,12 @@ SC.SelectView = SC.ButtonView.extend(
       return YES;
     }
     else {
-      arguments.callee.base.apply(this,arguments);
+      return sc_super();
     }
   },
 
   /**
     @private
-
     Pressing the Up or Down arrow key should display the menu pane
   */
   interpretKeyEvents: function(event) {
@@ -765,13 +776,8 @@ SC.SelectView = SC.ButtonView.extend(
         this.resignFirstResponder() ;
       }
     }
-    return arguments.callee.base.apply(this,arguments);
+    return sc_super();
   },
-  
-  /** Function overridden - tied to the isEnabled state */
-  acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
   
   /** @private
     Override the button isSelectedDidChange function in order to not perform any action
@@ -784,26 +790,118 @@ SC.SelectView = SC.ButtonView.extend(
 }) ;
 
 /**
-  Default metrics for the different control sizes.
+  @static
+  @type Number
+  @default 0
 */
 SC.SelectView.TINY_OFFSET_X = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
 SC.SelectView.TINY_OFFSET_Y = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
 SC.SelectView.TINY_POPUP_MENU_WIDTH_OFFSET = 0;
 
+
+/**
+  @static
+  @type Number
+  @default -18
+*/
 SC.SelectView.SMALL_OFFSET_X = -18;
+
+/**
+  @static
+  @type Number
+  @default 3
+*/
 SC.SelectView.SMALL_OFFSET_Y = 3;
+
+/**
+  @static
+  @type Number
+  @default 7
+*/
 SC.SelectView.SMALL_POPUP_MENU_WIDTH_OFFSET = 7;
 
+
+/**
+  @static
+  @type Number
+  @default -17
+*/
 SC.SelectView.REGULAR_OFFSET_X = -17;
+
+/**
+  @static
+  @type Number
+  @default 3
+*/
 SC.SelectView.REGULAR_OFFSET_Y = 3;
+
+/**
+  @static
+  @type Number
+  @default 4
+*/
 SC.SelectView.REGULAR_POPUP_MENU_WIDTH_OFFSET = 4;
 
+
+/**
+  @static
+  @type Number
+  @default -17
+*/
 SC.SelectView.LARGE_OFFSET_X = -17;
+
+/**
+  @static
+  @type Number
+  @default 6
+*/
 SC.SelectView.LARGE_OFFSET_Y = 6;
+
+/**
+  @static
+  @type Number
+  @default 3
+*/
 SC.SelectView.LARGE_POPUP_MENU_WIDTH_OFFSET = 3;
 
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
 SC.SelectView.HUGE_OFFSET_X = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
 SC.SelectView.HUGE_OFFSET_Y = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
 SC.SelectView.HUGE_POPUP_MENU_WIDTH_OFFSET = 0;
 
+
+/**
+  @static
+  @type Number
+  @default -2
+*/
 SC.SelectView.MENU_WIDTH_OFFSET = -2;

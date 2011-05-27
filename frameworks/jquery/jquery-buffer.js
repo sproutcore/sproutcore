@@ -223,7 +223,11 @@ jQuery.Buffer = (function() {
   };
 
   Buffer.prototype._dasherizeStyleName = function(name) {
-    var dasherized = name.dasherize();
+    /*
+      TODO This is in jQuery framework but its relying on dasherize,
+            which is defined in Core Foundation
+    */
+    var dasherized = SC.String.dasherize(name);
     if (dasherized.match(/^(webkit|moz|ms|o)-/)) dasherized = '-'+dasherized;
     return dasherized;
   };

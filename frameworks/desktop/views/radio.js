@@ -4,6 +4,8 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+
 /** @class
 
   A RadioView is used to create a group of radio buttons.  The user can use
@@ -15,36 +17,36 @@
   The radio buttons themselves are designed to be styled using CSS classes with
   the following structure:
   
-  <label class="sc-radio-button">
-  <img class="button" src="some_image.gif"/>
-  <input type="radio" name="<sc-guid>" value=""/>
-  <span class="sc-button-label">Label for button1</span>
-  </label>
+      <label class="sc-radio-button">
+        <img class="button" src="some_image.gif"/>
+        <input type="radio" name="<sc-guid>" value=""/>
+        <span class="sc-button-label">Label for button1</span>
+      </label>
   
   Setting up a RadioView accepts a number of properties, for example:
-  {
-    items: [{ title: "Red", 
-              value: "red", 
-              enabled: YES, 
-              icon: "button_red" },
-            { title: "Green", 
-              value: "green", 
-              enabled: YES, 
-              icon: 'button_green' }],
-    value: 'red',
-    itemTitleKey: 'title',
-    itemValueKey: 'value',
-    itemIconKey: 'icon',
-    itemIsEnabledKey: 'enabled',
-    isEnabled: YES,
-    layoutDirection: SC.LAYOUT_HORIZONTAL
-  }
   
-  Default layoutDirection is vertical. 
-  Default isEnabled is YES.
-  
-  The value property can be either a string, as above, or an array of strings
-  for pre-checking multiple values.
+      radio: SC.RadioView.design({
+        items: [
+          { 
+            title: "Red",
+            value: "red",
+            enabled: YES,
+            icon: "button_red"
+          },{
+            title: "Green",
+            value: "green",
+            enabled: YES,
+            icon: 'button_green'
+          }
+        ],
+        value: 'red',
+        itemTitleKey: 'title',
+        itemValueKey: 'value',
+        itemIconKey: 'icon',
+        itemIsEnabledKey: 'enabled',
+        isEnabled: YES,
+        layoutDirection: SC.LAYOUT_HORIZONTAL
+      })
   
   The items array can contain either strings, or as in the example above a 
   hash. When using a hash, make sure to also specify the itemTitleKey
@@ -52,33 +54,67 @@
   itemIconKey if you are using icons radio buttons. The individual items 
   enabled property is YES by default, and the icon is optional.
   
-  @extends SC.FieldView
+  @extends SC.View
+  @extends SC.Control
   @since SproutCore 1.0
 */
 SC.RadioView = SC.View.extend(SC.Control,
-/** @scope SC.RadioView.prototype */
-{
+/** @scope SC.RadioView.prototype */{
 
-  // HTML design options
+  /**
+    @field
+    @type Boolean
+    @default YES
+    @observes isEnabled
+  */
+  acceptsFirstResponder: function() {
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    return NO;
+  }.property('isEnabled'),
+
+  /**
+    @type Array
+    @default ['sc-radio-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-radio-view'],
 
   /**
-    The WAI-ARIA role for a group of radio buttons. This property's value
-    should not be changed.
+    The WAI-ARIA role for a group of radio buttons.
 
-    @property {String}
+    @type String
+    @default 'radiogroup'
+    @readOnly
   */
   ariaRole: 'radiogroup',
 
+  /** 
+    @type Array
+    @default ['displayItems', 'isEnabled', 'layoutDirection']
+    @see SC.View#displayProperties
+  */
+  displayProperties: ['displayItems', 'isEnabled', 'layoutDirection'],
+  
   /**
-  If items property is a hash, specify which property will function as
-  the ariaLabeledBy with this itemAriaLabeledByKey property.ariaLabeledBy is used
-  as the WAI-ARIA attribute for the radio view. This property is assigned to
-  'aria-labelledby' attribute, which defines a string value that labels the
-  element. Used to support voiceover.  It should be assigned a non-empty string,
-  if the 'aria-labelledby' attribute has to be set for the element.
+    @type String
+    @default 'radioGroupRenderDelegate'
+  */
+  renderDelegateName: 'radioGroupRenderDelegate',
 
-    @property {String}
+  // ..........................................................
+  // Properties
+  // 
+  
+  /**
+    If items property is a hash, specify which property will function as
+    the ariaLabeledBy with this itemAriaLabeledByKey property.ariaLabeledBy is used
+    as the WAI-ARIA attribute for the radio view. This property is assigned to
+    'aria-labelledby' attribute, which defines a string value that labels the
+    element. Used to support voiceover.  It should be assigned a non-empty string,
+    if the 'aria-labelledby' attribute has to be set for the element.
+
+    @type String
+    @default null
   */
   itemAriaLabeledByKey: null,
 
@@ -90,7 +126,8 @@ SC.RadioView = SC.View.extend(SC.Control,
     element. Used to support voiceover.  It should be assigned a non-empty string,
     if the 'aria-label' attribute has to be set for the element.
 
-    @property {String}
+    @type String
+    @default null
   */
   itemAriaLabelKey: null,
 
@@ -98,27 +135,45 @@ SC.RadioView = SC.View.extend(SC.Control,
     The value of the currently selected item, and which will be checked in the 
     UI. This can be either a string or an array with strings for checking 
     multiple values.
+    
+    @type Object|String
+    @default null
   */
   value: null,
 
   /**
-    This property indicates how the radio buttons are arranged.
+    This property indicates how the radio buttons are arranged. Possible values:
+    
+      - SC.LAYOUT_VERTICAL
+      - SC.LAYOUT_HORIZONTAL
+    
+    @type String
+    @default SC.LAYOUT_VERTICAL
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
 
-  // escape the HTML in label text
+  /**
+    @type Boolean
+    @default YES
+  */
   escapeHTML: YES,
 
   /** 
     The items property can be either an array with strings, or a
     hash. When using a hash, make sure to also specify the appropriate
     itemTitleKey, itemValueKey, itemIsEnabledKey and itemIconKey.
+    
+    @type Array
+    @default []
   */
   items: [],
 
   /** 
     If items property is a hash, specify which property will function as
     the title with this itemTitleKey property.
+    
+    @type String
+    @default null
   */
   itemTitleKey: null,
   
@@ -128,7 +183,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     layoutDirection is set to SC.LAYOUT_HORIONZTAL and can be used to override
     the default value provided by the framework or theme CSS.
     
-    @property {String}
+    @type String
     @default null
   */
   itemWidthKey: null,
@@ -136,22 +191,31 @@ SC.RadioView = SC.View.extend(SC.Control,
   /** 
     If items property is a hash, specify which property will function as
     the value with this itemValueKey property.
+    
+    @type String
+    @default null
   */
   itemValueKey: null,
 
   /** 
     If items property is a hash, specify which property will function as
     the value with this itemIsEnabledKey property.
+    
+    @type String
+    @default null
   */
   itemIsEnabledKey: null,
 
   /** 
     If items property is a hash, specify which property will function as
     the value with this itemIconKey property.
+    
+    @type String
+    @default null
   */
   itemIconKey: null,
 
-  /** 
+  /**  @private
     If the items array itself changes, add/remove observer on item... 
   */
   itemsDidChange: function() {
@@ -165,7 +229,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     this.itemContentDidChange();
   }.observes('items'),
 
-  /** 
+  /** @private
     Invoked whenever the item array or an item in the array is changed.
     This method will regenerate the list of items.
   */
@@ -179,11 +243,6 @@ SC.RadioView = SC.View.extend(SC.Control,
   // ..........................................................
   // PRIVATE SUPPORT
   // 
-  /** 
-    The display properties for radio buttons are the value and _displayItems.
-  */
-  displayProperties: ['displayItems', 'isEnabled', 'layoutDirection'],
-  renderDelegateName: 'radioGroupRenderDelegate',
 
   /** @private
     Data Sources for radioRenderDelegates, as required by radioGroupRenderDelegate.
@@ -261,7 +320,7 @@ SC.RadioView = SC.View.extend(SC.Control,
       }
 
       // localize title if needed
-      if (loc) title = title.loc();
+      if (loc) title = SC.String.loc(title);
       ret.push(SC.Object.create({
         title: title,
         icon: icon,
@@ -280,13 +339,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     return ret; // done!
   }.property('isEnabled', 'value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
 
-
-  acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
-  }.property('isEnabled'),
-  
-  /**
+  /** @private
     If the user clicks on of the items mark it as active on mouseDown unless
     is disabled.
 
@@ -312,7 +365,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /**
+  /** @private
     If we have a radio element that was clicked on previously, make sure we
     remove the active state. Then update the value if the item clicked is 
     enabled.
@@ -338,11 +391,14 @@ SC.RadioView = SC.View.extend(SC.Control,
     }
   },
 
+  /** @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
 
+  /** @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }
+
 });

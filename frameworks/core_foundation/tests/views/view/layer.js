@@ -85,13 +85,9 @@ test("once its discovers layer, returns the same element, even if you remove it 
 
 module("SC.View#layer - destroying");
 
-test("returns null again if it has layer and layer is destroyed", function() {
-  
-});
+test("returns null again if it has layer and layer is destroyed");
 
-test("returns null again if parent view's layer is destroyed", function() {
-  
-});
+test("returns null again if parent view's layer is destroyed");
 
 var pane, view ;
 module("SC.View#$", {

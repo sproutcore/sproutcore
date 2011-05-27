@@ -5,8 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
-require('core');
+/*
+  TODO More docs for this class
+*/
 
 /**
   @class
@@ -15,7 +16,7 @@ require('core');
   do is to make sure that you register a function with this manager to undo
   every change you make.  You can then invoke the undo/redo methods to do it.
   
-  h4. USING THE UNDOMANAGER
+  ## Using SC.UndoManager
   
   Typically you create an undo manager inside on of your controllers.  Then,
   whenever you are about to perform an action on your model object, all you
@@ -25,29 +26,28 @@ require('core');
   Besure the undo function you register also saves undo functions.  This makes
   redo possible.
   
-  More docs TBD.
-  
   @extends SC.Object
 */
 SC.UndoManager = SC.Object.extend(
-/** @scope SC.UndoManager.prototype */
-{
+/** @scope SC.UndoManager.prototype */ {
 
   /** 
-    (Property) Name of the next undo action name.  
-  
     Use this property to build your Undo menu name.
     
+    @field
+    @type String
+    @default null
   */
   undoActionName: function() { 
     return this.undoStack ? this.undoStack.name : null ;
   }.property('undoStack'),
   
   /** 
-    (Property) Name of the next return action name.  
-  
     Use this property to build your Redo menu name.
     
+    @field
+    @type String
+    @default null
   */
   redoActionName: function() { 
     return this.redoStack ? this.redoStack.name : null ;
@@ -57,43 +57,57 @@ SC.UndoManager = SC.Object.extend(
     True if there is an undo action on the stack.
     
     Use to validate your menu item.
+    
+    @field
+    @type Boolean
+    @default NO
   */
   canUndo: function() { 
-    return this.undoStack != null; 
+    // instead of this.undoStack !== null && this.undoStack !== undefined
+    return this.undoStack != null;
   }.property('undoStack'),
   
   /** 
-    True if there is an redo action on the stack.
+    True if there is an redo action on the stack. Use to validate your menu item.
     
-    Use to validate your menu item.
+    @field
+    @type Boolean
+    @default NO
   */
   canRedo: function() { 
+    // instead of this.redoStack !== null && this.redoStack !== undefined
     return this.redoStack != null; 
   }.property('redoStack'),
   
-  /**  
-    Tries to undo the last action.  
-  
-    Returns true if succeeded.  Fails if an undo group is currently open.
+  /**
+    Tries to undo the last action. Fails if an undo group is currently open.
+    
+    @returns {Boolean} YES if suceeded, NO otherwise.
   */
-  undo: function() { this._undoOrRedo('undoStack','isUndoing'); },
-  
-  /**  
-    Tries to redo the last action.  
-  
-    Returns true if succeeded.  Fails if an undo group is currently open.
-  */
-  redo: function() { this._undoOrRedo('redoStack','isRedoing'); },
+  undo: function() {
+    this._undoOrRedo('undoStack','isUndoing');
+  },
   
   /**
-    True if the manager is currently undoing events. 
+    Tries to redo the last action. Fails if a redo group is currently open.
+    
+    @returns {Boolean} YES if suceeded, NO otherwise.
   */
-  isUndoing: false, 
+  redo: function() {
+    this._undoOrRedo('redoStack','isRedoing');
+  },
   
   /**
-    True if the manager is currently redoing events.
+    @type Boolean
+    @default NO
   */
-  isRedoing: false, 
+  isUndoing: NO,
+  
+  /**
+    @type Boolean
+    @default NO
+  */
+  isRedoing: NO, 
   
   /** @private */
   groupingLevel: 0,
@@ -125,7 +139,9 @@ SC.UndoManager = SC.Object.extend(
     automatically bundled into this one action.
     
     When you are finished performing the action, balance this with a call to
-    endUndoGroup().
+    `endUndoGroup()`.
+    
+    @param {String} name
   */
   beginUndoGroup: function(name) {
     // is a group already active? Just increment the counter.
@@ -141,7 +157,12 @@ SC.UndoManager = SC.Object.extend(
     }
   },
  
-  /** end the undo group.  see beginUndoGroup() */
+  /**
+    @throws {Error} If there is no active group
+    
+    @param {String} name
+    @see beginUndoGroup()
+  */
   endUndoGroup: function(name) {
     // if more than one groups are active, just decrement the counter.
     if (!this._activeGroup) raise("endUndoGroup() called outside group.") ;
@@ -156,9 +177,13 @@ SC.UndoManager = SC.Object.extend(
   },
 
   /**
-    Change the name of the current undo group.  
-  
+    Change the name of the current undo group.
+    
     Normally you don't want to do this as it will effect the whole group.
+    
+    @param {String} name
+    
+    @throws {Error} If there is no active group
   */
   setActionName: function(name) {
     if (!this._activeGroup) raise("setActionName() called outside group.") ;
@@ -168,8 +193,18 @@ SC.UndoManager = SC.Object.extend(
   // --------------------------------
   // PRIVATE
   //
-  _activeGroup: null, undoStack: null, redoStack: null, 
-  _undoOrRedo: function(stack,state) {
+  
+  /** @private */
+  _activeGroup: null,
+  
+  /** @private */
+  undoStack: null,
+  
+  /** @private */
+  redoStack: null, 
+  
+  /** @private */
+  _undoOrRedo: function(stack, state) {
     if (this._activeGroup) return false ;
     if (this.get(stack) == null) return true; // noting to do.
 
