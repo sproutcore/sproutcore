@@ -236,7 +236,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
     @param {SC.Store} store the store to load into
     @param {SC.Record} recordType the record type to load
     @param {SC.Array} ret is passed, array to add loaded storeKeys to.
-    @returns {SC.Fixture} receiver
+    @returns {SC.FixturesDataSource} receiver
   */
   loadFixturesFor: function(store, recordType, ret) {
     var hashes   = [],
