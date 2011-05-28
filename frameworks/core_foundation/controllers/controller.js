@@ -46,12 +46,12 @@ SC.Controller = SC.Object.extend(
    * or other content that needs to be cleaned up (with `.destroy()`) when
    * new content is set.
    */
-  cleanOldContent: NO,
+  destroyContentOnReplace: NO,
 
   contentObjectDidChanged: function() {
     var oldContent, newContent;
 
-    if (!this.get('cleanOldContent')) return;
+    if (!this.get('destroyContentOnReplace')) return;
 
     oldContent = this._oldContent,
     newContent = this.get('content');
