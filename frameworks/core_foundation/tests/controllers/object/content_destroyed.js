@@ -30,7 +30,7 @@ module("SC.ObjectController - content destroyed", {
     destroyCount = 0;
     console.log('SSSSS');
     controller = SC.ObjectController.create({ 
-      cleanOldContent: YES,
+      destroyContentOnReplace: YES,
       content: content 
     });
   },
@@ -40,14 +40,14 @@ module("SC.ObjectController - content destroyed", {
   }
 });
 
-test("Setting content should call 'destroy' on old content if cleanOldContent has been set", function() {
+test("Setting content should call 'destroy' on old content if destroyContentOnReplace has been set", function() {
   controller.set('content', newContent);
   equals(destroyCount, 1, 'destroyCount');
   equals(controller.getPath('content.foo'), 'foo2');
 });
 
-test("Setting content should NOT call 'destroy' on old content if cleanOldContent has not been set", function() {
-  controller.set('cleanOldContent', NO);
+test("Setting content should NOT call 'destroy' on old content if destroyContentOnReplace has not been set", function() {
+  controller.set('destroyContentOnReplace', NO);
   controller.set('content', newContent);
   equals(destroyCount, 0, 'destroyCount');
   equals(controller.getPath('content.foo'), 'foo2');
