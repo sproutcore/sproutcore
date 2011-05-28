@@ -44,3 +44,4 @@ the `isPolymorphic` property:
 ## Contributors
 
 - Colin Campbell (<colin@sproutcore.com>)
+- Tyler Keating (<tyler@sproutcore.com>)
