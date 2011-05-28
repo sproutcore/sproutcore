@@ -13,7 +13,7 @@
 
     // ..........................................................
     // Properties
-    // 
+    //
 
     /**
       If YES, then searches for records of this type will return
@@ -38,7 +38,7 @@
 
     // ..........................................................
     // Propagation Support
-    // 
+    //
 
     /**
       Like the original SC.Record.storeKeyFor,
@@ -49,23 +49,35 @@
     */
     storeKeyFor: function(id) {
       var storeKeys = this.storeKeysById(),
-          ret = storeKeys[id];
+          ret = storeKeys[id],
+          superclass = this.superclass;
 
       if (!ret) {
-        ret = SC.Store.generateStoreKey();
-        SC.Store.idsByStoreKey[ret] = id;
+        // If this is a polymorphic record, send the key generation recursively up to its polymorphic
+        // superclasses.  This allows the key, which may exist or may be generated, to then propagate
+        // back down so that it exists at each level.
+        if (this.isPolymorphic && superclass.isPolymorphic && superclass !== SC.Record) {
+          ret = superclass.storeKeyFor(id);
+        } else {
+          ret = SC.Store.generateStoreKey();
+          SC.Store.idsByStoreKey[ret] = id;
+        }
+
+        // Update the RecordType for the key on each recursion return, so that it ends as the lowest class
         SC.Store.recordTypesByStoreKey[ret] = this;
+
+        // Each Record must keep track of its own storeKeys so that a find at any level on the same ID
+        // doesn't generate new storeKeys.  Plus it will be faster than always running back up to the 
+        // superclass method to retrieve the key.
         storeKeys[id] = ret;
-        this._propagateIdForStoreKey(id, ret);
       }
 
       return ret ;
     },
 
-
     // ..........................................................
     // Internal Support
-    // 
+    //
 
     extend: function() {
       var ret = oldExtend.apply(this, arguments);
@@ -76,34 +88,6 @@
       }
 
       return ret;
-    },
-
-    /** @private */
-    _propagateIdForStoreKey: function(id, storeKey) {
-      var superclass = this.superclass;
-      if (this.isPolymorphic) {
-        while (superclass.isPolymorphic && superclass !== SC.Record) {
-          superclass._storeKeyForId(storeKey, id);
-          superclass = superclass.superclass;
-        }
-      }
-    },
-
-    /** @private */
-    _storeKeyForId: function(storeKey, id) {
-      var storeKeys;
-      if (!this.isPolymorphic) return;
-
-      /*
-        TODO [CC] SC.Store.recordTypesByStoreKey will be broken
-      */
-
-      storeKeys = this.storeKeysById();
-      if (storeKeys[id]) {
-        throw "A store key (%@) already existing for %@ on %@".fmt(storeKey, id, this);
-      }
-
-      storeKeys[id] = storeKey;
     }
 
   });
