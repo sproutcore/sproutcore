@@ -897,6 +897,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     If a current state does can not respond to the sent event, then the current state's parent state
     will be tried. This process is recursively done until no more parent state can be tried.
     
+    Note that a state will only be checked once if it can respond to an event. Therefore, if
+    there is a state S that handles event foo and S has concurrent substates, then foo will
+    only be invoked once; not as many times as there are substates. 
+    
     @param event {String} name of the event
     @param arg1 {Object} optional argument
     @param arg2 {Object} optional argument
@@ -912,6 +916,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     var statechartHandledEvent = NO,
         eventHandled = NO,
         currentStates = this.get('currentStates').slice(),
+        checkedStates = {},
         len = 0,
         i = 0,
         state = null,
@@ -942,7 +947,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       state = currentStates[i];
       if (!state.get('isCurrentState')) continue;
       while (!eventHandled && state) {
-        eventHandled = state.tryToHandleEvent(event, arg1, arg2);
+        if (!checkedStates[state.get('fullPath')]) {
+         eventHandled = state.tryToHandleEvent(event, arg1, arg2);
+         checkedStates[state.get('fullPath')] = YES;
+        }
         if (!eventHandled) state = state.get('parentState');
         else statechartHandledEvent = YES;
       }
