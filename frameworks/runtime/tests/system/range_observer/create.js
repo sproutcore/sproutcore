@@ -57,3 +57,20 @@ test("does not observe object properties if isDeep is NO", function() {
   }
   equals(observer.callCount, 0, 'range observer should not fire');
 });
+
+test("SC.RangeObserver.create should accept methods specified as strings", function() {
+  var myArray = [ SC.Object.create({ prop: 0 })],
+      rangeObserverCount = 0,
+      observer = SC.Object.create({
+        rangeObserverDidFire: function(source, object, key, index) {
+          ++rangeObserverCount;
+        }
+      }),
+      rangeObserver = SC.RangeObserver.create( myArray, SC.IndexSet.create(0, 1),
+                                               observer, 'rangeObserverDidFire',
+                                               null, true /* isDeep */);
+
+  equals(rangeObserverCount, 0, "Range observer hasn't fired yet");
+  myArray[0].incrementProperty('prop');
+  equals(rangeObserverCount, 1, "Range observer should fire on property change");
+});

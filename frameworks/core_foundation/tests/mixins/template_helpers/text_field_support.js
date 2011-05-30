@@ -38,6 +38,10 @@
     equals(textFieldView.$('input').val(), "afterlife", "sets value of DOM to value property");
   });
 
+  // Not really sure how to test this without doing something like adding a selection then checking 
+  // to see if it's still there after setting value
+  test("only update DOM if value changed");
+
   test("value binding works properly for inputs that haven't been created", function() {
     var view = SC.TemplateView.create(SC.TextFieldSupport, {
       template: SC.Handlebars.compile('<input type="text">'),
@@ -74,7 +78,7 @@
     equals(focusCalled, 1, "focus called after field receives focus");
 
     textFieldView.$('input').blur();
-    equals(blurCalled, 1, "blur alled after field blurs");
+    equals(blurCalled, 1, "blur called after field blurs");
   });
 
   test("calls correct method for key events", function() {
@@ -130,6 +134,10 @@
     equals(textFieldView.$('input').val(), "afterlife", "sets value of DOM to value property");
   });
 
+  // Not really sure how to test this without doing something like adding a selection then checking 
+  // to see if it's still there after setting value
+  test("only update DOM if value changed");
+
   test("value binding works properly for inputs that haven't been created", function() {
     var view = SC.TextField.create({
       valueBinding: 'TestObject.value'
@@ -165,7 +173,7 @@
     equals(focusCalled, 1, "focus called after field receives focus");
 
     textFieldView.$('input').blur();
-    equals(blurCalled, 1, "blur alled after field blurs");
+    equals(blurCalled, 1, "blur called after field blurs");
   });
 
   test("calls correct method for key events", function() {

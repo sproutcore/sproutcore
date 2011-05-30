@@ -10,9 +10,9 @@ sc_require('system/drag') ;
 /**
   @namespace
 
-  This mixin can be used to implement a dynamic data source for a drag 
-  operation.  You can return a set of allowed data types and then the 
-  method will be used to actually get data in that format when requested.
+  This procol implements a dynamic data source for a drag operation. You can
+  return a set of allowed data types and then the method will be used to 
+  actually get data in that format when requested.
 */
 SC.DragDataSource = {
 

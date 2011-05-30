@@ -316,11 +316,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     @returns {SC.RecordArray}
   */
-  find: function(query, target) {
+  find: function(original, query, target) {
     if (query && query.isQuery) {
       return this.get('store').find(query.queryWithScope(this));
-    } else return sc_super();
-  },
+    } else return original.apply(this, SC.$A(arguments).slice(1));
+  }.enhance(),
 
   /**
     Call whenever you want to refresh the results of this query.  This will

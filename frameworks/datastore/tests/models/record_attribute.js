@@ -17,7 +17,7 @@ module("SC.RecordAttribute core methods", {
     
     // stick it to the window object so that objectForPropertyPath works
     window.MyApp = MyApp;
-    
+
     MyApp.Foo = SC.Record.extend({
       
       // test simple reading of a pass-through prop
@@ -263,4 +263,19 @@ test("writing an attribute should make many relationship aggregate dirty and add
   var store = bar.get('store');
   ok(store.changelog.contains(rec.get('storeKey')), "foo1 should be in the store's changelog");
   ok(store.changelog.contains(rec2.get('storeKey')), "foo2 should be in the store's changelog");
+});
+
+test("adding attribute with non existing class should throw error", function() {
+  MyApp.InvalidModel = SC.Record.extend({
+    foo: SC.Record.attr("SomethingSomethingSomething")
+  });
+
+  var message;
+  try {
+    MyApp.InvalidModel.prototype.foo.typeClass();
+  } catch (x) {
+    message = x;
+  }
+
+  same(message, 'SomethingSomethingSomething could not be found');
 });

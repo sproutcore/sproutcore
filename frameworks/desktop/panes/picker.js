@@ -803,14 +803,17 @@ SC.PickerPane = SC.PalettePane.extend(
         target = this.get('removeTarget') || null,
         action = this.get('removeAction'),
         rootResponder = this.get('rootResponder');
-        
+
     if (!this.clickInside(f, evt)) {
+      // We're not in the Pane so we must be in the modal
       if (action) {
         rootResponder.sendAction(action, target, this, this, null, this);
       } else this.remove();
+
+      return YES;
     }
-    
-    return YES ; 
+
+    return NO;
   },
 
   /** @private */

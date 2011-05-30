@@ -56,7 +56,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
     ret.source = source;
     ret.indexes = indexSet ? indexSet.frozenCopy() : null;
     ret.target = target;
-    ret.method = method;
+    ret.method = (typeof method === 'string') ? target[method] : method;
     ret.context = context ;
     ret.isDeep  = isDeep || false ;
     ret.beginObserving();

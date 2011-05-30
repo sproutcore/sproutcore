@@ -9,7 +9,7 @@ sc_require('models/record');
 
 /**
   @class
-  @deprecated
+  @deprecated SC.ChildRecord is deprecated. Please extend SC.Record instead.
 */
 SC.ChildRecord = SC.Record.extend({});
 

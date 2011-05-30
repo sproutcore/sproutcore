@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @mixin
+  @namespace
 
   This mixin allows a view to get its value from a content object based
   on the value of its contentValueKey.

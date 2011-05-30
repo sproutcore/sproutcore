@@ -6,3 +6,5 @@ config :greenhouse,
   :required => [:sproutcore, :designer, :statechart],
   :theme => :ace,
   :css_theme => 'ace.greenhouse'
+
+config :polymorphism, :required => :datastore

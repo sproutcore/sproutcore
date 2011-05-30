@@ -2723,7 +2723,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Implements the drag data source protocol method. The implementation of
     this method will consult the collection view delegate if one has been
-    provided.  It also respects the canReoderContent method.
+    provided.  It also respects the canReorderContent method.
   */
   dragDataForType: function(drag, dataType) {
     

@@ -133,6 +133,27 @@ SC.RecordAttribute = SC.Object.extend(
     @default NO
   */
   aggregate: NO,
+
+
+  /**
+    Can only be used for toOne or toMany relationship attributes. If YES,
+    this flag will lazily create the related record that was pushed in
+    from the data source (via pushRetrieve) if the related record does
+    not exist yet.
+
+    Useful when you have a record used as a join table. Assumptions then
+    can be made that the record exists at all times (even if it doesn't).
+    For instance, if you have a contact that is a member of groups,
+    a group will be created automatically when a contact pushes a new
+    group.
+
+    Note that you will have to take care of destroying the created record
+    once all relationships are removed from it.
+
+    @property {Boolean}
+    @default NO
+   */
+  lazilyInstantiate: NO,
   
   // ..........................................................
   // HELPER PROPERTIES
@@ -149,7 +170,7 @@ SC.RecordAttribute = SC.Object.extend(
   */
   typeClass: function() {
     var ret = this.get('type');
-    if (SC.typeOf(ret) === SC.T_STRING) ret = SC.objectForPropertyPath(ret);
+    if (SC.typeOf(ret) === SC.T_STRING) ret = SC.requiredObjectForPropertyPath(ret);
     return ret ;
   }.property('type').cacheable(),
   

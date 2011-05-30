@@ -258,7 +258,7 @@ SC.Logger = SC.Object.create(
     If this property is set to YES, it will set 'logOutputLevel' to
     SC.LOGGER_LEVEL_DEBUG.  Otherwise, it will have no effect.
 
-    @deprecated
+    @deprecated Set the log level instead.
     @property: {Boolean}
   */
   debugEnabled: NO,

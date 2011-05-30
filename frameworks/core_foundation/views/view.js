@@ -1241,7 +1241,7 @@ SC.CoreView.reopen(
 
 });
 
-SC.CoreView.mixin(/** @scope SC.View.prototype */ {
+SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
 
   /** @private walk like a duck -- used by SC.Page */
   isViewClass: YES,
