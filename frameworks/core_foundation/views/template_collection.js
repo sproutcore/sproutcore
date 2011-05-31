@@ -297,7 +297,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       case 'thead':
       case 'tbody':
       case 'tfoot':
-        return 'tr'
+        return 'tr';
     }
   }.property('tagName'),
 
