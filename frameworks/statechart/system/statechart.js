@@ -576,7 +576,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     // interferes. 
     this._gotoStateLocked = YES;
     
-    if (!SC.none(fromCurrentState)) {
+    if (fromCurrentState) {
       // Check to make sure the current state given is actually a current state of this statechart
       fromCurrentState = rootState.getSubstate(fromCurrentState);
       if (SC.none(fromCurrentState) || !fromCurrentState.get('isCurrentState')) {
@@ -586,12 +586,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         return;
       }
     } 
-    else if (this.getPath('currentStates.length') > 0) {
-      // No explicit current state to start from; therefore, just use the first current state as 
-      // a default, if there is a current state.
-      fromCurrentState = this.get('currentStates')[0];
-      msg = "gotoState: fromCurrentState not explicitly provided. Using a default current state to transition from: %@";
-      this.statechartLogWarning(msg.fmt(fromCurrentState));
+    else {
+      // No explicit current state to start from; therefore, need to find a current state
+      // to transition from.
+      fromCurrentState = state.findFirstRelativeCurrentState();
     }
         
     if (trace) {
@@ -750,7 +748,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (this.get('allowStatechartTracing')) this.statechartLogTrace("<-- exiting state: %@".fmt(state));
     
     state.set('currentSubstates', []);
-    state.notifyPropertyChange('isCurrentState');
     
     state.stateWillBecomeExited();
     var result = this.exitState(state, context);
@@ -797,8 +794,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     if (this.get('allowStatechartTracing')) this.statechartLogTrace("--> entering state: %@".fmt(state));
     
-    state.notifyPropertyChange('isCurrentState');
-  
     state.stateWillBecomeEntered();
     var result = this.enterState(state, context);
     state.stateDidBecomeEntered();

@@ -146,6 +146,7 @@ SC.State = SC.Object.extend({
 
     // Setting up observes this way is faster then using .observes,
     // which adds a noticable increase in initialization time.
+    
     var sc = this.get('statechart'),
         ownerKey = sc ? sc.get('statechartOwnerKey') : null,
         traceKey = sc ? sc.get('statechartTraceKey') : null;
@@ -165,7 +166,7 @@ SC.State = SC.Object.extend({
       sc.removeObserver(ownerKey, this, '_statechartOwnerDidChange');
       sc.removeObserver(traceKey, this, '_statechartTraceDidChange');
     }
-
+    
     var substates = this.get('substates');
     if (substates) {
       substates.forEach(function(state) {
@@ -522,15 +523,8 @@ SC.State = SC.Object.extend({
            exited and entered during the state transition process
   */
   gotoState: function(state, context) {
-    var fromState = null;
-    
-    if (this.get('isCurrentState')) {
-      fromState = this;
-    } else if (this.get('hasCurrentSubstates')) {
-      fromState = this.get('currentSubstates')[0];
-    }
-    
-    this.get('statechart').gotoState(state, fromState, context);
+    var from = this.findFirstRelativeCurrentState();
+    this.get('statechart').gotoState(state, from, false, context);
   },
   
   /**
@@ -560,15 +554,8 @@ SC.State = SC.Object.extend({
            entered during the state transition process
   */
   gotoHistoryState: function(state, recursive, context) {
-    var fromState = null;
-    
-    if (this.get('isCurrentState')) {
-      fromState = this;
-    } else if (this.get('hasCurrentSubstates')) {
-      fromState = this.get('currentSubstates')[0];
-    }
-    
-    this.get('statechart').gotoHistoryState(state, fromState, recursive, context);
+    var from = this.findFirstRelativeCurrentState();
+    this.get('statechart').gotoHistoryState(state, from, recursive, context);
   },
   
   /**
@@ -665,7 +652,29 @@ SC.State = SC.Object.extend({
     var entered = this.get('enteredSubstates');
     return !!entered  && entered.get('length') > 0;
   }.property('enteredSubstates').cacheable(),
+
+  /**
+    Will attempt to find a current state in the statechart that is relative to 
+    this state. The rules are as follows:
+
+      1. If this state is already a current state then it is returned
+      2. If this state has current substates, then the first one will be returned
+      3. Will return the parent state's first relative current state. If the
+         result is state then it is returned, otherwise null is returned.
+
+    @return {SC.State} the current state
+  */
+  findFirstRelativeCurrentState: function() {
+    if (this.get('isCurrentState')) return this;
+    
+    if (this.get('hasCurrentSubstates')) {
+      return this.get('currentSubstates')[0];
+    }
   
+    var parent = this.get('parentState');
+    return parent ? parent.findFirstRelativeCurrentState() : null;
+  },
+
   /**
     Used to re-enter this state. Call this only when the state a current state of
     the statechart.  
@@ -992,6 +1001,16 @@ SC.State = SC.Object.extend({
     var className = SC._object_className(this.constructor);
     return "%@<%@, %@>".fmt(className, this.get('fullPath'), SC.guidFor(this));
   },
+  
+  /** @private */
+  _enteredSubstatesDidChange: function() {
+    this.notifyPropertyChange('enteredSubstates');
+  }.observes('*enteredSubstates.[]'),
+  
+  /** @private */
+  _currentSubstatesDidChange: function() {
+    this.notifyPropertyChange('currentSubstates');
+  }.observes('*currentSubstates.[]'),
   
   /** @private */
   _statechartTraceDidChange: function() {
