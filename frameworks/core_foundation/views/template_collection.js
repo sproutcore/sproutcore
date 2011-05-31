@@ -9,7 +9,15 @@ sc_require('views/template');
 */
 SC.TemplateCollectionView = SC.TemplateView.extend(
   /** @scope SC.TemplateCollectionView.prototype */{
+  /**
+    Name of the tag that is used for the collection
 
+    If the tag is a list ('ul' or 'ol') each item will be wrapped into a 'li' tag.
+    If the tag is a table ('table', 'thead', 'tbody') each item will be wrapped into a 'tr' tag.
+
+    @property {String}
+    @default ul
+  */
   tagName: 'ul',
   content: null,
   template: SC.Handlebars.compile(''),
