@@ -587,10 +587,14 @@ test("cacheable nested dependent keys should clear after their dependencies upda
 module("Observable objects & object properties ", {
 
   setup: function() {
+    window.NormalArray = [1,2,3,4,5];
+    
     object = SC.Object.create({
 
       normal: 'value',
       abnormal: 'zeroValue',
+      abnormal2: 'zeroValue',
+      abnormal3: 'zeroValue',
       numberVal: 24,
       toggleVal: true,
       observedProperty: 'beingWatched',
@@ -620,9 +624,21 @@ module("Observable objects & object properties ", {
 
       testArrayObserver:function(){
         this.abnormal = 'notifiedObserver';
-      }.observes('*normalArray.[]')
+      }.observes('*normalArray.[]'),
+
+      testArrayObserver2:function(){
+        this.abnormal2 = 'notifiedObserver';
+      }.observes('normalArray.[]'),
+
+      testArrayObserver3:function(){
+        this.abnormal3 = 'notifiedObserver';
+      }.observes('NormalArray.[]')
 
     });
+  },
+
+  teardown: function() {
+    window.NormalArray = null;
   }
 
 });
@@ -652,9 +668,18 @@ test('should not notify the observers of a property automatically',function(){
   equals(object.abnormal,'zeroValue')  ;
 });
 
-test('should notify array observer when array changes',function(){
+test('should notify array observer when object\'s array changes',function(){
   object.normalArray.replace(0,0,6);
-  equals(object.abnormal, 'notifiedObserver', 'observer should be notified');
+  equals(object.abnormal, 'notifiedObserver', 'testArrayObserver should be notified');
+  equals(object.abnormal2, 'notifiedObserver', 'testArrayObserver2 should be notified');
+  equals(object.abnormal3, 'zeroValue', 'testArrayObserver3 should not be notified');
+});
+
+test('should notify array observer when NormalArray array changes',function(){
+  window.NormalArray.replace(0,0,6);
+  equals(object.abnormal, 'zeroValue', 'testArrayObserver should not be notified');
+  equals(object.abnormal2, 'zeroValue', 'testArrayObserver2 should not be notified');
+  equals(object.abnormal3, 'notifiedObserver', 'testArrayObserver3 should be notified');
 });
 
 
