@@ -18,11 +18,14 @@
   You do not create an instance of a state itself. The statechart manager will go through its 
   state heirarchy and create the states itself.
 
+  For more information on using statecharts, see SC.StatechartManager.
+
   @author Michael Cohen
   @extends SC.Object
 */
-SC.State = SC.Object.extend({
-  
+SC.State = SC.Object.extend(
+  /** @lends SC.State.prototype */ {
+
   /**
     The name of the state
     
