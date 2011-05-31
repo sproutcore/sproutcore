@@ -2385,14 +2385,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // become first responder if possible.
     this.becomeFirstResponder() ;
 
+    this._touchSelectedView = itemView;
+
     if (!this.get('useToggleSelection')) {
       // We're faking the selection visually here
       // Only track this if we added a selection so we can remove it later
       if (itemView && !itemView.get('isSelected')) {
         itemView.set('isSelected', YES);
-        this._touchSelectedView = itemView;
-      } else {
-        this._touchSelectedView = null;
       }
     }
 
