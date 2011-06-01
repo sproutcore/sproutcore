@@ -676,9 +676,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
     } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
       this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.get('layer').focus();
-      }
     }
 
     return YES;
@@ -731,9 +728,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
     } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
       this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.$()[0].focus();
-      }
     }
 
     // don't want to do whatever default is...
@@ -774,16 +768,21 @@ SC.ButtonView = SC.View.extend(SC.Control,
   /** @private */
   keyDown: function(evt) {
     // handle tab key
+     if(!this.get('isEnabled')) return YES;
     if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if(view) view.becomeFirstResponder();
       else evt.allowDefault();
       return YES ; // handled
     }
-    if (evt.which === 13) {
+    if (evt.which === 13 || evt.which === 32) {
       this.triggerActionAfterDelay(evt);
       return YES ; // handled
     }
+
+    // let other keys through to browser
+    evt.allowDefault();
+
     return NO;
   },
 
@@ -834,7 +833,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     var action = this.get('action'),
         target = this.get('target') || null,
         rootResponder = this.getPath('pane.rootResponder');
-    
+        
     if (action) {
       if (this._hasLegacyActionHandler()) {
         // old school... V
@@ -845,7 +844,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
           rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
         }
       }
-    }
+    }    
   },
 
   /** @private */
@@ -869,12 +868,12 @@ SC.ButtonView = SC.View.extend(SC.Control,
     if (action && (SC.typeOf(action) === SC.T_STRING) && (action.indexOf('.') != -1)) return true;
     return false;
   },
-
+  
   /** @private */
   _triggerLegacyActionHandler: function( evt )
   {
     if (!this._hasLegacyActionHandler()) return false;
-
+  
     var action = this.get('action');
     if (SC.typeOf(action) === SC.T_FUNCTION) this.action(evt);
     if (SC.typeOf(action) === SC.T_STRING) {
@@ -882,9 +881,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
       this.action(evt);
     }
   },
-
+  
   /** @private */
-  willBecomeKeyResponderFrom: function(keyView) {
+  didBecomeKeyResponderFrom: function(keyView) {
     // focus the text field.
     if (!this._isFocused) {
       this._isFocused = YES ;
@@ -894,12 +893,12 @@ SC.ButtonView = SC.View.extend(SC.Control,
       }
     }
   },
-
+  
   /** @private */
   willLoseKeyResponderTo: function(responder) {
     if (this._isFocused) this._isFocused = NO ;
   },
-
+  
   /** @private */
   didAppendToDocument: function() {
     if(parseInt(SC.browser.msie, 0)===7 && this.get('useStaticLayout')){

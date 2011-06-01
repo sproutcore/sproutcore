@@ -39,13 +39,20 @@ SC.View.reopen(
 
   /**
     Invokved just after the responder loses key responder status.
+    @param {SC.Responder} responder
   */
   didLoseKeyResponderTo: function(responder) {},
 
   /**
     Invoked just after the responder gains key responder status.
+    By default, it calls focus on the view root element. For accessibility 
+    purposes.
+  
+    @param {SC.Responder} responder
   */
-  didBecomeKeyResponderFrom: function(responder) {},
+  didBecomeKeyResponderFrom: function(responder) {
+    this.$().focus();
+  },
 
   /**
     This method will process a key input event, attempting to convert it to
@@ -276,7 +283,10 @@ SC.View.reopen(
       }
 
       // if no parents have a next sibling, start over from the beginning
-      if(!next) next = this.get('pane');
+      if(!next) {
+        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT) break;
+        else next = this.get('pane');
+      }
 
       // if it's a valid firstResponder, we're done!
       if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) return next;
@@ -287,7 +297,6 @@ SC.View.reopen(
 
     // this will only happen if no views are visible and accept first responder
     return null;
-
   }.property('nextKeyView'),
 
   /**
@@ -354,6 +363,9 @@ SC.View.reopen(
     while(prev !== this) {
       // normally, just try to get previous view's last child
       if(cur.get('parentView')) prev = cur._getPreviousKeyView();
+
+      // if we are the pane and address bar tabbing is enabled, trigger it now
+      else if(!SC.TABBING_ONLY_INSIDE_DOCUMENT) break;
 
       // if we are the pane, get our own last child
       else prev = cur;

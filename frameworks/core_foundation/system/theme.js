@@ -23,21 +23,6 @@
   by SC.View when you name a theme that doesn't actually exist: it creates
   a theme based on the parent theme.
 
-  Renderers
-  ---------------------------
-  Themes are used to keep track of theme class names and, more important,
-  to keep track of renderers.
-
-  Renderers are added to a theme using theme.addRenderer(theRenderer). After
-  this has been done, they may be instantiated using theme.renderer(rendererName).
-
-  Instantiating with renderer() instantiates a version of that renderer
-  specialized for this specific theme-- not any parent themes. The renderer
-  will include all class names for _this_ theme. This means that you can
-  theme controls differently without overriding any renderers: just subclass
-  the original theme that _has_ the renderers, give it its own name, and
-  all renderers will render with that name as a class name.
-
   Locating Child Themes
   ----------------------------
   Locating child themes is relatively simple for the most part: it looks in
@@ -51,7 +36,7 @@
   base classes; if the theme is a global theme, those class names should not
   be included.
 
-  This makes sense logically as well, because when searching for a renderer,
+  This makes sense logically as well, because when searching for a render delegate,
   it will locate it in any base theme that has it, but that doesn't mean
   class names from the derived theme shouldn't be included.
 
@@ -142,10 +127,6 @@ SC.Theme = {
     // we also have private ("invisible") child themes; look at invisibleSubtheme
     // method.
     result._privateThemes = {};
-
-    // the theme also specializes all renderers it creates so that they
-    // have the theme's classNames and have their 'theme' property set.
-    result._specializedRenderers = {};
 
     // also, the theme specializes all child themes as they are created
     // to ensure that all of the class names on this theme are included.
@@ -263,40 +244,6 @@ SC.Theme = {
   */
   addTheme: function(theme) {
     this.themes[theme.name] = theme;
-  },
-
-  /**
-    Adds a renderer to the theme. The renderer's name will be used to
-    keep track of it and identify it later.
-
-    The biggest responsibility of addRenderer is to ensure that renderer()
-    can be used to instantiate that renderer. If a renderer is not instantiated
-    through renderer(), it will not know its theme's classNames.
-  */
-  addRenderer: function(renderer) {
-    this[renderer.name] = renderer;
-  },
-
-   /**
-     Finds the named renderer and instantiates it, returning the result.
-     It also ensures it is using a version of the renderer specialized for
-     this theme. It keeps a cache of specialized versions of the renderer.
-
-     Any arguments after the name are passed on to the instantiated
-     renderer.
-   */
-  renderer: function(name) {
-    var renderer = this._specializedRenderers[name], base = this[name];
-    if (!renderer || renderer._specializedFrom !== base) {
-      if (!base) return null;
-
-      renderer = base.extend({ classNames: this.classNames, theme: this });
-    }
-
-    var args = SC.$A(arguments);
-    args.shift();
-    renderer = renderer.create.apply(renderer, args);
-    return renderer;
   }
 };
 
@@ -304,8 +251,8 @@ SC.Theme = {
 // optimal, but the reasoning is because of test running: the
 // test runner, when running foundation unit tests, cannot load
 // the theme. As such, foundation must include default versions of
-// all of its renderers, and it does so in BaseTheme. All SproutCore
-// controls have renderers in BaseTheme.
+// all of its render delegates, and it does so in BaseTheme. All SproutCore
+// controls have render delegates in BaseTheme.
 SC.BaseTheme = SC.Theme.create({
   name: '' // it is a base class, and doesn't need a class name or such
 });

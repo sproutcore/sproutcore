@@ -64,6 +64,12 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     X-SproutCore-Version headers to all outgoing requests. This allows
     you to override that behavior.
 
+    You may want to set this to NO if you are making simple CORS requests
+    in compatible browsers. See <a href="http://www.w3.org/TR/cors/">CORS 
+    Spec for more informatinon.</a>
+    
+    TODO: Add unit tests for this feature
+
     @type Boolean
     @default YES
   */
@@ -71,11 +77,6 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   init: function() {
     sc_super();
-
-    if (this.get('attachIdentifyingHeaders') !== NO) {
-      this.header('X-Requested-With', 'XMLHttpRequest');
-      this.header('X-SproutCore-Version', SC.VERSION);
-    }
   },
 
   /**
@@ -354,15 +355,19 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     if (flag) { this.set('isJSON', NO); }
     return this.set('isXML', flag);
   },
-
-  /**
-    @private
-
-    Called just before a request is enqueued. This will encode the body
-    into JSON if it is not already encoded.
+  
+  /** 
+    Called just before a request is enqueued.  This will encode the body 
+    into JSON if it is not already encoded, and set identifying headers
   */
   _prep: function() {
     var hasContentType = !!this.header('Content-Type');
+
+    if(this.get('attachIdentifyingHeaders')) {
+      this.header('X-Requested-With', 'XMLHttpRequest');
+      this.header('X-SproutCore-Version', SC.VERSION);
+    }
+    
     if (this.get('isJSON') && !hasContentType) {
       this.header('Content-Type', 'application/json');
     } else if (this.get('isXML') && !hasContentType) {
@@ -469,11 +474,10 @@ SC.Request.mixin(
     Helper method for quickly setting up a GET request.
 
     @param {String} address url of request
-    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  getUrl: function(address, attachHeaders) {
-    return this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'GET');
+  getUrl: function(address) {
+    return this.create().set('address', address).set('type', 'GET');
   },
 
   /**
@@ -481,24 +485,22 @@ SC.Request.mixin(
 
     @param {String} address url of request
     @param {String} body
-    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  postUrl: function(address, body, attachHeaders) {
-    var req = this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'POST');
-    if(body) { req.set('body', body); }
-    return req;
+  postUrl: function(address, body) {
+    var req = this.create().set('address', address).set('type', 'POST');
+    if(body) { req.set('body', body) ; }
+    return req ;
   },
 
   /**
     Helper method for quickly setting up a DELETE request.
 
     @param {String} address url of request
-    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  deleteUrl: function(address, attachHeaders) {
-    return this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'DELETE');
+  deleteUrl: function(address) {
+    return this.create().set('address', address).set('type', 'DELETE');
   },
 
   /**
@@ -506,13 +508,12 @@ SC.Request.mixin(
 
     @param {String} address url of request
     @param {String} body
-    @param {Boolean} [attachHeaders] See documentation for SC.Request#attachIdentifyingHeaders
     @returns {SC.Request} receiver
   */
-  putUrl: function(address, body, attachHeaders) {
-    var req = this.create({attachIdentifyingHeaders: attachHeaders}).set('address', address).set('type', 'PUT');
-    if(body) { req.set('body', body); }
-    return req;
+  putUrl: function(address, body) {
+    var req = this.create().set('address', address).set('type', 'PUT');
+    if(body) { req.set('body', body) ; }
+    return req ;
   }
 
 });

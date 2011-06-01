@@ -35,7 +35,7 @@ sc_require('render_delegates/render_delegate');
 */
 
 SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
-  name: 'label',
+  className: 'label',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);

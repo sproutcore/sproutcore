@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.BaseTheme.splitDividerRenderDelegate = SC.RenderDelegate.create({
-  name: 'split-divider',
+  className: 'split-divider',
   dividerSize: 1,
 
   splitPositionOffset: -5,

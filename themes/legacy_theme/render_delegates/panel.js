@@ -6,7 +6,7 @@
 // ==========================================================================
 sc_require("theme");
 SC.LegacyTheme.panelRenderDelegate = SC.RenderDelegate.create({
-  name: 'panel',
+  className: 'panel',
 
   render: function(dataSource, context) {
     context.push(

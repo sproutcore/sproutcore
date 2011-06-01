@@ -103,10 +103,20 @@ SC.MasterDetailView = SC.View.extend(
   }.property().cacheable(),
   
   /**
+    The width of the 'master' side of the master/detail view.
+
     @type Number
     @default 250
   */
   masterWidth: 250,
+
+  /**
+    The width of the divider between the master and detail views.
+
+    @type Number
+    @default From theme, or 1.
+  */
+  dividerWidth: SC.propertyFromRenderDelegate('dividerWidth', 1),
   
   /**
     A property (computed) that says whether the master view is hidden.
@@ -296,7 +306,7 @@ SC.MasterDetailView = SC.View.extend(
       });
       
       // and child, naturally
-      var extra = this.getThemedProperty('dividerWidth', 'MASTER_DETAIL_DIVIDER_WIDTH');
+      var extra = this.get('dividerWidth');
       detail.set("layout", { left: masterWidth + extra, right: 0, top: 0, bottom: 0 });
     } else {
       // remove master if needed

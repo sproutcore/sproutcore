@@ -349,14 +349,15 @@ SC.RadioView = SC.View.extend(SC.Control,
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return YES;
     
-    var delegate = this.get('renderDelegate'), proxy = this.get('renderDelegateProxy');
-    var index = delegate.indexForEvent(proxy, this.$(), evt);
+    var delegate = this.get('renderDelegate'), proxy = this.get('renderDelegateProxy'),
+        elem = this.$(),
+        index = delegate.indexForEvent(proxy, elem, evt);
     
     this._activeRadioButton = index;
     
     if (index !== undefined) {
       this.get('displayItems')[index].set('isActive', YES);
-      delegate.updateRadioAtIndex(proxy, this.$(), index);
+      delegate.updateRadioAtIndex(proxy, elem, index);
     }
     
     // even if radiobuttons are not set to get firstResponder, allow default 
@@ -374,22 +375,63 @@ SC.RadioView = SC.View.extend(SC.Control,
     if (!this.get('isEnabled')) return YES;
 
     var delegate = this.get('renderDelegate'), proxy = this.get('renderDelegateProxy'),
-        displayItems = this.get('displayItems');
-    var index = delegate.indexForEvent(proxy, this.$(), evt);
+        elem = this.$(),
+        displayItems = this.get('displayItems'),
+        index = delegate.indexForEvent(proxy, elem, evt);
     
     if (this._activeRadioButton !== undefined && index !== this._activeRadioButton) {
       displayItems[this._activeRadioButton].set('isActive', NO);
-      delegate.updateRadioAtIndex(proxy, this.$(), this._activeRadioButton);
+      delegate.updateRadioAtIndex(proxy, elem, this._activeRadioButton);
     }
     
     this._activeRadioButton = undefined;
     
     if (index !== undefined) {
       displayItems[index].set('isActive', NO);
-      delegate.updateRadioAtIndex(proxy, this.$(), index);
+      delegate.updateRadioAtIndex(proxy, elem, index);
       this.set('value', displayItems[index].value);
     }
+    
+    evt.allowDefault();
+    return YES;
   },
+  
+  keyDown: function(evt) {
+    if(!this.get('isEnabled')) return YES;
+    // handle tab key
+    if (evt.which === 9 || evt.keyCode === 9) {
+      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      if(view) view.becomeFirstResponder();
+      else evt.allowDefault();
+      return YES ; // handled
+    }
+    if (evt.which >= 37 && evt.which <= 40){
+      
+      var delegate = this.get('renderDelegate'), proxy = this.get('renderDelegateProxy'),
+          elem = this.$(),
+          displayItems = this.get('displayItems'),
+          val = this.get('value');
+      for(var i= 0, iLen = displayItems.length; i<iLen; i++){
+        if(val === displayItems[i].value) break;
+      }
+      
+     
+      if (evt.which === 37 || evt.which === 38 ){
+        if(i<=0) i = displayItems.length-1;
+        else i--;
+      }
+      if (evt.which === 39 || evt.which === 40 ){
+        if(i>=displayItems.length-1) i = 0;
+        else i++;
+      }
+      delegate.updateRadioAtIndex(proxy, elem, i);
+      this.set('value', displayItems[i].value);
+    }
+    evt.allowDefault();
+
+    return NO;
+  },
+  
 
   /** @private */
   touchStart: function(evt) {

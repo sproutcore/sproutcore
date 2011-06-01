@@ -1,5 +1,0 @@
-/* This default stylesheet for forms maximizes fluidity. */
-.sc-label-view.sc-form-label { white-space:pre; text-align: right; }
-
-/* Some fields have some... well, extra (think TextField's glow) */
-.sc-view.sc-form-view .sc-view.sc-form-row-view { overflow:visible; }

@@ -27,7 +27,7 @@
   button, there is a method to update a specific index.
 */
 SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
-  name: 'radio-group',
+  className: 'radio-group',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
@@ -47,7 +47,7 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
         .addClass('radio-' + idx)
         .attr('index', idx)
         .addClass(theme.classNames)
-        .addClass(theme.radioRenderDelegate.name)
+        .addClass(theme.radioRenderDelegate.className)
         
         // so we can identify it in event handling
         .addClass('sc-radio-button');

@@ -260,7 +260,7 @@ SC.RenderContext = SC.Builder.create(
     @returns {DOMElement} the element
   */
   element: function() {
-    return this._elem ? this._elem : SC.$(this.join())[0]
+    return this._elem ? this._elem : SC.$(this.join())[0];
   },
 
   /**
@@ -296,7 +296,7 @@ SC.RenderContext = SC.Builder.create(
   update: function() {
     var elem = this._elem,
         mode = this.updateMode,
-        cq, key, value, attr, styles, factory, cur, next, before;
+        cq, value, factory, cur, next;
 
     this._innerHTMLReplaced = NO;
 
@@ -319,14 +319,13 @@ SC.RenderContext = SC.Builder.create(
       } else {
         factory = elem.cloneNode(false);
         factory.innerHTML = this.join() ;
-        before = (mode === SC.MODE_APPEND) ? null : elem.firstChild;
         cur = factory.firstChild ;
         while(cur) {
           next = cur.nextSibling ;
           elem.insertBefore(cur, next);
           cur = next ;
         }
-        cur = next = factory = before = null ; // cleanup
+        cur = next = factory = null ; // cleanup
       }
     }
 
@@ -596,8 +595,9 @@ SC.RenderContext = SC.Builder.create(
         this._classNamesDidChange = YES ;
       }
     } else {
+      var cl;
       for(var i = 0, iLen= nameOrClasses.length; i<iLen; i++){
-        var cl = nameOrClasses[i];
+        cl = nameOrClasses[i];
         if (classNames.indexOf(cl)<0) {
           classNames.push(cl);
           this._classNamesDidChange = YES ;

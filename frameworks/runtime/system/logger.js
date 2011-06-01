@@ -132,7 +132,7 @@ SC.LOGGER_LEVEL_NONE  = 'none';
   functions, such as defining groups.
 
   The FireFox plugin Firebug was used as a function reference. Please see
-  {@link <a href="http://getfirebug.com/logging.html">Firebug Logging Reference</a>}
+  [Firebug Logging Reference](http://getfirebug.com/logging.html)
   for further information.
 
   @author Colin Campbell

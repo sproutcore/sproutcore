@@ -344,9 +344,18 @@ SC.RootResponder = SC.Object.extend(
     (removing sc-blur).  Also notify panes.
   */
   focus: function() {
+    
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
+      // If the app is getting focus again set the first responder to the first
+      // valid firstResponder view in the view's tree
+      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+        var mainPane = this.get('mainPane'),
+            nextValidKeyView = mainPane ? mainPane.get('nextValidKeyView') : null;
+        if (nextValidKeyView) mainPane.makeFirstResponder(nextValidKeyView);
+      }
+      
       SC.run(function() {
         this.set('hasFocus', YES);
       }, this);
@@ -689,7 +698,6 @@ SC.RootResponder = SC.Object.extend(
 
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
-    this.focus(); // assume the window is focused when you load.
 
     if (SC.browser.mobileSafari) {
 
@@ -1716,8 +1724,6 @@ SC.RootResponder = SC.Object.extend(
       this._lastMouseDownCustomHandling = YES;
       return YES;
     }
-
-    if(!SC.browser.msie) window.focus();
 
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more

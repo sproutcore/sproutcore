@@ -164,6 +164,15 @@ SC.PanelPane = SC.Pane.extend(
     }
     return ret ;
   },
+
+  destroy: function() {
+    var modal = this.get('modalPane');
+    if (modal && !modal.isClass) {
+      modal.destroy();
+    }
+
+    sc_super();
+  },
   
   /** @private - if isModal state changes, update pane state if needed. */
   _isModalDidChange: function() {

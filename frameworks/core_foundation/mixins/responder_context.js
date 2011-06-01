@@ -167,7 +167,7 @@ SC.ResponderContext = {
     if (responder) responder.set('isFirstResponder', YES);
 
     this._notifyDidBecomeFirstResponder(responder, responder, common);
-
+    
     // now, tell everyone the good news!
     this.endPropertyChanges();
 

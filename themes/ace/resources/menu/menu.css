@@ -37,7 +37,9 @@ $theme.menu {
     
     /* CHECKBOXES */
     .checkbox {
-      top: 3px;
+      position: absolute;
+      left: 5px;
+      top: 4px;
       width: 12px; height: 12px;
       @include slice(checkmark.png);
     }

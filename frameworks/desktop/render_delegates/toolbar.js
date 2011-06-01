@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.BaseTheme.toolbarRenderDelegate = SC.RenderDelegate.create({
-  name: 'toolbar',
+  className: 'toolbar',
 
   render: function(dataSource, context) {
     // toolbar has nothing in it

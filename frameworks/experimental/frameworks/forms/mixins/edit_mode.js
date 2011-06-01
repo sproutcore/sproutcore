@@ -4,7 +4,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /**
-  Handles propagation of a property inEditMode to all child views.
+  Handles propagation of a property isEditing to all child views.
 */
 SC.FormsEditMode = {
   
@@ -37,11 +37,19 @@ SC.FormsEditMode = {
   */
   _propagateEditMode: function() {
     var isEditing = this.get("isEditing");
-    var cv = this.get("childViews"), idx, len = cv.length, v;
+    var cv = this.get("childViews");
+    if (!cv) { return; }
+
+    var idx, len = cv.length, v;
     for (idx = 0; idx < len; idx++) {
       v = cv[idx];
-      if (SC.typeOf(v) === SC.T_STRING || v.isClass) return;
-      if (v.get("hasEditMode")) v.set("isEditing", isEditing);
+
+      if (SC.typeOf(v) === SC.T_STRING || v.isClass) {
+        return;
+      }
+      if (v.get("hasEditMode")) {
+        v.set("isEditing", isEditing);
+      }
     }
   }
   

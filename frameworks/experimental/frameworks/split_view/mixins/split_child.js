@@ -14,7 +14,8 @@
   child views. This mixin observes the position and size properties and 
   calls adjust().
 */
-SC.SplitChild = {
+SC.SplitChild = 
+  /** @scope SC.SplitChild.prototype */{
   /**
    * Set to YES if your Split Child is a divider view.
    *
@@ -48,13 +49,15 @@ SC.SplitChild = {
    * The current size of the SC.SplitView child. Use this to set the default
    * size.
    *
-   * Note: if undefined, results are undefined.
+   * If you specify a size, autoResizeStyle will default to SC.RESIZE_MANUAL;
+   * if you don't, SplitView will assume you want it to fill the available space
+   * and use SC.RESIZE_AUTOMATIC.
    *
-   * @default 100
+   * @default undefined
    *
    * @type Number
   */
-  size: 100,
+  size: undefined,
   
   /**
    * [RO] The current position of the SC.SplitView. This is read-only, and is set
@@ -121,9 +124,14 @@ SC.SplitChild = {
    *   SC.RESIZE_AUTOMATIC views have already been resized as much as possible.
    * - SC.FIXED_SIZE: Never resize.
    *
+   * If you specify an autoResizeStyle, it will be used. If you leave it at `undefined`, 
+   * it will look at `size`: if a `size` is supplied, it will use `SC.RESIZE_MANUAL`; otherwise
+   * it will use `SC.RESIZE_AUTOMATIC`.
+   *
+   * @default based on size
    * @type {AutoResizeStyle}
   */
-  autoResizeStyle: SC.RESIZE_MANUAL,
+  autoResizeStyle: undefined,
 
   /**
    * If NO, moving the divider before this view will not resize the view, but

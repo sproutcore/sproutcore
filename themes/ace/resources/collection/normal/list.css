@@ -1,12 +1,12 @@
-$theme.sc-collection-view {
+$theme.collection {
   background: white;
-  border-right: 1px #A8B0BA solid;
 
   &.alternating .sc-collection-item.even {
     background: #eef3f6;
   }
   
-  .sc-view.sc-collection-item.sel {
+  &.alternating .sc-collection-item.even.sel, 
+  .sc-collection-item.sel {
     color: white;
     background: #608AB9;
   }

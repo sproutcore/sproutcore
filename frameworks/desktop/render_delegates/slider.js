@@ -18,7 +18,7 @@
 
 SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   
-  name: 'slider',
+  className: 'slider',
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);

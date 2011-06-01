@@ -9,7 +9,7 @@ sc_require("theme");
   Renders and updates the HTML representation of a button.
 */
 SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
-  name: 'button',
+  className: 'button',
   
   /**
     Called when we need to create the HTML that represents the button.

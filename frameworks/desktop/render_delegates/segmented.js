@@ -9,7 +9,7 @@
   Renders and updates the HTML representation of SC.SegmentedView.
 */
 SC.BaseTheme.segmentedRenderDelegate = SC.RenderDelegate.create({
-  name: 'segmented',
+  className: 'segmented',
 
   /*
     We render everything external to the segments and let each segment use it's own render

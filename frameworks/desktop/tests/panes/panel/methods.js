@@ -7,4 +7,23 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.PanelPane Methods");
+module("PanelPane - Methods");
+
+function getViewCount() {
+  var i = 0; for (key in SC.View.views) ++i;
+  return i;
+}
+
+test("PanelPane destroy", function() {
+  var start = getViewCount();
+
+  var pane = SC.PanelPane.create({
+    isModal: YES
+  });
+  pane.append();
+  pane.remove();
+  pane.destroy();
+
+  var end = getViewCount();
+  equals(start, end, "No extra views lying about after calling .destroy");
+});

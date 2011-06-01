@@ -86,7 +86,11 @@ config :ace,
 # CONFIGURE APPS
 config :core_tools, :required => [
   :desktop, :datastore, :animation, "sproutcore/experimental/forms",
-  "sproutcore/ace", "sproutcore/experimental/split_view"
+  "sproutcore/ace",
+
+  # The SC apps will use the experimental version of these controls:
+  "sproutcore/experimental/select_view",
+  "sproutcore/experimental/split_view"
 ]
 
 # mode :debug do

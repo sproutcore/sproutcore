@@ -1,13 +1,13 @@
 /* Overriding some of the styles on checkbox */
 
 $theme.sc-list-item-view {
-  .sc-checkbox-view {
+  $theme.checkbox {
     background-color: transparent;
     border: 0 none;
     margin-top: -9px;
   }
 
- .disclosure {
+ $theme.disclosure {
     position: absolute;
     left: -6px;
     top: 50%;

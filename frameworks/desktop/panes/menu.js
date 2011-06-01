@@ -604,11 +604,28 @@ SC.MenuPane = SC.PickerPane.extend(
     This computed property parses `displayItems` and constructs an
     `SC.MenuItemView` (or whatever class you have set as the `exampleView`) for every item.
 
+    This calls createMenuItemViews. If you want to override this property, override
+    that method.
+
+    This calls createMenuItemViews. If you want to override this property, override
+    that method.
+
     @property
     @type Array
     @readOnly
   */
   menuItemViews: function() {
+    return this.createMenuItemViews();
+  }.property('displayItems').cacheable(),
+
+  /**
+    Processes the displayItems and creates menu item views for each item.
+
+    Override this method to change how menuItemViews is calculated.
+
+    @return Array
+  */
+  createMenuItemViews: function() {
     var views = [], items = this.get('displayItems'),
         exampleView = this.get('exampleView'), item, view,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
@@ -663,7 +680,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     this.set('menuHeight', menuHeight+menuHeightPadding);
     return views;
-  }.property('displayItems').cacheable(),
+  },
 
   /**
     Returns the menu item view for the content object at the specified index.

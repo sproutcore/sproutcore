@@ -194,3 +194,33 @@ test("enhance still works if there is no base method to enhance", function() {
 
   ok(enhanced.weirdName(), "enhanced function runs with no errors");
 });
+
+test("should invalidate a computed property added to a subclass via reopen() that depends on a key defined in original");
+
+// Enable the following once we fix this
+/*
+test("should invalidate a computed property added to a subclass via reopen() that depends on a key defined in original", function() {
+  var MyClass = SC.Object.extend({ property: function() { }.property() });
+  var MySubclass = MyClass.extend({ anotherProperty: function() { }.property() });
+
+  var observerCalled = 0;
+
+  MyClass.reopen({
+    yetAnotherProperty: function() {
+      return "Yet Another Property";
+    }.property('property')
+  });
+
+  var mySubclass = MySubclass.create();
+  mySubclass.addObserver('yetAnothesProperty', function() {
+    observerCalled++;
+  });
+
+  SC.run(function() {
+    mySubclass.set('property', "foo");
+  });
+
+  equals(observerCalled, 1, "fires observer once");
+});
+*/
+

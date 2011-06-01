@@ -211,6 +211,19 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     jQuery.globalEval(moduleSource);
     delete module.source;
 
+    if (module.cssSource) {
+      var el = document.createElement('style');
+      el.setAttribute('type', 'text/css');
+      if (el.styleSheet) {
+        el.styleSheet.cssText = module.cssSource;
+      } else {
+        var content = document.createTextNode(module.cssSource);
+        el.appendChild(content);
+      }
+
+      document.getElementsByTagName('head')[0].appendChild(el);
+    }
+
     module.isReady = YES;
   },
 

@@ -126,7 +126,7 @@
   directive. For example:
 
       MyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
-        name: 'button',
+        className: 'button',
         render: function(dataSource, context) {
           this.includeSlices(dataSource, context, SC.THREE_SLICE);
         }
@@ -199,7 +199,7 @@
   You can then use the helpers from your render delegates:
 
       MyTheme.someRenderDelegate = SC.RenderDelegate.create({
-        name: 'some-thingy',
+        className: 'some-thingy',
         render: function(dataSource, context) {
           this.myHelperMethod(dataSource);
         }
@@ -270,7 +270,7 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
     create a render delegate, you call this:
    
         MyTheme.myRenderDelegate = SC.RenderDelegate.create({
-          name: 'my-render-delegate',
+          className: 'my-render-delegate',
           render: function(dataSource, context) {
             // your code here...
           }
@@ -310,7 +310,7 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
       }
 
       if (v && v.isEnhancement && v !== this[i]) {
-        v = SC._enhance(this[i] || K, v);
+        v = SC._enhance(this[i] || SC.K, v);
       }
 
       this[i] = v;
@@ -343,11 +343,11 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
   },
 
   /**
-    All render delegates should have a name. Any time a render delegate is
+    All render delegates should have a class name. Any time a render delegate is
     used, this name should be added as a class name (`SC.View`s do this
     automatically).
   */
-  name: undefined,
+  className: undefined,
 
   /**
     Writes the DOM representation of this render delegate to the

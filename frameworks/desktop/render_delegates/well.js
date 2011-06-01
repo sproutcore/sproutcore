@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.BaseTheme.wellRenderDelegate = SC.RenderDelegate.create({
-  name: 'well',
+  className: 'well',
   render: function(dataSource, context) {
     this.includeSlices(dataSource, context, SC.NINE_SLICE);
   },

@@ -36,9 +36,11 @@ SC.ExceptionHandler = {
     @param {Exception} exception the exception thrown during execution
   */
   handleException: function(exception) {
-    if (this.isShowingErrorDialog) return;
-
+    if (this.isShowingErrorDialog) return NO;
+    
     this._displayErrorDialog(exception);
+    
+    return NO;
   },
 
   /** @private

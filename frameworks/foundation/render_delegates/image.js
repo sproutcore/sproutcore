@@ -34,7 +34,7 @@ sc_require('render_delegates/render_delegate');
 */
 
 SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
-  name: 'image',
+  className: 'image',
 
   render: function(dataSource, context) {
     var image = dataSource.get('image'),

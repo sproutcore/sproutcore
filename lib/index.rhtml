@@ -11,12 +11,13 @@
 <!DOCTYPE html>
 <html<% unless @content_for_html5_manifest.blank? %> manifest="app.manifest"<% end %>>
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge<%= config.chrome_frame ? ',chrome=1' : '' %>" />
+    
     <script>
     var SC_benchmarkPreloadEvents = { headStart: new Date().getTime() };
     </script>
     
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=EDGE<%= config.chrome_frame ? ',chrome=1' : '' %>" />
     <meta http-equiv="Content-Script-Type" content="text/javascript" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="<%= config.status_bar_style || 'default' %>" />

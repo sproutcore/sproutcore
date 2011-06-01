@@ -10,7 +10,8 @@ test("SC.typeOf", function() {
 	var a = null,
 	    arr = [1,2,3],
 	    obj = {},
-      object = SC.Object.create({ method: function() {} })
+      object = SC.Object.create({ method: function() {} }),
+      E = SC.Error.extend();
 
   equals(SC.T_UNDEFINED,  SC.typeOf(undefined),         "item of type undefined");
   equals(SC.T_NULL,       SC.typeOf(a),                 "item of type null");
@@ -20,6 +21,9 @@ test("SC.typeOf", function() {
 	equals(SC.T_FUNCTION,   SC.typeOf(object.method),     "item of type function") ;
 	equals(SC.T_CLASS,      SC.typeOf(SC.Object),         "item of type class");
   equals(SC.T_ERROR,      SC.typeOf(SC.Error.create()), "item of type error");
+  equals(SC.T_OBJECT,     SC.typeOf(SC.Object.create({ isError: YES })), "sc object with isError property should be of type object");
+  equals(SC.T_ERROR,      SC.typeOf(E.create()),         "item of type error");
+  equals(SC.T_HASH,       SC.typeOf({ isObject: YES }),  "hash object with isObject property should be of type hash");
 });
 
 test("SC.none", function() {
@@ -71,7 +75,7 @@ test("SC.isArray" ,function(){
   equals( SC.isArray(fn),       false, "function() {}" );
 
   if (window.document) {
-    var nodelist      = document.getElementsByTagName("body")
+    var nodelist      = document.getElementsByTagName("body");
     equals( SC.isArray(nodelist), true, "NodeList" );
   }
 });

@@ -4,7 +4,7 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*global module test equals context ok same */
+/*global module test equals context ok same should_throw*/
 var LocaleObject;
 
 module('SC.Object', {
@@ -25,6 +25,13 @@ module('SC.Object', {
     SC.stringsFor('English', {
       'Test': '%@',
       'Test.Multiple': '%@ %@'
+    });
+
+    SC.metricsFor('English', {
+      'Button.left': 10,
+      'Button.top': 20,
+      'Button.width': 80,
+      'Button.height': 30
     });
   }
 });
@@ -75,4 +82,37 @@ test("Localize a string even if localized version is empty", function() {
 
   equals("empty".locWithDefault("Empty"), "", "Using String.prototype.locWithDefault");
   equals(SC.String.locWithDefault("empty", "Empty"), "", "Using SC.String.locWithDefault");
+});
+
+test("Access a localized metric", function() {
+  equals(10, "Button.left".locMetric());
+  equals(20, "Button.top".locMetric());
+  equals(undefined, "Button.notThere".locMetric());
+});
+
+test("Access a localized layout hash", function() {
+  // Simple case (if we ever get a full hash comparison function, we should use
+  // it here).
+  var layout = "Button".locLayout();
+  equals(10, layout.left);
+  equals(20, layout.top);
+  equals(80, layout.width);
+  equals(30, layout.height);
+  equals(undefined, layout.right);    // No localized key
+
+
+  // Slightly more involved case:  allow the user to specify an additional hash.
+  layout = "Button".locLayout({right:50});
+  equals(10, layout.left);
+  equals(20, layout.top);
+  equals(80, layout.width);
+  equals(30, layout.height);
+  equals(50, layout.right);    // No localized key
+
+
+  // Sanity-check case:  Since we have both a localized key for 'left' and we'll
+  // pass it in, an exception should be thrown.
+  should_throw(function() {
+    "Button".locLayout({left:10});
+  }, Error, "locLayout():  There is a localized value for the key 'Button.left' but a value for 'left' was also specified in the non-localized hash");
 });

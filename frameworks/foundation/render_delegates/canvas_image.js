@@ -51,7 +51,7 @@ sc_require('render_delegates/render_delegate');
 */
 
 SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
-  name: 'canvasImage',
+  className: 'canvasImage',
 
   /** @private
     We don't have an element yet, so we do the minimal necessary setup

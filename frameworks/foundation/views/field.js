@@ -288,21 +288,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
     return NO;
   }.property('isEnabled'),
-  
-  willBecomeKeyResponderFrom: function(keyView) {
-    // focus the text field.
-    if (!this._isFocused) {
-      this._isFocused = YES ;
-      this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.$input()[0].focus();
-      }
-    }
-  },
-  
-  willLoseKeyResponderTo: function(responder) {
-    if (this._isFocused) this._isFocused = NO ;
-  },
     
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.

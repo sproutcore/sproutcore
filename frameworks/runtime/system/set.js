@@ -32,7 +32,7 @@ sc_require('mixins/copyable');
 
   Whether or not property observing is enabled, sets offer very powerful
   notifications of items being added and removed, through the
-  `#js:addSetObserver` and `#js:removeSetObserver` methods; this can be
+  `:addSetObserver` and `:removeSetObserver` methods; this can be
   very useful, for instance, for filtering or mapping sets.
 
   Note that SC.Set is a primitive object, like an array.  It does implement
@@ -49,18 +49,17 @@ sc_require('mixins/copyable');
   Finally, you can pass in an existing set and the set will be copied.  You
   can also create a copy of a set by calling SC.Set#clone().
 
-      #js
-      // creates a new empty set
-      var foundNames = SC.Set.create();
+        // creates a new empty set
+        var foundNames = SC.Set.create();
 
-      // creates a set with four names in it.
-      var names = SC.Set.create(["Charles", "Tom", "Juan", "Alex"]) ; // :P
+        // creates a set with four names in it.
+        var names = SC.Set.create(["Charles", "Tom", "Juan", "Alex"]) ; // :P
 
-      // creates a copy of the names set.
-      var namesCopy = SC.Set.create(names);
+        // creates a copy of the names set.
+        var namesCopy = SC.Set.create(names);
 
-      // same as above.
-      var anotherNamesCopy = names.clone();
+        // same as above.
+        var anotherNamesCopy = names.clone();
 
   Adding/Removing Objects
   -----------------------
@@ -91,8 +90,8 @@ sc_require('mixins/copyable');
 
   Observing changes
   -----------------
-  When using `#js:SC.Set` (rather than `#js:SC.CoreSet`), you can observe the
-  `#js:"[]"` property to be alerted whenever the content changes.
+  When using `:SC.Set` (rather than `:SC.CoreSet`), you can observe the
+  `:"[]"` property to be alerted whenever the content changes.
 
   This is often unhelpful. If you are filtering sets of objects, for instance,
   it is very inefficient to re-filter all of the items each time the set changes.
@@ -100,10 +99,10 @@ sc_require('mixins/copyable');
   was changed on the original set. The same issue applies to merging sets,
   as well.
 
-  `#js:SC.Set` and `#js:SC.CoreSet` both offer another method of being observed:
-  `#js:addSetObserver` and `#js:removeSetObserver`. These take a single parameter:
-  an object which implements `#js:didAddItem(set, item)` and
-  `#js:didRemoveItem(set, item)`.
+  `:SC.Set` and `:SC.CoreSet` both offer another method of being observed:
+  `:addSetObserver` and `:removeSetObserver`. These take a single parameter:
+  an object which implements `:didAddItem(set, item)` and
+  `:didRemoveItem(set, item)`.
 
   Whenever an item is added or removed from the set, all objects in the set
   (a SC.CoreSet, actually) of observing objects will be alerted appropriately.

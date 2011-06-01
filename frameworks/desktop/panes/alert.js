@@ -444,6 +444,7 @@ SC.AlertPane.mixin(
     if(buttons) {
       buttons.forEach(function(button) {
         idx++;
+        if(!button) return;
         buttonView = pane.get('button%@'.fmt(idx));
         
         title = button.title;

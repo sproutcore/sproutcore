@@ -10,7 +10,7 @@
   Renders and updates the HTML representation of a button.
 */
 SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
-  name: 'button',
+  className: 'button',
 
   //
   // SIZE DEFINITIONS
