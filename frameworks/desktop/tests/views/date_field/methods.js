@@ -66,11 +66,38 @@ function() {
   ok(view0.$().hasClass('disabled'), 'should have disabled class');
 });
 
-test("isEnabled and isEditable mapping",
-function() {
-  var obj = SC.DateFieldView.create();
-  obj.set('isEnabled', false);
-  equals(obj.get('isEditable'), false);
-  obj.set('isEnabled', true);
-  equals(obj.get('isEditable'), true);
+test("isEnabled=NO isEditable=NO should add disabled attribute", function() {
+  SC.RunLoop.begin();
+  view0.set('isEnabled', NO);
+  view0.set('isEditable', NO);
+  SC.RunLoop.end();
+  ok(view0.$input().attr('disabled'), 'should have disabled attribute');
+  ok(!view0.$input().attr('readOnly'), 'should not have readOnly attribute');
+});
+
+test("isEnabled=NO isEditable=YES should add disabled attribute", function() {
+  SC.RunLoop.begin();
+  view0.set('isEnabled', NO);
+  view0.set('isEditable', YES);
+  SC.RunLoop.end();
+  ok(view0.$input().attr('disabled'), 'should have disabled attribute');
+  ok(!view0.$input().attr('readOnly'), 'should not have readOnly attribute');
+});
+
+test("isEnabled=YES isEditable=NO should add readOnly attribute", function() {
+  SC.RunLoop.begin();
+  view0.set('isEnabled', YES);
+  view0.set('isEditable', NO);
+  SC.RunLoop.end();
+  ok(!view0.$input().attr('disabled'), 'should not have disabled attribute');
+  ok(view0.$input().attr('readOnly'), 'should have readOnly attribute');
+});
+
+test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute", function() {
+  SC.RunLoop.begin();
+  view0.set('isEnabled', YES);
+  view0.set('isEditable', YES);
+  SC.RunLoop.end();
+  ok(!view0.$input().attr('disabled'), 'should not have disabled attribute');
+  ok(!view0.$input().attr('readOnly'), 'should not have readOnly attribute');
 });
