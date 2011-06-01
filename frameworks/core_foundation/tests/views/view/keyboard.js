@@ -4,7 +4,18 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-module("SC.View - Keyboard support");
+
+var originalTabbing;
+
+module("SC.View - Keyboard support with Tabbing Only Inside Document", {
+  setup: function(){
+    originalTabbing = SC.TABBING_ONLY_INSIDE_DOCUMENT;
+    SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
+  },
+  teardown: function(){
+    SC.TABBING_ONLY_INSIDE_DOCUMENT = originalTabbing;
+  }
+});
 
 test("Views only attempt to call performKeyEquivalent on child views that support it", function() {
   var performKeyEquivalentCalled = 0;
@@ -422,3 +433,9 @@ test("previousValidKeyView prioritizes parent's firstKeyView even if previousKey
   equals(pane.view2.view6.get('previousValidKeyView'), pane.view1.view4, "firstKeyView was respected; views before firstKeyView were skipped");
 });
 
+
+module("SC.View - Keyboard support with Tabbing Outside of Document");
+
+test("forward tab with no next responder moves out of document");
+
+test("backwards tab with no previous responder moves out of document");
