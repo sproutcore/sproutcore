@@ -74,10 +74,6 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     @default YES
   */
   attachIdentifyingHeaders: YES,
-  
-  init: function() {
-    sc_super();
-  },
 
   /**
     Current set of headers for the request
