@@ -50,9 +50,7 @@ SC.View.reopen(
   
     @param {SC.Responder} responder
   */
-  didBecomeKeyResponderFrom: function(responder) {
-    this.$().focus();
-  },
+  didBecomeKeyResponderFrom: function(responder) {},
 
   /**
     This method will process a key input event, attempting to convert it to
