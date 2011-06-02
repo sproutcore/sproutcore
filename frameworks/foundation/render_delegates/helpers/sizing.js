@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('render_delegates/render_delegate');
+
 SC.RenderDelegate.reopen({
   /**
     A list of size names to look for when automatically determining
