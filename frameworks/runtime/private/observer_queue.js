@@ -71,13 +71,22 @@ SC.Observers = {
       tuple[0].removeObserver(tuple[1], target, method) ;
     }
 
-    idx = this.queue.length; queue = this.queue ;
+    // tests show that the fastest way is to create a new array. On Safari,
+    // it is fastest to set to null then loop over again to collapse, but for all other browsers
+    // it is not. Plus, this code shouldn't get hit very often anyway (it may not ever get hit
+    // for some apps).
+    idx = this.queue.length; queue = this.queue, newQueue = undefined;
     while(--idx >= 0) {
-      item = queue[idx] ;
-      if ((item[0] === propertyPath) && (item[1] === target) && (item[2] == method) && (item[3] === pathRoot)) {
-        queue.removeAt(idx);
+      item = queue[idx];
+
+      if (item[0] !== propertyPath || item[1] !== target || item[2] !== method || item[3] !== pathRoot) {
+        if (!newQueue) newQueue = [];
+        newQueue.push(item);
       }
     }
+
+    // even though performance probably won't be a problem, we are defensive about memory alloc.
+    this.queue = newQueue || this.queue;
   },
 
   /**
