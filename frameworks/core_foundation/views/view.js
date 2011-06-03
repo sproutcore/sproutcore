@@ -751,7 +751,7 @@ SC.CoreView.reopen(
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
 
     var parentView = this.get('parentView')
-    if(parentView && parentView.constructor.subclassOf(SC.TemplateView)) {
+    if(parentView && this.constructor.subclassOf(SC.View) && parentView.constructor.subclassOf(SC.TemplateView)) {
       this.replaceLayer();
     }
 
