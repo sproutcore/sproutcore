@@ -115,3 +115,14 @@ test("notifies receiver and each child if parent clipping frame changes", functi
   // number.
   equals(callCount, 2, 'should invoke observer on child and nested child');
 });
+
+test("returns 0, 0, W, H if parentView has no clippingFrame", function(){
+  a.clippingFrame = null;
+
+  var targetFrame = aa.get('clippingFrame');
+
+  equals(targetFrame.x, 0, "x should be 0");
+  equals(targetFrame.y, 0, "y should be 0");
+  equals(targetFrame.width, 40, "width should be 40");
+  equals(targetFrame.height, 40, "height should be 40");
+});
