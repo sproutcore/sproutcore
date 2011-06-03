@@ -1004,7 +1004,7 @@ SC.CoreView.reopen(
     pv = this.get('parentView');
     if (pv) {
       cf = pv.get('clippingFrame');
-      if (!cf) return f;
+      if (!cf) return { x: 0, y: 0, width: f.width, height: f.height};
       ret = SC.intersectRects(cf, f);
     }
     ret.x -= f.x;
