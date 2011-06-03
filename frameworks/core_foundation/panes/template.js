@@ -53,6 +53,8 @@ SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
 
     // Normally the awake process is started in the Page, but we don't have a Page
     pane.awake();
+    
+    pane.parentViewDidResize();
 
     return pane;
   }
