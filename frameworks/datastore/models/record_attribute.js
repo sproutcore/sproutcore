@@ -298,6 +298,15 @@ SC.RecordAttribute = SC.Object.extend(
     return value ;
   },
 
+  /**
+    Apply needs to implemented for sc_super to work.
+
+    @see SC.RecordAttribute#call
+  */
+  apply: function(target, args) {
+    return this.call.apply(target, args);
+  },
+
   // ..........................................................
   // INTERNAL SUPPORT
   // 
