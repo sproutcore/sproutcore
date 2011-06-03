@@ -750,6 +750,11 @@ SC.CoreView.reopen(
     if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
 
+    var parentView = this.get('parentView')
+    if(parentView && parentView.constructor.subclassOf(SC.TemplateView)) {
+      this.replaceLayer();
+    }
+
     var i=0, child, childLen, children = this.get('childViews');
     for(i=0, childLen=children.length; i<childLen; i++) {
       child = children[i];
