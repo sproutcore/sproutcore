@@ -31,6 +31,7 @@ SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
     @returns {SC.MainPane} the created pane
   */
   append: function(attrs) {
+    var views;
     var pane = SC.MainPane.extend({
       childViews: ['contentView'],
 
@@ -55,6 +56,12 @@ SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
     pane.awake();
     
     pane.parentViewDidResize();
+    
+    if(views = pane._views_need_replace_layer) {
+      for(var i = 0; i < views.get('length'); i++) {
+        views.objectAt(i).replaceLayer();
+      }
+    }
 
     return pane;
   }
