@@ -49,8 +49,13 @@ SC.TextField = SC.TemplateView.extend(
     var input = this.$input();
     input.val(this._value);
 
-    SC.Event.add(input, 'focus', this, this.focusIn);
-    SC.Event.add(input, 'blur', this, this.focusOut);
+    if (SC.browser.msie) {
+      SC.Event.add(input, 'focusin', this, this.focusIn);
+      SC.Event.add(input, 'focusout', this, this.focusOut);
+    } else {
+      SC.Event.add(input, 'focus', this, this.focusIn);
+      SC.Event.add(input, 'blur', this, this.focusOut);
+    }
 
     input.bind('change', function() {
       self.domValueDidChange(SC.$(this));
@@ -161,8 +166,13 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
 
     input.val(this._value);
 
-    SC.Event.add(input, 'focus', this, this.focusIn);
-    SC.Event.add(input, 'blur', this, this.focusOut);
+    if (SC.browser.msie) {
+      SC.Event.add(input, 'focusin', this, this.focusIn);
+      SC.Event.add(input, 'focusout', this, this.focusOut);
+    } else {
+      SC.Event.add(input, 'focus', this, this.focusIn);
+      SC.Event.add(input, 'blur', this, this.focusOut);
+    }
   },
 
   focusIn: function(event) {
