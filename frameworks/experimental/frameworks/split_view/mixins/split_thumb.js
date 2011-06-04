@@ -131,7 +131,7 @@ SC.SplitThumb = {
   // NOTE: While an edge case, this is implemented because it makes it _much_
   // easier to write the sample in the Test Controls app.
   splitViewLayoutDirection: null,
-  splitViewLayoutDirectionBinding: '*splitView.layoutDirection',
+  splitViewLayoutDirectionBinding: SC.Binding.oneWay('*splitView.layoutDirection'),
   
   /**
    * The name of the CSS cursor that should be used for splitting.
