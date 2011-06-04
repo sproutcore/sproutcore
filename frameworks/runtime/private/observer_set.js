@@ -119,6 +119,8 @@ SC.ObserverSet = {
   }
 
 } ;
+
 SC.ObserverSet.constructor.prototype = SC.ObserverSet;
-SC.ObserverSet.slice = SC.ObserverSet.clone ;
+SC.ObserverSet.slice = SC.ObserverSet.clone;
+SC.ObserverSet.copy = SC.ObserverSet.clone;
 
