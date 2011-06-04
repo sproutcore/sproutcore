@@ -81,6 +81,17 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     if (module.isLoaded && !module.isWaitingForRunLoop) {
       if (log) SC.Logger.log("SC.Module: Module '%@' already loaded.".fmt(moduleName));
 
+      // we can't just eval it if its dependencies have not been met...
+      if (!this._dependenciesMetForModule(moduleName)) {
+        // we can't let it return normally here, because we need the module to wait until the end of the run loop.
+        // This is because the module may set up bindings.
+        this._addCallbackForModule(moduleName, target, method, args);
+
+        this._loadDependenciesForModule(moduleName);
+
+        return NO;
+      }
+
       // If the module has finished loading and we have the string
       // representation, try to evaluate it now.
       if (module.source) {
