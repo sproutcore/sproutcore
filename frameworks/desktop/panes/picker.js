@@ -489,6 +489,19 @@ SC.PickerPane = SC.PalettePane.extend(
     
     var wsize = SC.RootResponder.responder.computeWindowSize(),
         wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
+
+    // if window size is smaller than the minimum size of app, use minimum size.
+    var mainPane = SC.RootResponder.responder.mainPane;
+    if (mainPane) {
+      var minWidth = mainPane.layout.minWidth,
+          minHeight = mainPane.layout.minHeight;
+      if (minWidth && wret.width < minWidth) {
+        wret.width = mainPane.layout.minWidth;
+      }
+      if (minHeight && wret.height < minHeight) {
+        wret.height = mainPane.layout.minHeight;
+      }
+    }
         
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
