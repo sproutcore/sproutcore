@@ -53,7 +53,7 @@ SC.Controller = SC.Object.extend(
 
     if (!this.get('destroyContentOnReplace')) return;
 
-    oldContent = this._oldContent,
+    oldContent = this._oldContent;
     newContent = this.get('content');
     if (oldContent && newContent !== oldContent && oldContent.destroy) {
       oldContent.destroy();
