@@ -701,6 +701,7 @@ SC.RootResponder = SC.Object.extend(
 
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
+    this.focus();
 
     if (SC.browser.mobileSafari) {
 
