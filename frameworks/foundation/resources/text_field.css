@@ -19,9 +19,6 @@
     right: 3px;
     position: absolute;
   }
-  &.text-area .padding {
-    right: 0px;
-  }
   &.sc-text-field-accessory-view {
   	z-index: 2;
   }
