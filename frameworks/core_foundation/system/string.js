@@ -116,7 +116,7 @@ SC.mixin(SC.String, {
   },
 
   /**
-    Localizes the string.  This will look up the reciever string as a key
+    Localizes the string.  This will look up the receiver string as a key
     in the current Strings hash.  If the key matches, the loc'd value will be
     used.  The resulting string will also be passed through fmt() to insert
     any variables.
@@ -136,7 +136,7 @@ SC.mixin(SC.String, {
 
     var args = SC.$A(arguments);
     args.shift(); // remove str param
-    //to extend String.prototype 
+    //to extend String.prototype
     if(args.length>0 && args[0].isSCArray) args=args[0];
 
     return SC.String.fmt(localized, args);
@@ -255,7 +255,7 @@ SC.mixin(SC.String, {
 
     return SC.String.fmt(localized, args);
   },
-  
+
   /**
    Removes any extra whitespace from the edges of the string. This method is
    also aliased as strip().
@@ -306,7 +306,7 @@ if(String.prototype.trim) {
 // We want the version defined here, not in Runtime
 SC.mixin(String.prototype,
 /** @scope String.prototype */ {
-  
+
   loc: function() {
     return SC.String.loc(this.toString(), SC.$A(arguments));
   },

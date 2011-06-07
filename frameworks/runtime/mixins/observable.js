@@ -783,7 +783,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       @param {String} key the key to observer
       @param {Object} target the target object to invoke
       @param {String|Function} method the method to invoke.
-      @returns {SC.Observable} reciever
+      @returns {SC.Observable} receiver
     */
     removeObserver: function(key, target, method) {
 

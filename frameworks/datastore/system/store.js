@@ -106,7 +106,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for the receiver.
 
     @param {SC.DataSource...} dataSource one or more data source arguments
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   cascade: function(dataSource) {
     var dataSources = SC.A(arguments) ;
@@ -416,7 +416,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @param {Number} storeKey
     @param {String} status optional new status
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   removeDataHash: function(storeKey, status) {
      // don't use delete -- that will allow parent dataHash to come through
@@ -2074,7 +2074,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     record.  This will transition the record back to it non-inflight state.
 
     @param {Number} storeKey record store key to cancel
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   dataSourceDidCancel: function(storeKey) {
     var status = this.readStatus(storeKey),
@@ -2130,7 +2130,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey record store key to change to READY_CLEAN state
     @param {Hash} dataHash optional data hash to replace current hash
     @param {Object} newId optional new id to replace the old one
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
     var status = this.readStatus(storeKey), K = SC.Record, statusOnly;
@@ -2169,7 +2169,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     transition the record to the proper state.
 
     @param {Number} storeKey record store key to cancel
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   dataSourceDidDestroy: function(storeKey) {
     var status = this.readStatus(storeKey), K = SC.Record;
@@ -2202,7 +2202,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @param {Number} storeKey record store key to error
     @param {SC.Error} error [optional] an SC.Error instance to associate with storeKey
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   dataSourceDidError: function(storeKey, error) {
     var status = this.readStatus(storeKey), errors = this.recordErrors, K = SC.Record;
@@ -2761,7 +2761,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
 
     @param {Integer} storeKey the store key
     @param {SC.Record} recordType a record class
-    @returns {SC.Store} reciever
+    @returns {SC.Store} receiver
   */
   replaceRecordTypeFor: function(storeKey, recordType) {
     this.recordTypesByStoreKey[storeKey] = recordType;

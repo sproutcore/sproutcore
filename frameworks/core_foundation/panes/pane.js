@@ -298,7 +298,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     giving it one last opportunity to save its state.
 
     @param {SC.Pane} pane
-    @returns {SC.Pane} reciever
+    @returns {SC.Pane} receiver
   */
   willLoseKeyPaneTo: function(pane) {
     this._forwardKeyChange(this.get('isKeyPane'), 'willLoseKeyResponderTo', pane, NO);
@@ -328,7 +328,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     final cleanup and changes its own display value if needed.
 
     @param {SC.Pane} pane
-    @returns {SC.Pane} reciever
+    @returns {SC.Pane} receiver
   */
   didLoseKeyPaneTo: function(pane) {
     var isKeyPane = this.get('isKeyPane');

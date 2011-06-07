@@ -555,7 +555,7 @@ SC.Object.prototype = {
     Although the default init() method returns the receiver, the return
     value is ignored.
 
-    
+
   */
   init: function() {
     this.initObservable();
@@ -729,7 +729,7 @@ SC.Object.prototype = {
     method is called automatically for view classes but may be used for any
     object.
 
-    
+
   */
   awake: function() {
     var outlets = this.outlets,
