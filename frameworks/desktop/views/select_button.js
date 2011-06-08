@@ -540,7 +540,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
     menuItemViewEscapeHTML = dummyMenuItemView.get('escapeHTML') ;
-    var body = document.body;
+    body = document.body;
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
       item = items.objectAt(idx) ;
