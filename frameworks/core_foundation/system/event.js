@@ -105,15 +105,6 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaX = 0 ;
     }
 
-    // we have a value over the limit and it wasn't caught when we generated MOUSE_WHEEL_MULTIPLIER
-    // this will happen as new Webkit-based browsers are released and we haven't covered them off
-    // in our browser detection. It'll scroll too quickly the first time, but we might as well learn
-    // and change our handling for the next scroll
-    if (this.wheelDelta > SC.Event.MOUSE_WHEEL_DELTA_LIMIT && !SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED) {
-      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.004;
-      SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES;
-    }
-
     this.wheelDelta *= deltaMultiplier;
     this.wheelDeltaX *= deltaMultiplier;
     this.wheelDeltaY *= deltaMultiplier;
@@ -127,10 +118,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   /**
     We need this because some browsers deliver different values
     for mouse wheel deltas. Once the first mouse wheel event has
-    been run, this value will get set. Because we don't know the
-    maximum or minimum value ahead of time, if the event's delta
-    exceeds `SC.Event.MOUSE_WHEEL_DELTA_LIMIT`, this value can be
-    invalidated and changed during a later event.
+    been run, this value will get set.
 
     @field
     @type Number
@@ -138,25 +126,19 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   MOUSE_WHEEL_MULTIPLIER: function() {
     var deltaMultiplier = 1,
-        version = parseFloat(SC.browser.version),
-        didChange = NO;
+        version = parseFloat(SC.browser.version);
 
     if (SC.browser.safari) {
       // Safari 5.0.1 and up
       if (version >= 533.17 && version<534) {
         deltaMultiplier = 0.004;
-        didChange = YES;
       } else if (version < 533) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
-        didChange = YES;
       }
     } else if (SC.browser.mozilla) {
       deltaMultiplier = 10;
-      didChange = YES;
     }
-
-    if (didChange) { SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES; }
 
     return deltaMultiplier;
   }(),
