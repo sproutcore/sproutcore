@@ -16,7 +16,8 @@ SC.Checkbox = SC.TemplateView.extend(
   value: null,
 
   displayTitle: function() {
-    return SC.String.loc(this.get('title'));
+    var title = this.get('title');
+    return title ? SC.String.loc(title) : null;
   }.property('title').cacheable(),
 
   classNames: ['sc-checkbox'],
