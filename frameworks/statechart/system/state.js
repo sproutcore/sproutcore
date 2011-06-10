@@ -382,7 +382,6 @@ SC.State = SC.Object.extend({
     this state with them.
   */
   _registerWithParentStates: function() {
-    this._registerSubstate(this);
     var parent = this.get('parentState');
     while (!SC.none(parent)) {
       parent._registerSubstate(this);
@@ -410,12 +409,11 @@ SC.State = SC.Object.extend({
     // to this state. 
     var regPaths = this._registeredSubstatePaths;
     if (regPaths[state.get('name')] === undefined) {
-      regPaths[state.get('name')] = { __ki_paths__: [] };
+      regPaths[state.get('name')] = { };
     }
     
     var paths = regPaths[state.get('name')];
     paths[path] = state;
-    paths.__ki_paths__.push(path);
   },
   
   /**
@@ -458,6 +456,8 @@ SC.State = SC.Object.extend({
     state; not the root state of the statechart.
   */
   getSubstate: function(value) {
+    if (!value) return null;
+    
     var valueType = SC.typeOf(value);
     
     // If the value is an object then just check if the value is 
@@ -471,31 +471,28 @@ SC.State = SC.Object.extend({
       return null;
     }
     
-    // The value is a string. Therefore treat the value as a relative path to 
-    // a substate of this state.
-    
-    // Extract that last part of the string. Ex. 'foo' => 'foo', 'foo.bar' => 'bar'
-    var matches = value.match(/(^|\.)(\w+)$/);
-    if (!matches) return null;
+    var matcher = SC.StatePathMatcher.create({ state: this, expression: value }), 
+        matches = [], key;
 
-    // Get all the paths related to the matched value. If no paths then return null.
-    var paths = this._registeredSubstatePaths[matches[2]];
-    if (SC.none(paths)) return null;
+    if (matcher.get('tokens').length === 0) return null;
+
+    var paths = this._registeredSubstatePaths[matcher.get('lastPart')];
+    if (!paths) return null;
     
-    // Do a quick check to see if there is a path that exactly matches the given
-    // value, and if so return the corresponding state
-    var state = paths[value];
-    if (!SC.none(state)) return state;
-    
-    // No exact match found. If the value given is a basic string with no ".", then check
-    // if there is only one path containing that string. If so, return it. If there is
-    // more than one path then it is ambiguous as to what state is trying to be reached.
-    if (matches[1] === "") {
-      if (paths.__ki_paths__.length === 1) return paths[paths.__ki_paths__[0]];
-      if (paths.__ki_paths__.length > 1) {
-        var msg = 'Can not find substate matching %@ in state %@. Ambiguous with the following: %@';
-        this.stateLogError(msg.fmt(value, this, paths.__ki_paths__));
+    for (key in paths) {
+      if (matcher.match(key)) {
+        matches.push(paths[key]);
       }
+    }
+  
+    if (matches.length === 1) return matches[0];
+      
+    if (matches.length > 1) {
+      var msg = "Can not find substate matching '%@' in state %@. Ambiguous with the following: %@";
+      var keys = [];
+      for (key in paths) { keys.push(key); }
+      this.stateLogError(msg.fmt(value, this.get('fullPath'), keys.join(', ')));
+      return null;
     } 
     
     return null;
@@ -503,27 +500,17 @@ SC.State = SC.Object.extend({
   
   /**
     Used to go to a state in the statechart either directly from this state if it is a current state,
-    or from one of this state's current substates.
+    or from the first relative current state from this state.
     
     Note that if the value given is a string, it will be assumed to be a path to a state. The path
     will be relative to the statechart's root state; not relative to this state.
-    
-    Method can be called in the following ways: 
-    
-        // With one argument
-        gotoState(<state>)
-      
-        // With two arguments
-        gotoState(<state>, <hash>)
-    
-    Where <state> is either a string or a SC.State object and <hash> is a regular JS hash object.
     
     @param state {SC.State|String} the state to go to
     @param context {Hash} Optional. context object that will be supplied to all states that are
            exited and entered during the state transition process
   */
   gotoState: function(state, context) {
-    var from = this.findFirstRelativeCurrentState();
+    var from = this.findFirstRelativeCurrentState(state);
     this.get('statechart').gotoState(state, from, false, context);
   },
   
@@ -655,24 +642,33 @@ SC.State = SC.Object.extend({
 
   /**
     Will attempt to find a current state in the statechart that is relative to 
-    this state. The rules are as follows:
+    this state. 
 
-      1. If this state is already a current state then it is returned
-      2. If this state has current substates, then the first one will be returned
-      3. Will return the parent state's first relative current state. If the
-         result is state then it is returned, otherwise null is returned.
-
-    @return {SC.State} the current state
+    @param anchor {State|String} Optional. a substate of this state used to help direct 
+      finding a current state
+    @return {SC.State} a current state
   */
-  findFirstRelativeCurrentState: function() {
+  findFirstRelativeCurrentState: function(anchor) {
     if (this.get('isCurrentState')) return this;
-    
-    if (this.get('hasCurrentSubstates')) {
-      return this.get('currentSubstates')[0];
+
+    var currentSubstates = this.get('currentSubstates') || [],
+        numCurrent = currentSubstates.get('length'),
+        parent = this.get('parentState');
+
+    if (numCurrent === 0) {
+      return parent ? parent.findFirstRelativeCurrentState() : null;
     }
-  
-    var parent = this.get('parentState');
-    return parent ? parent.findFirstRelativeCurrentState() : null;
+
+    if (numCurrent > 1) {
+      anchor = this.getSubstate(anchor);
+      return anchor ? anchor.findFirstRelativeCurrentState() : null;
+    }
+    
+    if (numCurrent === 1) {
+      return currentSubstates[0];
+    } 
+    
+    return null;
   },
 
   /**
@@ -998,8 +994,7 @@ SC.State = SC.Object.extend({
   }.property('name', 'parentState').cacheable(),
   
   toString: function() {
-    var className = SC._object_className(this.constructor);
-    return "%@<%@, %@>".fmt(className, this.get('fullPath'), SC.guidFor(this));
+    return "State(%@)".fmt(this.get('fullPath'));
   },
   
   /** @private */

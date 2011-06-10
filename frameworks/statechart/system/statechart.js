@@ -476,10 +476,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param value {State|String} either a state object of the name of a state
     @returns {State} if a match then the matching state is returned, otherwise null is returned 
   */
-  getState: function(value) {
-    return this.get('rootState').getSubstate(value);
+  getState: function(state) {
+    var root = this.get('rootState');
+    return root === state ? root : root.getSubstate(state);
   },
-  
+
   /**
     When called, the statechart will proceed with making state transitions in the statechart starting from 
     a current state that meet the statechart conditions. When complete, some or all of the statechart's 
@@ -524,7 +525,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param context {Hash} Optional. A context object that will be passed to all exited and entered states
   */
   gotoState: function(state, fromCurrentState, useHistory, context) {
-    
     if (!this.get('statechartIsInitialized')) {
       this.statechartLogError("can not go to state %@. statechart has not yet been initialized".fmt(state));
       return;
@@ -551,7 +551,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         paramFromCurrentState = fromCurrentState,
         msg;
     
-    state = rootState.getSubstate(state);
+    state = this.getState(state);
     
     if (SC.none(state)) {
       this.statechartLogError("Can not to goto state %@. Not a recognized state in statechart".fmt(paramState));
@@ -578,7 +578,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     if (fromCurrentState) {
       // Check to make sure the current state given is actually a current state of this statechart
-      fromCurrentState = rootState.getSubstate(fromCurrentState);
+      fromCurrentState = this.getState(fromCurrentState);
       if (SC.none(fromCurrentState) || !fromCurrentState.get('isCurrentState')) {
         msg = "Can not to goto state %@. %@ is not a recognized current state in statechart";
         this.statechartLogError(msg.fmt(paramState, paramFromCurrentState));
@@ -590,6 +590,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       // No explicit current state to start from; therefore, need to find a current state
       // to transition from.
       fromCurrentState = state.findFirstRelativeCurrentState();
+      if (!fromCurrentState) fromCurrentState = this.get('firstCurrentState');
     }
         
     if (trace) {

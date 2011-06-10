@@ -5,7 +5,7 @@
 
 var statechart1, statechart2, statechart3, statechart4;
 
-module("SC.Statechart: Namespace - Access Substate Tests", {
+module("SC.Statechart: getState method Tests", {
   setup: function() {
     
     statechart1 = SC.Statechart.create({
@@ -155,10 +155,10 @@ test("access statechart2 states", function() {
   equals(state.get('value'), 'state F', 'state b.f should have value "state F"');
 });
 
-test("access all A states in statechart3", function() {
+test("attempt to access all A states in statechart3", function() {
   var state;
       
-  state = statechart3.getState('a');
+  state = statechart3.getState('this.a');
   equals(SC.none(state), false, 'state a should not be null');
   equals(state.get('value'), 'state A', 'state a should have value "state A"');
   
@@ -168,28 +168,6 @@ test("access all A states in statechart3", function() {
   
   state = statechart3.getState('b.c.a');
   equals(SC.none(state), false, 'state b.c.a should not be null');
-  equals(state.get('value'), 'state B.C.A', 'state a should have value "state B.C.A"');
-});
-
-test("access all A states relative to state B in statechart3", function() {
-  var state,
-      stateB = statechart3.getState('b');
-      
-  state = stateB.getSubstate('a');
-  equals(SC.none(state), false, 'state a should not be null');
-  equals(state.get('value'), 'state B.A', 'state a should have value "state B.A"');
-  
-  state = stateB.getSubstate('c.a');
-  equals(SC.none(state), false, 'state c.a should not be null');
-  equals(state.get('value'), 'state B.C.A', 'state a should have value "state B.C.A"');
-});
-
-test("access all A states relative to state C in statechart3", function() {
-  var state,
-      stateC = statechart3.getState('c');
-      
-  state = stateC.getSubstate('a');
-  equals(SC.none(state), false, 'state a should not be null');
   equals(state.get('value'), 'state B.C.A', 'state a should have value "state B.C.A"');
 });
 
@@ -229,20 +207,4 @@ test("access all states in statechart4", function() {
   console.log('expecting to get an error message...');
   state = statechart4.getState('y');
   equals(SC.none(state), true, 'state y should be null');
-  
-  state = stateA.getSubstate('x');
-  equals(SC.none(state), false, 'state a.x should not be null');
-  equals(state.get('value'), 'state A.X', 'state a should have value "state A.X"');
-  
-  state = stateA.getSubstate('y');
-  equals(SC.none(state), false, 'state a.y should not be null');
-  equals(state.get('value'), 'state A.Y', 'state a should have value "state A.Y"');
-  
-  state = stateB.getSubstate('x');
-  equals(SC.none(state), false, 'state b.x should not be null');
-  equals(state.get('value'), 'state B.X', 'state a should have value "state B.X"');
-  
-  state = stateB.getSubstate('y');
-  equals(SC.none(state), false, 'state b.y should not be null');
-  equals(state.get('value'), 'state B.Y', 'state a should have value "state B.Y"');
 });
