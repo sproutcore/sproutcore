@@ -13,7 +13,8 @@ sc_require('views/media_slider');
 
   @extends SC.View
 */
-SC.MediaControlsView = SC.View.extend({
+SC.MediaControlsView = SC.View.extend(
+/** @scope SC.MediaControlsView.prototype */{
 
   target: null,
   

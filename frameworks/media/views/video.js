@@ -28,8 +28,8 @@ sc_require('views/mini_controls');
   @extends SC.View
   @since SproutCore 1.1
 */
-
-SC.VideoView = SC.View.extend({
+SC.VideoView = SC.View.extend(
+/** @scope SC.VideoView.prototype */{
 
   /** 
     Video view className. 

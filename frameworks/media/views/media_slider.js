@@ -7,12 +7,10 @@
 /*globals SC */
 
 /** @class
-
-  (Document Your View Here)
-
   @extends SC.View
 */
-SC.MediaSlider = SC.SliderView.extend({
+SC.MediaSlider = SC.SliderView.extend(
+/** @scope SC.MediaSlider.prototype */{
   
   mediaView: null,
 
