@@ -208,6 +208,8 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
         startClipOffsetY = verticalScrollOffset,
         needsScrollEnd = NO;
 
+    this.willScroll(this);
+
     if (this.touch && this.touch.timeout) {
       // clear the timeout
       clearTimeout(this.touch.timeout);
@@ -224,12 +226,11 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
     var contentWidth = view ? view.get('frame').width : 0,
         contentHeight = view ? view.get('frame').height : 0;
 
-    if (view.calculatedWidth && view.calculatedWidth!==0) contentWidth = view.calculatedWidth;
-    if (view.calculatedHeight && view.calculatedHeight !==0) contentHeight = view.calculatedHeight;
+    if (view.calculatedWidth && view.calculatedWidth!==0) contentWidth = view.get('calculatedWidth');
+    if (view.calculatedHeight && view.calculatedHeight !==0) contentHeight = view.get('calculatedHeight');
 
     var containerWidth = this.get('containerView').get('frame').width,
         containerHeight = this.get('containerView').get('frame').height;
-
 
     // calculate position in content
     var globalFrame = this.convertFrameToView(this.get("frame"), null),
@@ -424,7 +425,6 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
     maxOffsetY = this.maximumScrollOffset(touch.contentSize.height * this._scale,
                                           touch.containerSize.height, this.get("verticalAlign"));
 
-
     // So, the following is the completely written out algebra:
     // (offsetY + touchYInFrame) / this._scale = touch.startTouchOffsetInContent.y
     // offsetY + touchYInFrame = touch.startTouchOffsetInContent.y * this._scale;
@@ -528,6 +528,7 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
       this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
       this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
       this.endPropertyChanges();
+      this.didScroll(this);
       this.tracking = NO;
 
       if (this.dragging) {
@@ -746,6 +747,7 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
       this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
       this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
       this.endPropertyChanges();
+      this.didScroll(this);
 
       return;
     }

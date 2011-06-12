@@ -1104,21 +1104,23 @@ SC.CoreScrollView = SC.View.extend(
     this.invokeLast(this.adjustElementScroll);
   },
 
+  willScroll: function () {
+    var content = this.get('contentView');
+    content && content.willScroll && content.willScroll(this);
+  },
+
+  didScroll: function () {
+    var content = this.get('contentView');
+    content && content.didScroll && content.didScroll(this);
+  },
+
   /** @private
     Whenever the horizontal scroll offset changes, update the scrollers and
     edit the location of the contentView.
    */
-  _scroll_horizontalScrollOffsetDidChange: function () {
+  _scsv_offsetDidChange: function () {
     this.invokeLast(this.adjustElementScroll);
-  }.observes('horizontalScrollOffset'),
-
-  /** @private
-    Whenever the vertical scroll offset changes, update the scrollers and
-    edit the location of the contentView.
-   */
-  _scroll_verticalScrollOffsetDidChange: function () {
-    this.invokeLast(this.adjustElementScroll);
-  }.observes('verticalScrollOffset'),
+  }.observes('horizontalScrollOffset', 'verticalScrollOffset'),
 
   /** @private
     Called at the end of the run loop to actually adjust the scrollTop

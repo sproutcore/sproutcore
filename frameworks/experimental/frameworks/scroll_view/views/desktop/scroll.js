@@ -111,16 +111,14 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
     return this._scroll_verticalScrollOffset || 0;
   }.property().cacheable(),
 
-  /**
-    Tells the scroll view to notify of clipping frame size
-    changes every `incrementalRenderingDelta` pixels. This
-    allows incremental rendering to happen while doing
-    scrolling without firing off too many observers at once.
+   /**
+    The minimum interval between scroll event before
+    it signals that scrolling is "done".
 
     @type Number
-    @default 0
-   */
-  incrementalRenderingDelta: 0,
+    @default 100
+    */
+  debounceInterval: 100,
 
   // ..........................................................
   // SCROLL WHEEL SUPPORT
@@ -130,11 +128,17 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
 
     classNames: ['sc-scroll-container-view'],
 
+    wheelEvent: function () {
+      // Firefox emits different mousewheel events than other browsers
+      return SC.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel';
+    }.property().cacheable(),
+
     /** @private
       Remove the "scroll" event handler for the layer.
      */
     willDestroyLayer: function () {
       SC.Event.remove(this.get('layer'), 'scroll', this, this.scroll);
+      SC.Event.remove(this.get('layer'), this.get('wheelEvent'), this, this._scdsv_scrollDebounce);
     },
 
     /** @private
@@ -142,14 +146,32 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
      */
     didCreateLayer: function () {
       SC.Event.add(this.get('layer'), 'scroll', this, this.scroll);
+      SC.Event.add(this.get('layer'), this.get('wheelEvent'), this, this._scdsv_scrollDebounce);
       this.get('parentView').displayDidChange();
     },
 
-    /** @private */
-    _lastCapturedX: -1,
+    _scdsv_scrollDebounce: function (evt) {
+      if (this._debounce != null) {
+        this._debounce.invalidate();
+        this._debounce = null;
+      } else {
+        var layer = this.get('layer'),
+            scrollTop = layer.scrollTop,
+            scrollLeft = layer.scrollLeft;
+        this.get('parentView').willScroll(this.get('parentView'));
+      }
 
-    /** @private */
-    _lastCapturedY: -1,
+      this._debounce = this.invokeLater(this._scdsv_scrollDidFinish.bind(this),
+                                        this.getPath('parentView.debounceInterval'));
+    },
+
+    _scdsv_scrollDidFinish: function () {
+      var layer = this.get('layer'),
+          scrollTop = layer.scrollTop,
+          scrollLeft = layer.scrollLeft;
+      this.get('parentView').didScroll(this.get('parentView'));
+      this._debounce = null;
+    },
 
     /** @private
       Notify the container that the scroll offsets have changed.
@@ -158,10 +180,7 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
       var layer = this.get('layer'),
           scrollTop = layer.scrollTop,
           scrollLeft = layer.scrollLeft,
-          parentView = this.get('parentView'),
-          delta = parentView.get('incrementalRenderingDelta'),
-          shouldNotifyVOffset = Math.abs(scrollTop - this._lastCapturedY) > delta,
-          shouldNotifyHOffset = Math.abs(scrollLeft - this._lastCapturedX) > delta;
+          parentView = this.get('parentView');
 
       // I'm using `verticalScrollOffset` and `horizontalScrollOffset`
       // as proxies for the the actual scroll offsets.
@@ -169,26 +188,16 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
       // Since we know what the offsets are (we got the event), this
       // needs to set the cached value, and let properties know that
       // the offset changed.
-      if (this._scroll_verticalScrollOffset !== scrollTop) {
-        if (shouldNotifyVOffset) {
-          this._lastCapturedY = scrollTop;
-          parentView.propertyWillChange('verticalScrollOffset');
-        }
-
+      if (parentView._scroll_verticalScrollOffset !== scrollTop) {
+        parentView.propertyWillChange('verticalScrollOffset');
         parentView._scroll_verticalScrollOffset = scrollTop;
-        shouldNotifyVOffset &&
-          parentView.propertyDidChange('verticalScrollOffset');
+        parentView.propertyDidChange('verticalScrollOffset');
       }
 
-      if (this._scroll_horizontalScrollOffset !== scrollLeft) {
-        if (shouldNotifyHOffset) {
-          this._lastCapturedX = scrollLeft;
-          parentView.propertyWillChange('horizontalScrollOffset');
-        }
-
+      if (parentView._scroll_horizontalScrollOffset !== scrollLeft) {
+        parentView.propertyWillChange('horizontalScrollOffset');
         parentView._scroll_horizontalScrollOffset = scrollLeft;
-        shouldNotifyHOffset &&
-          parentView.propertyDidChange('horizontalScrollOffset');
+        parentView.propertyDidChange('horizontalScrollOffset');
       }
 
       return parentView.get('canScrollHorizontal') || parentView.get('canScrollVertical');
