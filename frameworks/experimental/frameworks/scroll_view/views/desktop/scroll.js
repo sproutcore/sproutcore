@@ -30,6 +30,15 @@ sc_require('views/desktop/scroller');
 SC.DesktopScrollView = SC.CoreScrollView.extend(
   /** @scope SC.DesktopScrollView.prototype */{
 
+  /** @private
+    Adjust scrollers immediately.
+   */
+  init: function () {
+    SC.platform.propertyDidChange('scrollbarSize'); // invalidate the cache.
+    this.set('nativeScrollbarThickness', SC.platform.get('scrollbarSize'));
+    return sc_super();
+  },
+
   /**
     @type SC.CoreScrollerView
     @default SC.DesktopScrollerView
