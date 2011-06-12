@@ -79,7 +79,7 @@
   background: static_url('images/sc-theme-repeat-x.png') no-repeat left -789px;
 }
 
-.sc-theme .sc-segmented-view .sc-segment label {
+.sc-theme .sc-segmented-view .sc-segment-view label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
   text-shadow: #fff 0px 1px 0px;
 }
