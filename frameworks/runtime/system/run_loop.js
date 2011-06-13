@@ -258,6 +258,20 @@ SC.RunLoop.end = function() {
   return this ;
 } ;
 
+  
+/**
+  Call this to kill the current run loop--stopping all propagation of bindings
+  and observers and clearing all timers.
+  
+  This is useful if you are popping up an error catcher: you need a run loop
+  for the error catcher, but you don't want the app itself to continue
+  running.
+*/
+SC.RunLoop.kill = function() {
+  this.currentRunLoop = this.runLoopClass.create();
+  return this;
+};
+
 /**
   Returns YES when a run loop is in progress
 

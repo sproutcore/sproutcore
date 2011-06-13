@@ -155,7 +155,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var module = SC.MODULE_INFO[moduleName];
 
     // Retrieve array of callbacks from MODULE_INFO hash.
-    callbacks = module.callbacks || [] ;
+    var callbacks = module.callbacks || [] ;
 
     if (method) {
       callbacks.push(function() {
@@ -335,12 +335,16 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if (SC.browser.isIE) {
         el.onreadystatechange = function() {
           if (this.readyState == 'complete' || this.readyState == 'loaded') {
-            SC.Module._moduleDidLoad(moduleName);
+            SC.run(function() {
+              SC.Module._moduleDidLoad(moduleName);
+            });
           }
         };
       } else {
         el.onload = function() {
-          SC.Module._moduleDidLoad(moduleName);
+          SC.run(function(){
+            SC.Module._moduleDidLoad(moduleName);
+          });
         };
       }
 
