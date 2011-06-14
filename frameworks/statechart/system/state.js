@@ -725,28 +725,24 @@ SC.State = SC.Object.extend({
       finding a current state
     @return {SC.State} a current state
   */
-  findFirstRelativeCurrentState: function(anchor) {
-    if (this.get('isCurrentState')) return this;
+ findFirstRelativeCurrentState: function(anchor) {
+   if (this.get('isCurrentState')) return this;
 
-    var currentSubstates = this.get('currentSubstates') || [],
-        numCurrent = currentSubstates.get('length'),
-        parent = this.get('parentState');
+   var currentSubstates = this.get('currentSubstates') || [],
+       numCurrent = currentSubstates.get('length'),
+       parent = this.get('parentState');
 
-    if (numCurrent === 0) {
-      return parent ? parent.findFirstRelativeCurrentState() : null;
-    }
+   if (numCurrent === 0) {
+     return parent ? parent.findFirstRelativeCurrentState() : null;
+   }
 
-    if (numCurrent > 1) {
-      anchor = this.getSubstate(anchor);
-      return anchor ? anchor.findFirstRelativeCurrentState() : null;
-    }
-    
-    if (numCurrent === 1) {
-      return currentSubstates[0];
-    } 
-    
-    return null;
-  },
+   if (numCurrent > 1) {
+     anchor = this.getSubstate(anchor);
+     if (anchor) return anchor.findFirstRelativeCurrentState();
+   }
+
+   return currentSubstates[0];
+ },
 
   /**
     Used to re-enter this state. Call this only when the state a current state of
