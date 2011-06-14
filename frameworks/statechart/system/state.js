@@ -510,6 +510,7 @@ SC.State = SC.Object.extend({
            exited and entered during the state transition process
   */
   gotoState: function(state, context) {
+    state = this._processGotoStateArg(state);
     var from = this.findFirstRelativeCurrentState(state);
     this.get('statechart').gotoState(state, from, false, context);
   },
@@ -541,8 +542,43 @@ SC.State = SC.Object.extend({
            entered during the state transition process
   */
   gotoHistoryState: function(state, recursive, context) {
+    state = this._processGotoStateArg(state);
     var from = this.findFirstRelativeCurrentState();
     this.get('statechart').gotoHistoryState(state, from, recursive, context);
+  },
+  
+  /** @private
+  
+    Processes the state argument that is supplied to a goto state method. 
+    
+    The following will be returned based on the state value provided:
+    
+      - If the value is a state object the object will be returned
+      - If the value is a string then:
+          - If it is prefixed with "parentState"
+  */
+  _processGotoStateArg: function(state) {
+    if (SC.kindOf(state, SC.State)) return value;
+    
+    if (SC.typeOf(state) !== SC.T_STRING) {
+      this.stateLogError("can not process go to state argument: %@".fmt(state));
+      return null;
+    }
+    
+    if (state.indexOf('parentState') < 0) return state;
+    
+    var parentState = this.get('parentState'),
+        dotIndex = state.indexOf('.'),
+        subpath = dotIndex > 0 ? state.slice(dotIndex + 1, state.length) : null,
+        msg;
+
+    if (!parentState) {
+      msg = "use of 'parentState' is invalid. state %@ has no parentState";
+      this.stateLogError(msg.fmt(this.get('fullPath')));
+      return null;
+    }
+    
+    return subpath ? parentState.getSubstate(subpath) : parentState;
   },
   
   /**
