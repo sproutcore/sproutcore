@@ -319,7 +319,7 @@ SC.AutoResizeManager = {
 
             // if the text is empty don't bother preparing
             if(!SC.none(autoResizeText) && autoResizeText !== "" && !prepared) {
-              SC.prepareStringMeasurement(layer);
+              SC.prepareStringMeasurement(layer, view.get('classNames'));
               prepared = YES;
             }
 
