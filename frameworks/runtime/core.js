@@ -166,6 +166,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
   T_BOOL:      'boolean',
   T_ARRAY:     'array',
   T_STRING:    'string',
+  T_DATE:      'date',
+  T_REGEXP:    'regexp',
 
   // ........................................
   // TYPING & ARRAY MESSAGING
@@ -186,6 +188,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
             SC.T_NULL: Null value,<br>
             SC.T_UNDEFINED: Undefined value,<br>
             SC.T_FUNCTION: A function,<br>
+            SC.T_DATE: Date primitive,<br>
+            SC.T_REGEXP: RegExp primitive,<br>
             SC.T_ARRAY: An instance of Array,<br>
             SC.T_CLASS: A SproutCore class (created using SC.Object.extend()),<br>
             SC.T_OBJECT: A SproutCore object instance,<br>
