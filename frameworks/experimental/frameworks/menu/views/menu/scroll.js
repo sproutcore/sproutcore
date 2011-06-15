@@ -107,13 +107,22 @@ SC.MenuScrollView = SC.ScrollView.extend(
 
   /**
     If YES, the vertical scroller will autohide if the contentView is
-    smaller than the visible area.  You must set hasVerticalScroller to YES
-    for this property to have any effect.
+    smaller than the visible area.  You must set `autohidesVerticalScroller`
+    or `hasVerticalScroller` to YES for this property to have any effect.
 
     @type Boolean
     @default YES
    */
   autohidesVerticalScrollers: YES,
+
+  /**
+    If YES, the vertical scroller will autohide (and show) both scrollers if the
+    contentView is smaller than the visible area.
+
+    @type Boolean
+    @default YES
+   */
+  autohidesVerticalScroller: YES,
 
   /**
     Use this property to set the 'bottom' offset of your vertical scroller,
@@ -184,19 +193,31 @@ SC.MenuScrollView = SC.ScrollView.extend(
         vOffset = this.get('verticalScrollOffset'),
         maxOffset = this.get('maximumVerticalScrollOffset'),
         scrollerThickness, vScrollerIsVisible,
-        cFrame = this.getPath('contentView.frame'),
+        cView = this.get('contentView'),
+        cFrame = cView.get('frame'),
         view = this.get('containerView'),
         frame = view.get('frame');
+
+    this.set('canScrollVertical',
+             (cView.get('calculatedHeight') || cFrame.height || 0) * this._scale > this.get('frame').height);
 
     // Fast path when the scrollers shouldn't be automatically hidden.
     if (hasScroller && !this.get('autohidesVerticalScrollers')) {
       vScroller = this.get('verticalScrollerView');
-      layout.top = vScroller.get('scrollerThickness');
-      vScroller.set('layout', { height: layout.top, top: 0, right: 0, left: 0 });
+      vScrollerIsVisible = vScroller && isVisible;
+      vScroller.set('isVisible', vScrollerIsVisible);
+      if (vScrollerIsVisible) {
+        layout.top = vScroller.get('scrollerThickness');
+        vScroller.set('layout', { height: layout.top, top: 0, right: 0, left: 0 });
+      }
 
       vScroller = this.get('verticalScrollerView2');
-      layout.bottom = vScroller.get('scrollerThickness');
-      vScroller.set('layout', { height: layout.bottom, bottom: 0, right: 0, left: 0 });
+      vScrollerIsVisible = vScroller && isVisible;
+      vScroller.set('isVisible', vScrollerIsVisible);
+      if (vScrollerIsVisible) {
+        layout.bottom = vScroller.get('scrollerThickness');
+        vScroller.set('layout', { height: layout.bottom, bottom: 0, right: 0, left: 0 });
+      }
 
     // Automatically hide scrollers.
     } else {
@@ -204,16 +225,16 @@ SC.MenuScrollView = SC.ScrollView.extend(
       // Top scrollbar calculations.
       vScroller = hasScroller ? this.get('verticalScrollerView') : null;
       vScrollerIsVisible = vScroller && isVisible;
-      vScroller.set('isVisible', vScrollerIsVisible);
       if (vScrollerIsVisible) {
         scrollerThickness = vScroller.get('scrollerThickness');
         layout.top = (vOffset === 0) ? 0 : scrollerThickness; // Scrolled; show the scrollbar.
         vScroller.set('layout', { height: layout.top, top: 0, right: 0, left: 0 });
       }
+      vScroller.set('isVisible', vScrollerIsVisible && layout.top !== 0);
 
       // Bottom scrollbar calculations
       vScroller = hasScroller ? this.get('verticalScrollerView2') : null;
-      vScroller.set('isVisible', (vScrollerIsVisible = vScroller && isVisible));
+      vScrollerIsVisible = vScroller && isVisible;
       if (vScroller && isVisible) {
         scrollerThickness = vScroller.get('scrollerThickness');
 
@@ -228,6 +249,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
           scrollerThickness : 0;
         vScroller.set('layout', { height: layout.bottom, bottom: 0, right: 0, left: 0 });
       }
+      vScroller.set('isVisible', vScrollerIsVisible && layout.bottom !== 0);
     }
 
     view.adjust(layout);
