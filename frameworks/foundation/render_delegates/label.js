@@ -39,7 +39,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
-
+    
 		var toolTip = dataSource.get('toolTip');
 		if (toolTip) {
 			context.attr('title', toolTip);
