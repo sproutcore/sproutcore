@@ -40,6 +40,11 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
+		var toolTip = dataSource.get('toolTip');
+		if (toolTip) {
+			context.attr('title', toolTip);
+		}
+
     /*
       TODO [CC @ 1.5] These properties have been deprecated. We should remove them
             in the next release
@@ -72,6 +77,14 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
+		
+		var toolTip = dataSource.get('toolTip');
+		if (toolTip) {
+			jquery.attr('title', toolTip);
+		}
+		else {
+			jquery.removeAttr('title');
+		}
     
     jquery.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
 
