@@ -209,8 +209,6 @@ SC.mixin( /** @scope SC */ {
     @param ignoreEscape {Boolean} To NOT html escape the string.
   */
   measureString: function(string, ignoreEscape) {
-    if(!ignoreEscape) string = SC.RenderContext.escapeHTML(string);
-
     var element = this._metricsCalculationElement;
     if (!element) {
       throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
