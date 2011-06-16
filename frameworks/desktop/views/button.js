@@ -835,9 +835,10 @@ SC.ButtonView = SC.View.extend(SC.Control,
         rootResponder = this.getPath('pane.rootResponder');
         
     if (action) {
-      if (this._hasLegacyActionHandler()) {
-        // old school... V
-        this._triggerLegacyActionHandler(evt);
+      //Removed support for actions with that included paths
+      if (action && (SC.typeOf(action) === SC.T_FUNCTION)) {
+        this.action(evt);
+        return;
       } else {
         if (rootResponder) {
           // newer action method + optional target syntax...
@@ -861,26 +862,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private */
-  _hasLegacyActionHandler: function() {
-    var action = this.get('action');
-    if (action && (SC.typeOf(action) === SC.T_FUNCTION)) return true;
-    if (action && (SC.typeOf(action) === SC.T_STRING) && (action.indexOf('.') != -1)) return true;
-    return false;
-  },
-  
-  /** @private */
-  _triggerLegacyActionHandler: function( evt )
-  {
-    if (!this._hasLegacyActionHandler()) return false;
-  
-    var action = this.get('action');
-    if (SC.typeOf(action) === SC.T_FUNCTION) this.action(evt);
-    if (SC.typeOf(action) === SC.T_STRING) {
-      eval("this.action = function(e) { return "+ action +"(this, e); };");
-      this.action(evt);
-    }
-  },
   
   /** @private */
   didBecomeKeyResponderFrom: function(keyView) {
