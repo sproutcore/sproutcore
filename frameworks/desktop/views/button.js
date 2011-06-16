@@ -832,14 +832,14 @@ SC.ButtonView = SC.View.extend(SC.Control,
   _runAction: function(evt) {
     var action = this.get('action'),
         target = this.get('target') || null,
-        rootResponder = this.getPath('pane.rootResponder');
+        rootResponder;
         
     if (action) {
-      //Removed support for actions with that included paths
       if (action && (SC.typeOf(action) === SC.T_FUNCTION)) {
         this.action(evt);
         return;
       } else {
+        rootResponder = this.getPath('pane.rootResponder');
         if (rootResponder) {
           // newer action method + optional target syntax...
           rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
