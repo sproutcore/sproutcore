@@ -993,38 +993,23 @@ SC.RenderContext.fn.html = SC.RenderContext.fn.push;
 */
 SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
 
-/**
-  Helper method escapes the passed string to ensure HTML is displayed as
-  plain text.  You should make sure you pass all user-entered data through
-  this method to avoid errors.  You can also do this with the text() helper
-  method on a render context.
-*/
+(function() {
+  var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function(match) {
+    switch(match) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+    }
+  };
 
-
-if (!SC.browser.isSafari || parseInt(SC.browser.version, 10) < 526) {
-  SC.RenderContext._safari3 = YES;
-}
-
-SC.RenderContext.escapeHTML = function(text) {
-  var elem, node, ret ;
-
-  if (SC.none(text)) { return text; } // ignore empty
-
-  elem = this.escapeHTMLElement;
-  if (!elem) { elem = this.escapeHTMLElement = document.createElement('div'); }
-
-  node = this.escapeTextNode;
-  if (!node) {
-    node = this.escapeTextNode = document.createTextNode('');
-    elem.appendChild(node);
-  }
-
-  node.data = text ;
-  ret = elem.innerHTML ;
-
-  // Safari 3 does not escape the '>' character
-  if (SC.RenderContext._safari3) { ret = ret.replace(/>/g, '&gt;'); }
-
-  node = elem = null;
-  return ret ;
-};
+  /**
+    Helper method escapes the passed string to ensure HTML is displayed as
+    plain text.  You should make sure you pass all user-entered data through
+    this method to avoid errors.  You can also do this with the text() helper
+    method on a render context.
+  */
+  SC.RenderContext.escapeHTML = function(text) {
+    if (!text) return '';
+    return text.replace(_escapeHTMLRegex, _escapeHTMLMethod);
+  }; 
+})();
