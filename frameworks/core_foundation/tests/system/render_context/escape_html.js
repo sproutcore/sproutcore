@@ -12,3 +12,30 @@ test("Escaping HTML", function() {
   
   equals(output, '&lt;p&gt;HTML!&lt;/p&gt;&lt;script&gt;alert(\'hi\');&lt;/script&gt; &amp; Hello, World!', "Properly escapes HTML");
 });
+
+test("Tests stolen from Prototype.js", function() {
+  var largeTextEscaped = '&lt;span&gt;test&lt;/span&gt;', 
+      largeTextUnescaped = '<span>test</span>';
+  for (var i = 0; i < 2048; i++) { 
+    largeTextEscaped += ' ABC';
+    largeTextUnescaped += ' ABC';
+  }
+  
+  
+  var tests = [
+    'foo bar', 'foo bar',
+    'foo <span>bar</span>', 'foo &lt;span&gt;bar&lt;/span&gt;',
+    'foo ß bar', 'foo ß bar',
+    'ウィメンズ2007\nクルーズコレクション', 'ウィメンズ2007\nクルーズコレクション',
+    'a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g',
+      'a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
+    '1\n2', '1\n2',
+    
+    largeTextUnescaped, largeTextEscaped
+  ];
+  
+  for (var idx = 0; idx < tests.length; idx++) {
+    // some of these strings are REALLY LONG so we don't want to write them out
+    ok(SC.RenderContext.escapeHTML(tests[idx++]) === tests[idx]);
+  }
+});
