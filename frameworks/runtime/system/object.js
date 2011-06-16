@@ -563,7 +563,7 @@ SC.Object.prototype = {
   },
 
   /**
-    Set to NO once this object has been destroyed.
+    Set to YES once this object has been destroyed.
 
     @type Boolean
   */
