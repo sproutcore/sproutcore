@@ -5,6 +5,7 @@
 
 sc_require('views/popup_button');
 sc_require('mixins/select_view_menu');
+sc_require('ext/menu');
 
 /**
  * @class
@@ -112,9 +113,9 @@ SC.SelectView = SC.PopupButtonView.extend({
    
    @property
    @type {SC.MenuPane}
-   @default SC.MenuPane.extend(SC.SelectViewMenu)
+   @default SC.AutoResizingMenuPane.extend(SC.SelectViewMenu)
   */
-  menu: SC.MenuPane.extend(SC.SelectViewMenu),
+  menu: SC.AutoResizingMenuPane.extend(SC.SelectViewMenu),
 
   /**
     The currently selected item. If no item is selected, `null`.

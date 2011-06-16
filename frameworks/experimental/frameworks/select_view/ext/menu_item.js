@@ -7,13 +7,11 @@
 
 /**
   @class
-  Enhances SC.MenuItemView to support auto resize.
+  Extends SC.MenuItemView to support auto resize.
 */
-SC.MenuItemView = SC.MenuItemView; // for docs
 
-SC.MenuItemView.reopen(SC.AutoResize);
-SC.MenuItemView.reopen(
-/** @scope SC.MenuItemView.prototype */{
+SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
+/** @scope SC.AutoResizingMenuItemView.prototype */ {
 
   //
   // For automatic resizing, if enabled (to be enabled by parent menu)
@@ -83,7 +81,7 @@ SC.MenuItemView.reopen(
   didUpdateLayer: function() {
     this.notifyPropertyChange('autoResizeLayer');
     this.scheduleMeasurement();
-  }.enhance()
+  }
 
 }) ;
 
