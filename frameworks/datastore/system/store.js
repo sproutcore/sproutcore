@@ -1118,7 +1118,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // add dataHash and setup initial status -- also save recordType
     this.writeDataHash(storeKey, (dataHash ? dataHash : {}), K.READY_NEW);
-    
+
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
     this.dataHashDidChange(storeKey);
     
@@ -1136,6 +1136,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // Finally return materialized record, after we propagate the status to
     // any aggregrate records.
     ret = this.materializeRecord(storeKey);
+
+    // initialize with default values
+    ret.normalize();
+
     if (ret) ret.propagateToAggregates();
     return ret;
   },  
