@@ -306,6 +306,9 @@ test('parse', function() {
   timeShouldBeEqualToHash(
     SC.DateTime.parse('71-01-01 00:00:00', '%y-%m-%d %H:%M:%S'),
     { year: 1971, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 });
+  timeShouldBeEqualToHash(
+    SC.DateTime.parse('71-01-01 12:00 AM', '%y-%m-%d %i:%M %p'),
+    { year: 1971, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 });
 });
 
 test('parse with time zones',function() {
