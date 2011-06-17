@@ -346,6 +346,16 @@ SC.PickerPane = SC.PalettePane.extend(
     @default null
   */
   removeAction: null,
+  
+  
+  /**
+    Disable repositioning as the window or size changes. It stays in the original
+    popup position.
+    
+    @type Boolean
+    @default NO
+  */
+  disablePositioning: NO,
 
   /**
     Displays a new picker pane.
@@ -844,7 +854,7 @@ SC.PickerPane = SC.PalettePane.extend(
     Invoked by the root responder. Re-position picker whenever the window resizes.
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    this.positionPane();
+    if (!this.disablePositioning) this.positionPane();
   },
   
   remove: function(){
