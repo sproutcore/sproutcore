@@ -86,7 +86,7 @@
 <% # The theme CSS class is added automatically based on your chosen theme.
    # If you need to specify a custom theme name, use CONFIG.theme_name 
 -%>
-  <body class="<%= [theme_name(:default => 'sc-theme'), 'focus'].compact.join(' ') %>">  
+  <body class="<%= [theme_name(:default => 'sc-theme'), 'sc-focus'].compact.join(' ') %>">  
     <script>
     SC.benchmarkPreloadEvents['bodyStart'] = new Date().getTime();
     </script>
