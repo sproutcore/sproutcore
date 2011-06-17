@@ -1398,9 +1398,8 @@ SC.Logger = SC.Object.create(
       // If we formatted, just include the message.  Otherwise, include all
       // the original arguments.
       if (!originalArguments) {
-        output = "";
-        if (timestampStr) output = timestampStr;
-        if (shouldIndent) output =+ this._indentation(indentation);
+        output = timestampStr ? timestampStr : "";
+        if (shouldIndent) output += this._indentation(indentation);
         output += message;
         reporter[type](output);
       }
