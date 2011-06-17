@@ -488,12 +488,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   _scheduleSync: function() {
-    if (SC.RunLoop.isRunLoopInProgress() || this._syncScheduled) { return; }
-
-    this._syncScheduled = YES;
-    var self = this;
-
-    setTimeout(function() { SC.run(); self._syncScheduled = NO; }, 1);
+    if (SC.RunLoop.isRunLoopInProgress() || SC.Binding._syncScheduled) { return; }
+    SC.Binding._syncScheduled = YES;
+    setTimeout(function() { SC.run(); SC.Binding._syncScheduled = NO; }, 1);
   },
 
   /** @private
