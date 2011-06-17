@@ -380,8 +380,8 @@ SC.IndexSet = SC.mixin({},
           .set('max', start.max)
           .set('length', start.length)
           .set('source', start.source)
-          .enumerableContentDidChange()
-        .endPropertyChanges();
+          .enumerableContentDidChange();
+        this.endPropertyChanges();
         return this ;
 
       } else {
