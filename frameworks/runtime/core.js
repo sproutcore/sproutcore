@@ -99,6 +99,9 @@ SC._baseMixin = function (override) {
       if (target===copy) continue ; // prevent never-ending loop
       if (copy !== undefined && ( override || (target[key] === undefined) )) target[key] = copy ;
     }
+    // Manually copy toString() because some JS engines do not enumerate it
+    // (such as IE8)
+    if (options.hasOwnProperty('toString')) target.toString = options.toString;
   }
 
   return target;
