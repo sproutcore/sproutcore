@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /*jslint evil:true */
-
+sc_require('tasks/task');
 SC.LOG_MODULE_LOADING = YES;
 
 /**
@@ -645,17 +645,17 @@ SC.ready(function() {
     module = moduleInfo[moduleName];
 
     if (module.isPrefetched) {
-      var prefetchedModuleName = moduleName;
-
       // Create a task that will load the module, and then register it with
       // the global background task queue.
-      task = SC.Task.create({
-        run: function() {
-          SC.Module.prefetchModule(prefetchedModuleName);
-        }
-      });
-
+      task = SC.Module.PrefetchModuleTask.create({ prefetchedModuleName: moduleName });
       SC.backgroundTaskQueue.push(task);
     }
+  }
+});
+
+SC.Module.PrefetchModuleTask = SC.Task.extend({
+  prefetchedModuleName: null,
+  run: function() {
+    SC.Module.prefetchModule(this.prefetchedModuleName);
   }
 });
