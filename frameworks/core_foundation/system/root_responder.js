@@ -345,7 +345,6 @@ SC.RootResponder = SC.Object.extend(
     (removing sc-blur).  Also notify panes.
   */
   focus: function(evt) {
-    console.log("focus "+appname+ " "+evt.target.toString());
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
@@ -391,7 +390,6 @@ SC.RootResponder = SC.Object.extend(
     sc-blur).  Also notify panes.
   */
   blur: function(evt) {
-    console.log("blur "+evt.target.toString());
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
 
