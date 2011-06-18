@@ -62,7 +62,8 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
   }.property().idempotent(),
 
   didCreateLayer: function() {
-    var input = this.$input();
+    var input = this.$input(),
+        self = this;
 
     input.val(this._value);
 
