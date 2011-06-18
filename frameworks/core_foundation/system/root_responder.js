@@ -224,8 +224,9 @@ SC.RootResponder = SC.Object.extend(
       previousKeyPanes = this.get('previousKeyPanes') ;
 
       newKeyPane = null ;
+      var candidate;
       while (previousKeyPanes.length > 0) {
-        var candidate = previousKeyPanes.pop();
+        candidate = previousKeyPanes.pop();
         if (candidate.get('isPaneAttached')  &&  candidate.get('acceptsKeyPane')) {
           newKeyPane = candidate ;
           break ;
@@ -343,8 +344,8 @@ SC.RootResponder = SC.Object.extend(
     Handle window focus.  Change hasFocus and add sc-focus CSS class
     (removing sc-blur).  Also notify panes.
   */
-  focus: function() {
-    
+  focus: function(evt) {
+    console.log("focus "+appname+ " "+evt.target.toString());
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
@@ -354,7 +355,7 @@ SC.RootResponder = SC.Object.extend(
         var mainPane = this.get('mainPane');
 
         if (mainPane) {
-          nextValidKeyView = mainPane.get('nextValidKeyView');
+          var nextValidKeyView = mainPane.get('nextValidKeyView');
           if (nextValidKeyView) mainPane.makeFirstResponder(nextValidKeyView);
         }
       }
@@ -371,8 +372,8 @@ SC.RootResponder = SC.Object.extend(
     reliable as per every focus event you receive you inmediately get a blur
     event (Only on IE of course ;)
   */
-  focusin: function() {
-    this.focus();
+  focusin: function(evt) {
+    this.focus(evt);
   },
 
   /**
@@ -380,8 +381,8 @@ SC.RootResponder = SC.Object.extend(
     reliable as per every focus event you receive you inmediately get a blur
     event (Only on IE of course ;)
   */
-  focusout: function() {
-    this.blur();
+  focusout: function(evt) {
+    this.blur(evt);
   },
 
 
@@ -389,7 +390,8 @@ SC.RootResponder = SC.Object.extend(
     Handle window focus.  Change hasFocus and add sc-focus CSS class (removing
     sc-blur).  Also notify panes.
   */
-  blur: function() {
+  blur: function(evt) {
+    console.log("blur "+evt.target.toString());
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
 
@@ -634,7 +636,7 @@ SC.RootResponder = SC.Object.extend(
     this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
-    if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
+    if(SC.browser.msie) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
 
     // handle animation events
@@ -701,7 +703,8 @@ SC.RootResponder = SC.Object.extend(
 
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
-    this.focus();
+    // window.focus()
+    //debugger;
 
     if (SC.browser.mobileSafari) {
 
