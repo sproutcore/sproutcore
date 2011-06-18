@@ -143,6 +143,8 @@ SC.State = SC.Object.extend({
     this._registeredStringEventHandlers = {};
     this._registeredRegExpEventHandlers = [];
     this._registeredStateObserveHandlers = {};
+    this._registeredSubstatePaths = {};
+    this._registeredSubstates = []; 
 
     // Setting up observes this way is faster then using .observes,
     // which adds a noticable increase in initialization time.
@@ -191,6 +193,8 @@ SC.State = SC.Object.extend({
     this._registeredStringEventHandlers = null;
     this._registeredRegExpEventHandlers = null;
     this._registeredStateObserveHandlers = null;
+    this._registeredSubstatePaths = null;
+    this._registeredSubstates = null;
 
     sc_super();
   },
@@ -396,13 +400,6 @@ SC.State = SC.Object.extend({
     var path = state.pathRelativeTo(this);
     if (SC.none(path)) return; 
     
-    // Create special private member variables to help
-    // keep track of substates and access them.
-    if (SC.none(this._registeredSubstatePaths)) {
-      this._registeredSubstatePaths = {};
-      this._registeredSubstates = [];
-    }
-    
     this._registeredSubstates.push(state);
     
     // Keep track of states based on their relative path
@@ -447,17 +444,37 @@ SC.State = SC.Object.extend({
     If the value is a state object, then the value will be returned if it is indeed 
     a substate of this state, otherwise null is returned. 
     
-    If the given value is a string, then the string is assumed to be a path to a substate. 
-    The value is then parsed to find the closes match. If there is no match then null 
-    is returned. If there is more than one match then null is return and an error 
-    is generated indicating ambiguity of the given value. 
+    If the given value is a string, then the string is assumed to be a path expression 
+    to a substate. The value is then parsed to find the closes match. For path expression
+    syntax, refer to the {@link SC.StatePathMatcher} class.
     
-    Note that when the value is a string, it is assumed to be a path relative to this 
-    state; not the root state of the statechart.
+    If there is no match then null is returned. If there is more than one match then null 
+    is return and an error is generated indicating ambiguity of the given value. 
+    
+    An optional callback can be provided to handle the scenario when either no 
+    substate is found or there is more than one match. The callback is then given
+    the opportunity to further handle the outcome and return a result which the
+    getSubstate method will then return. The callback should have the following
+    signature:
+    
+      function(state, value, paths) 
+      
+    - state: The state getState was invoked on
+    - value: The value supplied to getState 
+    - paths: An array of substate paths that matched the given value
+    
+    If there were no matches then `paths` is not provided to the callback. 
+    
+    You can also optionally provide a target that the callback is invoked on. If no
+    target is provided then this state is used as the target. 
+    
+    @param value {State|String} used to identify a substate of this state
+    @param [callback] {Function} the callback
+    @param [target] {Object} the target
   */
-  getSubstate: function(value) {
+  getSubstate: function(value, callback, target) {
     if (!value) return null;
-    
+
     var valueType = SC.typeOf(value);
     
     // If the value is an object then just check if the value is 
@@ -477,7 +494,7 @@ SC.State = SC.Object.extend({
     if (matcher.get('tokens').length === 0) return null;
 
     var paths = this._registeredSubstatePaths[matcher.get('lastPart')];
-    if (!paths) return null;
+    if (!paths) return this._notifySubstateNotFound(callback, target, value);
     
     for (key in paths) {
       if (matcher.match(key)) {
@@ -488,12 +505,56 @@ SC.State = SC.Object.extend({
     if (matches.length === 1) return matches[0];
       
     if (matches.length > 1) {
-      var msg = "Can not find substate matching '%@' in state %@. Ambiguous with the following: %@";
       var keys = [];
       for (key in paths) { keys.push(key); }
+      
+      if (callback) return this._notifySubstateNotFound(callback, target, value, keys);
+      
+      var msg = "Can not find substate matching '%@' in state %@. Ambiguous with the following: %@";
       this.stateLogError(msg.fmt(value, this.get('fullPath'), keys.join(', ')));
-      return null;
     } 
+    
+    return this._notifySubstateNotFound(callback, target, value);
+  },
+  
+  /** @private */
+  _notifySubstateNotFound: function(callback, target, value, keys) {
+    return callback ? callback.call(target || this, this, value, keys) : null;
+  },
+  
+  /**
+    Will attempt to get a state relative to this state. 
+    
+    A state is returned based on the following:
+    
+    1. First check this state's substates for a match; and
+    2. If no matching substate then attempt to get the state from
+       this state's parent state.
+       
+    Therefore states are recursively traversed up to the root state
+    to identify a match, and if found is ultimately returned, otherwise
+    null is returned. In the case that the value supplied is ambiguous
+    an error message is returned.
+    
+    The value provided can either be a state object or a state path expression.
+    For path expression syntax, refer to the {@link SC.StatePathMatcher} class.
+  */
+  getState: function(value) {
+    if (value === this.get('name')) return this;
+    if (SC.kindOf(value, SC.State)) return value;
+    return this.getSubstate(value, this._handleSubstateNotFound);
+  },
+  
+  /** @private */
+  _handleSubstateNotFound: function(state, value, keys) {
+    var parentState = this.get('parentState');
+    
+    if (parentState) return parentState.getState(value);
+    
+    if (keys) {
+      var msg = "Can not find state matching '%@'. Ambiguous with the following: %@";
+      this.stateLogError(msg.fmt(value, keys.join(', ')));
+    }
     
     return null;
   },
@@ -502,85 +563,65 @@ SC.State = SC.Object.extend({
     Used to go to a state in the statechart either directly from this state if it is a current state,
     or from the first relative current state from this state.
     
-    Note that if the value given is a string, it will be assumed to be a path to a state. The path
-    will be relative to the statechart's root state; not relative to this state.
+    If the value given is a string then it is considered a state path expression. The path is then
+    used to find a state relative to this state based on rules of the {@link #getState} method.
     
-    @param state {SC.State|String} the state to go to
-    @param context {Hash} Optional. context object that will be supplied to all states that are
+    @param value {SC.State|String} the state to go to
+    @param [context] {Hash} context object that will be supplied to all states that are
            exited and entered during the state transition process
   */
-  gotoState: function(state, context) {
-    state = this._processGotoStateArg(state);
+  gotoState: function(value, context) {
+    var state = this.getState(value);
+    
+    if (!state) {
+      var msg = "can not go to state %@ from state %@. Invalid value.";
+      this.stateLogError(msg.fmt(value, this));
+      return;
+    } 
+
     var from = this.findFirstRelativeCurrentState(state);
-    this.get('statechart').gotoState(state, from, false, context);
+    this.get('statechart').gotoState(state, from, false, context); 
   },
   
   /**
     Used to go to a given state's history state in the statechart either directly from this state if it
     is a current state or from one of this state's current substates. 
     
-    Note that if the value given is a string, it will be assumed to be a path to a state. The path
-    will be relative to the statechart's root state; not relative to this state.
+    If the value given is a string then it is considered a state path expression. The path is then
+    used to find a state relative to this state based on rules of the {@link #getState} method.
     
     Method can be called in the following ways:
     
         // With one argument
-        gotoHistoryState(<state>)
+        gotoHistoryState(<value>)
     
         // With two arguments
-        gotoHistoryState(<state>, <boolean | hash>)
+        gotoHistoryState(<value>, <boolean | hash>)
     
         // With three arguments
-        gotoHistoryState(<state>, <boolean>, <hash>)
+        gotoHistoryState(<value>, <boolean>, <hash>)
     
-    Where <state> is either a string or a SC.State object and <hash> is a regular JS hash object.
+    Where <value> is either a string or a SC.State object and <hash> is a regular JS hash object.
     
-    @param state {SC.State|String} the state whose history state to go to
-    @param recusive {Boolean} Optional. Indicates whether to follow history states recusively starting
+    @param value {SC.State|String} the state whose history state to go to
+    @param [recusive] {Boolean} indicates whether to follow history states recusively starting
            from the given state
-    @param context {Hash} Optional. context object that will be supplied to all states that are exited
+    @param [context] {Hash} context object that will be supplied to all states that are exited
            entered during the state transition process
   */
-  gotoHistoryState: function(state, recursive, context) {
-    state = this._processGotoStateArg(state);
-    var from = this.findFirstRelativeCurrentState();
+  gotoHistoryState: function(value, recursive, context) {
+    var state = this.getState(value);
+    
+    if (!state) {
+      var msg = "can not go to history state %@ from state %@. Invalid value.";
+      this.stateLogError(msg.fmt(value, this));
+      return;
+    }
+    
+    var from = this.findFirstRelativeCurrentState(state);
     this.get('statechart').gotoHistoryState(state, from, recursive, context);
   },
-  
-  /** @private
-  
-    Processes the state argument that is supplied to a goto state method. 
-    
-    The following will be returned based on the state value provided:
-    
-      - If the value is a state object the object will be returned
-      - If the value is a string then:
-          - If it is prefixed with "parentState"
-  */
-  _processGotoStateArg: function(state) {
-    if (SC.kindOf(state, SC.State)) return value;
-    
-    if (SC.typeOf(state) !== SC.T_STRING) {
-      this.stateLogError("can not process go to state argument: %@".fmt(state));
-      return null;
-    }
-    
-    if (state.indexOf('parentState') < 0) return state;
-    
-    var parentState = this.get('parentState'),
-        dotIndex = state.indexOf('.'),
-        subpath = dotIndex > 0 ? state.slice(dotIndex + 1, state.length) : null,
-        msg;
 
-    if (!parentState) {
-      msg = "use of 'parentState' is invalid. state %@ has no parentState";
-      this.stateLogError(msg.fmt(this.get('fullPath')));
-      return null;
-    }
-    
-    return subpath ? parentState.getSubstate(subpath) : parentState;
-  },
-  
   /**
     Resumes an active goto state transition process that has been suspended.
   */

@@ -282,7 +282,7 @@ test("from state g, go to state m calling state g\'s gotoState", function() {
 
 test("from state g, go to state h using 'parentState' syntax", function() {
   monitor.reset();
-  stateG.gotoState('parentState.h');
+  stateG.gotoState('h');
   
   equals(monitor.matchSequence().begin().exited('g').entered('h').end(), 
     true, 'sequence should be exited[g], entered[h]');

@@ -259,7 +259,8 @@ test("get umambiguous substates from foo state using state names", function() {
 
 test("get z substates from foo state", function() {
   var state,
-      foo = root.getSubstate('foo');
+      foo = root.getSubstate('foo'),
+      callbackState, callbackKeys;
   
   console.log('expecting a console error message...');
   state = foo.getSubstate('z');
@@ -304,4 +305,36 @@ test("get a1 substates from root state", function() {
   
   state = root.getSubstate('x~a.a1');
   equals(state.get('fullPath'), 'x.a.a1', "should return state for 'x~a.a1'");
+});
+
+test("get non-existing substate 'abc' with using callback", function() {
+  var result, cbState, cbValue, cbKeys; 
+  
+  result = root.getSubstate('abc', function(state, value, keys) {
+    cbState = state;
+    cbValue = value;
+    cbKeys = keys;
+  });
+  
+  ok(!result, "should not return result for 'abc'");
+  equals(cbState, root, "callback state arg should be root state");
+  equals(cbValue, 'abc', "callback value arg should be 'abc'");
+  ok(!cbKeys, "callback keys arg should be none");
+});
+
+test("get ambiguous substate 'x' substate with using callback", function() {
+  var result, cbState, cbValue, cbKeys; 
+  
+  result = root.getSubstate('x', function(state, value, keys) {
+    cbState = state;
+    cbValue = value;
+    cbKeys = keys;
+  });
+  console.log(cbKeys);
+  ok(!result, "should not return result for 'x'");
+  equals(cbState, root, "callback state arg should be root state");
+  equals(cbValue, 'x', "callback value arg should be 'x'");
+  equals(cbKeys.length, 2, "callback keys arg should be array with length 2");
+  ok(cbKeys.indexOf('x') >= 0, "callback keys arg should contain value 'x'");
+  ok(cbKeys.indexOf('bar.x') >= 0, "callback keys arg should contain value 'bar.x'");
 });
