@@ -102,6 +102,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     }
 
     jquery.attr('aria-pressed', dataSource.get('isActive').toString());
+    jquery.attr('title', dataSource.get('toolTip'));
 
     jquery.setClass('icon', !!dataSource.get('icon') || NO);
     jquery.setClass('def', dataSource.get('isDefault') || NO);
