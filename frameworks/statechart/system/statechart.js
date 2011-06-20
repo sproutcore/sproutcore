@@ -746,7 +746,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = parentState.get('parentState');
     }
       
-    if (this.get('allowStatechartTracing')) this.statechartLogTrace("<-- exiting state: %@".fmt(state));
+    if (this.get('allowStatechartTracing')) {
+      this.statechartLogTrace("<-- exiting state: %@".fmt(state));
+    }
     
     state.set('currentSubstates', []);
     
@@ -934,7 +936,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._sendEventLocked = YES;
     
     if (trace) {
-      this.statechartLogTrace("BEGIN sendEvent: event<%@>".fmt(event));
+      this.statechartLogTrace("BEGIN sendEvent: '%@'".fmt(event));
     }
     
     len = currentStates.get('length');
@@ -958,7 +960,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     if (trace) {
       if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event));
-      this.statechartLogTrace("END sendEvent: event<%@>".fmt(event));
+      this.statechartLogTrace("END sendEvent: '%@'".fmt(event));
     }
     
     var result = this._flushPendingSentEvents();

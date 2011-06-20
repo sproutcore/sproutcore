@@ -812,25 +812,25 @@ SC.State = SC.Object.extend({
     // First check if the name of the event is the same as a registered event handler. If so,
     // then do not handle the event.
     if (this._registeredEventHandlers[event]) {
-      this.stateLogWarning("state %@ can not handle event %@ since it is a registered event handler".fmt(this, event));
+      this.stateLogWarning("state %@ can not handle event '%@' since it is a registered event handler".fmt(this, event));
       return NO;
     }    
     
     if (this._registeredStateObserveHandlers[event]) {
-      this.stateLogWarning("state %@ can not handle event %@ since it is a registered state observe handler".fmt(this, event));
+      this.stateLogWarning("state %@ can not handle event '%@' since it is a registered state observe handler".fmt(this, event));
       return NO;
     }
     
     // Now begin by trying a basic method on the state to respond to the event
     if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
-      if (trace) this.stateLogTrace("will handle event %@".fmt(event));
+      if (trace) this.stateLogTrace("will handle event '%@'".fmt(event));
       return (this[event](arg1, arg2) !== NO);
     }
     
     // Try an event handler that is associated with an event represented as a string
     var handler = this._registeredStringEventHandlers[event];
     if (handler) {
-      if (trace) this.stateLogTrace("%@ will handle event %@".fmt(handler.name, event));
+      if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
       return (handler.handler.call(this, event, arg1, arg2) !== NO);
     }
     
@@ -842,7 +842,7 @@ SC.State = SC.Object.extend({
     for (; i < len; i += 1) {
       handler = this._registeredRegExpEventHandlers[i];
       if (event.match(handler.regexp)) {
-        if (trace) this.stateLogTrace("%@ will handle event %@".fmt(handler.name, event));
+        if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
         return (handler.handler.call(this, event, arg1, arg2) !== NO);
       }
     }
@@ -850,7 +850,7 @@ SC.State = SC.Object.extend({
     // Final attempt. If the state has an unknownEvent function then invoke it to 
     // handle the event
     if (SC.typeOf(this['unknownEvent']) === SC.T_FUNCTION) {
-      if (trace) this.stateLogTrace("unknownEvent will handle event %@".fmt(event));
+      if (trace) this.stateLogTrace("unknownEvent will handle event '%@'".fmt(event));
       return (this.unknownEvent(event, arg1, arg2) !== NO);
     }
     
@@ -1071,7 +1071,7 @@ SC.State = SC.Object.extend({
   }.property('name', 'parentState').cacheable(),
   
   toString: function() {
-    return "State(%@)".fmt(this.get('fullPath'));
+    return this.get('fullPath');
   },
   
   /** @private */
@@ -1083,7 +1083,7 @@ SC.State = SC.Object.extend({
   _currentSubstatesDidChange: function() {
     this.notifyPropertyChange('currentSubstates');
   }.observes('*currentSubstates.[]'),
-  
+
   /** @private */
   _statechartTraceDidChange: function() {
     this.notifyPropertyChange('trace');
