@@ -975,7 +975,8 @@ SC.DateTime.mixin(SC.Comparable,
     }
 
     if (!SC.none(opts.meridian) && !SC.none(opts.hour)) {
-      if ((opts.meridian === 1) || (opts.meridian === 0 && opts.hour === 12)) {
+      if ((opts.meridian === 1 && opts.hour !== 12)
+          || (opts.meridian === 0 && opts.hour === 12)) {
         opts.hour = (opts.hour + 12) % 24;
       }
       delete opts.meridian;
