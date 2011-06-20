@@ -566,9 +566,6 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
       }
     }
     
-    // ok, now if we are in last 10px, go to next item.
-    if ((index<len) && (loc.y >= max-10)) index++;
-    
     // finally, let's decide if we want to actually insert before/after.  Only
     // matters if we are using outlining.
     if (index>0) {
