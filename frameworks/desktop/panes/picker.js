@@ -355,7 +355,7 @@ SC.PickerPane = SC.PalettePane.extend(
     @type Boolean
     @default NO
   */
-  disablePositioning: NO,
+  repositionOnWindowResize: YES,
 
   /**
     Displays a new picker pane.
@@ -854,7 +854,7 @@ SC.PickerPane = SC.PalettePane.extend(
     Invoked by the root responder. Re-position picker whenever the window resizes.
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    if (!this.disablePositioning) this.positionPane();
+    if (this.repositionOnWindowResize) this.positionPane();
   },
   
   remove: function(){
