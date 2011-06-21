@@ -1,7 +1,6 @@
 /* SC.LabelView */
 
 .sc-label-view {
-  font-weight: normal;
   text-align: left;
   
   &.icon {
