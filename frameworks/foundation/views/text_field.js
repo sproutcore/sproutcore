@@ -95,16 +95,31 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
 
   /*
-  * Localizes the hint if necessary.
+    Localizes the hint if necessary.
+  
+    @property
+    @type String
   */
   formattedHint: function() {
     var hint = this.get('hint');
 
     return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
+  
+  /**
+    Whether to show the hint while the field has focus. If YES, it will disappear
+    as soon as any character is in the field.
+    
+    @property
+    @type Boolean
+  */
+  hintOnFocus: NO,
 
   /*
-  * Whether the hint should be localized or not.
+    Whether the hint should be localized or not.
+    
+    @property
+    @type Boolean
   */
   localize: YES,
 
@@ -547,11 +562,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
       autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
     }
+    // if hint is on and we don't want it to show on focus, create one
+    if(hint && !hintOnFocus) {
+      hintString = ' placeholder="' + hint + '"';
+    }
+    
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
       disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
       name = this.get('layerId');
-      
+
       if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
 
       // Render the padding element, with any necessary positioning
@@ -564,12 +584,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         adjustmentStyle += '"' ;
       }
       context.push('<span class="padding" '+adjustmentStyle+'>');
+      
+      if(hintOnFocus) {
+        context.push('<span class="hint">',hint,'</span>');
+      }
                   
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
       if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
-      } 
+      }
       
       //for gecko pre 1.9 vertical aligment is completely broken so we need
       //different styling.
@@ -581,8 +605,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
-                      '" '+ disabled+ ' placeholder="'+ hint + '"'+
-                      spellCheckString + autocorrectString +
+                      '" '+ disabled+ hintString + spellCheckString + autocorrectString +
                       autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
                       value+ '</textarea></span>') ;
       }
@@ -595,7 +618,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         
         context.push('<input class="'+fieldClassNames+'" type="'+ type+
                       '" name="'+ name + '" '+ disabled+ ' value="'+ value+
-                      '" placeholder="'+hint+'"'+ spellCheckString+ 
+                      hintString+ spellCheckString+ 
                       ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
                       autocapitalizeString+'/></span>') ;
       }
@@ -632,7 +655,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (!this.get('autoCorrect')) input.attr('autoCorrect', 'off');
         else input.attr('autoCorrect', 'true');
       }      
-      if (SC.platform.input.placeholder) input.attr('placeholder', hint);
+
+      if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
 
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
@@ -849,6 +873,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         this.fieldValueDidChange(NO);        
       }, this);
     }
+  },
+  
+  /** 
+    Make sure to hide hint if hintOnFocus is on and a character is typed into 
+    the field.
+  */
+  fieldValueDidChange: function() {
+    // if there is a value in the field, hide the hint
+    var hintOnFocus = this.get('hintOnFocus');
+    
+    if(hintOnFocus && this.getFieldValue()) {
+      this.$('.hint').hide();
+    }
+    else if(hintOnFocus) {
+      this.$('.hint').show();
+    }
+    
+    return sc_super();
   },
 
   /** @private
