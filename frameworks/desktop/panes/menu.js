@@ -274,8 +274,13 @@ SC.MenuPane = SC.PickerPane.extend(
   popup: function(anchorViewOrElement, preferMatrix) {
     var anchor;
     this.beginPropertyChanges();
-    if (anchorViewOrElement) {
-      anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
+    if(anchorViewOrElement){
+      if (anchorViewOrElement.isView) {
+        anchor = anchorViewOrElement.get('layer');
+        this._setupScrollObservers(anchorViewOrElement);
+      } else {
+        anchor = anchorViewOrElement;
+      }
     }
     this.set('anchorElement',anchor) ;
     this.set('anchor',anchorViewOrElement);

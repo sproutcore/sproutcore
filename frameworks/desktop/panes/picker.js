@@ -356,7 +356,7 @@ SC.PickerPane = SC.PalettePane.extend(
     @default NO
   */
   repositionOnWindowResize: YES,
-
+  
   /**
     Displays a new picker pane.
 
@@ -369,7 +369,12 @@ SC.PickerPane = SC.PalettePane.extend(
   popup: function(anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
     var anchor;
     if(anchorViewOrElement){
-      anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
+      if (anchorViewOrElement.isView) {
+        anchor = anchorViewOrElement.get('layer');
+        this._setupScrollObservers(anchorViewOrElement);
+      } else {
+        anchor = anchorViewOrElement;
+      }
     }
     this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
@@ -859,6 +864,7 @@ SC.PickerPane = SC.PalettePane.extend(
   
   remove: function(){
     if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._showOverflow();
+    this._removeScrollObservers();
     return sc_super();
   },
   
@@ -890,6 +896,53 @@ SC.PickerPane = SC.PalettePane.extend(
      // console.log(this.toString()+" "+SC.PICKERS_OPEN);
     }
     if(SC.PICKERS_OPEN === 0) body.css('overflow', 'visible');
+  },
+  
+  /** @private
+    Detect if view is inside a scroll view. Do this by traversing parent view
+    hierarchy until you hit a scroll view or main pane.
+  */
+  _getScrollViewOfView: function(view) {
+    var curLevel = view;
+    while (YES) {
+      if (curLevel.isScrollable) {
+        return curLevel;
+      }
+      if (curLevel.kindOf(SC.MainPane)) {
+        return null;
+      }
+      curLevel = curLevel.get('parentView');
+    }
+  },
+
+  /** @private
+    If anchor view is in a scroll view, setup observers on scroll offsets.
+  */
+  _setupScrollObservers: function(anchorView) {
+    var scrollView = this._getScrollViewOfView(anchorView);
+    if (scrollView) {
+      scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+      scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+      this._scrollView = scrollView;
+    }
+  },
+
+  /** @private
+    Teardown observers setup in _setupScrollObservers.
+  */
+  _removeScrollObservers: function() {
+    var scrollView = this._scrollView;
+    if (scrollView) {
+      scrollView.removeObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+      scrollView.removeObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+    }
+  },
+
+  /** @private
+    Reposition pane whenever scroll offsets change.
+  */
+  _scrollOffsetDidChange: function() {
+    this.positionPane();
   }
 });
 
