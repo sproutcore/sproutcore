@@ -803,7 +803,7 @@ SC.PickerPane = SC.PalettePane.extend(
       // picker default re-position rule :
       // perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
       // fallback to perfect top (2)
-      this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,0,1,2,3] : [0,1,2,3,2]) ;
+      this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,2,1,0,3] : [0,1,2,3,2]) ;
     }
   },
   
