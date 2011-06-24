@@ -402,6 +402,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   calculate: function() {
     var layout = this.get('layout'), pdim = null,
+        staticLayout = this.get('staticLayout'),
         translateTop = null,
         translateLeft = null,
         turbo = this.get('turbo'),
@@ -413,6 +414,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     this._handleMistakes(layout);
 
+    // If the developer sets useStaticLayout and doesn't provide a unique `layout` property, we
+    // should not insert the styles "left: 0px; right: 0px; top: 0px; bottom: 0px" as they could
+    // conflict with the developer's intention.  However, if they do provide a unique `layout`,
+    // use it.
+    if (staticLayout && layout === SC.View.prototype.layout) return {};
 
     // X DIRECTION
 
