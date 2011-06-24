@@ -473,21 +473,21 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
       if (pendingAnimations) {
         if (!activeAnimations) activeAnimations = {};
-        
+
         for (key in pendingAnimations) {
           if (!pendingAnimations.hasOwnProperty(key)) continue;
-          
+
           pendingAnimation = pendingAnimations[key];
           activeAnimation = activeAnimations[key];
           shouldCancel = NO;
-          
+
           if (newStyle[key] !== (currentStyle ? currentStyle[key] : null)) shouldCancel = YES;
-          
+
           // if we have a new animation (an animation property has changed), cancel current
           if (activeAnimation && (activeAnimation.duration !== pendingAnimation.duration || activeAnimation.timing !== pendingAnimation.timing)) {
             shouldCancel = YES;
           }
-          
+
           if (shouldCancel && activeAnimation) {
             if (callback = activeAnimation.callback) {
               if (transformsLength > 0) {
@@ -499,14 +499,14 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
                 this.runAnimationCallback(callback, null, key, YES);
               }
             }
-            
+
             this.removeAnimationFromLayout(key, YES);
           }
-          
+
           activeAnimations[key] = pendingAnimation;
         }
       }
-      
+
       this._activeAnimations = activeAnimations;
       this._pendingAnimations = null;
     }
