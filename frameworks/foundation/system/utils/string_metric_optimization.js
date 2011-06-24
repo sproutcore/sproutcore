@@ -180,7 +180,7 @@ SC.mixin( /** @scope SC */ {
   */
   cachedVersionOf: function() {
     var ret = function(func) {
-      var ret = function() {     var cache = motd.cacheSlotFor(arguments);
+      var ret = function() {     var cache = SC.cacheSlotFor(arguments);
                                  return cache.result || (cache.result = arguments.callee.func.apply(this,arguments));    };
       ret.func = func;
       return ret;
