@@ -7,7 +7,7 @@
 
 
 SC.BaseTheme.menuScrollerRenderDelegate = SC.RenderDelegate.create({
-  name: 'menu-scroller',
+  className: 'menu-scroller',
 
   render: function (dataSource, context) {
     this.addSizeClassName(dataSource, context);
