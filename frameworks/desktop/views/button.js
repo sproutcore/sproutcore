@@ -673,7 +673,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
     if (buttonBehavior === SC.HOLD_BEHAVIOR) {
       this._action(evt);
-    } else if (!this._isFocused) {
+    } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
       this.becomeFirstResponder();
     }
@@ -725,7 +725,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
     if (buttonBehavior === SC.HOLD_BEHAVIOR) {
       this._action(touch);
-    } else if (!this._isFocused) {
+    } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
       this.becomeFirstResponder();
     }
