@@ -629,6 +629,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           elem = input[0],
           val = this.get('value');
 
+      if(hintOnFocus) this.$('.hint')[0].innerHTML = hint;
+      else elem.placeholder = hint;
+
       if (!val || (val && val.length === 0)) {
         if (this._hintON && !this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
