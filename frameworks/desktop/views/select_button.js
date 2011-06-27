@@ -535,7 +535,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     var customViewClassName = this.get('customViewClassName'),
         customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth'),
-        className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+        className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button menu sc-scroll-view sc-menu-scroll-view sc-container-view sc-menu-item menu-item value sc-regular-size' ;
     className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
 
     dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
