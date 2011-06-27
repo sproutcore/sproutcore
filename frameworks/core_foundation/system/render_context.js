@@ -380,7 +380,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       if (id) attrs.id = id ;
       // old versions of safari (5.0)!!!! throw an error if we access 
       // attrs.class. meh... 
-      if (className) attrs.['class'] = className.join(' ');
+      if (className) attrs['class'] = className.join(' ');
 
       // add in styles.  note how we avoid memory allocs here to keep things
       // fast...
