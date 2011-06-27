@@ -132,14 +132,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       extensions.template = itemViewTemplate;
     }
 
-    if (this.get('tagName') === 'ul' || this.get('tagName') === 'ol') {
-      extensions.tagName = 'li';
-    } else if (this.get('tagName') === 'table' || this.get('tagName') === 'thead' || this.get('tagName') === 'tbody') {
-      extensions.tagName = 'tr';
-    }
+    extensions.tagName = this.get('itemTagName');
 
     return itemView.extend(extensions);
-  }.property('itemView').cacheable(),
+  }.property('itemView itemTagName').cacheable(),
 
   /**
     @private
@@ -306,6 +302,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       case 'tbody':
       case 'tfoot':
         return 'tr';
+      case 'select':
+        return 'option';
+      case 'dl':
+        return 'dt';
     }
   }.property('tagName'),
 
