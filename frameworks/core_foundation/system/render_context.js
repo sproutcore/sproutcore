@@ -378,7 +378,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (attrs || className || styles || id) {
       if (!attrs) attrs = this._DEFAULT_ATTRS ;
       if (id) attrs.id = id ;
-      if (className) attrs.class = className.join(' ');
+      // old versions of safari (5.0)!!!! throw an error if we access 
+      // attrs.class. meh... 
+      if (className) attrs.['class'] = className.join(' ');
 
       // add in styles.  note how we avoid memory allocs here to keep things
       // fast...
@@ -405,7 +407,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       // if we are using the DEFAULT_ATTRS temporary object, make sure we
       // reset.
       if (attrs === this._DEFAULT_ATTRS) {
-        delete attrs.style;  delete attrs.class; delete attrs.id;
+        delete attrs.style;  delete attrs['class']; delete attrs.id;
       }
 
     }
@@ -778,7 +780,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (comboStyles) {
 
       for (var idx=0, idxLen = comboStyles.length; idx < idxLen; idx++) {
-        tmp = comboStyles[idx]
+        tmp = comboStyles[idx];
         if (styles[tmp]) {
           delete styles[tmp];
           didChange = YES;
