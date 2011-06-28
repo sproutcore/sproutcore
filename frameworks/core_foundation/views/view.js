@@ -24,7 +24,7 @@ SC.CONTEXT_MENU_ENABLED = YES;
   Default property to disable or enable if the focus can jump to the address
   bar or not.
 */
-SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
+SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
 
 /**
   Tells the property (when fetched with themed()) to get its value from the renderer (if any).
