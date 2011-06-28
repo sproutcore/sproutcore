@@ -129,8 +129,8 @@ SC._detectBrowser = function(userAgent, language) {
     @name SC.browser.mobileSafari
     @type String
   */
-  browser.mobileSafari = /apple.*mobile.*safari/.test(userAgent) && browser.iOS ? webkitVersion : 0;
-  
+  browser.mobileSafari = /apple.*mobile/.test(userAgent) && browser.iOS ? webkitVersion : 0;
+
   /**
     @name SC.browser.isMobileSafari
     @type Boolean
@@ -174,11 +174,17 @@ SC._detectBrowser = function(userAgent, language) {
   browser.isiPodSafari = !!browser.iPodSafari;
 
   /**
+    @name SC.browser.isiOSHomeScreen
+    @type Boolean
+  */
+  browser.isiOSHomeScreen = browser.isMobileSafari && !/apple.*mobile.*safari/.test(userAgent);
+
+  /**
     @name SC.browser.safari
     @type String
   */
   browser.safari = browser.webkit && !browser.chrome && !browser.iOS && !browser.android ? webkitVersion : 0;
-  
+
   /**
     @name SC.browser.isSafari
     @type Boolean
