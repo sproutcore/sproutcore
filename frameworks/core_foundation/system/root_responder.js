@@ -1271,6 +1271,11 @@ SC.RootResponder = SC.Object.extend(
     @returns {Boolean}
   */
   touchstart: function(evt) {
+    // Starting iOS5 touch events are handled by textfields. 
+    // As a workaround just let the browser to use the default behavior.
+    if(this.ignoreTouchInTextField(evt)) return YES;
+    
+    
     var hidingTouchIntercept = NO;
 
     SC.run(function() {
@@ -1334,6 +1339,10 @@ SC.RootResponder = SC.Object.extend(
     used to keep track of when a specific type of touch event was last handled, to see if it needs to be re-handled
   */
   touchmove: function(evt) {
+    // Starting iOS5 touch events are handled by textfields. 
+    // As a workaround just let the browser to use the default behavior.
+    if(this.ignoreTouchInTextField(evt)) return YES;
+    
     SC.run(function() {
       // pretty much all we gotta do is update touches, and figure out which views need updating.
       var touches = evt.changedTouches, touch, touchEntry,
@@ -1428,6 +1437,10 @@ SC.RootResponder = SC.Object.extend(
   touchend: function(evt) {
     var hidesTouchIntercept = NO;
 
+    // Starting iOS5 touch events are handled by textfields. 
+    // As a workaround just let the browser to use the default behavior.
+    if(this.ignoreTouchInTextField(evt)) return YES;
+    
     SC.run(function() {
       var touches = evt.changedTouches, touch, touchEntry,
           idx, len = touches.length,
@@ -1488,6 +1501,18 @@ SC.RootResponder = SC.Object.extend(
   touchcancel: function(evt) {
     evt.isCancel = YES;
     this.touchend(evt);
+  },
+  
+  /** @private
+     Ignore Touch events on textfields, starting iOS 5 textfields get touch 
+     events. Textfields just need to get the default focus action.
+  */
+  ignoreTouchInTextField: function(evt) {
+    if(evt.target.tagName==="INPUT"){
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
   },
 
   // ..........................................................
