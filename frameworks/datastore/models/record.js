@@ -1439,7 +1439,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
   /** @private - enhance extend to notify SC.Query as well. */
   extend: function() {
     var ret = SC.Object.extend.apply(this, arguments);
-    SC.Query._scq_didDefineRecordType(ret);
+    if(SC.Query) SC.Query._scq_didDefineRecordType(ret);
     return ret ;
   }
 }) ;
