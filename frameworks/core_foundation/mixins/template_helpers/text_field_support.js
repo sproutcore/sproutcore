@@ -90,6 +90,16 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     this.tryToPerform('blur', event);
   },
 
+  touchStart: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  touchEnd: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
   /** @private
     Make sure our input value is synced with any bindings.
     In some cases, such as auto-filling, a value can get
