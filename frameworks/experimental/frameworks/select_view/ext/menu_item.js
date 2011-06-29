@@ -5,12 +5,14 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('ext/select_view_menu_item');
+
 /**
   @class
   Extends SC.MenuItemView to support auto resize.
 */
 
-SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
+SC.AutoResizingMenuItemView = SC.SelectViewMenuItemView.extend(SC.AutoResize,
 /** @scope SC.AutoResizingMenuItemView.prototype */ {
 
   //

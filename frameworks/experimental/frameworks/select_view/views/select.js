@@ -4,7 +4,7 @@
 // ==========================================================================
 
 sc_require('views/popup_button');
-sc_require('mixins/select_view_menu');
+sc_require('ext/select_view_menu');
 sc_require('ext/menu');
 
 /**
