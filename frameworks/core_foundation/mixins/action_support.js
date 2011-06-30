@@ -51,24 +51,18 @@ SC.ActionSupport =
      the action defaults to the `action` property.
 
      @param {String} [action] The action to fire.
-     @param {Object} [evt] An event object to pass along
 
      @returns {Boolean} true if successful
      @returns {Boolean} false otherwise
   */
-  fireAction: function(action, evt) {
+  fireAction: function(action) {
     var target = this.get('target') || null,
         rootResponder = this.getPath('pane.rootResponder');
 
-    if (action === undefined) {
-      action = this.get('action');
-    } else if (typeof action === "object" && evt === undefined) {
-      evt = action;
-      action = this.get('action');
-    }
+    if (action === undefined) { action = this.get('action'); }
 
     if (action && rootResponder) {
-      return rootResponder.sendAction(action, target, this, this.get('pane'), evt);
+      return rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
     }
 
     return false;

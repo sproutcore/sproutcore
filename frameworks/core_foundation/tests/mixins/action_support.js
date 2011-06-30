@@ -7,7 +7,7 @@
 /*global module test equals context ok same */
 
 (function() {
-  var target, pane, noneView, actionView, eventView, bothView,
+  var target, pane, noneView, actionView,
       paneActionSpy, paneSomeActionSpy,
       targetActionSpy, targetSomeActionSpy;
 
@@ -19,7 +19,7 @@
       });
 
       pane = SC.Pane.create({
-        childViews: ['noneView', 'actionView', 'eventView', 'bothView'],
+        childViews: ['noneView', 'actionView'],
 
         mainAction: function() {},
         someAction: function() {},
@@ -38,30 +38,12 @@
           mouseDown: function() {
             this.fireAction(this.get('otherAction'));
           }
-        }),
-
-        eventView: SC.View.design(SC.ActionSupport, {
-          action: 'mainAction',
-
-          mouseDown: function(evt) {
-            this.fireAction(evt);
-          }
-        }),
-
-        bothView: SC.View.design(SC.ActionSupport, {
-          differentAction: 'someAction',
-
-          mouseDown: function(evt) {
-            this.fireAction(this.get('differentAction'), evt);
-          }
         })
       });
       pane.append();
 
       noneView = pane.get('noneView');
       actionView = pane.get('actionView');
-      eventView = pane.get('eventView');
-      bothView = pane.get('bothView');
 
       paneActionSpy = CoreTest.spyOn(pane, 'mainAction');
       paneSomeActionSpy = CoreTest.spyOn(pane, 'someAction');
@@ -71,7 +53,7 @@
     },
     teardown: function() {
       pane.remove().destroy();
-      pane = noneView = actionView = eventView = bothView = null;
+      pane = noneView = actionView = null;
     }
   });
 
@@ -116,54 +98,6 @@
   test("action parameter - Invoking actions with target set calls on target", function() {
     actionView.set('target', target);
     actionView.mouseDown();
-
-    ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
-    ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
-    ok(!targetActionSpy.wasCalled, "target mainAction was not called by fireAction");
-    ok(targetSomeActionSpy.wasCalled, "target someAction was called by fireAction");
-  });
-
-
-  // ..........................................................
-  // Event Parameter
-  // 
-
-  test("event parameter - Invoking actions without setting target fires along responder chain", function() {
-    eventView.mouseDown({});
-
-    ok(paneActionSpy.wasCalled, "pane mainAction was called by fireAction");
-    ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
-    ok(!targetActionSpy.wasCalled, "target mainAction was not called by fireAction");
-    ok(!targetSomeActionSpy.wasCalled, "target someAction was not called by fireAction");
-  });
-
-  test("event parameter - Invoking actions with target set calls on target", function() {
-    eventView.set('target', target);
-    eventView.mouseDown();
-
-    ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
-    ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
-    ok(targetActionSpy.wasCalled, "target mainAction was called by fireAction");
-    ok(!targetSomeActionSpy.wasCalled, "target someAction was not called by fireAction");
-  });
-
-
-  // ..........................................................
-  // Both Parameters
-  // 
-
-  test("both parameters - Invoking actions without setting target fires along responder chain", function() {
-    bothView.mouseDown({});
-
-    ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
-    ok(paneSomeActionSpy.wasCalled, "pane someAction was called by fireAction");
-    ok(!targetActionSpy.wasCalled, "target mainAction was not called by fireAction");
-    ok(!targetSomeActionSpy.wasCalled, "target someAction was not called by fireAction");
-  });
-
-  test("both parameters - Invoking actions with target set calls on target", function() {
-    bothView.set('target', target);
-    bothView.mouseDown();
 
     ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
     ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
