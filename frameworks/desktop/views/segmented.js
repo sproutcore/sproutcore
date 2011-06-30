@@ -501,8 +501,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         childViews.objectAt(i).set('isVisible', YES);
       }
 
-      this.cachedWidths = renderDelegate.segmentWidths(this);
-      this.cachedOverflowWidth = renderDelegate.overflowSegmentWidth(this);
+      this.cachedWidths = this.segmentWidths();
+      this.cachedOverflowWidth = this.overflowSegmentWidth();
 
       this.adjustOverflow();
     }
@@ -568,6 +568,60 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.cachedMinimumWidth = curElementsWidth + this.cachedOverflowWidth;
   },
 
+  /**
+    Return the widths of the DOM elements of the segments.  This will be measured by the view to
+    determine which segments should be overflowed.
+
+    It ignores the last segment (the overflow segment).
+  */
+  segmentWidths: function() {
+    var cv = this.get('childViews'),
+        v,
+        widths = [];
+
+    for (var i = 0, length = cv.length; i < length - 1; i++) {
+      v = cv[i];
+      widths[i] = v.get('frame').width;
+    }
+
+    return widths;
+  },
+
+  overflowSegmentWidth: function() {
+    var cv = this.get('childViews'),
+        v;
+
+    v = cv.length && cv[cv.length - 1];
+
+    return v ? v.get('frame').width : 0;
+  },
+
+  indexForClientPosition: function(x, y) {
+    var cv = this.get('childViews'),
+        length, i,
+        v, rect,
+        point;
+
+    point = {x: x, y: y};
+    for (i = 0, length = cv.length; i < length; i++) {
+      v = cv[i];
+      
+      rect = v.get('layer').getBoundingClientRect();
+      rect = { 
+        x: rect.left, 
+        y: rect.top, 
+        width: (rect.right-rect.left), 
+        height: (rect.bottom - rect.top) 
+      };
+      
+      // Return the index early if found
+      if (SC.pointInRect(point, rect)) return i;
+    }
+
+    // Default not found
+    return -1;
+  }, 
+
   // ..........................................................
   // RENDERING/DISPLAY SUPPORT
   //
@@ -594,11 +648,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
-    var renderDelegate = this.get('renderDelegate');
-
-    if (renderDelegate && renderDelegate.indexForClientPosition) {
-      return renderDelegate.indexForClientPosition(this, evt.clientX, evt.clientY);
-    }
+    return this.indexForClientPosition(evt.clientX, evt.clientY);
   },
 
   /** @private */
