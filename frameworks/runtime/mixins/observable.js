@@ -1012,7 +1012,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
           root = this; path = path.slice(5);
         } else if (dotIndex < 0 && path.length === 4 && path === 'this') {
           root = this; path = '';
-        } else if (dotIndex > 0 && path[0] === path[0].toLowerCase()) {
+        } else if (dotIndex > 0 && path[0] === path.charAt(0).toLowerCase()) {
           // if the first character for the given path is lower case
           // then we assume the path is relative to this
           root = this;
