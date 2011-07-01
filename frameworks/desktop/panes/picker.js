@@ -905,11 +905,11 @@ SC.PickerPane = SC.PalettePane.extend(
   _getScrollViewOfView: function(view) {
     var curLevel = view;
     while (YES) {
+      if (!curLevel) {
+        return null;
+      }
       if (curLevel.isScrollable) {
         return curLevel;
-      }
-      if (curLevel.kindOf(SC.MainPane)) {
-        return null;
       }
       curLevel = curLevel.get('parentView');
     }
