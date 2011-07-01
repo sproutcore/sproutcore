@@ -23,7 +23,8 @@ SC.BaseTheme.segmentRenderDelegate = SC.RenderDelegate.create({
       'sc-first-segment': dataSource.get('isFirstSegment'),
       'sc-middle-segment': dataSource.get('isMiddleSegment'),
       'sc-last-segment': dataSource.get('isLastSegment'),
-      'sc-overflow-segment': dataSource.get('isOverflowSegment')
+      'sc-overflow-segment': dataSource.get('isOverflowSegment'),
+      'vertical': dataSource.get('layoutDirection') !== SC.LAYOUT_HORIZONTAL 
     };
 
     if (!SC.none(dataSource.get('index'))) classes['sc-segment-' + dataSource.get('index')] = YES;
@@ -45,7 +46,8 @@ SC.BaseTheme.segmentRenderDelegate = SC.RenderDelegate.create({
       'sc-first-segment': dataSource.get('isFirstSegment'),
       'sc-middle-segment': dataSource.get('isMiddleSegment'),
       'sc-last-segment': dataSource.get('isLastSegment'),
-      'sc-overflow-segment': dataSource.get('isOverflowSegment') || NO
+      'sc-overflow-segment': dataSource.get('isOverflowSegment') || NO,
+      'vertical': dataSource.get('layoutDirection') !== SC.LAYOUT_HORIZONTAL
     };
     if (!SC.none(dataSource.get('index'))) classes['sc-segment-' + dataSource.get('index')] = YES;
     jquery.setClass(classes);

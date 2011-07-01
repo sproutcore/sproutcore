@@ -318,7 +318,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       toolTip: toolTip,
       icon: icon,
       isLastSegment: YES,
-      isOverflowSegment: YES
+      isOverflowSegment: YES,
+      layoutDirection: this.get('layoutDirection')
     });
 
     this.appendChild(overflowView);
@@ -374,7 +375,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         // We create a default SC.ButtonView-like object for each segment
         childView = segmentViewClass.create({
           controlSize: this.get('controlSize'),
-          localize: this.get('localize')
+          localize: this.get('localize'),
+          layoutDirection: this.get('layoutDirection')
         });
 
         // Attach the child
@@ -462,7 +464,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       SC.Logger.warn("Item content change was observed on item without matching segment child view.");
     }
 
-    // Reset our measurements (which depend on width or title) and adjust visible views
+    // Reset our measurements (which depend on width/height or title) and adjust visible views
     this.invokeLast(this.remeasure);
   },
 
@@ -470,10 +472,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Whenever the view resizes, we need to check to see if we're overflowing.
   */
   viewDidResize: function() {
-    var visibleWidth = this.$().width();
-
-    // Only overflow if we've gone below the minimum width required to fit all the segments
-    if (this.isOverflowing || visibleWidth <= this.cachedMinimumWidth) this.adjustOverflow();
+    var isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
+        visibleDim = isHorizontal ? this.$().width() : this.$().height();
+     
+    // Only overflow if we've gone below the minimum dimension required to fit all the segments
+    if (this.isOverflowing || visibleDim <= this.cachedMinimumDim) this.adjustOverflow();
   },
 
   /** @private
@@ -501,24 +504,26 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         childViews.objectAt(i).set('isVisible', YES);
       }
 
-      this.cachedWidths = this.segmentWidths();
-      this.cachedOverflowWidth = this.overflowSegmentWidth();
+
+      this.cachedDims = this.segmentDimensions();
+      this.cachedOverflowDim = this.overflowSegmentDim();
 
       this.adjustOverflow();
     }
   },
 
   /** @private
-    This method is called to adjust the segment views for overflow.
+    This method is called to adjust the segment views to see if we need to handle for overflow.
    */
   adjustOverflow: function() {
     var childViews = this.get('childViews'),
         childView,
         value = this.get('value'),
         overflowView = childViews.lastObject(),
-        visibleWidth = this.$().width(),             // The inner width of the div
-        curElementsWidth = 0,
-        widthToFit,
+        isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
+        visibleDim = isHorizontal ? this.$().width() : this.$().height(),  // The inner width/height of the div
+        curElementsDim = 0,
+        dimToFit,
         length, i;
 
     // This variable is useful to optimize when we are overflowing
@@ -528,15 +533,15 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // Clear out the overflow items (these are the items not currently visible)
     this.overflowItems = [];
 
-    length = this.cachedWidths.length;
+    length = this.cachedDims.length;
     for (i=0; i < length; i++) {
       childView = childViews.objectAt(i);
-      curElementsWidth += this.cachedWidths[i];
+      curElementsDim += this.cachedDims[i];
 
       // check for an overflow (leave room for the overflow segment except for with the last segment)
-      widthToFit = (i === length - 1) ? curElementsWidth : curElementsWidth + this.cachedOverflowWidth;
+      dimToFit = (i === length - 1) ? curElementsDim : curElementsDim + this.cachedOverflowDim;
 
-      if (widthToFit > visibleWidth) {
+      if (dimToFit > visibleDim) {
         // Add the localItem to the overflowItems
         this.overflowItems.pushObject(childView.get('localItem'));
 
@@ -564,38 +569,52 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this.isOverflowing) overflowView.set('isVisible', YES);
     else overflowView.set('isVisible', NO);
 
-    // Store the minimum width before overflow
-    this.cachedMinimumWidth = curElementsWidth + this.cachedOverflowWidth;
+    // Store the minimum dimension (height/width) before overflow
+    this.cachedMinimumDim = curElementsDim + this.cachedOverflowDim;
   },
 
   /**
-    Return the widths of the DOM elements of the segments.  This will be measured by the view to
-    determine which segments should be overflowed.
+    Return the dimensions (either heights or widths depending on the layout direction) of the DOM 
+    elements of the segments.  This will be measured by the view to determine which segments should
+    be overflowed.
 
     It ignores the last segment (the overflow segment).
   */
-  segmentWidths: function() {
+  segmentDimensions: function() {
     var cv = this.get('childViews'),
-        v,
-        widths = [];
+        v, f,
+        dims = [],
+        isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL;
 
     for (var i = 0, length = cv.length; i < length - 1; i++) {
       v = cv[i];
-      widths[i] = v.get('frame').width;
+      f = v.get('frame');
+      dims[i] = isHorizontal ? f.width : f.height;
     }
 
-    return widths;
+    return dims;
   },
 
-  overflowSegmentWidth: function() {
+  /**
+    Return the dimension (height or width depending on the layout direction) over the overflow segment.
+  */
+  overflowSegmentDim: function() {
     var cv = this.get('childViews'),
-        v;
+        v, f, 
+        isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL;
 
     v = cv.length && cv[cv.length - 1];
+    if (v) {
+      f = v.get('frame');
+      return isHorizontal ? f.width : f.height;
+    }
 
-    return v ? v.get('frame').width : 0;
+    return 0;
   },
 
+  /**
+    Return the index of the segment view that is the target of the mouse click.
+  */
   indexForClientPosition: function(x, y) {
     var cv = this.get('childViews'),
         length, i,
