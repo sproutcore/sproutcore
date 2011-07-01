@@ -918,9 +918,10 @@ SC.Event.prototype = {
   */
   commandCodes: function() {
     var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
-    
+
     // handle function keys.
-    if (code) {
+    // WebKit browsers have equal values for keyCode and charCode on keypress event
+    if (code && code !== this.charCode) {
       ret = SC.FUNCTION_KEYS[code] ;
       if (!ret && (this.altKey || this.ctrlKey || this.metaKey)) {
         ret = SC.PRINTABLE_KEYS[code];
