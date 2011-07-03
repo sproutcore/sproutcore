@@ -1061,8 +1061,9 @@ SC.ScrollView = SC.View.extend({
     transform += 'translate3d('+ -this._scroll_horizontalScrollOffset +'px, '+ -Math.round(this._scroll_verticalScrollOffset)+'px,0) ';
     transform += this._scale_css;
     if (layer) {
-      layer.style.webkitTransform = transform;
-      layer.style.webkitTransformOrigin = "top left";
+      var style = layer.style;
+      style.webkitTransform = transform;
+      style.webkitTransformOrigin = "top left";
     }
   },
   
@@ -1125,7 +1126,11 @@ SC.ScrollView = SC.View.extend({
         horizontalScrollOffset = this._scroll_horizontalScrollOffset || 0,
         startClipOffsetX = horizontalScrollOffset,
         startClipOffsetY = verticalScrollOffset,
-        needsScrollEnd = NO;
+        needsScrollEnd = NO,
+        contentWidth = 0,
+        contentHeight = 0,
+        viewFrame,
+        view;
     
     if (this.touch && this.touch.timeout) {
       // clear the timeout
@@ -1139,15 +1144,20 @@ SC.ScrollView = SC.View.extend({
     }
     
     // calculate container+content width/height
-    var view = this.get('contentView') ;
-    var contentWidth = view ? view.get('frame').width : 0,
-        contentHeight = view ? view.get('frame').height : 0;
+    view = this.get('contentView') ;
+    
+    if(view){
+      viewFrame = view.get('frame');
+      contentWidth = viewFrame.width;
+      contentHeight = viewFrame.height;
+    }
     
     if(view.calculatedWidth && view.calculatedWidth!==0) contentWidth = view.calculatedWidth;
     if (view.calculatedHeight && view.calculatedHeight !==0) contentHeight = view.calculatedHeight;
     
-    var containerWidth = this.get('containerView').get('frame').width,
-        containerHeight = this.get('containerView').get('frame').height;
+    var containerFrame = this.get('containerView').get('frame'),
+        containerWidth = containerFrame.width,
+        containerHeight = containerFrame.height;
     
 
     // calculate position in content
@@ -1187,7 +1197,7 @@ SC.ScrollView = SC.View.extend({
       globalFrame: globalFrame,
       
       // cache some things
-      layer: this.get("contentView").get('layer'),
+      layer: view.get('layer'), //contentView
 
       // some constants
       resistanceCoefficient: 0.998,
