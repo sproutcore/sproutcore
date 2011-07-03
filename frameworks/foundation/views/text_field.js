@@ -81,6 +81,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @type String
   */
   hint: '',
+  
+  /**
+    The hint to display while the field is not active.
+    
+    @property
+    @type String
+  */
+  type: 'text',
+  
+  autoCorrect: true,
+  autoCapitalize: true,
+  
 
   /*
   * Localizes the hint if necessary.
@@ -519,7 +531,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     var hint = this.get('formattedHint'), disabled, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
-        spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
+        spellCheckString='', autocapitalizeString='', autocorrectString='',
         maxLength = this.get('maxLength'), isOldSafari;
 
     context.setClass('text-area', this.get('isTextArea'));
@@ -529,7 +541,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
-    spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
+    spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : '';
+    
+    if(SC.browser.mobileSafari){
+      autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
+      autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
+    }
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
       disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
@@ -563,22 +580,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
-        context.push('<textarea class="',fieldClassNames,'" name="', name, 
-                      '" ', disabled, ' placeholder="',hint, '"',
-                      spellCheckString,' maxlength="', maxLength, '">', 
-                      value, '</textarea></span>') ;
+        context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
+                      '" '+ disabled+ ' placeholder="'+ hint + '"'+
+                      spellCheckString + autocorrectString +
+                      autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
+                      value+ '</textarea></span>') ;
       }
       else {
-        type = 'text';
+        type = this.get('type');
         
         // Internet Explorer won't let us change the type attribute later
         // so we force it to password if needed now, or if the value is not the hint
         if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
         
-        context.push('<input class="',fieldClassNames,'" type="', type,
-                      '" name="', name, '" ', disabled, ' value="', value,
-                      '" placeholder="',hint,'"', spellCheckString, 
-                      ' maxlength="', maxLength, '" /></span>') ;
+        context.push('<input class="'+fieldClassNames+'" type="'+ type+
+                      '" name="'+ name + '" '+ disabled+ ' value="'+ value+
+                      '" placeholder="'+hint+'"'+ spellCheckString+ 
+                      ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
+                      autocapitalizeString+'/></span>') ;
       }
 
     }
@@ -591,7 +610,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (this._hintON && !this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
+          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
 
           if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', YES);
@@ -600,14 +619,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
           if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
-
           if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', NO);
             input.val('');
           }
         }
       }
-
+      
+      if(SC.browser.mobileSafari){      
+        if (!this.get('autoCapitalize')) input.attr('autoCapitalize', 'off');
+        else elem.attr('autoCapitalize', 'true');
+        if (!this.get('autoCorrect')) input.attr('autoCorrect', 'off');
+        else elem.attr('autoCorrect', 'true');
+      }      
       if (SC.platform.input.placeholder) input.attr('placeholder', hint);
 
       // Enable/disable the actual input/textarea as appropriate.
