@@ -628,9 +628,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
       if(SC.browser.mobileSafari){      
         if (!this.get('autoCapitalize')) input.attr('autoCapitalize', 'off');
-        else elem.attr('autoCapitalize', 'true');
+        else input.attr('autoCapitalize', 'true');
         if (!this.get('autoCorrect')) input.attr('autoCorrect', 'off');
-        else elem.attr('autoCorrect', 'true');
+        else input.attr('autoCorrect', 'true');
       }      
       if (SC.platform.input.placeholder) input.attr('placeholder', hint);
 
