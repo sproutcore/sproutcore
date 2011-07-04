@@ -15,6 +15,8 @@ Handlebars.registerHelper('collection', function(path, options) {
   // @if (debug)
   if (!collectionClass) {
     throw "%@ #collection: Could not find %@".fmt(data.view, path);
+  } else if (!SC.kindOf(collectionClass, SC.TemplateCollectionView)) {
+    throw "You must use a subclass of SC.TemplateCollectionView when using the #collection Handlebars helper";
   }
   // @endif
 
