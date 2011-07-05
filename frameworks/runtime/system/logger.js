@@ -200,8 +200,8 @@ SC.Logger = SC.Object.create(
 
 
   /**
-    The current log level determining what is output to the reporter object
-    (usually your browser’s console).  Valid values are the same as with
+    The current log level determining what is recorded to the
+    'recordedLogMessages' buffer.  Valid values are the same as with
     'logOutputLevel':
 
       -  SC.LOGGER_LEVEL_DEBUG
