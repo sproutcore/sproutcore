@@ -42,3 +42,23 @@ test("chained observers on enumerable properties are triggered when the observed
   equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
 });
 
+test("content observers are removed correctly", function() {
+  var child1 = SC.Object.create({ name: "Bartholomew", age: 15 });
+  var child2 = SC.Object.create({ name: "Agnes", age: 12 });
+  var children = [child1, child2];
+
+  var observerFiredCount = 0;
+  var observerFunc = function() { observerFiredCount++; }
+
+  children.addObserver('@each.name', this, observerFunc);
+  children.removeObserver('@each.name', this, observerFunc);
+  observerFiredCount = 0;
+  SC.run(function() { children.setEach('name', "Hanna"); });
+  equals(observerFiredCount, 0, "name observer did not fire after it was removed");
+
+  children.addObserver('@each.age', this, observerFunc);
+  children.removeObserver('@each.age', this, observerFunc);
+  observerFiredCount = 0;
+  SC.run(function() { children.setEach('age', 14); });
+  equals(observerFiredCount, 0, "age observer did not fire after it was removed");
+});
