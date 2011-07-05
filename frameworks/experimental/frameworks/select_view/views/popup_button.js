@@ -186,8 +186,19 @@ SC.PopupButtonView = SC.ButtonView.extend({
     this.set('_mouseDown', YES);
 
     this.showMenu();
-
-    this._mouseDownTimestamp = new Date().getTime();
+    
+    this._mouseDownTimestamp = null;
+    
+    // Some nutty stuff going on here. If the number of menu items is large, and
+    // it takes over 400 ms to create, then invokeLater will not return control
+    // to the browser, thereby causing the menu pane to dismiss itself
+    // instantly. Using setTimeout will guarantee that control goes back to the
+    // browser.
+    var self = this;
+    setTimeout(function() {
+      this._mouseDownTimestamp = new Date().getTime();
+    }, 1);
+    
     this.becomeFirstResponder();
 
     return YES;
