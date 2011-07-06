@@ -626,6 +626,83 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     }
 
     return methodName;
+  },
+
+  /**
+    A list of the methods to temporarily disable (and buffer calls for) when we are suspended.
+  */
+  methodsForSuspend: "loadModule _moduleDidLoad prefetchModule _moduleDidBecomeReady".w(),
+
+  /**
+    Call this in order to prevent expensive tasks from occurring at inopportune times.
+  */
+  suspend: function() {
+
+    //Increment the suspension count, to support nested suspend()/resume() pairs.
+    //We only do anything if the suspend count ends up at 1, as that implies it's
+    //the first suspend() call.
+    this._suspendCount = (this._suspendCount||0)+1;
+    if(this._suspendCount!==1) return;
+
+    //Yummy variables.
+    var methods = this.get('methodsForSuspend'),
+        replaceKey, saveKey, key, i;
+
+    //Now we go through the list of methods to suspend, and overwrite them with
+    //versions that will buffer their calls in a _bufferedCalls array.
+    for(i=0; key=methods[i]; i++) {
+
+      //Ensure the replacement function exists at a key where it'll be cached.
+      if(!this[replaceKey="__replacement_"+key+"__"]) {
+        (this[replaceKey] = function() {
+          (this._bufferedCalls||(this._bufferedCalls=[])).push({
+            method: arguments.callee.methodName,
+            arguments: arguments
+          });
+        }).methodName = key;
+      }
+
+      //Ensure the original function exists at a key where it'll be cached.
+      if(!this[saveKey="__saved_"+key+"__"]) this[saveKey] = this[key];
+
+      //Ensure that the replacement function exists where the rest of the
+      //code expects the original.
+      this[key] = this[replaceKey];
+    }
+  },
+
+  /**
+    Call this in order to resume normal behavior of the methods here, and to
+    finally perform any calls that may have occurred during suspension. Calls
+    will run in the order they were received.
+  */
+  resume: function() {
+
+    //First, we need to decrement the suspension count, and warn if the suspension
+    //count implied that we weren't already suspended. Furthermore, if the suspend
+    //count is not zero, then we haven't tackled the last suspend() call with a resume(),
+    //and should therefore not resume.
+    this._suspendCount = (this._suspendCount||0)-1;
+    if(this._suspendCount<0) {
+      SC.warn("SC.Module.resume() was called without SC.Module having been in a suspended state. Call aborted.");
+      this._suspendCount = 0;
+      return;
+    }
+    if(this._suspendCount>0) return;
+
+    //Yummy variables.
+    var methods = this.get('methodsForSuspend'),
+        calls = this._bufferedCalls,
+        key, i, method, call;
+
+    //Restore the original methods to where they belong for normal functionality.
+    for(i=0; (key=methods[i]); i++) this[key] = this["__saved_"+key+"__"];
+
+    //Perform any buffered calls that built up during the suspended period.
+    for(i=0; call=calls&&calls[i]; i++) this[call.method].apply(this,call.arguments);
+
+    //Clear the list of calls, so subsequent resume() calls won't flush them again.
+    if(calls) calls.length = 0;
   }
 });
 
