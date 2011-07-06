@@ -2158,13 +2158,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     if(!this.get('isSelectable')) return NO;
 
-    info = this.mouseDownInfo = {
-      event:        ev,
-      itemView:     itemView,
-      contentIndex: contentIndex,
-      at:           Date.now()
-    };
-
     // become first responder if possible.
     this.becomeFirstResponder() ;
 
@@ -2206,6 +2199,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // collection some basic setup info
     sel = this.get('selection');
     if (sel) sel = sel.indexSetForSource(content);
+
+    info = this.mouseDownInfo = {
+      event:        ev,
+      itemView:     itemView,
+      contentIndex: contentIndex,
+      at:           Date.now()
+    };
 
     isSelected = sel ? sel.contains(contentIndex) : NO;
     info.modifierKeyPressed = modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
