@@ -340,7 +340,8 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     var idx = this.get('_selectedItemIndex'), itemViews = menu.get('menuItemViews');
     if (idx > -1) {
-      return [leftPosition, topPosition - itemViews[idx].get('layout').top, 2];
+      var layout = itemViews[idx].get('layout');
+      return [leftPosition, topPosition - layout.top + (layout.height/2), 2];
     }
 
     return [leftPosition, topPosition, 2];
