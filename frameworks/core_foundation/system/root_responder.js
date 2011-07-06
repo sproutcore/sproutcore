@@ -1508,10 +1508,12 @@ SC.RootResponder = SC.Object.extend(
      get touch events. Textfields just need to get the default focus action.
   */
   ignoreTouchHandle: function(evt) {
-    var tag = evt.target.tagName;
-    if(tag==="INPUT" || tag==="A"){
-      evt.allowDefault();
-      return YES;
+    if(SC.browser.isMobileSafari){
+      var tag = evt.target.tagName;
+      if(tag==="INPUT" || tag==="A"){
+        evt.allowDefault();
+        return YES;
+      }
     }
     return NO;
   },
