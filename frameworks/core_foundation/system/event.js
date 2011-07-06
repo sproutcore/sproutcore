@@ -11,23 +11,23 @@ sc_require('system/core_query') ;
   The event class provides a simple cross-platform library for capturing and
   delivering events on DOM elements and other objects.  While this library
   is based on code from both jQuery and Prototype.js, it includes a number of
-  additional features including support for handler objects and event 
+  additional features including support for handler objects and event
   delegation.
 
   Since native events are implemented very unevenly across browsers,
   SproutCore will convert all native events into a standardized instance of
-  this special event class.  
-  
-  SproutCore events implement the standard W3C event API as well as some 
+  this special event class.
+
+  SproutCore events implement the standard W3C event API as well as some
   additional helper methods.
 
   @constructor
   @param {Event} originalEvent
   @returns {SC.Event} event instance
-  
+
   @since SproutCore 1.0
 */
-SC.Event = function(originalEvent) { 
+SC.Event = function(originalEvent) {
   var idx, len;
   // copy properties from original event, if passed in.
   if (originalEvent) {
@@ -46,7 +46,7 @@ SC.Event = function(originalEvent) {
 
   // Fix target property, if necessary
   // Fixes #1925 where srcElement might not be defined either
-  if (!this.target) this.target = this.srcElement || document; 
+  if (!this.target) this.target = this.srcElement || document;
 
   // check if target is a textnode (safari)
   if (this.target.nodeType === 3 ) this.target = this.target.parentNode;
@@ -89,7 +89,7 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
 
     // normalize wheelDelta for Firefox
-    // note that we multiple the delta on FF to make it's acceleration more 
+    // note that we multiple the delta on FF to make it's acceleration more
     // natural.
     } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
@@ -120,7 +120,7 @@ SC.Event = function(originalEvent) {
     this.wheelDeltaY *= deltaMultiplier;
   }
 
-  return this; 
+  return this;
 } ;
 
 SC.mixin(SC.Event, /** @scope SC.Event */ {
@@ -180,67 +180,67 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   _MOUSE_WHEEL_LIMIT_INVALIDATED: NO,
 
-  /** 
+  /**
     Standard method to create a new event.  Pass the native browser event you
     wish to wrap if needed.
   */
   create: function(e) { return new SC.Event(e); },
 
   // the code below was borrowed from jQuery, Dean Edwards, and Prototype.js
-  
+
   /**
     Bind an event to an element.
 
     This method will cause the passed handler to be executed whenever a
     relevant event occurs on the named element.  This method supports a
     variety of handler types, depending on the kind of support you need.
-    
+
     ## Simple Function Handlers
 
         SC.Event.add(anElement, "click", myClickHandler) ;
-    
+
     The most basic type of handler you can pass is a function.  This function
     will be executed everytime an event of the type you specify occurs on the
     named element.  You can optionally pass an additional context object which
     will be included on the event in the event.data property.
-    
+
     When your handler function is called the, the function's "this" property
     will point to the element the event occurred on.
-    
+
     The click handler for this method must have a method signature like:
-    
+
         function(event) { return YES|NO; }
-    
+
     ## Method Invocations
 
         SC.Event.add(anElement, "click", myObject, myObject.aMethod) ;
 
-    Optionally you can specify a target object and a method on the object to 
+    Optionally you can specify a target object and a method on the object to
     be invoked when the event occurs.  This will invoke the method function
-    with the target object you pass as "this".  The method should have a 
+    with the target object you pass as "this".  The method should have a
     signature like:
-    
+
         function(event, targetElement) { return YES|NO; }
 
     Like function handlers, you can pass an additional context data paramater
     that will be included on the event in the event.data property.
-    
+
     ## Handler Return Values
 
-    Both handler functions should return YES if you want the event to 
+    Both handler functions should return YES if you want the event to
     continue to propagate and NO if you want it to stop.  Returning NO will
-    both stop bubbling of the event and will prevent any default action 
+    both stop bubbling of the event and will prevent any default action
     taken by the browser.  You can also control these two behaviors separately
     by calling the stopPropagation() or preventDefault() methods on the event
     itself, returning YES from your method.
-    
+
     ## Limitations
-    
-    Although SproutCore's event implementation is based on jQuery, it is 
+
+    Although SproutCore's event implementation is based on jQuery, it is
     much simpler in design.  Notably, it does not support namespaced events
     and you can only pass a single type at a time.
-    
-    If you need more advanced event handling, consider the SC.ClassicResponder 
+
+    If you need more advanced event handling, consider the SC.ClassicResponder
     functionality provided by SproutCore or use your favorite DOM library.
 
     @param {Element} elem a DOM element, window, or document object
@@ -252,11 +252,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   add: function(elem, eventType, target, method, context, useCapture) {
 
-    // if a CQ object is passed in, either call add on each item in the 
+    // if a CQ object is passed in, either call add on each item in the
     // matched set, or simply get the first element and use that.
     if (elem && elem.isCoreQuery) {
       if (elem.length > 0) {
-        elem.forEach(function(e) { 
+        elem.forEach(function(e) {
           this.add(e, eventType, target, method, context);
         }, this);
         return this;
@@ -267,7 +267,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 		if (!useCapture) {
 			useCapture = NO;
 		}
-    
+
     // cannot register events on text nodes, etc.
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
@@ -278,7 +278,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
       context = method; method = target; target = null;
-      
+
     // handle case where passed method is a key on the target.
     } else if (target && SC.typeOf(method) === SC.T_STRING) {
       method = target[method] ;
@@ -288,12 +288,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // not exist yet, create it and also setup the shared listener for this
     // eventType.
     var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}) ,
-        handlers = events[eventType]; 
+        handlers = events[eventType];
     if (!handlers) {
       handlers = events[eventType] = {} ;
       this._addEventListener(elem, eventType, useCapture) ;
     }
-    
+
     // Build the handler array and add to queue
     handlers[SC.hashFor(target, method)] = [target, method, context];
     SC.Event._global[eventType] = YES ; // optimization for global triggers
@@ -309,21 +309,21 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     To remove a specific handler, you must pass in the same function or the
     same target and method as you passed into SC.Event.add().  See that method
     for full documentation on the parameters you can pass in.
-    
+
     If you omit a specific handler but provide both an element and eventType,
     then all handlers for that element will be removed.  If you provide only
     and element, then all handlers for all events on that element will be
     removed.
-    
+
     ## Limitations
-    
-    Although SproutCore's event implementation is based on jQuery, it is 
+
+    Although SproutCore's event implementation is based on jQuery, it is
     much simpler in design.  Notably, it does not support namespaced events
     and you can only pass a single type at a time.
-    
-    If you need more advanced event handling, consider the SC.ClassicResponder 
+
+    If you need more advanced event handling, consider the SC.ClassicResponder
     functionality provided by SproutCore or use your favorite DOM library.
-    
+
     @param {Element} elem a DOM element, window, or document object
     @param {String} eventType the event type to remove
     @param {Object} target The target object for a method call.  Or a function.
@@ -332,18 +332,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   remove: function(elem, eventType, target, method) {
 
-    // if a CQ object is passed in, either call add on each item in the 
+    // if a CQ object is passed in, either call add on each item in the
     // matched set, or simply get the first element and use that.
     if (elem && elem.isCoreQuery) {
       if (elem.length > 0) {
-        elem.forEach(function(e) { 
+        elem.forEach(function(e) {
           this.remove(e, eventType, target, method);
         }, this);
         return this;
       } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
-    
+
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
@@ -362,19 +362,19 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     } else if (handlers = events[eventType]) {
 
       var cleanupHandlers = NO ;
-      
+
       // if a target/method is provided, remove only that one
       if (target || method) {
-        
+
         // normalize the target/method
         if (SC.typeOf(target) === SC.T_FUNCTION) {
           method = target; target = null ;
         } else if (SC.typeOf(method) === SC.T_STRING) {
           method = target[method] ;
         }
-        
+
         delete handlers[SC.hashFor(target, method)];
-        
+
         // check to see if there are handlers left on this event/eventType.
         // if not, then cleanup the handlers.
         key = null ;
@@ -383,15 +383,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       // otherwise, just cleanup all handlers
       } else cleanupHandlers = YES ;
-      
-      // If there are no more handlers left on this event type, remove 
+
+      // If there are no more handlers left on this event type, remove
       // eventType hash from queue.
       if (cleanupHandlers) {
         delete events[eventType] ;
         this._removeEventListener(elem, eventType) ;
       }
-      
-      // verify that there are still events registered on this element.  If 
+
+      // verify that there are still events registered on this element.  If
       // there aren't, cleanup the element completely to avoid memory leaks.
       key = null ;
       for(key in events) break;
@@ -399,20 +399,20 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         SC.removeData(elem, "sc_events") ;
         delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
       }
-      
+
     }
-    
+
     elem = events = handlers = null ; // avoid memory leaks
     return this ;
   },
 
   NO_BUBBLE: ['blur', 'focus', 'change'],
-  
+
   /**
-    Generates a simulated event object.  This is mostly useful for unit 
-    testing.  You can pass the return value of this property into the 
+    Generates a simulated event object.  This is mostly useful for unit
+    testing.  You can pass the return value of this property into the
     trigger() method to actually send the event.
-    
+
     @param {Element} elem the element the event targets
     @param {String} eventType event type.  mousedown, mouseup, etc
     @param {Hash} attrs optional additonal attributes to apply to event.
@@ -433,24 +433,24 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (attrs) SC.mixin(ret, attrs) ;
     return ret ;
   },
-  
+
   /**
-    Trigger an event execution immediately.  You can use this method to 
+    Trigger an event execution immediately.  You can use this method to
     simulate arbitrary events on arbitary elements.
 
     ## Limitations
-    
-    Note that although this is based on the jQuery implementation, it is 
+
+    Note that although this is based on the jQuery implementation, it is
     much simpler.  Notably namespaced events are not supported and you cannot
     trigger events globally.
-    
-    If you need more advanced event handling, consider the SC.Responder 
+
+    If you need more advanced event handling, consider the SC.Responder
     functionality provided by SproutCore or use your favorite DOM library.
 
     ## Example
-    
+
         SC.Event.trigger(view.get('layer'), 'mousedown');
-    
+
     @param elem {Element} the target element
     @param eventType {String} the event type
     @param args {Array} optional argument or arguments to pass to handler.
@@ -459,11 +459,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   trigger: function(elem, eventType, args, donative) {
 
-    // if a CQ object is passed in, either call add on each item in the 
+    // if a CQ object is passed in, either call add on each item in the
     // matched set, or simply get the first element and use that.
     if (elem && elem.isCoreQuery) {
       if (elem.length > 0) {
-        elem.forEach(function(e) { 
+        elem.forEach(function(e) {
           this.trigger(e, eventType, args, donative);
         }, this);
         return this;
@@ -473,11 +473,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return undefined;
-    
+
     // Normalize to an array
     args = SC.A(args) ;
 
-    var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION , 
+    var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION ,
         event, current, onfoo, isClick;
 
     // Get the event to pass, creating a fake one if necessary
@@ -486,15 +486,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       event = this.simulateEvent(elem, eventType) ;
       args.unshift(event) ;
     }
-    
+
     event.type = eventType ;
-    
+
     // Trigger the event - bubble if enabled
     current = elem;
     do {
       ret = SC.Event.handle.apply(current, args);
       current = (current===document) ? null : (current.parentNode || document);
-    } while(!ret && event.bubbles && current);    
+    } while(!ret && event.bubbles && current);
     current = null ;
 
     // Handle triggering native .onfoo handlers
@@ -510,7 +510,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       // prevent IE from throwing an error for some hidden elements
       } catch (e) {}
     }
-    
+
     this.triggered = NO;
 
     return ret;
@@ -518,16 +518,16 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   /**
     This method will handle the passed event, finding any registered listeners
-    and executing them.  If you have an event you want handled, you can 
+    and executing them.  If you have an event you want handled, you can
     manually invoke this method.  This function expects it's "this" value to
-    be the element the event occurred on, so you should always call this 
+    be the element the event occurred on, so you should always call this
     method like:
-    
+
         SC.Event.handle.call(element, event) ;
 
     Note that like other parts of this library, the handle function does not
     support namespaces.
-    
+
     @param event {Event} the event to handle
     @returns {Boolean}
   */
@@ -536,7 +536,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // ignore events triggered after window is unloaded or if double-called
     // from within a trigger.
     if ((typeof SC === "undefined") || SC.Event.triggered) return YES ;
-    
+
     // returned undefined or NO
     var val, ret, namespace, all, handlers, args, key, handler, method, target;
 
@@ -548,7 +548,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // get the handlers for this event type
     handlers = (SC.data(this, "sc_events") || {})[event.type];
     if (!handlers) return NO ; // nothing to do
-    
+
     // invoke all handlers
     for (key in handlers ) {
       handler = handlers[key];
@@ -562,11 +562,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       target = handler[0] || this;
       ret = method.apply( target, args );
-      
+
       if (val !== NO) val = ret;
 
       // if method returned NO, do not continue.  Stop propogation and
-      // return default.  Note that we test explicitly for NO since 
+      // return default.  Note that we test explicitly for NO since
       // if the handler returns no specific value, we do not want to stop.
       if ( ret === NO ) {
         event.preventDefault();
@@ -578,29 +578,29 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   },
 
   /**
-    This method is called just before the window unloads to unhook all 
+    This method is called just before the window unloads to unhook all
     registered events.
   */
   unload: function() {
     var key, elements = this._elements ;
     for(key in elements) this.remove(elements[key]) ;
-    
+
     // just in case some book-keeping was screwed up.  avoid memory leaks
     for(key in elements) delete elements[key] ;
-    delete this._elements ; 
+    delete this._elements ;
   },
-  
+
   /**
     This hash contains handlers for special or custom events.  You can add
     your own handlers for custom events here by simply naming the event and
     including a hash with the following properties:
-    
+
      - setup: this function should setup the handler or return NO
      - teardown: this function should remove the event listener
-     
+
   */
   special: {
-    
+
     ready: {
       setup: function() {
         // Make sure the ready event is setup
@@ -675,11 +675,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   KEY_PAGEUP:   33,
   KEY_PAGEDOWN: 34,
   KEY_INSERT:   45,
-    
+
   _withinElement: function(event, elem) {
     // Check if mouse(over|out) are still within the same parent element
     var parent = event.relatedTarget;
-    
+
     // Traverse up the tree
     while ( parent && parent != elem ) {
       try { parent = parent.parentNode; } catch(error) { parent = elem; }
@@ -688,14 +688,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Return YES if we actually just moused on to a sub-element
     return parent === elem;
   },
-  
+
   /** @private
     Adds the primary event listener for the named type on the element.
-    
-    If the event type has a special handler defined in SC.Event.special, 
+
+    If the event type has a special handler defined in SC.Event.special,
     then that handler will be used.  Otherwise the normal browser method will
     be used.
-    
+
     @param elem {Element} the target element
     @param eventType {String} the event type
   */
@@ -710,17 +710,17 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Only use addEventListener/attachEvent if the special
     // events handler returns NO
     if ( !special || special.setup.call(elem)===NO) {
-      
-      // Save element in cache.  This must be removed later to avoid 
+
+      // Save element in cache.  This must be removed later to avoid
       // memory leaks.
       var guid = SC.guidFor(elem) ;
       this._elements[guid] = elem;
-      
-      listener = SC.data(elem, "listener") || SC.data(elem, "listener", 
+
+      listener = SC.data(elem, "listener") || SC.data(elem, "listener",
        function() {
-         return SC.Event.handle.apply(SC.Event._elements[guid], arguments); 
+         return SC.Event.handle.apply(SC.Event._elements[guid], arguments);
       }) ;
-      
+
       // Bind the global event handler to the element
       if (elem.addEventListener) {
         elem.addEventListener(eventType, listener, useCapture);
@@ -729,25 +729,25 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         // there is currently a hack in request , but it needs to fixed here.
         elem.attachEvent("on" + eventType, listener);
       }
-      //  
+      //
       // else {
       //         elem.onreadystatechange = listener;
       //       }
     }
-    
+
     elem = special = listener = null ; // avoid memory leak
   },
 
   /** @private
     Removes the primary event listener for the named type on the element.
-    
-    If the event type has a special handler defined in SC.Event.special, 
+
+    If the event type has a special handler defined in SC.Event.special,
     then that handler will be used.  Otherwise the normal browser method will
     be used.
-    
+
     Note that this will not clear the _elements hash from the element.  You
     must call SC.Event.unload() on unload to make sure that is cleared.
-    
+
     @param elem {Element} the target element
     @param eventType {String} the event type
   */
@@ -763,66 +763,66 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         }
       }
     }
-    
+
     elem = special = listener = null ;
   },
 
   _elements: {},
-  
+
   // implement preventDefault() in a cross platform way
-  
+
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
     if (event === window.event) {
       // IE can't do event.normalized on an Event object
-      return SC.Event.create(event) ; 
+      return SC.Event.create(event) ;
     } else {
       return event.normalized ? event : SC.Event.create(event) ;
     }
   },
-  
+
   _global: {},
 
   /** @private properties to copy from native event onto the event */
   _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches animationName elapsedTime dataTransfer".split(" ")
-  
+
 }) ;
 
 SC.Event.prototype = {
 
   /**
-    Set to YES if you have called either preventDefault() or stopPropagation().  
-    This allows a generic event handler to notice if you want to provide 
+    Set to YES if you have called either preventDefault() or stopPropagation().
+    This allows a generic event handler to notice if you want to provide
     detailed control over how the browser handles the real event.
-    
+
     @property {Boolean}
   */
   hasCustomEventHandling: NO,
-  
+
   /**
     Returns the touches owned by the supplied view.
-    
+
     @param {SC.View}
     @returns {Array} touches an array of SC.Touch objects
   */
   touchesForView: function(view) {
     if (this.touchContext) return this.touchContext.touchesForView(view);
   },
-  
+
   /**
     Same as touchesForView, but sounds better for responders.
-    
+
     @param {SC.RootResponder}
     @returns {Array} touches an array of SC.Touch objects
   */
   touchesForResponder: function(responder) {
     if (this.touchContext) return this.touchContext.touchesForView(responder);
   },
-  
+
   /**
-    Returns average data--x, y, and d (distance)--for the touches owned by the 
+    Returns average data--x, y, and d (distance)--for the touches owned by the
     supplied view.
-    
+
     @param {SC.View}
     @returns {Array} touches an array of SC.Touch objects
   */
@@ -830,22 +830,22 @@ SC.Event.prototype = {
     if (this.touchContext) return this.touchContext.averagedTouchesForView(view);
     return null;
   },
-  
+
   /**
     Indicates that you want to allow the normal default behavior.  Sets
     the hasCustomEventHandling property to YES but does not cancel the event.
-    
+
     @returns {SC.Event} receiver
   */
   allowDefault: function() {
     this.hasCustomEventHandling = YES ;
-    return this ;  
+    return this ;
   },
-  
-  /** 
+
+  /**
     Implements W3C standard.  Will prevent the browser from performing its
     default action on this event.
-    
+
     @returns {SC.Event} receiver
   */
   preventDefault: function() {
@@ -860,7 +860,7 @@ SC.Event.prototype = {
 
   /**
     Implements W3C standard.  Prevents further bubbling of the event.
-    
+
     @returns {SC.Event} receiver
   */
   stopPropagation: function() {
@@ -869,30 +869,30 @@ SC.Event.prototype = {
       if (evt.stopPropagation) evt.stopPropagation() ;
       evt.cancelBubble = YES ; // IE
     }
-    this.hasCustomEventHandling = YES ; 
+    this.hasCustomEventHandling = YES ;
     return this ;
   },
 
-  /** 
-    Stops both the default action and further propogation.  This is more 
+  /**
+    Stops both the default action and further propogation.  This is more
     convenient than calling both.
-    
+
     @returns {SC.Event} receiver
   */
   stop: function() {
     return this.preventDefault().stopPropagation();
   },
-  
-  /** 
-    Always YES to indicate the event was normalized. 
-    
+
+  /**
+    Always YES to indicate the event was normalized.
+
     @property {Boolean}
   */
   normalized: YES,
 
-  /** 
-    Returns the pressed character (found in this.which) as a string. 
-  
+  /**
+    Returns the pressed character (found in this.which) as a string.
+
     @returns {String}
   */
   getCharString: function() {
@@ -901,31 +901,31 @@ SC.Event.prototype = {
         return String.fromCharCode(0);
       }
       else {
-        return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;  
+        return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;
       }
     }
     else {
       return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
     }
   },
-  
-  /** 
-    Returns character codes for the event.  The first value is the normalized 
-    code string, with any shift or ctrl characters added to the begining.  
+
+  /**
+    Returns character codes for the event.  The first value is the normalized
+    code string, with any shift or ctrl characters added to the begining.
     The second value is the char string by itself.
-  
+
     @returns {Array}
   */
   commandCodes: function() {
     var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
-    
+
     // handle function keys.
     if (code) {
       ret = SC.FUNCTION_KEYS[code] ;
       if (!ret && (this.altKey || this.ctrlKey || this.metaKey)) {
         ret = SC.PRINTABLE_KEYS[code];
       }
-      
+
       if (ret) {
         if (this.altKey) modifiers += 'alt_' ;
         if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_' ;
@@ -941,14 +941,14 @@ SC.Event.prototype = {
       if (this.metaKey) {
         modifiers = 'meta_' ;
         ret = lowercase;
-        
+
       } else ret = null ;
     }
 
     if (ret) ret = modifiers + ret ;
     return [ret, key] ;
   }
-    
+
 } ;
 
 // Also provide a Prototype-like API so that people can use either one.
@@ -963,7 +963,7 @@ SC.Event.stopObserving = SC.Event.remove ;
 SC.Event.fire = SC.Event.trigger;
 
 // Register unload handler to eliminate any registered handlers
-// This avoids leaks in IE and issues with mouseout or other handlers on 
+// This avoids leaks in IE and issues with mouseout or other handlers on
 // other browsers.
 
 if(SC.browser.msie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
@@ -973,11 +973,11 @@ SC.MODIFIER_KEYS = {
 };
 
 SC.FUNCTION_KEYS = {
-  8: 'backspace',  9: 'tab',  13: 'return',  19: 'pause',  27: 'escape',  
-  33: 'pageup', 34: 'pagedown', 35: 'end', 36: 'home', 
-  37: 'left', 38: 'up', 39: 'right', 40: 'down', 44: 'printscreen', 
-  45: 'insert', 46: 'delete', 112: 'f1', 113: 'f2', 114: 'f3', 115: 'f4', 
-  116: 'f5', 117: 'f7', 119: 'f8', 120: 'f9', 121: 'f10', 122: 'f11', 
+  8: 'backspace',  9: 'tab',  13: 'return',  19: 'pause',  27: 'escape',
+  33: 'pageup', 34: 'pagedown', 35: 'end', 36: 'home',
+  37: 'left', 38: 'up', 39: 'right', 40: 'down', 44: 'printscreen',
+  45: 'insert', 46: 'delete', 112: 'f1', 113: 'f2', 114: 'f3', 115: 'f4',
+  116: 'f5', 117: 'f7', 119: 'f8', 120: 'f9', 121: 'f10', 122: 'f11',
   123: 'f12', 144: 'numlock', 145: 'scrolllock'
 } ;
 
