@@ -67,6 +67,14 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
     SC.Event.add(f, 'load', this, this.iframeDidLoad);
   },
 
+  /**
+    Called before the layer gets destroyed.
+  */
+  willDestroyLayer: function() {
+    var f = this.$('iframe');
+    // Remove the onload event so that the iframe can be released
+    SC.Event.remove(f, 'load', this, this.iframeDidLoad);
+  },
 
   /**  @private
     Called when iframe onload event is fired.
