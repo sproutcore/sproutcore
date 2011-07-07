@@ -39,7 +39,7 @@ sc_require('views/menu_item');
 
       var menuItems = [
         { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
-        { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
+        { title: 'Checked Menu Item', checkbox: YES, keyEquivalent: 'ctrl_a' },
         { title: 'Selected Menu Item', keyEquivalent: ['backspace', 'delete'] },
         { isSeparator: YES },
         { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
