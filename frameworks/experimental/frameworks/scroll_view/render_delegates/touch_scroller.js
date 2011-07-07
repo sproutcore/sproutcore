@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.BaseTheme.touchScrollerRenderDelegate = SC.RenderDelegate.create({
-  name: 'touch-scroller',
+  className: 'touch-scroller',
 
   render: function (dataSource, context) {
     var layoutDirection = dataSource.get('layoutDirection'),

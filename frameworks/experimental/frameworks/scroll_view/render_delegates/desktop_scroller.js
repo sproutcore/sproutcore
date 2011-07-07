@@ -7,7 +7,7 @@
 
 
 SC.BaseTheme.desktopScrollerRenderDelegate = SC.RenderDelegate.create({
-  name: 'desktop-scroller',
+  className: 'desktop-scroller',
 
   render: function (dataSource, context) {
     var layoutDirection = dataSource.get('layoutDirection'),
