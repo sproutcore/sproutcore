@@ -437,7 +437,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   /**
     Invoked whenever the value of the "from" property changes.  This will mark
     the binding as dirty if the value has changed.
-    
+
     @param {Object} target The object that contains the key
     @param {String} key The name of the property which changed
   */
@@ -467,7 +467,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     if the value does not match the transformedBindingValue, then it will
     become the new bindingValue.
-    
+
     @param {Object} target The object that contains the key
     @param {String} key The name of the property which changed
   */
@@ -983,7 +983,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   /**
     Adds a transform that will return YES if the value is null or undefined, NO otherwise.
-    
+
     @param {String} [fromPath]
     @returns {SC.Binding} this
   */
