@@ -469,7 +469,7 @@ SC.MenuPane = SC.PickerPane.extend(
     The name of the property that determines whether a unique exampleView should be created for the item .
 
     @type String
-    @default "layerId"
+    @default "exampleView"
     @commonTask Menu Item Properties
   */
   itemExampleViewKey: 'exampleView',
