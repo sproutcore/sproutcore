@@ -249,7 +249,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /**
     Disable context menu.
-    
+
     @property {Boolean}
     @default NO
   */
@@ -466,6 +466,15 @@ SC.MenuPane = SC.PickerPane.extend(
   itemLayerIdKey: 'layerId',
 
   /**
+    The name of the property that determines whether a unique exampleView should be created for the item .
+
+    @type String
+    @default "layerId"
+    @commonTask Menu Item Properties
+  */
+  itemExampleViewKey: 'exampleView',
+
+  /**
     The array of keys used by SC.MenuItemView when inspecting your menu items
     for display properties.
 
@@ -588,7 +597,7 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   /**
-    Remove the menu pane status from the pane.  This will simply set the 
+    Remove the menu pane status from the pane.  This will simply set the
     `menuPane` on the `rootResponder` to `null.
 
     @returns {SC.Pane} receiver
@@ -627,7 +636,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   createMenuItemViews: function() {
     var views = [], items = this.get('displayItems'),
-        exampleView = this.get('exampleView'), item, view,
+        exampleView = this.get('exampleView'), item, itemView, view,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
         keyArray, idx, layerIdKey, propertiesHash,
@@ -636,6 +645,7 @@ SC.MenuPane = SC.PickerPane.extend(
     if (!items) return views; // return an empty array
     heightKey = this.get('itemHeightKey');
     separatorKey = this.get('itemSeparatorKey');
+    exampleViewKey = this.get('itemExampleViewKey');
     defaultHeight = this.get('itemHeight');
     keyEquivalentKey = this.get('itemKeyEquivalentKey');
     separatorHeight = this.get('itemSeparatorHeight');
@@ -652,16 +662,27 @@ SC.MenuPane = SC.PickerPane.extend(
       if (!height) {
         height = item.get(separatorKey) ? separatorHeight : defaultHeight;
       }
+
       propertiesHash = {
         layout: { height: height, top: menuHeight },
         contentDisplayProperties: keyArray,
         content: item,
         parentMenu: this
       };
+
       if(item.get(layerIdKey)) {
         propertiesHash.layerId = item.get(layerIdKey);
       }
-      view = this._menuView.createChildView(exampleView, propertiesHash);
+
+      // Item has its own exampleView so use it
+      itemExampleView = item.get(exampleViewKey);
+      if (itemExampleView) {
+        itemView = itemExampleView;
+      } else {
+        itemView = exampleView;
+      }
+
+      view = this._menuView.createChildView(itemView, propertiesHash);
       views[idx] = view;
       menuHeight += height;
       keyEquivalent = item.get(keyEquivalentKey);
