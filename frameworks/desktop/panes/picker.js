@@ -7,9 +7,9 @@
 
 sc_require('panes/palette');
 
-/** 
+/**
   Popular customized picker position rules:
-  default: initiated just below the anchor. 
+  default: initiated just below the anchor.
            shift x, y to optimized picker visibility and make sure top-left corner is always visible.
   menu :   same as default rule +
            default(1,4,3) or custom offset below the anchor for default location to fine tunned visual alignment +
@@ -51,7 +51,7 @@ SC.PICKER_POINTER = 'pointer';
 */
 SC.PICKER_MENU_POINTER = 'menu-pointer';
 
-/** 
+/**
   Pointer layout for perfect right/left/top/bottom.
 
   @constant
@@ -61,10 +61,10 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 
 /**
   @class
-  
+
   Display a non-modal pane that automatically repositions around a view so as
   to remain visible.
-  
+
   An `SC.PickerPane` repositions around the view to which it is anchored as the
   browser window is resized so as to ensure the pane's content remains visible.
   A picker pane is useful for displaying supplementary information and does not
@@ -82,11 +82,11 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
         layout: { width: 400, height: 200 },
         contentView: SC.View.extend({})
       }).popup(someView);
-  
+
   This displays the `SC.PickerPane` anchored to `someView`.
 
   ## Positioning
-  
+
   Picker pane positioning can be classified into two broad categories:
   offset-based and position-based.
 
@@ -99,66 +99,66 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   value the y offset. The third value can be `0` (right) or `3` (bottom),
   controlling whether the origin of the pane is further offset by the width
   (in the case of 0) or the height (in the case of 3) of the anchor.
-  
+
   ### Position-based
-  
+
   When `preferType` is `SC.PICKER_POINTER` or `SC.PICKER_MENU_POINTER`, then
   the `preferMatrix` specifies the sides in the order in which you want the
   `SC.PickerPane` to try to arrange itself around the view to which it is
   anchored. The fifth element in the `preferMatrix` specifies which side the
   `SC.PickerPane` should display on when there isn't enough space around any
   of the preferred sides.
-  
+
   Anchor sides are defined by their index in `SC.POINTER_LAYOUT`, where right
   is `0`, left is `1`, top is `2`, and bottom is `3`.
-  
+
   For example, the `preferMatrix` of `[3, 0, 1, 2, 2]` says: "Display below the
   anchor (3); if there isn't enough space then display to the right of the anchor (0).
   If there isn't enough space either below or to the right of the anchor, then appear
   to the left (1), unless there is also no space on the left, in which case display
   above the anchor (2)."
-  
+
   ## Position Rules
-  
+
   When invoking `.popup()` you can optionally specify a picker position rule with
   the `preferType` argument.
-  
+
   If no `preferType` is specified, the picker pane is displayed just below the anchor.
   The pane will reposition automatically for optimal visibility, ensuring the top-left
   corner is visible.
-  
+
   These position rules have the following behaviors:
-  
+
   ### `SC.PICKER_MENU`
-  
+
   Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]`.
   Furthermore, a minimum left and right padding to window, of 7px and 8px, respectively,
   is enforced.
-  
-  
+
+
   ### `SC.PICKER_FIXED`
-  
+
   Positioning is offset-based, with `preferMatrix` defaulting to `[1, 4, 3]` and
   skipping `fitPositionToScreen`.
-  
-  
+
+
   ### `SC.PICKER_POINTER`
-  
+
   Positioning is position-based, with `preferMatrix` defaulting to `[0, 1, 2, 3, 2]`,
   i.e. right > left > top > bottom; fallback to top.
-  
-  
+
+
   ### `SC.PICKER_MENU_POINTER`
-  
+
   Positioning is position-based, with `preferMatrix` defaulting to `[3, 0, 1, 2, 3]`,
   i.e. bottom, right, left, top; fallback to bottom.
-  
-  
-  
+
+
+
   ## Examples
-  
+
   Examples for applying popular customized picker position rules:
-  
+
   ### default:
 
       SC.PickerPane.create({
@@ -200,7 +200,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
         layout: { width: 400, height: 200 },
         contentView: SC.View.extend({})
       }).popup(anchor, SC.PICKER_POINTER);
-  
+
   Positioning: right (0) > left (1) > top (2) > bottom (3). Fallback to top (2).
 
   ### pointer with custom `preferMatrix` of `[3,0,1,2,2]`:
@@ -218,34 +218,34 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
         layout: { width: 400, height: 200 },
         contentView: SC.View.extend({})
       }).popup(anchor, SC.PICKER_MENU_POINTER);
-  
+
   Positioning: bottom (3) > right (0) > left (1) > top (2). Fallback to bottom (3).
- 
+
   @extends SC.PalettePane
   @since SproutCore 1.0
 */
 SC.PickerPane = SC.PalettePane.extend(
 /** @scope SC.PickerPane.prototype */ {
-  
+
   /**
     @type Array
     @default ['sc-picker']
     @see SC.View#classNames
   */
   classNames: ['sc-picker'],
-  
+
   /**
     @type Boolean
     @default YES
   */
   isAnchored: YES,
-  
+
   /**
     @type Boolean
     @default YES
   */
   isModal: YES,
-  
+
   /**
     @type String
     @default 'perfectRight'
@@ -263,12 +263,12 @@ SC.PickerPane = SC.PalettePane.extend(
     @default 0
   */
   pointerPosY: 0,
-  
+
   /**
-    This property will be set to the element (or view.get('layer')) that 
-    triggered your picker to show.  You can use this to properly position your 
+    This property will be set to the element (or view.get('layer')) that
+    triggered your picker to show.  You can use this to properly position your
     picker.
-    
+
     @type HTMLElement
     @default null
   */
@@ -281,18 +281,18 @@ SC.PickerPane = SC.PalettePane.extend(
     @default null
   */
   anchorCached: null,
-  
+
   /**
     popular customized picker position rule
-    
+
     @type String
     @default null
   */
   preferType: null,
-  
+
   /**
     default/custom offset or position pref matrix for specific preferType
-    
+
     @type String
     @default null
   */
@@ -313,13 +313,13 @@ SC.PickerPane = SC.PalettePane.extend(
     @default 0
   */
   extraRightOffset: 0,
-  
+
   /**
-    The target object to invoke the remove action on when the user clicks off the 
+    The target object to invoke the remove action on when the user clicks off the
     picker that is to be removed.
 
     If you set this target, the action will be called on the target object
-    directly when the user clicks off the picker. If you leave this property 
+    directly when the user clicks off the picker. If you leave this property
     set to null, then the button will search the responder chain for a view that
     implements the action when the button is pressed instead.
 
@@ -327,19 +327,19 @@ SC.PickerPane = SC.PalettePane.extend(
     @default null
   */
   removeTarget: null,
-  
+
   /**
     The name of the action you want triggered when the user clicks off the
-    picker pane that is to be removed. 
-    
+    picker pane that is to be removed.
+
     This property is used in conjunction with the removeTarget property to execute
-    a method when the user clicks off the picker pane.  
+    a method when the user clicks off the picker pane.
 
     If you do not set a target, then clicking off the picker pane will cause the
     responder chain to search for a view that implements the action you name
-    here, if one was provided. 
-    
-    Note that this property is optional. If no explicit value is provided then the 
+    here, if one was provided.
+
+    Note that this property is optional. If no explicit value is provided then the
     picker pane will perform the default action which is to simply remove itself.
 
     @type String
@@ -373,25 +373,26 @@ SC.PickerPane = SC.PalettePane.extend(
   },
 
   /** @private
-    The ideal position for a picker pane is just below the anchor that 
-    triggered it + offset of specific preferType. Find that ideal position, 
-    then call fitPositionToScreen to get final position. If anchor is missing, 
+    The ideal position for a picker pane is just below the anchor that
+    triggered it + offset of specific preferType. Find that ideal position,
+    then call fitPositionToScreen to get final position. If anchor is missing,
     fallback to center.
-  */  
+  */
   positionPane: function(useAnchorCached) {
     useAnchorCached = useAnchorCached && this.get('anchorCached');
-    
+
     var anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
         origin;
-        
-    
-    // usually an anchorElement will be passed.  The ideal position is just 
+
+
+    // usually an anchorElement will be passed.  The ideal position is just
     // below the anchor + default or custom offset according to preferType.
-    // If that is not possible, fitPositionToScreen will take care of that for 
+    // If that is not possible, fitPositionToScreen will take care of that for
     // other alternative and fallback position.
+
     if (anchor) {
       if(!useAnchorCached) {
         anchor = this.computeAnchorRect(anchor);
@@ -405,19 +406,19 @@ SC.PickerPane = SC.PalettePane.extend(
           case SC.PICKER_MENU:
           case SC.PICKER_FIXED:
             if(!preferMatrix || preferMatrix.length !== 3) {
-              // default below the anchor with fine-tuned visual alignment 
+              // default below the anchor with fine-tuned visual alignment
               // for Menu to appear just below the anchorElement.
               this.set('preferMatrix', [1, 4, 3]) ;
             }
 
             // fine-tuned visual alignment from preferMatrix
             origin.x += ((this.preferMatrix[2]===0) ? origin.width : 0) + this.preferMatrix[0] ;
-            origin.y += ((this.preferMatrix[2]===3) ? origin.height : 0) + this.preferMatrix[1];    
+            origin.y += ((this.preferMatrix[2]===3) ? origin.height : 0) + this.preferMatrix[1];
             break;
           default:
             origin.y += origin.height ;
             break;
-        }   
+        }
       } else {
         origin.y += origin.height ;
       }
@@ -434,10 +435,10 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /** @private
     This method will return ret (x, y, width, height) from a rectangular element
-    Notice: temp hack for calculating visiable anchor height by counting height 
+    Notice: temp hack for calculating visiable anchor height by counting height
     up to window bottom only. We do have 'clippingFrame' supported from view.
     But since our anchor can be element, we use this solution for now.
-  */  
+  */
   computeAnchorRect: function(anchor) {
     var bounding, ret, cq,
         wsize = SC.RootResponder.responder.computeWindowSize();
@@ -482,14 +483,14 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /** @private
     This method will dispatch to the right re-position rule according to preferType
-  */  
+  */
   fitPositionToScreen: function(preferredPosition, picker, anchor) {
     // get window rect.
     //if(this._prefPosX && this._prefPosY)
-    
+
     var wsize = SC.RootResponder.responder.computeWindowSize(),
         wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
-        
+
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
     if(this.preferType) {
@@ -507,13 +508,13 @@ SC.PickerPane = SC.PalettePane.extend(
           this.setupPointer(anchor);
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
           break;
-          
+
         case SC.PICKER_FIXED:
           // skip fitPositionToScreen
           break;
         default:
           break;
-      }     
+      }
     } else {
       // apply default re-position rule
       picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
@@ -523,11 +524,11 @@ SC.PickerPane = SC.PalettePane.extend(
   },
 
   /** @private
-    re-position rule migrated from old SC.OverlayPaneView. 
+    re-position rule migrated from old SC.OverlayPaneView.
     shift x, y to optimized picker visibility and make sure top-left corner is always visible.
   */
   fitPositionToScreenDefault: function(w, f, a) {
-    // make sure the right edge fits on the screen.  If not, anchor to 
+    // make sure the right edge fits on the screen.  If not, anchor to
     // right edge of anchor or right edge of window, whichever is closer.
     if (SC.maxX(f) > w.width) {
       var mx = Math.max(SC.maxX(a), f.width) ;
@@ -535,7 +536,7 @@ SC.PickerPane = SC.PalettePane.extend(
     }
 
     // if the left edge is off of the screen, try to position at left edge
-    // of anchor.  If that pushes right edge off screen, shift back until 
+    // of anchor.  If that pushes right edge off screen, shift back until
     // right is on screen or left = 0
     if (SC.minX(f) < 0) {
       f.x = SC.minX(Math.max(a,0)) ;
@@ -559,7 +560,7 @@ SC.PickerPane = SC.PalettePane.extend(
       mx = Math.min(SC.maxY(a), (w.height - a.height)) ;
       f.y = Math.max(mx, 0) ;
     }
-    return f ;    
+    return f ;
   },
 
   /** @private
@@ -593,7 +594,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     // Make sure we are at least 7 pixels from the left edge of the screen.
     if( paneFrame.x < 7 ) paneFrame.x = 7;
-    
+
     if (paneFrame.y < 7) {
       paneFrame.height += paneFrame.y;
       paneFrame.y = 7;
@@ -638,7 +639,7 @@ SC.PickerPane = SC.PalettePane.extend(
   fitPositionToScreenPointer: function(w, f, a) {
     var offset = [this.pointerOffset[0], this.pointerOffset[1],
                   this.pointerOffset[2], this.pointerOffset[3]];
-                  
+
     // initiate perfect positions matrix
     // 4 perfect positions: right > left > top > bottom
     // 2 coordinates: x, y
@@ -653,7 +654,7 @@ SC.PickerPane = SC.PalettePane.extend(
                     [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y+offset[2]],
                     [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y+a.height+f.height+offset[3]]];
     // cutoff of 4 perfect positioned f: top, right, bottom, left  (4x4)
-    var cutoffPrefP =[[prefP1[0][1]>0 ? 0 : 0-prefP1[0][1], prefP2[0][0]<w.width ? 0 : prefP2[0][0]-w.width, prefP2[0][1]<w.height ? 0 : prefP2[0][1]-w.height, prefP1[0][0]>0 ? 0 : 0-prefP1[0][0]], 
+    var cutoffPrefP =[[prefP1[0][1]>0 ? 0 : 0-prefP1[0][1], prefP2[0][0]<w.width ? 0 : prefP2[0][0]-w.width, prefP2[0][1]<w.height ? 0 : prefP2[0][1]-w.height, prefP1[0][0]>0 ? 0 : 0-prefP1[0][0]],
                       [prefP1[1][1]>0 ? 0 : 0-prefP1[1][1], prefP2[1][0]<w.width ? 0 : prefP2[1][0]-w.width, prefP2[1][1]<w.height ? 0 : prefP2[1][1]-w.height, prefP1[1][0]>0 ? 0 : 0-prefP1[1][0]],
                       [prefP1[2][1]>0 ? 0 : 0-prefP1[2][1], prefP2[2][0]<w.width ? 0 : prefP2[2][0]-w.width, prefP2[2][1]<w.height ? 0 : prefP2[2][1]-w.height, prefP1[2][0]>0 ? 0 : 0-prefP1[2][0]],
                       [prefP1[3][1]>0 ? 0 : 0-prefP1[3][1], prefP2[3][0]<w.width ? 0 : prefP2[3][0]-w.width, prefP2[3][1]<w.height ? 0 : prefP2[3][1]-w.height, prefP1[3][0]>0 ? 0 : 0-prefP1[3][0]]];
@@ -667,12 +668,12 @@ SC.PickerPane = SC.PalettePane.extend(
       f.x = a.x+parseInt(a.width/2,0);
       f.y = a.y+parseInt(a.height/2,0)-parseInt(f.height/2,0);
       this.set('pointerPos', SC.POINTER_LAYOUT[0]+' fallback');
-      this.set('pointerPosY', parseInt(f.height/2,0)-40);      
+      this.set('pointerPosY', parseInt(f.height/2,0)-40);
     } else {
       f.x = prefP1[m[4]][0];
       f.y = prefP1[m[4]][1];
       this.set('pointerPos', SC.POINTER_LAYOUT[m[4]]);
-      this.set('pointerPosY', 0);      
+      this.set('pointerPosY', 0);
     }
     this.set('pointerPosX', 0);
 
@@ -719,9 +720,9 @@ SC.PickerPane = SC.PalettePane.extend(
         i = SC.POINTER_LAYOUT.length;
       }
     }
-    return f ;    
+    return f ;
   },
-  
+
   /** @private
     This method will set up pointerOffset and preferMatrix according to type
     and size if not provided explicitly.
@@ -729,7 +730,7 @@ SC.PickerPane = SC.PalettePane.extend(
   setupPointer: function(a) {
     var pointerOffset = this.pointerOffset,
         K             = SC.PickerPane;
-    
+
     // set up pointerOffset according to type and size if not provided explicitly
     if (!pointerOffset || pointerOffset.length !== 4) {
       if (this.get('preferType') == SC.PICKER_MENU_POINTER) {
@@ -783,7 +784,7 @@ SC.PickerPane = SC.PalettePane.extend(
       this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,0,1,2,3] : [0,1,2,3,2]) ;
     }
   },
-  
+
   /**
     @type Array
     @default ['preferType','pointerPos','pointerPosY']
@@ -820,30 +821,30 @@ SC.PickerPane = SC.PalettePane.extend(
   mouseDown: function(evt) {
     return this.modalPaneDidClick(evt);
   },
-  
+
   /** @private
-    internal method to define the range for clicking inside so the picker 
-    won't be clicked away default is the range of contentView frame. 
+    internal method to define the range for clicking inside so the picker
+    won't be clicked away default is the range of contentView frame.
     Over-write for adjustments. ex: shadow
   */
   clickInside: function(frame, evt) {
     return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
   },
 
-  /** 
+  /**
     Invoked by the root responder. Re-position picker whenever the window resizes.
   */
   windowSizeDidChange: function(oldSize, newSize) {
     this.positionPane();
   },
-  
+
   remove: function(){
     if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._showOverflow();
     return sc_super();
   },
-  
+
   /** @private
-    Internal method to hide the overflow on the body to make sure we don't 
+    Internal method to hide the overflow on the body to make sure we don't
     show scrollbars when the picker has shadows, as it's really anoying.
   */
   _hideOverflow: function(){
@@ -877,7 +878,7 @@ SC.PickerPane = SC.PalettePane.extend(
   Default metrics for the different control sizes.
 */
 
-// Counter to track how many pickers are open. This help us to now when to 
+// Counter to track how many pickers are open. This help us to now when to
 // show/hide the body overflow.
 SC.PICKERS_OPEN = 0;
 
