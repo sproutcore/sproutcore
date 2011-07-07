@@ -80,6 +80,20 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     });
   },
 
+  willDestroyLayerMixin: function() {
+    var input = this.$input();
+
+    if (SC.browser.msie) {
+      SC.Event.remove(input, 'focusin', this, this.focusIn);
+      SC.Event.remove(input, 'focusout', this, this.focusOut);
+    } else {
+      SC.Event.remove(input, 'focus', this, this.focusIn);
+      SC.Event.remove(input, 'blur', this, this.focusOut);
+    }
+
+    input.unbind('change');
+  },
+
   focusIn: function(event) {
     this.becomeFirstResponder();
     this.tryToPerform('focus', event);
