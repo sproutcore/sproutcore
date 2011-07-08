@@ -1056,6 +1056,9 @@ SC.CoreView.reopen(
     // SC.RootResponder to dispatch incoming events.
     SC.View.views[this.get('layerId')] = this;
 
+    // setup classNames
+    this.classNames = this.get('classNames').slice();
+
     // setup child views.  be sure to clone the child views array first
     this.childViews = this.get('childViews').slice() ;
     this.createChildViews() ; // setup child Views
