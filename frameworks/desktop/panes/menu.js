@@ -276,14 +276,13 @@ SC.MenuPane = SC.PickerPane.extend(
     this.beginPropertyChanges();
     if(anchorViewOrElement){
       if (anchorViewOrElement.isView) {
-        anchor = anchorViewOrElement.get('layer');
+        this._anchorView = anchorViewOrElement;
         this._setupScrollObservers(anchorViewOrElement);
       } else {
-        anchor = anchorViewOrElement;
+        this._anchorHTMLElement = anchorViewOrElement;
       }
     }
-    this.set('anchorElement',anchor) ;
-    this.set('anchor',anchorViewOrElement);
+   // this.set('anchor',anchorViewOrElement);
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
 
     this.adjust('height', this.get('menuHeight'));

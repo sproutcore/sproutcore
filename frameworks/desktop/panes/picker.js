@@ -357,6 +357,9 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   repositionOnWindowResize: YES,
   
+  _anchorView: null,
+  _anchorHTMLElement: null,
+  
   /**
     Displays a new picker pane.
 
@@ -367,17 +370,15 @@ SC.PickerPane = SC.PalettePane.extend(
     @returns {SC.PickerPane} receiver
   */
   popup: function(anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
-    var anchor;
     if(anchorViewOrElement){
       if (anchorViewOrElement.isView) {
-        anchor = anchorViewOrElement.get('layer');
+        this._anchorView = anchorViewOrElement;
         this._setupScrollObservers(anchorViewOrElement);
       } else {
-        anchor = anchorViewOrElement;
+        this._anchorHTMLElement = anchorViewOrElement;
       }
     }
     this.beginPropertyChanges();
-    this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
     if (pointerOffset) this.set('pointerOffset',pointerOffset) ;
@@ -867,6 +868,13 @@ SC.PickerPane = SC.PalettePane.extend(
     this._removeScrollObservers();
     return sc_super();
   },
+  
+  
+  /** Figure out what is the anchor element */
+  anchorElement: function() {
+    return this._anchorView ? this._anchorView.get('layer') : this.anchorHTMLElement;
+  }.property('layer').cacheable(),
+  
   
   /** @private
     Internal method to hide the overflow on the body to make sure we don't 
