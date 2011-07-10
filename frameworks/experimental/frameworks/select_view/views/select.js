@@ -379,16 +379,6 @@ SC.SelectView = SC.PopupButtonView.extend({
     return -1;
   }.property('value', 'menu').cacheable(),
 
-
-  /*
-    Documented in base class; supplying documentation here will break the argument list.
-  */
-  showMenu: function(orig) {
-    orig();
-
-    var menu = this.get('menu'), itemViews = menu.get('menuItemViews');
-  }.enhance(),
-
   /**
     The minimum width for the child menu. For instance, this property can make the
     menu always cover the entire SelectView--or, alternatively, cover all but the
