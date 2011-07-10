@@ -195,6 +195,12 @@ SC.PopupButtonView = SC.ButtonView.extend({
     // instantly. Using setTimeout will guarantee that control goes back to the
     // browser.
     var self = this;
+
+    // there is a bit of a race condition: we could get mouse up immediately.
+    // In that case, we will take note that the timestamp is 0 and treat it
+    // as if it were Date.now() at the time of checking.
+    self._mouseDownTimestamp = 0;
+
     setTimeout(function() {
       this._mouseDownTimestamp = new Date().getTime();
     }, 1);
@@ -219,6 +225,11 @@ SC.PopupButtonView = SC.ButtonView.extend({
           menu.remove();
         }
       } else {
+        // normalize the mouseDownTimestamp: it may not have been set yet.
+        if (this._mouseDownTimestamp === 0) {
+          this._mouseDownTimestamp = Date.now();
+        }
+        
         // If the user waits more than 200ms between mouseDown and mouseUp,
         // we can assume that they are clicking and dragging to the menu item,
         // and we should close the menu if they mouseup anywhere not inside
