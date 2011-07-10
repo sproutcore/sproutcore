@@ -539,7 +539,16 @@ SC.MenuPane = SC.PickerPane.extend(
       controlSize: this.get('controlSize')
     });
 
-    menuView = this._menuView = SC.View.create();
+    menuView = this._menuView = SC.View.create({
+      parentViewDidResize: function() {
+        this.notifyPropertyChange('frame');
+      },
+      
+      viewDidResize: function() {
+        
+      }
+    });
+    
     menuItemViews = this.get('menuItemViews');
     menuView.set('layout', { top: 0, left: 0, height : this.get('menuHeight')});
     menuView.replaceAllChildren(menuItemViews);
