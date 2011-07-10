@@ -871,8 +871,28 @@ SC.PickerPane = SC.PalettePane.extend(
   
   
   /** Figure out what is the anchor element */
-  anchorElement: function() {
-    return this._anchorView ? this._anchorView.get('layer') : this.anchorHTMLElement;
+  anchorElement: function(key, value) {
+    var anchorView;
+
+    if (value === undefined) {
+      // Getting the value.
+      anchorView = this._anchorView;
+      return anchorView ? anchorView.get('layer') : this._anchorHTMLElement;
+    }
+    else {
+      // Setting the value.
+      if (!value) {
+        throw "You must set 'anchorElement' to either a view or a DOM element";
+      }
+      else if (value.isView) {
+        this._anchorView        = value;
+        this._anchorHTMLElement = null;
+      }
+      else {
+        this._anchorView        = null;
+        this._anchorHTMLElement = value;
+      }
+    }
   }.property('layer').cacheable(),
   
   
