@@ -7,9 +7,7 @@
 /*global module test equals context ok same */
 
 (function() {
-  var target, pane, noneView, actionView,
-      paneActionSpy, paneSomeActionSpy,
-      targetActionSpy, targetSomeActionSpy;
+  var target, pane, sendActionSpy, view;
 
   module("SC.ActionSupport", {
     setup: function() {
@@ -18,42 +16,26 @@
         someAction: function() {}
       });
 
-      pane = SC.Pane.create({
-        childViews: ['noneView', 'actionView'],
+      var rootResponder = {sendAction: function(){} };
+      sendActionSpy = CoreTest.spyOn(rootResponder, 'sendAction');
 
-        mainAction: function() {},
-        someAction: function() {},
-
-        noneView: SC.View.design(SC.ActionSupport, {
-          action: 'mainAction',
-
-          mouseDown: function() {
-            this.fireAction();
-          }
-        }),
-
-        actionView: SC.View.design(SC.ActionSupport, {
-          otherAction: 'someAction',
-
-          mouseDown: function() {
-            this.fireAction(this.get('otherAction'));
-          }
-        })
+      pane = SC.Object.create({
+        rootResponder: rootResponder
       });
-      pane.append();
 
-      noneView = pane.get('noneView');
-      actionView = pane.get('actionView');
+      view = SC.View.create(SC.ActionSupport, {
+        action: null,
+        zomgAction: null,
+        pane: pane,
 
-      paneActionSpy = CoreTest.spyOn(pane, 'mainAction');
-      paneSomeActionSpy = CoreTest.spyOn(pane, 'someAction');
-
-      targetActionSpy = CoreTest.spyOn(target, 'mainAction');
-      targetSomeActionSpy = CoreTest.spyOn(target, 'someAction');
+        someEvent: function() {
+          return this.fireAction(this.get('zomgAction'));
+        }
+      });
     },
+
     teardown: function() {
-      pane.remove().destroy();
-      pane = noneView = actionView = null;
+      target = pane = sendActionSpy = view = null;
     }
   });
 
@@ -62,23 +44,23 @@
   // No Parameters
   // 
 
-  test("no paramaters - Invoking actions without setting target fires along responder chain", function() {
-    noneView.mouseDown();
+  test("no paramaters - only action set", function() {
+    var expectedAction = 'someAction';
 
-    ok(paneActionSpy.wasCalled, "pane mainAction was called by fireAction");
-    ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
-    ok(!targetActionSpy.wasCalled, "target mainAction was not called by fireAction");
-    ok(!targetSomeActionSpy.wasCalled, "target someAction was not called by fireAction");
+    view.set('action', expectedAction);
+    view.fireAction();
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, null, view), 'triggers the action');
   });
 
-  test("no paramaters - Invoking actions with target set calls on target", function() {
-    noneView.set('target', target);
-    noneView.mouseDown();
+  test("no paramaters - action and target set", function() {
+    var expectedAction = 'someAction';
 
-    ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
-    ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
-    ok(targetActionSpy.wasCalled, "target mainAction was called by fireAction");
-    ok(!targetSomeActionSpy.wasCalled, "target someAction was not called by fireAction");
+    view.set('target', target);
+    view.set('action', expectedAction);
+    view.fireAction();
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, target, view, pane, null, view), 'triggers the action');
   });
 
 
@@ -86,23 +68,39 @@
   // Actions Parameter
   // 
 
-  test("action parameter - Invoking actions without setting target fires along responder chain", function() {
-    actionView.mouseDown();
+  test("action parameter - only action set", function() {
+    var expectedAction = 'someAction';
 
-    ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
-    ok(paneSomeActionSpy.wasCalled, "pane someAction was called by fireAction");
-    ok(!targetActionSpy.wasCalled, "target mainAction was not called by fireAction");
-    ok(!targetSomeActionSpy.wasCalled, "target someAction was not called by fireAction");
+    view.set('zomgAction', expectedAction);
+    view.someEvent();
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, null, view), 'triggers the action');
   });
 
-  test("action parameter - Invoking actions with target set calls on target", function() {
-    actionView.set('target', target);
-    actionView.mouseDown();
+  test("action parameter - action and target set", function() {
+    var expectedAction = 'someAction';
 
-    ok(!paneActionSpy.wasCalled, "pane mainAction was not called by fireAction");
-    ok(!paneSomeActionSpy.wasCalled, "pane someAction was not called by fireAction");
-    ok(!targetActionSpy.wasCalled, "target mainAction was not called by fireAction");
-    ok(targetSomeActionSpy.wasCalled, "target someAction was called by fireAction");
+    view.set('target', target);
+    view.set('zomgAction', expectedAction);
+    view.someEvent();
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, target, view, pane, null, view), 'triggers the action');
+  });
+
+
+  // ..........................................................
+  // Action Context
+  // 
+
+  test("context", function() {
+    var expectedAction = 'someAction';
+    var context = {zomg: "context"};
+
+    view.set('action', expectedAction);
+    view.set('actionContext', context)
+    view.fireAction();
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, context, view), 'triggers the action');
   });
 
 })();

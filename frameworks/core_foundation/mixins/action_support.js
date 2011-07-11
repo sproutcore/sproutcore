@@ -46,6 +46,15 @@ SC.ActionSupport =
   */
   action: null,
 
+  /**
+    Will be sent along with the action to provide the context of the action.
+    This is an easy way to include information along with the action.
+
+    @type Object
+    @default null
+  */
+  actionContext: null,
+
    /**
      Perform the action. If an action paramter is not provided, then
      the action defaults to the `action` property.
@@ -62,7 +71,7 @@ SC.ActionSupport =
     if (action === undefined) { action = this.get('action'); }
 
     if (action && rootResponder) {
-      return rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
+      return rootResponder.sendAction(action, target, this, this.get('pane'), this.get('actionContext'), this);
     }
 
     return false;
