@@ -541,7 +541,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
-    spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : '';
+    spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : 'spellcheck="false"';
     
     if(SC.browser.mobileSafari){
       autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
