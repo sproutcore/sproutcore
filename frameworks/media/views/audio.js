@@ -4,11 +4,10 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 sc_require('views/controls');
 sc_require('views/mini_controls');
-/** 
-  @class
+
+/** @class
   
   Renders a audioView using different technologies like HTML5 audio tag, 
   quicktime and flash.
@@ -26,13 +25,13 @@ sc_require('views/mini_controls');
   @extends SC.View
   @since SproutCore 1.1
 */
-
 SC.AudioView = SC.View.extend(
-/** @scope SC.AudioView.prototype */{
+  /** @scope SC.AudioView.prototype */{
 
   /** 
     Audio view className. 
-    @property {String}
+    @field
+    @type String
   */
   classNames: 'sc-audio-view',
   
@@ -40,13 +39,15 @@ SC.AudioView = SC.View.extend(
     Properties that trigger a re render of the view. If the value changes, it
     means that the audio url changed.
     
-    @property {Array}
+    @field
+    @type Array
   */
   displayProperties: ['value', 'shouldAutoResize'],
   
   /** 
     Reference to the audio object once is created. 
-    @property {Object}
+    @field
+    @type Object
   */
   
   audioObject:null,
@@ -55,51 +56,59 @@ SC.AudioView = SC.View.extend(
     Array containing the technologies and the order to load them depending
     availability
      
-    @property {Array}
+    @field
+    @type Array
   */
-  degradeList: ['html5','quicktime', 'flash'],
+  degradeList: ['html5', 'quicktime', 'flash'],
   
   /** 
     Current time in secs
-    @property {Number}
+    @field
+    @type Number
   */
   currentTime: 0, 
   
   /** 
     Duration in secs
-    @property {Number}
+    @field
+    @type Number
   */
   duration: 0, //audio duration in secs
   
   /** 
     Volume. The value should be between 0 and 1
-    @property {Number}
+    @field
+    @type Number
   */
   volume:0, //volume value from 0 to 1
   
   /** 
     Tells you if the audio is paused or not.
-    @property {Boolean}
+    @field
+    @type Boolean
   */
   paused: YES, //is the audio paused
 
   /** 
     Tells you if the audio is loaded.
-    @property {Boolean}
+    @field
+    @type Boolean
   */
 
   loaded: NO, //has the audio loaded
   
   /** 
     Indicates if the audio has reached the end
-    @property {Boolean}
+    @field
+    @type Boolean
   */
   
   ended: NO, //did the audio finished playing
   
   /** 
     Indicates if the audio is ready to be played.
-    @property {Boolean}
+    @field
+    @type Boolean
   */
   
   canPlay: NO, //can the audio be played
@@ -108,7 +117,8 @@ SC.AudioView = SC.View.extend(
   
   /** 
     Formatted currentTime. (00:00)
-    @property {String}
+    @field
+    @type String
   */
   time: function(){
     var currentTime=this.get('currentTime'),
