@@ -199,6 +199,7 @@ SC.FlowedLayout = {
     c.addObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('isSpacer', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('maxSpacerLength', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('fillWidth', this, '_scfl_layoutPropertyDidChange');
     c.addObserver('fillHeight', this, '_scfl_layoutPropertyDidChange');
   },
@@ -215,6 +216,7 @@ SC.FlowedLayout = {
     c.removeObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('isSpacer', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('maxSpacerLength', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('fillWidth', this, '_scfl_layoutPropertyDidChange');
     c.removeObserver('fillHeight', this, '_scfl_layoutPropertyDidChange');
   },
@@ -266,9 +268,9 @@ SC.FlowedLayout = {
     @default {width: 0, height: 0}
   */
   flowSizeForChild: function(idx, view) {
-    var cw = view.get('calculatedWidth'), ch = view.get('calculatedHeight');
-    
-    var calc = {}, f = view.get('frame'), l = view.get('layout');
+    var cw = view.get('calculatedWidth'), ch = view.get('calculatedHeight'),
+    layoutDirection = this.get('layoutDirection'),
+    calc = {}, f = view.get('frame'), l = view.get('layout');
     view._scfl_lastFrame = f;
     
     // if there is a calculated width, use that. NOTE: if calculatedWidth === 0,
@@ -286,13 +288,12 @@ SC.FlowedLayout = {
       calc.height = f.height;
     }
 
-    calc.maxHeight = l.maxHeight;
-    calc.maxWidth = l.maxWidth;
-
     // if it is a spacer, we must set the dimension that it
     // expands in to 0.
     if (view.get('isSpacer')) {
-      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
+      calc.maxSpacerLength = view.get('maxSpacerLength');
+
+      if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
         calc.width = l.minWidth || 0;
       } else {
         calc.height = l.minHeight || 0;
@@ -300,13 +301,9 @@ SC.FlowedLayout = {
     }
     
     // if it has a fillWidth/Height, clear it for later
-    if (
-      this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')
-    ) {
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL && view.get('fillHeight')) {
       calc.height = l.minHeight || 0;
-    } else if (
-      this.get('layoutDirection') === SC.LAYOUT_VERTICAL && view.get('fillWidth')
-    ) {
+    } else if (layoutDirection === SC.LAYOUT_VERTICAL && view.get('fillWidth')) {
       calc.width = l.minWidth || 0;
     }
 
@@ -481,7 +478,7 @@ SC.FlowedLayout = {
   _scfl_distributeChildrenIntoRow: function(children, startingAt, row) {
     var idx, len = children.length, plan = row.plan, child, childSize, spacing,
         items = [], itemOffset = 0, isVertical = plan.isVertical, itemSize, itemLength,
-        maxItemLength, maxItemSize,
+        maxItemLength,
         canWrap = this.get('canWrap'),
         newRowPending = NO;
 
@@ -503,13 +500,10 @@ SC.FlowedLayout = {
 
       childSize.width += spacing.left + spacing.right;
       childSize.height += spacing.top + spacing.bottom;
-      childSize.maxWidth += spacing.left + spacing.right;
-      childSize.maxHeight += spacing.top + spacing.bottom;
 
       itemLength = childSize[isVertical ? 'height' : 'width'];
-      maxItemLength = childSize[isVertical ? 'maxHeight' : 'maxWidth'];
+      maxItemLength = childSize.maxSpacerLength + (isVertical ? spacing.top + spacing.bottom : spacing.left + spacing.right);
       itemSize = childSize[isVertical ? 'width' : 'height'];
-      maxItemSize = childSize[isVertical ? 'maxWidth' : 'maxHeight'];
 
       // there are two cases where we must start a new row: if the child or a
       // previous child in the row that wasn't included has
@@ -525,7 +519,6 @@ SC.FlowedLayout = {
         itemLength: itemLength,
         maxItemLength: maxItemLength,
         itemSize: itemSize,
-        maxItemSize: maxItemSize,
         
         spacing: spacing,
         
