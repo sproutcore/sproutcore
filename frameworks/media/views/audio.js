@@ -60,6 +60,91 @@ SC.AudioView = SC.View.extend(
     @type Array
   */
   degradeList: ['html5', 'quicktime', 'flash'],
+
+  /**
+    Checks to see whether a file extension is supported
+    for HTML5 audio.
+
+    @param {String} mediaExtension The media extension to test.
+    @returns {Boolean} Whether the media extension is supported
+   */
+  supportsExtension: function (mediaExtension) {
+    var isSupported = NO;
+
+    switch (mediaExtension && mediaExtension.toLowerCase()) {
+    case 'mp3':
+      isSupported = this.get('supportsMP3');
+      break;
+    case 'wav':
+      isSupported = this.get('supportsWAV');
+      break;
+    case 'ogg':
+    case 'oga':
+      isSupported = this.get('supportsOgg');
+      break;
+    case 'm4a':
+    case 'mp4':
+    case 'aac':
+      isSupported = this.get('supportsAAC');
+      break;
+    }
+
+    return isSupported;
+  },
+
+  /**
+    Whether HTML5 audio is supported.
+    @field
+    @type Boolean
+   */
+  supportsHTML5: function () {
+    return window["Audio"] && (new Audio()).canPlayType;
+  }.property().cacheable(),
+
+  /**
+    Whether the ogg codec is supported in this browser's
+    `<audio/>` tag.
+    @field
+    @type Boolean
+   */
+  supportsOgg: function () {
+    return this.get('supportsHTML5') &&
+      (new Audio()).canPlayType('audio/ogg; codecs="vorbis"');
+  }.property('supportsHTML5').cacheable(),
+
+  /**
+    Whether the WAV codec is supported in this browser's
+    `<audio/>` tag.
+    @field
+    @type Boolean
+   */
+  supportsWAV: function () {
+    return this.get('supportsHTML5') &&
+      (new Audio()).canPlayType('audio/wav; codecs="1"');
+  }.property('supportsHTML5').cacheable(),
+
+  /**
+    Whether the MP3 codec is supported in this browser's
+    `<audio/>` tag.
+    @field
+    @type Boolean
+   */
+  supportsMP3: function () {
+    return this.get('supportsHTML5') &&
+      (new Audio()).canPlayType('audio/mpeg;');
+  }.property('supportsHTML5').cacheable(),
+
+  /**
+    Whether the AAC codec is supported in this browser's
+    `<audio/>` tag.
+    @field
+    @type Boolean
+   */
+  supportsAAC: function () {
+    var audio = this.get('supportsHTML5') && new Audio();
+    return audio &&
+      (audio.canPlayType('audio/x-m4a;') || audio.canPlayType('audio/aac;'));
+  }.property('supportsHTML5').cacheable(),
   
   /** 
     Current time in secs
@@ -135,13 +220,17 @@ SC.AudioView = SC.View.extend(
     @returns {void}
   */
   render: function(context, firstTime) {
-    var i, j, listLen, pluginsLen, id = SC.guidFor(this);
+    var i, j, value = this.get('value'),
+        listLen, pluginsLen, id = SC.guidFor(this);
     if(firstTime){
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
-          if(SC.browser.safari){                          
-            context.push('<audio src="'+this.get('value')+'"');
+          var type = value && value.slice(value.lastIndexOf('.') + 1);
+
+          // Force HTML5 on iOS; then check for support of the file extension
+          if(SC.browser.iOS || this.supportsExtension(type)) {
+            context.push('<audio src="'+value+'"');
             if(this.poster){
               context.push(' poster="'+this.poster+'"');
             }
@@ -164,7 +253,7 @@ SC.AudioView = SC.View.extend(
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
                       'id="qt_'+id+'" '+
                       'codebase="http://www.apple.com/qtactivex/qtplugin.cab">'+
-                      '<param name="src" value="'+this.get('value')+'"/>'+
+                      '<param name="src" value="'+value+'"/>'+
                       '<param name="autoplay" value="false"/>'+
                       '<param name="loop" value="false"/>'+
                       '<param name="controller" value="false"/>'+
@@ -174,7 +263,7 @@ SC.AudioView = SC.View.extend(
                       '<param name="scale" value="aspect"/>'+
                       '<embed width="100%" height="100%" '+
                       'name="qt_'+id+'" '+
-                      'src="'+this.get('value')+'" '+
+                      'src="'+value+'" '+
                       'autostart="false" '+
                       'EnableJavaScript="true" '+
                       'postdomevents="true" '+
@@ -190,7 +279,7 @@ SC.AudioView = SC.View.extend(
         case "flash":
           var flashURL= sc_static('videoCanvas.swf');
 
-          var movieURL = this.get('value');
+          var movieURL = value;
           if (!movieURL) return;
 
           if(movieURL.indexOf('http:')==-1){
