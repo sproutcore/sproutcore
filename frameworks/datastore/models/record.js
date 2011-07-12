@@ -501,13 +501,19 @@ SC.Record = SC.Object.extend(
       @param {SC.Record} record to propagate to
     */
     iter =  function(rec) {
-      var childStatus, parentStatus;
+      var childStatus, parentStore, parentStoreKey, parentStatus;
       
       if (rec) { 
         childStatus = this.get('status');
         if ((childStatus & dirty)  ||  
             (childStatus & readyNew)  ||  (childStatus & destroyed)) {
-          parentStatus = rec.get('status');
+
+          // Since the parent can cache 'status', and we might be called before
+          // it has been invalidated, we'll read the status directly rather than
+          // trusting the cache.
+          parentStore    = rec.get('store');
+          parentStoreKey = rec.get('storeKey');
+          parentStatus   = parentStore.peekStatus(parentStoreKey);
           if (parentStatus === readyClean) {
             // Note:  storeDidChangeProperties() won't put it in the
             //        changelog!
