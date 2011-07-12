@@ -715,13 +715,29 @@ SC.SelectButtonView = SC.ButtonView.extend(
     this.becomeFirstResponder() ;
     this._action() ;
 
-    // Store the current timestamp. We register the timestamp at the end of
-    // the runloop so that the menu has been rendered, in case that operation
+    // Store the current timestamp. We register the timestamp after a setTimeout
+    // so that the menu has been rendered, in case that operation
     // takes more than a few hundred milliseconds.
 
     // One mouseUp, we'll use this value to determine how long the mouse was
     // pressed.
-    this.invokeLast(this._recordMouseDownTimestamp);
+    
+    // we need to keep track that we opened it just now in case we get the
+    // mouseUp before render finishes. If it is 0, then we know we have not
+    // waited long enough.
+    this._menuRenderedTimestamp = 0;
+    
+    var self = this;
+    
+    // setTimeout guarantees that all rendering is done. The browser will even
+    // have rendered by this point.
+    setTimeout(function() {
+      SC.run(function(){
+        // a run loop might be overkill here but what if Date.now fails?
+        self._menuRenderedTimestamp = Date.now();
+      });
+    }, 1);
+
     return YES ;
   },
 
@@ -756,6 +772,11 @@ SC.SelectButtonView = SC.ButtonView.extend(
         menu = this.get('menu'),
         touch = SC.platform.touch,
         targetMenuItem;
+
+    // normalize the previousTimestamp: if it is 0, it might as well be now.
+    // 0 means that we have not even triggered the nearly-immediate saving of timestamp.
+    if (previousTimestamp === 0) previousTimestamp = Date.now();
+
 
     if (menu) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
