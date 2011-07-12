@@ -28,7 +28,5 @@
   	background: black;
   	border-radius:6px;
   	-moz-border-radius:6px;
-  	-webkit-transform: translate3d(0,0,0);
-  	-webkit-transition: left 0.01s ease-in-out;
   }
 }
