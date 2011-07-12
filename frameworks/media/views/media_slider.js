@@ -55,7 +55,7 @@ SC.MediaSlider = SC.SliderView.extend(
     if(!this._defaultsEnsured) {
       this._defaultsEnsured = YES;
       for(i in this._defaults) {
-        if(SC.none(this.get(i))) {
+        if(this._defaults.hasOwnProperty(i) && SC.none(this.get(i))) {
           this.set(i,this._defaults[i]);
         }
       }
