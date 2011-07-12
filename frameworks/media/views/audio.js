@@ -746,35 +746,31 @@ SC.AudioView = SC.View.extend(
     return;
   },
 
-  /*private*/
-
-
-  /**
+  /** @private
     Gets the right audio object depending on the browser.
-    @returns {void}
-  */
-  _getAudioObject:function(){
+    @returns {HTMLElement} The raw audio object.
+   */
+  _getAudioObject:function () {
     if(this.loaded==="html5") return this.get('audioObject');
     if(this.loaded==="quicktime") return document['qt_'+SC.guidFor(this)];
     if(this.loaded==="flash") {
       var movieName='flash_'+SC.guidFor(this);
-      if (window.document[movieName])
-      {
+      if (window.document[movieName]) {
         return window.document[movieName];
       }
-      if (navigator.appName.indexOf("Microsoft Internet")==-1)
-      {
-        if (document.embeds && document.embeds[movieName]) {
-          return document.embeds[movieName];
-        }
-      }
-      else
-      {
+
+      if (navigator.appName.indexOf("Microsoft Internet") === -1 &&
+          document.embeds && document.embeds[movieName]) {
+        return document.embeds[movieName];
+      } else {
         return document.getElementById(movieName);
       }
     }
   },
 
+  /** @private
+    Add leading zeros to a string for string formatting.
+   */
   _addZeros:function(value){
     if(value.toString().length<2) return "0"+value;
     return value;
