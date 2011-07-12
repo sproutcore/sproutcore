@@ -202,6 +202,7 @@ SC.View.reopen(
     this.beginPropertyChanges();
     this.destroyLayer().removeAllChildren();
     for(idx=0;idx<len;idx++) { this.appendChild(views.objectAt(idx)); }
+    this.replaceLayer();
     this.endPropertyChanges();
 
     return this ;
