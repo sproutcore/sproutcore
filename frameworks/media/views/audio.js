@@ -219,6 +219,8 @@ SC.AudioView = SC.View.extend(
     var i, j, value = this.get('value'),
         listLen, pluginsLen, id = SC.guidFor(this);
     if(firstTime){
+      if (value == null) return;
+
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
