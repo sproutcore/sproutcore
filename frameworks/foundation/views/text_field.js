@@ -1055,11 +1055,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
 
     if (this.get('applyImmediately')) {
-      // We need this invokeLater as we need to get the value of the field
-      // once the event has been processed. I tried with invokeLast , but
-      // I guess the field doesn't repaint until js execution finishes and 
-      // therefore the field value doesn't update if we don't give it a break.
-      this.invokeLater(this.fieldValueDidChange, 1);
+      // There used to be an invokeLater here instead of setTimeout. What we
+      // really need is setTimeout.
+      var self = this;
+      setTimeout(function() {
+        self.fieldValueDidChange();
+      }, 10);
     }
 
     return YES;
