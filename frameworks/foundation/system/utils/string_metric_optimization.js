@@ -137,6 +137,10 @@ SC.mixin( /** @scope SC */ {
       metrics.lines = lines;
       metrics.searchPerformed = false;
     }
+    metrics.browserCorrection = 0;
+    if(SC.browser.msie) metrics.browserCorrection = 1;
+    if(SC.browser.mozilla) metrics.browserCorrection = 1;
+    metrics.width = Math.min(maxWidth,metrics.width+metrics.browserCorrection);
     if(cache) cache.list[lines] = metrics;
     if(exIsElement) exEl.style.maxWidth = savedMaxWidth;
     if(searchingUpward) return ret;
