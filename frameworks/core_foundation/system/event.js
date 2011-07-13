@@ -328,9 +328,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
-    // For whatever reason, IE has trouble passing the window object
-    // around, causing it to be cloned in the process
-    if (SC.browser.msie && elem.setInterval) elem = window;
+    /*
+      commenting out this block because 
+      1. this issue is no longer reproducible in IE7, 8 or 9
+      2. this causes undesired behavior if one tries to remove an event from
+         an iframe because elem.setInterval is true there.
+    */
+    // // For whatever reason, IE has trouble passing the window object
+    // // around, causing it to be cloned in the process
+    // if (SC.browser.msie && elem.setInterval) elem = window;
 
     var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
