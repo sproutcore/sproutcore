@@ -1429,7 +1429,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
 
       // pass one or more recordTypes.
       if (recordType && recordType.isEnumerable) {
-        opts.recordsTypes = recordType;
+        opts.recordTypes = recordType;
       } else opts.recordType = recordType;
 
       // set conditions and params if needed
