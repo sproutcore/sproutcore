@@ -315,6 +315,17 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this ;
   },
   
+  /**
+    @private
+    When the length changes, so does the layout. CollectionView doesn't
+    know to do this, because it only asks for layout when it reloads--which
+    makes sense, as it is agnostic to any layout logic (for all it knows, the
+    items in the collection are not in a completely random order relative to layout)
+  */
+  _sclv_lengthDidChange: function() {
+    this.adjust(this.computeLayout());
+  }.observes('length'),
+  
   // ..........................................................
   // SUBCLASS IMPLEMENTATIONS
   // 
