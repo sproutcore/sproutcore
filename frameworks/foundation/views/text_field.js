@@ -584,15 +584,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         adjustmentStyle += '"' ;
       }
       context.push('<span class="padding" '+adjustmentStyle+'>');
-     
+      
+      if(hintOnFocus) {
+        context.push('<span class="hint">',hint,'</span>');
+      }
+                  
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
       if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
-      }
-      
-      if(hintOnFocus) {
-        context.push('<span class="hint%@">'.fmt(value ? ' sc-hidden': ''), hint ,'</span>');
       }
       
       //for gecko pre 1.9 vertical aligment is completely broken so we need
@@ -866,8 +866,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       touchPane = null;
     }
   },
-
-  /** @private */
+  
   _field_fieldValueDidChange: function(evt) {
     if(this.get('focused')){
       SC.run(function() {
@@ -875,21 +874,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }, this);
     }
   },
-
-  /** @private 
-    Make sure to update visibility of hint if it changes
+  
+  /** 
+    Make sure to hide hint if hintOnFocus is on and a character is typed into 
+    the field.
   */
-  updateHintOnFocus: function() {
+  fieldValueDidChange: function() {
     // if there is a value in the field, hide the hint
     var hintOnFocus = this.get('hintOnFocus');
     
     if(hintOnFocus && this.getFieldValue()) {
-      this.$('.hint').addClass('sc-hidden');
+      this.$('.hint').hide();
     }
     else if(hintOnFocus) {
-      this.$('.hint').removeClass('sc-hidden');
+      this.$('.hint').show();
     }
-  }.observes('value'),
+    
+    return sc_super();
+  },
 
   /** @private
     Move magic number out so it can be over-written later in inline editor
