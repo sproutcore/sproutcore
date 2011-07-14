@@ -544,13 +544,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('formattedHint'), 
-        hintOnFocus = this.get('hintOnFocus'),
-        maxLength = this.get('maxLength'),
-        disabled, name, adjustmentStyle, type, 
+    var hint = this.get('formattedHint'), disabled, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckString='', autocapitalizeString='', autocorrectString='',
-        hintString, isOldSafari;
+        maxLength = this.get('maxLength'), isOldSafari;
 
     context.setClass('text-area', this.get('isTextArea'));
     
