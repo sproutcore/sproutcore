@@ -219,9 +219,11 @@ SC.State = SC.Object.extend({
         len = 0,
         valueIsFunc = NO,
         historyState = null;
+        
+    this.set('substates', substates);
             
     if (SC.kindOf(initialSubstate, SC.HistoryState) && initialSubstate.isClass) {
-      historyState = this.createHistoryState(initialSubstate, { parentState: this, statechart: statechart });
+      historyState = this.createSubstate(initialSubstate);
       this.set('initialSubstate', historyState);
       
       if (SC.none(historyState.get('defaultState'))) {
@@ -252,10 +254,7 @@ SC.State = SC.Object.extend({
       }
       
       if (SC.kindOf(value, SC.State) && value.isClass && this[key] !== this.constructor) {
-        state = this.createSubstate(value, { name: key, parentState: this, statechart: statechart });
-        substates.push(state);
-        this[key] = state;
-        state.initState();
+        state = this._addSubstate(key, value);
         if (key === initialSubstate) {
           this.set('initialSubstate', state);
           matchedInitialSubstate = YES;
@@ -276,45 +275,125 @@ SC.State = SC.Object.extend({
       }
     } 
     else if (substates.length > 0) {
-      if (SC.none(initialSubstate) && !substatesAreConcurrent) {
-        state = this.createEmptyState({ parentState: this, statechart: statechart });
-        this.set('initialSubstate', state);
-        substates.push(state);
-        this[state.get('name')] = state;
-        state.initState();
-        this.stateLogWarning("state %@ has no initial substate defined. Will default to using an empty state as initial substate".fmt(this));
-      } 
-      else if (!SC.none(initialSubstate) && substatesAreConcurrent) {
+      state = this._addEmptyInitialSubstateIfNeeded();
+      if (!state && initialSubstate && substatesAreConcurrent) {
         this.set('initialSubstate', null);
         this.stateLogWarning("Can not use %@ as initial substate since substates are all concurrent for state %@".fmt(initialSubstate, this));
       }
     }
     
-    this.set('substates', substates);
+    this.notifyPropertyChange('substates');
     this.set('currentSubstates', []);
     this.set('enteredSubstates', []);
     this.set('stateIsInitialized', YES);
   },
   
+  /** @private */
+  _addEmptyInitialSubstateIfNeeded: function() {
+    var initialSubstate = this.get('initialSubstate'),
+        substatesAreConcurrent = this.get('substatesAreConcurrent');
+    
+    if (initialSubstate || substatesAreConcurrent) return null;
+    
+    var state = this.createSubstate(SC.EmptyState);
+    this.set('initialSubstate', state);
+    this.get('substates').push(state);
+    this[state.get('name')] = state;
+    state.initState();
+    this.stateLogWarning("state %@ has no initial substate defined. Will default to using an empty state as initial substate".fmt(this));
+    return state;
+  },
+  
+  /** @private */
+  _addSubstate: function(name, state, attr) {
+    var substates = this.get('substates');
+    
+    attr = SC.clone(attr) || {};
+    attr.name = name;
+    state = this.createSubstate(state, attr);
+    substates.push(state);
+    this[name] = state;
+    state.initState();
+    return state;
+  },
+  
+  /**
+    Used to dynamically add a substate to this state. Once added successfully you
+    are then able to go to it from any other state within the owning statechart.
+   
+    A couple of notes when adding a substate:
+    
+    - If this state does not have any substates, then in addition to the 
+      substate being added, an empty state will also be added and set as the 
+      initial substate. To make the added substate the initial substate, set
+      this object's initialSubstate property.
+       
+    - If this state is a current state, the added substate will not be entered. 
+    
+    - If this state is entered and its substates are concurrent, the added 
+      substate will not be entered.  
+   
+    If this state is either entered or current and you'd like the added substate
+    to take affect, you will need to explicitly reenter this state by calling
+    its `reenter` method.
+   
+    Be aware that the name of the state you are adding must not conflict with
+    the name of a property on this state or else you will get an error. 
+    In addition, this state must be initialized to add substates.
+  
+    @param {String} name a unique name for the given substate.
+    @param {SC.State} state a class that derives from `SC.State`
+    @param {Hash} [attr] liternal to be applied to the substate
+    @returns {SC.State} an instance of the given state class
+  */
+  addSubstate: function(name, state, attr) {
+    if (SC.empty(name)) {
+      this.stateLogError("Can not add substate. name required");
+      return null;
+    }
+    
+    if (this[name] !== undefined) {
+      this.stateLogError("Can not add substate '%@'. Already a defined property".fmt(name));
+      return null;
+    }
+    
+    if (!this.get('stateIsInitialized')) {
+      this.stateLogError("Can not add substate '%@'. this state is not yet initialized".fmt(name));
+      return null;
+    }
+
+    var len = arguments.length;
+
+    if (len === 1) {
+      state = SC.State;
+    } else if (len === 2 && SC.typeOf(state) === SC.T_HASH) {
+      attr = state;
+      state = SC.State;
+    }
+    
+    var stateIsValid = SC.kindOf(state, SC.State) && state.isClass;
+  
+    if (!stateIsValid) {
+      this.stateLogError("Can not add substate '%@'. must provide a state class".fmt(name));
+      return null;
+    }
+    
+    state = this._addSubstate(name, state, attr);
+    this._addEmptyInitialSubstateIfNeeded();
+    this.notifyPropertyChange('substates');
+    
+    return state;
+  },
+  
   /**
     creates a substate for this state
   */
-  createSubstate: function(state, attrs) {
-    return state.create(attrs);
-  },
-  
-  /**
-    Create a history state for this state
-  */
-  createHistoryState: function(state, attrs) {
-    return state.create(attrs);
-  },
-  
-  /**
-    Create an empty state for this state's initial substate
-  */
-  createEmptyState: function(attrs) {
-    return SC.EmptyState.create(attrs);
+  createSubstate: function(state, attr) {
+    attr = attr || {};
+    return state.create({
+      parentState: this,
+      statechart: this.get('statechart')
+    }, attr);
   },
   
   /** @private 
@@ -725,35 +804,34 @@ SC.State = SC.Object.extend({
       finding a current state
     @return {SC.State} a current state
   */
- findFirstRelativeCurrentState: function(anchor) {
-   if (this.get('isCurrentState')) return this;
+  findFirstRelativeCurrentState: function(anchor) {
+    if (this.get('isCurrentState')) return this;
 
-   var currentSubstates = this.get('currentSubstates') || [],
-       numCurrent = currentSubstates.get('length'),
-       parent = this.get('parentState');
+    var currentSubstates = this.get('currentSubstates') || [],
+        numCurrent = currentSubstates.get('length'),
+        parent = this.get('parentState');
 
-   if (numCurrent === 0) {
-     return parent ? parent.findFirstRelativeCurrentState() : null;
-   }
+    if (numCurrent === 0) {
+      return parent ? parent.findFirstRelativeCurrentState() : null;
+    }
 
-   if (numCurrent > 1) {
-     anchor = this.getSubstate(anchor);
-     if (anchor) return anchor.findFirstRelativeCurrentState();
-   }
+    if (numCurrent > 1) {
+      anchor = this.getSubstate(anchor);
+      if (anchor) return anchor.findFirstRelativeCurrentState();
+    }
 
-   return currentSubstates[0];
- },
+    return currentSubstates[0];
+  },
 
   /**
     Used to re-enter this state. Call this only when the state a current state of
     the statechart.  
   */
   reenter: function() {
-    var statechart = this.get('statechart');
-    if (this.get('isCurrentState')) {
-      statechart.gotoState(this);
+    if (this.get('isEnteredState')) {
+      this.gotoState(this);
     } else {
-       SC.Logger.error('Can not re-enter state %@ since it is not a current state in the statechart'.fmt(this));
+       SC.Logger.error('Can not re-enter state %@ since it is not an entered state in the statechart'.fmt(this));
     }
   },
   

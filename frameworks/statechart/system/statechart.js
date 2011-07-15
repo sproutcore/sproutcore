@@ -617,7 +617,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     if (pivotState) {
       if (trace) this.statechartLogTrace("pivot state = %@".fmt(pivotState));
-      if (pivotState.get('substatesAreConcurrent')) {
+      if (pivotState.get('substatesAreConcurrent') && pivotState !== state) {
         this.statechartLogError("Can not go to state %@ from %@. Pivot state %@ has concurrent substates.".fmt(state, fromCurrentState, pivotState));
         this._gotoStateLocked = NO;
         return;
