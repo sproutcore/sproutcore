@@ -279,7 +279,7 @@ SC.Drag = SC.Object.extend(
     // if all else fails, check to see if the source object is a data source.
     } else {
       var source = this.get('source') ;
-      if (source && SC.typeOf(source.dragDataForType) == SC.T_FUNCTION) {
+      if (source && SC.typeOf(source.dragDataForType) === SC.T_FUNCTION) {
         return source.dragDataForType(this, dataType) ;
         
       // no data source found. :(
@@ -701,7 +701,8 @@ SC.Drag = SC.Object.extend(
       if (!ret) {
         ret = 1 ;
         while (x = x.get('parentView')) {
-          if (dropTargets[SC.guidFor(x)] !== undefined) ret++ ;
+          if (dropTargets[SC.guidFor(x)] !== undefined) ret = ret+1 ;
+          if(x.isPane && x.isMainPane) ret = ret+10000; // Arbitrary value always have the main pain on top
         }
         depth[guid] = ret ;
       }
@@ -902,7 +903,7 @@ SC.Drag = SC.Object.extend(
     ret = ret.sort(function(a,b) {
       var view = a;
       while (view = view.get('parentView')) {
-        if (b == view) return -1 ;
+        if (b === view) return -1 ;
       }
       return 1; 
     }) ;
