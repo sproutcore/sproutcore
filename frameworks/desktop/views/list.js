@@ -493,8 +493,6 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         this._lastDropOnView = null;
       }
       
-      if (dropOperation & SC.DROP_AFTER) layout.top += layout.height;
-      
       layout.height = 2;
       layout.right  = 0;
       layout.left   = ((level+1) * indent) + 12;
@@ -610,14 +608,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     if (dropOperation === SC.DROP_BEFORE) {
       itemView = (index<len) ? this.itemViewForContentIndex(index) : null;
       if (!itemView || itemView.get('isGroupView')) {
-        if (index>0) {
-          itemView = this.itemViewForContentIndex(index-1);
+        if (index>=0) {
+          itemView = this.itemViewForContentIndex(index);
           
           // don't allow a drop if the previous item is a group view and we're
           // insert before the end.  For the end, allow the drop if the 
           // previous item is a group view but OPEN.
           if (!itemView.get('isGroupView') || (itemView.get('disclosureState') === SC.BRANCH_OPEN)) {
-            index = index-1;
             dropOperation = SC.DROP_AFTER;
           } else index = -1;
 
