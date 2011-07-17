@@ -617,7 +617,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (this._hintON && !this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
+          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE && !SC.platform.input.placeholder) { elem.type = this.get('type'); }
 
           if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', YES);
