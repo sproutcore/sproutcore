@@ -149,9 +149,10 @@ SC._PropertyChain = SC.Object.extend(
 
       this.next.activate(newObj); // reactivate down the line
     }
-  },
+  }
 
   // @if (debug)
+  ,
   /**
     Returns a string representation of the chain segment.
 
