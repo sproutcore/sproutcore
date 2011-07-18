@@ -107,6 +107,14 @@ SC.ContentValueSupport = {
   contentPropertyDidChange: function(target, key) {
     return this.updatePropertyFromContent('value', key, 'contentValueKey', target);
   },
+
+  /**
+    @private
+
+    Cache of the last value synchronized. Used to prevent every write
+    from triggering a write in the opposite direction.
+  */
+  _justWroteValue: undefined,
   
   /**
     Helper method you can use from your own implementation of 
@@ -141,6 +149,10 @@ SC.ContentValueSupport = {
       if(content) v = content.get ? content.get(contentKey) : content[contentKey];
       else v = null;
       
+      // avoid thrashing
+      if(v === this._justWroteValue) return this;
+      this._justWroteValue = v;
+
       this.set(prop, v) ;
     }
     
@@ -168,10 +180,14 @@ SC.ContentValueSupport = {
       this.getDelegateProperty('contentValueKey', this.displayDelegate),
       content = this.get('content');
 
-    if (!key || !content) return ; // do nothing if disabled
+    if (!key || !content) return this; // do nothing if disabled
 
     // get value -- set on content if changed
     var value = this.get('value');
+
+    // avoid thrashing
+    if(value === this._justWroteValue) return this;
+    this._justWroteValue = value;
 
     if (typeof content.setIfChanged === SC.T_FUNCTION) {
       content.setIfChanged(key, value);
