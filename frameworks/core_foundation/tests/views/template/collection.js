@@ -17,6 +17,7 @@ test("creating a collection view works", function() {
 
   var ListItemChildView = CollectionChildView.extend({ tagName: "li" });
   var DefinitionTermChildView = CollectionChildView.extend({ tagName: "dt" });
+  var OptionChildView = CollectionChildView.extend({ tagName: "option" });
 
   var CollectionView = SC.TemplateCollectionView.extend({
     content: [{title: 'Hello'}]
@@ -26,12 +27,14 @@ test("creating a collection view works", function() {
   var ulCollectionView  = CollectionView.create({ tagName: "ul" });
   var olCollectionView  = CollectionView.create({ tagName: "ol" });
   var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
+  var selectCollectionView  = CollectionView.create({ tagName: "select", itemView: OptionChildView });
   var customTagCollectionView = CollectionView.create({ tagName: "p" });
   
   defaultCollectionView.createLayer();
   ulCollectionView.createLayer();
   olCollectionView.createLayer();
   dlCollectionView.createLayer();
+  selectCollectionView.createLayer();
   customTagCollectionView.createLayer();
   
   ok(defaultCollectionView.$().is("ul"), "Unordered list collection view was rendered (Default)");
@@ -45,10 +48,14 @@ test("creating a collection view works", function() {
 
   ok(dlCollectionView.$().is("dl"), "Definition List collection view was rendered");
   equals(dlCollectionView.$('dt').length, 1, "Definition term view was rendered");
-  
+
+  ok(selectCollectionView.$().is("select"), "Select collection view was rendered");
+  equals(selectCollectionView.$('option').length, 1, "Option view was rendered");
+
   ok(customTagCollectionView.$().is("p"), "Paragraph collection view was rendered");
   equals(customTagCollectionView.$('div').length, 1, "Child view was rendered");
 });
+
 
 test("not passing a block to the collection helper creates a collection", function() {
   TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
