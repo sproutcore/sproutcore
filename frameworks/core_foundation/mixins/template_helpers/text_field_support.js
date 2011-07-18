@@ -7,10 +7,146 @@
 
 sc_require('views/template');
 
-/** @class */
+/**
+  @class
+*/
+SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
 
-SC.TextField = SC.TemplateView.extend(
-  /** @scope SC.TextField.prototype */ {
+  $input: function() {
+    return this.$('input');
+  },
+
+  /** @private
+    Used internally to store value because the layer may not exist
+  */
+  _value: null,
+
+  /**
+    The problem this property is trying to solve is twofold:
+
+    1. Make it possible to set the value of a text field that has
+       not yet been inserted into the DOM
+    2. Make sure that `value` properly reflects changes made directly
+       to the element's `value` property.
+
+    In order to achieve (2), we need to make the property volatile,
+    so that SproutCore will call the getter no matter what if get()
+    is called.
+
+    In order to achieve (1), we need to store a local cache of the
+    value, so that SproutCore can set the proper value as soon as
+    the underlying DOM element is created.
+
+    @type String
+    @default  null
+  */
+  value: function(key, value) {
+    var input = this.$input();
+
+    if (value !== undefined) {
+      // We don't want to unnecessarily set the value.
+      // Doing that could cause the selection to be lost.
+      if (this._value !== value || input.val() !== value) {
+        this._value = value;
+        input.val(value);
+      }
+    } else {
+      if (input.length > 0) {
+        value = this._value = input.val();
+      } else {
+        value = this._value;
+      }
+    }
+
+    return value;
+  }.property().idempotent(),
+
+  didCreateLayer: function() {
+    var input = this.$input(),
+        self = this;
+
+    input.val(this._value);
+
+    if (SC.browser.msie) {
+      SC.Event.add(input, 'focusin', this, this.focusIn);
+      SC.Event.add(input, 'focusout', this, this.focusOut);
+    } else {
+      SC.Event.add(input, 'focus', this, this.focusIn);
+      SC.Event.add(input, 'blur', this, this.focusOut);
+    }
+
+    input.bind('change', function() {
+      self.domValueDidChange(SC.$(this));
+    });
+  },
+
+  willDestroyLayerMixin: function() {
+    var input = this.$input();
+
+    if (SC.browser.msie) {
+      SC.Event.remove(input, 'focusin', this, this.focusIn);
+      SC.Event.remove(input, 'focusout', this, this.focusOut);
+    } else {
+      SC.Event.remove(input, 'focus', this, this.focusIn);
+      SC.Event.remove(input, 'blur', this, this.focusOut);
+    }
+
+    input.unbind('change');
+  },
+
+  focusIn: function(event) {
+    this.becomeFirstResponder();
+    this.tryToPerform('focus', event);
+  },
+
+  focusOut: function(event) {
+    this.resignFirstResponder();
+    this.tryToPerform('blur', event);
+  },
+
+  touchStart: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  touchEnd: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private
+    Make sure our input value is synced with any bindings.
+    In some cases, such as auto-filling, a value can get
+    changed without an event firing. We could do this
+    on focusOut, but blur can potentially get called
+    after other events.
+  */
+  willLoseFirstResponder: function() {
+    this.notifyPropertyChange('value');
+  },
+
+  domValueDidChange: function(jquery) {
+    this.set('value', jquery.val());
+  },
+
+  keyUp: function(event) {
+    this.domValueDidChange(this.$input());
+
+    if (event.keyCode === SC.Event.KEY_RETURN) {
+      return this.tryToPerform('insertNewline', event);
+    } else if (event.keyCode === SC.Event.KEY_ESC) {
+      return this.tryToPerform('cancel', event);
+    }
+  }
+};
+
+/**
+  @class
+  @extends SC.TemplateView
+  @extends SC.TextFieldSupport
+*/
+SC.TextField = SC.TemplateView.extend(SC.TextFieldSupport,
+/** @scope SC.TextField.prototype */ {
 
   classNames: ['sc-text-field'],
 
@@ -39,151 +175,9 @@ SC.TextField = SC.TemplateView.extend(
   }.property('isMultiline').cacheable(),
 
   $input: function() {
-    tagName = this.get('isMultiline') ? 'textarea' : 'input';
+    var tagName = this.get('isMultiline') ? 'textarea' : 'input';
     return this.$(tagName);
-  },
-
-  didCreateLayer: function() {
-    var self = this;
-
-    var input = this.$input();
-    input.val(this._value);
-
-    SC.Event.add(input, 'focus', this, this.focusIn);
-    SC.Event.add(input, 'blur', this, this.focusOut);
-
-    input.bind('change', function() {
-      self.domValueDidChange(SC.$(this));
-    });
-  },
-
-  /**
-    The problem this property is trying to solve is twofold:
-
-    1. Make it possible to set the value of a text field that has
-       not yet been inserted into the DOM
-    2. Make sure that `value` properly reflects changes made directly
-       to the element's `value` property.
-
-    In order to achieve (2), we need to make the property volatile,
-    so that SproutCore will call the getter no matter what if get()
-    is called.
-
-    In order to achieve (1), we need to store a local cache of the
-    value, so that SproutCore can set the proper value as soon as
-    the underlying DOM element is created.
-  */
-  value: function(key, value) {
-    var input = this.$input();
-
-    if (value !== undefined) {
-      this._value = value;
-      input.val(value);
-    } else if (input.length) {
-      this._value = value = input.val();
-    } else {
-      value = this._value;
-    }
-
-    return value;
-  }.property().idempotent(),
-
-  domValueDidChange: function(jquery) {
-    this.set('value', jquery.val());
-  },
-
-  focusIn: function(event) {
-    this.becomeFirstResponder();
-    this.tryToPerform('focus', event);
-  },
-
-  focusOut: function(event) {
-    this.resignFirstResponder();
-    this.tryToPerform('blur', event);
-  },
-
-  willLoseFirstResponder: function() {
-    this.notifyPropertyChange('value');
-  },
-
-  keyUp: function(evt) {
-    this.domValueDidChange(this.$input());
-
-    if (evt.keyCode === SC.Event.KEY_RETURN) {
-      return this.tryToPerform('insertNewline', evt);
-    } else if (evt.keyCode === SC.Event.KEY_ESC) {
-      return this.tryToPerform('cancel', evt);
-    }
-
-    return true;
   }
 
 });
-
-SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
-
-  /** @private
-    Used internally to store value because the layer may not exist
-  */
-  _value: null,
-
-  /**
-    @type String
-    @default null
-  */
-  value: function(key, value) {
-    var input = this.$('input');
-
-    if (value !== undefined) {
-      this._value = value;
-      input.val(value);
-    } else {
-      if (input.length > 0) {
-        value = this._value = input.val();
-      } else {
-        value = this._value;
-      }
-    }
-
-    return value;
-  }.property().idempotent(),
-
-  didCreateLayer: function() {
-    var input = this.$('input');
-
-    input.val(this._value);
-
-    SC.Event.add(input, 'focus', this, this.focusIn);
-    SC.Event.add(input, 'blur', this, this.focusOut);
-  },
-
-  focusIn: function(event) {
-    this.becomeFirstResponder();
-    this.tryToPerform('focus', event);
-  },
-
-  focusOut: function(event) {
-    this.resignFirstResponder();
-    this.tryToPerform('blur', event);
-  },
-
-  /** @private
-    Make sure our input value is synced with any bindings.
-    In some cases, such as auto-filling, a value can get
-    changed without an event firing. We could do this
-    on focusOut, but blur can potentially get called
-    after other events.
-  */
-  willLoseFirstResponder: function() {
-    this.notifyPropertyChange('value');
-  },
-
-  keyUp: function(event) {
-    if (event.keyCode === SC.Event.KEY_RETURN) {
-      return this.tryToPerform('insertNewline', event);
-    } else if (event.keyCode === SC.Event.KEY_ESC) {
-      return this.tryToPerform('cancel', event);
-    }
-  }
-};
 

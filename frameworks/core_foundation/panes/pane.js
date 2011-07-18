@@ -260,8 +260,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
       if (current) { current.tryToPerform('willLoseKeyResponderTo', view); }
-      if (view) { 
-        view.tryToPerform('willBecomeKeyResponderFrom', current); 
+      if (view) {
+        view.tryToPerform('willBecomeKeyResponderFrom', current);
       }
     }
 
@@ -282,10 +282,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // and notify again if needed.
     if (isKeyPane) {
-      if (view) { 
+      if (view) {
         view.tryToPerform('didBecomeKeyResponderFrom', current); }
-      if (current) { 
-        current.tryToPerform('didLoseKeyResponderTo', view); 
+      if (current) {
+        current.tryToPerform('didLoseKeyResponderTo', view);
       }
     }
 
@@ -298,7 +298,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     giving it one last opportunity to save its state.
 
     @param {SC.Pane} pane
-    @returns {SC.Pane} reciever
+    @returns {SC.Pane} receiver
   */
   willLoseKeyPaneTo: function(pane) {
     this._forwardKeyChange(this.get('isKeyPane'), 'willLoseKeyResponderTo', pane, NO);
@@ -328,7 +328,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     final cleanup and changes its own display value if needed.
 
     @param {SC.Pane} pane
-    @returns {SC.Pane} reciever
+    @returns {SC.Pane} receiver
   */
   didLoseKeyPaneTo: function(pane) {
     var isKeyPane = this.get('isKeyPane');
@@ -438,6 +438,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     var dom = this.get('layer') ;
     if (dom && dom.parentNode) dom.parentNode.removeChild(dom) ;
     dom = null ;
+
+    // layer is cached by SC.View in this._view_layer, remove it so that the DOM node can be freed
+    this.destroyLayer();
 
     // remove intercept
     this._removeIntercept();

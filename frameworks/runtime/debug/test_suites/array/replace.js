@@ -58,7 +58,7 @@ SC.ArraySuite.define(function(T) {
 
     obj.replace(1,2, replace) ;
 
-    T.validateAfter(obj, after, observer, YES);
+    T.validateAfter(obj, after, observer, NO);
   });
   
   test("[A,B].replace(1,0,[X,Y]) => [A,X,Y,B] + notify", function() {

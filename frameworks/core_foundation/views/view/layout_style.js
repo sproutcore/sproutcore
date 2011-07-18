@@ -402,6 +402,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   calculate: function() {
     var layout = this.get('layout'), pdim = null,
+        staticLayout = this.get('staticLayout'),
         translateTop = null,
         translateLeft = null,
         turbo = this.get('turbo'),
@@ -413,6 +414,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     this._handleMistakes(layout);
 
+    // If the developer sets useStaticLayout and doesn't provide a unique `layout` property, we
+    // should not insert the styles "left: 0px; right: 0px; top: 0px; bottom: 0px" as they could
+    // conflict with the developer's intention.  However, if they do provide a unique `layout`,
+    // use it.
+    if (staticLayout && layout === SC.View.prototype.layout) return {};
 
     // X DIRECTION
 
@@ -482,21 +488,21 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
       if (pendingAnimations) {
         if (!activeAnimations) activeAnimations = {};
-        
+
         for (key in pendingAnimations) {
           if (!pendingAnimations.hasOwnProperty(key)) continue;
-          
+
           pendingAnimation = pendingAnimations[key];
           activeAnimation = activeAnimations[key];
           shouldCancel = NO;
-          
+
           if (newStyle[key] !== (currentStyle ? currentStyle[key] : null)) shouldCancel = YES;
-          
+
           // if we have a new animation (an animation property has changed), cancel current
           if (activeAnimation && (activeAnimation.duration !== pendingAnimation.duration || activeAnimation.timing !== pendingAnimation.timing)) {
             shouldCancel = YES;
           }
-          
+
           if (shouldCancel && activeAnimation) {
             if (callback = activeAnimation.callback) {
               if (transformsLength > 0) {
@@ -508,14 +514,14 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
                 this.runAnimationCallback(callback, null, key, YES);
               }
             }
-            
+
             this.removeAnimationFromLayout(key, YES);
           }
-          
+
           activeAnimations[key] = pendingAnimation;
         }
       }
-      
+
       this._activeAnimations = activeAnimations;
       this._pendingAnimations = null;
     }

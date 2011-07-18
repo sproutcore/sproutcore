@@ -80,7 +80,7 @@ test("invokes willAddChild() on receiver if defined before adding child" ,functi
 
 	  
   parent.insertBefore(child, otherChild);
-  ok(callCount, 1, 'invoked');
+  equals(callCount, 1, 'invoked');
 });
 
 test("invokes willAddToParent() on child view if defined before adding child" ,function() {
@@ -102,7 +102,7 @@ test("invokes willAddToParent() on child view if defined before adding child" ,f
 
 	  
   parent.insertBefore(child, otherChild);
-  ok(callCount, 1, 'invoked');
+  equals(callCount, 1, 'invoked');
 });
 
 test("invokes didAddChild() on receiver if defined after adding child" ,function() {
@@ -122,9 +122,11 @@ test("invokes didAddChild() on receiver if defined after adding child" ,function
   	callCount++;
   };
 
-	  
+  SC.RunLoop.begin();
   parent.insertBefore(child, otherChild);
-  ok(callCount, 1, 'invoked');
+  SC.RunLoop.end();
+
+  equals(callCount, 1, 'invoked');
 });
 
 test("invokes didAddToParent() on child view if defined after adding child" ,function() {
@@ -144,9 +146,11 @@ test("invokes didAddToParent() on child view if defined after adding child" ,fun
   	callCount++;
   };
 
-	  
+  SC.RunLoop.begin();
   parent.insertBefore(child, otherChild);
-  ok(callCount, 1, 'invoked');
+  SC.RunLoop.end();
+
+  equals(callCount, 1, 'invoked');
 });
 
 test("invokes parentViewDidChange() on child view.  this is used by the view internals to update layer loc", function() {

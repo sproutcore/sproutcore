@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @mixin
+  @namespace
 
   This mixin is used for views that show a seperate editor view to edit.
   For example, the default behavior of SC.LabelView if isEditable is set

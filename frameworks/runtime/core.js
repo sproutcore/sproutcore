@@ -39,7 +39,7 @@ window.SproutCore = window.SproutCore || SC ;
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.6.0.rc.1
+  @version 1.6.0
   @namespace
 
   All SproutCore methods and functions are defined
@@ -59,7 +59,7 @@ window.SproutCore = window.SproutCore || SC ;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = '1.6.0.rc.1';
+SC.VERSION = '1.6.0';
 
 /**
   @private
@@ -747,6 +747,23 @@ SC.mixin(/** @scope window.SC.prototype */ {
     }
 
     return root ;
+  },
+
+  /**
+   Acts very similar to SC.objectForPropertyPath(), the only difference is
+   that it will throw an error when object can't be found.
+
+    @param {String} path the path
+    @param {Object} root optional root object.  window is used otherwise
+    @param {Integer} stopAt optional point to stop searching the path.
+    @returns {Object} the found object or throws an error.
+  */
+  requiredObjectForPropertyPath: function(path, root, stopAt) {
+    var o = SC.objectForPropertyPath(path, root, stopAt);
+    if(!o) {
+      throw path + " could not be found";
+    }
+    return o;
   }
 
 }); // end mixin

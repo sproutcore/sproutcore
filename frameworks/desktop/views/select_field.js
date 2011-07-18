@@ -168,7 +168,8 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   /** @private */
   render: function(context, firstTime) {
-    if (this.get('cpDidChange')) {
+    // Only re-render if it's the firstTime or if a change is required
+    if (firstTime || this.get('cpDidChange')) {
       this.set('cpDidChange', NO);
       // get list of objects.
       var nameKey = this.get('nameKey') ;

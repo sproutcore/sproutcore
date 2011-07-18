@@ -142,7 +142,7 @@ SC.mixin(Function.prototype,
     not cacheable.
 
     @param {Boolean} aFlag optionally indicate cacheable or no, default YES
-    @returns {Function} reciever, useful for chaining calls.
+    @returns {Function} receiver, useful for chaining calls.
   */
   cacheable: function(aFlag) {
     return SC.Function.cacheable(this, aFlag);
@@ -163,7 +163,7 @@ SC.mixin(Function.prototype,
     non-volatile.
 
     @param {Boolean} aFlag optionally indicate state, default to YES
-    @returns {Function} reciever, useful for chaining calls.
+    @returns {Function} receiver, useful for chaining calls.
   */
   idempotent: function(aFlag) {
     return SC.Function.idempotent(this, aFlag);
@@ -174,13 +174,13 @@ SC.mixin(Function.prototype,
   },
 
   /**
-    Declare that a function should observe an object or property at the named 
+    Declare that a function should observe an object or property at the named
     path.  Note that the path is used only to construct the observation one time.
 
     @param {String...} propertyPaths A list of strings which indicate the
       properties being observed
-      
-    @returns {Function} reciever, useful for chaining calls.
+
+    @returns {Function} receiver, useful for chaining calls.
   */
   observes: function(propertyPaths) {
     return SC.Function.observes(this, arguments);

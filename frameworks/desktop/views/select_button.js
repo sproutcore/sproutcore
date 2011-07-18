@@ -16,12 +16,21 @@ sc_require('views/button');
   list of items. The selected item will be displayed on the button.
   User has the option of enabling checkbox for the selected menu item.
 
+  @deprecated Please use SC.SelectView instead
+
   @extends SC.ButtonView
   @version 1.0
   @author Mohammed Ashik
 */
 SC.SelectButtonView = SC.ButtonView.extend(
 /** @scope SC.SelectButtonView.prototype */ {
+
+  init: function(){
+    // @if (debug)
+    SC.Logger.warn("SC.SelectButtonView is deprecated. Please use SC.SelectView instead.");
+    // @endif
+    sc_super();
+  },
 
   /**
     @type Boolean

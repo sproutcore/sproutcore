@@ -1,6 +1,217 @@
 CHANGE LOG FOR 1.6
 ==================
 
+1.6.0
+-----
+* Minor bug fix for SC.Checkbox with no title
+* Fixed test typo
+* Make sure YUI reset styles are in the yuireset framework
+* Add displayTitle for SC.Checkbox which allows the title to be localized.
+* Fix datetime values being null when localization is being used. Causes problems when you try to format dates at execution time
+*  I'm not sure the intention of having the right padding gone for text-areas, but this override of the default looks really bad in Safari & Chrome & Firefox.
+* 'i' before 'e' except after 'c', plus Sublime Text 2 automatically removes extra whitespace, so lots of whitespace cleanups
+* Fixes failing Text Field unit tests in IE. Listens for focusin/focusout instead of focus/blur.
+* Clearer test message
+* Test for clippingFrame fixes
+* clippingFrame should always return a frame relative to the view itself, not its parent
+* Remove unused init override from SC.Request
+* Controller update to help clean up old record arrays and objects.
+* Added sc_require for sizing render delegate
+* Replaced a failing test with a pending one until fixed
+* Fixed SC.DateFieldView tests
+* Fixed tab responder tests
+* Test fixes for childView insertion
+* Testing CSS fixes
+* Revert "Remove namescape definition from SC.browser"
+* Added documentation for tagName in SC.TemplateCollectionView
+* Added missing semicolon
+* Fix CollectionView touchStart function not properly setting touchSelectedView
+* Statechart documentation improvements
+* Polymorphism requires datastore and added myself as Contributor
+* If a superclass was used to load a record first (ex.  toOne: {MyApp.Person}), then if a subclass later appeared with the same ID (ex. store.find(MyApp.Male, id), it would error out because the subclass would generate a new store key and as it passed the storeKey up to its superclass, the superclass would already have a different storeKey and throw an exception.  Plus store.recordTypesByStoreKey would forever be stuck on the superclass Record Type.
+* Added a DataSource reset function for fixtures - Fixes #408
+* Minor docs fix
+* Fix tests on nested records
+* Throw arror on attribute types that can't be resolved into an object
+* Fixed typo in docs (thx iammerrick)
+* Fixed didAppendToLayer callbacks from appendChild - Fixes #168
+* More rigorous test on didAppendToDocument
+* Make sure to awake SC.TemplatePane - Fixes #387
+* Deprecated SC.SelectButtonView - Fixes #393
+* Better target/action handling for AlertPanes - Fixes #394
+* Throw error when dataSource object can't be found in data store.
+* Minor documentation improvement
+* SC.RangeObserver method handles string (thx kswenson) - Fixes #482
+* Fix SC.TextField to only update DOM if actually changed - Fixes #436
+* Always re-render SelectField when firstTime is true - Fixes #448
+* refactored record relationship support into it's own mixin, SC.RelationshipSupport
+* modified relationships API to use enhance
+* added the ability for 'createIfEmpty' to follow a relationship chain. objects related via 'isMaster' RecordAttribute relationships will be lazily created with pushRetrieve
+* Added tests for pushDestroy not destroying a destroyed record & beginning of authoritative server push.
+* Cleaned up code, added comments, minimized common code across pushRetrieve and pushDestroy.
+* added support for propagating SingleAttribute and ManyAttribute relationships between store records on asynchronous updates
+* Fixed SC.Record JSON encoding - Closes #473
+* Fix parse error in SC.Math
+* Doc improvements
+* Improved docs on SC.DragDataSource
+* Correct SC.DropTarget documentation
+* Switch @mixin to @namespace for JSDoc to recognize
+* Added support for 'readOnly' attributes in the input and textarea fields. As discussed in issue 453, if isEnabled is set to YES and isEditable is set to NO a 'readOnly' attribute will be added to the input and textarea fields. This allows input fields to remain uneditable, but allows the user to select the text.
+* Documentation Improvements
+* Fix a bug in string measurement.js where the measurement width would be capped to the body width even without a max-width set
+* Remove namescape definition from SC.browser
+* fix TABBING_ONLY_INSIDE_DOCUMENT to work when tabbing backwards
+* fix for nextValidKeyView unit test failing with wrong return value when TABBING_ONLY_INSIDE_DOCUMENT is disabled
+* Form render delegate should use 'className' instead of 'name'
+* Fix formatting of warning for renderdelegate name property.
+* rename renderDelegate's 'name' property to 'className' to be more clear about what it does.
+* Separate logic for menuItemViews property so it can be overriden.
+* Make destroying panel panes destroy their modal pane as well, and test this.
+* Fix for focus issues with textfield and the app in general
+* Removing css rule to 3d accelerate panes, this rule is to aggresive and might be consuming too much memory
+* Allow exception handler to handle it so it is not thrown again
+* Adding isResponse flag to SC.Response
+* fixed isEnabled for new select and popup view
+* prevented invalid value from being changed to null by selectedItemDidChange
+* removed duplicate code and fixed prepare/teardown in situations where no elements could be measured
+* U-UA header needs to be on top before any other headers to actually be respected
+* Fix bug where null button would break pane
+* don't set border-right on collection
+* fixed docs for split_child.js
+* Forgot to revert part of the action button regression
+* Additional FormRowView tests.
+* Do not implicitly set contentValueKey from FormView.
+* Clean up FormRow, and start testing it.
+* Clean up FormView some more, and test it.
+* Fix FormView createChildViews logic.
+* Fix FormRowView whitespace.
+* Clean up forms a bit more. Styles should be in Ace.
+* Clean up and fix typo in FormRowView.
+* Clean up and test SC.CalculatesEmptiness.
+* Add tests for FormsEditMode.
+* Clean up FormsEditMode a little.
+* Checking for hasContentValueSupport in conditions
+* Make FlowedLayout handle empty defaultFlowSpacing gracefully (and test this)
+* Clean up FormView/FormRowView a little.
+* Remove the empty test files for views that are no longer used.
+* Get rid of View#getThemedProperty
+* Remove unused "renderer" code from SC.Theme.
+* Deprecate SelectFieldView.
+* Buttons removed support for legacy handlers (method-based actions and null targets), so, fixing test.
+* Fix CheckboxView
+* Test isSpacer in FlowedLayout.
+* For testing, we need to observe everything. If this causes performance issues we should investigate other solutions.
+* Add some tests for flowedLayout.
+* Add unit test for view.reopen bug.
+* Make SplitView 'guess' autoResizeStyle automatically based on the supplied 'size'.
+* Add 'extends' to list of reserved words (Safari reserves it, apparently)
+* Putting back legacy button support, we have to look into how to make action strings work faster, this seems to be way slower for mobile
+* Adding a check to focus event when the mainPane is still not initialized
+* fix alternating colors
+* updated some styling in runtime
+* Clean up SelectView handling to handle other types of items more easily.
+* Try to make the popup button auto-closing of the menu less tolerant.
+* Get rid of unnecessary sc_requires.
+* Test SelectView more thoroughly in Test Controls.
+* Adding reset styles back as it's affecting basic styling for template views
+* Add string-loaded CSS.
+* Fixed SC.typeOf to work correctly. Was giving incorrect results when determining if an object was an error object.
+* Set identifying headers in send() not init, get rid of attachHeaders parameter from class methods. Call set() attachIdentifyingHeaders to NO either in the hash or later.
+* updated statechart's gotoState method. Now provides a warning if an explicit fromCurrentState value was not supplied.
+* minor fix for Array.prototype.copy. Was missing a semicolon that JSLint was complaining about.
+* Updated SC.Copyable's copy method. Now provides a more informative error if copy has not been overriden.
+* Updated SC.State.plugin to perform addition checks on given value. If invalid then an error is reported
+* Make first responder in view hierarchy when gaining back focus only if not tabbing only inside the document
+* Update SC .ico file
+* Added code to imitate browser tabbing
+* Disabling default focus ring
+* Removing orphan code in render context update function
+* Adding z-index to segmented view since we need to change the order of tab view rendering for ARIA purposes
+* Change order tabs views are created, to fix accesibility tabindex order bug
+* Fix for radio button keyboard support
+* Always focus when it becomes key responder
+* removing debugger statement
+* Removing legacy action handler and improving keyboard handling for buttons
+* Keyboard support for radio views
+* Small code tweak
+* Stop bringing always SC app into focus by default
+* Call focus whenever a view gets responder that way ARIA does the right thing, and it also solves some issues with tabbing focus
+* Removing unneccesary keyresponder code from slider and field views
+* Added keyboard support to checkbox
+* Fixed regression to be able to tab between address bar and views, also added tabindex to view that is firstResponder, this will enable ARIA to handle focus
+* Fix a bug where setting the same value of the iframe would blow it away and cleaning it up a bit
+* Apply nested stores patch by Brian Moore.
+* Reset invalid widths and heights for views inside a FlowedLayout.
+* The previous method of calculating minWidth/Height was correct when canWrap was NO, but incorrect when canWrap was YES.
+* Fix docs for SelectView/PopupButtonView/etc.
+* Fix some broken styles.
+* Add tests for selectview's menu width.
+* Improve docs and get rid of useless minimumMenuWidthDidChange (it was not even observing anything)
+* Bind menu's minimumMenuWidth to the selectview.
+* Add defaults and observe the minimumMenuWidth.
+* Test aspects related to the selected item.
+* Fix bug and make it observe the selected item so it can change value and title appropriately.
+* Update some documentation.
+* Add PopupButtonView tests.
+* Lazy menu instantiation...
+* Add tests for the mixins and extensions for SC.MenuPane/SC.MenuItemView.
+* Fix menu item checkmark styling.
+* Fix list item styling...
+* Setting currentMenuItem doesn't work. This feature, while we should have it, wasn't in the old one, so skipping for now.
+* Update for new AutoResize API.
+* Add menuWidthPadding property for render delegate.
+* Test long menu items.
+* Update menu item for the new AutoResize API.
+* Enhance the createMenuItemViews method instead of menuItemViews, which is not enhanceable.
+* Separate logic for menuItemViews property so it can be overriden.
+* Improve key handling so that up/down goes relative to current selected item.
+* Make menu's minimum width themeable.
+* Make button handle the allowDefault.
+* Keyboard mostly working...
+* For mouse events, SelectView is now fully operational. Keyboard... not so much.
+* Make MenuItem a little more flexible.
+* Make Test Controls use experimental SelectView
+* Clean up select page
+* Add unfinished new SelectView/PopupButton.
+* Add in new support for specifying and accessing localized metrics in the same manner as you can currently specify and access localized strings.  For strings, you do:
+* 1. Introduces changes to maintain a separate hash of layout values, for the current locale 2. Added a separate method to do localization of layout hash
+
+1.6.0.rc.2
+----------
+* Fixed SC.PickerPane#modalPaneDidClick return values - Fixes #339
+* Fixed SC.Enumerable fallback for SC.RecordArray#find - Fixes #363
+* Added SC.requiredObjectForPropertyPath that throws an error when object can't be found
+* Make it possible for the handlebars helpers to generate tags other than <span>
+* Improved Observer Tests with better location (thx martoche)
+* Fixed disclosure positioning in Ace, fixes #457
+* Added backslash to prevent SASS comment interpolation warning
+* Allow for passing relative paths to #collection helper.
+* Further cleanup to TextField template multiline
+* Added isMultiline property to SC.TextField.
+* jQuery is now smart enough to take booleans for certain attributes
+* Stop using jQuery expando
+* Added unit tests for SC.ContainerView to verify it cleans up views that it instantiates.
+* SC.ContainerView will instantiate it's contentView if nowShowing is set with a string or class, however it was not cleaning up views when it was finished. Now it keeps track and cleans up when necessary.
+* Unit test for previous commit checking that the themeName got passed through to the buttons.
+* Allow you to set themeName on the AlertPane to also set the themeName on the buttons (which were previously stuck as 'capsule')
+* Unit test for previous commit adding controlSize to TabView + removed useless TabView methods test and left a warning unit test instead.
+* Whitespace + allow setting of controlSize
+* Comment typo forEachIndex is not a function in IndexSet
+* fix jQuery/SC conflict for events handeling add tryToPerform on SC.TextField
+* use prop instead of attr in SC.Checkbox replace SC.data with jQuery.data
+* remove more code : passing unit tests but fail in real app
+* upgrade to jquery 1.6 use jQuery.sub()
+* Minor adjustments for docs
+* fixed so that replace on ChildArray only notifies the part of the array that has actually changed
+* remove more code : passing unit tests but fail in real app
+* upgrade to jquery 1.6 use jQuery.sub()
+* Hacky solution to the issue where template collection views render their item views multiple times when they are nested inside another template collection view.
+* Adds support for specifying an inverse template name to template collection view.
+* Adds unit tests for using an inverse template in template collection views.
+* Fixes issue with nested template collection views causing childViews array to get messed up.
+* Adds failing unit test for childView structure of nested collection views.
+* Adds unit tests for checking the number of items rendered in nested collection views with default content.
+
 1.6.0.rc.1
 ----------
 * Added 'Show Progress' checkbox to Test Runner
@@ -95,7 +306,6 @@ CHANGE LOG FOR 1.6
 * Disabling image preloading by default
 * Fix the html examples of the routes file
 * Fix documentation for SC.routes
-* Fix problem with last merge
 * Refactor base css styles to use SCSS
 * Update to trimming functions
 * Minor unit test bug fixes for IE

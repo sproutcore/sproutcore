@@ -91,7 +91,7 @@ SC.Freezable = /** @scope SC.Freezable.prototype */ {
     Freezes the object.  Once this method has been called the object should
     no longer allow any properties to be edited.
 
-    @returns {Object} reciever
+    @returns {Object} receiver
   */
   freeze: function() {
     // NOTE: Once someone actually implements Object.freeze() in the browser,

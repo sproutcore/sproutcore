@@ -7,8 +7,9 @@
 
 /**
   @class
-  @deprecated
-  DEPRECATED. Kept to allow a modicum of backwards-compatibility. Please use 
+  @deprecated Use a normal view and mix-in SC.SplitThumb.
+
+  Kept to allow a modicum of backwards-compatibility. Please use
   a normal view and mix in SC.SplitThumb instead.
 
   @extends SC.View

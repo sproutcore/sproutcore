@@ -8,7 +8,13 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("SC.AlertPane UI");
+module("SC.AlertPane UI", {
+  setup: function(){
+    SC.TestDelegate = SC.Object.create();
+  },
+  teardown: function(){
+    delete SC.TestDelegate;SC.Object.create()}
+});
 
 var pane ;
 
@@ -183,33 +189,38 @@ test("AlertPane.info with individual actions and targets for three buttons", fun
   
   var clickValue = null;
   
-  var delegate = SC.Object.create({
-    didClickOK: function() {
-      clickValue = 'OK';
-    },
-    didClickCancel: function() {
-      clickValue = 'Cancel';
-    }
-  });
+  SC.TestDelegate.didClickOK = function() {
+    clickValue = 'OK';
+  };
+
+  SC.TestDelegate.didClickCancel = function() {
+    clickValue = 'Cancel';
+  };
+
+  function showPane(){
+    pane = SC.AlertPane.info({
+      message: 'AlertPane.message',
+      description: 'AlertPane.description',
+      caption: 'AlertPane.caption',
+      icon: 'sc-icon-tools-24',
+      buttons: [
+        { title: 'okButtonTitle', action: 'didClickOK', target: SC.TestDelegate },
+        { title: 'cancelButtonTitle', action: 'didClickCancel', target: 'SC.TestDelegate' },
+        { title: 'extraButtonTitle', action: function() { clickValue = 'Extra'; } }
+      ]
+    });
+    clickValue = null;
+  }
   
-  pane = SC.AlertPane.info({
-    message: 'AlertPane.message',
-    description: 'AlertPane.description',
-    caption: 'AlertPane.caption',
-    icon: 'sc-icon-tools-24',
-    buttons: [
-      { title: 'okButtonTitle', action: 'didClickOK', target: delegate },
-      { title: 'cancelButtonTitle', action: 'didClickCancel', target: delegate },
-      { title: 'extraButtonTitle', action: function() { clickValue = 'Extra'; } }
-    ]
-  });
-  
+  showPane();
   pane.dismiss(pane.get('button1'));
   equals(clickValue, 'OK', 'Action for the OK button was clicked');
-  
+
+  showPane();
   pane.dismiss(pane.get('button2'));
   equals(clickValue, 'Cancel', 'Action for the Cancel button was clicked');
   
+  showPane();
   pane.dismiss(pane.get('button3'));
   equals(clickValue, 'Extra', 'Action for the Extra button was clicked');
   

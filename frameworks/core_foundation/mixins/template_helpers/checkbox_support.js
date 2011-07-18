@@ -15,8 +15,13 @@ SC.Checkbox = SC.TemplateView.extend(
   title: null,
   value: null,
 
+  displayTitle: function() {
+    var title = this.get('title');
+    return title ? SC.String.loc(title) : null;
+  }.property('title').cacheable(),
+
   classNames: ['sc-checkbox'],
-  template: SC.Handlebars.compile('<label><input type="checkbox">{{title}}</label>'),
+  template: SC.Handlebars.compile('<label><input type="checkbox">{{displayTitle}}</label>'),
 
   didCreateLayer: function() {
     var self = this;

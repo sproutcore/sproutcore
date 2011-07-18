@@ -54,7 +54,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @default YES
   */
   acceptsFirstResponder: YES,
-  
+
   /**
     IE only attribute to block bluring of other controls
 
@@ -140,7 +140,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
           isModal: NO,
           isSubMenu: YES,
           parentMenu: parentMenu,
-          controlSize: parentMenu.get('controlSize')
+          controlSize: parentMenu.get('controlSize'),
+          exampleView: parentMenu.get('exampleView')
         });
       }
     }
@@ -302,7 +303,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /**
     The title from the content property.
-    
+
     @field
     @type String
     @observes content.title
@@ -470,9 +471,10 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     }
 
     if(this.get('hasSubMenu')) {
-      this._subMenuTimer = this.invokeLater(this.showSubMenu,100) ;
+      this._subMenuTimer = this.invokeLater(this.showSubMenu, 100) ;
     }
-	  return YES ;
+
+	  return YES;
   },
 
   /** @private

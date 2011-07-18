@@ -42,7 +42,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.CoreView.reopen(
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin'],
+  concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings'],
 
   /**
     The current pane.
@@ -670,6 +670,9 @@ SC.CoreView.reopen(
   },
 
   applyAttributesToContext: function(context) {
+    this._applyClassNameBindings();
+    this._applyAttributeBindings(context);
+
     context.addClass(this.get('classNames'));
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
@@ -683,6 +686,155 @@ SC.CoreView.reopen(
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
+  },
+
+  /**
+    @private
+
+    Iterates over the view's `classNameBindings` array, inserts the value
+    of the specified property into the `classNames` array, then creates an
+    observer to update the view's element if the bound property ever changes
+    in the future.
+  */
+  _applyClassNameBindings: function() {
+    var classBindings = this.get('classNameBindings'),
+        classNames = this.get('classNames'),
+        elem, newClass, dasherizedClass;
+
+    if (!classBindings) { return; }
+
+    // Loop through all of the configured bindings. These will be either
+    // property names ('isUrgent') or property paths relative to the view
+    // ('content.isUrgent')
+    classBindings.forEach(function(property) {
+
+      // Variable in which the old class value is saved. The observer function
+      // closes over this variable, so it knows which string to remove when
+      // the property changes.
+      var oldClass;
+
+      // Set up an observer on the context. If the property changes, toggle the
+      // class name.
+      observer = function() {
+        // Get the current value of the property
+        newClass = this._classStringForProperty(property);
+        elem = this.$();
+
+        // If we had previously added a class to the element, remove it.
+        if (oldClass) {
+          elem.removeClass(oldClass);
+        }
+
+        // If necessary, add a new class. Make sure we keep track of it so
+        // it can be removed in the future.
+        if (newClass) {
+          elem.addClass(newClass);
+          oldClass = newClass;
+        } else {
+          oldClass = null;
+        }
+      };
+
+      this.addObserver(property, this, observer);
+
+      // Get the class name for the property at its current value
+      dasherizedClass = this._classStringForProperty(property);
+
+      if (dasherizedClass) {
+        // Ensure that it gets into the classNames array
+        // so it is displayed when we render.
+        classNames.push(dasherizedClass);
+
+        // Save a reference to the class name so we can remove it
+        // if the observer fires. Remember that this variable has
+        // been closed over by the observer.
+        oldClass = dasherizedClass;
+      }
+    }, this);
+  },
+
+  /**
+    Iterates through the view's attribute bindings, sets up observers for each,
+    then applies the current value of the attributes to the passed render buffer.
+
+    @param {SC.RenderBuffer} buffer
+  */
+  _applyAttributeBindings: function(context) {
+    var attributeBindings = this.get('attributeBindings'),
+        attributeValue, elem, type;
+
+    if (!attributeBindings) { return; }
+
+    attributeBindings.forEach(function(attribute) {
+      // Create an observer to add/remove/change the attribute if the
+      // JavaScript property changes.
+      var observer = function() {
+        elem = this.$();
+        var currentValue = elem.attr(attribute);
+        attributeValue = this.get(attribute);
+
+        type = typeof attributeValue;
+
+        if ((type === 'string' || type === 'number') && attributeValue !== currentValue) {
+          elem.attr(attribute, attributeValue);
+        } else if (attributeValue && type === 'boolean') {
+          elem.attr(attribute, attribute);
+        } else if (attributeValue === NO) {
+          elem.removeAttr(attribute);
+        }
+      };
+
+      this.addObserver(attribute, this, observer);
+
+      // Determine the current value and add it to the render buffer
+      // if necessary.
+      attributeValue = this.get(attribute);
+      type = typeof attributeValue;
+
+      if (type === 'string' || type === 'number') {
+        context.attr(attribute, attributeValue);
+      } else if (attributeValue && type === 'boolean') {
+        // Apply boolean attributes in the form attribute="attribute"
+        context.attr(attribute, attribute);
+      }
+    }, this);
+  },
+
+  /**
+    @private
+
+    Given a property name, returns a dasherized version of that
+    property name if the property evaluates to a non-falsy value.
+
+    For example, if the view has property `isUrgent` that evaluates to true,
+    passing `isUrgent` to this method will return `"is-urgent"`.
+  */
+  _classStringForProperty: function(property) {
+    var split = property.split(':'), className = split[1];
+    property = split[0];
+
+    var val = SC.getPath(this, property);
+
+    // If value is a Boolean and true, return the dasherized property
+    // name.
+    if (val === YES) {
+      if (className) { return className; }
+
+      // Normalize property path to be suitable for use
+      // as a class name. For exaple, content.foo.barBaz
+      // becomes bar-baz.
+      return SC.String.dasherize(property.split('.').get('lastObject'));
+
+    // If the value is not NO, undefined, or null, return the current
+    // value of the property.
+    } else if (val !== NO && val !== undefined && val !== null) {
+      return val;
+
+    // Nothing to display. Return null so that the old class is removed
+    // but no new class is added.
+    } else {
+      return null;
+    }
   },
 
   /**
@@ -904,6 +1056,9 @@ SC.CoreView.reopen(
     // SC.RootResponder to dispatch incoming events.
     SC.View.views[this.get('layerId')] = this;
 
+    // setup classNames
+    this.classNames = this.get('classNames').slice();
+
     // setup child views.  be sure to clone the child views array first
     this.childViews = this.get('childViews').slice() ;
     this.createChildViews() ; // setup child Views
@@ -1004,7 +1159,7 @@ SC.CoreView.reopen(
     pv = this.get('parentView');
     if (pv) {
       cf = pv.get('clippingFrame');
-      if (!cf) return f;
+      if (!cf) return { x: 0, y: 0, width: f.width, height: f.height};
       ret = SC.intersectRects(cf, f);
     }
     ret.x -= f.x;
@@ -1241,7 +1396,7 @@ SC.CoreView.reopen(
 
 });
 
-SC.CoreView.mixin(/** @scope SC.View.prototype */ {
+SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
 
   /** @private walk like a duck -- used by SC.Page */
   isViewClass: YES,

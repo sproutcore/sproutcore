@@ -134,8 +134,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isContextMenuEnabled: YES,
 
   /**
-    @deprecated
-    
+    @deprecated Use #applyImmediately instead.
+
     If true, every change to the text in the text field updates 'value'.
     If false, 'value' is only updated when commitEditing() is called (this
     is called automatically when the text field loses focus), or whenever
@@ -265,10 +265,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     return sc_super();
   },
 
-  /** isEditable maps to isEnabled with a TextField. */
-  isEditable: function() {
-    return this.get('isEnabled') ;
-  }.property('isEnabled').cacheable(),
+  /** 
+    This property indicates if the value in the text field can be changed.
+    If set to NO, a readOnly attribute will be added to the DOM Element.
+    
+    Note if isEnabled is NO this property will have no effect.
+  
+    @property
+    @type Boolean
+  */
+  isEditable: YES,
 
   /**
     The current selection of the text field, returned as an SC.TextSelection
@@ -381,7 +387,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: ['formattedHint', 'fieldValue', 'isEditing', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  displayProperties: ['formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function() {
     sc_super();
@@ -490,6 +496,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if(firstTime) {
       context.attr('aria-multiline', this.get('isTextArea'));
       context.attr('aria-disabled', !this.get('isEnabled'));
+      context.attr('aria-readonly', this.get('isEnabled') && !this.get('isEditable'));
     }
     if(!SC.ok(this.get('value'))) {
       context.attr('aria-invalid', YES);
@@ -529,7 +536,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('formattedHint'), disabled, name, adjustmentStyle, type, 
+    var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckString='', autocapitalizeString='', autocorrectString='',
         maxLength = this.get('maxLength'), isOldSafari;
@@ -549,7 +556,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
+      activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
       name = this.get('layerId');
       
       if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
@@ -639,9 +646,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (element) {
         if (!this.get('isEnabled')) {
           element.disabled = 'true' ;
-        }
-        else {
+          element.readOnly = null ;
+        } else if(!this.get('isEditable')) {
           element.disabled = null ;
+          element.readOnly = 'true' ;
+        } else {
+          element.disabled = null ;
+          element.readOnly = null ;
         }
 
         // Adjust the padding element to accommodate any accessory views.

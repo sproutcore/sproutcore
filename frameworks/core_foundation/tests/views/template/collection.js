@@ -382,3 +382,21 @@ test("#collection helper should allow relative paths for the collection view cla
   equals(view.$('li').length, 3, '#collection should find relative collection view path');
 });
 
+test("#collection helper should raise an error when passing a first argument that isn't an SC.TemplateCollectionView", function() {
+  var view = SC.TemplateView.create({
+    content: {
+      names: ["Dom", "Arthur"]
+    },
+    template: SC.Handlebars.compile('{{#collection content.names}}{{/collection}}')
+  });
+  var errored = false;
+
+  try {
+    view.createLayer();
+  } catch(e) {
+    errored = true;
+  }
+
+  ok(errored, "throws an error when creating the view");
+});
+

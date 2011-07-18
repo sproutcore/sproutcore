@@ -18,7 +18,7 @@ SC.VALIDATE_NO_CHANGE = NO;
   "validate" attribute in your text field.  For example, if you want to
   validate a field using the PhoneNumberValidator use this:
 
-  <input value="1234567890" validate="phone-number" />
+      <input value="1234567890" validate="phone-number" />
 
   Validators get notified at three points.  You can implement one or all
   of these methods to support validation.  All of the validate methods except
@@ -28,10 +28,8 @@ SC.VALIDATE_NO_CHANGE = NO;
   following:
 
   1. You can simply validate the field value and return OK or an error str
-  
   2. You can modify the field value (for example, you could format the
      string to match some predefined format).
-     
   3. If you need to roundtrip the server first to perform validation, you can
      return Validator.OK, then save the form and field info until after the
      roundtrip.  On return, if there is a problem, first verify the field

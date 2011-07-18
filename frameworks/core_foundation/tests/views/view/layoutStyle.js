@@ -10,9 +10,15 @@
 
 /*globals module test ok same equals */
 
+
 /* These unit tests verify:  layout(), frame(), styleLayout() and clippingFrame(). */
 (function() {
-  var parent, child;
+  var parent, child, frameKeys, layoutKeys;
+
+  frameKeys = 'x y width height'.w();
+  layoutKeys = ['width','height','top','bottom','marginLeft','marginTop','left','right','zIndex',
+    'minWidth','maxWidth','minHeight','maxHeight','borderTopWidth','borderBottomWidth',
+    'borderLeftWidth','borderRightWidth'];
 
   /*
     helper method to test the layout of a view.  Applies the passed layout to a
@@ -31,19 +37,16 @@
     @returns {void}
   */
   function performLayoutTest(layout, no_f, no_s, with_f, with_s, isFixedShouldBe) {
-    // make sure we add null properties and convert numbers to 'XXpx' to style layout.
-    var layoutKeys = ('width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight ' +
-                      'borderTopWidth borderBottomWidth borderLeftWidth borderRightWidth').w();
     if (SC.platform.supportsCSSTransforms) { layoutKeys.push('transform'); }
 
-    var frameKeys = 'x y width height'.w();
-
+    // make sure we add null properties and convert numbers to 'XXpx' to style layout.
     layoutKeys.forEach(function(key) {
       if (no_s[key]===undefined) { no_s[key] = null; }
       if (with_s[key]===undefined) { with_s[key] = null; }
 
+
       if (typeof no_s[key] === 'number') { no_s[key] = no_s[key].toString() + 'px'; }
-      if (typeof with_s[key] === 'number') { with_s[key] = no_s[key].toString() + 'px'; }
+      if (typeof with_s[key] === 'number') { with_s[key] = with_s[key].toString() + 'px'; }
     });
 
     // set layout
@@ -85,9 +88,13 @@
     });
 
     if (with_f !== undefined) {
-      frameKeys.forEach(function(key){
-        equals(frame[key], with_f[key], "FRAME W/ PARENT %@".fmt(key));
-      });
+      if (frame && with_f) {
+        frameKeys.forEach(function(key){
+          equals(frame[key], with_f[key], "FRAME W/ PARENT %@".fmt(key));
+        });
+      } else {
+        equals(frame, with_f, "FRAME W/ PARENT");
+      }
     }
 
     // check if isFixedLayout is correct
@@ -723,7 +730,32 @@
   test("for proper null variables");
   // nothing should get passed through as undefined, instead we want null in certain cases
 
+  module('STATIC LAYOUT VARIATIONS', commonSetup);
 
+  test("no layout", function() {
+
+    var no_f = null,
+        no_s = {},
+        with_f = null,
+        with_s = {};
+
+    child.set('useStaticLayout', true);
+
+    performLayoutTest(SC.View.prototype.layout, no_f, no_s, with_f, with_s, NO);
+  });
+
+  test("with layout", function() {
+
+    var layout = { top: 10, left: 10, width: 50, height: 50 },
+        no_f = null,
+        no_s = { top: 10, left: 10, width: 50, height: 50 },
+        with_f = null,
+        with_s = { top: 10, left: 10, width: 50, height: 50 };
+
+    child.set('useStaticLayout', true);
+
+    performLayoutTest(layout, no_f, no_s, with_f, with_s, YES);
+  });
 
   // test("frame size shifts with top/left/bottom/right", function(){
   //   var error=null;

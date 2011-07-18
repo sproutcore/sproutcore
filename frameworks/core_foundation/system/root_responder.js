@@ -79,7 +79,7 @@ SC.RootResponder = SC.Object.extend(
     Usually you will not need to edit the main pane directly.  Instead, you
     should use a MainPane subclass, which will automatically make itself main
     when you append it to the document.
-    
+
     @type SC.MainPane
   */
   mainPane: null,
@@ -1730,9 +1730,9 @@ SC.RootResponder = SC.Object.extend(
   /**
     IE's default behavior to blur textfields and other controls can only be
     blocked by returning NO to this event. However we don't want to block
-    its default behavior otherwise textfields won't loose focus by clicking on
+    its default behavior otherwise textfields won't lose focus by clicking on
     an empty area as it's expected. If you want to block IE from bluring another
-    control set blockIEDeactivate to true on the especific view in which you
+    control set blockIEDeactivate to true on the specific view in which you
     want to avoid this. Think of an autocomplete menu, you want to click on
     the menu but don't loose focus.
   */

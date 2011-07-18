@@ -7,8 +7,8 @@
 /*global module test equals context ok same */
 
 // .......................................................
-// layoutChildViews() 
-// 
+// layoutChildViews()
+//
 module("SC.View#layoutChildViews");
 
 test("calls renderLayout() on child views on views that need layout if they have a layer", function() {
@@ -17,25 +17,25 @@ test("calls renderLayout() on child views on views that need layout if they have
 	var ChildView = SC.View.extend({
 		updateLayout: function(context) { callCount++; }
 	});
-	
+
 	var view = SC.View.create({
 		childViews: [ChildView, ChildView, ChildView]
 	});
-	
+
 	var cv1 = view.childViews[0];
 	var cv2 = view.childViews[1];
-	
+
 	// add to set...
 	view.layoutDidChangeFor(cv1);
 	view.layoutDidChangeFor(cv2);
-	
+
 	view.layoutChildViews();
 	equals(callCount, 2, 'updateLayout should be called on two dirty child views');
 });
 
 // .......................................................
-// updateLayout() 
-// 
+// updateLayout()
+//
 module("SC.View#updateLayout");
 
 test("if view has layout, calls renderLayout with context to update element", function() {
@@ -52,10 +52,10 @@ test("if view has layout, calls renderLayout with context to update element", fu
 			callCount++;
 		}
 	});
-	
+
 	view.createLayer(); // we need a layer
 	ok(view.get('layer'), 'precond - should have a layer');
-	
+
 	isTesting= YES ;
 	view.updateLayout();
 	equals(callCount, 1, 'should call renderLayout()');
@@ -74,9 +74,9 @@ test("if view has NO layout, should not call renderLayout", function() {
 			callCount++;
 		}
 	});
-	
+
 	ok(!view.get('layer'), 'precond - should NOT have a layer');
-	
+
 	isTesting= YES ;
 	view.updateLayout();
 	equals(callCount, 0, 'should NOT call renderLayout()');
@@ -88,7 +88,7 @@ test("returns receiver", function() {
 });
 
 // .......................................................
-//  renderLayout() 
+//  renderLayout()
 //
 module('SC.View#renderLayout');
 
@@ -96,7 +96,7 @@ test("adds layoutStyle property to passed context", function() {
 
 	var view = SC.View.create({
 		// mock style for testing...
-		layoutStyle: { width: 50, height: 50 } 
+		layoutStyle: { width: 50, height: 50 }
 	});
 	var context = view.renderContext();
 
@@ -111,7 +111,7 @@ test("adds layoutStyle property to passed context", function() {
 });
 
 // .......................................................
-// layoutChildViewsIfNeeded() 
+// layoutChildViewsIfNeeded()
 //
 var view, callCount ;
 module('SC.View#layoutChildViewsIfNeeded', {
@@ -123,7 +123,7 @@ module('SC.View#layoutChildViewsIfNeeded', {
 	},
 	teardown: function() { view = null; }
 });
-  
+
 test("calls layoutChildViews() if childViewsNeedLayout and isVisibleInWindow & sets childViewsNeedLayout to NO", function() {
 
 	view.childViewsNeedLayout = YES ;
@@ -149,7 +149,7 @@ test("does not call layoutChildViews() if isVisibleInWindow is NO unless passed 
 	view.layoutChildViewsIfNeeded();
 	equals(callCount, 0, 'should NOT call layoutChildViews()');
 	equals(view.get('childViewsNeedLayout'), YES, 'should leave childViewsNeedLayout set to YES');
-	
+
 	view.layoutChildViewsIfNeeded(YES);
 	equals(callCount, 1, 'should call layoutChildViews()');
 	equals(view.get('childViewsNeedLayout'), NO, 'should set childViewsNeedLayout to NO');
@@ -158,5 +158,5 @@ test("does not call layoutChildViews() if isVisibleInWindow is NO unless passed 
 test("returns receiver", function() {
 	equals(view.layoutChildViewsIfNeeded(), view, 'should return receiver');
 });
-  
+
 

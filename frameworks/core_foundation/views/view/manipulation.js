@@ -126,16 +126,22 @@ SC.View.reopen(
     if(view.parentViewDidChange) view.parentViewDidChange();
     if(view.layoutDidChange) view.layoutDidChange();
 
-    var pane = view.get('pane');
-    if(pane && pane.get('isPaneAttached')) {
-      view._notifyDidAppendToDocument();
-    }
-
-    // notify views
-    if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
-    if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }
-
     view.endPropertyChanges();
+
+    // Make sure all notifications are delayed since the appending
+    // doesn't complete until the end of the RunLoop
+    // There may be better ways to do this than with invokeLast,
+    // but it's the best I can do for now - PDW
+    this.invokeLast(function(){
+      var pane = view.get('pane');
+      if(pane && pane.get('isPaneAttached')) {
+        view._notifyDidAppendToDocument();
+      }
+
+      // notify views
+      if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
+      if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }
+    });
 
     return this ;
   },

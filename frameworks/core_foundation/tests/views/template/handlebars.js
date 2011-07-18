@@ -3,8 +3,54 @@
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 /*globals TemplateTests module */
+
+// Included to test bindAttr problem where setting an attr when it
+// has the same value is overkill and sometimes causes the browser
+// to misbehave, like in SC.TextField where listening to change
+// events caused the cursor to go to the end of the input
+(function() {
+
+  jQuery.fn.caretPosition = function() {
+      var ctrl = this[0];
+
+      var CaretPos = 0;
+      // IE Support
+      if (document.selection) {
+
+          ctrl.focus();
+          var Sel = document.selection.createRange ();
+
+          Sel.moveStart ('character', -ctrl.value.length);
+
+          CaretPos = Sel.text.length;
+      }
+      // Firefox support
+      else if (ctrl.selectionStart || ctrl.selectionStart == '0') {
+          CaretPos = ctrl.selectionStart;
+      }
+
+      return (CaretPos);
+  };
+
+
+  jQuery.fn.setCaretPosition = function(pos) {
+      var ctrl = this[0];
+
+      if(ctrl.setSelectionRange) {
+          ctrl.focus();
+          ctrl.setSelectionRange(pos,pos);
+      } else if (ctrl.createTextRange) {
+          var range = ctrl.createTextRange();
+          range.collapse(true);
+          range.moveEnd('character', pos);
+          range.moveStart('character', pos);
+          range.select();
+      }
+  }
+
+})();
+
 /**
   This module specifically tests integration with Handlebars and SproutCore-specific
   Handlebars extensions.
@@ -855,6 +901,30 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
   equals(view.$('img').attr('alt'), "Nanananana SproutCore!", "updates alt attribute when title property is computed");
 });
 
+test("should not reset cursor position when text field receives keyUp event", function() {
+  var pane = SC.Pane.create({
+    childViews: ['view'],
+    view: SC.TextField.create({
+      value: "Broseidon, King of the Brocean"
+    })
+  });
+
+  pane.append();
+
+  var view = pane.get('childViews')[0];
+
+  view.$('input').val('Brosiedoon, King of the Brocean');
+  view.$('input').setCaretPosition(5);
+
+  SC.run(function() {
+    view.keyUp({});
+  });
+
+  equals(view.$('input').caretPosition(), 5, "The keyUp event should not result in the cursor being reset due to the bindAttr observers");
+
+  pane.remove().destroy();
+});
+
 test("should be able to bind element attributes using {{bindAttr}} inside a block", function() {
   var template = SC.Handlebars.compile('{{#with content}}<img {{bindAttr src="url" alt="title"}}>{{/with}}');
 
@@ -898,7 +968,7 @@ test("should be able to bind class attribute with {{bindAttr}}", function() {
 });
 
 test("should be able to bind boolean element attributes using {{bindAttr}}", function() {
-  var template = SC.Handlebars.compile('<input type="check" {{bindAttr disabled="content.isDisabled" checked="content.isChecked"}} />');
+  var template = SC.Handlebars.compile('<input type="checkbox" {{bindAttr disabled="content.isDisabled" checked="content.isChecked"}} />');
   var content = SC.Object.create({
     isDisabled: false,
     isChecked: true

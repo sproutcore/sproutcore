@@ -5,7 +5,7 @@
 // ==========================================================================
 /*globals JN module test ok equals same stop start */
 
-var MyApp, wasCalled;
+var MyApp, wasCalled, resetWasCalled;
 module("SC.DataSource", {
   setup: function () {
     MyApp = window.MyApp = {};
@@ -41,6 +41,11 @@ module("SC.DataSource", {
         wasCalled = true;
         equals(arguments.length, 3);
         return YES;
+      },
+
+      reset: function() {
+        resetWasCalled = true;
+        return this;
       }
     });
     SC.RunLoop.begin();
@@ -187,4 +192,12 @@ test("The dataSource will return NO when all records committed return NO", funct
 
   equals(MyApp.store.commitRecords(), NO,
          "commiting records for an 'update', 'create', and 'destroy' should return NO");
+});
+
+test("The store calls reset on the dataSource when reset", function(){
+  MyApp.store.set('dataSource', MyApp.DataSource.create());
+  resetWasCalled = NO; // Just to be sure
+
+  MyApp.store.reset();
+  ok(resetWasCalled, "should have called reset");
 });

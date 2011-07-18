@@ -71,7 +71,6 @@
 .core-test table {
   background: #000;
   border-spacing: 1px;
-  border-collapse: separate;
   width: 100%;
 }
 

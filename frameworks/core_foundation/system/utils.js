@@ -152,8 +152,10 @@ SC.mixin( /** @scope SC */ {
     return result;
   },
 
-  /** @deprecated
-    Deprecated. SC.offset() is more accurate, more flexible in the value for the element parameter and
+  /**
+    @deprecated Use SC.offset instead.
+
+    SC.offset() is more accurate, more flexible in the value for the element parameter and
     easier to understand.
 
     @param el The DOM element

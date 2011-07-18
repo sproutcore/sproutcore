@@ -15,7 +15,7 @@ SC.BORDER_NONE   = null ;
 
 /**
   @namespace
-  @deprecated
+  @deprecated Border functionality is now included in SC.View.
 
   The `SC.Border` mixin has be deprecated in favour of applying border properties
   to an `SC.View`'s layout object. See {@link SC.View#layout}.

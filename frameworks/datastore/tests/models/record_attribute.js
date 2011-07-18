@@ -14,72 +14,72 @@ module("SC.RecordAttribute core methods", {
     MyApp = SC.Object.create({
       store: SC.Store.create()
     });
-    
+
     // stick it to the window object so that objectForPropertyPath works
     window.MyApp = MyApp;
-    
+
     MyApp.Foo = SC.Record.extend({
-      
+
       // test simple reading of a pass-through prop
       firstName: SC.Record.attr(String),
 
       // test mapping to another internal key
       otherName: SC.Record.attr(String, { key: "firstName" }),
-      
+
       // test mapping Date
       date: SC.Record.attr(Date),
       nonIsoDate: SC.Record.attr(Date, { useIsoDate: false }),
 
       // test SC.DateTimes
       dateTime: SC.Record.attr(SC.DateTime),
-      
+
       // test Array
       anArray: SC.Record.attr(Array),
-      
+
       // test Object
       anObject: SC.Record.attr(Object),
-                                 
+
       // test Number
       aNumber: SC.Record.attr(Number),
-      
+
       // used to test default value
       defaultValue: SC.Record.attr(String, {
         defaultValue: "default"
       }),
-      
+
       // used to test default value
       defaultComputedValue: SC.Record.attr(Number, {
         defaultValue: function() {
           return Math.floor(Math.random()*3+1);
         }
       }),
-      
+
       // test toOne relationships
       relatedTo: SC.Record.toOne('MyApp.Foo'),
-      
+
       // test toOne relationship with computed type
       relatedToComputed: SC.Record.toOne(function() {
-        // not using .get() to avoid another transform which will 
+        // not using .get() to avoid another transform which will
         // trigger an infinite loop
         return (this.readAttribute('relatedToComputed').indexOf("foo")===0) ? MyApp.Foo : MyApp.Bar;
       }),
-      
+
       // test readONly
       readOnly: SC.Record.attr(String, { isEditable: NO })
-      
+
     });
-    
+
     MyApp.Bar = SC.Record.extend({
       parent: SC.Record.toOne('MyApp.Foo', { aggregate: YES }),
       relatedMany: SC.Record.toMany('MyApp.Foo', { aggregate: YES })
     });
-    
+
     SC.RunLoop.begin();
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
-      { 
-        guid: 'foo1', 
-        firstName: "John", 
-        lastName: "Doe", 
+      {
+        guid: 'foo1',
+        firstName: "John",
+        lastName: "Doe",
         date: "2009-03-01T20:30-08:00",
         dateTime: new Date(1235939425000),
         anArray: ['one', 'two', 'three'],
@@ -87,11 +87,11 @@ module("SC.RecordAttribute core methods", {
         aNumber: '123',
         readOnly: 'foo1'
       },
-      
-      { 
-        guid: 'foo2', 
-        firstName: "Jane", 
-        lastName: "Doe", 
+
+      {
+        guid: 'foo2',
+        firstName: "Jane",
+        lastName: "Doe",
         relatedTo: 'foo1',
         relatedToAggregate: 'bar1',
         dateTime: "2009-03-01T20:30:25Z",
@@ -100,39 +100,39 @@ module("SC.RecordAttribute core methods", {
         aNumber: '123',
         nonIsoDate: "2009/06/10 8:55:50 +0000"
       },
-      
-      { 
-        guid: 'foo3', 
-        firstName: "Alex", 
-        lastName: "Doe", 
+
+      {
+        guid: 'foo3',
+        firstName: "Alex",
+        lastName: "Doe",
         relatedToComputed: 'bar1',
         dateTime: SC.DateTime.create(1235939425000),
         anArray: ['one', 'two', 'three'],
         anObject: { 'key1': 'value1', 'key2': 'value2' },
         aNumber: '123'
       }
-      
+
     ]);
-    
+
     MyApp.store.loadRecords(MyApp.Bar, [
       { guid: 'bar1', city: "Chicago", parent: 'foo2', relatedMany: ['foo1', 'foo2'] }
     ]);
-    
+
     SC.RunLoop.end();
-    
+
     rec = MyApp.store.find(MyApp.Foo, 'foo1');
     rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
     rec3 = MyApp.store.find(MyApp.Foo, 'foo3');
-    
+
     bar = MyApp.store.find(MyApp.Bar, 'bar1');
     equals(rec.storeKey, storeKeys[0], 'should find record');
-    
+
   }
 });
 
 // ..........................................................
 // READING
-// 
+//
 
 test("pass-through should return builtin value" ,function() {
   equals(rec.get('firstName'), 'John', 'reading prop should get attr value');
@@ -190,7 +190,7 @@ test("reading computed default value", function() {
 
 // ..........................................................
 // WRITING
-// 
+//
 
 test("writing pass-through should simply set value", function() {
   rec.set("firstName", "Foo");
@@ -201,7 +201,7 @@ test("writing pass-through should simply set value", function() {
 
   rec.set("firstName", YES);
   equals(rec.readAttribute("firstName"), YES, "should write bool");
-  
+
 });
 
 test("writing when isEditable is NO should ignore", function() {
@@ -217,7 +217,7 @@ test("writing a value should override default value", function() {
 });
 
 test("writing a string to a number attribute should store a number" ,function() {
-     equals(rec.set('aNumber', "456"), rec, 'returns reciever');
+     equals(rec.set('aNumber', "456"), rec, 'returns receiver');
      equals(rec.get('aNumber'), 456, 'should have new value');
      equals(typeof rec.get('aNumber'), 'number', 'new value should be a number');
 });
@@ -229,27 +229,27 @@ test("writing a date should generate an ISO date" ,function() {
   var utcDate = new Date(Number(date) + (date.getTimezoneOffset() * 60000)); // Adjust for timezone offset
   utcDate.getTimezoneOffset = function(){ return 0; }; // Hack the offset to respond 0
 
-  equals(rec.set('date', utcDate), rec, 'returns reciever');
+  equals(rec.set('date', utcDate), rec, 'returns receiver');
   equals(rec.readAttribute('date'), '2009-04-02T05:28:03Z', 'should have time in ISO format');
 });
 
 test("writing an attribute should make relationship aggregate dirty" ,function() {
   equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
-  
+
   bar.set('city', 'Oslo');
   bar.get('store').flush();
-  
+
   equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");
 });
 
 test("writing an attribute should make many relationship aggregate dirty" ,function() {
   equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
-  
+
   bar.set('city', 'Oslo');
   bar.get('store').flush();
-  
+
   equals(rec.get('status'), SC.Record.READY_DIRTY, "foo1 should be READY_DIRTY");
   equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");
 });
@@ -257,10 +257,25 @@ test("writing an attribute should make many relationship aggregate dirty" ,funct
 test("writing an attribute should make many relationship aggregate dirty and add the aggregate to the store" ,function() {
   equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
-  
+
   bar.set('city', 'Oslo');
 
   var store = bar.get('store');
   ok(store.changelog.contains(rec.get('storeKey')), "foo1 should be in the store's changelog");
   ok(store.changelog.contains(rec2.get('storeKey')), "foo2 should be in the store's changelog");
+});
+
+test("adding attribute with non existing class should throw error", function() {
+  MyApp.InvalidModel = SC.Record.extend({
+    foo: SC.Record.attr("SomethingSomethingSomething")
+  });
+
+  var message;
+  try {
+    MyApp.InvalidModel.prototype.foo.typeClass();
+  } catch (x) {
+    message = x;
+  }
+
+  same(message, 'SomethingSomethingSomething could not be found');
 });

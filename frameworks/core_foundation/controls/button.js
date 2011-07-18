@@ -1,10 +1,23 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
+
+sc_require('mixins/action_support');
 sc_require('views/template');
 
-SC.Button = SC.TemplateView.extend({
+/**
+  @class
+  @extends SC.TemplateView
+  @extends SC.ActionSupport
+*/
+SC.Button = SC.TemplateView.extend(SC.ActionSupport,
+/** @scope SC.Button.prototype */{
+
   classNames: ['sc-button'],
 
-  // Setting isActive to true will trigger the classBinding and add
-  // 'is-active' to our layer's class names.
   mouseDown: function() {
     this.set('isActive', true);
     this._isMouseDown = YES;
@@ -25,18 +38,9 @@ SC.Button = SC.TemplateView.extend({
     return pane.get('rootResponder');
   }.property('pane').cacheable(),
 
-  // Setting isActive to false will remove 'is-active' from our
-  // layer's class names.
   mouseUp: function(event) {
     if (this.get('isActive')) {
-      var action = this.get('action'),
-          target = this.get('target') || null,
-          rootResponder = this.get('rootResponder');
-
-      if (action && rootResponder) {
-        rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
-      }
-
+      this.fireAction();
       this.set('isActive', false);
     }
 
@@ -50,4 +54,5 @@ SC.Button = SC.TemplateView.extend({
   touchEnd: function(touch) {
     this.mouseUp(touch);
   }
+
 });

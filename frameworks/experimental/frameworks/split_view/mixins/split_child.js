@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @class
+  @namespace
   Child views of SplitViews should use this mixin to get their positioning
   logic and default settings.
   

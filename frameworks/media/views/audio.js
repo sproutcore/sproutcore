@@ -27,7 +27,8 @@ sc_require('views/mini_controls');
   @since SproutCore 1.1
 */
 
-SC.AudioView = SC.View.extend({
+SC.AudioView = SC.View.extend(
+/** @scope SC.AudioView.prototype */{
 
   /** 
     Audio view className. 
