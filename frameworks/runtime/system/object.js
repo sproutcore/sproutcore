@@ -757,8 +757,20 @@ SC.Object.prototype = {
     @returns {SC.Object} receiver
   */
   invokeOnce: function(method) {
-    SC.RunLoop.currentRunLoop.invokeOnce(this, method) ;
-    return this ;
+    //@if(debug)
+    // If we're logging deferred calls, send along the information that needs to
+    // be recorded.
+    var originatingTarget, originatingMethod, originatingStack;
+    if (SC.LOG_DEFERRED_CALLS) {
+      originatingTarget = this;
+      originatingStack  = SC._getRecentStack();
+      originatingMethod = originatingStack[0];
+    }
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);    
+    return this;
+    //@endif
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method);
+    return this;
   },
 
   /**
@@ -796,8 +808,20 @@ SC.Object.prototype = {
     @returns {SC.Object} receiver
   */
   invokeLast: function(method) {
-    SC.RunLoop.currentRunLoop.invokeLast(this, method) ;
-    return this ;
+    //@if(debug)
+    // If we're logging deferred calls, send along the information that needs to
+    // be recorded.
+    var originatingTarget, originatingMethod, originatingStack;
+    if (SC.LOG_DEFERRED_CALLS) {
+      originatingTarget = this ;
+      originatingStack  = SC._getRecentStack();
+      originatingMethod = originatingStack[0];
+    }
+    SC.RunLoop.currentRunLoop.invokeLast(this, method, originatingTarget, originatingMethod, originatingStack);    
+    return this;
+    //@endif
+    SC.RunLoop.currentRunLoop.invokeLast(this, method);
+    return this;
   },
 
   /**

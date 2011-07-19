@@ -12,7 +12,7 @@
 /**
   @namespace
 
-  This private class is used to store information about obversers on a
+  This private class is used to store information about observers on a
   particular key.  Note that this object is not observable.  You create new
   instances by calling SC.beget(SC.ObserverSet) ;
 
@@ -24,21 +24,40 @@ SC.ObserverSet = {
   /**
     Adds the named target/method observer to the set.  The method must be
     a function, not a string.
-
-    Note that in debugging mode only, this method is overridden to also record
-    the name of the object and function that resulted in the target/method
-    being added.
   */
   add: function(target, method, context) {
-    var targetGuid = SC.guidFor(target), methodGuid = SC.guidFor(method);
-    var targets = this._members, members = this.members;
+    var targetGuid = SC.guidFor(target),
+        methodGuid = SC.guidFor(method),
+        targets    = this._members,
+        members    = this.members,
+        indexes    = targets[targetGuid],       // get the set of methods
+        index;
 
-    // get the set of methods
-    var indexes = targets[targetGuid];
     if ( !indexes ) indexes = targets[targetGuid] = {};
 
-    if (indexes[methodGuid] === undefined) indexes[methodGuid] = members.length;
-    else return;
+    index = indexes[methodGuid];
+    if (index === undefined) {
+      indexes[methodGuid] = members.length;
+    }
+    else {
+      //@if(debug)
+      // If context was specified (such as when logging is enabled), we need to
+      // add this new context to the enqueued target/method.
+      var member, memberContext;
+      if (context) {
+        member        = members[index];
+        memberContext = member[2];
+        if (!memberContext) {
+          member[2] = [context];
+        }
+        else if (!(memberContext instanceof Array)) {
+          member[2] = [memberContext, context];
+        }
+      }
+      //@endif
+
+      return;
+    }
 
     members.push([target, method, context]);
   },
@@ -77,11 +96,59 @@ SC.ObserverSet = {
   invokeMethods: function() {
     var members = this.members, member;
 
+    //@if(debug)
+    var shouldLog = SC.LOG_DEFERRED_CALLS,
+        target, method, methodName, context, contexts, originatingTarget,
+        originatingMethod, originatingMethodName, originatingStack, j, jLen;
+    //@endif
+
     for( var i=0, l=members.length; i<l; i++ ) {
       member = members[i];
 
       // method.call(target);
       member[1].call(member[0]);
+
+      //@if(debug)
+      // If we have context specified for who scheduled the particular
+      // invocation, and logging is enabled, then output it.
+      if (shouldLog) {
+        target     = member[0];
+        method     = member[1];
+        methodName = method.displayName || method;
+        context    = member[2];
+        if (context) {
+          // If the context is not an array, that means only one place scheduled
+          // the invocation.
+          if (!(context instanceof Array)) {
+            // We'll treat single-scheduler cases specially to make the output
+            // better for the user, even if it means some essentially-duplicated
+            // code.
+            originatingTarget     = context.originatingTarget;
+            originatingMethod     = context.originatingMethod;
+            originatingStack      = context.originatingStack;            
+            originatingMethodName = (originatingMethod ? originatingMethod.displayName : "(unknown)") || originatingMethod;
+            SC.Logger.log("Invoking runloop-scheduled method %@ on %@.  Originated by target %@,  method %@,  stack: ".fmt(methodName, target, originatingTarget, originatingMethodName), originatingStack);
+          }
+          else {
+            SC.Logger.log("Invoking runloop-scheduled method %@ on %@, which was scheduled by multiple target/method pairs:".fmt(methodName, target));
+            contexts = context;
+            for (j = 0, jLen = contexts.length;  j < jLen;  ++j) {
+              context               = contexts[j];
+              originatingTarget     = context.originatingTarget;
+              originatingMethod     = context.originatingMethod;
+              originatingStack      = context.originatingStack;
+              originatingMethodName = (originatingMethod ? originatingMethod.displayName : "(unknown)") || originatingMethod;
+              SC.Logger.log("  [%@]  originated by target %@,  method %@,  stack:".fmt(j, originatingTarget, originatingMethodName), originatingStack);
+            }
+          }
+        }
+        else {
+          // If we didn't capture information for this invocation, just report
+          // what we can.
+          SC.Logger.log("Invoking runloop-scheduled method %@ on %@, but we didn’t capture information about who scheduled it…".fmt(methodName, target));
+        }
+      }
+      //@endif
     }
   },
 

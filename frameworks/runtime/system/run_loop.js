@@ -37,6 +37,16 @@ sc_require('private/observer_set');
   @extends SC.Object
   @since SproutCore 1.0
 */
+
+
+// When in debug mode, users can log deferred calls (such as .invokeOnce()) by
+// setting SC.LOG_DEFERRED_CALLS.  We'll declare the variable explicitly to make
+// life easier for people who want to enter it inside consoles that auto-
+// complete.
+//@if(debug)
+if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
+//@endif
+
 SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
   /**
@@ -134,9 +144,38 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
+    var context;      // Used only in debug mode
+
+    //@if(debug)
+    // When in debug mode, SC.Object#invokeOnce() will pass in the originating
+    // method, target, and stack.  That way, we'll record the interesting parts
+    // rather than having most of these calls seemingly coming from
+    // SC.Object#invokeOnce().
+    //
+    // If it was not specified, we'll record the originating function ourselves.
+    var shouldLog = SC.LOG_DEFERRED_CALLS;
+    if (shouldLog) {
+      var originatingTarget = arguments[2],
+          originatingMethod = arguments[3],
+          originatingStack  = arguments[4];
+
+      if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
+      if (!originatingMethod) {
+        originatingStack  = SC._getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+
+      context = {
+        originatingTarget: originatingTarget,
+        originatingMethod: originatingMethod,
+        originatingStack:  originatingStack
+      };
+    }
+    //@endif
+
     if (typeof method === "string") method = target[method];
     if (!this._invokeQueue) this._invokeQueue = SC.ObserverSet.create();
-    if ( method ) this._invokeQueue.add(target, method);
+    if ( method ) this._invokeQueue.add(target, method, context);
     return this ;
   },
 
@@ -165,9 +204,39 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
+    var context;      // Used only in debug mode
+
+    //@if(debug)
+    // When in debug mode, SC.Object#invokeOnce() will pass in the originating
+    // method, target, and stack.  That way, we'll record the interesting parts
+    // rather than having most of these calls seemingly coming from
+    // SC.Object#invokeOnce().
+    //
+    // If it was not specified, we'll record the originating function ourselves.
+    var shouldLog = SC.LOG_DEFERRED_CALLS;
+    if (shouldLog) {
+      var originatingTarget = arguments[2],
+          originatingMethod = arguments[3],
+          originatingStack  = arguments[4];
+
+      if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
+      if (!originatingMethod) {
+        originatingStack  = SC._getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+
+      context = {
+        originatingTarget: originatingTarget,
+        originatingMethod: originatingMethod,
+        originatingStack:  originatingStack
+      };
+    }
+    //@endif
+
+
     if (typeof method === "string") method = target[method];
     if (!this._invokeLastQueue) this._invokeLastQueue = SC.ObserverSet.create();
-    this._invokeLastQueue.add(target, method);
+    this._invokeLastQueue.add(target, method, context);
     return this ;
   },
 
@@ -213,6 +282,41 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   }
 
 });
+
+
+//@if(debug)
+ /**
+  Will return the recent stack as a hash with numerical keys, for nice output
+  in some browsers’ debuggers.  The “recent” stack is capped at 6 entries.
+
+  This is used by, amongst other places, SC.LOG_DEFERRED_CALLS.
+
+  @returns {Hash}
+*/
+SC._getRecentStack = function() {
+  var currentFunction = arguments.callee.caller,
+      i               = 0,
+      stack           = {},
+      first           = YES,
+      functionName;
+
+  while (currentFunction  &&  i < 10) {
+    // Skip ourselves!
+    if (first) {
+      first = NO;
+    }
+    else {
+      functionName = currentFunction.displayName || currentFunction.toString().substring(0, 40);
+      stack[i++]   = functionName;
+    }
+    currentFunction = currentFunction.caller;
+  }
+  
+  return stack;
+};
+//@endif
+
+
 
 /**
   The current run loop.  This is created automatically the first time you
