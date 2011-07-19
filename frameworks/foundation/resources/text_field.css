@@ -27,8 +27,7 @@
   	top: 0px;
   	left: 0px;
   	width: 100%;
-    bottom: 0px;
-  	right: 0px;
+    height: 100%;
   	display: block;
   	background: transparent;
   	vertical-align: middle;
@@ -36,7 +35,7 @@
   	outline: none;
   	-webkit-appearance:none;
   }
-  
+
   textarea {
     position: absolute;
   	top: 0px;
@@ -44,6 +43,7 @@
   	width:100%;
     bottom: 0px;
   	right: 0px;
+    padding-top: 10px;
   	display: block;
   	background: transparent;
   	vertical-align: middle;
