@@ -209,7 +209,9 @@ SC.mixin( /** @scope SC */ {
     @param ignoreEscape {Boolean} To NOT html escape the string.
   */
   measureString: function(string, ignoreEscape) {
-    var element = this._metricsCalculationElement;
+    var element = this._metricsCalculationElement,
+    padding = 0;
+
     if (!element) {
       throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
     }
@@ -221,9 +223,12 @@ SC.mixin( /** @scope SC */ {
     else if (typeof element.innerText != "undefined") element.innerText = string;
     else element.textContent = string;
 
+    // for some reason IE measures 1 pixel too small
+    if(SC.browser.isIE) padding = 1;
+
     // generate result
     var result = {
-      width: element.clientWidth,
+      width: element.clientWidth + padding,
       height: element.clientHeight
     };
 
