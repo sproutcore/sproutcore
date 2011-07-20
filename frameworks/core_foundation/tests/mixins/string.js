@@ -76,6 +76,20 @@ test("Localize a string with mutliple parameters", function() {
   equals(SC.String.loc("Test.Multiple", 'parameter1', 'parameter2'), 'parameter1 parameter2', "Localizing with multiple parameters - using SC.String.loc");
 });
 
+test("Localize a string with null or missing parameters", function() {
+  equals("Test".loc(null), "(null)", "Localizing with null parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test", null), "(null)", "Localizing with null parameter - using SC.String.loc");
+
+  equals("Test".loc(), "", "Localizing with missing parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test"), "", "Localizing with missing parameter - using SC.String.loc");
+
+  equals("Test.Multiple".loc("p1", null), "p1 (null)", "Localizing multiple with null parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test.Multiple", "p1", null), "p1 (null)", "Localizing with null parameter - using SC.String.loc");
+
+  equals("Test.Multiple".loc("p1"), "p1 ", "Localizing multiple with missing parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test.Multiple", "p1"), "p1 ", "Localizing with missing parameter - using SC.String.loc");
+});
+
 test("Localize a string even if localized version is empty", function() {
   equals("empty".loc(), "", "Using String.prototype.loc");
   equals(SC.String.loc("empty"), "", "Using SC.String.loc");

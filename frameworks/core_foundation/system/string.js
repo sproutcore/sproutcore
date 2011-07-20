@@ -129,7 +129,7 @@ SC.mixin(SC.String, {
     // NB: This could be implemented as a wrapper to locWithDefault() but
     // it would add some overhead to deal with the arguments and adds stack
     // frames, so we are keeping the implementation separate.
-    if(!SC.Locale.currentLocale) { SC.Locale.createCurrentLocale(); }
+    if (!SC.Locale.currentLocale) { SC.Locale.createCurrentLocale(); }
 
     var localized = SC.Locale.currentLocale.locWithDefault(str);
     if (SC.typeOf(localized) !== SC.T_STRING) { localized = str; }
@@ -137,7 +137,7 @@ SC.mixin(SC.String, {
     var args = SC.$A(arguments);
     args.shift(); // remove str param
     //to extend String.prototype
-    if(args.length>0 && args[0].isSCArray) args=args[0];
+    if (args.length > 0 && args[0] && args[0].isSCArray) { args = args[0]; }
 
     return SC.String.fmt(localized, args);
   },
