@@ -584,6 +584,7 @@ SC.FlowedLayout = {
       item = items[idx];
       if (item.isSpacer) {
         spacerCount += item.child.get('spaceUnits') || 1;
+        shouldExpand = YES;
       }
     }
     
@@ -616,13 +617,10 @@ SC.FlowedLayout = {
       if (item.isSpacer) {
         item.itemLength += spacerSize * (item.child.get('spaceUnits') || 1);
       }
-
-      // if this item has fillWidth or fillHeight set, the row should expand
-      // laterally
-      if(item.fillRow) shouldExpand = YES;
-
+      
       // if the item is not a fill-row item, this row has a size that all fill-row
       // items should expand to
+      if (item.fillRow) shouldExpand = YES;
       rowSize = Math.max(item.itemSize, rowSize);
       
       item.position = position;
