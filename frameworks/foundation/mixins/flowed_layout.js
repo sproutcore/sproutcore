@@ -575,17 +575,14 @@ SC.FlowedLayout = {
   */
   _scfl_positionChildrenInRow: function(row) {
     var items = row.items, len = items.length, idx, item, position, rowSize = 0,
-        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = NO;
+        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = YES;
     
     // 
     // STEP ONE: DETERMINE SPACER SIZE + COUNT
     // 
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
-      if (item.isSpacer) {
-        spacerCount += item.child.get('spaceUnits') || 1;
-        shouldExpand = YES;
-      }
+      if (item.isSpacer) spacerCount += item.child.get('spaceUnits') || 1;
     }
     
     // justification is like adding a spacer between every item. We'll actually account for
@@ -620,7 +617,7 @@ SC.FlowedLayout = {
       
       // if the item is not a fill-row item, this row has a size that all fill-row
       // items should expand to
-      if (item.fillRow) shouldExpand = YES;
+      if (!item.fillRow) shouldExpand = NO;
       rowSize = Math.max(item.itemSize, rowSize);
       
       item.position = position;
