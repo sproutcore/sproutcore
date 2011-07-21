@@ -3,8 +3,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/select_view_menu_item');
-
 /**
  * Binds a menu view to an owning SC.SelectView, and checks selected items.
  *
@@ -60,10 +58,19 @@ SC.SelectViewMenu = {
     it is selected.
     
     @property
-    @type {SC.SelectViewMenuItemViewView}
-    @default SC.SelectViewMenuItemView subclass
+    @type {SC.MenuItemView}
+    @default SC.MenuItemView subclass
   */
-  exampleView: SC.SelectViewMenuItemView,
+  exampleView: SC.MenuItemView.extend({
+    isChecked: function() {
+      // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
+      // the isChecked property needs to be invalidated.
+      this._lastIsChecked = this.getContentProperty('itemValueKey') === this.getPath('parentMenu.rootMenu.value');
+      return this._lastIsChecked;
+    }.property(),
+
+    displayProperties: ['isChecked']
+  }),
 
   //
   // CODE TO BIND TO SELECTVIEW PROPERTIES
