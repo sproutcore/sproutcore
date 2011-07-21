@@ -589,7 +589,6 @@ SC.Record = SC.Object.extend(
         recordId   = this.get('id'), 
         store      = this.get('store'), 
         storeKey   = this.get('storeKey'), 
-        keysToKeep = {},
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
         isChild, defaultVal, keyForDataHash, attr;
 
@@ -604,26 +603,17 @@ SC.Record = SC.Object.extend(
         typeClass = valueForKey.typeClass;
         if (typeClass) {
           keyForDataHash = valueForKey.get('key') || key; // handle alt keys
-          
-          // As we go, we'll build up a key —> attribute mapping table that we
-          // can use when purging keys from the data hash that are not defined
-          // in the schema, below.
-          keysToKeep[keyForDataHash] = YES;
-          
           isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
           isChild  = valueForKey.isNestedRecordTransform;
           if (!isRecord && !isChild) {
             attrValue = this.get(key);
-            if(attrValue!==undefined && (attrValue!==null || includeNull)) {
+            if(attrValue!==undefined || (attrValue===null && includeNull)) {
               attr = this[key];
               // if record attribute, make sure we transform with the fromType
               if(SC.instanceOf(attr, SC.RecordAttribute)) {
                 attrValue = attr.fromType(this, key, attrValue);
               }
               dataHash[keyForDataHash] = attrValue;
-            }
-            else if(!includeNull) {
-              keysToKeep[keyForDataHash] = NO;
             }
           
           } else if (isChild) {
@@ -653,18 +643,6 @@ SC.Record = SC.Object.extend(
             }
           }
         }
-      }
-    }
-    
-    // Finally, we'll go through the underlying data hash and remove anything
-    // for which no appropriate attribute is defined.  We can do this using
-    // the mapping table we prepared above.
-    for (key in dataHash) {
-      if (!keysToKeep[key]) {
-        // Deleting a key doesn't seem too common unless it's a mistake, so
-        // we'll log it in debug mode.
-        SC.debug("%@:  Deleting key from underlying data hash due to normalization:  %@", this, key);
-        delete dataHash[key];
       }
     }
 
