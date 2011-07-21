@@ -1902,6 +1902,10 @@ SC.ScrollView = SC.View.extend({
     if (forceHeight || forceWidth) {
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     }
+
+    // send change notifications since they don't invalidate automatically
+    this.notifyPropertyChange('maximumVerticalScrollOffset');
+    this.notifyPropertyChange('maximumHorizontalScrollOffset');
   },
 
   /** @private
