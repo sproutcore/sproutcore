@@ -806,8 +806,6 @@ SC.FlowedLayout = {
     
     while(i-- > 0) {
       view = views[i];
-
-      if(SC.typeOf(view) === SC.T_STRING) view = this.get(view);
       
       childViews.removeObject(view);
       childViews.unshiftObject(view);
