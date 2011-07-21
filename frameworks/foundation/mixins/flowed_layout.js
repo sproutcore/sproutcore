@@ -285,10 +285,7 @@ SC.FlowedLayout = {
     } else {
       calc.height = f.height;
     }
-
-    calc.maxHeight = l.maxHeight;
-    calc.maxWidth = l.maxWidth;
-
+    
     // if it is a spacer, we must set the dimension that it
     // expands in to 0.
     if (view.get('isSpacer')) {
@@ -479,9 +476,8 @@ SC.FlowedLayout = {
     at the given index, and returning the index of the next item, if any.
   */
   _scfl_distributeChildrenIntoRow: function(children, startingAt, row) {
-    var idx, len = children.length, plan = row.plan, child, childSize, spacing,
+    var idx, len = children.length, plan = row.plan, child, childSize, spacing, childSpacedSize, 
         items = [], itemOffset = 0, isVertical = plan.isVertical, itemSize, itemLength,
-        maxItemLength, maxItemSize,
         canWrap = this.get('canWrap'),
         newRowPending = NO;
 
@@ -501,16 +497,14 @@ SC.FlowedLayout = {
       childSize = this.flowSizeForChild(idx, child);
       spacing = this.flowSpacingForChild(idx, child);
 
-      childSize.width += spacing.left + spacing.right;
-      childSize.height += spacing.top + spacing.bottom;
-      childSize.maxWidth += spacing.left + spacing.right;
-      childSize.maxHeight += spacing.top + spacing.bottom;
-
-      itemLength = childSize[isVertical ? 'height' : 'width'];
-      maxItemLength = childSize[isVertical ? 'maxHeight' : 'maxWidth'];
-      itemSize = childSize[isVertical ? 'width' : 'height'];
-      maxItemSize = childSize[isVertical ? 'maxWidth' : 'maxHeight'];
-
+      childSpacedSize = {
+        width: childSize.width + spacing.left + spacing.right,
+        height: childSize.height + spacing.top + spacing.bottom
+      };
+      
+      itemLength = childSpacedSize[isVertical ? 'height' : 'width'];
+      itemSize = childSpacedSize[isVertical ? 'width' : 'height'];
+      
       // there are two cases where we must start a new row: if the child or a
       // previous child in the row that wasn't included has
       // startsNewRow === YES, and if the item cannot fit. Neither applies if there
@@ -523,9 +517,7 @@ SC.FlowedLayout = {
         child: child,
         
         itemLength: itemLength,
-        maxItemLength: maxItemLength,
         itemSize: itemSize,
-        maxItemSize: maxItemSize,
         
         spacing: spacing,
         
@@ -583,9 +575,8 @@ SC.FlowedLayout = {
   */
   _scfl_positionChildrenInRow: function(row) {
     var items = row.items, len = items.length, idx, item, position, rowSize = 0,
-        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = NO,
-        leftOver = 0, noMaxWidth = NO;
-
+        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = NO;
+    
     // 
     // STEP ONE: DETERMINE SPACER SIZE + COUNT
     // 
@@ -602,31 +593,6 @@ SC.FlowedLayout = {
     
     // calculate spacer size
     spacerSize = Math.max(0, row.plan.maximumRowLength - row.rowLength) / spacerCount;
-
-    // determine individual spacer sizes using spacerSize and limited by
-    // each spacer's maxWidth (if they have one)
-    while(spacerSize > 0) {
-      for (idx = 0; idx < len; idx++) {
-        item = items[idx];
-
-        if (item.isSpacer) {
-          item.itemLength += spacerSize * (item.child.get('spaceUnits') || 1);
-          if(item.itemLength > item.maxItemLength) {
-            leftOver +=  item.itemLength - item.maxItemLength;
-            item.itemLength = item.maxItemLength;
-          }
-          else {
-            noMaxWidth = YES;
-          }
-        }
-      }
-
-      // if none of the spacers can expand further, stop
-      if(!noMaxWidth) break;
-
-      spacerSize = Math.round(leftOver / spacerCount);
-      leftOver = 0;
-    }
     
     //
     // STEP TWO: ADJUST FOR ALIGNMENT
@@ -646,6 +612,10 @@ SC.FlowedLayout = {
     // 
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
+      
+      if (item.isSpacer) {
+        item.itemLength += spacerSize * (item.child.get('spaceUnits') || 1);
+      }
 
       // if this item has fillWidth or fillHeight set, the row should expand
       // laterally
