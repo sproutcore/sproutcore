@@ -820,10 +820,14 @@ SC.State = SC.Object.extend(
 
     if (numCurrent > 1) {
       anchor = this.getSubstate(anchor);
-      if (anchor) return anchor.findFirstRelativeCurrentState();
+      return anchor ? anchor.findFirstRelativeCurrentState() : null;
     }
-
-    return currentSubstates[0];
+    
+    if (numCurrent === 1) {
+      return currentSubstates[0];
+    } 
+    
+    return null;
   },
 
   /**
