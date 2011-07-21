@@ -150,7 +150,7 @@ SC.FlowedLayout = {
   /** @private */
   _scfl_layoutPropertyDidChange: function(){
     this.invokeOnce("_scfl_tile");
-  }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing', 'isVisibleInWindow'),
+  }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing'),
   
   /** @private
     Overriden to only update if it is a view we do not manage, or the width or height has changed
@@ -731,9 +731,6 @@ SC.FlowedLayout = {
   
   /** @private */
   _scfl_tile: function() {
-    // short circuit when hidden
-    if(!this.get('isVisibleInWindow')) return;
-
     // first, do the plan
     var plan = this._scfl_createPlan();
     this._scfl_distributeChildrenIntoRows(plan);
