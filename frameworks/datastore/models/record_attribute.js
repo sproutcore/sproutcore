@@ -57,10 +57,10 @@ SC.RecordAttribute = SC.Object.extend(
 
   /**
     The default value.  If attribute is `null` or `undefined`, this default
-    value will be substituted instead.  Note that `defaultValue`s are not
-    converted, so the value should be in the output type expected by the
-    attribute.
-    
+    value will be substituted instead.   Note that default values are placed
+    directly in the data hash, so when you call get they will be put through
+    the toType transform before being read.
+
     If you use a `defaultValue` function, the arguments given to it are the
     record instance and the key.
     
@@ -310,8 +310,10 @@ SC.RecordAttribute = SC.Object.extend(
        if (typeof value === SC.T_FUNCTION) {
         value = value(record, key, this);
       }
-    } else value = this.toType(record, key, value);
-    
+    }
+
+    value = this.toType(record, key, value);
+
     return value ;
   },
 
