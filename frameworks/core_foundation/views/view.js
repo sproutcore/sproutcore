@@ -566,7 +566,10 @@ SC.CoreView.reopen(
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
         nextView.updateLayerLocationIfNeeded() ;
-        nextNode = nextView.get('layer') ;
+        
+        // just in case it still couldn't generate the layer, force to null, because
+        // IE doesn't support insertBefore(blah, undefined) in version IE9.
+        nextNode = nextView.get('layer') || null;
       }
 
       // add to parentNode if needed.
