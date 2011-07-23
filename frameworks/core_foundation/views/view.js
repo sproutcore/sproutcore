@@ -480,8 +480,8 @@ SC.CoreView.reopen(
   */
   replaceLayer: function() {
     this.destroyLayer();
-    //this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocation) ;
+    this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocationIfNeeded);
   },
 
   /**
