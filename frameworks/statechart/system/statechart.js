@@ -1151,10 +1151,14 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Boolean} YES if handled, NO if not handled
   */
   tryToPerform: function(event, arg1, arg2) {
-    if (this.respondsTo(event)) {
-      if (SC.typeOf(this[event]) === SC.T_FUNCTION) return (this[event](arg1, arg2) !== NO);
-      else return !!this.sendEvent(event, arg1, arg2);
-    } return NO;
+    if (!this.respondsTo(event)) return NO;
+
+    if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
+      var result = this[event](arg1, arg2);
+      if (result !== NO) return YES;
+    }
+    
+    return !!this.sendEvent(event, arg1, arg2);
   },
   
   /**

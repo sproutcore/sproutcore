@@ -280,7 +280,7 @@ test("check states X, Y and Z", function() {
   ok(!statechart.respondsTo('eventC'), 'statechart should not respond to event eventC');
 });
 
-test("try to perform 'someFunction' on statechart -- current states A", function() {
+test("try to perform 'someFunction' on statechart -- current states A", function() {  
   ok(statechart.respondsTo('someFunction'), 'statechart should respond to someFunction');
   ok(!statechart.get('someFunctionInvoked'), 'someFunctionInvoked should be false');
   ok(statechart.tryToPerform('someFunction'), 'statechart should perform someFunction');
