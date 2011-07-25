@@ -1095,7 +1095,16 @@ SC.ScrollView = SC.View.extend({
     if (gen !== this.touchGeneration) return;
     
     var touch = this.touch, itemView;
-    if (touch && this.tracking && !this.dragging && !touch.touch.scrollHasEnded) {
+        
+    // NOTE!  On iPad it is possible that the timer set in touchStart() will not have yet fired and that touchEnd() will
+    // come in in the same Run Loop as the one that started with the call to touchStart().  The bad thing that happens is that 
+    // even though we cleared this.touch, occasionally if touchEnd() comes in right at the end of the Run Loop and
+    // then the timer expires and starts a new Run Loop to call beginTouchesInContent(), that this.touch will STILL exist
+    // here.  There's no explanation for it, and it's not 100% reproducible, but what happens is that if we try to capture
+    // the touch that has already ended, assignTouch() in RootResponder will check touch.hasEnded and throw an exception.
+    
+    // Therefore, don't capture a touch if the touch still exists and hasEnded
+    if (touch && this.tracking && !this.dragging && !touch.touch.scrollHasEnded && !touch.touch.hasEnded) {
       // try to capture the touch
       touch.touch.captureTouch(this, YES);
       
