@@ -621,6 +621,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
           if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', YES);
+            input.val(hint);
           }
         } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
