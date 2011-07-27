@@ -5,7 +5,7 @@
 // ==========================================================================
 
 SC.BaseTheme.nativeScrollRenderDelegate = SC.RenderDelegate.create({
-  name: 'native-scroll',
+  className: 'native-scroll',
 
   render: function (dataSource, context) {},
 
