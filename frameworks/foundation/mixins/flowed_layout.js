@@ -768,6 +768,9 @@ SC.FlowedLayout = {
     this._scfl_positionChildrenInRows(plan);
     this._scfl_positionRows(plan);
     this._scfl_applyPlan(plan);
+
+    // save so it can be observed
+    this.setIfChanged('numberOfRows', plan.rows.length);
     
     // second, observe all children, and stop observing any children we no longer
     // should be observing.
