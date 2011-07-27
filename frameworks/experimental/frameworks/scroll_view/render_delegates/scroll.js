@@ -5,7 +5,7 @@
 // ==========================================================================
 
 SC.BaseTheme.scrollRenderDelegate = SC.RenderDelegate.create({
-  name: 'scroll',
+  className: 'scroll',
 
   render: function (dataSource, context) {
     context.push('<div class="corner"></div>');
