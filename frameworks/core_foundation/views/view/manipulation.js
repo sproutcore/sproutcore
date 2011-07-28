@@ -137,11 +137,12 @@ SC.View.reopen(
       if(pane && pane.get('isPaneAttached')) {
         view._notifyDidAppendToDocument();
       }
-
-      // notify views
-      if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
-      if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }
     });
+
+    // Even though its layer has not necessarily been created, the child views 
+    // are added immediately. Hence notify views immediately.
+    if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
+    if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }
 
     return this ;
   },
