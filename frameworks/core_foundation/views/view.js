@@ -625,6 +625,8 @@ SC.CoreView.reopen(
     if (SC.none(firstTime)) { firstTime = YES; }
 
     this._renderLayerSettings(context, firstTime);
+    this._applyClassNameBindings();
+    this._applyAttributeBindings(context);
 
     // If the render method takes two parameters, we assume that it is a
     // legacy implementation that takes context and firstTime. If it has only
@@ -670,9 +672,6 @@ SC.CoreView.reopen(
   },
 
   applyAttributesToContext: function(context) {
-    this._applyClassNameBindings();
-    this._applyAttributeBindings(context);
-
     context.addClass(this.get('classNames'));
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
