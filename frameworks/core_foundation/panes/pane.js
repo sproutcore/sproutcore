@@ -439,9 +439,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (dom && dom.parentNode) dom.parentNode.removeChild(dom) ;
     dom = null ;
 
-    // layer is cached by SC.View in this._view_layer, remove it so that the DOM node can be freed
-    this.destroyLayer();
-
     // remove intercept
     this._removeIntercept();
 
