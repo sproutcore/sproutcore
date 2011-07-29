@@ -587,7 +587,7 @@ SC.CoreView.reopen(
           nextNode = (nextView) ? nextView.get('layer') : null ;
 
       // before we add to parent node, make sure that the nextNode exists...
-      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
+      if (nextView) {
         nextView.updateLayerLocationIfNeeded() ;
         
         // just in case it still couldn't generate the layer, force to null, because
