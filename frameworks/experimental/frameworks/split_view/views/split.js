@@ -348,7 +348,6 @@ SC.SplitView = SC.View.extend({
     
     // finally, remove all dividers that we didn't keep
     for (dividerId in oldDividers) {
-      this.removeChild(oldDividers[dividerId]);
       oldDividers[dividerId].destroy();
     }
     
