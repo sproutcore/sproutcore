@@ -75,7 +75,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
       SC.Event.add(input, 'blur', this, this.focusOut);
     }
 
-    input.bind('change', function() {
+    input.bind('keyup', function() {
       self.domValueDidChange(SC.$(this));
     });
   },
