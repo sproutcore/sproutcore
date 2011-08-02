@@ -670,8 +670,10 @@ SC.CoreView.reopen(
   },
 
   applyAttributesToContext: function(context) {
-    this._applyClassNameBindings();
-    this._applyAttributeBindings(context);
+    if (!this.get('layer')) {
+      this._applyClassNameBindings();
+      this._applyAttributeBindings(context);
+    }
 
     context.addClass(this.get('classNames'));
 
