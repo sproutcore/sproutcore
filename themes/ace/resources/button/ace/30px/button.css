@@ -1,11 +1,10 @@
 @theme(sc-huge-size) {
 
   $theme.button {
-
+    font-size:13px;
     .sc-button-label {
       margin-top:4px;
       height: 30px;
-      font-size:13px;
     }
 
 

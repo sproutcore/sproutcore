@@ -17,22 +17,22 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   //
   'sc-small-size': {
     height: 18,
-    autoResizePadding: 15
+    autoResizePadding: { width: 15, height: 0 }
   },
 
   'sc-regular-size': {
     height: 24,
-    autoResizePadding: 20
+    autoResizePadding: { width: 20, height: 0 }
   },
 
   'sc-huge-size': {
     height: 30,
-    autoResizePadding: 30
+    autoResizePadding: { width: 30, height: 0 }
   },
 
   'sc-jumbo-size': {
     height: 44,
-    autoResizePadding: 50
+    autoResizePadding: { width: 50, height: 0 }
   },
 
 

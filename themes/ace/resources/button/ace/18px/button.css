@@ -1,9 +1,9 @@
 @theme(sc-small-size) {
 
   $theme.button {
+    font-size: 11px;
 
     .sc-button-label {
-      font-size: 11px;
       margin-top:-4px;
       height: 18px;
       padding-top:2px;
