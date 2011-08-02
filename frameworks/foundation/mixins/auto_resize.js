@@ -86,6 +86,48 @@ SC.AutoResize = {
     @type Rect
   */
   measuredSize: { width: 0, height: 0 },
+  
+  /**
+    If provided, will limit the maximum width to this value.
+  */
+  maxWidth: null,
+  
+  /**
+    If provided, will limit the maximum height to this value.
+  */
+  maxHeight: null,
+  
+  /**
+    If YES, the view's text will be resized to fit the view. This is applied _after_ any
+    resizing, so will only take affect if shouldAutoResize is off, or a maximum width/height
+    is set.
+    
+    You also must set a minimum and maximum font size. Any auto resizing will happen at the
+    maximum size, and then the text will be resized as necessary.
+  */
+  shouldAutoFitText: NO,
+  
+  /**
+    The minimum font size to use when automatically fitting text. If shouldAutoFitText is set,
+    this _must_ be supplied.
+    
+    Font size is in pixels.
+  */
+  minFontSize: 12,
+  
+  /**
+    The maximum font size to use when automatically fitting text. If shouldAutoFitText is set,
+    this _must_ be supplied.
+    
+    Font size is in pixels.
+  */
+  maxFontSize: 20,
+  
+  /**
+    If shouldAutoFitText is YES, this is the calculated font size.
+  */
+  calculatedFontSize: 20,
+  
 
   /**
     Observes the measured size and actually performs the resize if necessary.
@@ -94,7 +136,8 @@ SC.AutoResize = {
     var measuredSize = this.get('measuredSize'),
     calculatedWidth = measuredSize.width, calculatedHeight = measuredSize.height,
     paddingHeight, paddingWidth,
-    autoResizePadding = this.get('autoResizePadding') || 0;
+    autoResizePadding = this.get('autoResizePadding') || 0,
+    maxWidth = this.get('maxWidth'), maxHeight = this.get('maxHeight');
 
     if(SC.typeOf(autoResizePadding) === SC.T_NUMBER) {
       paddingHeight = paddingWidth = autoResizePadding;
@@ -109,11 +152,17 @@ SC.AutoResize = {
     if(this.get('shouldAutoResize')) {
       // if we are allowed to autoresize, adjust the layout
       if (this.get('shouldResizeWidth')) {
+        if (maxWidth && calculatedWidth > maxWidth) {
+          calculatedWidth = maxWidth;
+        }
         this.set('calculatedWidth', calculatedWidth);
         this.adjust('width', calculatedWidth);
       }
 
       if (this.get('shouldResizeHeight')) {
+        if (maxHeight && calculatedHeight > maxHeight) {
+          calculatedHeight = maxHeight;
+        }
         this.set('calculatedHeight', calculatedHeight);
         this.adjust('height', calculatedHeight);
       }
@@ -202,6 +251,7 @@ SC.AutoResize = {
         return;
       }
 
+      this.prepareLayerForStringMeasurement(layer);
       metrics = SC.metricsForString(value, layer, this.get('classNames'), ignoreEscape);
     }
 
@@ -212,10 +262,156 @@ SC.AutoResize = {
     this._lastMeasuredText = value;
     this._lastMeasuredId = this.get('batchResizeId');
 
+    if (this.get('shouldAutoFitText')) {
+      this.invokeOnce('fitTextToFrame');
+    }
+
     this._scar_measurementPending = NO;
 
     return metrics;
   },
+  
+  
+  //
+  // FITTING TEXT
+  //
+  
+  /**
+    If we are fitting text, the layer must be measured with its font size set to our
+    maximum font size.
+  */
+  prepareLayerForStringMeasurement: function(layer) {
+    if (this.get('shouldAutoFitText')) {
+      layer.style.fontSize = this.get('maxFontSize') + "px";
+    }
+  },
+  
+  /**
+    Whenever the view resizes, the text fitting must be reevaluated.
+  */
+  viewDidResize: function(orig) {
+    orig();
+    
+    if (this.get('shouldAutoFitText')) {
+      this.invokeOnce('fitTextToFrame');
+    }
+  }.enhance(),
+  
+  /**
+    Fits the text into the frame's size, minus autoResizePadding.
+  */
+  fitTextToFrame: function() {      
+    // we can only fit text when we have a layer.
+    var layer = this.get('layer');
+    if (!layer) return;
+    
+    var frame = this.get('frame'),
+    
+        padding = this.get('autoResizePadding') || 0,
+        
+        width = frame.width, height = frame.height,
+        measured = this.get('measuredSize'), 
+        mWidth = measured.width, mHeight = measured.height;
+
+    // figure out and apply padding to the width/height
+    if(SC.typeOf(padding) === SC.T_NUMBER) {
+      width -= padding;
+      height -= padding;
+    } else {
+      width -= padding.width;
+      height -= padding.height;
+    }
+    
+    // measured size is at maximum. If there is no resizing to be done, short-circuit.
+    if (mWidth <= width && mHeight <= height) return;
+    
+    
+    // now, we are going to make an estimate font size. We will figure out the proportion
+    // of both actual width and actual height to the measured width and height, and then we'll
+    // pick the smaller. We'll multiply that by the maximum font size to figure out
+    // a rough guestimate of the proper font size.
+    var xProportion = width / mWidth, yProportion = height / mHeight,
+    
+        maxFontSize = this.get('maxFontSize'),
+        minFontSize = this.get('minFontSize'),
+        
+        guestimate = Math.floor(maxFontSize * Math.min(xProportion, yProportion)),
+        actual,
+        
+        classNames = this.get('classNames'),
+        ignoreEscape = !this.get('escapeHTML'),
+        value = this.get('autoResizeText'),
+        
+        metrics;
+    
+
+    guestimate = Math.min(maxFontSize, Math.max(minFontSize, guestimate));
+
+    // Now, we must test the guestimate. Based on that, we'll either loop down
+    // or loop up, depending on the measured size.
+    layer.style.fontSize = guestimate + "px";
+    metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+
+
+    if (metrics.width > width || metrics.height > height) {
+      actual = guestimate;
+      
+      // if we're larger, we must go down until we are smaller, at which point we are done.
+      for (guestimate = guestimate - 1; guestimate >= minFontSize; guestimate--) {
+        layer.style.fontSize = guestimate + "px";
+        metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+        
+        if (metrics.width <= width && metrics.height <= height) {
+          break;
+        }
+        
+        // always have an actual in this case; even if we can't get it small enough, we want
+        // to keep this as close as possible.
+        actual = guestimate;
+      }
+      
+    } else if (metrics.width < width || metrics.height < height) {
+      // if we're smaller, we must go up until we hit maxFontSize or get larger. If we get
+      // larger, we want to use the previous guestimate (which we know was valid)
+      //
+      // So, we'll start actual at guestimate, and only increase it while we're smaller.
+      actual = guestimate;
+      for (guestimate = guestimate + 1; guestimate <= maxFontSize; guestimate++) {
+        layer.style.fontSize = guestimate + "px";
+        metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+        
+        // we update actual only if it is still valid. Then below, whether valid
+        // or not, if we are at or past the width/height we leave
+        if (metrics.width <= width && metrics.height <= height) {
+          actual = guestimate;
+        }
+        
+        // we put this in a separate if statement JUST IN CASE it is ===.
+        // Unlikely, but possible, and why ruin a good thing?
+        if (metrics.width >= width || metrics.height >= height){
+          break;
+        }
+        
+      }
+      
+      
+    }
+    
+    layer.style.fontSize = actual + "px";
+    this.set('calculatedFontSize', actual);
+    
+  },
+  
+  /**
+    Extends renderSettingsToContext to add font size if shouldAutoFitText is YES.
+  */
+  applyAttributesToContext: function(orig, context) {
+    orig(context);
+    
+    if (this.get('shouldAutoFitText')) {
+      context.css('font-size', this.get('calculatedFontSize') + "px");
+    }
+  }.enhance(),
 
   /**
     @private
@@ -319,6 +515,13 @@ SC.AutoResizeManager = {
 
             // if the text is empty don't bother preparing
             if(!SC.none(autoResizeText) && autoResizeText !== "" && !prepared) {
+              // this is a bit of a hack: before we can prepare string measurement, there are cases where we
+              // need to reset the font size first (specifically, if we are also fitting text)
+              //
+              // It is expected that all views in a batch will have the same font settings.
+              view.prepareLayerForStringMeasurement(layer);
+              
+              // now we can tell SC to prepare the layer with the settings from the view's layer
               SC.prepareStringMeasurement(layer, view.get('classNames'));
               prepared = YES;
             }
