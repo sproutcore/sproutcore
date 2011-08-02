@@ -1897,8 +1897,10 @@ SC.RootResponder = SC.Object.extend(
   },
 
   dblclick: function(evt){
-    if (SC.browser.isIE8OrLower) {
+    
+    if (SC.browser.isIE) {
       this._clickCount = 2;
+      this._mouseDownView = this.targetViewForEvent(evt);
       // this._onmouseup(evt);
       this.mouseup(evt);
     }
