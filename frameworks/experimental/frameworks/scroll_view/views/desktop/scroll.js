@@ -160,6 +160,8 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
     },
 
     _scdsv_scrollDebounce: function (evt) {
+      var self = this;
+      
       if (this._debounce != null) {
         this._debounce.invalidate();
         this._debounce = null;
@@ -170,8 +172,9 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
         this.get('parentView').willScroll(this.get('parentView'));
       }
 
-      this._debounce = this.invokeLater(this._scdsv_scrollDidFinish.bind(this),
-                                        this.getPath('parentView.debounceInterval'));
+      this._debounce = this.invokeLater(function() {
+        self._scdsv_scrollDidFinish();
+      }, this.getPath('parentView.debounceInterval'));
     },
 
     _scdsv_scrollDidFinish: function () {
