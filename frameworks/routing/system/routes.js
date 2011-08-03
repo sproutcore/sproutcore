@@ -214,6 +214,30 @@ SC.routes = SC.Object.create(
     @type {String}
   */
   location: function(key, value) {
+    this._skipRoute = NO;
+    return this._extractLocation(key, value);
+  }.property(),
+  
+  /*
+    Works exactly like 'location' but you usee this property only when 
+    you want to just change the location w/out triggering the routes
+  */
+  informLocation: function(key, value){
+    this._skipRoute = YES;
+    // This is a very special case where this property
+    // has a very heavy influence on the 'location' property
+    // this is a case where you might want to use idempotent
+    // but you would take a performance hit because it is possible
+    // call set() multiple time and we don't want to take the extra
+    // cost, so we just invalidate the cached set() value ourselves
+    // you shouldn't do this in your own code unless you REALLY
+    // know what you are doing.
+    var lsk = this.location.lastSetValueKey;
+    if (lsk && this._kvo_cache) this._kvo_cache[lsk] = value;
+    return this._extractLocation(key, value);
+  }.property(),
+  
+  _extractLocation: function(key, value) {
     var crumbs, encodedValue;
     
     if (value !== undefined) {
@@ -243,7 +267,7 @@ SC.routes = SC.Object.create(
     }
     
     return this._location;
-  }.property(),
+  },
   
   /**
     You usually don't need to call this method. It is done automatically after
@@ -300,11 +324,12 @@ SC.routes = SC.Object.create(
       loc = decodeURI(loc);
     }
     
-    if (this.get('location') !== loc) {
+    if (this.get('location') !== loc && !this._skipRoute) {
       SC.run(function() {
         this.set('location', loc);
       }, this);
     }
+    this._skipRoute = false;
   },
   
   popState: function(event) {
@@ -316,12 +341,13 @@ SC.routes = SC.Object.create(
       // Remove the base prefix and the extra '/'
       loc = loc.slice(base.length + 1, loc.length);
       
-      if (this.get('location') !== loc) {
+      if (this.get('location') !== loc && !this._skipRoute) {
         SC.run(function() {
           this.set('location', loc);
         }, this);
       }
     }
+    this._skipRoute = false;
   },
   
   /**
