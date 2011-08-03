@@ -729,7 +729,7 @@ SC.Record = SC.Object.extend(
     @dependsOn status
   */
   isError: function() {
-    return this.get('status') & SC.Record.ERROR;
+    return !!(this.get('status') & SC.Record.ERROR);
   }.property('status').cacheable(),
 
   /**

@@ -635,7 +635,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Boolean
   */
   isError: function() {
-    return this.get('status') & SC.Record.ERROR;
+    return !!(this.get('status') & SC.Record.ERROR);
   }.property('status').cacheable(),
 
   /**

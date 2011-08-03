@@ -45,8 +45,8 @@ test("Verify error methods behave correctly", function() {
   store.dataSourceDidError(storeKey, SC.Record.GENERIC_ERROR);
   SC.RunLoop.end();
 
-  ok(thing1.get('isError'), "isError on thing1 should be YES");
-  ok(!thing2.get('isError'), "isError on thing2 should be NO");
+  ok((thing1.get('isError') === YES), "isError on thing1 should be YES");
+  ok((thing2.get('isError') === NO), "isError on thing2 should be NO");
 
   equals(thing1.get('errorObject'), SC.Record.GENERIC_ERROR,
     "get('errorObject') on thing1 should return the correct error object");
