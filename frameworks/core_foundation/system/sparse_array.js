@@ -314,15 +314,18 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     @returns {Number} the discovered index or -1 if not found
   */
   indexOf: function(obj) {
-    var del = this.delegate ;
+    var c, ret, del = this.delegate ;
     if (del && del.sparseArrayDidRequestIndexOf) {
-      return del.sparseArrayDidRequestIndexOf(this, obj);
-    } else {
-      var content = this._sa_content ;
-      if (!content) content = this._sa_content = [] ;
-      return content.indexOf(obj) ;
+      ret = del.sparseArrayDidRequestIndexOf(this, obj);
+    } 
+    
+    if (SC.none(ret)) {
+      c = this._sa_content ;
+      if (!c) c = this._sa_content = [] ;
+      ret = c.indexOf(obj) ;
     }
-  },
+    return ret;
+  },  
 
   // ..........................................................
   // EDITING
