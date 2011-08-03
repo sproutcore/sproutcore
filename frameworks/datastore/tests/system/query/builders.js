@@ -144,6 +144,13 @@ function performBasicTests(methodName, loc) {
     equals(q5, q4, 'second call for different conditions should return cache');
   });
 
+  test("query with record types and conditions hash", function() {
+
+    var q = invokeWith([TestRecord, TestRecord2], {});
+    queryEquals(q, loc, [TestRecord, TestRecord2], null, 'first query');
+
+  });
+
   test("query with no record type and with conditions", function() {
     var q1, q2;
 
