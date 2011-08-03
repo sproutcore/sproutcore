@@ -11,7 +11,7 @@ SC.BaseTheme.nativeScrollRenderDelegate = SC.RenderDelegate.create({
 
   update: function (dataSource, context) {
     var K = 'scrollRenderDelegate',
-        scroll = context.find('.sc-scroll-container-view');
+        scroll = context.find('> .sc-scroll-container-view');
 
     if (dataSource.didChangeFor(K, 'canScrollHorizontal')) {
       scroll.css('overflow-x', dataSource.get('canScrollHorizontal') ? 'scroll' : 'hidden');
