@@ -551,9 +551,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       // otherwise, lookup all storeKeys for the named recordType...
       } else if (recordType = query.get('expandedRecordTypes')) {
         sourceKeys = SC.IndexSet.create();
-        recordType.forEach(function(cur) {
-          sourceKeys.addEach(store.storeKeysFor(recordType));
-        });
+        sourceKeys.addEach(store.storeKeysFor(recordType));
       }
 
       // loop through storeKeys to determine if it belongs in this query or
