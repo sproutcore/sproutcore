@@ -282,3 +282,29 @@ test("isEditable NO should not fire property change observer", function() {
   rec5.removeObserver('readOnlyRelatedTo', modifierListener);
 });
 
+test("adding toOne pointing to non existing class should throw error", function() {
+  var message;
+  try {
+    MyApp.InvalidModel = SC.Record.extend({
+      foo: SC.Record.toOne(MyApp.DoesNotExist)
+    });
+  } catch (x) {
+    message = x;
+  }
+
+  same(message, 'Attempted to create toOne attribute with undefined recordType. Did you forget to sc_require a dependency?');
+});
+
+test("adding toMany pointing to non existing class should throw error", function() {
+  var message;
+  try {
+    MyApp.InvalidModel = SC.Record.extend({
+      foo: SC.Record.toMany(MyApp.DoesNotExist)
+    });
+  } catch (x) {
+    message = x;
+  }
+
+  same(message, 'Attempted to create toMany attribute with undefined recordType. Did you forget to sc_require a dependency?');
+});
+
