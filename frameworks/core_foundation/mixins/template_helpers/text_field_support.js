@@ -91,7 +91,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
       SC.Event.remove(input, 'blur', this, this.focusOut);
     }
 
-    input.unbind('change');
+    input.unbind('keyup');
   },
 
   focusIn: function(event) {
