@@ -302,7 +302,7 @@ SC.AutoResize = {
   */
   fitTextToFrame: function() {      
     // we can only fit text when we have a layer.
-    var layer = this.get('layer');
+    var layer = this.get('autoResizeLayer');
     if (!layer) return;
     
     var frame = this.get('frame'),
@@ -321,7 +321,7 @@ SC.AutoResize = {
       width -= padding.width;
       height -= padding.height;
     }
-    
+        
     // measured size is at maximum. If there is no resizing to be done, short-circuit.
     if (mWidth <= width && mHeight <= height) return;
     
