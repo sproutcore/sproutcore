@@ -576,7 +576,7 @@ SC.FlowedLayout = {
   */
   _scfl_positionChildrenInRow: function(row) {
     var items = row.items, len = items.length, idx, item, position, rowSize = 0,
-        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = NO,
+        spacerCount = 0, spacerSize, align = row.plan.align, shouldExpand = YES,
         leftOver = 0, noMaxWidth = NO;
 
     // 
@@ -642,7 +642,7 @@ SC.FlowedLayout = {
 
       // if this item has fillWidth or fillHeight set, the row should expand
       // laterally
-      if(item.fillRow) shouldExpand = YES;
+      if(!item.fillRow) shouldExpand = NO;
 
       // if the item is not a fill-row item, this row has a size that all fill-row
       // items should expand to
@@ -656,7 +656,7 @@ SC.FlowedLayout = {
       if (align === SC.ALIGN_JUSTIFY && idx < len - 1) position += spacerSize;
     }
     
-    row.shouldExpand = shouldExpand;
+    row.shouldExpand = len > 0 ? shouldExpand : NO;
     row.rowLength = position - row.plan.rowStartPadding; // row length does not include padding
     row.rowSize = rowSize;
 
