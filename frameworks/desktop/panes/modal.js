@@ -44,6 +44,10 @@ SC.ModalPane = SC.Pane.extend(
   paneWillAppend: function(pane) {
     this._openPaneCount++;
     if (!this.get('isVisibleInWindow')) this.append();
+    var panes = SC.RootResponder.responder.panes;
+    for(var i=0, iLen=panes.length; i<iLen; i++ ){
+      if(panes[i]!==pane) panes[i].set('ariaHidden', YES);
+    }
     return this ;    
   },
   
@@ -57,6 +61,10 @@ SC.ModalPane = SC.Pane.extend(
   */
   paneDidRemove: function(pane) { 
     this._openPaneCount--;
+    var panes = SC.RootResponder.responder.panes;
+    for(var i=0, iLen=panes.length; i<iLen; i++ ){
+      if(panes[i]!==pane) panes[i].set('ariaHidden', NO);
+    }
     if (this._openPaneCount <= 0) {
       this._openPaneCount = 0 ;
       if (this.get('isVisibleInWindow')) this.remove();

@@ -45,6 +45,29 @@ SC.CoreView.reopen(
   concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings'],
 
   /**
+    The WAI-ARIA role of the control represented by this view. For example, a
+    button may have a role of type 'button', or a pane may have a role of
+    type 'alertdialog'. This property is used by assistive software to help
+    visually challenged users navigate rich web applications.
+
+    The full list of valid WAI-ARIA roles is available at:
+    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+
+    @property {String}
+  */
+  
+  ariaRole: null,
+
+  /**
+    The full list of valid WAI-ARIA roles is available at:
+    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+
+    @property {String}
+  */
+  
+  ariaHidden: null,
+  
+  /**
     The current pane.
     @property {SC.Pane}
   */
@@ -689,6 +712,10 @@ SC.CoreView.reopen(
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
+    
+    var _ariaHidden = this.get('ariaHidden');
+    debugger;
+    if(_ariaHidden!==null) context.attr('aria-hidden', _ariaHidden);  
   },
 
   /**
@@ -718,7 +745,7 @@ SC.CoreView.reopen(
 
       // Set up an observer on the context. If the property changes, toggle the
       // class name.
-      observer = function() {
+      var observer = function() {
         // Get the current value of the property
         newClass = this._classStringForProperty(property);
         elem = this.$();
@@ -937,19 +964,8 @@ SC.CoreView.reopen(
   */
   tagName: 'div',
 
-  /**
-    The WAI-ARIA role of the control represented by this view. For example, a
-    button may have a role of type 'button', or a pane may have a role of
-    type 'alertdialog'. This property is used by assistive software to help
-    visually challenged users navigate rich web applications.
 
-    The full list of valid WAI-ARIA roles is available at:
-    http://www.w3.org/TR/wai-aria/roles#roles_categorization
-
-    @property {String}
-  */
-  ariaRole: null,
-
+  
   /**
     Standard CSS class names to apply to the view's outer element.  This
     property automatically inherits any class names defined by the view's
@@ -1016,7 +1032,7 @@ SC.CoreView.reopen(
     @property {Array}
     @readOnly
   */
-  displayProperties: [],
+  displayProperties: ['ariaHidden'],
 
   // .......................................................
   // SC.RESPONDER SUPPORT
