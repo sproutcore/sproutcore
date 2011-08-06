@@ -714,7 +714,6 @@ SC.CoreView.reopen(
     context.attr('role', this.get('ariaRole'));
     
     var _ariaHidden = this.get('ariaHidden');
-    debugger;
     if(_ariaHidden!==null) context.attr('aria-hidden', _ariaHidden);  
   },
 
