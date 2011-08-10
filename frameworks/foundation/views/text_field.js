@@ -86,15 +86,30 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
 
   /*
-  * Localizes the hint if necessary.
+    Localizes the hint if necessary.
+  
+    @property
+    @type String
   */
   formattedHint: function() {
     var hint = this.get('hint');
     return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
+  
+  /**
+    Whether to show the hint while the field has focus. If YES, it will disappear
+    as soon as any character is in the field.
+    
+    @property
+    @type Boolean
+  */
+  hintOnFocus: NO,
 
   /*
-  * Whether the hint should be localized or not.
+    Whether the hint should be localized or not.
+    
+    @property
+    @type Boolean
   */
   localize: YES,
 
@@ -516,6 +531,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        contexts as parent/child.
 
     var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
+        hintOnFocus = this.get('hintOnFocus'),
+        maxLength = this.get('maxLength'), 
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckString='', autocapitalizeString='', autocorrectString='',
         maxLength = this.get('maxLength'), isOldSafari;
@@ -533,11 +550,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
       autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
     }
+    // if hint is on and we don't want it to show on focus, create one
+    if(hint && !hintOnFocus) {
+      hintString = ' placeholder="' + hint + '"';
+    }
+    
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
       activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
       name = this.get('layerId');
-      
+
       if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
 
       // Render the padding element, with any necessary positioning
@@ -550,12 +572,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         adjustmentStyle += '"' ;
       }
       context.push('<span class="padding" '+adjustmentStyle+'>');
-                  
+     
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
       if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
-      } 
+      }
+      
+      if(hintOnFocus) {
+        context.push('<span class="hint%@">'.fmt(value ? ' sc-hidden': ''), hint ,'</span>');
+      }
       
       fieldClassNames = "field";
       
@@ -586,6 +612,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           elem = input[0],
           val = this.get('value');
 
+      if(hintOnFocus) this.$('.hint')[0].innerHTML = hint;
+      else elem.placeholder = hint;
+
       if (!val || (val && val.length === 0)) {
         if (!SC.platform.input.placeholder && this._hintON && !this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
@@ -611,7 +640,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (!this.get('autoCorrect')) input.attr('autoCorrect', 'off');
         else input.attr('autoCorrect', 'true');
       }      
-      if (SC.platform.input.placeholder) input.attr('placeholder', hint);
+
+      if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
 
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
@@ -826,7 +856,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       touchPane = null;
     }
   },
-  
+
+  /** @private */
   _field_fieldValueDidChange: function(evt) {
     if(this.get('focused')){
       SC.run(function() {
@@ -834,7 +865,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }, this);
     }
   },
-   
+
+  /** @private 
+    Make sure to update visibility of hint if it changes
+  */
+  updateHintOnFocus: function() {
+    // if there is a value in the field, hide the hint
+    var hintOnFocus = this.get('hintOnFocus');
+    
+    if(hintOnFocus && this.getFieldValue()) {
+      this.$('.hint').addClass('sc-hidden');
+    }
+    else if(hintOnFocus) {
+      this.$('.hint').removeClass('sc-hidden');
+    }
+  }.observes('value'),
+
+  /** @private
+    Move magic number out so it can be over-written later in inline editor
+  */
+  _topOffsetForFirefoxCursorFix: 3,
   
   /** @private
     In Firefox, as of 3.6 -- including 3.0 and 3.5 -- for input fields only
