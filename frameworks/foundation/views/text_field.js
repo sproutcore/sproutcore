@@ -531,8 +531,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        contexts as parent/child.
 
     var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
-        hintOnFocus = this.get('hintOnFocus'),
-        maxLength = this.get('maxLength'), 
+        hintOnFocus = this.get('hintOnFocus'), hintString = '',
+        maxLength = this.get('maxLength'),
         hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckString='', autocapitalizeString='', autocorrectString='',
         maxLength = this.get('maxLength'), isOldSafari;
@@ -588,7 +588,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
-                      '" '+ activeState + ' placeholder="'+ hint + '"'+
+                      '" '+ activeState + hintString +
                       spellCheckString + autocorrectString +
                       autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
                       value+ '</textarea></span>') ;
@@ -601,8 +601,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
         
         context.push('<input class="'+fieldClassNames+'" type="'+ type+
-                      '" name="'+ name + '" '+ activeState + ' value="'+ value+
-                      '" placeholder="'+hint+'"'+ spellCheckString+ 
+                      '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
+                      hintString + spellCheckString+
                       ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
                       autocapitalizeString+'/></span>') ;
       }
