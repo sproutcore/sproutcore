@@ -33,7 +33,7 @@ SC.String = /** @scope SC.String.prototype */ {
     // formatters are optional
     if (formatter) value = formatter(value, arg);
     else if (arg) {
-      SC.error("String.fmt was given a formatting string, but key `" + key + "` has no formatter! String: " + string);
+      throw "String.fmt was given a formatting string, but key `" + key + "` has no formatter! String: " + string;
     }
     
     return value;
@@ -94,7 +94,7 @@ SC.String = /** @scope SC.String.prototype */ {
         throw "Cannot use named parameters with `fmt` without a data hash. String: '" + string + "'";
       }
 
-      return SC.String._scs_valueForKey(propertyPath, data);
+      return SC.String._scs_valueForKey(propertyPath, data, string);
     }).replace(/%@([0-9]+)?/g, function(match, index) {
       if (hasHadNamedArguments) {
         throw "Invalid attempt to use both named parameters and indexed parameters. String: '" + string + "'";
