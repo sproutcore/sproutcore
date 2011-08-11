@@ -460,5 +460,52 @@ test("Hour", function() {
   
 });
 
+test("Minutes", function() {
+  date = new Date(2011, 7, 1, 13, 9);
+  equals(fmt("%{date:m}", date), "9");
+  equals(fmt("%{date:mm}", date), "09");
+  
+  date = new Date(2011, 7, 1, 13, 12);
+  equals(fmt("%{date:m}", date), "12");
+  equals(fmt("%{date:mm}", date), "12");
+});
+
+test("Seconds", function() {
+  date = new Date(2011, 7, 1, 13, 1, 9);
+  equals(fmt("%{date:s}", date), "9");
+  equals(fmt("%{date:ss}", date), "09");
+  
+  date = new Date(2011, 7, 1, 13, 1, 19);
+  equals(fmt("%{date:s}", date), "19");
+  equals(fmt("%{date:ss}", date), "19");
+});
+
+test("Fractional seconds", function() {
+  date = new Date(2011, 7, 1);
+  
+  date.setMilliseconds(100);
+  equals(fmt("%{date:S}", date), "1");
+  
+  date.setMilliseconds(151);
+  equals(fmt("%{date:S}", date), "2");
+  equals(fmt("%{date:SS}", date), "15");
+  equals(fmt("%{date:SSS}", date), "151");
+  
+  date.setMilliseconds(1);
+  equals(fmt("%{date:S}", date), "0");
+  equals(fmt("%{date:SS}", date), "00");
+  equals(fmt("%{date:SSS}", date), "001");
+  
+  
+});
+
+test("Milliseconds in day", function() {
+  date = new Date(2011, 7, 1, 0, 1, 1);
+  date.setMilliseconds(100);
+  
+  equals(fmt("%{date:A}", date), "61100");
+  equals(fmt("%{date:AAAAA}", date), "61100");
+  equals(fmt("%{date:AAAAAA}", date), "061100");
+});
 
 

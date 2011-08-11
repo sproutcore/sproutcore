@@ -315,8 +315,14 @@ SC.DateFormatter.s = function(date, count) {
 };
 
 SC.DateFormatter.S = function(date, count) {
-  var fraction = date.getMilliseconds() / 1000;
-  return fraction.toString().substr(0, count);
+  var fraction = date.getMilliseconds() / 1000.0,
+      mult = Math.pow(10, count);
+  
+  fraction = Math.round(fraction * mult);
+  fraction = "" + fraction;
+  
+  while(fraction.length < count) fraction="0" + fraction;
+  return fraction;
 };
 
 SC.DateFormatter.A = function(date, count) {
