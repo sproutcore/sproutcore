@@ -48,13 +48,14 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   */
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
-
+    
     var labelContent,
         toolTip     = dataSource.get('toolTip'),
         isSelected  = !!dataSource.get('isSelected'),
         isActive    = !!dataSource.get('isActive'),
         isDefault   = !!dataSource.get('isDefault'),
         isCancel    = !!dataSource.get('isCancel'),
+        isToggle    = (dataSource.get('buttonBehavior')===SC.TOGGLE_BEHAVIOR),
         labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
@@ -71,9 +72,14 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     }
 
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
-
     // accessibility
-    context.attr('aria-pressed', isActive.toString());
+    if(isToggle){
+      if(dataSource.get('isSegment')){
+        context.attr('aria-pressed', isSelected.toString());
+      }else{
+        context.attr('aria-pressed', isActive.toString());
+      } 
+    }
     context.attr('aria-labelledby', labelId);
 
     // Create the inner label element that contains the text and, optionally,
@@ -97,6 +103,8 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
+    var isToggle = (dataSource.get('buttonBehavior')===SC.TOGGLE_BEHAVIOR);
+    
     this.updateSizeClassName(dataSource, jquery);
 
     if (dataSource.get('isActive')) {
@@ -106,7 +114,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     var isDefault = dataSource.get('isDefault'),
         isCancel = dataSource.get('isCancel');
 
-    jquery.attr('aria-pressed', dataSource.get('isActive').toString());
+    if(isToggle) jquery.attr('aria-pressed', dataSource.get('isActive').toString());
     jquery.attr('title', dataSource.get('toolTip'));
 
     jquery.setClass('icon', !!dataSource.get('icon'));

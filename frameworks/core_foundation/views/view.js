@@ -705,10 +705,10 @@ SC.CoreView.reopen(
     if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
     if (this.get('isFirstResponder')) { 
       context.addClass('focus');
-      context.attr('tabindex', '0'); 
-    }else{
-      context.attr('tabindex', '-1');
-    }
+      // context.attr('tabindex', '0'); 
+    }//else{
+      // context.attr('tabindex', '-1');
+    // }
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));

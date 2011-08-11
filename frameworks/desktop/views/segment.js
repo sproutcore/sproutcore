@@ -24,6 +24,13 @@ SC.SegmentView = SC.View.extend(SC.Control,
   ariaRole: 'tab',
 
   /**
+    @type Boolean
+    @default YES
+    @readOnly
+  */
+  isSegment: YES,
+
+  /**
     @type Array
     @default ['sc-segment-view']
     @see SC.View#classNames
@@ -73,7 +80,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
   supportFocusRing: NO,
 
   // TODO: isDefault, isCancel, value not really used by render delegate
-  displayProperties: ['icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
+  displayProperties: ['icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isSegment','isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
 
   /**
     @type String

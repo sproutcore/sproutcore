@@ -479,7 +479,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   displayProperties: [
     'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-    'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing'
+    'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing',
+    'buttonBehavior'
   ],
 
   /**
