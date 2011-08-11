@@ -252,3 +252,94 @@ test("Month", function() {
 
 
 
+//
+// Week Number: Not done...
+//
+
+
+//
+// Day
+//
+test("Day", function() {
+  date = new Date(2011, 1, 2);
+  fmt("%{date:d}", date, "2");
+  fmt("%{date:dd}", date, "02");
+  
+  date = new Date(2011, 1, 12);
+  fmt("%{date:d}", date, "12");
+  fmt("%{date:dd}", date, "12");
+});
+
+test("Day of Year", function() {
+  date = new Date(2011, 0, 1);
+  equals(fmt("%{date:D}", date), "1");
+  
+  date = new Date(2011, 1, 1);
+  equals(fmt("%{date:D}", date), "32");
+});
+
+test("Day of Week", function() {
+  SC.stringsFor("English", {
+    "SC.Date.Day.StandAlone.Monday.Abbreviated": "SMon",
+    "SC.Date.Day.StandAlone.Monday.Full": "SMonday",
+    "SC.Date.Day.StandAlone.Monday.Letter": "SM",
+
+    "SC.Date.Day.StandAlone.Tuesday.Abbreviated": "STue",
+    "SC.Date.Day.StandAlone.Tuesday.Full": "STuesday",
+    "SC.Date.Day.StandAlone.Tuesday.Letter": "ST",
+
+    "SC.Date.Day.StandAlone.Wednesday.Abbreviated": "SWed",
+    "SC.Date.Day.StandAlone.Wednesday.Full": "SWednesday",
+    "SC.Date.Day.StandAlone.Wednesday.Letter": "SW",
+
+    "SC.Date.Day.StandAlone.Thursday.Abbreviated": "SThu",
+    "SC.Date.Day.StandAlone.Thursday.Full": "SThursday",
+    "SC.Date.Day.StandAlone.Thursday.Letter": "SR",
+
+    "SC.Date.Day.StandAlone.Friday.Abbreviated": "SFri",
+    "SC.Date.Day.StandAlone.Friday.Full": "SFriday",
+    "SC.Date.Day.StandAlone.Friday.Letter": "SF",
+
+    "SC.Date.Day.StandAlone.Saturday.Abbreviated": "SSat",
+    "SC.Date.Day.StandAlone.Saturday.Full": "SSaturday",
+    "SC.Date.Day.StandAlone.Saturday.Letter": "SS",
+
+    "SC.Date.Day.StandAlone.Sunday.Abbreviated": "SSun",
+    "SC.Date.Day.StandAlone.Sunday.Full": "SSunday",
+    "SC.Date.Day.StandAlone.Sunday.Letter": "SS"
+  });
+  
+  function check(day, number, abbr, full, letter) {
+    date = new Date(2011, 7, day);
+    equals(fmt("%{date:E}", date), abbr);
+    equals(fmt("%{date:EE}", date), abbr);
+    equals(fmt("%{date:EEE}", date), abbr);
+    equals(fmt("%{date:EEEE}", date), full);
+    equals(fmt("%{date:EEEEE}", date), letter);
+    
+    equals(fmt("%{date:e}", date), "" + number);
+    equals(fmt("%{date:ee}", date), "0" + number);
+    equals(fmt("%{date:eee}", date), abbr);
+    equals(fmt("%{date:eeee}", date), full);
+    equals(fmt("%{date:eeeee}", date), letter);
+    
+    equals(fmt("%{date:c}", date), "" + number);
+    equals(fmt("%{date:cc}", date), "0" + number);
+    equals(fmt("%{date:ccc}", date), "S" + abbr);
+    equals(fmt("%{date:cccc}", date), "S" + full);
+    equals(fmt("%{date:ccccc}", date), "S" + letter);
+  }
+  
+  // the first is the day of the month of August 2011; the second is the
+  // expected day-of-week number
+  check(1, 2, "Mon", "Monday", "M");
+  check(2, 3, "Tue", "Tuesday", "T");
+  check(3, 4, "Wed", "Wednesday", "W");
+  check(4, 5, "Thu", "Thursday", "R");
+  check(5, 6, "Fri", "Friday", "F");
+  check(6, 7, "Sat", "Saturday", "S");
+  check(7, 1, "Sun", "Sunday", "S");
+
+});
+
+

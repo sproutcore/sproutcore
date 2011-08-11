@@ -9,6 +9,12 @@
 
 */
 SC.DateFormatter = function(date, f) {
+  if (!date) {
+    throw "No date passed to date formatter.";
+  } else if (!date.getFullYear) {
+    throw "Object passed to date formatter was not a date!";
+  }
+  
   // f is expected to be a character, potentially repeated.
   // What we do is figure out what letter, and how many times it is repeated.
   // we also sanity-check.
@@ -173,7 +179,7 @@ SC.DateFormatter.d = function(date, count) {
 
 SC.DateFormatter.D = function(date, count) {
   // day of year
-  var firstDayOfYear = new Date(date.getYear(), 0, 1),
+  var firstDayOfYear = new Date(date.getFullYear(), 0, 1),
       timestamp = firstDayOfYear.getTime(),
       diff = date.getTime() - timestamp,
       days = Math.floor(diff / (24 * 60 * 60 * 1000)) + 1;
@@ -185,7 +191,7 @@ SC.DateFormatter.D = function(date, count) {
 
 SC.DateFormatter.F = function(date, count) {
   // day of week in month; for instance, 2 if it is the second wednesday in the month.
-  throw "Date of week in month (F) is not supported in date formatting";
+  throw "Day of week in month (F) is not supported in date formatting";
 };
 
 SC.DateFormatter.g = function(date, count) {
@@ -215,14 +221,14 @@ SC.DateFormatter.E = function(date, count) {
 
 SC.DateFormatter.e = function(date, count, isStandAlone) {
   var day = date.getDay(),
-      dayString = "" + day,
+      dayString = "" + (day + 1),
       dayName = "SC.Date.Day." + (isStandAlone ? "StandAlone." : "") +
-        SC.DateFormatter.ENGLISH_DAY_NAMES;
+        SC.DateFormatter.ENGLISH_DAY_NAMES[day];
   
   if (count === 1) {
     return dayString;
   } else if (count === 2) {
-    if (dayString.length < 2) dayString = "0" + dayString;
+    dayString = "0" + dayString;
     return dayString;
   } else if (count === 3) {
     return (dayName + ".Abbreviated").loc();
@@ -307,7 +313,7 @@ SC.DateFormatter.S = function(date, count) {
 
 SC.DateFormatter.A = function(date, count) {
   // ms in day...
-  var timestamp = new Date(date.getYear(), date.getMonth(), date.getDay()).getTime();
+  var timestamp = new Date(date.getFullYear(), date.getMonth(), date.getDay()).getTime();
   var res = date.getTime() - timestamp;
   res = "" + res;
   while (res.length < count) res = "0" + res;
