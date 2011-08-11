@@ -267,7 +267,15 @@ SC.DateFormatter.a = function(date, count) {
 SC.DateFormatter._h = function(date, count, is24, base) {
   var hour = date.getHours();
   if (!is24) hour = hour % 12;
-  hour += base;
+  if (base) {
+    if (!is24) {
+      // if hour is 0, then we need to make it 12.
+      if (hour === 0) hour = 12;
+    } else {
+      // if hour is 0, hour needs to be 24
+      if (hour === 0) hour = 24;
+    }
+  }
   
   var hourStr = "" + hour;
   if (hourStr.length < count) hourStr = "0" + hourStr;

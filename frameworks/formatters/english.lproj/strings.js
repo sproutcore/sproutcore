@@ -163,11 +163,12 @@ SC.stringsFor('English', {
   "SC.Date.Day.Sunday.Letter": "S",
   "SC.Date.Day.StandAlone.Sunday.Abbreviated": "Sun",
   "SC.Date.Day.StandAlone.Sunday.Full": "Sunday",
-  "SC.Date.Day.StandAlone.Sunday.Letter": "S"
+  "SC.Date.Day.StandAlone.Sunday.Letter": "S",
   
   
   
-  
+  "SC.Date.Period.AM": "AM",
+  "SC.Date.Period.PM": "PM"
   
   
 });

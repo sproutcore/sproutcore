@@ -343,3 +343,122 @@ test("Day of Week", function() {
 });
 
 
+test("Period", function() {
+  // one in the morning...
+  date = new Date(2011, 7, 1, 1);
+  equals(fmt("%{date:a}", date), "AM");
+  
+  date = new Date(2011, 7, 1, 11);
+  equals(fmt("%{date:a}", date), "AM");
+  
+  date = new Date(2011, 7, 1, 12);
+  equals(fmt("%{date:a}", date), "PM");
+  
+});
+
+
+test("Hour", function() {
+  // 12:00 AM
+  date = new Date(2011, 7, 1, 0);
+  
+  // h: 12hr, 12:00 == 12:00
+  equals(fmt("%{date:h}", date), "12");
+  equals(fmt("%{date:hh}", date), "12");
+  
+  // K: 12hr, 12:00 == 0:00
+  equals(fmt("%{date:K}", date), "0");
+  equals(fmt("%{date:KK}", date), "00");
+  
+  // H: 24hr, 24:00 == 0:00
+  equals(fmt("%{date:H}", date), "0");
+  equals(fmt("%{date:HH}", date), "00");
+  
+  // k: 24hr, 24:00 == 24:00
+  equals(fmt("%{date:k}", date), "24");
+  equals(fmt("%{date:kk}", date), "24");
+  
+  
+  // 1:00 AM
+  date = new Date(2011, 7, 1, 1);
+  
+  // h: 12hr, 12:00 == 12:00
+  equals(fmt("%{date:h}", date), "1");
+  equals(fmt("%{date:hh}", date), "01");
+  
+  // K: 12hr, 12:00 == 0:00
+  equals(fmt("%{date:K}", date), "1");
+  equals(fmt("%{date:KK}", date), "01");
+  
+  // H: 24hr, 24:00 == 0:00
+  equals(fmt("%{date:H}", date), "1");
+  equals(fmt("%{date:HH}", date), "01");
+  
+  // k: 24hr, 24:00 == 24:00
+  equals(fmt("%{date:k}", date), "1");
+  equals(fmt("%{date:kk}", date), "01");
+  
+  
+  
+  // 11:00 AM
+  date = new Date(2011, 7, 1, 11);
+  
+  // h: 12hr, 12:00 == 12:00
+  equals(fmt("%{date:h}", date), "11");
+  equals(fmt("%{date:hh}", date), "11");
+  
+  // K: 12hr, 12:00 == 0:00
+  equals(fmt("%{date:K}", date), "11");
+  equals(fmt("%{date:KK}", date), "11");
+  
+  // H: 24hr, 24:00 == 0:00
+  equals(fmt("%{date:H}", date), "11");
+  equals(fmt("%{date:HH}", date), "11");
+  
+  // k: 24hr, 24:00 == 24:00
+  equals(fmt("%{date:k}", date), "11");
+  equals(fmt("%{date:kk}", date), "11");
+  
+  
+  // 12:00 PM
+  date = new Date(2011, 7, 1, 12);
+  
+  // h: 12hr, 12:00 == 12:00
+  equals(fmt("%{date:h}", date), "12");
+  equals(fmt("%{date:hh}", date), "12");
+  
+  // K: 12hr, 12:00 == 0:00
+  equals(fmt("%{date:K}", date), "0");
+  equals(fmt("%{date:KK}", date), "00");
+  
+  // H: 24hr, 24:00 == 0:00
+  equals(fmt("%{date:H}", date), "12");
+  equals(fmt("%{date:HH}", date), "12");
+  
+  // k: 24hr, 24:00 == 24:00
+  equals(fmt("%{date:k}", date), "12");
+  equals(fmt("%{date:kk}", date), "12");
+  
+  
+  // 1:00 PM
+  date = new Date(2011, 7, 1, 13);
+  
+  // h: 12hr, 12:00 == 12:00
+  equals(fmt("%{date:h}", date), "1");
+  equals(fmt("%{date:hh}", date), "01");
+  
+  // K: 12hr, 12:00 == 0:00
+  equals(fmt("%{date:K}", date), "1");
+  equals(fmt("%{date:KK}", date), "01");
+  
+  // H: 24hr, 24:00 == 0:00
+  equals(fmt("%{date:H}", date), "13");
+  equals(fmt("%{date:HH}", date), "13");
+  
+  // k: 24hr, 24:00 == 24:00
+  equals(fmt("%{date:k}", date), "13");
+  equals(fmt("%{date:kk}", date), "13");
+  
+});
+
+
+
