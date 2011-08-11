@@ -2,6 +2,7 @@
 
 .sc-label-view {
   text-align: left;
+  white-space: pre-line;      /* Allow strings to include '\n' characters, etc., like many other UI frameworks */
   
   &.icon {
   	position: relative;
