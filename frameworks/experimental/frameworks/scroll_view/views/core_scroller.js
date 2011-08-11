@@ -82,7 +82,7 @@ SC.CoreScrollerView = SC.View.extend(
     @field
     @type String
    */
-  controlsIdBinding: SC.Binding.oneWay('*parentView.contentView.layerId'),
+  controlsIdBinding: SC.Binding.oneWay('.parentView*contentView.layerId'),
 
   /**
     @type Number

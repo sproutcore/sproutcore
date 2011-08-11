@@ -70,6 +70,10 @@ SC.BaseTheme.desktopScrollerRenderDelegate = SC.RenderDelegate.create({
       context.attr('aria-valuenow', dataSource.get('value'));
     }
 
+    if (dataSource.didChangeFor(K, 'controlsId')) {
+      context.attr('aria-controls', dataSource.get('controlsId'));
+    }
+
     // Don't bother if the controls are hidden.
     if (!controlsAreHidden) {
       thumb = context.find('.thumb');

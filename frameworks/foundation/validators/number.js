@@ -51,7 +51,7 @@ SC.Validator.Number = SC.Validator.extend(
         } else if (this.get('places') > 0) {
           value = parseFloat(value) ;
         } else {
-          if(value.length==1 && value.match(/-/)) value = null;
+          if(value.length===1 && value.match(/-/)) value = null;
           else {
             result = parseInt(value,0) ;
             if(isNaN(result)){
@@ -84,9 +84,11 @@ SC.Validator.Number = SC.Validator.extend(
     Allow only numbers, dashes, period, and commas
   */
   validateKeyDown: function(form, field, charStr) {
+    if(!charStr) charStr = "";
     var text = field.$input().val();
     if (!text) text='';
     text+=charStr;
+
     if(this.get('places')===0){
       if(charStr.length===0) return true;
       else return text.match(/^[\-{0,1}]?[0-9,\0]*/)[0]===text;

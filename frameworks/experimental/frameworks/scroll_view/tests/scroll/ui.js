@@ -26,6 +26,42 @@
       autohidesVerticalScroller: NO
     })
     
+    .add("nestedHoriz", SC.ScrollView, {
+      layout: { width: 100, height: 440 },
+        
+      contentView: SC.ScrollView.design({
+        layout: { width: 200, height: 420 },
+        contentView: iv
+      })
+    })
+    
+    .add("nestedVert", SC.ScrollView, {
+      layout: { width: 440, height: 100 },
+        
+      contentView: SC.ScrollView.design({
+        layout: { width: 420, height: 200 },
+        contentView: iv
+      })
+    })
+    
+    .add("nestedVertInHoriz", SC.ScrollView, {
+      layout: { width: 100, height: 220 },
+        
+      contentView: SC.ScrollView.design({
+        layout: { width: 420, height: 200 },
+        contentView: iv
+      })
+    })
+    
+    .add("nestedHorizInVert", SC.ScrollView, {
+      layout: { width: 220, height: 100 },
+        
+      contentView: SC.ScrollView.design({
+        layout: { width: 200, height: 420 },
+        contentView: iv
+      })
+    })
+    
     .add("disabled", SC.ScrollView, {
       isEnabled: NO
     })
@@ -122,7 +158,67 @@
     var maxVScroll = view.maximumVerticalScrollOffset();    
     equals(maxVScroll ,0, 'Max vertical scroll should be equal to zero');
   });
+   
+  test("nestedHoriz", function() {
+    var view = pane.view('nestedHoriz');
+    ok(view.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(!view.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-x'), 'scroll', 'should have \'overflow-x\': \'scroll\' style');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-y'), 'hidden', 'should have \'overflow-y\': \'hidden\' style');
+    var nestedView = view.get('contentView');
+    ok(nestedView.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(!nestedView.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(nestedView.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-x'), 'scroll', 'should have \'overflow-x\': \'scroll\' style');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-y'), 'hidden', 'should have \'overflow-y\': \'hidden\' style');
+  });
 
+  test("nestedVert", function() {
+    var view = pane.view('nestedVert');
+    ok(!view.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(view.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-x'), 'hidden', 'should have \'overflow-x\': \'scroll\' style');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-y'), 'scroll', 'should have \'overflow-y\': \'hidden\' style');
+    var nestedView = view.get('contentView');
+    ok(!nestedView.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(nestedView.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(nestedView.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-x'), 'hidden', 'should have \'overflow-x\': \'scroll\' style');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-y'), 'scroll', 'should have \'overflow-y\': \'hidden\' style');
+  });
+  
+  test("nestedVertInHoriz", function() {
+    var view = pane.view('nestedVertInHoriz');
+    ok(view.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(!view.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-x'), 'scroll', 'should have \'overflow-x\': \'scroll\' style');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-y'), 'hidden', 'should have \'overflow-y\': \'hidden\' style');
+    var nestedView = view.get('contentView');
+    ok(!nestedView.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(nestedView.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(nestedView.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-x'), 'hidden', 'should have \'overflow-x\': \'scroll\' style');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-y'), 'scroll', 'should have \'overflow-y\': \'hidden\' style');
+  });
+
+  test("nestedHorizInVert", function() {
+    var view = pane.view('nestedHorizInVert');
+    ok(!view.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(view.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-x'), 'hidden', 'should have \'overflow-x\': \'scroll\' style');
+    equals(view.$('> .sc-scroll-container-view').css('overflow-y'), 'scroll', 'should have \'overflow-y\': \'hidden\' style');
+    var nestedView = view.get('contentView');
+    ok(nestedView.get('canScrollHorizontal'),'can scroll in horizontal direction');
+    ok(!nestedView.get('canScrollVertical'),'cannot scroll in vertical direction');
+    ok(nestedView.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-x'), 'scroll', 'should have \'overflow-x\': \'scroll\' style');
+    equals(nestedView.$('> .sc-scroll-container-view').css('overflow-y'), 'hidden', 'should have \'overflow-y\': \'hidden\' style');
+  });
+  
   test("disabled", function() {
      var view = pane.view('disabled'); 
      ok(view.$().hasClass('disabled'), 'should have disabled class');

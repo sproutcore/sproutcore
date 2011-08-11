@@ -729,7 +729,7 @@ SC.Record = SC.Object.extend(
     @dependsOn status
   */
   isError: function() {
-    return this.get('status') & SC.Record.ERROR;
+    return !!(this.get('status') & SC.Record.ERROR);
   }.property('status').cacheable(),
 
   /**
@@ -1336,6 +1336,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
     opts = opts || {};
     var isNested = opts.nested || opts.isNested;
     var attr;
+    
+    this._throwUnlessRecordTypeDefined(recordType, 'toMany');
+    
     if(isNested){
       attr = SC.ChildrenAttribute.attr(recordType, opts);
     }
@@ -1362,6 +1365,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
     opts = opts || {};
     var isNested = opts.nested || opts.isNested;
     var attr;
+
+    this._throwUnlessRecordTypeDefined(recordType, 'toOne');
+
     if(isNested){
       attr = SC.ChildAttribute.attr(recordType, opts);
     }
@@ -1369,6 +1375,13 @@ SC.Record.mixin( /** @scope SC.Record */ {
       attr = SC.SingleAttribute.attr(recordType, opts);
     }
     return attr;
+  },
+  
+  _throwUnlessRecordTypeDefined: function(recordType, relationshipType) {
+    if (!recordType) {
+      throw "Attempted to create " + relationshipType + " attribute with " +
+            "undefined recordType. Did you forget to sc_require a dependency?";
+    }
   },
 
   /**

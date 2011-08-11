@@ -350,8 +350,8 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
         positionInContentY = ((this._scroll_verticalScrollOffset||0) + touchYInFrame) / this._scale;
 
     // calculate deltas
-    var deltaX = positionInContentX - touch.startTouchOffset.x,
-        deltaY = positionInContentY - touch.startTouchOffset.y;
+    var deltaX = positionInContentX - touch.startTouchOffsetInContent.x,
+        deltaY = positionInContentY - touch.startTouchOffsetInContent.y;
 
     var isDragging = touch.dragging;
     if (!touch.scrolling.x && Math.abs(deltaX) > touch.scrollTolerance.x && touch.enableScrolling.x) {
