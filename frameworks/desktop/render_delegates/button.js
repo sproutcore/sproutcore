@@ -73,13 +73,12 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     // accessibility
-    if(isToggle){
-      if(dataSource.get('isSegment')){
-        context.attr('aria-pressed', isSelected.toString());
-      }else{
-        context.attr('aria-pressed', isActive.toString());
-      } 
-    }
+    if(dataSource.get('isSegment')){
+      context.attr('aria-selected', isSelected.toString());
+    }else if(isToggle) {
+      context.attr('aria-pressed', isActive.toString());
+    } 
+    
     context.attr('aria-labelledby', labelId);
 
     // Create the inner label element that contains the text and, optionally,
@@ -111,10 +110,14 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       jquery.addClass('active');
     }
 
-    var isDefault = dataSource.get('isDefault'),
-        isCancel = dataSource.get('isCancel');
 
-    if(isToggle) jquery.attr('aria-pressed', dataSource.get('isActive').toString());
+    var isDefault = dataSource.get('isDefault'),
+        isCancel = dataSource.get('isCancel');if(dataSource.get('isSegment')){
+      jquery.attr('aria-selected', dataSource.get('isSelected').toString());
+    }else if(isToggle){
+      jquery.attr('aria-pressed', dataSource.get('isActive').toString());
+    }
+    
     jquery.attr('title', dataSource.get('toolTip'));
 
     jquery.setClass('icon', !!dataSource.get('icon'));
