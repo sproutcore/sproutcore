@@ -65,6 +65,7 @@ SC.DateFormatter.y = function(date, count) {
   // do a Math.abs()
   var year = Math.abs(date.getFullYear()).toString();
   while (year.length < count) { year = '0' + year; }
+  year = year.substr(year.length - count);
   return year;
 };
 
@@ -79,6 +80,7 @@ SC.DateFormatter.u = function(date, count) {
   var year = Math.abs(date.getFullYear()).toString();
   
   while (year.length < count) { year = '0' + year; }
+  year = year.substr(year.length - count);
   
   return (lt0 ? "-" : "") + year;
 };

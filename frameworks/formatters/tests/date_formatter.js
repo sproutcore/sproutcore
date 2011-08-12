@@ -29,13 +29,19 @@ test("Era", function() {
 
 test("Year", function() {
   date.setFullYear(10);
-  equals(fmt("%{date:y}", date), "10");
+  equals(fmt("%{date:y}", date), "0");
   equals(fmt("%{date:yy}", date), "10");
   equals(fmt("%{date:yyy}", date), "010");
   equals(fmt("%{date:yyyy}", date), "0010");
   
+  date.setFullYear(2010);
+  equals(fmt("%{date:y}", date), "0");
+  equals(fmt("%{date:yy}", date), "10");
+  equals(fmt("%{date:yyy}", date), "010");
+  equals(fmt("%{date:yyyy}", date), "2010");
+  
   date.setFullYear(-10);
-  equals(fmt("%{date:y}", date), "10");
+  equals(fmt("%{date:y}", date), "0");
   equals(fmt("%{date:yy}", date), "10");
   equals(fmt("%{date:yyy}", date), "010");
   equals(fmt("%{date:yyyy}", date), "0010");
@@ -43,13 +49,13 @@ test("Year", function() {
 
 test("Year - Negative for BC", function() {
   date.setFullYear(10);
-  equals(fmt("%{date:u}", date), "10");
+  equals(fmt("%{date:u}", date), "0");
   equals(fmt("%{date:uu}", date), "10");
   equals(fmt("%{date:uuu}", date), "010");
   equals(fmt("%{date:uuuu}", date), "0010");
   
   date.setFullYear(-10);
-  equals(fmt("%{date:u}", date), "-10");
+  equals(fmt("%{date:u}", date), "-0");
   equals(fmt("%{date:uu}", date), "-10");
   equals(fmt("%{date:uuu}", date), "-010");
   equals(fmt("%{date:uuuu}", date), "-0010");
