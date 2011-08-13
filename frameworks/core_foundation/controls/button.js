@@ -4,7 +4,6 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 sc_require('mixins/action_support');
 sc_require('views/template');
 
@@ -14,13 +13,17 @@ sc_require('views/template');
   @extends SC.ActionSupport
 */
 SC.Button = SC.TemplateView.extend(SC.ActionSupport,
-/** @scope SC.Button.prototype */{
+/** @scope SC.Button.prototype */
+{
 
   classNames: ['sc-button'],
+  isEnabled: YES,
 
   mouseDown: function() {
-    this.set('isActive', true);
-    this._isMouseDown = YES;
+    if (this.isEnabled) {
+      this.set('isActive', true);
+      this._isMouseDown = YES;
+    }
   },
 
   mouseExited: function() {
@@ -28,7 +31,7 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   },
 
   mouseEntered: function() {
-    if (this._isMouseDown) {
+    if (this._isMouseDown && this.isEnabled) {
       this.set('isActive', true);
     }
   },
@@ -39,7 +42,7 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   }.property('pane').cacheable(),
 
   mouseUp: function(event) {
-    if (this.get('isActive')) {
+    if (this.get('isActive') && this.isEnabled) {
       this.fireAction();
       this.set('isActive', false);
     }
@@ -48,11 +51,15 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   },
 
   touchStart: function(touch) {
-    this.mouseDown(touch);
+		if(this.isEnabled){
+    	this.mouseDown(touch);
+		}
   },
 
   touchEnd: function(touch) {
-    this.mouseUp(touch);
+		if(this.isEnabled){
+    	this.mouseUp(touch);
+		}
   }
 
 });
