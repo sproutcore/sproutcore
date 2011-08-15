@@ -246,7 +246,27 @@ SC.View.reopen(
       SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
     }
     // @endif
-  }.enhance()
+  }.enhance(),
+  
+
+  /**
+    Invokes a method on the render delegate, if one is present and it implements
+    that method.
+    
+    @param {String} method The name of the method to call.
+    @param arg One or more arguments.
+  */
+  invokeRenderDelegateMethod: function(method, args) {
+    var renderDelegate = this.get('renderDelegate');
+    if (!renderDelegate) return undefined;
+    
+    if (SC.typeOf(renderDelegate[method]) !== SC.T_FUNCTION) return undefined;
+    
+    args = SC.$A(arguments);
+    args.shift();
+    args.unshift(this.get('renderDelegateProxy'));
+    return renderDelegate[method].apply(renderDelegate, args);
+  }
 });
 
 /**

@@ -345,7 +345,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   /** @private */
   autoResizeLayer: function() {
-    return this.get('layer');
+    var ret = this.invokeRenderDelegateMethod('getRenderedAutoResizeLayer', this.$());
+    return ret || this.get('layer');
   }.property('layer').cacheable(),
 
   /** @private */

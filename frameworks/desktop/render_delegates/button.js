@@ -51,12 +51,10 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     
     var labelContent,
         toolTip     = dataSource.get('toolTip'),
-        isSelected  = !!dataSource.get('isSelected'),
-        isActive    = !!dataSource.get('isActive'),
-        isDefault   = !!dataSource.get('isDefault'),
-        isCancel    = !!dataSource.get('isCancel'),
-        isToggle    = (dataSource.get('buttonBehavior')===SC.TOGGLE_BEHAVIOR),
-        labelId     = SC.guidFor(dataSource) + '-label';
+        isSelected  = dataSource.get('isSelected') || NO,
+        isActive    = dataSource.get('isActive') || NO,
+        labelId     = SC.guidFor(dataSource) + '-label',
+        minWidth    = dataSource.get('titleMinWidth') || NO;
 
     context.setClass({
       'icon': !!dataSource.get('icon'),
@@ -69,6 +67,10 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     if (toolTip) {
       context.attr('title', toolTip);
       context.attr('alt', toolTip);
+    }
+    
+    if (minWidth) {
+      context.attr('min-width', minWidth + 'px');
     }
 
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
@@ -125,5 +127,12 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     jquery.setClass('cancel', !!isCancel && !isDefault);
 
     dataSource.get('theme').labelRenderDelegate.update(dataSource, jquery.find('label'));
+  },
+  
+  /**
+    Returns the layer to be used for auto resizing.
+  */
+  getRenderedAutoResizeLayer: function(dataSource, jq) {
+    return jq.find('.sc-button-label')[0];
   }
 });
