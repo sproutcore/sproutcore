@@ -51,7 +51,32 @@ SC.View.reopen(
     @param {SC.Responder} responder
   */
   didBecomeKeyResponderFrom: function(responder) {
-    this.$().focus();
+    
+    // Hack!!!
+    // If we try to execute the focus code right now, the iPad will take this as an opportunity to break
+    // execution of the current Run Loop (if that Run Loop was started by a timer expiring) to execute
+    // any touch event code that is waiting at this time.
+    //
+    // This becomes a problem in particular for ScrollView's that use a timer to pass touches to their content,
+    // because the touchend event can come in while the timer code is executing and pause here to complete
+    // the touchend code and then continue the timer code afterward.  However, the timer code's 
+    // execution context will then be out-of-date and will cause a crash in RootResponder's assignTouch().
+    //
+    // To verify this, use the branch sproutcore/timer_touch_debug in any SproutCore project.  Then visit
+    // the app launcher http://my.local.machine.ip:4020 on an iPad 1 and simply press one of the app's
+    // in the list.  The app should crash on the first touch (depending slightly on the speed at which you
+    // touch the selection; presses will crash it, taps generally won't).  It should occur on the first
+    // touch or else try reloading the app until you get the proper touch speed figured out.
+    //
+    // Using the debug branch, when it crashes, notice how the console statements aren't in order according
+    // to the timestamps and notice how there is a big gap in timestamps around this.$().focus() where the
+    // touchend block of code runs.
+    //
+    // -Tyler Keating : tyler@sproutcore.com
+
+    this.invokeLater(function() {
+      this.$().focus();
+    });
   },
 
   /**
