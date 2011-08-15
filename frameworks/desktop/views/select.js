@@ -174,6 +174,15 @@ SC.SelectView = SC.ButtonView.extend(
   showCheckbox: YES,
 
   /**
+    Set this to non-null to place an empty option at the top of the menu.
+
+    @property
+    @type String
+    @default null
+  */
+  emptyName: null,
+
+  /**
     Default value of the select button.
      This will be the first item from the menu item list.
 
@@ -366,7 +375,7 @@ SC.SelectView = SC.ButtonView.extend(
     sc_super();
     var layoutWidth, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
       currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
-      idx, name, icon, value, item, itemEnabled, isEnabledKey;
+      idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName;
 
     items = this.get('items') ;
     items = this.sortObjects(items) ;
@@ -386,6 +395,10 @@ SC.SelectView = SC.ButtonView.extend(
     // get the localization flag.
     shouldLocalize = this.get('localize') ;
 
+    // get the empty name.
+    emptyName = this.get('emptyName');
+    emptyName = shouldLocalize ? SC.String.loc(emptyName) : Name ;
+
     //itemList array to set the menu items
     itemList = [] ;
 
@@ -394,6 +407,23 @@ SC.SelectView = SC.ButtonView.extend(
 
     //index for finding the first item in the list
     idx = 0 ;
+
+    // Add the empty name to the list if applicable
+    if(!SC.none(emptyName)) {
+      var item = SC.Object.create({
+        separator: NO,
+        title: emptyName,
+        icon: null,
+        value: null,
+        isEnabled: YES,
+        checkbox: NO,
+        target: this,
+        action: 'displaySelectedItem'
+      });
+
+      //Set the items in the itemList array
+      itemList.push(item);
+    }
 
     items.forEach(function(object) {
     if (object || object === 0) {
@@ -472,9 +502,12 @@ SC.SelectView = SC.ButtonView.extend(
       this.invokeLast(function() {
         var value = this.get('value') ;
         if(SC.none(value)) {
-          this.set('value', this._defaultVal) ;
-          this.set('title', this._defaultTitle) ;
-          this.set('icon', this._defaultIcon) ;
+          if(SC.none(emptyName)) {
+            this.set('value', this._defaultVal) ;
+            this.set('title', this._defaultTitle) ;
+            this.set('icon', this._defaultIcon) ;
+          }
+          else this.set('title', emptyName) ;
         }
       });
     }
