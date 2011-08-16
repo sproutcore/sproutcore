@@ -120,5 +120,6 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
     }
 
     this.adjust('width', width);
+    this.positionPane();
   }
 });
