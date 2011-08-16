@@ -148,8 +148,8 @@ SC.FlowedLayout = {
   }.observes("childViews"),
   
   /** @private */
-  _scfl_layoutPropertyDidChange: function(){
-    this.invokeOnce("_scfl_tile");
+  _scfl_layoutPropertyDidChange: function(childView) {
+    this.invokeOnce('_scfl_tile');
   }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing', 'isVisibleInWindow'),
   
   /** @private
@@ -737,7 +737,7 @@ SC.FlowedLayout = {
           layout.height -= item.spacing.top + item.spacing.bottom;
         }
         
-        item.child.adjust(layout);
+        this.applyPlanToView(item.child, layout);
         item.child._scfl_lastLayout = layout;
         
         item.child.endPropertyChanges();
@@ -755,6 +755,14 @@ SC.FlowedLayout = {
     this.set('_scfl_totalCollapsedRowSize', plan.totalCollapsedRowSize);
 
     this.endPropertyChanges();
+  },
+
+  /**
+    Applies the given layout to the view.
+    Override this if you would like your view to, for example, animate to a new position.
+  */
+  applyPlanToView: function(view, layout) {
+    view.adjust(layout);
   },
   
   /** @private */
