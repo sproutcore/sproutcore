@@ -256,7 +256,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
   init: function() {
     var val = this.get('value');
-    this._hintON = (!val || val && val.length===0) ? YES : NO;
+    this._hintON = ((!val || val && val.length===0) && !this.get('hintOnFocus')) ? YES : NO;
     
     var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
     if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
@@ -530,12 +530,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
-        hintOnFocus = this.get('hintOnFocus'), hintString = '',
+    var hint = this.get('formattedHint'), 
+        hintOnFocus = this.get('hintOnFocus'), 
+        hintString = '',
         maxLength = this.get('maxLength'),
-        hintElements, element, paddingElementStyle, fieldClassNames,
         spellCheckString='', autocapitalizeString='', autocorrectString='',
-        maxLength = this.get('maxLength'), isOldSafari;
+        name, adjustmentStyle, type, hintElements, element, paddingElementStyle, 
+        fieldClassNames, isOldSafari, activeState;
 
     context.setClass('text-area', this.get('isTextArea'));
     
@@ -551,7 +552,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
     }
     // if hint is on and we don't want it to show on focus, create one
-    if(hint && !hintOnFocus) {
+    if(SC.platform.input.placeholder && !hintOnFocus) {
       hintString = ' placeholder="' + hint + '"';
     }
     
@@ -574,7 +575,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       context.push('<span class="padding" '+adjustmentStyle+'>');
      
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
+      if(this._hintON && !SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
       }
@@ -613,21 +614,23 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           val = this.get('value');
 
       if(hintOnFocus) this.$('.hint')[0].innerHTML = hint;
-      else elem.placeholder = hint;
+      else if(!hintOnFocus) elem.placeholder = hint;
 
       if (!val || (val && val.length === 0)) {
-        if (!SC.platform.input.placeholder && this._hintON && !this.get('isFirstResponder')) {
+        if (!this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
           if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
 
-          context.setClass('sc-hint', YES);
-          input.val(hint);
+          if (!SC.platform.input.placeholder && this._hintON) {
+            context.setClass('sc-hint', YES);
+            input.val(hint);
+          }
         } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (!SC.browser.isIE && this.get('isPassword') && elem.type === 'text') { elem.type = 'password'; }
-          if (!SC.platform.input.placeholder) {
+          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
+          if (!SC.platform.input.placeholder && this._hintON) {
             context.setClass('sc-hint', NO);
             input.val('');
           }
@@ -815,7 +818,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
-      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && !this.get('hintOnFocus') && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
       }
     }, this);
@@ -864,6 +867,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         this.fieldValueDidChange(NO);        
       }, this);
     }
+    this.updateHintOnFocus();
   },
 
   /** @private 
@@ -872,11 +876,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   updateHintOnFocus: function() {
     // if there is a value in the field, hide the hint
     var hintOnFocus = this.get('hintOnFocus');
+    if(!hintOnFocus) return;
     
-    if(hintOnFocus && this.getFieldValue()) {
+    if(this.getFieldValue()) {
       this.$('.hint').addClass('sc-hidden');
     }
-    else if(hintOnFocus) {
+    else {
       this.$('.hint').removeClass('sc-hidden');
     }
   }.observes('value'),
@@ -1110,7 +1115,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (!SC.platform.input.maxlength && val.length > max) {
         this.set('value', val.substr(0, max));
       }
-    } else {
+    } else if(!this.get('hintOnFocus')) {
       this._hintON = YES;
     }
   }.observes('value')
