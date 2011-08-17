@@ -44,7 +44,6 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     var input = this.$input();
 
     if (value !== undefined) {
-      if (window.billy) { debugger; }
       // We don't want to unnecessarily set the value.
       // Doing that could cause the selection to be lost.
       if (this._value !== value) { this._value = value; }
