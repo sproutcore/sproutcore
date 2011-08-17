@@ -73,10 +73,6 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
       SC.Event.add(input, 'focus', this, this.focusIn);
       SC.Event.add(input, 'blur', this, this.focusOut);
     }
-
-    input.bind('keyup', function() {
-      self.domValueDidChange(SC.$(this));
-    });
   },
 
   willDestroyLayerMixin: function() {
@@ -89,8 +85,6 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
       SC.Event.remove(input, 'focus', this, this.focusIn);
       SC.Event.remove(input, 'blur', this, this.focusOut);
     }
-
-    input.unbind('change');
   },
 
   focusIn: function(event) {
