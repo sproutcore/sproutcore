@@ -51,14 +51,16 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     var labelContent,
         toolTip     = dataSource.get('toolTip'),
-        isSelected  = dataSource.get('isSelected') || NO,
-        isActive    = dataSource.get('isActive') || NO,
+        isSelected  = !!dataSource.get('isSelected'),
+        isActive    = !!dataSource.get('isActive'),
+        isDefault   = !!dataSource.get('isDefault'),
+        isCancel    = !!dataSource.get('isCancel'),
         labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
-      'icon': !!dataSource.get('icon') || NO,
-      'def': dataSource.get('isDefault'),
-      'cancel': dataSource.get('isCancel'),
+      'icon': !!dataSource.get('icon'),
+      'def':  isDefault,
+      'cancel': isCancel && !isDefault,
       'active': isActive,
       'sel': isSelected
     });
@@ -101,12 +103,15 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       jquery.addClass('active');
     }
 
+    var isDefault = dataSource.get('isDefault'),
+        isCancel = dataSource.get('isCancel');
+
     jquery.attr('aria-pressed', dataSource.get('isActive').toString());
     jquery.attr('title', dataSource.get('toolTip'));
 
-    jquery.setClass('icon', !!dataSource.get('icon') || NO);
-    jquery.setClass('def', dataSource.get('isDefault') || NO);
-    jquery.setClass('cancel', dataSource.get('isCancel') || NO);
+    jquery.setClass('icon', !!dataSource.get('icon'));
+    jquery.setClass('def', !!isDefault);
+    jquery.setClass('cancel', !!isCancel && !isDefault);
 
     dataSource.get('theme').labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
