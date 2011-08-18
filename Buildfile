@@ -43,6 +43,8 @@ config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop]
 config :ajax,            :required => [:runtime, :core_foundation]
 
+config :"experimental/split_view", :test_required => [:desktop]
+
 # WRAPPER FRAMEWORKS
 config :sproutcore, :required => [:desktop, :datastore, :statechart]
 config :mini, :required => [:runtime, :datastore]
