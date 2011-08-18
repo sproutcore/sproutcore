@@ -179,12 +179,12 @@ SC.SplitView = SC.View.extend({
   }.property('frame', 'layoutDirection').cacheable(),
 
   viewDidResize: function(orig) {
-    this.invokeOnce('_scsv_tile');
+    this.scheduleTiling();
     orig();
   }.enhance(),
   
   layoutDirectionDidChange: function() {
-    this.invokeOnce('_scsv_tile');
+    this.scheduleTiling();
   }.observes('layoutDirection'),
   
   // 
@@ -354,14 +354,33 @@ SC.SplitView = SC.View.extend({
     
     this._scsv_dividers = newDividers;
     
-    // whenever the child views have changed and need setup, SplitView
-    // will need to lay out the children again.
-    this.invokeOnce('_scsv_tile');
+    // retile immediately. 
+    this._scsv_tile();
   },
   
   //
   // BASIC LAYOUT CODE
   //
+  
+  /**
+    Whether the SplitView needs to be re-laid out. You can change this by
+    calling scheduleTiling.
+  */
+  needsTiling: YES,
+  
+  /**
+    Schedules a retile of the SplitView.
+  */
+  scheduleTiling: function() {
+    this.set('needsTiling', YES);
+    this.invokeOnce('_scsv_tile');
+  },
+  
+  tileIfNeeded: function() {
+    if (!this.get('needsTiling')) return;
+    this._scsv_tile();
+  },
+  
   /**
    * @private
    * Tiling is the simpler of two layout paths. Tiling lays out all of the
@@ -404,6 +423,8 @@ SC.SplitView = SC.View.extend({
         this.adjust('height', size);
       }
     }
+    
+    this.set('needsTiling', NO);
   },
   
   /**
