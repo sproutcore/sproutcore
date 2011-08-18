@@ -244,8 +244,26 @@ test("Resizing split view", function() {
   splitView.adjust('height', 300);
   SC.RunLoop.end();
   
-  // there should be no change, because everything is at minimum
-  confirmPositions(0, 100, 200, 300);
+  // there should be change, because the left side collapses.
+  confirmPositions(0, 0, 100, 200);
+  
+  // and if we shrink further still...
+  SC.RunLoop.begin();
+  splitView.adjust('width', 200);
+  splitView.adjust('height', 200);
+  SC.RunLoop.end();
+  
+  // there should be no change
+  confirmPositions(0, 0, 100, 200);
+  
+  // and if we shrink further still, way beyond the smallest it can get...
+  SC.RunLoop.begin();
+  splitView.adjust('width', 100);
+  splitView.adjust('height', 100);
+  SC.RunLoop.end();
+  
+  // there should be no change
+  confirmPositions(0, 0, 100, 200);
 });
 
 test("Fitting to fill disabled", function() {
