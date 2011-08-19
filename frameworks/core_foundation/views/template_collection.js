@@ -255,7 +255,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       childView = this.createChildView(itemViewClass.extend(itemOptions, {
         content: item,
         render: renderFunc,
-        tagName: itemOptions.tagName || itemViewClass.prototype.tagName
+        tagName: itemOptions.tagName || itemViewClass.prototype.tagName || this.get('itemTagName')
       }));
 
       var contextProperty = childView.get('contextProperty');
