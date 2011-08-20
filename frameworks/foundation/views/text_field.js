@@ -575,6 +575,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         context.setClass('sc-hint', YES);
       } 
       
+      fieldClassNames = "field";
+      
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
