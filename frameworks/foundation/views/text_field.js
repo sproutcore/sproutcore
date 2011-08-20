@@ -23,7 +23,6 @@ sc_require('mixins/editable');
 SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 /** @scope SC.TextFieldView.prototype */ {
 
-  tagName: 'label',
   classNames: ['sc-text-field-view'],
   isTextField: YES,
 
@@ -99,7 +98,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   formattedHint: function() {
     var hint = this.get('hint');
-
     return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
 
@@ -514,8 +512,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (leftAdjustment)  leftAdjustment  += 'px' ;
     if (rightAdjustment) rightAdjustment += 'px' ;
 
-   this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
-    if(SC.browser.mozilla) this.invokeLast(this._applyFirefoxCursorFix);
+    this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment);
   },
 
   /** @private
@@ -578,13 +575,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         context.setClass('sc-hint', YES);
       } 
       
-      //for gecko pre 1.9 vertical aligment is completely broken so we need
-      //different styling.
-      fieldClassNames = (SC.browser.mozilla &&
-                          (parseFloat(SC.browser.mozilla)<1.9 || 
-                          SC.browser.mozilla.match(/1\.9\.0|1\.9\.1/))) ?
-                          "field oldGecko": "field";
-      
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
@@ -606,7 +596,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
                       ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
                       autocapitalizeString+'/></span>') ;
       }
-
     }
     else {
       var input= this.$input(),
@@ -614,19 +603,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           val = this.get('value');
 
       if (!val || (val && val.length === 0)) {
-        if (this._hintON && !this.get('isFirstResponder')) {
+        if (!SC.platform.input.placeholder && this._hintON && !this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE && !SC.platform.input.placeholder) { elem.type = this.get('type'); }
+          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
 
-          if (!SC.platform.input.placeholder) {
-            context.setClass('sc-hint', YES);
-            input.val(hint);
-          }
+          context.setClass('sc-hint', YES);
+          input.val(hint);
         } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
+          if (!SC.browser.isIE && this.get('isPassword') && elem.type === 'text') { elem.type = 'password'; }
           if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', NO);
             input.val('');
@@ -721,15 +708,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   didCreateLayer: function() {
     sc_super(); 
+    if(!SC.platform.input.placeholder) this.invokeLast(this._setInitialPlaceHolderIE);
     // For some strange reason if we add focus/blur events to textarea
     // inmediately they won't work. However if I add them at the end of the
     // runLoop it works fine.
-    if(!SC.platform.input.placeholder && this._hintON){
-      var currentValue = this.$input().val();
-      if(!currentValue || (currentValue && currentValue.length===0)){
-        this.$input().val(this.get('formattedHint'));
-      }
-    }
     if(this.get('isTextArea')) {
       this.invokeLast(this._addTextAreaEvents);
     }
@@ -749,8 +731,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
   
+  /**  @private
+    Set initial placeholder for IE
+  */
+  _setInitialPlaceHolderIE: function() {
+    if(!SC.platform.input.placeholder && this._hintON){
+      var input = this.$input(),
+          currentValue = input.val();
+      if(!currentValue || (currentValue && currentValue.length===0)){
+        input.val(this.get('formattedHint'));
+      }
+    }
+  },
   
-  /** 
+  /**  @private
     Adds all the textarea events. This functions is called by didCreateLayer
     at different moments depending if it is a textarea or not. Appending 
     events to text areas is not reliable unless the element is already added 
@@ -766,12 +760,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // our key/mouse down/up handlers (such as the user choosing Select All
     // from a menu).
     SC.Event.add(input, 'select', this, this._textField_selectionDidChange);
-        
-    if(SC.browser.mozilla){
-      // cache references to layer items to improve firefox hack perf
-      this._cacheInputElement = this.$input();
-      this._cachePaddingElement = this.$('.padding');
-    }
   },
 
   /**
@@ -862,62 +850,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }, this);
     }
   },
-
-  /** @private
-    Move magic number out so it can be over-written later in inline editor
-  */
-  _topOffsetForFirefoxCursorFix: 3,
-  
-  /** @private
-    Mozilla had this bug until firefox 3.5 or gecko 1.8 They rewrote input text
-    and textareas and now they work better. But we have to keep this for older
-    versions.
-  */
-  _applyFirefoxCursorFix: function() {
-    // Be extremely careful changing this code.  !!!!!!!! 
-    // Contact me if you need to change or improve the code. After several 
-    // iterations the new way to apply the fix seems to be the most 
-    // consistent.
-    // This fixes: selection visibility, cursor visibility, and the ability 
-    // to fix the cursor at any position. As of FF 3.5.3 mozilla hasn't fixed this 
-    // bug, even though related bugs that I've found on their database appear
-    // as fixed.  
-    
-    // UPDATE: Things seem to be working on FF3.6 therefore we are disabling the
-    // hack for the latest versions of FF.
-    // 
-    // Juan Pinzon
-    
-    if (parseFloat(SC.browser.mozilla)<1.9 && !this.get('useStaticLayout')) {
-      var top, left, width, height, p, layer, element, textfield;
-      
-      // I'm caching in didCreateLayer this elements to improve perf
-      element = this._cacheInputElement;
-      textfield = this._cachePaddingElement;
-      if(textfield && textfield[0]){
-        layer = textfield[0];
-        p = SC.$(layer).offset() ;
-      
-        // this is to take into account an styling issue.
-        // this is counterproductive in FF >= 3.6
-        if(SC.browser.compareVersion(1,9,2) < 0 && 
-           element[0].tagName.toLowerCase()==="input") {
-          top = p.top+this._topOffsetForFirefoxCursorFix; 
-        }
-        else top = p.top;
-        left = p.left;
-        width = layer.offsetWidth;
-        height = layer.offsetHeight ;
-      
-        var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
-        // if the style is the same don't re-apply
-        if(!this._prevStyle || this._prevStyle!=style) element.attr('style', style) ;
-        this._prevStyle = style;
-      }
-    }
-    return this ;
-  },
-  
+   
   
   /** @private
     In Firefox, as of 3.6 -- including 3.0 and 3.5 -- for input fields only
@@ -1003,13 +936,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!first || !first.get("isTextField")) {
       document.body.scrollTop = document.body.scrollLeft = 0;
     }
-  },
-  
-  parentViewDidResize: function() {
-    if (SC.browser.mozilla) {
-      this.invokeLast(this._applyFirefoxCursorFix);
-    }
-    sc_super();
   },
 
   /**
