@@ -128,6 +128,9 @@ SC.AutoResize = {
   */
   calculatedFontSize: 20,
   
+  fontPropertyDidChange: function() {
+    if(this.get('shouldAutoFitText')) this.invokeOnce(this.fitTextToFrame);
+  }.observes('shouldAutoFitText', 'minFontSize', 'maxFontSize', 'measuredSize'),
 
   /**
     Observes the measured size and actually performs the resize if necessary.
@@ -261,10 +264,6 @@ SC.AutoResize = {
     // set the measured value so we can avoid extra measurements in the future
     this._lastMeasuredText = value;
     this._lastMeasuredId = this.get('batchResizeId');
-
-    if (this.get('shouldAutoFitText')) {
-      this.invokeOnce('fitTextToFrame');
-    }
 
     this._scar_measurementPending = NO;
 
