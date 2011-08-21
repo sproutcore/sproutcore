@@ -129,6 +129,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         version = parseFloat(SC.browser.version);
 
     if (SC.browser.safari) {
+      deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
       if (version >= 533.17 && version<534) {
         deltaMultiplier = 0.004;
@@ -136,10 +137,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
       }
-    } else if (SC.browser.mozilla) {
-      deltaMultiplier = 10;
+    }else if(SC.browser.msie){
+      deltaMultiplier = 0.3;
+    }else if(SC.browser.chrome){
+      deltaMultiplier = 0.04;
     }
-
+    console.log(deltaMultiplier);
     return deltaMultiplier;
   }(),
 
@@ -668,7 +671,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     var parent = event.relatedTarget;
 
     // Traverse up the tree
-    while ( parent && parent != elem ) {
+    while ( parent && parent !== elem ) {
       try { parent = parent.parentNode; } catch(error) { parent = elem; }
     }
 
