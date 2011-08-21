@@ -397,7 +397,7 @@ SC.SelectView = SC.ButtonView.extend(
 
     // get the empty name.
     emptyName = this.get('emptyName');
-    emptyName = shouldLocalize ? SC.String.loc(emptyName) : Name ;
+    emptyName = shouldLocalize ? SC.String.loc(emptyName) : emptyName ;
 
     //itemList array to set the menu items
     itemList = [] ;
