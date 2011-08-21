@@ -387,7 +387,7 @@ SC.SelectView = SC.ButtonView.extend(
     valueKey = this.get('itemValueKey') ;
     separatorKey = this.get('itemSeparatorKey');
     showCheckbox = this.get('showCheckbox') ;
-    isEnabledKey = this.get('isEnabledKey');
+    isEnabledKey = this.get('itemIsEnabledKey');
 
     //get the current selected value
     currentSelectedVal = this.get('value') ;
