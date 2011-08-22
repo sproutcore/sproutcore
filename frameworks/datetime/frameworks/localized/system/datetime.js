@@ -21,6 +21,7 @@ SC.DateTime.mixin(
     SC.DateTime.abbreviatedDayNames = SC.String.w(SC.String.loc('_SC.DateTime.abbreviatedDayNames'));
     SC.DateTime.monthNames = SC.String.w(SC.String.loc('_SC.DateTime.monthNames'));
     SC.DateTime.abbreviatedMonthNames = SC.String.w(SC.String.loc('_SC.DateTime.abbreviatedMonthNames'));
+    SC.DateTime.AMPMNames = SC.String.w(SC.String.loc('_SC.DateTime.AMPMNames'));
   }
 
 });

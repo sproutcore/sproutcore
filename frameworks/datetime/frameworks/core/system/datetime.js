@@ -470,6 +470,12 @@ SC.DateTime.mixin(SC.Comparable,
   abbreviatedMonthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   
   /**
+    @type Array
+    @default ['AM', 'PM']
+  */
+  AMPMNames:['AM', 'PM'],
+  
+  /**
     @private
 
     The unique internal `Date` object used to make computations. Better
@@ -944,7 +950,7 @@ SC.DateTime.mixin(SC.Comparable,
           case 'j': throw "%j is not implemented";
           case 'm': opts.month = scanner.scanInt(1, 2); break;
           case 'M': opts.minute = scanner.scanInt(1, 2); break;
-          case 'p': opts.meridian = scanner.scanArray(['AM', 'PM']); break;
+          case 'p': opts.meridian = scanner.scanArray(this.AMPMNames); break;
           case 'S': opts.second = scanner.scanInt(1, 2); break;
           case 's': opts.millisecond = scanner.scanInt(1, 3); break;
           case 'U': throw "%U is not implemented";
@@ -1042,7 +1048,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'j': return this._pad(this._get('dayOfYear'), 3);
       case 'm': return this._pad(this._get('month'));
       case 'M': return this._pad(this._get('minute'));
-      case 'p': return this._get('hour') > 11 ? 'PM' : 'AM';
+      case 'p': return this._get('hour') > 11 ? this.AMPMNames[1] : this.AMPMNames[0];
       case 'S': return this._pad(this._get('second'));
       case 's': return this._pad(this._get('millisecond'), 3);
       case 'u': return this._pad(this._get('utc')); //utc
