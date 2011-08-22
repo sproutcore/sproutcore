@@ -114,11 +114,8 @@
     .border {
       border:1px inset;
     }
-    input.field {
-      padding-bottom: 1px;
-    }
     textarea.field {
     	height: 100%;
     }
-  } 
+  }
 }
