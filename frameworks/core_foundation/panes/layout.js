@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 sc_require("panes/pane");
-
 SC.Pane.reopen(
   /** @scope SC.Pane.prototype */ {
 
@@ -52,6 +51,18 @@ SC.Pane.reopen(
     // into account when calculating dimensions.
 
     if (layout.minHeight || layout.minWidth) {
+      var isOverflowing = false;
+      if ((layout.minHeight && wDim.height===layout.minHeight) ||
+        (layout.minWidth && wDim.width===layout.minWidth)) {
+          
+        isOverflowing = true;
+      }
+      if(isOverflowing){
+        $(document.body).css('overflow', 'auto');
+      }else{
+        // to avoid Lion rubberbanding
+        $(document.body).css('overflow', 'hidden'); 
+      }
       if (layout.minHeight) {
         wDim.height = Math.max(wDim.height, layout.minHeight);
       }
