@@ -4,8 +4,13 @@
 
       "My date: %{date:yyyy} %{date:MM} %{date:dd}".fmt(myDate, SC.DateFormatter)
 
-  You can only put item (yyyy, MM, dd) per token, but you can put as many
-  tokens as you'd like.
+  You can use almost any of the Unicode Technical Standard #35 (draft 10)
+  formatting strings.  See:
+
+    http://unicode.org/reports/tr35/tr35-10.html#Date_Format_Patterns
+
+  Note that you can only put one (yyyy, MM, dd) per token, but you can put as
+  many tokens as you'd like.
 
 */
 SC.DateFormatter = function(date, f) {
