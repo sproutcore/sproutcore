@@ -129,7 +129,7 @@ SC.AutoResize = {
   calculatedFontSize: 20,
   
   fontPropertyDidChange: function() {
-    if(this.get('shouldAutoFitText')) this.invokeOnce(this.fitTextToFrame);
+    if(this.get('shouldAutoFitText')) this.invokeLast(this.fitTextToFrame);
   }.observes('shouldAutoFitText', 'minFontSize', 'maxFontSize', 'measuredSize'),
 
   /**
@@ -290,10 +290,8 @@ SC.AutoResize = {
   */
   viewDidResize: function(orig) {
     orig();
-    
-    if (this.get('shouldAutoFitText')) {
-      this.invokeOnce('fitTextToFrame');
-    }
+
+    if (this.get('shouldAutoFitText')) this.fontPropertyDidChange();
   }.enhance(),
   
   /**
@@ -303,13 +301,16 @@ SC.AutoResize = {
     // we can only fit text when we have a layer.
     var layer = this.get('autoResizeLayer');
     if (!layer) return;
+
+    // the max font size may have changed
+    this.prepareLayerForStringMeasurement(layer);
     
     var frame = this.get('frame'),
     
         padding = this.get('autoResizePadding') || 0,
         
         width = frame.width, height = frame.height,
-        measured = this.get('measuredSize'), 
+        measured = this.get('measuredSize'),
         mWidth = measured.width, mHeight = measured.height;
 
     // figure out and apply padding to the width/height
