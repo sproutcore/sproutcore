@@ -6,7 +6,17 @@
 // ==========================================================================
 
 sc_require('views/view');
+sc_require('views/view/acceleration');
+sc_require('views/view/cursor');
+sc_require('views/view/enabled');
+sc_require('views/view/keyboard');
+sc_require('views/view/layout');
+sc_require('views/view/manipulation');
+sc_require('views/view/theming');
+sc_require('views/view/touch');
+sc_require('views/view/visibility');
 sc_require('mixins/responder_context');
+console.log('panes/pane');
 
 /**
   Indicates a value has a mixed state of both on and off.

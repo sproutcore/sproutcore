@@ -6,7 +6,7 @@
 // ==========================================================================
 
 sc_require('panes/pane');
-
+console.log('panes/main');
 /** @class
 
   Most SproutCore applications have a main pane, which dominates the 
@@ -32,8 +32,8 @@ SC.MainPane = SC.Pane.extend({
   
   /** @private - extends SC.Pane's method */
   paneDidAttach: function() {
-    var ret = sc_super();
-    var responder = this.rootResponder;
+    var ret = sc_super(),
+        responder = this.rootResponder;
     responder.makeMainPane(this);
     if (!responder.get('keyRootView')) responder.makeKeyPane(this);
     return ret ;
@@ -45,6 +45,26 @@ SC.MainPane = SC.Pane.extend({
   /** @private */
   classNames: ['sc-main'],
   
-  ariaRole: 'application'
+  ariaRole: 'application',
   
+  computeParentDimensions: function(frame) {
+    var ret = sc_super(),
+        layout = this.get('layout');
+          
+    if (layout.minHeight || layout.minWidth) {
+      var isOverflowing = false;
+      if ((layout.minHeight && ret.height===layout.minHeight) ||
+        (layout.minWidth && ret.width===layout.minWidth)) {
+          
+        isOverflowing = true;
+      }
+      if(isOverflowing){
+        $(document.body).css('overflow', 'auto');
+      }else{
+        // to avoid Lion rubberbanding
+        $(document.body).css('overflow', 'hidden'); 
+      }
+    }
+    return ret;
+  }  
 });
