@@ -268,12 +268,13 @@ SC.ScrollerView = SC.View.extend(
     var classNames = {},
         buttons = '',
         parentView = this.get('parentView'),
+        layoutDirection = this.get('layoutDirection'),
         thumbPosition, thumbLength, thumbCenterLength, thumbElement,
         value, max, scrollerLength, length, pct;
 
     // We set a class name depending on the layout direction so that we can
     // style them differently using CSS.
-    switch (this.get('layoutDirection')) {
+    switch (layoutDirection) {
       case SC.LAYOUT_VERTICAL:
         classNames['sc-vertical'] = YES;
         break;
@@ -297,37 +298,13 @@ SC.ScrollerView = SC.View.extend(
 
     // If this is the first time, generate the actual HTML
     if (firstTime) {
-      if (this.get('hasButtons')) {
-        buttons = '<div class="button-bottom"></div><div class="button-top"></div>';
-      } else {
-        buttons = '<div class="endcap"></div>';
-      }
+      context.push('<div class="track"></div>',
+                    '<div class="cap"></div>');
+      this.renderButtons(context, this.get('hasButtons'));
+      this.renderThumb(context, layoutDirection, thumbLength, thumbPosition);
 
-      switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-        context.push('<div class="track"></div>',
-                      '<div class="cap"></div>',
-                      buttons,
-                      '<div class="thumb" style="height: '+thumbLength+'px; top: ' + thumbPosition + 'px;">',
-                      '<div class="thumb-center"></div>',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-bottom"></div></div>');
-
-        //addressing accessibility
-        context.attr('aria-orientation', 'vertical');
-        break;
-        case SC.LAYOUT_HORIZONTAL:
-        context.push('<div class="track"></div>',
-                      '<div class="cap"></div>',
-                      buttons,
-                      '<div class="thumb" style="width: '+thumbLength+'px; left: ' + thumbPosition + 'px;">',
-                      '<div class="thumb-center"></div>',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-bottom"></div></div>');
-
-        //addressing accessibility
-        context.attr('aria-orientation', 'horizontal');
-      }
+      //addressing accessibility
+      context.attr('aria-orientation', 'vertical');
 
       //addressing accessibility
       context.attr('aria-valuemax', this.get('maximum'));
@@ -349,6 +326,26 @@ SC.ScrollerView = SC.View.extend(
       //addressing accessibility
       context.attr('aria-valuenow', this.get('value'));
 
+    }
+  },
+
+  renderThumb: function(context, layoutDirection, thumbLength, thumbPosition) {
+    var styleString;
+    if(layoutDirection === SC.LAYOUT_HORIZONTAL) styleString = 'width: '+thumbLength+'px; left: ' + thumbPosition + 'px;';
+    else styleString = 'height: '+thumbLength+'px; top: ' + thumbPosition + 'px;';
+
+    context.push('<div class="thumb" style=%@>'.fmt(styleString),
+                 '<div class="thumb-center"></div>',
+                 '<div class="thumb-top"></div>',
+                 '<div class="thumb-bottom"></div></div>');
+
+  },
+
+  renderButtons: function(context, hasButtons) {
+    if (hasButtons) {
+      context.push('<div class="button-bottom"></div><div class="button-top"></div>');
+    } else {
+      context.push('<div class="endcap"></div>');
     }
   },
 
@@ -920,7 +917,6 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
   /** @private */
   render: function(context, firstTime) {
     var classNames = [],
-        buttons = '',
         thumbPosition, thumbLength, thumbCenterLength, thumbElement,
         value, max, scrollerLength, length, pct;
 
@@ -950,36 +946,13 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
 
     // If this is the first time, generate the actual HTML
     if (firstTime) {
-      if (this.get('hasButtons')) {
-        buttons = '<div class="button-bottom"></div><div class="button-top"></div>';
-      } else {
-        buttons = '<div class="endcap"></div>';
-      }
+      context.push('<div class="track"></div>',
+                    '<div class="cap"></div>');
+      this.renderButtons(context, this.get('hasButtons'));
+      this.renderThumb(context, this.get('layoutDirection'), thumbLength);
+    }
 
-      switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-        context.push('<div class="track"></div>',
-                      '<div class="cap"></div>',
-                      buttons,
-                      '<div class="thumb">',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-clip">',
-                      '<div class="thumb-inner" style="-webkit-transform: translateY('+(thumbLength-1044)+'px);">',
-                      '<div class="thumb-center"></div>',
-                      '<div class="thumb-bottom"></div></div></div></div>');
-        break;
-        case SC.LAYOUT_HORIZONTAL:
-        context.push('<div class="track"></div>',
-                      '<div class="cap"></div>',
-                      buttons,
-                      '<div class="thumb">',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-clip">',
-                      '<div class="thumb-inner" style="-webkit-transform: translateX('+(thumbLength-1044)+'px);">',
-                      '<div class="thumb-center"></div>',
-                      '<div class="thumb-bottom"></div></div></div></div>');
-      }
-    } else {
+    else {
       // The HTML has already been generated, so all we have to do is
       // reposition and resize the thumb
 
@@ -990,6 +963,19 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
 
       this.adjustThumb(thumbElement, thumbPosition, thumbLength);
     }
+  },
+
+  renderThumb: function(context, layoutDirection, thumbLength) {
+    // where is this magic number from?
+    thumbLength -= 1044;
+    layoutDirection = (layoutDirection === HORIZONTAL ? 'X' : 'Y');
+
+    context.push('<div class="thumb">',
+                 '<div class="thumb-top"></div>',
+                 '<div class="thumb-clip">',
+                 '<div class="thumb-inner" style="-webkit-transform: translate%@(%@px);">'.fmt(layoutDirection, thumbLength),
+                 '<div class="thumb-center"></div>',
+                 '<div class="thumb-bottom"></div></div></div></div>');
+
   }
-  
 });
