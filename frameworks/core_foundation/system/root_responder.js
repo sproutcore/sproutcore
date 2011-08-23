@@ -1892,7 +1892,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   dblclick: function(evt){
-    if (SC.browser.isIE) {
+    if (SC.browser.isIE8OrLower) {
       this._clickCount = 2;
       // this._onmouseup(evt);
       this.mouseup(evt);
