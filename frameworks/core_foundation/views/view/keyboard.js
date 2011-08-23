@@ -264,7 +264,6 @@ SC.View.reopen(
   */
   nextValidKeyView: function() {
     var cur = this, next;
-
     while(next !== this) {
       next = null;
 
@@ -276,8 +275,10 @@ SC.View.reopen(
 
       // if we have no children or siblings, unroll up closest parent that has a
       // next sibling
-      if(!next) while(cur = cur.get('parentView')) {
-        if(next = cur._getNextKeyView()) break;
+      if(!next) {
+        while(cur = cur.get('parentView')) {
+          if(next = cur._getNextKeyView()) break;
+        }
       }
 
       // if no parents have a next sibling, start over from the beginning
