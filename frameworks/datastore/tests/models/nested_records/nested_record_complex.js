@@ -66,7 +66,7 @@ module("Basic SC.Record Functions w/ a Parent > Child > Child", {
     delete NestedRecord.ParentRecordTest;
     delete NestedRecord.Person;
     delete NestedRecord.Address;
-    delete window.NestedRecord;
+    //delete window.NestedRecord;
     NestedRecord = null;
     testParent = null;
     store = null;
