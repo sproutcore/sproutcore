@@ -1787,7 +1787,6 @@ SC.RootResponder = SC.Object.extend(
     if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
       fr.resignFirstResponder();
     }
-
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
 
@@ -1808,6 +1807,7 @@ SC.RootResponder = SC.Object.extend(
     sent.
   */
   mouseup: function(evt) {
+    var clickOrDoubleClickDidTrigger=NO;
     if (SC.platform.touch) {
       evt.allowDefault();
       this._lastMouseUpCustomHandling = YES;
@@ -1833,16 +1833,18 @@ SC.RootResponder = SC.Object.extend(
       // try doubleClick
       if (!handler && (this._clickCount === 2)) {
         handler = this.sendEvent('doubleClick', evt, view) ;
+        clickOrDoubleClickDidTrigger = YES;
       }
 
       // try single click
       if (!handler) {
         handler = this.sendEvent('click', evt, view) ;
+        clickOrDoubleClickDidTrigger = YES;
       }
     }
 
     // try whoever's under the mouse if we haven't handle the mouse up yet
-    if (!handler) {
+    if (!handler && !clickOrDoubleClickDidTrigger) {
 
       // try doubleClick
       if (this._clickCount === 2) {
