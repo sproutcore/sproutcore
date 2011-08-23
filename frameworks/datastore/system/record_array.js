@@ -552,7 +552,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       } else if (recordType = query.get('expandedRecordTypes')) {
         sourceKeys = SC.IndexSet.create();
         recordType.forEach(function(cur) {
-          sourceKeys.addEach(store.storeKeysFor(recordType));
+          sourceKeys.addEach(store.storeKeysFor(cur));
         });
       }
 
