@@ -309,7 +309,9 @@ SC.AutoResize = {
     
         padding = this.get('autoResizePadding') || 0,
         
-        width = frame.width, height = frame.height,
+        // these need to be shrunk by 1 pixel or text that is exactly as wide as
+        // the frame will be truncated
+        width = frame.width - 1, height = frame.height - 1,
         measured = this.get('measuredSize'),
         mWidth = measured.width, mHeight = measured.height;
 
