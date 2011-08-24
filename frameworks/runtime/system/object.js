@@ -766,7 +766,7 @@ SC.Object.prototype = {
       originatingStack  = SC._getRecentStack();
       originatingMethod = originatingStack[0];
     }
-    SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);    
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);
     return this;
     //@endif
     SC.RunLoop.currentRunLoop.invokeOnce(this, method);
@@ -817,7 +817,7 @@ SC.Object.prototype = {
       originatingStack  = SC._getRecentStack();
       originatingMethod = originatingStack[0];
     }
-    SC.RunLoop.currentRunLoop.invokeLast(this, method, originatingTarget, originatingMethod, originatingStack);    
+    SC.RunLoop.currentRunLoop.invokeLast(this, method, originatingTarget, originatingMethod, originatingStack);
     return this;
     //@endif
     SC.RunLoop.currentRunLoop.invokeLast(this, method);

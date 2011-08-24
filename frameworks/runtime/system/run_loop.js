@@ -144,7 +144,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
-    var context;      // Used only in debug mode
+    var deferredCallLoggingInfo;      // Used only in debug mode
 
     //@if(debug)
     // When in debug mode, SC.Object#invokeOnce() will pass in the originating
@@ -165,7 +165,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
         originatingMethod = originatingStack[0];
       }
 
-      context = {
+      deferredCallLoggingInfo = {
         originatingTarget: originatingTarget,
         originatingMethod: originatingMethod,
         originatingStack:  originatingStack
@@ -175,7 +175,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
     if (typeof method === "string") method = target[method];
     if (!this._invokeQueue) this._invokeQueue = SC.ObserverSet.create();
-    if ( method ) this._invokeQueue.add(target, method, context);
+    if ( method ) this._invokeQueue.add(target, method, undefined, deferredCallLoggingInfo);
     return this ;
   },
 
@@ -204,7 +204,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
-    var context;      // Used only in debug mode
+    var deferredCallLoggingInfo;      // Used only in debug mode
 
     //@if(debug)
     // When in debug mode, SC.Object#invokeOnce() will pass in the originating
@@ -225,7 +225,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
         originatingMethod = originatingStack[0];
       }
 
-      context = {
+      deferredCallLoggingInfo = {
         originatingTarget: originatingTarget,
         originatingMethod: originatingMethod,
         originatingStack:  originatingStack
@@ -236,7 +236,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
     if (typeof method === "string") method = target[method];
     if (!this._invokeLastQueue) this._invokeLastQueue = SC.ObserverSet.create();
-    this._invokeLastQueue.add(target, method, context);
+    this._invokeLastQueue.add(target, method, undefined, deferredCallLoggingInfo);
     return this ;
   },
 

@@ -31,35 +31,47 @@ SC.ObserverSet = {
         targets    = this._members,
         members    = this.members,
         indexes    = targets[targetGuid],       // get the set of methods
-        index;
+        index, member;
 
     if ( !indexes ) indexes = targets[targetGuid] = {};
 
     index = indexes[methodGuid];
     if (index === undefined) {
       indexes[methodGuid] = members.length;
+      member = [target, method, context];
+
+      //@if(debug)
+      // If deferred call logging info was specified (i.e., in debug mode when
+      // such logging is enabled), we need to add it to the enqueued target/
+      // method.
+      member[3] = arguments[3];
+      //@endif
+
+      members.push(member);
     }
     else {
       //@if(debug)
-      // If context was specified (such as when logging is enabled), we need to
-      // add this new context to the enqueued target/method.
-      var member, memberContext;
-      if (context) {
-        member        = members[index];
-        memberContext = member[2];
-        if (!memberContext) {
-          member[2] = [context];
+      // If deferred call logging info was specified (i.e., in debug mode when
+      // such logging is enabled), we need to add it to the enqueued target/
+      // method.
+      var loggingInfo = arguments[3],
+          memberLoggingInfo;
+
+      if (loggingInfo) {
+        member            = members[index];
+        memberLoggingInfo = member[3];
+        if (!memberLoggingInfo) {
+          member[3] = [loggingInfo];
         }
-        else if (!(memberContext instanceof Array)) {
-          member[2] = [memberContext, context];
+        else if (!(memberLoggingInfo instanceof Array)) {
+          member[3] = [memberLoggingInfo, loggingInfo];
+        }
+        else {
+          memberLoggingInfo.push(loggingInfo);
         }
       }
       //@endif
-
-      return;
     }
-
-    members.push([target, method, context]);
   },
 
   /**
@@ -98,8 +110,9 @@ SC.ObserverSet = {
 
     //@if(debug)
     var shouldLog = SC.LOG_DEFERRED_CALLS,
-        target, method, methodName, context, contexts, originatingTarget,
-        originatingMethod, originatingMethodName, originatingStack, j, jLen;
+        target, method, methodName, loggingInfo, loggingInfos,
+        originatingTarget, originatingMethod, originatingMethodName,
+        originatingStack, j, jLen;
     //@endif
 
     for( var i=0, l=members.length; i<l; i++ ) {
@@ -109,34 +122,34 @@ SC.ObserverSet = {
       member[1].call(member[0]);
 
       //@if(debug)
-      // If we have context specified for who scheduled the particular
+      // If we have logging info specified for who scheduled the particular
       // invocation, and logging is enabled, then output it.
       if (shouldLog) {
-        target     = member[0];
-        method     = member[1];
-        methodName = method.displayName || method;
-        context    = member[2];
-        if (context) {
-          // If the context is not an array, that means only one place scheduled
-          // the invocation.
-          if (!(context instanceof Array)) {
+        target      = member[0];
+        method      = member[1];
+        methodName  = method.displayName || method;
+        loggingInfo = member[3];
+        if (loggingInfo) {
+          // If the logging info is not an array, that means only one place
+          // scheduled the invocation.
+          if (!(loggingInfo instanceof Array)) {
             // We'll treat single-scheduler cases specially to make the output
             // better for the user, even if it means some essentially-duplicated
             // code.
-            originatingTarget     = context.originatingTarget;
-            originatingMethod     = context.originatingMethod;
-            originatingStack      = context.originatingStack;            
+            originatingTarget     = loggingInfo.originatingTarget;
+            originatingMethod     = loggingInfo.originatingMethod;
+            originatingStack      = loggingInfo.originatingStack;
             originatingMethodName = (originatingMethod ? originatingMethod.displayName : "(unknown)") || originatingMethod;
             SC.Logger.log("Invoking runloop-scheduled method %@ on %@.  Originated by target %@,  method %@,  stack: ".fmt(methodName, target, originatingTarget, originatingMethodName), originatingStack);
           }
           else {
             SC.Logger.log("Invoking runloop-scheduled method %@ on %@, which was scheduled by multiple target/method pairs:".fmt(methodName, target));
-            contexts = context;
-            for (j = 0, jLen = contexts.length;  j < jLen;  ++j) {
-              context               = contexts[j];
-              originatingTarget     = context.originatingTarget;
-              originatingMethod     = context.originatingMethod;
-              originatingStack      = context.originatingStack;
+            loggingInfos = loggingInfo;
+            for (j = 0, jLen = loggingInfos.length;  j < jLen;  ++j) {
+              loggingInfo           = loggingInfos[j];
+              originatingTarget     = loggingInfo.originatingTarget;
+              originatingMethod     = loggingInfo.originatingMethod;
+              originatingStack      = loggingInfo.originatingStack;
               originatingMethodName = (originatingMethod ? originatingMethod.displayName : "(unknown)") || originatingMethod;
               SC.Logger.log("  [%@]  originated by target %@,  method %@,  stack:".fmt(j, originatingTarget, originatingMethodName), originatingStack);
             }
@@ -164,6 +177,9 @@ SC.ObserverSet = {
     for( var i=0, l=memberArray.length; i<l; i++ ) {
       newMembers[i] = SC.clone(memberArray[i]);
       newMembers[i].length = 3;
+      //@if(debug)
+      newMembers[i].length = 4;
+      //@endif
     }
 
     return newSet;
