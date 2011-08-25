@@ -1071,7 +1071,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   _valueObserver: function() {
     var val = this.get('value'), max;
-    console.log(val);
     if (val && val.length>0) {
       this._hintON = NO;
 
