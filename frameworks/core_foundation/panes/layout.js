@@ -51,18 +51,6 @@ SC.Pane.reopen(
     // into account when calculating dimensions.
 
     if (layout.minHeight || layout.minWidth) {
-      var isOverflowing = false;
-      if ((layout.minHeight && wDim.height===layout.minHeight) ||
-        (layout.minWidth && wDim.width===layout.minWidth)) {
-          
-        isOverflowing = true;
-      }
-      if(isOverflowing){
-        $(document.body).css('overflow', 'auto');
-      }else{
-        // to avoid Lion rubberbanding
-        $(document.body).css('overflow', 'hidden'); 
-      }
       if (layout.minHeight) {
         wDim.height = Math.max(wDim.height, layout.minHeight);
       }
@@ -89,6 +77,17 @@ SC.Pane.reopen(
     @returns {SC.Pane} receiver
   */
   windowSizeDidChange: function(oldSize, newSize) {
+    var layout = this.get('layout'),
+        isOverflowing = false;
+    if (layout.minHeight || layout.minWidth) {
+      if ((layout.minHeight && newSize.height<=layout.minHeight) ||
+        (layout.minWidth && newSize.width<=layout.minWidth)) {
+          $(document.body).css('overflow', 'auto');
+      }else{
+        // to avoid Lion rubberbanding
+        $(document.body).css('overflow', 'hidden'); 
+      }
+    }
     this.set('currentWindowSize', newSize) ;
     this.parentViewDidResize(); // start notifications.
     return this ;
