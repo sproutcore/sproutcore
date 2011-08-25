@@ -347,29 +347,28 @@ SC.AutoResize = {
         metrics;
     
 
-    guestimate = Math.min(maxFontSize, Math.max(minFontSize, guestimate));
+    guestimate = actual = Math.min(maxFontSize, Math.max(minFontSize, guestimate));
 
     // Now, we must test the guestimate. Based on that, we'll either loop down
     // or loop up, depending on the measured size.
     layer.style.fontSize = guestimate + "px";
     metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
 
-
     if (metrics.width > width || metrics.height > height) {
-      actual = guestimate;
       
       // if we're larger, we must go down until we are smaller, at which point we are done.
       for (guestimate = guestimate - 1; guestimate >= minFontSize; guestimate--) {
         layer.style.fontSize = guestimate + "px";
         metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
         
-        if (metrics.width <= width && metrics.height <= height) {
-          break;
-        }
-        
         // always have an actual in this case; even if we can't get it small enough, we want
         // to keep this as close as possible.
         actual = guestimate;
+        
+        // if the new size is small enough, stop shrinking and set it for real
+        if (metrics.width <= width && metrics.height <= height) {
+          break;
+        }
       }
       
     } else if (metrics.width < width || metrics.height < height) {
@@ -377,7 +376,6 @@ SC.AutoResize = {
       // larger, we want to use the previous guestimate (which we know was valid)
       //
       // So, we'll start actual at guestimate, and only increase it while we're smaller.
-      actual = guestimate;
       for (guestimate = guestimate + 1; guestimate <= maxFontSize; guestimate++) {
         layer.style.fontSize = guestimate + "px";
         metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
@@ -393,15 +391,11 @@ SC.AutoResize = {
         if (metrics.width >= width || metrics.height >= height){
           break;
         }
-        
       }
-      
-      
     }
     
     layer.style.fontSize = actual + "px";
     this.set('calculatedFontSize', actual);
-    
   },
   
   /**
