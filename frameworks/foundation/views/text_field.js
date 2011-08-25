@@ -811,7 +811,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   fieldDidFocus: function(evt) {
     this.becomeFirstResponder();
-
+    
     this.beginEditing(evt);
     
     // We have to hide the intercept pane, as it blocks the events. 
@@ -912,7 +912,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var inputElem = this.$input()[0];
     // Make sure input element still exists, as a redraw could have remove it
     // already.
-    if(inputElem) inputElem.select() ;
+    if(inputElem){
+      if(!(SC.browser.isSafari && SC.browser.isLion && SC.buildLocale==='ko-kr')){
+        inputElem.select() ;
+       }
+    } 
     else this._textField_selectionDidChange();
   },
   
@@ -976,7 +980,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         maxLengthReached = true;
       }
     }
-
     // validate keyDown...
     // do not validate on touch, as it prevents return.
     if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
@@ -1068,6 +1071,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   _valueObserver: function() {
     var val = this.get('value'), max;
+    console.log(val);
     if (val && val.length>0) {
       this._hintON = NO;
 
