@@ -79,6 +79,7 @@ SC.Pane.reopen(
   windowSizeDidChange: function(oldSize, newSize) {
     var layout = this.get('layout'),
         isOverflowing = false;
+    //Code to get rid of Lion rubberbanding.
     if (layout.minHeight || layout.minWidth) {
       if ((layout.minHeight && newSize.height<=layout.minHeight) ||
         (layout.minWidth && newSize.width<=layout.minWidth)) {

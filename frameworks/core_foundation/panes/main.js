@@ -34,6 +34,28 @@ SC.MainPane = SC.Pane.extend({
   /** @private */
   layout: { top: 0, left: 0, bottom: 0, right: 0, minHeight:200, minWidth:200 },
   
+  init:function(){
+    var wDim = {x: 0, y: 0, width: 1000, height: 1000},
+        layout = this.get('layout'), isOverflowing = false;
+    
+    //Initial computation to get ride of Lion rubberbanding.
+    if (document && document.body) {
+      wDim.width = document.body.clientWidth;
+      wDim.height = document.body.clientHeight;
+      
+      if (layout.minHeight || layout.minWidth) {
+        if ((layout.minHeight && wDim.height<=layout.minHeight) ||
+          (layout.minWidth && wDim.width<=layout.minWidth)) {
+            $(document.body).css('overflow', 'auto');
+        }else{
+          // to avoid Lion rubberbanding
+          $(document.body).css('overflow', 'hidden'); 
+        }
+      }
+    }
+    sc_super();
+  },
+  
   /** @private - extends SC.Pane's method */
   paneDidAttach: function() {
     var ret = sc_super(),
