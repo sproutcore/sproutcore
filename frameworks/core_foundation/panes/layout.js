@@ -77,26 +77,48 @@ SC.Pane.reopen(
     @returns {SC.Pane} receiver
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    var layout = this.get('layout'),
-        isOverflowing = false;
-    //Code to get rid of Lion rubberbanding.
-    if (layout.minHeight || layout.minWidth) {
-      if ((layout.minHeight && newSize.height<=layout.minHeight) ||
-        (layout.minWidth && newSize.width<=layout.minWidth)) {
-          $(document.body).css('overflow', 'auto');
-      }else{
-        // to avoid Lion rubberbanding
-        $(document.body).css('overflow', 'hidden'); 
-      }
-    }
     this.set('currentWindowSize', newSize) ;
+    this.setBodyOverflowIfNeeded();    
     this.parentViewDidResize(); // start notifications.
     return this ;
+  },
+  
+  /**
+    Changes the body overflow according to whether minWidth or minHeight
+    are present in the layout hash. If there are no minimums, nothing 
+    is done unless true is passed as the first argument. If so, then 
+    overflow:hidden; will be used.
+    
+    It's possible to call this manually and pass YES to remove overflow
+    if setting layout to a hash without minWidth and minHeight, but it's
+    probably not a good idea to do so unless you're doing it from the main
+    pane. There's only one body tag, after all, and if this is called from
+    multiple different panes, the panes could fight over whether it gets
+    an overflow if care isn't taken!
+    
+    @param {Boolean} [force] force a style to be set even if there are
+                             no minimums.
+  */
+  setBodyOverflowIfNeeded: function(force) {
+    //Code to get rid of Lion rubberbanding.
+    var layout = this.get('layout'),
+        size = this.get('currentWindowSize');
+    if(!layout || !size || !size.width || !size.height) return;
+    var minW = layout.minWidth,
+        minH = layout.minHeight;
+    if(force===true || minW || minH) {
+      if( (minH && size.height<=minH) || (minW && size.width<=minW) ) {
+        $(document.body).css('overflow', 'auto');
+      } else {
+        $(document.body).css('overflow', 'hidden');
+      }
+    }
   },
 
   /** @private */
   paneLayoutDidChange: function() {
     this.invokeOnce(this.updateLayout);
+    this.setBodyOverflowIfNeeded();
   }.observes('layout'),
 
   recomputeDependentProperties: function(original) {
