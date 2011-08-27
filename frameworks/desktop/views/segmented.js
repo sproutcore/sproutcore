@@ -966,7 +966,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (targetKey) {
         target = item.get ? item.get(targetKey) : item[targetKey];
       }
-      if (resp) resp.sendAction(action, target, this, this.get('pane'));
+      if (resp) resp.sendAction(action, target, this, this.get('pane'),value);
     }
 
     if(val !== undefined && (!action || this.get('selectSegmentWhenTriggeringAction'))) {
@@ -976,7 +976,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // if an action/target is defined on self use that also
     action =this.get('action');
     if (action && resp) {
-      resp.sendAction(action, this.get('target'), this, this.get('pane'));
+      resp.sendAction(action, this.get('target'), this, this.get('pane'),value);
     }
   },
 
