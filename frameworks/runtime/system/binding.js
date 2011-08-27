@@ -855,7 +855,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
     return this.from(fromPath).transform(function(value, isForward) {
-      if (SC.none(value) || (value === '') || (SC.isArray(value) && value.length === 0)) {
+      if (SC.none(value) || (value === '') || (SC.isArray(value) && (value.get ? value.get('length') : value.length)=== 0)) {
         value = placeholder ;
       }
       return value ;
