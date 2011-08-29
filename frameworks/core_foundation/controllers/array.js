@@ -77,7 +77,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     step.  You can use this orderBy property, however, for displaying smaller
     arrays of content.
 
-    Note that you can only to use addObject() to insert new objects into an
+    Note that you can only use addObject() to insert new objects into an
     array that is ordered.  You cannot manually reorder or insert new objects
     into specific locations because the order is managed by this property
     instead.

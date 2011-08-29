@@ -46,10 +46,8 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     if (value !== undefined) {
       // We don't want to unnecessarily set the value.
       // Doing that could cause the selection to be lost.
-      if (this._value !== value || input.val() !== value) {
-        this._value = value;
-        input.val(value);
-      }
+      if (this._value !== value) { this._value = value; }
+      if (input.val() !== value) { input.val(value); }
     } else {
       if (input.length > 0) {
         value = this._value = input.val();
@@ -74,10 +72,6 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
       SC.Event.add(input, 'focus', this, this.focusIn);
       SC.Event.add(input, 'blur', this, this.focusOut);
     }
-
-    input.bind('keyup', function() {
-      self.domValueDidChange(SC.$(this));
-    });
   },
 
   willDestroyLayerMixin: function() {
@@ -90,8 +84,6 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
       SC.Event.remove(input, 'focus', this, this.focusIn);
       SC.Event.remove(input, 'blur', this, this.focusOut);
     }
-
-    input.unbind('change');
   },
 
   focusIn: function(event) {
