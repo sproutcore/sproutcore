@@ -69,7 +69,5 @@ SC.MainPane = SC.Pane.extend({
   acceptsKeyPane: YES,
 
   /** @private */
-  classNames: ['sc-main'],
-  
-  ariaRole: 'application'
+  classNames: ['sc-main']
 });
