@@ -587,7 +587,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
                       '" placeholder="',hint,'"', spellCheckString, 
                       ' maxlength="', maxLength, '" /></span>') ;
       }
-
     }
     else {
       var input= this.$input(),
@@ -696,20 +695,39 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   didCreateLayer: function() {
     sc_super(); 
-    // For some strange reason if we add focus/blur events to textarea
-    // inmediately they won't work. However if I add them at the end of the
-    // runLoop it works fine.
+    this._applyHint();
+    this._addEvents();
+  },
+  
+  /** @private
+    after the layer is append to the doc, set the field value and observe events
+    only for textarea.
+  */
+  didAppendToDocument: function() {
+    if (this.get('isTextArea')) {
+      this.setFieldValue(this.get('fieldValue'));
+      this._performAddEvents();
+    }
+  },
+  
+  _applyHint: function() {
     if(!SC.platform.input.placeholder && this._hintON){
       var currentValue = this.$input().val();
       if(!currentValue || (currentValue && currentValue.length===0)){
         this.$input().val(this.get('formattedHint'));
       }
     }
+  },
+  
+  _addEvents: function() {
+    // For some strange reason if we add focus/blur events to textarea
+    // inmediately they won't work. However if I add them at the end of the
+    // runLoop it works fine.
     if(this.get('isTextArea')) {
-      this.invokeLast(this._addTextAreaEvents);
+      this.invokeLast(this._performAddEvents);
     }
     else {
-      this._addTextAreaEvents();
+      this._performAddEvents();
       
       // In Firefox, for input fields only (that is, not textarea elements),
       // if the cursor is at the end of the field, the "down" key will not
@@ -724,16 +742,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
   
-  
   /** 
-    Adds all the textarea events. This functions is called by didCreateLayer
-    at different moments depending if it is a textarea or not. Appending 
-    events to text areas is not reliable unless the element is already added 
-    to the DOM.
+    Adds appropriate events to the input or textarea element. This functions is
+    called by didCreateLayer at different moments depending if it is a textarea
+    or not.
     
+    Note that appending events to textarea elements is not reliable unless the
+    element is already added to the DOM. (TODO: link source of this info?)
   */
-  _addTextAreaEvents: function() {
+  _performAddEvents: function() {
     var input = this.$input();
+    this._addChangeEvent();
     SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
     
@@ -1105,6 +1124,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   selectStart: function(evt) {
     return YES;
+  },
+  
+  _inputElementTagName: function() {
+    if (this.get('isTextArea')) {
+      return 'textarea';
+    } else {
+      return 'input';
+    }
   },
   
   /** @private
