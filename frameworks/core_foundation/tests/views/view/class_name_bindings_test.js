@@ -45,3 +45,18 @@ test("should add, remove, or change class names if changed after element is crea
   ok(!view.$().hasClass('is-urgent', "removes dasherized class when changed from true to false"));
   ok(view.$().hasClass('can-ignore'), "adds dasherized class when changed from false to true");
 });
+
+test("should preserve class names applied via classNameBindings when view layer is updated",
+function(){
+  var view = SC.View.create({
+    classNameBindings: ['isUrgent'],
+    isUrgent: false
+  });
+  view.createLayer();
+  ok(!view.$().hasClass('is-urgent', "removes dasherized class when changed from true to false"));
+  view.set('isUrgent', true);
+  ok(view.$().hasClass('is-urgent', "adds dasherized class when changed from true to false"));
+  view.set('layerNeedsUpdate', YES);
+  view.updateLayer();
+  ok(view.$().hasClass('is-urgent', "still has class when view display property is updated"));
+});
