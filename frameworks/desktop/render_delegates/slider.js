@@ -32,14 +32,14 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuemax', valueMax);
     context.attr('aria-valuemin', valueMin);
     context.attr('aria-valuenow', valueNow);
-    context.attr('aria-valuetext', valueNow);
+    if(valueMin !== 0 || valueMax !== 100) context.attr('aria-valuetext', valueNow);
     context.attr('aria-orientation', 'horizontal');
 
     context = context.begin('span').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context.push(
-      '<img src="', blankImage,
-      '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
+      '<img src="' + blankImage +
+      '" class="sc-handle" style="left: '+ dataSource.get('value') + '%" />'+
       '</span>'
     );
 
@@ -61,7 +61,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     jquery.attr('aria-valuemax', valueMax);
     jquery.attr('aria-valuemin', valueMin);
     jquery.attr('aria-valuenow', valueNow);
-    jquery.attr('aria-valuetext', valueNow);
+    if(valueMin !== 0 || valueMax !== 100) jquery.attr('aria-valuetext', valueNow);
     jquery.attr('aria-orientation', 'horizontal');
 
     if (dataSource.didChangeFor('sliderRenderDelegate', 'value')) {

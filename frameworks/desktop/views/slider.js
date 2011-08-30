@@ -216,7 +216,6 @@ SC.SliderView = SC.View.extend(SC.Control,
   }.property('isEnabled'),
   
   keyDown: function(evt) {
-
      // handle tab key
      if (evt.which === 9 || evt.keyCode === 9) {
        var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
@@ -224,37 +223,42 @@ SC.SliderView = SC.View.extend(SC.Control,
        else evt.allowDefault(); 
        return YES ; // handled
      }
-     
-     if (evt.which >= 37 && evt.which <= 40){
+     if (evt.which >= 33 && evt.which <= 40){
        var min = this.get('minimum'),max=this.get('maximum'),
           step = this.get('step'),
-          size = max-min, val=0, calculateStep;
+          size = max-min, val=0, calculateStep, current=this.get('value');
      
-       if (evt.which === 37 || evt.which === 38 ){
+       if (evt.which === 37 || evt.which === 38 || evt.which === 34 ){
          if(step === 0){
            if(size<100){
-             val = this.get('value')-1;
+             val = current-1;
            }else{
              calculateStep = Math.abs(size/100);
-             if(calculateStep<2) calculateStep =2;
-             val = this.get('value')-Math.abs(size/100);
+             if(calculateStep<2) calculateStep = 2;
+             val = current-calculateStep;
            }
          }else{
-           val = this.get('value')-step;
+           val = current-step;
          }
        }
-       if (evt.which === 39 || evt.which === 40 ){
+       if (evt.which === 39 || evt.which === 40 || evt.which === 33 ){
            if(step === 0){
               if(size<100){
-                val = this.get('value') + 2;
+                val = current + 2;
               }else{
                 calculateStep = Math.abs(size/100);
                 if(calculateStep<2) calculateStep =2;
-                val = this.get('value')+calculateStep;
+                val = current+calculateStep;
               }
             }else{
-              val = this.get('value')+step;
+              val = current+step;
             }       
+       }
+       if (evt.which === 36){
+         val=max;
+       }
+       if (evt.which === 35){
+          val=min;
        }
        if(val>=min && val<=max) this.set('value', val);
      }else{
@@ -273,5 +277,4 @@ SC.SliderView = SC.View.extend(SC.Control,
       .updatePropertyFromContent('isIndeterminate', key, 'contentIsIndeterminateKey', content)
     .endPropertyChanges();
   }  
-  
 });
