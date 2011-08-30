@@ -1,6 +1,73 @@
 CHANGE LOG FOR 1.6
 ==================
 
+1.7.0
+-----
+
+### MINOR FEATURES
+
+* Added Safari Lion browser detection.
+* Speed improvements in renderContext, switching from joining arrays of strings to simple string concatenation.
+* Faster code escaping using regular expressions instead of DOM.
+* New flag to stop picker repositioning when the window is resized.
+* SegmentedView update to enable/disable overflow.
+* Small performance improvement for splitView.
+* New string measurement functions to optimize for string wrapping.
+* Added support for autoCorrect and autoCapitalize in TextFields.
+* Added back object types previously removed by the refactored SC.Object
+* Refactored observer paths code for a more robust handling.
+* Rewrite SC.LOG_RUNLOOP_INVOCATIONS — now renamed to SC.LOG_DEFERRED_CALLS — to work with the new runloop implementation.
+* Added this SC.RunLoop.kill to terminate cleanly a run loop in case of an error.
+* Added the ability to dynamically add substates to a statechart via a state's addSubstate method.
+* Updated the statechart tracing logic.
+* Updated SC.State. getSubstate now accepts a callback; added getState method; gotoState and gotoHistoryState now use getState
+* Updated state's gotoState and gotoHistoryState to allow for a more expressive state arg that now allows for the use of 'parentState'
+* Updated SC.State's getSubstate method to allow for path expressions. Also refacted the findFirstRelativeCurrentState method.
+* New SC globals to provide information like build mode, build number and locale.
+
+### BUG FIXES
+
+* Bug fix, when the apps don’t have a first responder at loading time the app throws an error.
+* Tweaked scrolling acceleration and speed to match native scroller.
+* Removed Internet Explorer legacy code.
+* Passing the native event when a focus or blur event is called. This makes it consistent with all the other event handlers.
+* Workarounds for mobileSafari touch handling in textfields and links.
+* IE was getting two blur/focus events. 
+* Small bug fix for timers when there is no currentRunLoop.
+* Unit test updates for renderContext.
+* Reverted change to receive focus if it the view becomes key responder.
+* Disabling layout style calculations for opacity in IE, as this will always break transparent pngs.
+* Changed code to get a reliable anchor for pickers and menus.
+* Reposition pickers based on the size of the app and not the window viewport.
+* Added tooltips back to button.
+* Fix for popup_buttons as they were not rendering as expected.
+* Removing acceleration layer on sliders as this was creating GPU glitches on views appended after the slider.
+* Removing legacy handler of buttons to improve speed.
+* Bug fix to update list scrollers when adding new items to the list.
+* Changed timeout value for a faster experience in menu scrolling.
+* Removed deltaAdjust in scrollView and left only the calculations done in SC.Event. 
+* Updated values in select button to fix rendering regressions.
+* Refactored childViews creation in formView.
+* Updated new selectView to correctly support width resizing.
+* Better string measurements for autoResize mixin. Also included the support to auto fit text (reduce font size if neccessary.
+* FlowedLayout fixes when the view changes visibility and code clean up.
+* Added back hints to labels.
+* Removed unneccesary font-weight label css attribute.
+* Removed zIndex in text-fields.
+* Removed preload images task for “Chance” slicing system .
+* Several modular loading bug fixes, including support for css.
+* Bug fix for string measurement. It was double escaping.
+* Observers failing in IE as strings don’t work as arrays.
+* Don't schedule multiple run loops when we only need one in SC.Binding.
+* Add in support for specifying an optional prefix that will be applied to all messages.
+* Updated observable unit tests
+* Updated SC.Logger unit tests
+* Updated SC.State's getSubstate method to allow for path expressions.
+* Updated Statechart unit tests
+* Updated state charts unit tests
+* Updated css to match abbot css fixes for $skip parameter in chance.
+* Added css style namespace to sc-focus, this was generating problems when focusing the elements the first time in the app.
+
 1.6.0
 -----
 * Minor bug fix for SC.Checkbox with no title
