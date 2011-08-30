@@ -1,8 +1,8 @@
-CHANGE LOG FOR 1.6
-==================
+CHANGE LOG FOR 1.6+
+===================
 
-1.7.0
------
+1.7.1.beta
+----------
 
 ### MINOR FEATURES
 
