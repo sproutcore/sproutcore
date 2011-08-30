@@ -602,6 +602,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
           if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', YES);
+            input.val(hint);
           }
         } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
@@ -771,7 +772,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.set('focused',YES);
       this.fieldDidFocus(evt);
       var val = this.get('value');
-      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0) || (val && val == this.hint))) {
         this._hintON = NO;
       }
     }, this);
@@ -788,8 +789,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
-      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && !this._hintON && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
+        this.updateLayer();
       }
     }, this);
   },
