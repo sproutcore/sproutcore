@@ -15,7 +15,7 @@ sc_require('views/button');
   Clicking the SelectView button displays a menu pane with a
   list of items. The selected item will be displayed on the button.
   User has the option of enabling checkbox for the selected menu item.
-  
+
   @extends SC.ButtonView
   @version 1.0
   @author Alex Iskander, Mohammed Ashik
@@ -80,7 +80,7 @@ SC.SelectView = SC.ButtonView.extend(
      @default null
   */
   itemIconKey: null,
-  
+
   /**
     Key to use to identify separators.
 
@@ -88,7 +88,7 @@ SC.SelectView = SC.ButtonView.extend(
     @default "separator"
   */
   itemSeparatorKey: "separator",
-  
+
   /**
     Key used to indicate if the item is to be enabled.
 
@@ -121,7 +121,7 @@ SC.SelectView = SC.ButtonView.extend(
 
   /**
     Menu attached to the SelectView.
-    
+
     @type SC.View
     @default SC.MenuView
   */
@@ -208,7 +208,7 @@ SC.SelectView = SC.ButtonView.extend(
 
   /**
     The button theme will be popup
-    
+
     @type String
     @default 'popup'
     @readOnly
@@ -268,15 +268,15 @@ SC.SelectView = SC.ButtonView.extend(
 
   /**
     Example view used for menu items.
-    
+
     @type SC.View
     @default null
   */
   exampleView: null,
-  
+
   /**
     customView menu offset width
-    
+
     @type Number
     @default 0
   */
@@ -298,26 +298,26 @@ SC.SelectView = SC.ButtonView.extend(
     @default 0
   */
   menuPaneHeightPadding: 0,
-  
+
   /**
     The amount of space to add to the calculated width of the menu item strings to
     determine the width of the menu pane.
-    
+
     @type Number
     @default 35
   */
   menuItemPadding: 35,
-  
+
   /**
     @type Boolean
     @default NO
   */
   isContextMenuEnabled: NO,
-  
+
   /**
-    This is a property to enable/disable focus rings in buttons. 
+    This is a property to enable/disable focus rings in buttons.
     For select_button, we are making it a default.
-    
+
     @type Boolean
     @default YES
     @see SC.ButtonView#supportFocusRing
@@ -462,11 +462,11 @@ SC.SelectView = SC.ButtonView.extend(
       else {
         isChecked = NO ;
       }
-      
+
       // Check if the item is enabled
       itemEnabled = (object.get ? object.get(isEnabledKey) : object[isEnabledKey]);
       if (NO !== itemEnabled) itemEnabled = YES;
-      
+
       // get the separator
       isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
 
@@ -477,7 +477,7 @@ SC.SelectView = SC.ButtonView.extend(
         this._defaultIcon = icon ;
       }
 
-      var item = SC.Object.create({
+      item = SC.Object.create({
         separator: isSeparator,
         title: name,
         icon: icon,
@@ -552,7 +552,7 @@ SC.SelectView = SC.ButtonView.extend(
     }
     // Get the length of the text on the button in pixels
     menuWidth = this.get('layer').offsetWidth + menuWidthOffset ;
-    
+
     // Get the length of the text on the button in pixels
     menuWidth = this.get('layer').offsetWidth ;
     scrollWidth = buttonLabel.scrollWidth ;
@@ -574,7 +574,7 @@ SC.SelectView = SC.ButtonView.extend(
     var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth') ;
     var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
     className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
-    
+
     SC.prepareStringMeasurement("", className);
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
@@ -665,7 +665,7 @@ SC.SelectView = SC.ButtonView.extend(
   */
   displaySelectedItem: function(menuView) {
     var currentItem = menuView.get("selectedItem");
-    
+
     this.set("value", currentItem.get("value"));
     this.set("title", currentItem.get("title"));
     this.set("_itemIdx", currentItem.get("contentIndex"));
@@ -782,7 +782,7 @@ SC.SelectView = SC.ButtonView.extend(
   mouseExited: function() {
     return YES;
   },
-  
+
   /**
     @private
     Handle Key event - Down arrow key
@@ -811,13 +811,13 @@ SC.SelectView = SC.ButtonView.extend(
     }
     return sc_super();
   },
-  
+
   /** @private
     Override the button isSelectedDidChange function in order to not perform any action
     on selecting the select_button
   */
   _button_isSelectedDidChange: function() {
-    
+
   }.observes('isSelected')
 
 }) ;
