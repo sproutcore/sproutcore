@@ -83,9 +83,22 @@ var pane = SC.ControlTestPane.design()
       isEnabledKey: 'isEnabled',
       itemSortKey: 'pos',
       showCheckbox: YES
-    }) ;
+    })
 
-    pane.show();
+    // sample11
+    .add("SelectButtonWithEmptyName", SC.SelectView, {
+      items: [{ title: "None", icon: 'select-button-icon' },
+        { title: "Low", icon: 'select-button-icon' },
+        { title: "Medium", icon: 'select-button-icon' },
+        { title: "High", icon: 'select-button-icon' }],
+      itemTitleKey: 'title',
+      itemIconKey: 'icon',
+      emptyName: '&lt;empty&gt;',
+      escapeHTML: NO,
+      showCheckbox: YES
+    });
+
+pane.show();
 
 // ..........................................................
 // TEST VIEWS
@@ -112,6 +125,7 @@ test("Check the visiblity of the selectButtons", function() {
   ok(pane.view('redraw').get('isVisibleInWindow'), 'redraw.isVisibleInWindow should be YES') ;
   ok(pane.view('SelectButtonWithIcon').get('isVisibleInWindow'), 'SelectButtonWithIcon.isVisibleInWindow should be YES') ;
   ok(pane.view('StaticLayout').get('isVisibleInWindow'), 'StaticLayout.isVisibleInWindow should be YES') ;
+  ok(pane.view('SelectButtonWithEmptyName').get('isVisibleInWindow'), 'SelectButtonWithEmptyName.isVisibleInWindow should be YES') ;
 }) ;
 
 //test2
@@ -194,7 +208,7 @@ test("redraw", function() {
   view.set('items', ['Calendar', 'Work', 'Home']);
   SC.RunLoop.end();
   ok(view.get('items').length === 3, "Items length should be 3");
-  
+
   // Can someone actually put a redraw test here?
 }) ;
 
@@ -221,4 +235,19 @@ test("StaticLayout", function() {
   var view = pane.view('StaticLayout');
   ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   ok(!view.$().hasClass('sel'), 'should not have sel class');
+});
+
+//test11
+test("SelectButtonWithEmptyName", function() {
+  var view=pane.view('SelectButtonWithEmptyName').$(),
+      label = pane.view('SelectButtonWithEmptyName').$('label');
+      console.log('label = ' + label);
+  ok(!view.hasClass('icon'), 'hasClass(Icon) should be NO') ;
+  ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
+  ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
+  ok(view.hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
+  ok(!view.hasClass('sel'), 'hasClass(sel) should be NO') ;
+  ok(!view.hasClass('disabled'), 'hasClass(disabled) should be NO') ;
+  ok(!view.hasClass('def'), 'hasClass(def) should be NO') ;
+  equals(label[0].innerHTML, '&lt;empty&gt;', 'The label should be "&lt;empty&gt;"');
 });
