@@ -33,6 +33,15 @@ SC.SelectView = SC.ButtonView.extend(
   }.property('isEnabled'),
 
   /**
+    If true, titles will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+  escapeHTMLBindingDefault: SC.Binding.oneWay().bool(),
+
+  /**
     An array of items that will be form the menu you want to show.
 
     @type Array
@@ -220,7 +229,7 @@ SC.SelectView = SC.ButtonView.extend(
     @default ['icon', 'value','controlSize','items']
     @see SC.View#displayProperties
   */
-  displayProperties: ['icon', 'value','controlSize','items'],
+  displayProperties: ['icon', 'value','controlSize','items', 'escapeHTML', 'emptyName'],
 
   /**
     Prefer matrix to position the select button menu such that the
@@ -373,9 +382,10 @@ SC.SelectView = SC.ButtonView.extend(
   */
   render: function(context,firstTime) {
     sc_super();
-    var layoutWidth, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
-      currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
-      idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName;
+
+    var escapeHTML, layoutWidth, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
+        currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
+        idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName;
 
     items = this.get('items') ;
     items = this.sortObjects(items) ;
@@ -388,16 +398,13 @@ SC.SelectView = SC.ButtonView.extend(
     separatorKey = this.get('itemSeparatorKey');
     showCheckbox = this.get('showCheckbox') ;
     isEnabledKey = this.get('itemIsEnabledKey');
+    escapeHTML = this.get('escapeHTML');
 
     //get the current selected value
     currentSelectedVal = this.get('value') ;
 
     // get the localization flag.
     shouldLocalize = this.get('localize') ;
-
-    // get the empty name.
-    emptyName = this.get('emptyName');
-    emptyName = shouldLocalize ? SC.String.loc(emptyName) : emptyName ;
 
     //itemList array to set the menu items
     itemList = [] ;
@@ -409,8 +416,13 @@ SC.SelectView = SC.ButtonView.extend(
     idx = 0 ;
 
     // Add the empty name to the list if applicable
+    emptyName = this.get('emptyName');
+
     if(!SC.none(emptyName)) {
-      var item = SC.Object.create({
+      emptyName = shouldLocalize ? SC.String.loc(emptyName) : emptyName;
+      emptyName = escapeHTML ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
+
+      item = SC.Object.create({
         separator: NO,
         title: emptyName,
         icon: null,
@@ -435,6 +447,7 @@ SC.SelectView = SC.ButtonView.extend(
 
       // localize name if specified.
       name = shouldLocalize? SC.String.loc(name) : name ;
+      name = escapeHTML ? SC.RenderContext.escapeHTML(name) : name;
 
       //Get the icon value
       icon = iconKey ? (object.get ?
@@ -526,10 +539,10 @@ SC.SelectView = SC.ButtonView.extend(
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
-      menu, itemsLength, itemIdx;
-    
+      menu, itemsLength, itemIdx, escapeHTML;
+
     buttonLabel = this.$('.sc-button-label')[0] ;
-    
+
     var menuWidthOffset = SC.SelectView.MENU_WIDTH_OFFSET ;
     if(!this.get('isDefaultPosition')) {
       switch (this.get('controlSize')) {
@@ -603,9 +616,10 @@ SC.SelectView = SC.ButtonView.extend(
     itemList = this.get('_itemList') ;
     menuControlSize = this.get('controlSize') ;
     menuHeightPadding = this.get('menuPaneHeightPadding') ;
+    escapeHTML = this.get('escapeHTML');
 
     // get the user defined custom view
-    customView = this.get('exampleView') || SC.MenuItemView;
+    customView = this.get('exampleView') || SC.MenuItemView.extend({ escapeHTML: escapeHTML });
 
     menu  = SC.MenuPane.create({
 
