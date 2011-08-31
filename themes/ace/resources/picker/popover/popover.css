@@ -24,7 +24,7 @@
       left: -25px;
       right: -25px;
       
-      @include slices("popover_notoolbar.png", $left: 40, $top: 40, $bottom: 40, $right: 40, $fill: 1 1, skip-middle);
+      @include slices("popover_notoolbar.png", $left: 40, $top: 40, $bottom: 40, $right: 40, $fill: 1 1, $skip: middle);
       
       div { z-index: 5; }
     }
@@ -33,7 +33,7 @@
       top: -20px;
       @include slices(
         "popover.png", $left: 40, $top: 75, $bottom: 40, $right: 40, 
-        skip-left, skip-middle, skip-right, skip-bottom-left, skip-bottom, skip-bottom-right
+        $skip: left middle right bottom-left bottom bottom-left bottom-right
       );
       
       .left { top: 75px; }
@@ -45,7 +45,7 @@
       bottom: -20px;
       @include slices(
         "popover.png", $left: 40, $bottom: 75, $top: 40, $right: 40, 
-        skip-left, skip-middle, skip-right, skip-top-left, skip-top, skip-top-right
+        $skip: left middle right top-left top top-right
       );
       
       .left { bottom: 75px; }
