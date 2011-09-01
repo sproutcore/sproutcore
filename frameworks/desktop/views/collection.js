@@ -62,9 +62,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     @type Array
-    @default ['isFirstResponder', 'isEnabled', 'isActive']
+    @default ['hasFirstResponder', 'isEnabled', 'isActive']
   */
-  displayProperties: ['isFirstResponder', 'isEnabled', 'isActive'],
+  displayProperties: ['hasFirstResponder', 'isEnabled', 'isActive'],
 
   /**
     @type String
