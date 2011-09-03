@@ -731,9 +731,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       activeChildView.set('isActive', NO);
       this.activeChildView = null;
 
-      this._isMouseDown = NO;
+      
     }
-
+    
+    this._isMouseDown = NO;
     return YES;
   },
 
