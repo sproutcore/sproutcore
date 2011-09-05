@@ -25,6 +25,8 @@
       right: -25px;
       
       @include slices("popover_notoolbar.png", $left: 40, $top: 40, $bottom: 40, $right: 40, $fill: 1 1, $skip: middle);
+
+      .middle { display: none }
       
       div { z-index: 5; }
     }
