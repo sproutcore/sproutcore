@@ -618,7 +618,8 @@ SC.SelectView = SC.ButtonView.extend(
     this.set('menu', menu);
 
     itemIdx = this._itemIdx;
-    if (itemIdx && itemIdx > -1) {
+    if (!SC.empty(itemIdx) && itemIdx > -1) {
+    // if there is an item selected, make it the first responder
       customView = menu.menuItemViewForContentIndex(itemIdx);
       if (customView) { customView.becomeFirstResponder(); }
     }
@@ -843,9 +844,9 @@ SC.SelectView.REGULAR_OFFSET_X = -17;
 /**
   @static
   @type Number
-  @default 3
+  @default 1
 */
-SC.SelectView.REGULAR_OFFSET_Y = 3;
+SC.SelectView.REGULAR_OFFSET_Y = 1;
 
 /**
   @static
