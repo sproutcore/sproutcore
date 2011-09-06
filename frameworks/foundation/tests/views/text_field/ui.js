@@ -623,6 +623,21 @@ test("focus and blurring text field", function() {
   
 });
 
+test("focus and blur an empty text field", function() {
+  var view = pane.view('empty');
+  var input = view.$('input');
+
+  // verify the field is empty and the hint is properly set
+  pane.verifyEmpty(view, 'Full Name');
+
+  // focus and blur the text field
+  SC.Event.trigger(input, 'focus');
+  SC.Event.trigger(input, 'blur');
+
+  // field should still be still be empty with hint properly set
+  pane.verifyEmpty(view, 'Full Name');
+});
+
 test("editing a field should not change the cursor position", function() {
   var textField = pane.view('empty');
   var input = textField.$('input');
