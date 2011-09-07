@@ -39,7 +39,7 @@ window.SproutCore = window.SproutCore || SC ;
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.6.0
+  @version 1.7.1.beta
   @namespace
 
   All SproutCore methods and functions are defined
@@ -59,7 +59,7 @@ window.SproutCore = window.SproutCore || SC ;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = '1.6.0';
+SC.VERSION = '1.7.1.beta';
 
 /**
   @private
