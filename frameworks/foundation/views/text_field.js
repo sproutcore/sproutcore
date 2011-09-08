@@ -806,7 +806,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // passing the original event here instead that was potentially set from
       // loosing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
-      this.resignFirstResponder();
       this.fieldDidBlur(this._origEvent || evt);
 
       var val = this.get('value');
@@ -841,6 +840,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidBlur: function(evt) {
+    this.resignFirstResponder(evt) ;
+
     if(this.get('commitOnBlur')) this.commitEditing(evt);
     
     // get the pane we hid intercept pane for (if any)
