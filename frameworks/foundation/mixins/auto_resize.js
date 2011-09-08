@@ -59,6 +59,16 @@ SC.AutoResize = {
   shouldMeasureSize: YES,
 
   /**
+    Caches sizes for measured strings. This cache does not have a max size, so
+    should only be used when a view has a limited number of possible values.
+    Multiple views that have the same batchResizeId will share the same cache.
+
+    @type Boolean
+    @default NO
+  */
+  shouldCacheSizes: NO,
+
+  /**
     Determines if the view's width should be resized
     on calculation.
 
@@ -225,6 +235,19 @@ SC.AutoResize = {
 
   _lastMeasuredText: null,
 
+  _cachedMetrics: function(key, value) {
+    if(!this.get('shouldCacheSizes')) return;
+
+    // if we don't have a tag, then it is unique per view
+    // you shouldn't usually turn on caching without a tag, but it is supported
+    var cacheSlot = SC.cacheSlotFor(this.get('batchResizeId') || this, this.get('autoResizeText'));
+
+    if(value) cacheSlot.measuredSize = value;
+    else value = cacheSlot.measuredSize;
+
+    return value;
+  }.property('shouldCacheSizes', 'autoResizeText', 'batchResizeId').cacheable(),
+
   /**
     Measures the size of the view.
 
@@ -233,20 +256,33 @@ SC.AutoResize = {
   measureSize: function(batch) {
     var metrics, layer, value = this.get('autoResizeText'),
         autoSizePadding, paddingHeight, paddingWidth,
-        ignoreEscape = !this.get('escapeHTML');
+        ignoreEscape = !this.get('escapeHTML'),
+        batchResizeId = this.get('batchResizeId'),
+        cachedMetrics = this.get('_cachedMetrics');
 
-    // There are two special cases.
+
+    // There are three special cases.
+    //   - size is cached: the cached size is used with no measurement
+    //     necessary
     //   - empty: we should do nothing. The metrics are 0.
     //   - batch mode: just call measureString.
     //
     // If we are in neither of those special cases, we should go ahead and
     // resize normally.
     //
-    if (SC.none(value) || value === "") {
+    if(cachedMetrics) {
+      metrics = cachedMetrics;
+    }
+
+    else if (SC.none(value) || value === "") {
       metrics = { width: 0, height: 0 };
-    } else if (batch) {
+    }
+
+    else if (batch) {
       metrics = SC.measureString(value, ignoreEscape);
-    } else {
+    }
+
+    else {
       // Normal resize pattern: get our own layer, pass it as a template to SC.metricsForString.
       layer = this.get('autoResizeLayer');
 
@@ -261,9 +297,12 @@ SC.AutoResize = {
     // In any case, we set measuredSize.
     this.set('measuredSize', metrics);
 
+    // and update the cache if we are using it
+    if(this.get('shouldCacheSizes')) this.setIfChanged('_cachedMetrics', metrics);
+
     // set the measured value so we can avoid extra measurements in the future
     this._lastMeasuredText = value;
-    this._lastMeasuredId = this.get('batchResizeId');
+    this._lastMeasuredId = batchResizeId;
 
     this._scar_measurementPending = NO;
 
@@ -429,7 +468,6 @@ SC.AutoResize = {
  * methods/properties into each view.
  */
 SC.AutoResizeManager = {
-
   /**
     A hash of views needing resizing, mapped from batch resize ID to SC.CoreSets
     of views.
@@ -509,8 +547,8 @@ SC.AutoResizeManager = {
           if(view.get('isVisibleInWindow') && view.get('shouldMeasureSize') && (layer = view.get('autoResizeLayer'))) {
             autoResizeText = view.get('autoResizeText');
 
-            // if the text is empty don't bother preparing
-            if(!SC.none(autoResizeText) && autoResizeText !== "" && !prepared) {
+            // if the text is empty or a size is cached don't bother preparing
+            if(!SC.none(autoResizeText) && autoResizeText !== "" && !view.get('_cachedMetrics') && !prepared) {
               // this is a bit of a hack: before we can prepare string measurement, there are cases where we
               // need to reset the font size first (specifically, if we are also fitting text)
               //
