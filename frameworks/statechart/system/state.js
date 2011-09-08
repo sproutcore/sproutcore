@@ -802,6 +802,20 @@ SC.State = SC.Object.extend(
   /**
     Will attempt to find a current state in the statechart that is relative to 
     this state. 
+    
+    Ordered set of rules to find a relative current state:
+    
+      1. If this state is a current state then it will be returned
+      
+      2. If this state has no current states and this state has a parent state then
+        return parent state's first relative current state, otherwise return null
+        
+      3. If this state has more than one current state then use the given anchor state
+         to get a corresponding substate that can be used to find a current state relative
+         to the substate, if a substate was found. 
+        
+      4. If (3) did not find a relative current state then default to returning
+         this state's first current substate. 
 
     @param anchor {State|String} Optional. a substate of this state used to help direct 
       finding a current state
@@ -820,14 +834,10 @@ SC.State = SC.Object.extend(
 
     if (numCurrent > 1) {
       anchor = this.getSubstate(anchor);
-      return anchor ? anchor.findFirstRelativeCurrentState() : null;
+      if (anchor) return anchor.findFirstRelativeCurrentState();
     }
     
-    if (numCurrent === 1) {
-      return currentSubstates[0];
-    } 
-    
-    return null;
+    return currentSubstates[0];
   },
 
   /**
