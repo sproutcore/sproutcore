@@ -848,7 +848,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidBlur: function(evt) {
-    this.resignFirstResponder() ;
+    this.resignFirstResponder(evt) ;
 
     if(this.get('commitOnBlur')) this.commitEditing(evt);
     
