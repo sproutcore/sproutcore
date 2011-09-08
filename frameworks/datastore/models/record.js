@@ -466,23 +466,22 @@ SC.Record = SC.Object.extend(
     Should not have to be called manually.
   */
   propagateToAggregates: function() {
-    var storeKey = this.get('storeKey'),
+    var storeKey   = this.get('storeKey'),
         recordType = SC.Store.recordTypeFor(storeKey),
-        idx, len, key, val, recs;
-
-    var aggregates = recordType.aggregates;
+        aggregates = recordType.__sc_aggregate_keys,
+        idx, len, key, prop, val, recs;
 
     // if recordType aggregates are not set up yet, make sure to
     // create the cache first
     if (!aggregates) {
-      var dataHash = this.get('store').readDataHash(storeKey);
       aggregates = [];
-      for(var k in dataHash) {
-        if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
-          aggregates.push(k);
+      for (key in this) {
+        prop = this[key];
+        if (prop  &&  prop.isRecordAttribute  &&  prop.aggregate === YES) {
+          aggregates.push(key);
         }
       }
-      recordType.aggregates = aggregates;
+      recordType.__sc_aggregate_keys = aggregates;
     }
 
     // now loop through all aggregate properties and mark their related
