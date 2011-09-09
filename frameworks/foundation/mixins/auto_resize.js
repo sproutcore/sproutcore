@@ -116,6 +116,15 @@ SC.AutoResize = {
     maximum size, and then the text will be resized as necessary.
   */
   shouldAutoFitText: NO,
+
+  /**
+    If NO, the calculated font size may be any size between minFontSize and
+    maxFontSize. If YES, it will only be either minFontSize or maxFontSize.
+
+    @type Boolean
+    @default NO
+  */
+  autoFitDiscreteFontSizes: NO,
   
   /**
     The minimum font size to use when automatically fitting text. If shouldAutoFitText is set,
@@ -365,70 +374,78 @@ SC.AutoResize = {
         
     // measured size is at maximum. If there is no resizing to be done, short-circuit.
     if (mWidth <= width && mHeight <= height) return;
-    
-    
-    // now, we are going to make an estimate font size. We will figure out the proportion
-    // of both actual width and actual height to the measured width and height, and then we'll
-    // pick the smaller. We'll multiply that by the maximum font size to figure out
-    // a rough guestimate of the proper font size.
-    var xProportion = width / mWidth, yProportion = height / mHeight,
-    
-        maxFontSize = this.get('maxFontSize'),
-        minFontSize = this.get('minFontSize'),
-        
-        guestimate = Math.floor(maxFontSize * Math.min(xProportion, yProportion)),
-        actual,
-        
-        classNames = this.get('classNames'),
-        ignoreEscape = !this.get('escapeHTML'),
-        value = this.get('autoResizeText'),
-        
-        metrics;
-    
 
-    guestimate = actual = Math.min(maxFontSize, Math.max(minFontSize, guestimate));
+    var maxFontSize = this.get('maxFontSize'),
+        minFontSize = this.get('minFontSize');
 
-    // Now, we must test the guestimate. Based on that, we'll either loop down
-    // or loop up, depending on the measured size.
-    layer.style.fontSize = guestimate + "px";
-    metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+    // if only discrete values are allowed, we can short circuit here and just
+    // use the minimum
+    if(this.get('autoFitDiscreteFontSizes')) {
+      actual = minFontSize;
+    }
 
-    if (metrics.width > width || metrics.height > height) {
+    // otherwise we have to find the actual best font size
+    else {
+      // now, we are going to make an estimate font size. We will figure out the proportion
+      // of both actual width and actual height to the measured width and height, and then we'll
+      // pick the smaller. We'll multiply that by the maximum font size to figure out
+      // a rough guestimate of the proper font size.
+      var xProportion = width / mWidth, yProportion = height / mHeight,
       
-      // if we're larger, we must go down until we are smaller, at which point we are done.
-      for (guestimate = guestimate - 1; guestimate >= minFontSize; guestimate--) {
-        layer.style.fontSize = guestimate + "px";
-        metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
-        
-        // always have an actual in this case; even if we can't get it small enough, we want
-        // to keep this as close as possible.
-        actual = guestimate;
-        
-        // if the new size is small enough, stop shrinking and set it for real
-        if (metrics.width <= width && metrics.height <= height) {
-          break;
-        }
-      }
+          guestimate = Math.floor(maxFontSize * Math.min(xProportion, yProportion)),
+          actual,
+          
+          classNames = this.get('classNames'),
+          ignoreEscape = !this.get('escapeHTML'),
+          value = this.get('autoResizeText'),
+          
+          metrics;
       
-    } else if (metrics.width < width || metrics.height < height) {
-      // if we're smaller, we must go up until we hit maxFontSize or get larger. If we get
-      // larger, we want to use the previous guestimate (which we know was valid)
-      //
-      // So, we'll start actual at guestimate, and only increase it while we're smaller.
-      for (guestimate = guestimate + 1; guestimate <= maxFontSize; guestimate++) {
-        layer.style.fontSize = guestimate + "px";
-        metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+
+      guestimate = actual = Math.min(maxFontSize, Math.max(minFontSize, guestimate));
+
+      // Now, we must test the guestimate. Based on that, we'll either loop down
+      // or loop up, depending on the measured size.
+      layer.style.fontSize = guestimate + "px";
+      metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+
+      if (metrics.width > width || metrics.height > height) {
         
-        // we update actual only if it is still valid. Then below, whether valid
-        // or not, if we are at or past the width/height we leave
-        if (metrics.width <= width && metrics.height <= height) {
+        // if we're larger, we must go down until we are smaller, at which point we are done.
+        for (guestimate = guestimate - 1; guestimate >= minFontSize; guestimate--) {
+          layer.style.fontSize = guestimate + "px";
+          metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+          
+          // always have an actual in this case; even if we can't get it small enough, we want
+          // to keep this as close as possible.
           actual = guestimate;
+          
+          // if the new size is small enough, stop shrinking and set it for real
+          if (metrics.width <= width && metrics.height <= height) {
+            break;
+          }
         }
         
-        // we put this in a separate if statement JUST IN CASE it is ===.
-        // Unlikely, but possible, and why ruin a good thing?
-        if (metrics.width >= width || metrics.height >= height){
-          break;
+      } else if (metrics.width < width || metrics.height < height) {
+        // if we're smaller, we must go up until we hit maxFontSize or get larger. If we get
+        // larger, we want to use the previous guestimate (which we know was valid)
+        //
+        // So, we'll start actual at guestimate, and only increase it while we're smaller.
+        for (guestimate = guestimate + 1; guestimate <= maxFontSize; guestimate++) {
+          layer.style.fontSize = guestimate + "px";
+          metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+          
+          // we update actual only if it is still valid. Then below, whether valid
+          // or not, if we are at or past the width/height we leave
+          if (metrics.width <= width && metrics.height <= height) {
+            actual = guestimate;
+          }
+          
+          // we put this in a separate if statement JUST IN CASE it is ===.
+          // Unlikely, but possible, and why ruin a good thing?
+          if (metrics.width >= width || metrics.height >= height){
+            break;
+          }
         }
       }
     }
