@@ -53,6 +53,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
         toolTip     = dataSource.get('toolTip'),
         isSelected  = dataSource.get('isSelected') || NO,
         isActive    = dataSource.get('isActive') || NO,
+        isDefault   = dataSource.get('isDefault') || NO,
+        isCancel    = dataSource.get('isCancel') || NO,
+        isToggle    = dataSource.get('isToggle') || NO,
         labelId     = SC.guidFor(dataSource) + '-label',
         minWidth    = dataSource.get('titleMinWidth') || NO;
 
