@@ -7,7 +7,7 @@
   @type String
   @constant
 */
-SC.FOCUS_ALL_CONTROLS = YES;
+SC.FOCUS_ALL_CONTROLS = NO;
 
 /*
   TODO [CC @ 1.5] Remove this deprecation warning eventually
