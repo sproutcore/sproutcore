@@ -129,7 +129,18 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     } else if (event.keyCode === SC.Event.KEY_ESC) {
       return this.tryToPerform('cancel', event);
     }
+  },
+
+  /** @private
+    RootResponder will call this function whenever a selection
+    event has occurred, for instance a select all. Simply return
+    true so that all selection events bubble up to the browser,
+    triggering the default browser behavior.
+  */
+  selectStart: function() {
+    return true;
   }
+
 };
 
 /**
