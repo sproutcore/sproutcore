@@ -263,12 +263,14 @@ SC.AutoResize = {
     @param batch For internal use during batch resizing.
   */
   measureSize: function(batch) {
-    var metrics, layer, value = this.get('autoResizeText'),
+    var metrics, layer = this.get('autoResizeLayer'), value = this.get('autoResizeText'),
         autoSizePadding, paddingHeight, paddingWidth,
         ignoreEscape = !this.get('escapeHTML'),
         batchResizeId = this.get('batchResizeId'),
-        cachedMetrics = this.get('_cachedMetrics');
+        cachedMetrics = this.get('_cachedMetrics'),
+        maxFontSize = this.get('maxFontSize');
 
+    if(!layer) return;
 
     // There are three special cases.
     //   - size is cached: the cached size is used with no measurement
@@ -288,18 +290,16 @@ SC.AutoResize = {
     }
 
     else if (batch) {
+      if(this.get('calculatedFontSize') !== maxFontSize) this.prepareLayerForStringMeasurement(layer);
       metrics = SC.measureString(value, ignoreEscape);
     }
 
     else {
-      // Normal resize pattern: get our own layer, pass it as a template to SC.metricsForString.
       layer = this.get('autoResizeLayer');
 
-      if(!layer) {
-        return;
-      }
+      if(!layer) return;
 
-      this.prepareLayerForStringMeasurement(layer);
+      if(this.get('calculatedFontSize') !== maxFontSize) this.prepareLayerForStringMeasurement(layer);
       metrics = SC.metricsForString(value, layer, this.get('classNames'), ignoreEscape);
     }
 
@@ -350,8 +350,11 @@ SC.AutoResize = {
     var layer = this.get('autoResizeLayer');
     if (!layer) return;
 
-    // the max font size may have changed
-    this.prepareLayerForStringMeasurement(layer);
+    var maxFontSize = this.get('maxFontSize'),
+        minFontSize = this.get('minFontSize');
+
+    // if the font size has been adjusted, reset it to the max
+    if(this.get('calculatedFontSize') !== maxFontSize) this.prepareLayerForStringMeasurement(layer);
     
     var frame = this.get('frame'),
     
@@ -374,9 +377,6 @@ SC.AutoResize = {
         
     // measured size is at maximum. If there is no resizing to be done, short-circuit.
     if (mWidth <= width && mHeight <= height) return;
-
-    var maxFontSize = this.get('maxFontSize'),
-        minFontSize = this.get('minFontSize');
 
     // if only discrete values are allowed, we can short circuit here and just
     // use the minimum
