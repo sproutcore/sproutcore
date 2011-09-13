@@ -71,14 +71,17 @@
         var styles = [];
         if (window.devicePixelRatio == 2 || window.location.search.indexOf("2x") > -1) {
           styles = <%= stylesheet_urls_for_client(nil, { :x2 => true }).to_json %>;
+          APP_IMAGE_ASSETS = <%= image_urls_for_client(nil, { :sprited => true, :x2 => true }).to_json %>;
         } else {
           styles = <%= stylesheet_urls_for_client.to_json %>;
+          APP_IMAGE_ASSETS = <%= image_urls_for_client(nil, { :sprited => true }).to_json %>;          
         }
+        
 
-        var head = document.getElementsByTagName("head")[0];
-        var len = styles.length, idx;
+        var head = document.getElementsByTagName("head")[0],
+            len = styles.length, idx, css;
         for (idx = 0; idx < len; idx++) {
-          var css   = document.createElement('link');
+          css = document.createElement('link');
           css.rel   = 'stylesheet';
           css.type  = 'text/css';
           css.href  = styles[idx];
