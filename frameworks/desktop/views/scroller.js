@@ -946,7 +946,7 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
 
     // If this is the first time, generate the actual HTML
     if (firstTime) {
-      context.push('<div class="track"></div>',
+      context.push('<div class="track"></div>'+
                     '<div class="cap"></div>');
       this.renderButtons(context, this.get('hasButtons'));
       this.renderThumb(context, this.get('layoutDirection'), thumbLength);
@@ -968,13 +968,13 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
   renderThumb: function(context, layoutDirection, thumbLength) {
     // where is this magic number from?
     thumbLength -= 1044;
-    layoutDirection = (layoutDirection === HORIZONTAL ? 'X' : 'Y');
+    layoutDirection = (layoutDirection === SC.LAYOUT_HORIZONTAL ? 'X' : 'Y');
 
-    context.push('<div class="thumb">',
-                 '<div class="thumb-top"></div>',
-                 '<div class="thumb-clip">',
-                 '<div class="thumb-inner" style="-webkit-transform: translate%@(%@px);">'.fmt(layoutDirection, thumbLength),
-                 '<div class="thumb-center"></div>',
+    context.push('<div class="thumb">'+
+                 '<div class="thumb-top"></div>'+
+                 '<div class="thumb-clip">'+
+                 '<div class="thumb-inner" style="-webkit-transform: translate%@(%@px);">'.fmt(layoutDirection, thumbLength)+
+                 '<div class="thumb-center"></div>'+
                  '<div class="thumb-bottom"></div></div></div></div>');
 
   }
