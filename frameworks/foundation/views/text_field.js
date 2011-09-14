@@ -81,6 +81,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   type: 'text',
   
+  /**
+    This property will set a tabindex="-1" on your view if set to NO. 
+    
+    This gives us control over the native tabbing behavior. When nextValidKeyView
+    reaches the end of the views in the pane views tree, it won't go to a textfield
+    that can accept the default tabbing behavior in any other pane. This was a 
+    problem when you had an alert on top of a mainPane with textfields. 
+    
+    Modal panes set this to NO on all textfields that don't belong to itself.
+    @property {Boolean}
+  */
+  
+  isBrowserFocusable: YES,
+  
   autoCorrect: true,
   autoCapitalize: true,
   
@@ -392,7 +406,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: ['formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  displayProperties: ['isBrowserFocusable','formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function() {
     sc_super();
@@ -536,7 +550,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         maxLength = this.get('maxLength'),
         spellCheckString='', autocapitalizeString='', autocorrectString='',
         name, adjustmentStyle, type, hintElements, element, paddingElementStyle, 
-        fieldClassNames, isOldSafari, activeState;
+        fieldClassNames, isOldSafari, activeState, browserFocusable;
 
     context.setClass('text-area', this.get('isTextArea'));
     
@@ -545,21 +559,27 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
-    spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
-    
-    if(SC.browser.mobileSafari){
-      autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
-      autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
-    }
-    // if hint is on and we don't want it to show on focus, create one
-    if(SC.platform.input.placeholder && !hintOnFocus) {
-      hintString = ' placeholder="' + hint + '"';
-    }
+   
     
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
       activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
       name = this.get('layerId');
+      
+      spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
+
+      if(SC.browser.mobileSafari){
+        autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
+        autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
+      }
+
+      if(this.get('isBrowserFocusable')){
+        browserFocusable = 'tabindex="-1"';
+      }
+        // if hint is on and we don't want it to show on focus, create one
+      if(SC.platform.input.placeholder && !hintOnFocus) {
+        hintString = ' placeholder="' + hint + '"';
+      }
 
       if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
 
@@ -590,7 +610,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (this.get('isTextArea')) {
         context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
                       '" '+ activeState + hintString +
-                      spellCheckString + autocorrectString +
+                      spellCheckString + autocorrectString + browserFocusable + 
                       autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
                       value+ '</textarea></span>') ;
       }
@@ -603,7 +623,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         
         context.push('<input class="'+fieldClassNames+'" type="'+ type+
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
-                      hintString + spellCheckString+
+                      hintString + spellCheckString+ browserFocusable +
                       ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
                       autocapitalizeString+'/></span>') ;
       }
@@ -646,6 +666,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
 
+      if(this.get('isBrowserFocusable')){
+        input.removeAttr('tabindex');
+      }else{
+        input.attr('tabindex', '-1');
+      }
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
       if (element) {

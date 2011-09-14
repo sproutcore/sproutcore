@@ -288,12 +288,12 @@ SC.View.reopen(
       }
 
       // if it's a valid firstResponder, we're done!
-      if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) return next;
-
+      if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) {
+        return next;
+      }
       // otherwise keep looking
       cur = next;
     }
-
     // this will only happen if no views are visible and accept first responder
     return null;
   }.property('nextKeyView'),

@@ -42,14 +42,19 @@ SC.ModalPane = SC.Pane.extend(
     @returns {SC.ModalPane} receiver
   */
   paneWillAppend: function(pane) {
+    var _tmpPane;
     this._openPaneCount++;
     if (!this.get('isVisibleInWindow')) this.append();
     var panes = SC.RootResponder.responder.panes;
     for(var i=0, iLen=panes.length; i<iLen; i++ ){
-      if(panes[i]!==pane) panes[i].set('ariaHidden', YES);
+      _tmpPane = panes[i];
+      if(_tmpPane!==pane) {
+        _tmpPane.set('ariaHidden', YES);
+        this._hideShowTextfields(_tmpPane, NO);
+      }
     }
     return this ;    
-  },
+  },  
   
   /** @private
     Called by a pane just after it removes itself.  The modal pane can remove
@@ -60,14 +65,30 @@ SC.ModalPane = SC.Pane.extend(
     @returns {SC.ModalPane} receiver
   */
   paneDidRemove: function(pane) { 
+    var _tmpPane;
     this._openPaneCount--;
     var panes = SC.RootResponder.responder.panes;
     for(var i=0, iLen=panes.length; i<iLen; i++ ){
-      if(panes[i]!==pane) panes[i].set('ariaHidden', NO);
+      _tmpPane = panes[i];
+      if(_tmpPane!==pane) {
+        _tmpPane.set('ariaHidden', NO);
+        this._hideShowTextfields(_tmpPane, YES);
+      }
     }
     if (this._openPaneCount <= 0) {
       this._openPaneCount = 0 ;
       if (this.get('isVisibleInWindow')) this.remove();
+    }
+  },
+  
+  /** @private */
+  _hideShowTextfields: function(pane, focusable){
+    var view;
+    for(view in SC.View.views){
+      view = SC.View.views[view];
+      if (view!==pane && view.get('pane')===pane && view.get('isTextField')){
+        view.set('isBrowserFocusable', focusable);
+      }
     }
   },
   
