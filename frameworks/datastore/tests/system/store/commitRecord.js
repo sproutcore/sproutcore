@@ -108,11 +108,11 @@ module("SC.Store#commitRecord", {
     storeKey4 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey4, json4, SC.Record.DESTROYED_DIRTY);
     storeKey5 = SC.Store.generateStoreKey();
-    store.writeDataHash(storeKey5, json5, SC.Record.READY_EMPTY);
+    store.writeDataHash(storeKey5, json5, SC.Record.EMPTY);
     storeKey6 = SC.Store.generateStoreKey();
-    store.writeDataHash(storeKey6, json6, SC.Record.READY_ERROR);
+    store.writeDataHash(storeKey6, json6, SC.Record.ERROR);
     storeKey7 = SC.Store.generateStoreKey();
-    store.writeDataHash(storeKey7, json7, SC.Record.READY_DESTROYED_CLEAN);
+    store.writeDataHash(storeKey7, json7, SC.Record.DESTROYED_CLEAN);
     SC.RunLoop.end();
   }
 });
@@ -140,35 +140,23 @@ test("Confirm that all the states are switched as expected after running commitR
   status = store.readStatus( storeKey4);
   equals(status, SC.Record.BUSY_DESTROYING, "the status should be SC.Record.BUSY_DESTROYING");
   
-  try {
-    store.commitRecord(undefined, undefined, storeKey5);
-    throwError=false;
-    msg='';
-  }catch(error1){
-    throwError=true;
-    msg=error1.message;
-  }
-  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  store.commitRecord(undefined, undefined, storeKey5);
+  status = store.readStatus( storeKey5);
+  equals(status, SC.Record.EMPTY, "the status should be SC.Record.EMPTY");
   
   try{
     store.commitRecord(undefined, undefined, storeKey6);
     throwError=false;
     msg='';
-  }catch(error2){
+  }catch(error){
     throwError=true;
-    msg=error2.message;
+    msg=error.message;
   }
   equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
   
-  try{
-    store.commitRecord(undefined, undefined, storeKey7);
-    throwError=false;
-    msg='';
-  }catch(error3){
-    throwError=true;
-    msg=error3.message;
-  }
-  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  store.commitRecord(undefined, undefined, storeKey7);
+  status = store.readStatus( storeKey7);
+  equals(status, SC.Record.DESTROYED_CLEAN, "the status should be SC.Record.DESTROYED_CLEAN");
   
 });
 
