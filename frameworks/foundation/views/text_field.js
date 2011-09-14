@@ -619,7 +619,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         
         // Internet Explorer won't let us change the type attribute later
         // so we force it to password if needed now, or if the value is not the hint
-        if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
+        if (this.get('isPassword')) { type = 'password'; }
         
         context.push('<input class="'+fieldClassNames+'" type="'+ type+
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
@@ -640,7 +640,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (!this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
+          //if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
 
           if (!SC.platform.input.placeholder && this._hintON) {
             context.setClass('sc-hint', YES);
@@ -649,7 +649,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
+          //if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
           if (!SC.platform.input.placeholder && this._hintON) {
             context.setClass('sc-hint', NO);
             input.val('');
@@ -989,7 +989,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   didLoseKeyResponderTo: function(keyView) {
     var el = this.$input()[0];
     if (el) el.blur();
-    
     this.invokeLater("scrollToOriginIfNeeded", 100);
   },
   
