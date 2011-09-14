@@ -346,11 +346,12 @@ SC.RootResponder = SC.Object.extend(
   */
   focus: function(evt) {
     if (!this.get('hasFocus')) {
+    
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
       // If the app is getting focus again set the first responder to the first
       // valid firstResponder view in the view's tree
-      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
         var keyPane = SC.RootResponder.responder.get('keyPane');
         if (keyPane) {
           var nextValidKeyView = keyPane.get('nextValidKeyView');
@@ -633,7 +634,7 @@ SC.RootResponder = SC.Object.extend(
     this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
-    if(SC.browser.msie) this.listenFor(['focusin', 'focusout'], document);
+    if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
 
     // handle animation events
