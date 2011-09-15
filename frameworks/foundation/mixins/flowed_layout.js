@@ -41,7 +41,7 @@ SC.ALIGN_JUSTIFY = "justify";
   @since SproutCore 1.0
 */
 SC.FlowedLayout = {
-
+  isFlowedLayout: YES,
   /**
     The direction of flow. Possible values:
     
@@ -133,23 +133,23 @@ SC.FlowedLayout = {
     return ret;
   }.property('flowPadding').cacheable(),
   
-  concatenatedProperties: ["childMixins"],
+  concatenatedProperties: ['childMixins'],
   
   /** @private */
   initMixin: function() {
-    this.invokeOnce("_scfl_tile");
+    this._scfl_tileOnce();
   },
   
   /** @private
     Detects when the child views change.
   */
   _scfl_childViewsDidChange: function(c) {
-    this.invokeOnce("_scfl_tile");
-  }.observes("childViews"),
+    this._scfl_tileOnce();
+  }.observes('childViews'),
   
   /** @private */
   _scfl_layoutPropertyDidChange: function(childView) {
-    this.invokeOnce('_scfl_tile');
+    this._scfl_tileOnce();
   }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing', 'isVisibleInWindow'),
   
   /** @private
@@ -177,7 +177,7 @@ SC.FlowedLayout = {
     }
     
     // nothing has changed. This is where we do something
-    this.invokeOnce("_scfl_tile");
+    this._scfl_tileOnce();
     sc_super();
   },
   
@@ -192,16 +192,16 @@ SC.FlowedLayout = {
   observeChildLayout: function(c) {
     if (c._scfl_isBeingObserved) return;
     c._scfl_isBeingObserved = YES;
-    c.addObserver('flowSpacing', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('isSpacer', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('maxSpacerLength', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('fillWidth', this, '_scfl_layoutPropertyDidChange');
-    c.addObserver('fillHeight', this, '_scfl_layoutPropertyDidChange');
+    c.addObserver('flowSpacing', this, '_scfl_tileOnce');
+    c.addObserver('isVisible', this, '_scfl_tileOnce');
+    c.addObserver('useAbsoluteLayout', this, '_scfl_tileOnce');
+    c.addObserver('calculatedWidth', this, '_scfl_tileOnce');
+    c.addObserver('calculatedHeight', this, '_scfl_tileOnce');
+    c.addObserver('startsNewRow', this, '_scfl_tileOnce');
+    c.addObserver('isSpacer', this, '_scfl_tileOnce');
+    c.addObserver('maxSpacerLength', this, '_scfl_tileOnce');
+    c.addObserver('fillWidth', this, '_scfl_tileOnce');
+    c.addObserver('fillHeight', this, '_scfl_tileOnce');
   },
   
   /** @private
@@ -209,16 +209,16 @@ SC.FlowedLayout = {
   */
   unobserveChildLayout: function(c) {
     c._scfl_isBeingObserved = NO;
-    c.removeObserver('flowSpacing', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('isVisible', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('useAbsoluteLayout', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('calculatedWidth', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('calculatedHeight', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('startsNewRow', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('isSpacer', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('maxSpacerLength', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('fillWidth', this, '_scfl_layoutPropertyDidChange');
-    c.removeObserver('fillHeight', this, '_scfl_layoutPropertyDidChange');
+    c.removeObserver('flowSpacing', this, '_scfl_tileOnce');
+    c.removeObserver('isVisible', this, '_scfl_tileOnce');
+    c.removeObserver('useAbsoluteLayout', this, '_scfl_tileOnce');
+    c.removeObserver('calculatedWidth', this, '_scfl_tileOnce');
+    c.removeObserver('calculatedHeight', this, '_scfl_tileOnce');
+    c.removeObserver('startsNewRow', this, '_scfl_tileOnce');
+    c.removeObserver('isSpacer', this, '_scfl_tileOnce');
+    c.removeObserver('maxSpacerLength', this, '_scfl_tileOnce');
+    c.removeObserver('fillWidth', this, '_scfl_tileOnce');
+    c.removeObserver('fillHeight', this, '_scfl_tileOnce');
   },
   
   /**
@@ -241,8 +241,8 @@ SC.FlowedLayout = {
     @type Hash
   */
   flowSpacingForChild: function(idx, view) {
-    var spacing = view.get("flowSpacing");
-    if (SC.none(spacing)) spacing = this.get("defaultFlowSpacing");
+    var spacing = view.get('flowSpacing');
+    if (SC.none(spacing)) spacing = this.get('defaultFlowSpacing');
     if (SC.none(spacing)) spacing = 0;
     
     if (SC.typeOf(spacing) === SC.T_NUMBER) {
@@ -766,6 +766,10 @@ SC.FlowedLayout = {
   },
   
   /** @private */
+  _scfl_tileOnce: function() {
+    this.invokeLast(this._scfl_tile);
+  },
+
   _scfl_tile: function() {
     // short circuit when hidden
     if(!this.get('isVisibleInWindow')) return;
@@ -806,8 +810,6 @@ SC.FlowedLayout = {
   
   /** @private */
   _scfl_frameDidChange: function() {
-    if (this._scfl_isChangingSize) return;
-
     var frame = this.get("frame"), lf = this._scfl_lastFrameSize || {};
     this._scfl_lastFrameSize = SC.clone(frame);
 
@@ -815,8 +817,8 @@ SC.FlowedLayout = {
       return;
     }
 
-    this.invokeOnce("_scfl_tile");
-  }.observes("frame"),
+    this._scfl_tileOnce();
+  }.observes('frame'),
   
   /** @private */
   destroyMixin: function() {
@@ -856,3 +858,4 @@ SC.FlowedLayout = {
     return this;
   }
 };
+
