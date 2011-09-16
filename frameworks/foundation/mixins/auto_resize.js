@@ -273,7 +273,6 @@ SC.AutoResize = {
     }
 
     else if (batch) {
-      if(this.get('calculatedFontSize') !== maxFontSize) this.prepareLayerForStringMeasurement(layer);
       metrics = SC.measureString(value, ignoreEscape);
     }
 
@@ -282,7 +281,7 @@ SC.AutoResize = {
 
       if(!layer) return;
 
-      if(this.get('calculatedFontSize') !== maxFontSize) this.prepareLayerForStringMeasurement(layer);
+       this.prepareLayerForStringMeasurement(layer);
       metrics = SC.metricsForString(value, layer, this.get('classNames'), ignoreEscape);
     }
 
@@ -309,8 +308,10 @@ SC.AutoResize = {
     maximum font size.
   */
   prepareLayerForStringMeasurement: function(layer) {
-    if (this.get('shouldAutoFitText')) {
-      layer.style.fontSize = this.get('maxFontSize') + "px";
+    var maxFontSize = this.get('maxFontSize');
+
+    if (this.get('shouldAutoFitText') && this.get('calculatedFontSize') !== maxFontSize) {
+      layer.style.fontSize = maxFontSize + "px";
     }
   },
   
@@ -335,7 +336,7 @@ SC.AutoResize = {
         minFontSize = this.get('minFontSize');
 
     // if the font size has been adjusted, reset it to the max
-    if(this.get('calculatedFontSize') !== maxFontSize) this.prepareLayerForStringMeasurement(layer);
+    this.prepareLayerForStringMeasurement(layer);
     
     var frame = this.get('frame'),
     
