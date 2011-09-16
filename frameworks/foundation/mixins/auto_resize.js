@@ -211,12 +211,6 @@ SC.AutoResize = {
   */
   batchResizeId: null,
 
-  /** @private */
-  _scar_measurementPending: NO,
-  
-  /** @private */
-  _scar_requestedBatchResizeId: null,
-
   /**
     Schedules a measurement to happen later.
   */
@@ -226,20 +220,9 @@ SC.AutoResize = {
     // only measure if we are visible, active, and the text or style actually changed
     if (!this.get('shouldMeasureSize') || !this.get('isVisibleInWindow') || (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId)) return;
 
-    var requestedBatchResizeId = this._scar_requestedBatchResizeId;
-
-    // check if a request is out and the id changed
-    if(this._scar_measurementPending && this._scar_requestedBatchResizeId !== batchResizeId) {
-      // if so, cancel the old request
-      SC.AutoResizeManager.cancelMeasurementForView(this, requestedBatchResizeId);
-    }
-
     // batchResizeId is allowed to be undefined; views without an id will just
     // get measured one at a time
     SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
-
-    this._scar_measurementPending = YES;
-    this._scar_requestedBatchResizeId = batchResizeId;
   }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId'),
 
   _lastMeasuredText: null,
@@ -312,8 +295,6 @@ SC.AutoResize = {
     // set the measured value so we can avoid extra measurements in the future
     this._lastMeasuredText = value;
     this._lastMeasuredId = batchResizeId;
-
-    this._scar_measurementPending = NO;
 
     return metrics;
   },
@@ -486,17 +467,11 @@ SC.AutoResize = {
  */
 SC.AutoResizeManager = {
   /**
-    A hash of views needing resizing, mapped from batch resize ID to SC.CoreSets
-    of views.
-  */
-  viewsNeedingResize: null,
-
-  /**
     Views queued for batch resizing, but with no batch resize id.
 
     @property {SC.CoreSet}
   */
-  untaggedViews: null,
+  measurementQueue: SC.CoreSet.create(),
 
   /**
     Schedules a re-measurement for the specified view in the batch with the
@@ -508,20 +483,8 @@ SC.AutoResizeManager = {
     @param view The view to measure.
     @param id The id of the batch to measure the view in.
   */
-  scheduleMeasurementForView: function(view, id) {
-    // views with no tag just get put in their own list
-    if(SC.none(id)) {
-      var untaggedViews = this.untaggedViews || (this.untaggedViews = SC.CoreSet.create());
-
-      untaggedViews.add(view);
-
-    // views with a batch resize id set for each tag
-    } else {
-      var needResize = this.viewsNeedingResize || (this.viewsNeedingResize = {}),
-      views = needResize[id] || (needResize[id] = SC.CoreSet.create());
-
-      views.add(view);
-    }
+  scheduleMeasurementForView: function(view) {
+    this.measurementQueue.add(view);
 
     SC.RunLoop.currentRunLoop.invokeLast(this.doBatchResize);
   },
@@ -533,11 +496,7 @@ SC.AutoResizeManager = {
     @param id The batch id the view was scheduled in.
   */
   cancelMeasurementForView: function(view, id) {
-    var set = SC.none(id) ? this.untaggedViews : this.viewsNeedingResize[id];
-
-    if(set) {
-      set.remove(view);
-    }
+    this.measurementQueue.remove(view);
   },
 
   /**
@@ -551,53 +510,50 @@ SC.AutoResizeManager = {
       return SC.AutoResizeManager.doBatchResize();
     }
 
-    var tag, views, view, layer, batches, prepared, autoResizeText;
+    var tag, view, layer, measurementQueue = this.measurementQueue, prepared, autoResizeText,
+    i, len;
 
-    // first measure all the batched views
-    batches = this.viewsNeedingResize;
-    for(tag in batches) {
-      if (batches.hasOwnProperty(tag)) {
-        views = batches[tag];
-        prepared = NO;
+    while((len = measurementQueue.get('length')) > 0) {
+      tag = measurementQueue[len - 1].get('batchResizeId');
+      prepared = NO;
 
-        while ((view = views.pop())) {
-          if(view.get('isVisibleInWindow') && view.get('shouldMeasureSize') && (layer = view.get('autoResizeLayer'))) {
-            autoResizeText = view.get('autoResizeText');
+      for(i = len - 1; i >= 0; --i) {
+        view = measurementQueue[i];
 
-            // if the text is empty or a size is cached don't bother preparing
-            if(!SC.none(autoResizeText) && autoResizeText !== "" && !view.get('_cachedMetrics') && !prepared) {
-              // this is a bit of a hack: before we can prepare string measurement, there are cases where we
-              // need to reset the font size first (specifically, if we are also fitting text)
-              //
-              // It is expected that all views in a batch will have the same font settings.
-              view.prepareLayerForStringMeasurement(layer);
-              
-              // now we can tell SC to prepare the layer with the settings from the view's layer
-              SC.prepareStringMeasurement(layer, view.get('classNames'));
-              prepared = YES;
-            }
+        if(view.get('batchResizeId') !== tag) continue;
 
-            view.measureSize(YES);
+        // make sure the view is still qualified to be measured
+        if(view.get('isVisibleInWindow') && view.get('shouldMeasureSize') && (layer = view.get('autoResizeLayer'))) {
+          autoResizeText = view.get('autoResizeText');
+
+          // if the text is empty or a size is cached don't bother preparing
+          if(!SC.none(autoResizeText) && autoResizeText !== "" && !view.get('_cachedMetrics') && !prepared) {
+            // this is a bit of a hack: before we can prepare string measurement, there are cases where we
+            // need to reset the font size first (specifically, if we are also fitting text)
+            //
+            // It is expected that all views in a batch will have the same font settings.
+            view.prepareLayerForStringMeasurement(layer);
+            
+            // now we can tell SC to prepare the layer with the settings from the view's layer
+            SC.prepareStringMeasurement(layer, view.get('classNames'));
+            prepared = YES;
           }
+
+          view.measureSize(YES);
         }
 
-        // don't call teardown if prepare was never called either
-        if(prepared) {
-          SC.teardownStringMeasurement();
-        }
+        // it's been handled
+        measurementQueue.remove(view);
+
+        // if the view didn't have a tag, don't bother trying to batch
+        // it
+        if(!tag) break;
+      }
+
+      // only call teardown if prepare was called
+      if(prepared) {
+        SC.teardownStringMeasurement();
       }
     }
-
-    // measure views with no batch id
-    views = this.untaggedViews;
-
-    if(!views) {
-      return;
-    }
-
-    while((view = views.pop())) {
-      view.measureSize();
-    }
   }
-
 };
