@@ -433,6 +433,10 @@ SC.SelectView = SC.ButtonView.extend(
         action: 'displaySelectedItem'
       });
 
+      if(SC.none(currentSelectedVal)) {
+        this.set('title', emptyName);
+      }
+
       //Set the items in the itemList array
       itemList.push(item);
     }
