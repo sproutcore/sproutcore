@@ -463,7 +463,10 @@ SC.SelectView = SC.ButtonView.extend(
         object.get(valueKey) : object[valueKey]) : object ;
 
       if (!SC.none(currentSelectedVal) && !SC.none(value)){
-        if( currentSelectedVal === value ) {
+        if( currentSelectedVal === value ||
+            (SC.kindOf(currentSelectedVal, SC.Record) &&
+             SC.kindOf(value, SC.Record) &&
+                       currentSelectedVal.get('storeKey') === value.get('storeKey'))) {
           this.set('title', name) ;
           this.set('icon', icon) ;
         }
