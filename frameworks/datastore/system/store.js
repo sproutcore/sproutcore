@@ -2255,7 +2255,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN) {
 
       status = K.READY_CLEAN;
-      if(dataHash===undefined) this.writeStatus(storeKey, status) ;
+      if(dataHash===undefined) this.writeStatus(storeKey, K.EMPTY) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
 
       this.dataHashDidChange(storeKey);
