@@ -140,7 +140,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     }else if(SC.browser.msie){
       deltaMultiplier = 0.3;
     }else if(SC.browser.chrome){
-      deltaMultiplier = 0.04;
+      deltaMultiplier = 0.4;
     }
     return deltaMultiplier;
   }(),
