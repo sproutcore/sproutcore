@@ -96,10 +96,10 @@ test("pass no context when going to state a's history state using state", functi
   stateD.gotoState('f');
   stateF.gotoHistoryState('a');
   equals(stateD.get('isCurrentState'), true);
-  equals(stateD.get('enterStateContext'), null);
-  equals(stateA.get('enterStateContext'), null);
-  equals(stateB.get('exitStateContext'), null);
-  equals(stateF.get('exitStateContext'), null);
+  equals(stateD.get('enterStateContext'), null, "state D's enterState method should not be passed a context value");
+  equals(stateA.get('enterStateContext'), null, "state A's enterState method should not be passed a context value");
+  equals(stateB.get('exitStateContext'), null, "state B's enterState method should not be passed a context value");
+  equals(stateF.get('exitStateContext'), null, "state F's enterState method should not be passed a context value");
 });
 
 test("pass context when going to state a's history state using statechart - gotoHistoryState('f', context)", function() {  
@@ -161,31 +161,3 @@ test("pass context when going to state a's history state using state - gotoHisto
   equals(stateB.get('exitStateContext'), context, 'state b should have context upon exiting');
   equals(stateF.get('exitStateContext'), context, 'state f should have context upon exiting');
 });
-
-// 
-// test("pass context when going to state f using state - gotoState('f', context)", function() {  
-//   stateC.gotoState('f', context);
-//   equals(stateF.get('isCurrentState'), true);
-//   equals(stateC.get('exitStateContext'), context, 'state c should have context upon exiting');
-//   equals(stateA.get('exitStateContext'), context, 'state a should have context upon exiting');
-//   equals(stateB.get('enterStateContext'), context, 'state b should have context upon entering');
-//   equals(stateF.get('enterStateContext'), context, 'state f should have context upon entering');
-// });
-// 
-// test("pass context when going to state f using statechart - gotoState('f', stateC, context) ", function() {  
-//   statechart.gotoState('f', stateC, context);
-//   equals(stateF.get('isCurrentState'), true);
-//   equals(stateC.get('exitStateContext'), context, 'state c should have context upon exiting');
-//   equals(stateA.get('exitStateContext'), context, 'state a should have context upon exiting');
-//   equals(stateB.get('enterStateContext'), context, 'state b should have context upon entering');
-//   equals(stateF.get('enterStateContext'), context, 'state f should have context upon entering');
-// });
-// 
-// test("pass context when going to state f using statechart - gotoState('f', stateC, false, context) ", function() {  
-//   statechart.gotoState('f', stateC, false, context);
-//   equals(stateF.get('isCurrentState'), true);
-//   equals(stateC.get('exitStateContext'), context, 'state c should have context upon exiting');
-//   equals(stateA.get('exitStateContext'), context, 'state a should have context upon exiting');
-//   equals(stateB.get('enterStateContext'), context, 'state b should have context upon entering');
-//   equals(stateF.get('enterStateContext'), context, 'state f should have context upon entering');
-// });

@@ -8,6 +8,7 @@
 /*globals SC */
 
 sc_require('system/state');
+sc_require('mixins/statechart_delegate');
 
 /**
   @class
@@ -314,6 +315,29 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @property {Boolean}
   */
   suppressStatechartWarnings: NO,
+  
+  /**
+    A statechart delegate used by the statechart and the states that the statechart 
+    manages. The value assigned must adhere to the {@link SC.StatechartDelegate} mixin.
+    
+    @property {SC.Object}
+    
+    @see SC.StatechartDelegate
+  */
+  delegate: null,
+  
+  /**
+    Computed property that returns an objects that adheres to the
+    {@link SC.StatechartDelegate} mixin. If the {@link #delegate} is not
+    assigned then this object is the default value returned.
+    
+    @see SC.StatechartDelegate
+    @see #delegate
+  */
+  statechartDelegate: function() {
+    var del = this.get('delegate');
+    return this.delegateFor('isStatechartDelegate', del);
+  }.property('delegate'),
   
   initMixin: function() {
     if (this.get('autoInitStatechart')) {
@@ -648,8 +672,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     // Collected all the state transition actions to be performed. Now execute them.
     this._gotoStateActions = gotoStateActions;
-    this._executeGotoStateActions(state, this._gotoStateActions, null, context);
-    this._gotoStateActions = null;
+    this._executeGotoStateActions(state, gotoStateActions, null, context);
   },
   
   /**
@@ -731,10 +754,14 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       this.statechartLogTrace("END gotoState: %@".fmt(gotoState));
     }
     
-    // Okay. We're done with the current state transition. Make sure to unlock the
-    // gotoState and let other pending state transitions execute.
+    this._cleanupStateTransition();
+  },
+  
+  /** @private */
+  _cleanupStateTransition: function() {
     this._currentGotoStateAction = null;
     this._gotoStateSuspendedPoint = null;
+    this._gotoStateActions = null;
     this._gotoStateLocked = NO;
     this._flushPendingStateTransition();
   },
@@ -763,9 +790,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     state.set('currentSubstates', []);
     
-    state.stateWillBecomeExited();
+    state.stateWillBecomeExited(context);
     var result = this.exitState(state, context);
-    state.stateDidBecomeExited();
+    state.stateDidBecomeExited(context);
     
     if (this.get('monitorIsActive')) this.get('monitor').pushExitedState(state);
     
@@ -808,9 +835,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     if (this.get('allowStatechartTracing')) this.statechartLogTrace("--> entering state: %@".fmt(state));
     
-    state.stateWillBecomeEntered();
+    state.stateWillBecomeEntered(context);
     var result = this.enterState(state, context);
-    state.stateDidBecomeEntered();
+    state.stateDidBecomeEntered(context);
     
     if (this.get('monitorIsActive')) this.get('monitor').pushEnteredState(state);
     
@@ -823,11 +850,21 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Called during the state transition process whenever the gotoState method is
     invoked.
     
+    If the context provided is a state route context object 
+    ({@link SC.StateRouteContext}), then if the given state has a enterStateByRoute 
+    method, that method will be invoked, otherwise the state's enterState method 
+    will be invoked by default. The state route context object will be supplied to 
+    both enter methods in either case.
+    
     @param state {SC.State} the state whose enterState method is to be invoked
     @param context {Hash} a context hash object to provide the enterState method
   */
   enterState: function(state, context) {
-    return state.enterState(context);
+    if (state.enterStateByRoute && SC.kindOf(context, SC.StateRouteHandlerContext)) {
+      return state.enterStateByRoute(context);
+    } else {
+      return state.enterState(context);
+    }
   },
   
   /**
@@ -1372,7 +1409,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         processedArgs.useHistory = value;
         break;
       case SC.T_HASH:
-        processedArgs.context = value;
+      case SC.T_OBJECT:
+        if (!SC.kindOf(value, SC.State)) {
+          processedArgs.context = value;
+        }
         break;
       default:
         processedArgs.fromCurrentState = value;
@@ -1641,6 +1681,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   }
   
 };
+
+SC.mixin(SC.StatechartManager, SC.StatechartDelegate, SC.DelegateSupport); 
 
 /** 
   The default name given to a statechart's root state
