@@ -43,13 +43,12 @@ SC.MainPane = SC.Pane.extend({
       wDim.width = document.body.clientWidth;
       wDim.height = document.body.clientHeight;
       
-      if (layout.minHeight || layout.minWidth) {
-        if ((layout.minHeight && wDim.height<=layout.minHeight) ||
-          (layout.minWidth && wDim.width<=layout.minWidth)) {
-            $(document.body).css('overflow', 'auto');
-        }else{
+      if( layout.minHeight || layout.minWidth ) {
+        if( (layout.minHeight && wDim.height<=layout.minHeight) || (layout.minWidth && wDim.width<=layout.minWidth) ) {
+          SC.bodyOverflowArbitrator.requestVisible(this);
+        } else {
           // to avoid Lion rubberbanding
-          $(document.body).css('overflow', 'hidden'); 
+          SC.bodyOverflowArbitrator.requestHidden(this);
         }
       }
     }

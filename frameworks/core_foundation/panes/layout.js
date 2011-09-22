@@ -108,9 +108,9 @@ SC.Pane.reopen(
         minH = layout.minHeight;
     if(force===true || minW || minH) {
       if( (minH && size.height<=minH) || (minW && size.width<=minW) ) {
-        $(document.body).css('overflow', 'auto');
+        SC.bodyOverflowArbitrator.requestVisible(this);
       } else {
-        $(document.body).css('overflow', 'hidden');
+        SC.bodyOverflowArbitrator.requestHidden(this);
       }
     }
   },
