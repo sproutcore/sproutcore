@@ -165,6 +165,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @default ""
   */
   title: "",
+  
+  tooltip: "",
 
   /**
     If set, the title property will be updated automatically
@@ -475,12 +477,12 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @type Array
     @default [
       'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-      'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing'
+      'escapeHTML', 'needsEllipsis', 'tooltip', 'titleMinWidth', 'supportFocusRing'
     ]
   */
   displayProperties: [
     'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-    'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing',
+    'escapeHTML', 'needsEllipsis', 'tooltip', 'titleMinWidth', 'supportFocusRing',
     'buttonBehavior'
   ],
 
