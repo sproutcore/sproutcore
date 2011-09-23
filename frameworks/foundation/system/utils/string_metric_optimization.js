@@ -96,10 +96,11 @@ SC.mixin( /** @scope SC */ {
         outer = cache.list[i-1];
         if(!inner || !inner.width) continue;
         if(maxWidth>=inner.width) {
-          if(outer && outer.width) {
+          if((outer && outer.width) || (maxWidth<=inner.maxWidth)) {
+            // console.error('returning from cache,',CW.Anim.enumerate(inner));
             return inner;
           }
-          searchingUpward = true;
+          // searchingUpward = true;  //commented because this is currently problematic. If this remains false, duplicate work will be done if increasing in maxWidth since previous calls, but at least the results will be correct.
           ret = inner;
         }
       }
@@ -126,6 +127,7 @@ SC.mixin( /** @scope SC */ {
       }
       metrics.width = Math.ceil(middle);
       metrics.height = necessaryHeight;
+      metrics.maxWidth = maxWidth;
       metrics.lineHeight = oneLineHeight;
       metrics.lines = lines;
       metrics.searchPerformed = true;
@@ -133,6 +135,7 @@ SC.mixin( /** @scope SC */ {
       metrics.searchCount = count;
     } else {
       if(searchingUpward) metrics = SC.metricsForString(string,exEl=removeMax(exEl),classNames,ignoreEscape);
+      metrics.maxWidth = maxWidth;
       metrics.lineHeight = oneLineHeight;
       metrics.lines = lines;
       metrics.searchPerformed = false;
@@ -141,10 +144,15 @@ SC.mixin( /** @scope SC */ {
     if(SC.browser.msie) metrics.browserCorrection = 1;
     if(SC.browser.mozilla) metrics.browserCorrection = 1;
     metrics.width = Math.min(maxWidth,metrics.width+metrics.browserCorrection);
-    if(cache) cache.list[lines] = metrics;
+    if(cache) {
+      var entry = cache.list[lines];
+      if(entry && entry.maxWidth<maxWidth) entry.maxWidth = maxWidth;
+      if(!entry) entry = cache.list[lines] = metrics;
+    }
     if(exIsElement) exEl.style.maxWidth = savedMaxWidth;
-    if(searchingUpward) return ret;
-    return metrics;
+    ret = searchingUpward ? ret : metrics;
+    // console.error('returning at end'+(searchingUpward?" after searching upward and finding"+CW.Anim.enumerate(metrics):"")+'. Returned value is ',CW.Anim.enumerate(ret));
+    return ret;
   },
 
   /**
