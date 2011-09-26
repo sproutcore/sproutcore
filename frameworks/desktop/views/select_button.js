@@ -458,6 +458,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }, this ) ;
 
     if(firstTime) {
+      context.attr('aria-haspopup', 'true') ;
       this.invokeLast(function() {
         var value = this.get('value') ;
         if(SC.none(value)) {
