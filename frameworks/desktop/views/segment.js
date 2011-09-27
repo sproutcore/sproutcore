@@ -59,6 +59,18 @@ SC.SegmentView = SC.View.extend(SC.Control,
   isSelected: NO,
 
   /**
+    Change the layout direction to make this a vertical segment instead of horizontal ones. 
+    Possible values:
+    
+      - SC.LAYOUT_HORIZONTAL
+      - SC.LAYOUT_VERTICAL
+    
+    @type String
+    @default SC.LAYOUT_HORIZONTAL
+  */
+  layoutDirection: SC.LAYOUT_HORIZONTAL,   
+
+  /**
     @type String
     @default null
     @see SC.Control#controlSize
@@ -73,7 +85,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
   supportFocusRing: NO,
 
   // TODO: isDefault, isCancel, value not really used by render delegate
-  displayProperties: ['icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index'],
+  displayProperties: ['icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 'width', 'isFirstSegment', 'isMiddleSegment', 'isLastSegment', 'isOverflowSegment', 'index', 'layoutDirection'],
 
   /**
     @type String

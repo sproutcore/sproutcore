@@ -25,56 +25,6 @@ SC.BaseTheme.segmentedRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
     jquery.css('text-align', dataSource.get('align'));
-  },
-
-  /**
-    Return the widths of the DOM elements of the segments.  This will be measured by the view to
-    determine which segments should be overflowed.
-
-    It ignores the last segment (the overflow segment).
-  */
-  segmentWidths: function(dataSource) {
-    var elements = dataSource.$('.sc-segment-view'),
-        el,
-        widths = [];
-
-    for (var i = 0, length = elements.length; i < length - 1; i++) {
-      el = elements[i];
-      widths[i] = el.getBoundingClientRect().width;
-    }
-
-    return widths;
-  },
-
-  overflowSegmentWidth: function(dataSource) {
-    var elements = dataSource.$('.sc-segment-view'),
-        el;
-
-    el = elements[elements.length - 1];
-
-    return el.getBoundingClientRect().width;
-  },
-
-  indexForClientPosition: function(dataSource, x, y) {
-    var segmentLayers = dataSource.$('.sc-segment-view'),
-        length, i,
-        segmentLayer, rect,
-        point;
-
-    point = {x: x, y: y};
-    for (i = 0, length = segmentLayers.length; i < length; i++) {
-      segmentLayer = segmentLayers[i];
-      rect = segmentLayer.getBoundingClientRect();
-
-      // Convert client rect into standard rect
-      // Remake the rect since IE8 won't let us modify the boundingClientRect
-      rect = { x: rect.left, y: rect.top, width: (rect.right-rect.left), height: (rect.bottom - rect.top) };
-
-      // Return the index early if found
-      if (SC.pointInRect(point, rect)) return i;
-    }
-
-    // Default not found
-    return -1;
   }
+
 });
