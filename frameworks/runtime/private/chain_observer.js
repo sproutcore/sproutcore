@@ -166,8 +166,13 @@ SC._ChainObserver.prototype = {
 
     // remove observer
     var obj = this.object ;
-    if (obj && obj.removeObserver) {
-      obj.removeObserver(this.property, this, this.propertyDidChange) ;
+    if (obj) {
+      if (this.property === '@each' && this.next && obj._removeContentObserver) {
+        obj._removeContentObserver(this);
+      }
+      if (obj.removeObserver) {
+        obj.removeObserver(this.property, this, this.propertyDidChange) ;
+      }
     }
 
     // destroy next item in chain
