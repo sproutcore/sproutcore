@@ -98,3 +98,22 @@ test("Works with dividers", function() {
   
   validateChildren(splitView, 7);
 });
+
+test("Destroying the split view with dividers doesn't break things", function() {
+  var add = SC.View.create(SC.SplitChild, { name: 'add' });
+
+  splitView.splitDividerView = SC.SplitDividerView;
+
+  SC.RunLoop.begin();
+  splitView.appendChild(add); // trigger _scsv_setupChildViews
+  SC.RunLoop.end();
+
+  try {
+    SC.RunLoop.begin();
+    splitView.destroy();
+    SC.RunLoop.end();
+    ok(true, "No error was thrown");
+  } catch(e) {
+    ok(false, "An error was thrown - " + e);
+  }
+});
