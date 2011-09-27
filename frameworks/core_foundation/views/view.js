@@ -725,12 +725,14 @@ SC.CoreView.reopen(
         // If we had previously added a class to the element, remove it.
         if (oldClass) {
           elem.removeClass(oldClass);
+          classNames.removeObject(oldClass);
         }
 
         // If necessary, add a new class. Make sure we keep track of it so
         // it can be removed in the future.
         if (newClass) {
           elem.addClass(newClass);
+          classNames.push(newClass);
           oldClass = newClass;
         } else {
           oldClass = null;
