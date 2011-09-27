@@ -309,6 +309,37 @@ test("changing isEditable", function() {
   pane.verifyReadOnly(view, YES);
 });
 
+test("changing value from not a textarea to a textarea", function() {
+  // test the the SC.Event for 'change' gets wired up properly to the DOM element when it changes from input to textarea
+  var view = pane.view('empty');
+  SC.RunLoop.begin();
+  view.set('value', 'Original');
+  view.set('isTextArea', YES);
+  SC.RunLoop.end();
+
+  var $textarea = view.$('textarea');
+
+  SC.Event.trigger($textarea, 'focus');
+  
+  // simulate typing a letter
+  SC.Event.trigger($textarea, 'keydown');
+  SC.Event.trigger($textarea, 'keyup');
+  $textarea.val("My New Value");
+  SC.Event.trigger($textarea, 'change');
+  
+  // wait a little bit to let text field propogate changes
+  stop();
+  
+  setTimeout(function() {
+    start();
+    equals(view.get("value"), "My New Value", "SC.Event for change should get wired up properly");
+  }, 100);  
+  
+  // SC.RunLoop.begin();
+  // SC.RunLoop.end();
+});
+
+
 if (!SC.browser.isIE && !SC.platform.input.placeholder) {
   test("Changing value to null -- password field", function() {
     var view = pane.view('password-hint'),
