@@ -385,7 +385,7 @@ SC.SelectView = SC.ButtonView.extend(
 
     var escapeHTML, layoutWidth, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
         currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
-        idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName;
+        idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
 
     items = this.get('items') ;
     items = this.sortObjects(items) ;
@@ -462,13 +462,17 @@ SC.SelectView = SC.ButtonView.extend(
         value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
 
-      if (!SC.none(currentSelectedVal) && !SC.none(value)){
-        if( currentSelectedVal === value ||
-            (SC.kindOf(currentSelectedVal, SC.Record) &&
-             SC.kindOf(value, SC.Record) &&
-                       currentSelectedVal.get('storeKey') === value.get('storeKey'))) {
-          this.set('title', name) ;
-          this.set('icon', icon) ;
+      if (!SC.none(currentSelectedVal) && !SC.none(value)) {
+
+        // If the objects in question are records, we should just their storeKeys
+        isSameRecord = false;
+        if (SC.kindOf(currentSelectedVal, SC.Record) && SC.kindOf(value, SC.Record)) {
+          isSameRecord = currentSelectedVal.get('storeKey') === value.get('storeKey');
+        }
+
+        if (currentSelectedVal === value || isSameRecord) {
+          this.set('title', name);
+          this.set('icon', icon);
         }
       }
 
