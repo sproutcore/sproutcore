@@ -60,14 +60,14 @@ CoreTest.Runner = {
     if (navigator.userAgent.indexOf('MSIE')==-1) {
       str.push(
           '<label class="show-progress">',
-            '<input type="checkbox"'+(this.showProgress?' checked="checked"':'')+'" /> Show progess (slower)',
+            '<input type="checkbox"'+(this.showProgress?' checked="checked"':'')+'" /> Show progress (slower)',
           '</label>'
       );
     }
 
     str.push(
           '<label class="show-progress">',
-            '<input type="checkbox"'+(this.showProgress?' checked="checked"':'')+'" /> Show progess (slower)',
+            '<input type="checkbox"'+(this.showProgress?' checked="checked"':'')+'" /> Show progress (slower)',
           '</label>',
           '<span class="status">Running...</span>',
         '</div>',
