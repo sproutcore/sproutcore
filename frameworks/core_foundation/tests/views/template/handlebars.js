@@ -60,6 +60,8 @@
 */
 module("SC.TemplateView - handlebars integration");
 
+TemplateTests = {};
+
 test("template view should call the function of the associated template", function() {
   var view = SC.TemplateView.create({
     templateName: 'test_template',
@@ -540,6 +542,34 @@ test("should update the block when object passed to #if helper changes and an in
 
     equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "precond - renders block when conditional is true");
   });
+});
+
+test("views nested within an #if helper should be destroyed every time they are removed", function() {
+  var view, didCreateLayerCalled = 0, willDestroyLayerCalled = 0;
+
+  TemplateTests.someView = SC.TemplateView.create({
+    template: SC.Handlebars.compile("<h1>hello</h1>"),
+    didCreateLayer: function() { didCreateLayerCalled++; },
+    willDestroyLayer: function() { willDestroyLayerCalled++; }
+  });
+
+  view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#if foo}}{{view TemplateTests.someView}}{{/if}}'),
+    foo: true
+  });
+
+  view.createLayer();
+
+  SC.run(function() { view.set('foo', false); });
+
+  equals(didCreateLayerCalled, 1, 'didCreateLayer should have been called once');
+  equals(willDestroyLayerCalled, 1, 'willDestroyLayer should have been called once');
+
+  SC.run(function() { view.set('foo', true); });
+  SC.run(function() { view.set('foo', false); });
+
+  equals(didCreateLayerCalled, 2, 'didCreateLayer should have been called twice');
+  equals(willDestroyLayerCalled, 2, 'willDestroyLayer should have been called twice');
 });
 
 test("Should insert a localized string if the {{loc}} helper is used", function() {
