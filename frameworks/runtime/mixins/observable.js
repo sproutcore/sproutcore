@@ -527,7 +527,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         keys = dependentKeys;
         lim  = 0;
       } else {
-        keys = arguments;
+        keys = Array.prototype.slice.call(arguments);
         lim  = 1;
       }
       idx  = keys.length;
