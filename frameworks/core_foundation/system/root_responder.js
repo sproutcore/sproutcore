@@ -1742,16 +1742,10 @@ SC.RootResponder = SC.Object.extend(
     this._lastMouseDownX = evt.clientX ;
     this._lastMouseDownY = evt.clientY ;
 
-    var fr, view = this.targetViewForEvent(evt) ;
+    var view = this.targetViewForEvent(evt);
 
-    // InlineTextField needs to loose firstResponder whenever you click outside
-    // the view. This is a special case as textfields are not supposed to loose
-    // focus unless you click on a list, another textfield or an special
-    // view/control.
-
-    if(view) fr=view.getPath('pane.firstResponder');
-
-    if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
+    if (view && this.shouldResignFirstResponder(view)) {
+      var fr = view.getPath('pane.firstResponder');
       fr.resignFirstResponder();
     }
 
@@ -1765,6 +1759,31 @@ SC.RootResponder = SC.Object.extend(
     this._lastMouseDownCustomHandling = ret;
 
     return ret;
+  },
+
+  /**
+    There are specific cases where we want to force a view to resign being
+    this first responder before we continue. InlineTextField needs to loose
+    firstResponder whenever you click outside the view. This is a special case
+    as textfields are not supposed to loose focus unless you click on a list,
+    another textfield or an special view/control.
+
+    @param {SC.View} targetView The target view of the event
+    @returns {Boolean} true if it should resign the first responder, false otherwise
+  */
+  shouldResignFirstResponder: function(targetView) {
+    var firstResponder = targetView.getPath('pane.firstResponder'),
+        shouldResign = false;
+
+    if (firstResponder && firstResponder.kindOf(SC.InlineTextFieldView)) {
+      // we first want to check if the targetView is a child of the text field
+      // ie. it could be an accessory view
+      if (firstResponder !== targetView && !SC.$.contains(firstResponder.get('layer'), targetView.get('layer'))) {
+        shouldResign = true;
+      }
+    }
+
+    return shouldResign;
   },
 
   /**

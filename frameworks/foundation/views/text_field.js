@@ -786,7 +786,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // passing the original event here instead that was potentially set from
       // loosing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
+      this.resignFirstResponder();
       this.fieldDidBlur(this._origEvent || evt);
+
       var val = this.get('value');
       if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
@@ -818,8 +820,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidBlur: function(evt) {
-    this.resignFirstResponder() ;
-
     if(this.get('commitOnBlur')) this.commitEditing(evt);
     
     // get the pane we hid intercept pane for (if any)
@@ -961,9 +961,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     the hint text if needed.
   */
   didLoseKeyResponderTo: function(keyView) {
-    SC.RunLoop.begin();
-    this.fieldDidBlur();
-    SC.RunLoop.end();
+    SC.run(function() {
+      this.fieldDidBlur();
+    }, this);
     this.invokeLater("scrollToOriginIfNeeded", 100);
   },
   
