@@ -193,7 +193,19 @@ SC.SelectFieldView = SC.FieldView.extend(
         if(!firstTime){
           selectElement=this.$input()[0];
           if (!selectElement) return;
-          selectElement.innerHTML='';
+          // selectElement.innerHTML='';
+          // this method to clear options in select tag not work for IE8&9.
+          // In IE 8&9,innerHTML will change DOM,but when a new objects hash set,
+          // select pop up option still the old items. 
+          // This bug can't test out by a testsuite,for DOM is correct.
+          if (SC.Browser.current ==='msie') {
+            var i;
+            for(i=selectElement.options.length-1;i>=0;i--) {
+              selectbox.remove(i);
+            }
+          }else{
+            selectElement.innerHTML='';
+          }
         } 
       
         var emptyName = this.get('emptyName') ;
