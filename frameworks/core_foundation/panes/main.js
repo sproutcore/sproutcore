@@ -44,7 +44,7 @@ SC.MainPane = SC.Pane.extend({
       wDim.height = document.body.clientHeight;
       
       if( layout.minHeight || layout.minWidth ) {
-        if( (layout.minHeight && wDim.height<=layout.minHeight) || (layout.minWidth && wDim.width<=layout.minWidth) ) {
+        if( (layout.minHeight && wDim.height<layout.minHeight) || (layout.minWidth && wDim.width<layout.minWidth) ) {
           SC.bodyOverflowArbitrator.requestVisible(this);
         } else {
           // to avoid Lion rubberbanding

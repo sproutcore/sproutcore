@@ -107,7 +107,7 @@ SC.Pane.reopen(
     var minW = layout.minWidth,
         minH = layout.minHeight;
     if(force===true || minW || minH) {
-      if( (minH && size.height<=minH) || (minW && size.width<=minW) ) {
+      if( (minH && size.height<minH) || (minW && size.width<minW) ) {
         SC.bodyOverflowArbitrator.requestVisible(this);
       } else {
         SC.bodyOverflowArbitrator.requestHidden(this);
