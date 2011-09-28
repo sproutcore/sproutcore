@@ -433,10 +433,10 @@ SC.RunLoop.wrapFunction = function(func) {
   var ret = function() {
     var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
     if(!alreadyRunning) SC.RunLoop.begin();
-    var ret = arguments.callee.base.apply(this,arguments);
+    var ret = arguments.callee.wrapped.apply(this,arguments);
     if(!alreadyRunning) SC.RunLoop.end();
     return ret;
   };
-  ret.base = func;
+  ret.wrapped = func;
   return ret;
 };
