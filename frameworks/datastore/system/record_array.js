@@ -506,7 +506,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var oldStoreKeys = storeKeys;
     if (storeKeys && !_flush) {
 
-      if (changed) {
+      if (changed && changed.get('length') > 0) {
         changed.forEach(function(storeKey) {
           if(storeKeysToPace.length>0 || new Date()-startDate>SC.RecordArray.QUERY_MATCHING_THRESHOLD) {
             storeKeysToPace.push(storeKey);
