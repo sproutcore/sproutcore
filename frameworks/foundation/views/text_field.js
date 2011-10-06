@@ -637,10 +637,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       else if(!hintOnFocus) elem.placeholder = hint;
 
       if (!val || (val && val.length === 0)) {
+        if (this.get('isPassword')) { elem.type = 'password'; }
+        
         if (!this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          //if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = this.get('type'); }
+          
 
           if (!SC.platform.input.placeholder && this._hintON) {
             context.setClass('sc-hint', YES);
@@ -649,7 +651,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          //if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
           if (!SC.platform.input.placeholder && this._hintON) {
             context.setClass('sc-hint', NO);
             input.val('');
