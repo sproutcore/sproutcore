@@ -1705,7 +1705,10 @@ SC.RootResponder = SC.Object.extend(
           charCode           = evt.charCode;
       if ((charCode !== undefined && charCode === 0 && evt.keyCode!==9) && !isFirefoxArrowKeys) return YES;
       if (isFirefoxArrowKeys) evt.which = keyCode;
-      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+
+      // we only want to rethrow if this is a printable key so that we don't
+      // duplicate the event sent in keydown when a modifier key is pressed
+      if(isFirefoxArrowKeys || !this._isFunctionOrNonPrintableKey(evt)) return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
   },
 
