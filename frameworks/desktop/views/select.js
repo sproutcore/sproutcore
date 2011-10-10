@@ -846,7 +846,7 @@ SC.SelectView.REGULAR_OFFSET_X = -17;
   @type Number
   @default 1
 */
-SC.SelectView.REGULAR_OFFSET_Y = 1;
+SC.SelectView.REGULAR_OFFSET_Y = 0;
 
 /**
   @static
