@@ -182,6 +182,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   */
   statechartIsInitialized: NO,
   
+  name: null,
+  
   /**
     The root state of this statechart. All statecharts must have a root state.
     
@@ -627,6 +629,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     // Collect what actions to perform for the state transition process
     var gotoStateActions = [];
     
+    
     // Go ahead and find states that are to be exited
     this._traverseStatesToExit(exitStates.shift(), exitStates, pivotState, gotoStateActions);
     
@@ -639,7 +642,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
     
     // Collected all the state transition actions to be performed. Now execute them.
-    this._executeGotoStateActions(state, gotoStateActions, null, context);
+    this._gotoStateActions = gotoStateActions;
+    this._executeGotoStateActions(state, this._gotoStateActions, null, context);
+    this._gotoStateActions = null;
   },
   
   /**
@@ -679,7 +684,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     marker = SC.none(marker) ? 0 : marker;
     
     for (; marker < len; marker += 1) {
-      action = actions[marker];
+      this._currentGotoStateAction = action = actions[marker];
       switch (action.action) {
         case SC.EXIT_STATE:
           actionResult = this._exitState(action.state, context);
@@ -723,6 +728,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     
     // Okay. We're done with the current state transition. Make sure to unlock the
     // gotoState and let other pending state transitions execute.
+    this._currentGotoStateAction = null;
     this._gotoStateSuspendedPoint = null;
     this._gotoStateLocked = NO;
     this._flushPendingStateTransition();
@@ -903,6 +909,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param arg1 {Object} optional argument
     @param arg2 {Object} optional argument
     @returns {SC.Responder} the responder that handled it or null
+    
+    @see #stateWillTryToHandleEvent
+    @see #stateDidTryToHandleEvent
   */
   sendEvent: function(event, arg1, arg2) {
     
@@ -966,6 +975,35 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     var result = this._flushPendingSentEvents();
     
     return statechartHandledEvent ? this : (result ? this : null);
+  },
+  
+  /**
+    Used to notify the statechart that a state will try to handle event that has been passed
+    to it.
+    
+    @param {SC.State} state the state that will try to handle the event
+    @param {String} event the event the state will try to handle
+    @param {String} handler the name of the method on the state that will try to handle the event 
+  */
+  stateWillTryToHandleEvent: function(state, event, handler) {
+    this._stateHandleEventInfo = {
+      state: state,
+      event: event,
+      handler: handler
+    };
+  },
+  
+  /**
+    Used to notify the statechart that a state did try to handle event that has been passed
+    to it.
+    
+    @param {SC.State} state the state that did try to handle the event
+    @param {String} event the event the state did try to handle
+    @param {String} handler the name of the method on the state that did try to handle the event
+    @param {Boolean} handled indicates if the handler was able to handle the event 
+  */
+  stateDidTryToHandleEvent: function(state, event, handler, handled) {
+    this._stateHandleEventInfo = null;
   },
 
   /** @private
@@ -1469,6 +1507,132 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /** @private */
   _statechartTraceDidChange: function() {
     this.notifyPropertyChange('allowStatechartTracing');
+  },
+  
+  /**
+    @property
+    
+    Returns an object containing current detailed information about
+    the statechart. This is primarily used for diagnostic/debugging
+    purposes.
+    
+    Detailed information includes:
+    
+      - current states
+      - state transtion information
+      - event handling information
+    
+    @returns {Hash}
+  */
+  details: function() {
+    var details = {
+      'initialized': this.get('statechartIsInitialized')
+    }; 
+    
+    if (this.get('name')) {
+      details['name'] = this.get('name');
+    }
+    
+    if (!this.get('statechartIsInitialized')) {
+      return details;
+    }
+    
+    details['current-states'] = [];
+    this.get('currentStates').forEach(function(state) {
+      details['current-states'].push(state.get('fullPath'));
+    });
+    
+    var stateTransition = {
+      active: this.get('gotoStateActive'),
+      suspended: this.get('gotoStateSuspended')
+    };
+
+    if (this._gotoStateActions) {
+      stateTransition['transition-sequence'] = [];
+      var actions = this._gotoStateActions,
+          actionToStr = function(action) {
+            var actionName = action.action === SC.ENTER_STATE ? "enter" : "exit";
+            return "%@ %@".fmt(actionName, action.state.get('fullPath'));
+          };
+          
+      actions.forEach(function(action) {
+        stateTransition['transition-sequence'].push(actionToStr(action));
+      });
+      
+      stateTransition['current-transition'] = actionToStr(this._currentGotoStateAction);
+    }
+    
+    details['state-transition'] = stateTransition;
+    
+    if (this._stateHandleEventInfo) {
+      var info = this._stateHandleEventInfo; 
+      details['handling-event'] = {
+        state: info.state.get('fullPath'),
+        event: info.event,
+        handler: info.handler
+      };
+    } else {
+      details['handling-event'] = false;
+    }
+    
+    return details;
+  }.property(),
+
+  /**
+    Returns a formatted string of detailed information about this statechart. Useful
+    for diagnostic/debugging purposes.
+    
+    @returns {String}
+    
+    @see #details
+  */
+  toStringWithDetails: function() {
+    var str = "",
+        header = this.toString(),
+        details = this.get('details');
+    
+    str += header + "\n";
+    str += this._hashToString(details, 2);
+    
+    return str;
+  },
+
+  /** @private */
+  _hashToString: function(hash, indent) {
+    var str = "";
+    
+    for (var key in hash) {
+      var value = hash[key];
+      if (value instanceof Array) {
+        str += this._arrayToString(key, value, indent) + "\n";
+      }
+      else if (value instanceof Object) {
+        str += "%@%@:\n".fmt(' '.mult(indent), key);
+        str += this._hashToString(value, indent + 2);
+      } 
+      else {
+        str += "%@%@: %@\n".fmt(' '.mult(indent), key, value);
+      }
+    }
+    
+    return str;
+  },
+  
+  /** @private */
+  _arrayToString: function(key, array, indent) {
+    if (array.length === 0) {
+      return "%@%@: []".fmt(' '.mult(indent), key);
+    }
+    
+    var str = "%@%@: [\n".fmt(' '.mult(indent), key);
+    
+    array.forEach(function(item, idx) {
+      str += "%@%@\n".fmt(' '.mult(indent + 2), item);
+    }, this);
+    
+    str += ' '.mult(indent) + "]";
+    
+    return str;
   }
   
 };

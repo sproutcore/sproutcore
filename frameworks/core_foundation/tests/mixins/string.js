@@ -116,3 +116,11 @@ test("Access a localized layout hash", function() {
     "Button".locLayout({left:10});
   }, Error, "locLayout():  There is a localized value for the key 'Button.left' but a value for 'left' was also specified in the non-localized hash");
 });
+
+test("Multiply string", function() {
+  equals('a'.mult(0), null);
+  equals('a'.mult(1), 'a');
+  equals('a'.mult(2), 'aa');
+  equals('xyz'.mult(1), 'xyz');
+  equals('xyz'.mult(2), 'xyzxyz');
+});

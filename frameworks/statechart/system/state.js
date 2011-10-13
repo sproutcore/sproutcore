@@ -898,7 +898,9 @@ SC.State = SC.Object.extend(
   */
   tryToHandleEvent: function(event, arg1, arg2) {
 
-    var trace = this.get('trace');
+    var trace = this.get('trace'),
+        sc = this.get('statechart'),
+        ret;
 
     // First check if the name of the event is the same as a registered event handler. If so,
     // then do not handle the event.
@@ -915,14 +917,20 @@ SC.State = SC.Object.extend(
     // Now begin by trying a basic method on the state to respond to the event
     if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
       if (trace) this.stateLogTrace("will handle event '%@'".fmt(event));
-      return (this[event](arg1, arg2) !== NO);
+      sc.stateWillTryToHandleEvent(this, event, event);
+      ret = (this[event](arg1, arg2) !== NO);
+      sc.stateDidTryToHandleEvent(this, event, event, ret);
+      return ret;
     }
     
     // Try an event handler that is associated with an event represented as a string
     var handler = this._registeredStringEventHandlers[event];
     if (handler) {
       if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
-      return (handler.handler.call(this, event, arg1, arg2) !== NO);
+      sc.stateWillTryToHandleEvent(this, event, handler.name);
+      ret = (handler.handler.call(this, event, arg1, arg2) !== NO);
+      sc.stateDidTryToHandleEvent(this, event, handler.name, ret);
+      return ret;
     }
     
     // Try an event handler that is associated with events matching a regular expression
@@ -934,7 +942,10 @@ SC.State = SC.Object.extend(
       handler = this._registeredRegExpEventHandlers[i];
       if (event.match(handler.regexp)) {
         if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
-        return (handler.handler.call(this, event, arg1, arg2) !== NO);
+        sc.stateWillTryToHandleEvent(this, event, handler.name);
+        ret = (handler.handler.call(this, event, arg1, arg2) !== NO);
+        sc.stateDidTryToHandleEvent(this, event, handler.name, ret);
+        return ret;
       }
     }
     
@@ -942,7 +953,10 @@ SC.State = SC.Object.extend(
     // handle the event
     if (SC.typeOf(this['unknownEvent']) === SC.T_FUNCTION) {
       if (trace) this.stateLogTrace("unknownEvent will handle event '%@'".fmt(event));
-      return (this.unknownEvent(event, arg1, arg2) !== NO);
+      sc.stateWillTryToHandleEvent(this, event, 'unknownEvent');
+      ret = (this.unknownEvent(event, arg1, arg2) !== NO);
+      sc.stateDidTryToHandleEvent(this, event, 'unknownEvent', ret);
+      return ret;
     }
     
     // Nothing was able to handle the given event for this state

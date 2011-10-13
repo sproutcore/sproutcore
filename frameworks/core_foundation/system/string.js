@@ -294,7 +294,27 @@ SC.mixin(SC.String, {
   */
   trimRight: function (str) {
     return str.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
+  },
+  
+  /**
+    Mulitplies a given string. For instance if you have a string "xyz"
+    and multiply it by 2 the result is "xyzxyz".
+    
+    @param {String} str the string to multiply
+    @param {Number} value the number of times to multiply the string
+    @returns {String} the mulitiplied string
+  */
+  mult: function(str, value) {
+    if (SC.typeOf(value) !== SC.T_NUMBER || value < 1) return null;
+    
+    var ret = "";
+    for (var i = 0; i < value; i += 1) {
+      ret += str;
+    }
+    
+    return ret;
   }
+  
 });
 
 
