@@ -182,6 +182,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   */
   statechartIsInitialized: NO,
   
+  /**
+    Optional name you can provide the statechart with. If set this will be included
+    in tracing and error output as well as detail output. Useful for 
+    debugging/diagnostic purposes
+  */
   name: null,
   
   /**
