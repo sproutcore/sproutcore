@@ -367,8 +367,18 @@ SC.View.reopen(
     }
   },
 
-  _adjustForBorder: function(frame, layout, border){
-    var borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0,
+  /**
+    The normalized border, using proper masking of borders in the
+    `layout` hash and the `border` hash.
+
+    @field
+    @type Hash
+    @default { top: 0, left: 0, right: 0, bottom: 0 }
+   */
+  normalizedBorder: function () {
+    var layout = this.get('layout'),
+        border = this.get('border'),
+        borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0,
         borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0,
         borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0,
         borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0;
@@ -384,10 +394,17 @@ SC.View.reopen(
       }
     }
 
-    frame.x += borderLeft; // The border on the left pushes the frame to the right
-    frame.y += borderTop; // The border on the top pushes the frame down
-    frame.width -= (borderLeft + borderRight); // Border takes up space
-    frame.height -= (borderTop + borderBottom); // Border takes up space
+    return { top: borderTop,
+             left: borderLeft,
+             right: borderRight,
+             bottom: borderBottom };
+  }.property('layout', 'border').cacheable(),
+
+  _adjustForBorder: function(frame, border){
+    frame.x += border.left; // The border on the left pushes the frame to the right
+    frame.y += border.top; // The border on the top pushes the frame down
+    frame.width -= (border.left + border.right); // Border takes up space
+    frame.height -= (border.top + border.bottom); // Border takes up space
 
     return frame;
   },
@@ -409,13 +426,13 @@ SC.View.reopen(
   */
   computeFrameWithParentFrame: function(original, pdim) {
     var layout = this.get('layout'),
-        border = this.get('border');
+        border = this.get('normalizedBorder');
 
     // We can't predict the frame for static layout, so just return the view's
     // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
       f = original();
-      return f ? this._adjustForBorder(f, layout, border) : null;
+      return f ? this._adjustForBorder(f, border) : null;
     } else {
       f = {};
     }
@@ -559,7 +576,7 @@ SC.View.reopen(
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
 
-    f = this._adjustForBorder(f, layout, border);
+    f = this._adjustForBorder(f, border);
 
     // Account for special cases inside ScrollView, where we adjust the
     // element's scrollTop/scrollLeft property for performance reasons.
@@ -612,21 +629,16 @@ SC.View.reopen(
     The frame of the view including the borders
   */
   borderFrame: function(){
-    var layout = this.get('layout'),
-        frame = this.get('frame'),
-        defaultBorder = layout.border,
-        topBorder = ((layout.topBorder !== undefined) ? layout.topBorder : layout.border) || 0,
-        rightBorder = ((layout.rightBorder !== undefined) ? layout.rightBorder : layout.border) || 0,
-        bottomBorder = ((layout.bottomBorder !== undefined) ? layout.bottomBorder : layout.border) || 0,
-        leftBorder = ((layout.leftBorder !== undefined) ? layout.leftBorder : layout.border) || 0;
+    var border = this.get('normalizedBorder'),
+        frame = this.get('frame');
 
     return {
-      x: frame.x - leftBorder,
-      y: frame.y - topBorder,
-      width: frame.width + leftBorder + rightBorder,
-      height: frame.height + topBorder + bottomBorder
+      x: frame.x - border.left,
+      y: frame.y - border.top,
+      width: frame.width + border.left + border.right,
+      height: frame.height + border.top + border.bottom
     };
-  }.property('frame').cacheable(),
+  }.property('frame', 'normalizedBorder').cacheable(),
 
   /**
     This method may be called on your view whenever the parent view resizes.

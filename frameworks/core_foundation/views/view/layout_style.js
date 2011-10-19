@@ -51,7 +51,7 @@ SC.View.reopen(
   layoutStyle: function() {
     var props = {
       layout:       this.get('layout'),
-      border:       this.get('border'),
+      border:       this.get('normalizedBorder'),
       turbo:        this.get('hasAcceleratedLayer'),
       staticLayout: this.get('useStaticLayout')
     };
@@ -83,26 +83,10 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     @returns {Hash}
    */
-  _borderHashToLayoutBorderHash: function (hash) {
-    if (hash == null) return hash;
-
-    var layout = {}, k;
-    if (SC.typeOf(hash) === SC.T_HASH) {
-      for (k in hash) {
-        layout["border" + k.capitalize()] = hash[k];
-      }
-    } else {
-      layout.border = hash;
-    }
-    return layout;
-  },
-
   _layoutDidUpdate: function(){
     var layout = this.get('layout'),
         border = this.get('border');
     if (layout == null && border == null) { return; }
-    // user-defined border should override the layout's border properties.
-    layout = SC.supplement(this._borderHashToLayoutBorderHash(border), layout);
 
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
@@ -143,10 +127,10 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var centerY = (this.centerY = layout.centerY);
     this.hasCenterY = (centerY != null);
 
-    var borderTop = (this.borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0);
-    var borderRight = (this.borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0);
-    var borderBottom = (this.borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0);
-    var borderLeft = (this.borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0);
+    var borderTop = (this.borderTop = border.top);
+    var borderRight = (this.borderRight = border.right);
+    var borderBottom = (this.borderBottom = border.bottom);
+    var borderLeft = (this.borderLeft = border.left);
 
     // the toString here is to ensure that it doesn't get px added to it
     this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
