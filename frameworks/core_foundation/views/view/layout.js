@@ -383,14 +383,14 @@ SC.View.reopen(
         borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0,
         borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0;
 
-    if (border !== undefined) {
+    if (border != null) {
       if (SC.typeOf(border) === SC.T_HASH) {
         borderTop = (border.top !== undefined) ? border.top : borderTop;
         borderLeft = (border.left !== undefined) ? border.left : borderLeft;
         borderRight = (border.right !== undefined) ? border.right : borderRight;
         borderBottom = (border.bottom !== undefined) ? border.bottom : borderBottom;
       } else {
-        borderTop = borderLeft = borderRight = borderBottom = border;
+        borderTop = borderLeft = borderRight = borderBottom = border || 0;
       }
     }
 

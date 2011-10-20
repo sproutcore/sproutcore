@@ -67,26 +67,10 @@ SC.View.reopen(
 
 SC.View.LayoutStyleCalculator = SC.Object.extend({
 
-  /**
-    Only notify that `layout` changed when both `border`
-    and `layout` have changed.
-
-    This way, style calculation isn't done twice.
-   */
-  automaticallyNotifiesObserversFor: function (key) {
-    return (key === 'layout' || key === 'border') ? NO : sc_super();
-  },
-
-  /**
-    Transforms a border hash or number into a hash
-    appropriate layout.
-
-    @returns {Hash}
-   */
   _layoutDidUpdate: function(){
     var layout = this.get('layout'),
         border = this.get('border');
-    if (layout == null && border == null) { return; }
+    if (layout == null || border == null) { return; }
 
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
