@@ -278,14 +278,18 @@ SC.FlowedLayout = {
     if (cw) {
       calc.width = cw;
     } else {
-      calc.width = f.width;
+      // we should use the layout width if available to avoid breaking layouts
+      // that have borders
+      calc.width = l.width || f.width;
     }
     
     // same for calculated height
     if (ch) {
       calc.height = ch;
     } else {
-      calc.height = f.height;
+      // we should use the layout width if available to avoid breaking layouts
+      // that have borders
+      calc.height = l.height || f.height;
     }
 
     // if it is a spacer, we must set the dimension that it
@@ -307,16 +311,6 @@ SC.FlowedLayout = {
       calc.width = l.minWidth || 0;
     }
 
-    // finally, RECREATE the view's layout if it is invalid (lacks a width or a height)
-    if (l.width == undefined) {
-      view.adjust('width', f.width);
-    }
-
-    if (l.height == undefined) {
-      view.adjust('height', f.height);
-    }
-    
-    // return
     return calc;
   },
   
@@ -478,12 +472,11 @@ SC.FlowedLayout = {
   _scfl_distributeChildrenIntoRow: function(children, startingAt, row) {
     var idx, len = children.length, plan = row.plan, child, childSize, spacing,
         items = [], itemOffset = 0, isVertical = plan.isVertical, itemSize, itemLength,
-        maxItemLength,
+        maxSpacerLength,
         canWrap = this.get('canWrap'),
-        newRowPending = NO;
-
-    var maxItemLength = 0;
-    var max = row.plan.maximumRowLength;
+        newRowPending = NO,
+        maxItemLength = 0,
+        max = row.plan.maximumRowLength;
     
     for (idx = startingAt; idx < len; idx++) {
       child = children[idx];
@@ -502,7 +495,7 @@ SC.FlowedLayout = {
       childSize.height += spacing.top + spacing.bottom;
 
       itemLength = childSize[isVertical ? 'height' : 'width'];
-      maxItemLength = childSize.maxSpacerLength + (isVertical ? spacing.top + spacing.bottom : spacing.left + spacing.right);
+      if(!SC.none(childSize.maxSpacerLength)) maxSpacerLength = childSize.maxSpacerLength + (isVertical ? spacing.top + spacing.bottom : spacing.left + spacing.right);
       itemSize = childSize[isVertical ? 'width' : 'height'];
 
       // there are two cases where we must start a new row: if the child or a
@@ -517,7 +510,7 @@ SC.FlowedLayout = {
         child: child,
         
         itemLength: itemLength,
-        maxItemLength: maxItemLength,
+        maxSpacerLength: maxSpacerLength,
         itemSize: itemSize,
         
         spacing: spacing,
@@ -538,6 +531,7 @@ SC.FlowedLayout = {
         left: undefined, top: undefined,
         width: undefined, height: undefined
       };
+
       
       items.push(item);
       itemOffset += itemLength;
@@ -604,9 +598,9 @@ SC.FlowedLayout = {
 
         if (item.isSpacer) {
           item.itemLength += spacerSize * (item.child.get('spaceUnits') || 1);
-          if(item.itemLength > item.maxItemLength) {
-            leftOver +=  item.itemLength - item.maxItemLength;
-            item.itemLength = item.maxItemLength;
+          if(item.itemLength > item.maxSpacerLength) {
+            leftOver +=  item.itemLength - item.maxSpacerLength;
+            item.itemLength = item.maxSpacerLength;
           }
           else {
             noMaxWidth = YES;
@@ -649,6 +643,7 @@ SC.FlowedLayout = {
       rowSize = Math.max(item.itemSize, rowSize);
       
       item.position = position;
+
       position += item.itemLength;
       
       // if justification is on, we have one more spacer
@@ -699,7 +694,7 @@ SC.FlowedLayout = {
   */
   _scfl_applyPlan: function(plan) {
     var rows = plan.rows, rowIdx, rowsLen, row, longestRow = 0, totalSize = 0,
-        items, itemIdx, itemsLen, item, layout,
+        items, itemIdx, itemsLen, item, layout, itemSize,
         
         isVertical = plan.isVertical;
     
@@ -714,28 +709,18 @@ SC.FlowedLayout = {
       for (itemIdx = 0; itemIdx < itemsLen; itemIdx++) {
         item = items[itemIdx];
         item.child.beginPropertyChanges();
+
+        itemSize = item.fillRow ? row.rowSize : item.itemSize;
+
+        layout = {
+          left: item.spacing.left + (isVertical ? row.position : item.position),
+          top: item.spacing.top + (isVertical ? item.position : row.position),
+          width: isVertical ? itemSize : item.itemLength,
+          height: isVertical ? item.itemLength : itemSize
+        };
         
-        layout = {};
-        
-        // we are _going_ to set position. that much is certain.
-        layout.left = item.spacing.left + (isVertical ? row.position : item.position);
-        layout.top = item.spacing.top + (isVertical ? item.position : row.position);
-        
-        // the size is more questionable: we only change that if the
-        // item wants.
-        if (item.fillRow) {
-          layout[isVertical ? 'width' : 'height'] = row.rowSize;
-        }
-        if (item.isSpacer) {
-          layout[isVertical ? 'height' : 'width'] = item.itemLength;
-        }
-        
-        if (layout.width !== undefined) {
-          layout.width -= item.spacing.left + item.spacing.right;
-        }
-        if (layout.height !== undefined) {
-          layout.height -= item.spacing.top + item.spacing.bottom;
-        }
+        layout.width -= item.spacing.left + item.spacing.right;
+        layout.height -= item.spacing.top + item.spacing.bottom;
         
         this.applyPlanToView(item.child, layout);
         item.child._scfl_lastLayout = layout;
