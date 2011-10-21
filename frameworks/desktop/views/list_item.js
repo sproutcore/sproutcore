@@ -250,6 +250,15 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   */
   validator: null,
 
+  contentKeys: {
+    contentValueKey: 'title',
+    contentCheckboxKey: 'checkbox',
+    contentIconKey:  'icon',
+    contentRightIconKey: 'rightIcon',
+    contentUnreadCountKey: 'count',
+    contentIsBranchKey: 'branch',
+  },
+
   /** @private */
   contentPropertyDidChange: function() {
     //if (this.get('isEditing')) this.discardEditing() ;

@@ -15,6 +15,18 @@ var CommentView = SC.View.extend(SC.StaticLayout, SC.Control, {
   
   classNames: 'comment-view',
 
+  contentKeys: {
+    'contentFromKey': 'from',
+    'contentDateKey': 'date',
+    'contentCommentKey': 'comment'
+  },
+
+  contentFromKey: 'from',
+
+  contentDateKey: 'date',
+
+  contentCommentKey: 'comment',
+
   contentPropertyDidChange: function(target, key) {
 
     // update everything!

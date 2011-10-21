@@ -498,35 +498,11 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   renderDelegateName: 'buttonRenderDelegate',
 
-  /**
-    Updates the value, title, and icon keys based on the content object, if
-    set.
-    
-    @type {Object} target the target of the object that changed
-    @type {String} key name of property that changed
-    @returns {SC.ButtonView} receiver
-  */
-  contentPropertyDidChange: function(target, key) {
-    var del = this.get('displayDelegate'), 
-        content = this.get('content'), value ;
-
-    var valueKey = this.getDelegateProperty('contentValueKey', del) ;
-    if (valueKey && (key === valueKey || key === '*')) {
-      this.set('value', content ? (content.get ? content.get(valueKey) : content[valueKey]) : null) ;
-    }
-
-    var titleKey = this.getDelegateProperty('contentTitleKey', del) ;
-    if (titleKey && (key === titleKey || key === '*')) {
-      this.set('title', content ? (content.get ? content.get(titleKey) : content[titleKey]) : null) ;
-    }
-
-    var iconKey = this.getDelegateProperty('contentIconKey', del);
-    if (iconKey && (key === iconKey || key === '*')) {
-      this.set('icon', content ? (content.get ? content.get(iconKey) : content[iconKey]) : null) ;
-    }
-    
-    return this ;
-  },
+   contentKeys: {
+     'contentValueKey': 'value',
+     'contentTitleKey': 'title',
+     'contentIconKey': 'icon'
+   },
 
   /** @private - when title changes, dirty display. */
   _button_displayObserver: function() {

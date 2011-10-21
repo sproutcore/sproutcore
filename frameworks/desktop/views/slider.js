@@ -268,13 +268,10 @@ SC.SliderView = SC.View.extend(SC.Control,
      return YES; 
    },
 
-  contentPropertyDidChange: function(target, key) {
-    var content = this.get('content');
-    this.beginPropertyChanges()
-      .updatePropertyFromContent('value', key, 'contentValueKey', content)
-      .updatePropertyFromContent('minimum', key, 'contentMinimumKey', content)
-      .updatePropertyFromContent('maximum', key, 'contentMaximumKey', content)
-      .updatePropertyFromContent('isIndeterminate', key, 'contentIsIndeterminateKey', content)
-    .endPropertyChanges();
-  }  
+   contentKeys: {
+     'contentValueKey': 'value',
+     'contentMinimumKey': 'minimum',
+     'contentMaximumKey': 'maximum',
+     'contentIsIndeterminateKey': 'isIndeterminate'
+   }
 });

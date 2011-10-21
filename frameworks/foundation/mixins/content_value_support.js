@@ -24,7 +24,6 @@
   only have primitive values, consider using SC.Control instead.
 */
 SC.ContentValueSupport = {
-
   /**
     Walk like a duck.
 
@@ -35,7 +34,8 @@ SC.ContentValueSupport = {
 
   /** @private */
   initMixin: function() {
-    this._control_contentDidChange() ; // setup content observing if needed.
+    // setup content observing if needed.
+    this._control_contentKeysDidChange();
   },
   
   /**
@@ -76,6 +76,22 @@ SC.ContentValueSupport = {
     @default null
   */
   content: null,
+
+  /**
+    Keys that should be observed on the content object and mapped to values on
+    this object. Should be a hash of local keys that point to keys on the content to
+    map to local values. For example, the default is {'contentValueKey': 'value'}.
+    This means that the value of this.contentValueKey will be observed as a key on
+    the content object and its value will be mapped to this.value.
+
+    @type Hash
+    @default null
+  */
+  contentKeys: null,
+
+  _default_contentKeys: {
+    contentValueKey: 'value'
+  },
   
   /**
     The property on the content object that would want to represent the 
@@ -105,17 +121,21 @@ SC.ContentValueSupport = {
     @test in content
   */
   contentPropertyDidChange: function(target, key) {
-    return this.updatePropertyFromContent('value', key, 'contentValueKey', target);
+    var contentKeys = this.get('contentKeys');
+
+    if(contentKeys) {
+      var contentKey;
+
+      for(contentKey in contentKeys) {
+        if(key === '*' || key === this.getDelegateProperty(contentKey)) return this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+      }
+    }
+
+    else {
+      return this.updatePropertyFromContent('value', key, 'contentValueKey', target);
+    }
   },
 
-  /**
-    @private
-
-    Cache of the last value synchronized. Used to prevent every write
-    from triggering a write in the opposite direction.
-  */
-  _justWroteValue: undefined,
-  
   /**
     Helper method you can use from your own implementation of 
     contentPropertyDidChange().  This method will look up the content key to
@@ -132,7 +152,7 @@ SC.ContentValueSupport = {
   */
   updatePropertyFromContent: function(prop, key, contentKey, content) {
     var del, v;
-    
+
     if (contentKey === undefined) contentKey = "content"+prop.capitalize()+"Key";
     
     // prefer our own definition of contentKey
@@ -141,19 +161,15 @@ SC.ContentValueSupport = {
     else if((del = this.displayDelegate) && (v = del[contentKey])) contentKey = del.get ? del.get(contentKey) : v;
     // if we have no key we can't do anything so just short circuit out
     else return this;
-    
+
     // only bother setting value if the observer triggered for the correct key
     if (key === '*' || key === contentKey) {
       if (content === undefined) content = this.get('content');
       
       if(content) v = content.get ? content.get(contentKey) : content[contentKey];
       else v = null;
-      
-      // avoid thrashing
-      if(v === this._justWroteValue) return this;
-      this._justWroteValue = v;
 
-      this.set(prop, v) ;
+      this.setIfChanged(prop, v) ;
     }
     
     return this ;
@@ -174,70 +190,172 @@ SC.ContentValueSupport = {
     
     @returns {void}
   */
-  updateContentWithValueObserver: function() {
-    var key = this.contentValueKey ?
-      this.get('contentValueKey') :
-      this.getDelegateProperty('contentValueKey', this.displayDelegate),
-      content = this.get('content');
+  updateContentWithValueObserver: function(target, key) {
+    var reverseContentKeys = this._reverseContentKeys;
 
-    if (!key || !content) return this; // do nothing if disabled
+    // if everything changed, iterate through and update them all
+    if(!key || key === '*') {
+      for(key in reverseContentKeys) {
+        this.updateContentWithValueObserver(this, key);
+      }
+    }
 
     // get value -- set on content if changed
-    var value = this.get('value');
+    var value = this.get(key);
 
-    // avoid thrashing
-    if(value === this._justWroteValue) return this;
-    this._justWroteValue = value;
+    var content = this.get('content'),
+    // get the key we should be setting on content, asking displayDelegate if
+    // necessary
+    contentKey = this.getDelegateProperty(reverseContentKeys[key], this.displayDelegate);
+
+    // do nothing if disabled
+    if (!contentKey || !content) return this;
 
     if (typeof content.setIfChanged === SC.T_FUNCTION) {
-      content.setIfChanged(key, value);
+      content.setIfChanged(contentKey, value);
     }
 
     // avoid re-writing inherited props
-    else if (content[key] !== value) {
-      content[key] = value ;
+    else if (content[contentKey] !== value) {
+      content[contentKey] = value ;
     }
-  }.observes('value'),
-  
+  },
+
   /** @private
     This should be null so that if content is also null, the
     _contentDidChange won't do anything on init.
   */
   _control_content: null,
+  _old_contentValueKeys: null,
+  _old_contentKeys: null,
 
   /** @private
     Observes when a content object has changed and handles notifying 
     changes to the value of the content object.
-  */
-  // TODO: observing * is unnecessary and inefficient, but a bunch of stuff in sproutcore depends on it (like button)
-  _control_contentDidChange: function() {
-    var content = this.get('content');
-    
-    if (this._control_content === content) return; // nothing changed
-    
-    var f = this.contentPropertyDidChange,
-    // remove an observer from the old content if necessary
-        old = this._control_content;
 
-    if (old && old.removeObserver) old.removeObserver('*', this, f) ;
-  
+    Optimized for the default case of only observing contentValueKey. If you use
+    a custom value for contentKeys it will switch to using a CoreSet to track
+    observed keys.
+  */
+  _control_contentDidChange: function(target, key) {
+    var content = this.get('content'),
+    contentKeys = this.get('contentKeys'), contentKey,
+    old = this._control_content,
+    oldKeys = this._old_contentValueKeys,
+    oldType = SC.typeOf(oldKeys),
+    f = this.contentPropertyDidChange;
+
+    // remove an observer from the old content if necessary
+    if (old && old.removeObserver && oldKeys) {
+      // default case
+      if(oldType === SC.T_STRING) {
+        old.removeObserver(oldKeys, this, f);
+
+        oldKeys = null;
+      }
+
+      // set case
+      else {
+        var i, len = oldKeys.get('length');
+
+        for(i = 0; i < len; i++) {
+          contentKey = oldKeys[i];
+
+          old.removeObserver(contentKey, this, f);
+        }
+
+        oldKeys.clear();
+      }
+    }
+
+    // add observer to new content if necessary.
+    if (content && content.addObserver) {
+      // set case
+      if(contentKeys) {
+        // lazily create the key set
+        if(!oldKeys) oldKeys = SC.CoreSet.create();
+
+        // add observers to each key
+        for(contentKey in contentKeys) {
+          contentKey = this.getDelegateProperty(contentKey);
+
+          if(contentKey) {
+            content.addObserver(contentKey, this, f);
+
+            oldKeys.add(contentKey);
+          }
+        }
+      }
+
+      // default case hardcoded for contentValueKey
+      else {
+        contentKey = this.getDelegateProperty('contentValueKey');
+
+        if(contentKey) {
+          content.addObserver(contentKey, this, f);
+
+          // if we had a set before, continue using it
+          if(oldKeys) oldKeys.add(contentKey);
+          // otherwise just use a string
+          else oldKeys = contentKey;
+        }
+      }
+    }
+
     // update previous values
     this._control_content = content ;
-  
-    // add observer to new content if necessary.
-    if (content && content.addObserver) content.addObserver('*', this, f) ;
+    this._old_contentValueKeys = oldKeys;
 
     // notify that value did change.
-    this.contentPropertyDidChange(content, '*') ;
-    
+    key = (!key || key === 'content') ? '*' : this.get('key');
+    if(key) this.contentPropertyDidChange(content, key) ;
   }.observes('content'),
-  
+
+  // holds the previous value of contentKeys
+  _old_contentKeys: null,
+
   /** @private
-    Since we always observe *, just call the update function
+    Observes changes to contentKeys and sets up observers on the local keys to
+    update the observers on the content object.
   */
-  _control_contentValueKeyDidChange: function() {
-    // notify that value did change.
-    this.contentPropertyDidChange(this.get('content'), '*') ;
-  }.observes('contentValueKey')
+  _control_contentKeysDidChange: function() {
+    var key, reverse = {},
+    // if no hash is present, use the default contentValueKey -> value
+    contentKeys = this.get('contentKeys') || this._default_contentKeys, contentKey,
+    oldContentKeys = this._old_contentKeys,
+    f = this._control_contentDidChange,
+    reverseF = this.updateContentWithValueObserver;
+
+    // remove old observers
+    for(key in oldContentKeys) {
+      contentKey = oldContentKeys[key];
+
+      this.removeObserver(contentKey, this, reverseF);
+
+      this.removeObserver(key, this, f);
+    }
+
+    // add new observers
+    for(key in contentKeys) {
+      contentKey = contentKeys[key];
+
+      // build reverse mapping to update content with value
+      reverse[contentKey] = key;
+
+      // add value observer
+      this.addObserver(contentKey, this, reverseF);
+
+      // add content key observer
+      this.addObserver(key, this, f);
+    }
+
+    // store reverse map for later use
+    this._reverseContentKeys = reverse;
+
+    this._old_contentKeys = contentKeys;
+
+    // call the other observer now to update all the observers
+    this._control_contentDidChange();
+  }.observes('contentKeys')
 };
 
