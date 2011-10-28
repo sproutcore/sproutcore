@@ -117,7 +117,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @property
     @type Boolean
   */
-  hintOnFocus: NO,
+  hintOnFocus: YES,
 
   /*
     Whether the hint should be localized or not.
