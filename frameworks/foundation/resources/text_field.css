@@ -82,7 +82,7 @@
     color: #B3B3B3 !important;
   }
 
-  .safari &{
+  .webkit &{
     &.focus {
       outline: auto 7px -webkit-focus-ring-color; 
       outline-offset: -2px;
