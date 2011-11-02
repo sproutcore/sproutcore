@@ -379,5 +379,5 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   name.
 */
 SC.ImageView.valueIsUrl = function(value) {
-  return value ? value.indexOf('/') >= 0 : NO ;
+  return value && SC.typeOf(value)===SC.T_STRING ? value.indexOf('/') >= 0 : NO ;
 } ;
