@@ -92,11 +92,12 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     this.set('isActive', NO);
     this._isMouseDown = NO;
 
-    this._toggleValue();
-
     // fire action
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      if (this.$().within(evt.target)) { this._action(evt); }
+      if (this.$().within(evt.target)) {
+        this._toggleValue();
+        this._action(evt);
+      }
     }
 
     return YES;
