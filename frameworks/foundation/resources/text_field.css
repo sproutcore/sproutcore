@@ -56,31 +56,22 @@
   
   
   .sc-hint {
-  	z-index: 1;
-  	position: absolute;
-  	top: 3px;
-  	left: 1px;
-  	right: 1px;
-  	bottom: 3px;
-  	padding: 0px;
-  	color: #aaa ;
-  	font-size: 12px;
+    position: absolute;
+    z-index: 1;
+    left: 1px;
+    right: 1px;
+    padding: 0px;
+    color: #aaa;
+    font-size: 12px;
   }
 
   &.text-area .sc-hint {
-  	top: 2px;
   	left: 3px;
   	right: 3px;
-  	bottom: 2px;
   }
 
-  &.focus .sc-hint,
-  &.not-empty .sc-hint {
-    display: none ;
-  }
-
-  &.sc-hint .field{
-    color: #B3B3B3 !important;
+  .sc-hint.disabled {
+    display: none;
   }
 
   .safari &{
@@ -115,9 +106,11 @@
     .border {
       border:1px inset;
     }
+
     input.field {
       padding-bottom: 1px;
     }
+
     textarea.field {
     	height: 100%;
     }

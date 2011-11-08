@@ -31,7 +31,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     The WAI-ARIA role for text field view. This property's value should not be
     changed.
 
-    @property {String}
+    @type String
   */
   ariaRole: 'textbox',
 
@@ -42,83 +42,137 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   /**
     When applyImmediately is turned on, every keystroke will set the value
     of the underlying object. Turning it off will only set the value on blur.
-    
+
     @type String
     @default YES
   */
   applyImmediately: YES,
 
-  /*
-  * Flag indicating whether the editor should automatically commit if you click
-  * outside it.
-  *
-  * @type {Boolean}
-  */
+  /**
+    Flag indicating whether the editor should automatically commit if you click
+    outside it.
+
+    @type Boolean
+    @default YES
+   */
   commitOnBlur: YES,
 
   /**
-    If YES, the field will hide its text from display. The default value is NO.
-    
-    @property
+    If YES, the field will hide its text from display.
+
+    Deprecated. Use `type` instead.
+
     @type Boolean
-  */
+    @default NO
+   */
   isPassword: NO,
 
   /**
-    If YES then allow multi-line input.  This will also change the default
-    tag type from "input" to "textarea".  Otherwise, pressing return will
+    If YES then allow multi-line input. This will also change the default
+    tag type from "input" to "textarea". Otherwise, pressing return will
     trigger the default insertion handler.
-    
-    @property
+
     @type Boolean
-  */
+    @default NO
+   */
   isTextArea: NO,
 
   /**
-    The hint to display while the field is not active.
-    
-    @property
+    Whether iOS should auto correct the input according to it's internal dictionary.
+    When null, it defaults to the system preferences.
+
+    @type Boolean
+    @default null
+   */
+  shouldAutoCorrect: null,
+ 
+  /**
+    Whether iOS should automatically capitalize the first letter of the input.
+    When null, it defaults to the system preferences.
+
+    @type Boolean
+    @default null
+   */
+  shouldAutoCapitalize: null,
+ 
+  /**
+    The type of the input.
+
+    Acceptable values are HTML5 <input/> type attributes
+    for text fields: `'email'`, `'url'`, `'number'`, `'search'`,
+    `'text'`, and `'password'`. Will default to `'text'`.
+
     @type String
-  */
+    @default 'text'
+   */
+  type: 'text',
+
+  /**
+    The hint to display while the field is not active.
+
+    @type String
+    @default ''
+   */
   hint: '',
 
-  /*
-  * Localizes the hint if necessary.
-  */
+  /**
+    Whether the hint should be shown when the field is focused a lá OSX Lion.
+
+    @type Boolean
+    @default NO
+   */
+  hintOnFocus: NO,
+
+  /**
+    Localizes the hint if necessary.
+    @field
+    @type String
+   */
   formattedHint: function() {
     var hint = this.get('hint');
 
     return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
 
-  /*
-  * Whether the hint should be localized or not.
-  */
+  /**
+    Whether the hint should be localized or not.
+
+    @type Boolean
+    @default YES
+   */
   localize: YES,
 
   /**
-    If YES then the text field is currently editing.
-    
-    @property
+    Whether the text field is currently focused.
+
     @type Boolean
-  */
+    @default NO
+   */
+  focused: NO,
+
+  /**
+    If YES then the text field is currently editing.
+
+    @type Boolean
+    @default NO
+   */
   isEditing: NO,
   
   /**
     If you set this property to false the tab key won't trigger its default 
     behavior (tabbing to the next field).
-    
-    @property
+
     @type Boolean
-  */
+    @default YES
+   */
   defaultTabbingEnabled: YES,
   
   /**
     Enabled context menu for textfields.
-    
-    @property
+
     @type Boolean
-  */
+    @default YES
+   */
   isContextMenuEnabled: YES,
 
   /**
@@ -131,17 +185,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     @type Boolean
     @default null
-  */
+   */
   continuouslyUpdatesValue: null,
 
   /**
     If no, will not allow transform or validation errors (SC.Error objects)
-    to be passed to 'value'.  Upon focus lost, the text field will revert
+    to be passed to `value`. Upon focus lost, the text field will revert
     to its previous value.
     
-    @property
     @type Boolean
-  */
+    @default YES
+   */
   allowsErrorAsValue: YES,
 
   /**
@@ -164,9 +218,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     amount of left padding used when the accessory view is visible, make the
     accessory view wider, with empty space on the right.
     
-    @property
     @type SC.View
-  */
+    @default null
+   */
   leftAccessoryView: null,
 
   /**
@@ -190,8 +244,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     amount of right padding used when the accessory view is visible, make the
     accessory view wider, with empty space on the left.
     
-    @property
     @type SC.View
+    @default null
   */
   rightAccessoryView: null,
   
@@ -199,44 +253,68 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     This property will enable disable HTML5 spell checking if available on the 
     browser. As of today Safari 4+, Chrome 3+ and Firefox 3+ support it
     
-    @property
     @type Boolean
+    @default YES
   */
   spellCheckEnabled: YES,
   
   /**
     Maximum amount of characters this field will allow.
     
-    @property
     @type Number
+    @default 5096
   */
   maxLength: 5096,
   
   /**
     Whether to render a border or not.
-    
-    @property
+
     @type Boolean
-  */
+    @default YES
+   */
   shouldRenderBorder: YES,
 
-  //
+  // ..........................................................
   // SUPPORT FOR AUTOMATIC RESIZING
   //
-  supportsAutoResize: YES,
-  autoResizeLayer: function() { return this.$input()[0]; }
-  .property('layer').cacheable(),
 
-  autoResizeText: function() { return this.get('value'); }
-  .property('value').cacheable(),
+  /**
+    This view supports auto resize.
+
+    @type Boolean
+    @default YES
+   */
+  supportsAutoResize: YES,
+
+  /**
+    The layer to use is the actual `<input/>` element
+    for resizing.
+
+    @field
+    @type HTMLElement
+   */
+  autoResizeLayer: function () {
+    return this.$input()[0];
+  }.property('layer').cacheable(),
+
+  /**
+    The string to use when auto-resizing.
+
+    @field
+    @type String
+   */
+  autoResizeText: function () {
+    return this.get('value');
+  }.property('value').cacheable(),
 
   autoResizePadding: SC.propertyFromRenderDelegate('autoResizePadding', 20),
 
   /** @private
-    Whether to show hint or not
-  */
+    Whether to show hint or not.
+   */
   _hintON: YES,
-  
+
+  /** @private */
   init: function() {
     var val = this.get('value');
     this._hintON = (!val || val && val.length===0) ? YES : NO;
@@ -259,8 +337,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     Note if isEnabled is NO this property will have no effect.
   
-    @property
     @type Boolean
+    @default YES
   */
   isEditable: YES,
 
@@ -272,7 +350,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     not the case that a previously-returned SC.TextSelection object will
     simply have its properties mutated.
 
-    @property {SC.TextSelection}
+    @field
+    @type SC.TextSelection
   */
   selection: function(key, value) {
     var element = this.$input()[0],
@@ -502,7 +581,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (leftAdjustment)  leftAdjustment  += 'px' ;
     if (rightAdjustment) rightAdjustment += 'px' ;
 
-   this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
+    this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment);
     if(SC.browser.mozilla) this.invokeLast(this._applyFirefoxCursorFix);
   },
 
@@ -524,134 +603,173 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
-        hintElements, element, paddingElementStyle, fieldClassNames,
-        spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
-        maxLength = this.get('maxLength'), isOldSafari;
+    var isTextArea = this.get('isTextArea'),
+        isDisabled = !this.get('isEnabled'),
+        isReadOnly = !isDisabled && !this.get('isEditable'),
+        isHintOn = this._hintON,
+        wasHintOn = this._wasHintON,
+        hint = this.get('formattedHint'),
+        adjustmentStyle = '',
+        type = this.get('type');
 
-    context.setClass('text-area', this.get('isTextArea'));
-    
-    //Adding this to differentiate between older and newer versions of safari
-    //since the internal default field padding changed 
-    isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
-    context.setClass('oldWebKitFieldPadding', isOldSafari);
-    
-    spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
+    context.setClass('text-area', isTextArea);
+ 
+    // Adding this to differentiate between older and newer versions of Safari
+    // since the internal default field padding changed
+    context.setClass('oldWebKitFieldPadding',
+      SC.browser.isWebkit && (parseInt(SC.browser.webkit, 0) < 532));
+
+    // ..........................................................
+    // RENDER
+    //
     if (firstTime || this._forceRenderFirstTime) {
-      this._forceRenderFirstTime = NO;
-      activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
-      name = this.get('layerId');
-      
-      if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
 
-      // Render the padding element, with any necessary positioning
-      // adjustments to accommodate accessory views.
-      adjustmentStyle = '' ;
-      if (leftAdjustment  ||  rightAdjustment) {
-        adjustmentStyle = 'style="' ;
-        if (leftAdjustment)  adjustmentStyle += 'left: '  + leftAdjustment  + '; ' ;
-        if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
-        adjustmentStyle += '"' ;
-      }
-      context.push('<span class="padding" '+adjustmentStyle+'>');
-                  
-      value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
-        value = hint;
-        context.setClass('sc-hint', YES);
-      } 
-      
-      //for gecko pre 1.9 vertical aligment is completely broken so we need
-      //different styling.
-      fieldClassNames = (SC.browser.mozilla &&
-                          (parseFloat(SC.browser.mozilla)<1.9 || 
-                          SC.browser.mozilla.match(/1\.9\.0|1\.9\.1/))) ?
-                          "field oldGecko": "field";
-      
-      // Render the input/textarea field itself, and close off the padding.
-      if (this.get('isTextArea')) {
-        context.push('<textarea class="',fieldClassNames,'" name="', name, 
-                      '" ', activeState, ' placeholder="',hint, '"',
-                      spellCheckString,' maxlength="', maxLength, '">', 
-                      value, '</textarea></span>') ;
-      }
-      else {
-        type = 'text';
-        
-        // Internet Explorer won't let us change the type attribute later
-        // so we force it to password if needed now, or if the value is not the hint
-        if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
-        
-        context.push('<input class="',fieldClassNames,'" type="', type,
-                      '" name="', name, '" ', activeState, ' value="', value,
-                      '" placeholder="',hint,'"', spellCheckString, 
-                      ' maxlength="', maxLength, '" /></span>') ;
-      }
-    }
-    else {
-      var input= this.$input(),
-          elem = input[0],
-          val = this.get('value');
-
-      if (!val || (val && val.length === 0)) {
-        if (this._hintON && !this.get('isFirstResponder')) {
-          // Internet Explorer doesn't allow you to modify the type afterwards
-          // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
-
-          if (!SC.platform.input.placeholder) {
-            context.setClass('sc-hint', YES);
-            input.val(hint);
-          }
-        } else {
-          // Internet Explorer doesn't allow you to modify the type afterwards
-          // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
-
-          if (!SC.platform.input.placeholder) {
-            context.setClass('sc-hint', NO);
-            input.val('');
-          }
-        }
+      if (this.get('shouldRenderBorder')) {
+        context.push('<span class="border"></span>');
       }
 
-      if (SC.platform.input.placeholder) input.attr('placeholder', hint);
-
-      // Enable/disable the actual input/textarea as appropriate.
-      element = input[0];
-      if (element) {
-        if (!this.get('isEnabled')) {
-          element.disabled = 'true' ;
-          element.readOnly = null ;
-        } else if(!this.get('isEditable')) {
-          element.disabled = null ;
-          element.readOnly = 'true' ;
-        } else {
-          element.disabled = null ;
-          element.readOnly = null ;
-        }
-
-        // Adjust the padding element to accommodate any accessory views.
-        paddingElementStyle = element.parentNode.style;
+      if (leftAdjustment || rightAdjustment) {
+        adjustmentStyle = ' style="';
         if (leftAdjustment) {
-          if (paddingElementStyle.left !== leftAdjustment) {
-            paddingElementStyle.left = leftAdjustment ;
-          }
+          adjustmentStyle += 'left:' + leftAdjustment + ';';
         }
-        else {
-          paddingElementStyle.left = null ;
-        }
-
         if (rightAdjustment) {
-          if (paddingElementStyle.right !== rightAdjustment) {
-            paddingElementStyle.right = rightAdjustment ;
-          }
+          adjustmentStyle += 'right:' + rightAdjustment + ';';
         }
-        else {
-          paddingElementStyle.right = null ;
+        adjustmentStyle += '"';
+      }
+
+      context.push('<span class="padding"' + adjustmentStyle + '>');
+
+      var attrs = {
+        maxlength: this.get('maxLength'),
+        disabled: isDisabled ? 'disabled' : null,
+        readonly: isReadOnly ? 'readonly' : null,
+        name: this.get('name') || this.get('layerId'),
+        'class': 'field'
+      };
+
+      var attr = this.get('spellCheckEnabled');
+      if (attr != null) {
+        attrs.spellcheck = attr ? 'true' : 'false';
+      }
+
+      // iOS auto correct
+      attr = this.get('shouldAutoCorrect');
+      if (attr != null) {
+        attrs.autocorrect = attr ? 'on' : 'off';
+      }
+
+      // iOS auto capitalize
+      attr = this.get('shouldAutoCapitalize');
+      if (attr != null) {
+        attrs.autocapitalize = attr ? 'on' : 'off';
+      }
+
+      attrs.readonly = !attrs.disabled && !this.get('isEditable') ? 'readonly' : null;
+
+      // Use inline <span> for the hint.
+      if (this.get('hintOnFocus') || !SC.platform.input.placeholder) {
+        this._hasSpanHint = YES;
+        context.push('<span class="sc-hint' + (!isHintOn ? ' disabled' : '') + '">' +
+                       hint +
+                     '</span>');
+
+      // Use HTML5 placeholder attribute
+      } else {
+        attrs.placeholder = hint;
+      }
+
+      if (this.get('isPassword')) {
+        type = 'password';
+      }
+
+      if (!isTextArea) {
+        attrs.type = type || 'text';
+        if (value) {
+          attrs.value = value;
+        }
+      }
+
+      if (SC.browser.mozilla &&
+          (parseFloat(SC.browser.mozilla) < 1.9 || SC.browser.mozilla.match(/1\.9\.0|1\.9\.1/))) {
+        attrs['class'] += ' oldGecko';
+      }
+
+      var input = '';
+      for (var k in attrs) {
+        if (attrs.hasOwnProperty(k) && attrs[k] != null) {
+          input += ' ' + k + '="' + attrs[k] + '"';
+        }
+      }
+
+      if (isTextArea) {
+        input = '<textarea' + input + '/>' + value + '</textarea>';
+      } else {
+        input = '<input' + input + '/>';
+      }
+
+      context.push(input);
+      context.push('</span>');
+
+    // ..........................................................
+    // UPDATE
+    //
+    } else {
+      var $input = this.$input(),
+          input = $input[0],
+          $hint;
+
+      if (this._hasSpanHint) {
+        $hint = this.$('.sc-hint');
+      }
+
+      // IE8 has problems aligning the input text in the center
+      // This is a workaround for centering it.
+      if (SC.browser.isIE8OrLower && !isTextArea) {
+        $input.css('line-height', this.get('frame').height + 'px');
+      }
+
+      if (isHintOn) {
+        if ($hint) {
+          $hint.html(hint);
+          $hint.css('line-height', this.get('frame').height + 'px');
+        } else if (hint !== $input.attr('placeholder')) {
+          $input.attr('placeholder', hint);
+        }
+      }
+
+      if (isHintOn !== wasHintOn && $hint) {
+        $hint.setClass('disabled', !isHintOn);
+      }
+
+      if (input) {
+        input.disabled = isDisabled ? 'disabled' : null;
+        input.readOnly = isReadOnly ? 'readonly' : null;
+      }
+
+      var padding = input.parentNode.style;
+
+      // Update padding
+      if (padding) {
+        if (leftAdjustment) {
+          if (padding.left !== leftAdjustment) {
+            padding.left = leftAdjustment;
+          }
+        } else {
+          padding.left = null;
+        }
+        if (rightAdjustment) {
+          if (padding.right !== rightAdjustment) {
+            padding.right = rightAdjustment;
+          }
+        } else {
+          padding.right = null;
         }
       }
     }
+
+    this._wasHintON = isHintOn;
   },
 
   _getAccessoryViewWidths: function() {
@@ -696,7 +814,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   didCreateLayer: function() {
     sc_super(); 
-    this._applyHint();
     this._addEvents();
   },
   
@@ -709,14 +826,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.setFieldValue(this.get('fieldValue'));
       this._performAddEvents();
     }
+    if (this._hasSpanHint ||
+        (SC.browser.isIE8OrLower && !this.get('isTextArea'))) {
+      this._fixupTextLayout();
+    }
   },
-  
-  _applyHint: function() {
-    if(!SC.platform.input.placeholder && this._hintON){
-      var currentValue = this.$input().val();
-      if(!currentValue || (currentValue && currentValue.length===0)){
-        this.$input().val(this.get('formattedHint'));
-      }
+
+  /** @private
+    Apply proper text layout to sc-hints and inputs.
+   */
+  _fixupTextLayout: function () {
+    var lineHeight = this.get('frame').height + 'px';
+
+    if (SC.browser.isIE8OrLower && !this.get('isTextArea')) {
+      this.$input().css('line-height', lineHeight);
+    }
+
+    if (this._hasSpanHint) {
+      this.$('.sc-hint').css('line-height', lineHeight);
     }
   },
   
@@ -791,7 +918,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.set('focused',YES);
       this.fieldDidFocus(evt);
       var val = this.get('value');
-      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0) || (val && val == this.hint))) {
+      if(!SC.platform.input.placeholder &&
+         ((!val) || (val && val.length===0) || (val && val == this.hint)) &&
+         !this.get('hintOnFocus')) {
         this._hintON = NO;
       }
     }, this);
@@ -1089,7 +1218,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   mouseUp: function(evt) {
-    this._txtFieldMouseDown=NO;
+    this._txtFieldMouseDown = NO;
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.

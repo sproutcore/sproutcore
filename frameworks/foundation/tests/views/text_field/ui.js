@@ -12,7 +12,13 @@
     hint: "Full Name", 
     value: ''
   })
-  
+
+  .add("hintOnFocus", SC.TextFieldView, {
+    hint: "Full Name",
+    hintOnFocus: YES,
+    value: ''
+  })
+
   .add("with value", SC.TextFieldView, { 
     hint: "Full Name", 
     value: 'John Doe'
@@ -669,6 +675,34 @@ test("focus and blur an empty text field", function() {
   pane.verifyEmpty(view, 'Full Name');
 });
 
+test("hintOnFocus will disable hint only when the input field has a value", function () {
+  var view = pane.view('hintOnFocus');
+  var input = view.$('input');
+  var hint = view.$('.sc-hint');
+
+  // verify the field is empty and the hint is properly set
+  pane.verifyEmpty(view, 'Full Name');
+  ok(hint.attr('class').indexOf('disabled') === -1, "PRECOND- the sc-hint should NOT be disabled");
+
+  // focus and blur the text field
+  SC.Event.trigger(input, 'focus');
+
+  ok(hint.attr('class').indexOf('disabled') === -1, "the sc-hint should NOT be disabled");
+
+  input.val('John Doe');
+  SC.Event.trigger(input, 'change');
+  ok(hint.attr('class').indexOf('disabled') !== -1, "the sc-hint should be disabled");
+
+  input.val('');
+  SC.Event.trigger(input, 'change');
+  ok(hint.attr('class').indexOf('disabled') === -1, "the sc-hint should NOT be disabled");
+
+  SC.Event.trigger(input, 'blur');
+
+  // field should still be still be empty with hint properly set
+  pane.verifyEmpty(view, 'Full Name');
+});
+
 test("editing a field should not change the cursor position", function() {
   var textField = pane.view('empty');
   var input = textField.$('input');
@@ -711,4 +745,5 @@ test("should have aria-invalid as YES", function() {
   var label = view.$();
   equals(label.attr('aria-invalid'), 'true', 'aria-invalid should be true');
 });
+
 })();
