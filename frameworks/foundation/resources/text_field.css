@@ -57,12 +57,14 @@
   
   .sc-hint {
     position: absolute;
-    z-index: 1;
+    z-index: -1;
     left: 1px;
     right: 1px;
     padding: 0px;
     color: #aaa;
     font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   &.text-area .sc-hint {
