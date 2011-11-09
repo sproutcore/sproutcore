@@ -39,6 +39,47 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
     // schedule the timer
     return SC.Timer.schedule({ target: this, action: f, interval: interval });
   },
+  
+  /**
+    A convenience method which makes it easy to coalesce invocations to ensure 
+    that the method is only called once. This is useful if you need to schedule 
+    a call but only want it to trigger once after some defined interval has 
+    passed.
+    
+    @param {Function|String} method reference or method name
+    @param {Number} interval
+  */
+  invokeOnceLater: function(method, interval) {
+    if (interval === undefined) { interval = 1 ; }
+
+    var methodGuid, existingTimer, f, newTimer;
+
+    // ensure we always deal with real functions
+    if (SC.typeOf(method) === SC.T_STRING) {
+      method = this[method];
+    }
+    
+    methodGuid = SC.guidFor(method);
+    
+    if(!this._invokeOnceLaterTimers) {
+      this._invokeOnceLaterTimers = {};
+    }
+    
+    existingTimer = this._invokeOnceLaterTimers[methodGuid];
+    if(existingTimer) existingTimer.invalidate();
+    
+    f = function() {
+      // GC assistance for IE
+      this._invokeOnceLaterTimers[methodGuid] = null;
+      return method.apply(this, arguments);
+    };
+    
+    // schedule the timer
+    newTimer = SC.Timer.schedule({ target: this, action: f, interval: interval });
+    this._invokeOnceLaterTimers[methodGuid] = newTimer;
+    
+    return newTimer;
+  },
 
   /**
     Lookup the named property path and then invoke the passed function,
