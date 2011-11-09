@@ -52,7 +52,8 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
   invokeOnceLater: function(method, interval) {
     if (interval === undefined) { interval = 1 ; }
 
-    var methodGuid, existingTimer, f, newTimer;
+    var timers = this._sc_invokeOnceLaterTimers,
+        methodGuid, existingTimer, f, newTimer;
 
     // ensure we always deal with real functions
     if (SC.typeOf(method) === SC.T_STRING) {
@@ -61,22 +62,22 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
     
     methodGuid = SC.guidFor(method);
     
-    if(!this._invokeOnceLaterTimers) {
-      this._invokeOnceLaterTimers = {};
+    if(!timers) {
+      this._sc_invokeOnceLaterTimers = timers = {};
     }
     
-    existingTimer = this._invokeOnceLaterTimers[methodGuid];
+    existingTimer = timers[methodGuid];
     if(existingTimer) existingTimer.invalidate();
     
     f = function() {
       // GC assistance for IE
-      this._invokeOnceLaterTimers[methodGuid] = null;
+      delete timers[methodGuid];
       return method.apply(this, arguments);
     };
     
     // schedule the timer
     newTimer = SC.Timer.schedule({ target: this, action: f, interval: interval });
-    this._invokeOnceLaterTimers[methodGuid] = newTimer;
+    timers[methodGuid] = newTimer;
     
     return newTimer;
   },
