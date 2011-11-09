@@ -131,6 +131,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     var fieldValue = this.getFieldValue();
     var value = this.objectForFieldValue(fieldValue, partialChange);
     this.setIfChanged('value', value);
+    this.propertyDidChange('fieldValue');
 
 
     // ======= [Old code -- left here for concept reminders. Basic validation
