@@ -548,11 +548,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         hintOnFocus = this.get('hintOnFocus'), 
         hintString = '',
         maxLength = this.get('maxLength'),
+        isTextArea = this.get('isTextArea'),
+        isEnabled = this.get('isEnabled'),
+        isEditable = this.get('isEditable'),
+        autoCorrect = this.get('autoCorrect'),
+        autoCapitalize = this.get('autoCapitalize'),
+        isBrowserFocusable = this.get('isBrowserFocusable'),
         spellCheckString='', autocapitalizeString='', autocorrectString='',
         name, adjustmentStyle, type, hintElements, element, paddingElementStyle, 
         fieldClassNames, isOldSafari, activeState, browserFocusable;
 
-    context.setClass('text-area', this.get('isTextArea'));
+    context.setClass('text-area', isTextArea);
     
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed 
@@ -563,17 +569,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
+      activeState = isEnabled ? (isEditable ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
       name = this.get('layerId');
       
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
       if(SC.browser.mobileSafari){
-        autocorrectString = !this.get('autoCorrect') ? ' autocorrect="off"' : '';
-        autocapitalizeString = !this.get('autoCapitalize') ? ' autocapitalize="off"' : '';
+        autocorrectString = !autoCorrect ? ' autocorrect="off"' : '';
+        autocapitalizeString = !autoCapitalize ? ' autocapitalize="off"' : '';
       }
 
-      if(this.get('isBrowserFocusable')){
+      if(isBrowserFocusable){
         browserFocusable = 'tabindex="-1"';
       }
         // if hint is on and we don't want it to show on focus, create one
@@ -581,7 +587,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         hintString = ' placeholder="' + hint + '"';
       }
 
-      if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
+      if(this.get('shouldRenderBorder')) context.push('<div class="border"></div>');
 
       // Render the padding element, with any necessary positioning
       // adjustments to accommodate accessory views.
@@ -592,7 +598,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
         adjustmentStyle += '"' ;
       }
-      context.push('<span class="padding" '+adjustmentStyle+'>');
+      context.push('<div class="padding" '+adjustmentStyle+'>');
      
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
       if(this._hintON && !SC.platform.input.placeholder && (!value || (value && value.length===0))) {
@@ -601,18 +607,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
       
       if(hintOnFocus) {
-        context.push('<span class="hint%@">'.fmt(value ? ' sc-hidden': ''), hint ,'</span>');
+        var hintStr = '<div aria-hidden="true" class="hint '+ 
+                      (isTextArea ? '':'ellipsis')+'%@">'+ hint + '</div>';
+        context.push(hintStr.fmt(value ? ' sc-hidden': ''));
       }
       
       fieldClassNames = "field";
       
       // Render the input/textarea field itself, and close off the padding.
-      if (this.get('isTextArea')) {
+      if (isTextArea) {
         context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
                       '" '+ activeState + hintString +
                       spellCheckString + autocorrectString + browserFocusable + 
                       autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
-                      value+ '</textarea></span>') ;
+                      value+ '</textarea></div>') ;
       }
       else {
         type = this.get('type');
@@ -625,7 +633,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
                       hintString + spellCheckString+ browserFocusable +
                       ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
-                      autocapitalizeString+'/></span>') ;
+                      autocapitalizeString+'/></div>') ;
       }
     }
     else {
@@ -639,19 +647,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (!val || (val && val.length === 0)) {
         if (this.get('isPassword')) { elem.type = 'password'; }
         
-        if (!this.get('isFirstResponder')) {
+        if (!SC.platform.input.placeholder && this._hintON) {
+          if (!this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
           
-
-          if (!SC.platform.input.placeholder && this._hintON) {
-            context.setClass('sc-hint', YES);
-            input.val(hint);
-          }
-        } else {
+          context.setClass('sc-hint', YES);
+          input.val(hint);
+          } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (!SC.platform.input.placeholder && this._hintON) {
             context.setClass('sc-hint', NO);
             input.val('');
           }
@@ -659,15 +664,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
       
       if(SC.browser.mobileSafari){      
-        if (!this.get('autoCapitalize')) input.attr('autoCapitalize', 'off');
-        else input.attr('autoCapitalize', 'true');
-        if (!this.get('autoCorrect')) input.attr('autoCorrect', 'off');
-        else input.attr('autoCorrect', 'true');
+        input.attr('autoCapitalize', !autoCapitalize ? 'off':'true');
+        input.attr('autoCorrect', !autoCorrect ? 'off':'true');        
       }      
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
 
-      if(this.get('isBrowserFocusable')){
+      if(isBrowserFocusable){
         input.removeAttr('tabindex');
       }else{
         input.attr('tabindex', '-1');
@@ -675,10 +678,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
       if (element) {
-        if (!this.get('isEnabled')) {
+        if (!isEnabled) {
           element.disabled = 'true' ;
           element.readOnly = null ;
-        } else if(!this.get('isEditable')) {
+        } else if(!isEditable) {
           element.disabled = null ;
           element.readOnly = 'true' ;
         } else {
