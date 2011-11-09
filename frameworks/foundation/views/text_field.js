@@ -623,6 +623,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // RENDER
     //
     if (firstTime || this._forceRenderFirstTime) {
+      this._forceRenderFirstTime = NO;
 
       if (this.get('shouldRenderBorder')) {
         context.push('<span class="border"></span>');
@@ -665,8 +666,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (attr != null) {
         attrs.autocapitalize = attr ? 'on' : 'off';
       }
-
-      attrs.readonly = !attrs.disabled && !this.get('isEditable') ? 'readonly' : null;
 
       // Use inline <span> for the hint.
       if (this.get('hintOnFocus') || !SC.platform.input.placeholder) {
