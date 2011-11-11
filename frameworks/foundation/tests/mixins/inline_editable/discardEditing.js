@@ -32,6 +32,8 @@ fakeDelegate = {
   inlineEditorDidDiscardEditing: function() {
     this.didDiscardCalled = YES;
     ok(this.willDiscardCalled, "willDiscard called before didDiscard");
+
+    view._endEditing();
   }
 };
 
@@ -58,13 +60,13 @@ view = SC.View.create(SC.InlineEditable, {
 });
 
 function reset() {
+  if(fakeEditor.isEditing) fakeEditor.commitEditing();
+
   fakeDelegate.shouldDiscardCalled = NO;
   fakeEditor.discardEditingCalled = NO;
 
   fakeDelegate.willDiscardCalled = NO;
   fakeDelegate.didDiscardCalled = NO;
-
-  if(fakeEditor.isEditing) fakeEditor.commitEditing();
 }
 
 module('SC.InlineEditable.discardEditing');
