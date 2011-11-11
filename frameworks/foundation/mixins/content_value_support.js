@@ -84,6 +84,10 @@ SC.ContentValueSupport = {
     This means that the value of this.contentValueKey will be observed as a key on
     the content object and its value will be mapped to this.value.
 
+    If you do not set a contentXKey, it will default to the same key as the
+    target key. For example, for {'contentValueKey': 'value'} contentValueKey will
+    default to value.
+
     @type Hash
     @default null
   */
@@ -151,14 +155,16 @@ SC.ContentValueSupport = {
     @returns {SC.Control} receiver
   */
   updatePropertyFromContent: function(prop, key, contentKey, content) {
-    var del, v;
+    var del, v, contentKeys;
 
     if (contentKey === undefined) contentKey = "content"+prop.capitalize()+"Key";
     
     // prefer our own definition of contentKey
     if(this[contentKey]) contentKey = this.get(contentKey);
     // if we don't have one defined check the delegate
-    else if((del = this.displayDelegate) && (v = del[contentKey])) contentKey = del.get ? del.get(contentKey) : v;
+    else if((del = this.get('displayDelegate')) && (v = del[contentKey])) contentKey = del.get ? del.get(contentKey) : v;
+    // if we have contentKeys set, default to the target key
+    else if((contentKeys = this.get('contentKeys')) && (v = contentKeys[contentKey])) contentKey = v;
     // if we have no key we can't do anything so just short circuit out
     else return this;
 
@@ -206,7 +212,7 @@ SC.ContentValueSupport = {
     var content = this.get('content'),
     // get the key we should be setting on content, asking displayDelegate if
     // necessary
-    contentKey = this.getDelegateProperty(reverseContentKeys[key], this.displayDelegate);
+    contentKey = this.getDelegateProperty(reverseContentKeys[key], this.get('displayDelegate'), this, this.get('contentKeys'));
 
     // do nothing if disabled
     if (!contentKey || !content) return this;
@@ -277,7 +283,8 @@ SC.ContentValueSupport = {
 
         // add observers to each key
         for(contentKey in contentKeys) {
-          contentKey = this.getDelegateProperty(contentKey);
+          // default to target key if none found
+          contentKey = this.getDelegateProperty(contentKey, this.get('displayDelegate'), this, contentKeys);
 
           if(contentKey) {
             content.addObserver(contentKey, this, f);
@@ -289,7 +296,7 @@ SC.ContentValueSupport = {
 
       // default case hardcoded for contentValueKey
       else {
-        contentKey = this.getDelegateProperty('contentValueKey');
+        contentKey = this.getDelegateProperty('contentValueKey', this.get('displayDelegate'));
 
         if(contentKey) {
           content.addObserver(contentKey, this, f);
