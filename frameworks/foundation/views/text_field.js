@@ -616,7 +616,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
       // Render the input/textarea field itself, and close off the padding.
       if (isTextArea) {
-        context.push('<textarea class="'+fieldClassNames+'" name="'+ name+ 
+        context.push('<textarea aria-label="' + hint + '" aria-multiline="true" class="'+fieldClassNames+'" name="'+ name+ 
                       '" '+ activeState + hintString +
                       spellCheckString + autocorrectString + browserFocusable + 
                       autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
@@ -629,7 +629,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         // so we force it to password if needed now, or if the value is not the hint
         if (this.get('isPassword')) { type = 'password'; }
         
-        context.push('<input class="'+fieldClassNames+'" type="'+ type+
+        context.push('<input aria-label="' + hint + '" class="'+fieldClassNames+'" type="'+ type+
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
                       hintString + spellCheckString+ browserFocusable +
                       ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
