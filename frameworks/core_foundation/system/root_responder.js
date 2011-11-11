@@ -1540,13 +1540,13 @@ SC.RootResponder = SC.Object.extend(
 
     // couldn't build a keystring for this key event, nothing to do
     if (!keystring) return NO;
-
+    
     var menuPane = this.get('menuPane'),
         keyPane  = this.get('keyPane'),
         mainPane = this.get('mainPane');
 
     if (menuPane) {
-      ret = menuPane.performKeyEquivalent(keystring, evt) ;
+      ret = menuPane.performKeyEquivalent(keystring, evt, YES) ;
       if (ret) return ret;
     }
 
