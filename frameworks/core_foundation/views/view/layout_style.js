@@ -51,12 +51,15 @@ SC.View.reopen(
   layoutStyle: function() {
     var props = {
       layout:       this.get('layout'),
+      border:       this.get('normalizedBorder'),
       turbo:        this.get('hasAcceleratedLayer'),
       staticLayout: this.get('useStaticLayout')
     };
 
     var calculator = this.get('layoutStyleCalculator');
+    calculator.propertyWillChange('layout');
     calculator.set(props);
+    calculator.propertyDidChange('layout');
 
     return calculator.calculate();
   }.property().cacheable()
@@ -65,8 +68,9 @@ SC.View.reopen(
 SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   _layoutDidUpdate: function(){
-    var layout = this.get('layout');
-    if (!layout) { return; }
+    var layout = this.get('layout'),
+        border = this.get('border');
+    if (layout == null || border == null) { return; }
 
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
@@ -107,10 +111,10 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     var centerY = (this.centerY = layout.centerY);
     this.hasCenterY = (centerY != null);
 
-    var borderTop = (this.borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0);
-    var borderRight = (this.borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0);
-    var borderBottom = (this.borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0);
-    var borderLeft = (this.borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0);
+    var borderTop = (this.borderTop = border.top);
+    var borderRight = (this.borderRight = border.right);
+    var borderBottom = (this.borderBottom = border.bottom);
+    var borderLeft = (this.borderLeft = border.left);
 
     // the toString here is to ensure that it doesn't get px added to it
     this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
