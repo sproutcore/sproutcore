@@ -703,7 +703,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
 
       if (isTextArea) {
-        input = '<textarea' + input + '/>' + value + '</textarea>';
+        input = '<textarea' + input + '>' + value + '</textarea>';
       } else {
         input = '<input' + input + '/>';
       }
