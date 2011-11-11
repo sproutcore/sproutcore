@@ -417,25 +417,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   didTriggerAction: function() {},
 
-  /*
-    TODO Why is this not set by the theme? --TD
-  */
-  /**
-    The minimum width the button title should consume.  This property is used
-    when generating the HTML styling for the title itself.  The default
-    width of 80 usually provides a nice looking style, but you can set it to 0
-    if you want to disable minimum title width.
-
-    Note that the title width does not exactly match the width of the button
-    itself.  Extra padding added by the theme can impact the final total
-    size.
-
-    @type Number
-    @default 80
-  */
-  titleMinWidth: 80,
-
-
+ 
   // ................................................................
   // INTERNAL SUPPORT
   //
@@ -477,12 +459,12 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @type Array
     @default [
       'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-      'escapeHTML', 'needsEllipsis', 'tooltip', 'titleMinWidth', 'supportFocusRing'
+      'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing'
     ]
   */
   displayProperties: [
     'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-    'escapeHTML', 'needsEllipsis', 'tooltip', 'titleMinWidth', 'supportFocusRing',
+    'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing',
     'buttonBehavior'
   ],
 

@@ -331,7 +331,6 @@ SC.AlertPane = SC.PanelPane.extend(
           useStaticLayout: YES,
           actionKey: SC.BUTTON2_STATUS,
           localize: YES,
-          titleMinWidth: 64,
           layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
           isCancel: YES,
           action: "dismiss",
@@ -342,7 +341,6 @@ SC.AlertPane = SC.PanelPane.extend(
           useStaticLayout: YES,
           actionKey: SC.BUTTON1_STATUS,
           localize: YES,
-          titleMinWidth: 64,
           layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
           isDefault: YES,
           action: "dismiss",
@@ -357,7 +355,6 @@ SC.AlertPane = SC.PanelPane.extend(
             useStaticLayout: YES,
             actionKey: SC.BUTTON3_STATUS,
             localize: YES,
-            titleMinWidth: 64,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
             action: "dismiss",
             isVisible: NO

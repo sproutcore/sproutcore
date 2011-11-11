@@ -56,8 +56,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
         isDefault   = dataSource.get('isDefault') || NO,
         isCancel    = dataSource.get('isCancel') || NO,
         isToggle    = dataSource.get('isToggle') || NO,
-        labelId     = SC.guidFor(dataSource) + '-label',
-        minWidth    = dataSource.get('titleMinWidth') || NO;
+        labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
       'icon': !!dataSource.get('icon'),
@@ -72,10 +71,6 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       context.attr('alt', toolTip);
     }
     
-    if (minWidth) {
-      context.attr('min-width', minWidth + 'px');
-    }
-
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     // accessibility
     if(dataSource.get('isSegment')){
