@@ -158,7 +158,7 @@ SC.InlineEditable = {
     @returns {Boolean} if the view is allowed to begin editing
   */
   inlineEditorShouldBeginEditing: function() {
-    return !this.get('isEditing') && this.get('isEditable');
+    return !this.isEditing && this.isEditable;
   },
 
   // TODO: implement validator

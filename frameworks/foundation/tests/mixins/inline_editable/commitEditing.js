@@ -32,7 +32,6 @@ fakeDelegate = {
   inlineEditorDidCommitEditing: function() {
     this.didCommitCalled = YES;
     ok(this.willCommitCalled, "willCommit called before didCommit");
-    view._endEditing();
   }
 };
 
@@ -59,13 +58,13 @@ view = SC.View.create(SC.InlineEditable, {
 });
 
 function reset() {
-  if(fakeEditor.isEditing) fakeEditor.discardEditing();
-
   fakeDelegate.shouldCommitCalled = NO;
   fakeEditor.commitEditingCalled = NO;
 
   fakeDelegate.willCommitCalled = NO;
   fakeDelegate.didCommitCalled = NO;
+
+  if(fakeEditor.isEditing) fakeEditor.discardEditing();
 }
 
 module('SC.InlineEditable.commitEditing');
@@ -85,7 +84,7 @@ test("commitEditing should ask shouldCommit and then call commitEditing", functi
   ok(fakeDelegate.shouldCommitCalled, "shouldCommit called");
 });
 
-test("commitEditing should fail if shouldCommit returns NO", function() {
+test("commitEditing should fail if shouldCommit returns false", function() {
   reset();
 
   fakeDelegate.shouldCommitAllowed = NO;

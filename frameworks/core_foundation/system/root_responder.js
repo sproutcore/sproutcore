@@ -1540,13 +1540,13 @@ SC.RootResponder = SC.Object.extend(
 
     // couldn't build a keystring for this key event, nothing to do
     if (!keystring) return NO;
-    
+
     var menuPane = this.get('menuPane'),
         keyPane  = this.get('keyPane'),
         mainPane = this.get('mainPane');
 
     if (menuPane) {
-      ret = menuPane.performKeyEquivalent(keystring, evt, YES) ;
+      ret = menuPane.performKeyEquivalent(keystring, evt) ;
       if (ret) return ret;
     }
 
@@ -1705,10 +1705,7 @@ SC.RootResponder = SC.Object.extend(
           charCode           = evt.charCode;
       if ((charCode !== undefined && charCode === 0 && evt.keyCode!==9) && !isFirefoxArrowKeys) return YES;
       if (isFirefoxArrowKeys) evt.which = keyCode;
-
-      // we only want to rethrow if this is a printable key so that we don't
-      // duplicate the event sent in keydown when a modifier key is pressed
-      if(isFirefoxArrowKeys || !this._isFunctionOrNonPrintableKey(evt)) return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
   },
 
@@ -1902,7 +1899,6 @@ SC.RootResponder = SC.Object.extend(
   dblclick: function(evt){
     if (SC.browser.isIE8OrLower) {
       this._clickCount = 2;
-      this._mouseDownView = this.targetViewForEvent(evt);
       // this._onmouseup(evt);
       this.mouseup(evt);
     }

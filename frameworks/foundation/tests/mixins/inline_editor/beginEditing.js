@@ -62,13 +62,13 @@ view = SC.View.create(SC.InlineEditable, {
 });
 
 function reset() {
-  if(fakeEditor.isEditing) fakeEditor.discardEditing();
-
   fakeDelegate.shouldBeginCalled = NO;
   fakeDelegate.acquireEditorCalled = NO;
   fakeEditor.beginEditingCalled = NO;
   fakeDelegate.willBeginCalled = NO;
   fakeDelegate.didBeginCalled = NO;
+
+  if(fakeEditor.isEditing) fakeEditor.discardEditing();
 };
 
 module("SC.InlineEditor.beginEditing");

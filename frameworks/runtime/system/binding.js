@@ -647,14 +647,17 @@ SC.Binding = /** @scope SC.Binding.prototype */{
           key = this._fromPropertyKey ;
       if (!target || !key) return this ; // nothing to do
 
-      // Let's check for whether target is a valid observable with getPath.
+      // in debug, let's check for whether target is a valid observable with getPath.
       // Common cases might have it be a Window or a DOM object.
       //
       // If we have a target, it is ready, but if it is invalid, that is WRONG.
+      //
+      // @if (debug)
       if (!target.isObservable) {
         SC.Logger.warn("Cannot bind '%@' to property '%@' on non-observable '%@'".fmt(this._toPropertyPath, key, target));
         return this;
       }
+      // @endif
 
       // get the new value
       var v = target.getPath(key) ;

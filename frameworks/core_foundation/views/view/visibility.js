@@ -44,18 +44,17 @@ SC.View.reopen(
         current  = this.get('isVisible'),
         parentView;
 
-
-    // If we weren't passed in 'parentViewIsVisible' (we generally aren't;
-    // it's an optimization), then calculate it.
-    if (parentViewIsVisible === undefined) {
-      parentView = this.get('parentView');
-      parentViewIsVisible = parentView ? parentView.get('isVisibleInWindow') : NO;
-    }
-
-
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
-    current = current && parentViewIsVisible;
+    if (current) {
+      // If we weren't passed in 'parentViewIsVisible' (we generally aren't;
+      // it's an optimization), then calculate it.
+      if (parentViewIsVisible === undefined) {
+        parentView = this.get('parentView');
+        parentViewIsVisible = parentView ? parentView.get('isVisibleInWindow') : NO;
+      }
+      current = current && parentViewIsVisible;
+    }
 
     // If our visibility has changed, then set the new value and notify our
     // child views to update their value.
@@ -93,7 +92,7 @@ SC.View.reopen(
     // 'sc-hidden' class to the layer because of the "don't update the layer if
     // we're not visible in the window" check.  If any of our parent views
     // became visible, our layer would incorrectly be shown!
-    this.updateLayerIfNeeded(parentViewIsVisible);
+    this.updateLayerIfNeeded(YES);
 
     return this;
   },

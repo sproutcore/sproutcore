@@ -10,7 +10,7 @@ SC.mixin( /** @scope SC */ {
   _copy_computed_props: [
     "maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
     "fontFamily", "fontSize", "fontStyle", "fontWeight", "fontVariant", "lineHeight",
-    "whiteSpace", "letterSpacing", "wordWrap"
+    "whiteSpace", "letterSpacing"
   ],
 
   /**
