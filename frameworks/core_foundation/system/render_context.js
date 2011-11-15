@@ -926,6 +926,22 @@ SC.RenderContext = SC.Builder.create(
 
     return this ;
   },
+  
+  /**
+    Sets the named attribute on the tag.  Note that if you set the 'class'
+    attribute or the 'styles' attribute, it will be ignored.  Use the
+    relevant class name and style methods instead.
+  
+    @param {String|Hash} nameOrAttrs the attr name or hash of attrs.
+    @param {String} value attribute value if attribute name was passed
+    @returns {SC.RenderContext} receiver
+  */
+  removeAttr: function(name) {
+    if (this._elem) {
+      this.$().removeAttr(name);
+      return this;
+    }
+  },
 
   //
   // COREQUERY SUPPORT
