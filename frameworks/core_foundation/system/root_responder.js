@@ -345,13 +345,13 @@ SC.RootResponder = SC.Object.extend(
     (removing sc-blur).  Also notify panes.
   */
   focus: function(evt) {
-    if (!this.get('hasFocus')) {
     
+    if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
       // If the app is getting focus again set the first responder to the first
       // valid firstResponder view in the view's tree
-      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
         var keyPane = SC.RootResponder.responder.get('keyPane');
         if (keyPane) {
           var nextValidKeyView = keyPane.get('nextValidKeyView');
@@ -366,6 +366,25 @@ SC.RootResponder = SC.Object.extend(
     return YES ; // allow default
   },
 
+  /**
+    Handle window focus event for IE. Listening to the focus event is not
+    reliable as per every focus event you receive you inmediately get a blur
+    event (Only on IE of course ;)
+  */
+  focusin: function(evt) {
+    if(this._focusTimeout) clearTimeout(this._focusTimeout);
+    this.focus(evt);
+  },
+
+  /**
+    Handle window blur event for IE. Listening to the focus event is not
+    reliable as per every focus event you receive you inmediately get a blur
+    event (Only on IE of course ;)
+  */
+  focusout: function(evt) {
+    var that = this;
+    this._focusTimeout = setTimeout(function(){that.blur(evt);}, 300);
+  },
 
 
   /**
@@ -617,7 +636,8 @@ SC.RootResponder = SC.Object.extend(
     this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
-    this.listenFor(['focus', 'blur'], window);
+    if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
+    else this.listenFor(['focus', 'blur'], window);
 
     // handle animation events
     this.listenFor(['webkitAnimationStart', 'webkitAnimationIteration', 'webkitAnimationEnd'], document);
