@@ -137,7 +137,7 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
 
   /** @private */
   captureTouch: function (touch) {
-    return YES;
+    return !touch.targetView.get('isNativeWidget');
   },
 
   /** @private */
