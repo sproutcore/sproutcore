@@ -67,6 +67,23 @@ SC.PanelPane = SC.Pane.extend(
   ariaLabel: null,
 
   /**
+    The WAI-ARIA labelledby for the panel. Screen readers will use this to tell
+    the header or name of your panel if there is no label. This should be an id
+    to an element inside the panel.
+
+    @type String
+  */
+  ariaLabelledBy: null,
+
+  /**
+    The WAI-ARIA describedby text. Screen readers will use this to speak the description
+    of the panel. This should be an id to an element inside the panel.
+
+    @type String
+  */
+  ariaDescribedBy: null,
+
+  /**
     Indicates that a pane is modal and should not allow clicks to pass
     though to panes underneath it. This will usually cause the pane to show
     the modalPane underneath it.
@@ -204,5 +221,5 @@ SC.PanelPane = SC.Pane.extend(
     return ret ;
   },
 
-  displayProperties: ['ariaLabel']
+  displayProperties: ['ariaLabel', 'ariaLabelledBy', 'ariaDescribedBy']
 });
