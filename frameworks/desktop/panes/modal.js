@@ -49,7 +49,7 @@ SC.ModalPane = SC.Pane.extend(
     for(var i=0, iLen=panes.length; i<iLen; i++ ){
       _tmpPane = panes[i];
       if(_tmpPane!==pane) {
-        _tmpPane.set('ariaHidden', YES);
+        //_tmpPane.set('ariaHidden', YES);
         this._hideShowTextfields(_tmpPane, NO);
       }
     }
@@ -71,7 +71,7 @@ SC.ModalPane = SC.Pane.extend(
     for(var i=0, iLen=panes.length; i<iLen; i++ ){
       _tmpPane = panes[i];
       if(_tmpPane!==pane) {
-        _tmpPane.set('ariaHidden', NO);
+        //_tmpPane.set('ariaHidden', NO);
         this._hideShowTextfields(_tmpPane, YES);
       }
     }
