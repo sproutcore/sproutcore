@@ -21,7 +21,8 @@ SC.SegmentView = SC.View.extend(SC.Control,
     @default 'tab'
     @readOnly
   */
-  ariaRole: 'tab',
+  //ariaRole: 'tab',
+  ariaRole: 'button', // workaround for <rdar://problem/10444670>; switch back to 'tab' later with <rdar://problem/10463928> (also see segmented.js)
 
   /**
     @type Boolean

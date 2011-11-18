@@ -61,7 +61,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @default 'tablist'
     @readOnly
   */
-  ariaRole: 'tablist',
+  //ariaRole: 'tablist',
+  ariaRole: 'group', // workaround for <rdar://problem/10444670>; switch back to 'tablist' later with <rdar://problem/10463928> (also see segment.js)
 
   /**
     @type Array
@@ -628,7 +629,21 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var renderDelegate = this.get('renderDelegate');
 
     if (renderDelegate && renderDelegate.indexForClientPosition) {
-      return renderDelegate.indexForClientPosition(this, evt.clientX, evt.clientY);
+      
+      var x = evt.clientX;
+      var y = evt.clientY;
+      
+      // Accessibility workaround: <rdar://problem/10467360> WebKit sends all event coords as 0,0 for all AXPress-triggered events
+      if (x === 0 && y === 0) {
+        var el = evt.target;
+        if (el) {
+          var offset = SC.offset(el);
+          x = offset.x + Math.round(el.offsetWidth/2);
+          y = offset.y + Math.round(el.offsetHeight/2);
+        }
+      }
+      
+      return renderDelegate.indexForClientPosition(this, x, y);
     }
   },
 
@@ -701,7 +716,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (!this.get('isEnabled')) return YES; // nothing to do
 
     index = this.displayItemIndexForEvent(evt);
-
     if (index >= 0) {
       childView = childViews.objectAt(index);
       childView.set('isActive', YES);
@@ -721,7 +735,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         index;
 
     index = this.displayItemIndexForEvent(evt);
-
     if (this._isMouseDown && (index >= 0)) {
 
       this.triggerItemAtIndex(index);
