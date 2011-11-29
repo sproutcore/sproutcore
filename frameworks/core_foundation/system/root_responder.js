@@ -2085,7 +2085,8 @@ SC.Touch = function(touch, touchContext) {
     if (target) targetView = SC.$(target).view()[0];
 
     this.hidesTouchIntercept = NO;
-    if (target.tagName === "INPUT") {
+    if (target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA") {
       this.hidesTouchIntercept = touch.target;
     } else {
       touch.target.style.webkitTransform = "translate3d(0px,0px,0px)";
