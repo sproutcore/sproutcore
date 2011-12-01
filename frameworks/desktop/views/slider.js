@@ -142,8 +142,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (!this.get('isEnabled')) return YES;
     var min = this.get('minimum'),
         max = this.get('maximum'),
-        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*0.1),
         step = this.get('step'),
+        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*step),
         value = Math.round(newVal / step) * step ;
     if (newVal< min) this.setIfChanged('value', min);
     else if (newVal> max) this.setIfChanged('value', max);
