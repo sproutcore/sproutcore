@@ -814,7 +814,7 @@ test("pushDestroy record doesn't create a slave when it's been destroyed [*(mast
 
 /**
   Standard Sproutcore Behaviors
- 
+
   This is data showing up from the server- after pushing in changes,
   all records should have status READY_CLEAN.
  */
