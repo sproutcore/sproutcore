@@ -428,6 +428,8 @@ SC.CoreView.reopen(
   _notifyDidCreateLayer: function() {
     this.notifyPropertyChange('layer');
 
+    if (this.get('useStaticLayout')) this.viewDidResize();
+
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
     // and notify others
