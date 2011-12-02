@@ -189,7 +189,7 @@ SC.RelationshipSupport = {
     } else if (SC.instanceOf(proto[key], SC.ManyAttribute)) {
       dataHash[hashKey] = dataHash[hashKey] || [];
 
-      if (dataHash[key].indexOf(relativeID) < 0) {
+      if (dataHash[hashKey].indexOf(relativeID) < 0) {
         dataHash[hashKey].push(relativeID);
       }
     }
