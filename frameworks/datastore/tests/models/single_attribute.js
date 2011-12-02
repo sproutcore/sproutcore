@@ -314,7 +314,7 @@ module("modifying a keyed toOne relationship via the inverse", {
 
     MyApp.Foo = SC.Record.extend({
       bar: SC.Record.toOne('MyApp.Bar', {
-        sMaster: YES, inverse: 'foo'
+        isMaster: YES, inverse: 'foo'
       })
     });
 
