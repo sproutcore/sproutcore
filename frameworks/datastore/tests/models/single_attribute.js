@@ -308,3 +308,50 @@ test("adding toMany pointing to non existing class should throw error", function
   same(message, 'Attempted to create toMany attribute with undefined recordType. Did you forget to sc_require a dependency?');
 });
 
+module("modifying a keyed toOne relationship via the inverse", {
+  setup: function() {
+    MyApp = SC.Object.create({ store: SC.Store.create() });
+
+    MyApp.Foo = SC.Record.extend({
+      bar: SC.Record.toOne('MyApp.Bar', {
+        sMaster: YES, inverse: 'foo'
+      })
+    });
+
+    MyApp.Bar = SC.Record.extend({
+      foo: SC.Record.toOne('MyApp.Foo', {
+        isMaster: NO, key: 'foo_id', inverse: 'bar'
+      })
+    });
+  }
+});
+
+test("creating an association", function() {
+  var foo1, bar1;
+
+  MyApp.store.loadRecords(MyApp.Foo, [{guid: 'foo1', bar: null}]);
+
+  foo1 = MyApp.store.find(MyApp.Foo, 'foo1');
+  bar1 = MyApp.store.createRecord(MyApp.Bar, {guid: 'bar1'});
+
+  foo1.set('bar', bar1);
+
+  equals(bar1.get('foo'), foo1, 'bar1.foo relationship should be established');
+  equals(bar1.get('attributes').foo_id, 'foo1', 'correct key should be set in attributes');
+});
+
+test("destroying an association", function() {
+  var foo1, bar1;
+
+  MyApp.store.loadRecords(MyApp.Foo, [{guid: 'foo1', bar: 'bar1'}]);
+  MyApp.store.loadRecords(MyApp.Bar, [{guid: 'bar1', foo_id: 'foo1'}]);
+
+  foo1 = MyApp.store.find(MyApp.Foo, 'foo1');
+  bar1 = MyApp.store.find(MyApp.Bar, 'bar1');
+
+  equals(foo1.get('bar'), bar1, 'foo1.bar relationship should be established');
+  foo1.set('bar', null);
+  equals(bar1.get('foo'), null, 'bar.foo relationship should be destroyed');
+  equals(bar1.get('attributes').foo_id, null, 'correct key should be set in attributes');
+});
+

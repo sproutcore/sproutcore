@@ -113,7 +113,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
         isMaster = this.get('isMaster'), attr;
 
     // ok, you removed me, I'll remove you...  if isMaster, notify change.
-    record.writeAttribute(key, null, !isMaster);
+    record.writeAttribute(this.get('key') || key, null, !isMaster);
     record.notifyPropertyChange(key);
 
     // if we have another value, notify them as well...
@@ -135,7 +135,6 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     @param {String} inverseKey key on inverse that was modified
   */
   inverseDidAddRecord: function(record, key, inverseRecord, inverseKey) {
-    
     var myInverseKey  = this.get('inverse'),
         curRec   = this._scsa_call(record, key),
         isMaster = this.get('isMaster'), 
@@ -143,7 +142,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
 
     // ok, replace myself with the new value...
     nvalue = this.fromType(record, key, inverseRecord); // convert to attr.
-    record.writeAttribute(key, nvalue, !isMaster);
+    record.writeAttribute(this.get('key') || key, nvalue, !isMaster);
     record.notifyPropertyChange(key);
 
     // if we have another value, notify them as well...

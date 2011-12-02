@@ -926,6 +926,43 @@ test("Record Attribute can reference renamed attribute key", function () {
   equals(s1.get('master'), m1, 's1 should have master of m1');
 });
 
+test("Record Attribute can reference renamed attribute key (1 to many)", function () {
+  MyApp.Master = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'masters',
+      isMaster: YES
+    })
+  });
+
+  MyApp.Slave = SC.Record.extend({
+    masters: SC.Record.toMany('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO,
+      key: 'master_ids'
+    })
+  });
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Slave, [
+    { guid: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var s1 = MyApp.store.find(MyApp.Slave, 's1');
+  ok(s1.get('status') & SC.Record.READY_CLEAN, 'precond - s1 should be ready clean');
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Master, [
+    { guid: 'm1', slave: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var m1 = MyApp.store.find(MyApp.Master, 'm1');
+
+  equals(m1.get('slave'), s1, 'm1 should be master of s1');
+  same(s1.get('masters').toArray(), [m1], 's1 should have m1 in masters');
+  same(s1.get('attributes').master_ids, [m1.get('id')], 's1.attributes should have master_ids key');
+});
 
 test("Record Attribute can reference renamed attribute key (on remote side)", function () {
   MyApp.Master = SC.Record.extend({
@@ -1175,3 +1212,4 @@ test("RecordAttribute flag 'lazilyInstantiate' will create chains of records pro
   ok(ss, 'ss should be created lazily');
   equals(ss.get('slave'), s, 's should be master of ss');
 });
+
