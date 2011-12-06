@@ -20,7 +20,7 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   isEnabled: YES,
 
   mouseDown: function() {
-    if (this.isEnabled) {
+    if (this.get('isEnabled')) {
       this.set('isActive', true);
       this._isMouseDown = YES;
     }
@@ -31,7 +31,7 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   },
 
   mouseEntered: function() {
-    if (this._isMouseDown && this.isEnabled) {
+    if (this._isMouseDown && this.get('isEnabled')) {
       this.set('isActive', true);
     }
   },
@@ -42,7 +42,7 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   }.property('pane').cacheable(),
 
   mouseUp: function(event) {
-    if (this.get('isActive') && this.isEnabled) {
+    if (this.get('isActive') && this.get('isEnabled')) {
       this.fireAction();
       this.set('isActive', false);
     }
@@ -51,15 +51,15 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
   },
 
   touchStart: function(touch) {
-		if(this.isEnabled){
-    	this.mouseDown(touch);
-		}
+    if (this.get('isEnabled')) {
+      this.mouseDown(touch);
+    }
   },
 
   touchEnd: function(touch) {
-		if(this.isEnabled){
-    	this.mouseUp(touch);
-		}
+    if (this.get('isEnabled')) {
+      this.mouseUp(touch);
+    }
   }
 
 });
