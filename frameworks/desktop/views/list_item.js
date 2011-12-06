@@ -256,7 +256,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     contentIconKey:  'icon',
     contentRightIconKey: 'rightIcon',
     contentUnreadCountKey: 'count',
-    contentIsBranchKey: 'branch',
+    contentIsBranchKey: 'branch'
   },
 
   /** @private */
