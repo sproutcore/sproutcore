@@ -1,0 +1,7 @@
+Garçon : SproutCore build tools using node.js.
+
+1. Install node.js (http://nodejs.org/, http://github.com/ry/node)
+
+2. Create a configuration file for your application based on the sample sample_server_config.js file
+
+3. Start the server with `node myApp.js`
