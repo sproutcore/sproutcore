@@ -54,6 +54,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       SC.Logger.log("-- SC.RunLoop.beginRunLoop at %@".fmt(this._start));
     }
     this._runLoopInProgress = YES;
+    this._flushinvokeNextQueue();
     return this ;
   },
 
@@ -172,6 +173,36 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   },
 
   /**
+    Invokes the passed target/method pair once at the beginning of the next
+    runloop, before any other methods (including events) are processed.
+    Use this to defer painting to make views more responsive.
+
+    If you call this with the same target/method pair multiple times it will
+    only invoke the pair only once at the beginning of the next runloop.
+
+    Usually you will not call this method directly but use invokeNext()
+    defined on SC.Object.
+
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
+
+    @param {Object} target
+    @param {Function} method
+    @returns {SC.RunLoop} receiver
+  */
+  invokeNext: function(target, method) {
+    // normalize
+    if (method === undefined) {
+      method = target; target = this ;
+    }
+
+    if (typeof method === "string") method = target[method];
+    if (!this._invokeNextQueue) this._invokeNextQueue = SC.ObserverSet.create();
+    this._invokeNextQueue.add(target, method);
+    return this ;
+  },
+
+  /**
     Executes any pending events at the end of the run loop.  This method is
     called automatically at the end of a run loop to flush any pending
     queue changes.
@@ -206,6 +237,16 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     var queue = this._invokeLastQueue, hadContent = NO ;
     if (queue && queue.getMembers().length ) {
       this._invokeLastQueue = null; // reset queue.
+      hadContent = YES; // has targets!
+      if (hadContent) queue.invokeMethods();
+    }
+    return hadContent ;
+  },
+
+  _flushinvokeNextQueue: function() {
+    var queue = this._invokeNextQueue, hadContent = NO ;
+    if (queue && queue.getMembers().length ) {
+      this._invokeNextQueue = null; // reset queue.
       hadContent = YES; // has targets!
       if (hadContent) queue.invokeMethods();
     }
