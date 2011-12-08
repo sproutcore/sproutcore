@@ -1,3 +1,7 @@
+body {
+  overflow: hidden;
+}
+
 .sc-main {
   background: #ccc;
 }
