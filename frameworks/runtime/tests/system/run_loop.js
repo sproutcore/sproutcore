@@ -123,4 +123,75 @@ test("Should propograte bindings after the RunLoop completes (checking invokeOnc
 	//Since the invoker function is called only once the value of output did not change.
 	equals(second.get("output"), "change") ;
 	
-}); 
+});
+
+test("Should flush the invoke last queue at the end of the current run loop", function () {
+  var iCalled = 0;
+  SC.RunLoop.begin();
+
+  SC.RunLoop.currentRunLoop.invokeLast(function () {
+    iCalled++;
+  });
+
+  ok(!iCalled, "should not have flushed the invokeLast queue");
+  SC.RunLoop.end();
+  ok(iCalled, "should have flushed the invokeLast queue");
+
+  SC.RunLoop.begin();
+  SC.RunLoop.end();
+  equals(iCalled, 1, "should have flushed the invokeLast queue only once");
+});
+
+test("Should repeatedly flush the invoke last queue until there are no more items", function () {
+  var iCalled = 0;
+  SC.RunLoop.begin();
+
+  SC.RunLoop.currentRunLoop.invokeLast(function () {
+    iCalled++;
+    if (iCalled < 5) {
+      SC.RunLoop.currentRunLoop.invokeLast(arguments.callee);
+    }
+  });
+
+  ok(!iCalled, "should not have flushed the invokeLast queue");
+  SC.RunLoop.end();
+  ok(iCalled, "should have flushed the invokeLast queue");
+  equals(iCalled, 5, "should have flushed the invokeLast queue 5 times");
+});
+
+test("Should flush the invoke next queue at the beginning of the next run loop", function () {
+  var iCalled = 0;
+  SC.RunLoop.begin();
+
+  SC.RunLoop.currentRunLoop.invokeNext(function () {
+    iCalled++;
+  });
+
+  SC.RunLoop.end();
+  ok(!iCalled, "should not have flushed the invokeNext queue");
+
+  SC.RunLoop.begin();
+  ok(iCalled, "should have flushed the invokeNext queue");
+
+  SC.RunLoop.end();
+  equals(iCalled, 1, "should have flushed the invokeNext queue only once");
+});
+
+test("Calling invokeNext inside an invokeNext invocation will schedule for the function to run in the next run loop", function () {
+  var iCalled = 0;
+  SC.RunLoop.begin();
+
+  SC.RunLoop.currentRunLoop.invokeNext(function () {
+    if (iCalled < 5) {
+      SC.RunLoop.currentRunLoop.invokeNext(arguments.callee);
+    }
+    iCalled++;
+  });
+
+  for (var i = 0; i < 5; i++) {
+    equals(iCalled, i, "should have flushed the invokeNext queue " + i + " time" + (i !== 1 ? 's' : ''));
+    SC.RunLoop.end();
+    SC.RunLoop.begin();
+  }
+  equals(iCalled, 5, "should have flushed the invokeNext queue 5 times");
+});

@@ -759,6 +759,23 @@ SC.Object.prototype = {
   },
 
   /**
+    Invokes the passed method once at the end of the current runloop,
+    after bindings have synchronized. This is useful for situations where
+    you know you need to update something, but due to the way the run loop
+    works, you can't actually do the update until the run loop has completed.
+
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
+
+    @param {Function|String} method method or method name
+    @returns {SC.Object} receiver
+  */
+  invokeLast: function(method) {
+    SC.RunLoop.currentRunLoop.invokeLast(this, method) ;
+    return this ;
+  },
+
+  /**
     Invokes the passed method once at the beginning of the next runloop,
     before any other methods (including events) are processed. This is useful
     for situations where you know you need to update something, but due to
@@ -778,13 +795,10 @@ SC.Object.prototype = {
             var obj = MyRecord.newRecord() ;
 
             // update the collection controller's selection
-            MyApp.myRecordCollectionController.invokeLast( function() {
+            MyApp.myRecordCollectionController.invokeNext( function() {
               this.set('selection', [obj]) ;
             });
           }
-
-    You can call invokeLast as many times as you like and the method will
-    only be invoked once.
 
     Note that in development mode only, the object and method that call this
     method will be recorded, for help in debugging scheduled code.
@@ -792,9 +806,8 @@ SC.Object.prototype = {
     @param {Function|String} method method or method name
     @returns {SC.Object} receiver
   */
-  invokeLast: function(method) {
-    SC.RunLoop.currentRunLoop.invokeLast(this, method) ;
-    return this ;
+  invokeNext: function (method) {
+    SC.RunLoop.currentRunLoop.invokeNext(this, method);
   },
 
   /**
