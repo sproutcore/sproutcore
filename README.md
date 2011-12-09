@@ -14,7 +14,7 @@ The Changes
 
 SproutCore.js involves three separate modifications to the existing SproutCore 1.4.5 framework (actually, the 1-4-stable branch).
 
-First, the many sub-frameworks will be consolidated and/or removed. Just three frameworks will remain, Foundation, Datastore, and Desktop (similar to Cocoa’s Foundation, Core Data, and AppKit frameworks, respectively). Touch and mobile support will be dropped completely, as well as anything experimental or unmaintained (e.g. Greenhouse).
+First, the many sub-frameworks will be consolidated and/or removed. Just three frameworks will remain, Foundation, Datastore, and Desktop (similar to Cocoa’s Foundation, Core Data, and AppKit frameworks, respectively). Touch and mobile code will be removed completely, as well as anything experimental or unmaintained (e.g. Greenhouse).
 
 Second, the Node.js buildtools (Garçon) will be moved into the SproutCore repository itself (they will not be a separate project). Historically, the Ruby buildtools have been tied to specific versions of SproutCore, but due to having two repositories, users would frequently use the wrong buildtools with their version of SproutCore. This was particularly problematic when working on SproutCore itself.
 
