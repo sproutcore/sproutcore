@@ -5,7 +5,7 @@ The goal for this SproutCore fork is:
 
 * an all-JavaScript buildtools with installation via npm
 * a simplified, streamlined framework organization with dead and experimental code removed
-* laser-like focus on desktop web browsers, awesome documentation, and stability, especially in the view layer
+* a laser-like focus on desktop web browsers, awesome documentation, and framework stability, especially in the view layer
 
 In addition, the view layer is being updated in conjunction with the development of Blossom, Fohr's soon-to-be-released <canvas>-based SproutCore view layer.
 
@@ -20,7 +20,7 @@ Second, the Node.js buildtools (Garçon) will be moved into the SproutCore repos
 
 To combat the many problems we’ve had over the years, the JavaScript buildtools will be distributed and maintained within the main SproutCore repository and npm installer, not as a separate project.
 
-Third, the view layer (Desktop) will be updated and modernized to remain in sync with Fohr’s proposed <canvas>-based view layer, called Blossom.
+Third, the view layer (Desktop) will be updated and modernized to remain in sync with Fohr’s proposed canvas-based view layer, called Blossom.
 
 Getting Involved
 ----------------
