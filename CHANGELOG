@@ -1,4 +1,5 @@
-*SproutCore 1.4.5 (January 25, 2010)*
+SproutCore 1.4.5 (January 25, 2010)
+-----------------------------------
 
 * Removed old HISTORY file
 * Remove content observer when destroyed
@@ -29,8 +30,8 @@
 * Updated references to mouseOut and mouseOver to mouseExited and mouseEntered - Fixes #100
 * Fixed bug with toggling isEnabled on SelectFieldView
 
-
-*SproutCore 1.4.4 (November 12, 2010)*
+SproutCore 1.4.4 (November 12, 2010)
+-------------------------------------
 
 * Fix SC.platform.touch for Chrome 9
 * Better docs for setIfChanged
@@ -51,7 +52,8 @@
 * Animatable should check that transitions exist before using special case
 * Typos prevent accelerating anything with a right or bottom even if it also has a top/height or left/width
 
-*SproutCore 1.4.3 (October 19, 2010)*
+SproutCore 1.4.3 (October 19, 2010)
+-----------------------------------
 
 * Send a warning to the console when using SC.RecordArray#indexOf or SC.RecordArray#lastIndexOf and providing an object that is
 * Applied fix to the findClassNames function so that class names can be detected when using SproutCore in IE 7 and 8.
@@ -81,13 +83,178 @@
 * Fixes passing contexts with addObserver.
 * Make sure a bad DateTime.parse() doesn't mess up future parses
 
-*SproutCore 1.4.2 (October 1, 2010)*
+SproutCore 1.4.2 (October 1, 2010)
+----------------------------------
 
 * Fixes a DateTime .get('lastMonday') bug
 * default to using ISO 8601 format for time parsing if none is specified
 * Allow SelectFieldView to obtain focus if the user presses TAB key from previous field.
 * Fixed typo
 
-*SproutCore 1.4.1 (September 21, 2010)*
+SproutCore 1.4.1 (September 21, 2010)
+-------------------------------------
 
 * Update the X-SproutCore-Version header to 1.4 [MO]
+
+CHANGE LOG FOR 1.4
+==================
+
+DISCLAIMER: This is a very rough and not comprehensive overview of the 1000+ commits that formed SproutCore 1.4.
+
+MAJOR
+-----
+* Touch Support Gen 1
+* Bug Fixes and Stabilization
+* Build tools performance improvements
+* Greenhouse (experimental)
+* SC.TableView (experimental)
+
+NEW
+---
+* Implementation of SC.ErrorCatcher.
+* Orientation change recognition
+* Add all sorts of alt-key goodness to scrollers:
+  * alt-click in track scrolls to click
+  * alt-click on buttons scrolls by page
+  * alt-drag scrolls 1/2 speed.
+* CollectionView fast path (experimental)
+* SC.Animatable
+* Accelerated Layer
+* Adding new SC.device object for states such as orientation, online and offline (and moving orientation out from root responder)
+* Add application manifest check to html tag of default index.rhtml
+* Media framework (experimental)
+* Default iPhone loading screen for webapps
+* Nested Records (experimental? or functional?)
+* SC.DateTime
+* SC.StaticContentView
+* SC.Border
+* Add a task queue to SproutCore, capable of running tasks in the "background"; that is, while idle. (experimental)
+
+MISCELLANEOUS
+-------------
+* Better IME support
+* MainPane now has a 200x200 min app size. This is where you should set the minimum size of your app.
+* Move feature detection from SC.browser to SC.platform.
+* Desktop framework no longer requires all other frameworks to load
+* Improved context menu handling
+* Add trigger() method to SC.routes to trigger the current route.
+* Improvements to MenuViews
+* Add the ability to observe changes on SC.Set at an add/remove level, allowing for efficient filtering, merging, etc.
+* Allow configuration of the touch icons and status bar, as well as favicon via Buildfile.
+* Add deprecation warning to SC.Scrollable
+* Better mouseWheel support
+* Added some ARIA tags for accessibility.
+* SC.ScrollView / SC.ScrollerView improvements
+* Experimental mousewheel momentum support.  Set SC.WHEEL_MOMENTUM to YES.
+* Support descending sort in ArrayControllers.
+* SC.StaticLayout functionality is now built into SC.View
+* Allow panes the chance to handle user events.
+* Fixes/improvements to PopupButton
+* Make inline text editor inherit escapeHTML from the list item view
+* Added domCSSPrefix to SC.platform
+* Make views update their layer's layerId if their layerId changes.
+* Adding maxlength property to textfield view
+* Added inflector functions to SC.String: singularize() and pluralize()  
+* Adding mousewheel support to textareas.
+* Adding HTML5 spellCheck support for textfields. It works with the latest versions of Firefox, Sproutcore, Chrome
+* Adding lastObject() method to SC.Enumerable
+* Allow SC.outlet to specify a different root.
+* Improvements to drag/drop
+* Improvements to SC.UserDefaults
+* Switch from XHTML -> HTML5.
+* Update SelectButtonView to use target/action instead of deprecated function calls.
+* Invoke button actions after a delay if triggered by keyboard shortcuts.
+* Make PopupButtonView and SelectButtonView click and hold delay a constant. Also lowered default value.
+* Use SC.Enumerable's sortProperty to sort objects so that this works on any SC.Enumerable not just native arrays.
+* SC.Record: Add in a the new concept of 'readOnlyAttributes' to complement 'attributes'.
+* New type of SC.PickerPane: PICKER_MENU_POINTER - It's a menu but position like picker pointer
+* Add a willRemoveAllChildren to SC.CollectionView.
+* Added max() and min() to SC.Array
+* Added isDescendantOf method to SC.View
+* Added acceptFirstResponder code to radio and checkbox button.
+* Add a constant for the default separator height, too.
+* use SC.WELL_CONTAINER_PADDING for well and change default value to 15
+* Initial support for re-using views in collections
+* Push an extra div into the scrollView so that it's possible to style the corner differently.
+* Moved all of the standard theme scroller metrics into SproutCore as default values.
+* Adding themes to segmented view
+* Changing tabView so you can set the height of the tabs with a global variable
+* Added provision for Enabling/Disabling menu items in SelectButtonView
+* AlertPane: Esc triggers cancel button / enter triggers default button
+* SC.Query: 'orderBy' can now optionally be a comparison function. In this case, the specified function will be passed the two records directly, rather than the typical method of operating on specific properties.  This can be useful for complicated comparisons that cannot be expressed by the simpler method.   
+* Add option to only allow focus tabbing among webapp controls.(No jumping to address bar
+* pushRetrieve, pushDestroy and pushError now return storeKey on success instead of YES
+* If there is a list item being edited, commit the changes if the list is scrolled.
+* New Validator for positive integers and also accepts a default value
+* Make sure we always have a root responder.
+* Taught toFormattedString to handle characters %h (unpadded 24-hour time, 1-24) and %i (unpadded 12-hour time, 1-12).
+* FocusRings for SC.ButtonView
+* Adding a handy escapeForRegExp method to String
+* Alignment support for SC.SegmentedView
+* allowing text fields to only apply changes on blur via applyImmediately: NO
+* Added a property to enable/disable textfield tabbing.
+* Removed mobile framework as it was unnecessary
+* Update all encodings to be valid UTF-8
+* We now force parentViewDidResize. It is no longer optional.
+* Only add 'px' units to layout values that are numbers. Strings will be unchanged.
+* 'layerLocationNeedsUpdate' is not set until updates are completed.
+* If a pane receives a tab key press, try to find the next eligible view in the view hierarchy and assign it first responder.
+* In collection view, check if the item is loaded or not before advancing to it.
+* SelectButtonView should by default highlight whatever item is set to its value property.
+* SC.Request: Added 'proper' async() function
+* Changed disclosure from using a label tag to using span
+* add debug() support to SC.Logger
+* Added the shouldInheritCursor property & documentation to SC.View.  Defaults to YES.
+* ResponderContext is now a mixin included by SC.Pane and SC.Application.
+* TextFieldView: add support for escapeHTML
+* Renamed isEnabledObserver to reduce the likelihood of naming collisions.
+* Move Date.now() into runtime, and only implement if the browser does not.
+* do not append font-weight style with px
+* Disable other mouse events while dealing with inputs.
+
+BUG FIXES
+---------
+* XSS security improvements
+* Fixed a bug with listItem views not always being removed properly
+* Miscellaneous code cleanup, optimizations and fixes
+* Fix for memory leak in SC.Response
+* Fixed issue with SC.ManyArray not notifying inverse attributes of correct records that got removed in SC.ManyArray#replace, with tests.
+* TextField hint was not updating for browsers that support placeholder
+* Fix SC.Object so it handles both local and non-local property paths at the same time.
+* Fixed SC.Binding.disconnect()
+* Initialize the value of the select field view to the value of the first element if there is no emptyName and the value hasn't been previously set.
+* Fixed RenderContext to properly handle styles starting with a dash
+* Change the value of the textfield on keyDown to reflect key repetitions.
+* Ignore moveRight and moveLeft events if the user has a control or meta key held down. Otherwise, we may inadvertently block browser keyboard shortcuts.
+* Destroy the layer before removing from parent , otherwise the view will leak
+* Fixes to SC.SegmentedView.
+* Fixed checkbox/righticon/disclosure states in SC.ListItemView
+* RootResponder's performKeyEquivalent should check the menupane before the keypane.
+* Fixed broken useToggleSelection property.
+* Correctly trigger the document's 'ready' event
+* SC.LabelView was lacking a default implementation of inlineEditorShouldBeginEditing(), so by default it would never switch to editable mode when 'isEditable' == true.
+* Fix for bug in SC.Record.normalize().  It would try to normalize a null child record reference.
+* SC.Event.special.mouseover didn't exist, changing it to mouseenter fixes the mouseenter event
+* RecordAttribute: Allow null dates
+* Checking / Unchecking checkboxes or clicking in empty space was not removing focus from in-focus form fields
+* Fixing before ondeactivate in textfield as it is not letting textfields within iframes get focus
+* Invalidate the verticalScrollOffset and horizontalScrollOffset with -1 instead of 0, because those are actually valid values.
+* Reset the click count if clicks occur too far away from one another
+* Make SC.RecordAttribute respect isEditable
+* SC.SelectButton should accept first responder only if it is enabled.
+* Prevent scrollbars from being shown when PickerPane is opened.
+
+BROWSER
+-------
+* XHR requests now work with Opera
+* IE7 fixes
+* Fixed problem with poor security management in FF4
+* Fix for window focus events on IE.
+* Fixed issue with underscore characters not appearing in IE text fields.
+* Adding extra validation to avoid incorrect appearance of hint when deleting all text while using firefox
+* Fix the default # added in FF and IE when using routes
+* SC.Pane should not call sendAction from its sendEvent implementation.
+* Fixing IE8 selection woes and removing a lot of legacy cross-browser code
+* Resolve a bug where other panes would disappear if a menu pane was opened (IE7 only).
+* Fix for SC.button on IE7, now it calculates the label with once is appended to the document
+* SC.TextFieldView: Default hint as empty string to avoid IE displaying null in the text fields
