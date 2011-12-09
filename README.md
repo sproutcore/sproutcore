@@ -7,7 +7,7 @@ The goal for this SproutCore fork is:
 * a simplified, streamlined framework organization with dead and experimental code removed
 * a laser-like focus on desktop web browsers, awesome documentation, and framework stability, especially in the view layer
 
-In addition, the view layer is being updated in conjunction with the development of Blossom, Fohr's soon-to-be-released <canvas>-based SproutCore view layer.
+In addition, the view layer is being updated in conjunction with the development of Blossom, Fohr's soon-to-be-released canvas-based SproutCore view layer.
 
 The Changes
 -----------
