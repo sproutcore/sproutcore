@@ -25,10 +25,10 @@ Third, the view layer (Desktop) will be updated and modernized to remain in sync
 Getting Involved
 ----------------
 
-Why this fork exists: http://bit.ly/future-of-sproutcore
-Pull request to merge changes back into SproutCore proper: https://github.com/sproutcore/sproutcore/pull/633
-IRC Channel: #sproutcorejs on Freenode
-Google Group: https://groups.google.com/group/sproutcorejs
+* Why this fork exists: http://bit.ly/future-of-sproutcore
+* Pull request to merge changes back into SproutCore proper: https://github.com/sproutcore/sproutcore/pull/633
+* IRC Channel: #sproutcorejs on Freenode
+* Google Group: https://groups.google.com/group/sproutcorejs
 
 Please watch this repository on GitHub to follow development, or fork it and submit a pull request to help contribute to it's evolution.
 
