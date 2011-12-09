@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>README.md</string>
+	<string>unsupported/README.md</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -12,19 +12,9 @@
 			<key>name</key>
 			<string>sproutcore</string>
 			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|public|tmp|buildtools|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<string>!.*/(\.[^/]*|CVS|public|tmp|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
 			<key>sourceDirectory</key>
 			<string></string>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>buildtools</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|public|tmp|buildtools|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>selected</key>
-			<true/>
-			<key>sourceDirectory</key>
-			<string>buildtools</string>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
@@ -36,9 +26,23 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>11</integer>
+				<integer>273</integer>
 				<key>line</key>
-				<integer>12</integer>
+				<integer>18</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>unsupported/README.md</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>192</integer>
+				<key>line</key>
+				<integer>2</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -49,6 +53,7 @@
 	<key>openDocuments</key>
 	<array>
 		<string>README.md</string>
+		<string>unsupported/README.md</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
