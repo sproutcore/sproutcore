@@ -1,7 +1,7 @@
 SproutCore.js
 =============
 
-The goal for this SproutCore fork is:
+The goal for this SproutCore fork are:
 
 * an all-JavaScript buildtools with installation via npm
 * a simplified, streamlined framework organization with dead and experimental code removed
