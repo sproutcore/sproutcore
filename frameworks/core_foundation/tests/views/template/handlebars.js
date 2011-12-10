@@ -547,7 +547,7 @@ test("should update the block when object passed to #if helper changes and an in
 test("views nested within an #if helper should be destroyed every time they are removed", function() {
   var view, didCreateLayerCalled = 0, willDestroyLayerCalled = 0;
 
-  TemplateTests.someView = SC.TemplateView.create({
+  TemplateTests.someView = SC.TemplateView.extend({
     template: SC.Handlebars.compile("<h1>hello</h1>"),
     didCreateLayer: function() { didCreateLayerCalled++; },
     willDestroyLayer: function() { willDestroyLayerCalled++; }
