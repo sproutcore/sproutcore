@@ -110,42 +110,62 @@ test("should evaluate all comparators", function() {
   q.conditions = "'Tea pot' ENDS_WITH 'a cup'";
   q.parse();
   ok(q._tokenTree.evaluate() === false, "'Tea pot' ENDS_WITH 'a cup' should be false");
+
+  q.conditions = "'baguette fille bouteille fée' ENDS_WITH 'ille'";
+  q.parse();
+  ok(q._tokenTree.evaluate() === false, "'baguette fille bouteille fée' ENDS_WITH 'ille' should be false");
+
+  q.conditions = "'baguette fille bouteille' ENDS_WITH 'ille'";
+  q.parse();
+  ok(q._tokenTree.evaluate() === true, "'baguette fille bouteille' ENDS_WITH 'ille' should be true");
+
+  q.conditions = "'fée' ENDS_WITH 'ille'";
+  q.parse();
+  ok(q._tokenTree.evaluate() === false, "'fée' ENDS_WITH 'ille' should be false");
+
+  q.conditions = "'fille baguette bouteílle' ENDS_WITH 'ille'";
+  q.parse();
+  ok(q._tokenTree.evaluate() === false, "'fille baguette bouteílle' ENDS_WITH 'ille' should be false");
+
+  q.conditions = "'fille baguette bouteílle' ENDS_WITH 'ílle'";
+  q.parse();
+  ok(q._tokenTree.evaluate() === true, "'fille baguette bouteílle' ENDS_WITH 'ílle' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'Tea pot'";
   q.parse();
-  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'Tea pot' should be true");
+  ok(q._tokenTree.evaluate() === true, "'Tea pot' CONTAINS 'Tea pot' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'Tea'";
   q.parse();
-  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'Tea' should be true");
+  ok(q._tokenTree.evaluate() === true, "'Tea pot' CONTAINS 'Tea' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'pot'";
   q.parse();
-  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'pot' should be true");
+  ok(q._tokenTree.evaluate() === true, "'Tea pot' CONTAINS 'pot' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'a po'";
   q.parse();
-  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'a po' should be true");
+  ok(q._tokenTree.evaluate() === true, "'Tea pot' CONTAINS 'a po' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'a cup'";
   q.parse();
-  ok(q._tokenTree.evaluate() == false, "'Tea pot' CONTAINS 'a cup' should be false");
+  ok(q._tokenTree.evaluate() === false, "'Tea pot' CONTAINS 'a cup' should be false");
   
   q.conditions = "{myTeapot} CONTAINS 'Tea'";
   q.parse();
-  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) == true, "['Tea', 'pot'] CONTAINS 'Tea' should be true");
+  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) === true, "['Tea', 'pot'] CONTAINS 'Tea' should be true");
 
   q.conditions = "{myTeapot} CONTAINS 'pot'";
   q.parse();
-  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) == true, "['Tea', 'pot'] CONTAINS 'pot' should be true");
+  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) === true, "['Tea', 'pot'] CONTAINS 'pot' should be true");
 
   q.conditions = "{myTeapot} CONTAINS 'coffee'";
   q.parse();
-  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) == false, "['Tea', 'pot'] CONTAINS 'coffee' should be false");
+  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) === false, "['Tea', 'pot'] CONTAINS 'coffee' should be false");
   
   q.conditions = "'Tea pot' MATCHES {myCup}";
   q.parse();
-  ok(q._tokenTree.evaluate(null,{myCup: /a\sp/}) === true, "'Tea pot' MATCHES /a\sp/ should be true");
+  ok(q._tokenTree.evaluate(null,{myCup: /a\sp/}) === true, "'Tea pot' MATCHES /a\\sp/ should be true");
   
   q.conditions = "'Tea pot' MATCHES {myCup}";
   q.parse();
