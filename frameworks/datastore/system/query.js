@@ -749,7 +749,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
-                          return ( all && all.indexOf(end) === (all.length - end.length) );
+                          return ( all && all.length >= end.length && all.lastIndexOf(end) === (all.length - end.length));
                         }
     },
 
