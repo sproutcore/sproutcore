@@ -52,7 +52,8 @@ sc_require('ext/handlebars');
         inverseTemplate: inverse,
         property: property,
         previousContext: this,
-        tagName: (options.hash.tagName || "span")
+        tagName: (options.hash.tagName || "span"),
+        isEscaped: options.hash.escaped
       });
 
       var observer, invoker;
