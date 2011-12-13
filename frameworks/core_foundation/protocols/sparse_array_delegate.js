@@ -43,7 +43,7 @@ SC.SparseArrayDelegate = {
   /**
     Invoked when an object requests an index on the sparse array that has not
     yet been set.  You should implement this method to set the object at the
-    index using provideObjectsAtIndex() or provideObjectsInRange() on the
+    index using provideObjectAtIndex() or provideObjectsInRange() on the
     sparse array.  You can call these methods immediately during this handler
     or you can wait and call them at a later time once you have loaded any
     data.
