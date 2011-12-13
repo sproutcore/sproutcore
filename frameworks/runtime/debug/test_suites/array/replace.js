@@ -90,5 +90,17 @@ SC.ArraySuite.define(function(T) {
     
     T.validateAfter(obj, after, observer, YES);
   });
+
+  test("[].replace(0, 0, 'X') will call notify `[]` changed only once", function() {
+    var exp = T.expected(1),
+        callCount = 0;
+
+    obj.addObserver('[]', function () {
+      callCount++;
+    });
+
+    obj.replace(0, 0, exp);
+    equals(callCount, 1, "expects the key '[]' to be notified only once");
+  });
   
 });
