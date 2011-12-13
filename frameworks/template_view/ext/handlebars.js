@@ -39,6 +39,13 @@ SC.Handlebars.JavaScriptCompiler.prototype.nameLookup = function(parent, name, t
   }
 };
 
+/**
+  Rewrite simple mustaches from {{foo}} to {{bind "foo"}}. This means that all simple
+  mustaches in SproutCore's Handlebars will also set up an observer to keep the DOM
+  up to date when the underlying property changes.
+
+  @private
+*/
 SC.Handlebars.Compiler.prototype.mustache = function(mustache) {
   if (mustache.params.length || mustache.hash) {
     return Handlebars.Compiler.prototype.mustache.call(this, mustache);
@@ -49,12 +56,19 @@ SC.Handlebars.Compiler.prototype.mustache = function(mustache) {
   }
 };
 
+/**
+  The entry point for SproutCore Handlebars. This replaces the default Handlebars.compile and turns on
+  template-local data and String parameters.
+
+  @param {String} string The template to compile
+*/
 SC.Handlebars.compile = function(string) {
   var ast = Handlebars.parse(string);
-  var environment = new SC.Handlebars.Compiler().compile(ast, {data: true, stringParams: true});
-  var ret = new SC.Handlebars.JavaScriptCompiler().compile(environment, {data: true, stringParams: true});
-  ret.rawTemplate = string;
-  return ret;
+  var options = { data: true, stringParams: true };
+  var environment = new SC.Handlebars.Compiler().compile(ast, options);
+  var templateSpec = new SC.Handlebars.JavaScriptCompiler().compile(environment, options, undefined, true);
+
+  return Handlebars.template(templateSpec);
 };
 
 /**
