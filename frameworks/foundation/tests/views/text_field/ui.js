@@ -76,26 +76,6 @@
     isEnabled: NO
   })
   
-  .add("aria-role", SC.TextFieldView, {
-    hint: "Full Name", 
-    value: 'John Doe',
-    isTextArea: YES,
-    isEnabled: YES
-  })
-
-  .add("aria-multiline", SC.TextFieldView, {
-    hint: "Full Name", 
-    value: 'John Doe',
-    isTextArea: YES,
-    isEnabled: YES
-  })
-  
-  .add("aria-disabled", SC.TextFieldView, {
-    hint: "Full Name", 
-    value: 'John Doe',
-    isTextArea: YES,
-    isEnabled: NO
-  })
 
   .add("aria-readonly", SC.TextFieldView, {
     hint: "Full Name", 
@@ -103,12 +83,8 @@
     isTextArea: YES,
     isEnabled: YES,
     isEditable: NO
-  })
-  
-  .add("aria-invalid", SC.TextFieldView, {
-      value: SC.Error.create({errorValue:'Error Message'}),
-      isEnabled: YES
   });
+  
     
 pane.show(); // add a test to show the test pane
 
@@ -120,10 +96,10 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   var layer = view.$();
   
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-  if(SC.browser.webkit || parseInt(SC.browser.mozilla) >= 2.0) equals(input.val(), '', 'input should have empty value');
+  if(SC.browser.webkit || parseInt(SC.browser.mozilla,0) >= 2.0) equals(input.val(), '', 'input should have empty value');
   else equals(input.val(), expectedHint, 'input should have expected hint as value');
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = view.$('.hint');
     if (hint.length===1) {
     hint = hint.text();
   } else {
@@ -142,7 +118,7 @@ pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint)
   equals(input.val(), expectedValue, 'input should have value');
   
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = view.$('.hint');
     if (hint.length===1) {
     hint = hint.text();
   } else {
@@ -308,6 +284,38 @@ test("changing isEditable", function() {
   SC.RunLoop.end();
   pane.verifyReadOnly(view, YES);
 });
+
+test("changing value from not a textarea to a textarea", function() {
+  // test the the SC.Event for 'change' gets wired up properly to the DOM element when it changes from input to textarea
+  var view = pane.view('empty');
+  SC.RunLoop.begin();
+  view.set('value', 'Original');
+  view.set('isTextArea', YES);
+  SC.RunLoop.end();
+
+  var $textarea = view.$('textarea');
+
+  SC.Event.trigger($textarea, 'focus');
+  
+  // simulate typing a letter
+  SC.Event.trigger($textarea, 'keydown');
+  $textarea.val("My New Value");
+  SC.Event.trigger($textarea, 'keyup');
+  SC.Event.trigger($textarea, 'change');
+  view.fieldValueDidChange();
+  
+  // wait a little bit to let text field propogate changes
+  stop();
+  
+  setTimeout(function() {
+    start();
+    equals(view.get("value"), "My New Value", "SC.Event for change should get wired up properly");
+  }, 100);  
+  
+  SC.RunLoop.begin();
+  SC.RunLoop.end();
+});
+
 
 if (!SC.browser.isIE && !SC.platform.input.placeholder) {
   test("Changing value to null -- password field", function() {
@@ -636,33 +644,4 @@ test("editing a field should not change the cursor position", function() {
   ok(selection.get('start') == 2 && selection.get('end') == 3, 'cursor position should be unchanged');
 });
 
-test("should have role as textbox", function() {
-  var view = pane.view('aria-role');
-  var label = view.$();  
-  equals(label.attr('role'), 'textbox', 'role should be textbox');
-});
-
-test("should have aria-multiline as YES", function() {
-  var view = pane.view('aria-multiline');
-  var label = view.$();  
-  equals(label.attr('aria-multiline'), 'true', 'aria-multiline should be true');
-});
-
-test("should have aria-disabled as YES", function() {
-  var view = pane.view('aria-disabled');
-  var label = view.$();  
-  equals(label.attr('aria-disabled'), 'true', 'aria-disabled should be true');
-});
-
-test("should have aria-readonly as YES", function() {
-  var view = pane.view('aria-readonly');
-  var label = view.$();  
-  equals(label.attr('aria-readonly'), 'true', 'aria-readonly should be true');
-});
-
-test("should have aria-invalid as YES", function() {
-  var view = pane.view('aria-invalid');
-  var label = view.$();
-  equals(label.attr('aria-invalid'), 'true', 'aria-invalid should be true');
-});
 })();
