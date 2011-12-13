@@ -88,6 +88,10 @@ SC._BindableSpan = SC.TemplateView.extend(
     @param {SC.RenderContext} renderContext}
   */
   render: function(renderContext) {
+    // If not invoked via a triple-mustache ({{{foo}}}), escape
+    // the content of the template.
+    var escape = this.get('isEscaped');
+
     var shouldDisplay = this.get('shouldDisplayFunc'),
         property = this.get('property'),
         preserveContext = this.get('preserveContext'),
@@ -96,7 +100,16 @@ SC._BindableSpan = SC.TemplateView.extend(
     var inverseTemplate = this.get('inverseTemplate'),
         displayTemplate = this.get('displayTemplate');
 
-    var result = context.getPath(property);
+    var result;
+
+
+    // Use the current context as the result if no
+    // property is provided.
+    if (property === '') {
+      result = context;
+    } else {
+      result = context.getPath(property);
+    }
 
     // First, test the conditional to see if we should
     // render the template or not.
@@ -108,14 +121,16 @@ SC._BindableSpan = SC.TemplateView.extend(
       if (preserveContext) {
         this.set('context', context);
       } else {
-      // Otherwise, determine if this is a block bind or not.
-      // If so, pass the specified object to the template
+        // Otherwise, determine if this is a block bind or not.
+        // If so, pass the specified object to the template
         if (displayTemplate) {
           this.set('context', result);
         } else {
-        // This is not a bind block, just push the result of the
-        // expression to the render context and return.
-          renderContext.push(Handlebars.Utils.escapeExpression(result));
+          // This is not a bind block, just push the result of the
+          // expression to the render context and return.
+          if (result == null) { result = ""; } else { result = String(result); }
+          if (escape) { result = Handlebars.Utils.escapeExpression(result); }
+          renderContext.push(result); //Handlebars.Utils.escapeExpression(result));
           return;
         }
       }

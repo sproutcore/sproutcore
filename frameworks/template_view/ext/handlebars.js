@@ -51,6 +51,14 @@ SC.Handlebars.Compiler.prototype.mustache = function(mustache) {
     return Handlebars.Compiler.prototype.mustache.call(this, mustache);
   } else {
     var id = new Handlebars.AST.IdNode(['bind']);
+
+    // Update the mustache node to include a hash value indicating whether the original node
+    // was escaped. This will allow us to properly escape values when the underlying value
+    // changes and we need to re-render the value.
+    if(mustache.escaped) {
+      mustache.hash = mustache.hash || new Handlebars.AST.HashNode([]);
+      mustache.hash.pairs.push(["escaped", new Handlebars.AST.StringNode("true")]);
+    }
     mustache = new Handlebars.AST.MustacheNode([id].concat([mustache.id]), mustache.hash, !mustache.escaped);
     return Handlebars.Compiler.prototype.mustache.call(this, mustache);
   }
