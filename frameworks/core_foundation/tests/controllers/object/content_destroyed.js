@@ -28,7 +28,7 @@ module("SC.ObjectController - content destroyed", {
       foo: "foo2"
     });
     destroyCount = 0;
-    console.log('SSSSS');
+
     controller = SC.ObjectController.create({ 
       destroyContentOnReplace: YES,
       content: content 
