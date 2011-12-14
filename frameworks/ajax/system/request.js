@@ -510,6 +510,19 @@ SC.Request.mixin(
     var req = this.create().set('address', address).set('type', 'PUT');
     if(body) { req.set('body', body) ; }
     return req ;
+  },
+
+  /**
+    Helper method for quickly setting up a PATCH request.
+
+    @param {String} address url of request
+    @param {String} body
+    @returns {SC.Request} receiver
+  */
+  patchUrl: function(address, body) {
+    var req = this.create().set('address', address).set('type', 'PATCH');
+    if(body) { req.set('body', body) ; }
+    return req ;
   }
 
 });
