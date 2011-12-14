@@ -97,6 +97,27 @@ test("template view should call the function of the associated template with its
   equals("template was called for Tom DAAAALE1. Yea Tom DAAAALE1", view.$('#twas-called').text(), "the named template was called with the view as the data source");
 });
 
+test("template view should call the function of the associated template with itself as the context", function() {
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('<div id="not-escaped">{{{notEscaped}}}</div><div id="escaped">{{escaped}}</div>'),
+    notEscaped: '<p>NOT_ESCAPED</p>',
+    escaped: '<p>ESCAPED</p>'
+  });
+
+  view.createLayer();
+
+  equals("&lt;p&gt;ESCAPED&lt;/p&gt;", view.$('#escaped span')[0].innerHTML, "the value was properly inserted escaped");
+  equals("<p>NOT_ESCAPED</p>", view.$('#not-escaped span')[0].innerHTML, "the value was properly inserted unescaped");
+
+  SC.run(function() {
+    view.set('notEscaped', '<br>NOT_ESCAPED<br>');
+    view.set('escaped', '<br>ESCAPED<br>');
+  });
+
+  equals("&lt;br&gt;ESCAPED&lt;br&gt;", view.$('#escaped span')[0].innerHTML, "the value was properly inserted escaped");
+  equals("<br>NOT_ESCAPED<br>", view.$('#not-escaped span')[0].innerHTML, "the value was properly inserted unescaped");
+});
+
 test("should allow values from normal JavaScript hash objects to be used", function() {
   var view = SC.TemplateView.create({
     template: SC.Handlebars.compile('{{#with person}}{{firstName}} {{lastName}} (and {{pet.name}}){{/with}}'),
