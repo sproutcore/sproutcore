@@ -21,19 +21,19 @@ test("creating a collection view works", function() {
   var CollectionView = SC.TemplateCollectionView.extend({
     content: [{title: 'Hello'}]
   });
-  
+
   var defaultCollectionView = CollectionView.create();
   var ulCollectionView  = CollectionView.create({ tagName: "ul" });
   var olCollectionView  = CollectionView.create({ tagName: "ol" });
   var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
   var customTagCollectionView = CollectionView.create({ tagName: "p" });
-  
+
   defaultCollectionView.createLayer();
   ulCollectionView.createLayer();
   olCollectionView.createLayer();
   dlCollectionView.createLayer();
   customTagCollectionView.createLayer();
-  
+
   ok(defaultCollectionView.$().is("ul"), "Unordered list collection view was rendered (Default)");
   equals(defaultCollectionView.$('li').length, 1, "List item view was rendered (Default)");
 
@@ -45,7 +45,7 @@ test("creating a collection view works", function() {
 
   ok(dlCollectionView.$().is("dl"), "Definition List collection view was rendered");
   equals(dlCollectionView.$('dt').length, 1, "Definition term view was rendered");
-  
+
   ok(customTagCollectionView.$().is("p"), "Paragraph collection view was rendered");
   equals(customTagCollectionView.$('div').length, 1, "Child view was rendered");
 });

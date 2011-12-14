@@ -9,7 +9,7 @@ var content, newContent, controller, destroyCount;
 
 // ..........................................................
 // SINGLE OBSERVABLE OBJECT
-// 
+//
 
 SC.TestObject = SC.Object.extend();
 
@@ -21,7 +21,7 @@ SC.TestObject.reopen({
 
 module("SC.ObjectController - content destroyed", {
   setup: function() {
-    content = SC.TestObject.create({ 
+    content = SC.TestObject.create({
       foo: "foo1", bar: "bar1"
     });
     newContent = SC.Object.create({
@@ -29,12 +29,12 @@ module("SC.ObjectController - content destroyed", {
     });
     destroyCount = 0;
 
-    controller = SC.ObjectController.create({ 
+    controller = SC.ObjectController.create({
       destroyContentOnReplace: YES,
-      content: content 
+      content: content
     });
   },
-  
+
   teardown: function() {
     controller.destroy();
   }
