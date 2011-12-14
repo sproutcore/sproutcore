@@ -49,10 +49,10 @@ test("should not error when there is a dud view name in childViews list.", funct
   var called = [];
   var v = SC.View.create({
     childViews: [
-      "nonExistantClassNme",       // string - should NOT be called
-        'customClassName'          // string - should be called
+      'nonExistantClassName',       // string - should NOT be called
+      'customClassName'          // string - should be called
     ],
-    // this shuld be used for the 'customClassName' item above
+    // this should be used for the 'customClassName' item above
     customClassName: SC.View.extend({ key: 2 }),
 
     // patch to record results...
