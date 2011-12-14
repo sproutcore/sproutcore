@@ -44,7 +44,7 @@ config :statechart,      :required => [:core_foundation], :test_required => [:co
 config :ajax,            :required => [:runtime, :core_foundation]
 
 # WRAPPER FRAMEWORKS
-config :sproutcore, :required => [:desktop, :datastore, :statechart]
+config :sproutcore, :required => [:desktop, :datastore, :statechart, :template_view]
 config :mini, :required => [:runtime, :datastore]
 config :animation, :required => :foundation
 
