@@ -885,14 +885,14 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
   var view = SC.TemplateView.create({
     template: template,
     content: SC.Object.create({
-      url: "http://www.sproutcore.com/assets/images/logo.png",
+      url: "http://www.sproutcore.com/img/branding/logo/png/dark.png",
       title: "The SproutCore Logo"
     })
   });
 
   view.createLayer();
 
-  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/img/branding/logo/png/dark.png", "sets src attribute");
   equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
 
   SC.run(function() {
@@ -912,7 +912,7 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
 
   SC.run(function() {
     view.set('content', {
-      url: "http://www.sproutcore.com/assets/images/logo.png",
+      url: "http://www.sproutcore.com/img/branding/logo/png/dark.png",
       title: "The SproutCore Logo"
     });
   });
@@ -921,7 +921,7 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
 
   SC.run(function() {
     view.set('content', {
-      url: "http://www.sproutcore.com/assets/images/logo.png",
+      url: "http://www.sproutcore.com/img/branding/logo/png/dark.png",
       title: function() {
         return "Nanananana SproutCore!";
       }
@@ -961,14 +961,14 @@ test("should be able to bind element attributes using {{bindAttr}} inside a bloc
   var view = SC.TemplateView.create({
     template: template,
     content: SC.Object.create({
-      url: "http://www.sproutcore.com/assets/images/logo.png",
+      url: "http://www.sproutcore.com/img/branding/logo/png/dark.png",
       title: "The SproutCore Logo"
     })
   });
 
   view.createLayer();
 
-  equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
+  equals(view.$('img').attr('src'), "http://www.sproutcore.com/img/branding/logo/png/dark.png", "sets src attribute");
   equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
 
   SC.run(function() {
