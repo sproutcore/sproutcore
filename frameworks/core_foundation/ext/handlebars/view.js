@@ -49,6 +49,13 @@ SC.Handlebars.ViewHelper = SC.Object.create({
 
     var childViews = currentView.get('childViews');
     var childView = currentView.createChildView(newView);
+    
+    if(newView.subclassOf(SC.View)) {
+      var pane = currentView.get('pane'), views
+      if(views = pane._views_need_replace_layer = (pane._views_need_replace_layer || [])) {
+        views.pushObject(childView)
+      }
+    }
 
     // Set the template of the view to the passed block if we got one
     if (fn) { childView.template = fn; }
@@ -64,7 +71,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     childView.applyAttributesToContext(context);
     // tomdale wants to make SproutCore slow
     childView.render(context, YES);
-
+    
     return new Handlebars.SafeString(context.join());
   },
 

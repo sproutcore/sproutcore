@@ -31,6 +31,7 @@ SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
     @returns {SC.MainPane} the created pane
   */
   append: function(attrs) {
+    var views;
     var pane = SC.MainPane.extend({
       childViews: ['contentView'],
 
@@ -53,7 +54,16 @@ SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
 
     // Normally the awake process is started in the Page, but we don't have a Page
     pane.awake();
+    
+    if(views = pane._views_need_replace_layer) {
+      for(var i = 0; i < views.get('length'); i++) {
+        view = views.objectAt(i)
+        view.replaceLayer();
+      }
+    }
 
+    pane.viewDidResize();
+    
     return pane;
   }
 });
