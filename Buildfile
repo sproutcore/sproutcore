@@ -4,12 +4,12 @@
 #           portions copyright Strobe Inc. and contributors
 # ==========================================================================
 
-# This buildfile defines the configurations needed to link together the 
+# This buildfile defines the configurations needed to link together the
 # various frameworks that make up SproutCore.  If you want to override some
-# of these settings, you should make changes to your project Buildfile 
+# of these settings, you should make changes to your project Buildfile
 # instead.
 
-config :all, 
+config :all,
   :layout         => 'sproutcore:lib/index.rhtml',
   :test_layout    => 'sproutcore:lib/index.rhtml',
   :test_required  => ['sproutcore/testing'],
@@ -19,7 +19,7 @@ config :all,
 # while working with apps.  If you are hacking SC itself, you can turn this
 # off in your project buildfile by referencing sproutcore specifically
 mode :debug do
-  config :all, 
+  config :all,
     :combine_javascript => true,
     :combine_stylesheet => true
 end
@@ -29,7 +29,7 @@ config :bootstrap,  :required => [], :use_modules => false
 
 config :jquery,          :required => [], :test_required => [], :debug_required => []
 config :yuireset,        :required => [], :test_required => [], :debug_required => []
-config :templates,       :required => [:core_foundation], :test_required => [:core_foundation]
+config :template_view,   :required => [:core_foundation], :test_required => [:core_foundation]
 config :runtime,         :required => [:jquery]
 config :'datetime/core', :required => [:runtime]
 config :datetime,        :required => [:'datetime/core']
@@ -54,30 +54,30 @@ config :testing, :required => [:jquery], :test_required => [], :debug_required =
 # SPECIAL FRAMEWORKS AND THEMES
 # These do not require any of the built-in SproutCore frameworks
 %w(debug legacy_theme empty_theme).each do |target_name|
-  config target_name, 
+  config target_name,
     :required => [], :test_required => [], :debug_required => []
 end
 
 # CONFIGURE THEMES
-config :empty_theme, 
+config :empty_theme,
   :theme_name => 'empty-theme',
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
-config :iphone_theme, 
+config :iphone_theme,
   :theme_name     => 'iphone-theme',
   :required       => [],
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
-config :legacy_theme, 
-  :required => :empty_theme, 
+config :legacy_theme,
+  :required => :empty_theme,
   :theme_name => 'sc-theme',
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
-config :ace, 
-  :required => :empty_theme, 
+config :ace,
+  :required => :empty_theme,
   :theme_name => nil,
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug'],
@@ -98,7 +98,7 @@ config :core_tools, :required => [
 # end
 
 %w(tests test_controls welcome).each do |app_target|
-  config app_target, 
+  config app_target,
     :required => [:desktop, :datastore, :core_tools],
     :theme => :ace
 
