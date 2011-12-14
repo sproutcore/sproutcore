@@ -345,7 +345,7 @@ test("should render inverse template when its present and there is no content", 
 
   view.createLayer();
 
-  equals(view.$('h1').text(), 'inverse', 'collection view with no content and inverse template should render inverse template')
+  equals(view.$('h1').text(), 'inverse', 'collection view with no content and inverse template should render inverse template');
 });
 
 test("should render inverse template name when its present and there is no content", function() {
@@ -366,7 +366,7 @@ test("should render inverse template name when its present and there is no conte
 
   view.createLayer();
 
-  equals(view.$('h1').text(), 'inverse template from file', 'collection view with no content and inverse template name should render template')
+  equals(view.$('h1').text(), 'inverse template from file', 'collection view with no content and inverse template name should render template');
 });
 
 test("#collection helper should allow relative paths for the collection view class", function() {
