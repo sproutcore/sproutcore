@@ -115,7 +115,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     ret = this.nextObject(0, null, context);
     context = SC.Enumerator._pushContext(context);
     return ret ;
-  }.property(),
+  }.property('[]').cacheable(),
 
   /**
     Helper method returns the last object from a collection.
@@ -126,7 +126,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     var len = this.get('length');
     if (len===0) return undefined ;
     if (this.objectAt) return this.objectAt(len-1); // support arrays out of box
-  }.property(),
+  }.property('[]').cacheable(),
 
   /**
     Returns a new enumerator for this object.  See SC.Enumerator for
@@ -807,6 +807,8 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @returns {Object} receiver
   */
   enumerableContentDidChange: function(start, length, deltas) {
+    if (start === 0) this.notifyPropertyChange('firstObject');
+    if (start + length === this.get('length') - 1) this.notifyPropertyChange('lastObject');
     this.notifyPropertyChange('[]') ;
   },
 
