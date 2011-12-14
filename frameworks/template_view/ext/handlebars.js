@@ -33,7 +33,7 @@ SC.Handlebars.JavaScriptCompiler.prototype.compiler = SC.Handlebars.JavaScriptCo
 
 SC.Handlebars.JavaScriptCompiler.prototype.nameLookup = function(parent, name, type) {
   if (type === 'context') {
-    return "SC.get(" + parent + ", " + this.quotedString(name) + ");";
+    return "SC.get(" + parent + ", " + this.quotedString(name) + ")";
   } else {
     return Handlebars.JavaScriptCompiler.prototype.nameLookup.call(this, parent, name, type);
   }
