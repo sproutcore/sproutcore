@@ -307,7 +307,7 @@ SC.ContentValueSupport = {
     this._old_contentValueKeys = oldKeys;
 
     // notify that value did change.
-    key = (!key || key === 'content') ? '*' : this.get('key');
+    key = (!key || key === 'content') ? '*' : this.get(key);
     if(key) this.contentPropertyDidChange(content, key) ;
   }.observes('content'),
 
