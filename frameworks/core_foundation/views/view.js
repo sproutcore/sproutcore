@@ -679,9 +679,9 @@ SC.CoreView.reopen(
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
     if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
-    if (this.get('isFirstResponder')) { 
+    if (this.get('isFirstResponder')) {
       context.addClass('focus');
-      context.attr('tabindex', '0'); 
+      context.attr('tabindex', '0');
     }else{
       context.attr('tabindex', '-1');
     }
@@ -1676,7 +1676,7 @@ SC.CoreView.unload = function() {
 */
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   classNames: ['sc-view'],
-  
+
   displayProperties: ['isFirstResponder']
 });
 
