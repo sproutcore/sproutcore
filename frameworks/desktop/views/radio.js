@@ -356,8 +356,11 @@ SC.RadioView = SC.View.extend(SC.Control,
     this._activeRadioButton = index;
     
     if (index !== undefined) {
-      this.get('displayItems')[index].set('isActive', YES);
-      delegate.updateRadioAtIndex(proxy, elem, index);
+      var item = this.get('displayItems')[index];
+      if (item.get('isEnabled')) {
+        item.set('isActive', YES);
+        delegate.updateRadioAtIndex(proxy, elem, index);
+      }
     }
     
     // even if radiobuttons are not set to get firstResponder, allow default 
@@ -387,9 +390,12 @@ SC.RadioView = SC.View.extend(SC.Control,
     this._activeRadioButton = undefined;
     
     if (index !== undefined) {
-      displayItems[index].set('isActive', NO);
-      delegate.updateRadioAtIndex(proxy, elem, index);
-      this.set('value', displayItems[index].value);
+      var item = this.get('displayItems')[index];
+      if (item.get('isEnabled')) {
+        item.set('isActive', NO);
+        delegate.updateRadioAtIndex(proxy, elem, index);
+        this.set('value', item.value);
+      }
     }
     
     evt.allowDefault();
