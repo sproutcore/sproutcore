@@ -82,15 +82,15 @@ SC.Event = function(originalEvent) {
     var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.webkit && originalEvent.wheelDelta !== undefined) {
+    if (SC.browser.engine === SC.ENGINE.webkit && originalEvent.wheelDelta !== undefined) {
       this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
 
-    // normalize wheelDelta for Firefox
+    // normalize wheelDelta for Firefox (all Mozilla browsers)
     // note that we multiple the delta on FF to make it's acceleration more
     // natural.
-    } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
+    } else if (!SC.none(originalEvent.detail) && SC.browser.engine === SC.BROWSER.gecko) {
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
         this.wheelDeltaY = this.wheelDelta = 0;
@@ -101,7 +101,7 @@ SC.Event = function(originalEvent) {
 
     // handle all other legacy browser
     } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.msie || SC.browser.opera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+      this.wheelDelta = this.wheelDeltaY = SC.browser.name === SC.BROWSER.ie || SC.browser.name === SC.BROWSER.opera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
     }
 
@@ -126,9 +126,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   MOUSE_WHEEL_MULTIPLIER: function() {
     var deltaMultiplier = 1,
-        version = parseFloat(SC.browser.version);
+        version = SC.browser.versionFloat(SC.browser.engineVersion);
 
-    if (SC.browser.safari) {
+    if (SC.browser.name === SC.BROWSER.safari) {
       deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
       if (version >= 533.17 && version<534) {
@@ -137,9 +137,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
       }
-    }else if(SC.browser.msie){
+    }else if(SC.browser.name === SC.BROWSER.ie){
       deltaMultiplier = 0.3;
-    }else if(SC.browser.chrome){
+    }else if(SC.browser.name === SC.BROWSER.chrome){
       deltaMultiplier = 0.4;
     }
     return deltaMultiplier;
@@ -256,7 +256,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
-    if (SC.browser.msie && elem.setInterval) elem = window;
+    if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
 
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
@@ -338,7 +338,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     */
     // // For whatever reason, IE has trouble passing the window object
     // // around, causing it to be cloned in the process
-    // if (SC.browser.msie && elem.setInterval) elem = window;
+    // if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
 
     var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
@@ -605,13 +605,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         Implement support for mouseenter on browsers other than IE */
     mouseenter: {
       setup: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
@@ -629,13 +629,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         Implement support for mouseleave on browsers other than IE */
     mouseleave: {
       setup: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
@@ -885,7 +885,7 @@ SC.Event.prototype = {
     @returns {String}
   */
   getCharString: function() {
-    if(SC.browser.msie){
+    if(SC.browser.name === SC.BROWSER.ie){
       if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
         return String.fromCharCode(0);
       }
@@ -956,7 +956,7 @@ SC.Event.fire = SC.Event.trigger;
 // This avoids leaks in IE and issues with mouseout or other handlers on
 // other browsers.
 
-if(SC.browser.msie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
+if(SC.browser.name === SC.BROWSER.ie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'

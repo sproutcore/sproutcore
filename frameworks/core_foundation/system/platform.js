@@ -39,8 +39,11 @@ SC.platform = SC.Object.create({
 
   /*
     NOTES
-     - A development version of Chrome 9 incorrectly reported supporting touch
-     - Android is assumed to support touch, but incorrectly reports that it does not
+     - Chrome would incorrectly indicate support for touch events.  This has been fixed:
+       http://code.google.com/p/chromium/issues/detail?id=36415
+     - Android is assumed to support touch, but incorrectly reports that it does not.
+     - See: https://github.com/Modernizr/Modernizr/issues/84 for a discussion on detecting
+       touch capability.
   */
   /**
     YES if the current device supports touch events, NO otherwise.
@@ -50,7 +53,7 @@ SC.platform = SC.Object.create({
 
     @property {Boolean}
   */
-  touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
+  touch: 'ontouchstart' in window || SC.browser.name === SC.BROWSER.android,
   
   bounceOnScroll: SC.browser.iOS,
   pinchToZoom: SC.browser.iOS,
@@ -346,7 +349,7 @@ SC.platform = SC.Object.create({
     @property {Boolean}
     @default NO
   */
-  windowSizeDeterminesOrientation: SC.browser.iOS || !('onorientationchange' in window)
+  windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window)
 
 });
 
