@@ -966,6 +966,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   /** @private
+    When we loose first responder, ensure that the field has been blurred.
+  */
+  willLoseFirstResponder: function () {
+    if(this.get('focused')) {
+      this.$input().blur();
+    }
+  },
+  
+  /** @private
     In IE, you can't modify functions on DOM elements so we need to wrap the
     call to select() like this.
   */
