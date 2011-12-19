@@ -54,10 +54,24 @@ SC.platform = SC.Object.create({
     @property {Boolean}
   */
   touch: 'ontouchstart' in window || SC.browser.name === SC.BROWSER.android,
-  
-  bounceOnScroll: SC.browser.iOS,
-  pinchToZoom: SC.browser.iOS,
 
+  /**
+    YES if the current browser supports bounce on scroll.
+
+    @property {Boolean}
+  */
+  bounceOnScroll: SC.browser.os === SC.OS.ios,
+
+  /**
+    YES if the current browser supports pinch to zoom.
+
+    @property {Boolean}
+  */
+  pinchToZoom:  SC.browser.os === SC.OS.ios,
+
+  /**
+    YES if the current browser supports the `placeholder` attribute in `input` elements.
+  */
   input: {
     placeholder: ('placeholder' in document.createElement('input'))
   },
@@ -119,7 +133,7 @@ SC.platform = SC.Object.create({
       // @endif
       return;
     }
-    
+
     SC.Logger.log("Simulating touch events");
 
     // Tell the app that we now "speak" touch
@@ -326,26 +340,26 @@ SC.platform = SC.Object.create({
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
   }(),
-  
+
   /**
     Whether the browser supports HTML5 history.
   */
   supportsHistory: function() {
     return !!(window.history && window.history.pushState);
   }(),
-  
+
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
   }(),
-  
+
   supportsOrientationChange: ('onorientationchange' in window),
-  
+
   /**
     Because iOS is slow to dispatch the window.onorientationchange event,
     we use the window size to determine the orientation on iOS devices
     and desktop environments when SC.platform.touch is YES (ie. when
     SC.platform.simulateTouchEvents has been called)
-    
+
     @property {Boolean}
     @default NO
   */
