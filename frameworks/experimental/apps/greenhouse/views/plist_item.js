@@ -129,7 +129,7 @@ Greenhouse.PlistItemView = SC.View.extend(SC.Control,
     this._checkboxRenderDelegate = renderer;
   },
   /** 
-    Determines if the event occured inside an element with the specified
+    Determines if the event occurred inside an element with the specified
     classname or not.
   */
   _isInsideElementWithClassName: function(className, evt) {

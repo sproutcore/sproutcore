@@ -15,7 +15,7 @@ TestRunner.targetsController = SC.ArrayController.create(
 /** @scope TestRunner.targetsController.prototype */ {
 
   /**
-    Call this method whenever you want to relaod the targets from the server.
+    Call this method whenever you want to reload the targets from the server.
   */
   reload: function() {
     var targets = TestRunner.store.find(CoreTools.TARGETS_QUERY);

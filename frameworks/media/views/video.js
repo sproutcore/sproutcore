@@ -18,7 +18,7 @@ sc_require('views/mini_controls');
   This view wraps the different technologies so you can use one standard and 
   simple API to play videos.
   
-  You can specify and array with the order of how the technologies will degrad
+  You can specify and array with the order of how the technologies will degrade
   depending on availability. For example you can set degradeList to be 
   ['html5', 'flash'] and it will load your video in a video tag if the 
   technology is available otherwise flash and if neither of the technologies 
@@ -139,7 +139,7 @@ SC.VideoView = SC.View.extend(
   }.property('currentTime', 'duration').cacheable(),
   
   /** 
-    Renders the appropiate HTML according for the technology to use.
+    Renders the appropriate HTML according for the technology to use.
     
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
@@ -268,7 +268,7 @@ SC.VideoView = SC.View.extend(
 
 
   /** 
-    This function is called everytime the frame changes. This is done to get 
+    This function is called every time the frame changes. This is done to get 
     the right video dimensions for HTML5 video tag.
     
     @returns {void}
@@ -304,7 +304,7 @@ SC.VideoView = SC.View.extend(
   },
   
   /** 
-    Adds all the neccesary video DOM elements.
+    Adds all the necessary video DOM elements.
     
     @returns {void}
   */
@@ -464,7 +464,7 @@ SC.VideoView = SC.View.extend(
   },
   
   /** 
-     Adds all the neccesary quicktime DOM elements.
+     Adds all the necessary quicktime DOM elements.
 
      @returns {void}
    */
@@ -603,7 +603,7 @@ SC.VideoView = SC.View.extend(
   }.observes('paused'),
   
   /** 
-    Called when currentTime changes. Notifies the differnt technologies 
+    Called when currentTime changes. Notifies the different technologies 
     then new currentTime.
     
     @returns {void}

@@ -220,7 +220,7 @@ SC.ResponderContext = {
 
     @param {String} action name of action
     @param {Object} sender object sending the action
-    @param {Object} context optional additonal context info
+    @param {Object} context optional additional context info
     @returns {SC.Responder} the responder that handled it or null
   */
   sendAction: function(action, sender, context) {

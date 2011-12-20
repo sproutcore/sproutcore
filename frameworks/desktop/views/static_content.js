@@ -12,7 +12,7 @@
 
   Normally, views in SproutCore are absolutely positioned. Their width and
   height are either pre-determined, or specified relative to their enclosing
-  view. Occasionally, you may want to display content that is layed out by
+  view. Occasionally, you may want to display content that is laid out by
   the browser. For example, if you were writing a documentation browser, you
   may want to display the table of contents as an SC.ListView, but the actual
   pages as HTML content.

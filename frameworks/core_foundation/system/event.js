@@ -200,7 +200,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         SC.Event.add(anElement, "click", myClickHandler) ;
 
     The most basic type of handler you can pass is a function.  This function
-    will be executed everytime an event of the type you specify occurs on the
+    will be executed every time an event of the type you specify occurs on the
     named element.  You can optionally pass an additional context object which
     will be included on the event in the event.data property.
 
@@ -415,7 +415,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     @param {Element} elem the element the event targets
     @param {String} eventType event type.  mousedown, mouseup, etc
-    @param {Hash} attrs optional additonal attributes to apply to event.
+    @param {Hash} attrs optional additional attributes to apply to event.
     @returns {Hash} simulated event object
   */
   simulateEvent: function(elem, eventType, attrs) {
@@ -436,7 +436,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   /**
     Trigger an event execution immediately.  You can use this method to
-    simulate arbitrary events on arbitary elements.
+    simulate arbitrary events on arbitrary elements.
 
     ## Limitations
 
@@ -565,7 +565,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       if (val !== NO) val = ret;
 
-      // if method returned NO, do not continue.  Stop propogation and
+      // if method returned NO, do not continue.  Stop propagation and
       // return default.  Note that we test explicitly for NO since
       // if the handler returns no specific value, we do not want to stop.
       if ( ret === NO ) {
@@ -874,7 +874,7 @@ SC.Event.prototype = {
   },
 
   /**
-    Stops both the default action and further propogation.  This is more
+    Stops both the default action and further propagation.  This is more
     convenient than calling both.
 
     @returns {SC.Event} receiver

@@ -838,7 +838,7 @@ SC.View.reopen(
 
   /**
     One of two methods that are invoked whenever one of your childViews
-    layout changes.  This method is invoked everytime a child view's layout
+    layout changes.  This method is invoked every time a child view's layout
     changes to give you a chance to record the information about the view.
 
     Since this method may be called many times during a single run loop, you

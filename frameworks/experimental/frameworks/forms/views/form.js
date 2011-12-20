@@ -216,7 +216,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
     if (this._rowLabelSize !== ret) {
       this._rowLabelSize = ret;
       
-      // set by looping throuhg child views
+      // set by looping through child views
       for (idx = 0; idx < len; idx++) {
         child = children[idx];
 

@@ -259,7 +259,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 
   /**
     Returns a new `SC.DateTime` object advanced according the the given parameters.
-    Don't use floating point values, it might give unpredicatble results.
+    Don't use floating point values, it might give unpredictable results.
 
     @see SC.DateTime#create for the list of options you can pass
     @param {Hash} options the amount of date/time to advance the receiver
@@ -522,7 +522,7 @@ SC.DateTime.mixin(SC.Comparable,
   /**
     @private
 
-    The index of the lastest cached value. Used with `_DT_CACHE_MAX_LENGTH` to
+    The index of the latest cached value. Used with `_DT_CACHE_MAX_LENGTH` to
     limit the size of the cache.
 
     @type Integer
@@ -851,7 +851,7 @@ SC.DateTime.mixin(SC.Comparable,
     local timezone. If you want to create a UTC+2 (CEST) date, for example,
     then you should pass a timezone of -120.
 
-    @param options one of the three kind of parameters descibed above
+    @param options one of the three kind of parameters described above
     @returns {SC.DateTime} the SC.DateTime instance that corresponds to the
       passed parameters, possibly fetched from cache
   */

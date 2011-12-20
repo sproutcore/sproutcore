@@ -153,7 +153,7 @@ SC.FlowedLayout = {
   }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing'),
   
   /** @private
-    Overriden to only update if it is a view we do not manage, or the width or height has changed
+    Overridden to only update if it is a view we do not manage, or the width or height has changed
     since our last record of it.
   */
   layoutDidChangeFor: function(c) {
@@ -439,7 +439,7 @@ SC.FlowedLayout = {
       lastIdx = idx;
       
       var row = {
-        // always a referene to the plan
+        // always a reference to the plan
         plan: plan,
         
         // the combined size of the items in the row. This is used, for instance,
@@ -788,7 +788,7 @@ SC.FlowedLayout = {
   },
   
   /** @private
-    Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are layed out in the order they appear in childViews.
+    Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are laid out in the order they appear in childViews.
   */
   reorder: function(views) {
     if(!SC.typeOf(views) === SC.T_ARRAY) views = arguments;

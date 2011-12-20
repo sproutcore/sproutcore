@@ -11,7 +11,7 @@
   page in the browser history, which is the default behavior in most browsers.
   
   Usually it is best to leave this property set to `NO` in order to prevent the
-  user from inadvertantly losing data by pressing the backspace key.
+  user from inadvertently losing data by pressing the backspace key.
 
   @static
   @type Boolean

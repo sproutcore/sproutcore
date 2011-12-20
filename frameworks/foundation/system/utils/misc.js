@@ -143,7 +143,7 @@ SC.mixin( /** @scope SC */ {
   
   
   /**
-    Switch the scale of your app. Useful when vizualizing apps not designed
+    Switch the scale of your app. Useful when visualizing apps not designed
     for iphone.
   */
   switchScale: function() {

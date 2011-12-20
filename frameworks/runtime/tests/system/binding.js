@@ -186,7 +186,7 @@ module("chained binding", {
   
 });
 
-test("changing first output should propograte to third after flush", function() {
+test("changing first output should propagate to third after flush", function() {
   first.set("output", "change") ;
   equals("change", first.get("output"), "first.output") ;
   ok("change" !== third.get("input"), "third.input") ;
@@ -230,7 +230,7 @@ module("Custom Binding", {
   }
 });
 
-test("Binding value1 such that it will recieve only single values", function() {
+test("Binding value1 such that it will receive only single values", function() {
 	var bon1 = Bon1.create({
 		value1Binding: SC.Binding.single("TestNamespace.bon2.val1"),
 		array1Binding: SC.Binding.single("TestNamespace.bon2.arr")

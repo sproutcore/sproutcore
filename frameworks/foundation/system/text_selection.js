@@ -15,7 +15,7 @@
     *  end
     *  length
   
-  Important note:  In Internet Explorer, newlines in textara elements are
+  Important note:  In Internet Explorer, newlines in textarea elements are
   considered two characters.  SproutCore does not currently try to hide this from you.
   
   @extends SC.Object

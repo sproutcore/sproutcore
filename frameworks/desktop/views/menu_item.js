@@ -56,7 +56,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   acceptsFirstResponder: YES,
 
   /**
-    IE only attribute to block bluring of other controls
+    IE only attribute to block blurring of other controls
 
     @type Boolean
     @default YES
@@ -289,7 +289,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /**
     This method will check whether the current Menu Item is still
-    selected and then create a submenu accordignly.
+    selected and then create a submenu accordingly.
   */
   showSubMenu: function() {
     var subMenu = this.get('subMenu') ;

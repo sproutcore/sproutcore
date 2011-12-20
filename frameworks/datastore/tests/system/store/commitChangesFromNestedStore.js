@@ -22,7 +22,7 @@ module("SC.Store#commitChangesFromNestedStore", {
 
     child = store.chain();  // test multiple levels deep
 
-    // wirte basic status
+    // write basic status
     child.writeDataHash(storeKey, json, SC.Record.READY_DIRTY);
     child.dataHashDidChange(storeKey);
     child.changelog = SC.Set.create();

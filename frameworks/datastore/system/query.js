@@ -967,7 +967,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       c = inputString.charAt(i);
     
       // set true after end of delimeted token so that
-      // final delimeter is not catched again
+      // final delimeter is not caught again
       skipThisCharacter = false;
         
     
@@ -1485,7 +1485,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
 
 
 /** @private
-  Hash of registered comparisons by propery name. 
+  Hash of registered comparisons by property name. 
 */
 SC.Query.comparisons = {};
 
@@ -1506,7 +1506,7 @@ SC.Query.registerComparison = function(propertyName, comparison) {
 
 /**
   Call to register an extension for the query language.
-  You shoud provide a name for your extension and a definition
+  You should provide a name for your extension and a definition
   specifying how it should be parsed and evaluated.
   
   Have a look at `queryLanguage` for examples of definitions.

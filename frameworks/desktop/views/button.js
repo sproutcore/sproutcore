@@ -243,7 +243,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
      - `SC.TOGGLE_OFF_BEHAVIOR` -- Pressing the button will set the current state to
        false no matter the previous value.
      - `SC.HOLD_BEHAVIOR` -- Pressing the button will cause the action to repeat at a
-       regular interval specifed by 'holdInterval'
+       regular interval specified by 'holdInterval'
 
     @type String
     @default SC.PUSH_BEHAVIOR
@@ -546,7 +546,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
     // button has defined a keyEquivalent and it matches!
     // if triggering succeeded, true will be returned and the operation will 
-    // be handeled (i.e performKeyEquivalent will cease crawling the view 
+    // be handled (i.e performKeyEquivalent will cease crawling the view 
     // tree)
     if (equiv) {
       if (equiv === keystring) return this.triggerAction(evt);
@@ -562,7 +562,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   },
 
   // ..........................................................
-  // VALUE <-> isSelected STATE MANAGEMNT
+  // VALUE <-> isSelected STATE MANAGEMENT
   // 
 
   /**

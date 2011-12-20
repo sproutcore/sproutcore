@@ -15,7 +15,7 @@ sc_require('mixins/copyable');
 
   A collection of ranges.  You can use an IndexSet to keep track of non-
   continuous ranges of items in a parent array.  IndexSet's are used for
-  selection, for managing invalidation ranges and other data-propogation.
+  selection, for managing invalidation ranges and other data-propagation.
 
   Examples
   ---
@@ -817,7 +817,7 @@ SC.IndexSet = SC.mixin({},
   },
 
   /**
-    Invoke the callback, passing each occuppied range instead of each
+    Invoke the callback, passing each occupied range instead of each
     index.  This can be a more efficient way to iterate in some cases.  The
     callback should have the signature:
 
@@ -1137,7 +1137,7 @@ SC.IndexSet = SC.mixin({},
 
   /**
     Usually observing notifications from IndexSet are not useful, so
-    supress them by default.
+    suppress them by default.
 
     @type Boolean
   */

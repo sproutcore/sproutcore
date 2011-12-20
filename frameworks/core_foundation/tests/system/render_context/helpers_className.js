@@ -85,7 +85,7 @@ module("SC.RenderContext#addClass", {
   }
 });
 
-test("shoudl return receiver", function() {
+test("shouldl return receiver", function() {
   equals(context.addClass('foo'), context, "receiver");
 });
 

@@ -12,7 +12,7 @@
 TestRunner.NO_TARGETS = SC.Responder.create({
   
   /**
-    Show laoding targets view.
+    Show loading targets view.
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'noTargets');

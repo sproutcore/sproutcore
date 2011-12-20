@@ -296,7 +296,7 @@ SC.CoreView.reopen(
     run at the end of the run loop, or you can call updateLayerIfNeeded()
     to force the layer to update immediately.
 
-    Instead of overriding this method, consider overidding the render() method
+    Instead of overriding this method, consider overriding the render() method
     instead, which is called both when creating and updating a layer.  If you
     do not want your render() method called when updating a layer, then you
     should override this method instead.
@@ -1033,7 +1033,7 @@ SC.CoreView.reopen(
 
   /** @property
     Set to YES if your view is willing to accept first responder status.  This
-    is used when calculcating key responder loop.
+    is used when calculating key responder loop.
   */
   acceptsFirstResponder: NO,
 
@@ -1344,7 +1344,7 @@ SC.CoreView.reopen(
     } else {
       // attrs should always exist...
       if (!attrs) { attrs = {} ; }
-      // clone the hash that was given so we dont pollute it if it's being reused
+      // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
     }
 
@@ -1377,7 +1377,7 @@ SC.CoreView.reopen(
     to override this function to always return YES , instead of setting
     isTextSelectable to true.
 
-    For example in textfield you dont want to enable textSelection on the text
+    For example in textfield you do not want to enable textSelection on the text
     hint only on the actual text you are entering. You can achieve that by
     only overriding this method.
 
@@ -1586,7 +1586,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
   },
 
   /**
-    Internal method actually updates the localizated attributes on the view
+    Internal method actually updates the localized attributes on the view
     class.  This is overloaded in design mode to also save the attributes.
   */
   applyLocalizedAttributes: function(loc) {
@@ -1645,7 +1645,7 @@ SC.CoreView.unload = function() {
 
    - `init` -- override this method for any general object setup (such as
      observers, starting timers and animations, etc) that you need to happen
-     everytime the view is created, regardless of whether or not its layer
+     every time the view is created, regardless of whether or not its layer
      exists yet.
    - `render` -- override this method to generate or update your HTML to reflect
      the current state of your view.  This method is called both when your view

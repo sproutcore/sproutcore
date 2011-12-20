@@ -107,7 +107,7 @@ SC.InlineEditable = {
 
     Will fail if the delegate returns NO to inlineEditorShouldBeginEditing.
 
-    @returns {Boolean} whether the view succesfully entered edit mode
+    @returns {Boolean} whether the view successfully entered edit mode
   */
   beginEditing: function() {
     var del;

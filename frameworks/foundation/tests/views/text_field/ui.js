@@ -635,7 +635,7 @@ test("focus and blurring text field", function() {
   input.val('f');
   SC.Event.trigger(input, 'change');
   
-  // wait a little bit to let text field propograte changes
+  // wait a little bit to let text field propagate changes
   stop();
   
   setTimeout(function() {

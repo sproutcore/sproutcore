@@ -68,7 +68,7 @@ test("data state=EDITABLE", function() {
 });
 
 test("should return null when accessing an unknown storeKey", function() {
-  equals(store.readDataHash(20000000), null, 'shuld return null for non-existant store key');
+  equals(store.readDataHash(20000000), null, 'should return null for non-existent store key');
   equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'should put into locked edit state');
 });
 

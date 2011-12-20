@@ -194,7 +194,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
     Likewise, if you try to call get() on a property whose values is
     undefined, the unknownProperty() method will be called on the object.
-    If this method reutrns any value other than undefined, it will be returned
+    If this method returns any value other than undefined, it will be returned
     instead.  This allows you to implement "virtual" properties that are
     not defined upfront.
 
@@ -238,7 +238,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     If you try to set a value on a key that is undefined in the target
     object, then the unknownProperty() handler will be called instead.  This
     gives you an opportunity to implement complex "virtual" properties that
-    are not predefined on the obejct.  If unknownProperty() returns
+    are not predefined on the object.  If unknownProperty() returns
     undefined, then set() will simply set the value on the object.
 
     Property Observers
@@ -250,7 +250,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     observers (i.e. observer methods declared on the same object), will be
     called immediately.  Any "remote" observers (i.e. observer methods
     declared on another object) will be placed in a queue and called at a
-    later time in a coelesced manner.
+    later time in a coalesced manner.
 
     Chaining
     ---
@@ -630,7 +630,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
       Called by set() whenever it needs to determine which cached dependent
       keys to clear.  Recursively searches dependent keys to determine all
-      cached property direcly or indirectly affected.
+      cached property directly or indirectly affected.
 
       The return value is also saved for future reference
 
@@ -860,7 +860,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
     /**
       This method will register any observers and computed properties saved on
-      the object.  Normally you do not need to call this method youself.  It
+      the object.  Normally you do not need to call this method yourself.  It
       is invoked automatically just before property notifications are sent and
       from the init() method of SC.Object.  You may choose to call this
       from your own initialization method if you are using SC.Observable in
@@ -1312,7 +1312,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     /**
       Navigates the property path, finally setting the value but only if
       the value does not match the current value.  This will avoid sending
-      unecessary change notifications.
+      unnecessary change notifications.
 
       @param {String} path the property path to set
       @param {Object} value the value to set

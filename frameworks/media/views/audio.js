@@ -118,7 +118,7 @@ SC.AudioView = SC.View.extend(
   }.property('currentTime', 'duration').cacheable(),
   
   /** 
-    Renders the appropiate HTML according for the technology to use.
+    Renders the appropriate HTML according for the technology to use.
     
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
@@ -263,7 +263,7 @@ SC.AudioView = SC.View.extend(
   },
   
   /** 
-    Adds all the neccesary audio DOM elements.
+    Adds all the necessary audio DOM elements.
     
     @returns {void}
   */
@@ -421,7 +421,7 @@ SC.AudioView = SC.View.extend(
   },
   
   /** 
-     Adds all the neccesary quicktime DOM elements.
+     Adds all the necessary quicktime DOM elements.
 
      @returns {void}
    */
@@ -534,7 +534,7 @@ SC.AudioView = SC.View.extend(
   }.observes('paused'),
   
   /** 
-    Called when currentTime changes. Notifies the differnt technologies 
+    Called when currentTime changes. Notifies the different technologies 
     then new currentTime.
     
     @returns {void}

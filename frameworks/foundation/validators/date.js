@@ -52,7 +52,7 @@ SC.Validator.Date = SC.Validator.extend(
   },
 
   /**
-    Try to pase value as a date. convert into a number, or return null if
+    Try to pass value as a date. convert into a number, or return null if
     it could not be parsed.
   */
   objectForFieldValue: function(value, form, field) {

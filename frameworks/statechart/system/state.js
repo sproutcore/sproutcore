@@ -16,7 +16,7 @@
   it immediately registers itself with it parent states. 
   
   You do not create an instance of a state itself. The statechart manager will go through its 
-  state heirarchy and create the states itself.
+  state hierarchy and create the states itself.
 
   For more information on using statecharts, see SC.StatechartManager.
 
@@ -148,7 +148,7 @@ SC.State = SC.Object.extend(
     this._registeredStateObserveHandlers = {};
 
     // Setting up observes this way is faster then using .observes,
-    // which adds a noticable increase in initialization time.
+    // which adds a noticeable increase in initialization time.
     var sc = this.get('statechart'),
         ownerKey = sc ? sc.get('statechartOwnerKey') : null,
         traceKey = sc ? sc.get('statechartTraceKey') : null;
@@ -424,7 +424,7 @@ SC.State = SC.Object.extend(
     Will generate path for a given state that is relative to this state. It is
     required that the given state is a substate of this state.
     
-    If the heirarchy of the given state to this state is the following:
+    If the hierarchy of the given state to this state is the following:
     A > B > C, where A is this state and C is the given state, then the 
     relative path generated will be "B.C"
   */

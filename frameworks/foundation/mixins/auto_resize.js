@@ -332,7 +332,7 @@ SC.AutoResizeManager = {
         }
 
         // if they were all isVisible:NO, then prepare was never called
-        // so dont call teardown
+        // so do not call teardown
         if(prepared) SC.teardownStringMeasurement();
       }
     }

@@ -336,7 +336,7 @@ SC.Record = SC.Object.extend(
 
   /**
     You can invoke this method anytime you need to make the record as dirty.
-    This will cause the record to be commited when you `commitChanges()`
+    This will cause the record to be committed when you `commitChanges()`
     on the underlying store.
 
     If you use the `writeAttribute()` primitive, this method will be called
@@ -691,7 +691,7 @@ SC.Record = SC.Object.extend(
     Lets you commit this specific record to the store which will trigger
     the appropriate methods in the data source for you.
 
-    @param {Hash} params optional additonal params that will passed down
+    @param {Hash} params optional additional params that will passed down
       to the data source
     @param {boolean} recordOnly optional param if you want to only commit a single
       record if it has a parent.
@@ -913,7 +913,7 @@ SC.Record = SC.Object.extend(
 
       if (!id && (pk = recordType.prototype.primaryKey)) {
         id = hash[pk];
-        // In case there isnt a primary key supplied then we create on
+        // In case there is not a primary key supplied then we create on
         // on the fly
         sk = id ? store.storeKeyExists(recordType, id) : null;
         if (sk){
@@ -1352,7 +1352,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     Will return one of the following:
 
      1. `SC.SingleAttribute` that converts the underlying ID to a single
-        record.  If you modify this property, it will rewrite the underyling
+        record.  If you modify this property, it will rewrite the underlying
         ID. It will also modify the inverse of the relationship, if you set it.
      2. `SC.ChildAttribute` that you can edit the contents
         of this relationship.

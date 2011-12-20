@@ -562,7 +562,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   /**
     Creates a new object with the passed object as its prototype.
 
-    This method uses JavaScript's native inheritence method to create a new
+    This method uses JavaScript's native inheritance method to create a new
     object.
 
     You cannot use beget() to create new SC.Object-based objects, but you
@@ -657,7 +657,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     Convenience method to inspect an object.  This method will attempt to
     convert the object into a useful string description.
     
-    @param {Object} obj The object you want to inspec.
+    @param {Object} obj The object you want to inspect.
     
     @returns {String} A description of the object
   */

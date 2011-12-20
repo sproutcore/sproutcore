@@ -421,7 +421,7 @@ test("focus and blurring text field", function() {
   var selection = view.get('selection');
   console.log("Current selection:  %@".fmt(selection));
   
-  // wait a little bit to let text field propograte changes
+  // wait a little bit to let text field propagate changes
   stop();
   
   setTimeout(function() {

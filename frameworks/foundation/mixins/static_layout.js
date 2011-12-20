@@ -20,7 +20,7 @@
   when you use static and relative positioning.
   
   This mixin can be added to a view class to enable the use of any kind of 
-  static and relative browser positionining.  In exchange for using static
+  static and relative browser positioning.  In exchange for using static
   layout, you will lose a few features that are normally available on a view
   class such as the 'frame' and 'clippingFrame' properties as well as 
   notifications when your view or parentView are resized.

@@ -82,7 +82,7 @@ SC.UndoManager = SC.Object.extend(
   /**
     Tries to undo the last action. Fails if an undo group is currently open.
     
-    @returns {Boolean} YES if suceeded, NO otherwise.
+    @returns {Boolean} YES if succeeded, NO otherwise.
   */
   undo: function() {
     this._undoOrRedo('undoStack','isUndoing');
@@ -91,7 +91,7 @@ SC.UndoManager = SC.Object.extend(
   /**
     Tries to redo the last action. Fails if a redo group is currently open.
     
-    @returns {Boolean} YES if suceeded, NO otherwise.
+    @returns {Boolean} YES if succeeded, NO otherwise.
   */
   redo: function() {
     this._undoOrRedo('redoStack','isRedoing');
@@ -133,7 +133,7 @@ SC.UndoManager = SC.Object.extend(
   /**
     Begins a new undo groups
 
-    Whenver you start an action that you expect to need to bundle under a single
+    Whenever you start an action that you expect to need to bundle under a single
     undo action in the menu, you should begin an undo group.  This way any
     undo actions registered by other parts of the application will be
     automatically bundled into this one action.

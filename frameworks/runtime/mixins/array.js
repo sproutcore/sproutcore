@@ -31,7 +31,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   // length: 0,
 
   /**
-    This is one of the primitves you must implement to support SC.Array.  You
+    This is one of the primitives you must implement to support SC.Array.  You
     should replace amt objects started at idx with the objects in the passed
     array.
 

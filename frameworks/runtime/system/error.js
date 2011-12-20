@@ -67,8 +67,8 @@ SC.Error = SC.Object.extend(
 
   /**
     The original error object.  Normally this will return the receiver.
-    However, sometimes another object will masquarade as an error; this gives
-    you a way to get at the underyling error.
+    However, sometimes another object will masquerade as an error; this gives
+    you a way to get at the underlying error.
 
     @type SC.Error
   */

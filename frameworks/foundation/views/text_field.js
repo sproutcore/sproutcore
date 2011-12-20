@@ -508,7 +508,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   /** @private
     If isTextArea is changed (this might happen in inlineeditor constantly)
-    force the field render to render like the firsttime to avoid writing extra
+    force the field render to render like the first time to avoid writing extra
     code. This can be useful also 
   */
   _forceRenderFirstTime: NO,
@@ -722,7 +722,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
   _addEvents: function() {
     // For some strange reason if we add focus/blur events to textarea
-    // inmediately they won't work. However if I add them at the end of the
+    // immediately they won't work. However if I add them at the end of the
     // runLoop it works fine.
     if(this.get('isTextArea')) {
       this.invokeLast(this._performAddEvents);

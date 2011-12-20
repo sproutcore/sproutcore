@@ -138,7 +138,7 @@ test("pass-through should return builtin value" ,function() {
   equals(rec.get('firstName'), 'John', 'reading prop should get attr value');
 });
 
-test("returns default value if underyling value is empty", function() {
+test("returns default value if underlying value is empty", function() {
   equals(rec.get('defaultValue'), 'default', 'reading prop should return default value');
 });
 

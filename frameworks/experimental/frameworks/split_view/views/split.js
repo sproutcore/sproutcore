@@ -152,7 +152,7 @@ SC.SplitView = SC.View.extend({
   //
   // RENDERING
   // Things like layoutDirection must be rendered as class names.
-  // We delegate to a render delegaate.
+  // We delegate to a render delegate.
   //
   displayProperties: ['layoutDirection'],
   renderDelegateName: 'splitRenderDelegate',
@@ -163,7 +163,7 @@ SC.SplitView = SC.View.extend({
   /**
    * @private
    * Returns either the width or the height of the SplitView's frame,
-   * depending on the value of layoutDiretion. If layoutDirection is
+   * depending on the value of layoutDirection. If layoutDirection is
    * SC.LAYOUT_HORIZONTAL, this will return the SplitView's width; otherwise,
    * the SplitView's height.
    *
@@ -193,7 +193,7 @@ SC.SplitView = SC.View.extend({
   /**
    * Attempts to adjust the position of a child view, such as a divider.
    * 
-   * The implementation for this may be overriden in the delegate method
+   * The implementation for this may be overridden in the delegate method
    * splitViewAdjustPositionForChild.
    *
    * You may use this method to automatically collapse the view by setting
@@ -303,7 +303,7 @@ SC.SplitView = SC.View.extend({
       
       // we initialize the size first thing in case the size is empty (fill)
       // if it is empty, the way we position the views would lead to inconsistent
-      // sizes. In addition, we will constrain all initial sizes so they'll be vali
+      // sizes. In addition, we will constrain all initial sizes so they'll be valid
       // when/if we auto-resize them.
       var size = this.invokeDelegateMethod(del, 'splitViewGetSizeForChild', this, child);
       size = this.invokeDelegateMethod(del, 'splitViewConstrainSizeForChild', this, child, size);
@@ -503,7 +503,7 @@ SC.SplitView = SC.View.extend({
             
       var isResizable = this.invokeDelegateMethod(del, 'splitViewShouldResizeChildToFit', this, child);
       if (isResizable === useResizable) {
-        // if outOfSize === -1 then we are agressively resizing (not resizing proportionally)
+        // if outOfSize === -1 then we are aggressively resizing (not resizing proportionally)
         if (outOfSize === -1) size += diff
         else size += (size / outOfSize) * diff;
         

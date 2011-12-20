@@ -16,7 +16,7 @@ TestRunner.READY_LIST = SC.Responder.create({
   nextResponder: TestRunner.READY,
   
   /**
-    Show laoding targets view.
+    Show loading targets view.
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'testsMaster');

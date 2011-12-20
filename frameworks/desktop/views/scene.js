@@ -34,7 +34,7 @@ SC.SceneView = SC.ContainerView.extend(
 
   /**
     Array of scene names.  Scenes will slide on and off screen in the order
-    that you specifiy them here.  That is, if you shift from a scene at index
+    that you specify them here.  That is, if you shift from a scene at index
     2 to a scene at index 1, the scenes will animation backwards.  If you
     shift to a scene at index 3, the scenes will animate forwards.
     
@@ -46,7 +46,7 @@ SC.SceneView = SC.ContainerView.extend(
   /**
     The currently showing scene.  Changing this property will cause the 
     scene view to transition to the new scene.  If you set this property to 
-    null, an empty string, or a non-existant scene, then the scene will appear
+    null, an empty string, or a non-existent scene, then the scene will appear
     empty.
     
     @type String

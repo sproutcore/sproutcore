@@ -154,7 +154,7 @@ SC.Builder.fn = {
     new matched set.)  The receiver will be saved so it can be popped later.
     
     @param {Object|Array} content
-    @returns {SC.Builder} new isntance
+    @returns {SC.Builder} new instance
   */
   pushStack: function() {
     // Build a new CoreQuery matched element set

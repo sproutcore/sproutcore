@@ -30,7 +30,7 @@ SC.PageDesignController = SC.Object.extend({
   selection: null,
   
   /** 
-    Updates the selection either by adding the item or by reseting the 
+    Updates the selection either by adding the item or by resetting the 
     selection.  Calling this method with no parameters will reset the 
     selection.
     
@@ -155,7 +155,7 @@ SC.PageDesignController = SC.Object.extend({
     this.deselect(designer);
     designer.set('isRootDesigner', YES);
     designer.set('prevRootDesigner', currRoot);
-    //TODO: allow greenhouse to hightlight the root view!
+    //TODO: allow greenhouse to highlight the root view!
     this.set('rootDesigner', designer);
   },
   

@@ -56,7 +56,7 @@ SC.ActionSupport =
   actionContext: null,
 
    /**
-     Perform the action. If an action paramter is not provided, then
+     Perform the action. If an action parameter is not provided, then
      the action defaults to the `action` property.
 
      @param {String} [action] The action to fire.

@@ -10,41 +10,41 @@
   number formatting conventions, and localization strings.  You can define
   various locales by adding them to the SC.locales hash, keyed by language
   and/or country code.
-
-  On page load, the default locale will be chosen based on the current
-  languages and saved at SC.Locale.current.  This locale is used for
+  
+  On page load, the default locale will be chosen based on the current 
+  languages and saved at SC.Locale.current.  This locale is used for 
   localization, etc.
-
+  
   ## Creating a new locale
-
+  
   You can create a locale by simply extending the SC.Locale class and adding
   it to the locales hash:
-
+  
       SC.Locale.locales['en'] = SC.Locale.extend({ .. config .. }) ;
-
+  
   Alternatively, you could choose to base your locale on another locale by
   extending that locale:
-
+  
       SC.Locale.locales['en-US'] = SC.Locale.locales['en'].extend({ ... }) ;
-
+  
   Note that if you do not define your own strings property, then your locale
   will inherit any strings added to the parent locale.  Otherwise you must
   implement your own strings instead.
-
+  
   @extends SC.Object
   @since SproutCore 1.0
 */
 SC.Locale = SC.Object.extend({
-
+  
   init: function() {
     // make sure we know the name of our own locale.
     if (!this.language) SC.Locale._assignLocales();
-
+    
     // Make sure we have strings that were set using the new API.  To do this
-    // we check to a bool that is set by one of the string helpers.  This
+    // we check to a bool that is set by one of the string helpers.  This 
     // indicates that the new API was used. If the new API was not used, we
-    // check to see if the old API was used (which places strings on the
-    // String class).
+    // check to see if the old API was used (which places strings on the 
+    // String class). 
     if (!this.hasStrings) {
       var langs = this._deprecatedLanguageCodes || [] ;
       langs.push(this.language);
@@ -54,18 +54,18 @@ SC.Locale = SC.Object.extend({
         strings = String[langs[idx]];
       }
       if (strings) {
-        this.hasStrings = YES;
+        this.hasStrings = YES; 
         this.strings = strings ;
       }
     }
   },
-
+  
   /** Set to YES when strings have been added to this locale. */
   hasStrings: NO,
-
+  
   /** The strings hash for this locale. */
   strings: {},
-
+  
   /**
     The metrics for this locale.  A metric is a singular value that is usually
     used in a user interface layout, such as "width of the OK button".
@@ -76,18 +76,18 @@ SC.Locale = SC.Object.extend({
     if (!this.language) SC.Locale._assignLocales() ;
     return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
   },
-
-  /**
+  
+  /** 
     Returns the localized version of the string or the string if no match
     was found.
-
+    
     @param {String} string
     @param {String} optional default string to return instead
     @returns {String}
   */
   locWithDefault: function(string, def) {
     var ret = this.strings[string];
-
+    
     // strings may be blank, so test with typeOf.
     if (SC.typeOf(ret) === SC.T_STRING) return ret;
     else if (SC.typeOf(def) === SC.T_STRING) return def;
@@ -215,16 +215,16 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   layoutKeys: ['left', 'top', 'right', 'bottom', 'width', 'height',
                'minWidth', 'minHeight', 'centerX', 'centerY'],
 
-  /**
-    Invoked at the start of SproutCore's document onready handler to setup
+  /** 
+    Invoked at the start of SproutCore's document onready handler to setup 
     the currentLocale.  This will use the language properties you have set on
     the locale to make a decision.
   */
   createCurrentLocale: function() {
 
-    // get values from String if defined for compatibility with < 1.0 build
+    // get values from String if defined for compatibility with < 1.0 build 
     // tools.
-    var autodetect = (String.useAutodetectedLanguage !== undefined) ? String.useAutodetectedLanguage : this.useAutodetectedLanguage;
+    var autodetect = (String.useAutodetectedLanguage !== undefined) ? String.useAutodetectedLanguage : this.useAutodetectedLanguage; 
     var preferred = (String.preferredLanguage !== undefined) ? String.preferredLanguage : this.preferredLanguage ;
 
     // determine the language
@@ -251,33 +251,33 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   localeClassFor: function(lang) {
     lang = SC.Locale.normalizeLanguage(lang) ;
     var parent, klass = this.locales[lang];
-
+    
     // if locale class was not found and there is a broader-based locale
     // present, create a new locale based on that.
     if (!klass && ((parent = lang.split('-')[0]) !== lang) && (klass = this.locales[parent])) {
-      klass = this.locales[lang] = klass.extend() ;
+      klass = this.locales[lang] = klass.extend() ;      
     }
-
+    
     // otherwise, try to create a new locale based on english.
     if (!klass) klass = this.locales[lang] = this.locales.en.extend();
-
+    
     return klass;
   },
 
-  /**
+  /** 
     Shorthand method to define the settings for a particular locale.
     The settings you pass here will be applied directly to the locale you
-    designate.
+    designate.  
 
     If you are already holding a reference to a locale definition, you can
     also use this method to operate on the receiver.
-
-    If the locale you name does not exist yet, this method will create the
-    locale for you, based on the most closely related locale or english.  For
+    
+    If the locale you name does not exist yet, this method will create the 
+    locale for you, based on the most closely related locale or english.  For 
     example, if you name the locale 'fr-CA', you will be creating a locale for
     French as it is used in Canada.  This will be based on the general French
     locale (fr), since that is more generic.  On the other hand, if you create
-    a locale for manadarin (cn), it will be based on generic english (en)
+    a locale for mandarin (cn), it will be based on generic english (en) 
     since there is no broader language code to match against.
 
     @param {String} localeName
@@ -292,20 +292,20 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     SC.mixin(locale.prototype, options) ;
     return locale ;
   },
-
+  
   /**
-    Gets the current options for the receiver locale.  This is useful for
+    Gets the current options for the receiver locale.  This is useful for 
     inspecting registered locales that have not been instantiated.
-
+    
     @returns {Hash} options + instance methods
   */
   options: function() { return this.prototype; },
-
+  
   /**
     Adds the passed hash of strings to the locale's strings table.  Note that
-    if the receiver locale inherits its strings from its parent, then the
+    if the receiver locale inherits its strings from its parent, then the 
     strings table will be cloned first.
-
+    
     @returns {Object} receiver
   */
   addStrings: function(stringsHash) {
@@ -316,7 +316,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
         this.prototype.strings = SC.clone(strings) ;
       }
     } else strings = this.prototype.strings = {} ;
-
+    
     // add strings hash
     if (stringsHash)  this.prototype.strings = SC.mixin(strings, stringsHash) ;
     this.prototype.hasStrings = YES ;
@@ -354,13 +354,13 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   },
 
   _map: { english: 'en', french: 'fr', german: 'de', japanese: 'ja', jp: 'ja', spanish: 'es' },
-
+  
   /**
     Normalizes the passed language into a two-character language code.
     This method allows you to specify common languages in their full english
     name (i.e. English, French, etc). and it will be treated like their two
     letter code equivalent.
-
+    
     @param {String} languageCode
     @returns {String} normalized code
   */
@@ -368,19 +368,19 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     if (!languageCode) return 'en' ;
     return SC.Locale._map[languageCode.toLowerCase()] || languageCode ;
   },
-
-  // this method is called once during init to walk the installed locales
+  
+  // this method is called once during init to walk the installed locales 
   // and make sure they know their own names.
   _assignLocales: function() {
     for(var key in this.locales) this.locales[key].prototype.language = key;
   },
-
+  
   toString: function() {
     if (!this.prototype.language) SC.Locale._assignLocales() ;
     return "SC.Locale["+this.prototype.language+"]" ;
   },
-
-  // make sure important properties are copied to new class.
+  
+  // make sure important properties are copied to new class. 
   extend: function() {
     var ret= SC.Object.extend.apply(this, arguments) ;
     ret.addStrings= SC.Locale.addStrings;
@@ -389,14 +389,14 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     ret.toString = SC.Locale.toString ;
     return ret ;
   }
-
+    
 }) ;
 
-/**
+/** 
   This locales hash contains all of the locales defined by SproutCore and
   by your own application.  See the SC.Locale class definition for the
   various properties you can set on your own locales.
-
+  
   @property {Hash}
 */
 SC.Locale.locales = {
@@ -413,12 +413,12 @@ SC.Locale.locales = {
 /**
   This special helper will store the strings you pass in the locale matching
   the language code.  If a locale is not defined from the language code you
-  specify, then one will be created for you with the english locale as the
+  specify, then one will be created for you with the english locale as the 
   parent.
-
+  
   @param {String} languageCode
   @param {Hash} strings
-  @returns {Object} receiver
+  @returns {Object} receiver 
 */
 SC.stringsFor = function(languageCode, strings) {
   // get the locale, creating one if needed.

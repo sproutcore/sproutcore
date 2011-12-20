@@ -252,7 +252,7 @@ test("A slave does NOT update a relationship [one(slave) to *]", function () {
   ok(SC.none(s1.get('relative')), 'precond2 - s1 has no relative');
   equals(r1.get('slave'), s1, 'test1- r1 is related to s1');
 
-  // case - create slave WITH releationship
+  // case - create slave WITH relationship
   SC.RunLoop.begin();
   MyApp.store.loadRecords(MyApp.Relative, [
     { guid: 'r2'}
@@ -1087,7 +1087,7 @@ test("RecordAttribute flag 'lazilyInstantiate' tests", function () {
   equals(m1.get('slave'), s1, 'm1 should be master of s1');
 
   // test lazy creation fails on isMaster => NO
-  ok(SC.none(m2), 'm2 should NOT have been creaetd');
+  ok(SC.none(m2), 'm2 should NOT have been created');
   ok(!s2.get('master') ||
       s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
 });
@@ -1133,7 +1133,7 @@ test("RecordAttribute flag 'lazilyInstantiate' can be a function", function () {
   ok(!s1, 's1 should NOT be created lazily');
 
   // test lazy creation fails on isMaster => NO
-  ok(SC.none(m2), 'm2 should NOT have been creaetd');
+  ok(SC.none(m2), 'm2 should NOT have been created');
   ok(!s2.get('master') ||
       s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
 });
