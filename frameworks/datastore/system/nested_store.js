@@ -77,7 +77,7 @@ SC.NestedStore = SC.Store.extend(
   /** @private
     Array contains the base revision for an attribute hash when it was first
     cloned from the parent store.  If the attribute hash is edited and 
-    commited, the commit will fail if the parent attributes hash has been 
+    committed, the commit will fail if the parent attributes hash has been 
     edited since.
     
     This is a form of optimistic locking, hence the name.
@@ -402,7 +402,7 @@ SC.NestedStore = SC.Store.extend(
   /** @private - bookkeeping for a single data hash. */
   dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
     // update the revision for storeKey.  Use generateStoreKey() because that
-    // gaurantees a universally (to this store hierarchy anyway) unique 
+    // guarantes a universally (to this store hierarchy anyway) unique 
     // key value.
     if (!rev) rev = SC.Store.generateStoreKey();
     var isArray, len, idx, storeKey;

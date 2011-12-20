@@ -108,7 +108,7 @@ CoreTest.Plan = {
   },
   
   /**
-    Begins running the test plan after a slight delay to avoid interupting
+    Begins running the test plan after a slight delay to avoid interrupting
     any current callbacks. 
   
     @returns {CoreTest.Plan} receiver
@@ -127,7 +127,7 @@ CoreTest.Plan = {
   /**
     Stops the test plan from running any further.  If you pass a timeout,
     it will raise an exception if the test plan does not begin executing 
-    with the alotted timeout.
+    with the allotted timeout.
     
     @param {Number} timeout optional timeout in msec
     @returns {CoreTest.Plan} receiver

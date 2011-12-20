@@ -98,7 +98,7 @@ SC.platform = SC.Object.create({
   cssPrefix: null,
 
   /**
-    Prefix for browsew specific CSS attributes when used in the DOM. Calculated later.
+    Prefix for browser specific CSS attributes when used in the DOM. Calculated later.
   */
   domCSSPrefix: null,
 
@@ -171,7 +171,7 @@ SC.platform = SC.Object.create({
     When simulating touch events, this method is called when mousemove events
     are received.
 
-    If the altKey is depresed and pinch center not yet established, we will capture the mouse position.
+    If the altKey is depressed and pinch center not yet established, we will capture the mouse position.
   */
   _simtouch_mousemove: function(evt) {
     if (!this._mousedown) {
@@ -316,7 +316,7 @@ SC.platform = SC.Object.create({
   supportsAcceleratedLayers: NO,
 
   /**
-    Wether the browser supports the hashchange event.
+    Whether the browser supports the hashchange event.
   */
   supportsHashChange: function() {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
@@ -325,7 +325,7 @@ SC.platform = SC.Object.create({
   }(),
   
   /**
-    Wether the browser supports HTML5 history.
+    Whether the browser supports HTML5 history.
   */
   supportsHistory: function() {
     return !!(window.history && window.history.pushState);

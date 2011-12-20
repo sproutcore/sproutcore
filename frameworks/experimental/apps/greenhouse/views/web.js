@@ -22,7 +22,7 @@ Greenhouse.WebView = SC.WebView.extend(
         if(contentWindow && contentWindow.document && contentWindow.document.documentElement){
           var docElement = contentWindow.document.documentElement;
           // setting the width before the height gives more accurate results.. 
-          // atleast for the test iframe content i'm using.
+          // at least for the test iframe content i'm using.
           //TODO: try out document flows other than top to bottom.
           if (!SC.browser.isIE){
             this.$().width(docElement.scrollWidth);

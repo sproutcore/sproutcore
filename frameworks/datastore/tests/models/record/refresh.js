@@ -23,7 +23,7 @@ module("SC.Record#refresh", {
     
     MyApp.foo = MyApp.store.createRecord(MyApp.Foo, MyApp.json);
     
-    // modify store so that everytime refreshRecords() is called it updates 
+    // modify store so that every time refreshRecords() is called it updates 
     // callInfo
     callInfo = null ;
     MyApp.store.refreshRecord = function(records) {

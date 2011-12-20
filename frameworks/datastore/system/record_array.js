@@ -279,7 +279,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /**
     Adds the specified record to the record array if it is not already part
-    of the array.  Provided for compatibilty with `SC.Set`.
+    of the array.  Provided for compatibility with `SC.Set`.
 
     @param {SC.Record} record
     @returns {SC.RecordArray} receiver

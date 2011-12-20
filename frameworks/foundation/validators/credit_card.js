@@ -91,7 +91,7 @@ SC.Validator.CreditCard = SC.Validator.extend(
       bResult = false;
     } else{  // ccNumb is a number and the proper length - let's see if it is a valid card number
       if(len >= 15){  // 15 or 16 for Amex or V/MC
-        for(var i=len;i>0;i--){  // LOOP throught the digits of the card
+        for(var i=len;i>0;i--){  // LOOP through the digits of the card
           calc = parseInt(iCCN,0) % 10;  // right most digit
           calc = parseInt(calc,0);  // assure it is an integer
           iTotal += calc;  // running total of the card number as we loop - Do Nothing to first digit

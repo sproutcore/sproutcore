@@ -52,7 +52,7 @@ SC.RootResponder = SC.Object.extend(
   /** @scope SC.RootResponder.prototype */{
 
   /**
-    Contains a list of all panes currently visible on screen.  Everytime a
+    Contains a list of all panes currently visible on screen.  Every time a
     pane attaches or detaches, it will update itself in this array.
   */
   panes: null,
@@ -365,7 +365,7 @@ SC.RootResponder = SC.Object.extend(
 
   /**
     Handle window focus event for IE. Listening to the focus event is not
-    reliable as per every focus event you receive you inmediately get a blur
+    reliable as per every focus event you receive you immediately get a blur
     event (Only on IE of course ;)
   */
   focusin: function() {
@@ -374,7 +374,7 @@ SC.RootResponder = SC.Object.extend(
 
   /**
     Handle window blur event for IE. Listening to the focus event is not
-    reliable as per every focus event you receive you inmediately get a blur
+    reliable as per every focus event you receive you immediately get a blur
     event (Only on IE of course ;)
   */
   focusout: function() {
@@ -1698,7 +1698,7 @@ SC.RootResponder = SC.Object.extend(
     IE's default behavior to blur textfields and other controls can only be
     blocked by returning NO to this event. However we don't want to block
     its default behavior otherwise textfields won't lose focus by clicking on
-    an empty area as it's expected. If you want to block IE from bluring another
+    an empty area as it's expected. If you want to block IE from blurring another
     control set blockIEDeactivate to true on the specific view in which you
     want to avoid this. Think of an autocomplete menu, you want to click on
     the menu but don't loose focus.
@@ -1707,7 +1707,7 @@ SC.RootResponder = SC.Object.extend(
     var toElement = evt.toElement;
     if (toElement && toElement.tagName && toElement.tagName!=="IFRAME") {
       var view = SC.$(toElement).view()[0];
-      //The following line is neccesary to allow/block text selection for IE,
+      //The following line is necessary to allow/block text selection for IE,
       // in combination with the selectstart event.
       if (view && view.get('blocksIEDeactivate')) return NO;
     }
@@ -1919,7 +1919,7 @@ SC.RootResponder = SC.Object.extend(
     this._lastMoveY = evt.clientY;
 
     SC.run(function() {
-       // make sure the view gets focus no matter what.  FF is inconsistant
+       // make sure the view gets focus no matter what.  FF is inconsistent
        // about this.
       // this.focus();
        // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session

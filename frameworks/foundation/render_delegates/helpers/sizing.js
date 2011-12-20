@@ -150,7 +150,7 @@ SC.RenderDelegate.reopen({
     Retrieves the given property for the specified data source. This property
     may be static, or may be computed specifically for this data source. This
     version fo `getPropertyFor` will check in your size hashes to see if any
-    properties have been overriden.
+    properties have been overridden.
     
     @param {DataSource} dataSource The data source to get the property
     for. Some properties may differ based on the data source; for instance,

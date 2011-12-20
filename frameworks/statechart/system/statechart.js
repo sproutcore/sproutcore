@@ -15,7 +15,7 @@ sc_require('system/state');
   The startchart manager mixin allows an object to be a statechart. By becoming a statechart, the
   object can then be manage a set of its own states.
   
-  This implemention of the statechart manager closely follows the concepts stated in D. Harel's 
+  This implementation of the statechart manager closely follows the concepts stated in D. Harel's 
   original paper "Statecharts: A Visual Formalism For Complex Systems" 
   (www.wisdom.weizmann.ac.il/~harel/papers/Statecharts.pdf). 
   
@@ -210,7 +210,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   rootStateExample: SC.State,
   
   /** 
-    Indicates what state should be the intiail state of this statechart. The value
+    Indicates what state should be the initial state of this statechart. The value
     assigned must be the name of a property on this object that represents a state.
     As well, the statesAreConcurrent must be set to NO.
     
@@ -1032,7 +1032,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   
   /** @private
   
-    Recursively follow states that are to be entred during the state transition process. The
+    Recursively follow states that are to be entered during the state transition process. The
     enter process is to start from the given state and work its way down a given enter path. When
     the end of enter path has been reached, then continue entering states based on whether 
     an initial substate is defined, there are concurrent substates or history states are to be
@@ -1135,7 +1135,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   
   /** @override
   
-    Attemps to handle a given event against any of the statechart's current states and the
+    Attempts to handle a given event against any of the statechart's current states and the
     statechart itself. If any current state can handle the event or the statechart itself can
     handle the event then YES is returned, otherwise NO is returned.
   

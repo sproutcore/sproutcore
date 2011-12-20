@@ -111,7 +111,7 @@ SC.GridView = SC.ListView.extend(
   },
   
   /** @private
-    Overrides default CollectionView method to compute the minimim height
+    Overrides default CollectionView method to compute the minimum height
     of the list view.
   */
   computeLayout: function() {

@@ -260,7 +260,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     queries, you can do so by passing a SC.SparseArray instance instead of
     a regular array of storeKeys and then populate the sparse array on demand.
 
-    ### Handling Errors and Cancelations
+    ### Handling Errors and Cancellations
 
     If you encounter an error while trying to fetch the results for a query
     you can call SC.Store#dataSourceDidErrorQuery() instead.  This will put
@@ -424,7 +424,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
   },
 
   /**
-    Called from `commitRecords()` to commit destroted records to the
+    Called from `commitRecords()` to commit destroyed records to the
     store.  You can override this method to actually send the destroyed
     records to your store.  The default version will simply call
     `destroyRecord()` for each storeKey.

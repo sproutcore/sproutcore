@@ -29,30 +29,30 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   ok(pane.childViews[0].childViews[1].get('isVisibleInWindow'), 'pane.div.div.isVisibleInWindow should be YES');
 
   // content
-  ok(pane.childViews[0].childViews[0].$('img'), 'pane.div.info.img existance should be YES');
+  ok(pane.childViews[0].childViews[0].$('img'), 'pane.div.info.img existence should be YES');
   ok(pane.childViews[0].childViews[0].$('img').hasClass('icon'), 'pane.div.info.img should have icon class');
   ok(pane.childViews[0].childViews[0].$('img').hasClass(iconClass), 'pane.div.info.img should have %@ class'.fmt(iconClass));
-  ok(pane.childViews[0].childViews[0].$('h1'), 'pane.div.info.h1 existance should be YES');
+  ok(pane.childViews[0].childViews[0].$('h1'), 'pane.div.info.h1 existence should be YES');
   equals(pane.childViews[0].childViews[0].$('h1').text(), 'AlertPane.message', 'pane.div.info.h1 should have title');
 
   if (description) {
-    ok(pane.childViews[0].childViews[0].$('p.description'), 'pane.div.info.description existance should be YES');
+    ok(pane.childViews[0].childViews[0].$('p.description'), 'pane.div.info.description existence should be YES');
     equals(pane.childViews[0].childViews[0].$('p.description').text(), 'AlertPane.description', 'pane.div.info.description should have description');
   } else {
     equals(pane.childViews[0].childViews[0].$('p.description').length, 0, 'pane.div.info should have 0 description');
   }
 
   if (caption) {
-    ok(pane.childViews[0].childViews[0].$('p.caption'), 'pane.div.info.caption existance should be YES');
+    ok(pane.childViews[0].childViews[0].$('p.caption'), 'pane.div.info.caption existence should be YES');
     equals(pane.childViews[0].childViews[0].$('p.caption').text(), 'AlertPane.caption', 'pane.div.info.caption should have caption');
   } else {
     equals(pane.childViews[0].childViews[0].$('p.caption').length, 0, 'pane.div.info should have 0 caption');
   }
   
   // buttons
-  ok(pane.childViews[0].childViews[1].$('div'), 'pane.div.div.div existance should be YES');
+  ok(pane.childViews[0].childViews[1].$('div'), 'pane.div.div.div existence should be YES');
   equals(pane.childViews[0].childViews[1].$('div.button').length, 2, 'pane.div.div should have 2 Buttons');
-  ok(pane.childViews[0].$('div'), 'pane.div.div existance should be YES');
+  ok(pane.childViews[0].$('div'), 'pane.div.div existence should be YES');
   
   var button1 = pane.childViews[0].childViews[1].childViews[1];
   var button2 = pane.childViews[0].childViews[1].childViews[0];
@@ -75,9 +75,9 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   }
   
   if (!themeName) themeName = 'capsule';
-  ok(button1.$().hasClass(themeName), 'pane.div.div button1 shoud have class ' + themeName);
-  ok(button2.$().hasClass(themeName), 'pane.div.div button2 shoud have class ' + themeName);
-  ok(button3.$().hasClass(themeName), 'pane.div.div button3 shoud have class ' + themeName);
+  ok(button1.$().hasClass(themeName), 'pane.div.div button1 should have class ' + themeName);
+  ok(button2.$().hasClass(themeName), 'pane.div.div button2 should have class ' + themeName);
+  ok(button3.$().hasClass(themeName), 'pane.div.div button3 should have class ' + themeName);
 }
 
 test("AlertPane.show with icon, message, description, caption and 3 buttons", function() {

@@ -90,7 +90,7 @@ SC.routes = SC.Object.create(
 
         <base href="http://domain.tld/my_app">
     
-    The value can also be customized before or during the exectution of the
+    The value can also be customized before or during the execution of the
     main() method.
     
     @see http://www.w3.org/TR/html5/semantics.html#the-base-element
@@ -219,7 +219,7 @@ SC.routes = SC.Object.create(
   }.property(),
   
   /*
-    Works exactly like 'location' but you usee this property only when 
+    Works exactly like 'location' but you use this property only when 
     you want to just change the location w/out triggering the routes
   */
   informLocation: function(key, value){
@@ -514,7 +514,7 @@ SC.routes = SC.Object.create(
             }
           }
 
-          // else, try to match a wilcard route
+          // else, try to match a wildcard route
           for (key in this.wildcardRoutes) {
             parts.unshift(part);
             params[key] = parts.join('/');

@@ -13,7 +13,7 @@
   
   SproutCore views have built-in touch events. However, sometimes you may want
   to recognize gestures like tap, pinch, swipe, etc. This becomes tedious if you
-  need to do this often, and moreso if you need to check for multiple possible
+  need to do this often, and more so if you need to check for multiple possible
   gestures on the same view.
   
   SC.Gesturable allows you to define a collection of gestures (SC.Gesture objects)
@@ -130,7 +130,7 @@ SC.Gesturable = {
     
     If you override touchStart, you will need to call gestureTouchStart to
     give the gesture system control of the touch. You will continue to get
-    events until if and when a gesture decides to take "posession" of a touch—
+    events until if and when a gesture decides to take "possession" of a touch—
     at this point, you will get a [gestureName]Start event.
     
     You do not have to call gestureTouchStart immediately; you can call it

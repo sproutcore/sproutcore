@@ -278,14 +278,14 @@ function() {
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
   oldP = p;
   p = testParent.get('person');
-  same(p, oldP, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
+  same(p, oldP, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
   same(testParent.readAttribute('person'), p.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
   
   // Check changes on the address
   a = testParent.getPath('person.address');
   a.set('street', '321 Nutty Professor Lane');
   parentAttrs = testParent.readAttribute('person');
-  same(a.get('attributes'), parentAttrs.address, "after a set('street', <new>) on address child, checking to see that the parent has recieved the changes from the child record");
+  same(a.get('attributes'), parentAttrs.address, "after a set('street', <new>) on address child, checking to see that the parent has received the changes from the child record");
 });
 
 test("Basic normalize()", function() {

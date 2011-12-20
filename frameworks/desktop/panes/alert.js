@@ -214,7 +214,7 @@ SC.AlertPane = SC.PanelPane.extend(
   }.property('message').cacheable(),
 
   /**
-    An optional detailed decription. Use this string to provide further
+    An optional detailed description. Use this string to provide further
     explanation of the condition and, optionally, ways the user can resolve
     the problem.
     

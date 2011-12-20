@@ -307,7 +307,7 @@ module("Computed properties", {
         return 'dependentCached';
       }.property('changer').cacheable(),
 
-      // everytime it is recomputed, increments call
+      // every time it is recomputed, increments call
       incCallCount: 0,
       inc: function() {
         return this.incCallCount++;

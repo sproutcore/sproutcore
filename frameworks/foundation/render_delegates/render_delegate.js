@@ -331,7 +331,7 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
     be looked up on the render delegate.
     
     NOTE: this implementation is a reference implementation. It
-    is overriden in the sizing code (helpers/sizing.js) to be
+    is overridden in the sizing code (helpers/sizing.js) to be
     size-sensitive.
   */
   getPropertyFor: function(dataSource, propertyName) {

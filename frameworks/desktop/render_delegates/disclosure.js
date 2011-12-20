@@ -18,7 +18,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
 
     var labelId = SC.guidFor(dataSource) + "-label";
 
-    //addresing accessibility
+    //addressing accessibility
     context.attr('aria-expanded', value);
     context.attr('aria-labelledby', labelId);
 
@@ -42,7 +42,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
         value = dataSource.get('value'),
         title = dataSource.get('title');
 
-    //addresing accessibility
+    //addressing accessibility
     jquery.attr('aria-expanded', value);
 
     if (dataSource.get('isSelected')) jquery.addClass('sel');

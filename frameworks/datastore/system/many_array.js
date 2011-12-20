@@ -255,7 +255,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // objects are added and removed
     if (inverse) {
 
-      // notive removals
+      // notify removals
       for(i=0;i<amt;i++) {
         inverseRecord = toRemove[i];
         attr = inverseRecord ? inverseRecord[inverse] : null;

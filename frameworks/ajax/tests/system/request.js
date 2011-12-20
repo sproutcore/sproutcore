@@ -223,7 +223,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
       ok(elapsed >= 10,
         'timeout must not fire earlier than 10msec - actual %@'.fmt(elapsed));
     } else {
-      // We received a response from thes server, which should never happen
+      // We received a response from the server, which should never happen
       ok(false, 'timeout did not fire before response was received.  should have fired after 10msec.  response time: %@msec'.fmt(Date.now() - now));
     }
   });

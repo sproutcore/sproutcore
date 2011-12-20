@@ -10,7 +10,7 @@
 
   An object that iterates over all of the values in an object.
 
-  An instance of this object is returned everytime you call the
+  An instance of this object is returned every time you call the
   enumerator() method on an object that implements the SC.Enumerable mixin.
 
   Once you create an enumerator instance, you can call nextObject() on it

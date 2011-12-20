@@ -12,7 +12,7 @@ sc_require('panes/palette');
   default: initiated just below the anchor.
            shift x, y to optimized picker visibility and make sure top-left corner is always visible.
   menu :   same as default rule +
-           default(1,4,3) or custom offset below the anchor for default location to fine tunned visual alignment +
+           default(1,4,3) or custom offset below the anchor for default location to fine tuned visual alignment +
            enforce min left(7px)/right(8px) padding to the window
   fixed :  default(1,4,3) or custom offset below the anchor for default location to cope with specific anchor and skip fitPositionToScreen
   pointer :take default [0,1,2,3,2] or custom matrix to choose one of four perfect pointer positions.Ex:
@@ -435,7 +435,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /** @private
     This method will return ret (x, y, width, height) from a rectangular element
-    Notice: temp hack for calculating visiable anchor height by counting height
+    Notice: temp hack for calculating visible anchor height by counting height
     up to window bottom only. We do have 'clippingFrame' supported from view.
     But since our anchor can be element, we use this solution for now.
   */
@@ -455,7 +455,7 @@ SC.PickerPane = SC.PalettePane.extend(
         height: bounding.height
       };
       // If width and height are undefined this means we are in IE or FF<3.5
-      // if we didnt get the frame dimensions the do the calculations
+      // if we did not get the frame dimensions the do the calculations
       // based on an element
       if(ret.width===undefined || ret.height===undefined){
         cq = SC.$(anchor);
@@ -771,9 +771,9 @@ SC.PickerPane = SC.PalettePane.extend(
       }
     }
 
-    // set up preferMatrix according to type if not provided excplicitly:
+    // set up preferMatrix according to type if not provided explicitly:
     // take default [0,1,2,3,2] for picker, [3,0,1,2,3] for menu picker if
-    // custom matrix not provided excplicitly
+    // custom matrix not provided explicitly
     if(!this.preferMatrix || this.preferMatrix.length !== 5) {
       // menu-picker default re-position rule :
       // perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
@@ -845,7 +845,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /** @private
     Internal method to hide the overflow on the body to make sure we don't
-    show scrollbars when the picker has shadows, as it's really anoying.
+    show scrollbars when the picker has shadows, as it's really annoying.
   */
   _hideOverflow: function(){
     var body = SC.$(document.body),
@@ -862,7 +862,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /** @private
     Internal method to show the overflow on the body to make sure we don't
-    show scrollbars when the picker has shadows, as it's really anoying.
+    show scrollbars when the picker has shadows, as it's really annoying.
   */
   _showOverflow: function(){
     var body = SC.$(document.body);

@@ -11,7 +11,7 @@
   A Date field add behaviour to the Text Field to support date management, 
   for example, disabling deletion, and special behaviour to tabs commands.
   
-  This field view is tighly inregrated with SC.DateTime
+  This field view is tightly integrated with SC.DateTime
   
   By default the Date Field View show Date only, but if you need to show the Time do:
   
@@ -87,8 +87,8 @@ SC.DateFieldView = SC.TextFieldView.extend(
   
   // DateTime constants (with fixed width, like numbers or abbs with fixed length)
   // original: '%a %A %b %B %c %d %h %H %i %I %j %m %M %p %S %U %W %x %X %y %Y %Z %%'.w(),
-  // NOTE: I think that %a and %b areb't useful because is more adecuato to represente day
-  // with 1..31 without zeros at start, but causes the lenght not to be fixed)
+  // NOTE: I think that %a and %b aren't useful because is more adequate to represent day
+  // with 1..31 without zeros at start, but causes the length not to be fixed)
 
   /** @private*/
   _dtConstants: ['%a', '%b', '%d', '%H', '%I', '%j', '%m', '%M', '%p', '%S', '%U', '%W', '%y', '%Y'],
@@ -133,7 +133,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   }.property('showTime', 'showDate').cacheable(),
   
   /**
-    The current validator to format the Date to the input field and viceversa.
+    The current validator to format the Date to the input field and vice versa.
     
     @field
     @type SC.Validator.DateTime

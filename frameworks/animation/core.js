@@ -19,7 +19,7 @@
     - display, in a way. All animating display does is delay setting display:none
       until <em>after</em> the transition duration has passed. This allows you
       to set display:none after fading out. If mixing with CSS transitions, you will
-      need to set the delay a tad longer to accomodate any delays in beginning the
+      need to set the delay a tad longer to accommodate any delays in beginning the
       transition.
 
   ## Example Usage:
@@ -754,7 +754,7 @@ SC.Animatable = {
   },
 
   /**
-  Overriden to support animation.
+  Overridden to support animation.
 
   Works by copying the styles to the object's "style" property.
   */
@@ -1079,7 +1079,7 @@ SC.mixin(SC.Animatable, {
   _ticks: 0,
   _timer_start_time: null,
 
-  // the global tiemr interval
+  // the global timer interval
   interval: 10,
 
   // the current time (a placeholder, really)

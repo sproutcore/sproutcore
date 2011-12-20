@@ -172,7 +172,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @method
   *
   * Scans the given element for styles and copies them into a style element in
-  * the head. This allows the styles to be overriden by css matching classNames
+  * the head. This allows the styles to be overridden by css matching classNames
   * on the editor.
   *
   * @params {element} the dom element to copy

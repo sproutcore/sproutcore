@@ -71,7 +71,7 @@ SC.View.reopen(
   @class
   
   An instance of this object is created whenever a drag occurs.  The instance
-  manages the mouse/touch events and coordinating with droppable targets until the
+  manages the mouse/touch events and coordinating with dropable targets until the
   user releases the mouse button. 
   
   To initiate a drag, you should call `SC.Drag.start()` with the options below
@@ -335,7 +335,7 @@ SC.Drag = SC.Object.extend(
   _dragInProgress: YES,
 
   /** @private
-    Stores the initial visibililty state of the dragView so it can be restored
+    Stores the initial visibility state of the dragView so it can be restored
     after the drag
   */
   _dragViewWasVisible: null,
@@ -360,7 +360,7 @@ SC.Drag = SC.Object.extend(
 	    var dv = this._getDragView() ;
 	    var pv = dv.get('parentView') ;
 
-	    // convert to global cooridinates
+	    // convert to global coordinates
 	    var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
 
 	    if (this.get('ghost')) {
@@ -885,7 +885,7 @@ SC.Drag = SC.Object.extend(
   /** @private
     Returns an array of scrollable views, sorted with nested scrollable views 
     at the top of the array.  The first time this method is called during a 
-    drag, it will reconstrut this array using the current state of scrollable 
+    drag, it will reconstruct this array using the current state of scrollable 
     views.  Afterwards it uses the cached set until the drop completes.
   */
   _scrollableViews: function() {

@@ -156,7 +156,7 @@ test("remove a range should trigger an observer notification", function() {
   equals(callCnt, 1, 'should have called observer once');
 });
 
-test("removing a non-existant range should not trigger observer notification", function() {
+test("removing a non-existent range should not trigger observer notification", function() {
   var callCnt = 0;
   
   set.addObserver('[]', function() { callCnt++; });
@@ -176,7 +176,7 @@ test("removing an index range outside of target range (specific bug)", function(
   var set = SC.IndexSet.create(10,3);
   var set2 = SC.IndexSet.create(0,3);
   
-  // removing set2 from set should not changed set at all beceause it is 
+  // removing set2 from set should not changed set at all because it is 
   // before the first range, but it causes a problem with the length.
   set.remove(set2);
   equals(set.get('length'), 3, 'length should not change');

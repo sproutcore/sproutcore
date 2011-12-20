@@ -277,7 +277,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     example, if you name the locale 'fr-CA', you will be creating a locale for
     French as it is used in Canada.  This will be based on the general French
     locale (fr), since that is more generic.  On the other hand, if you create
-    a locale for manadarin (cn), it will be based on generic english (en) 
+    a locale for mandarin (cn), it will be based on generic english (en) 
     since there is no broader language code to match against.
 
     @param {String} localeName

@@ -152,7 +152,7 @@ SC.RenderContext = SC.Builder.create(
     managed code (such as in CollectionView) can append or prepend content
     instead.
 
-    You probably do not want to change this propery unless you know what you
+    You probably do not want to change this property unless you know what you
     are doing.
 
     @property {String}
@@ -329,7 +329,7 @@ SC.RenderContext = SC.Builder.create(
       }
     }
 
-    // attributes, styles, and class naems will already have been set.
+    // attributes, styles, and class names will already have been set.
 
     // id="foo"
     if (this._idDidChange && (value = this._id)) {
@@ -985,7 +985,7 @@ SC.RenderContext = SC.Builder.create(
 });
 
 /**
-  html is an alias for push().  Makes thie object more CoreQuery like
+  html is an alias for push().  Makes the object more CoreQuery like
 */
 SC.RenderContext.fn.html = SC.RenderContext.fn.push;
 

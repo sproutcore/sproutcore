@@ -189,7 +189,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
   /**
     This function overrides the default function in SC.Scroller.
     SC.MenuScroller and SC.MenuScroll use valueBinding so this function is
-    not neccesary.
+    not necessary.
   */
   _sc_scroller_valueDidChange: function() {}.observes('value'),
   
@@ -394,7 +394,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   autohidesHorizontalScroller: NO,
   
   /** 
-    YES if the view shuld maintain a vertical scroller.   This property must 
+    YES if the view should maintain a vertical scroller.   This property must 
     be set when the view is created.
     
     @type Boolean
@@ -647,7 +647,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the 
-    scroller maxmimum and optionally update the scroller visibility if the
+    scroller maximum and optionally update the scroller visibility if the
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
   */

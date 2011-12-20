@@ -95,7 +95,7 @@ test("modifying delegate and content", function() {
   callCount=0;
   SC.run(function() { view.set('delegate', null); });
   ok(callCount>0, 'rowDelegate should change when setting delegate');
-  equals(view.get('rowDelegate'), view, 'rowDelegate should go back to view when delegate and content cleared or dont implement');
+  equals(view.get('rowDelegate'), view, 'rowDelegate should go back to view when delegate and content cleared or do not implement');
   
 });
 
@@ -106,7 +106,7 @@ test("modifying delegate and content", function() {
 test("changing the rowHeight should invalidate all row heights", function() {
   var indexes = null;
   view = SC.ListView.create({
-    content:  '1 2 3 4 5'.w(), // provide some contnet
+    content:  '1 2 3 4 5'.w(), // provide some content
     delegate: del,
     
     // override for testing
@@ -137,7 +137,7 @@ test("changing the rowHeight should invalidate all row heights", function() {
 test("changing the customRowHeightIndexes should invalidate impacted row heights", function() {
   var indexes = null;
   view = SC.ListView.create({
-    content:  '1 2 3 4 5'.w(), // provide some contnet
+    content:  '1 2 3 4 5'.w(), // provide some content
     delegate: del,
     
     // override for testing

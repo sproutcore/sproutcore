@@ -38,7 +38,7 @@ SC.SnapLines = {
   
   
   /*
-    This method will setup the datastructure required to draw snap lines
+    This method will setup the data structure required to draw snap lines
     it should be called in dragStarted if using with an `SC.Drag` or on
     `mouseDown` if using it with a move
   
@@ -123,7 +123,7 @@ SC.SnapLines = {
     This method will check the passed views position with the other child views
     and draw any lines.  It should be called in `dragUpdated` if using `SC.Drag`
     or in `mouseMoved` if using a move.  it will also return a hash of the
-    snapped coords in local and global coodinates
+    snapped coords in local and global coordinates
     
   */
   drawLines: function(view, eventX, eventY, mouseDownX, mouseDownY){
@@ -137,7 +137,7 @@ SC.SnapLines = {
         rMinY, rMidY, rMaxY, rMinXMod, rMidXMod, rMaxXMod, rMinYMod, rMidYMod, rMaxYMod, xHit, yHit,
         moveDirection = this._dragDirection(eventX, eventY, mouseDownX, mouseDownY), xValues, yValues, 
         that = this, xHitVals, yHitVals, ret;
-    //get the frame and all the relavent points of interest
+    //get the frame and all the relevant points of interest
     parent = view.get('parentView');
     frame = parent ? parent.convertFrameToView(view.get('frame'), null) : view.get('frame');
     rMinX = SC.minX(frame);

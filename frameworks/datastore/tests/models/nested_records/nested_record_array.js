@@ -170,7 +170,7 @@ test("Basic Read", function() {
   ok(storeRef, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
   equals(cr, storeRef, "check the parent reference to the first child is the same as the direct store reference");
   
-  // Check to see if the attributes of a Child Record match the refrence of the parent
+  // Check to see if the attributes of a Child Record match the reference of the parent
   var parentArray = testParent.readAttribute('elements');
   ok(!SC.instanceOf(parentArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
   same(parentArray[0], storeRef.get('attributes'), "check that the ChildRecord's attributes are the same as the ParentRecord's readAttribute for the reference");
@@ -234,7 +234,7 @@ test("Basic Write: reference tests", function() {
    ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
    newElems = testParent.get('elements');
    var newCR = newElems.objectAt(0);
-   same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
+   same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
    var readAttrsArray = testParent.readAttribute('elements');
    ok(readAttrsArray, "checks to make sure the readAttibute works with a change to the name in the first child.");
    equals(readAttrsArray.length, 4, "after set() on parent, check that the length of the attribute array of child records is 4");

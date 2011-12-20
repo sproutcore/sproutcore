@@ -31,7 +31,7 @@ test("invoked with key = * whenever content changes", function() {
   view.set('content', content);
 });
 
-test("invoked with key = foo whenever a propery on content is changed", function() {
+test("invoked with key = foo whenever a property on content is changed", function() {
   var isTesting = NO, curKey ;
   view.contentPropertyDidChange = function(target, key) {
     if (!isTesting) return ; //wait until testing should begin...

@@ -120,7 +120,7 @@ SC.Response = SC.Object.extend(
 
   /**
     If set, then will attempt to automatically parse response as XML
-    regarldess of headers.
+    regardless of headers.
 
     @field
     @type Boolean
@@ -609,7 +609,7 @@ SC.XHRResponse = SC.Response.extend(
           this.set('errorObject', error);
         }
 
-        // set the status - this will trigger changes on relatedp properties
+        // set the status - this will trigger changes on related properties
         this.set('status', status);
       }, this);
 

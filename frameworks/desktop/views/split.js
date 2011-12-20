@@ -463,7 +463,7 @@ SC.SplitView = SC.View.extend(
       
       dividerThickness = !SC.none(dividerThickness) ? dividerThickness : 7;
       
-      // Turn a flag on to recalculate the spliting if the desired thickness
+      // Turn a flag on to recalculate the splitting if the desired thickness
       // is a percentage
       if (this._recalculateDivider === undefined && desiredThickness < 1) {
         this._recalculateDivider = YES;
@@ -828,7 +828,7 @@ SC.SplitView = SC.View.extend(
   /**
     (DELEGATE) Control whether a view can be collapsed.
     
-    The default implemention returns NO if the split view property
+    The default implementation returns NO if the split view property
     canCollapseViews is set to NO or when the given view has
     property canCollapse set to NO, otherwise it returns YES.
     

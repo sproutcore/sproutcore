@@ -13,7 +13,7 @@
   array content as needed.
 
   Your object does not need to implement all of these methods, but it should
-  at least implment the sparseArrayDidRequestIndex() method.
+  at least implement the sparseArrayDidRequestIndex() method.
 
   @since SproutCore 1.0
 */

@@ -26,7 +26,7 @@ SC.HELP_CURSOR = 'help' ;
 /**
   @class SC.Cursor
 
-  A Cursor object is used to sychronize the cursor used by multiple views at 
+  A Cursor object is used to synchronize the cursor used by multiple views at 
   the same time. For example, thumb views within a split view acquire a cursor
   instance from the split view and set it as their cursor. The split view is 
   able to update its cursor object to reflect the state of the split view.

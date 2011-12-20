@@ -350,7 +350,7 @@ SC.Logger = SC.Object.create(
 
   /**
     Begins a new group in the console and/or in the recorded array provided
-    the respective log levels are set to ouput/record 'debug' messages.
+    the respective log levels are set to output/record 'debug' messages.
     Every message after this call (at any log level) will be indented for
     readability until a matching {@link SC.Logger.debugGroupEnd} is invoked,
     and you can create as many levels as you want.
@@ -445,7 +445,7 @@ SC.Logger = SC.Object.create(
 
   /**
     Begins a new group in the console and/or in the recorded array provided
-    the respective log levels are set to ouput/record 'info' messages.
+    the respective log levels are set to output/record 'info' messages.
     Every message after this call (at any log level) will be indented for
     readability until a matching {@link SC.Logger.infoGroupEnd} is invoked,
     and you can create as many levels as you want.
@@ -541,7 +541,7 @@ SC.Logger = SC.Object.create(
 
   /**
     Begins a new group in the console and/or in the recorded array provided
-    the respective log levels are set to ouput/record 'warn' messages.
+    the respective log levels are set to output/record 'warn' messages.
     Every message after this call (at any log level) will be indented for
     readability until a matching {@link SC.Logger.warnGroupEnd} is invoked,
     and you can create as many levels as you want.
@@ -635,7 +635,7 @@ SC.Logger = SC.Object.create(
 
   /**
     Begins a new group in the console and/or in the recorded array provided
-    the respective log levels are set to ouput/record 'error' messages.
+    the respective log levels are set to output/record 'error' messages.
     Every message after this call (at any log level) will be indented for
     readability until a matching {@link SC.Logger.errorGroupEnd} is invoked,
     and you can create as many levels as you want.
@@ -804,7 +804,7 @@ SC.Logger = SC.Object.create(
         message = entry.message;
         if (message) {
           // It's a message entry.  Were arguments used, or did we format a
-          // message?  If arguments were used, we need to stringfy those
+          // message?  If arguments were used, we need to stringify those
           // instead of using the message.
           originalArguments = entry.originalArguments;
           line =  prefix + this._indentation(indentation);

@@ -91,7 +91,7 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
   /**
     Called to actually perform the drag operation.
     
-    Overide this method to actually perform the drag operation.  This method
+    Override this method to actually perform the drag operation.  This method
     is only called if you returned `YES` in `acceptDragOperation()`.
     
     Return the operation that was actually performed or `SC.DRAG_NONE` if the

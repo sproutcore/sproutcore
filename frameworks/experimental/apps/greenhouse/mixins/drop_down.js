@@ -50,7 +50,7 @@ Greenhouse.DropDown = {
       }
     }
 
-    // TODO: [BB] Check for existance of target and action
+    // TODO: [BB] Check for existence of target and action
     if (this.target !== undefined && this.action !== undefined) {
       this.set('target', this);
       this.set('action', 'toggle');

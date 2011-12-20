@@ -157,7 +157,7 @@ SC.CollectionViewDelegate = {
     The default implementation always returns `YES`.
     
     @param {SC.CollectionView} view the collection view
-    @returns {Boolean} YES to alow, NO to prevent it
+    @returns {Boolean} YES to allow, NO to prevent it
   */
   collectionViewShouldBeginDrag: function(view) {
     return YES;

@@ -358,7 +358,7 @@ SC.View._RenderDelegateProxy = {
   the view's render delegate, if present. You may specify a default value to
   return if there is no such property or is no render delegate.
   
-  The generated property is read+write, so it may be overriden.
+  The generated property is read+write, so it may be overridden.
   
   @param {String} propertyName The name of the property to get from the render delegate..
   @param {Value} def The default value to use if the property is not present.

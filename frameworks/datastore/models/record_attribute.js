@@ -377,7 +377,7 @@ SC.RecordAttribute.mixin(
      - `to(value, attr, klass, record, key)` converts the passed value
        (which will be of the class expected by the attribute) into the
        underlying attribute value
-     - `from(value, attr, klass, record, key)` converts the underyling
+     - `from(value, attr, klass, record, key)` converts the underlying
        attribute value into a value of the class
 
     You can also provide an array of keys to observer on the return value.

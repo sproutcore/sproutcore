@@ -45,7 +45,7 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
   /**
     Use this to overlay the vertical scroller.
 
-    This ensures that the container frame will not resize to accomodate the
+    This ensures that the container frame will not resize to accommodate the
     vertical scroller, hence overlaying the scroller on top of
     the container.
 
@@ -57,7 +57,7 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
   /**
     Use this to overlay the horizontal scroller.
 
-    This ensures that the container frame will not resize to accomodate the
+    This ensures that the container frame will not resize to accommodate the
     horizontal scroller, hence overlaying the scroller on top of
     the container
 

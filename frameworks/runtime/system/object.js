@@ -234,7 +234,7 @@ SC._enhance = function(originalFunction, enhancement) {
   ===
 
   JavaScript is not a class-based language.  Instead it uses a type of
-  inheritence inspired by self called "prototypical" inheritance.
+  inheritance inspired by self called "prototypical" inheritance.
   ...
 
   Using SproutCore objects with other JavaScript object.
@@ -614,7 +614,7 @@ SC.Object.prototype = {
   },
 
   /**
-    Attemps to invoke the named method, passing the included two arguments.
+    Attempts to invoke the named method, passing the included two arguments.
     Returns NO if the method is either not implemented or if the handler
     returns NO (indicating that it did not handle the event).  This method
     is invoked to deliver actions from menu items and to deliver events.

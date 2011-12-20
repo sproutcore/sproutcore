@@ -15,7 +15,7 @@
 Greenhouse.libraryController = SC.TreeController.create( SC.CollectionViewDelegate,
 /** @scope Greenhouse.libraryController.prototype */ {
   /**
-    Call this method whenever you want to relaod the library from hte server
+    Call this method whenever you want to reload the library from hte server
   */
   reload: function() {
     var configQuery = Greenhouse.CONFIG_QUERY, target = Greenhouse.targetController.get('content');

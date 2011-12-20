@@ -26,7 +26,7 @@ SC.ResponderProtocol = {
   //
   
   /**
-    Called when the mouse is pressed. You must return `YES` to recieve
+    Called when the mouse is pressed. You must return `YES` to receive
     mouseDragged and mouseUp in the future.
     
     @param evt {SC.Event} the mousedown event
@@ -118,7 +118,7 @@ SC.ResponderProtocol = {
     
     @param charCode {String} the character code
     @param evt {SC.Event} the keydown event
-    @returns {Boolean} YES if you handled th emethod; NO otherwise
+    @returns {Boolean} YES if you handled the method; NO otherwise
   */
   performKeyEquivalent: function(charCode, evt) { return false; },
   

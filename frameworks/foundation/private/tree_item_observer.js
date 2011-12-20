@@ -260,7 +260,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
         // if this branch range is before the start loc, just remove it and
         // go on.  If cur is somewhere inside of the range, then save to pass
-        // on.  Note use of operation to determine the abiguous end op.
+        // on.  Note use of operation to determine the ambiguous end op.
         if ((i+len === cur) && operation === SC.DROP_AFTER) cur -= i;
         else if (i+len > cur) cur -= i; // put inside of nested range
         else {
@@ -697,7 +697,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
   /**
     Called just before a branch observer is removed.  Should stop any
-    observering and invalidate any child observers.
+    observing and invalidate any child observers.
   */
   destroy: function() {
     this.invalidateBranchObserversAt(0);
@@ -779,7 +779,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
   /**
     Computes the current disclosure state of the item by asking the item or
-    the delegate.  If no pitem or index is passed, the parentItem and idex
+    the delegate.  If no pitem or index is passed, the parentItem and index
     will be used.
   */
   _computeDisclosureState: function(item, pitem, index) {

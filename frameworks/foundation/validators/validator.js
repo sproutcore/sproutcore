@@ -102,11 +102,11 @@ SC.Validator = SC.Object.extend(
   /**
     Returns an error object if the field is invalid.
   
-    This is the other standard validator method that can be used to impement basic validation.
+    This is the other standard validator method that can be used to implement basic validation.
     Return an error object explaining why the field is not valid.  It will only be called if
     validate() returned NO.
     
-    The default implementation of htis method returns a generic error message with the loc
+    The default implementation of this method returns a generic error message with the loc
     string "Invalid.Generate({fieldValue})".  You can simply define this loc string in
     strings.js if you prefer or you can override this method to provide a more specific error message.
   
@@ -131,7 +131,7 @@ SC.Validator = SC.Object.extend(
     methods (validate() and validateError()) if you prefer.
     
     The default implementation calls your validate() method and then validateError()
-    if valiate() returns NO.  This method should return SC.VALIDATE_OK if validation
+    if validate() returns NO.  This method should return SC.VALIDATE_OK if validation
     succeeded or an error object if it fails.
   
     @param {SC.FormView} form the form for the field

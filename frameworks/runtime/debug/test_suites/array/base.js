@@ -11,7 +11,7 @@
   Adds a new module of unit tests to verify that the passed object implements
   the SC.Array interface.  To generate, call the ArrayTests array with a 
   test descriptor.  Any properties you pass will be applied to the ArrayTests
-  descendent created by the create method.
+  descendant created by the create method.
   
   You should pass at least a newObject() method, which should return a new 
   instance of the object you want to have tested.  You can also implement the
@@ -145,7 +145,7 @@ SC.TestSuite = /** @scope SC.TestSuite.prototype */ {
   
   /**
     Default teardown method for use with modules.  This method will call the
-    destroyObejct() method, passing the current object property on the 
+    destroyObject() method, passing the current object property on the 
     receiver.  It will also clear the object property.
   */
   teardown: function() {
@@ -164,7 +164,7 @@ SC.TestSuite = /** @scope SC.TestSuite.prototype */ {
   
   /**
     Default method to destroy a generated object instance after a test has 
-    completed.  If you override newObject() you can also overried this method
+    completed.  If you override newObject() you can also override this method
     to cleanup the object you just created.
     
     Default method does nothing.
@@ -184,7 +184,7 @@ SC.TestSuite = /** @scope SC.TestSuite.prototype */ {
           teardown: function() { T.teardown(); }
         }
     
-    @param {String} desc detailed descrition
+    @param {String} desc detailed description
     @returns {SC.TestSuite} receiver
   */
   module: function(desc) {
@@ -375,7 +375,7 @@ SC.ArraySuite = SC.TestSuite.create("Verify SC.Array compliance: %@#%@", {
   
 });
 
-// Simple verfication of length
+// Simple verification of length
 SC.ArraySuite.define(function(T) {
   T.module("length");
   

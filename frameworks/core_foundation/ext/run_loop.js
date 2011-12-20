@@ -29,12 +29,12 @@ SC.RunLoop = SC.RunLoop.extend(
 
     Note that timers should fire only once per run loop to avoid the
     situation where a timer might cause an infinite loop by constantly
-    rescheduling itself everytime it is fired.
+    rescheduling itself every time it is fired.
   */
   endRunLoop: function() {
     this.fireExpiredTimers(); // fire them timers!
     var ret = sc_super(); // do everything else
-    this.scheduleNextTimeout(); // schedule a timout if timers remain
+    this.scheduleNextTimeout(); // schedule a timeout if timers remain
     return ret;
   },
 

@@ -22,7 +22,7 @@ sc_require('panes/panel');
   
   Palette pane is a simple way to provide non-modal messaging that won't 
   blocks the user's interaction with your application.  Palette panes are 
-  useful for showing important detail informations with flexsible position.
+  useful for showing important detail information with flexible position.
   They provide a better user experience than modal panel.
   
   @extends SC.PanelPane

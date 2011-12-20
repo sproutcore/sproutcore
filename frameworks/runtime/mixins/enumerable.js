@@ -762,7 +762,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
 } ;
 
-// Build in a separate function to avoid unintential leaks through closures...
+// Build in a separate function to avoid unintentional leaks through closures...
 SC._buildReducerFor = function(reducerKey, reducerProperty) {
   return function(key, value) {
     var reducer = this[reducerKey] ;
@@ -899,7 +899,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the max of the items in the enumerable. If
+    Reduces an enumerable to the max of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
 
@@ -929,7 +929,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the min of the items in the enumerable. If
+    Reduces an enumerable to the min of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
 
@@ -949,7 +949,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the max of the items in the enumerable. If
+    Reduces an enumerable to the max of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
 
@@ -979,7 +979,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the average of the items in the enumerable. If
+    Reduces an enumerable to the average of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
 
@@ -1001,7 +1001,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   },
 
   /**
-    Reduces an enumberable to the sum of the items in the enumerable. If
+    Reduces an enumerable to the sum of the items in the enumerable. If
     reducerProperty is passed, it will reduce that property. Otherwise, it will
     reduce the item itself.
 
@@ -1328,7 +1328,7 @@ Array.prototype.isEnumerable = YES ;
     // The mixinIfMissing methods should be applied if they are not defined.
     // If Prototype 1.6 is included, some of these methods will be defined
     // already, but we want to override them anyway in this special case
-    // because our version is faster and functionally identitical.
+    // because our version is faster and functionally identical.
     if (!Array.prototype[key] || ((typeof Prototype === 'object') && Prototype.Version.match(/^1\.6/))) {
       Array.prototype[key] = mixinIfMissing[key] ;
     }

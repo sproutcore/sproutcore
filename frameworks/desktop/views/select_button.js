@@ -153,7 +153,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   value: null,
 
   /**
-    if this property is set to `YES`, a checbox is shown next to the
+    if this property is set to `YES`, a checkbox is shown next to the
     selected menu item.
 
     @type Boolean
@@ -162,7 +162,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
-    Set this property to required display positon of separator from bottom
+    Set this property to required display position of separator from bottom
 
     @default null
   */
@@ -204,7 +204,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     Prefer matrix to position the select button menu such that the
     selected item for the menu item will appear aligned to the
     the button. The value at the second `index(0)` changes based on the
-    `postion(index)` of the menu item in the menu pane.
+    `position(index)` of the menu item in the menu pane.
 
     @type Array
     @default null

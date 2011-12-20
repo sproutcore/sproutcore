@@ -85,7 +85,7 @@ test("Object not yet instantiated", function() {
   SC.Observers.flush(garage);
   ok(SC.Observers.queue.some(function(el) { return el[1] === observer; }), "The observer should still be in the queue.");
 
-  // 3. After we instantiate the class, a call to SC.Observers.flush shoud remove the object from the queue...
+  // 3. After we instantiate the class, a call to SC.Observers.flush should remove the object from the queue...
   car = garage.car = car.create({ make: 'Renault' });
   SC.Observers.flush(garage);
   ok(!SC.Observers.queue.some(function(el) { return el[1] === observer; }), "The observer should have been removed from the queue.");
