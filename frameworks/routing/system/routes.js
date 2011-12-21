@@ -144,20 +144,8 @@ SC.routes = SC.Object.create(
     } else if (parts.length > 2) {
       parts.shift();
     }
-
-    // extract the parameters from the route string
-    len = parts.length;
-    for (i = 0; i < len; ++i) {
-      crumbs = parts[i].split('=');
-      params[crumbs[0]] = crumbs[1];
-    }
-
-    // overlay any parameter passed in obj
-    for (key in obj) {
-      if (obj.hasOwnProperty(key) && key !== 'route') {
-        params[key] = '' + obj[key];
-      }
-    }
+    
+    params = this.deparam(parts.join('&'), true);
 
     // build the route
     parts = [];
