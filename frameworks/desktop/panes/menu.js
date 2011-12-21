@@ -893,7 +893,7 @@ SC.MenuPane = SC.PickerPane.extend(
     }
 
     // Scroll to the selected menu item if it's not visible on screen.
-    // This is useful for keyboard navigation and programmaticaly selecting
+    // This is useful for keyboard navigation and programmatically selecting
     // the selected menu item, as in `SelectButtonView`.
     if (currentMenuItem && currentMenuItem.get('isEnabled')) {
       currentMenuItem.scrollToVisible();

@@ -487,7 +487,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
 
     // update the revision for storeKey.  Use generateStoreKey() because that
-    // guarantes a universally (to this store hierarchy anyway) unique
+    // guarantees a universally (to this store hierarchy anyway) unique
     // key value.
     if (!rev) rev = SC.Store.generateStoreKey();
     var isArray, len, idx, storeKey;

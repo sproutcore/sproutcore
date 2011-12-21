@@ -402,7 +402,7 @@ SC.NestedStore = SC.Store.extend(
   /** @private - bookkeeping for a single data hash. */
   dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
     // update the revision for storeKey.  Use generateStoreKey() because that
-    // guarantes a universally (to this store hierarchy anyway) unique 
+    // guarantees a universally (to this store hierarchy anyway) unique 
     // key value.
     if (!rev) rev = SC.Store.generateStoreKey();
     var isArray, len, idx, storeKey;

@@ -28,7 +28,7 @@
   Timers, on the other handle, are scheduled cooperatively using the
   SC.RunLoop, which uses exactly one timeout to fire itself when needed and
   then executes by timers that need to fire on its own.  This approach can
-  be many timers faster than using timers and guarantes that timers scheduled
+  be many timers faster than using timers and guarantees that timers scheduled
   to execute at the same time generally will do so, keeping animations and
   other operations in sync.
 
