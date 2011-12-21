@@ -63,7 +63,7 @@ SC.chance = {
 };
 
 
-// Disabling image preloadin in the mean time temporarily. 
+// Disabling image preloading in the mean time temporarily. 
 // If you want to enable it in your
 // app add the following line.
 //SC.ready(SC.chance, 'preloadImages');

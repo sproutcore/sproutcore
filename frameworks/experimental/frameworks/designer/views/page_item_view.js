@@ -35,8 +35,8 @@ SC.pageItemView = SC.ListItemView.extend(
    valid in a given area.
 
    Override this method to return an OR'd mask of the allowed drag 
-   operations.  If the user drags over a dropable area within another 
-   dropable area, the drag will latch onto the deepest view that returns one 
+   operations.  If the user drags over a droppable area within another 
+   droppable area, the drag will latch onto the deepest view that returns one 
    or more available operations.
 
    The default implementation returns `SC.DRAG_NONE`
