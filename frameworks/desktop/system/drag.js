@@ -71,7 +71,7 @@ SC.View.reopen(
   @class
   
   An instance of this object is created whenever a drag occurs.  The instance
-  manages the mouse/touch events and coordinating with dropable targets until the
+  manages the mouse/touch events and coordinating with droppable targets until the
   user releases the mouse button. 
   
   To initiate a drag, you should call `SC.Drag.start()` with the options below
