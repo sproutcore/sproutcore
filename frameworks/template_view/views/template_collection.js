@@ -132,7 +132,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       extensions.template = itemViewTemplate;
     }
 
-    if (this.get('itemTagName')) {
+    // If the itemView has not defined a unique tagName, then check for a unique item tagName
+    // to match the given collection tagName.  This is safe, since the unique item tagNames
+    // are required by HTML to be children of the special collection tagName.  If the collection
+    // doesn't have a special tagName, then the default value of SC.TemplateView is still
+    // used.
+    if (itemView.prototype.tagName === SC.TemplateView.prototype.tagName) {
       extensions.tagName = this.get('itemTagName');
     }
 
@@ -250,29 +255,30 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       delete itemOptions['class'];
       delete itemOptions.classBinding;
 
-    for (idx = 0; idx < len; idx++) {
-      item = addedObjects.objectAt(idx);
-      childView = this.createChildView(itemViewClass.extend(itemOptions, {
-        content: item,
-        render: renderFunc,
-        tagName: itemOptions.tagName || itemViewClass.prototype.tagName || this.get('itemTagName')
-      }));
+      for (idx = 0; idx < len; idx++) {
+        item = addedObjects.objectAt(idx);
+        childView = this.createChildView(itemViewClass.extend(itemOptions, {
+          content: item,
+          render: renderFunc,
+          // Use the itemTagName property if it is set, over the tagName of the itemViewClass which is 'div' by default
+          tagName: itemOptions.tagName || itemViewClass.prototype.tagName
+        }));
 
-      var contextProperty = childView.get('contextProperty');
-      if (contextProperty) {
-        childView.set('context', childView.get(contextProperty));
+        var contextProperty = childView.get('contextProperty');
+        if (contextProperty) {
+          childView.set('context', childView.get(contextProperty));
+        }
+
+        itemElem = childView.createLayer().$();
+        if (!insertAtElement) {
+          elem.append(itemElem);
+        } else {
+          itemElem.insertAfter(insertAtElement);
+        }
+        insertAtElement = itemElem;
+
+        addedViews.push(childView);
       }
-
-      itemElem = childView.createLayer().$();
-      if (!insertAtElement) {
-        elem.append(itemElem);
-      } else {
-        itemElem.insertAfter(insertAtElement);
-      }
-      insertAtElement = itemElem;
-
-      addedViews.push(childView);
-    }
 
       childViews.replace(start, 0, addedViews);
     }
@@ -296,6 +302,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
 
   itemTagName: function() {
     switch(this.get('tagName')) {
+      case 'dl':
+        return 'dt';
       case 'ul':
       case 'ol':
         return 'li';
@@ -304,6 +312,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       case 'tbody':
       case 'tfoot':
         return 'tr';
+      case 'select':
+        return 'option';
+      default:
+        return SC.TemplateView.prototype.tagName;
     }
   }.property('tagName'),
 

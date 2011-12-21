@@ -15,8 +15,8 @@ test("creating a collection view works", function() {
     template: SC.Handlebars.compile('<b>{{content.title}}</b>')
   });
 
-  var ListItemChildView = CollectionChildView.extend({ tagName: "li" });
   var DefinitionTermChildView = CollectionChildView.extend({ tagName: "dt" });
+  var CustomChildView = CollectionChildView.extend({ tagName: "p" });
 
   var CollectionView = SC.TemplateCollectionView.extend({
     content: [{title: 'Hello'}]
@@ -25,29 +25,54 @@ test("creating a collection view works", function() {
   var defaultCollectionView = CollectionView.create();
   var ulCollectionView  = CollectionView.create({ tagName: "ul" });
   var olCollectionView  = CollectionView.create({ tagName: "ol" });
-  var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
-  var customTagCollectionView = CollectionView.create({ tagName: "p" });
+  var dlCollectionView  = CollectionView.create({ tagName: "dl" });
+  var dlCollectionView2  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
+  var dlCollectionView3  = CollectionView.create({ tagName: "dl", itemView: CustomChildView });
+  var dlCollectionView4  = CollectionView.create({ tagName: "dl", itemViewOptions: { tagName: "li"} });
+  var dlCollectionView5  = CollectionView.create({ tagName: "dl", itemViewOptions: { tagName: "li"}, itemView: CustomChildView });
+  var selectCollectionView  = CollectionView.create({ tagName: "select" });
+  var customTagCollectionView = CollectionView.create({ tagName: "p", itemView: CustomChildView });
 
   defaultCollectionView.createLayer();
   ulCollectionView.createLayer();
   olCollectionView.createLayer();
   dlCollectionView.createLayer();
+  dlCollectionView2.createLayer();
+  dlCollectionView3.createLayer();
+  dlCollectionView4.createLayer();
+  dlCollectionView5.createLayer();
+  selectCollectionView.createLayer();
   customTagCollectionView.createLayer();
 
   ok(defaultCollectionView.$().is("ul"), "Unordered list collection view was rendered (Default)");
-  equals(defaultCollectionView.$('li').length, 1, "List item view was rendered (Default)");
+  equals(defaultCollectionView.$('li').length, 1, "List item was rendered (Default)");
 
   ok(ulCollectionView.$().is("ul"), "Unordered list collection view was rendered");
-  equals(ulCollectionView.$('li').length, 1, "List item view was rendered");
+  equals(ulCollectionView.$('li').length, 1, "List item was rendered");
 
   ok(olCollectionView.$().is("ol"), "Ordered collection collection view was rendered");
-  equals(olCollectionView.$('li').length, 1, "List item view was rendered");
+  equals(olCollectionView.$('li').length, 1, "List item was rendered");
 
   ok(dlCollectionView.$().is("dl"), "Definition List collection view was rendered");
-  equals(dlCollectionView.$('dt').length, 1, "Definition term view was rendered");
+  equals(dlCollectionView.$('dt').length, 1, "Definition term was rendered (Default).");
+
+  ok(dlCollectionView2.$().is("dl"), "Definition List collection view was rendered");
+  equals(dlCollectionView2.$('dt').length, 1, "Definition term was rendered (when specified in itemView).");
+
+  ok(dlCollectionView3.$().is("dl"), "Definition List collection view was rendered");
+  equals(dlCollectionView3.$('p').length, 1, "Paragraph was rendered (when specified in itemView).");
+
+  ok(dlCollectionView4.$().is("dl"), "Definition List collection view was rendered");
+  equals(dlCollectionView4.$('li').length, 1, "List item was rendered (when specified in itemViewOptions.tagName).");
+
+  ok(dlCollectionView4.$().is("dl"), "Definition List collection view was rendered");
+  equals(dlCollectionView4.$('li').length, 1, "List item was rendered (when specified in itemViewOptions.tagName and also specified in itemView).");
+
+  ok(selectCollectionView.$().is("select"), "Select collection view was rendered");
+  equals(selectCollectionView.$('option').length, 1, "Option view was rendered");
 
   ok(customTagCollectionView.$().is("p"), "Paragraph collection view was rendered");
-  equals(customTagCollectionView.$('div').length, 1, "Child view was rendered");
+  equals(customTagCollectionView.$('p').length, 1, "Custom child view was rendered");
 });
 
 test("not passing a block to the collection helper creates a collection", function() {
