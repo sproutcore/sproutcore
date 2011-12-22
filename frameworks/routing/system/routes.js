@@ -129,30 +129,26 @@ SC.routes = SC.Object.create(
 
     @returns {Hash}
   */
-  _extractParametersAndRoute: function(obj) {
+  _extractParametersAndRoute: function(obj, coerce) {
     var params = {},
         route = obj.route || '',
         separator, parts, i, len, crumbs, key;
 
     separator = (route.indexOf('?') < 0 && route.indexOf('&') >= 0) ? '&' : '?';
+    
     parts = route.split(separator);
-    route = parts[0];
-    if (parts.length === 1) {
-      parts = [];
-    } else if (parts.length === 2) {
-      parts = parts[1].split('&');
-    } else if (parts.length > 2) {
-      parts.shift();
+    route = parts.shift();
+    
+    params = this.deparam(parts.join('&'), coerce || false);
+
+    // overlay any parameter passed in obj
+    for (key in obj) {
+      if (obj.hasOwnProperty(key) && key !== 'route') {
+        params[key] = '' + obj[key];
+      }
     }
     
-    params = this.deparam(parts.join('&'), true);
-
-    // build the route
-    parts = [];
-    for (key in params) {
-      parts.push([key, params[key]].join('='));
-    }
-    params.params = separator + parts.join('&');
+    params.params = separator + $.param(params);
     params.route = route;
 
     return params;
