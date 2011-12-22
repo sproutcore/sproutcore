@@ -65,7 +65,7 @@ SC.Validator.Password = SC.Validator.extend(
   },
 
   // this method is called just before the form is submitted.
-  // field: the field toe validate.
+  // field: the field to validate.
   validateSubmit: function(form, field) { 
     return this.updateFields(form, this.validate(true)) ;
   },
