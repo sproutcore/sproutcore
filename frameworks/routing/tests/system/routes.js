@@ -356,6 +356,14 @@ test('_extractParametersAndRoute with ? syntax', function() {
   same(SC.routes._extractParametersAndRoute({ format: 'h264', size: 'small' }),
        { route: '', params:'?format=h264&size=small', format: 'h264', size: 'small' },
        'route should be well formatted with the given parameters even if there is no initial route');
+      
+  same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA' }),
+       { route: 'videos/5', params:'?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA', format: 'h264', size: 'small', url: 'http://www.youtube.com/watch?v=G0k3kHtyoqc&feature=g-logo&context=G21d2678FOAAAAAAABAA' },
+       'route paramters should be extracted and urldecoded');
+      
+  same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA&videoLength=1120&macVersion=true' }, true),
+       { route: 'videos/5', params:'?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA&videoLength=1120&macVersion=true', format: 'h264', size: 'small', url: 'http://www.youtube.com/watch?v=G0k3kHtyoqc&feature=g-logo&context=G21d2678FOAAAAAAABAA', videoLength: 1120, macVersion: true },
+       'route paramters should be extracted, urldecoded and coerced');
 });
 
 test('_extractParametersAndRoute with & syntax', function() {
