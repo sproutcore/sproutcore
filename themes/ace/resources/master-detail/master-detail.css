@@ -5,7 +5,7 @@ $theme.master-detail {
     -webkit-border-top-left-radius: 10px;
     -webkit-border-top-right-radius: 10px;
     -moz-border-radius-topleft: 10px;
-    -moz-border-raidus-topright: 10px;
+    -moz-border-radius-topright: 10px;
   }
   
   & > .sc-view {
@@ -22,6 +22,6 @@ $theme.master-detail {
     -webkit-border-top-left-radius: 10px;
     -webkit-border-top-right-radius: 10px;
     -moz-border-radius-topleft: 10px;
-    -moz-border-raidus-topright: 10px;
+    -moz-border-radius-topright: 10px;
   }
 }
