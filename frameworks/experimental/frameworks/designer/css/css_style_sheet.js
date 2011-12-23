@@ -46,7 +46,7 @@ SC.CSSStyleSheet = SC.Object.extend(
   },
   
   /**
-    @property {Boolean} YES if the stylsheet is enabled.
+    @property {Boolean} YES if the stylesheet is enabled.
   */
   isEnabled: function(key, val) {
     if (val !== undefined) {
@@ -144,7 +144,7 @@ SC.mixin(SC.CSSStyleSheet,
         var ss2 = SC.CSSStyleSheet.find('style') ; // same thing
         sc_assert(ss === ss2) ; // SC.CSSStyleSheet objects are stable
     
-    @param {String} nameOrUrl a stylsheet name or href to find
+    @param {String} nameOrUrl a stylesheet name or href to find
     @returns {SC.CSSStyleSheet} null if not found
   */
   find: function(nameOrUrl) {
