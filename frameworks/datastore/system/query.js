@@ -565,7 +565,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     'STRING': {
       firstCharacter:   /['"]/,
-      delimeted:        true,
+      delimited:        true,
       evalType:         'PRIMITIVE',
 
       /** @ignore */
@@ -575,7 +575,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     'PARAMETER': {
       firstCharacter:   /\{/,
       lastCharacter:    '}',
-      delimeted:        true,
+      delimited:        true,
       evalType:         'PRIMITIVE',
 
       /** @ignore */
@@ -903,7 +903,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         currentToken        = null,
         currentTokenType    = null,
         currentTokenValue   = null,
-        currentDelimeter    = null,
+        currentDelimiter    = null,
         endOfString         = false,
         endOfToken          = false,
         belongsToToken      = false,
@@ -920,11 +920,11 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       // handling of special cases
       // check format
       if (t.format && !t.format.test(tokenValue)) tokenType = "UNKNOWN";
-      // delimeted token (e.g. by ")
-      if (t.delimeted) skipThisCharacter = true;
+      // delimited token (e.g. by ")
+      if (t.delimited) skipThisCharacter = true;
       
       // reserved words
-      if ( !t.delimeted ) {
+      if ( !t.delimited ) {
         for ( var anotherToken in grammar ) {
           if ( grammar[anotherToken].reservedWord
                && anotherToken == tokenValue ) {
@@ -966,8 +966,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       // current character
       c = inputString.charAt(i);
     
-      // set true after end of delimeted token so that
-      // final delimeter is not catched again
+      // set true after end of delimited token so that
+      // final delimiter is not catched again
       skipThisCharacter = false;
         
     
@@ -977,7 +977,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       
         // some helpers
         t = grammar[currentToken];
-        endOfToken = t.delimeted ? c===currentDelimeter : t.notAllowed.test(c);
+        endOfToken = t.delimited ? c===currentDelimiter : t.notAllowed.test(c);
       
         // if still in token
         if ( !endOfToken ) currentTokenValue += c;
@@ -1007,10 +1007,10 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
           t = grammar[currentToken];
           currentTokenValue = c;
           // handling of special cases
-          if ( t.delimeted ) {
+          if ( t.delimited ) {
             currentTokenValue = "";
-            if ( t.lastCharacter ) currentDelimeter = t.lastCharacter;
-            else currentDelimeter = c;
+            if ( t.lastCharacter ) currentDelimiter = t.lastCharacter;
+            else currentDelimiter = c;
           }
 
           if ( t.singleCharacter || endOfString ) {

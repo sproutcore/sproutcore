@@ -57,7 +57,7 @@ test("Calling buildInChild adds child and builds it in.", function(){
   // check right after build in is called
   ok(v.called_buildIn, "child started build in.");
   ok(v.isBuildingIn, "child is building in.");
-  ok(!p.called_buildInDidFinsihFor, "child has not finished building in, according to parent.");
+  ok(!p.called_buildInDidFinishFor, "child has not finished building in, according to parent.");
   
   // the parent view should be set already
   equals(v.get("parentView"), p, "Parent view should be the parent");

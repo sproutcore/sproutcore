@@ -1493,11 +1493,11 @@ SC.Logger = SC.Object.create(
   */
   _argumentsToString: function() {
     var ret       = "",
-        delimeter = SC.LOGGER_LOG_DELIMITER,
+        delimiter = SC.LOGGER_LOG_DELIMITER,
         i, len;
 
     for (i = 0, len = (arguments.length - 1);  i < len;  ++i) {
-      ret += arguments[i] + delimeter;
+      ret += arguments[i] + delimiter;
     }
     ret += arguments[len];
     return ret;

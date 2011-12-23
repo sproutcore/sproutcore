@@ -280,7 +280,7 @@ SC.View.reopen(
   },
 
   /**
-    Implement this, and call didFinsihBuildOut when you are done.
+    Implement this, and call didFinishBuildOut when you are done.
   */
   buildOut: function() {
     this.buildOutDidFinish();
