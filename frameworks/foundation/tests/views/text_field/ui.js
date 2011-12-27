@@ -669,6 +669,25 @@ test("focus and blur an empty text field", function() {
   pane.verifyEmpty(view, 'Full Name');
 });
 
+test("loosing first responder should blur", function() {
+  var view = pane.view('empty');
+  var input = view.$('input');
+  var testResponder = SC.Responder.create(SC.ResponderContext, {});
+
+  // preliminary setup
+  view.get('pane').becomeKeyPane();
+  SC.Event.trigger(input, 'focus');
+
+  // verify it did receive focus
+  ok(view.get('focused'), 'view should have focus');
+  
+  // tell the pane to make our test responder the first responder
+  view.get('pane').makeFirstResponder(testResponder);
+  
+  // verify it no longer has focus
+  ok(!view.get('focused'), 'view should no longer have focus');
+});
+
 test("editing a field should not change the cursor position", function() {
   var textField = pane.view('empty');
   var input = textField.$('input');
