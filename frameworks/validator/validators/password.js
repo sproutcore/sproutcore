@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('validators/validator') ;
+sc_require('validator') ;
 
 /**
   Ensures all fields with the Password validator attached in the same form

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('validators/validator') ;
+sc_require('validator') ;
 
 /**
   Handle parsing and display of dates.

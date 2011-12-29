@@ -5,8 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('validators/validator') ;
-sc_require('system/utils/misc');
+sc_require('validator') ;
 
 /**
   Handles parsing and validating of numbers.
