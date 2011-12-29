@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/validatable') ;
-
 /** @class
 
   Base view for managing a view backed by an input element.  Since the web
