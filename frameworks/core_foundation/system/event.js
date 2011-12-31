@@ -111,7 +111,7 @@ SC.Event = function(originalEvent) {
     // in our browser detection. It'll scroll too quickly the first time, but we might as well learn
     // and change our handling for the next scroll
     if (this.wheelDelta > SC.Event.MOUSE_WHEEL_DELTA_LIMIT && !SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED) {
-      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.004;
+      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.04;
       SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES;
     }
 
@@ -146,6 +146,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       // Scrolling in Safari 5.0.1, which is huge for some reason
        if (version >= 533.17 && version <= 533.19) {
          deltaMultiplier = 0.001;
+         didChange = YES;
       } else if (version < 533 || version >= 534) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 0.04;
