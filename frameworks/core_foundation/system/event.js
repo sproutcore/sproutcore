@@ -143,8 +143,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         didChange = NO;
 
     if (SC.browser.safari) {
-      // Safari 5.0.1 and up
-      if (version >= 533.17) {
+      // Safari 5.0.1 to Safari 5.1
+      if (version >= 533.17 && version <= 534.48) {
         deltaMultiplier = 0.004;
         didChange = YES;
       } else if (version < 533) {
@@ -152,8 +152,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         deltaMultiplier = 40;
         didChange = YES;
       }
-    } else if (SC.browser.mozilla) {
-      deltaMultiplier = 10;
+    } else if (SC.browser.opera) {
+      deltaMultiplier = 0.001;
       didChange = YES;
     }
 
@@ -173,7 +173,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @type Number
     @default 1000
   */
-  MOUSE_WHEEL_DELTA_LIMIT: 1000,
+  MOUSE_WHEEL_DELTA_LIMIT: 20000,
 
   /** @private
     We only want to invalidate once
