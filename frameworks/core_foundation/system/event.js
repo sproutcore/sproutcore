@@ -143,17 +143,17 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         didChange = NO;
 
     if (SC.browser.safari) {
-      // Safari 5.0.1 and up
-      if (version >= 533.17) {
-        deltaMultiplier = 0.004;
-        didChange = YES;
-      } else if (version < 533) {
+      // Scrolling in Safari 5.0.1, which is huge for some reason
+       if (version >= 533.17 && version <= 533.19) {
+         deltaMultiplier = 0.001;
+      } else if (version < 533 || version >= 534) {
         // Scrolling in Safari 5.0
-        deltaMultiplier = 40;
+        deltaMultiplier = 0.04;
         didChange = YES;
       }
+      
     } else if (SC.browser.mozilla) {
-      deltaMultiplier = 10;
+      deltaMultiplier = .09;
       didChange = YES;
     }
 
@@ -920,8 +920,7 @@ SC.Event.prototype = {
     var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
 
     // handle function keys.
-    // WebKit browsers have equal values for keyCode and charCode on keypress event
-    if (code && code !== this.charCode) {
+    if (code) {
       ret = SC.FUNCTION_KEYS[code] ;
       if (!ret && (this.altKey || this.ctrlKey || this.metaKey)) {
         ret = SC.PRINTABLE_KEYS[code];
