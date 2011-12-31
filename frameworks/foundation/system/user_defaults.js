@@ -49,6 +49,12 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   _defaults: null,
 
   _safari3DB: null,
+  
+  /**
+    Default is local for a persistent storage. This property can also be set
+    to session for a storage only during the lifetime of the page.
+  */
+  storageType: 'local',
 
   /**
     Invoke this method to set the builtin defaults.  This will cause all
@@ -68,12 +74,13 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {Object} read value
   */
   readDefault: function(keyName) {
-    var ret, userKeyName, localStorage, key, del, storageSafari3;
+    var ret, userKeyName, storageType, localStorage, key, del, storageSafari3;
 
     // namespace keyname
     keyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(keyName);
-
+    storageType = this.get('storageType');
+    
     // look into recently written values
     if (this._written) { ret = this._written[userKeyName]; }
 
@@ -89,7 +96,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
     }else{
-      localStorage = window.localStorage ;
+      if (storageType === 'session') localStorage = window.sessionStorage;
+      else localStorage = window.localStorage;
+      
       if (!localStorage && window.globalStorage) {
         localStorage = window.globalStorage[window.location.hostname];
       }
@@ -131,12 +140,15 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @param {Object} value
     @returns {SC.UserDefault} receiver
   */
+  
+  
   writeDefault: function(keyName, value) {
-    var userKeyName, written, localStorage, key, del, storageSafari3;
+    var userKeyName, written, storageType, localStorage, key, del, storageSafari3;
 
     keyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(keyName);
-
+    storageType = this.get('storageType');
+    
     // save to local hash
     written = this._written ;
     if (!written) { written = this._written = {}; }
@@ -149,7 +161,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
     }else{
-       localStorage = window.localStorage ;
+       if (storageType === 'session') localStorage = window.sessionStorage ;
+       else localStorage = window.localStorage ;
+      
        if (!localStorage && window.globalStorage) {
          localStorage = window.globalStorage[window.location.hostname];
        }
@@ -200,10 +214,12 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefaults} receiver
   */
   resetDefault: function(keyName) {
-    var fullKeyName, userKeyName, written, localStorage, key, storageSafari3;
+    var fullKeyName, userKeyName, storageType, written, localStorage, key, storageSafari3;
+    
     fullKeyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(fullKeyName);
-
+    storageType = this.get('storageType');
+    
     this.propertyWillChange(keyName);
     this.propertyWillChange(fullKeyName);
 
@@ -215,7 +231,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }else if(this.HTML5DB_noLocalStorage){
          storageSafari3 = this._safari3DB;
     }else{
-       localStorage = window.localStorage ;
+       if (storageType === 'session') localStorage = window.sessionStorage ;
+       else localStorage = window.localStorage ;
+      
        if (!localStorage && window.globalStorage) {
          localStorage = window.globalStorage[window.location.hostname];
        }
