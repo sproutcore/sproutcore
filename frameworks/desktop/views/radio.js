@@ -214,6 +214,16 @@ SC.RadioView = SC.View.extend(SC.Control,
     @default null
   */
   itemIconKey: null,
+  
+  /**
+    Set this property to YES to allow multiple selection. If this property
+    is set to YES, value will be an array.
+    
+    @type Boolean
+    @default NO
+  */
+  allowsMultipleSelection: NO,
+  
 
   /**  @private
     If the items array itself changes, add/remove observer on item... 
@@ -386,15 +396,33 @@ SC.RadioView = SC.View.extend(SC.Control,
       displayItems[this._activeRadioButton].set('isActive', NO);
       delegate.updateRadioAtIndex(proxy, elem, this._activeRadioButton);
     }
-    
+
     this._activeRadioButton = undefined;
     
     if (index !== undefined) {
-      var item = this.get('displayItems')[index];
+      var item = displayItems[index];
+      
       if (item.get('isEnabled')) {
         item.set('isActive', NO);
         delegate.updateRadioAtIndex(proxy, elem, index);
-        this.set('value', item.value);
+        
+        if (this.get('allowsMultipleSelection')) {
+          // If multiple selection is allow, make sure value is an array
+          var value = SC.makeArray(this.get('value'));
+          
+          if (value.get('length') > 0 && jQuery.inArray(item.value, value) !== -1) {
+            value.removeObject(item.value);
+          }
+          else {
+            value.pushObject(item.value);
+          }
+          
+          this.set('value', value);
+          this.notifyPropertyChange('value');
+        }
+        else {
+          this.set('value', item.value);
+        }
       }
     }
     

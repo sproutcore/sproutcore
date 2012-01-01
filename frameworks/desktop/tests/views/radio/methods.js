@@ -33,6 +33,38 @@ module("SC.RadioView Logic", {
             title: 'Salgar',
             enabled: YES
           }]
+        }),
+        SC.RadioView.extend({
+          layout: { right: 20, bottom: 20, width: 100, height: 23 },
+          allowsMultipleSelection: YES,
+          itemTitleKey: 'title',
+          itemIsEnabledKey: 'enabled',
+          items: [{
+            title: 'Sugar',
+            enabled: YES
+          }, {
+            title: 'Salt',
+            enabled: YES
+          }, {
+            title: 'Salgar',
+            enabled: YES
+          }, {
+            title: 'Sulgar',
+            enabled: NO
+          }]
+        }),
+        SC.RadioView.extend({
+          layout: { right: 20, bottom: 20, width: 100, height: 23 },
+          allowsMultipleSelection: YES,
+          itemTitleKey: 'title',
+          itemValueKey: 'title',
+          items: [{
+            title: 'Sugar',
+          }, {
+            title: 'Salt',
+          }, {
+            title: 'Salgar',
+          }]
         })]
     });
     pane.append(); // make sure there is a layer...
@@ -161,4 +193,77 @@ test("disabled radio buttons do not become selected on click", function () {
   equals(view.get('value'), view.items[2], "value should be 'Salgar'");
 
   elem = null ;
+});
+
+test("clicking on radio buttons if allowsMultipleSelection is set to YES will push or remove objects to the value array", function () {
+  view = pane.childViews[2];
+
+  var r = view.$('.sc-radio-button');
+  
+  SC.Event.trigger(r[0], 'mousedown');
+  SC.Event.trigger(r[0],'mouseup');
+  ok(view.get('value').get('length') === 1, 'value length should be 1');
+  equals(view.get('value')[0], view.items[0], "value should be an array containing the Sugar item");
+
+  SC.Event.trigger(r[1],'mousedown');
+  SC.Event.trigger(r[1],'mouseup');
+  ok(view.get('value').get('length') === 2, 'value length should be 2');
+  equals(view.get('value')[1], view.items[1], "the last value object should be the Salt item");
+  
+  SC.Event.trigger(r[2],'mousedown');
+  SC.Event.trigger(r[2],'mouseup');
+  ok(view.get('value').get('length') === 3, 'value length should be 3');
+  equals(view.get('value')[1], view.items[1], "the last value object should be the Salgar item");
+  
+  // This item is disabled
+  SC.Event.trigger(r[3],'mousedown');
+  SC.Event.trigger(r[3],'mouseup');
+  ok(view.get('value').get('length') === 3, 'value length should be 3');
+  
+  // We deselect the second element
+  SC.Event.trigger(r[1],'mousedown');
+  SC.Event.trigger(r[1],'mouseup');
+  
+  ok(view.get('value').get('length') === 2, 'value length should be 2');
+  equals(view.get('value')[1], view.items[2], "the last value object should be the Salgar item");
+  
+  // We deselect all the items
+  SC.Event.trigger(r[0], 'mousedown');
+  SC.Event.trigger(r[0],'mouseup');
+  SC.Event.trigger(r[2],'mousedown');
+  SC.Event.trigger(r[2],'mouseup');
+  ok(view.get('value').get('length') === 0, 'value length should be 0');
+});
+
+test("clicking on radio buttons if allowsMultipleSelection is set to YES will push or remove strings to the value array", function () {
+  view = pane.childViews[3];
+
+  var r = view.$('.sc-radio-button');
+  
+  SC.Event.trigger(r[0], 'mousedown');
+  SC.Event.trigger(r[0],'mouseup');
+  equals(view.get('value').join(' '), view.items[0].title, "value should be an array containing 'Sugar'");
+
+  SC.Event.trigger(r[1],'mousedown');
+  SC.Event.trigger(r[1],'mouseup');
+  
+  equals(view.get('value').join(' '), view.items[0].title+' '+view.items[1].title, "value should be an array containing 'Sugar' and 'Salt'");
+  
+  SC.Event.trigger(r[2],'mousedown');
+  SC.Event.trigger(r[2],'mouseup');
+  
+  equals(view.get('value').join(' '), view.items[0].title+' '+view.items[1].title+' '+view.items[2].title, "value should be an array containing 'Sugar', 'Salt' and 'Salgar'");
+  
+  // We deselect the second element
+  SC.Event.trigger(r[1],'mousedown');
+  SC.Event.trigger(r[1],'mouseup');
+  
+  equals(view.get('value').join(' '), view.items[0].title+' '+view.items[2].title, "value should be an array containing 'Sugar' and 'Salgar'");
+  
+  // We deselect all the items
+  SC.Event.trigger(r[0], 'mousedown');
+  SC.Event.trigger(r[0],'mouseup');
+  SC.Event.trigger(r[2],'mousedown');
+  SC.Event.trigger(r[2],'mouseup');
+  ok(view.get('value').get('length') === 0, 'value length should be 0');
 });
