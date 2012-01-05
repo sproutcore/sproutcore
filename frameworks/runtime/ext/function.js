@@ -78,7 +78,7 @@ SC.mixin(Function.prototype,
 
         capitalizedName: function() {
           return this.getPath('person.fullName').toUpper();
-        }.property('person.firstName')
+        }.property('person.fullName')
 
     This will cause observers of +capitalizedName+ to be fired when either
     +fullName+ _or_ +person+ changes.
