@@ -19,8 +19,23 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     @default ul
   */
   tagName: 'ul',
+
+  /**
+    A list of items to be displayed by the TemplateCollectionView.
+
+    @type SC.Array
+    @default null
+  */
   content: null,
+
   template: SC.Handlebars.compile(''),
+
+  /**
+    An optional view to display if content is set to an empty array.
+
+    @type SC.TemplateView
+    @default null
+  */
   emptyView: null,
 
   /**
@@ -50,6 +65,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     }
   },
 
+  /**
+    @type SC.TemplateView
+    @default SC.TemplateView
+  */
   itemView: 'SC.TemplateView',
 
   /**
