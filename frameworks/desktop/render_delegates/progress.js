@@ -7,16 +7,16 @@
 
 /**
   Renders and updates DOM representations of progress bars.
-  
+
   Parameters
   --------------------------
   Expects these properties on the data source:
-  
+
    - `isIndeterminate`
    - `isRunning`
    - `isEnabled`
    - `value`
-  
+
   Theme Constants
   -------------------------------------
   Ace's `progressRenderDelegate`'s rendering process is not affected by
@@ -24,7 +24,7 @@
 */
 SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   className: 'progress',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
@@ -46,25 +46,25 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuenow', valueNow);
     context.attr('aria-valuetext', valueNow);
 
-    
+
     context.setClass({
       indeterminate: dataSource.get('isIndeterminate'),
       running: dataSource.get('isRunning'),
       disabled: !dataSource.get('isEnabled'),
       'sc-empty': (value <= 0),
-      'sc-complete': (value >= 100)
+      'sc-complete': (value >= 1)
     });
-    
+
     context = context.begin('div').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
-    
+
     context = context.begin('div').addClass('content');
     context.css('width', (value * 100) + "%");
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
   },
-  
+
   update: function(dataSource, $) {
     this.updateSizeClassName(dataSource, $);
 
@@ -92,9 +92,9 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       running: dataSource.get('isRunning'),
       disabled: !dataSource.get('isEnabled'),
       'sc-empty': (value <= 0),
-      'sc-complete': (value >= 100)
+      'sc-complete': (value >= 1)
     });
-    
+
     $.find('.content').css('width', (value * 100) + "%");
   }
 });
