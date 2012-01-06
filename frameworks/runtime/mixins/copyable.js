@@ -8,7 +8,7 @@
 /**
   @class
 
-  Impelements some standard methods for copying an object.  Add this mixin to
+  Implements some standard methods for copying an object.  Add this mixin to
   any object you create that can create a copy of itself.  This mixin is
   added automatically to the built-in array.
 
