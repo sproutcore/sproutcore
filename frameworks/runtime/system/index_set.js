@@ -164,7 +164,14 @@ SC.IndexSet = SC.mixin({},
     accel = index - (index % SC.IndexSet.HINT_SIZE);
     ret = content[accel];
     if (ret<0 || ret>index) ret = accel;
-    next = Math.abs(content[ret]);
+    next = content[ret];
+
+    // the accelerator pointed to the middle of a range
+    if (next === undefined) {
+      next = this.rangeStartForIndex(ret);
+    } else {
+      next = Math.abs(next);
+    }
 
     // now step forward through ranges until we find one that includes the
     // index.
