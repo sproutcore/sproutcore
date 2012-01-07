@@ -79,8 +79,7 @@ SC.Event = function(originalEvent) {
 
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER,
-        version = parseFloat(SC.browser.version);
+    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
     if (SC.browser.webkit && originalEvent.wheelDelta !== undefined) {
@@ -106,15 +105,6 @@ SC.Event = function(originalEvent) {
       this.wheelDeltaX = 0 ;
     }
 
-    // we have a value over the limit and it wasn't caught when we generated MOUSE_WHEEL_MULTIPLIER
-    // this will happen as new Webkit-based browsers are released and we haven't covered them off
-    // in our browser detection. It'll scroll too quickly the first time, but we might as well learn
-    // and change our handling for the next scroll
-    if (this.wheelDelta > SC.Event.MOUSE_WHEEL_DELTA_LIMIT && !SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED) {
-      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.004;
-      SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES;
-    }
-
     this.wheelDelta *= deltaMultiplier;
     this.wheelDeltaX *= deltaMultiplier;
     this.wheelDeltaY *= deltaMultiplier;
@@ -128,39 +118,32 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   /**
     We need this because some browsers deliver different values
     for mouse wheel deltas. Once the first mouse wheel event has
-    been run, this value will get set. Because we don't know the
-    maximum or minimum value ahead of time, if the event's delta
-    exceeds `SC.Event.MOUSE_WHEEL_DELTA_LIMIT`, this value can be
-    invalidated and changed during a later event.
+    been run, this value will get set.
 
     @field
     @type Number
     @default 1
   */
-  MOUSE_WHEEL_MULTIPLIER: (function() {
+  MOUSE_WHEEL_MULTIPLIER: function() {
     var deltaMultiplier = 1,
-        version = parseFloat(SC.browser.version),
-        didChange = NO;
+        version = parseFloat(SC.browser.version);
 
     if (SC.browser.safari) {
+      deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
-      if (version >= 533.17) {
+      if (version >= 533.17 && version<534) {
         deltaMultiplier = 0.004;
-        didChange = YES;
       } else if (version < 533) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
-        didChange = YES;
       }
-    } else if (SC.browser.mozilla) {
-      deltaMultiplier = 10;
-      didChange = YES;
+    }else if(SC.browser.msie){
+      deltaMultiplier = 0.3;
+    }else if(SC.browser.chrome){
+      deltaMultiplier = 0.4;
     }
-
-    if (didChange) { SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES; }
-
     return deltaMultiplier;
-  })(),
+  }(),
 
   /**
     This represents the limit in the delta before a different multiplier
@@ -347,9 +330,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
-    // For whatever reason, IE has trouble passing the window object
-    // around, causing it to be cloned in the process
-    if (SC.browser.msie && elem.setInterval) elem = window;
+    /*
+      commenting out this block because 
+      1. this issue is no longer reproducible in IE7, 8 or 9
+      2. this causes undesired behavior if one tries to remove an event from
+         an iframe because elem.setInterval is true there.
+    */
+    // // For whatever reason, IE has trouble passing the window object
+    // // around, causing it to be cloned in the process
+    // if (SC.browser.msie && elem.setInterval) elem = window;
 
     var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
@@ -681,7 +670,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     var parent = event.relatedTarget;
 
     // Traverse up the tree
-    while ( parent && parent != elem ) {
+    while ( parent && parent !== elem ) {
       try { parent = parent.parentNode; } catch(error) { parent = elem; }
     }
 

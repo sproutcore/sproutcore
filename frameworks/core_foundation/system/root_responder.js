@@ -224,8 +224,9 @@ SC.RootResponder = SC.Object.extend(
       previousKeyPanes = this.get('previousKeyPanes') ;
 
       newKeyPane = null ;
+      var candidate;
       while (previousKeyPanes.length > 0) {
-        var candidate = previousKeyPanes.pop();
+        candidate = previousKeyPanes.pop();
         if (candidate.get('isPaneAttached')  &&  candidate.get('acceptsKeyPane')) {
           newKeyPane = candidate ;
           break ;
@@ -343,17 +344,19 @@ SC.RootResponder = SC.Object.extend(
     Handle window focus.  Change hasFocus and add sc-focus CSS class
     (removing sc-blur).  Also notify panes.
   */
-  focus: function() {
-
+  focus: function(evt) {
+    
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
       // If the app is getting focus again set the first responder to the first
       // valid firstResponder view in the view's tree
-      if(!SC.browser.msie && !SC.TABBING_ONLY_INSIDE_DOCUMENT){
-        var mainPane = this.get('mainPane'),
-            nextValidKeyView = mainPane ? mainPane.get('nextValidKeyView') : null;
-        if (nextValidKeyView) mainPane.makeFirstResponder(nextValidKeyView);
+      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
+        var keyPane = SC.RootResponder.responder.get('keyPane');
+        if (keyPane) {
+          var nextValidKeyView = keyPane.get('nextValidKeyView');
+          if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView);
+        }
       }
 
       SC.run(function() {
@@ -368,8 +371,9 @@ SC.RootResponder = SC.Object.extend(
     reliable as per every focus event you receive you immediately get a blur
     event (Only on IE of course ;)
   */
-  focusin: function() {
-    this.focus();
+  focusin: function(evt) {
+    if(this._focusTimeout) clearTimeout(this._focusTimeout);
+    this.focus(evt);
   },
 
   /**
@@ -377,8 +381,9 @@ SC.RootResponder = SC.Object.extend(
     reliable as per every focus event you receive you immediately get a blur
     event (Only on IE of course ;)
   */
-  focusout: function() {
-    this.blur();
+  focusout: function(evt) {
+    var that = this;
+    this._focusTimeout = setTimeout(function(){that.blur(evt);}, 300);
   },
 
 
@@ -386,7 +391,7 @@ SC.RootResponder = SC.Object.extend(
     Handle window focus.  Change hasFocus and add sc-focus CSS class (removing
     sc-blur).  Also notify panes.
   */
-  blur: function() {
+  blur: function(evt) {
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
 
@@ -631,7 +636,7 @@ SC.RootResponder = SC.Object.extend(
     this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
-    if(SC.browser.msie) this.listenFor('focusin focusout'.w(), document);
+    if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
 
     // handle animation events
@@ -698,6 +703,8 @@ SC.RootResponder = SC.Object.extend(
 
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
+    // window.focus()
+    //debugger;
 
     if (SC.browser.mobileSafari) {
 
@@ -1266,6 +1273,11 @@ SC.RootResponder = SC.Object.extend(
     @returns {Boolean}
   */
   touchstart: function(evt) {
+    // Starting iOS5 touch events are handled by textfields. 
+    // As a workaround just let the browser to use the default behavior.
+    if(this.ignoreTouchHandle(evt)) return YES;
+    
+    
     var hidingTouchIntercept = NO;
 
     SC.run(function() {
@@ -1329,6 +1341,10 @@ SC.RootResponder = SC.Object.extend(
     used to keep track of when a specific type of touch event was last handled, to see if it needs to be re-handled
   */
   touchmove: function(evt) {
+    // Starting iOS5 touch events are handled by textfields. 
+    // As a workaround just let the browser to use the default behavior.
+    if(this.ignoreTouchHandle(evt)) return YES;
+    
     SC.run(function() {
       // pretty much all we gotta do is update touches, and figure out which views need updating.
       var touches = evt.changedTouches, touch, touchEntry,
@@ -1423,6 +1439,10 @@ SC.RootResponder = SC.Object.extend(
   touchend: function(evt) {
     var hidesTouchIntercept = NO;
 
+    // Starting iOS5 touch events are handled by textfields. 
+    // As a workaround just let the browser to use the default behavior.
+    if(this.ignoreTouchHandle(evt)) return YES;
+    
     SC.run(function() {
       var touches = evt.changedTouches, touch, touchEntry,
           idx, len = touches.length,
@@ -1483,6 +1503,21 @@ SC.RootResponder = SC.Object.extend(
   touchcancel: function(evt) {
     evt.isCancel = YES;
     this.touchend(evt);
+  },
+  
+  /** @private
+     Ignore Touch events on textfields and links. starting iOS 5 textfields 
+     get touch events. Textfields just need to get the default focus action.
+  */
+  ignoreTouchHandle: function(evt) {
+    if(SC.browser.isMobileSafari){
+      var tag = evt.target.tagName;
+      if(tag==="INPUT" || tag==="A"){
+        evt.allowDefault();
+        return YES;
+      }
+    }
+    return NO;
   },
 
   // ..........................................................
@@ -1672,7 +1707,10 @@ SC.RootResponder = SC.Object.extend(
           charCode           = evt.charCode;
       if ((charCode !== undefined && charCode === 0 && evt.keyCode!==9) && !isFirefoxArrowKeys) return YES;
       if (isFirefoxArrowKeys) evt.which = keyCode;
-      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+
+      // we only want to rethrow if this is a printable key so that we don't
+      // duplicate the event sent in keydown when a modifier key is pressed
+      if(isFirefoxArrowKeys || !this._isFunctionOrNonPrintableKey(evt)) return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
   },
 
@@ -1744,11 +1782,19 @@ SC.RootResponder = SC.Object.extend(
 
     var view = this.targetViewForEvent(evt);
 
-    if (view && this.shouldResignFirstResponder(view)) {
-      var fr = view.getPath('pane.firstResponder');
-      fr.resignFirstResponder();
-    }
+    // InlineTextField needs to loose firstResponder whenever you click outside
+    // the view. This is a special case as textfields are not supposed to loose
+    // focus unless you click on a list, another textfield or an special
+    // view/control.
 
+    if(view) fr=view.getPath('pane.firstResponder');
+
+    // some fields like SC.InlineTextFieldView need to blur on any click, even
+    // if it's not on a control that can be focused
+    // TODO: remove this when focus behavior is improved
+    if(fr && fr.get('blurOnMouseDown') && fr!==view){
+      fr.resignFirstResponder(evt);
+    }
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
 
@@ -1762,31 +1808,6 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    There are specific cases where we want to force a view to resign being
-    this first responder before we continue. InlineTextField needs to loose
-    firstResponder whenever you click outside the view. This is a special case
-    as textfields are not supposed to loose focus unless you click on a list,
-    another textfield or an special view/control.
-
-    @param {SC.View} targetView The target view of the event
-    @returns {Boolean} true if it should resign the first responder, false otherwise
-  */
-  shouldResignFirstResponder: function(targetView) {
-    var firstResponder = targetView.getPath('pane.firstResponder'),
-        shouldResign = false;
-
-    if (firstResponder && firstResponder.kindOf(SC.InlineTextFieldView)) {
-      // we first want to check if the targetView is a child of the text field
-      // ie. it could be an accessory view
-      if (firstResponder !== targetView && !SC.$.contains(firstResponder.get('layer'), targetView.get('layer'))) {
-        shouldResign = true;
-      }
-    }
-
-    return shouldResign;
-  },
-
-  /**
     mouseUp only gets delivered to the view that handled the mouseDown evt.
     we also handle click and double click notifications through here to
     ensure consistant delivery.  Note that if mouseDownView is not
@@ -1794,6 +1815,7 @@ SC.RootResponder = SC.Object.extend(
     sent.
   */
   mouseup: function(evt) {
+    var clickOrDoubleClickDidTrigger=NO;
     if (SC.platform.touch) {
       evt.allowDefault();
       this._lastMouseUpCustomHandling = YES;
@@ -1819,16 +1841,18 @@ SC.RootResponder = SC.Object.extend(
       // try doubleClick
       if (!handler && (this._clickCount === 2)) {
         handler = this.sendEvent('doubleClick', evt, view) ;
+        clickOrDoubleClickDidTrigger = YES;
       }
 
       // try single click
       if (!handler) {
         handler = this.sendEvent('click', evt, view) ;
+        clickOrDoubleClickDidTrigger = YES;
       }
     }
 
     // try whoever's under the mouse if we haven't handle the mouse up yet
-    if (!handler) {
+    if (!handler && !clickOrDoubleClickDidTrigger) {
 
       // try doubleClick
       if (this._clickCount === 2) {
@@ -1878,7 +1902,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   dblclick: function(evt){
-    if (SC.browser.isIE) {
+    if (SC.browser.isIE8OrLower) {
       this._clickCount = 2;
       // this._onmouseup(evt);
       this.mouseup(evt);

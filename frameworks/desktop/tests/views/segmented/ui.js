@@ -431,13 +431,13 @@ var pane;
         viewElem  = sv.$(),
         segments, i, len, segmentViewElem, role;
 
-    equals(viewElem.attr('role'), 'tablist', "The segmented view has aria role set");
+    equals(viewElem.attr('role'), 'group', "The segmented view has aria role set");
 
     segments = sv.get('childViews');
     for( i = 0, len = segments.length; i<len; ++i) {
       segmentViewElem = segments[i].$();
       role = segmentViewElem.attr('role');
-      equals(role, "tab", "segment " + (i+1) + " have aria role set");
+      equals(role, "button", "segment " + (i+1) + " have aria role set");
     }
   });
 

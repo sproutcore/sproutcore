@@ -22,6 +22,12 @@ module("SC.Statechart: With Concurrent States - Send Event Tests", {
         
         x: SC.State.design({
           
+          fooInvokedCount: 0,
+          
+          foo: function() {
+            this.fooInvokedCount++;
+          },
+          
           substatesAreConcurrent: YES,
           
           a: SC.State.design({
@@ -200,4 +206,14 @@ test("send event eventZ", function() {
   
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
+});
+
+test("send event foo to statechart and ensure event is only handled once by state X", function() {
+  var x = statechart.getState('x');
+  
+  equals(x.fooInvokedCount, 0, "x.fooInvokedCount should be 0");
+  
+  statechart.sendEvent('foo');
+  
+  equals(x.fooInvokedCount, 1, "x.fooInvokedCount should be 1");
 });

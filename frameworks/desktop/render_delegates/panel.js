@@ -14,15 +14,23 @@ SC.BaseTheme.panelRenderDelegate = SC.RenderDelegate.create({
     this.includeSlices(dataSource, context, SC.NINE_SLICE);
     context = context.end();
 
-    // the label for the panel could change...
-    var ariaLabel = dataSource.get('ariaLabel');
-    context.attr('aria-label', ariaLabel || '');
+    var ariaLabel = dataSource.get('ariaLabel'),
+        ariaLabelledBy = dataSource.get('ariaLabelledBy'),
+        ariaDescribedBy = dataSource.get('ariaDescribedBy');
+    
+    if(ariaLabel) context.attr('aria-label', ariaLabel);
+    if (ariaLabelledBy) context.attr('aria-labelledby', ariaLabelledBy);
+    if (ariaDescribedBy) context.attr('aria-describedby', ariaDescribedBy);
   },
 
   update: function(dataSource, jQuery) {
     // the label for the panel could change...
-    var ariaLabel = dataSource.get('ariaLabel');
-    jQuery.attr('aria-label', ariaLabel || '');
-
+    var ariaLabel = dataSource.get('ariaLabel'),
+        ariaLabelledBy = dataSource.get('ariaLabelledBy'),
+        ariaDescribedBy = dataSource.get('ariaDescribedBy');
+    
+    if(ariaLabel) jQuery.attr('aria-label', ariaLabel);
+    if(ariaLabelledBy) jQuery.attr('aria-labelledby', ariaLabelledBy);
+    if(ariaDescribedBy) jQuery.attr('aria-describedby', ariaDescribedBy);
   }
 });

@@ -95,6 +95,15 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   */
   _topOffsetForFirefoxCursorFix: 0,
 
+  /**
+    Tells RootResponder to blur us when there is a mousedown anywhere else.
+
+    @type Boolean
+    @default YES
+  */
+  // TODO: remove this when focus behavior is improved
+  blurOnMouseDown: YES,
+
   /*
   * @private
   * @method

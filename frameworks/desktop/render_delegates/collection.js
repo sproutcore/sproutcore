@@ -12,13 +12,13 @@ SC.BaseTheme.collectionRenderDelegate = SC.RenderDelegate.create({
   className: 'collection',
   
   render: function(dataSource, context) {
-    context.setClass('focus', dataSource.get('isFirstResponder'));
+    context.setClass('focus', dataSource.get('hasFirstResponder'));
     context.setClass('disabled', !dataSource.get('isEnabled'));
     context.setClass('active', dataSource.get('isActive'));
   },
   
   update: function(dataSource, jquery) {
-    jquery.setClass('focus', dataSource.get('isFirstResponder'));
+    jquery.setClass('focus', dataSource.get('hasFirstResponder'));
     jquery.setClass('disabled', !dataSource.get('isEnabled'));
     jquery.setClass('active', dataSource.get('isActive'));
   }

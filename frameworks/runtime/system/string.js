@@ -12,35 +12,98 @@
   applications.
 */
 SC.String = /** @scope SC.String.prototype */ {
-
-  // Interpolate string. looks for %@ or %@1; to control the order of params.
+  
   /**
-    Apply formatting options to the string.  This will look for occurrences
-    of %@ in your string and substitute them with the arguments you pass into
-    this method.  If you want to control the specific order of replacement,
-    you can add a number after the key as well to indicate which argument
-    you want to insert.
-
-    Ordered insertions are most useful when building loc strings where values
-    you need to insert may appear in different orders.
-
-    Examples
-    -----
-
-        "Hello %@ %@".fmt('John', 'Doe') => "Hello John Doe"
-        "Hello %@2, %@1".fmt('John', 'Doe') => "Hello Doe, John"
-
-    @param {Object...} args optional arguments
-    @returns {String} formatted string
+    This finds the value for a key in a formatting string.
+    
+    Keys take the form:
+    
+        key[:argument to formatter]
   */
-  fmt: function(str, formats) {
-    // first, replace any ORDERED replacements.
-    var idx  = 0; // the current index for non-numerical replacements
-    return str.replace(/%@([0-9]+)?/g, function(s, argIndex) {
-      argIndex = (argIndex) ? parseInt(argIndex,0) - 1 : idx++ ;
-      s = formats[argIndex];
-      return ((s === null) ? '(null)' : (s === undefined) ? '' : s).toString();
-    }) ;
+  _scs_valueForKey: function(key, data, /* for debugging purposes: */ string) {
+    var arg, value, formatter, argsplit = key.indexOf(':');
+    if (argsplit > -1) {
+      arg = key.substr(argsplit + 1);
+      key = key.substr(0, argsplit);
+    }
+    
+    value = data[key];
+    formatter = data[key + 'Formatter'];
+    
+    // formatters are optional
+    if (formatter) value = formatter(value, arg);
+    else if (arg) {
+      throw "String.fmt was given a formatting string, but key `" + key + "` has no formatter! String: " + string;
+    }
+    
+    return value;
+  },
+
+  /**
+    Formats a string. You can format either with named parameters or
+    indexed, but not both.
+
+    Indexed Parameters
+    --------------------
+    Indexed parameters are just arguments you pass into format.
+
+    For example, if you call fmt("%@1 %3 %2", 1, 2, 3), you'll get "1 3 2" as output.
+    
+    If you don't supply a number, it will use them in the order you supplied. For instance:
+    
+        "abc".fmt("%@, %@", "Iskander", "Alex")  would return "Iskander, Alex".
+
+    Named Paramters
+    --------------------
+    You can use named parameters like this:
+
+        "Value: %{key_name}".fmt({ key_name: "A Value" })
+        
+        // -> "Value: A Value"
+    
+    You can supply formatters for each field. A formatter is a method to get applied
+    to the parameter:
+    
+        Currency = function(v) { return "$" + v; };
+        "Value: %{val}".fmt({ val: 12.00, valFormatter: Currency })
+        
+        // -> $12.00
+    
+    Formatters can also use arguments:
+    
+        Currency = function(v, sign) { return sign + v; };
+        "Value: %{val:£}".fmt({ val: 12.00, valFormatter: Currency })
+        
+        // -> £12.00
+
+    You can supply a different formatter for each named parameter. Formatters can ONLY be
+    used with named parameters (not indexed parameters).
+        
+  */
+  fmt: function(string, args) {
+    var i = 0, data = undefined, hasHadNamedArguments;
+    
+    if (args) {
+      data = args[0];
+    }
+    
+    return string.replace(/%\{(.*?)\}/g, function(match, propertyPath) {
+      hasHadNamedArguments = YES;
+      
+      if (!data) {
+        throw "Cannot use named parameters with `fmt` without a data hash. String: '" + string + "'";
+      }
+
+      return SC.String._scs_valueForKey(propertyPath, data, string);
+    }).replace(/%@([0-9]+)?/g, function(match, index) {
+      if (hasHadNamedArguments) {
+        throw "Invalid attempt to use both named parameters and indexed parameters. String: '" + string + "'";
+      }
+      
+      index = index ? parseInt(index, 10) - 1 : i++;
+
+      return args[index];
+    });
   },
   
   /**

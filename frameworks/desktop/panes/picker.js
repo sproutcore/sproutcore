@@ -346,7 +346,20 @@ SC.PickerPane = SC.PalettePane.extend(
     @default null
   */
   removeAction: null,
-
+  
+  
+  /**
+    Disable repositioning as the window or size changes. It stays in the original
+    popup position.
+    
+    @type Boolean
+    @default NO
+  */
+  repositionOnWindowResize: YES,
+  
+  _anchorView: null,
+  _anchorHTMLElement: null,
+  
   /**
     Displays a new picker pane.
 
@@ -357,12 +370,15 @@ SC.PickerPane = SC.PalettePane.extend(
     @returns {SC.PickerPane} receiver
   */
   popup: function(anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
-    var anchor;
     if(anchorViewOrElement){
-      anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
+      if (anchorViewOrElement.isView) {
+        this._anchorView = anchorViewOrElement;
+        this._setupScrollObservers(anchorViewOrElement);
+      } else {
+        this._anchorHTMLElement = anchorViewOrElement;
+      }
     }
     this.beginPropertyChanges();
-    this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
     if (pointerOffset) this.set('pointerOffset',pointerOffset) ;
@@ -491,6 +507,19 @@ SC.PickerPane = SC.PalettePane.extend(
     var wsize = SC.RootResponder.responder.computeWindowSize(),
         wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
 
+    // if window size is smaller than the minimum size of app, use minimum size.
+    var mainPane = SC.RootResponder.responder.mainPane;
+    if (mainPane) {
+      var minWidth = mainPane.layout.minWidth,
+          minHeight = mainPane.layout.minHeight;
+      if (minWidth && wret.width < minWidth) {
+        wret.width = mainPane.layout.minWidth;
+      }
+      if (minHeight && wret.height < minHeight) {
+        wret.height = mainPane.layout.minHeight;
+      }
+    }
+        
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
     if(this.preferType) {
@@ -781,7 +810,7 @@ SC.PickerPane = SC.PalettePane.extend(
       // picker default re-position rule :
       // perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
       // fallback to perfect top (2)
-      this.set('preferMatrix', this.get('preferType') == SC.PICKER_MENU_POINTER ? [3,0,1,2,3] : [0,1,2,3,2]) ;
+      this.set('preferMatrix', this.get('preferType') === SC.PICKER_MENU_POINTER ? [3,2,1,0,3] : [0,1,2,3,2]) ;
     }
   },
 
@@ -835,13 +864,41 @@ SC.PickerPane = SC.PalettePane.extend(
     Invoked by the root responder. Re-position picker whenever the window resizes.
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    this.positionPane();
+    if (this.repositionOnWindowResize) this.positionPane();
   },
 
   remove: function(){
-    if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._showOverflow();
+    if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._withdrawOverflowRequest();
+    this._removeScrollObservers();
     return sc_super();
   },
+  
+  /** Figure out what is the anchor element */
+  anchorElement: function(key, value) {
+    var anchorView;
+
+    if (value === undefined) {
+      // Getting the value.
+      anchorView = this._anchorView;
+      return anchorView ? anchorView.get('layer') : this._anchorHTMLElement;
+    }
+    else {
+      // Setting the value.
+      if (!value) {
+        throw "You must set 'anchorElement' to either a view or a DOM element";
+      }
+      else if (value.isView) {
+        this._anchorView        = value;
+        this._anchorHTMLElement = null;
+      }
+      else {
+        this._anchorView        = null;
+        this._anchorHTMLElement = value;
+      }
+    }
+  }.property('layer').cacheable(),
+  
+  
 
   /** @private
     Internal method to hide the overflow on the body to make sure we don't
@@ -854,9 +911,7 @@ SC.PickerPane = SC.PalettePane.extend(
         minHeight = parseInt(main.css('minHeight'),0),
         windowSize = SC.RootResponder.responder.get('currentWindowSize');
     if(windowSize.width>=minWidth && windowSize.height>=minHeight){
-      SC.PICKERS_OPEN++;
-      //console.log(this.toString()+" "+SC.PICKERS_OPEN);
-      if(SC.PICKERS_OPEN > 0) body.css('overflow', 'hidden');
+      SC.bodyOverflowArbitrator.requestHidden(this);
     }
   },
 
@@ -864,23 +919,61 @@ SC.PickerPane = SC.PalettePane.extend(
     Internal method to show the overflow on the body to make sure we don't
     show scrollbars when the picker has shadows, as it's really annoying.
   */
-  _showOverflow: function(){
-    var body = SC.$(document.body);
-    if(SC.PICKERS_OPEN > 0) {
-      SC.PICKERS_OPEN--;
-     // console.log(this.toString()+" "+SC.PICKERS_OPEN);
+  _withdrawOverflowRequest: function(){
+    SC.bodyOverflowArbitrator.withdrawRequest(this);
+  },
+  
+  /** @private
+    Detect if view is inside a scroll view. Do this by traversing parent view
+    hierarchy until you hit a scroll view or main pane.
+  */
+  _getScrollViewOfView: function(view) {
+    var curLevel = view;
+    while (YES) {
+      if (!curLevel) {
+        return null;
+      }
+      if (curLevel.isScrollable) {
+        return curLevel;
+      }
+      curLevel = curLevel.get('parentView');
     }
-    if(SC.PICKERS_OPEN === 0) body.css('overflow', 'visible');
+  },
+
+  /** @private
+    If anchor view is in a scroll view, setup observers on scroll offsets.
+  */
+  _setupScrollObservers: function(anchorView) {
+    var scrollView = this._getScrollViewOfView(anchorView);
+    if (scrollView) {
+      scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+      scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+      this._scrollView = scrollView;
+    }
+  },
+
+  /** @private
+    Teardown observers setup in _setupScrollObservers.
+  */
+  _removeScrollObservers: function() {
+    var scrollView = this._scrollView;
+    if (scrollView) {
+      scrollView.removeObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+      scrollView.removeObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+    }
+  },
+
+  /** @private
+    Reposition pane whenever scroll offsets change.
+  */
+  _scrollOffsetDidChange: function() {
+    this.positionPane();
   }
 });
 
 /**
   Default metrics for the different control sizes.
 */
-
-// Counter to track how many pickers are open. This help us to now when to
-// show/hide the body overflow.
-SC.PICKERS_OPEN = 0;
 
 /**
   @static

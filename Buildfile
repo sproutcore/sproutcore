@@ -40,8 +40,10 @@ config :foundation,      :required => [:routing, :core_foundation, :datetime, :'
 config :datastore,       :required => [:runtime, :datetime]
 config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
-config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop]
+config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop, :routing]
 config :ajax,            :required => [:runtime, :core_foundation]
+
+config :"experimental/split_view", :test_required => [:desktop]
 
 # WRAPPER FRAMEWORKS
 config :sproutcore, :required => [:desktop, :datastore, :statechart, :template_view]

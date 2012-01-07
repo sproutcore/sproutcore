@@ -2,7 +2,6 @@
 
 .sc-text-field-view {
   border:none;
-  z-index:100;
   overflow: visible;
   background :white;
   .border {
@@ -83,7 +82,7 @@
     color: #B3B3B3 !important;
   }
 
-  .safari &{
+  .webkit &{
     &.focus {
       outline: auto 7px -webkit-focus-ring-color; 
       outline-offset: -2px;
@@ -115,11 +114,8 @@
     .border {
       border:1px inset;
     }
-    input.field {
-      padding-bottom: 1px;
-    }
     textarea.field {
     	height: 100%;
     }
-  } 
+  }
 }

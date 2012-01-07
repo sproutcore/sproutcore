@@ -38,7 +38,6 @@ SC.BaseTheme.segmentRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     var theme = dataSource.get('theme'),
         buttonDelegate,
-        titleMinWidth,
         classes = {};
 
     // Segment specific additions

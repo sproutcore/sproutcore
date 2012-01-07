@@ -347,9 +347,6 @@ SC.RenderContext = SC.Builder.create(
 
   // these are temporary objects are reused by end() to avoid memory allocs.
   _DEFAULT_ATTRS: {},
-  _TAG_ARRAY: [],
-  _JOIN_ARRAY: [],
-  _STYLE_PAIR_ARRAY: [],
 
   /**
     Ends the current tag editing context.  This will generate the tag string
@@ -371,48 +368,41 @@ SC.RenderContext = SC.Builder.create(
     // generate opening tag.
 
     // get attributes first.  Copy in className + styles...
-    var tag = this._TAG_ARRAY, pair, joined, key , value,
+    var tag = '', styleStr='', pair, joined, key , value,
         attrs = this._attrs, className = this._classNames,
-        id = this._id, styles = this._styles;
+        id = this._id, styles = this._styles, strings, selfClosing;
 
     // add tag to tag array
-    tag[0] = '<';  tag[1] = this._tagName ;
+    tag = '<' + this._tagName ;
 
     // add any attributes...
     if (attrs || className || styles || id) {
       if (!attrs) attrs = this._DEFAULT_ATTRS ;
       if (id) attrs.id = id ;
+      // old versions of safari (5.0)!!!! throw an error if we access 
+      // attrs.class. meh... 
       if (className) attrs['class'] = className.join(' ');
 
       // add in styles.  note how we avoid memory allocs here to keep things
       // fast...
       if (styles) {
-        joined = this._JOIN_ARRAY ;
-        pair = this._STYLE_PAIR_ARRAY;
         for(key in styles) {
           if(!styles.hasOwnProperty(key)) continue ;
           value = styles[key];
           if (value === null) continue; // skip empty styles
           if (typeof value === SC.T_NUMBER && !SC.NON_PIXEL_PROPERTIES.contains(key)) value += "px";
-
-          pair[0] = this._dasherizeStyleName(key);
-          pair[1] = value;
-          joined.push(pair.join(': '));
+          styleStr = styleStr + this._dasherizeStyleName(key)+": "+value + "; "; 
         }
-        attrs.style = joined.join('; ') ;
-
-        // reset temporary object.  pair does not need to be reset since it
-        // is always overwritten
-        joined.length = 0;
+        attrs.style = styleStr;
       }
 
       // now convert attrs hash to tag array...
-      tag.push(' '); // add space for joining0
+      tag = tag + ' '; // add space for joining0
       for(key in attrs) {
         if (!attrs.hasOwnProperty(key)) continue ;
         value = attrs[key];
         if (value === null) continue ; // skip empty attrs
-        tag.push(key, '="', value, '" ');
+        tag = tag + key + '="' + value + '" ';
       }
 
       // if we are using the DEFAULT_ATTRS temporary object, make sure we
@@ -425,25 +415,20 @@ SC.RenderContext = SC.Builder.create(
 
     // this is self closing if there is no content in between and selfClosing
     // is not set to false.
-    var strings = this.strings;
-    var selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1) ;
-    tag.push(selfClosing ? ' />' : '>') ;
+    strings = this.strings;
+    selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1) ;
+    tag = tag + (selfClosing ? ' />' : '>') ;
 
     // console.log('selfClosing == %@'.fmt(selfClosing));
-    strings[this.offset] = tag.join('');
-    tag.length = 0 ; // reset temporary object
+    strings[this.offset] = tag;
 
     // now generate closing tag if needed...
     if (!selfClosing) {
-      tag[0] = '</' ;
-      tag[1] = this._tagName;
-      tag[2] = '>';
-      strings.push(tag.join(''));
+      strings.push('</' + this._tagName + '>');
 
       // increase length of receiver and all parents
       var c = this;
       while(c) { c.length++; c = c.prevObject; }
-      tag.length = 0; // reset temporary object again
     }
 
     // if there was a source element, cleanup to avoid memory leaks
@@ -791,13 +776,14 @@ SC.RenderContext = SC.Builder.create(
 
   _deleteComboStyles: function(styles, key) {
     var comboStyles = SC.COMBO_STYLES[key],
-        didChange = NO;
+        didChange = NO, tmp;
 
     if (comboStyles) {
-      var idx;
-      for (idx=0; idx < comboStyles.length; idx++) {
-        if (styles[comboStyles[idx]]) {
-          delete styles[comboStyles[idx]];
+
+      for (var idx=0, idxLen = comboStyles.length; idx < idxLen; idx++) {
+        tmp = comboStyles[idx];
+        if (styles[tmp]) {
+          delete styles[tmp];
           didChange = YES;
         }
       }
@@ -940,6 +926,22 @@ SC.RenderContext = SC.Builder.create(
 
     return this ;
   },
+  
+  /**
+    Sets the named attribute on the tag.  Note that if you set the 'class'
+    attribute or the 'styles' attribute, it will be ignored.  Use the
+    relevant class name and style methods instead.
+  
+    @param {String|Hash} nameOrAttrs the attr name or hash of attrs.
+    @param {String} value attribute value if attribute name was passed
+    @returns {SC.RenderContext} receiver
+  */
+  removeAttr: function(name) {
+    if (this._elem) {
+      this.$().removeAttr(name);
+      return this;
+    }
+  },
 
   //
   // COREQUERY SUPPORT
@@ -994,38 +996,23 @@ SC.RenderContext.fn.html = SC.RenderContext.fn.push;
 */
 SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
 
-/**
-  Helper method escapes the passed string to ensure HTML is displayed as
-  plain text.  You should make sure you pass all user-entered data through
-  this method to avoid errors.  You can also do this with the text() helper
-  method on a render context.
-*/
+(function() {
+  var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function(match) {
+    switch(match) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+    }
+  };
 
-
-if (!SC.browser.isSafari || parseInt(SC.browser.version, 10) < 526) {
-  SC.RenderContext._safari3 = YES;
-}
-
-SC.RenderContext.escapeHTML = function(text) {
-  var elem, node, ret ;
-
-  if (SC.none(text)) { return text; } // ignore empty
-
-  elem = this.escapeHTMLElement;
-  if (!elem) { elem = this.escapeHTMLElement = document.createElement('div'); }
-
-  node = this.escapeTextNode;
-  if (!node) {
-    node = this.escapeTextNode = document.createTextNode('');
-    elem.appendChild(node);
-  }
-
-  node.data = text ;
-  ret = elem.innerHTML ;
-
-  // Safari 3 does not escape the '>' character
-  if (SC.RenderContext._safari3) { ret = ret.replace(/>/g, '&gt;'); }
-
-  node = elem = null;
-  return ret ;
-};
+  /**
+    Helper method escapes the passed string to ensure HTML is displayed as
+    plain text.  You should make sure you pass all user-entered data through
+    this method to avoid errors.  You can also do this with the text() helper
+    method on a render context.
+  */
+  SC.RenderContext.escapeHTML = function(text) {
+    if (!text) return '';
+    return text.replace(_escapeHTMLRegex, _escapeHTMLMethod);
+  }; 
+})();

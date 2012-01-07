@@ -10,7 +10,7 @@ SC.mixin( /** @scope SC */ {
   _copy_computed_props: [
     "maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
     "fontFamily", "fontSize", "fontStyle", "fontWeight", "fontVariant", "lineHeight",
-    "whiteSpace", "letterSpacing"
+    "whiteSpace", "letterSpacing", "wordWrap"
   ],
 
   /**
@@ -209,9 +209,9 @@ SC.mixin( /** @scope SC */ {
     @param ignoreEscape {Boolean} To NOT html escape the string.
   */
   measureString: function(string, ignoreEscape) {
-    if(!ignoreEscape) string = SC.RenderContext.escapeHTML(string);
+    var element = this._metricsCalculationElement,
+    padding = 0;
 
-    var element = this._metricsCalculationElement;
     if (!element) {
       throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
     }
@@ -223,11 +223,19 @@ SC.mixin( /** @scope SC */ {
     else if (typeof element.innerText != "undefined") element.innerText = string;
     else element.textContent = string;
 
+    // for some reason IE measures 1 pixel too small
+    if(SC.browser.isIE) padding = 1;
+
     // generate result
     var result = {
-      width: element.clientWidth,
+      width: element.clientWidth + padding,
       height: element.clientHeight
     };
+    
+    // Firefox seems to be 1 px short at times, especially with non english characters.
+    if (SC.browser.isMozilla) {
+      result.width += 1;
+    }
 
     element = null;
     return result;

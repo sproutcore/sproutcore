@@ -7,7 +7,7 @@ var TestState;
 var obj1, rootState1, stateA, stateB;
 var obj2, rootState2, stateC, stateD;
 
-module("SC.Statechart: invokeStateMethod Tests", {
+module("SC.Statechart: invokeStateMethod method Tests", {
   setup: function() {
     TestState = SC.State.extend({
       testInvokedCount: 0,

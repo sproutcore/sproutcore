@@ -419,11 +419,6 @@ test("Check if attribute aria-valuenow is set correctly", function() {
   equals(viewElem.attr('aria-valuenow'), 40, 'aria-valuenow should be 40');
 });
 
-test("Check if attribute aria-valuetext is set correctly", function() {
-  var viewElem = pane.view('slider aria-valuetext').$();
-  equals(viewElem.attr('aria-valuetext'), 20, 'aria-valuetext should be 20');
-});
-
 test("Check if attribute aria-orientation is set correctly", function() {
   var viewElem = pane.view('slider aria-orientation').$();
   equals(viewElem.attr('aria-orientation'), "horizontal", 'aria-orientation should be horizontal');

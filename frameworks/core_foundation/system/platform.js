@@ -179,7 +179,7 @@ SC.platform = SC.Object.create({
         we need to capture when was the first spot that the altKey was pressed and use it as
         the center point of a pinch
        */
-      if(evt.altKey && this._pinchCenter == null) {
+      if(evt.altKey && this._pinchCenter === null) {
         this._pinchCenter = {
           pageX: evt.pageX,
           pageY: evt.pageY,
@@ -188,7 +188,7 @@ SC.platform = SC.Object.create({
           clientX: evt.clientX,
           clientY: evt.clientY
         };
-      } else if(!evt.altKey && this._pinchCenter != null){
+      } else if(!evt.altKey && this._pinchCenter !== null){
         this._pinchCenter = null;
       }
       return NO;
@@ -256,7 +256,7 @@ SC.platform = SC.Object.create({
     /*
       simulate pinch gesture
      */
-    if(evt.altKey && this._pinchCenter != null)
+    if(evt.altKey && this._pinchCenter !== null)
     {
       //calculate the mirror position of the virtual touch
       var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX ,
@@ -376,26 +376,29 @@ SC.platform = SC.Object.create({
   var el = document.createElement("div");
 
   // the css and javascript to test
-  var css_browsers = ["-moz-", "-moz-", "-o-", "-ms-", "-webkit-"];
-  var test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
+  var css_browsers = ["-moz-", "-moz-", "-o-", "-ms-", "-webkit-"],
+      test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
 
   // prepare css
-  var css = "", i = null;
-  for (i = 0; i < css_browsers.length; i++) {
-    css += css_browsers[i] + "transition:all 1s linear;";
-    css += css_browsers[i] + "transform: translate(1px, 1px);";
-    css += css_browsers[i] + "perspective: 500px;";
+  var css = "", i = null, cssBrowser, iLen;
+  for (i = 0, iLen = css_browsers.length; i < iLen; i++) {
+    cssBrowser = css_browsers[i];
+    css += cssBrowser + "transition:all 1s linear;";
+    css += cssBrowser + "transform: translate(1px, 1px);";
+    css += cssBrowser + "perspective: 500px;";
   }
 
   // set css text
   el.style.cssText = css;
 
   // test
-  for (i = 0; i < test_browsers.length; i++)
+  var testBrowser;
+  for (i = 0, iLen=test_browsers.length; i < iLen; i++)
   {
-    if (el.style[test_browsers[i] + "TransitionProperty"] !== undefined) SC.platform.supportsCSSTransitions = YES;
-    if (el.style[test_browsers[i] + "Transform"] !== undefined) SC.platform.supportsCSSTransforms = YES;
-    if (el.style[test_browsers[i] + "Perspective"] !== undefined || el.style[test_browsers[i] + "PerspectiveProperty"] !== undefined) {
+    testBrowser = test_browsers[i];
+    if (el.style[testBrowser + "TransitionProperty"] !== undefined) SC.platform.supportsCSSTransitions = YES;
+    if (el.style[testBrowser + "Transform"] !== undefined) SC.platform.supportsCSSTransforms = YES;
+    if (el.style[testBrowser + "Perspective"] !== undefined || el.style[testBrowser + "PerspectiveProperty"] !== undefined) {
       SC.platform.understandsCSS3DTransforms = YES;
       SC.platform.supportsCSS3DTransforms = YES;
     }

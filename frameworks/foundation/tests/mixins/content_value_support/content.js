@@ -30,22 +30,21 @@ test("invoked with key = * whenever content changes", function() {
   view.set('content', content);
 });
 
-test("invoked with key = foo whenever a property on content is changed", function() {
-  var isTesting = NO, curKey ;
+test("should not be invoked when arbitrary keys are changed", function() {
+  var isTesting = NO, count = 0;
   view.contentPropertyDidChange = function(target, key) {
     if (!isTesting) return ; //wait until testing should begin...
-    ok(target === content, 'should pass content object as target');
-    equals(key, curKey, 'should pass * as key');    
+    count++;
   };
+
   view.set('content', content);
   
   isTesting = YES ;
   
-  curKey= 'foo';
   content.set('foo', 'foo');
-  
-  curKey = 'bar';
   content.set('bar', 'bar');
+
+  equals(count, 0, "method was not invoked");
 });
 
 test("should no longer be invoked when a key is changed on a former content object", function() {
@@ -73,7 +72,7 @@ test("should fire even on a content object set when the object is created", func
   equals(callCount, 1, 'should call contentPropertyDidChange on init to do initial setup');
   
   content.set('foo', 'foo');
-  equals(callCount, 2, 'should call contentPropertyDidChange when changing content.foo');
+  equals(callCount, 1, 'should not call contentPropertyDidChange when changing content.foo');
 });
 
 // ..........................................................
@@ -166,3 +165,73 @@ test("if contentValueKey is not set & displayDelegate not set, does nothing", fu
   equals(content.get('bar'), 'bar', 'should not change');
   equals(content.get('foo'), 'foo', 'should not change');
 });
+
+// ..........................................................
+// updateContentWithValueObserver()
+// 
+module("SC.ContentValueSupport#contentKeys", {
+  setup: function() {
+    this.count = 0;
+    var self = this;
+
+    this.obj = SC.Object.create(SC.ContentValueSupport, SC.DelegateSupport, {
+      contentKeys: {'contentFooKey': 'foo'},
+      contentFooKey: 'foo',
+      content: SC.Object.create({foo: 'BAR'}),
+      contentPropertyDidChange: function(orig, target, key) {
+        equals(target, this.content, "content is target");
+        self.count++;
+
+        return orig(target, key);
+      }.enhance()
+    });
+  },
+
+  teardown: function() {
+    this.obj.destroy();
+
+    this.obj = null;
+  }
+});
+
+test("different contentKeys on creation are observed correctly", function() {
+  equals(this.count, 1, "observer was called once on init");
+
+  this.obj.content.set('foo', 'BAR2');
+
+  equals(this.count, 2, "observer was called again on set");
+
+  equals(this.obj.get('foo'), 'BAR2', "value is updated correctly");
+
+  this.obj.content.set('bar', 'ASDF');
+
+  equals(this.count, 2, "observer was not called again on setting other keys");
+});
+
+test("different contentKeys after creation are observed correctly", function() {
+  equals(this.count, 1, "observer was called once on init");
+
+  this.obj.beginPropertyChanges();
+  this.obj.set({
+    contentKeys: {'contentBarKey': 'bar'},
+    contentBarKey: 'bar'
+  });
+  this.obj.endPropertyChanges();
+
+  equals(this.count, 2, "observer was called when changing contentKeys");
+
+  this.obj.content.set('bar', 'BAR2');
+
+  equals(this.count, 3, "observer was called when changing bar");
+
+  equals(this.obj.get('bar'), 'BAR2', "value is updated correctly");
+
+  this.obj.content.set('asdfasf', 'asdfasd');
+
+  equals(this.count, 3, "observer was not called again on setting other keys");
+
+  this.obj.content.set('foo', 'asdfasd');
+
+  equals(this.count, 3, "observer was not called again on setting old observed keys");
+});
+

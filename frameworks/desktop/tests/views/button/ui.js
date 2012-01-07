@@ -49,7 +49,8 @@ var pane = SC.ControlTestPane.design({height:24})
 
   .add("aria-pressed", SC.ButtonView, {
     title: 'aria-pressed',
-    ariaRole: 'button'
+    ariaRole: 'button',
+    buttonBehavior: SC.TOGGLE_BEHAVIOR
   })
 
   .add("aria-haspopup",SC.PopupButtonView, {

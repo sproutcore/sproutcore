@@ -319,7 +319,10 @@ SC.Timer = SC.Object.extend(
   invalidate: function() {
     this.beginPropertyChanges();
     this.set('isValid', NO);
-    SC.RunLoop.currentRunLoop.cancelTimer(this);
+    
+    var runLoop = SC.RunLoop.currentRunLoop;
+    if(runLoop) runLoop.cancelTimer(this);
+    
     this.action = this.target = null ; // avoid memory leaks
     this.endPropertyChanges();
 

@@ -42,11 +42,3 @@ module("SC.TabView", {
   }
 });
 
-test("Methods of TabView are untested");
-
-
-//_tab_nowShowingDidChange: function() {
-
-//_tab_saveUserDefault: function() {
-
-//_tab_itemsDidChange: function() {

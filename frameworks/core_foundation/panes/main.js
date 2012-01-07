@@ -6,6 +6,10 @@
 // ==========================================================================
 
 sc_require('panes/pane');
+sc_require('panes/keyboard');
+sc_require('panes/layout');
+sc_require('panes/manipulation');
+sc_require('panes/visibility');
 
 /** @class
 
@@ -30,10 +34,31 @@ SC.MainPane = SC.Pane.extend({
   /** @private */
   layout: { top: 0, left: 0, bottom: 0, right: 0, minHeight:200, minWidth:200 },
   
+  init:function(){
+    var wDim = {x: 0, y: 0, width: 1000, height: 1000},
+        layout = this.get('layout'), isOverflowing = false;
+    
+    //Initial computation to get ride of Lion rubberbanding.
+    if (document && document.body) {
+      wDim.width = document.body.clientWidth;
+      wDim.height = document.body.clientHeight;
+      
+      if( layout.minHeight || layout.minWidth ) {
+        if( (layout.minHeight && wDim.height<layout.minHeight) || (layout.minWidth && wDim.width<layout.minWidth) ) {
+          SC.bodyOverflowArbitrator.requestVisible(this);
+        } else {
+          // to avoid Lion rubberbanding
+          SC.bodyOverflowArbitrator.requestHidden(this);
+        }
+      }
+    }
+    sc_super();
+  },
+  
   /** @private - extends SC.Pane's method */
   paneDidAttach: function() {
-    var ret = sc_super();
-    var responder = this.rootResponder;
+    var ret = sc_super(),
+        responder = this.rootResponder;
     responder.makeMainPane(this);
     if (!responder.get('keyRootView')) responder.makeKeyPane(this);
     return ret ;
@@ -43,8 +68,5 @@ SC.MainPane = SC.Pane.extend({
   acceptsKeyPane: YES,
 
   /** @private */
-  classNames: ['sc-main'],
-  
-  ariaRole: 'application'
-  
+  classNames: ['sc-main']
 });

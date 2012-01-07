@@ -24,23 +24,54 @@ SC.ObserverSet = {
   /**
     Adds the named target/method observer to the set.  The method must be
     a function, not a string.
-
-    Note that in debugging mode only, this method is overridden to also record
-    the name of the object and function that resulted in the target/method
-    being added.
   */
   add: function(target, method, context) {
-    var targetGuid = SC.guidFor(target), methodGuid = SC.guidFor(method);
-    var targets = this._members, members = this.members;
+    var targetGuid = SC.guidFor(target),
+        methodGuid = SC.guidFor(method),
+        targets    = this._members,
+        members    = this.members,
+        indexes    = targets[targetGuid],       // get the set of methods
+        index, member;
 
-    // get the set of methods
-    var indexes = targets[targetGuid];
     if ( !indexes ) indexes = targets[targetGuid] = {};
 
-    if (indexes[methodGuid] === undefined) indexes[methodGuid] = members.length;
-    else return;
+    index = indexes[methodGuid];
+    if (index === undefined) {
+      indexes[methodGuid] = members.length;
+      member = [target, method, context];
 
-    members.push([target, method, context]);
+      //@if(debug)
+      // If deferred call logging info was specified (i.e., in debug mode when
+      // such logging is enabled), we need to add it to the enqueued target/
+      // method.
+      member[3] = arguments[3];
+      //@endif
+
+      members.push(member);
+    }
+    else {
+      //@if(debug)
+      // If deferred call logging info was specified (i.e., in debug mode when
+      // such logging is enabled), we need to add it to the enqueued target/
+      // method.
+      var loggingInfo = arguments[3],
+          memberLoggingInfo;
+
+      if (loggingInfo) {
+        member            = members[index];
+        memberLoggingInfo = member[3];
+        if (!memberLoggingInfo) {
+          member[3] = [loggingInfo];
+        }
+        else if (!(memberLoggingInfo instanceof Array)) {
+          member[3] = [memberLoggingInfo, loggingInfo];
+        }
+        else {
+          memberLoggingInfo.push(loggingInfo);
+        }
+      }
+      //@endif
+    }
   },
 
   /**
@@ -77,11 +108,60 @@ SC.ObserverSet = {
   invokeMethods: function() {
     var members = this.members, member;
 
+    //@if(debug)
+    var shouldLog = SC.LOG_DEFERRED_CALLS,
+        target, method, methodName, loggingInfo, loggingInfos,
+        originatingTarget, originatingMethod, originatingMethodName,
+        originatingStack, j, jLen;
+    //@endif
+
     for( var i=0, l=members.length; i<l; i++ ) {
       member = members[i];
 
       // method.call(target);
       member[1].call(member[0]);
+
+      //@if(debug)
+      // If we have logging info specified for who scheduled the particular
+      // invocation, and logging is enabled, then output it.
+      if (shouldLog) {
+        target      = member[0];
+        method      = member[1];
+        methodName  = method.displayName || method;
+        loggingInfo = member[3];
+        if (loggingInfo) {
+          // If the logging info is not an array, that means only one place
+          // scheduled the invocation.
+          if (!(loggingInfo instanceof Array)) {
+            // We'll treat single-scheduler cases specially to make the output
+            // better for the user, even if it means some essentially-duplicated
+            // code.
+            originatingTarget     = loggingInfo.originatingTarget;
+            originatingMethod     = loggingInfo.originatingMethod;
+            originatingStack      = loggingInfo.originatingStack;
+            originatingMethodName = (originatingMethod ? originatingMethod.displayName : "(unknown)") || originatingMethod;
+            SC.Logger.log("Invoking runloop-scheduled method %@ on %@.  Originated by target %@,  method %@,  stack: ".fmt(methodName, target, originatingTarget, originatingMethodName), originatingStack);
+          }
+          else {
+            SC.Logger.log("Invoking runloop-scheduled method %@ on %@, which was scheduled by multiple target/method pairs:".fmt(methodName, target));
+            loggingInfos = loggingInfo;
+            for (j = 0, jLen = loggingInfos.length;  j < jLen;  ++j) {
+              loggingInfo           = loggingInfos[j];
+              originatingTarget     = loggingInfo.originatingTarget;
+              originatingMethod     = loggingInfo.originatingMethod;
+              originatingStack      = loggingInfo.originatingStack;
+              originatingMethodName = (originatingMethod ? originatingMethod.displayName : "(unknown)") || originatingMethod;
+              SC.Logger.log("  [%@]  originated by target %@,  method %@,  stack:".fmt(j, originatingTarget, originatingMethodName), originatingStack);
+            }
+          }
+        }
+        else {
+          // If we didn't capture information for this invocation, just report
+          // what we can.
+          SC.Logger.log("Invoking runloop-scheduled method %@ on %@, but we didn’t capture information about who scheduled it…".fmt(methodName, target));
+        }
+      }
+      //@endif
     }
   },
 
@@ -97,6 +177,9 @@ SC.ObserverSet = {
     for( var i=0, l=memberArray.length; i<l; i++ ) {
       newMembers[i] = SC.clone(memberArray[i]);
       newMembers[i].length = 3;
+      //@if(debug)
+      newMembers[i].length = 4;
+      //@endif
     }
 
     return newSet;
@@ -119,6 +202,8 @@ SC.ObserverSet = {
   }
 
 } ;
+
 SC.ObserverSet.constructor.prototype = SC.ObserverSet;
-SC.ObserverSet.slice = SC.ObserverSet.clone ;
+SC.ObserverSet.slice = SC.ObserverSet.clone;
+SC.ObserverSet.copy = SC.ObserverSet.clone;
 

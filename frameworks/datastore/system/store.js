@@ -1120,7 +1120,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // add dataHash and setup initial status -- also save recordType
     this.writeDataHash(storeKey, (dataHash ? dataHash : {}), K.READY_NEW);
-
+    
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
     this.dataHashDidChange(storeKey);
 

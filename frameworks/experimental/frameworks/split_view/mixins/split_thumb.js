@@ -131,7 +131,7 @@ SC.SplitThumb = {
   // NOTE: While an edge case, this is implemented because it makes it _much_
   // easier to write the sample in the Test Controls app.
   splitViewLayoutDirection: null,
-  splitViewLayoutDirectionBinding: '*splitView.layoutDirection',
+  splitViewLayoutDirectionBinding: SC.Binding.oneWay('*splitView.layoutDirection'),
   
   /**
    * The name of the CSS cursor that should be used for splitting.
@@ -176,6 +176,8 @@ SC.SplitThumb = {
     this._isDragging = YES;
     
     var splitView = this.get('splitView');
+    splitView.beginLiveResize();
+    
     this._scst_mouseStartPosition = splitView.get('layoutDirection') === SC.LAYOUT_HORIZONTAL ? 
       touch.pageX : touch.pageY;
     
@@ -194,7 +196,7 @@ SC.SplitThumb = {
         start = this._scst_childStartPosition;
     
     splitView.adjustPositionForChild(this.get('movesChild'), start + diff);
-    
+
     return YES;
   },
   
@@ -212,7 +214,7 @@ SC.SplitThumb = {
     splitView.adjustPositionForChild(this.get('movesChild'), start + diff);
     
     splitView.set('splitChildCursorStyle', null);
-    
+    splitView.endLiveResize();
     return YES;
   },
 

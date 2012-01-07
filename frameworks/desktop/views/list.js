@@ -315,6 +315,17 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this ;
   },
   
+  /**
+    @private
+    When the length changes, so does the layout. CollectionView doesn't
+    know to do this, because it only asks for layout when it reloads--which
+    makes sense, as it is agnostic to any layout logic (for all it knows, the
+    items in the collection are not in a completely random order relative to layout)
+  */
+  _sclv_lengthDidChange: function() {
+    this.adjust(this.computeLayout());
+  }.observes('length'),
+  
   // ..........................................................
   // SUBCLASS IMPLEMENTATIONS
   // 
@@ -565,9 +576,6 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         return [index, SC.DROP_ON];
       }
     }
-    
-    // ok, now if we are in last 10px, go to next item.
-    if ((index<len) && (loc.y >= max-10)) index++;
     
     // finally, let's decide if we want to actually insert before/after.  Only
     // matters if we are using outlining.

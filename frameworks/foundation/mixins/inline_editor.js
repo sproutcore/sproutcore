@@ -83,7 +83,7 @@ SC.InlineEditor = {
     @returns {Boolean} whether the editor was able to successfully begin editing
   */
   beginEditing:function(editable) {
-    if(this.get('isEditing') || !editable) return NO;
+    if(this.get('isEditing') || !editable || !editable.isInlineEditable) return NO;
 
     var del, target;
 
@@ -98,6 +98,10 @@ SC.InlineEditor = {
     // first responder
     this.invokeLast(this._callDidBegin);
 
+    // remember that we invoked in case commit gets called before the invoke
+    // goes off
+    this._didBeginInvoked = YES;
+
     return YES;
   },
 
@@ -108,6 +112,11 @@ SC.InlineEditor = {
     and didBegin is supposed to occur after the editor becomes first responder.
   */
   _callDidBegin: function() {
+    // don't notify if we already ended editing
+    if(!this.get('isEditing')) return NO;
+
+    this._didBeginInvoked = NO;
+
     var target = this._target, del;
 
     del = this.delegateFor('inlineEditorDidBeginEditing', this.inlineEditorDelegate, target);
@@ -128,6 +137,9 @@ SC.InlineEditor = {
   */
   commitEditing:function() {
     if(!this.get('isEditing')) return NO;
+
+    // if the handler was invoked but never went off, call it now
+    if(this._didBeginInvoked) this._callDidBegin();
 
     var del, target = this._target;
 
@@ -158,6 +170,9 @@ SC.InlineEditor = {
   */
   discardEditing:function() {
     if(!this.get('isEditing')) return NO;
+
+    // if the handler was invoked but never went off, call it now
+    if(this._didBeginInvoked) this._callDidBegin();
 
     var del, target = this._target;
 

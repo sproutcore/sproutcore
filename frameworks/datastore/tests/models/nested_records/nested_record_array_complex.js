@@ -118,7 +118,7 @@ module("Complex SC.Record: Parent > Array of Children > Array of Children", {
     delete NestedRecord.Group;
     delete NestedRecord.Person;
     delete NestedRecord.Address;
-    delete window.NestedRecord;
+    //delete window.NestedRecord;
     NestedRecord = null;
     testParent = null;
     peopleData1 = null;

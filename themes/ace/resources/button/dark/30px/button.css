@@ -26,22 +26,22 @@
 
   @theme(point-left) {
     $theme.button {
-      @include slices("normal_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-right);
+      @include slices("normal_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
 
       .middle { left: 12px; }
 
       &.active {
-        @include slices("active_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-right);
+        @include slices("active_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
         .middle { left: 12px; }
       }
 
       &.sel, &.def {
-        @include slices("selected_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-right);
+        @include slices("selected_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
         .middle { left: 12px; }
       }
 
       &.sel.active, &.def.active {
-        @include slices("selected_active_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-right);
+        @include slices("selected_active_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
         .middle { left: 12px; }
       }
     }
@@ -49,22 +49,22 @@
 
   @theme(point-right) {
     $theme.button {
-      @include slices("normal_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-left);
+      @include slices("normal_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
 
       .middle { right: 12px; }
 
       &.active {
-        @include slices("active_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-left);
+        @include slices("active_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
         .middle { right: 12px; }
       }
 
       &.sel, &.def {
-        @include slices("selected_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-left);
+        @include slices("selected_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
         .middle { right: 12px; }
       }
 
       &.sel.active, &.def.active {
-        @include slices("selected_active_button_pointer.png", $left: 12, $right: 12, skip-middle, skip-left);
+        @include slices("selected_active_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
         .middle { right: 12px; }
       }
     }

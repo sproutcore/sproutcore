@@ -466,23 +466,22 @@ SC.Record = SC.Object.extend(
     Should not have to be called manually.
   */
   propagateToAggregates: function() {
-    var storeKey = this.get('storeKey'),
+    var storeKey   = this.get('storeKey'),
         recordType = SC.Store.recordTypeFor(storeKey),
-        idx, len, key, val, recs;
-
-    var aggregates = recordType.aggregates;
+        aggregates = recordType.__sc_aggregate_keys,
+        idx, len, key, prop, val, recs;
 
     // if recordType aggregates are not set up yet, make sure to
     // create the cache first
     if (!aggregates) {
-      var dataHash = this.get('store').readDataHash(storeKey);
       aggregates = [];
-      for(var k in dataHash) {
-        if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
-          aggregates.push(k);
+      for (key in this) {
+        prop = this[key];
+        if (prop  &&  prop.isRecordAttribute  &&  prop.aggregate === YES) {
+          aggregates.push(key);
         }
       }
-      recordType.aggregates = aggregates;
+      recordType.__sc_aggregate_keys = aggregates;
     }
 
     // now loop through all aggregate properties and mark their related
@@ -505,13 +504,19 @@ SC.Record = SC.Object.extend(
       @param {SC.Record} record to propagate to
     */
     iter =  function(rec) {
-      var childStatus, parentStatus;
+      var childStatus, parentStore, parentStoreKey, parentStatus;
 
       if (rec) {
         childStatus = this.get('status');
         if ((childStatus & dirty)  ||
             (childStatus & readyNew)  ||  (childStatus & destroyed)) {
-          parentStatus = rec.get('status');
+
+          // Since the parent can cache 'status', and we might be called before
+          // it has been invalidated, we'll read the status directly rather than
+          // trusting the cache.
+          parentStore    = rec.get('store');
+          parentStoreKey = rec.get('storeKey');
+          parentStatus   = parentStore.peekStatus(parentStoreKey);
           if (parentStatus === readyClean) {
             // Note:  storeDidChangeProperties() won't put it in the
             //        changelog!
@@ -577,12 +582,13 @@ SC.Record = SC.Object.extend(
     @param {Boolean} includeNull will write empty (null) attributes
     @returns {SC.Record} the normalized record
   */
-
-  normalize: function(includeNull) {
-    var primaryKey = this.primaryKey,
-        recordId   = this.get('id'),
-        store      = this.get('store'),
-        storeKey   = this.get('storeKey'),
+  
+  normalize: function(includeNull) {    
+    var primaryKey = this.primaryKey, 
+        recordId   = this.get('id'), 
+        store      = this.get('store'), 
+        storeKey   = this.get('storeKey'), 
+        keysToKeep = {},
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
         isChild, defaultVal, keyForDataHash, attr;
 
@@ -597,11 +603,17 @@ SC.Record = SC.Object.extend(
         typeClass = valueForKey.typeClass;
         if (typeClass) {
           keyForDataHash = valueForKey.get('key') || key; // handle alt keys
+          
+          // As we go, we'll build up a key —> attribute mapping table that we
+          // can use when purging keys from the data hash that are not defined
+          // in the schema, below.
+          keysToKeep[keyForDataHash] = YES;
+          
           isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
           isChild  = valueForKey.isNestedRecordTransform;
           if (!isRecord && !isChild) {
             attrValue = this.get(key);
-            if(attrValue!==undefined || (attrValue===null && includeNull)) {
+            if(attrValue!==undefined && (attrValue!==null || includeNull)) {
               attr = this[key];
               // if record attribute, make sure we transform with the fromType
               if(SC.instanceOf(attr, SC.RecordAttribute)) {
@@ -609,7 +621,10 @@ SC.Record = SC.Object.extend(
               }
               dataHash[keyForDataHash] = attrValue;
             }
-
+            else if(!includeNull) {
+              keysToKeep[keyForDataHash] = NO;
+            }
+          
           } else if (isChild) {
             attrValue = this.get(key);
 
@@ -637,6 +652,18 @@ SC.Record = SC.Object.extend(
             }
           }
         }
+      }
+    }
+    
+    // Finally, we'll go through the underlying data hash and remove anything
+    // for which no appropriate attribute is defined.  We can do this using
+    // the mapping table we prepared above.
+    for (key in dataHash) {
+      if (!keysToKeep[key]) {
+        // Deleting a key doesn't seem too common unless it's a mistake, so
+        // we'll log it in debug mode.
+        SC.debug("%@:  Deleting key from underlying data hash due to normalization:  %@", this, key);
+        delete dataHash[key];
       }
     }
 

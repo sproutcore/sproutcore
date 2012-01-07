@@ -258,7 +258,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
   _invokeScrollOnMouseOver: function(){
     this._scrollMenu();
     if(this.get('isMouseOver')){
-      this.invokeLater(this._invokeScrollOnMouseOver, 100);
+      this.invokeLater(this._invokeScrollOnMouseOver, 50);
     }
   }
   
@@ -695,7 +695,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
-    if (contentView) contentView.adjust('top', 0-offset) ;
+    if (contentView) contentView.$().css('top', (0-offset) + "px");
     
   }.observes('verticalScrollOffset')
 

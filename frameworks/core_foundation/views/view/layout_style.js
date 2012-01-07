@@ -446,7 +446,16 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     ret.zIndex     = this.zIndex;
     ret.opacity    = this.opacity;
-    ret.mozOpacity = this.opacity;
+
+    // for ie, we will NOT use alpha. It is just a source of pain.
+    // a) it will not affect absolutely positioned child elements, and is therefore
+    //    useless for most SC purposes.
+    // 
+    // b) It completely breaks semitransparent background images (PNGs with opacity)
+    //
+    // If users want to use alpha, they should do it on their own.
+    
+    // if(!SC.none(this.opacity)) ret.filter = "alpha(opacity=%@)".fmt(this.opacity * 100);
 
     ret.backgroundPosition = this.backgroundPosition;
 

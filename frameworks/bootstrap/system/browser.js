@@ -30,6 +30,12 @@ SC._detectBrowser = function(userAgent, language) {
   browser.mac = browser.isMac = !!/macintosh/.test(userAgent) || (/mac os x/.test(userAgent) && !/like mac os x/.test(userAgent));
 
   /**
+    @name SC.browser.isLion
+    @type Boolean
+  */
+  browser.lion = browser.isLion = !!(/mac os x 10_7/.test(userAgent) && !/like mac os x 10_7/.test(userAgent));
+  
+  /**
     @name SC.browser.isiPhone
     @type Boolean
   */

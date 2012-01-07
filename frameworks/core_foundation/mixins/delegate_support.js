@@ -99,12 +99,12 @@ SC.DelegateSupport = {
 
     while(idx<len) {
       ret = arguments[idx++];
-      if (ret && ret[key] !== undefined) {
+      if (ret && ret[key] != undefined) {
         return ret.get ? ret.get(key) : ret[key] ;
       }
     }
 
-    return (this[key] !== undefined) ? this.get(key) : undefined ;
+    return (this[key] != undefined) ? this.get(key) : undefined ;
   }
 
 };

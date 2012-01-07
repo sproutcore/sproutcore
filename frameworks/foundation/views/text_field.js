@@ -23,17 +23,8 @@ sc_require('mixins/editable');
 SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 /** @scope SC.TextFieldView.prototype */ {
 
-  tagName: 'label',
   classNames: ['sc-text-field-view'],
   isTextField: YES,
-
-  /**
-    The WAI-ARIA role for text field view. This property's value should not be
-    changed.
-
-    @property {String}
-  */
-  ariaRole: 'textbox',
 
   // ..........................................................
   // PROPERTIES
@@ -81,18 +72,58 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @type String
   */
   hint: '',
+  
+  /**
+    The hint to display while the field is not active.
+    
+    @property
+    @type String
+  */
+  type: 'text',
+  
+  /**
+    This property will set a tabindex="-1" on your view if set to NO. 
+    
+    This gives us control over the native tabbing behavior. When nextValidKeyView
+    reaches the end of the views in the pane views tree, it won't go to a textfield
+    that can accept the default tabbing behavior in any other pane. This was a 
+    problem when you had an alert on top of a mainPane with textfields. 
+    
+    Modal panes set this to NO on all textfields that don't belong to itself.
+    @property {Boolean}
+  */
+  
+  isBrowserFocusable: YES,
+  
+  autoCorrect: true,
+  autoCapitalize: true,
+  
 
   /*
-  * Localizes the hint if necessary.
+    Localizes the hint if necessary.
+  
+    @property
+    @type String
   */
   formattedHint: function() {
     var hint = this.get('hint');
-
     return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
   }.property('hint', 'localize').cacheable(),
+  
+  /**
+    Whether to show the hint while the field has focus. If YES, it will disappear
+    as soon as any character is in the field.
+    
+    @property
+    @type Boolean
+  */
+  hintOnFocus: YES,
 
   /*
-  * Whether the hint should be localized or not.
+    Whether the hint should be localized or not.
+    
+    @property
+    @type Boolean
   */
   localize: YES,
 
@@ -239,7 +270,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
   init: function() {
     var val = this.get('value');
-    this._hintON = (!val || val && val.length===0) ? YES : NO;
+    this._hintON = ((!val || val && val.length===0) && !this.get('hintOnFocus')) ? YES : NO;
     
     var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
     if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
@@ -375,7 +406,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: ['formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  displayProperties: ['isBrowserFocusable','formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function() {
     sc_super();
@@ -480,16 +511,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // update layer classes always
     context.setClass('not-empty', v.length > 0);
 
-    //addressing accessibility
-    if(firstTime) {
-      context.attr('aria-multiline', this.get('isTextArea'));
-      context.attr('aria-disabled', !this.get('isEnabled'));
-      context.attr('aria-readonly', this.get('isEnabled') && !this.get('isEditable'));
-    }
-    if(!SC.ok(this.get('value'))) {
-      context.attr('aria-invalid', YES);
-    }
-
     // If we have accessory views, we'll want to update the padding on the
     // hint to compensate for the width of the accessory view.  (It'd be nice
     // if we could add in the original padding, too, but there's no efficient
@@ -502,13 +523,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (leftAdjustment)  leftAdjustment  += 'px' ;
     if (rightAdjustment) rightAdjustment += 'px' ;
 
-   this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
-    if(SC.browser.mozilla) this.invokeLast(this._applyFirefoxCursorFix);
+    this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment);
   },
 
   /** @private
     If isTextArea is changed (this might happen in inlineeditor constantly)
-    force the field render to render like the first time to avoid writing extra
+    force the field render to render like the firsttime to avoid writing extra
     code. This can be useful also 
   */
   _forceRenderFirstTime: NO,
@@ -524,25 +544,50 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
 
-    var hint = this.get('formattedHint'), activeState, name, adjustmentStyle, type, 
-        hintElements, element, paddingElementStyle, fieldClassNames,
-        spellCheckEnabled=this.get('spellCheckEnabled'), spellCheckString,
-        maxLength = this.get('maxLength'), isOldSafari;
+    var hint = this.get('formattedHint'), 
+        hintOnFocus = this.get('hintOnFocus'), 
+        hintString = '',
+        maxLength = this.get('maxLength'),
+        isTextArea = this.get('isTextArea'),
+        isEnabled = this.get('isEnabled'),
+        isEditable = this.get('isEditable'),
+        autoCorrect = this.get('autoCorrect'),
+        autoCapitalize = this.get('autoCapitalize'),
+        isBrowserFocusable = this.get('isBrowserFocusable'),
+        spellCheckString='', autocapitalizeString='', autocorrectString='',
+        name, adjustmentStyle, type, hintElements, element, paddingElementStyle, 
+        fieldClassNames, isOldSafari, activeState, browserFocusable;
 
-    context.setClass('text-area', this.get('isTextArea'));
+    context.setClass('text-area', isTextArea);
     
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed 
     isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
     context.setClass('oldWebKitFieldPadding', isOldSafari);
     
-    spellCheckString = spellCheckEnabled ? ' spellcheck="true"' : ' spellcheck="false"';
+   
+    
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      activeState = this.get('isEnabled') ? (this.get('isEditable') ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
+      activeState = isEnabled ? (isEditable ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
       name = this.get('layerId');
       
-      if(this.get('shouldRenderBorder')) context.push('<span class="border"></span>');
+      spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
+
+      if(SC.browser.mobileSafari){
+        autocorrectString = !autoCorrect ? ' autocorrect="off"' : '';
+        autocapitalizeString = !autoCapitalize ? ' autocapitalize="off"' : '';
+      }
+
+      if(isBrowserFocusable){
+        browserFocusable = 'tabindex="-1"';
+      }
+        // if hint is on and we don't want it to show on focus, create one
+      if(SC.platform.input.placeholder && !hintOnFocus) {
+        hintString = ' placeholder="' + hint + '"';
+      }
+
+      if(this.get('shouldRenderBorder')) context.push('<div class="border"></div>');
 
       // Render the padding element, with any necessary positioning
       // adjustments to accommodate accessory views.
@@ -553,39 +598,42 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
         adjustmentStyle += '"' ;
       }
-      context.push('<span class="padding" '+adjustmentStyle+'>');
-                  
+      context.push('<div class="padding" '+adjustmentStyle+'>');
+     
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if(!SC.platform.input.placeholder && (!value || (value && value.length===0))) {
+      if(this._hintON && !SC.platform.input.placeholder && (!value || (value && value.length===0))) {
         value = hint;
         context.setClass('sc-hint', YES);
-      } 
+      }
       
-      //for gecko pre 1.9 vertical aligment is completely broken so we need
-      //different styling.
-      fieldClassNames = (SC.browser.mozilla &&
-                          (parseFloat(SC.browser.mozilla)<1.9 || 
-                          SC.browser.mozilla.match(/1\.9\.0|1\.9\.1/))) ?
-                          "field oldGecko": "field";
+      if(hintOnFocus) {
+        var hintStr = '<div aria-hidden="true" class="hint '+ 
+                      (isTextArea ? '':'ellipsis')+'%@">'+ hint + '</div>';
+        context.push(hintStr.fmt(value ? ' sc-hidden': ''));
+      }
+      
+      fieldClassNames = "field";
       
       // Render the input/textarea field itself, and close off the padding.
-      if (this.get('isTextArea')) {
-        context.push('<textarea class="',fieldClassNames,'" name="', name, 
-                      '" ', activeState, ' placeholder="',hint, '"',
-                      spellCheckString,' maxlength="', maxLength, '">', 
-                      value, '</textarea></span>') ;
+      if (isTextArea) {
+        context.push('<textarea aria-label="' + hint + '" aria-multiline="true" class="'+fieldClassNames+'" name="'+ name+ 
+                      '" '+ activeState + hintString +
+                      spellCheckString + autocorrectString + browserFocusable + 
+                      autocapitalizeString + ' maxlength="'+ maxLength+ '">'+ 
+                      value+ '</textarea></div>') ;
       }
       else {
-        type = 'text';
+        type = this.get('type');
         
         // Internet Explorer won't let us change the type attribute later
         // so we force it to password if needed now, or if the value is not the hint
-        if (this.get('isPassword') && (value !== hint || SC.browser.isIE || SC.platform.input.placeholder)) { type = 'password'; }
+        if (this.get('isPassword')) { type = 'password'; }
         
-        context.push('<input class="',fieldClassNames,'" type="', type,
-                      '" name="', name, '" ', activeState, ' value="', value,
-                      '" placeholder="',hint,'"', spellCheckString, 
-                      ' maxlength="', maxLength, '" /></span>') ;
+        context.push('<input aria-label="' + hint + '" class="'+fieldClassNames+'" type="'+ type+
+                      '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
+                      hintString + spellCheckString+ browserFocusable +
+                      ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
+                      autocapitalizeString+'/></div>') ;
       }
     }
     else {
@@ -593,37 +641,47 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           elem = input[0],
           val = this.get('value');
 
+      if(hintOnFocus) this.$('.hint')[0].innerHTML = hint;
+      else if(!hintOnFocus) elem.placeholder = hint;
+
       if (!val || (val && val.length === 0)) {
-        if (this._hintON && !this.get('isFirstResponder')) {
+        if (this.get('isPassword')) { elem.type = 'password'; }
+        
+        if (!SC.platform.input.placeholder && this._hintON) {
+          if (!this.get('isFirstResponder')) {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === "password" && !SC.browser.isIE) { elem.type = 'text'; }
-
-          if (!SC.platform.input.placeholder) {
-            context.setClass('sc-hint', YES);
-            input.val(hint);
-          }
-        } else {
+          
+          context.setClass('sc-hint', YES);
+          input.val(hint);
+          } else {
           // Internet Explorer doesn't allow you to modify the type afterwards
           // jQuery throws an exception as well, so set attribute directly
-          if (this.get('isPassword') && elem.type === 'text' && !SC.browser.isIE) { elem.type = 'password'; }
-
-          if (!SC.platform.input.placeholder) {
             context.setClass('sc-hint', NO);
             input.val('');
           }
         }
       }
+      
+      if(SC.browser.mobileSafari){      
+        input.attr('autoCapitalize', !autoCapitalize ? 'off':'true');
+        input.attr('autoCorrect', !autoCorrect ? 'off':'true');        
+      }      
 
-      if (SC.platform.input.placeholder) input.attr('placeholder', hint);
+      if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
 
+      if(isBrowserFocusable){
+        input.removeAttr('tabindex');
+      }else{
+        input.attr('tabindex', '-1');
+      }
       // Enable/disable the actual input/textarea as appropriate.
       element = input[0];
       if (element) {
-        if (!this.get('isEnabled')) {
+        if (!isEnabled) {
           element.disabled = 'true' ;
           element.readOnly = null ;
-        } else if(!this.get('isEditable')) {
+        } else if(!isEditable) {
           element.disabled = null ;
           element.readOnly = 'true' ;
         } else {
@@ -696,39 +754,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   didCreateLayer: function() {
     sc_super(); 
-    this._applyHint();
-    this._addEvents();
-  },
-  
-  /** @private
-    after the layer is append to the doc, set the field value and observe events
-    only for textarea.
-  */
-  didAppendToDocument: function() {
-    if (this.get('isTextArea')) {
-      this.setFieldValue(this.get('fieldValue'));
-      this._performAddEvents();
-    }
-  },
-  
-  _applyHint: function() {
-    if(!SC.platform.input.placeholder && this._hintON){
-      var currentValue = this.$input().val();
-      if(!currentValue || (currentValue && currentValue.length===0)){
-        this.$input().val(this.get('formattedHint'));
-      }
-    }
-  },
-  
-  _addEvents: function() {
+    if(!SC.platform.input.placeholder) this.invokeLast(this._setInitialPlaceHolderIE);
     // For some strange reason if we add focus/blur events to textarea
-    // immediately they won't work. However if I add them at the end of the
+    // inmediately they won't work. However if I add them at the end of the
     // runLoop it works fine.
     if(this.get('isTextArea')) {
-      this.invokeLast(this._performAddEvents);
+      this.invokeLast(this._addTextAreaEvents);
     }
     else {
-      this._performAddEvents();
+      this._addTextAreaEvents();
       
       // In Firefox, for input fields only (that is, not textarea elements),
       // if the cursor is at the end of the field, the "down" key will not
@@ -743,17 +777,28 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
   
-  /** 
-    Adds appropriate events to the input or textarea element. This functions is
-    called by didCreateLayer at different moments depending if it is a textarea
-    or not.
-    
-    Note that appending events to textarea elements is not reliable unless the
-    element is already added to the DOM. (TODO: link source of this info?)
+  /**  @private
+    Set initial placeholder for IE
   */
-  _performAddEvents: function() {
+  _setInitialPlaceHolderIE: function() {
+    if(!SC.platform.input.placeholder && this._hintON){
+      var input = this.$input(),
+          currentValue = input.val();
+      if(!currentValue || (currentValue && currentValue.length===0)){
+        input.val(this.get('formattedHint'));
+      }
+    }
+  },
+  
+  /**  @private
+    Adds all the textarea events. This functions is called by didCreateLayer
+    at different moments depending if it is a textarea or not. Appending 
+    events to text areas is not reliable unless the element is already added 
+    to the DOM.
+    
+  */
+  _addTextAreaEvents: function() {
     var input = this.$input();
-    this._addChangeEvent();
     SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
     
@@ -761,12 +806,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // our key/mouse down/up handlers (such as the user choosing Select All
     // from a menu).
     SC.Event.add(input, 'select', this, this._textField_selectionDidChange);
-        
-    if(SC.browser.mozilla){
-      // cache references to layer items to improve firefox hack perf
-      this._cacheInputElement = this.$input();
-      this._cachePaddingElement = this.$('.padding');
-    }
   },
 
   /**
@@ -791,7 +830,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.set('focused',YES);
       this.fieldDidFocus(evt);
       var val = this.get('value');
-      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0) || (val && val == this.hint))) {
+      if(!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
         this._hintON = NO;
       }
     }, this);
@@ -807,18 +846,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // loosing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent || evt);
-
       var val = this.get('value');
-      if(!SC.platform.input.placeholder && !this._hintON && ((!val) || (val && val.length===0))) {
+      if(!SC.platform.input.placeholder && !this.get('hintOnFocus') && ((!val) || (val && val.length===0))) {
         this._hintON = YES;
-        this.updateLayer();
       }
     }, this);
   },
 
   fieldDidFocus: function(evt) {
     this.becomeFirstResponder();
-
+    
     this.beginEditing(evt);
     
     // We have to hide the intercept pane, as it blocks the events. 
@@ -851,70 +888,37 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       touchPane = null;
     }
   },
-  
+
+  /** @private */
   _field_fieldValueDidChange: function(evt) {
     if(this.get('focused')){
       SC.run(function() {
         this.fieldValueDidChange(NO);        
       }, this);
     }
+    this.updateHintOnFocus();
   },
+
+  /** @private 
+    Make sure to update visibility of hint if it changes
+  */
+  updateHintOnFocus: function() {
+    // if there is a value in the field, hide the hint
+    var hintOnFocus = this.get('hintOnFocus');
+    if(!hintOnFocus) return;
+    
+    if(this.getFieldValue()) {
+      this.$('.hint').addClass('sc-hidden');
+    }
+    else {
+      this.$('.hint').removeClass('sc-hidden');
+    }
+  }.observes('value'),
 
   /** @private
     Move magic number out so it can be over-written later in inline editor
   */
   _topOffsetForFirefoxCursorFix: 3,
-  
-  /** @private
-    Mozilla had this bug until firefox 3.5 or gecko 1.8 They rewrote input text
-    and textareas and now they work better. But we have to keep this for older
-    versions.
-  */
-  _applyFirefoxCursorFix: function() {
-    // Be extremely careful changing this code.  !!!!!!!! 
-    // Contact me if you need to change or improve the code. After several 
-    // iterations the new way to apply the fix seems to be the most 
-    // consistent.
-    // This fixes: selection visibility, cursor visibility, and the ability 
-    // to fix the cursor at any position. As of FF 3.5.3 mozilla hasn't fixed this 
-    // bug, even though related bugs that I've found on their database appear
-    // as fixed.  
-    
-    // UPDATE: Things seem to be working on FF3.6 therefore we are disabling the
-    // hack for the latest versions of FF.
-    // 
-    // Juan Pinzon
-    
-    if (parseFloat(SC.browser.mozilla)<1.9 && !this.get('useStaticLayout')) {
-      var top, left, width, height, p, layer, element, textfield;
-      
-      // I'm caching in didCreateLayer this elements to improve perf
-      element = this._cacheInputElement;
-      textfield = this._cachePaddingElement;
-      if(textfield && textfield[0]){
-        layer = textfield[0];
-        p = SC.$(layer).offset() ;
-      
-        // this is to take into account an styling issue.
-        // this is counterproductive in FF >= 3.6
-        if(SC.browser.compareVersion(1,9,2) < 0 && 
-           element[0].tagName.toLowerCase()==="input") {
-          top = p.top+this._topOffsetForFirefoxCursorFix; 
-        }
-        else top = p.top;
-        left = p.left;
-        width = layer.offsetWidth;
-        height = layer.offsetHeight ;
-      
-        var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
-        // if the style is the same don't re-apply
-        if(!this._prevStyle || this._prevStyle!=style) element.attr('style', style) ;
-        this._prevStyle = style;
-      }
-    }
-    return this ;
-  },
-  
   
   /** @private
     In Firefox, as of 3.6 -- including 3.0 and 3.5 -- for input fields only
@@ -974,7 +978,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var inputElem = this.$input()[0];
     // Make sure input element still exists, as a redraw could have remove it
     // already.
-    if(inputElem) inputElem.select() ;
+    if(inputElem){
+      if(!(SC.browser.isSafari && SC.browser.isLion && SC.buildLocale==='ko-kr')){
+        inputElem.select() ;
+       }
+    } 
     else this._textField_selectionDidChange();
   },
   
@@ -999,13 +1007,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!first || !first.get("isTextField")) {
       document.body.scrollTop = document.body.scrollLeft = 0;
     }
-  },
-  
-  parentViewDidResize: function() {
-    if (SC.browser.mozilla) {
-      this.invokeLast(this._applyFirefoxCursorFix);
-    }
-    sc_super();
   },
 
   /**
@@ -1044,7 +1045,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         maxLengthReached = true;
       }
     }
-
     // validate keyDown...
     // do not validate on touch, as it prevents return.
     if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
@@ -1055,11 +1055,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
 
     if (this.get('applyImmediately')) {
-      // We need this invokeLater as we need to get the value of the field
-      // once the event has been processed. I tried with invokeLast , but
-      // I guess the field doesn't repaint until js execution finishes and 
-      // therefore the field value doesn't update if we don't give it a break.
-      this.invokeLater(this.fieldValueDidChange, 1);
+      // There used to be an invokeLater here instead of setTimeout. What we
+      // really need is setTimeout.
+      var self = this;
+      setTimeout(function() {
+        self.fieldValueDidChange();
+      }, 10);
     }
 
     return YES;
@@ -1080,6 +1081,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   mouseDown: function(evt) {
     var fieldValue = this.get('fieldValue'); // use 'fieldValue' since we want actual text
     this._txtFieldMouseDown=YES;
+    this.becomeFirstResponder();
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
@@ -1128,14 +1130,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     return YES;
   },
   
-  _inputElementTagName: function() {
-    if (this.get('isTextArea')) {
-      return 'textarea';
-    } else {
-      return 'input';
-    }
-  },
-  
   /** @private
     This observer makes sure to hide the hint when a value is entered, or
     show it if it becomes empty.
@@ -1149,7 +1143,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (!SC.platform.input.maxlength && val.length > max) {
         this.set('value', val.substr(0, max));
       }
-    } else {
+    } else if(!this.get('hintOnFocus')) {
       this._hintON = YES;
     }
   }.observes('value')

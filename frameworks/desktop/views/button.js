@@ -165,6 +165,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @default ""
   */
   title: "",
+  
+  tooltip: "",
 
   /**
     If set, the title property will be updated automatically
@@ -345,7 +347,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   /** @private */
   autoResizeLayer: function() {
-    return this.get('layer');
+    var ret = this.invokeRenderDelegateMethod('getRenderedAutoResizeLayer', this.$());
+    return ret || this.get('layer');
   }.property('layer').cacheable(),
 
   /** @private */
@@ -414,25 +417,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   didTriggerAction: function() {},
 
-  /*
-    TODO Why is this not set by the theme? --TD
-  */
-  /**
-    The minimum width the button title should consume.  This property is used
-    when generating the HTML styling for the title itself.  The default
-    width of 80 usually provides a nice looking style, but you can set it to 0
-    if you want to disable minimum title width.
-
-    Note that the title width does not exactly match the width of the button
-    itself.  Extra padding added by the theme can impact the final total
-    size.
-
-    @type Number
-    @default 80
-  */
-  titleMinWidth: 80,
-
-
+ 
   // ................................................................
   // INTERNAL SUPPORT
   //
@@ -474,12 +459,13 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @type Array
     @default [
       'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-      'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing'
+      'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing'
     ]
   */
   displayProperties: [
     'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel', 
-    'escapeHTML', 'needsEllipsis', 'hint', 'titleMinWidth', 'supportFocusRing'
+    'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing',
+    'buttonBehavior'
   ],
 
   /**
@@ -494,35 +480,11 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   renderDelegateName: 'buttonRenderDelegate',
 
-  /**
-    Updates the value, title, and icon keys based on the content object, if
-    set.
-    
-    @type {Object} target the target of the object that changed
-    @type {String} key name of property that changed
-    @returns {SC.ButtonView} receiver
-  */
-  contentPropertyDidChange: function(target, key) {
-    var del = this.get('displayDelegate'), 
-        content = this.get('content'), value ;
-
-    var valueKey = this.getDelegateProperty('contentValueKey', del) ;
-    if (valueKey && (key === valueKey || key === '*')) {
-      this.set('value', content ? (content.get ? content.get(valueKey) : content[valueKey]) : null) ;
-    }
-
-    var titleKey = this.getDelegateProperty('contentTitleKey', del) ;
-    if (titleKey && (key === titleKey || key === '*')) {
-      this.set('title', content ? (content.get ? content.get(titleKey) : content[titleKey]) : null) ;
-    }
-
-    var iconKey = this.getDelegateProperty('contentIconKey', del);
-    if (iconKey && (key === iconKey || key === '*')) {
-      this.set('icon', content ? (content.get ? content.get(iconKey) : content[iconKey]) : null) ;
-    }
-    
-    return this ;
-  },
+   contentKeys: {
+     'contentValueKey': 'value',
+     'contentTitleKey': 'title',
+     'contentIconKey': 'icon'
+   },
 
   /** @private - when title changes, dirty display. */
   _button_displayObserver: function() {
@@ -832,13 +794,14 @@ SC.ButtonView = SC.View.extend(SC.Control,
   _runAction: function(evt) {
     var action = this.get('action'),
         target = this.get('target') || null,
-        rootResponder = this.getPath('pane.rootResponder');
+        rootResponder;
         
     if (action) {
-      if (this._hasLegacyActionHandler()) {
-        // old school... V
-        this._triggerLegacyActionHandler(evt);
+      if (action && (SC.typeOf(action) === SC.T_FUNCTION)) {
+        this.action(evt);
+        return;
       } else {
+        rootResponder = this.getPath('pane.rootResponder');
         if (rootResponder) {
           // newer action method + optional target syntax...
           rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
@@ -861,26 +824,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private */
-  _hasLegacyActionHandler: function() {
-    var action = this.get('action');
-    if (action && (SC.typeOf(action) === SC.T_FUNCTION)) return true;
-    if (action && (SC.typeOf(action) === SC.T_STRING) && (action.indexOf('.') != -1)) return true;
-    return false;
-  },
-  
-  /** @private */
-  _triggerLegacyActionHandler: function( evt )
-  {
-    if (!this._hasLegacyActionHandler()) return false;
-  
-    var action = this.get('action');
-    if (SC.typeOf(action) === SC.T_FUNCTION) this.action(evt);
-    if (SC.typeOf(action) === SC.T_STRING) {
-      eval("this.action = function(e) { return "+ action +"(this, e); };");
-      this.action(evt);
-    }
-  },
   
   /** @private */
   didBecomeKeyResponderFrom: function(keyView) {

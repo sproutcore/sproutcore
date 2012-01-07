@@ -49,7 +49,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
   classNames: 'sc-image-view',
 
-  ariaRole: 'img',
+  // Don't apply this role until each image view can assign a non-empty string value for @aria-label <rdar://problem/9941887>
+  // ariaRole: 'img',
 
   displayProperties: ['frame', 'image', 'innerFrame', 'toolTip', 'imageValue', 'type'],
 
@@ -378,5 +379,5 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   name.
 */
 SC.ImageView.valueIsUrl = function(value) {
-  return value ? value.indexOf('/') >= 0 : NO ;
+  return value && SC.typeOf(value)===SC.T_STRING ? value.indexOf('/') >= 0 : NO ;
 } ;

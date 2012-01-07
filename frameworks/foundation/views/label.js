@@ -103,6 +103,17 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   */
   hint: null,
 
+  /*
+    Whether hint should be shown or not. By default this is tied to isEditable
+    so the hint will only show if isEditable is YES.
+
+    @type Boolean
+    @property
+  */
+  hintEnabled: function() {
+    return this.get('isEditable');
+  }.property('isEditable').cacheable(),
+
   /**
     An optional icon to display to the left of the label.  Set this value
     to either a CSS class name (for spriting) or an image URL.

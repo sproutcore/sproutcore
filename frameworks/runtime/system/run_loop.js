@@ -37,6 +37,16 @@ sc_require('private/observer_set');
   @extends SC.Object
   @since SproutCore 1.0
 */
+
+
+// When in debug mode, users can log deferred calls (such as .invokeOnce()) by
+// setting SC.LOG_DEFERRED_CALLS.  We'll declare the variable explicitly to make
+// life easier for people who want to enter it inside consoles that auto-
+// complete.
+//@if(debug)
+if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
+//@endif
+
 SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
   /**
@@ -135,9 +145,38 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
+    var deferredCallLoggingInfo;      // Used only in debug mode
+
+    //@if(debug)
+    // When in debug mode, SC.Object#invokeOnce() will pass in the originating
+    // method, target, and stack.  That way, we'll record the interesting parts
+    // rather than having most of these calls seemingly coming from
+    // SC.Object#invokeOnce().
+    //
+    // If it was not specified, we'll record the originating function ourselves.
+    var shouldLog = SC.LOG_DEFERRED_CALLS;
+    if (shouldLog) {
+      var originatingTarget = arguments[2],
+          originatingMethod = arguments[3],
+          originatingStack  = arguments[4];
+
+      if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
+      if (!originatingMethod) {
+        originatingStack  = SC._getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+
+      deferredCallLoggingInfo = {
+        originatingTarget: originatingTarget,
+        originatingMethod: originatingMethod,
+        originatingStack:  originatingStack
+      };
+    }
+    //@endif
+
     if (typeof method === "string") method = target[method];
     if (!this._invokeQueue) this._invokeQueue = SC.ObserverSet.create();
-    if ( method ) this._invokeQueue.add(target, method);
+    if ( method ) this._invokeQueue.add(target, method, undefined, deferredCallLoggingInfo);
     return this ;
   },
 
@@ -166,9 +205,39 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
+    var deferredCallLoggingInfo;      // Used only in debug mode
+
+    //@if(debug)
+    // When in debug mode, SC.Object#invokeOnce() will pass in the originating
+    // method, target, and stack.  That way, we'll record the interesting parts
+    // rather than having most of these calls seemingly coming from
+    // SC.Object#invokeOnce().
+    //
+    // If it was not specified, we'll record the originating function ourselves.
+    var shouldLog = SC.LOG_DEFERRED_CALLS;
+    if (shouldLog) {
+      var originatingTarget = arguments[2],
+          originatingMethod = arguments[3],
+          originatingStack  = arguments[4];
+
+      if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
+      if (!originatingMethod) {
+        originatingStack  = SC._getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+
+      deferredCallLoggingInfo = {
+        originatingTarget: originatingTarget,
+        originatingMethod: originatingMethod,
+        originatingStack:  originatingStack
+      };
+    }
+    //@endif
+
+
     if (typeof method === "string") method = target[method];
     if (!this._invokeLastQueue) this._invokeLastQueue = SC.ObserverSet.create();
-    this._invokeLastQueue.add(target, method);
+    this._invokeLastQueue.add(target, method, undefined, deferredCallLoggingInfo);
     return this ;
   },
 
@@ -255,6 +324,41 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
 });
 
+
+//@if(debug)
+ /**
+  Will return the recent stack as a hash with numerical keys, for nice output
+  in some browsers’ debuggers.  The “recent” stack is capped at 6 entries.
+
+  This is used by, amongst other places, SC.LOG_DEFERRED_CALLS.
+
+  @returns {Hash}
+*/
+SC._getRecentStack = function() {
+  var currentFunction = arguments.callee.caller,
+      i               = 0,
+      stack           = {},
+      first           = YES,
+      functionName;
+
+  while (currentFunction  &&  i < 10) {
+    // Skip ourselves!
+    if (first) {
+      first = NO;
+    }
+    else {
+      functionName = currentFunction.displayName || currentFunction.toString().substring(0, 40);
+      stack[i++]   = functionName;
+    }
+    currentFunction = currentFunction.caller;
+  }
+  
+  return stack;
+};
+//@endif
+
+
+
 /**
   The current run loop.  This is created automatically the first time you
   call begin().
@@ -298,6 +402,20 @@ SC.RunLoop.end = function() {
   runLoop.endRunLoop();
   return this ;
 } ;
+
+  
+/**
+  Call this to kill the current run loop--stopping all propagation of bindings
+  and observers and clearing all timers.
+  
+  This is useful if you are popping up an error catcher: you need a run loop
+  for the error catcher, but you don't want the app itself to continue
+  running.
+*/
+SC.RunLoop.kill = function() {
+  this.currentRunLoop = this.runLoopClass.create();
+  return this;
+};
 
 /**
   Returns YES when a run loop is in progress
@@ -346,4 +464,20 @@ SC.run = function(callback, target, forceNested) {
     if (callback) callback.call(target);
     if(forceNested || !alreadyRunning) SC.RunLoop.end();
   }
+};
+
+/** 
+  Wraps the passed function in code that ensures a run loop will
+  surround it when run.
+*/
+SC.RunLoop.wrapFunction = function(func) {
+  var ret = function() {
+    var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
+    if(!alreadyRunning) SC.RunLoop.begin();
+    var ret = arguments.callee.wrapped.apply(this,arguments);
+    if(!alreadyRunning) SC.RunLoop.end();
+    return ret;
+  };
+  ret.wrapped = func;
+  return ret;
 };

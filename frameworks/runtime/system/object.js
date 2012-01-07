@@ -70,8 +70,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   base._kvo_cloned = null;
 
   // get some common vars
-  var key, idx, len, cur, cprops = base.concatenatedProperties, K = SC.K ;
-  var p1,p2;
+  var key, idx, len, cur, cprops = base.concatenatedProperties, K = SC.K,
+      p1,p2;
 
   // first, save any concat props.  use old or new array or concat
   idx = (cprops) ? cprops.length : 0 ;
@@ -91,10 +91,10 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   // setup arrays for bindings, observers, and properties.  Normally, just
   // save the arrays from the base.  If these need to be changed during
   // processing, then they will be cloned first.
-  var bindings = base._bindings, clonedBindings = NO;
-  var observers = base._observers, clonedObservers = NO;
-  var properties = base._properties, clonedProperties = NO;
-  var paths, pathLoc, local ;
+  var bindings = base._bindings, clonedBindings = NO,
+      observers = base._observers, clonedObservers = NO,
+      properties = base._properties, clonedProperties = NO,
+      paths, pathLoc, local, value;
 
   // outlets are treated a little differently because you can manually
   // name outlets in the passed in hash. If this is the case, then clone
@@ -114,7 +114,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
     if (!ext.hasOwnProperty(key)) continue ;
 
     // get the value.  use concats if defined
-    var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
+    value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
 
     // Possibly add to a bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
@@ -210,8 +210,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
 
 SC._enhance = function(originalFunction, enhancement) {
   return function() {
-    var args = Array.prototype.slice.call(arguments, 0);
-    var self = this;
+    var args = Array.prototype.slice.call(arguments, 0),
+        self = this;
 
     args.unshift(function() { return originalFunction.apply(self, arguments); });
     return enhancement.apply(this, args);
@@ -324,9 +324,12 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     this.subclasses.add(ret); // now we can walk a class hierarchy
 
     // setup new prototype and add properties to it
-    var base = (ret.prototype = SC.beget(this.prototype));
-    var idx, len = arguments.length;
-    for(idx=0;idx<len;idx++) { SC._object_extend(base, arguments[idx], ret.__sc_super__) ; }
+    var base = (ret.prototype = SC.beget(this.prototype)),
+        idx, len = arguments.length;
+    
+    for(idx=0;idx<len;idx++) { 
+      SC._object_extend(base, arguments[idx], ret.__sc_super__) ; 
+    }
     base.constructor = ret; // save constructor
 
     if (bench) SC.Benchmark.end('SC.Object.extend') ;
@@ -532,12 +535,12 @@ SC.Object.prototype = {
     @returns {Object} receiver
   */
   mixin: function() {
-    var idx, len = arguments.length;
+    var idx, len = arguments.length, init;
     for(idx=0;idx<len;idx++) SC.mixin(this, arguments[idx]) ;
 
     // call initMixin
     for(idx=0;idx<len;idx++) {
-      var init = arguments[idx].initMixin ;
+      init = arguments[idx].initMixin ;
       if (init) init.call(this) ;
     }
     return this ;
@@ -716,8 +719,8 @@ SC.Object.prototype = {
   toString: function() {
     if (!this._object_toString) {
       // only cache the string if the klass name is available
-      var klassName = SC._object_className(this.constructor) ;
-      var string = "%@:%@".fmt(klassName, SC.guidFor(this));
+      var klassName = SC._object_className(this.constructor),
+          string = klassName + ":" + SC.guidFor(this);
       if (klassName) this._object_toString = string ;
       else return string ;
     }
@@ -754,25 +757,20 @@ SC.Object.prototype = {
     @returns {SC.Object} receiver
   */
   invokeOnce: function(method) {
-    SC.RunLoop.currentRunLoop.invokeOnce(this, method) ;
-    return this ;
-  },
-
-  /**
-    Invokes the passed method once at the end of the current runloop,
-    after bindings have synchronized. This is useful for situations where
-    you know you need to update something, but due to the way the run loop
-    works, you can't actually do the update until the run loop has completed.
-
-    Note that in development mode only, the object and method that call this
-    method will be recorded, for help in debugging scheduled code.
-
-    @param {Function|String} method method or method name
-    @returns {SC.Object} receiver
-  */
-  invokeLast: function(method) {
-    SC.RunLoop.currentRunLoop.invokeLast(this, method) ;
-    return this ;
+    //@if(debug)
+    // If we're logging deferred calls, send along the information that needs to
+    // be recorded.
+    var originatingTarget, originatingMethod, originatingStack;
+    if (SC.LOG_DEFERRED_CALLS) {
+      originatingTarget = this;
+      originatingStack  = SC._getRecentStack();
+      originatingMethod = originatingStack[0];
+    }
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);
+    return this;
+    //@endif
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method);
+    return this;
   },
 
   /**
@@ -806,8 +804,21 @@ SC.Object.prototype = {
     @param {Function|String} method method or method name
     @returns {SC.Object} receiver
   */
-  invokeNext: function (method) {
-    SC.RunLoop.currentRunLoop.invokeNext(this, method);
+  invokeLast: function(method) {
+    //@if(debug)
+    // If we're logging deferred calls, send along the information that needs to
+    // be recorded.
+    var originatingTarget, originatingMethod, originatingStack;
+    if (SC.LOG_DEFERRED_CALLS) {
+      originatingTarget = this ;
+      originatingStack  = SC._getRecentStack();
+      originatingMethod = originatingStack[0];
+    }
+    SC.RunLoop.currentRunLoop.invokeLast(this, method, originatingTarget, originatingMethod, originatingStack);
+    return this;
+    //@endif
+    SC.RunLoop.currentRunLoop.invokeLast(this, method);
+    return this;
   },
 
   /**
@@ -845,9 +856,11 @@ function findClassNames() {
   if (SC._object_foundObjectClassNames) return ;
   SC._object_foundObjectClassNames = true ;
 
-  var seen = [] ;
-  var detectedSC = false;
+  var seen = [],
+      detectedSC = false;
   var searchObject = function(root, object, levels) {
+    
+    var path, value, type;
     levels-- ;
 
     // not the fastest, but safe
@@ -864,11 +877,11 @@ function findClassNames() {
         detectedSC = true;
       }
 
-      var path = (root) ? [root,key].join('.') : key ;
-      var value = object[key] ;
+      path = (root) ? [root,key].join('.') : key ;
+      value = object[key] ;
 
       try {
-        var type = SC.typeOf(value);
+        type = SC.typeOf(value);
       } catch (e) {
         // Firefox gives security errors when trying to run typeOf on certain objects
         break;

@@ -263,3 +263,19 @@ test("Ensure that log messages via the “will not format” methods don’t for
   equals(SC.Logger.getPath('recordedLogMessages.3').originalArguments[1], null, "errorWithoutFmt() should record all the arguments (1)");
   equals(SC.Logger.getPath('recordedLogMessages.3').originalArguments[2], 1, "errorWithoutFmt() should record all the arguments (2)");
 });
+
+
+
+// ..........................................................
+// LOG MESSAGE PREFIX
+//
+test("Ensure that the log message prefix is respected", function() {
+  SC.Logger.set('recordedLogMessages', null);
+
+  SC.Logger.set('logRecordingLevel', SC.LOGGER_LEVEL_DEBUG);
+
+  SC.Logger.set('messagePrefix', "prefix: ");
+  SC.Logger.debug("message");
+
+  equals(SC.Logger.getPath('recordedLogMessages.0').message, "prefix: message", "The message should have the specified prefix");
+});

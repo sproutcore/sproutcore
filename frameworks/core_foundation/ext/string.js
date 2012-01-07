@@ -54,6 +54,13 @@ SC.supplement(String.prototype,
     var args = SC.$A(arguments);
     args.unshift(this);
     return SC.String.locWithDefault.apply(SC.String, args);
+  },
+  
+  /**
+    @see SC.String.mult
+  */
+  mult: function(value) {
+    return SC.String.mult(this, value);
   }
 
 });

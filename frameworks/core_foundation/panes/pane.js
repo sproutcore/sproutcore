@@ -6,7 +6,17 @@
 // ==========================================================================
 
 sc_require('views/view');
+sc_require('views/view/acceleration');
+sc_require('views/view/cursor');
+sc_require('views/view/enabled');
+sc_require('views/view/keyboard');
+sc_require('views/view/layout');
+sc_require('views/view/manipulation');
+sc_require('views/view/theming');
+sc_require('views/view/touch');
+sc_require('views/view/visibility');
 sc_require('mixins/responder_context');
+
 
 /**
   Indicates a value has a mixed state of both on and off.
@@ -438,9 +448,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     var dom = this.get('layer') ;
     if (dom && dom.parentNode) dom.parentNode.removeChild(dom) ;
     dom = null ;
-
-    // layer is cached by SC.View in this._view_layer, remove it so that the DOM node can be freed
-    this.destroyLayer();
 
     // remove intercept
     this._removeIntercept();

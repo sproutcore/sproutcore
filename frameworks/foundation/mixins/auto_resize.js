@@ -59,6 +59,16 @@ SC.AutoResize = {
   shouldMeasureSize: YES,
 
   /**
+    Caches sizes for measured strings. This cache does not have a max size, so
+    should only be used when a view has a limited number of possible values.
+    Multiple views that have the same batchResizeId will share the same cache.
+
+    @type Boolean
+    @default NO
+  */
+  shouldCacheSizes: NO,
+
+  /**
     Determines if the view's width should be resized
     on calculation.
 
@@ -86,6 +96,101 @@ SC.AutoResize = {
     @type Rect
   */
   measuredSize: { width: 0, height: 0 },
+  
+  /**
+    If provided, will limit the maximum width to this value.
+  */
+  maxWidth: null,
+  
+  /**
+    If provided, will limit the maximum height to this value.
+  */
+  maxHeight: null,
+  
+  /**
+    If YES, the view's text will be resized to fit the view. This is applied _after_ any
+    resizing, so will only take affect if shouldAutoResize is off, or a maximum width/height
+    is set.
+    
+    You also must set a minimum and maximum font size. Any auto resizing will happen at the
+    maximum size, and then the text will be resized as necessary.
+  */
+  shouldAutoFitText: NO,
+
+  /**
+    If NO, the calculated font size may be any size between minFontSize and
+    maxFontSize. If YES, it will only be either minFontSize or maxFontSize.
+
+    @type Boolean
+    @default NO
+  */
+  autoFitDiscreteFontSizes: NO,
+  
+  /**
+    The minimum font size to use when automatically fitting text. If shouldAutoFitText is set,
+    this _must_ be supplied.
+    
+    Font size is in pixels.
+  */
+  minFontSize: 12,
+  
+  /**
+    The maximum font size to use when automatically fitting text. If shouldAutoFitText is set,
+    this _must_ be supplied.
+    
+    Font size is in pixels.
+  */
+  maxFontSize: 20,
+  
+  /**
+    If shouldAutoFitText is YES, this is the calculated font size.
+  */
+  calculatedFontSize: 20,
+  
+  fontPropertyDidChange: function() {
+    if(this.get('shouldAutoFitText')) this.invokeLast(this.fitTextToFrame);
+  }.observes('shouldAutoFitText', 'minFontSize', 'maxFontSize', 'measuredSize'),
+
+  /**
+    Observes the measured size and actually performs the resize if necessary.
+  */
+  measuredSizeDidChange: function() {
+    var measuredSize = this.get('measuredSize'),
+    calculatedWidth = measuredSize.width, calculatedHeight = measuredSize.height,
+    paddingHeight, paddingWidth,
+    autoResizePadding = this.get('autoResizePadding') || 0,
+    maxWidth = this.get('maxWidth'), maxHeight = this.get('maxHeight');
+
+    if(SC.typeOf(autoResizePadding) === SC.T_NUMBER) {
+      paddingHeight = paddingWidth = autoResizePadding;
+    } else {
+      paddingHeight = autoResizePadding.height;
+      paddingWidth = autoResizePadding.width;
+    }
+
+    calculatedHeight += paddingHeight;
+    calculatedWidth += paddingWidth;
+
+    if(this.get('shouldAutoResize')) {
+      // if we are allowed to autoresize, adjust the layout
+      if (this.get('shouldResizeWidth')) {
+        if (maxWidth && calculatedWidth > maxWidth) {
+          calculatedWidth = maxWidth;
+        }
+        this.set('calculatedWidth', calculatedWidth);
+        this.adjust('width', calculatedWidth);
+      }
+
+      if (this.get('shouldResizeHeight')) {
+        if (maxHeight && calculatedHeight > maxHeight) {
+          calculatedHeight = maxHeight;
+        }
+        this.set('calculatedHeight', calculatedHeight);
+        this.adjust('height', calculatedHeight);
+      }
+    }
+
+  }.observes('shouldAutoResize', 'measuredSize', 'autoResizePadding', 'maxWidth', 'minWidth', 'shouldResizeWidth', 'shouldResizeHeight'),
 
   /**
     @private
@@ -100,61 +205,41 @@ SC.AutoResize = {
   },
 
   /**
-    Observe the autoResizePadding so we can update our measurements if it changes.
-
-    @private
-  */
-  _scar_autoResizePaddingDidChange: function() {
-    this.invokeOnce('measureSize');
-  }.observes('autoResizePadding'),
-
-
-  /**
     If this property is provided, all views that share the same value for this property will be resized as a batch for increased performance.
 
     @type String
   */
   batchResizeId: null,
 
-  /** @private */
-  _scar_measurementPending: NO,
-  
-  /** @private */
-  _scar_requestedBatchResizeId: null,
-
-  /** @private
-    If the batch id changed while a request is out, we have to fix it
-  */
-  _scar_batchResizeIdDidChange: function() {
-    var batchResizeId = this.get('batchResizeId'),
-    requestedBatchResizeId = this._scar_requestedBatchResizeId;
-
-    // check if a request is out and the id changed
-    if(this._scar_measurementPending && this._scar_requestedBatchResizeId !== batchResizeId) {
-      // if so, cancel the old request and make a new one
-      SC.AutoResizeManager.cancelMeasurementForView(this, requestedBatchResizeId);
-      SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
-
-      // update the requested batchResizeId to the new id
-      this._scar_requestedBatchResizeId = batchResizeId;
-    }
-  }.observes('batchResizeId'),
-
   /**
-    Schedules a measurement to happen later, in batch mode. Only valid when the view
-    has a `batchResizeId`.
+    Schedules a measurement to happen later.
   */
   scheduleMeasurement: function() {
-    if (!this.get('shouldMeasureSize')) {
-      return;
-    }
-
     var batchResizeId = this.get('batchResizeId');
-    SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
 
-    this._scar_measurementPending = YES;
-    this._scar_requestedBatchResizeId = batchResizeId;
-  }.observes('isVisible'),
+    // only measure if we are visible, active, and the text or style actually changed
+    if (!this.get('shouldMeasureSize') || !this.get('isVisibleInWindow') || (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId)) return;
+
+    // batchResizeId is allowed to be undefined; views without an id will just
+    // get measured one at a time
+    SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
+  }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId'),
+
+  _lastMeasuredText: null,
+
+  _cachedMetrics: function(key, value) {
+    if(!this.get('shouldCacheSizes')) return;
+
+    // if we don't have a tag, then it is unique per view
+    // you shouldn't usually turn on caching without a tag, but it is supported
+    var cacheSlot = SC.cacheSlotFor(this.get('batchResizeId') || this),
+    autoResizeText = this.get('autoResizeText');
+
+    if(value) cacheSlot[autoResizeText] = value;
+    else value = cacheSlot[autoResizeText];
+
+    return value;
+  }.property('shouldCacheSizes', 'autoResizeText', 'batchResizeId').cacheable(),
 
   /**
     Measures the size of the view.
@@ -162,70 +247,202 @@ SC.AutoResize = {
     @param batch For internal use during batch resizing.
   */
   measureSize: function(batch) {
-    var metrics, layer, value = this.get('autoResizeText'),
-        autoSizePadding, paddingHeight, paddingWidth,
-        ignoreEscape = !this.get('escapeHTML');
+    var metrics, layer = this.get('autoResizeLayer'), autoResizeText = this.get('autoResizeText'),
+        ignoreEscape = !this.get('escapeHTML'),
+        batchResizeId = this.get('batchResizeId'),
+        cachedMetrics = this.get('_cachedMetrics'),
+        maxFontSize = this.get('maxFontSize');
 
-    // There are two special cases.
+    if(!layer) return;
+
+    // There are three special cases.
+    //   - size is cached: the cached size is used with no measurement
+    //     necessary
     //   - empty: we should do nothing. The metrics are 0.
     //   - batch mode: just call measureString.
     //
     // If we are in neither of those special cases, we should go ahead and
     // resize normally.
     //
-    if (SC.none(value) || value === "") {
+    if(cachedMetrics) {
+      metrics = cachedMetrics;
+    }
+
+    else if (SC.none(autoResizeText) || autoResizeText === "") {
       metrics = { width: 0, height: 0 };
-    } else if (batch) {
-      metrics = SC.measureString(value, ignoreEscape);
-    } else {
-      // Normal resize pattern: get our own layer, pass it as a template to SC.metricsForString.
-      layer = this.get('autoResizeLayer');
-
-      if(!layer) {
-        return;
-      }
-
-      metrics = SC.metricsForString(value, layer, this.get('classNames'), ignoreEscape);
     }
 
-    // metrics should include padding
-    autoSizePadding = this.get('autoResizePadding') || 0;
-    if(SC.typeOf(autoSizePadding) === SC.T_NUMBER) {
-      paddingHeight = paddingWidth = autoSizePadding;
-    } else {
-      paddingHeight = autoSizePadding.height;
-      paddingWidth = autoSizePadding.width;
+    else if (batch) {
+      metrics = SC.measureString(autoResizeText, ignoreEscape);
     }
 
-    metrics.width += paddingWidth;
-    metrics.height += paddingHeight;
+    else {
+      this.prepareLayerForStringMeasurement(layer);
+
+      metrics = SC.metricsForString(autoResizeText, layer, this.get('classNames'), ignoreEscape);
+    }
 
     // In any case, we set measuredSize.
     this.set('measuredSize', metrics);
 
-    if (this.get('shouldAutoResize')) {
-      // if we are allowed to autoresize, adjust the layout
-      if (this.get('shouldResizeWidth')) {
-        this.adjust('width', metrics.width);
-      }
+    // and update the cache if we are using it
+    if(this.get('shouldCacheSizes')) this.setIfChanged('_cachedMetrics', metrics);
 
-      if (this.get('shouldResizeHeight')) {
-        this.adjust('height', metrics.height);
-      }
-
-    }
-
-    this._scar_measurementPending = NO;
+    // set the measured value so we can avoid extra measurements in the future
+    this._lastMeasuredText = autoResizeText;
+    this._lastMeasuredId = batchResizeId;
 
     return metrics;
   },
-
+  
+  
+  //
+  // FITTING TEXT
+  //
+  
   /**
-    @private
+    If we are fitting text, the layer must be measured with its font size set to our
+    maximum font size.
   */
-  _scar_valueDidChange: function() {
-    this.scheduleMeasurement();
-  }.observes('autoResizeText'),
+  prepareLayerForStringMeasurement: function(layer) {
+    var maxFontSize = this.get('maxFontSize');
+
+    if (this.get('shouldAutoFitText') && this.get('calculatedFontSize') !== maxFontSize) {
+      layer.style.fontSize = maxFontSize + "px";
+    }
+  },
+  
+  /**
+    Whenever the view resizes, the text fitting must be reevaluated.
+  */
+  viewDidResize: function(orig) {
+    orig();
+
+    this.fontPropertyDidChange();
+  }.enhance(),
+  
+  /**
+    Fits the text into the frame's size, minus autoResizePadding.
+  */
+  fitTextToFrame: function() {      
+    // we can only fit text when we have a layer.
+    var layer = this.get('autoResizeLayer');
+    if (!layer) return;
+
+    var maxFontSize = this.get('maxFontSize'),
+        minFontSize = this.get('minFontSize');
+
+    // if the font size has been adjusted, reset it to the max
+    this.prepareLayerForStringMeasurement(layer);
+    
+    var frame = this.get('frame'),
+    
+        padding = this.get('autoResizePadding') || 0,
+        
+        // these need to be shrunk by 1 pixel or text that is exactly as wide as
+        // the frame will be truncated
+        width = frame.width - 1, height = frame.height - 1,
+        measured = this.get('measuredSize'),
+        mWidth = measured.width, mHeight = measured.height;
+
+    // figure out and apply padding to the width/height
+    if(SC.typeOf(padding) === SC.T_NUMBER) {
+      width -= padding;
+      height -= padding;
+    } else {
+      width -= padding.width;
+      height -= padding.height;
+    }
+        
+    // measured size is at maximum. If there is no resizing to be done, short-circuit.
+    if (mWidth <= width && mHeight <= height) return;
+
+    // if only discrete values are allowed, we can short circuit here and just
+    // use the minimum
+    if(this.get('autoFitDiscreteFontSizes')) {
+      actual = minFontSize;
+    }
+
+    // otherwise we have to find the actual best font size
+    else {
+      // now, we are going to make an estimate font size. We will figure out the proportion
+      // of both actual width and actual height to the measured width and height, and then we'll
+      // pick the smaller. We'll multiply that by the maximum font size to figure out
+      // a rough guestimate of the proper font size.
+      var xProportion = width / mWidth, yProportion = height / mHeight,
+      
+          guestimate = Math.floor(maxFontSize * Math.min(xProportion, yProportion)),
+          actual,
+          
+          classNames = this.get('classNames'),
+          ignoreEscape = !this.get('escapeHTML'),
+          value = this.get('autoResizeText'),
+          
+          metrics;
+      
+
+      guestimate = actual = Math.min(maxFontSize, Math.max(minFontSize, guestimate));
+
+      // Now, we must test the guestimate. Based on that, we'll either loop down
+      // or loop up, depending on the measured size.
+      layer.style.fontSize = guestimate + "px";
+      metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+
+      if (metrics.width > width || metrics.height > height) {
+        
+        // if we're larger, we must go down until we are smaller, at which point we are done.
+        for (guestimate = guestimate - 1; guestimate >= minFontSize; guestimate--) {
+          layer.style.fontSize = guestimate + "px";
+          metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+          
+          // always have an actual in this case; even if we can't get it small enough, we want
+          // to keep this as close as possible.
+          actual = guestimate;
+          
+          // if the new size is small enough, stop shrinking and set it for real
+          if (metrics.width <= width && metrics.height <= height) {
+            break;
+          }
+        }
+        
+      } else if (metrics.width < width || metrics.height < height) {
+        // if we're smaller, we must go up until we hit maxFontSize or get larger. If we get
+        // larger, we want to use the previous guestimate (which we know was valid)
+        //
+        // So, we'll start actual at guestimate, and only increase it while we're smaller.
+        for (guestimate = guestimate + 1; guestimate <= maxFontSize; guestimate++) {
+          layer.style.fontSize = guestimate + "px";
+          metrics = SC.metricsForString(value, layer, classNames, ignoreEscape);
+          
+          // we update actual only if it is still valid. Then below, whether valid
+          // or not, if we are at or past the width/height we leave
+          if (metrics.width <= width && metrics.height <= height) {
+            actual = guestimate;
+          }
+          
+          // we put this in a separate if statement JUST IN CASE it is ===.
+          // Unlikely, but possible, and why ruin a good thing?
+          if (metrics.width >= width || metrics.height >= height){
+            break;
+          }
+        }
+      }
+    }
+    
+    layer.style.fontSize = actual + "px";
+    this.set('calculatedFontSize', actual);
+  },
+  
+  /**
+    Extends renderSettingsToContext to add font size if shouldAutoFitText is YES.
+  */
+  applyAttributesToContext: function(orig, context) {
+    orig(context);
+    
+    if (this.get('shouldAutoFitText')) {
+      context.css('font-size', this.get('calculatedFontSize') + "px");
+    }
+  }.enhance(),
 
   /**
     @private
@@ -247,19 +464,12 @@ SC.AutoResize = {
  * methods/properties into each view.
  */
 SC.AutoResizeManager = {
-
-  /**
-    A hash of views needing resizing, mapped from batch resize ID to SC.CoreSets
-    of views.
-  */
-  viewsNeedingResize: null,
-
   /**
     Views queued for batch resizing, but with no batch resize id.
 
     @property {SC.CoreSet}
   */
-  untaggedViews: null,
+  measurementQueue: SC.CoreSet.create(),
 
   /**
     Schedules a re-measurement for the specified view in the batch with the
@@ -271,20 +481,8 @@ SC.AutoResizeManager = {
     @param view The view to measure.
     @param id The id of the batch to measure the view in.
   */
-  scheduleMeasurementForView: function(view, id) {
-    // views with no tag just get put in their own list
-    if(SC.none(id)) {
-      var untaggedViews = this.untaggedViews || (this.untaggedViews = SC.CoreSet.create());
-
-      untaggedViews.add(view);
-
-    // views with a batch resize id set for each tag
-    } else {
-      var needResize = this.viewsNeedingResize || (this.viewsNeedingResize = {}),
-      views = needResize[id] || (needResize[id] = SC.CoreSet.create());
-
-      views.add(view);
-    }
+  scheduleMeasurementForView: function(view) {
+    this.measurementQueue.add(view);
 
     SC.RunLoop.currentRunLoop.invokeLast(this.doBatchResize);
   },
@@ -296,11 +494,7 @@ SC.AutoResizeManager = {
     @param id The batch id the view was scheduled in.
   */
   cancelMeasurementForView: function(view, id) {
-    var set = SC.none(id) ? this.untaggedViews : this.viewsNeedingResize[id];
-
-    if(set) {
-      set.remove(view);
-    }
+    this.measurementQueue.remove(view);
   },
 
   /**
@@ -314,39 +508,52 @@ SC.AutoResizeManager = {
       return SC.AutoResizeManager.doBatchResize();
     }
 
-    var tag, views, view, layer, batches, prepared;
+    var tag, view, layer, measurementQueue = this.measurementQueue, prepared, autoResizeText,
+    i, len;
 
-    // first measure all the batched views
-    batches = this.viewsNeedingResize;
-    for(tag in batches) {
-      if (batches.hasOwnProperty(tag)) {
-        views = batches[tag];
+    while((len = measurementQueue.get('length')) > 0) {
+      prepared = NO;
+      // save the first tag we see
+      tag = measurementQueue[len - 1].get('batchResizeId');
 
-        // now measure the rest using the same settings
-        while ((view = views.pop())) {
-          if(view.get('isVisible') && (layer = view.get('autoResizeLayer'))) {
-            if(!prepared) SC.prepareStringMeasurement(layer);
+      // now we iterate over all the views with the same tag
+      for(i = len - 1; i >= 0; --i) {
+        view = measurementQueue[i];
 
-            view.measureSize(YES);
+        // if the view has a different tag, skip it
+        if(view.get('batchResizeId') !== tag) continue;
+
+        // make sure the view is still qualified to be measured
+        if(view.get('isVisibleInWindow') && view.get('shouldMeasureSize') && (layer = view.get('autoResizeLayer'))) {
+          autoResizeText = view.get('autoResizeText');
+
+          // if the text is empty or a size is cached don't bother preparing
+          if(!SC.none(autoResizeText) && autoResizeText !== "" && !view.get('_cachedMetrics') && !prepared) {
+            // this is a bit of a hack: before we can prepare string measurement, there are cases where we
+            // need to reset the font size first (specifically, if we are also fitting text)
+            //
+            // It is expected that all views in a batch will have the same font settings.
+            view.prepareLayerForStringMeasurement(layer);
+            
+            // now we can tell SC to prepare the layer with the settings from the view's layer
+            SC.prepareStringMeasurement(layer, view.get('classNames'));
+            prepared = YES;
           }
+
+          view.measureSize(YES);
         }
 
-        // if they were all isVisible:NO, then prepare was never called
-        // so do not call teardown
-        if(prepared) SC.teardownStringMeasurement();
+        // it's been handled
+        measurementQueue.remove(view);
+
+        // if the view didn't have a tag, we can't batch so just move on
+        if(!tag) break;
+      }
+
+      // only call teardown if prepare was called
+      if(prepared) {
+        SC.teardownStringMeasurement();
       }
     }
-
-    // measure views with no batch id
-    views = this.untaggedViews;
-
-    if(!views) {
-      return;
-    }
-
-    while((view = views.pop())) {
-      view.measureSize();
-    }
   }
-
 };

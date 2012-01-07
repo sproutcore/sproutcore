@@ -18,6 +18,7 @@ module("SC.Statechart: Responder Chain Tests", {
         viewB: SC.View.extend(SC.StatechartManager, {
 
           initialState: 'a',
+          returnValue: NO,
 
           a: SC.State.design({
             mouseDown: function(evt) {
@@ -41,11 +42,15 @@ module("SC.Statechart: Responder Chain Tests", {
           
           keyUp: function(evt) { 
             responder = this;
-          }
+            return this.get('returnValue');
+          },
+          
+          toString: function() { return "view B"; }
 
         }),
         
         keyUp: function(evt) { 
+          console.log('%@: keyUp invoked'.fmt(this));
           responder = this;
         },
         
@@ -55,7 +60,9 @@ module("SC.Statechart: Responder Chain Tests", {
         
         click: function(evt) {
           responder = this;
-        }
+        },
+        
+        toString: function() { return "view A"; }
         
       })
       
@@ -91,9 +98,10 @@ test("check state A and B are responders -- mouseDown, mouseUp", function() {
 });
 
 test("check view B is responder -- keyUp", function() {
+  viewB.set('returnValue', YES);
   equals(responder, null, "responder should be null");
   pane.sendEvent('keyUp', {}, viewB);
-  equals(responder, viewB, "view A should be responder");
+  equals(responder, viewB, "view B should be responder");
 });
 
 test("check view A is responder -- keyDown", function() {

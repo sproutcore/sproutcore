@@ -183,7 +183,7 @@ SC.ResponderContext = {
   },
 
   _notifyWillLoseFirstResponder: function(responder, cur, root, evt) {
-    if (cur === root) return ; // nothing to do
+    if (!cur || cur === root) return ; // nothing to do
 
     cur.willLoseFirstResponder(responder, evt);
     cur.set('hasFirstResponder', NO);
@@ -193,7 +193,7 @@ SC.ResponderContext = {
   },
 
   _notifyDidBecomeFirstResponder: function(responder, cur, root) {
-    if (cur === root) return ; // nothing to do
+    if (!cur || cur === root) return ; // nothing to do
 
     var next = this.nextResponderFor(cur);
     if (next) this._notifyDidBecomeFirstResponder(responder, next, root);

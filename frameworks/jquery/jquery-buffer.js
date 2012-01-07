@@ -4,7 +4,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 // sc_require("jquery");
-jQuery.Buffer = (function() {
+jQuery.Buffer = function() {
 
   var Buffer = function(elem) {
     if (elem) this.assign(elem);
@@ -387,4 +387,4 @@ jQuery.Buffer = (function() {
   dn(Buffer.prototype);
 
   return Buffer;
-})();
+}();

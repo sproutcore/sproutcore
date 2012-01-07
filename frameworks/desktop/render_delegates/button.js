@@ -17,22 +17,22 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   //
   'sc-small-size': {
     height: 18,
-    autoResizePadding: 15
+    autoResizePadding: { width: 15, height: 0 }
   },
 
   'sc-regular-size': {
     height: 24,
-    autoResizePadding: 20
+    autoResizePadding: { width: 20, height: 0 }
   },
 
   'sc-huge-size': {
     height: 30,
-    autoResizePadding: 30
+    autoResizePadding: { width: 30, height: 0 }
   },
 
   'sc-jumbo-size': {
     height: 44,
-    autoResizePadding: 50
+    autoResizePadding: { width: 50, height: 0 }
   },
 
 
@@ -48,17 +48,20 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   */
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
-
+    
     var labelContent,
         toolTip     = dataSource.get('toolTip'),
         isSelected  = dataSource.get('isSelected') || NO,
         isActive    = dataSource.get('isActive') || NO,
+        isDefault   = dataSource.get('isDefault') || NO,
+        isCancel    = dataSource.get('isCancel') || NO,
+        isToggle    = dataSource.get('isToggle') || NO,
         labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
-      'icon': !!dataSource.get('icon') || NO,
-      'def': dataSource.get('isDefault'),
-      'cancel': dataSource.get('isCancel'),
+      'icon': !!dataSource.get('icon'),
+      'def':  isDefault,
+      'cancel': isCancel && !isDefault,
       'active': isActive,
       'sel': isSelected
     });
@@ -67,11 +70,15 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       context.attr('title', toolTip);
       context.attr('alt', toolTip);
     }
-
+    
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
-
     // accessibility
-    context.attr('aria-pressed', isActive.toString());
+    if(dataSource.get('isSegment')){
+      context.attr('aria-selected', isSelected.toString());
+    }else if(isToggle) {
+      context.attr('aria-pressed', isActive.toString());
+    } 
+    
     context.attr('aria-labelledby', labelId);
 
     // Create the inner label element that contains the text and, optionally,
@@ -95,18 +102,35 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
+    var isToggle = (dataSource.get('buttonBehavior')===SC.TOGGLE_BEHAVIOR);
+    
     this.updateSizeClassName(dataSource, jquery);
 
     if (dataSource.get('isActive')) {
       jquery.addClass('active');
     }
 
-    jquery.attr('aria-pressed', dataSource.get('isActive').toString());
 
-    jquery.setClass('icon', !!dataSource.get('icon') || NO);
-    jquery.setClass('def', dataSource.get('isDefault') || NO);
-    jquery.setClass('cancel', dataSource.get('isCancel') || NO);
+    var isDefault = dataSource.get('isDefault'),
+        isCancel = dataSource.get('isCancel');if(dataSource.get('isSegment')){
+      jquery.attr('aria-selected', dataSource.get('isSelected').toString());
+    }else if(isToggle){
+      jquery.attr('aria-pressed', dataSource.get('isActive').toString());
+    }
+    
+    jquery.attr('title', dataSource.get('toolTip'));
+
+    jquery.setClass('icon', !!dataSource.get('icon'));
+    jquery.setClass('def', !!isDefault);
+    jquery.setClass('cancel', !!isCancel && !isDefault);
 
     dataSource.get('theme').labelRenderDelegate.update(dataSource, jquery.find('label'));
+  },
+  
+  /**
+    Returns the layer to be used for auto resizing.
+  */
+  getRenderedAutoResizeLayer: function(dataSource, jq) {
+    return jq.find('.sc-button-label')[0];
   }
 });

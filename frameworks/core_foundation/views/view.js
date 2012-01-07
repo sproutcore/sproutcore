@@ -45,6 +45,29 @@ SC.CoreView.reopen(
   concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings'],
 
   /**
+    The WAI-ARIA role of the control represented by this view. For example, a
+    button may have a role of type 'button', or a pane may have a role of
+    type 'alertdialog'. This property is used by assistive software to help
+    visually challenged users navigate rich web applications.
+
+    The full list of valid WAI-ARIA roles is available at:
+    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+
+    @property {String}
+  */
+  
+  ariaRole: null,
+
+  /**
+    The full list of valid WAI-ARIA roles is available at:
+    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+
+    @property {String}
+  */
+  
+  ariaHidden: null,
+  
+  /**
     The current pane.
     @property {SC.Pane}
   */
@@ -405,6 +428,8 @@ SC.CoreView.reopen(
   _notifyDidCreateLayer: function() {
     this.notifyPropertyChange('layer');
 
+    if (this.get('useStaticLayout')) this.viewDidResize();
+
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
     // and notify others
@@ -480,8 +505,8 @@ SC.CoreView.reopen(
   */
   replaceLayer: function() {
     this.destroyLayer();
-    //this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocation) ;
+    this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocationIfNeeded);
   },
 
   /**
@@ -566,7 +591,10 @@ SC.CoreView.reopen(
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
         nextView.updateLayerLocationIfNeeded() ;
-        nextNode = nextView.get('layer') ;
+        
+        // just in case it still couldn't generate the layer, force to null, because
+        // IE doesn't support insertBefore(blah, undefined) in version IE9.
+        nextNode = nextView.get('layer') || null;
       }
 
       // add to parentNode if needed.
@@ -679,15 +707,16 @@ SC.CoreView.reopen(
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
     if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
-    if (this.get('isFirstResponder')) {
-      context.addClass('focus');
-      context.attr('tabindex', '0');
-    }else{
-      context.attr('tabindex', '-1');
-    }
-
+    if (this.get('isFirstResponder')) { context.addClass('focus'); }
+    
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
+    
+    var _ariaHidden = this.get('ariaHidden');
+    if(_ariaHidden!==null){
+      if(_ariaHidden === NO) context.removeAttr('aria-hidden');
+      else context.attr('aria-hidden', _ariaHidden);
+    }   
   },
 
   /**
@@ -717,7 +746,7 @@ SC.CoreView.reopen(
 
       // Set up an observer on the context. If the property changes, toggle the
       // class name.
-      observer = function() {
+      var observer = function() {
         // Get the current value of the property
         newClass = this._classStringForProperty(property);
         elem = this.$();
@@ -938,19 +967,8 @@ SC.CoreView.reopen(
   */
   tagName: 'div',
 
-  /**
-    The WAI-ARIA role of the control represented by this view. For example, a
-    button may have a role of type 'button', or a pane may have a role of
-    type 'alertdialog'. This property is used by assistive software to help
-    visually challenged users navigate rich web applications.
 
-    The full list of valid WAI-ARIA roles is available at:
-    http://www.w3.org/TR/wai-aria/roles#roles_categorization
-
-    @property {String}
-  */
-  ariaRole: null,
-
+  
   /**
     Standard CSS class names to apply to the view's outer element.  This
     property automatically inherits any class names defined by the view's
@@ -1017,7 +1035,7 @@ SC.CoreView.reopen(
     @property {Array}
     @readOnly
   */
-  displayProperties: [],
+  displayProperties: ['ariaHidden'],
 
   // .......................................................
   // SC.RESPONDER SUPPORT

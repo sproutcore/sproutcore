@@ -80,7 +80,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
     store = null;
     childData1 = null;
     NestedRecord = null;
-    delete(window.NestedRecord);
+    //delete(window.NestedRecord);
   }
 });
 
