@@ -7,19 +7,19 @@
 
 /**
   Renders and updates the DOM representation of a slider.
-  
+
   Parameters
   -------------------------
   Requires the following parameters:
-  
+
    - `value` -- a value from 0 to 1.
    - `frame` -- containing the frame in which the slider is being drawn.
 */
 
 SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
-  
+
   className: 'slider',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
@@ -49,7 +49,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
 
     dataSource.get('renderState')._cachedHandle = null;
   },
-  
+
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 
@@ -74,5 +74,5 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       handle.css('left', value + "%");
     }
   }
-  
+
 });
