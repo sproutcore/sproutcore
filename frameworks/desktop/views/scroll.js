@@ -1070,7 +1070,7 @@ SC.ScrollView = SC.View.extend({
   
   /** @private */
   captureTouch: function(touch) {
-    return YES;
+    return !touch.targetView.get('isNativeWidget');
   },
   
   /** @private */

@@ -34,6 +34,14 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   ariaRole: 'textbox',
 
+  /**
+    Whether this view will accept native events.
+    @type Boolean
+    @default YES
+    @see SC.ScrollView#captureTouch
+   */
+  isNativeWidget: YES,
+
   _field_isMouseDown: NO,
 
   /**
