@@ -82,14 +82,12 @@ SC.String = /** @scope SC.String.prototype */ {
   */
   fmt: function(string, args) {
     var i = 0, data = undefined, hasHadNamedArguments;
-    
     if (args) {
       data = args[0];
     }
     
     return string.replace(/%\{(.*?)\}/g, function(match, propertyPath) {
       hasHadNamedArguments = YES;
-      
       if (!data) {
         throw "Cannot use named parameters with `fmt` without a data hash. String: '" + string + "'";
       }
@@ -99,10 +97,9 @@ SC.String = /** @scope SC.String.prototype */ {
       if (hasHadNamedArguments) {
         throw "Invalid attempt to use both named parameters and indexed parameters. String: '" + string + "'";
       }
-      
       index = index ? parseInt(index, 10) - 1 : i++;
-
-      return args[index];
+      if(args[index]!==undefined) return args[index];
+      else return "";
     });
   },
   
