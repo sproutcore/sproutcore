@@ -71,12 +71,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       }
 
       var frame = dataSource.get('frame'), value = dataSource.get('value');
-      if (frame && SC.platform.supportsCSS3DTransforms) {
-        value = (value / 100) * frame.width;
-        handle[0].style.cssText = "-webkit-transform: translate3d(" + value + "px,0,0);";
-      } else {
-        handle.css('left', value + "%");
-      }
+      handle.css('left', value + "%");
     }
   }
 
