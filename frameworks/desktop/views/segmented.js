@@ -699,25 +699,25 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function(evt) {
-    var renderDelegate = this.get('renderDelegate');
-
-    if (renderDelegate && renderDelegate.indexForClientPosition) {
-      
-      var x = evt.clientX;
-      var y = evt.clientY;
-      
-      // Accessibility workaround: <rdar://problem/10467360> WebKit sends all event coords as 0,0 for all AXPress-triggered events
-      if (x === 0 && y === 0) {
-        var el = evt.target;
-        if (el) {
-          var offset = SC.offset(el);
-          x = offset.x + Math.round(el.offsetWidth/2);
-          y = offset.y + Math.round(el.offsetHeight/2);
-        }
+    var renderDelegate = this.get('renderDelegate');      
+    var x = evt.clientX;
+    var y = evt.clientY;
+    
+    // Accessibility workaround: <rdar://problem/10467360> WebKit sends all event coords as 0,0 for all AXPress-triggered events
+    if (x === 0 && y === 0) {
+      var el = evt.target;
+      if (el) {
+        var offset = SC.offset(el);
+        x = offset.x + Math.round(el.offsetWidth/2);
+        y = offset.y + Math.round(el.offsetHeight/2);
       }
-      
+    }
+    
+    if (renderDelegate && renderDelegate.indexForClientPosition) {
       return renderDelegate.indexForClientPosition(this, x, y);
     }
+    
+    return this.indexForClientPosition(evt.clientX, evt.clientY);
   },
 
   /** @private */
