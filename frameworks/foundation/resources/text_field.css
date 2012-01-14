@@ -53,9 +53,11 @@
     -webkit-appearance:none;
   }
   
+  .sc-hint {
+    z-index: 1;
+  }  
   
   .sc-hint, .hint {
-  	z-index: 1;
   	position: absolute;
   	top: 3px;
   	left: 1px;
