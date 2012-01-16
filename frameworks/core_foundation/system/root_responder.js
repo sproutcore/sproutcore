@@ -1757,6 +1757,8 @@ SC.RootResponder = SC.Object.extend(
   //
 
   mousedown: function(evt) {
+    var fr;
+
     if (SC.platform.touch) {
       evt.allowDefault();
       this._lastMouseDownCustomHandling = YES;

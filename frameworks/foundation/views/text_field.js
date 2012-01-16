@@ -432,9 +432,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
       // If the view is the same, there's nothing to do.  Otherwise, remove
       // the old one (if any) and add the new one.
-      if (! (previousView
-             &&  accessoryView
-             &&  (previousView === accessoryView) ) ) {
+      if (! (previousView &&
+             accessoryView &&
+             (previousView === accessoryView) ) ) {
 
         // If there was a previous previous accessory view, remove it now.
         if (previousView) {

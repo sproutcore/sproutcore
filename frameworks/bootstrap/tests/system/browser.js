@@ -530,7 +530,7 @@ for (var userAgent in userAgents) {
         expected;
 
     userAgent = this.working.test;
-    browser = SC._detectBrowser(userAgent);
+    browser = SC.detectBrowser(userAgent);
     expected = userAgents[userAgent];
     for (var key in expected) {
       if (browser[key] && typeof browser[key] !== "function") {
@@ -546,14 +546,14 @@ for (var userAgent in userAgents) {
 // COMMON
 
 test("Language", function(){
-  equals(SC._detectBrowser(undefined, 'fr').language, 'fr', "should only show base language part");
-  equals(SC._detectBrowser(undefined, 'en-US').language, 'en', "should only show base language part");
-  equals(SC._detectBrowser(undefined, 'es-ES').language, 'es', "should only show base language part");
+  equals(SC.detectBrowser(undefined, 'fr').language, 'fr', "should only show base language part");
+  equals(SC.detectBrowser(undefined, 'en-US').language, 'en', "should only show base language part");
+  equals(SC.detectBrowser(undefined, 'es-ES').language, 'es', "should only show base language part");
 });
 
 test("CountyCode", function(){
-  equals(SC._detectBrowser(undefined, 'fr').countryCode, undefined, "should not have a countryCode if the language doesn't indicate it");
-  equals(SC._detectBrowser(undefined, 'en-US').countryCode, 'us', "should only show ISO 639-1 countryCode part");
-  equals(SC._detectBrowser(undefined, 'es-ES').countryCode, 'es', "should only show ISO 639-1 countryCode part");
+  equals(SC.detectBrowser(undefined, 'fr').countryCode, undefined, "should not have a countryCode if the language doesn't indicate it");
+  equals(SC.detectBrowser(undefined, 'en-US').countryCode, 'us', "should only show ISO 639-1 countryCode part");
+  equals(SC.detectBrowser(undefined, 'es-ES').countryCode, 'es', "should only show ISO 639-1 countryCode part");
 });
 

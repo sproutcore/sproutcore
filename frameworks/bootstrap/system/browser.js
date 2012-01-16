@@ -7,7 +7,13 @@
 
 window.SC = window.SC || { MODULE_INFO: {}, LAZY_INSTANTIATION: {} };
 
-// The list of browsers that will be automatically identified.
+
+/**
+  The list of browsers that are automatically identified.
+
+  @static
+  @constant
+*/
 SC.BROWSER = {
   android: 'android',
   blackberry: 'blackberry',
@@ -19,7 +25,12 @@ SC.BROWSER = {
   unknown: 'unknown'
 };
 
-// The list of devices that will be automatically identified.
+/**
+  The list of devices that are automatically identified.
+
+  @static
+  @constant
+*/
 SC.DEVICE = {
   android: 'android',
   blackberry: 'blackberry',
@@ -30,7 +41,12 @@ SC.DEVICE = {
   mobile: 'mobile'
 };
 
-// The list of layout engines that will be automatically identified.
+/**
+  The list of browser engines that are automatically identified.
+
+  @static
+  @constant
+*/
 SC.ENGINE = {
   gecko: 'gecko',
   opera: 'opera',
@@ -39,7 +55,12 @@ SC.ENGINE = {
   webkit: 'webkit'
 };
 
-// The list of operating systems that will be automatically identified.
+/**
+  The list of operating systems that are automatically identified.
+
+  @static
+  @constant
+*/
 SC.OS = {
   android: 'android',
   blackberry: 'blackberry',
@@ -50,8 +71,12 @@ SC.OS = {
 };
 
 
-// Detects browser properties based on the given userAgent and language.
-SC._detectBrowser = function(userAgent, language) {
+/**
+  Detects browser properties based on the given userAgent and language.
+
+  @private
+*/
+SC.detectBrowser = function(userAgent, language) {
   var browser = {},
       device,
       engineAndVersion,
@@ -67,19 +92,17 @@ SC._detectBrowser = function(userAgent, language) {
   language = language || navigator.language || navigator.browserLanguage;
 
   // Calculations to determine the device.  See SC.DEVICE.
-  device = userAgent.match( new RegExp('(android|ipad|iphone|ipod|blackberry)') ) ||
+  device =
+    userAgent.match( new RegExp('(android|ipad|iphone|ipod|blackberry)') ) ||
     userAgent.match( new RegExp('(mobile)') ) ||
     ['', SC.DEVICE.desktop];
 
-
   /**
     @name SC.browser.device
-    @type SC.DEVICE
+    @type {SC.DEVICE}
   */
   browser.device = device[1];
 
-
-  // Calculations to determine the name and version.  See SC.BROWSER.
 
   // It simplifies further matching by recognizing this group of devices.
   isIOSDevice =
@@ -87,7 +110,11 @@ SC._detectBrowser = function(userAgent, language) {
     browser.device === SC.DEVICE.iphone ||
     browser.device === SC.DEVICE.ipod;
 
-  nameAndVersion = // Match the specific names first, avoiding commonly spoofed browsers.
+
+  // Calculations to determine the name and version.  See SC.BROWSER.
+
+  nameAndVersion =
+    // Match the specific names first, avoiding commonly spoofed browsers.
     userAgent.match( new RegExp('(opera|chrome|firefox|android|blackberry)' + conExp + numExp) ) ||
     userAgent.match( new RegExp('(ie|safari)' + conExp + numExp) ) ||
     ['', SC.BROWSER.unknown, '0'];
@@ -98,13 +125,14 @@ SC._detectBrowser = function(userAgent, language) {
   // If a `Version` number is found, use that over the `Name` number
   override = userAgent.match( new RegExp('(version)' + conExp + numExp) );
   if (override) { nameAndVersion[2] = override[2]; }
-  // If there is no `Version` in Safari, don't use the Safari number since it is the Webkit number
+  // If there is no `Version` in Safari, don't use the Safari number since it is
+  // the Webkit number.
   else if (nameAndVersion[1] === SC.BROWSER.safari) { nameAndVersion[2] = '0'; }
 
 
   /**
     @name SC.browser.name
-    @type SC.BROWSER
+    @type {SC.BROWSER}
   */
   browser.name = nameAndVersion[1];
 
@@ -116,7 +144,8 @@ SC._detectBrowser = function(userAgent, language) {
 
 
   // Calculations to determine the engine and version.  See SC.ENGINE.
-  engineAndVersion = // Match the specific engines first, avoiding commonly spoofed browsers.
+  engineAndVersion =
+    // Match the specific engines first, avoiding commonly spoofed browsers.
     userAgent.match( new RegExp('(presto)' + conExp + numExp) ) ||
     userAgent.match( new RegExp('(opera|trident|webkit|gecko)' + conExp + numExp) ) ||
     ['', SC.BROWSER.unknown, '0'];
@@ -125,8 +154,8 @@ SC._detectBrowser = function(userAgent, language) {
   override = browser.name === SC.BROWSER.ie ? SC.ENGINE.trident : false;
   if (override) { engineAndVersion[1] = override; }
 
-  // If the engineVersion is unknown and the browser is SC.BROWSER.ie, use browser.version for
-  // browser.engineVersion.
+  // If the engineVersion is unknown and the browser is SC.BROWSER.ie, use
+  // browser.version for browser.engineVersion.
   override = browser.name === SC.BROWSER.ie && engineAndVersion[2] === '0';
   if (override) { engineAndVersion[2] = browser.version; }
 
@@ -137,7 +166,8 @@ SC._detectBrowser = function(userAgent, language) {
 
   /**
     @name SC.browser.engine
-    @type SC.ENGINE || SC.BROWSER.unknown
+    @type {SC.ENGINE}
+    @type {SC.BROWSER.unknown}
   */
   browser.engine = engineAndVersion[1];
 
@@ -152,7 +182,8 @@ SC._detectBrowser = function(userAgent, language) {
   if (browser.name === SC.BROWSER.unknown) { browser.name = browser.engine; }
 
   // Calculations to determine the os and version.  See SC.OS.
-  osAndVersion = // Match the specific names first, avoiding commonly spoofed os's.
+  osAndVersion =
+    // Match the specific names first, avoiding commonly spoofed os's.
     userAgent.match( new RegExp('(blackberry)') ) ||
     userAgent.match( new RegExp('(android|iphone(?: os)|windows(?: nt))' + conExp + numExp) ) ||
     userAgent.match( new RegExp('(os|mac(?: os)(?: x))' + conExp + numExp) ) ||
@@ -170,7 +201,8 @@ SC._detectBrowser = function(userAgent, language) {
 
   /**
     @name SC.browser.os
-    @type SC.OS | SC.BROWSER.unknown
+    @type {SC.OS}
+    @type {SC.BROWSER.unknown}
   */
   browser.os = osAndVersion[1];
 
@@ -245,7 +277,6 @@ SC._detectBrowser = function(userAgent, language) {
   */
   browser.lion = browser.isLion = !!(/mac os x 10_7/.test(userAgent) && !/like mac os x 10_7/.test(userAgent));
   
-  /**
   /** @deprecated Since version 1.7. Use browser.device === SC.DEVICE.iphone.
     @name SC.browser.isiPhone
     @type Boolean
@@ -397,7 +428,7 @@ SC._detectBrowser = function(userAgent, language) {
     @name SC.browser.isiOSHomeScreen
     @type Boolean
   */
-  browser.isiOSHomeScreen = browser.isMobileSafari && !/apple.*mobile.*safari/.test(userAgent);
+  browser.isiOSHomeScreen = browser.isMobileSafari && !(/apple.*mobile.*safari/.test(userAgent));
 
   /** @deprecated Since version 1.7. Use browser.version.
     @name SC.browser.safari
@@ -447,8 +478,8 @@ SC._detectBrowser = function(userAgent, language) {
 
 /** @class
 
-  Contains information about the browser environment that SproutCore
-  is running in. This includes the following properties:
+  This object contains information about the browser environment SproutCore is
+  running in. This includes the following properties:
 
     - browser.device            ex. SC.DEVICE.ipad
     - browser.name              ex. SC.BROWSER.chrome
@@ -495,4 +526,4 @@ SC._detectBrowser = function(userAgent, language) {
 
   @since SproutCore 1.0
 */
-SC.browser = SC._detectBrowser();
+SC.browser = SC.detectBrowser();
