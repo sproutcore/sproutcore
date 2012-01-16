@@ -39,7 +39,7 @@ SC.View.reopen({
         }
       }
 
-      return this.isFixedLayout();
+      return this.get('isFixedLayout');
     }
     return NO;
   }.property('wantsAcceleratedLayer').cacheable()
