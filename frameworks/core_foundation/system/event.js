@@ -126,14 +126,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   MOUSE_WHEEL_MULTIPLIER: function() {
     var deltaMultiplier = 1,
-        version = SC.browser.versionFloat(SC.browser.engineVersion);
+        version = SC.browser.engineVersion;
 
     if (SC.browser.name === SC.BROWSER.safari) {
       deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
-      if (version >= 533.17 && version<534) {
+      if (SC.browser.compare(version, 533.17) > 0 && SC.browser.compare(version, 534) < 0) {
         deltaMultiplier = 0.004;
-      } else if (version < 533) {
+      } else if (SC.browser.compare(version, 533) < 0) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
       }
@@ -331,7 +331,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
     /*
-      commenting out this block because 
+      commenting out this block because
       1. this issue is no longer reproducible in IE7, 8 or 9
       2. this causes undesired behavior if one tries to remove an event from
          an iframe because elem.setInterval is true there.

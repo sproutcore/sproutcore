@@ -213,51 +213,13 @@ SC.detectBrowser = function(userAgent, language) {
   browser.osVersion = osAndVersion[2];
 
 
-  /**
-    This function takes the major version part and creates a comparable integer.
-
-    Example: '10.89' => 10 === '10.77' => 10
-
-    @returns {Number}
-  */
-  browser.versionMajor = function(version) {
-    return version === SC.BROWSER.unknown ? 0 : parseInt(version);
-  };
-
-  /**
-    This function takes all minor version parts and creates a comparable float.
-
-    Example: '2.1b4-7' => 0.147 > '2.1b4-5' => 0.145 > '2.09a' => 0.09
-
-    @returns {Number}
-  */
-  browser.versionMinor = function(version) {
-    var part,
-        parts,
-        ret = '0.';
-
-    if (version !== SC.BROWSER.unknown) {
-      // Split on non-decimals
-      parts = version.split(/\D/);
-      for (var i = 1; i < parts.length; i++) {
-        // Simply append each part.
-        ret += parts[i];
-      }
-    }
-    return parseFloat(ret);
-  };
-
-  /**
-    This function takes the major and minor version parts and creates a comparable float.
-
-    Example: '1.45.0.3' => 1.4503 > '1.45.0.2' => 1.4502 > '1.36.9.10' => 1.3691
-
-    @returns {Number}
-  */
-  browser.versionFloat = function(version) {
-    return this.versionMajor(version) + this.versionMinor(version);
-  };
-
+  // The following long list of properties have all been deprecated.  While they
+  // are a bit less verbose then the above constants, they lack standardization
+  // and can be prone to failure.  Rather than continuing to expand this list
+  // with more and more one-off comparisons, which often muddle the line between
+  // the browser, the engine, the os and the device, it seems more practical to
+  // only maintain the 7 identifiable properties listed above:  device, name,
+  // version, os, osVersion, engine and engineVersion.
 
   /** @deprecated Since version 1.7. Use browser.os === SC.OS.windows.
     @name SC.browser.isWindows
@@ -271,12 +233,12 @@ SC.detectBrowser = function(userAgent, language) {
   */
   browser.mac = browser.isMac = browser.os === SC.BROWSER.mac;
 
-  /** @deprecated Since version 1.7. Use browser.os === SC.OS.mac && SC.browser.versionFloat(browser.osVersion) >= 10.7 && SC.browser.versionFloat(browser.osVersion) < 10.8
+  /** @deprecated Since version 1.7. Use browser.os === SC.OS.mac && browser.compareVersion(browser.osVersion, 10.7) == 0
     @name SC.browser.isLion
     @type Boolean
   */
   browser.lion = browser.isLion = !!(/mac os x 10_7/.test(userAgent) && !/like mac os x 10_7/.test(userAgent));
-  
+
   /** @deprecated Since version 1.7. Use browser.device === SC.DEVICE.iphone.
     @name SC.browser.isiPhone
     @type Boolean
@@ -331,11 +293,11 @@ SC.detectBrowser = function(userAgent, language) {
   */
   browser.isIE = browser.name === SC.BROWSER.ie;
 
-  /** @deprecated Since version 1.7. Use browser.versionMajor(browser.version) <= 8 or browser.versionMajor(browser.engineVersion) <= 8
+  /** @deprecated Since version 1.7. Use browser.compareVersion(browser.version, 8) <= 0.
     @name SC.browser.isIE8OrLower
     @type Boolean
   */
-  browser.isIE8OrLower = browser.name === SC.BROWSER.ie && browser.versionMajor(browser.version) <= 8;
+  browser.isIE8OrLower = browser.name === SC.BROWSER.ie && browser.version <= 8;
 
   /** @deprecated Since version 1.7. Use browser.version or browser.engineVersion.
     @name SC.browser.mozilla
@@ -481,48 +443,20 @@ SC.detectBrowser = function(userAgent, language) {
   This object contains information about the browser environment SproutCore is
   running in. This includes the following properties:
 
-    - browser.device            ex. SC.DEVICE.ipad
-    - browser.name              ex. SC.BROWSER.chrome
-    - browser.version           ex. '16.0.2.34'
-    - browser.os                ex. SC.OS.mac
-    - browser.osVersion         ex. '10.6'
-    - browser.engine            ex. SC.ENGINE.webkit
-    - browser.engineVersion     ex. '533.29'
+    - browser.device                  ex. SC.DEVICE.ipad
+    - browser.name                    ex. SC.BROWSER.chrome
+    - browser.version                 ex. '16.0.2.34'
+    - browser.os                      ex. SC.OS.mac
+    - browser.osVersion               ex. '10.6'
+    - browser.engine                  ex. SC.ENGINE.webkit
+    - browser.engineVersion           ex. '533.29'
 
-  For utility, this object also contains the functions versionMajor(),
-  versionMinor() and versionFloat() which allow you to faithfully compare
-  different versions.
-
-  Ex.
-    var A = '16.1.20.7'
-    var B = '16.1.93.2'
-
-    browser.versionMajor(A)
-    16
-    browser.versionMajor(B)
-    16
-    browser.versionMajor(A) === browser.versionMajor(B)
-    true
-
-    browser.versionMinor(A)
-    0.1207
-    browser.versionMinor(B)
-    0.1932
-    browser.versionMinor(A) > browser.versionMinor(B)
-    false
-
-    browser.versionFloat(A)
-    16.1207
-    browser.versionFloat(B)
-    16.1932
-    browser.versionFloat(A) < browser.versionFloat(B)
-    true
-
-  User agent sniffing does not provide guaranteed results and spoofing may
+  Note: User agent sniffing does not provide guaranteed results and spoofing may
   affect the accuracy.  Therefore, as a general rule, it is much better
-  to rely on the browser's verified capabilities in SC.platform.  Based on
-  the unit test sample, the most accurate browser properties are `engine` and
-  `engineVersion`.
+  to rely on the browser's verified capabilities in SC.platform.
+
+  Based on the unit test samples, the most stable browser properties appear to
+  be `engine` and `engineVersion`.
 
   @since SproutCore 1.0
 */

@@ -345,7 +345,7 @@ SC.RootResponder = SC.Object.extend(
     (removing sc-blur).  Also notify panes.
   */
   focus: function(evt) {
-    
+
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
@@ -688,8 +688,8 @@ SC.RootResponder = SC.Object.extend(
 
     // Firefox emits different mousewheel events than other browsers
     if (SC.browser.mozilla) {
-      // For Firefox <3.5, subscribe to DOMMouseScroll events
-      if (SC.browser.compareVersion(1,9,1) < 0) {
+      // For Firefox < 3.5, subscribe to DOMMouseScroll events
+      if (SC.browser.compare(SC.browser.engineVersion, '1.9.1') < 0) {
         mousewheel = 'DOMMouseScroll';
 
       // For Firefox 3.5 and greater, we can listen for MozMousePixelScroll,
@@ -1273,11 +1273,11 @@ SC.RootResponder = SC.Object.extend(
     @returns {Boolean}
   */
   touchstart: function(evt) {
-    // Starting iOS5 touch events are handled by textfields. 
+    // Starting iOS5 touch events are handled by textfields.
     // As a workaround just let the browser to use the default behavior.
     if(this.ignoreTouchHandle(evt)) return YES;
-    
-    
+
+
     var hidingTouchIntercept = NO;
 
     SC.run(function() {
@@ -1341,10 +1341,10 @@ SC.RootResponder = SC.Object.extend(
     used to keep track of when a specific type of touch event was last handled, to see if it needs to be re-handled
   */
   touchmove: function(evt) {
-    // Starting iOS5 touch events are handled by textfields. 
+    // Starting iOS5 touch events are handled by textfields.
     // As a workaround just let the browser to use the default behavior.
     if(this.ignoreTouchHandle(evt)) return YES;
-    
+
     SC.run(function() {
       // pretty much all we gotta do is update touches, and figure out which views need updating.
       var touches = evt.changedTouches, touch, touchEntry,
@@ -1439,10 +1439,10 @@ SC.RootResponder = SC.Object.extend(
   touchend: function(evt) {
     var hidesTouchIntercept = NO;
 
-    // Starting iOS5 touch events are handled by textfields. 
+    // Starting iOS5 touch events are handled by textfields.
     // As a workaround just let the browser to use the default behavior.
     if(this.ignoreTouchHandle(evt)) return YES;
-    
+
     SC.run(function() {
       var touches = evt.changedTouches, touch, touchEntry,
           idx, len = touches.length,
@@ -1504,9 +1504,9 @@ SC.RootResponder = SC.Object.extend(
     evt.isCancel = YES;
     this.touchend(evt);
   },
-  
+
   /** @private
-     Ignore Touch events on textfields and links. starting iOS 5 textfields 
+     Ignore Touch events on textfields and links. starting iOS 5 textfields
      get touch events. Textfields just need to get the default focus action.
   */
   ignoreTouchHandle: function(evt) {
