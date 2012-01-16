@@ -230,7 +230,8 @@ SC.View.reopen(
     ret = (
       ((layout.width !== undefined) && (layout.height !== undefined)) &&
       ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO)) &&
-      ((layout.left !== undefined) && (layout.top !== undefined))
+      ((layout.left !== undefined) && (layout.top !== undefined)) &&
+      ((layout.left !== SC.LAYOUT_AUTO) && (layout.top !== SC.LAYOUT_AUTO))
     );
 
     // The layout may appear fixed, but only if none of the values are percentages
