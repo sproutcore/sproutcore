@@ -1131,6 +1131,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   /** @private
+    Overridden from SC.FieldView. Provides correct tag name based on the 
+    'isTextArea' property.
+   */
+  _inputElementTagName: function() {
+    if (this.get('isTextArea')) {
+      return 'textarea';
+    } else {
+      return 'input';
+    }
+  },
+  
+  /** @private
     This observer makes sure to hide the hint when a value is entered, or
     show it if it becomes empty.
   */
