@@ -13,7 +13,9 @@ module("SC.Store#createRecord", {
     MyRecordType = SC.Record.extend({
       string: SC.Record.attr(String, { defaultValue: "Untitled" }),
       number: SC.Record.attr(Number, { defaultValue: 5 }),
-      bool: SC.Record.attr(Boolean, { defaultValue: YES })
+      bool: SC.Record.attr(Boolean, { defaultValue: YES }),
+      array: SC.Record.attr(Array, { defaultValue: [1, 2] }),
+      funcDef: SC.Record.attr(Array, { defaultValue: function() { return [1, 3]} })
     });
 
     SC.RunLoop.begin();
@@ -41,12 +43,16 @@ test("create a record", function() {
     guid: "1234abcd",
     string: "abcd",
     number: 1,
-    bool:   NO
+    bool:   NO,
+    array:  [],
+    funcDef: [1, 2]
     };
   hash2 = {
     string: "abcd",
     number: 1,
-    bool:   NO
+    bool:   NO,
+    array:  [],
+    funcDef: [1, 2]
   };
 
   rec = store.createRecord(SC.Record, hash);
@@ -73,4 +79,38 @@ test("Creating an empty (null) record should make the hash available", function(
   
   ok(store.readDataHash(storeKey), 'data hash should not be empty/undefined');
   
+});
+
+test("Initializing default values", function() {
+    
+    var rec1, rec2, sk1, sk2;
+    
+    //create 2 records
+    rec1 = store.createRecord(MyRecordType, null, 'test1');
+    rec2 = store.createRecord(MyRecordType, null, 'test2');
+    
+    //get storKeys
+    sk1 = store.storeKeyFor(MyRecordType, rec1.id());
+    sk2 = store.storeKeyFor(MyRecordType, rec2.id());
+    
+    ok(sk1, "a first record with default values was created");
+    console.log(store.readDataHash(sk1));;
+    equals(store.readDataHash(sk1)['string'], "Untitled", "the default value for 'string' was initialized");
+    equals(store.readDataHash(sk1)['number'], 5, "the default value for 'number' was initialized");
+    equals(store.readDataHash(sk1)['bool'], YES, "the default value for 'bool' was initialized");
+    same(store.readDataHash(sk1)['array'], [1, 2], "the default value for 'array' was initialized");
+    same(store.readDataHash(sk1)['funcDef'], [1, 3], "the default value for 'funcDef' was initialized");
+    
+    
+    ok(sk2, "a second record with default values was created");
+    
+    rec2.get('array').push(3);
+    rec2.get('funcDef').push(2);
+    
+    same(store.readDataHash(sk2)['array'], [1, 2, 3], "the array for 'array' was updated");
+    same(store.readDataHash(sk2)['funcDef'], [1, 3, 2], "the array for 'funcDef' was updated");
+    
+    ok(store.readDataHash(sk2)['array'] !== store.readDataHash(sk1)['array'], "the default value for 'array' is a copy not a reference");
+    ok(store.readDataHash(sk2)['funcDef'] !== store.readDataHash(sk1)['funcDef'], "the default value for 'funcDef' is a copy not a reference");
+    
 });
