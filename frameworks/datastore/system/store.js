@@ -1085,9 +1085,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} Returns the created record
   */
   createRecord: function(recordType, dataHash, id) {
-    var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal, prop
+    var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal, prop,
         ret;
 
+    //initialize dataHash if necessary
+    dataHash = (dataHash ? dataHash : {});
+    
     // First, try to get an id.  If no id is passed, look it up in the
     // dataHash.
     if (!id && (primaryKey = recordType.prototype.primaryKey)) {
@@ -1118,19 +1121,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       throw K.BAD_STATE_ERROR;
     }
     
-    //initialize dataHash if necessary
-    dataHash = (dataHash ? dataHash : {});
+    
     //search for recordAttribute
-    for (var prop in recordType.prototype) {
+    for (prop in recordType.prototype) {
       
       if (recordType.prototype[ prop ] && recordType.prototype[ prop ].isRecordAttribute) {
         //if attribute doesn't exist in dataHash
         if (!dataHash[ prop ]) {
           defaultVal = recordType.prototype[ prop ] ? recordType.prototype[ prop ].defaultValue : null;
           if(SC.typeOf(defaultVal)===SC.T_FUNCTION)
-            dataHash[ prop ] = defaultVal();
+            dataHash[ prop ] = SC.copy(defaultVal(), YES);
           else
-            dataHash[ prop ] = defaultVal;
+            dataHash[ prop ] = SC.copy(defaultVal, YES);
         }
       }
     }
