@@ -48,17 +48,23 @@ var DummyArray = SC.Object.extend(SC.Array, {
 
     // Update the length property
     this.set('length', this.content.length) ;
+    this.endPropertyChanges();
 
+    // Both arrayContentDidChange and enumerableContentDidChange will invoke
+    // "this.notifyPropertyChange('[]')". o prevent multiple notifications 
+    // hese calls are made as grouped property changes.
+    this.beginPropertyChanges();
+    
     // Call the general-purpose enumerableContentDidChange
     // Enumerable method.
     this.enumerableContentDidChange(idx, amt, len - amt) ;
-    this.endPropertyChanges() ;
-
+    
     // SC.Array implementations must call arrayContentDidChange
     // after making mutations. This allows observers to perform
     // operations based on the mutation. For instance, a listener
     // might want to reflect additions onto itself.
     this.arrayContentDidChange(idx, amt, len);
+    this.endPropertyChanges();
   },
 
   // SC.Arrays must implement objectAt, which returns an object
