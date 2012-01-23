@@ -51,8 +51,8 @@ var DummyArray = SC.Object.extend(SC.Array, {
     this.endPropertyChanges();
 
     // Both arrayContentDidChange and enumerableContentDidChange will invoke
-    // "this.notifyPropertyChange('[]')". o prevent multiple notifications 
-    // hese calls are made as grouped property changes.
+    // "this.notifyPropertyChange('[]')". To prevent multiple notifications 
+    // these calls are made as grouped property changes.
     this.beginPropertyChanges();
     
     // Call the general-purpose enumerableContentDidChange
