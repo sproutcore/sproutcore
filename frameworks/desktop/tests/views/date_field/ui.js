@@ -56,6 +56,19 @@
     showTime: YES,
     showDate: NO,
     isEnabled: NO
+  })
+  
+  .add("empty - no hint on focus", SC.DateFieldView, { 
+    hint: "dd/mm/yyyy", 
+    value: '',
+    hintOnFocus: NO
+  })
+  
+  .add("empty - disabled - no hint on focus", SC.DateFieldView, { 
+    hint: "dd/mm/yyyy", 
+    value: '',
+    isEnabled: NO,
+    hintOnFocus: NO
   });
   
   
@@ -74,7 +87,7 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   else equals(input.val(), expectedHint, 'input should have empty value');
   
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = (view.get('hintOnFocus') ? view.$('.hint') : view.$('.sc-hint'));
 
     if (hint.length===1) {
       hint = hint.text();
@@ -94,7 +107,7 @@ pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint)
   equals(input.val(), expectedValue, 'input should have value');
   
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = (view.get('hintOnFocus') ? view.$('.hint') : view.$('.sc-hint'));
 
     if (hint.length===1) {
       hint = hint.text();
@@ -172,6 +185,18 @@ test("time - disabled - with value", function() {
   var view = pane.view('time - disabled - with value');
   pane.verifyNotEmpty(view, '10:20 AM', 'hh:mm AM/PM');
   pane.verifyDisabled(view, YES);
+});
+
+test("empty - no hint on focus", function() {
+   var view = pane.view('empty - no hint on focus');
+   pane.verifyEmpty(view, 'dd/mm/yyyy');
+   pane.verifyDisabled(view, NO);
+});
+
+test("empty - disabled - no hint on focus", function() {
+   var view = pane.view('empty - disabled - no hint on focus');
+   pane.verifyEmpty(view, 'dd/mm/yyyy');
+   pane.verifyDisabled(view, YES);
 });
 
 // ..........................................................

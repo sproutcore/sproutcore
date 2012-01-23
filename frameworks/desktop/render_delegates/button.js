@@ -55,7 +55,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
         isActive    = dataSource.get('isActive') || NO,
         isDefault   = dataSource.get('isDefault') || NO,
         isCancel    = dataSource.get('isCancel') || NO,
-        isToggle    = dataSource.get('isToggle') || NO,
+        isToggle    = (dataSource.get('buttonBehavior') === SC.TOGGLE_BEHAVIOR),
         labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
