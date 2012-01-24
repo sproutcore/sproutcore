@@ -135,9 +135,6 @@ test("layout {top, left, bottom, right, centerX, centerY, height, width} - top/l
   same(cl, testLayout, 'conversion is equal');
 }) ;
 
-
-test("layout {centerX, centerY, width:auto, height:auto}");
-/*
 test("layout {centerX, centerY, width:auto, height:auto}", function() {
   var error=null;
   var layout = { centerX: 10, centerY: 10, width: 'auto', height: 'auto' };
@@ -150,4 +147,3 @@ test("layout {centerX, centerY, width:auto, height:auto}", function() {
   equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
     'error if centerx/y and width/height are set at the same time ' + error );
 }) ;
-*/

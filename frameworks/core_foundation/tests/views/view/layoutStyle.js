@@ -188,7 +188,7 @@
       useStaticLayout: YES,
       render: function(context) {
         // needed for auto
-        context.push('<div style="padding: 10px"></div>');
+        context.push('<div style="padding: 100px"></div>');
       }
     });
 
@@ -200,17 +200,13 @@
     var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
     var no_f = null;
     // See test below
-    var with_f = undefined; // { x: 0, y: 0, width: 200, height: 200 };
+    var with_f = { x: 0, y: 0, width: 200, height: 200 };
     var s = { top: 0, left: 0, width: 'auto', height: 'auto' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
 
     layer.parentNode.removeChild(layer);
   });
-
-  // See comment in above test
-  test("layout {top, left, width: auto, height: auto} - frame");
-
 
 
   // ..........................................................
@@ -266,7 +262,7 @@
       useStaticLayout: YES,
       render: function(context) {
         // needed for auto
-        context.push('<div style="padding: 10px"></div>');
+        context.push('<div style="padding: 90px"></div>');
       }
     });
 
@@ -278,18 +274,14 @@
     var layout = { top: 0.1, left: 0.1, width: 'auto', height: 'auto' };
     var no_f = null;
     // See pending test below
-    var with_f = undefined; // { x: 20, y: 20, width: 180, height: 180 };
+    var with_f = { x: 20, y: 20, width: 180, height: 180 };
     var s = { top: '10%', left: '10%', width: 'auto', height: 'auto' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
 
     layer.parentNode.removeChild(layer);
   });
-
-  // See commented out lines in test above
-  test("layout {top, left, width: auto, height: auto} - frame");
-
-
+  
 
   // ..........................................................
   // TEST CSS TRANSFORM LAYOUT VARIATIONS
@@ -405,7 +397,7 @@
         useStaticLayout: YES,
         render: function(context) {
           // needed for auto
-          context.push('<div style="padding: 10px"></div>');
+          context.push('<div style="padding: 100px"></div>');
         }
       });
 
@@ -417,16 +409,13 @@
       var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
       var no_f = null;
       // See test below
-      var with_f = undefined; // { x: 0, y: 0, width: 200, height: 200 };
+      var with_f = { x: 0, y: 0, width: 200, height: 200 };
       var s = { top: 0, left: 0, width: 'auto', height: 'auto', transform: null };
 
       performLayoutTest(layout, no_f, s, with_f, s, NO);
 
       layer.parentNode.removeChild(layer);
     });
-
-      // See commented lines in test above
-      test("layout {top, left, width: auto, height: auto} - frame");
 
     test("layout w/ percentage {top, left, width, height}", function() {
 
@@ -544,7 +533,7 @@
   test("layout {centerX, centerY, width:auto, height:auto}", function() {
     var error= 'NONE';
     var layout = { centerX: 0.1, centerY: 0.1, width: 'auto', height: 'auto' };
-
+    
     child.set('layout', layout) ;
     try{
       child.layoutStyle();
