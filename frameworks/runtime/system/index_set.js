@@ -83,8 +83,7 @@ SC.IndexSet = SC.mixin({},
     // match the function definition.
     // This is here because `create` doesn't follow the
     // idiomatic SC convention of passing in an object literal to `create`.
-    if (!start ||
-        !(SC.typeOf(start) === SC.T_NUMBER || start.isIndexSet)) {
+    if (start && !(SC.typeOf(start) === SC.T_NUMBER || start.isIndexSet)) {
       throw "SC.IndexSet does not accept `%@` as a parameter to `create`. Take a look at the function signature for proper usage.".fmt(start);
     }
     // @endif
