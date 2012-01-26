@@ -36,7 +36,9 @@ SC.Pane.reopen(
       wDim.height = document.body.clientHeight;
 
       // IE7 is the only browser which reports clientHeight _including_ scrollbar.
-      if (SC.browser.isIE && SC.browser.compareVersion("7.0") === 0) {
+      if (SC.browser.name === SC.BROWSER.ie &&
+          SC.browser.compareVersion(SC.browser.version, "7") === 0) {
+
         var scrollbarSize = SC.platform.get('scrollbarSize');
         if (document.body.scrollWidth > wDim.width) {
           wDim.width -= scrollbarSize;
@@ -78,24 +80,24 @@ SC.Pane.reopen(
   */
   windowSizeDidChange: function(oldSize, newSize) {
     this.set('currentWindowSize', newSize) ;
-    this.setBodyOverflowIfNeeded();    
+    this.setBodyOverflowIfNeeded();
     this.parentViewDidResize(); // start notifications.
     return this ;
   },
-  
+
   /**
     Changes the body overflow according to whether minWidth or minHeight
-    are present in the layout hash. If there are no minimums, nothing 
-    is done unless true is passed as the first argument. If so, then 
+    are present in the layout hash. If there are no minimums, nothing
+    is done unless true is passed as the first argument. If so, then
     overflow:hidden; will be used.
-    
+
     It's possible to call this manually and pass YES to remove overflow
     if setting layout to a hash without minWidth and minHeight, but it's
     probably not a good idea to do so unless you're doing it from the main
     pane. There's only one body tag, after all, and if this is called from
     multiple different panes, the panes could fight over whether it gets
     an overflow if care isn't taken!
-    
+
     @param {Boolean} [force] force a style to be set even if there are
                              no minimums.
   */
