@@ -3,14 +3,7 @@
 .sc-pane.sc-panel {
   overflow: visible;
   z-index: 100;
-  &.for-sc-panel {
-    background: black;
-    opacity: 0.3;
-    -moz-opacity: 0.3;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)"; 
-    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
-  }
-  
+
   > .sc-view {
     border: 0px #444 solid;
     background-color: #eaeaea ;
