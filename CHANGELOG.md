@@ -1,7 +1,7 @@
 CHANGE LOG FOR 1.6+
 ===================
 
-1.7.1.beta
+1.8.0
 ----------
 
 ### MINOR FEATURES
@@ -25,6 +25,12 @@ CHANGE LOG FOR 1.6+
 * Updated SC.State's getSubstate method to allow for path expressions. Also refacted the findFirstRelativeCurrentState method.
 * New SC globals to provide information like build mode, build number and locale.
 
+### DEPRECATIONS
+
+* SC.Animatable has been deprecated.  Please use the animate method in SC.View.
+* SC.TableView has been deprecated.  Please use one of the alternative community versions.
+* Several properties of SC.browser have been deprecated.  Please use the standardized properties and matching constants.
+
 ### BUG FIXES
 
 * Bug fix, when the apps don’t have a first responder at loading time the app throws an error.
@@ -32,7 +38,7 @@ CHANGE LOG FOR 1.6+
 * Removed Internet Explorer legacy code.
 * Passing the native event when a focus or blur event is called. This makes it consistent with all the other event handlers.
 * Workarounds for mobileSafari touch handling in textfields and links.
-* IE was getting two blur/focus events. 
+* IE was getting two blur/focus events.
 * Small bug fix for timers when there is no currentRunLoop.
 * Unit test updates for renderContext.
 * Reverted change to receive focus if it the view becomes key responder.
@@ -45,7 +51,7 @@ CHANGE LOG FOR 1.6+
 * Removing legacy handler of buttons to improve speed.
 * Bug fix to update list scrollers when adding new items to the list.
 * Changed timeout value for a faster experience in menu scrolling.
-* Removed deltaAdjust in scrollView and left only the calculations done in SC.Event. 
+* Removed deltaAdjust in scrollView and left only the calculations done in SC.Event.
 * Updated values in select button to fix rendering regressions.
 * Refactored childViews creation in formView.
 * Updated new selectView to correctly support width resizing.
@@ -445,7 +451,7 @@ Upcoming
 * Fixes for making panes properly handle first responder
 * General CSS Cleanup throughout
 * Add support for trim and loc back to string.js
-* Bug fixes for IE7/8/9 support 
+* Bug fixes for IE7/8/9 support
 * Fixed unit tests for IE
 * Added unit tests for keyboard focus functionality
 * Fix keyboard focus issues in the view layer
@@ -646,7 +652,7 @@ Upcoming
 * Support for IE7 base64 images using MHTML
 * Initial support for accessibility (WAI-ARIA)
 * Improved SC.Logger, allows log recording and different reporting levels like log4j
-* Modular loading and whitelisting. 
+* Modular loading and whitelisting.
 * Improvements and bug fixes in SC.TemplateView and Handlebars helpers
 * Added {{bindAttr}}, {{boundIf}}, and {{collection}} helpers
 * Fixes to Ace CSS
@@ -758,7 +764,7 @@ MISCELLANEOUS
 * Added domCSSPrefix to SC.platform
 * Make views update their layer's layerId if their layerId changes.
 * Adding maxlength property to textfield view
-* Added inflector functions to SC.String: singularize() and pluralize()  
+* Added inflector functions to SC.String: singularize() and pluralize()
 * Adding mousewheel support to textareas.
 * Adding HTML5 spellCheck support for textfields. It works with the latest versions of Firefox, Sproutcore, Chrome
 * Adding lastObject() method to SC.Enumerable
@@ -785,7 +791,7 @@ MISCELLANEOUS
 * Changing tabView so you can set the height of the tabs with a global variable
 * Added provision for Enabling/Disabling menu items in SelectButtonView
 * AlertPane: Esc triggers cancel button / enter triggers default button
-* SC.Query: 'orderBy' can now optionally be a comparison function. In this case, the specified function will be passed the two records directly, rather than the typical method of operating on specific properties.  This can be useful for complicated comparisons that cannot be expressed by the simpler method.   
+* SC.Query: 'orderBy' can now optionally be a comparison function. In this case, the specified function will be passed the two records directly, rather than the typical method of operating on specific properties.  This can be useful for complicated comparisons that cannot be expressed by the simpler method.
 * Add option to only allow focus tabbing among webapp controls.(No jumping to address bar
 * pushRetrieve, pushDestroy and pushError now return storeKey on success instead of YES
 * If there is a list item being edited, commit the changes if the list is scrolled.
