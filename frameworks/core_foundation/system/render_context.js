@@ -733,7 +733,8 @@ SC.RenderContext = SC.Builder.create(
         attr = this.$().attr('style');
 
         if (attr && (attr = attr.toString()).length>0) {
-          if(SC.browser.msie){
+          // Ensure attributes are lower case for IE
+          if(SC.browser.name === SC.BROWSER.ie) {
             attr = attr.toLowerCase();
           }
           styles = {};
@@ -926,7 +927,7 @@ SC.RenderContext = SC.Builder.create(
 
     return this ;
   },
-  
+
   /**
     Sets the named attribute on the tag.  Note that if you set the 'class'
     attribute or the 'styles' attribute, it will be ignored.  Use the
@@ -1005,14 +1006,14 @@ SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
     }
   };
 
-  /**
-    Helper method escapes the passed string to ensure HTML is displayed as
-    plain text.  You should make sure you pass all user-entered data through
-    this method to avoid errors.  You can also do this with the text() helper
-    method on a render context.
-  */
-  SC.RenderContext.escapeHTML = function(text) {
+/**
+  Helper method escapes the passed string to ensure HTML is displayed as
+  plain text.  You should make sure you pass all user-entered data through
+  this method to avoid errors.  You can also do this with the text() helper
+  method on a render context.
+*/
+SC.RenderContext.escapeHTML = function(text) {
     if (!text) return '';
     return text.replace(_escapeHTMLRegex, _escapeHTMLMethod);
-  }; 
+};
 })();
