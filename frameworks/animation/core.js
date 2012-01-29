@@ -7,7 +7,8 @@
 // ==========================================================================
 /*globals */
 
-/** @namespace
+/** @deprecated
+  @namespace
   A simple mixin called Animatable is provided. What does it do?
   It makes CSS transitions for you, and if they aren't available,
   implements them in JavaScript.
@@ -32,6 +33,8 @@
         }
       })
 */
+SC.warn("SC.Animatable is deprecated and will be removed in the next release.  Animation can be achieved by using the .animate method on SC.View.");
+
 SC.Animatable = {
   /** @scope SC.Animatable.prototype */
 
@@ -255,7 +258,7 @@ SC.Animatable = {
       var propertyName = evt.originalEvent.propertyName,
           callback = this._transitionCallbacks[propertyName];
 
-      // only callback is animation is not disabled; assume if anim was 
+      // only callback is animation is not disabled; assume if anim was
       // disabled we already invoked the callback..
       if(callback && this._disableAnimation<=0) {
         SC.Animatable.runCallback(callback);
