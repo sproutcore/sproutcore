@@ -94,9 +94,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
             // Check for an array
             if (value instanceof Array) {
               // Instantiate the construct and replace all of the content.
-              console.log(value);
               value = this.toType(record, key, value).replace(0, value.length, value);
-              console.log(value);
             } else {
               record.writeAttribute(attrKey, value, true);
             }
