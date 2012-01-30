@@ -81,9 +81,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
     var attrKey = this.get('key') || key, cRef,
         cacheKey = SC.keyFor('__kid__', SC.guidFor(this));
     if (value !== undefined) {
-      // this.orphan(record, cacheKey, value);
       value = this.fromType(record, key, value) ; // convert to attribute.
-      // record[cacheKey] = value;
     } else {
       value = record.readAttribute(attrKey);
       if (SC.none(value) && (value = this.get('defaultValue'))) {
