@@ -703,10 +703,9 @@ SC.RootResponder = SC.Object.extend(
 
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
-    // window.focus()
-    //debugger;
 
-    if (SC.browser.mobileSafari) {
+    // TODO: Is this workaround still valid?
+    if (SC.browser.os === SC.OS.ios && SC.browser.name === SC.BROWSER.safari) {
 
       // If the browser is identifying itself as a touch-enabled browser, but
       // touch events are not present, assume this is a desktop browser doing
