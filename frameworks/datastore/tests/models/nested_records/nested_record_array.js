@@ -10,13 +10,6 @@
 var NestedRecord, store, testParent, testParent2; 
 
 var initModels = function(){
-  NestedRecord.ParentRecordTest = SC.Record.extend({
-    /** Child Record Namespace */
-    nestedRecordNamespace: NestedRecord,
-
-    name: SC.Record.attr(String),
-    elements: SC.Record.toMany('SC.Record', { nested: true })
-  });
 
   NestedRecord.ChildRecordTest1 = SC.Record.extend({
     name: SC.Record.attr(String),
@@ -28,7 +21,38 @@ var initModels = function(){
      info: SC.Record.attr(String),
      value: SC.Record.attr(String)
    });
+  
+  NestedRecord.ParentRecordTest = SC.Record.extend({
+    /** Child Record Namespace */
+    nestedRecordNamespace: NestedRecord,
+
+    name: SC.Record.attr(String),
+    elements: SC.Record.toMany('SC.Record', { nested: true }),
+    
+    defaultElements: SC.Record.toMany(NestedRecord.ChildRecordTest1, {
+      isNested: true,
+      defaultValue: function(record, key) {
+        var array = [];
+        array.pushObject(record.createNestedRecord(NestedRecord.ChildRecordTest1));
+        return array;
+      }
+    }),
+    
+    defaultPolymorphicElements: SC.Record.toMany('SC.Record', {
+      isNested: true,
+      defaultValue: function(record, key) {
+        var array = [];
+        array.pushObject(record.createNestedRecord(SC.Record, {
+          type: 'ChildRecordTest1',
+          name: 'Default Child 1',
+          value: 'burninate'
+        }));
+        return array;
+      }
+    })
+  });
 };
+
 
 // ..........................................................
 // Basic SC.Record with an Array of Children
@@ -162,7 +186,23 @@ test("Basic Read", function() {
   var cr = arrayOfCRs.objectAt(0);
   ok(SC.kindOf(cr, SC.Record), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that first ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
-  
+
+  // Test Default Child Record creation
+  var arrayOfDRs = testParent.get('defaultElements');
+  ok(SC.instanceOf(arrayOfDRs, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
+  equals(arrayOfDRs.get('length'), 1, "check that the length of the array of default records is 1");
+  var dr = arrayOfDRs.objectAt(0);
+  ok(SC.kindOf(dr, SC.Record), "check that first default ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
+  ok(SC.instanceOf(dr, NestedRecord.ChildRecordTest1), "check that first default ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
+
+  // Test Default Polymorphic Child Record creation
+  var arrayOfDPRs = testParent.get('defaultPolymorphicElements');
+  ok(SC.instanceOf(arrayOfDPRs, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
+  equals(arrayOfDPRs.get('length'), 1, "check that the length of the array of default records is 1");
+  var dpr = arrayOfDPRs.objectAt(0);
+  ok(SC.kindOf(dpr, SC.Record), "check that first default polymorphic ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
+  ok(SC.instanceOf(dpr, NestedRecord.ChildRecordTest1), "check that first default polymorphic ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
+
   // Check reference information
   var pm = cr.get('primaryKey');
   var key = cr.get(pm);
