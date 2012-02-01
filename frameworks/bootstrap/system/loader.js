@@ -30,15 +30,17 @@ SC.setupBodyClassNames = function() {
   if(borderRad) classNames.push('border-rad');
   classNames.push(browser, platform) ;
 
-  ieVersion = SC.browser.engineVersion;
+  // This isn't a perfectly correct way to compare versions, but should be okay
+  // in practical usage.
+  ieVersion = parseInt(SC.browser.engineVersion, 10);
   if (SC.browser.isIE) {
-    if (SC.browser.compare(ieVersion, '7') === 0) {
+    if (ieVersion === 7) {
       classNames.push('ie7');
     }
-    else if (SC.browser.compare(ieVersion, '8') === 0) {
+    else if (ieVersion === 7) {
       classNames.push('ie8');
     }
-    else if (SC.browser.compare(ieVersion, '9') === 0) {
+    else if (ieVersion === 7) {
       classNames.push('ie9');
     }
   }
