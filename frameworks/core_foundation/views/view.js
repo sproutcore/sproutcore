@@ -55,7 +55,7 @@ SC.CoreView.reopen(
 
     @property {String}
   */
-  
+
   ariaRole: null,
 
   /**
@@ -64,9 +64,9 @@ SC.CoreView.reopen(
 
     @property {String}
   */
-  
+
   ariaHidden: null,
-  
+
   /**
     The current pane.
     @property {SC.Pane}
@@ -591,7 +591,7 @@ SC.CoreView.reopen(
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
         nextView.updateLayerLocationIfNeeded() ;
-        
+
         // just in case it still couldn't generate the layer, force to null, because
         // IE doesn't support insertBefore(blah, undefined) in version IE9.
         nextNode = nextView.get('layer') || null;
@@ -708,15 +708,15 @@ SC.CoreView.reopen(
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
     if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
-    
+
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
-    
+
     var _ariaHidden = this.get('ariaHidden');
     if(_ariaHidden!==null){
       if(_ariaHidden === NO) context.removeAttr('aria-hidden');
       else context.attr('aria-hidden', _ariaHidden);
-    }   
+    }
   },
 
   /**
@@ -968,7 +968,7 @@ SC.CoreView.reopen(
   tagName: 'div',
 
 
-  
+
   /**
     Standard CSS class names to apply to the view's outer element.  This
     property automatically inherits any class names defined by the view's
@@ -1699,6 +1699,6 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 });
 
 //unload views for IE, trying to collect memory.
-if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
+if(SC.browser.isIE) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
 
 

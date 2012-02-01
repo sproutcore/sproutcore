@@ -95,10 +95,10 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       SC.Logger.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
-    } 
-    
+    }
+
     this.flushAllPending();
-    
+
     this._start = null ;
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
@@ -116,14 +116,14 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   */
   flushAllPending: function() {
     var didChange ;
-    
+
     do {
       didChange = this.flushApplicationQueues() ;
-      if (!didChange) didChange = this._flushinvokeLastQueue() ; 
+      if (!didChange) didChange = this._flushinvokeLastQueue() ;
     } while(didChange) ;
   },
-  
-  
+
+
   /**
     Invokes the passed target/method pair once at the end of the runloop.
     You can call this method as many times as you like and the method will
@@ -352,7 +352,7 @@ SC._getRecentStack = function() {
     }
     currentFunction = currentFunction.caller;
   }
-  
+
   return stack;
 };
 //@endif
@@ -403,11 +403,11 @@ SC.RunLoop.end = function() {
   return this ;
 } ;
 
-  
+
 /**
   Call this to kill the current run loop--stopping all propagation of bindings
   and observers and clearing all timers.
-  
+
   This is useful if you are popping up an error catcher: you need a run loop
   for the error catcher, but you don't want the app itself to continue
   running.
@@ -428,13 +428,13 @@ SC.RunLoop.isRunLoopInProgress = function() {
 };
 
 /**
-  Executes a passed function in the context of a run loop. If called outside a 
-  runloop, starts and ends one. If called inside an existing runloop, is 
+  Executes a passed function in the context of a run loop. If called outside a
+  runloop, starts and ends one. If called inside an existing runloop, is
   simply executes the function unless you force it to create a nested runloop.
-  
+
   If an exception is thrown during execution, we give an error catcher the
   opportunity to handle it before allowing the exception to bubble again.
-  
+
   @param {Function} callback callback to execute
   @param {Object} target context for callback
   @param {Boolean} if YES, starts/ends a new runloop even if one is already running
@@ -455,7 +455,7 @@ SC.run = function(callback, target, forceNested) {
       // If the exception was not handled, throw it again so the browser
       // can deal with it (and potentially use it for debugging).
       // (We don't throw it in IE because the user will see two errors)
-      if (!handled && !SC.browser.msie) {
+      if (!handled && !SC.browser.isIE) {
         throw e;
       }
     }
@@ -466,7 +466,7 @@ SC.run = function(callback, target, forceNested) {
   }
 };
 
-/** 
+/**
   Wraps the passed function in code that ensures a run loop will
   surround it when run.
 */

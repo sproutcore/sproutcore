@@ -68,7 +68,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {Object} read value
   */
   readDefault: function(keyName) {
-    var ret, userKeyName, localStorage, key, del, storageSafari3;
+    var isIE7, ret, userKeyName, localStorage, key, del, storageSafari3;
 
     // namespace keyname
     keyName = this._normalizeKeyName(keyName);
@@ -78,8 +78,10 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     if (this._written) { ret = this._written[userKeyName]; }
 
     // attempt to read from localStorage
+    isIE7 = SC.browser.isIE &&
+        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
 
-    if(SC.browser.msie=="7.0"){
+    if(isIE7) {
       localStorage=document.body;
       try{
         localStorage.load("SC.UserDefaults");
@@ -96,7 +98,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }
     if (localStorage || storageSafari3) {
       key=["SC.UserDefaults",userKeyName].join('-at-');
-      if(SC.browser.msie == "7.0") {
+      if(isIE7) {
         ret=localStorage.getAttribute(key.replace(/\W/gi, ''));
       } else if(storageSafari3) {
         ret = this.dataHash[key];
@@ -132,7 +134,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefault} receiver
   */
   writeDefault: function(keyName, value) {
-    var userKeyName, written, localStorage, key, del, storageSafari3;
+    var isIE7, userKeyName, written, localStorage, key, del, storageSafari3;
 
     keyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(keyName);
@@ -143,8 +145,10 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     written[userKeyName] = value ;
 
     // save to local storage
+    isIE7 = SC.browser.isIE &&
+        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
 
-    if(SC.browser.msie=="7.0"){
+    if(isIE7){
       localStorage=document.body;
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
@@ -157,7 +161,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     key=["SC.UserDefaults",userKeyName].join('-at-');
     if (localStorage || storageSafari3) {
       var encodedValue = SC.json.encode(value);
-      if(SC.browser.msie=="7.0"){
+      if(isIE7){
         localStorage.setAttribute(key.replace(/\W/gi, ''), encodedValue);
         localStorage.save("SC.UserDefaults");
       }else if(storageSafari3){
@@ -200,7 +204,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefaults} receiver
   */
   resetDefault: function(keyName) {
-    var fullKeyName, userKeyName, written, localStorage, key, storageSafari3;
+    var fullKeyName, isIE7, userKeyName, written, localStorage, key, storageSafari3;
     fullKeyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(fullKeyName);
 
@@ -210,7 +214,10 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     written = this._written;
     if (written) delete written[userKeyName];
 
-    if(SC.browser.msie=="7.0"){
+    isIE7 = SC.browser.isIE &&
+        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
+
+    if(isIE7){
        localStorage=document.body;
     }else if(this.HTML5DB_noLocalStorage){
          storageSafari3 = this._safari3DB;
@@ -224,7 +231,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     key=["SC.UserDefaults",userKeyName].join('-at-');
 
     if (localStorage) {
-      if(SC.browser.msie=="7.0"){
+      if(isIE7){
         localStorage.setAttribute(key.replace(/\W/gi, ''), null);
         localStorage.save("SC.UserDefaults");
       } else if(storageSafari3){
@@ -305,6 +312,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
   init: function() {
     sc_super();
+    var isIE7;
 
     // Increment the jQuery ready counter, so that SproutCore will
     // defer loading the app until the user defaults are available.
@@ -312,16 +320,22 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
     if(SC.userDefaults && SC.userDefaults.get('dataHash')){
       var dh = SC.userDefaults.get('dataHash');
-      if (dh) this.dataHash=SC.userDefaults.get('dataHash')
+      if (dh) this.dataHash=SC.userDefaults.get('dataHash');
     }
     this._scud_userDomain = this.get('userDomain');
     this._scud_appDomain  = this.get('appDomain');
-    if(SC.browser.msie=="7.0"){
+
+    isIE7 = SC.browser.isIE &&
+        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
+
+    if(isIE7){
       //Add user behavior userData. This works in all versions of IE.
       //Adding to the body as is the only element never removed.
       document.body.addBehavior('#default#userData');
     }
-    this.HTML5DB_noLocalStorage = ((parseInt(SC.browser.webkit, 0)>523) && (parseInt(SC.browser.webkit, 0)<528));
+    this.HTML5DB_noLocalStorage = SC.browser.isWebkit &&
+      SC.browser.compare(SC.browser.engineVersion, '523')>0 &&
+      SC.browser.compare(SC.browser.engineVersion, '528')<0;
     if(this.HTML5DB_noLocalStorage){
       var myDB;
       try {

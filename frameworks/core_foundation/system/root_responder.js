@@ -650,7 +650,7 @@ SC.RootResponder = SC.Object.extend(
     // handle special case for keypress- you can't use normal listener to block
     // the backspace key on Mozilla
     if (this.keypress) {
-      if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.mozilla) {
+      if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.isMozilla) {
         var responder = this ;
         document.onkeypress = function(e) {
           e = SC.Event.normalizeEvent(e);
@@ -667,7 +667,7 @@ SC.RootResponder = SC.Object.extend(
     ['drag', 'selectstart'].forEach(function(keyName) {
       var method = this[keyName] ;
       if (method) {
-        if (SC.browser.msie) {
+        if (SC.browser.isIE) {
           var responder = this ;
           document.body['on' + keyName] = function(e) {
             // return method.call(responder, SC.Event.normalizeEvent(e));
@@ -688,7 +688,7 @@ SC.RootResponder = SC.Object.extend(
     var mousewheel = 'mousewheel';
 
     // Firefox emits different mousewheel events than other browsers
-    if (SC.browser.name === SC.BROWSER.firefox) {
+    if (SC.browser.isMozilla) {
       // For Firefox < 3.5, subscribe to DOMMouseScroll events
       if (SC.browser.compare(SC.browser.engineVersion, '1.9.1') < 0) {
         mousewheel = 'DOMMouseScroll';
@@ -1598,7 +1598,7 @@ SC.RootResponder = SC.Object.extend(
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
     var keyCode = evt.keyCode;
-    if(SC.browser.mozilla && evt.keyCode===9){
+    if(SC.browser.isMozilla && evt.keyCode===9){
       this.keydownCounter=1;
     }
     // Fix for IME input (japanese, mandarin).
@@ -1619,7 +1619,7 @@ SC.RootResponder = SC.Object.extend(
     }
 
     // Firefox does NOT handle delete here...
-    if (SC.browser.mozilla && (evt.which === 8)) return true ;
+    if (SC.browser.isMozilla && (evt.which === 8)) return true ;
 
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this
@@ -1640,7 +1640,7 @@ SC.RootResponder = SC.Object.extend(
       // processing.
 
       // Arrow keys are handled in keypress for firefox
-      if (keyCode>=37 && keyCode<=40 && SC.browser.mozilla) return YES;
+      if (keyCode>=37 && keyCode<=40 && SC.browser.isMozilla) return YES;
 
 
       ret = this.sendEvent('keyDown', evt) ;
@@ -1668,9 +1668,9 @@ SC.RootResponder = SC.Object.extend(
   keypress: function(evt) {
     var ret,
         keyCode   = evt.keyCode,
-        isFirefox = !!SC.browser.mozilla;
+        isFirefox = SC.browser.isMozilla;
 
-    if(SC.browser.mozilla && evt.keyCode===9){
+    if(isFirefox && evt.keyCode===9){
       this.keydownCounter++;
       if(this.keydownCounter==2) return YES;
     }
@@ -1916,7 +1916,7 @@ SC.RootResponder = SC.Object.extend(
       return YES;
     }
 
-    if (SC.browser.msie) {
+    if (SC.browser.isIE) {
       if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
     }
 
@@ -1933,7 +1933,7 @@ SC.RootResponder = SC.Object.extend(
        // drags send their own events, e.g. drag[Moved|Entered|Exited]
        if (this._drag) {
          //IE triggers mousemove at the same time as mousedown
-         if(SC.browser.msie){
+         if(SC.browser.isIE){
            if (this._lastMouseDownX !== evt.clientX || this._lastMouseDownY !== evt.clientY) {
              this._drag.tryToPerform('mouseDragged', evt);
            }
@@ -1980,7 +1980,7 @@ SC.RootResponder = SC.Object.extend(
          // also, if a mouseDownView exists, call the mouseDragged action, if
          // it exists.
          if (this._mouseDownView) {
-           if(SC.browser.msie){
+           if(SC.browser.isIE){
              if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
                this._mouseDownView.tryToPerform('mouseDragged', evt);
              }

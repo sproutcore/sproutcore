@@ -225,15 +225,15 @@ SC.detectBrowser = function(userAgent, language) {
     @name SC.browser.isWindows
     @type Boolean
   */
-  browser.windows = browser.isWindows = browser.os === SC.BROWSER.windows;
+  browser.windows = browser.isWindows = browser.os === SC.OS.windows;
 
   /** @deprecated Since version 1.7. Use browser.os === SC.OS.mac.
     @name SC.browser.isMac
     @type Boolean
   */
-  browser.mac = browser.isMac = browser.os === SC.BROWSER.mac;
+  browser.mac = browser.isMac = browser.os === SC.OS.mac;
 
-  /** @deprecated Since version 1.7. Use browser.os === SC.OS.mac && browser.compareVersion(browser.osVersion, 10.7) == 0
+  /** @deprecated Since version 1.7. Use browser.os === SC.OS.mac && browser.compare(browser.osVersion, '10.7') == 0
     @name SC.browser.isLion
     @type Boolean
   */
@@ -263,7 +263,7 @@ SC.detectBrowser = function(userAgent, language) {
   */
   browser.iOS = browser.isiOS = browser.os === SC.OS.ios;
 
-  /** @deprecated Since version 1.7. Use browser.os === SC.OS.android or browser.name === SC.BROWSER.android or browser.device === SC.BROWSER.android.
+  /** @deprecated Since version 1.7. Use browser.os === SC.OS.android or browser.name === SC.BROWSER.android or browser.device === SC.DEVICE.android.
     @name SC.browser.isAndroid
     @type Boolean
   */
@@ -287,13 +287,13 @@ SC.detectBrowser = function(userAgent, language) {
   */
   browser.msie = browser.name === SC.BROWSER.ie ? browser.version : '0';
 
-  /** @deprecated Since version 1.7. Use browser.name === SC.BROWSER.ie.
+  /** @deprecated Since version 1.7. Use browser.engine === SC.ENGINE.trident.
     @name SC.browser.isIE
     @type Boolean
   */
-  browser.isIE = browser.name === SC.BROWSER.ie;
+  browser.isIE = browser.engine === SC.ENGINE.trident;
 
-  /** @deprecated Since version 1.7. Use browser.compareVersion(browser.version, 8) <= 0.
+  /** @deprecated Since version 1.7. Use browser.compare(browser.version, '8') <= 0.
     @name SC.browser.isIE8OrLower
     @type Boolean
   */

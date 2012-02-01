@@ -346,20 +346,20 @@ SC.PickerPane = SC.PalettePane.extend(
     @default null
   */
   removeAction: null,
-  
-  
+
+
   /**
     Disable repositioning as the window or size changes. It stays in the original
     popup position.
-    
+
     @type Boolean
     @default NO
   */
   repositionOnWindowResize: YES,
-  
+
   _anchorView: null,
   _anchorHTMLElement: null,
-  
+
   /**
     Displays a new picker pane.
 
@@ -487,10 +487,10 @@ SC.PickerPane = SC.PalettePane.extend(
       ret.height = cq.outerHeight();
     }
     ret.height = (wsize.height-ret.y) < ret.height ? (wsize.height-ret.y) : ret.height;
-    if(!SC.browser.msie && window.scrollX>0 || window.scrollY>0){
+    if(!SC.browser.isIE && window.scrollX>0 || window.scrollY>0){
       ret.x+=window.scrollX;
       ret.y+=window.scrollY;
-    }else if(SC.browser.msie && (document.documentElement.scrollTop>0 || document.documentElement.scrollLeft>0)){
+    }else if(SC.browser.isIE && (document.documentElement.scrollTop>0 || document.documentElement.scrollLeft>0)){
       ret.x+=document.documentElement.scrollLeft;
       ret.y+=document.documentElement.scrollTop;
     }
@@ -519,7 +519,7 @@ SC.PickerPane = SC.PalettePane.extend(
         wret.height = mainPane.layout.minHeight;
       }
     }
-        
+
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
     if(this.preferType) {
@@ -872,7 +872,7 @@ SC.PickerPane = SC.PalettePane.extend(
     this._removeScrollObservers();
     return sc_super();
   },
-  
+
   /** Figure out what is the anchor element */
   anchorElement: function(key, value) {
     var anchorView;
@@ -897,8 +897,8 @@ SC.PickerPane = SC.PalettePane.extend(
       }
     }
   }.property('layer').cacheable(),
-  
-  
+
+
 
   /** @private
     Internal method to hide the overflow on the body to make sure we don't
@@ -922,7 +922,7 @@ SC.PickerPane = SC.PalettePane.extend(
   _withdrawOverflowRequest: function(){
     SC.bodyOverflowArbitrator.withdrawRequest(this);
   },
-  
+
   /** @private
     Detect if view is inside a scroll view. Do this by traversing parent view
     hierarchy until you hit a scroll view or main pane.

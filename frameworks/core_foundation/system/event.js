@@ -82,7 +82,7 @@ SC.Event = function(originalEvent) {
     var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.engine === SC.ENGINE.webkit && originalEvent.wheelDelta !== undefined) {
+    if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
       this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
@@ -90,7 +90,7 @@ SC.Event = function(originalEvent) {
     // normalize wheelDelta for Firefox (all Mozilla browsers)
     // note that we multiple the delta on FF to make it's acceleration more
     // natural.
-    } else if (!SC.none(originalEvent.detail) && SC.browser.engine === SC.ENGINE.gecko) {
+    } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
         this.wheelDeltaY = this.wheelDelta = 0;
@@ -101,7 +101,7 @@ SC.Event = function(originalEvent) {
 
     // handle all other legacy browser
     } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.name === SC.BROWSER.ie || SC.browser.name === SC.BROWSER.opera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+      this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
     }
 

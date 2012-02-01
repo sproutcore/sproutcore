@@ -65,7 +65,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
 
     input.val(this._value);
 
-    if (SC.browser.msie) {
+    if (SC.browser.isIE) {
       SC.Event.add(input, 'focusin', this, this.focusIn);
       SC.Event.add(input, 'focusout', this, this.focusOut);
     } else {
@@ -77,7 +77,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
   willDestroyLayerMixin: function() {
     var input = this.$input();
 
-    if (SC.browser.msie) {
+    if (SC.browser.isIE) {
       SC.Event.remove(input, 'focusin', this, this.focusIn);
       SC.Event.remove(input, 'focusout', this, this.focusOut);
     } else {

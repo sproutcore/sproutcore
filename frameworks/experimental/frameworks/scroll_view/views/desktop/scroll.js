@@ -139,7 +139,7 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
 
     wheelEvent: function () {
       // Firefox emits different mousewheel events than other browsers
-      return SC.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel';
+      return SC.browser.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
     }.property().cacheable(),
 
     /** @private
@@ -161,7 +161,7 @@ SC.DesktopScrollView = SC.CoreScrollView.extend(
 
     _scdsv_scrollDebounce: function (evt) {
       var self = this;
-      
+
       if (this._debounce != null) {
         this._debounce.invalidate();
         this._debounce = null;

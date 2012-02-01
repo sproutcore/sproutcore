@@ -21,12 +21,12 @@ SC.mixin( /** @scope SC */ {
 
     Therefore, very aggressive caching is used in order to get out of having to perform the search. The final optimimum width is a
     result of all the following values:
-    
+
       - The string itself
       - The styles on the exampleElement
       - The classNames passed in
       - Whether ignoreEscape is YES or NO
-      
+
     The caching goes against all of these in order to remember results. Note that maxWidth, though an argument, isn't one of them;
     this means that the optimal width will be searched for only once per distinct *number of lines of text* for a given string and
     styling. However, due to the fact that a passed exampleElement can have different styles a subsequent time it's passed in (but
@@ -35,27 +35,27 @@ SC.mixin( /** @scope SC */ {
     an element won't change from call to call, so this is purely defensive and for arguably infrequent benefit, but it's good
     insurance. If you set the *cacheableForMetrics* key to YES on your exampleElement, caching will kick in, and repeated calls to
     this function will cease to have any appreciable amortized cost.
-    
+
     The caching works by detecting and constructing known intervals of width for each number of lines required by widths in those
     intervals. As soon as you get a result from this function, it remembers that any width between the width it returned and the
-    maxWidth you gave it will return that same result. This also applies to maxWidths greater than the with you passed in, up 
-    until the width at which the text can fit inside maxWidth with one fewer line break. However, at this point, the function 
+    maxWidth you gave it will return that same result. This also applies to maxWidths greater than the with you passed in, up
+    until the width at which the text can fit inside maxWidth with one fewer line break. However, at this point, the function
     can't know how MUCH larger maxWidth can get before getting to the next widest setting. A simple check can be done at this point
-    to determine if the existing cached result can be used: if the height of the string at the new maxWidth is the same as the 
+    to determine if the existing cached result can be used: if the height of the string at the new maxWidth is the same as the
     cached height, then we know the string didn't fit onto one fewer line, so return the cached value. If we did this check, we
     could return very quickly after only one string measurement, but EACH time we increase the maxWidth we'll have to do a new
     string measurement to check that we didn't end up with horizontal room for one fewer line. Because of this, instead of doing
-    the check, the function will perform its binary search to go all the way UP to the minimum maxWidth at which one fewer line 
-    can be used to fit the text. After caching this value, all subsequent calls to the function will result in no string 
+    the check, the function will perform its binary search to go all the way UP to the minimum maxWidth at which one fewer line
+    can be used to fit the text. After caching this value, all subsequent calls to the function will result in no string
     measurements as long as all the maxWidths are within the interval determined to lead to the cached result. So, the second call
     can in some cases be more expensive than it needs to be, but this saves A LOT of expense on all subsequent calls. The less
     often one calls metricsForString, the happier one's life is.
-    
-    The amount of time this function will take ranges from 0 to maybe 35ms on an old, slow machine, and, when used for window 
+
+    The amount of time this function will take ranges from 0 to maybe 35ms on an old, slow machine, and, when used for window
     resizing, you'll see 35, 20, 0, 0, 0, ..., 0, 0, 35, 0, 0, 0, ..., 0, 0, 35, 0, 0, 0, ..., 0, 0, 0, 35, 0, 0, 0, ...
     After resizing through all the different caching intervals, the function will always execute quickly... under 1ms nearly always.
     The expensive calls are when a caching interval is crossed and a new cached set of metrics for the new number of lines of text
-    must be calculated. And in reality, the number of sub-millisecond function calls will be much greater relative to the number  
+    must be calculated. And in reality, the number of sub-millisecond function calls will be much greater relative to the number
     of expensive calls, because window resizing just works like that.
 
     @param {String} string The text whose width you wish to optimize within your maximum width preference.
@@ -141,8 +141,8 @@ SC.mixin( /** @scope SC */ {
       metrics.searchPerformed = false;
     }
     metrics.browserCorrection = 0;
-    if(SC.browser.msie) metrics.browserCorrection = 1;
-    if(SC.browser.mozilla) metrics.browserCorrection = 1;
+    if(SC.browser.isIE) metrics.browserCorrection = 1;
+    if(SC.browser.isMozilla) metrics.browserCorrection = 1;
     metrics.width = Math.min(maxWidth,metrics.width+metrics.browserCorrection);
     if(cache) {
       var entry = cache.list[lines];
@@ -159,7 +159,7 @@ SC.mixin( /** @scope SC */ {
     Supply any number of arguments of any type, and this function will return you a hash associated with all those arguments.
     Call it twice with the same arguments in the same order, and the hash is the same. This is great for getting out of
     calculations whose answers depend on many different variables.
-    
+
     @param {anything} your-arguments Any set of arguments whatsoever. If the FIRST argument is an array (including Arguments
                                      arrays), all other arguments will be ignored and the array will be treated as if its
                                      values at its numerical indices were passed in themselves as individual arguments.
@@ -168,7 +168,7 @@ SC.mixin( /** @scope SC */ {
   cacheSlotFor: function() {
     var     me = arguments.callee.caller,
           curr = me.cache || (me.cache={});
-    if(!arguments[0]) return curr;          
+    if(!arguments[0]) return curr;
     var   args = (arguments[0] instanceof Array || arguments[0].callee) ? arguments[0] : arguments,
         length = args.length,
            arg ,
@@ -180,14 +180,14 @@ SC.mixin( /** @scope SC */ {
     }
     return curr;
   },
-  
+
   /**
     Returns a wrapped copy of your function that caches its results according to its arguments. This function itself is cached, so
     the function you receive when you pass in a particular function will always be the same function.
-    
+
     How was does this function handle its own caching? Using itself, of course! :-D
-    
-    Use this only on functions without side effects you depend on, and only on functions whose outputs depend entirely on their 
+
+    Use this only on functions without side effects you depend on, and only on functions whose outputs depend entirely on their
     arguments and on nothing else external to them that could change.
   */
   cachedVersionOf: function() {

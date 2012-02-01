@@ -562,7 +562,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed
-    isOldSafari= SC.browser.isWebkit && (parseInt(SC.browser.webkit,0)<532);
+    isOldSafari= SC.browser.isWebkit &&
+        SC.browser.compare(SC.browser.engineVersion, '532')<0;
     context.setClass('oldWebKitFieldPadding', isOldSafari);
 
 
@@ -770,7 +771,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // element), although it will be bubbled up in other contexts.  Since
       // SproutCore's event dispatching requires the document to see the
       // event, we'll manually forward the event along.
-      if (SC.browser.mozilla) {
+      if (SC.browser.isMozilla) {
         var input = this.$input();
         SC.Event.add(input, 'keypress', this, this._firefox_dispatch_keypress);
       }
@@ -1045,8 +1046,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       var val = this.get('value');
 
       // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
-      if(val && ((!SC.browser.mozilla && which>47) ||
-        (SC.browser.mozilla && ((which>32 && which<43) || which>47) && !(keyCode>36 && keyCode<41))) &&
+      if(val && ((!SC.browser.isMozilla && which>47) ||
+        (SC.browser.isMozilla && ((which>32 && which<43) || which>47) && !(keyCode>36 && keyCode<41))) &&
         (val.length >= this.get('maxLength'))) {
         maxLengthReached = true;
       }
@@ -1073,7 +1074,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   keyUp: function(evt) {
-    if (SC.browser.mozilla && evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
+    if (SC.browser.isMozilla &&
+        evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
 
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
