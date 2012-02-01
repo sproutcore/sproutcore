@@ -32,7 +32,7 @@ SC.setupBodyClassNames = function() {
 
   // This isn't a perfectly correct way to compare versions, but should be okay
   // in practical usage.
-  ieVersion = parseInt(SC.browser.engineVersion, 10);
+  ieVersion = parseInt(SC.browser.version, 10);
   if (SC.browser.isIE) {
     if (ieVersion === 7) {
       classNames.push('ie7');
