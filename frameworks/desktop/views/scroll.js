@@ -409,7 +409,7 @@ SC.ScrollView = SC.View.extend({
   autohidesHorizontalScroller: YES,
 
   /**
-    YES if the view should maintain a vertical scroller.   This property must 
+    YES if the view should maintain a vertical scroller.   This property must
     be set when the view is created.
 
     @type Boolean
@@ -1161,7 +1161,7 @@ SC.ScrollView = SC.View.extend({
       contentWidth = viewFrame.width;
       contentHeight = viewFrame.height;
     }
-    
+
     if(view.calculatedWidth && view.calculatedWidth!==0) contentWidth = view.calculatedWidth;
     if (view.calculatedHeight && view.calculatedHeight !==0) contentHeight = view.calculatedHeight;
 

@@ -880,20 +880,28 @@ SC.Event.prototype = {
   normalized: YES,
 
   /**
-    Returns the pressed character (found in this.which) as a string.
+    Returns the pressed character as a String.
 
     @returns {String}
   */
+  // Warning.
+  // Older versions of IE don't support charCode, but on keypress return the
+  // ASCII value in keyCode instead of the key code.  Therefore, if this code is
+  // used on keyDown in IE versions prior to 9.0, it will fail.
+  // Since SproutCore passes the keydown and keypress events as a keyDown
+  // method, it's most likely that this code will cause unexpected problems
+  // in IE 7 & IE 8.
+  //
+  // Reference: http://unixpapa.com/js/key.html
   getCharString: function() {
     if(SC.browser.name === SC.BROWSER.ie){
       if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
         return String.fromCharCode(0);
-      }
-      else {
+      } else {
+        // This will only be accurate if the event is a keypress event.
         return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;
       }
-    }
-    else {
+    } else {
       return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
     }
   },
