@@ -90,7 +90,7 @@ SC.Event = function(originalEvent) {
     // normalize wheelDelta for Firefox (all Mozilla browsers)
     // note that we multiple the delta on FF to make it's acceleration more
     // natural.
-    } else if (!SC.none(originalEvent.detail) && SC.browser.engine === SC.BROWSER.gecko) {
+    } else if (!SC.none(originalEvent.detail) && SC.browser.engine === SC.ENGINE.gecko) {
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
         this.wheelDeltaY = this.wheelDelta = 0;
@@ -131,9 +131,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (SC.browser.name === SC.BROWSER.safari) {
       deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
-      if (SC.browser.compare(version, 533.17) > 0 && SC.browser.compare(version, 534) < 0) {
+      if (SC.browser.compare(version, '533.17') > 0 && SC.browser.compare(version, '534') < 0) {
         deltaMultiplier = 0.004;
-      } else if (SC.browser.compare(version, 533) < 0) {
+      } else if (SC.browser.compare(version, '533') < 0) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
       }
