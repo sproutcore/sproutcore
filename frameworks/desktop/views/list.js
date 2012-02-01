@@ -438,6 +438,14 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // convert to IndexSet and return
     return SC.IndexSet.create(start, end-start);
   },
+    
+  /** @private 
+    Whenever the length changes, call computeLayout to update calculatedHeight
+    for the scroll view to update its vertical scrollbar
+  */
+  _lengthDidChange: function() {
+    this.computeLayout();
+  }.observes('length'),
   
   
   // ..........................................................
