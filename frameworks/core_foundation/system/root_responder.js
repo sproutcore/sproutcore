@@ -687,7 +687,7 @@ SC.RootResponder = SC.Object.extend(
     var mousewheel = 'mousewheel';
 
     // Firefox emits different mousewheel events than other browsers
-    if (SC.browser.mozilla) {
+    if (SC.browser.name === SC.BROWSER.firefox) {
       // For Firefox < 3.5, subscribe to DOMMouseScroll events
       if (SC.browser.compare(SC.browser.engineVersion, '1.9.1') < 0) {
         mousewheel = 'DOMMouseScroll';

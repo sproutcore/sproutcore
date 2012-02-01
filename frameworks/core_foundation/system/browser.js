@@ -51,7 +51,7 @@ SC.mixin(SC.browser,
 
     // Test each part stopping when there is a difference.
     for (var i = 0; i < tests.length; i++) {
-      console.log("parts[i]: %@, tests[i]: %@".fmt(parts[i], tests[i]));
+      //console.log("parts[i]: %@, tests[i]: %@".fmt(parts[i], tests[i]));
       var check = parts[i] - tests[i];
       if (isNaN(check)) return 0;
       if (check !== 0) return check;
