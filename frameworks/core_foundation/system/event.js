@@ -131,9 +131,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (SC.browser.name === SC.BROWSER.safari) {
       deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
-      if (SC.browser.compare(version, 533.17) > 0 && SC.browser.compare(version, 534) < 0) {
+      if (SC.browser.compare(version, '533.17') > 0 && SC.browser.compare(version, '534') < 0) {
         deltaMultiplier = 0.004;
-      } else if (SC.browser.compare(version, 533) < 0) {
+      } else if (SC.browser.compare(version, '533') < 0) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
       }
