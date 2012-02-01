@@ -647,7 +647,8 @@ SC.RootResponder = SC.Object.extend(
       this.listenFor(['transitionend', SC.platform.cssPrefix+'TransitionEnd'], document);
     }
 
-    // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
+    // handle special case for keypress- you can't use normal listener to block
+    // the backspace key on Mozilla
     if (this.keypress) {
       if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.mozilla) {
         var responder = this ;
@@ -656,10 +657,10 @@ SC.RootResponder = SC.Object.extend(
           return responder.keypress.call(responder, e);
         };
 
-        // SC.Event.add(window, 'unload', this, function() { document.onkeypress = null; }); // be sure to cleanup memory leaks
-
       // Otherwise, just add a normal event handler.
-      } else SC.Event.add(document, 'keypress', this, this.keypress);
+      } else {
+        SC.Event.add(document, 'keypress', this, this.keypress);
+      }
     }
 
     // handle these two events specially in IE
@@ -763,28 +764,7 @@ SC.RootResponder = SC.Object.extend(
               // move element back into document...
               pen.appendChild(target);
 
-              // // In MobileSafari, our target can sometimes
-              // // be a text node, so make sure we handle that case.
-              // textNode = (target.nodeType === 3);
-              //
-              // if (textNode && target.parentElement) {
-              //   // Hide the text node's parent element if it has one
-              //   target = target.parentElement;
-              //   target.style.display = 'none';
-              // } else if (textNode) {
-              //   // We have a text node with no containing element,
-              //   // so just erase its text content.
-              //   target.nodeValue = '';
-              // } else {
-              //   // Standard Element, just toggle its display off.
-              //   target.style.display = 'none';
-              // }
-              //
-              // // Now move the captured and hidden element back to the DOM.
-              // document.body.appendChild(target);
-
-              // ...and save the element to be garbage collected on
-              // touchEnd.
+              // ...and save the element to be garbage collected on touchEnd.
               touches[touch]._rescuedElement = target;
             }
           }
@@ -794,17 +774,14 @@ SC.RootResponder = SC.Object.extend(
     }
   },
 
-  // ................................................................................
+  // ...........................................................................
   // TOUCH SUPPORT
   //
   /*
-    This touch support is written to meet the following specifications. They are actually
-    simple, but I decided to write out in great detail all of the rules so there would
-    be no confusion.
+    There are three events: touchStart, touchEnd and touchesDragged.
 
-    There are three events: touchStart, touchEnd, touchDragged. touchStart and End are called
-    individually for each touch. touchDragged events are sent to whatever view owns the touch
-    event
+    The touchStart and touchEnd events are called individually for each touch.
+    The touchesDragged events are sent to whichever view owns the touch event.
   */
 
   /**
@@ -1612,6 +1589,11 @@ SC.RootResponder = SC.Object.extend(
 
     All actions that might cause an actual insertion of text are handled in
     the keypress event.
+
+    References:
+        http://www.quirksmode.org/js/keys.html
+        https://developer.mozilla.org/en/DOM/KeyboardEvent
+        http://msdn.microsoft.com/library/ff974342.aspx
   */
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
