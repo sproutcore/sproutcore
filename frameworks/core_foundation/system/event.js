@@ -894,8 +894,11 @@ SC.Event.prototype = {
   //
   // Reference: http://unixpapa.com/js/key.html
   getCharString: function() {
-    if(SC.browser.name === SC.BROWSER.ie){
-      if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
+    if(SC.browser.name === SC.BROWSER.ie &&
+        SC.browser.compare(SC.browser.version, '9.0') < 0) {
+      // Return an empty String for backspace, tab, left, right, up or down.
+      if(this.keyCode == 8 || this.keyCode == 9 ||
+          (this.keyCode >= 37 && this.keyCode<=40)) {
         return String.fromCharCode(0);
       } else {
         // This will only be accurate if the event is a keypress event.
