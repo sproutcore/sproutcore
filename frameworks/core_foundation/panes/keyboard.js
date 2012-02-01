@@ -41,7 +41,7 @@ SC.Pane.reopen(
     var nextValidKeyView;
 
     // Handle tab key presses if we don't have a first responder already
-    if ((evt.which === 9 || (SC.browser.mozilla && evt.keyCode ===9)) && !this.get('firstResponder')) {
+    if (evt.keyCode === 9 && !this.get('firstResponder')) {
       // Cycle forwards by default, backwards if the shift key is held
       if (evt.shiftKey) {
         nextValidKeyView = this.get('previousValidKeyView');
