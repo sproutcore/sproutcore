@@ -37,10 +37,10 @@ SC.setupBodyClassNames = function() {
     if (ieVersion === 7) {
       classNames.push('ie7');
     }
-    else if (ieVersion === 7) {
+    else if (ieVersion === 8) {
       classNames.push('ie8');
     }
-    else if (ieVersion === 7) {
+    else if (ieVersion === 9) {
       classNames.push('ie9');
     }
   }
