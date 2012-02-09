@@ -1416,7 +1416,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var children = this.parentRecords[storeKey] || {};
     if (SC.none(func)) return;
     for (var key in children) {
-      if (children.hasOwnProperty(key)) func(key);
+      // for .. in makes the key a String, but be sure to pass a Number to the
+      // function.
+      if (children.hasOwnProperty(key)) func(parseInt(key, 10));
     }
   },
 
