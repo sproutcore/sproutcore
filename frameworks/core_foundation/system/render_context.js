@@ -307,10 +307,6 @@ SC.RenderContext = SC.Builder.create(
 
     cq = this.$();
 
-    // console.log('%@#update() called'.fmt(this));
-    // if (this.length>0) console.log(this.join());
-    // else console.log('<no length>');
-
     // replace innerHTML
     if (this.length>0) {
       this._innerHTMLReplaced = YES;
@@ -379,8 +375,8 @@ SC.RenderContext = SC.Builder.create(
     if (attrs || className || styles || id) {
       if (!attrs) attrs = this._DEFAULT_ATTRS ;
       if (id) attrs.id = id ;
-      // old versions of safari (5.0)!!!! throw an error if we access 
-      // attrs.class. meh... 
+      // old versions of safari (5.0)!!!! throw an error if we access
+      // attrs.class. meh...
       if (className) attrs['class'] = className.join(' ');
 
       // add in styles.  note how we avoid memory allocs here to keep things
@@ -391,7 +387,7 @@ SC.RenderContext = SC.Builder.create(
           value = styles[key];
           if (value === null) continue; // skip empty styles
           if (typeof value === SC.T_NUMBER && !SC.NON_PIXEL_PROPERTIES.contains(key)) value += "px";
-          styleStr = styleStr + this._dasherizeStyleName(key)+": "+value + "; "; 
+          styleStr = styleStr + this._dasherizeStyleName(key)+": "+value + "; ";
         }
         attrs.style = styleStr;
       }
@@ -932,7 +928,7 @@ SC.RenderContext = SC.Builder.create(
     Sets the named attribute on the tag.  Note that if you set the 'class'
     attribute or the 'styles' attribute, it will be ignored.  Use the
     relevant class name and style methods instead.
-  
+
     @param {String|Hash} nameOrAttrs the attr name or hash of attrs.
     @param {String} value attribute value if attribute name was passed
     @returns {SC.RenderContext} receiver

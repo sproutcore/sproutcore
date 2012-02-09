@@ -582,12 +582,12 @@ SC.Record = SC.Object.extend(
     @param {Boolean} includeNull will write empty (null) attributes
     @returns {SC.Record} the normalized record
   */
-  
-  normalize: function(includeNull) {    
-    var primaryKey = this.primaryKey, 
-        recordId   = this.get('id'), 
-        store      = this.get('store'), 
-        storeKey   = this.get('storeKey'), 
+
+  normalize: function(includeNull) {
+    var primaryKey = this.primaryKey,
+        recordId   = this.get('id'),
+        store      = this.get('store'),
+        storeKey   = this.get('storeKey'),
         keysToKeep = {},
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
         isChild, defaultVal, keyForDataHash, attr;
@@ -603,12 +603,12 @@ SC.Record = SC.Object.extend(
         typeClass = valueForKey.typeClass;
         if (typeClass) {
           keyForDataHash = valueForKey.get('key') || key; // handle alt keys
-          
+
           // As we go, we'll build up a key —> attribute mapping table that we
           // can use when purging keys from the data hash that are not defined
           // in the schema, below.
           keysToKeep[keyForDataHash] = YES;
-          
+
           isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
           isChild  = valueForKey.isNestedRecordTransform;
           if (!isRecord && !isChild) {
@@ -624,7 +624,7 @@ SC.Record = SC.Object.extend(
             else if(!includeNull) {
               keysToKeep[keyForDataHash] = NO;
             }
-          
+
           } else if (isChild) {
             attrValue = this.get(key);
 
@@ -654,7 +654,7 @@ SC.Record = SC.Object.extend(
         }
       }
     }
-    
+
     // Finally, we'll go through the underlying data hash and remove anything
     // for which no appropriate attribute is defined.  We can do this using
     // the mapping table we prepared above.
@@ -1363,9 +1363,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
     opts = opts || {};
     var isNested = opts.nested || opts.isNested;
     var attr;
-    
+
     this._throwUnlessRecordTypeDefined(recordType, 'toMany');
-    
+
     if(isNested){
       attr = SC.ChildrenAttribute.attr(recordType, opts);
     }
@@ -1403,7 +1403,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     }
     return attr;
   },
-  
+
   _throwUnlessRecordTypeDefined: function(recordType, relationshipType) {
     if (!recordType) {
       throw "Attempted to create " + relationshipType + " attribute with " +
