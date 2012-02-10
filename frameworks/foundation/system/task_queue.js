@@ -20,6 +20,7 @@ SC.TaskQueue = SC.Task.extend({
       self._idleEntry();
     };
     
+    this._suspendCount = 0;
     this._tasks = [];
   },
   
@@ -88,6 +89,24 @@ SC.TaskQueue = SC.Task.extend({
   },
   
   /**
+    Suspends cycling of the queue. Only affects task queues that run when idle,
+    such as the backgroundTaskQueue.
+  */
+  suspend: function() {
+    this._suspendCount++;
+  },
+  
+  /**
+    Resumes cycling of the queue.
+  */
+  resume: function() {
+    this._suspendCount--;
+    if (this._suspendCount <= 0) {
+      this._setupIdle();
+    }
+  },
+  
+  /**
     @private
     Sets up idling if needed when the task count changes.
   */
@@ -96,11 +115,22 @@ SC.TaskQueue = SC.Task.extend({
   }.observes('taskCount'),
   
   /**
+    When runWhenIdle changes, we need to setup idle again if needed. This allows us to suspend
+    and resume processing of the background task queue.
+  */
+  _runWhenIdleDidChange: function() {
+    this._setupIdle();
+  }.observes('runWhenIdle'),
+  
+  /**
     Sets up the scheduled idling check if needed and applicable.
     @private
   */
   _setupIdle: function() {
-    if (this.get('runWhenIdle') && !this._idleIsScheduled && this.get('taskCount') > 0) {
+    if (
+      !this._suspendCount && this.get('runWhenIdle') && 
+      !this._idleIsScheduled && this.get('taskCount') > 0
+    ) {
       setTimeout(this._doIdleEntry, 
         this.get('interval')
       );
@@ -115,6 +145,9 @@ SC.TaskQueue = SC.Task.extend({
   _idleEntry: function() {
     this._idleIsScheduled = NO;
     var last = SC.RunLoop.lastRunLoopEnd;
+    
+    // if we are not supposed to run when idle we need to short-circuit out.
+    if (!this.get('runWhenIdle') && !this._suspendCount) return;
     
     // if no recent events (within < 1s)
     if (Date.now() - last > this.get('minimumIdleDuration')) {

@@ -45,6 +45,29 @@ SC.CoreView.reopen(
   concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings'],
 
   /**
+    The WAI-ARIA role of the control represented by this view. For example, a
+    button may have a role of type 'button', or a pane may have a role of
+    type 'alertdialog'. This property is used by assistive software to help
+    visually challenged users navigate rich web applications.
+
+    The full list of valid WAI-ARIA roles is available at:
+    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+
+    @property {String}
+  */
+
+  ariaRole: null,
+
+  /**
+    The full list of valid WAI-ARIA roles is available at:
+    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+
+    @property {String}
+  */
+
+  ariaHidden: null,
+
+  /**
     The current pane.
     @property {SC.Pane}
   */
@@ -296,7 +319,7 @@ SC.CoreView.reopen(
     run at the end of the run loop, or you can call updateLayerIfNeeded()
     to force the layer to update immediately.
 
-    Instead of overriding this method, consider overidding the render() method
+    Instead of overriding this method, consider overriding the render() method
     instead, which is called both when creating and updating a layer.  If you
     do not want your render() method called when updating a layer, then you
     should override this method instead.
@@ -405,6 +428,8 @@ SC.CoreView.reopen(
   _notifyDidCreateLayer: function() {
     this.notifyPropertyChange('layer');
 
+    if (this.get('useStaticLayout')) this.viewDidResize();
+
     if (this.didCreateLayer) { this.didCreateLayer() ; }
 
     // and notify others
@@ -480,8 +505,8 @@ SC.CoreView.reopen(
   */
   replaceLayer: function() {
     this.destroyLayer();
-    //this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocation) ;
+    this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocationIfNeeded);
   },
 
   /**
@@ -566,7 +591,10 @@ SC.CoreView.reopen(
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
         nextView.updateLayerLocationIfNeeded() ;
-        nextNode = nextView.get('layer') ;
+
+        // just in case it still couldn't generate the layer, force to null, because
+        // IE doesn't support insertBefore(blah, undefined) in version IE9.
+        nextNode = nextView.get('layer') || null;
       }
 
       // add to parentNode if needed.
@@ -679,15 +707,16 @@ SC.CoreView.reopen(
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
     if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
-    if (this.get('isFirstResponder')) { 
-      context.addClass('focus');
-      context.attr('tabindex', '0'); 
-    }else{
-      context.attr('tabindex', '-1');
-    }
+    if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));
     context.attr('role', this.get('ariaRole'));
+
+    var _ariaHidden = this.get('ariaHidden');
+    if(_ariaHidden!==null){
+      if(_ariaHidden === NO) context.removeAttr('aria-hidden');
+      else context.attr('aria-hidden', _ariaHidden);
+    }
   },
 
   /**
@@ -717,7 +746,7 @@ SC.CoreView.reopen(
 
       // Set up an observer on the context. If the property changes, toggle the
       // class name.
-      observer = function() {
+      var observer = function() {
         // Get the current value of the property
         newClass = this._classStringForProperty(property);
         elem = this.$();
@@ -938,18 +967,7 @@ SC.CoreView.reopen(
   */
   tagName: 'div',
 
-  /**
-    The WAI-ARIA role of the control represented by this view. For example, a
-    button may have a role of type 'button', or a pane may have a role of
-    type 'alertdialog'. This property is used by assistive software to help
-    visually challenged users navigate rich web applications.
 
-    The full list of valid WAI-ARIA roles is available at:
-    http://www.w3.org/TR/wai-aria/roles#roles_categorization
-
-    @property {String}
-  */
-  ariaRole: null,
 
   /**
     Standard CSS class names to apply to the view's outer element.  This
@@ -1017,7 +1035,7 @@ SC.CoreView.reopen(
     @property {Array}
     @readOnly
   */
-  displayProperties: [],
+  displayProperties: ['ariaHidden'],
 
   // .......................................................
   // SC.RESPONDER SUPPORT
@@ -1033,7 +1051,7 @@ SC.CoreView.reopen(
 
   /** @property
     Set to YES if your view is willing to accept first responder status.  This
-    is used when calculcating key responder loop.
+    is used when calculating key responder loop.
   */
   acceptsFirstResponder: NO,
 
@@ -1344,7 +1362,7 @@ SC.CoreView.reopen(
     } else {
       // attrs should always exist...
       if (!attrs) { attrs = {} ; }
-      // clone the hash that was given so we dont pollute it if it's being reused
+      // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
     }
 
@@ -1377,7 +1395,7 @@ SC.CoreView.reopen(
     to override this function to always return YES , instead of setting
     isTextSelectable to true.
 
-    For example in textfield you dont want to enable textSelection on the text
+    For example in textfield you do not want to enable textSelection on the text
     hint only on the actual text you are entering. You can achieve that by
     only overriding this method.
 
@@ -1586,7 +1604,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
   },
 
   /**
-    Internal method actually updates the localizated attributes on the view
+    Internal method actually updates the localized attributes on the view
     class.  This is overloaded in design mode to also save the attributes.
   */
   applyLocalizedAttributes: function(loc) {
@@ -1645,7 +1663,7 @@ SC.CoreView.unload = function() {
 
    - `init` -- override this method for any general object setup (such as
      observers, starting timers and animations, etc) that you need to happen
-     everytime the view is created, regardless of whether or not its layer
+     every time the view is created, regardless of whether or not its layer
      exists yet.
    - `render` -- override this method to generate or update your HTML to reflect
      the current state of your view.  This method is called both when your view
@@ -1676,11 +1694,11 @@ SC.CoreView.unload = function() {
 */
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   classNames: ['sc-view'],
-  
+
   displayProperties: ['isFirstResponder']
 });
 
 //unload views for IE, trying to collect memory.
-if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
+if(SC.browser.isIE) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
 
 

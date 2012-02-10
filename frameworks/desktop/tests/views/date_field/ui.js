@@ -8,73 +8,87 @@
 /*global module test htmlbody ok equals same stop start */
 (function() {
   var pane = SC.ControlTestPane.design()
-  .add("empty", SC.DateFieldView, { 
-    hint: "dd/mm/yyyy", 
+  .add("empty", SC.DateFieldView, {
+    hint: "dd/mm/yyyy",
     value: ''
   })
-  
-  .add("with value", SC.DateFieldView, { 
-    hint: "dd/mm/yyyy", 
+
+  .add("with value", SC.DateFieldView, {
+    hint: "dd/mm/yyyy",
     value: SC.DateTime.create({ day: 1, month: 1, year: 2010 })
   })
-  
-  .add("disabled - empty", SC.DateFieldView, { 
-    hint: "dd/mm/yyyy", 
+
+  .add("disabled - empty", SC.DateFieldView, {
+    hint: "dd/mm/yyyy",
     value: null,
     isEnabled: NO
   })
-  
-  .add("disabled - with value", SC.DateFieldView, { 
-    hint: "dd/mm/yyyy", 
+
+  .add("disabled - with value", SC.DateFieldView, {
+    hint: "dd/mm/yyyy",
     value: SC.DateTime.create({ day: 1, month: 1, year: 2010 }),
     isEnabled: NO
   })
-  
-  .add("date & time - empty", SC.DateFieldView, { 
-    hint: "dd/mm/yyyy hh:mm AM/PM", 
+
+  .add("date & time - empty", SC.DateFieldView, {
+    hint: "dd/mm/yyyy hh:mm AM/PM",
     value: null,
     showTime: YES
   })
-  
-  .add("date & time - with value", SC.DateFieldView, { 
-    hint: "dd/mm/yyyy hh:mm AM/PM", 
+
+  .add("date & time - with value", SC.DateFieldView, {
+    hint: "dd/mm/yyyy hh:mm AM/PM",
     value: SC.DateTime.create({ day: 1, month: 1, year: 2010, hour: 10, minute: 20 }),
     showTime: YES
   })
-  
-  .add("time - disabled - empty", SC.DateFieldView, { 
-    hint: "hh:mm AM/PM", 
+
+  .add("time - disabled - empty", SC.DateFieldView, {
+    hint: "hh:mm AM/PM",
     value: null,
     showTime: YES,
     showDate: NO,
     isEnabled: NO
   })
-  
-  .add("time - disabled - with value", SC.DateFieldView, { 
-    hint: "hh:mm AM/PM", 
+
+  .add("time - disabled - with value", SC.DateFieldView, {
+    hint: "hh:mm AM/PM",
     value: SC.DateTime.create({ hour: 10, minute: 20 }),
     showTime: YES,
     showDate: NO,
     isEnabled: NO
+  })
+
+  .add("empty - no hint on focus", SC.DateFieldView, {
+    hint: "dd/mm/yyyy",
+    value: '',
+    hintOnFocus: NO
+  })
+
+  .add("empty - disabled - no hint on focus", SC.DateFieldView, {
+    hint: "dd/mm/yyyy",
+    value: '',
+    isEnabled: NO,
+    hintOnFocus: NO
   });
-  
-  
-    
+
+
+
 pane.show(); // add a test to show the test pane
 
 // ..........................................................
 // VERIFY STANDARD STATES
-// 
+//
 pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   var input = view.$('input');
   var layer = view.$();
-  
+
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-  if(SC.browser.webkit || parseInt(SC.browser.mozilla) >= 2.0) equals(input.val(), '', 'input should have empty value');
+  if(SC.browser.isWebkit || (SC.browser.isMozilla &&
+      SC.browser.compare(SC.browser.engineVersion, '2.0') >= 0) equals(input.val(), '', 'input should have empty value');
   else equals(input.val(), expectedHint, 'input should have empty value');
-  
+
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = (view.get('hintOnFocus') ? view.$('.hint') : view.$('.sc-hint'));
 
     if (hint.length===1) {
       hint = hint.text();
@@ -89,12 +103,12 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
 pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint) {
   var input = view.$('input');
   var layer = view.$();
-  
+
   ok(layer.hasClass('not-empty'), 'layer should have not-empty class');
   equals(input.val(), expectedValue, 'input should have value');
-  
+
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = (view.get('hintOnFocus') ? view.$('.hint') : view.$('.sc-hint'));
 
     if (hint.length===1) {
       hint = hint.text();
@@ -109,7 +123,7 @@ pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint)
 pane.verifyDisabled = function verifyDisabled(view, isDisabled) {
   var layer = view.$();
   var input = view.$('input');
-  
+
   if (isDisabled) {
     ok(layer.hasClass('disabled'), 'layer should have disabled class');
     ok(input.attr('disabled'), 'input should have disabled attr');
@@ -122,7 +136,7 @@ pane.verifyDisabled = function verifyDisabled(view, isDisabled) {
 
 // ..........................................................
 // TEST INITIAL STATES
-// 
+//
 
 module('SC.DateFieldView ui', pane.standardSetup());
 
@@ -174,13 +188,25 @@ test("time - disabled - with value", function() {
   pane.verifyDisabled(view, YES);
 });
 
+test("empty - no hint on focus", function() {
+   var view = pane.view('empty - no hint on focus');
+   pane.verifyEmpty(view, 'dd/mm/yyyy');
+   pane.verifyDisabled(view, NO);
+});
+
+test("empty - disabled - no hint on focus", function() {
+   var view = pane.view('empty - disabled - no hint on focus');
+   pane.verifyEmpty(view, 'dd/mm/yyyy');
+   pane.verifyDisabled(view, YES);
+});
+
 // ..........................................................
 // TEST CHANGING VIEWS
-// 
+//
 
 test("changing value from empty -> value", function() {
   var view = pane.view('empty');
-  
+
   // test changing value updates like it should
   SC.RunLoop.begin();
   view.set('value', SC.DateTime.create({ day: 1, month: 1, year: 2010 }));
@@ -188,9 +214,9 @@ test("changing value from empty -> value", function() {
   pane.verifyNotEmpty(view, '01/01/2010', 'dd/mm/yyyy');
 });
 
-test("disabling view", function() {  
+test("disabling view", function() {
   var view = pane.view('empty');
-  
+
   // test changing enabled state updates like it should
   SC.RunLoop.begin();
   view.set('isEnabled', NO);
@@ -221,13 +247,13 @@ test("enabling disabled view", function() {
 
 // ..........................................................
 // TEST SELECTION SUPPORT
-// 
+//
 
-test("Setting the selection to a null value should fail", function() {  
+test("Setting the selection to a null value should fail", function() {
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-  
+
   var thrownException = null;
   try {
     view.set('selection', null);
@@ -241,11 +267,11 @@ test("Setting the selection to a null value should fail", function() {
   }
 });
 
-test("Setting the selection to a non-SC.TextSelection value should fail", function() {  
+test("Setting the selection to a non-SC.TextSelection value should fail", function() {
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-  
+
   var thrownException = null;
   try {
     view.set('selection', {start: 0, end: 0});
@@ -259,15 +285,15 @@ test("Setting the selection to a non-SC.TextSelection value should fail", functi
   }
 });
 
-test("Setting and then getting back the selection", function() {  
+test("Setting and then getting back the selection", function() {
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.focus();
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-  
+
   var newSelection = SC.TextSelection.create({start:2, end:5});
   view.set('selection', newSelection);
-  
+
   var fetchedSelection = view.get('selection');
   ok(fetchedSelection.get('start') === 2, 'the selection should start at index 2');
   ok(fetchedSelection.get('end') === 5, 'the selection should end at index 4');
@@ -276,11 +302,11 @@ test("Setting and then getting back the selection", function() {
 
 // ..........................................................
 // TEST ACCESSORY VIEWS
-// 
+//
 
-test("Adding left accessory view", function() {  
+test("Adding left accessory view", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var accessoryView = SC.View.create({
@@ -292,14 +318,14 @@ test("Adding left accessory view", function() {
   ok(view.get('leftAccessoryView') === accessoryView, 'left accessory view should be set to ' + accessoryView.toString());
   ok(view.get('childViews').length === 1, 'there should only be one child view');
   ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
-  
-  
+
+
   // The hint and padding elements should automatically have their 'left'
   // values set to the accessory view's offset + width
   // (18 = 2 left offset + 16 width)
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
-  
+
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('leftAccessoryView', null);
@@ -308,9 +334,9 @@ test("Adding left accessory view", function() {
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
-test("Adding right accessory view", function() {  
+test("Adding right accessory view", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var accessoryView = SC.View.create({
@@ -322,15 +348,15 @@ test("Adding right accessory view", function() {
   ok(view.get('rightAccessoryView') === accessoryView, 'right accessory view should be set to ' + accessoryView.toString());
   ok(view.get('childViews').length === 1, 'there should only be one child view');
   ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
-  
-  
+
+
   // The hint and padding elements should automatically have their 'right'
   // values set to the accessory view's offset + width
   // (20 = 3 right offset + 17 width)
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
-  
-  
+
+
   // If a right accessory view is set with only 'left' (and not 'right')
   // defined in its layout, 'left' should be cleared out and 'right' should
   // be set to 0.
@@ -340,11 +366,11 @@ test("Adding right accessory view", function() {
   });
   view.set('rightAccessoryView', accessoryView);
   SC.RunLoop.end();
-  
+
   ok(view.get('rightAccessoryView').get('layout').left === null, "right accessory view created with 'left' rather than 'right' in layout should have layout.left set to null");
   ok(view.get('rightAccessoryView').get('layout').right === 0, "right accessory view created with 'left' rather than 'right' in layout should have layout.right set to 0");
-  
-  
+
+
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('rightAccessoryView', null);
@@ -353,9 +379,9 @@ test("Adding right accessory view", function() {
   ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
 });
 
-test("Adding both left and right accessory views", function() {  
+test("Adding both left and right accessory views", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var leftAccessoryView = SC.View.create({
@@ -369,8 +395,8 @@ test("Adding both left and right accessory views", function() {
   SC.RunLoop.end();
 
   ok(view.get('childViews').length === 2, 'we should have two child views since we added both a left and a right accessory view');
-  
-  
+
+
   // The hint and padding elements should automatically have their 'left' and
   // 'right' values set to the accessory views' offset + width
   //   *  left:   18 = 2 left offset + 16 width)
@@ -378,8 +404,8 @@ test("Adding both left and right accessory views", function() {
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
-  
-  
+
+
   // Test removing the accessory views.
   SC.RunLoop.begin();
   view.set('rightAccessoryView', null);
@@ -397,19 +423,19 @@ test("Adding both left and right accessory views", function() {
 
 // ..........................................................
 // TEST EVENTS
-// 
+//
 /*
 test("focus and blurring text field", function() {
   var view = pane.view('with value');
   var input = view.$('input');
-  
+
   // attempt to focus...
   SC.Event.trigger(input, 'focus');
-  
+
   // verify editing state changed...
   ok(view.get('isEditing'), 'view.isEditing should be YES');
   ok(view.$().hasClass('focus'), 'view layer should have focus class');
-  
+
   // simulate typing a letter
   //SC.Event.trigger(input, 'keydown');
   SC.Event.trigger(input, 'right');
@@ -417,27 +443,27 @@ test("focus and blurring text field", function() {
   //SC.Event.trigger(input, 'keyup');
   //input.val('f');
   SC.Event.trigger(input, 'change');
-  
+
   var selection = view.get('selection');
   console.log("Current selection:  %@".fmt(selection));
-  
-  // wait a little bit to let text field propograte changes
+
+  // wait a little bit to let text field propagate changes
   stop();
-  
+
   setTimeout(function() {
     start();
-    
+
     equals(view.get('value'), '02/01/2010', 'view should have new value');
     equals(view.get('fieldValue'), '02/01/2010', 'view should have new value');
-    
+
     // attempt to blur...
     SC.Event.trigger(input, 'blur');
 
     // verify editing state changed...
     ok(!view.get('isEditing'), 'view.isEditing should be NO');
     ok(!view.$().hasClass('focus'), 'view layer should NOT have focus class');
-  }, 100);  
-  
+  }, 100);
+
 });
 
 test("editing a field should not change the cursor position", function() {

@@ -12,15 +12,15 @@ sc_require('mixins/inline_editor');
 
 /**
   @class
-  
-  The inline text editor is used to display an editable area for controls 
+
+  The inline text editor is used to display an editable area for controls
   that are not always editable such as label views and source list views.
-  
+
   You generally will not use the inline editor directly but instead will
-  invoke beginEditing() and endEditing() on the views you are 
-  editing. If you would like to use the inline editor for your own views, 
+  invoke beginEditing() and endEditing() on the views you are
+  editing. If you would like to use the inline editor for your own views,
   you can do that also by using the editing API described here.
-  
+
   ## Using the Inline Editor in Your Own Views
 
   To use the inlineEditor on a custom view you should mixin SC.InlineEditable on
@@ -30,16 +30,16 @@ sc_require('mixins/inline_editor');
 
       MyProject.MyView = SC.View.extend(SC.InlineEditable, {
       });
-  
+
   ### Starting the Editor
-  
-  The inline editor works by positioning itself over the top of your view 
+
+  The inline editor works by positioning itself over the top of your view
   with the same offset, width, and font information.
 
   To start it simply call beginEditing on your view.
 
       myView.beginEditing();
-  
+
   By default, if the inline editor is currently in use elsewhere, it will automatically
   close itself over there and begin editing for your view instead. This behavior
   is defined by the inlineEditorDelegate of your view, and can be changed by using
@@ -65,25 +65,25 @@ sc_require('mixins/inline_editor');
   the editor.
 
   ## Committing or Discarding Changes
-  
-  Normally the editor will automatically commit or discard its changes 
+
+  Normally the editor will automatically commit or discard its changes
   whenever the user exits the edit mode by pressing enter, escape, or clicking
   elsewhere on the page. If you need to force the editor to end editing, you can
   do so by calling commitEditing() or discardEditing():
-  
+
       myView.commitEditing();
       myView.discardEditing();
-  
-  Both methods will try to end the editing context and will call the 
+
+  Both methods will try to end the editing context and will call the
   relevant delegate methods on the inlineEditorDelegate set on your view.
-  
-  Note that it is possible an editor may not be able to commit editing 
+
+  Note that it is possible an editor may not be able to commit editing
   changes because either the delegate disallowed it or because its validator
   failed.  In this case commitEditing() will return NO.  If you want to
   end editing anyway, you can discard the editing changes instead by calling
   discardEditing().  This method will generally succeed unless your delegate
   refuses it as well.
-  
+
   @extends SC.TextFieldView
   @since SproutCore 1.0
 */
@@ -94,6 +94,15 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     Over-write magic number from SC.TextFieldView
   */
   _topOffsetForFirefoxCursorFix: 0,
+
+  /**
+    Tells RootResponder to blur us when there is a mousedown anywhere else.
+
+    @type Boolean
+    @default YES
+  */
+  // TODO: remove this when focus behavior is improved
+  blurOnMouseDown: YES,
 
   /*
   * @private
@@ -172,7 +181,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @method
   *
   * Scans the given element for styles and copies them into a style element in
-  * the head. This allows the styles to be overriden by css matching classNames
+  * the head. This allows the styles to be overridden by css matching classNames
   * on the editor.
   *
   * @params {element} the dom element to copy
@@ -226,6 +235,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @param {Boolean} if the view is a member of a collection
   */
 	positionOverTargetView: function(target, isCollection, pane, frame, elem) {
+    var isIE7;
+
     if(!pane) pane = target.get('pane');
 
     if(!elem) elem = target.$()[0];
@@ -247,20 +258,22 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     layout.height = frame.height;
     layout.width = frame.width;
 
+    isIE7 = SC.browser.isIE &&
+        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
     if (isCollection && tarLayout.left) {
       layout.left=frame.x-tarLayout.left-paneElem.offsetLeft-1;
-      if(SC.browser.msie==7) layout.left--;
+      if(isIE7) layout.left--;
     } else {
       layout.left=frame.x-paneElem.offsetLeft-1;
-      if(SC.browser.msie==7) layout.left--;
+      if(isIE7) layout.left--;
     }
 
     if (isCollection && tarLayout.top) {
       layout.top=frame.y-tarLayout.top-paneElem.offsetTop;
-      if(SC.browser.msie==7) layout.top=layout.top-2;
+      if(isIE7) layout.top=layout.top-2;
     } else {
       layout.top=frame.y-paneElem.offsetTop;
-      if(SC.browser.msie==7) layout.top=layout.top-2;
+      if(isIE7) layout.top=layout.top-2;
     }
 
     this.set('layout', layout);
@@ -321,9 +334,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   }.enhance(),
 
   /**
-    Invoked whenever the editor loses (or should lose) first responder 
+    Invoked whenever the editor loses (or should lose) first responder
     status to commit or discard editing.
-    
+
     @returns {Boolean}
   */
   // TODO: this seems to do almost the same thing as fieldDidBlur
@@ -331,18 +344,18 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     if (!this.get('isEditing')) return YES ;
     return this.commitOnBlur ? this.commitEditing() : this.discardEditing();
   },
-  
-  /** 
+
+  /**
     @method
     @private
 
     Called by commitEditing and discardEditing to actually end editing.
-    
+
   */
   _endEditing: function(original) {
     var ret = original();
 
-    // resign first responder if not done already.  This may call us in a 
+    // resign first responder if not done already.  This may call us in a
     // loop but since isEditing is already NO, nothing will happen.
     if (this.get('isFirstResponder')) {
       var pane = this.get('pane');
@@ -362,21 +375,21 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     arguments.callee.base.call(this, e) ;
     return this.get('isEditing');
   },
-  
+
   touchStart: function(e){
     this.mouseDown(e);
   },
-  
+
   /** @private */
   keyDown: function(evt) {
     var ret = this.interpretKeyEvents(evt) ;
     this.fieldValueDidChange(true);
     return !ret ? NO : ret ;
   },
-  
+
   /** @private */
   insertText: null,
-  
+
   //keyUp: function() { return true; },
 
   _scitf_blurInput: function() {
@@ -385,43 +398,43 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     el = null;
   },
 
-  // [Safari] if you don't take key focus away from an element before you 
+  // [Safari] if you don't take key focus away from an element before you
   // remove it from the DOM key events are no longer sent to the browser.
   /** @private */
   willRemoveFromParent: function() {
     return this._scitf_blurInput();
   },
-  
+
   // ask owner to end editing.
   /** @private */
   willLoseFirstResponder: function(responder, evt) {
     if (responder !== this) return;
 
     // if we're about to lose first responder for any reason other than
-    // ending editing, make sure we clear the previous first responder so 
+    // ending editing, make sure we clear the previous first responder so
     // isn't cached
     this._previousFirstResponder = null;
-    
+
     // store the original event that caused this to loose focus so that
     // it can be passed to the delegate
     this._origEvent = evt;
-    
-    // should have been covered by willRemoveFromParent, but this was needed 
+
+    // should have been covered by willRemoveFromParent, but this was needed
     // too.
     this._scitf_blurInput();
     return this.blurEditor(evt) ;
   },
-  
+
   /**
     invoked when the user presses escape.  Returns true to ignore keystroke
-    
+
     @returns {Boolean}
   */
-  cancel: function() { 
-    this.discardEditing(); 
+  cancel: function() {
+    this.discardEditing();
     return YES;
   },
-  
+
   // do it here instead of waiting on the binding to make sure the UI
   // updates immediately.
   /** @private */
@@ -429,30 +442,30 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     arguments.callee.base.call(this, partialChange) ;
     //this.resizeToFit(this.getFieldValue()) ;
   },
-  
+
   // invoked when the user presses return.  If this is a multi-line field,
-  // then allow the newine to proceed.  Otherwise, try to commit the 
+  // then allow the newine to proceed.  Otherwise, try to commit the
   // edit.
   /** @private */
-  insertNewline: function(evt) { 
+  insertNewline: function(evt) {
     if (this.get('isTextArea')) {
       evt.allowDefault();
       return arguments.callee.base.call(this, evt) ;
     } else {
-      // TODO : this is a work around. There is a bug where the 
-      // last character would get dropped 
+      // TODO : this is a work around. There is a bug where the
+      // last character would get dropped
       // if the editing was completed by pressing return
       // needs to be fixed
       if (this.get('value') != this.$input().val()) {
         this.set('value', this.$input().val());
       }
-      
+
       this.commitEditing() ;
       return YES ;
     }
   },
-  
-  // Tries to find the next key view when tabbing.  If the next view is 
+
+  // Tries to find the next key view when tabbing.  If the next view is
   // editable, begins editing.
   /** @private */
   insertTab: function(evt) {
@@ -477,13 +490,13 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     }
     return YES ;
   },
-  
+
   /** @private */
   deleteForward: function(evt) {
     evt.allowDefault();
     return YES;
   },
-  
+
   /** @private */
   deleteBackward: function(evt) {
     evt.allowDefault();

@@ -26,7 +26,7 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
   displayProperties: ['value', 'shouldAutoResize'],
 
   /**
-    The content of the iframe can be bigger than the size specifed when creating
+    The content of the iframe can be bigger than the size specified when creating
     the view. If you want the view to be auto-resized to the dimensions of the
     iframe, then set the value of this property to YES.
     The web view can be auto resized only if the contents are from the same
@@ -95,7 +95,7 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
         if(contentWindow && contentWindow.document && contentWindow.document.documentElement){
           var docElement = contentWindow.document.documentElement;
           // setting the width before the height gives more accurate results..
-          // atleast for the test iframe content i'm using.
+          // at least for the test iframe content i'm using.
           //TODO: try out document flows other than top to bottom.
           if (!SC.browser.isIE) {
             this.$().width(docElement.scrollWidth);

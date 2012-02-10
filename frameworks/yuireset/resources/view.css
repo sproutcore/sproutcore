@@ -24,10 +24,10 @@
     cursor:  text;
   }
   /*Use the following to know what view has the focus in webkit*/
- /* &.focus {
-         outline: auto 5px solid; 
-         outline-offset: -2px;
-       }*/
+ /*&.focus {
+           outline: auto 7px -webkit-focus-ring-color; 
+           outline-offset: -2px;
+         }*/
   /* This className is useful when aligning buttons to the right */
   &.text-align-right{
     text-align:right;

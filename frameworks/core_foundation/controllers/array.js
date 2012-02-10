@@ -223,7 +223,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   },
 
   /**
-    Removes the passed object from the array.  If the underyling content
+    Removes the passed object from the array.  If the underlying content
     is a single object, then this simply sets the content to null.  Otherwise
     it will call removeObject() on the content.
 
@@ -410,12 +410,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   },
 
   _scac_arrayContentDidChange: function(start, removed, added) {
+    this._scac_cached = NO;
     this.arrayContentDidChange(start, removed, added);
     if (this._kvo_enumerable_property_chains) {
       var addedObjects = this.slice(start, start+added);
       this.setupEnumerablePropertyChains(addedObjects);
     }
-    this._scac_cached = NO;
     this.updateSelectionAfterContentChange();
   },
 
@@ -524,7 +524,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   }.observes('orderBy'),
 
   /** @private
-    Whenver the content "status" property changes, relay out.
+    Whenever the content "status" property changes, relay out.
   */
   _scac_contentStatusDidChange: function() {
     this.notifyPropertyChange('status');

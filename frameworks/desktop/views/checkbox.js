@@ -79,9 +79,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     if(!this.get('isEnabled')) return YES;
     this.set('isActive', YES);
     this._isMouseDown = YES;
-    // even if radiobuttons are not set to get firstResponder, allow default 
-    // action, that way textfields loose focus as expected.
-    if (evt) evt.allowDefault();
+    if (evt && this.get('acceptsFirstResponder')) evt.allowDefault();
     return YES;
   },
   
@@ -92,11 +90,12 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     this.set('isActive', NO);
     this._isMouseDown = NO;
 
-    this._toggleValue();
-
     // fire action
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      if (this.$().within(evt.target)) { this._action(evt); }
+      if (this.$().within(evt.target)) {
+        this._toggleValue();
+        this._action(evt);
+      }
     }
 
     return YES;

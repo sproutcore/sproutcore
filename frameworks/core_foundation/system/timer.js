@@ -19,7 +19,7 @@
   Timers were created for SproutCore as a way to efficiently defer execution
   of code fragments for use in Animations, event handling, and other tasks.
 
-  Browsers are typically fairly inconsistant about when they will fire a
+  Browsers are typically fairly inconsistent about when they will fire a
   timeout or interval based on what the browser is currently doing.  Timeouts
   and intervals are also fairly expensive for a browser to execute, which
   means if you schedule a large number of them it can quickly slow down the
@@ -28,7 +28,7 @@
   Timers, on the other handle, are scheduled cooperatively using the
   SC.RunLoop, which uses exactly one timeout to fire itself when needed and
   then executes by timers that need to fire on its own.  This approach can
-  be many timers faster than using timers and gaurantees that timers scheduled
+  be many times faster than using timers and guarantees that timers scheduled
   to execute at the same time generally will do so, keeping animations and
   other operations in sync.
 
@@ -319,7 +319,10 @@ SC.Timer = SC.Object.extend(
   invalidate: function() {
     this.beginPropertyChanges();
     this.set('isValid', NO);
-    SC.RunLoop.currentRunLoop.cancelTimer(this);
+    
+    var runLoop = SC.RunLoop.currentRunLoop;
+    if(runLoop) runLoop.cancelTimer(this);
+    
     this.action = this.target = null ; // avoid memory leaks
     this.endPropertyChanges();
 
@@ -414,7 +417,7 @@ SC.Timer = SC.Object.extend(
     Resets the timer settings with the new settings.  This is the method
     called by the Timer pool when a timer is reused.  You will not normally
     call this method yourself, though you could override it if you need to
-    reset additonal properties when a timer is reused.
+    reset additional properties when a timer is reused.
 
     @params {Hash} props properties to copy over
     @returns {SC.Timer} receiver

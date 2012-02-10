@@ -118,7 +118,7 @@ module("Complex SC.Record: Parent > Array of Children > Array of Children", {
     delete NestedRecord.Group;
     delete NestedRecord.Person;
     delete NestedRecord.Address;
-    delete window.NestedRecord;
+    //delete window.NestedRecord;
     NestedRecord = null;
     testParent = null;
     peopleData1 = null;
@@ -196,7 +196,7 @@ test("Basic Read, Testing the First Child Array", function() {
   ok(pStore, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
   equals(p, pStore, "check the parent reference to the first child is the same as the direct store reference");
   
-  // Check to see if the attributes of a Child Record match the refrence of the parent
+  // Check to see if the attributes of a Child Record match the reference of the parent
   pplAttr = testParent.readAttribute('people');
   ok(!SC.instanceOf(pplAttr, SC.ChildArray), "check that readAttribute() does not create an actual instance of a SC.ChildArray");
   same(pplAttr[0], pStore.get('attributes'), "check that the ChildRecord's attributes are the same as the ParentRecord's readAttribute for the reference");
@@ -237,7 +237,7 @@ test("Basic Read, Testing the Second Child Array", function() {
   ok(aStore, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
   equals(a, aStore, "check the parent reference to the first child is the same as the direct store reference");
   
-  // Check to see if the attributes of a Child Record match the refrence of the parent
+  // Check to see if the attributes of a Child Record match the reference of the parent
   addrsAttr = p.readAttribute('addresses');
   ok(!SC.instanceOf(addrsAttr, SC.ChildArray), "check that readAttribute() does not create an actual instance of a SC.ChildArray");
   same(addrsAttr[0], aStore.get('attributes'), "check that the ChildRecord's attributes are the same as the ParentRecord's readAttribute for the reference");
@@ -274,7 +274,7 @@ test("Basic Write: Testing the First Child Array", function() {
    ok(SC.kindOf(p, SC.Record), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
    ok(SC.instanceOf(p, NestedRecord.Person), "check that first ChildRecord from the get() creates an actual instance of a Person Object");
    
-   // TODO: [EG] Add test to make sure the number of ChildRecords in store is correct when we add store recored clearing
+   // TODO: [EG] Add test to make sure the number of ChildRecords in store is correct when we add store record clearing
    
    // Check reference information
    pm = p.get('primaryKey');

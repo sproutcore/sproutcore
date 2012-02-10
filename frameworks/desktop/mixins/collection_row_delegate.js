@@ -71,7 +71,7 @@ SC.CollectionRowDelegate = {
 
   /**
     Index set of rows that should have a custom row height. If you need
-    certains rows to have a custom row height, then set this property to a
+    certain rows to have a custom row height, then set this property to a
     non-null value.  Otherwise leave it blank to disable custom row heights.
     
     @type SC.IndexSet

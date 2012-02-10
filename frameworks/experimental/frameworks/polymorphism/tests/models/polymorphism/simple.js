@@ -69,7 +69,7 @@
         guid: '1'
       });
     } catch (e) {
-      ok(true, "Error occured when trying to create type with same guid");
+      ok(true, "Error occurred when trying to create type with same guid");
     }
   });
 

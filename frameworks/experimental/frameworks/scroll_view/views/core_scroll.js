@@ -378,7 +378,7 @@ SC.CoreScrollView = SC.View.extend(
   autohidesHorizontalScroller: YES,
 
   /**
-    YES if the view shuld maintain a vertical scroller.   This property must
+    YES if the view should maintain a vertical scroller.   This property must
     be set when the view is created.
 
     @type Boolean
@@ -443,7 +443,7 @@ SC.CoreScrollView = SC.View.extend(
   /**
     Use this to overlay the vertical scroller.
 
-    This ensures that the container frame will not resize to accomodate the
+    This ensures that the container frame will not resize to accommodate the
     vertical scroller, hence overlaying the scroller on top of
     the container.
 
@@ -455,7 +455,7 @@ SC.CoreScrollView = SC.View.extend(
   /**
     Use this to overlay the horizontal scroller.
 
-    This ensures that the container frame will not resize to accomodate the
+    This ensures that the container frame will not resize to accommodate the
     horizontal scroller, hence overlaying the scroller on top of
     the container
 
@@ -520,7 +520,7 @@ SC.CoreScrollView = SC.View.extend(
     offset into the contentView you want to appear at the top-left corner of
     the scroll view.
 
-    This method will contrain the actual scroll based on whether the view
+    This method will contain the actual scroll based on whether the view
     can scroll in the named direction and the maximum distance it can
     scroll.
 
@@ -1003,7 +1003,7 @@ SC.CoreScrollView = SC.View.extend(
 
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the
-    scroller maxmimum and optionally update the scroller visibility if the
+    scroller maximum and optionally update the scroller visibility if the
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
 
@@ -1086,7 +1086,7 @@ SC.CoreScrollView = SC.View.extend(
   },
 
   /** @private
-    If our frame changes, then we need to re-calculate the visiblility of our
+    If our frame changes, then we need to re-calculate the visibility of our
     scrollers, etc.
    */
   frameDidChange: function () {

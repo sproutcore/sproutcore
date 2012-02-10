@@ -135,7 +135,7 @@ test("mouse events move the movesChild", function() {
   mm(divider1, 10, 0);
   equals(adjustedChild, divider2, "Attempts to move divider2.");
 
-  // note: it _attempts_ to move to 420; doesn't neccessarily succeed.
+  // note: it _attempts_ to move to 420; doesn't necessarily succeed.
   equals(adjustedPosition, 420, "Attempts to move divider2 to 420.");
 });
 

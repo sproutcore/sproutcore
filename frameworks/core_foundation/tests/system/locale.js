@@ -55,27 +55,27 @@ test("Locale.addStrings() : Should be able to add the passed hash of strings to 
 	//Added the new languages to the existing list of locales
 	SC.Locale.addStrings(newLocales);
 	
-	//Result should be true as the new lacales added to the list of default locales
+	//Result should be true as the new locales added to the list of default locales
 	equals(true, SC.Locale.options().strings.chinese === 'zh' && SC.Locale.options().strings.dutch === 'nl') ;
 });
 
 test("Locale.options() : Should provide the registered locales that have not been instantiated", function() {
 		
 		//hash of new languages
-		var newLocales = { jamican: 'ji', korean: 'ko'};
+		var newLocales = { jamaican: 'ji', korean: 'ko'};
 
 		//Added the new languages to the existing list of locales
 		SC.Locale.addStrings(newLocales);
 		
-		//Options should return the list of registered locales, so checking if the retruned object has strings.
+		//Options should return the list of registered locales, so checking if the returned object has strings.
 		equals(SC.Locale.options().hasStrings, true) ;
 		
 		//Checking the strings with default locales.
-		equals(true, SC.Locale.options().strings.jamican === 'ji' && SC.Locale.options().strings.korean === 'ko') ;
+		equals(true, SC.Locale.options().strings.jamaican === 'ji' && SC.Locale.options().strings.korean === 'ko') ;
 	});
 	
 test("Locale.normalizeLanguage() : Should provide the two character language code for the passed locale", function() {
-	//If nothing is passed this will retrun the default code as 'en'
+	//If nothing is passed this will return the default code as 'en'
 	equals(SC.Locale.normalizeLanguage(), 'en') ;
 	
 	//If the language is passed as 'English' this will return the code as 'en'
@@ -85,17 +85,17 @@ test("Locale.normalizeLanguage() : Should provide the two character language cod
 	equals(SC.Locale.normalizeLanguage('ab'), 'ab') ; 
 });
 
-test("Locale.toString() : Should retrun the current language set with the guid value", function() {
+test("Locale.toString() : Should return the current language set with the guid value", function() {
 	// Creating the new locale by extending an existing Locale object
 	SC.Locale.locales['mx'] = SC.Locale.extend({ _deprecatedLanguageCodes: ['mexican'] }) ;
 	
-	//Result should retrun the chinese object
+	//Result should return the chinese object
 	equals(SC.Locale.locales.mx.currentLocale.isObject, true) ;
 
 });
 
-test("Locale.createCurrentLocale() : Should create the Lacale Object for the language selected", function() {
-	//This will match the browser language with the SC lanuage and create the object accordingly
+test("Locale.createCurrentLocale() : Should create the Locale Object for the language selected", function() {
+	//This will match the browser language with the SC language and create the object accordingly
 	// This test will pass only for the default languages i.e en, fr, de, ja, es, it. 
 	equals(true, SC.Locale.createCurrentLocale().language === SC.browser.language) ;
 	
@@ -123,7 +123,7 @@ test("Locale.define() : Should be able to define a particular type of locale", f
 		shortNames: ['C','A','Y','N']
 	});
 	
-	//Result should retrun the new locale object
+	//Result should return the new locale object
 	equals(SC.Locale.locales.xy.isClass, true) ;
 });
 
@@ -135,6 +135,6 @@ test("Locale.extend() : Should make sure important properties of Locale object a
 	//Added the new languages to the existing list of locales through the new locale object
 	SC.Locale.locales.mn.addStrings(testLocales);
 	
-	//Result should be true as the new lacales added to the list of default locales
+	//Result should be true as the new locales added to the list of default locales
 	equals(SC.Locale.locales.mn.options().strings.test,'te') ;
 });

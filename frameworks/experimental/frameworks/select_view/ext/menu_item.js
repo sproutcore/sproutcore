@@ -7,13 +7,11 @@
 
 /**
   @class
-  Enhances SC.MenuItemView to support auto resize.
+  Extends SC.MenuItemView to support auto resize.
 */
-SC.MenuItemView = SC.MenuItemView; // for docs
 
-SC.MenuItemView.reopen(SC.AutoResize);
-SC.MenuItemView.reopen(
-/** @scope SC.MenuItemView.prototype */{
+SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
+/** @scope SC.AutoResizingMenuItemView.prototype */ {
 
   //
   // For automatic resizing, if enabled (to be enabled by parent menu)
@@ -60,6 +58,19 @@ SC.MenuItemView.reopen(
   autoResizeLayer: function() {
     return this.$('.value')[0];
   }.property('layer').cacheable(),
+  
+  /** 
+    @private
+    The batch resize id is computed to be "good enough." It is unlikely that
+    multiple menus of different size will need to resize at the same time, but
+    we guard against this a little bit by giving it a name based on the menu's guid.
+    
+    This won't cover cases where the menu has items of multiple sizes, but that's
+    an edge case that can address the issue by overriding batchResizeId to null.
+  */
+  batchResizeId: function() {
+    return 'menu-' + SC.guidFor(this.parentMenu);
+  }.property().cacheable(),
 
   /**
    * @private
@@ -83,7 +94,7 @@ SC.MenuItemView.reopen(
   didUpdateLayer: function() {
     this.notifyPropertyChange('autoResizeLayer');
     this.scheduleMeasurement();
-  }.enhance()
+  }
 
 }) ;
 

@@ -66,7 +66,7 @@ SC.DisclosureView = SC.ButtonView.extend(
   /** @private
 
     Allows toggling of the value with the right and left arrow keys.
-    Extends the behavior inherted from SC.ButtonView.
+    Extends the behavior inherited from SC.ButtonView.
     @param evt
   */
   keyDown: function(evt) {

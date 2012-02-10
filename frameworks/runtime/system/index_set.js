@@ -15,7 +15,7 @@ sc_require('mixins/copyable');
 
   A collection of ranges.  You can use an IndexSet to keep track of non-
   continuous ranges of items in a parent array.  IndexSet's are used for
-  selection, for managing invalidation ranges and other data-propogation.
+  selection, for managing invalidation ranges and other data-propagation.
 
   Examples
   ---
@@ -69,14 +69,24 @@ SC.IndexSet = SC.mixin({},
   /**
     To create a set, pass either a start and index or another IndexSet.
 
-    @param {Number} start
-    @param {Number} length
+    @param {Number|SC.IndexSet} start The start of the range or an index set.
+    @param {Number} [length] The length of the range (by default set to 1 if start is a Number)
     @returns {SC.IndexSet}
   */
   create: function(start, length) {
     var ret = SC.beget(this);
     ret.initObservable();
     ret.registerDependentKey('min', '[]');
+
+    // @if (debug)
+    // Validate the input to ensure that the parameters
+    // match the function definition.
+    // This is here because `create` doesn't follow the
+    // idiomatic SC convention of passing in an object literal to `create`.
+    if (start && !(SC.typeOf(start) === SC.T_NUMBER || start.isIndexSet)) {
+      throw "SC.IndexSet does not accept `%@` as a parameter to `create`. Take a look at the function signature for proper usage.".fmt(start);
+    }
+    // @endif
 
     // optimized method to clone an index set.
     if (start && start.isIndexSet) {
@@ -164,7 +174,14 @@ SC.IndexSet = SC.mixin({},
     accel = index - (index % SC.IndexSet.HINT_SIZE);
     ret = content[accel];
     if (ret<0 || ret>index) ret = accel;
-    next = Math.abs(content[ret]);
+    next = content[ret];
+
+    // the accelerator pointed to the middle of a range
+    if (next === undefined) {
+      next = this.rangeStartForIndex(ret);
+    } else {
+      next = Math.abs(next);
+    }
 
     // now step forward through ranges until we find one that includes the
     // index.
@@ -817,7 +834,7 @@ SC.IndexSet = SC.mixin({},
   },
 
   /**
-    Invoke the callback, passing each occuppied range instead of each
+    Invoke the callback, passing each occupied range instead of each
     index.  This can be a more efficient way to iterate in some cases.  The
     callback should have the signature:
 
@@ -1137,7 +1154,7 @@ SC.IndexSet = SC.mixin({},
 
   /**
     Usually observing notifications from IndexSet are not useful, so
-    supress them by default.
+    suppress them by default.
 
     @type Boolean
   */

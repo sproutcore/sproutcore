@@ -14,7 +14,7 @@ SC._mapDisplayNamesUseHashForSeenTypes = ['object', 'number', 'boolean', 'array'
 
 
 SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
-  if (!SC.browser.webkit) return ;
+  if (SC.browser.engine !== SC.ENGINE.webkit) return ;
 
   // Lazily instantiate the hash of types we'll use a hash for the "have we
   // seen this before?" structure.  (Some types are not safe to put in a hash
@@ -51,9 +51,9 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
   else {
     arrayToCheck = seenArray;
   }
-  
+
   if (arrayToCheck  &&  arrayToCheck.indexOf(obj) !== -1) return ;
-  
+
   if (arrayToCheck) {
     arrayToCheck.push(obj) ;
   }

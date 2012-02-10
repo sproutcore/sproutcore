@@ -10,7 +10,7 @@ sc_require('system/drag') ;
 /**
   @namespace
 
-  This procol implements a dynamic data source for a drag operation. You can
+  This protocol implements a dynamic data source for a drag operation. You can
   return a set of allowed data types and then the method will be used to 
   actually get data in that format when requested.
 */

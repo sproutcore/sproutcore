@@ -165,7 +165,7 @@ SC.SelectView = SC.ButtonView.extend(
   value: null,
 
   /**
-    if this property is set to 'YES', a checbox is shown next to the
+    if this property is set to 'YES', a checkbox is shown next to the
     selected menu item.
 
     @type Boolean
@@ -174,7 +174,7 @@ SC.SelectView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
-    if this property is set to 'YES', a checbox is shown next to the
+    if this property is set to 'YES', a checkbox is shown next to the
     selected menu item.
 
     @type Boolean
@@ -235,7 +235,7 @@ SC.SelectView = SC.ButtonView.extend(
     Prefer matrix to position the select button menu such that the
     selected item for the menu item will appear aligned to the
     the button. The value at the second index(0) changes based on the
-    postion(index) of the menu item in the menu pane.
+    position(index) of the menu item in the menu pane.
 
     @type Array
     @default null
@@ -676,7 +676,8 @@ SC.SelectView = SC.ButtonView.extend(
     this.set('menu', menu);
 
     itemIdx = this._itemIdx;
-    if (itemIdx && itemIdx > -1) {
+    if (!SC.empty(itemIdx) && itemIdx > -1) {
+    // if there is an item selected, make it the first responder
       customView = menu.menuItemViewForContentIndex(itemIdx);
       if (customView) { customView.becomeFirstResponder(); }
     }
@@ -901,9 +902,9 @@ SC.SelectView.REGULAR_OFFSET_X = -17;
 /**
   @static
   @type Number
-  @default 3
+  @default 1
 */
-SC.SelectView.REGULAR_OFFSET_Y = 3;
+SC.SelectView.REGULAR_OFFSET_Y = 0;
 
 /**
   @static

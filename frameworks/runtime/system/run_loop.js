@@ -37,6 +37,16 @@ sc_require('private/observer_set');
   @extends SC.Object
   @since SproutCore 1.0
 */
+
+
+// When in debug mode, users can log deferred calls (such as .invokeOnce()) by
+// setting SC.LOG_DEFERRED_CALLS.  We'll declare the variable explicitly to make
+// life easier for people who want to enter it inside consoles that auto-
+// complete.
+//@if(debug)
+if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
+//@endif
+
 SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
   /**
@@ -54,6 +64,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       SC.Logger.log("-- SC.RunLoop.beginRunLoop at %@".fmt(this._start));
     }
     this._runLoopInProgress = YES;
+    this._flushinvokeNextQueue();
     return this ;
   },
 
@@ -84,10 +95,10 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       SC.Logger.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
-    } 
-    
+    }
+
     this.flushAllPending();
-    
+
     this._start = null ;
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
@@ -105,14 +116,14 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   */
   flushAllPending: function() {
     var didChange ;
-    
+
     do {
       didChange = this.flushApplicationQueues() ;
-      if (!didChange) didChange = this._flushinvokeLastQueue() ; 
+      if (!didChange) didChange = this._flushinvokeLastQueue() ;
     } while(didChange) ;
   },
-  
-  
+
+
   /**
     Invokes the passed target/method pair once at the end of the runloop.
     You can call this method as many times as you like and the method will
@@ -134,9 +145,38 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
+    var deferredCallLoggingInfo;      // Used only in debug mode
+
+    //@if(debug)
+    // When in debug mode, SC.Object#invokeOnce() will pass in the originating
+    // method, target, and stack.  That way, we'll record the interesting parts
+    // rather than having most of these calls seemingly coming from
+    // SC.Object#invokeOnce().
+    //
+    // If it was not specified, we'll record the originating function ourselves.
+    var shouldLog = SC.LOG_DEFERRED_CALLS;
+    if (shouldLog) {
+      var originatingTarget = arguments[2],
+          originatingMethod = arguments[3],
+          originatingStack  = arguments[4];
+
+      if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
+      if (!originatingMethod) {
+        originatingStack  = SC._getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+
+      deferredCallLoggingInfo = {
+        originatingTarget: originatingTarget,
+        originatingMethod: originatingMethod,
+        originatingStack:  originatingStack
+      };
+    }
+    //@endif
+
     if (typeof method === "string") method = target[method];
     if (!this._invokeQueue) this._invokeQueue = SC.ObserverSet.create();
-    if ( method ) this._invokeQueue.add(target, method);
+    if ( method ) this._invokeQueue.add(target, method, undefined, deferredCallLoggingInfo);
     return this ;
   },
 
@@ -165,9 +205,69 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
 
+    var deferredCallLoggingInfo;      // Used only in debug mode
+
+    //@if(debug)
+    // When in debug mode, SC.Object#invokeOnce() will pass in the originating
+    // method, target, and stack.  That way, we'll record the interesting parts
+    // rather than having most of these calls seemingly coming from
+    // SC.Object#invokeOnce().
+    //
+    // If it was not specified, we'll record the originating function ourselves.
+    var shouldLog = SC.LOG_DEFERRED_CALLS;
+    if (shouldLog) {
+      var originatingTarget = arguments[2],
+          originatingMethod = arguments[3],
+          originatingStack  = arguments[4];
+
+      if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
+      if (!originatingMethod) {
+        originatingStack  = SC._getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+
+      deferredCallLoggingInfo = {
+        originatingTarget: originatingTarget,
+        originatingMethod: originatingMethod,
+        originatingStack:  originatingStack
+      };
+    }
+    //@endif
+
+
     if (typeof method === "string") method = target[method];
     if (!this._invokeLastQueue) this._invokeLastQueue = SC.ObserverSet.create();
-    this._invokeLastQueue.add(target, method);
+    this._invokeLastQueue.add(target, method, undefined, deferredCallLoggingInfo);
+    return this ;
+  },
+
+  /**
+    Invokes the passed target/method pair once at the beginning of the next
+    runloop, before any other methods (including events) are processed.
+    Use this to defer painting to make views more responsive.
+
+    If you call this with the same target/method pair multiple times it will
+    only invoke the pair only once at the beginning of the next runloop.
+
+    Usually you will not call this method directly but use invokeNext()
+    defined on SC.Object.
+
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
+
+    @param {Object} target
+    @param {Function} method
+    @returns {SC.RunLoop} receiver
+  */
+  invokeNext: function(target, method) {
+    // normalize
+    if (method === undefined) {
+      method = target; target = this ;
+    }
+
+    if (typeof method === "string") method = target[method];
+    if (!this._invokeNextQueue) this._invokeNextQueue = SC.ObserverSet.create();
+    this._invokeNextQueue.add(target, method);
     return this ;
   },
 
@@ -210,9 +310,54 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       if (hadContent) queue.invokeMethods();
     }
     return hadContent ;
+  },
+
+  _flushinvokeNextQueue: function() {
+    var queue = this._invokeNextQueue, hadContent = NO ;
+    if (queue && queue.getMembers().length ) {
+      this._invokeNextQueue = null; // reset queue.
+      hadContent = YES; // has targets!
+      if (hadContent) queue.invokeMethods();
+    }
+    return hadContent ;
   }
 
 });
+
+
+//@if(debug)
+ /**
+  Will return the recent stack as a hash with numerical keys, for nice output
+  in some browsers’ debuggers.  The “recent” stack is capped at 6 entries.
+
+  This is used by, amongst other places, SC.LOG_DEFERRED_CALLS.
+
+  @returns {Hash}
+*/
+SC._getRecentStack = function() {
+  var currentFunction = arguments.callee.caller,
+      i               = 0,
+      stack           = {},
+      first           = YES,
+      functionName;
+
+  while (currentFunction  &&  i < 10) {
+    // Skip ourselves!
+    if (first) {
+      first = NO;
+    }
+    else {
+      functionName = currentFunction.displayName || currentFunction.toString().substring(0, 40);
+      stack[i++]   = functionName;
+    }
+    currentFunction = currentFunction.caller;
+  }
+
+  return stack;
+};
+//@endif
+
+
 
 /**
   The current run loop.  This is created automatically the first time you
@@ -258,6 +403,20 @@ SC.RunLoop.end = function() {
   return this ;
 } ;
 
+
+/**
+  Call this to kill the current run loop--stopping all propagation of bindings
+  and observers and clearing all timers.
+
+  This is useful if you are popping up an error catcher: you need a run loop
+  for the error catcher, but you don't want the app itself to continue
+  running.
+*/
+SC.RunLoop.kill = function() {
+  this.currentRunLoop = this.runLoopClass.create();
+  return this;
+};
+
 /**
   Returns YES when a run loop is in progress
 
@@ -269,13 +428,13 @@ SC.RunLoop.isRunLoopInProgress = function() {
 };
 
 /**
-  Executes a passed function in the context of a run loop. If called outside a 
-  runloop, starts and ends one. If called inside an existing runloop, is 
+  Executes a passed function in the context of a run loop. If called outside a
+  runloop, starts and ends one. If called inside an existing runloop, is
   simply executes the function unless you force it to create a nested runloop.
-  
+
   If an exception is thrown during execution, we give an error catcher the
   opportunity to handle it before allowing the exception to bubble again.
-  
+
   @param {Function} callback callback to execute
   @param {Object} target context for callback
   @param {Boolean} if YES, starts/ends a new runloop even if one is already running
@@ -296,7 +455,7 @@ SC.run = function(callback, target, forceNested) {
       // If the exception was not handled, throw it again so the browser
       // can deal with it (and potentially use it for debugging).
       // (We don't throw it in IE because the user will see two errors)
-      if (!handled && !SC.browser.msie) {
+      if (!handled && !SC.browser.isIE) {
         throw e;
       }
     }
@@ -305,4 +464,20 @@ SC.run = function(callback, target, forceNested) {
     if (callback) callback.call(target);
     if(forceNested || !alreadyRunning) SC.RunLoop.end();
   }
+};
+
+/**
+  Wraps the passed function in code that ensures a run loop will
+  surround it when run.
+*/
+SC.RunLoop.wrapFunction = function(func) {
+  var ret = function() {
+    var alreadyRunning = SC.RunLoop.isRunLoopInProgress();
+    if(!alreadyRunning) SC.RunLoop.begin();
+    var ret = arguments.callee.wrapped.apply(this,arguments);
+    if(!alreadyRunning) SC.RunLoop.end();
+    return ret;
+  };
+  ret.wrapped = func;
+  return ret;
 };

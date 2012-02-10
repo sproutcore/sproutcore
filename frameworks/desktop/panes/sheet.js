@@ -9,7 +9,7 @@ sc_require('panes/panel');
 
 /**
   @class
-  
+
   Displays a modal sheet pane that animates from the top of the viewport.
 
   The default way to use the sheet pane is to simply add it to your page like this:
@@ -31,7 +31,7 @@ sc_require('panes/panel');
 */
 SC.SheetPane = SC.PanelPane.extend(
 /** @scope SC.SheetPane.prototype */{
-  
+
   /**
     @type Array
     @default ['sc-sheet']
@@ -52,17 +52,17 @@ SC.SheetPane = SC.PanelPane.extend(
     @default 200
   */
   transitionDuration: 200,
-  
+
   _state: 'NO_VIEW', // no view
-  
+
   /** @private */
   init: function() {
     sc_super();
-    
+
     if (SC.Animatable) {
       SC.SheetPane.ANIMATABLE_AVAILABLE = YES;
       this.mixin(SC.Animatable);
-      
+
       if (!this.transitions) this.transitions = {};
       if (!this.transitions.top) {
         // transitionDuration = 200 seems to be too fast when using Animatable
@@ -94,7 +94,7 @@ SC.SheetPane = SC.PanelPane.extend(
     this.adjust(layout);
     this.updateLayout();
     if (this.enableAnimation) this.enableAnimation();
-    
+
     return sc_super();
   },
 
@@ -168,16 +168,16 @@ SC.SheetPane = SC.PanelPane.extend(
         centerX: 0,
         left: null
       });
-      if(SC.browser.mozilla) this.parentViewDidChange();
+      if(SC.browser.isMozilla) this.parentViewDidChange();
     } else {
       var layout = this.get('layout');
       if (!SC.SheetPane.ANIMATABLE_AVAILABLE) this.adjust('top', -1*layout.height);
     }
-    
+
     this._state = SC.SheetPane.READY;
     this.updateLayout();
   },
-  
+
   /** @private
     Needed because of the runLoop and that it is animated...
     must lose focus because will break if selection is change
@@ -194,10 +194,10 @@ SC.SheetPane = SC.PanelPane.extend(
 
     var now = Date.now();
     var pct = (now-this._start)/(this._end-this._start),
-        target = this, dir = this._direction, layout = this.get('layout'), 
+        target = this, dir = this._direction, layout = this.get('layout'),
         newLayout, adjust;
     if (pct<0) pct = 0;
-    
+
     // If we are done...
     if (pct>=1) {
       this._complete();
@@ -223,9 +223,9 @@ SC.SheetPane = SC.PanelPane.extend(
 
 SC.SheetPane.mixin(
 /** @scope SC.SheetPane */ {
-  
+
   ANIMATABLE_AVAILABLE: NO,
-  
+
   // states for view animation
   NO_VIEW: 'NO_VIEW',
   ANIMATING: 'ANIMATING',
@@ -233,5 +233,5 @@ SC.SheetPane.mixin(
 
   SLIDE_DOWN: 'SLIDEDOWN',
   SLIDE_UP: 'SLIDEUP'
-  
+
 });

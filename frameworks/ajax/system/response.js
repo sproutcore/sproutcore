@@ -24,14 +24,14 @@ SC.Response = SC.Object.extend(
 
   /**
     Walk like a duck
-    
+
     @type Boolean
   */
   isResponse: YES,
-  
+
   /**
     Becomes true if there was a failure.  Makes this into an error object.
-    
+
     @type Boolean
     @default NO
   */
@@ -67,7 +67,7 @@ SC.Response = SC.Object.extend(
     @default null
   */
   request: null,
-  
+
   /**
     The request object that originated this request series.  Mostly this is
     useful if you are looking for a reference to the original request.  To
@@ -83,7 +83,7 @@ SC.Response = SC.Object.extend(
     return ret ;
   }.property('request').cacheable(),
 
-  /** 
+  /**
     Type of request. Must be an HTTP method. Based on the request.
 
     @field
@@ -106,7 +106,7 @@ SC.Response = SC.Object.extend(
   }.property('request').cacheable(),
 
   /**
-    If set then will attempt to automatically parse response as JSON 
+    If set then will attempt to automatically parse response as JSON
     regardless of headers.
 
     @field
@@ -120,7 +120,7 @@ SC.Response = SC.Object.extend(
 
   /**
     If set, then will attempt to automatically parse response as XML
-    regarldess of headers.
+    regardless of headers.
 
     @field
     @type Boolean
@@ -212,7 +212,7 @@ SC.Response = SC.Object.extend(
     @default null
   */
   timedOut: null,
-  
+
   /**
     The timer tracking the timeout
 
@@ -224,7 +224,7 @@ SC.Response = SC.Object.extend(
 
   // ..........................................................
   // METHODS
-  // 
+  //
 
   /**
     Called by the request manager when its time to actually run. This will
@@ -241,7 +241,7 @@ SC.Response = SC.Object.extend(
     req.freeze();
 
     // if the source did not cancel the request, then invoke the transport
-    // to actually trigger the request.  This might receive a response 
+    // to actually trigger the request.  This might receive a response
     // immediately if it is synchronous.
     if (!this.get('isCancelled')) { this.invokeTransport(); }
 
@@ -410,10 +410,10 @@ SC.Response = SC.Object.extend(
     handled = this._notifyListeners(listeners, status);
     if (!handled && baseStat !== status) { handled = this._notifyListeners(listeners, baseStat); }
     if (!handled && status !== 0) { handled = this._notifyListeners(listeners, 0); }
-    
+
     return this ;
   },
-  
+
   /**
     String representation of the response object
 
@@ -513,7 +513,7 @@ SC.XHRResponse = SC.Response.extend(
     async = !!this.getPath('request.isAsynchronous');
 
     if (async) {
-      if (!SC.browser.msie && !SC.browser.opera) {
+      if (!SC.browser.isIE && !SC.browser.isOpera) {
         SC.Event.add(rawRequest, 'readystatechange', this,
                      this.finishRequest, rawRequest);
       } else {
@@ -609,12 +609,12 @@ SC.XHRResponse = SC.Response.extend(
           this.set('errorObject', error);
         }
 
-        // set the status - this will trigger changes on relatedp properties
+        // set the status - this will trigger changes on related properties
         this.set('status', status);
       }, this);
 
       // Avoid memory leaks
-      if (!SC.browser.msie && !SC.browser.opera) {
+      if (!SC.browser.isIE && !SC.browser.isOpera) {
         SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);
       } else {
         rawRequest.onreadystatechange = null;

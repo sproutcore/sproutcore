@@ -20,7 +20,7 @@ SC.IMAGE_TYPE_CSS_CLASS = 'CSS_CLASS';
 */
 SC.BLANK_IMAGE_DATAURL = "data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==";
 
-SC.BLANK_IMAGE_URL = SC.browser.msie && SC.browser.msie<8 ? sc_static('blank.gif') : SC.BLANK_IMAGE_DATAURL;
+SC.BLANK_IMAGE_URL = SC.browser.isIE && SC.browser.compare(SC.browser.engineVersion, '8') < 0 ? sc_static('blank.gif') : SC.BLANK_IMAGE_DATAURL;
 
 SC.BLANK_IMAGE = new Image();
 SC.BLANK_IMAGE.src = SC.BLANK_IMAGE_URL;
@@ -49,7 +49,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
   classNames: 'sc-image-view',
 
-  ariaRole: 'img',
+  // Don't apply this role until each image view can assign a non-empty string value for @aria-label <rdar://problem/9941887>
+  // ariaRole: 'img',
 
   displayProperties: ['frame', 'image', 'innerFrame', 'toolTip', 'imageValue', 'type'],
 
@@ -378,5 +379,5 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   name.
 */
 SC.ImageView.valueIsUrl = function(value) {
-  return value ? value.indexOf('/') >= 0 : NO ;
+  return value && SC.typeOf(value)===SC.T_STRING ? value.indexOf('/') >= 0 : NO ;
 } ;

@@ -9,125 +9,125 @@
 sc_require('views/controls');
 sc_require('views/mini_controls');
 
-/** 
+/**
   @class
-  
-  Renders a videoView using different technologies like HTML5 video tag, 
+
+  Renders a videoView using different technologies like HTML5 video tag,
   quicktime and flash.
-  
-  This view wraps the different technologies so you can use one standard and 
+
+  This view wraps the different technologies so you can use one standard and
   simple API to play videos.
-  
-  You can specify and array with the order of how the technologies will degrad
-  depending on availability. For example you can set degradeList to be 
-  ['html5', 'flash'] and it will load your video in a video tag if the 
-  technology is available otherwise flash and if neither of the technologies 
+
+  You can specify and array with the order of how the technologies will degrade
+  depending on availability. For example you can set degradeList to be
+  ['html5', 'flash'] and it will load your video in a video tag if the
+  technology is available otherwise flash and if neither of the technologies
   are available it will show a message saying that your machine needs to install
   one of this technologies.
-  
+
   @extends SC.View
   @since SproutCore 1.1
 */
 SC.VideoView = SC.View.extend(
 /** @scope SC.VideoView.prototype */{
 
-  /** 
-    Video view className. 
+  /**
+    Video view className.
     @property {String}
   */
   classNames: 'sc-video-view',
-  
-  /** 
+
+  /**
     Properties that trigger a re render of the view. If the value changes, it
     means that the video url changed.
-    
+
     @property {Array}
   */
   displayProperties: ['value', 'shouldAutoResize'],
-  
-  /** 
-    Reference to the video object once is created. 
+
+  /**
+    Reference to the video object once is created.
     @property {Object}
   */
-  
+
   videoObject:null,
-  
-  /** 
+
+  /**
     Array containing the technologies and the order to load them depending
     availability
-     
+
     @property {Array}
   */
   degradeList: ['html5','quicktime', 'flash'],
-  
-  /** 
+
+  /**
     Current time in secs
     @property {Number}
   */
-  currentTime: 0, 
-  
-  /** 
+  currentTime: 0,
+
+  /**
     Duration in secs
     @property {Number}
   */
   duration: 0, //video duration in secs
-  
-  /** 
+
+  /**
     Volume. The value should be between 0 and 1
     @property {Number}
   */
   volume:0, //volume value from 0 to 1
-  
-  /** 
+
+  /**
     Tells you if the video is paused or not.
     @property {Boolean}
   */
   paused: YES, //is the video paused
 
-  /** 
+  /**
     Tells you if the video is loaded.
     @property {Boolean}
   */
 
   loaded: NO, //has the video loaded
-  
-  /** 
+
+  /**
     Indicates if the video has reached the end
     @property {Boolean}
   */
-  
+
   ended: NO, //did the video finished playing
-  
-  /** 
+
+  /**
     Indicates if the video is ready to be played.
     @property {Boolean}
   */
-  
+
   canPlay: NO, //can the video be played
-  
-  /** 
+
+  /**
     Width of the video in pixels.
     @property {Number}
   */
   videoWidth:0,
-  
-  /** 
+
+  /**
     Width of the video in pixels.
     @property {Number}
   */
   videoHeight:0,
-  
-  /** 
+
+  /**
     Flag to enable captions if available.
     @property {Boolean}
   */
   captionsEnabled: NO,
-  
+
   loadedTimeRanges:[], //loaded bits
-  
+
   poster: null,
-  
-  /** 
+
+  /**
     Formatted currentTime. (00:00)
     @property {String}
   */
@@ -137,10 +137,10 @@ SC.VideoView = SC.View.extend(
     var formattedTime = this._addZeros(Math.floor(currentTime/60))+':'+this._addZeros(Math.floor(currentTime%60))+"/"+this._addZeros(Math.floor(totaltimeInSecs/60))+':'+this._addZeros(Math.floor(totaltimeInSecs%60));
     return formattedTime;
   }.property('currentTime', 'duration').cacheable(),
-  
-  /** 
-    Renders the appropiate HTML according for the technology to use.
-    
+
+  /**
+    Renders the appropriate HTML according for the technology to use.
+
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
     @returns {void}
@@ -151,7 +151,8 @@ SC.VideoView = SC.View.extend(
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
-          if(SC.browser.safari){
+          // TODO: this doesn't seem like the best way to determine what tags to use!
+          if(SC.browser.name === SC.BROWSER.safari){
             context.push('<video src="'+this.get('value')+'"');
             if(this.poster){
               context.push(' poster="'+this.poster+'"');
@@ -165,14 +166,15 @@ SC.VideoView = SC.View.extend(
           }
           break;
         case "quicktime":
-          if(SC.browser.msie){
+          // TODO: this doesn't seem like the best way to determine what tags to use!
+          if(SC.browser.name === SC.BROWSER.ie){
             context.push('<object id="qt_event_source" '+
-                        'classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" '+         
+                        'classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" '+
                         'codebase="http://www.apple.com/qtactivex/qtplugin.cab#version=7,2,1,0"> '+
                         '</object> ');
           }
           context.push('<object width="100%" height="100%"');
-          if(SC.browser.msie){
+          if(SC.browser.name === SC.BROWSER.ie){
             context.push('style="position: absolute; top:0px; left:0px; behavior:url(#qt_event_source);"');
           }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
@@ -253,27 +255,27 @@ SC.VideoView = SC.View.extend(
       }
     }
   },
-  
+
   valueObserver:function(){
-    this.set('currentTime', 0); 
-    this.set('duration', 0); 
-    this.set('volume', 0); 
-    this.set('paused', YES); 
-    this.set('loaded', NO); 
-    this.set('ended', NO); 
-    this.set('canPlay', NO); 
-    this.set('loadedTimeRanges', []); 
+    this.set('currentTime', 0);
+    this.set('duration', 0);
+    this.set('volume', 0);
+    this.set('paused', YES);
+    this.set('loaded', NO);
+    this.set('ended', NO);
+    this.set('canPlay', NO);
+    this.set('loadedTimeRanges', []);
     this.replaceLayer();
   }.observes('value'),
 
 
-  /** 
-    This function is called everytime the frame changes. This is done to get 
+  /**
+    This function is called everytime the frame changes. This is done to get
     the right video dimensions for HTML5 video tag.
-    
+
     @returns {void}
   */
-  frameDidChange: function() { 
+  frameDidChange: function() {
     if(this.loaded==="html5"){
       var fr= this.get('frame'),
           elem = this.$('video');
@@ -281,10 +283,10 @@ SC.VideoView = SC.View.extend(
       elem.attr('height', fr.height);
     }
   }.observes('frame'),
-  
-  /** 
+
+  /**
     In didCreateLayer we add DOM events for video tag or quicktime.
-    
+
     @returns {void}
   */
   didCreateLayer :function(){
@@ -296,16 +298,16 @@ SC.VideoView = SC.View.extend(
       this.addQTDOMEvents();
     }
   },
-  
+
   didAppendToDocument :function(){
     if(this.loaded==="quicktime"){
       this.addQTDOMEvents();
     }
   },
-  
-  /** 
-    Adds all the neccesary video DOM elements.
-    
+
+  /**
+    Adds all the necessary video DOM elements.
+
     @returns {void}
   */
   addVideoDOMEvents: function() {
@@ -327,31 +329,31 @@ SC.VideoView = SC.View.extend(
       this.updateVideoElementLoadedTimeRanges(videoElem);
       view.set('volume', videoElem.volume);
       SC.RunLoop.end();
-    });     
+    });
     SC.Event.add(videoElem, 'play', this, function () {
       SC.RunLoop.begin();
       view.set('paused', NO);
       SC.RunLoop.end();
-    });     
+    });
     SC.Event.add(videoElem, 'pause', this, function () {
       SC.RunLoop.begin();
       view.set('paused', YES);
       SC.RunLoop.end();
-    });     
+    });
     SC.Event.add(videoElem, 'loadedmetadata', this, function () {
       SC.RunLoop.begin();
       view.set('videoWidth', videoElem.videoWidth);
       view.set('videoHeight', videoElem.videoHeight);
       SC.RunLoop.end();
-    });     
-       
+    });
+
     SC.Event.add(videoElem, 'canplay', this, function () {
       SC.RunLoop.begin();
       this.updateVideoElementLoadedTimeRanges(videoElem);
       view.set('canPlay', YES);
       SC.RunLoop.end();
-    });     
-         
+    });
+
     SC.Event.add(videoElem, 'ended', this, function () {
       SC.RunLoop.begin();
       view.set('ended', YES);
@@ -372,52 +374,52 @@ SC.VideoView = SC.View.extend(
       //console.log('progress '+ev.loaded+","+ev.total );
       SC.RunLoop.end();
     });
-         
+
     // SC.Event.add(videoElem, 'suspend', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('suspend');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     // SC.Event.add(videoElem, 'load', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('load');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'abort', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('abort');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'error', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('error');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'loadend', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('loadend');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'emptied', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('emptied');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'stalled', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('stalled');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     // SC.Event.add(videoElem, 'loadeddata', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('loadeddata');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'waiting', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('waiting');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'playing', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('playing');
@@ -427,12 +429,12 @@ SC.VideoView = SC.View.extend(
     //       SC.RunLoop.begin();
     //       console.log('canplaythrough');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'seeking', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('seeking');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'seeked', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('seeked');
@@ -442,15 +444,15 @@ SC.VideoView = SC.View.extend(
     //       SC.RunLoop.begin();
     //       console.log('ratechange');
     //       SC.RunLoop.end();
-    //     });     
+    //     });
     //     SC.Event.add(videoElem, 'volumechange', this, function () {
     //       SC.RunLoop.begin();
     //       console.log('volumechange');
     //       SC.RunLoop.end();
     //     });
-    
+
   },
-  
+
   updateVideoElementLoadedTimeRanges: function(videoElem) {
     if(!videoElem) videoElem = this.$('video')[0];
     if(!this.loadedTimeRanges) this.loadedTimeRanges=[];
@@ -458,13 +460,13 @@ SC.VideoView = SC.View.extend(
     for (var j=0, jLen = videoElem.buffered.length; j<jLen; j++){
       this.loadedTimeRanges.push(videoElem.buffered.start(j));
       this.loadedTimeRanges.push(videoElem.buffered.end(j));
-    }                                             
+    }
     //console.log('handled loadedTimeRanges='+this.loadedTimeRanges.toString());
     this.notifyPropertyChange('loadedTimeRanges');
   },
-  
-  /** 
-     Adds all the neccesary quicktime DOM elements.
+
+  /**
+     Adds all the necessary quicktime DOM elements.
 
      @returns {void}
    */
@@ -484,7 +486,7 @@ SC.VideoView = SC.View.extend(
     this._setDurationFromQTVideoObject();
     this.set('volume', vid.GetVolume()/256);
     this._setDimensionsFromQTVideoObject();
-    
+
     SC.Event.add(videoElem, 'qt_durationchange', this, function () {
       SC.RunLoop.begin();
       this._setDurationFromQTVideoObject();
@@ -511,7 +513,7 @@ SC.VideoView = SC.View.extend(
       view.set('canPlay', YES);
       SC.RunLoop.end();
     });
-    
+
     SC.Event.add(videoElem, 'qt_ended', this, function () {
       view.set('ended', YES);
     });
@@ -563,7 +565,7 @@ SC.VideoView = SC.View.extend(
       //         SC.RunLoop.end();
     // });
   },
-  
+
   updateQTVideoObjectLoadedTimeRanges: function(vid) {
     vid = vid || this._getVideoObject();
     if(!this.loadedTimeRanges) this.loadedTimeRanges=[];
@@ -572,13 +574,13 @@ SC.VideoView = SC.View.extend(
     this.loadedTimeRanges.push(vid.GetMaxTimeLoaded()/vid.GetTimeScale());
     this.notifyPropertyChange('loadedTimeRanges');
   },
-  
+
   _setDurationFromQTVideoObject: function(vid) {
     if(!vid) vid = this._getVideoObject();
     try{ this.set('duration', vid.GetDuration()/vid.GetTimeScale()); }
     catch(e) { this.invokeLater('_setDurationFromQTVideoObject',100); }
   },
-  
+
   _setDimensionsFromQTVideoObject: function(vid) {
     if(!vid) vid = this._getVideoObject();
     try{
@@ -587,10 +589,10 @@ SC.VideoView = SC.View.extend(
       this.set('videoHeight', dimensions[3]);
     } catch(e) { this.invokeLater('_setDimensionsFromQTVideoObject',100); }
   },
-  
-  /** 
+
+  /**
      For Quicktime we need to simulated the timer as there is no data,
-     coming back from the plugin that reports back the currentTime of the 
+     coming back from the plugin that reports back the currentTime of the
      video.
 
      @returns {void}
@@ -601,11 +603,11 @@ SC.VideoView = SC.View.extend(
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),
-  
-  /** 
-    Called when currentTime changes. Notifies the differnt technologies 
+
+  /**
+    Called when currentTime changes. Notifies the different technologies 
     then new currentTime.
-    
+
     @returns {void}
   */
   seek:function(){
@@ -620,11 +622,11 @@ SC.VideoView = SC.View.extend(
       if(this.get('paused')) vid.setTime(this.get('currentTime'));
     }
   }.observes('currentTime'),
-  
-  /** 
+
+  /**
     Should be called once the progress view is clicked to stop the event and
     later start seeking.
-    
+
     @returns {void}
   */
   startSeek: function(){
@@ -634,11 +636,11 @@ SC.VideoView = SC.View.extend(
       this._wasPlaying = true;
     }
   },
-  
-  /** 
+
+  /**
     Should be called once the progress view gets a mouseUp. It will get the
     player to continue playing if it was playing before starting the seek.
-    
+
     @returns {void}
   */
   endSeek: function(){
@@ -648,11 +650,11 @@ SC.VideoView = SC.View.extend(
       this._wasPlaying = false;
     }
   },
-  
-  
-  /** 
+
+
+  /**
     Set the volume of the video.
-    
+
     @returns {void}
   */
   setVolume:function(){
@@ -661,8 +663,8 @@ SC.VideoView = SC.View.extend(
     if(this.loaded==="quicktime") vid.SetVolume(this.get('volume')*256);
     if(this.loaded==="flash") vid.setVolume(this.get('volume'));
   }.observes('volume'),
-  
-  /** 
+
+  /**
     Calls the right play method depending on the technology.
     @returns {void}
   */
@@ -677,8 +679,8 @@ SC.VideoView = SC.View.extend(
       SC.Logger.warn('The video cannot play!!!! It might still be loading the plugging');
     }
   },
-  
-  /** 
+
+  /**
     Calls the right stop method depending on the technology.
     @returns {void}
   */
@@ -689,8 +691,8 @@ SC.VideoView = SC.View.extend(
     if(this.loaded==="flash")  vid.pauseVideo();
     this.set('paused', YES);
   },
-  
-  /** 
+
+  /**
     Plays or stops the video.
     @returns {void}
   */
@@ -699,21 +701,21 @@ SC.VideoView = SC.View.extend(
       this.play();
     }else{
       this.stop();
-    }   
+    }
   },
-   
-  /** 
+
+  /**
     Goes into fullscreen mode if available
     @returns {void}
-  */ 
+  */
   fullScreen: function(){
     var vid=this._getVideoObject();
     if(this.loaded==="html5") this.$('video')[0].webkitEnterFullScreen();
     if(this.loaded==="flash") vid.fullScreen();
-    return; 
+    return;
   },
-  
-  /** 
+
+  /**
     Enables captions if available
     @returns {void}
   */
@@ -728,16 +730,16 @@ SC.VideoView = SC.View.extend(
         }else{
           this.SetTrackEnabled(this._closedCaptionTrackIndex,false);
           this.set('captionsEnabled', NO);
-        }   
+        }
       }catch(a){}
     }
     return;
   },
-  
+
   /*private*/
-  
-  
-  /** 
+
+
+  /**
     Gets the right video object depending on the browser.
     @returns {void}
   */
@@ -746,14 +748,14 @@ SC.VideoView = SC.View.extend(
     if(this.loaded==="quicktime") return document['qt_'+SC.guidFor(this)];
     if(this.loaded==="flash") {
       var movieName='flash_'+SC.guidFor(this);
-      if (window.document[movieName]) 
+      if (window.document[movieName])
       {
         return window.document[movieName];
       }
       if (navigator.appName.indexOf("Microsoft Internet")==-1)
       {
         if (document.embeds && document.embeds[movieName]) {
-          return document.embeds[movieName]; 
+          return document.embeds[movieName];
         }
       }
       else
@@ -762,15 +764,15 @@ SC.VideoView = SC.View.extend(
       }
     }
   },
-  
+
   _addZeros:function(value){
     if(value.toString().length<2) return "0"+value;
     return value;
   }
-  
+
 });
 
-/** 
+/**
   Hash to store references to the different flash videos.
 */
 SC.VideoView.flashViews={};
@@ -806,19 +808,19 @@ SC.VideoView.logFlash = function(message) {
 
 SC.VideoPlayerView = SC.View.extend({
   classNames: 'sc-video-player-view',
-  
+
   childViews: ['videoView', 'regular'],
-  
+
   value: null,
-  
+
   degradeList: null,
-  
+
   videoView:SC.VideoView.design({
     layout: { top: 0, bottom:20, right:0, left:0},
     degradeListBinding: '*parentView.degradeList',
     valueBinding: '*parentView.value'
   }),
-  
+
   regular: SC.MediaControlsView.design({
      layout: { bottom:0, left: 0, right: 0, height: 20 },
      targetBinding: '*parentView.videoView'

@@ -7,19 +7,19 @@
 
 /**
   Renders and updates the DOM representation of a slider.
-  
+
   Parameters
   -------------------------
   Requires the following parameters:
-  
+
    - `value` -- a value from 0 to 1.
    - `frame` -- containing the frame in which the slider is being drawn.
 */
 
 SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
-  
+
   className: 'slider',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
@@ -32,14 +32,14 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuemax', valueMax);
     context.attr('aria-valuemin', valueMin);
     context.attr('aria-valuenow', valueNow);
-    context.attr('aria-valuetext', valueNow);
+    if(valueMin !== 0 || valueMax !== 100) context.attr('aria-valuetext', valueNow);
     context.attr('aria-orientation', 'horizontal');
 
     context = context.begin('span').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context.push(
-      '<img src="', blankImage,
-      '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
+      '<img src="' + blankImage +
+      '" class="sc-handle" style="left: '+ dataSource.get('value') + '%" />'+
       '</span>'
     );
 
@@ -49,7 +49,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
 
     dataSource.get('renderState')._cachedHandle = null;
   },
-  
+
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 
@@ -61,7 +61,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     jquery.attr('aria-valuemax', valueMax);
     jquery.attr('aria-valuemin', valueMin);
     jquery.attr('aria-valuenow', valueNow);
-    jquery.attr('aria-valuetext', valueNow);
+    if(valueMin !== 0 || valueMax !== 100) jquery.attr('aria-valuetext', valueNow);
     jquery.attr('aria-orientation', 'horizontal');
 
     if (dataSource.didChangeFor('sliderRenderDelegate', 'value')) {
@@ -71,13 +71,8 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       }
 
       var frame = dataSource.get('frame'), value = dataSource.get('value');
-      if (frame && SC.platform.supportsCSS3DTransforms) {
-        value = (value / 100) * frame.width;
-        handle[0].style.cssText = "-webkit-transform: translate3d(" + value + "px,0,0);";
-      } else {
-        handle.css('left', value + "%");
-      }
+      handle.css('left', value + "%");
     }
   }
-  
+
 });

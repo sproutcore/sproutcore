@@ -183,6 +183,27 @@ test("array orderBy using function", function(){
 // ADD SPECIAL CASES HERE
 //
 
+test("verify length is correct in arrayObserver didChange method when orderBy is set", function () {
+  content = [];
+  controller = SC.ArrayController.create({
+    content: content,
+    orderBy: 'i haz your content!'
+  });
+  expect(2);
+
+  controller.addArrayObservers({
+    willChange: function () {
+      equals(this.get('length'), 0, 'length should be 0');
+    },
+
+    didChange: function () {
+      equals(this.get('length'), 1, 'length should be 1');
+    }
+  });
+
+  content.pushObject(":{");
+});
+
 test("verify rangeObserver fires when content is deleted", function() {
 
   content = "1 2 3 4 5".w().map(function(x) {

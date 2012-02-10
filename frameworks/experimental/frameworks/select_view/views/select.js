@@ -5,6 +5,7 @@
 
 sc_require('views/popup_button');
 sc_require('mixins/select_view_menu');
+sc_require('ext/menu');
 
 /**
  * @class
@@ -112,9 +113,9 @@ SC.SelectView = SC.PopupButtonView.extend({
    
    @property
    @type {SC.MenuPane}
-   @default SC.MenuPane.extend(SC.SelectViewMenu)
+   @default SC.AutoResizingMenuPane.extend(SC.SelectViewMenu)
   */
-  menu: SC.MenuPane.extend(SC.SelectViewMenu),
+  menu: SC.AutoResizingMenuPane.extend(SC.SelectViewMenu),
 
   /**
     The currently selected item. If no item is selected, `null`.
@@ -339,7 +340,8 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     var idx = this.get('_selectedItemIndex'), itemViews = menu.get('menuItemViews');
     if (idx > -1) {
-      return [leftPosition, topPosition - itemViews[idx].get('layout').top, 2];
+      var layout = itemViews[idx].get('layout');
+      return [leftPosition, topPosition - layout.top + (layout.height/2), 2];
     }
 
     return [leftPosition, topPosition, 2];
@@ -376,16 +378,6 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     return -1;
   }.property('value', 'menu').cacheable(),
-
-
-  /*
-    Documented in base class; supplying documentation here will break the argument list.
-  */
-  showMenu: function(orig) {
-    orig();
-
-    var menu = this.get('menu'), itemViews = menu.get('menuItemViews');
-  }.enhance(),
 
   /**
     The minimum width for the child menu. For instance, this property can make the

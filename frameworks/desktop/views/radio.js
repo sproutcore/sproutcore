@@ -180,7 +180,7 @@ SC.RadioView = SC.View.extend(SC.Control,
   /**
     If items property is a hash, specify which property will function as
     the item width with this itemWidthKey property. This is only used when
-    layoutDirection is set to SC.LAYOUT_HORIONZTAL and can be used to override
+    layoutDirection is set to SC.LAYOUT_HORIZONTAL and can be used to override
     the default value provided by the framework or theme CSS.
     
     @type String
@@ -304,7 +304,7 @@ SC.RadioView = SC.View.extend(SC.Control,
           ariaLabel = item.get ? item.get(ariaLabelKey) : item[ariaLabelKey];
         } else ariaLabel = null;
 
-        // if item is nil, use somedefaults...
+        // if item is nil, use some defaults...
       } else {
         title = value = icon = null;
         isEnabled = NO;
@@ -356,8 +356,11 @@ SC.RadioView = SC.View.extend(SC.Control,
     this._activeRadioButton = index;
     
     if (index !== undefined) {
-      this.get('displayItems')[index].set('isActive', YES);
-      delegate.updateRadioAtIndex(proxy, elem, index);
+      var item = this.get('displayItems')[index];
+      if (item.get('isEnabled')) {
+        item.set('isActive', YES);
+        delegate.updateRadioAtIndex(proxy, elem, index);
+      }
     }
     
     // even if radiobuttons are not set to get firstResponder, allow default 
@@ -387,9 +390,12 @@ SC.RadioView = SC.View.extend(SC.Control,
     this._activeRadioButton = undefined;
     
     if (index !== undefined) {
-      displayItems[index].set('isActive', NO);
-      delegate.updateRadioAtIndex(proxy, elem, index);
-      this.set('value', displayItems[index].value);
+      var item = this.get('displayItems')[index];
+      if (item.get('isEnabled')) {
+        item.set('isActive', NO);
+        delegate.updateRadioAtIndex(proxy, elem, index);
+        this.set('value', item.value);
+      }
     }
     
     evt.allowDefault();

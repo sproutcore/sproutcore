@@ -336,7 +336,7 @@ SC.Record = SC.Object.extend(
 
   /**
     You can invoke this method anytime you need to make the record as dirty.
-    This will cause the record to be commited when you `commitChanges()`
+    This will cause the record to be committed when you `commitChanges()`
     on the underlying store.
 
     If you use the `writeAttribute()` primitive, this method will be called
@@ -466,23 +466,22 @@ SC.Record = SC.Object.extend(
     Should not have to be called manually.
   */
   propagateToAggregates: function() {
-    var storeKey = this.get('storeKey'),
+    var storeKey   = this.get('storeKey'),
         recordType = SC.Store.recordTypeFor(storeKey),
-        idx, len, key, val, recs;
-
-    var aggregates = recordType.aggregates;
+        aggregates = recordType.__sc_aggregate_keys,
+        idx, len, key, prop, val, recs;
 
     // if recordType aggregates are not set up yet, make sure to
     // create the cache first
     if (!aggregates) {
-      var dataHash = this.get('store').readDataHash(storeKey);
       aggregates = [];
-      for(var k in dataHash) {
-        if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
-          aggregates.push(k);
+      for (key in this) {
+        prop = this[key];
+        if (prop  &&  prop.isRecordAttribute  &&  prop.aggregate === YES) {
+          aggregates.push(key);
         }
       }
-      recordType.aggregates = aggregates;
+      recordType.__sc_aggregate_keys = aggregates;
     }
 
     // now loop through all aggregate properties and mark their related
@@ -505,13 +504,19 @@ SC.Record = SC.Object.extend(
       @param {SC.Record} record to propagate to
     */
     iter =  function(rec) {
-      var childStatus, parentStatus;
+      var childStatus, parentStore, parentStoreKey, parentStatus;
 
       if (rec) {
         childStatus = this.get('status');
         if ((childStatus & dirty)  ||
             (childStatus & readyNew)  ||  (childStatus & destroyed)) {
-          parentStatus = rec.get('status');
+
+          // Since the parent can cache 'status', and we might be called before
+          // it has been invalidated, we'll read the status directly rather than
+          // trusting the cache.
+          parentStore    = rec.get('store');
+          parentStoreKey = rec.get('storeKey');
+          parentStatus   = parentStore.peekStatus(parentStoreKey);
           if (parentStatus === readyClean) {
             // Note:  storeDidChangeProperties() won't put it in the
             //        changelog!
@@ -583,6 +588,7 @@ SC.Record = SC.Object.extend(
         recordId   = this.get('id'),
         store      = this.get('store'),
         storeKey   = this.get('storeKey'),
+        keysToKeep = {},
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
         isChild, defaultVal, keyForDataHash, attr;
 
@@ -597,17 +603,26 @@ SC.Record = SC.Object.extend(
         typeClass = valueForKey.typeClass;
         if (typeClass) {
           keyForDataHash = valueForKey.get('key') || key; // handle alt keys
+
+          // As we go, we'll build up a key —> attribute mapping table that we
+          // can use when purging keys from the data hash that are not defined
+          // in the schema, below.
+          keysToKeep[keyForDataHash] = YES;
+
           isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
           isChild  = valueForKey.isNestedRecordTransform;
           if (!isRecord && !isChild) {
             attrValue = this.get(key);
-            if(attrValue!==undefined || (attrValue===null && includeNull)) {
+            if(attrValue!==undefined && (attrValue!==null || includeNull)) {
               attr = this[key];
               // if record attribute, make sure we transform with the fromType
               if(SC.instanceOf(attr, SC.RecordAttribute)) {
                 attrValue = attr.fromType(this, key, attrValue);
               }
               dataHash[keyForDataHash] = attrValue;
+            }
+            else if(!includeNull) {
+              keysToKeep[keyForDataHash] = NO;
             }
 
           } else if (isChild) {
@@ -637,6 +652,18 @@ SC.Record = SC.Object.extend(
             }
           }
         }
+      }
+    }
+
+    // Finally, we'll go through the underlying data hash and remove anything
+    // for which no appropriate attribute is defined.  We can do this using
+    // the mapping table we prepared above.
+    for (key in dataHash) {
+      if (!keysToKeep[key]) {
+        // Deleting a key doesn't seem too common unless it's a mistake, so
+        // we'll log it in debug mode.
+        SC.debug("%@:  Deleting key from underlying data hash due to normalization:  %@", this, key);
+        delete dataHash[key];
       }
     }
 
@@ -691,7 +718,7 @@ SC.Record = SC.Object.extend(
     Lets you commit this specific record to the store which will trigger
     the appropriate methods in the data source for you.
 
-    @param {Hash} params optional additonal params that will passed down
+    @param {Hash} params optional additional params that will passed down
       to the data source
     @param {boolean} recordOnly optional param if you want to only commit a single
       record if it has a parent.
@@ -913,7 +940,7 @@ SC.Record = SC.Object.extend(
 
       if (!id && (pk = recordType.prototype.primaryKey)) {
         id = hash[pk];
-        // In case there isnt a primary key supplied then we create on
+        // In case there is not a primary key supplied then we create on
         // on the fly
         sk = id ? store.storeKeyExists(recordType, id) : null;
         if (sk){
@@ -1336,9 +1363,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
     opts = opts || {};
     var isNested = opts.nested || opts.isNested;
     var attr;
-    
+
     this._throwUnlessRecordTypeDefined(recordType, 'toMany');
-    
+
     if(isNested){
       attr = SC.ChildrenAttribute.attr(recordType, opts);
     }
@@ -1352,7 +1379,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     Will return one of the following:
 
      1. `SC.SingleAttribute` that converts the underlying ID to a single
-        record.  If you modify this property, it will rewrite the underyling
+        record.  If you modify this property, it will rewrite the underlying
         ID. It will also modify the inverse of the relationship, if you set it.
      2. `SC.ChildAttribute` that you can edit the contents
         of this relationship.
@@ -1376,7 +1403,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     }
     return attr;
   },
-  
+
   _throwUnlessRecordTypeDefined: function(recordType, relationshipType) {
     if (!recordType) {
       throw "Attempted to create " + relationshipType + " attribute with " +

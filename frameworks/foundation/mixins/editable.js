@@ -135,7 +135,7 @@ SC.Editable = {
     changes.
   
     If this method is called on a view that is not currently editing, you
-    should always just reutrn YES.
+    should always just return YES.
     
     The default implementation sets isEditing to NO, resigns first responder
     and returns YES.

@@ -18,7 +18,7 @@ sc_require('system/object');
 SC.LOG_BINDINGS = NO ;
 
 /**
-  Performance paramter.  This will benchmark the time spent firing each
+  Performance parameter.  This will benchmark the time spent firing each
   binding.
 
   @property {Boolean}
@@ -285,7 +285,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     until you connect the binding.
 
     The binding will search for the property path starting at the root level
-    unless you specify an alternate root object as the second paramter to this
+    unless you specify an alternate root object as the second parameter to this
     method.  Alternatively, you can begin your property path with either "." or
     "*", which will use the root object of the to side be default.  This special
     behavior is used to support the high-level API provided by SC.Object.
@@ -488,12 +488,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   _scheduleSync: function() {
-    if (SC.RunLoop.isRunLoopInProgress() || this._syncScheduled) { return; }
-
-    this._syncScheduled = YES;
-    var self = this;
-
-    setTimeout(function() { SC.run(); self._syncScheduled = NO; }, 1);
+    if (SC.RunLoop.isRunLoopInProgress() || SC.Binding._syncScheduled) { return; }
+    SC.Binding._syncScheduled = YES;
+    setTimeout(function() { SC.run(); SC.Binding._syncScheduled = NO; }, 1);
   },
 
   /** @private
@@ -650,17 +647,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
           key = this._fromPropertyKey ;
       if (!target || !key) return this ; // nothing to do
 
-      // in debug, let's check for whether target is a valid observable with getPath.
+      // Let's check for whether target is a valid observable with getPath.
       // Common cases might have it be a Window or a DOM object.
       //
       // If we have a target, it is ready, but if it is invalid, that is WRONG.
-      //
-      // @if (debug)
       if (!target.isObservable) {
         SC.Logger.warn("Cannot bind '%@' to property '%@' on non-observable '%@'".fmt(this._toPropertyPath, key, target));
         return this;
       }
-      // @endif
 
       // get the new value
       var v = target.getPath(key) ;
@@ -864,7 +858,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   /**
     Adds a transform that will return the placeholder value if the value is
-    null or undefined.  Otherwise it will passthrough untouched.  See also notEmpty().
+    null or undefined.  Otherwise it will pass through untouched.  See also notEmpty().
 
     @param {String} fromPath from path or null
     @param {Object} [placeholder]

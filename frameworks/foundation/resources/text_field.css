@@ -2,7 +2,6 @@
 
 .sc-text-field-view {
   border:none;
-  z-index:100;
   overflow: visible;
   background :white;
   .border {
@@ -55,7 +54,7 @@
   }
   
   
-  .sc-hint {
+  .sc-hint, .hint {
   	z-index: 1;
   	position: absolute;
   	top: 3px;
@@ -67,7 +66,8 @@
   	font-size: 12px;
   }
 
-  &.text-area .sc-hint {
+  &.text-area .sc-hint,
+  &.text-area .hint {
   	top: 2px;
   	left: 3px;
   	right: 3px;
@@ -83,7 +83,7 @@
     color: #B3B3B3 !important;
   }
 
-  .safari &{
+  .webkit &{
     &.focus {
       outline: auto 7px -webkit-focus-ring-color; 
       outline-offset: -2px;
@@ -115,11 +115,8 @@
     .border {
       border:1px inset;
     }
-    input.field {
-      padding-bottom: 1px;
-    }
     textarea.field {
     	height: 100%;
     }
-  } 
+  }
 }

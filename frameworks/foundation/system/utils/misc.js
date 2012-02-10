@@ -118,16 +118,16 @@ SC.mixin( /** @scope SC */ {
       height = elem.innerHeight();
 
       // Adjust offset to account for top & left borders
-      offset.x += window.parseInt(elem.css('border-top-width').replace('px', ''));
-      offset.y += window.parseInt(elem.css('border-left-width').replace('px', ''));
+      offset.x += window.parseInt(elem.css('border-left-width').replace('px', ''));
+      offset.y += window.parseInt(elem.css('border-top-width').replace('px', ''));
     } else {
       width = elem.outerWidth(includeFlag === 'margin');
       height = elem.outerHeight(includeFlag === 'margin');
 
       if (includeFlag === 'margin') {
         // Adjust offset to account for top & left margins
-        offset.x -= window.parseInt(elem.css('margin-top').replace('px', ''));
-        offset.y -= window.parseInt(elem.css('margin-left').replace('px', ''));
+        offset.x -= window.parseInt(elem.css('margin-left').replace('px', ''));
+        offset.y -= window.parseInt(elem.css('margin-top').replace('px', ''));
       }
     }
 
@@ -140,10 +140,10 @@ SC.mixin( /** @scope SC */ {
 
     return SC.pointInRect(point, rect);
   },
-  
-  
+
+
   /**
-    Switch the scale of your app. Useful when vizualizing apps not designed
+    Switch the scale of your app. Useful when visualizing apps not designed
     for iphone.
   */
   switchScale: function() {

@@ -153,7 +153,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   value: null,
 
   /**
-    if this property is set to `YES`, a checbox is shown next to the
+    if this property is set to `YES`, a checkbox is shown next to the
     selected menu item.
 
     @type Boolean
@@ -162,7 +162,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
-    Set this property to required display positon of separator from bottom
+    Set this property to required display position of separator from bottom
 
     @default null
   */
@@ -204,7 +204,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     Prefer matrix to position the select button menu such that the
     selected item for the menu item will appear aligned to the
     the button. The value at the second `index(0)` changes based on the
-    `postion(index)` of the menu item in the menu pane.
+    `position(index)` of the menu item in the menu pane.
 
     @type Array
     @default null
@@ -458,6 +458,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }, this ) ;
 
     if(firstTime) {
+      context.attr('aria-haspopup', 'true') ;
       this.invokeLast(function() {
         var value = this.get('value') ;
         if(SC.none(value)) {
@@ -544,12 +545,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     var customViewClassName = this.get('customViewClassName'),
         customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth'),
-        className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+        className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button menu sc-scroll-view sc-menu-scroll-view sc-container-view sc-menu-item menu-item value sc-regular-size' ;
     className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
 
     dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
     menuItemViewEscapeHTML = dummyMenuItemView.get('escapeHTML') ;
-    var body = document.body;
+    body = document.body;
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
       item = items.objectAt(idx) ;
@@ -659,28 +660,28 @@ SC.SelectButtonView = SC.ButtonView.extend(
     switch (this.get('controlSize')) {
       case SC.TINY_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.TINY_OFFSET_Y;
-        customMenuItemHeight = SC.SelectButtonView.TINY_OFFSET_Y;
-        customSeparatorHeight = SC.SelectButtonView.TINY_POPUP_MENU_WIDTH_OFFSET;
+        customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.SMALL_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.SMALL_OFFSET_Y;
-        customMenuItemHeight = SC.SelectButtonView.SMALL_OFFSET_Y;
-        customSeparatorHeight = SC.SelectButtonView.SMALL_POPUP_MENU_WIDTH_OFFSET;
+        customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.REGULAR_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.REGULAR_OFFSET_Y;
-        customMenuItemHeight = SC.SelectButtonView.REGULAR_OFFSET_Y;
-        customSeparatorHeight = SC.SelectButtonView.REGULAR_POPUP_MENU_WIDTH_OFFSET;
+        customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.LARGE_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.LARGE_OFFSET_Y;
-        customMenuItemHeight = SC.SelectButtonView.LARGE_OFFSET_Y;
-        customSeparatorHeight = SC.SelectButtonView.LARGE_POPUP_MENU_WIDTH_OFFSET;
+        customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
       case SC.HUGE_CONTROL_SIZE:
         controlSizeTuning = SC.SelectButtonView.HUGE_OFFSET_Y;
-        customMenuItemHeight = SC.SelectButtonView.HUGE_OFFSET_Y;
-        customSeparatorHeight = SC.SelectButtonView.HUGE_POPUP_MENU_WIDTH_OFFSET;
+        customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
+        customSeparatorHeight = SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT;
         break;
     }
 
@@ -724,13 +725,29 @@ SC.SelectButtonView = SC.ButtonView.extend(
     this.becomeFirstResponder() ;
     this._action() ;
 
-    // Store the current timestamp. We register the timestamp at the end of
-    // the runloop so that the menu has been rendered, in case that operation
+    // Store the current timestamp. We register the timestamp after a setTimeout
+    // so that the menu has been rendered, in case that operation
     // takes more than a few hundred milliseconds.
 
     // One mouseUp, we'll use this value to determine how long the mouse was
     // pressed.
-    this.invokeLast(this._recordMouseDownTimestamp);
+    
+    // we need to keep track that we opened it just now in case we get the
+    // mouseUp before render finishes. If it is 0, then we know we have not
+    // waited long enough.
+    this._menuRenderedTimestamp = 0;
+    
+    var self = this;
+    
+    // setTimeout guarantees that all rendering is done. The browser will even
+    // have rendered by this point.
+    setTimeout(function() {
+      SC.run(function(){
+        // a run loop might be overkill here but what if Date.now fails?
+        self._menuRenderedTimestamp = Date.now();
+      });
+    }, 1);
+
     return YES ;
   },
 
@@ -765,6 +782,11 @@ SC.SelectButtonView = SC.ButtonView.extend(
         menu = this.get('menu'),
         touch = SC.platform.touch,
         targetMenuItem;
+
+    // normalize the previousTimestamp: if it is 0, it might as well be now.
+    // 0 means that we have not even triggered the nearly-immediate saving of timestamp.
+    if (previousTimestamp === 0) previousTimestamp = Date.now();
+
 
     if (menu) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
@@ -986,12 +1008,12 @@ SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT = 7;
 SC.MenuPane.SMALL_MENU_HEIGHT_PADDING = 4;
 SC.MenuPane.SMALL_SUBMENU_OFFSET_X = 2;
 
-SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT = 20;
+SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT = 22;
 SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT = 9;
 SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING = 6;
 SC.MenuPane.REGULAR_SUBMENU_OFFSET_X = 2;
 
-SC.MenuPane.LARGE_MENU_ITEM_HEIGHT = 60;
+SC.MenuPane.LARGE_MENU_ITEM_HEIGHT = 31;
 SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT = 20;
 SC.MenuPane.LARGE_MENU_HEIGHT_PADDING = 0;
 SC.MenuPane.LARGE_SUBMENU_OFFSET_X = 4;

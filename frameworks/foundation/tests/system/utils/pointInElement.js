@@ -99,8 +99,8 @@ function runChecks(element, offsetAdjust, values) {
       top = jqOffset.top;
 
   equals(SC.pointInElement({x: left + offsetAdjust, y: top + offsetAdjust}, element, 'padding'), values[0], 'point {left: %@, top: %@} within the element\'s padding'.fmt(offsetAdjust, offsetAdjust));
-  equals(SC.pointInElement({x: left + offsetAdjust, y: top + offsetAdjust}, element, 'border'), values[1], 'point {left: %@, top: %@} within the element\'s padding'.fmt(offsetAdjust, offsetAdjust));
-  equals(SC.pointInElement({x: left + offsetAdjust, y: top + offsetAdjust}, element, 'margin'), values[2], 'point {left: %@, top: %@} within the element\'s padding'.fmt(offsetAdjust, offsetAdjust));
+  equals(SC.pointInElement({x: left + offsetAdjust, y: top + offsetAdjust}, element, 'border'), values[1], 'point {left: %@, top: %@} within the element\'s border'.fmt(offsetAdjust, offsetAdjust));
+  equals(SC.pointInElement({x: left + offsetAdjust, y: top + offsetAdjust}, element, 'margin'), values[2], 'point {left: %@, top: %@} within the element\'s margin'.fmt(offsetAdjust, offsetAdjust));
 }
 
 test("A plain child element", function() {

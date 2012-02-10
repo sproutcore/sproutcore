@@ -13,46 +13,46 @@ var QUNIT_BREAK_ON_TEST_FAIL = false;
 
   A test plan contains a set of functions that will be executed in order.  The
   results will be recorded into a results hash as well as calling a delegate.
-  
+
   When you define tests and modules, you are adding to the active test plan.
   The test plan is then run when the page has finished loading.
-  
+
   Normally you will not need to work with a test plan directly, though if you
   are writing a test runner application that needs to monitor test progress
   you may write a delegate to talk to the test plan.
 
   The CoreTest.Plan.fn hash contains functions that will be made global via
-  wrapper methods.  The methods must accept a Plan object as their first 
+  wrapper methods.  The methods must accept a Plan object as their first
   parameter.
-  
-  ## Results 
-  
-  The results hash contains a summary of the results of running the test 
+
+  ## Results
+
+  The results hash contains a summary of the results of running the test
   plan.  It includes the following properties:
-  
+
    - *assertions* -- the total number of assertions
    - *tests* -- the total number of tests
    - *passed* -- number of assertions that passed
    - *failed* -- number of assertions that failed
    - *errors* -- number of assertions with errors
    - *warnings* -- number of assertions with warnings
-  
+
   You can also consult the log property, which contains an array of hashes -
   one for each assertion - with the following properties:
-  
+
    - *module* -- module descriptions
    - *test* -- test description
    - *message* -- assertion description
    - *result* -- CoreTest.OK, CoreTest.FAILED, CoreTest.ERROR, CoreTest.WARN
-  
+
   @since SproutCore 1.0
 */
 CoreTest.Plan = {
-  
+
   /**
-    Define a new test plan instance.  Optionally pass attributes to apply 
+    Define a new test plan instance.  Optionally pass attributes to apply
     to the new plan object.  Usually you will call this without arguments.
-    
+
     @param {Hash} attrs plan arguments
     @returns {CoreTest.Plan} new instance/subclass
   */
@@ -66,38 +66,38 @@ CoreTest.Plan = {
   },
 
   // ..........................................................
-  // RUNNING 
-  // 
-  
+  // RUNNING
+  //
+
   /** @private - array of functions to execute in order. */
   queue: [],
 
   /**
     If true then the test plan is currently running and items in the queue
     will execute in order.
-    
+
     @type {Boolean}
   */
   isRunning: false,
 
   /**
     Primitive used to add callbacks to the test plan queue.  Usually you will
-    not want to call this method directly but instead use the module() or 
+    not want to call this method directly but instead use the module() or
     test() methods.
-    
+
     @returns {CoreTest.Plan} receiver
   */
   synchronize: function synchronize(callback) {
     this.queue.push(callback);
-    if (this.isRunning) this.process(); // run queue    
+    if (this.isRunning) this.process(); // run queue
     return this;
   },
-  
+
   /**
     Processes items in the queue as long as isRunning remained true.  When
     no further items are left in the queue, calls finish().  Usually you will
     not call this method directly.  Instead call run().
-    
+
     @returns {CoreTest.Plan} receiver
   */
   process: function process() {
@@ -106,35 +106,35 @@ CoreTest.Plan = {
     }
     return this ;
   },
-  
+
   /**
-    Begins running the test plan after a slight delay to avoid interupting
-    any current callbacks. 
-  
+    Begins running the test plan after a slight delay to avoid interrupting
+    any current callbacks.
+
     @returns {CoreTest.Plan} receiver
   */
   start: function() {
     var plan = this ;
     setTimeout(function() {
       if (plan.timeout) clearTimeout(plan.timeout);
-      plan.timeout = null; 
+      plan.timeout = null;
       plan.isRunning = true;
       plan.process();
     }, 13);
     return this ;
   },
-  
+
   /**
     Stops the test plan from running any further.  If you pass a timeout,
-    it will raise an exception if the test plan does not begin executing 
-    with the alotted timeout.
-    
+    it will raise an exception if the test plan does not begin executing
+    with the allotted timeout.
+
     @param {Number} timeout optional timeout in msec
     @returns {CoreTest.Plan} receiver
   */
   stop: function(timeout) {
     this.isRunning = false ;
-    
+
     if (this.timeout) clearTimeout(this.timeout);
     if (timeout) {
       var plan = this;
@@ -144,7 +144,7 @@ CoreTest.Plan = {
     } else this.timeout = null ;
     return this ;
   },
-  
+
   /**
     Force the test plan to take a break.  Avoids slow script warnings.  This
     is called automatically after each test completes.
@@ -153,15 +153,15 @@ CoreTest.Plan = {
     if (this.isRunning) {
       var del = this.delegate;
       if (del && del.planDidPause) del.planDidPause(this);
-      
+
       this.isRunning = false ;
       this.start();
     }
     return this ;
   },
-  
+
   /**
-    Initiates running the tests for the first time.  This will add an item 
+    Initiates running the tests for the first time.  This will add an item
     to the queue to call finish() on the plan when the run completes.
 
     @returns {CoreTest.Plan} receiver
@@ -169,7 +169,7 @@ CoreTest.Plan = {
   run: function() {
     this.isRunning = true;
     this.prepare();
-    
+
     // initialize new results
     this.results = {
       start: new Date().getTime(),
@@ -186,14 +186,14 @@ CoreTest.Plan = {
 
     // add item to queue to finish running the test plan when finished.
     this.begin().synchronize(this.finish).process();
-    
+
     return this ;
   },
 
   /**
     Called when the test plan begins running.  This method will notify the
     delegate.  You will not normally call this method directly.
-    
+
     @returns {CoreTest.Plan} receiver
   */
   begin: function() {
@@ -201,7 +201,7 @@ CoreTest.Plan = {
     if (del && del.planDidBegin) del.planDidBegin(this);
     return this ;
   },
-  
+
   /**
     When the test plan finishes running, this method will be called to notify
     the delegate that the plan as finished.
@@ -211,10 +211,10 @@ CoreTest.Plan = {
   finish: function() {
     var r   = this.results,
         del = this.delegate;
-        
+
     r.finish = new Date().getTime();
     r.runtime = r.finish - r.start;
-    
+
     if (del && del.planDidFinish) del.planDidFinish(this, r);
     return this ;
   },
@@ -229,25 +229,25 @@ CoreTest.Plan = {
     if (typeof SC !== 'undefined' && SC.filename) {
       desc = SC.filename.replace(/^.+?\/current\/tests\//,'') + '\n' + desc;
     }
-    
+
     this.currentModule = desc;
 
     if (!lifecycle) lifecycle = {};
     this.setup(lifecycle.setup).teardown(lifecycle.teardown);
-    
+
     return this ;
   },
-  
+
   /**
     Sets the current setup method.
-    
+
     @returns {CoreTest.Plan} receiver
   */
   setup: function(func) {
     this.currentSetup = func || CoreTest.K;
     return this;
   },
-  
+
   /**
     Sets the current teardown method
 
@@ -257,14 +257,14 @@ CoreTest.Plan = {
     this.currentTeardown = func || CoreTest.K ;
     return this;
   },
-  
+
   now: function() { return new Date().getTime(); },
-  
+
   /**
     Generates a unit test, adding it to the test plan.
   */
   test: function test(desc, func) {
-    
+
     if (!this.enabled(this.currentModule, desc)) return this; // skip
 
     // base prototype describing test
@@ -274,14 +274,14 @@ CoreTest.Plan = {
       expected: 0,
       assertions: []
     };
-    
+
     var msg;
     var name = desc ;
     if (this.currentModule) name = this.currentModule + " module: " + name;
-    
+
     var setup = this.currentSetup || CoreTest.K;
     var teardown = this.currentTeardown || CoreTest.K;
-    
+
     // add setup to queue
     this.synchronize(function() {
 
@@ -291,7 +291,7 @@ CoreTest.Plan = {
       mainEl = null;
 
       this.working = working;
-      
+
       try {
         working.total_begin = working.setup_begin = this.now();
         setup.call(this);
@@ -301,7 +301,7 @@ CoreTest.Plan = {
         this.error("Setup exception on " + name + ": " + msg);
       }
     });
-    
+
     // now actually invoke test
     this.synchronize(function() {
       if (!func) {
@@ -318,7 +318,7 @@ CoreTest.Plan = {
         }
       }
     });
-    
+
     // cleanup
     this.synchronize(function() {
       try {
@@ -330,10 +330,10 @@ CoreTest.Plan = {
         this.error("Teardown exception on " + name + ": " + msg);
       }
     });
-    
+
     // finally, reset and report result
     this.synchronize(function() {
-      
+
       if (this.reset) {
         try {
           this.working.reset_begin = this.now();
@@ -344,16 +344,16 @@ CoreTest.Plan = {
           this.error("Reset exception on " + name + ": " + msg) ;
         }
       }
-      
+
       // check for expected assertions
       var w = this.working,
           exp = w.expected,
           len = w.assertions.length;
-          
+
       if (exp && exp !== len) {
         this.fail("Expected " + exp + " assertions, but " + len + " were run");
       }
-      
+
       // finally, record result
       this.working = null;
       this.record(w.module, w.test, w.assertions, w);
@@ -367,7 +367,7 @@ CoreTest.Plan = {
           this.pauseTime = now ;
         }
       }
-      
+
     });
   },
 
@@ -385,9 +385,9 @@ CoreTest.Plan = {
     }
     begin = null;
   },
-  
+
   /**
-    Converts the passed string into HTML and then appends it to the main body 
+    Converts the passed string into HTML and then appends it to the main body
     element.  This is a useful way to automatically load fixture HTML into the
     main page.
   */
@@ -400,10 +400,10 @@ CoreTest.Plan = {
     // now append new content
     html.each(function() { body.appendChild(this); });
   },
-  
+
   /**
     Records the results of a test.  This will add the results to the log
-    and notify the delegate.  The passed assertions array should contain 
+    and notify the delegate.  The passed assertions array should contain
     hashes with the result and message.
   */
   record: function(module, test, assertions, timings) {
@@ -411,7 +411,7 @@ CoreTest.Plan = {
         len = assertions.length,
         del = this.delegate,
         idx, cur;
-        
+
     r.tests++;
     for(idx=0;idx<len;idx++) {
       cur = assertions[idx];
@@ -422,15 +422,15 @@ CoreTest.Plan = {
       r[cur.result]++;
       r.assertions.push(cur);
     }
-    
+
     if (del && del.planDidRecord) {
       del.planDidRecord(this, module, test, assertions, timings) ;
     }
-    
+
   },
-  
+
   /**
-    Universal method can be called to reset the global state of the 
+    Universal method can be called to reset the global state of the
     application for each test.  The default implementation will reset any
     saved fixture.
   */
@@ -439,24 +439,24 @@ CoreTest.Plan = {
       var mainEl = document.getElementById('main');
       if (mainEl) mainEl.innerHTML = this.fixture;
       mainEl = null;
-    }  
+    }
     return this ;
   },
-  
+
   /**
-    Can be used to decide if a particular test should be enabled or not.  
+    Can be used to decide if a particular test should be enabled or not.
     Current implementation allows a test to run.
-    
+
     @returns {Boolean}
   */
   enabled: function(moduleName, testName) {
     return true;
   },
-  
+
   // ..........................................................
   // MATCHERS
-  // 
-  
+  //
+
   /**
     Called by a matcher to record that a test has passed.  Requires a working
     test property.
@@ -480,7 +480,7 @@ CoreTest.Plan = {
   },
 
   /**
-    Called by a matcher to record that a test issued a warning.  Requires a 
+    Called by a matcher to record that a test issued a warning.  Requires a
     working test property.
   */
   warn: function(msg) {
@@ -491,22 +491,22 @@ CoreTest.Plan = {
   },
 
   /**
-    Called by a matcher to record that a test had an error.  Requires a 
+    Called by a matcher to record that a test had an error.  Requires a
     working test property.
   */
   error: function(msg, e) {
     var w = this.working ;
     if (!w) throw "error("+msg+") called outside of a working test";
-    
+
     if(e && typeof console != "undefined" && console.error && console.warn ) {
       console.error(msg);
       console.error(e);
     }
-    
+
     w.assertions.push({ message: msg, result: CoreTest.ERROR });
     return this ;
   },
-  
+
   /**
     Any methods added to this hash will be made global just before the first
     test is run.  You can add new methods to this hash to use them in unit
@@ -549,9 +549,9 @@ CoreTest.Plan = {
     /**
       Primitive performs a basic equality test on the passed values.  Prints
       out both actual and expected values.
-      
+
       Preferred to ok(actual === expected, message);
-      
+
       @param {Object} actual tested object
       @param {Object} expected expected value
       @param {String} msg optional message
@@ -561,13 +561,13 @@ CoreTest.Plan = {
       if (msg === undefined) msg = null; // make sure ok logs properly
       return this.ok(actual == expected, actual, expected, msg);
     },
-    
+
     /**
       Expects the passed function call to throw an exception of the given
       type. If you pass null or Error for the expected exception, this will
-      pass if any error is received.  If you pass a string, this will check 
+      pass if any error is received.  If you pass a string, this will check
       message property of the exception.
-      
+
       @param {Function} callback the function to execute
       @param {Error} expected optional, the expected error
       @param {String} a description
@@ -575,13 +575,13 @@ CoreTest.Plan = {
     */
     should_throw: function should_throw(callback, expected, msg) {
       var actual = false ;
-      
+
       try {
         callback();
       } catch(e) {
-        actual = (typeof expected === "string") ? e.message : e;        
+        actual = (typeof expected === "string") ? e.message : e;
       }
-      
+
       if (expected===false) {
         ok(actual===false, CoreTest.fmt("%@ expected no exception, actual %@", msg, actual));
       } else if (expected===Error || expected===null || expected===true) {
@@ -590,9 +590,9 @@ CoreTest.Plan = {
         equals(actual, expected, msg);
       }
     },
-    
+
     /**
-      Specify the number of expected assertions to gaurantee that a failed 
+      Specify the number of expected assertions to gaurantee that a failed
       test (no assertions are run at all) don't slip through
 
       @returns {CoreTest.Plan} receiver
@@ -600,13 +600,13 @@ CoreTest.Plan = {
     expect: function expect(asserts) {
       this.working.expected = asserts;
     },
-    
+
     /**
       Verifies that two objects are actually the same.  This method will do
       a deep compare instead of a simple equivalence test.  You should use
-      this instead of equals() when you expect the two object to be different 
+      this instead of equals() when you expect the two object to be different
       instances but to have the same content.
-      
+
       @param {Object} value tested object
       @param {Object} actual expected value
       @param {String} msg optional message
@@ -616,66 +616,66 @@ CoreTest.Plan = {
       if (msg === undefined) msg = null ; // make sure ok logs properly
       return this.ok(CoreTest.equiv(actual, expected), actual, expected, msg);
     },
-    
+
     /**
-      Stops the current tests from running.  An optional timeout will 
+      Stops the current tests from running.  An optional timeout will
       automatically fail the test if it does not restart within the specified
       period of time.
-      
+
       @param {Number} timeout timeout in msec
       @returns {CoreTest.Plan} receiver
     */
     stop: function(timeout) {
       return this.stop(timeout);
     },
-    
+
     /**
       Restarts tests running.  Use this to begin tests after you stop tests.
-      
+
       @returns {CoreTest.Plan} receiver
     */
     start: function() {
       return this.start();
     },
-    
-    reset: function() { 
-      return this.reset(); 
+
+    reset: function() {
+      return this.reset();
     }
-  
+
   },
-  
+
   /**
     Exports the comparison functions into the global namespace.  This will
-    allow you to call these methods from within testing functions.  This 
+    allow you to call these methods from within testing functions.  This
     method is called automatically just before the first test is run.
-    
+
     @returns {CoreTest.Plan} receiver
   */
   prepare: function() {
     var fn   = this.fn,
         plan = this,
         key, func;
-        
+
     for(key in fn) {
       if (!fn.hasOwnProperty(key)) continue ;
       func = fn[key];
       if (typeof func !== "function") continue ;
       window[key] = this._bind(func);
-      if (!plan[key]) plan[key] = func; 
+      if (!plan[key]) plan[key] = func;
     }
     return this ;
   },
-  
+
   _bind: function(func) {
     var plan = this;
     return function() { return func.apply(plan, arguments); };
   }
-  
+
 };
 
 // ..........................................................
 // EXPORT BASIC API
-// 
+//
 
 CoreTest.defaultPlan = function defaultPlan() {
   var plan = CoreTest.plan;
@@ -689,20 +689,20 @@ CoreTest.defaultPlan = function defaultPlan() {
 // create a module.  If this is the first time, create the test plan and
 // runner.  This will cause the test to run on page load
 window.module = function(desc, l) {
-  CoreTest.defaultPlan().module(desc, l); 
-}; 
+  CoreTest.defaultPlan().module(desc, l);
+};
 
 // create a test.  If this is the first time, create the test plan and
 // runner.  This will cause the test to run on page load
 window.test = function(desc, func) {
-  CoreTest.defaultPlan().test(desc, func); 
-}; 
+  CoreTest.defaultPlan().test(desc, func);
+};
 
 // reset htmlbody for unit testing
 window.clearHtmlbody = function() {
-  CoreTest.defaultPlan().clearHtmlbody(); 
-}; 
+  CoreTest.defaultPlan().clearHtmlbody();
+};
 
 window.htmlbody = function(string) {
-  CoreTest.defaultPlan().htmlbody(string); 
-}; 
+  CoreTest.defaultPlan().htmlbody(string);
+};

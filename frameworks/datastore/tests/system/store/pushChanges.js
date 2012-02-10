@@ -66,7 +66,7 @@ test("A pushRetrieve updating the id of an existing record should update the pri
   recFirst = { firstname: 'me', lastname: 'too', guid: tmpid };
   recSecond = { firstname: 'me', lastname: 'too', guid: 1 };
   SC.RunLoop.begin();
-  var sK = store.loadRecord(SC.Record, rec, tmpid);
+  var sK = store.loadRecord(SC.Record, recFirst, tmpid);
   SC.RunLoop.end();
   equals(store.idFor(sK),tmpid); //check whether the id is indeed tmpid
   SC.RunLoop.begin();

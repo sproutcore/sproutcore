@@ -59,8 +59,8 @@
           ?transparency: 0.2
         }
       }
-  
-  @author Evin Grano 
+
+  @author Evin Grano
   @extends SC.View
   @since SproutCore 1.0
 */
@@ -74,23 +74,23 @@ SC.STROKE = 'stroke';
 
 
 SC.DrawingView = SC.View.extend({
-  
+
   classNames: 'scui-drawing-view',
-  
+
   shapes: [],
-  
+
   _drawingManager: {},
-  
+
   shapesDidChange: function(){
     this.set('layerNeedsUpdate', YES);
     this.updateLayerIfNeeded();
   }.observes('*shapes.[]'),
-  
+
   init: function(){
     sc_super();
-    
+
     // Register Basic Shapes
-    
+
     // Drawing a Line
     this.registerShapeDrawing( SC.LINE, function(ctx, params){
       if (params.style){
@@ -103,7 +103,7 @@ SC.DrawingView = SC.View.extend({
       ctx.lineTo(params.end.x, params.end.y);
       ctx.stroke();
     });
-    
+
     // Drawing a Rectangle
     this.registerShapeDrawing( SC.RECT, function(ctx, params){
       if (params.style){
@@ -123,7 +123,7 @@ SC.DrawingView = SC.View.extend({
           break;
       }
     });
-    
+
     // Drawing a Circle
     this.registerShapeDrawing( SC.CIRCLE, function(ctx, params){
       if (params.style){
@@ -136,7 +136,7 @@ SC.DrawingView = SC.View.extend({
       if (params.type === SC.FILL) ctx.fill();
       else ctx.stroke();
     });
-    
+
     // Drawing a Polygon
     this.registerShapeDrawing( SC.POLY, function(ctx, params){
       if (params.style){
@@ -147,7 +147,7 @@ SC.DrawingView = SC.View.extend({
       ctx.beginPath();
       var len = params.path ? params.path.length : 0;
       if (len < 2) return;
-      
+
       var path = params.path, curr;
       ctx.moveTo(path[0].x, path[0].y);
       for(var i = 1; i < len; i++){
@@ -159,12 +159,12 @@ SC.DrawingView = SC.View.extend({
       else ctx.stroke();
     });
   },
-  
+
   render: function(context, firstTime) {
     //console.log('%@.render()'.fmt(this));
     var frame = this.get('frame');
     if (firstTime) {
-      if (!SC.browser.msie) {
+      if (!SC.browser.isIE) {
         context.push('<canvas class="base-layer" width="%@" height="%@">You can\'t use canvas tags</canvas>'.fmt(frame.width, frame.height));
       }
     }
@@ -191,26 +191,26 @@ SC.DrawingView = SC.View.extend({
         SC.Logger.error("SC.DrawingView.render(): Canvas element is not accessible.");
       }
     }
-    
+
     return sc_super();
   },
-  
+
   registerShapeDrawing: function(name, drawingFunction){
     if (!name) {
       SC.Logger.error('Can\'t register this drawing paradigm because name is null');
       return NO;
     }
-    
+
     // OK, create the drawing paradigm
     this._drawingManager[name] = drawingFunction;
     this.set('layerNeedsUpdate', YES);
     this.updateLayerIfNeeded();
     return YES;
   },
-  
+
   /**
-    @private 
-    
+    @private
+
     Function for actually drawing the shapes that we have listed
   */
   _drawShapes: function(cntx){

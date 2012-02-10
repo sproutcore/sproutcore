@@ -250,6 +250,15 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   */
   validator: null,
 
+  contentKeys: {
+    contentValueKey: 'title',
+    contentCheckboxKey: 'checkbox',
+    contentIconKey:  'icon',
+    contentRightIconKey: 'rightIcon',
+    contentUnreadCountKey: 'count',
+    contentIsBranchKey: 'branch'
+  },
+
   /** @private */
   contentPropertyDidChange: function() {
     //if (this.get('isEditing')) this.discardEditing() ;
@@ -292,7 +301,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   },
 
   /** @private
-    Determines if the event occured inside an element with the specified
+    Determines if the event occurred inside an element with the specified
     classname or not.
   */
   _isInsideElementWithClassName: function(className, evt) {
@@ -393,7 +402,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       this._removeCheckboxActiveState() ;
       ret = YES ;
 
-    // if mouse as down on disclosure -- handle mosue up.  otherwise pass on
+    // if mouse as down on disclosure -- handle mouse up.  otherwise pass on
     // to parent.
     } else if (this._isMouseDownOnDisclosure) {
       if (this._isInsideDisclosure(evt)) {

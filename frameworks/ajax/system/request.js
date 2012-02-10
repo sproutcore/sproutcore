@@ -66,7 +66,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     You may want to set this to NO if you are making simple CORS requests
     in compatible browsers. See <a href="http://www.w3.org/TR/cors/">CORS 
-    Spec for more informatinon.</a>
+    Spec for more information.</a>
     
     TODO: Add unit tests for this feature
 
@@ -508,6 +508,19 @@ SC.Request.mixin(
   */
   putUrl: function(address, body) {
     var req = this.create().set('address', address).set('type', 'PUT');
+    if(body) { req.set('body', body) ; }
+    return req ;
+  },
+
+  /**
+    Helper method for quickly setting up a PATCH request.
+
+    @param {String} address url of request
+    @param {String} body
+    @returns {SC.Request} receiver
+  */
+  patchUrl: function(address, body) {
+    var req = this.create().set('address', address).set('type', 'PATCH');
     if(body) { req.set('body', body) ; }
     return req ;
   }

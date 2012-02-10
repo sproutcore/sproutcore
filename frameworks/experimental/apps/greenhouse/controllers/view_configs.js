@@ -14,7 +14,7 @@ Greenhouse.viewConfigsController = SC.ArrayController.create(
 /** @scope Greenhouse.viewConfigsController.prototype */ {
 
   /**
-    Call this method whenever you want to relaod the view configs from the server.
+    Call this method whenever you want to reload the view configs from the server.
   */
   reload: function() {
     var configQuery = Greenhouse.CONFIG_QUERY, target = Greenhouse.targetController.get('content');

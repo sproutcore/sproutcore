@@ -42,9 +42,9 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
       $.attr('alt', toolTip);
     }
 
-    if (dataSource.didChangeFor('imageButtonRenderDelegate', 'image')) {
-      image = dataSource.get('image');
+    image = dataSource.get('image');
 
+    if (image && dataSource.didChangeFor('imageButtonRenderDelegate', 'image')) {
       $.children()[0].className = 'img '+image;
     }
   }

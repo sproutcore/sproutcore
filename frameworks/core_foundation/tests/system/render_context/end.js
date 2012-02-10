@@ -34,13 +34,13 @@ test("should emit id in tag opts.id", function() {
 
 test("should emit style in tag if opts.styles is defined", function() {
   context.styles({ alpha: "beta", foo: "bar" }).end();
-  ok(context.get(0).match(/style=\"alpha: beta; foo: bar\"/), '<div> has style="alpha: beta; foo: bar"');
+  ok(context.get(0).match(/style=\"alpha: beta; foo: bar; \"/), '<div> has style="alpha: beta; foo: bar; "');
 });
 
 test("should emit style with custom browser attributes", function() {
   context.styles({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' }).end();
-  ok(context.get(0).match('<div style="-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3" >'),
-                            '<div> has style="-moz-column-count: 3; -webkit-column-count: 3, -o-column-count: 3, -ms-column-count: 3"');
+  ok(context.get(0).match('<div style="-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3; " >'),
+                            '<div> has style="-moz-column-count: 3; -webkit-column-count: 3, -o-column-count: 3, -ms-column-count: 3; "');
 });
 
 test("should write arbitrary attrs has in opts", function() {
@@ -61,7 +61,7 @@ test("opts.id should override opts.attrs.id", function() {
 
 test("opts.styles should override opts.attrs.style", function() {
   context.styles({ foo: "foo" }).attr({ style: "bar: bar" }).end();
-  ok(context.get(0).match(/style=\"foo: foo\"/), 'has style="foo: foo"');
+  ok(context.get(0).match(/style=\"foo: foo; \"/), 'has style="foo: foo; "');
 });
 
 test("should return receiver if receiver has no prevObject", function() {

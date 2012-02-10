@@ -103,7 +103,7 @@ CoreTest.equiv = function () {
             "regexp": function (b, a) {
                 return hoozit(b) === "regexp" &&
                     a.source === b.source && // the regex itself
-                    a.global === b.global && // and its modifers (gmi) ...
+                    a.global === b.global && // and its modifiers (gmi) ...
                     a.ignoreCase === b.ignoreCase &&
                     a.multiline === b.multiline;
             },

@@ -30,7 +30,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   classNames: ['sc-label-view'],
 
-  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint'],
+  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint', 'toolTip'],
 
   /**
     The delegate that gets notified of events related to the editing process. Set
@@ -102,6 +102,17 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     is set to YES.
   */
   hint: null,
+
+  /*
+    Whether hint should be shown or not. By default this is tied to isEditable
+    so the hint will only show if isEditable is YES.
+
+    @type Boolean
+    @property
+  */
+  hintEnabled: function() {
+    return this.get('isEditable');
+  }.property('isEditable').cacheable(),
 
   /**
     An optional icon to display to the left of the label.  Set this value

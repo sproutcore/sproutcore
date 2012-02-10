@@ -1,9 +1,8 @@
-/**
- * @license
+/*!
  * ==========================================================================
  * SproutCore -- JavaScript Application Framework
- * Copyright 2006-2011, Strobe Inc. and contributors.
  * Copyright ©2008-2011 Apple Inc. All rights reserved.
+ * Copyright 2006-2011, Strobe Inc. and contributors.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -26,7 +25,6 @@
  * SproutCore and the SproutCore logo are trademarks of Strobe Inc.
  * 
  * For more information about SproutCore, visit http://www.sproutcore.com
- * 
  * 
  * ==========================================================================
  */

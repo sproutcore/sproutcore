@@ -39,8 +39,11 @@ SC.platform = SC.Object.create({
 
   /*
     NOTES
-     - A development version of Chrome 9 incorrectly reported supporting touch
-     - Android is assumed to support touch, but incorrectly reports that it does not
+     - Chrome would incorrectly indicate support for touch events.  This has been fixed:
+       http://code.google.com/p/chromium/issues/detail?id=36415
+     - Android is assumed to support touch, but incorrectly reports that it does not.
+     - See: https://github.com/Modernizr/Modernizr/issues/84 for a discussion on detecting
+       touch capability.
   */
   /**
     YES if the current device supports touch events, NO otherwise.
@@ -50,11 +53,25 @@ SC.platform = SC.Object.create({
 
     @property {Boolean}
   */
-  touch: (('createTouch' in document) && SC.browser.chrome < 9) || SC.browser.android,
-  
-  bounceOnScroll: SC.browser.iOS,
-  pinchToZoom: SC.browser.iOS,
+  touch: 'ontouchstart' in window || SC.browser.name === SC.BROWSER.android,
 
+  /**
+    YES if the current browser supports bounce on scroll.
+
+    @property {Boolean}
+  */
+  bounceOnScroll: SC.browser.os === SC.OS.ios,
+
+  /**
+    YES if the current browser supports pinch to zoom.
+
+    @property {Boolean}
+  */
+  pinchToZoom:  SC.browser.os === SC.OS.ios,
+
+  /**
+    YES if the current browser supports the `placeholder` attribute in `input` elements.
+  */
   input: {
     placeholder: ('placeholder' in document.createElement('input'))
   },
@@ -98,7 +115,7 @@ SC.platform = SC.Object.create({
   cssPrefix: null,
 
   /**
-    Prefix for browsew specific CSS attributes when used in the DOM. Calculated later.
+    Prefix for browser specific CSS attributes when used in the DOM. Calculated later.
   */
   domCSSPrefix: null,
 
@@ -116,7 +133,7 @@ SC.platform = SC.Object.create({
       // @endif
       return;
     }
-    
+
     SC.Logger.log("Simulating touch events");
 
     // Tell the app that we now "speak" touch
@@ -171,7 +188,7 @@ SC.platform = SC.Object.create({
     When simulating touch events, this method is called when mousemove events
     are received.
 
-    If the altKey is depresed and pinch center not yet established, we will capture the mouse position.
+    If the altKey is depressed and pinch center not yet established, we will capture the mouse position.
   */
   _simtouch_mousemove: function(evt) {
     if (!this._mousedown) {
@@ -179,7 +196,7 @@ SC.platform = SC.Object.create({
         we need to capture when was the first spot that the altKey was pressed and use it as
         the center point of a pinch
        */
-      if(evt.altKey && this._pinchCenter == null) {
+      if(evt.altKey && this._pinchCenter === null) {
         this._pinchCenter = {
           pageX: evt.pageX,
           pageY: evt.pageY,
@@ -188,7 +205,7 @@ SC.platform = SC.Object.create({
           clientX: evt.clientX,
           clientY: evt.clientY
         };
-      } else if(!evt.altKey && this._pinchCenter != null){
+      } else if(!evt.altKey && this._pinchCenter !== null){
         this._pinchCenter = null;
       }
       return NO;
@@ -256,7 +273,7 @@ SC.platform = SC.Object.create({
     /*
       simulate pinch gesture
      */
-    if(evt.altKey && this._pinchCenter != null)
+    if(evt.altKey && this._pinchCenter !== null)
     {
       //calculate the mirror position of the virtual touch
       var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX ,
@@ -316,37 +333,37 @@ SC.platform = SC.Object.create({
   supportsAcceleratedLayers: NO,
 
   /**
-    Wether the browser supports the hashchange event.
+    Whether the browser supports the hashchange event.
   */
   supportsHashChange: function() {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
   }(),
-  
+
   /**
-    Wether the browser supports HTML5 history.
+    Whether the browser supports HTML5 history.
   */
   supportsHistory: function() {
     return !!(window.history && window.history.pushState);
   }(),
-  
+
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
   }(),
-  
+
   supportsOrientationChange: ('onorientationchange' in window),
-  
+
   /**
     Because iOS is slow to dispatch the window.onorientationchange event,
     we use the window size to determine the orientation on iOS devices
     and desktop environments when SC.platform.touch is YES (ie. when
     SC.platform.simulateTouchEvents has been called)
-    
+
     @property {Boolean}
     @default NO
   */
-  windowSizeDeterminesOrientation: SC.browser.iOS || !('onorientationchange' in window)
+  windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window)
 
 });
 
@@ -376,26 +393,29 @@ SC.platform = SC.Object.create({
   var el = document.createElement("div");
 
   // the css and javascript to test
-  var css_browsers = ["-moz-", "-moz-", "-o-", "-ms-", "-webkit-"];
-  var test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
+  var css_browsers = ["-moz-", "-moz-", "-o-", "-ms-", "-webkit-"],
+      test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
 
   // prepare css
-  var css = "", i = null;
-  for (i = 0; i < css_browsers.length; i++) {
-    css += css_browsers[i] + "transition:all 1s linear;";
-    css += css_browsers[i] + "transform: translate(1px, 1px);";
-    css += css_browsers[i] + "perspective: 500px;";
+  var css = "", i = null, cssBrowser, iLen;
+  for (i = 0, iLen = css_browsers.length; i < iLen; i++) {
+    cssBrowser = css_browsers[i];
+    css += cssBrowser + "transition:all 1s linear;";
+    css += cssBrowser + "transform: translate(1px, 1px);";
+    css += cssBrowser + "perspective: 500px;";
   }
 
   // set css text
   el.style.cssText = css;
 
   // test
-  for (i = 0; i < test_browsers.length; i++)
+  var testBrowser;
+  for (i = 0, iLen=test_browsers.length; i < iLen; i++)
   {
-    if (el.style[test_browsers[i] + "TransitionProperty"] !== undefined) SC.platform.supportsCSSTransitions = YES;
-    if (el.style[test_browsers[i] + "Transform"] !== undefined) SC.platform.supportsCSSTransforms = YES;
-    if (el.style[test_browsers[i] + "Perspective"] !== undefined || el.style[test_browsers[i] + "PerspectiveProperty"] !== undefined) {
+    testBrowser = test_browsers[i];
+    if (el.style[testBrowser + "TransitionProperty"] !== undefined) SC.platform.supportsCSSTransitions = YES;
+    if (el.style[testBrowser + "Transform"] !== undefined) SC.platform.supportsCSSTransforms = YES;
+    if (el.style[testBrowser + "Perspective"] !== undefined || el.style[testBrowser + "PerspectiveProperty"] !== undefined) {
       SC.platform.understandsCSS3DTransforms = YES;
       SC.platform.supportsCSS3DTransforms = YES;
     }

@@ -30,6 +30,12 @@ SC.PanelPane = SC.Pane.extend(
 /** @scope SC.PanelPane.prototype */ {
 
   /**
+    Walk like a duck.
+    @type {Boolean}
+  */
+  isPanelPane: YES,
+
+  /**
     @type Array
     @default ['sc-panel']
     @see SC.View#classNames
@@ -59,6 +65,23 @@ SC.PanelPane = SC.Pane.extend(
     @type String
   */
   ariaLabel: null,
+
+  /**
+    The WAI-ARIA labelledby for the panel. Screen readers will use this to tell
+    the header or name of your panel if there is no label. This should be an id
+    to an element inside the panel.
+
+    @type String
+  */
+  ariaLabelledBy: null,
+
+  /**
+    The WAI-ARIA describedby text. Screen readers will use this to speak the description
+    of the panel. This should be an id to an element inside the panel.
+
+    @type String
+  */
+  ariaDescribedBy: null,
 
   /**
     Indicates that a pane is modal and should not allow clicks to pass
@@ -198,5 +221,5 @@ SC.PanelPane = SC.Pane.extend(
     return ret ;
   },
 
-  displayProperties: ['ariaLabel']
+  displayProperties: ['ariaLabel', 'ariaLabelledBy', 'ariaDescribedBy']
 });

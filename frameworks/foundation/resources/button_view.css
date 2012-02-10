@@ -4,8 +4,6 @@
   vertical-align: middle;
   text-decoration: none ;
   border: 1px #555 solid;
-  border-radius: 3px;
-  -moz-border-radius: 3px;
   
   &.sc-static-layout {
     margin: 0 4px;

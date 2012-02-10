@@ -8,122 +8,99 @@
 /*global module test htmlbody ok equals same stop start */
 (function() {
   var pane = SC.ControlTestPane.design()
-  .add("empty", SC.TextFieldView, { 
-    hint: "Full Name", 
+  .add("empty", SC.TextFieldView, {
+    hint: "Full Name",
     value: ''
   })
-  
-  .add("with value", SC.TextFieldView, { 
-    hint: "Full Name", 
+
+  .add("with value", SC.TextFieldView, {
+    hint: "Full Name",
     value: 'John Doe'
   })
-  
+
   .add("password", SC.TextFieldView, {
     isPassword: YES,
     value: "I'm so secret"
   })
-  
+
   .add("password-hint", SC.TextFieldView, {
     hint: "Passwerd",
     isPassword: YES,
     value: "I'm so secret"
   })
-  
-  .add("disabled - empty", SC.TextFieldView, { 
-    hint: "Full Name", 
+
+  .add("disabled - empty", SC.TextFieldView, {
+    hint: "Full Name",
     value: null,
     isEnabled: NO,
     isEditable: NO
   })
-  
-  .add("disabled - with value", SC.TextFieldView, { 
-    hint: "Full Name", 
+
+  .add("disabled - with value", SC.TextFieldView, {
+    hint: "Full Name",
     value: 'John Doe',
     isEnabled: NO,
     isEditable: NO
   })
 
-  .add("enabled - not editable - with value", SC.TextFieldView, { 
-    hint: "Full Name", 
+  .add("enabled - not editable - with value", SC.TextFieldView, {
+    hint: "Full Name",
     value: 'John Doe',
     isEnabled: YES,
     isEditable: NO
   })
-  
-  .add("textarea - empty", SC.TextFieldView, { 
-    hint: "Full Name", 
+
+  .add("textarea - empty", SC.TextFieldView, {
+    hint: "Full Name",
     value: '',
     isTextArea: YES
-  })
-  
-  .add("textarea - with value", SC.TextFieldView, { 
-    hint: "Full Name", 
-    value: 'John Doe',
-    isTextArea: YES
-  })
-  
-  .add("textarea - disabled - empty", SC.TextFieldView, { 
-    hint: "Full Name", 
-    value: '',
-    isTextArea: YES,
-    isEnabled: NO
-  })
-  
-  .add("textarea - disabled - with value", SC.TextFieldView, { 
-    hint: "Full Name", 
-    value: 'John Doe',
-    isTextArea: YES,
-    isEnabled: NO
-  })
-  
-  .add("aria-role", SC.TextFieldView, {
-    hint: "Full Name", 
-    value: 'John Doe',
-    isTextArea: YES,
-    isEnabled: YES
   })
 
-  .add("aria-multiline", SC.TextFieldView, {
-    hint: "Full Name", 
+  .add("textarea - with value", SC.TextFieldView, {
+    hint: "Full Name",
     value: 'John Doe',
-    isTextArea: YES,
-    isEnabled: YES
+    isTextArea: YES
   })
-  
-  .add("aria-disabled", SC.TextFieldView, {
-    hint: "Full Name", 
+
+  .add("textarea - disabled - empty", SC.TextFieldView, {
+    hint: "Full Name",
+    value: '',
+    isTextArea: YES,
+    isEnabled: NO
+  })
+
+  .add("textarea - disabled - with value", SC.TextFieldView, {
+    hint: "Full Name",
     value: 'John Doe',
     isTextArea: YES,
     isEnabled: NO
   })
+
 
   .add("aria-readonly", SC.TextFieldView, {
-    hint: "Full Name", 
+    hint: "Full Name",
     value: 'John Doe',
     isTextArea: YES,
     isEnabled: YES,
     isEditable: NO
-  })
-  
-  .add("aria-invalid", SC.TextFieldView, {
-      value: SC.Error.create({errorValue:'Error Message'}),
-      isEnabled: YES
   });
-    
+
+
 pane.show(); // add a test to show the test pane
 
 // ..........................................................
 // VERIFY STANDARD STATES
-// 
+//
 pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   var input = view.$('input');
   var layer = view.$();
-  
+
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-  if(SC.browser.webkit || parseInt(SC.browser.mozilla) >= 2.0) equals(input.val(), '', 'input should have empty value');
+  if(SC.browser.isWebkit || (SC.browser.isMozilla &&
+      SC.browser.compare(SC.browser.engineVersion, '2.0') >= 0)) equals(input.val(), '', 'input should have empty value');
   else equals(input.val(), expectedHint, 'input should have expected hint as value');
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = view.$('.hint');
     if (hint.length===1) {
     hint = hint.text();
   } else {
@@ -137,12 +114,12 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
 pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint) {
   var input = view.$('input');
   var layer = view.$();
-  
+
   ok(layer.hasClass('not-empty'), 'layer should have not-empty class');
   equals(input.val(), expectedValue, 'input should have value');
-  
+
   if (expectedHint) {
-    var hint = view.$('.sc-hint');
+    var hint = view.$('.hint');
     if (hint.length===1) {
     hint = hint.text();
   } else {
@@ -156,7 +133,7 @@ pane.verifyNotEmpty = function verifyNotEmpty(view, expectedValue, expectedHint)
 pane.verifyDisabled = function verifyDisabled(view, isDisabled) {
   var layer = view.$();
   var input = view.$('input');
-  
+
   if (isDisabled) {
     ok(layer.hasClass('disabled'), 'layer should have disabled class');
     ok(input.attr('disabled'), 'input should have disabled attr');
@@ -168,7 +145,7 @@ pane.verifyDisabled = function verifyDisabled(view, isDisabled) {
 
 pane.verifyReadOnly = function verifyReadonly(view, isReadOnly) {
   var input = view.$('input');
-  
+
   if(isReadOnly) {
     ok(input.attr('readOnly'), 'input should have readOnly attr');
   } else {
@@ -178,7 +155,7 @@ pane.verifyReadOnly = function verifyReadonly(view, isReadOnly) {
 
 // ..........................................................
 // TEST INITIAL STATES
-// 
+//
 
 module('SC.TextFieldView ui', pane.standardSetup());
 
@@ -250,11 +227,11 @@ test("textarea - disabled - with value", function() {
 
 // ..........................................................
 // TEST CHANGING VIEWS
-// 
+//
 
 test("changing value from empty -> value", function() {
   var view = pane.view('empty');
-  
+
   // test changing value updates like it should
   SC.RunLoop.begin();
   view.set('value', 'John Doe');
@@ -262,9 +239,9 @@ test("changing value from empty -> value", function() {
   pane.verifyNotEmpty(view, 'John Doe', 'Full Name');
 });
 
-test("disabling view", function() {  
+test("disabling view", function() {
   var view = pane.view('empty');
-  
+
   // test changing enabled state updates like it should
   SC.RunLoop.begin();
   view.set('isEnabled', NO);
@@ -320,23 +297,24 @@ test("changing value from not a textarea to a textarea", function() {
   var $textarea = view.$('textarea');
 
   SC.Event.trigger($textarea, 'focus');
-  
+
   // simulate typing a letter
   SC.Event.trigger($textarea, 'keydown');
-  SC.Event.trigger($textarea, 'keyup');
   $textarea.val("My New Value");
+  SC.Event.trigger($textarea, 'keyup');
   SC.Event.trigger($textarea, 'change');
-  
+  view.fieldValueDidChange();
+
   // wait a little bit to let text field propogate changes
   stop();
-  
+
   setTimeout(function() {
     start();
     equals(view.get("value"), "My New Value", "SC.Event for change should get wired up properly");
-  }, 100);  
-  
-  // SC.RunLoop.begin();
-  // SC.RunLoop.end();
+  }, 100);
+
+  SC.RunLoop.begin();
+  SC.RunLoop.end();
 });
 
 
@@ -356,13 +334,13 @@ if (!SC.browser.isIE && !SC.platform.input.placeholder) {
 
 // ..........................................................
 // TEST SELECTION SUPPORT
-// 
+//
 
-test("Setting the selection to a null value should fail", function() {  
+test("Setting the selection to a null value should fail", function() {
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-  
+
   var thrownException = null;
   try {
     view.set('selection', null);
@@ -376,11 +354,11 @@ test("Setting the selection to a null value should fail", function() {
   }
 });
 
-test("Setting the selection to a non-SC.TextSelection value should fail", function() {  
+test("Setting the selection to a non-SC.TextSelection value should fail", function() {
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-  
+
   var thrownException = null;
   try {
     view.set('selection', {start: 0, end: 0});
@@ -394,15 +372,15 @@ test("Setting the selection to a non-SC.TextSelection value should fail", functi
   }
 });
 
-test("Setting and then getting back the selection", function() {  
+test("Setting and then getting back the selection", function() {
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.focus();
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-  
+
   var newSelection = SC.TextSelection.create({start:2, end:5});
   view.set('selection', newSelection);
-  
+
   var fetchedSelection = view.get('selection');
   ok(fetchedSelection.get('start') === 2, 'the selection should start at index 2');
   ok(fetchedSelection.get('end') === 5, 'the selection should end at index 4');
@@ -411,11 +389,11 @@ test("Setting and then getting back the selection", function() {
 
 // ..........................................................
 // TEST ACCESSORY VIEWS
-// 
+//
 
-test("Adding left accessory view", function() {  
+test("Adding left accessory view", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var accessoryView = SC.View.create({
@@ -427,14 +405,14 @@ test("Adding left accessory view", function() {
   ok(view.get('leftAccessoryView') === accessoryView, 'left accessory view should be set to ' + accessoryView.toString());
   ok(view.get('childViews').length === 1, 'there should only be one child view');
   ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
-  
-  
+
+
   // The hint and padding elements should automatically have their 'left'
   // values set to the accessory view's offset + width
   // (18 = 2 left offset + 16 width)
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
-  
+
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('leftAccessoryView', null);
@@ -443,9 +421,9 @@ test("Adding left accessory view", function() {
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
-test("Adding left accessory view changes style -- using design()", function() {  
+test("Adding left accessory view changes style -- using design()", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var accessoryView = SC.View.design({
@@ -459,7 +437,7 @@ test("Adding left accessory view changes style -- using design()", function() {
   // (18 = 2 left offset + 16 width)
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
-  
+
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('leftAccessoryView', null);
@@ -467,9 +445,9 @@ test("Adding left accessory view changes style -- using design()", function() {
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
-test("Adding right accessory view", function() {  
+test("Adding right accessory view", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var accessoryView = SC.View.create({
@@ -481,15 +459,15 @@ test("Adding right accessory view", function() {
   ok(view.get('rightAccessoryView') === accessoryView, 'right accessory view should be set to ' + accessoryView.toString());
   ok(view.get('childViews').length === 1, 'there should only be one child view');
   ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
-  
-  
+
+
   // The hint and padding elements should automatically have their 'right'
   // values set to the accessory view's offset + width
   // (20 = 3 right offset + 17 width)
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
-  
-  
+
+
   // If a right accessory view is set with only 'left' (and not 'right')
   // defined in its layout, 'left' should be cleared out and 'right' should
   // be set to 0.
@@ -499,11 +477,11 @@ test("Adding right accessory view", function() {
   });
   view.set('rightAccessoryView', accessoryView);
   SC.RunLoop.end();
-  
+
   ok(view.get('rightAccessoryView').get('layout').left === null, "right accessory view created with 'left' rather than 'right' in layout should have layout.left set to null");
   ok(view.get('rightAccessoryView').get('layout').right === 0, "right accessory view created with 'left' rather than 'right' in layout should have layout.right set to 0");
-  
-  
+
+
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('rightAccessoryView', null);
@@ -512,9 +490,9 @@ test("Adding right accessory view", function() {
   ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
 });
 
-test("Adding right accessory view changes style -- using design()", function() {  
+test("Adding right accessory view changes style -- using design()", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var accessoryView = SC.View.design({
@@ -527,8 +505,8 @@ test("Adding right accessory view changes style -- using design()", function() {
   // values set to the accessory view's offset + width
   // (20 = 3 right offset + 17 width)
   var paddingElement = view.$('.padding')[0];
-  ok(paddingElement.style.right === '20px', 'padding element should get 20px right');  
-  
+  ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
+
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('rightAccessoryView', null);
@@ -537,9 +515,9 @@ test("Adding right accessory view changes style -- using design()", function() {
 });
 
 
-test("Adding both left and right accessory views", function() {  
+test("Adding both left and right accessory views", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var leftAccessoryView = SC.View.create({
@@ -553,8 +531,8 @@ test("Adding both left and right accessory views", function() {
   SC.RunLoop.end();
 
   ok(view.get('childViews').length === 2, 'we should have two child views since we added both a left and a right accessory view');
-  
-  
+
+
   // The hint and padding elements should automatically have their 'left' and
   // 'right' values set to the accessory views' offset + width
   //   *  left:   18 = 2 left offset + 16 width)
@@ -562,8 +540,8 @@ test("Adding both left and right accessory views", function() {
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
-  
-  
+
+
   // Test removing the accessory views.
   SC.RunLoop.begin();
   view.set('rightAccessoryView', null);
@@ -577,9 +555,9 @@ test("Adding both left and right accessory views", function() {
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
-test("Adding both left and right accessory views changes style -- using design()", function() {  
+test("Adding both left and right accessory views changes style -- using design()", function() {
   var view = pane.view('with value');
-  
+
   // test adding accessory view adds the view like it should
   SC.RunLoop.begin();
   var leftAccessoryView = SC.View.design({
@@ -590,8 +568,8 @@ test("Adding both left and right accessory views changes style -- using design()
     layout:  { top:1, right:3, width:17, height:16 }
   });
   view.set('rightAccessoryView', rightAccessoryView);
-  SC.RunLoop.end();  
-  
+  SC.RunLoop.end();
+
   // The hint and padding elements should automatically have their 'left' and
   // 'right' values set to the accessory views' offset + width
   //   *  left:   18 = 2 left offset + 16 width)
@@ -599,8 +577,8 @@ test("Adding both left and right accessory views changes style -- using design()
   var paddingElement = view.$('.padding')[0];
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
-  
-  
+
+
   // Test removing the accessory views.
   SC.RunLoop.begin();
   view.set('rightAccessoryView', null);
@@ -616,31 +594,31 @@ test("Adding both left and right accessory views changes style -- using design()
 
 // ..........................................................
 // TEST EVENTS
-// 
+//
 
 test("focus and blurring text field", function() {
   var view = pane.view('empty');
   var input = view.$('input');
-  
+
   // attempt to focus...
   SC.Event.trigger(input, 'focus');
-  
+
   // verify editing state changed...
   ok(view.get('isEditing'), 'view.isEditing should be YES');
   ok(view.$().hasClass('focus'), 'view layer should have focus class');
-  
+
   // simulate typing a letter
   SC.Event.trigger(input, 'keydown');
   SC.Event.trigger(input, 'keyup');
   input.val('f');
   SC.Event.trigger(input, 'change');
-  
-  // wait a little bit to let text field propograte changes
+
+  // wait a little bit to let text field propagate changes
   stop();
-  
+
   setTimeout(function() {
     start();
-    
+
     equals(view.get('value'), 'f', 'view should have new value');
     ok(view.$().hasClass('not-empty'), 'should have not-empty class');
 
@@ -650,8 +628,8 @@ test("focus and blurring text field", function() {
     // verify editing state changed...
     ok(!view.get('isEditing'), 'view.isEditing should be NO');
     ok(!view.$().hasClass('focus'), 'view layer should NOT have focus class');
-  }, 100);  
-  
+  }, 100);
+
 });
 
 test("focus and blur an empty text field", function() {
@@ -669,6 +647,25 @@ test("focus and blur an empty text field", function() {
   pane.verifyEmpty(view, 'Full Name');
 });
 
+test("loosing first responder should blur", function() {
+  var view = pane.view('empty');
+  var input = view.$('input');
+  var testResponder = SC.Responder.create(SC.ResponderContext, {});
+
+  // preliminary setup
+  view.get('pane').becomeKeyPane();
+  SC.Event.trigger(input, 'focus');
+
+  // verify it did receive focus
+  ok(view.get('focused'), 'view should have focus');
+
+  // tell the pane to make our test responder the first responder
+  view.get('pane').makeFirstResponder(testResponder);
+
+  // verify it no longer has focus
+  ok(!view.get('focused'), 'view should no longer have focus');
+});
+
 test("editing a field should not change the cursor position", function() {
   var textField = pane.view('empty');
   var input = textField.$('input');
@@ -682,33 +679,4 @@ test("editing a field should not change the cursor position", function() {
   ok(selection.get('start') == 2 && selection.get('end') == 3, 'cursor position should be unchanged');
 });
 
-test("should have role as textbox", function() {
-  var view = pane.view('aria-role');
-  var label = view.$();  
-  equals(label.attr('role'), 'textbox', 'role should be textbox');
-});
-
-test("should have aria-multiline as YES", function() {
-  var view = pane.view('aria-multiline');
-  var label = view.$();  
-  equals(label.attr('aria-multiline'), 'true', 'aria-multiline should be true');
-});
-
-test("should have aria-disabled as YES", function() {
-  var view = pane.view('aria-disabled');
-  var label = view.$();  
-  equals(label.attr('aria-disabled'), 'true', 'aria-disabled should be true');
-});
-
-test("should have aria-readonly as YES", function() {
-  var view = pane.view('aria-readonly');
-  var label = view.$();  
-  equals(label.attr('aria-readonly'), 'true', 'aria-readonly should be true');
-});
-
-test("should have aria-invalid as YES", function() {
-  var view = pane.view('aria-invalid');
-  var label = view.$();
-  equals(label.attr('aria-invalid'), 'true', 'aria-invalid should be true');
-});
 })();

@@ -60,6 +60,13 @@ SC.RecordAttribute = SC.Object.extend(
     value will be substituted instead.  Note that `defaultValue`s are not
     converted, so the value should be in the output type expected by the
     attribute.
+    
+    value will be substituted instead.  Note that `defaultValue`s are not
+    converted, so the value should be in the output type expected by the
+    attribute.
+    value will be substituted instead.   Note that default values are placed
+    directly in the data hash, so when you call get they will be put through
+    the toType transform before being read.
 
     If you use a `defaultValue` function, the arguments given to it are the
     record instance and the key.
@@ -302,21 +309,28 @@ SC.RecordAttribute = SC.Object.extend(
       // careful: don't overwrite value here.  we want the return value to
       // cache.
       nvalue = this.fromType(record, key, value) ; // convert to attribute.
-      record.writeAttribute(attrKey, nvalue);
+      record.writeAttribute(attrKey, nvalue); 
     }
 
-    nvalue = value = record.readAttribute(attrKey);
+    value = record.readAttribute(attrKey);
     if (SC.none(value) && (value = this.get('defaultValue'))) {
        if (typeof value === SC.T_FUNCTION) {
-        value = this.defaultValue(record, key, this);
-        // write default value so it doesn't have to be executed again
-        if ((nvalue !== value)  &&  record.get('store').readDataHash(record.get('storeKey'))) {
-          record.writeAttribute(attrKey, value, true);
-        }
+        value = value(record, key, this);
       }
-    } else value = this.toType(record, key, value);
+    }
+
+    value = this.toType(record, key, value);
 
     return value ;
+  },
+
+  /**
+    Apply needs to implemented for sc_super to work.
+
+    @see SC.RecordAttribute#call
+  */
+  apply: function(target, args) {
+    return this.call.apply(target, args);
   },
 
   // ..........................................................
@@ -377,7 +391,7 @@ SC.RecordAttribute.mixin(
      - `to(value, attr, klass, record, key)` converts the passed value
        (which will be of the class expected by the attribute) into the
        underlying attribute value
-     - `from(value, attr, klass, record, key)` converts the underyling
+     - `from(value, attr, klass, record, key)` converts the underlying
        attribute value into a value of the class
 
     You can also provide an array of keys to observer on the return value.

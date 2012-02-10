@@ -77,14 +77,14 @@ test("Localize a string with mutliple parameters", function() {
 });
 
 test("Localize a string with null or missing parameters", function() {
-  equals("Test".loc(null), "(null)", "Localizing with null parameter - using String.prototype.loc");
-  equals(SC.String.loc("Test", null), "(null)", "Localizing with null parameter - using SC.String.loc");
+  equals("Test".loc(null), "null", "Localizing with null parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test", null), "null", "Localizing with null parameter - using SC.String.loc");
 
   equals("Test".loc(), "", "Localizing with missing parameter - using String.prototype.loc");
   equals(SC.String.loc("Test"), "", "Localizing with missing parameter - using SC.String.loc");
 
-  equals("Test.Multiple".loc("p1", null), "p1 (null)", "Localizing multiple with null parameter - using String.prototype.loc");
-  equals(SC.String.loc("Test.Multiple", "p1", null), "p1 (null)", "Localizing with null parameter - using SC.String.loc");
+  equals("Test.Multiple".loc("p1", null), "p1 null", "Localizing multiple with null parameter - using String.prototype.loc");
+  equals(SC.String.loc("Test.Multiple", "p1", null), "p1 null", "Localizing with null parameter - using SC.String.loc");
 
   equals("Test.Multiple".loc("p1"), "p1 ", "Localizing multiple with missing parameter - using String.prototype.loc");
   equals(SC.String.loc("Test.Multiple", "p1"), "p1 ", "Localizing with missing parameter - using SC.String.loc");
@@ -129,4 +129,12 @@ test("Access a localized layout hash", function() {
   should_throw(function() {
     "Button".locLayout({left:10});
   }, Error, "locLayout():  There is a localized value for the key 'Button.left' but a value for 'left' was also specified in the non-localized hash");
+});
+
+test("Multiply string", function() {
+  equals('a'.mult(0), null);
+  equals('a'.mult(1), 'a');
+  equals('a'.mult(2), 'aa');
+  equals('xyz'.mult(1), 'xyz');
+  equals('xyz'.mult(2), 'xyzxyz');
 });

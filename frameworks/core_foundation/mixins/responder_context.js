@@ -183,7 +183,7 @@ SC.ResponderContext = {
   },
 
   _notifyWillLoseFirstResponder: function(responder, cur, root, evt) {
-    if (cur === root) return ; // nothing to do
+    if (!cur || cur === root) return ; // nothing to do
 
     cur.willLoseFirstResponder(responder, evt);
     cur.set('hasFirstResponder', NO);
@@ -193,7 +193,7 @@ SC.ResponderContext = {
   },
 
   _notifyDidBecomeFirstResponder: function(responder, cur, root) {
-    if (cur === root) return ; // nothing to do
+    if (!cur || cur === root) return ; // nothing to do
 
     var next = this.nextResponderFor(cur);
     if (next) this._notifyDidBecomeFirstResponder(responder, next, root);
@@ -220,7 +220,7 @@ SC.ResponderContext = {
 
     @param {String} action name of action
     @param {Object} sender object sending the action
-    @param {Object} context optional additonal context info
+    @param {Object} context optional additional context info
     @returns {SC.Responder} the responder that handled it or null
   */
   sendAction: function(action, sender, context) {

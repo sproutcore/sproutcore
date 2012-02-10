@@ -78,7 +78,7 @@ SC.mixin(Function.prototype,
 
         capitalizedName: function() {
           return this.getPath('person.fullName').toUpper();
-        }.property('person.firstName')
+        }.property('person.fullName')
 
     This will cause observers of +capitalizedName+ to be fired when either
     +fullName+ _or_ +person+ changes.
@@ -156,7 +156,7 @@ SC.mixin(Function.prototype,
 
     All non-computed properties are idempotent and normally you should make
     your computed properties behave the same way.  However, if you need to
-    make your property change its return value everytime your method is
+    make your property change its return value every time your method is
     called, you may chain this to your property to make it volatile.
 
     If you do not specify this option, properties are assumed to be

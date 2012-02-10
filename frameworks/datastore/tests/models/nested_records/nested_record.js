@@ -80,7 +80,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
     store = null;
     childData1 = null;
     NestedRecord = null;
-    delete(window.NestedRecord);
+    //delete(window.NestedRecord);
   }
 });
 
@@ -164,7 +164,7 @@ test("Basic Read", function() {
   ok(storeRef, 'checking that the store has the instance of the child record with proper primary key');
   equals(cr, storeRef, "checking the parent reference is the same as the direct store reference");
   
-  // Check to see if the attributes of a Child Record match the refrence of the parent
+  // Check to see if the attributes of a Child Record match the reference of the parent
   same(storeRef.get('attributes'), testParent.readAttribute('info'), "check that the ChildRecord's attributes are the same as the ParentRecord's readAttribute for the reference");
   
   // Duplication check
@@ -211,7 +211,7 @@ test("Basic Write As a Hash", function() {
   ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
   var newCR = testParent.get('info');
-  same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
+  same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
   same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
 });
 
@@ -248,7 +248,7 @@ test("Basic Write As a Child Record", function() {
   ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
   var newCR = testParent.get('info');
-  same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
+  same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
   same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
 
   // Make sure you can set the child to null.

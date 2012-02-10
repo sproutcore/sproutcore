@@ -19,6 +19,9 @@ sc_require('private/chain_observer');
 */
 SC.LOG_OBSERVERS = NO ;
 
+SC.OBSERVES_HANDLER_ADD = 0;
+SC.OBSERVES_HANDLER_REMOVE = 1;
+
 /**
   @class
 
@@ -194,7 +197,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
     Likewise, if you try to call get() on a property whose values is
     undefined, the unknownProperty() method will be called on the object.
-    If this method reutrns any value other than undefined, it will be returned
+    If this method returns any value other than undefined, it will be returned
     instead.  This allows you to implement "virtual" properties that are
     not defined upfront.
 
@@ -238,7 +241,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     If you try to set a value on a key that is undefined in the target
     object, then the unknownProperty() handler will be called instead.  This
     gives you an opportunity to implement complex "virtual" properties that
-    are not predefined on the obejct.  If unknownProperty() returns
+    are not predefined on the object.  If unknownProperty() returns
     undefined, then set() will simply set the value on the object.
 
     Property Observers
@@ -250,7 +253,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     observers (i.e. observer methods declared on the same object), will be
     called immediately.  Any "remote" observers (i.e. observer methods
     declared on another object) will be placed in a queue and called at a
-    later time in a coelesced manner.
+    later time in a coalesced manner.
 
     Chaining
     ---
@@ -630,7 +633,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
       Called by set() whenever it needs to determine which cached dependent
       keys to clear.  Recursively searches dependent keys to determine all
-      cached property direcly or indirectly affected.
+      cached property directly or indirectly affected.
 
       The return value is also saved for future reference
 
@@ -860,7 +863,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
     /**
       This method will register any observers and computed properties saved on
-      the object.  Normally you do not need to call this method youself.  It
+      the object.  Normally you do not need to call this method yourself.  It
       is invoked automatically just before property notifications are sent and
       from the init() method of SC.Object.  You may choose to call this
       from your own initialization method if you are using SC.Observable in
@@ -896,32 +899,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
           propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
           for(ploc=0;ploc<propertyPathsLength;ploc++) {
             path = propertyPaths[ploc] ;
-            dotIndex = path.indexOf('.') ;
-            // handle most common case, observing a local property
-            if (dotIndex < 0) {
-              this.addObserver(path, this, observer) ;
-
-            // next most common case, use a chained observer
-            } else if (path.indexOf('*') === 0) {
-              this.addObserver(path.slice(1), this, observer) ;
-
-            // otherwise register the observer in the observers queue.  This
-            // will add the observer now or later when the named path becomes
-            // available.
-            } else {
-              root = null ;
-
-              // handle special cases for observers that look to the local root
-              if (dotIndex === 0) {
-                root = this; path = path.slice(1) ;
-              } else if (dotIndex===4 && path.slice(0,5) === 'this.') {
-                root = this; path = path.slice(5) ;
-              } else if (dotIndex<0 && path.length===4 && path === 'this') {
-                root = this; path = '';
-              }
-
-              SC.Observers.addObserver(path, this, observer, root);
-            }
+            this.addObservesHandler(observer, path);
           }
         }
       }
@@ -954,6 +932,94 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         }
       }
 
+    },
+    
+    /**
+      Will add an observes handler to this object for a given property path.
+      
+      In most cases, the path provided is relative to this object. However,
+      if the path begins with a captial character then the path is considered
+      relative to the window object.
+      
+      @param {Function} observer the function on this object that will be 
+        notified of changes
+      @param {String} path a property path string
+      @return {Object} returns this
+    */
+    addObservesHandler: function(observer, path) {
+      this._configureObservesHandler(SC.OBSERVES_HANDLER_ADD, observer, path);
+      return this;
+    },
+    
+    /**
+      Will remove an observes handler from this object for a given property path.
+      
+      In most cases, the path provided is relative to this object. However,
+      if the path begins with a captial character then the path is considered
+      relative to the window object.
+      
+      @param {Function} observer the function on this object that will be 
+        notified of changes
+      @param {String} path a property path string
+      @return {Object} returns this
+    */
+    removeObservesHandler: function(observer, path) {
+      this._configureObservesHandler(SC.OBSERVES_HANDLER_REMOVE, observer, path);
+      return this;
+    },
+    
+    /** @private
+    
+      Used to either add or remove an observer handler on this object
+      for a given property path.
+      
+      In most cases, the path provided is relative to this object. However,
+      if the path begins with a captial character then the path is considered
+      relative to the window object.
+      
+      You must supply an action that is to be performed by this method. The 
+      action can either be `SC.OBSERVES_HANDLER_ADD` or `SC.OBSERVES_HANDLER_REMOVE`.
+      
+      @param {Function} observer the function on this object that will be 
+        notified of changes
+      @param {String} path a property path string
+      @param {String} path a dot-notation property path string
+    */
+    _configureObservesHandler: function(action, observer, path) {
+      var dotIndex, root;
+      
+      switch (action) {
+      case SC.OBSERVES_HANDLER_ADD:
+        action = "addObserver"; break;
+      case SC.OBSERVES_HANDLER_REMOVE:
+        action = "removeObserver"; break;
+      default:
+        throw "invalid action provided: " + action;
+      }
+
+      dotIndex = path.indexOf('.');
+
+      if (dotIndex < 0) {
+        this[action](path, this, observer);
+      } else if (path.indexOf('*') === 0) {
+        this[action](path.slice(1), this, observer);
+      } else {
+        root = null;
+
+        if (dotIndex === 0) {
+          root = this; path = path.slice(1);
+        } else if (dotIndex === 4 && path.slice(0, 5) === 'this.') {
+          root = this; path = path.slice(5);
+        } else if (dotIndex < 0 && path.length === 4 && path === 'this') {
+          root = this; path = '';
+        } else if (dotIndex > 0 && path[0] === path.charAt(0).toLowerCase()) {
+          // if the first character for the given path is lower case
+          // then we assume the path is relative to this
+          root = this;
+        }
+
+        SC.Observers[action](path, this, observer, root);
+      }
     },
 
     // ..........................................
@@ -1312,7 +1378,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     /**
       Navigates the property path, finally setting the value but only if
       the value does not match the current value.  This will avoid sending
-      unecessary change notifications.
+      unnecessary change notifications.
 
       @param {String} path the property path to set
       @param {Object} value the value to set

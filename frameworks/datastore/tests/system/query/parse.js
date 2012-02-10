@@ -217,7 +217,7 @@ test("token tree should build", function() {
   q.parse();
   ok(q._tokenList.length == 13, 'list should have 13 tokens');
   ok(!q._tokenTree.error, 'there should be no errors');
-  ok(q._tokenTree.tokenValue == 'AND', 'tree root shoud be AND');
+  ok(q._tokenTree.tokenValue == 'AND', 'tree root should be AND');
   
 });
 

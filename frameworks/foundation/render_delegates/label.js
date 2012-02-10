@@ -39,6 +39,11 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
+    
+    var toolTip = dataSource.get('toolTip');
+    if (toolTip) {
+      context.attr('title', toolTip);
+    }
 
     /*
       TODO [CC @ 1.5] These properties have been deprecated. We should remove them
@@ -52,7 +57,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     context.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
     context.setClass('icon', dataSource.get('icon') || NO);
 
-    var html = this._htmlForTitleAndIcon(dataSource);
+    var html = this.htmlForTitleAndIcon(dataSource);
     context.push(html);
     
     // we could use didChangeFor, but in this case, checking the generated
@@ -73,18 +78,35 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       textAlign: dataSource.get('textAlign') || null
     });
     
+    var toolTip = dataSource.get('toolTip');
+    if (toolTip) {
+      jquery.attr('title', toolTip);
+    }
+    else {
+      jquery.removeAttr('title');
+    }
+    
     jquery.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
 
-    var html = this._htmlForTitleAndIcon(dataSource);
+    var html = this.htmlForTitleAndIcon(dataSource);
     if (dataSource.get('renderState')._lastHTMLForTitleAndIcon !== html) {
       jquery.html(html);
       dataSource.get('renderState')._lastHTMLForTitleAndIcon = html;
     }
   },
   
-  _htmlForTitleAndIcon: function(dataSource) {
+  /**
+    Generates the HTML for the title and icon of the label. Render delegates can
+    override this to change how that HTML renders without affecting the rest of the
+    rendering of the label.
+
+    @param dataSource The data source that provides the title and icon properties.
+    @return the html to use
+  */
+  htmlForTitleAndIcon: function(dataSource) {
     var title = dataSource.get('title'),
         hint = dataSource.get('hint'),
+        hintEnabled = dataSource.get('hintEnabled'),
         escapeHTML = dataSource.get('escapeHTML'),
         icon = dataSource.get('icon') || '';
 
@@ -94,7 +116,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       title = SC.RenderContext.escapeHTML(title) ;
     }
 
-    if (hint && !title) {
+    if (hintEnabled && hint && !title) {
       if (escapeHTML) hint = SC.RenderContext.escapeHTML(hint);
       title = "<span class='sc-hint'>" + hint + "</span>";
     }
@@ -112,8 +134,8 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
         icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="icon '+icon+'" />';
       }
     }
-    
+
     return icon + title;
   }
-  
+
 });

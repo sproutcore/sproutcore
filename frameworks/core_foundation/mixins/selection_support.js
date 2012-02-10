@@ -65,7 +65,7 @@ SC.SelectionSupport = {
     have groups or want to otherwise limit the kinds of objects that can be
     selected.
 
-    the default imeplementation returns firstObject property.
+    the default implementation returns firstObject property.
 
     @returns {Object} first selectable object
   */

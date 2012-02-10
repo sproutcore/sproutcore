@@ -31,22 +31,21 @@ test("invoked with key = * whenever content changes", function() {
   view.set('content', content);
 });
 
-test("invoked with key = foo whenever a propery on content is changed", function() {
-  var isTesting = NO, curKey ;
+test("should not be invoked when arbitrary keys are changed", function() {
+  var isTesting = NO, count = 0;
   view.contentPropertyDidChange = function(target, key) {
     if (!isTesting) return ; //wait until testing should begin...
-    ok(target === content, 'should pass content object as target');
-    equals(key, curKey, 'should pass * as key');    
+    count++;
   };
+
   view.set('content', content);
   
   isTesting = YES ;
   
-  curKey= 'foo';
   content.set('foo', 'foo');
-  
-  curKey = 'bar';
   content.set('bar', 'bar');
+
+  equals(count, 0, "method was not invoked");
 });
 
 test("should no longer be invoked when a key is changed on a former content object", function() {
@@ -66,15 +65,16 @@ test("should no longer be invoked when a key is changed on a former content obje
 
 test("should fire even on a content object set when the object is created", function() {
   var callCount = 0;
-  var view = SC.View.create(SC.Control, {
+  var view = SC.ButtonView.create({
     contentPropertyDidChange: function() { callCount++; },
-    content: content
+    content: content,
+    contentTitleKey: 'title'
   });
   
   equals(callCount, 1, 'should call contentPropertyDidChange on init to do initial setup');
   
-  content.set('foo', 'foo');
-  equals(callCount, 2, 'should call contentPropertyDidChange when changing content.foo');
+  content.set('title', 'title');
+  equals(callCount, 2, 'should call contentPropertyDidChange when changing content.title');
 });
 
 

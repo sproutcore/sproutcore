@@ -59,7 +59,7 @@ SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
   hasFirstResponder: NO,    
   
   /** @property
-    Set to YES if your view is willing to accept first responder status.  This is used when calculcating key responder loop.
+    Set to YES if your view is willing to accept first responder status.  This is used when calculating key responder loop.
   */
   acceptsFirstResponder: YES,
   

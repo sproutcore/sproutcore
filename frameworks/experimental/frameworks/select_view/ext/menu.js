@@ -5,14 +5,15 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('ext/menu_item');
+
 /**
   @class
-  Enhances SC.MenuPane to add support for automatic resizing.
+  Extends SC.MenuPane to add support for automatic resizing.
 */
-SC.MenuPane = SC.MenuPane; // for docs
 
-SC.MenuPane.reopen(
-/** @scope SC.MenuPane.prototype */ {
+SC.AutoResizingMenuPane = SC.MenuPane.extend(
+/** @scope SC.AutoResizingMenuPane.prototype */ {
 
   /**
     If YES, the menu should automatically resize its width to fit its items.
@@ -55,13 +56,15 @@ SC.MenuPane.reopen(
     @private
     In addition to the normal init, we need to schedule an automatic resize.
   */
-  init: function(orig) {
-    orig();
+  init: function() {
+    sc_super();
+    
+    this.set('exampleView', SC.AutoResizingMenuItemView);
 
     if (this.get('shouldAutoResize')) {
       this.invokeOnce('_updateMenuWidth');
     }
-  }.enhance(),
+  },
 
   /**
     The array of child menu item views that compose the menu.
@@ -73,10 +76,10 @@ SC.MenuPane.reopen(
     @readOnly
     @private
   */
-  createMenuItemViews: function(orig) {
+  createMenuItemViews: function() {
     // EXTENDED to set shouldMeasureSize to its initial value and to
     // observe the measured size.
-    var views = orig();
+    var views = sc_super();
 
     var idx, len = views.length, view;
     if (this.get('shouldAutoResize')) {
@@ -90,7 +93,7 @@ SC.MenuPane.reopen(
     }
 
     return views;
-  }.enhance(),
+  },
 
   _menuItemViewsDidChange: function() {
     if (this.get('shouldAutoResize')) this.invokeOnce('_updateMenuWidth');
@@ -117,5 +120,6 @@ SC.MenuPane.reopen(
     }
 
     this.adjust('width', width);
+    this.positionPane();
   }
 });

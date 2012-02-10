@@ -274,11 +274,15 @@ SC.MenuPane = SC.PickerPane.extend(
   popup: function(anchorViewOrElement, preferMatrix) {
     var anchor;
     this.beginPropertyChanges();
-    if (anchorViewOrElement) {
-      anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
+    if(anchorViewOrElement){
+      if (anchorViewOrElement.isView) {
+        this._anchorView = anchorViewOrElement;
+        this._setupScrollObservers(anchorViewOrElement);
+      } else {
+        this._anchorHTMLElement = anchorViewOrElement;
+      }
     }
-    this.set('anchorElement',anchor) ;
-    this.set('anchor',anchorViewOrElement);
+   // this.set('anchor',anchorViewOrElement);
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
 
     this.adjust('height', this.get('menuHeight'));
@@ -544,7 +548,16 @@ SC.MenuPane = SC.PickerPane.extend(
       controlSize: this.get('controlSize')
     });
 
-    menuView = this._menuView = SC.View.create();
+    menuView = this._menuView = SC.View.create({
+      parentViewDidResize: function() {
+        this.notifyPropertyChange('frame');
+      },
+      
+      viewDidResize: function() {
+        
+      }
+    });
+    
     menuItemViews = this.get('menuItemViews');
     menuView.set('layout', { top: 0, left: 0, height : this.get('menuHeight')});
     menuView.replaceAllChildren(menuItemViews);
@@ -893,7 +906,7 @@ SC.MenuPane = SC.PickerPane.extend(
     }
 
     // Scroll to the selected menu item if it's not visible on screen.
-    // This is useful for keyboard navigation and programmaticaly selecting
+    // This is useful for keyboard navigation and programmatically selecting
     // the selected menu item, as in `SelectButtonView`.
     if (currentMenuItem && currentMenuItem.get('isEnabled')) {
       currentMenuItem.scrollToVisible();

@@ -22,7 +22,7 @@ module("SC.CollectionView.reload", {
 });
 
 /*
-  Verfies that the item views for the passed collection view match exactly the
+  Verifies that the item views for the passed collection view match exactly the
   content array passed.  If shouldShowAllContent is also YES then verifies 
   that the nowShowing range is showing the entire content range.
   

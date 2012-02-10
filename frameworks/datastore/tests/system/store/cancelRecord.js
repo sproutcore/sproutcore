@@ -49,6 +49,6 @@ test("Check for error state handling and make sure that the method executes.", f
   }catch (error){
     throwError=false;
   }
-  ok(throwError, " cancelRecord was succesfully executed.");
+  ok(throwError, " cancelRecord was successfully executed.");
   
 });

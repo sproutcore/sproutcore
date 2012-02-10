@@ -95,8 +95,8 @@ test('Route tree', function() {
   s = a.wildcardRoutes['foo'];
   ok(s, 'There should be a wildcardRoutes tree for a');
   
-  equals(r.routeForParts(['a'], {}), null, 'routeForParts should return null for non existant routes');
-  equals(r.routeForParts(['a', 'b'], {}), null, 'routeForParts should return null for non existant routes');
+  equals(r.routeForParts(['a'], {}), null, 'routeForParts should return null for non existent routes');
+  equals(r.routeForParts(['a', 'b'], {}), null, 'routeForParts should return null for non existent routes');
   equals(r.routeForParts(abc, {}), c, 'routeForParts should return the correct route for a/b/c');
   
   equals(r.routeForParts(abd, {}), d, 'routeForParts should return the correct route for a/b/d');

@@ -107,7 +107,7 @@ SC.InlineEditable = {
 
     Will fail if the delegate returns NO to inlineEditorShouldBeginEditing.
 
-    @returns {Boolean} whether the view succesfully entered edit mode
+    @returns {Boolean} whether the view successfully entered edit mode
   */
   beginEditing: function() {
     var del;
@@ -158,7 +158,7 @@ SC.InlineEditable = {
     @returns {Boolean} if the view is allowed to begin editing
   */
   inlineEditorShouldBeginEditing: function() {
-    return !this.isEditing && this.isEditable;
+    return !this.get('isEditing') && this.get('isEditable');
   },
 
   // TODO: implement validator

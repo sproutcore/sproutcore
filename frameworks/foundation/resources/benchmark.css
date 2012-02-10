@@ -98,11 +98,6 @@
   -moz-opacity:0.4;
 }
 
-
-.no-min-width {
-  min-width: 20px !important;
-}
-
 .sc-benchmark-event {
   position: absolute;
   z-index: 1;

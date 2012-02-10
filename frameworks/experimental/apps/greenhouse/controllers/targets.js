@@ -20,7 +20,7 @@ Greenhouse.targetsController = SC.ArrayController.create(
 /** @scope Greenhouse.targetsController.prototype */ {
 
   /**
-    Call this method whenever you want to relaod the targets from the server.
+    Call this method whenever you want to reload the targets from the server.
   */
   reload: function() {
     var targets = Greenhouse.store.find(Greenhouse.TARGETS_QUERY);

@@ -487,7 +487,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
 
     // update the revision for storeKey.  Use generateStoreKey() because that
-    // gaurantees a universally (to this store hierarchy anyway) unique
+    // guarantees a universally (to this store hierarchy anyway) unique
     // key value.
     if (!rev) rev = SC.Store.generateStoreKey();
     var isArray, len, idx, storeKey;
@@ -678,7 +678,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /** @private
     Called by a nested store on a parent store to commit any changes from the
-    store.  This will copy any changed dataHashes as well as any persistant
+    store.  This will copy any changed dataHashes as well as any persistent
     change logs.
 
     If the parentStore detects a conflict with the optimistic locking, it will
@@ -1120,7 +1120,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // add dataHash and setup initial status -- also save recordType
     this.writeDataHash(storeKey, (dataHash ? dataHash : {}), K.READY_NEW);
-
+    
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
     this.dataHashDidChange(storeKey);
 
@@ -1136,7 +1136,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
 
     // Finally return materialized record, after we propagate the status to
-    // any aggregrate records.
+    // any aggregate records.
     ret = this.materializeRecord(storeKey);
     if (ret) ret.propagateToAggregates();
     return ret;
@@ -1416,7 +1416,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var children = this.parentRecords[storeKey] || {};
     if (SC.none(func)) return;
     for (var key in children) {
-      if (children.hasOwnProperty(key)) func(key);
+      // for .. in makes the key a String, but be sure to pass a Number to the
+      // function.
+      if (children.hasOwnProperty(key)) func(parseInt(key, 10));
     }
   },
 
@@ -1714,7 +1716,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
     @param {Number} storeKey (optional) optional store key
-    @param {Function} callback (optional) when refresh complets
+    @param {Function} callback (optional) when refresh completes
     @returns {Boolean} YES if the retrieval was a success.
   */
   refreshRecord: function(recordType, id, storeKey, callback) {
@@ -1729,7 +1731,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to destroy
     @param {Array} storeKeys (optional) store keys to destroy
-    @param {Function} callback (optional) when refresh complets
+    @param {Function} callback (optional) when refresh completes
     @returns {Boolean} YES if the retrieval was a success.
   */
   refreshRecords: function(recordTypes, ids, storeKeys, callback) {
@@ -1821,7 +1823,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
     }
 
-    //remove all commited changes from changelog
+    //remove all committed changes from changelog
     if (ret && !recordTypes && !ids) {
       if (storeKeys === this.changelog) {
         this.changelog = null;
@@ -1844,7 +1846,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType the expected record type
     @param {String} id the id of the record to commit
     @param {Number} storeKey the storeKey of the record to commit
-    @param {Hash} params optional additonal params that will passed down
+    @param {Hash} params optional additional params that will passed down
       to the data source
     @param {Function|Array} callback function or array of functions
     @returns {Boolean} if the action was successful.

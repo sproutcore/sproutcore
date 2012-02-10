@@ -20,7 +20,7 @@ sc_require('views/collection') ;
   
   This view makes no attempt to size or position your child views.  It assumes
   you are using StaticLayout for your child views.  If you don't enable static
-  layout your views will probably overlay on top of eachother and will look 
+  layout your views will probably overlay on top of each other and will look 
   incorrect.
 
   Note also that the default layout for this view set's the height to "auto".
@@ -72,7 +72,7 @@ SC.StackedView = SC.CollectionView.extend(
     of the view until the end of the run loop.  You can force an immediate 
     update by passing YES to the "immediately" parameter.
     
-    @param {Boolean} immediately YES to update immedately
+    @param {Boolean} immediately YES to update immediately
     @returns {SC.StackedView} receiver
   */
   updateHeight: function(immediately) {

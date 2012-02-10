@@ -97,7 +97,7 @@ test("removing index set should also remove individually added objects", functio
   
   ok(set.contains(objToRemove), 'set should contain objToRemove');
   ok(set.contains(objToNotRemove), 'set should contain objToNotRemove');
-  equals(set.get('length'), 5, 'set.length sould == two objects + index.length');
+  equals(set.get('length'), 5, 'set.length should == two objects + index.length');
     
   // now remove from array set
   set.remove(array, 2, 4);  

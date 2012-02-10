@@ -67,12 +67,16 @@ SC.mixin({
   onReady: {
     done: function() {
       if(SC.isReady) return;
+      
       SC.isReady = true;
       
       SC.RunLoop.begin();
       
       SC.Locale.createCurrentLocale();
-      jQuery("body").addClass(SC.Locale.currentLanguage.toLowerCase());
+      var loc = SC.Locale.currentLanguage.toLowerCase();
+      jQuery("body").addClass(loc);
+      
+      jQuery("html").attr("lang", loc);
       
       jQuery("#loading").remove();
       

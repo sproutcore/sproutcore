@@ -99,7 +99,7 @@ SC.ObjectDesigner = SC.Object.extend(
   
   
   /*
-    Array of properties avaliaible to edit in greenhouse
+    Array of properties available to edit in greenhouse
     
   */
   editableProperties: function(){

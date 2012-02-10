@@ -252,7 +252,7 @@ test("A slave does NOT update a relationship [one(slave) to *]", function () {
   ok(SC.none(s1.get('relative')), 'precond2 - s1 has no relative');
   equals(r1.get('slave'), s1, 'test1- r1 is related to s1');
 
-  // case - create slave WITH releationship
+  // case - create slave WITH relationship
   SC.RunLoop.begin();
   MyApp.store.loadRecords(MyApp.Relative, [
     { guid: 'r2'}
@@ -814,7 +814,7 @@ test("pushDestroy record doesn't create a slave when it's been destroyed [*(mast
 
 /**
   Standard Sproutcore Behaviors
- 
+
   This is data showing up from the server- after pushing in changes,
   all records should have status READY_CLEAN.
  */
@@ -926,6 +926,43 @@ test("Record Attribute can reference renamed attribute key", function () {
   equals(s1.get('master'), m1, 's1 should have master of m1');
 });
 
+test("Record Attribute can reference renamed attribute key (1 to many)", function () {
+  MyApp.Master = SC.Record.extend({
+    slave: SC.Record.toOne('MyApp.Slave', {
+      inverse: 'masters',
+      isMaster: YES
+    })
+  });
+
+  MyApp.Slave = SC.Record.extend({
+    masters: SC.Record.toMany('MyApp.Master', {
+      inverse: 'slave',
+      isMaster: NO,
+      key: 'master_ids'
+    })
+  });
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Slave, [
+    { guid: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var s1 = MyApp.store.find(MyApp.Slave, 's1');
+  ok(s1.get('status') & SC.Record.READY_CLEAN, 'precond - s1 should be ready clean');
+
+  SC.RunLoop.begin();
+  MyApp.store.loadRecords(MyApp.Master, [
+    { guid: 'm1', slave: 's1' }
+  ]);
+  SC.RunLoop.end();
+
+  var m1 = MyApp.store.find(MyApp.Master, 'm1');
+
+  equals(m1.get('slave'), s1, 'm1 should be master of s1');
+  same(s1.get('masters').toArray(), [m1], 's1 should have m1 in masters');
+  same(s1.get('attributes').master_ids, [m1.get('id')], 's1.attributes should have master_ids key');
+});
 
 test("Record Attribute can reference renamed attribute key (on remote side)", function () {
   MyApp.Master = SC.Record.extend({
@@ -1050,7 +1087,7 @@ test("RecordAttribute flag 'lazilyInstantiate' tests", function () {
   equals(m1.get('slave'), s1, 'm1 should be master of s1');
 
   // test lazy creation fails on isMaster => NO
-  ok(SC.none(m2), 'm2 should NOT have been creaetd');
+  ok(SC.none(m2), 'm2 should NOT have been created');
   ok(!s2.get('master') ||
       s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
 });
@@ -1096,7 +1133,7 @@ test("RecordAttribute flag 'lazilyInstantiate' can be a function", function () {
   ok(!s1, 's1 should NOT be created lazily');
 
   // test lazy creation fails on isMaster => NO
-  ok(SC.none(m2), 'm2 should NOT have been creaetd');
+  ok(SC.none(m2), 'm2 should NOT have been created');
   ok(!s2.get('master') ||
       s2.get('master').get('status') & SC.Record.ERROR, 's2 should have no master record');
 });
@@ -1175,3 +1212,4 @@ test("RecordAttribute flag 'lazilyInstantiate' will create chains of records pro
   ok(ss, 'ss should be created lazily');
   equals(ss.get('slave'), s, 's should be master of ss');
 });
+

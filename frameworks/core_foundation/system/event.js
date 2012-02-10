@@ -79,19 +79,18 @@ SC.Event = function(originalEvent) {
 
   // Normalize wheel delta values for mousewheel events
   if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER,
-        version = parseFloat(SC.browser.version);
+    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
 
     // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.webkit && originalEvent.wheelDelta !== undefined) {
+    if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
       this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
       this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
       this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
 
-    // normalize wheelDelta for Firefox
+    // normalize wheelDelta for Firefox (all Mozilla browsers)
     // note that we multiple the delta on FF to make it's acceleration more
     // natural.
-    } else if (!SC.none(originalEvent.detail) && SC.browser.mozilla) {
+    } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
       if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
         this.wheelDeltaX = originalEvent.detail;
         this.wheelDeltaY = this.wheelDelta = 0;
@@ -102,17 +101,8 @@ SC.Event = function(originalEvent) {
 
     // handle all other legacy browser
     } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.msie || SC.browser.opera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+      this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
       this.wheelDeltaX = 0 ;
-    }
-
-    // we have a value over the limit and it wasn't caught when we generated MOUSE_WHEEL_MULTIPLIER
-    // this will happen as new Webkit-based browsers are released and we haven't covered them off
-    // in our browser detection. It'll scroll too quickly the first time, but we might as well learn
-    // and change our handling for the next scroll
-    if (this.wheelDelta > SC.Event.MOUSE_WHEEL_DELTA_LIMIT && !SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED) {
-      deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER = 0.004;
-      SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES;
     }
 
     this.wheelDelta *= deltaMultiplier;
@@ -128,39 +118,32 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   /**
     We need this because some browsers deliver different values
     for mouse wheel deltas. Once the first mouse wheel event has
-    been run, this value will get set. Because we don't know the
-    maximum or minimum value ahead of time, if the event's delta
-    exceeds `SC.Event.MOUSE_WHEEL_DELTA_LIMIT`, this value can be
-    invalidated and changed during a later event.
+    been run, this value will get set.
 
     @field
     @type Number
     @default 1
   */
-  MOUSE_WHEEL_MULTIPLIER: (function() {
+  MOUSE_WHEEL_MULTIPLIER: function() {
     var deltaMultiplier = 1,
-        version = parseFloat(SC.browser.version),
-        didChange = NO;
+        version = SC.browser.engineVersion;
 
-    if (SC.browser.safari) {
+    if (SC.browser.name === SC.BROWSER.safari) {
+      deltaMultiplier = 0.4;
       // Safari 5.0.1 and up
-      if (version >= 533.17) {
+      if (SC.browser.compare(version, '533.17') > 0 && SC.browser.compare(version, '534') < 0) {
         deltaMultiplier = 0.004;
-        didChange = YES;
-      } else if (version < 533) {
+      } else if (SC.browser.compare(version, '533') < 0) {
         // Scrolling in Safari 5.0
         deltaMultiplier = 40;
-        didChange = YES;
       }
-    } else if (SC.browser.mozilla) {
-      deltaMultiplier = 10;
-      didChange = YES;
+    }else if(SC.browser.name === SC.BROWSER.ie){
+      deltaMultiplier = 0.3;
+    }else if(SC.browser.name === SC.BROWSER.chrome){
+      deltaMultiplier = 0.4;
     }
-
-    if (didChange) { SC.Event._MOUSE_WHEEL_LIMIT_INVALIDATED = YES; }
-
     return deltaMultiplier;
-  })(),
+  }(),
 
   /**
     This represents the limit in the delta before a different multiplier
@@ -200,7 +183,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         SC.Event.add(anElement, "click", myClickHandler) ;
 
     The most basic type of handler you can pass is a function.  This function
-    will be executed everytime an event of the type you specify occurs on the
+    will be executed every time an event of the type you specify occurs on the
     named element.  You can optionally pass an additional context object which
     will be included on the event in the event.data property.
 
@@ -273,7 +256,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
-    if (SC.browser.msie && elem.setInterval) elem = window;
+    if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
 
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
@@ -347,9 +330,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
-    // For whatever reason, IE has trouble passing the window object
-    // around, causing it to be cloned in the process
-    if (SC.browser.msie && elem.setInterval) elem = window;
+    /*
+      commenting out this block because
+      1. this issue is no longer reproducible in IE7, 8 or 9
+      2. this causes undesired behavior if one tries to remove an event from
+         an iframe because elem.setInterval is true there.
+    */
+    // // For whatever reason, IE has trouble passing the window object
+    // // around, causing it to be cloned in the process
+    // if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
 
     var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
@@ -415,7 +404,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     @param {Element} elem the element the event targets
     @param {String} eventType event type.  mousedown, mouseup, etc
-    @param {Hash} attrs optional additonal attributes to apply to event.
+    @param {Hash} attrs optional additional attributes to apply to event.
     @returns {Hash} simulated event object
   */
   simulateEvent: function(elem, eventType, attrs) {
@@ -436,7 +425,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   /**
     Trigger an event execution immediately.  You can use this method to
-    simulate arbitrary events on arbitary elements.
+    simulate arbitrary events on arbitrary elements.
 
     ## Limitations
 
@@ -565,7 +554,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       if (val !== NO) val = ret;
 
-      // if method returned NO, do not continue.  Stop propogation and
+      // if method returned NO, do not continue.  Stop propagation and
       // return default.  Note that we test explicitly for NO since
       // if the handler returns no specific value, we do not want to stop.
       if ( ret === NO ) {
@@ -616,13 +605,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         Implement support for mouseenter on browsers other than IE */
     mouseenter: {
       setup: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
@@ -640,13 +629,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         Implement support for mouseleave on browsers other than IE */
     mouseleave: {
       setup: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.msie ) return NO;
+        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
@@ -681,7 +670,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     var parent = event.relatedTarget;
 
     // Traverse up the tree
-    while ( parent && parent != elem ) {
+    while ( parent && parent !== elem ) {
       try { parent = parent.parentNode; } catch(error) { parent = elem; }
     }
 
@@ -874,7 +863,7 @@ SC.Event.prototype = {
   },
 
   /**
-    Stops both the default action and further propogation.  This is more
+    Stops both the default action and further propagation.  This is more
     convenient than calling both.
 
     @returns {SC.Event} receiver
@@ -891,20 +880,31 @@ SC.Event.prototype = {
   normalized: YES,
 
   /**
-    Returns the pressed character (found in this.which) as a string.
+    Returns the pressed character as a String.
 
     @returns {String}
   */
+  // Warning.
+  // Older versions of IE don't support charCode, but on keypress return the
+  // ASCII value in keyCode instead of the key code.  Therefore, if this code is
+  // used on keyDown in IE versions prior to 9.0, it will fail.
+  // Since SproutCore passes the keydown and keypress events as a keyDown
+  // method, it's most likely that this code will cause unexpected problems
+  // in IE 7 & IE 8.
+  //
+  // Reference: http://unixpapa.com/js/key.html
   getCharString: function() {
-    if(SC.browser.msie){
-      if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
+    if(SC.browser.name === SC.BROWSER.ie &&
+        SC.browser.compare(SC.browser.version, '9.0') < 0) {
+      // Return an empty String for backspace, tab, left, right, up or down.
+      if(this.keyCode == 8 || this.keyCode == 9 ||
+          (this.keyCode >= 37 && this.keyCode<=40)) {
         return String.fromCharCode(0);
-      }
-      else {
+      } else {
+        // This will only be accurate if the event is a keypress event.
         return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;
       }
-    }
-    else {
+    } else {
       return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
     }
   },
@@ -967,7 +967,7 @@ SC.Event.fire = SC.Event.trigger;
 // This avoids leaks in IE and issues with mouseout or other handlers on
 // other browsers.
 
-if(SC.browser.msie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
+if(SC.browser.name === SC.BROWSER.ie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'

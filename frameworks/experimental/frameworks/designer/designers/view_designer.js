@@ -352,7 +352,7 @@ SC.ViewDesigner = SC.Object.extend(
 
 
   /*
-    Array of properties avaliaible to edit in greenhouse
+    Array of properties available to edit in greenhouse
 
   */
   editableProperties: function(){
@@ -485,7 +485,7 @@ SC.ViewDesigner = SC.Object.extend(
 
 
   /**
-    over-ride this method in your designers to customies drop operations
+    over-ride this method in your designers to customize drop operations
     default just calls appendChild
 
     TODO: Come up with a better name for this method.

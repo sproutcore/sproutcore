@@ -20,7 +20,7 @@ test("calls createChildView() for each class or string in childViews array", fun
       'customClassName'           // string - should be called
     ],
 
-    // this shuld be used for the 'customClassName' item above
+    // this should be used for the 'customClassName' item above
     customClassName: SC.View.extend({ key: 2 }),
 
     // patch to record results...
@@ -49,10 +49,10 @@ test("should not error when there is a dud view name in childViews list.", funct
   var called = [];
   var v = SC.View.create({
     childViews: [
-      "nonExistantClassNme",       // string - should NOT be called
-        'customClassName'          // string - should be called
+      'nonExistantClassName',       // string - should NOT be called
+      'customClassName'          // string - should be called
     ],
-    // this shuld be used for the 'customClassName' item above
+    // this should be used for the 'customClassName' item above
     customClassName: SC.View.extend({ key: 2 }),
 
     // patch to record results...
@@ -71,7 +71,7 @@ test("should not throw error when there is an extra space in the childViews list
   var called = [];
   var v = SC.View.create({
     childViews: "customClassName  customKlassName".w(),
-    // this shuld be used for the 'customClassName' item above
+    // this should be used for the 'customClassName' item above
     customClassName: SC.View.extend({ key: 2 }),
     customKlassName: SC.View.extend({ key: 3 })
   });

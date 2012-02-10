@@ -133,7 +133,7 @@ Greenhouse.mixin( /** @scope Greenhouse */{
     fileSelected: SC.State.design({
 
       enterState: function(){
-        //TODO: draw message saing we can't do anythign with this right now...
+        //TODO: draw message saying we can't do anything with this right now...
       },
       exitState: function(){}
     }),

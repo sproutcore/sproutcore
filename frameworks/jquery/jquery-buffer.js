@@ -4,7 +4,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 // sc_require("jquery");
-jQuery.Buffer = (function() {
+jQuery.Buffer = function() {
 
   var Buffer = function(elem) {
     if (elem) this.assign(elem);
@@ -205,7 +205,7 @@ jQuery.Buffer = (function() {
   };
 
 
-  // 
+  //
   // SUPPORT FOR CSS STYLES
   //
   Buffer.prototype._STYLE_REGEX = /-?\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g;
@@ -235,18 +235,18 @@ jQuery.Buffer = (function() {
   Buffer.prototype._loadStyles = function(attr) {
     // parse style...
     if (!attr) attr = this.$().attr('style');
-    
+
     if (attr && (attr = attr.toString()).length>0) {
-      if(SC.browser.msie){ 
+      if(SC.browser.isIE){
         attr = attr.toLowerCase();
       }
       var styles = {};
-      
+
       var regex = this._STYLE_REGEX, match;
       regex.lastIndex = 0;
-      
+
       while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
-      
+
       return styles;
     } else {
       return { };
@@ -293,7 +293,7 @@ jQuery.Buffer = (function() {
     this.$().attr("style", props.join("; "));
   };
 
-  // 
+  //
   // SUPPORT FOR CLASS NAMES
   //
   Buffer.prototype._hashFromClassNames = function(classNames) {
@@ -346,15 +346,15 @@ jQuery.Buffer = (function() {
     if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
     return !!context.classNames[className];
   };
-  
+
   Buffer.prototype.addClass = function(value) {
     if (!value) return;
-    
+
     var context = this.bufferedCommand("flushClassNames");
     if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
-    
+
     if (typeof value === "string") value = value.split(' ');
-    
+
     var idx, len = value.length;
     for (idx = 0; idx < len; idx++) context.classNames[jQuery.trim(value[idx])] = true;
   };
@@ -387,4 +387,4 @@ jQuery.Buffer = (function() {
   dn(Buffer.prototype);
 
   return Buffer;
-})();
+}();

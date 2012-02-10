@@ -14,7 +14,7 @@ Welcome.targetsController = SC.ArrayController.create(
 /** @scope Welcome.targetsController.prototype */ {
 
   /**
-    Call this method whenever you want to relaod the targets from the server.
+    Call this method whenever you want to reload the targets from the server.
   */
   reload: function() {
     var targets = Welcome.store.find(CoreTools.TARGETS_QUERY);

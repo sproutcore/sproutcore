@@ -279,7 +279,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /**
     Adds the specified record to the record array if it is not already part
-    of the array.  Provided for compatibilty with `SC.Set`.
+    of the array.  Provided for compatibility with `SC.Set`.
 
     @param {SC.Record} record
     @returns {SC.RecordArray} receiver
@@ -551,7 +551,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       // otherwise, lookup all storeKeys for the named recordType...
       } else if (recordType = query.get('expandedRecordTypes')) {
         sourceKeys = SC.IndexSet.create();
-        sourceKeys.addEach(store.storeKeysFor(recordType));
+        recordType.forEach(function(cur) {
+          sourceKeys.addEach(store.storeKeysFor(cur));
+        });
       }
 
       // loop through storeKeys to determine if it belongs in this query or

@@ -246,7 +246,27 @@ SC.View.reopen(
       SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
     }
     // @endif
-  }.enhance()
+  }.enhance(),
+  
+
+  /**
+    Invokes a method on the render delegate, if one is present and it implements
+    that method.
+    
+    @param {String} method The name of the method to call.
+    @param arg One or more arguments.
+  */
+  invokeRenderDelegateMethod: function(method, args) {
+    var renderDelegate = this.get('renderDelegate');
+    if (!renderDelegate) return undefined;
+    
+    if (SC.typeOf(renderDelegate[method]) !== SC.T_FUNCTION) return undefined;
+    
+    args = SC.$A(arguments);
+    args.shift();
+    args.unshift(this.get('renderDelegateProxy'));
+    return renderDelegate[method].apply(renderDelegate, args);
+  }
 });
 
 /**
@@ -358,7 +378,7 @@ SC.View._RenderDelegateProxy = {
   the view's render delegate, if present. You may specify a default value to
   return if there is no such property or is no render delegate.
   
-  The generated property is read+write, so it may be overriden.
+  The generated property is read+write, so it may be overridden.
   
   @param {String} propertyName The name of the property to get from the render delegate..
   @param {Value} def The default value to use if the property is not present.

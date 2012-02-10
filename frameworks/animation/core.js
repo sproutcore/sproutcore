@@ -7,7 +7,8 @@
 // ==========================================================================
 /*globals */
 
-/** @namespace
+/** @deprecated
+  @namespace
   A simple mixin called Animatable is provided. What does it do?
   It makes CSS transitions for you, and if they aren't available,
   implements them in JavaScript.
@@ -19,7 +20,7 @@
     - display, in a way. All animating display does is delay setting display:none
       until <em>after</em> the transition duration has passed. This allows you
       to set display:none after fading out. If mixing with CSS transitions, you will
-      need to set the delay a tad longer to accomodate any delays in beginning the
+      need to set the delay a tad longer to accommodate any delays in beginning the
       transition.
 
   ## Example Usage:
@@ -32,6 +33,8 @@
         }
       })
 */
+SC.warn("SC.Animatable is deprecated and will be removed in the next release.  Animation can be achieved by using the .animate method on SC.View.");
+
 SC.Animatable = {
   /** @scope SC.Animatable.prototype */
 
@@ -255,7 +258,7 @@ SC.Animatable = {
       var propertyName = evt.originalEvent.propertyName,
           callback = this._transitionCallbacks[propertyName];
 
-      // only callback is animation is not disabled; assume if anim was 
+      // only callback is animation is not disabled; assume if anim was
       // disabled we already invoked the callback..
       if(callback && this._disableAnimation<=0) {
         SC.Animatable.runCallback(callback);
@@ -754,7 +757,7 @@ SC.Animatable = {
   },
 
   /**
-  Overriden to support animation.
+  Overridden to support animation.
 
   Works by copying the styles to the object's "style" property.
   */
@@ -1079,7 +1082,7 @@ SC.mixin(SC.Animatable, {
   _ticks: 0,
   _timer_start_time: null,
 
-  // the global tiemr interval
+  // the global timer interval
   interval: 10,
 
   // the current time (a placeholder, really)

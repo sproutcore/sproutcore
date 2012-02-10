@@ -28,7 +28,7 @@ Greenhouse.filesController = SC.TreeController.create(SC.CollectionViewDelegate,
   treeItemChildrenKey: "contents",
   
   /**
-    Call this method whenever you want to relaod the files from the server.
+    Call this method whenever you want to reload the files from the server.
   */
   reload: function() {
     var fileQuery = Greenhouse.FILES_QUERY, target = Greenhouse.targetController.get('content');
