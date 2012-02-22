@@ -32,20 +32,24 @@
       @include slices("normal_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
 
       .middle { left: 12px; }
+      .right { right:10px; width:3px }
 
       &.active {
         @include slices("active_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
         .middle { left: 12px; }
+        .right { right:10px; width:3px }
       }
 
       &.sel, &.def {
         @include slices("selected_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
         .middle { left: 12px; }
+        .right { right:10px; width:3px }
       }
 
       &.sel.active, &.def.active {
         @include slices("selected_active_button_pointer.png", $left: 12, $right: 12, $skip: middle right);
         .middle { left: 12px; }
+        .right { right:10px; width:3px }
       }
     }
   }
@@ -55,20 +59,24 @@
       @include slices("normal_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
 
       .middle { right: 12px; }
+      .left { left:10px; width:3px }
 
       &.active {
         @include slices("active_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
         .middle { right: 12px; }
+        .left { left:10px; width:3px }
       }
 
       &.sel, &.def {
         @include slices("selected_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
         .middle { right: 12px; }
+        .left { left:10px; width:3px }
       }
 
       &.sel.active, &.def.active {
         @include slices("selected_active_button_pointer.png", $left: 12, $right: 12, $skip: middle left);
         .middle { right: 12px; }
+        .left { left:10px; width:3px }
       }
     }
   }
