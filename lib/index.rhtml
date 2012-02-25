@@ -8,37 +8,41 @@
    # See the comments in this file for more information on what you can
    # change.
 -%>
-<!DOCTYPE html>
-<html<% unless @content_for_html5_manifest.blank? %> manifest="app.manifest"<% end %>>
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="<%=language%>"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang="<%=language%>"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang="<%=language%>"> <![endif]-->
+<!--[if gt IE 8]><!--> <html<% unless @content_for_html5_manifest.blank? %> manifest="manifest.appcache"<% end %> class="no-js" lang="<%=language%>"> <!--<![endif]-->
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge<%= config.chrome_frame ? ',chrome=1' : '' %>" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge<%= config.chrome_frame ? ',chrome=1' : '' %>"  >
 
     <script>
-    var SC_benchmarkPreloadEvents = { headStart: new Date().getTime() };
+      var SC_benchmarkPreloadEvents = { headStart: new Date().getTime() };
+      window.documentElement.className = window.documentElement.className.replace(/(^|\s)no-js(\s|$)/, '$1js$2');
     </script>
 
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta http-equiv="Content-Script-Type" content="text/javascript" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="<%= config.status_bar_style || 'default' %>" />
-    <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"  >
+    <meta http-equiv="Content-Script-Type" content="text/javascript"  >
+    <meta name="apple-mobile-web-app-capable" content="yes"  >
+    <meta name="apple-mobile-web-app-status-bar-style" content="<%= config.status_bar_style || 'default' %>"  >
+    <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"  >
 
     <% if config.touch_enabled %>
     <% if config.precomposed_icon %>
-    <link rel="apple-touch-icon-precomposed" href="<%= sc_static(config.precomposed_icon) %>" />
+    <link rel="apple-touch-icon-precomposed" href="<%= sc_static(config.precomposed_icon) %>"  >
     <% elsif config.icon %>
-    <link rel="apple-touch-icon" href="<%= sc_static(config.icon) %>" />
+    <link rel="apple-touch-icon" href="<%= sc_static(config.icon) %>"  >
     <% end %>
     <% if config.startup_image_portrait %>
-    <link rel="apple-touch-startup-image" media="screen and (orientation:portrait)" href="<%= sc_static(config.startup_image_portrait) %>" />
+    <link rel="apple-touch-startup-image" media="screen and (orientation:portrait)" href="<%= sc_static(config.startup_image_portrait) %>"  >
     <% end %>
     <% if config.startup_image_landscape %>
-    <link rel="apple-touch-startup-image" media="screen and (orientation:landscape)" href="<%= sc_static(config.startup_image_landscape) %>" />
+    <link rel="apple-touch-startup-image" media="screen and (orientation:landscape)" href="<%= sc_static(config.startup_image_landscape) %>"  >
     <% end %>
     <% end %>
 
     <% if config.favicon %>
-    <link rel="shortcut icon" href="<%= sc_static(config.favicon) %>" type="image/x-icon" />
+    <link rel="shortcut icon" href="<%= sc_static(config.favicon) %>" type="image/x-icon"  >
     <% end %>
 
 
@@ -74,9 +78,9 @@
           SC.APP_IMAGE_ASSETS = <%= image_urls_for_client(nil, { :sprited => true, :x2 => true }).to_json %>;
         } else {
           styles = <%= stylesheet_urls_for_client.to_json %>;
-          SC.APP_IMAGE_ASSETS = <%= image_urls_for_client(nil, { :sprited => true }).to_json %>;          
+          SC.APP_IMAGE_ASSETS = <%= image_urls_for_client(nil, { :sprited => true }).to_json %>;
         }
-        
+
 
         var head = document.getElementsByTagName("head")[0],
             len = styles.length, idx, css;
@@ -102,7 +106,7 @@
 -%>
   <body class="<%= [theme_name(:default => 'sc-theme'), 'sc-focus'].compact.join(' ') %>">
     <script>
-    SC.benchmarkPreloadEvents['bodyStart'] = new Date().getTime();
+      SC.benchmarkPreloadEvents['bodyStart'] = new Date().getTime();
     </script>
 <% # This section is used to setup additional optional class names on the
    # body content based on JS-selected conditions.  Use this to make sure you
@@ -188,7 +192,7 @@
 <%= @content_for_designer -%>
 
   <script>
-  SC.benchmarkPreloadEvents['bodyEnd'] = new Date().getTime();
+    SC.benchmarkPreloadEvents['bodyEnd'] = new Date().getTime();
   </script>
-	</body>
+  </body>
 </html>
