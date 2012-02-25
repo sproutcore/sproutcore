@@ -1791,7 +1791,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // collect status and process
       status = this.readStatus(storeKey);
 
-      if ((status == K.EMPTY) || (status == K.ERROR)) {
+      if (status == K.ERROR) {
         throw K.NOT_FOUND_ERROR ;
       }
       else {
@@ -1813,7 +1813,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         } else if (status==K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
         }
-        // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING,
+        // ignore K.EMPTY, K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING,
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
       }
     }
