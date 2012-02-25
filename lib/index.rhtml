@@ -9,10 +9,7 @@
    # change.
 -%>
 <!doctype html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="<%=language%>"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang="<%=language%>"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9" lang="<%=language%>"> <![endif]-->
-<!--[if gt IE 8]><!--> <html<% unless @content_for_html5_manifest.blank? %> manifest="manifest.appcache"<% end %> class="no-js" lang="<%=language%>"> <!--<![endif]-->
+<html<% unless @content_for_html5_manifest.blank? %> manifest="manifest.appcache"<% end %> class="no-js" lang="<%=language%>">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge<%= config.chrome_frame ? ',chrome=1' : '' %>"  >
 
