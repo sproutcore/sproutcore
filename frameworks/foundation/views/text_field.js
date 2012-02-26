@@ -65,6 +65,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   isTextArea: NO,
 
+  /** @private
+    Override to specify the HTML element type to use as the field. For
+    example, "input" or "textarea".
+  */
+  _inputElementTagName: function() {
+    var tagName = this.get("isTextArea") ? 'textarea' : 'input';
+    return tagName;
+  },
+
+
   /**
     The hint to display while the field is not active.
 
@@ -638,7 +648,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
     }
     else {
-      var input= this.$input(),
+      var input=this.$input(),
           elem = input[0],
           val = this.get('value');
 
