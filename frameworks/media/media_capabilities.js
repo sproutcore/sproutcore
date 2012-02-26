@@ -56,7 +56,7 @@ SC.mediaCapabilities = SC.Object.create(
    * 
    * @type Boolean
    */
-  hasVideoRecorder : function() {
+  hasVideoCamera : function() {
     return this.get('isFlashSupported') || this.get('isHTML5StreamApiSupported');
   }.property('isFlashSupported', 'isHTML5StreamApiSupported').cacheable(),
 

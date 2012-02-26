@@ -142,28 +142,18 @@ test("Test HTML5 User Media Support", function() {
 test("Test Video Recording support", function() {
   // This is true if we either have flash available or if we support user media.
   var isRecordingSupported = SC.mediaCapabilities.get('isHTML5StreamApiSupported') || SC.mediaCapabilities.get('isFlashSupported');
-  equals(SC.mediaCapabilities.get('hasVideoRecorder'), isRecordingSupported, "Video Recording support flag must match what we've found in the browser");
+  equals(SC.mediaCapabilities.get('hasVideoCamera'), isRecordingSupported, "Camera support flag must match what we've found in the browser");
 });
 
 /**
- * Check for video recording support. This test assumes all previous tests have
- * passed.
- */
-test("Test Video Recorder detection", function() {
-  // This is true if we either have flash available or if we support user media.
-  var isRecordingSupported = SC.mediaCapabilities.get('isHTML5StreamApiSupported') || SC.mediaCapabilities.get('isFlashSupported');
-  equals(SC.mediaCapabilities.get('hasMicrophone'), isRecordingSupported, "Microphone support flag must match what we've found in the browser");
-});
-
-/**
- * Check for video recording support. This test assumes all previous tests have
+ * Check for microphone support. This test assumes all previous tests have
  * passed.
  */
 test("Test Microphone detection", function() {
   // This is true if we either have flash available or if we support user media.
   var isRecordingSupported = SC.mediaCapabilities.get('isHTML5StreamApiSupported') || SC.mediaCapabilities.get('isFlashSupported');
   equals(SC.mediaCapabilities.get('hasMicrophone'), isRecordingSupported, "Microphone support flag must match what we've found in the browser");
-}); 
+});
 
 /**
  * Check for video playback support. This test assumes all previous tests have
