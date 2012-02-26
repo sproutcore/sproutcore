@@ -7,7 +7,9 @@
 
 sc_require('views/controls');
 sc_require('views/mini_controls');
-/**
+sc_require('media_capabilities');
+
+/** 
   @class
 
   Renders a audioView using different technologies like HTML5 audio tag,
@@ -60,12 +62,37 @@ SC.AudioView = SC.View.extend(
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
+<<<<<<< HEAD
     Current time in secs
     @property {Number}
   */
   currentTime: 0,
 
   /**
+=======
+     Current time in secs
+     
+     @property {Number}
+   */
+  currentTime : function(key, value) {
+    if (!SC.empty(value)) {
+      this._currentTime = value;
+      this.seek(value);
+    }
+
+    return this._currentTime;
+  }.property('_currentTime'),
+
+  /**
+     Current time in secs
+     
+     @property {Number}
+     @private
+   */
+  _currentTime : 0,
+  
+  /** 
+>>>>>>> 345536a... Added correct sc_require directives.
     Duration in secs
     @property {Number}
   */
@@ -287,11 +314,12 @@ SC.AudioView = SC.View.extend(
       });
     }) ;
 
-    SC.Event.add(audioElem, 'timeupdate', this, function () {
+    SC.Event.add(audioElem, 'timeupdate', this, function() {
       SC.run(function() {
-        view.set('currentTime', audioElem.currentTime);
+        view._currentTime = audioElem.currentTime;
+        view.propertyDidChange('currentTime');
       });
-    }) ;
+    });
 
     SC.Event.add(audioElem, 'loadstart', this, function () {
       SC.run(function() {
@@ -484,14 +512,16 @@ SC.AudioView = SC.View.extend(
 
     SC.Event.add(audioElem, 'qt_pause', this, function () {
       SC.run(function() {
-        view.set('currentTime', media.GetTime()/media.GetTimeScale());
+        view._currentTime = media.GetTime() / media.GetTimeScale();
+        view.propertyDidChange('currentTime');
         view.set('paused', YES);
       });
     });
 
     SC.Event.add(audioElem, 'qt_play', this, function () {
       SC.run(function() {
-        view.set('currentTime', media.GetTime()/media.GetTimeScale());
+        view._currentTime = media.GetTime() / media.GetTimeScale();
+        view.propertyDidChange('currentTime');
         view.set('paused', NO);
       });
     });
@@ -537,8 +567,9 @@ SC.AudioView = SC.View.extend(
      @returns {void}
    */
   _qtTimer:function(){
-    if(this.loaded==='quicktime' && !this.get('paused')){
-      this.incrementProperty('currentTime');
+    if (this.loaded === 'quicktime' && !this.get('paused')) {
+      this.incrementProperty('_currentTime');
+      view.propertyDidChange('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),

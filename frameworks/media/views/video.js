@@ -8,7 +8,7 @@
 
 sc_require('views/controls');
 sc_require('views/mini_controls');
-sc_require('media_capablities');
+sc_require('media_capabilities');
 
 /**
   @class
