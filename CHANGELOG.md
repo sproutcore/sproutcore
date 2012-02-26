@@ -4,10 +4,74 @@ CHANGE LOG FOR 1.6+
 1.8.0
 ----------
 
-### MINOR FEATURES
+### CHANGES & FEATURES
 
-* Added Safari Lion browser detection.
-* Speed improvements in renderContext, switching from joining arrays of strings to simple string concatenation.
+* Addition of `invokeNext` to SC.RunLoop (easily accessed from SC.Object).
+  This function invokes the passed target/method pair once at the beginning of
+  the next runloop, before any other methods (including events) are processed.
+  Use this to defer painting to make views more responsive.
+
+  If you call this with the same target/method pair multiple times it will
+  only invoke the pair only once at the beginning of the next runloop.
+* Addition of `invokeOnceLater` to SC.Object.  A convenience method which makes
+  it easy to coalesce invocations to ensure that the method is only called
+  once. This is useful if you need to schedule a call but only want it to
+  trigger once after some defined interval has passed.
+* Desktop framework thoroughly updated to include WAI-ARIA attributes for
+  improved compatibility with assistive technologies.
+* Addition of routing integration with SC.Statechart. States can be made to
+  represent a route (by default SC.routes routes) and if assigned then the
+  state will be notified to handle the route when triggered any time the app's
+  location changes to match the state's assigned route.
+* Added `mult` extension to String that multiplies a string a given number of
+  times. [5a2aee1]
+* Addition of SC.StatechartDelegate mixin. Apply this to objects that are to
+  represent a delegate for a SC.Statechart object.  When assigned to a
+  statechart, the statechart and its associated states will use the delegate
+  in order to make various decisions.
+* TextFieldView has a new property'hintOnFocus' which uses a div to act in place
+  of the regular 'placeholder' so that it remains visible when the text field
+  has focus.
+* SC.TextFieldView long placeholders will show ellipsis if too long. [ab66960]
+* Rewrite of SC.browser.  Matches more browsers correctly and replaces the
+  potpourri of various properties with seven standard properties: device, name,
+  version, os, osVersion, engine and engineVersion with matching constants:
+  SC.BROWSER, SC.DEVICE, SC.OS, SC.ENGINE.
+* Added a function SC.RunLoop.wrapFunction, which, when called on a function,
+  returns a version wrapped in code that ensures a run loop. [de83d88]
+* Created a new object SC.bodyOverflowArbitrator, which, given requests for
+  body overflow:hidden; or overflow:visible; will decide which overflow to
+  assign. Objects issue, then change or withdraw their requests. Previously,
+  views may have set the body overflow directly, which would lead to
+  unpredictable behavior when more than one object had an interest in the
+  setting at one time. [c55e32b]
+* APP_IMAGE_ASSETS is a new global array that contains the list of all sprited
+  images, this is ideal to preload images at different points. Even before the
+  app or SC finishes loading. [31c2239]
+* Added support for text selection in SC.TextFieldSupport. [1dcc289]
+* Don't throw an exception if there are SC.Record.EMPTY records in the store and
+  calling commitRecords on the store.
+* Changed getDelegateProperty of SC.DelegateSupport to not accept null as a
+  valid value.
+* Updated Handlebars to version 1.0.0.beta.4. [e80d40d]
+* Added helper method `patchUrl` to SC.Request. [5e955ce]
+* Throw an error in development mode when passing an incorrect parameter to
+  SC.IndexSet.create.
+* Added default itemTagNames for 'dl' and 'select' collection tagNames in
+  TemplateCollectionView. [73c3f84]
+* Don't allow disabled radio buttons to be checked in SC.RadioView. [99e47b1]
+* Moved all TemplateView code into its own framework.  It is still included by
+  default when requiring :sproutcore in your Buildfile, but can easily be
+  excluded by requiring specific frameworks instead.
+* Speed improvement in IE by avoiding excessive focusin/focusout events.
+  [1c817a9]
+* Speed improvements in renderContext, switching from joining arrays of strings
+  to simple string concatenation.
+* SC.TabView places tabs first in the view hierarchy for accessibility.
+  [9e1b4e4]
+* In SC.SelectView, if value object and list objects are both records, compare
+  the store keys to see if they are really the same thing.
+* Added @lang support for multi-lingual text-to-speech voices. [4f9ec80]
 * Faster code escaping using regular expressions instead of DOM.
 * New flag to stop picker repositioning when the window is resized.
 * SegmentedView update to enable/disable overflow.
@@ -25,53 +89,106 @@ CHANGE LOG FOR 1.6+
 * Updated SC.State's getSubstate method to allow for path expressions. Also refacted the findFirstRelativeCurrentState method.
 * New SC globals to provide information like build mode, build number and locale.
 
-### DEPRECATIONS
+### DEPRECATIONS & REMOVALS
 
 * SC.Animatable has been deprecated.  Please use the animate method in SC.View.
 * SC.TableView has been deprecated.  Please use one of the alternative community versions.
 * Several properties of SC.browser have been deprecated.  Please use the standardized properties and matching constants.
+* Removed `minWidth` property in SC.ButtonView. [9ae0a43]
+* Removed unused frameworks: mini and documentation.
+* Removed unnecessary Internet Explorer legacy code.
+* Removed unnecessary font-weight SC.LabelView CSS attribute.
+* Removed zIndex inside SC.TextFieldViews.
+* Removed preload images task for “Chance” slicing system.
+* Removed unnecesary strong reset in YUI reset.
+* Removed unnecessary line-heights for SC.LabelView that caused problems with
+  theme stylings and the global 1.2em line-height.
+* Removed acceleration layer on sliders as it was creating GPU glitches on
+  views appended after the slider.
+* Removed legacy handler of buttons to improve speed.
+* Removed deltaAdjust in scrollView and left only the calculations done in
+  SC.Event.
 
 ### BUG FIXES
 
-* Bug fix, when the apps don’t have a first responder at loading time the app throws an error.
-* Tweaked scrolling acceleration and speed to match native scroller.
-* Removed Internet Explorer legacy code.
-* Passing the native event when a focus or blur event is called. This makes it consistent with all the other event handlers.
+* Several new unit tests, fixes for failing unit tests and clean up of outdated
+  tests.
+* The documentation was extensively searched for typographical and
+  grammatical errors and was fixed.
+* Several fixes to Ace styles and images to remove inconsistencies.
+* If the defaultValue of a child attribute returned an array of childRecords,
+  the resulting constructed instance would be an Array, not a ChildArray.
+* Fixed the determination of `hasAcceleratedLayer` for accelerated Views.
+* Fix 'x' & 'y' values returned by SC.pointInElement.  Note: This method is the
+  most correct way to test the inclusion of a point within a DOM element.
+* Fix `rangeStartForIndex` in SC.IndexSet when encountering holes where hints
+  should have pointed. [506752b]
+* Fix in Handlebars template integration, so that the triple-stash {{{ doesn't
+  escape values and only {{ does. [7d3703d]
+* Fixed adding `.sc-complete` class to SC.ProgressView when the maximum is
+  reached. [98b4ce5]
+* Fixed inline text field view attempting to be blurred after it is destroyed.
+  [fe18943]
+* ListItemViews edited inline can work with a validator.
+* Fixed bug in TemplateCollectionView where specifying a tagName in the
+  itemView or itemViewOptions wouldn't properly override default itemTagNames.
+  [73c3f84]
+* Fixes to improve scrolling acceleration and speed in different browsers,
+  including OS X Lion.
+* Fixed the ENDS_WITH conditional in SC.query to return correct results.
+  [63e5492]
+* Fixes to SC.FlowedLayout: remove name collision with maxSpacerLength, removed
+  extra adjust calls, and fixed to work better with border properties in
+  layouts. [15472f8]
+* Fix in SC.RootResponder for double keydown event with wrong charcode when
+  modifier key is held down. [eb7b59e]
+* Fixed case where Views with useStaticLayout == true would return improper
+  measurements for `frame`. [91eca04]
+* If you clicked on a checkbox but let go of the mouse when not over it, it
+  behaved like you clicked it. [a4ebdcc]
+* Fixed some datastore issues when using key values that were different than
+  the association property names. [80efcdb]
+* Fixed the body overflow decision in SC.Panes by using > and < instead of >=
+  and <=. This keeps overflow properly hidden when size equals min size.
+  [7dfe46d]
+* Fixed the positioning/initial selection of the popup menus in SC.SelectView,
+  which was about 1px off. [51f31ff]
+* Fixed crash in InlineEditor mixin when beginEditing and commitEditing were
+  called in the same runloop. [3c124cc]
+* TextFieldView now correctly hides the text when the field type is password.
+  [7df3c4b]
+* Fixed tooltip for image buttons. [dcbf4ec]
+* Tabbing was not respecting modal panes. Fixed so that textfields get a
+  tabindex=-1 when they are not in the modal pane. [4313d5f]
+* When apps didn't have a first responder at loading time the app would throw
+  an error.
+* Passing the native event when a focus or blur event is called. This makes it
+  consistent with all the other event handlers.
 * Workarounds for mobileSafari touch handling in textfields and links.
 * IE was getting two blur/focus events.
 * Small bug fix for timers when there is no currentRunLoop.
-* Unit test updates for renderContext.
 * Reverted change to receive focus if it the view becomes key responder.
 * Disabling layout style calculations for opacity in IE, as this will always break transparent pngs.
 * Changed code to get a reliable anchor for pickers and menus.
 * Reposition pickers based on the size of the app and not the window viewport.
 * Added tooltips back to button.
 * Fix for popup_buttons as they were not rendering as expected.
-* Removing acceleration layer on sliders as this was creating GPU glitches on views appended after the slider.
-* Removing legacy handler of buttons to improve speed.
 * Bug fix to update list scrollers when adding new items to the list.
 * Changed timeout value for a faster experience in menu scrolling.
-* Removed deltaAdjust in scrollView and left only the calculations done in SC.Event.
 * Updated values in select button to fix rendering regressions.
 * Refactored childViews creation in formView.
 * Updated new selectView to correctly support width resizing.
-* Better string measurements for autoResize mixin. Also included the support to auto fit text (reduce font size if neccessary.
+* Better string measurements for autoResize mixin. Also included the support to
+  auto fit text (reduce font size if necessary).
 * FlowedLayout fixes when the view changes visibility and code clean up.
 * Added back hints to labels.
-* Removed unneccesary font-weight label css attribute.
-* Removed zIndex in text-fields.
-* Removed preload images task for “Chance” slicing system .
 * Several modular loading bug fixes, including support for css.
 * Bug fix for string measurement. It was double escaping.
-* Observers failing in IE as strings don’t work as arrays.
+* Observers failing in IE as strings don't work as arrays.
 * Don't schedule multiple run loops when we only need one in SC.Binding.
 * Add in support for specifying an optional prefix that will be applied to all messages.
-* Updated observable unit tests
-* Updated SC.Logger unit tests
 * Updated SC.State's getSubstate method to allow for path expressions.
-* Updated Statechart unit tests
-* Updated state charts unit tests
-* Updated css to match abbot css fixes for $skip parameter in chance.
+* Updated css to match Abbot css fixes for $skip parameter in chance.
 * Added css style namespace to sc-focus, this was generating problems when focusing the elements the first time in the app.
 
 1.6.0
@@ -707,7 +824,8 @@ are all passing.
 CHANGE LOG FOR 1.4
 ==================
 
-DISCLAIMER: This is a very rough and not comprehensive overview of the 1000+ commits that formed SproutCore 1.4.
+DISCLAIMER: This is a very rough and not comprehensive overview of the 1000+
+commits that formed SproutCore 1.4.
 
 MAJOR
 -----
