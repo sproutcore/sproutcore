@@ -8,6 +8,7 @@
 
 sc_require('views/controls');
 sc_require('views/mini_controls');
+sc_require('media_capablities');
 
 /**
   @class
@@ -151,21 +152,25 @@ SC.VideoView = SC.View.extend(
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
-          // TODO: this doesn't seem like the best way to determine what tags to use!
-          if(SC.browser.name === SC.BROWSER.safari){
-            context.push('<video src="'+this.get('value')+'"');
-            if(this.poster){
-              context.push(' poster="'+this.poster+'"');
-            }
-            // if(SC.browser.touch){
-            //               context.push(' controls="true"');
-            //             }
-            context.push('/>');
-            this.loaded='html5';
-            return;
+          if(!SC.mediaCapabilities.get('isHTML5VideoSupported'))
+          {
+            break;
           }
-          break;
+          context.push('<video src="'+this.get('value')+'"');
+          if(this.poster){
+            context.push(' poster="'+this.poster+'"');
+          }
+          // if(SC.browser.touch){
+          //               context.push(' controls="true"');
+          //             }
+          context.push('/>');
+          this.loaded='html5';
+          return;
         case "quicktime":
+          if(!SC.mediaCapabilities.get('isQuicktimeSupported'))
+          {
+            break;
+          }
           // TODO: this doesn't seem like the best way to determine what tags to use!
           if(SC.browser.name === SC.BROWSER.ie){
             context.push('<object id="qt_event_source" '+
@@ -204,6 +209,10 @@ SC.VideoView = SC.View.extend(
           this.loaded='quicktime';
           return;
         case "flash":
+          if(!SC.mediaCapabilities.get('isFlashSupported'))
+          {
+            break;
+          }
           var flashURL= sc_static('videoCanvas.swf');
 
           var movieURL = this.get('value');
