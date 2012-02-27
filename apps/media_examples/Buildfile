@@ -1,0 +1,13 @@
+# ==========================================================================
+# Project:   MediaExamples - A Media Playback Sandbox.
+# Copyright: ©2012 Michael Krotscheck and contributors.
+# License:   Licensed under MIT license (see license.js)
+# ==========================================================================
+
+config :media_examples,
+	:css_theme => 'ace',
+	:required => [
+		"sproutcore",
+		"media"
+	]
+
