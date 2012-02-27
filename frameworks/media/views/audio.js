@@ -62,20 +62,12 @@ SC.AudioView = SC.View.extend(
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
-<<<<<<< HEAD
-    Current time in secs
-    @property {Number}
-  */
-  currentTime: 0,
-
-  /**
-=======
      Current time in secs
      
      @property {Number}
    */
   currentTime : function(key, value) {
-    if (!SC.empty(value)) {
+    if (!SC.empty(value) && this._currentTime != value) {
       this._currentTime = value;
       this.seek(value);
     }
@@ -92,7 +84,6 @@ SC.AudioView = SC.View.extend(
   _currentTime : 0,
   
   /** 
->>>>>>> 345536a... Added correct sc_require directives.
     Duration in secs
     @property {Number}
   */
@@ -584,44 +575,15 @@ SC.AudioView = SC.View.extend(
     var timeInSecs, totaltimeInSecs, formattedTime, media=this._getAudioObject();
     if(this.loaded==='html5'){
       // also check for media && media.currentTime, because media.currentTime doesn't exist on value change
-      if(this.get('paused') && media && media.currentTime) media.currentTime=this.get('currentTime');
+      if(media && media.currentTime) media.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
-      if(this.get('paused')) media.SetTime(this.get('currentTime')*media.GetTimeScale());
+      media.SetTime(this.get('currentTime')*media.GetTimeScale());
     }
     if(this.loaded==='flash'){
-      if(this.get('paused')) media.setTime(this.get('currentTime'));
-    }
-  }.observes('currentTime'),
-
-  /**
-    Should be called once the progress view is clicked to stop the event and
-    later start seeking.
-
-    @returns {void}
-  */
-  startSeek: function(){
-    if(!this.get('paused')) {
-      SC.Logger.log('startseetk');
-      this.stop();
-      this._wasPlaying = true;
+      media.setTime(this.get('currentTime'));
     }
   },
-
-  /**
-    Should be called once the progress view gets a mouseUp. It will get the
-    player to continue playing if it was playing before starting the seek.
-
-    @returns {void}
-  */
-  endSeek: function(){
-    if(this._wasPlaying) {
-      SC.Logger.log('startseetk');
-      this.play();
-      this._wasPlaying = false;
-    }
-  },
-
 
   /**
     Set the volume of the audio.
