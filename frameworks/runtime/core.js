@@ -39,7 +39,7 @@ window.SproutCore = window.SproutCore || SC ;
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.7.1.beta
+  @version 1.8.0
   @namespace
 
   All SproutCore methods and functions are defined
@@ -59,7 +59,7 @@ window.SproutCore = window.SproutCore || SC ;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = '1.7.1.beta';
+SC.VERSION = '1.8.0';
 
 /**
   @private
@@ -181,7 +181,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
 
     Use this instead of the built-in typeOf() to get the type of an item.
     It will return the same result across all browsers and includes a bit
-    more detail. 
+    more detail.
 
     @param {Object} item the item to check
     @returns {String} One of the following, depending on the type of the item<br>
@@ -208,7 +208,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     if (nativeType === "function") {
       return item.isClass ? SC.T_CLASS : SC.T_FUNCTION;
     } else if (nativeType === "object") {
-      
+
       // Note: typeOf() may be called before SC.Error has had a chance to load
       // so this code checks for the presence of SC.Error first just to make
       // sure.  No error instance can exist before the class loads anyway so
@@ -663,9 +663,9 @@ SC.mixin(/** @scope window.SC.prototype */ {
   /**
     Convenience method to inspect an object.  This method will attempt to
     convert the object into a useful string description.
-    
+
     @param {Object} obj The object you want to inspect.
-    
+
     @returns {String} A description of the object
   */
   inspect: function(obj) {
