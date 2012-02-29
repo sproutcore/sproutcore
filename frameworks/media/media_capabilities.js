@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ¬©2012 Michael Krotscheck and contributors.
+// Copyright: ©2012 Michael Krotscheck and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -19,64 +19,107 @@
  * @since SproutCore 1.8
  * @author Michael Krotscheck
  */
-SC.mediaCapabilities = SC.Object.create(
-/** @scope SC.mediaCapabilities */
-{
-  /**
-   * Specifies whether the browser has audio playback capabilities.
-   * 
-   * @type Boolean
-   */
-  hasAudioPlayback : function() {
-    return this.get('isHTML5AudioSupported') || this.get('isQuicktimeSupported') || this.get('isFlashSupported');
-  }.property('isHTML5AudioSupported', 'isQuicktimeSupported', 'isFlashSupported').cacheable(),
+SC.mediaCapabilities = SC.Object.create({});
 
-  /**
-   * Specifies whether the browser has video playback capabilities.
-   * 
-   * @type Boolean
-   */
-  hasVideoPlayback : function() {
-    return this.get('isHTML5VideoSupported') || this.get('isQuicktimeSupported') || this.get('isFlashSupported');
-  }.property('isHTML5VideoSupported', 'isQuicktimeSupported', 'isFlashSupported').cacheable(),
+console.log("FOO");
 
+/**
+ * Automatic detection of various browser media capabilities.
+ */
+(function() {
   /**
-   * Specifies whether the browser supports audio recording via the HTML5 stream
-   * API or the Adobe Flash plugin.
-   * 
-   * @type Boolean
-   */
-  hasMicrophone : function() {
-    return this.get('isFlashSupported') || this.get('isHTML5StreamApiSupported');
-  }.property('isFlashSupported', 'isHTML5StreamApiSupported').cacheable(),
-
-  /**
-   * Specifies whether the browser supports video recording via the HTML5 stream
-   * API or the Adobe Flash Plugin.
-   * 
-   * @type Boolean
-   */
-  hasVideoCamera : function() {
-    return this.get('isFlashSupported') || this.get('isHTML5StreamApiSupported');
-  }.property('isFlashSupported', 'isHTML5StreamApiSupported').cacheable(),
-
-  /**
-   * Specifies whether the browser supports the HTML5 <audio> tag. Versions are
-   * taken from http://caniuse.com
+   * Specifies whether the browser supports the HTML5 <audio> tag. Versions
+   * are taken from http://caniuse.com
    * 
    * @see http://caniuse.com
+   * @name SC.mediaCapabilities.isHTML5AudioSupported
    * @type Boolean
    */
-  isHTML5AudioSupported : function() {
-    try {
-      var doc = document.createElement('audio');
-      isAudioSupported = !!doc.canPlayType;
-      delete doc;
-      return isAudioSupported;
-    } catch (e) {
-      return NO;
+  SC.mediaCapabilities.isHTML5AudioSupported = NO;
+  try {
+    var doc = document.createElement('audio');
+    isAudioSupported = !!doc.canPlayType;
+    delete doc;
+    SC.mediaCapabilities.isHTML5AudioSupported = YES;
+  } catch (e) {
+  }
+
+  /**
+   * Specifies whether the browser supports the HTML5 <video> tag.
+   * 
+   * @name SC.mediaCapabilities.isHTML5AudioSupported
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isHTML5VideoSupported = NO;
+  try {
+    var doc = document.createElement('video');
+    isVideoSupported = !!doc.canPlayType;
+    delete doc;
+    SC.mediaCapabilities.isHTML5VideoSupported = YES;
+  } catch (e) {
+  }
+
+  /**
+   * Specifies whether the browser supports the Adobe Flash plugin.
+   * 
+   * @name SC.mediaCapabilities.isHTML5AudioSupported
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isFlashSupported = NO;
+  // Non-IE detection
+  if (navigator.plugins) {
+    for ( var i = 0; i < navigator.plugins.length; i++) {
+      if (navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
+        SC.mediaCapabilities.isFlashSupported = YES;
+      }
     }
-  }.property().cacheable(),
+  }
+  // IE ActiveX detection
+  if (window.ActiveXObject) {
+    try {
+      var control = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+      delete control;
+      SC.mediaCapabilities.isFlashSupported = YES;
+    } catch (e) {
+      // Do nothing- The ActiveX object isn't available.
+    }
+  }
+
+  /**
+   * Specifies whether the browser supports quicktime media playback.
+   * 
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isQuicktimeSupported = NO;
+
+  // Non-IE detection
+  if (navigator.plugins) {
+    for ( var i = 0; i < navigator.plugins.length; i++) {
+      if (navigator.plugins[i].name.indexOf("QuickTime") >= 0) {
+        SC.mediaCapabilities.isQuicktimeSupported = YES;
+      }
+    }
+  }
+  // IE ActiveX detection
+  if (window.ActiveXObject) {
+    var control = null;
+    try {
+      control = new ActiveXObject('QuickTime.QuickTime');
+      delete control;
+      SC.mediaCapabilities.isQuicktimeSupported = YES;
+    } catch (e) {
+      // Do nothing- the ActiveX object isn't available.
+    }
+
+    try {
+      // This generates a user prompt in Internet Explorer 7
+      control = new ActiveXObject('QuickTimeCheckObject.QuickTimeCheck');
+      delete control;
+      SC.mediaCapabilities.isQuicktimeSupported = YES;
+    } catch (e) {
+      // Do nothing- The ActiveX object isn't available.
+    }
+  }
 
   /**
    * Specifies whether the browser supports the HTML5 getUserMedia/Stream API.
@@ -85,97 +128,43 @@ SC.mediaCapabilities = SC.Object.create(
    * likely to change frequently. It's included here for the sake of
    * completeness, however concrete implementations don't yet exist.
    * 
+   * @name SC.mediaCapabilities.isHTML5StreamApiSupported
    * @type Boolean
    */
-  isHTML5StreamApiSupported : function() {
-    return !!navigator.getUserMedia;
-  }.property().cacheable(),
+  SC.mediaCapabilities.isHTML5StreamApiSupported = !!navigator.getUserMedia;
 
   /**
-   * Specifies whether the browser supports the HTML5 <video> tag.
+   * Specifies whether the browser supports audio recording via the HTML5
+   * stream API or the Adobe Flash plugin.
    * 
+   * @name SC.mediaCapabilities.hasMicrophone
    * @type Boolean
    */
-  isHTML5VideoSupported : function() {
-    try {
-      var doc = document.createElement('video');
-      isVideoSupported = !!doc.canPlayType;
-      delete doc;
-      return isVideoSupported;
-    } catch (e) {
-      return NO;
-    }
-  }.property().cacheable(),
+  SC.mediaCapabilities.hasMicrophone = SC.mediaCapabilities.isHTML5StreamApiSupported || SC.mediaCapabilities.isFlashSupported;
 
   /**
-   * Specifies whether the browser supports quicktime media playback.
+   * Specifies whether the browser supports video recording via the HTML5
+   * stream API or the Adobe Flash Plugin.
    * 
+   * @name SC.mediaCapabilities.hasMicrophone
    * @type Boolean
    */
-  isQuicktimeSupported : function() {
-
-    // Non-IE detection
-    if (navigator.plugins) {
-      for ( var i = 0; i < navigator.plugins.length; i++) {
-        if (navigator.plugins[i].name.indexOf("QuickTime") >= 0) {
-          return YES;
-        }
-      }
-    }
-
-    // IE ActiveX detection
-    if (window.ActiveXObject) {
-      var control = null;
-      try {
-        control = new ActiveXObject('QuickTime.QuickTime');
-        delete control;
-        return YES;
-      } catch (e) {
-        // Do nothing- the ActiveX object isn't available.
-      }
-
-      try {
-        // This generates a user prompt in Internet Explorer 7
-        control = new ActiveXObject('QuickTimeCheckObject.QuickTimeCheck');
-        delete control;
-        return YES;
-      } catch (e) {
-        // Do nothing- The ActiveX object isn't available.
-      }
-    }
-
-    // We didn't find it.
-    return NO;
-  }.property().cacheable(),
+  SC.mediaCapabilities.hasVideoCamera = SC.mediaCapabilities.isHTML5StreamApiSupported || SC.mediaCapabilities.isFlashSupported;
 
   /**
-   * Specifies whether the browser supports the Adobe Flash plugin.
+   * Specifies whether the browser has audio playback capabilities.
    * 
+   * @name SC.mediaCapabilities.hasAudioPlayback
    * @type Boolean
    */
-  isFlashSupported : function() {
+  SC.mediaCapabilities.hasAudioPlayback = SC.mediaCapabilities.isHTML5AudioSupported || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
 
-    // Non-IE detection
-    if (navigator.plugins) {
-      for ( var i = 0; i < navigator.plugins.length; i++) {
-        if (navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
-          return YES;
-        }
-      }
-    }
+  /**
+   * Specifies whether the browser has video playback capabilities.
+   * 
+   * @name SC.mediaCapabilities.hasVideoPlayback
+   * @type Boolean
+   */
+  SC.mediaCapabilities.hasVideoPlayback = SC.mediaCapabilities.isHTML5VideoSupported || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
 
-    // IE ActiveX detection
-    if (window.ActiveXObject) {
-      try {
-        var control = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-        delete control;
-        return YES;
-      } catch (e) {
-        // Do nothing- The ActiveX object isn't available.
-      }
-    }
-
-    // We didn't find it.
-    return NO;
-  }.property().cacheable(),
-});
+})();

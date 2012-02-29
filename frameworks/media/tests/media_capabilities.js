@@ -6,32 +6,7 @@
 // ==========================================================================
 
 module("SC.mediaCapabilities", {
-  setup : function() {
-    // Store these so we can reset all this later.
-    oldBrowserAgent = navigator.userAgent;
-    oldBrowserLanguage = navigator.language || navigator.browserLanguage;
-    oldCompareVersion = SC.browser.compareVersion;
-  },
-  teardown : function() {
-    SC.browser = SC._detectBrowser(oldBrowserAgent, oldBrowserLanguage);
-    SC.browser.compareVersion = oldCompareVersion;
-    delete oldBrowserAgent;
-    delete oldBrowserLanguage;
-    delete oldCompareVersion;
-  }
 });
-
-/**
- * Helper function, resets the user agent in the browser detection.
- * 
- * @param userAgentString
- * @param language
- */
-function resetUserAgent(userAgentString, language) {
-  SC.browser = SC._detectBrowser(userAgentString, oldBrowserLanguage);
-  SC.browser.compareVersion = oldCompareVersion;
-  delete SC.browser._versionSplit;
-}
 
 /**
  * Is Flash supported?
@@ -67,7 +42,7 @@ test("Test Flash Support", function() {
     }
   }
 
-  equals(SC.mediaCapabilities.get('isFlashSupported'), doesFlashExist, "Flash plugin result must match what the browser supports.");
+  equals(SC.mediaCapabilities.isFlashSupported, doesFlashExist, "Flash plugin result must match what the browser supports.");
 });
 
 /**
@@ -93,7 +68,7 @@ test("Test Quicktime Support", function() {
     }
   }
 
-  equals(SC.mediaCapabilities.get('isQuicktimeSupported'), doesQuicktimeExist, "Quicktime plugin result must match what the browser supports.");
+  equals(SC.mediaCapabilities.isQuicktimeSupported, doesQuicktimeExist, "Quicktime plugin result must match what the browser supports.");
 });
 
 /**
@@ -108,7 +83,7 @@ test("Test HTML5 Audio Support", function() {
   } catch (e) {
   }
 
-  equals(SC.mediaCapabilities.get('isHTML5AudioSupported'), isAudioSupported, "Audio Support flag must match what we've been able to determine from the browser.");
+  equals(SC.mediaCapabilities.isHTML5AudioSupported, isAudioSupported, "Audio Support flag must match what we've been able to determine from the browser.");
 });
 
 /**
@@ -123,7 +98,7 @@ test("Test HTML5 Video Support", function() {
   } catch (e) {
   }
 
-  equals(SC.mediaCapabilities.get('isHTML5VideoSupported'), isVideoSupported, "Video Support flag must match what we've been able to determine from the browser.");
+  equals(SC.mediaCapabilities.isHTML5VideoSupported, isVideoSupported, "Video Support flag must match what we've been able to determine from the browser.");
 });
 
 /**
@@ -132,7 +107,7 @@ test("Test HTML5 Video Support", function() {
 test("Test HTML5 User Media Support", function() {
 
   var isMediaSupported = !!navigator.getUserMedia;
-  equals(SC.mediaCapabilities.get('isHTML5StreamApiSupported'), isMediaSupported, "Stream Support flag must match what we've been able to determine from the browser.");
+  equals(SC.mediaCapabilities.isHTML5StreamApiSupported, isMediaSupported, "Stream Support flag must match what we've been able to determine from the browser.");
 });
 
 /**
@@ -142,7 +117,7 @@ test("Test HTML5 User Media Support", function() {
 test("Test Video Recording support", function() {
   // This is true if we either have flash available or if we support user media.
   var isRecordingSupported = SC.mediaCapabilities.get('isHTML5StreamApiSupported') || SC.mediaCapabilities.get('isFlashSupported');
-  equals(SC.mediaCapabilities.get('hasVideoCamera'), isRecordingSupported, "Camera support flag must match what we've found in the browser");
+  equals(SC.mediaCapabilities.hasVideoCamera, isRecordingSupported, "Camera support flag must match what we've found in the browser");
 });
 
 /**
@@ -152,7 +127,7 @@ test("Test Video Recording support", function() {
 test("Test Microphone detection", function() {
   // This is true if we either have flash available or if we support user media.
   var isRecordingSupported = SC.mediaCapabilities.get('isHTML5StreamApiSupported') || SC.mediaCapabilities.get('isFlashSupported');
-  equals(SC.mediaCapabilities.get('hasMicrophone'), isRecordingSupported, "Microphone support flag must match what we've found in the browser");
+  equals(SC.mediaCapabilities.hasMicrophone, isRecordingSupported, "Microphone support flag must match what we've found in the browser");
 });
 
 /**
@@ -162,7 +137,7 @@ test("Test Microphone detection", function() {
 test("Test Video Playback detection", function() {
   // This is true if we either have flash available or if we support user media.
   var isVideoPlaybackSupported = SC.mediaCapabilities.get('isHTML5VideoSupported') || SC.mediaCapabilities.get('isQuicktimeSupported') || SC.mediaCapabilities.get('isFlashSupported');
-  equals(SC.mediaCapabilities.get('hasVideoPlayback'), isVideoPlaybackSupported, "Video Playback support flag must match what we've found in the browser");
+  equals(SC.mediaCapabilities.hasVideoPlayback, isVideoPlaybackSupported, "Video Playback support flag must match what we've found in the browser");
 });
 
 /**
@@ -172,5 +147,5 @@ test("Test Video Playback detection", function() {
 test("Test Audio Playback detection", function() {
   // This is true if we either have flash available or if we support user media.
   var isAudioPlaybackSupported = SC.mediaCapabilities.get('isHTML5AudioSupported') || SC.mediaCapabilities.get('isQuicktimeSupported') || SC.mediaCapabilities.get('isFlashSupported');
-  equals(SC.mediaCapabilities.get('hasAudioPlayback'), isAudioPlaybackSupported, "Audio Playback support flag must match what we've found in the browser");
+  equals(SC.mediaCapabilities.hasAudioPlayback, isAudioPlaybackSupported, "Audio Playback support flag must match what we've found in the browser");
 });
