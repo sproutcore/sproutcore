@@ -110,4 +110,48 @@
       .sc-pointer { left: 70px; }
     }
   }
+
+  $theme.picker.perfectLeft {
+    .sc-pointer {
+      z-index: 6;
+      position: absolute; width: 20px; height: 50px; margin-left: -20px; right: 0px; top: 40px;
+      @include slice("popover_pointers.png", $right: 0, $top: 85, $width: 20, $height: 50);
+    }
+
+    &.solid .sc-pointer, .solid .sc-pointer {
+      bottom: 0px;
+      @include slice("popover_pointers.png", $right: 0, $top: 85, $width: 20, $height: 50);
+    }
+
+    .top-toolbar .sc-pointer { 
+      bottom: 0px;
+      @include slice("popover_pointers.png", $right: 0, $top: 85, $width: 20, $height: 50);
+    }
+
+    &.extra-left {
+      .sc-pointer { left: 70px; }
+    }
+  }
+
+  $theme.picker.perfectRight {
+    .sc-pointer {
+      z-index: 6;
+      position: absolute; width: 20px; height: 50px; margin-left: 0px; left: 0px; top: 40px;
+      @include slice("popover_pointers.png", $left: 0, $top: 85, $width: 20, $height: 50);
+    }
+
+    &.solid .sc-pointer, .solid .sc-pointer {
+      bottom: 0px;
+      @include slice("popover_pointers.png", $left: 0, $top: 85, $width: 20, $height: 50);
+    }
+
+    .top-toolbar .sc-pointer { 
+      bottom: 0px;
+      @include slice("popover_pointers.png", $left: 0, $top: 85, $width: 20, $height: 50);
+    }
+
+    &.extra-left {
+      .sc-pointer { left: 70px; }
+    }
+  }
 }
