@@ -114,6 +114,7 @@ CHANGE LOG FOR 1.6+
 
 ### BUG FIXES
 
+* SC.CollectionView's height updates when its length changes. [cb03ec4]
 * Fixed the --dry-run switch for sc-init.
 * Several new unit tests, fixes for failing unit tests and clean up of outdated
   tests.
