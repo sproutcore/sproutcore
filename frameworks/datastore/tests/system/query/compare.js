@@ -36,7 +36,21 @@ module("SC.Query comparison of records", {
     rec3 = MyApp.store.find(MyApp.Foo,3);
     rec4 = MyApp.store.find(MyApp.Foo,4);
     rec5 = MyApp.store.find(MyApp.Foo,5);
-    
+    rec6 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Clark", lastName: "Douglas", active: true });
+    rec7 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Amy", lastName: "Simmons", active: true });
+    rec8 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Fred", lastName: "Chambers", active: false });
+    rec9 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Mari", lastName: "Chambers", active: false });
+    rec10 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Glenn", lastName: "Armour", active: true });
+    rec11 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Jake", lastName: "Timmons", active: true });
+    rec12 = MyApp.store.createRecord(MyApp.Foo, { firstName: "John", lastName: "Fitzgerald", active: true });
+    rec13 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Carly", lastName: "Anderson", active: true });
+    rec14 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Clark", lastName: "Thompson", active: true });
+    rec15 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Indi", lastName: "Karish", active: true });
+    rec16 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Yi Jia", lastName: "Li", active: true });
+    rec17 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Marcel", lastName: "Frontenac", active: true });
+    rec18 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Amie", lastName: "Frontenac", active: true });
+    rec19 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Amelie", lastName: "Auguste", active: true });
+    rec20 = MyApp.store.createRecord(MyApp.Foo, { firstName: "Percy", lastName: "Douglas", active: true });
     
     q = SC.Query.create();
   }
@@ -88,6 +102,44 @@ test("no order should result in comparison by guid", function() {
   q.orderBy = null;
   q.parse();
   equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
+/**
+  This test was added to prove new code that switched from ordering by guid
+  if there is no orderBy property on the query to ordering by storeKey if
+  there is no orderBy property.  The reason is that new records that haven't
+  been committed may not have a guid and therefore comparing null to null
+  would result in the order changing slightly in Chrome when the array length
+  grew over 10 items long.  For some reason if every comparison in the sort
+  returns 0, the first item and second item swap places and then the new first
+  and the middle item swap places (or vice versa).  If you get objectAt(0) on
+  this type of RecordArray, it cycles between three different values.
+
+  See it in action in Chrome 17.0 on Mac:
+
+  > [0,1,2,3,4,5,6,7,8,9].sort(function(a,b) { return 0; })
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  > [0,1,2,3,4,5,6,7,8,9,10].sort(function(a,b) { return 0; })
+    [5, 0, 2, 3, 4, 1, 6, 7, 8, 9, 10]
+    // WTF?  So the next time the RecordArray flushes its array will be
+    // [5, 0, 2, 3, 4, 1, 6, 7, 8, 9, 10] and it keeps changing each flush.
+  > [5, 0, 2, 3, 4, 1, 6, 7, 8, 9, 10].sort(function(a,b) { return 0; })
+    [1, 5, 2, 3, 4, 0, 6, 7, 8, 9, 10]
+*/
+test("storeKeys should maintain order between repeat calls to orderStoreKeys even if the array is longer than 10 items and the matching records have no ids", function() {
+  var records,
+      storeKeysSorted1,
+      storeKeysSorted2,
+      storeKeys;
+
+  q.orderBy = null;
+  q.parse();
+
+  records = MyApp.store.find(MyApp.Foo);
+  records.flush();
+
+  storeKeys = records.get('storeKeys');
+  storeKeysSorted1 = SC.Query.orderStoreKeys(records.get('storeKeys'), q, MyApp.store).copy();
+  storeKeysSorted2 = SC.Query.orderStoreKeys(records.get('storeKeys'), q, MyApp.store).copy();
+  ok(storeKeysSorted1.isEqual(storeKeysSorted2), 'Each time you call orderStoreKeys, it should return the same order if the storeKeys haven\'t changed');
 });
 
 test("comparing non existent properties", function() {
@@ -142,3 +194,4 @@ test("specifying a custom orderBy comparison function", function() {
   equals(q.compare(rec1,rec2), 1, 'guid 2 should be before guid 1');
   equals(usedCustomFunction, YES, 'we should have used our custom comparison function');
 });
+
