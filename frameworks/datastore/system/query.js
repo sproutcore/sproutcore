@@ -52,7 +52,7 @@ sc_require('models/record');
   The default order direction is ascending. You can change it to descending
   by writing `'DESC'` behind the property name like in the example above.
   If no order is given, or records are equal in respect to a given order,
-  records will be ordered by guid.
+  records will be ordered by their storeKey.
 
   SproutCore Query Language
   =====
@@ -395,8 +395,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // if called for the first time we have to build the order array
     if (!this._isReady) this.parse();
-    if (!this._isReady) { // can't parse. guid is wrong but consistent
-      return SC.compare(record1.get('id'),record2.get('id'));
+    if (!this._isReady) { // can't parse, so use storeKey.  Not proper, but consistent.
+      return SC.compare(record1.get('storeKey'),record2.get('storeKey'));
     }
 
     // For every property specified in orderBy until non-eql result is found.
@@ -425,9 +425,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       }
     }
 
-    // return result or compare by guid
+    // return result or compare by storeKey
     if (result !== 0) return result ;
-    else return SC.compare(record1.get('id'),record2.get('id'));
+    else return SC.compare(record1.get('storeKey'),record2.get('storeKey'));
   },
 
   /** @private
