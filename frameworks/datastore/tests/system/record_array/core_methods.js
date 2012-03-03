@@ -64,7 +64,7 @@ test("should materialize record for object", function() {
 });
 
 test("reading past end of array length should return undefined", function() {
-  equals(recs.objectAt(2000), undefined, 'recs.objectAt(2000) should be undeinfed');
+  equals(recs.objectAt(2000), undefined, 'recs.objectAt(2000) should be undefined');
 });
 
 test("modifying the underlying storeKey should change the returned materialized record", function() {

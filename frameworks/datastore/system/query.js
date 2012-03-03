@@ -379,14 +379,6 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                       0 if equal
   */
   compare: function(record1, record2) {
-    // IMPORTANT:  THIS CODE IS ALSO INLINED INSIDE OF THE 'compareStoreKeys'
-    //             CLASS METHOD.  IF YOU CHANGE THIS IMPLEMENTATION, BE SURE
-    //             TO UPDATE IT THERE, TOO.
-    //
-    // (Any clients overriding this method will have their version called,
-    // however.  That's why we'll keep this here; clients might want to
-    // override it and call sc_super()).
-
     var result = 0,
         propertyName, order, len, i;
 
@@ -437,7 +429,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
   /**
     This method has to be called before the query object can be used.
-    You will normaly not have to do this; it will be called automatically
+    You will normally not have to do this; it will be called automatically
     if you try to evaluate a query.
     You can, however, use this function for testing your queries.
 
