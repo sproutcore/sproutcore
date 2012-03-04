@@ -49,6 +49,18 @@ test("Layout direction is Vertical",function() {
   equals(view.getPath('thumbViewCursor.cursorStyle'),"ns-resize",'The Cursor is');
 });
 
+test("Cursor remains correct after drag", function() {
+  view.set('layoutDirection', SC.LAYOUT_HORIZONTAL) ;
+  equals(view.getPath('thumbViewCursor.cursorStyle'), "ew-resize", 'The Cursor is');
+ 	
+ 	// Trigger the action
+ 	var elem = view.getPath('dividerView.layer');
+ 	SC.Event.trigger(elem, 'mousedown'); 	
+ 	SC.Event.trigger(elem, 'mouseup');
+  
+  equals(view.getPath('thumbViewCursor.cursorStyle'), "ew-resize",'The Cursor is');
+});
+
 // 
 // test("performing the mouse up event", function() {
 // 	var elem = thumb.get('layer');
