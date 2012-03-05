@@ -132,7 +132,6 @@ code and ideas:
 - Thomas Lang
 - Tim Evans
 - Tom Dale
-- Tom Huda
 - Tomasz Mazur
 - Trek Glowacki
 - Tyler Keating
