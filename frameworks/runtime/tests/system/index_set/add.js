@@ -20,11 +20,11 @@ function iter(s) {
 
 // ..........................................................
 // BASIC ADDS
-// 
+//
 
 test("add range to end of set", function() {
   set.add(1000,5);
-  equals(set.get('length'), 5, 'should have correct index count');  
+  equals(set.get('length'), 5, 'should have correct index count');
   equals(set.get('max'), 1005, 'max should return 1 past last index');
   same(iter(set), [1000,1001,1002,1003,1004]);
 });
@@ -32,7 +32,7 @@ test("add range to end of set", function() {
 test("add range into middle of empty range", function() {
   set.add(100,2); // add initial set.
   equals(iter(set)[0], 100, 'precond - first index is 100');
-  
+
   // now add second range
   set.add(10,1);
   equals(set.get('length'), 3, 'should have extra length');
@@ -43,7 +43,7 @@ test("add range into middle of empty range", function() {
 test("add range overlapping front edge of range", function() {
   set.add(100,2); // add initial set.
   equals(iter(set)[0], 100, 'precond - first index is 100');
-  
+
   // now add second range
   set.add(99,2);
   equals(set.get('length'), 3, 'should have extra length');
@@ -54,7 +54,7 @@ test("add range overlapping front edge of range", function() {
 test("add range overlapping last edge of range", function() {
   set.add(100,2).add(200,2);
   same(iter(set), [100,101,200,201], 'should have two sets');
-  
+
   // now add overlapping range
   set.add(101,2);
   equals(set.get('length'), 5, 'new set.length');
@@ -65,7 +65,7 @@ test("add range overlapping last edge of range", function() {
 test("add range overlapping two ranges, merging into one", function() {
   set.add(100,2).add(110,2);
   same(iter(set), [100,101,110,111], 'should have two sets');
-  
+
   // now add overlapping range
   set.add(101,10);
   equals(set.get('length'), 12, 'new set.length');
@@ -76,7 +76,7 @@ test("add range overlapping two ranges, merging into one", function() {
 test("add range overlapping three ranges, merging into one", function() {
   set.add(100,2).add(105,2).add(110,2);
   same(iter(set), [100,101,105,106,110,111], 'should have two sets');
-  
+
   // now add overlapping range
   set.add(101,10);
   equals(set.get('length'), 12, 'new set.length');
@@ -87,7 +87,7 @@ test("add range overlapping three ranges, merging into one", function() {
 test("add range partially overlapping one range and replaing another range, merging into one", function() {
   set.add(100,2).add(105,2);
   same(iter(set), [100,101,105,106], 'should have two sets');
-  
+
   // now add overlapping range
   set.add(101,10);
   equals(set.get('length'), 11, 'new set.length');
@@ -99,7 +99,7 @@ test("add range partially overlapping one range and replaing another range, merg
 test("add range overlapping last index", function() {
   set.add(100,2); // add initial set.
   equals(iter(set)[0], 100, 'precond - first index is 100');
-  
+
   // now add second range
   set.add(101,2);
   equals(set.get('length'), 3, 'should have extra length');
@@ -110,17 +110,17 @@ test("add range overlapping last index", function() {
 test("add range matching existing range", function() {
   set.add(100,5); // add initial set.
   equals(iter(set)[0], 100, 'precond - first index is 100');
-  
+
   // now add second range
   set.add(100,5);
   equals(set.get('length'), 5, 'should not change');
   equals(set.get('max'), 105, 'max should return 1 past last index');
-  same(iter(set), [100, 101, 102, 103, 104]);  
+  same(iter(set), [100, 101, 102, 103, 104]);
 });
 
 // ..........................................................
 // NORMALIZED PARAMETER CASES
-// 
+//
 
 test("add with no params should do nothing", function() {
   set.add();
@@ -144,7 +144,7 @@ test("add with index set should add indexes in set", function() {
 
 // ..........................................................
 // OTHER BEHAVIORS
-// 
+//
 
 test("adding a range should trigger an observer notification", function() {
   var callCnt = 0;
@@ -171,7 +171,7 @@ test("appending a range to end should merge into last range", function() {
   equals(set.rangeStartForIndex(3990), 2000, 'last two range should merge together (%@)'.fmt(set.inspect()));
   equals(set.get('max'), 4000, 'should have max');
   equals(set.get('length'), 2000, 'should have length');
-  
+
 });
 
 test("appending range to start of empty set should create a single range", function() {
@@ -179,34 +179,121 @@ test("appending range to start of empty set should create a single range", funct
   equals(set.rangeStartForIndex(1), 0, 'should have single range (%@)'.fmt(set.inspect()));
   equals(set.get('length'), 2, 'should have length');
   equals(set.get('max'), 2, 'should have max');
-  
+
   set = SC.IndexSet.create().add(0,2000);
   equals(set.rangeStartForIndex(1998), 0, 'should have single range (%@)'.fmt(set.inspect()));
   equals(set.get('length'), 2000, 'should have length');
   equals(set.get('max'), 2000, 'should have max');
-  
+
 });
 
 test("add raises exception when frozen", function() {
   should_throw(function() {
-    set.freeze().add(0,2);    
-  }, SC.FROZEN_ERROR);  
+    set.freeze().add(0,2);
+  }, SC.FROZEN_ERROR);
 });
 
 // ..........................................................
 // SPECIAL CASES
-// 
+//
 // demonstrate fixes for specific bugs here.
 
 test("adding in the same range should keep length consistent", function() {
   set = SC.IndexSet.create();
   set.add(1,4);
   equals(set.length, 4, 'set length should be 4');
-  
+
   set.add(1,3); // should be like a no-op
   equals(set.length, 4, 'set length should remain 4 after set.add(1,3)');
 
   set.add(1,2); // should be like a no-op
   equals(set.length, 4, 'set length should remain 4 after set.add(1,2)');
-  
+
+});
+
+test("magic 256 ordering problem causes infinte loop", function() {
+/*
+  //
+  // Simple set of real data boiled down from orig ranges that
+  // exposes the problem
+  //
+  var setGroups = [
+    [[63,1]],
+    [[465,1]],
+    [[64,1]],
+    [[464,1]]
+  ];
+*/
+
+  //
+  // Base case of the problem:
+  // given 4 start indexes
+  //
+  // a1,a2,b1,b2
+  //
+  // such that
+  //
+  // a2 = a1 + 1
+  // b2 = b1 + 1
+  //
+  // if the numbers are added in the order of:
+  //
+  // a1, b1, a2, b2
+  //
+  // and
+  //
+  // b1 > a1 + 255
+  //
+  // an infinite loop occurs in the SC.IndexSet iteration
+  //
+  // the base case problem set is: 1,257,2,256
+
+  // utility function - ignore me - returns all reordered combinations
+  // of length N of an array of length N
+  var orderCombinations = function(numbers) {
+    if (!numbers || !numbers.length) return [];
+    if (numbers.length == 1) return [numbers];
+    if (numbers.length == 2) return [numbers,[numbers[1],numbers[0]]];
+
+    var ret = [], current, others, tmp;
+    for (var i=0,l=numbers.length;i<l;i++) {
+      current = numbers[i];
+      others = orderCombinations(numbers.copy().replace(i,1,null));
+      for (var j=0,lj=others.length;j<lj;j++) {
+        tmp = [];
+        tmp = tmp.concat(current,others[j]);
+        ret.push(tmp);
+      }
+    }
+
+    return ret;
+  };
+
+  var numbers = [1,2,257,256]; // base case numbers
+  var combos = orderCombinations(numbers); // test that all ordered combinations of [1,2,257,256] are tested
+
+  var setGroups = {
+    knownBad: [1,257,2,256],
+    good1: [1,256,2,255] // proof that b1 = a1 + 255 is OK
+  };
+
+  // test all ordered combos
+  for (var i=0,l=combos.length;i<l;i++) {
+    if (!combos[i].isEqual(setGroups.knownBad)) setGroups[i] = combos[i];
+  }
+
+  // run assertions for each combo
+  for(var name in setGroups) if (setGroups.hasOwnProperty(name)) {
+    set = SC.IndexSet.create();
+    setGroups[name].forEach(function(start) {
+                              set.add(start,1);
+                            });
+
+    try {
+      set.forEachRange(function(s,l) {}); // this is the test
+      ok(true, 'set %@ passed'.fmt(name));
+    } catch(e) {
+      ok(false, 'set %@ failed, %@'.fmt(name, setGroups[name]));
+    }
+  }
 });

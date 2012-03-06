@@ -438,6 +438,7 @@ SC.IndexSet = SC.mixin({},
       cur = 0 ;
       next = content[0];
       while(next !== 0) {
+        if (next === undefined) throw new Error('next is undefined');
         if (next>0) this.add(cur, next-cur);
         cur = next<0 ? 0-next : next;
         next = content[cur];
@@ -857,6 +858,8 @@ SC.IndexSet = SC.mixin({},
     while (next !== 0) {
       if (next > 0) callback.call(target, cur, next - cur, this, source);
       cur  = Math.abs(next);
+      // infinite loop results with this error in a very specific case, see test "magic 256 problem"
+      if (isNaN(cur)) throw new Error('not a number in forEachRange');
       next = content[cur];
     }
 
