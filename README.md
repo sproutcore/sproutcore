@@ -36,10 +36,13 @@ code and ideas:
 - Bruz Marzolf
 - Charles Jolley
 - Charlie Lai
+- Cherif Yaya
 - Chris Hyle
 - Christopher M Pieper
 - Christopher Swasey
+- Chuck Edwall
 - Colin Campbell
+- Corey Burrows
 - Cortland Klein
 - Devin Torres
 - Devon Govett
@@ -50,16 +53,20 @@ code and ideas:
 - Ganesh J
 - Gareth Townsend
 - Geoffrey Donaldson
+- Gopal Sharma
 - Gregory Moeck
 - Hemanth Kumar
 - James A. Rosen
 - James Austin
+- James Craig
 - James F. Herdman
 - James Ribar
 - Jason Ketterman
+- Jeff Pittman
 - Jim Benton
 - Jiří Zajpt
 - Joe Gaudet
+- John Rogelstad
 - Jonathan Lewis
 - Joshua Dickens
 - Joshua Holt
@@ -71,6 +78,7 @@ code and ideas:
 - Lawrence Pit
 - Levi McCallum
 - Luke Burton
+- Luke Melia
 - Majd Taby
 - Martin Häcker
 - Martin Ottenwaelter
@@ -80,6 +88,7 @@ code and ideas:
 - Maurits Lamers
 - Michael Cohen
 - Michael Harris
+- Michael Krotscheck
 - Michael Rykov
 - Michal Kurgan
 - Mike Ball
@@ -94,9 +103,11 @@ code and ideas:
 - Nitin Gupta
 - Onar Vikingstad
 - Patrick Walton
+- Paul Chavard
 - Paul Lambert
 - Peter Bergström
 - Peter Wagenet
+- Piotr Sarnacki
 - Piotr Steininger
 - Ray Bodenhorn
 - Rich Harrison
@@ -111,6 +122,7 @@ code and ideas:
 - Sergey Ukustov
 - Steven Tate
 - Sudarshan Bhat
+- Sunny Ripert
 - Suvajit Gupta
 - Tanner Donovan
 - Teresa Tsui
@@ -123,7 +135,10 @@ code and ideas:
 - Tomasz Mazur
 - Trek Glowacki
 - Tyler Keating
+- Umberto Nicoletti
+- Vibul Imtarnasa
 - Vincent Fiano
+- Wesley Workman
 - William Kakes
 - Yehuda Katz
 - Yogesh Kumar
@@ -136,4 +151,5 @@ including:
 * [jQuery](http://www.jquery.com/)
 * [Prototype](http://www.prototypejs.org/)
 * [Datejs](http://www.datejs.com/)
-* [JSON2](http://www.json.org/) 
+* [JSON2](http://www.json.org/)
+ 
