@@ -60,6 +60,7 @@ code and ideas:
 - James Craig
 - James F. Herdman
 - James Ribar
+- Jason Dooley
 - Jason Ketterman
 - Jeff Pittman
 - Jim Benton
@@ -78,6 +79,7 @@ code and ideas:
 - Levi McCallum
 - Luke Burton
 - Luke Melia
+- Mahesh Mukundan
 - Majd Taby
 - Martin Häcker
 - Martin Ottenwaelter
@@ -86,6 +88,7 @@ code and ideas:
 - Matthias Loitsch
 - Maurits Lamers
 - Michael Cohen
+- Michael Gillogly
 - Michael Harris
 - Michael Krotscheck
 - Michael Rykov
@@ -108,12 +111,14 @@ code and ideas:
 - Peter Wagenet
 - Piotr Sarnacki
 - Piotr Steininger
+- Rajesh Segu
 - Ray Bodenhorn
 - Rich Harrison
 - Richard Klancer
 - Rick Russell
 - Rob Linton
 - Robert Buchholz
+- Rodrigo Basa
 - Ryan Mudryk
 - Ryan Nielsen
 - Santhakumar Murugaiyan
@@ -132,6 +137,7 @@ code and ideas:
 - Tim Evans
 - Tom Dale
 - Tomasz Mazur
+- Topher Fangio
 - Trek Glowacki
 - Tyler Keating
 - Umberto Nicoletti
