@@ -86,18 +86,20 @@ test("root_responder.ignoreTouchHandle() : Should ignore TEXTAREA, INPUT, A, and
  var wasMobileSafari = SC.browser.isMobileSafari;
  SC.browser.isMobileSafari = YES;
 
- ["A", "INPUT", "TEXTAREA", "SELECT"].forEach(function (i, tag) {
+ ["A", "INPUT", "TEXTAREA", "SELECT"].forEach(function (tag) {
    ok(responder.ignoreTouchHandle({
-     target: { tagName: tag }
-   }), "should pass touch events through to <" + tag + ">s");
+     target: { tagName: tag },
+     allowDefault: SC.K
+   }), "should pass touch events through to &lt;" + tag + "&gt;s");
  });
 
  ["AUDIO", "B", "Q", "BR", "BODY", "BUTTON", "CANVAS", "FORM",
   "IFRAME", "IMG", "OPTION", "P", "PROGRESS", "STRONG",
-  "TABLE", "TBODY", "TR", "TH", "TD", "VIDEO"].forEach(function (i, tag) {
+  "TABLE", "TBODY", "TR", "TH", "TD", "VIDEO"].forEach(function (tag) {
    ok(!responder.ignoreTouchHandle({
-     target: { tagName: tag }
-   }), "should NOT pass touch events through to <" + tag + ">s");
+     target: { tagName: tag },
+     allowDefault: SC.K
+   }), "should NOT pass touch events through to &lt;" + tag + "&gt;s");
  });
 
  SC.browser.isMobileSafari = wasMobileSafari;
