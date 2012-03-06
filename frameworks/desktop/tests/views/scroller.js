@@ -89,6 +89,11 @@ test('hasButtons', function() {
   equals(view2.$('.button-bottom, .button-top').length, 0, 'scrollers with buttons should not have an up or a down button');  
 });
 
+test('hasThumb', function() {
+  equals(view.$('.thumb').height(), view.get('thumbLength'),  'vertical scroller should have the right height');
+  equals(view1.$('.thumb').width(), view1.get('thumbLength'), 'horizontal scroller should have the right width');
+});
+
 test('aria-role', function() {
   var viewElem = view.$();
   equals(viewElem.attr('role'), 'scrollbar', 'aria role set to the scroller');
