@@ -122,7 +122,7 @@ sc_require('mixins/statechart_delegate');
             initialSubstate: 'stateX',
 
             stateX: SC.State.design({ ... })
-            stateY: SC.State.desgin({ ... })
+            stateY: SC.State.design({ ... })
           })
         })
       });
@@ -886,17 +886,17 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Method can be called in the following ways:
     
         // With one arguments. 
-        gotoHistorytate(<state>)
+        gotoHistoryState(<state>)
       
         // With two arguments. 
-        gotoHistorytate(<state>, <state | boolean | hash>)
+        gotoHistoryState(<state>, <state | boolean | hash>)
       
         // With three arguments.
-        gotoHistorytate(<state>, <state>, <boolean | hash>)
-        gotoHistorytate(<state>, <boolean>, <hash>)
+        gotoHistoryState(<state>, <state>, <boolean | hash>)
+        gotoHistoryState(<state>, <boolean>, <hash>)
       
         // With four argumetns
-        gotoHistorytate(<state>, <state>, <boolean>, <hash>)
+        gotoHistoryState(<state>, <state>, <boolean>, <hash>)
     
     where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
     
