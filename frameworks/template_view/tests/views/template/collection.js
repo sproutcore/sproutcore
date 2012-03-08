@@ -425,3 +425,16 @@ test("#collection helper should raise an error when passing a first argument tha
   ok(errored, "throws an error when creating the view");
 });
 
+test("should still cleanup childViews after removed from DOM", function() {
+  var view = SC.TemplateCollectionView.create({
+    content: [1, 2, 3]
+  });
+
+  view.createLayer();
+  equals(view.get('childViews').length, 3, "precond - creates three child views");
+
+  view.destroyLayer();
+
+  view.set('content', null);
+  equals(view.get('childViews').length, 0, "should not have any child views");
+});

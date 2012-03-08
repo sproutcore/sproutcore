@@ -203,8 +203,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   }.observes('content'),
 
   arrayContentWillChange: function(start, removedCount, addedCount) {
-    if (!this.get('layer')) { return; }
-
     // If the contents were empty before and this template collection has an empty view
     // remove it now.
     var emptyView = this.get('emptyView');
@@ -218,9 +216,11 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     len = childViews.get('length');
     for (idx = start+removedCount-1; idx >= start; idx--) {
       childView = childViews[idx];
-      childView.$().remove();
-      childView.removeFromParent();
-      childView.destroy();
+      if(childView) {
+        childView.$().remove();
+        childView.removeFromParent();
+        childView.destroy();
+      }
     }
   },
 
