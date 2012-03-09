@@ -16,11 +16,8 @@ SC.SimpleMediaControlsView = SC.View.extend(
   target: null,
   
   childViews: ['playButton', 'progressView'],
-  classNames: ['sc-media-controls'],
   
-  leftHandleInset:null,   //until a bug in the way bindings are handled is fixed, these have to be defined
-  rightHandleInset:null,  //for the slider to be able to have its notEmpty bindings function and drop in
-  handleWidth:null,       //their placeholder values.
+  classNames: ['sc-media-controls'],
   
   playObserver: function(){
     if(this.getPath('target.paused')){
@@ -34,14 +31,13 @@ SC.SimpleMediaControlsView = SC.View.extend(
     title: '',
     titleMinWidth: 35,
     icon: 'play',
-    noStyle: YES,
     layout: { top: 0, left: 0, width: 20, height:20 },
     action: "playPause",
     targetBinding: "*owner.target",
-    renderStyle: 'renderImage'
   }),
+  
   progressView: SC.MediaSlider.design({
-    layout: { top: 0, left: 25, right: 0, height:20 },
+    layout: { top: 0, left: 25, right: 10, height:20 },
     value:0,
     minimum: 0,
     step:0.1,

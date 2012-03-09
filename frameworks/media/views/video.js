@@ -8,6 +8,7 @@
 
 sc_require('views/controls');
 sc_require('views/mini_controls');
+sc_require('media_capabilities');
 
 /**
   @class
@@ -61,12 +62,28 @@ SC.VideoView = SC.View.extend(
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
-    Current time in secs
-    @property {Number}
-  */
-  currentTime: 0,
+     Current time in secs
+     
+     @property {Number}
+   */
+  currentTime : function(key, value) {
+    if (!SC.empty(value) && this._currentTime != value) {
+      this._currentTime = value;
+      this.seek(value);
+    }
+
+    return this._currentTime;
+  }.property('_currentTime'),
 
   /**
+     Current time in secs
+     
+     @property {Number}
+     @private
+   */
+  _currentTime : 0,
+  
+  /** 
     Duration in secs
     @property {Number}
   */
@@ -151,21 +168,25 @@ SC.VideoView = SC.View.extend(
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
-          // TODO: this doesn't seem like the best way to determine what tags to use!
-          if(SC.browser.name === SC.BROWSER.safari){
-            context.push('<video src="'+this.get('value')+'"');
-            if(this.poster){
-              context.push(' poster="'+this.poster+'"');
-            }
-            // if(SC.browser.touch){
-            //               context.push(' controls="true"');
-            //             }
-            context.push('/>');
-            this.loaded='html5';
-            return;
+          if(!SC.mediaCapabilities.get('isHTML5VideoSupported'))
+          {
+            break;
           }
-          break;
+          context.push('<video src="'+this.get('value')+'"');
+          if(this.poster){
+            context.push(' poster="'+this.poster+'"');
+          }
+          // if(SC.browser.touch){
+          //               context.push(' controls="true"');
+          //             }
+          context.push('/>');
+          this.loaded='html5';
+          return;
         case "quicktime":
+          if(!SC.mediaCapabilities.get('isQuicktimeSupported'))
+          {
+            break;
+          }
           // TODO: this doesn't seem like the best way to determine what tags to use!
           if(SC.browser.name === SC.BROWSER.ie){
             context.push('<object id="qt_event_source" '+
@@ -204,6 +225,10 @@ SC.VideoView = SC.View.extend(
           this.loaded='quicktime';
           return;
         case "flash":
+          if(!SC.mediaCapabilities.get('isFlashSupported'))
+          {
+            break;
+          }
           var flashURL= sc_static('videoCanvas.swf');
 
           var movieURL = this.get('value');
@@ -321,7 +346,8 @@ SC.VideoView = SC.View.extend(
     }) ;
     SC.Event.add(videoElem, 'timeupdate', this, function () {
       SC.RunLoop.begin();
-      view.set('currentTime', videoElem.currentTime);
+      view._currentTime = videoElem.currentTime;
+      view.propertyDidChange('currentTime');
       SC.RunLoop.end();
     }) ;
     SC.Event.add(videoElem, 'loadstart', this, function () {
@@ -519,7 +545,8 @@ SC.VideoView = SC.View.extend(
     });
     SC.Event.add(videoElem, 'qt_pause', this, function () {
       SC.RunLoop.begin();
-      view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      view._currentTime = vid.GetTime()/vid.GetTimeScale();
+      view.propertyDidChange('currentTime');
       view.set('paused', YES);
       SC.RunLoop.end();
     });
@@ -599,7 +626,8 @@ SC.VideoView = SC.View.extend(
    */
   _qtTimer:function(){
     if(this.loaded==='quicktime' && !this.get('paused')){
-      this.incrementProperty('currentTime');
+      this.incrementProperty('_currentTime');
+      view.propertyDidChange('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),
@@ -613,46 +641,17 @@ SC.VideoView = SC.View.extend(
   seek:function(){
     var timeInSecs, totaltimeInSecs, formattedTime, vid=this._getVideoObject();
     if(this.loaded==='html5'){
-      if(this.get('paused')) vid.currentTime=this.get('currentTime');
+      vid.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
-      if(this.get('paused')) vid.SetTime(this.get('currentTime')*vid.GetTimeScale());
+      vid.SetTime(this.get('currentTime')*vid.GetTimeScale());
     }
     if(this.loaded==='flash'){
-      if(this.get('paused')) vid.setTime(this.get('currentTime'));
-    }
-  }.observes('currentTime'),
-
-  /**
-    Should be called once the progress view is clicked to stop the event and
-    later start seeking.
-
-    @returns {void}
-  */
-  startSeek: function(){
-    if(!this.get('paused')) {
-      SC.Logger.log('startseetk');
-      this.stop();
-      this._wasPlaying = true;
+      vid.setTime(this.get('currentTime'));
     }
   },
-
-  /**
-    Should be called once the progress view gets a mouseUp. It will get the
-    player to continue playing if it was playing before starting the seek.
-
-    @returns {void}
-  */
-  endSeek: function(){
-    if(this._wasPlaying) {
-      SC.Logger.log('startseetk');
-      this.play();
-      this._wasPlaying = false;
-    }
-  },
-
-
-  /**
+  
+  /** 
     Set the volume of the video.
 
     @returns {void}
@@ -772,7 +771,7 @@ SC.VideoView = SC.View.extend(
 
 });
 
-/**
+/** 
   Hash to store references to the different flash videos.
 */
 SC.VideoView.flashViews={};

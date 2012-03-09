@@ -7,7 +7,9 @@
 
 sc_require('views/controls');
 sc_require('views/mini_controls');
-/**
+sc_require('media_capabilities');
+
+/** 
   @class
 
   Renders a audioView using different technologies like HTML5 audio tag,
@@ -60,12 +62,28 @@ SC.AudioView = SC.View.extend(
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
-    Current time in secs
-    @property {Number}
-  */
-  currentTime: 0,
+     Current time in secs
+     
+     @property {Number}
+   */
+  currentTime : function(key, value) {
+    if (!SC.empty(value) && this._currentTime != value) {
+      this._currentTime = value;
+      this.seek(value);
+    }
+
+    return this._currentTime;
+  }.property('_currentTime'),
 
   /**
+     Current time in secs
+     
+     @property {Number}
+     @private
+   */
+  _currentTime : 0,
+  
+  /** 
     Duration in secs
     @property {Number}
   */
@@ -130,18 +148,22 @@ SC.AudioView = SC.View.extend(
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
         case "html5":
-          // TODO: this doesn't seem like the best way to determine what tags to use!
-          if(SC.browser.name === SC.BROWSER.safari){
-            context.push('<audio src="'+this.get('value')+'"');
-            if(this.poster){
-              context.push(' poster="'+this.poster+'"');
-            }
-            context.push('/>');
-            this.loaded='html5';
-            return;
+          if(!SC.mediaCapabilities.get('isHTML5AudioSupported'))
+          {
+            break;
           }
-          break;
+          context.push('<audio src="'+this.get('value')+'"');
+          if(this.poster){
+            context.push(' poster="'+this.poster+'"');
+          }
+          context.push('/>');
+          this.loaded='html5';
+          return;
         case "quicktime":
+          if(!SC.mediaCapabilities.get('isQuicktimeSupported'))
+          {
+            break;
+          }
           // TODO: this doesn't seem like the best way to determine what tags to use!
           if(SC.browser.name === SC.BROWSER.ie){
             context.push('<object id="qt_event_source" '+
@@ -180,6 +202,10 @@ SC.AudioView = SC.View.extend(
           this.loaded='quicktime';
           return;
         case "flash":
+          if(!SC.mediaCapabilities.get('isFlashSupported'))
+          {
+            break;
+          }
           var flashURL= sc_static('videoCanvas.swf');
 
           var movieURL = this.get('value');
@@ -279,11 +305,12 @@ SC.AudioView = SC.View.extend(
       });
     }) ;
 
-    SC.Event.add(audioElem, 'timeupdate', this, function () {
+    SC.Event.add(audioElem, 'timeupdate', this, function() {
       SC.run(function() {
-        view.set('currentTime', audioElem.currentTime);
+        view._currentTime = audioElem.currentTime;
+        view.propertyDidChange('currentTime');
       });
-    }) ;
+    });
 
     SC.Event.add(audioElem, 'loadstart', this, function () {
       SC.run(function() {
@@ -476,14 +503,16 @@ SC.AudioView = SC.View.extend(
 
     SC.Event.add(audioElem, 'qt_pause', this, function () {
       SC.run(function() {
-        view.set('currentTime', media.GetTime()/media.GetTimeScale());
+        view._currentTime = media.GetTime() / media.GetTimeScale();
+        view.propertyDidChange('currentTime');
         view.set('paused', YES);
       });
     });
 
     SC.Event.add(audioElem, 'qt_play', this, function () {
       SC.run(function() {
-        view.set('currentTime', media.GetTime()/media.GetTimeScale());
+        view._currentTime = media.GetTime() / media.GetTimeScale();
+        view.propertyDidChange('currentTime');
         view.set('paused', NO);
       });
     });
@@ -529,8 +558,9 @@ SC.AudioView = SC.View.extend(
      @returns {void}
    */
   _qtTimer:function(){
-    if(this.loaded==='quicktime' && !this.get('paused')){
-      this.incrementProperty('currentTime');
+    if (this.loaded === 'quicktime' && !this.get('paused')) {
+      this.incrementProperty('_currentTime');
+      view.propertyDidChange('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),
@@ -545,44 +575,15 @@ SC.AudioView = SC.View.extend(
     var timeInSecs, totaltimeInSecs, formattedTime, media=this._getAudioObject();
     if(this.loaded==='html5'){
       // also check for media && media.currentTime, because media.currentTime doesn't exist on value change
-      if(this.get('paused') && media && media.currentTime) media.currentTime=this.get('currentTime');
+      if(media && media.currentTime) media.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
-      if(this.get('paused')) media.SetTime(this.get('currentTime')*media.GetTimeScale());
+      media.SetTime(this.get('currentTime')*media.GetTimeScale());
     }
     if(this.loaded==='flash'){
-      if(this.get('paused')) media.setTime(this.get('currentTime'));
-    }
-  }.observes('currentTime'),
-
-  /**
-    Should be called once the progress view is clicked to stop the event and
-    later start seeking.
-
-    @returns {void}
-  */
-  startSeek: function(){
-    if(!this.get('paused')) {
-      SC.Logger.log('startseetk');
-      this.stop();
-      this._wasPlaying = true;
+      media.setTime(this.get('currentTime'));
     }
   },
-
-  /**
-    Should be called once the progress view gets a mouseUp. It will get the
-    player to continue playing if it was playing before starting the seek.
-
-    @returns {void}
-  */
-  endSeek: function(){
-    if(this._wasPlaying) {
-      SC.Logger.log('startseetk');
-      this.play();
-      this._wasPlaying = false;
-    }
-  },
-
 
   /**
     Set the volume of the audio.
