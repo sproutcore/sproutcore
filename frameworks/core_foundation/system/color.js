@@ -546,8 +546,8 @@ SC.Color.mixin(
   // 
   PARSE_RGBA: /^rgba\(([\d]+%?),\s*([\d]+%?),\s*([\d]+%?),\s*([.\d]+)\)$/,
   PARSE_RGB : /^rgb\(([\d]+%?),\s*([\d]+%?),\s*([\d]+%?)\)$/,
-  PARSE_HSLA: /^hsla\(([\d]+),\s*([\d]+)%,\s*([\d]+)%,\s*([.\d]+)\)$/,
-  PARSE_HSL : /^hsl\(([\d]+),\s*([\d]+)%,\s*([\d]+)%\)$/,
+  PARSE_HSLA: /^hsla\((-?[\d]+),\s*([\d]+)%,\s*([\d]+)%,\s*([.\d]+)\)$/,
+  PARSE_HSL : /^hsl\((-?[\d]+),\s*([\d]+)%,\s*([\d]+)%\)$/,
   PARSE_HEX : /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
   PARSE_ARGB: /^#[0-9a-fA-F]{8}$/,
 
