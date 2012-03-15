@@ -13,10 +13,6 @@
   which will turn any valid CSS color into it's
   appropriate SC.Color.
 
-  Colors are immutable objects, and new ones should
-  be created when dealing when you want to adjust a
-  color's values.
-
   To get the CSS value of the color, call `toCSS`,
   which will provide the best CSS color to use
   according to browser support. This means that
@@ -25,7 +21,7 @@
   hack to use:
 
       // This hack disables ClearType on IE!
-      var color = SC.Color.from('rgba(0, 0, 0, .5)').toCSS(),
+      var color = SC.Color.from('rgba(0, 0, 0, .5)').get('cssText'),
           css;
       if (SC.Color.supportsARGB) {
         var gradient = "progid:DXImageTransform.Microsoft.gradient";
@@ -50,14 +46,14 @@
      // Tick is called using a percent
      // between 0 and 1
      function tick (t) {
-       return blue.add(delta.mult(t)).toCSS();
+       return blue.add(delta.mult(t)).get('cssText');
      }
 
   @extends SC.Object
-  @extends SC.Freezable
+  @extends SC.Copyable
  */
 SC.Color = SC.Object.extend(
-  SC.Freezable,
+  SC.Copyable,
   /** @scope SC.Color.prototype */{
 
   /**
@@ -97,15 +93,100 @@ SC.Color = SC.Object.extend(
   b: 0,
 
   /**
+    The current hue of this color.
+    Hue is in degrees between 0 and 360.
+
+    @field
+    @type Number
+   */
+  h: function (key, deg) {
+    var clamp = SC.Color.clampToDeviceGamut,
+        hsl = SC.Color.rgbToHSL(clamp(this.get('r')),
+                                clamp(this.get('g')),
+                                clamp(this.get('b'))),
+        rgb;
+
+    if (deg !== undefined) {
+      // Normalize the hue to be between 0 and 360
+      hsl[0] = (deg % 360 + 360) % 360;
+
+      rgb = SC.Color.hslToRGB(hsl[0], hsl[1], hsl[2]);
+      this.beginPropertyChanges();
+      this.set('r', rgb[0]);
+      this.set('g', rgb[1]);
+      this.set('b', rgb[2]);
+      this.endPropertyChanges();
+    }
+    return hsl[0];
+  }.property('r', 'g', 'b').cacheable(),
+
+  /**
+    The current saturation of this color.
+    Saturation is a percent between 0 and 100.
+
+    @field
+    @type Number
+   */
+  s: function (key, value) {
+    var clamp = SC.Color.clampToDeviceGamut,
+        hsl = SC.Color.rgbToHSL(clamp(this.get('r')),
+                                clamp(this.get('g')),
+                                clamp(this.get('b'))),
+        rgb;
+
+    if (value !== undefined) {
+      // Clamp the saturation between 0 and 100
+      hsl[1] = SC.Color.clampInt(value, 0, 100);
+
+      rgb = SC.Color.hslToRGB(hsl[0], hsl[1], hsl[2]);
+      this.beginPropertyChanges();
+      this.set('r', rgb[0]);
+      this.set('g', rgb[1]);
+      this.set('b', rgb[2]);
+      this.endPropertyChanges();
+    }
+
+    return hsl[1];
+  }.property('r', 'g', 'b').cacheable(),
+
+  /**
+    The current lightness of this color.
+    Saturation is a percent between 0 and 100.
+
+    @field
+    @type Number
+   */
+  l: function (key, value) {
+    var clamp = SC.Color.clampToDeviceGamut,
+        hsl = SC.Color.rgbToHSL(clamp(this.get('r')),
+                                clamp(this.get('g')),
+                                clamp(this.get('b'))),
+        rgb;
+
+    if (value !== undefined) {
+      // Clamp the lightness between 0 and 100
+      hsl[2] = SC.Color.clampInt(value, 0, 100);
+
+      rgb = SC.Color.hslToRGB(hsl[0], hsl[1], hsl[2]);
+      this.beginPropertyChanges();
+      this.set('r', rgb[0]);
+      this.set('g', rgb[1]);
+      this.set('b', rgb[2]);
+      this.endPropertyChanges();
+    }
+    return hsl[2];
+  }.property('r', 'g', 'b').cacheable(),
+
+  /**
     Whether two colors are equivalent.
     @param {SC.Color} color The color to compare.
     @returns {Boolean} Whether the two colors are equivalent.
    */
   isEqualTo: function (color) {
-    return this.r === color.r &&
-           this.g === color.g &&
-           this.b === color.b &&
-           this.a === color.a;
+    return this.get('r') === color.get('r') &&
+           this.get('g') === color.get('g') &&
+           this.get('b') === color.get('b') &&
+           this.get('a') === color.get('a');
   },
 
   /**
@@ -122,9 +203,15 @@ SC.Color = SC.Object.extend(
     @returns {String} The color in the rgba color space as a hex value.
    */
   toARGB: function () {
-    var a = Math.round(255 * this.a).toString(16);
-    return '#' + (a.length === 1 ? '0' + a : a) +
-                 this.toHex().slice(1);
+    var clamp = SC.Color.clampToDeviceGamut;
+
+    return '#' + [clamp(255 * this.get('a')),
+                  clamp(this.get('r')),
+                  clamp(this.get('g')),
+                  clamp(this.get('b'))].map(function (v) {
+      v = v.toString(16);
+      return v.length === 1 ? '0' + v : v;
+    }).join('');
   },
 
   /**
@@ -134,7 +221,10 @@ SC.Color = SC.Object.extend(
     @returns {String} The color in the rgb color space as a hex value.
    */
   toHex: function () {
-    return '#' + [this.r, this.g, this.b].map(function (v) {
+    var clamp = SC.Color.clampToDeviceGamut;
+    return '#' + [clamp(this.get('r')),
+                  clamp(this.get('g')),
+                  clamp(this.get('b'))].map(function (v) {
       v = v.toString(16);
       return v.length === 1 ? '0' + v : v;
     }).join('');
@@ -147,9 +237,10 @@ SC.Color = SC.Object.extend(
     @returns {String} The color in the rgb color space.
    */
   toRGB: function () {
-    return 'rgb(' + this.r + ','
-                  + this.g + ','
-                  + this.b + ')';
+    var clamp = SC.Color.clampToDeviceGamut;
+    return 'rgb(' + clamp(this.get('r')) + ','
+                  + clamp(this.get('g')) + ','
+                  + clamp(this.get('b')) + ')';
   },
 
   /**
@@ -159,8 +250,11 @@ SC.Color = SC.Object.extend(
     @returns {String} The color in the rgba color space.
    */
   toRGBA: function () {
-    var rgb = this.toRGB();
-    return 'rgba' + rgb.slice(3, -1) + ',' + this.a + ')';
+    var clamp = SC.Color.clampToDeviceGamut;
+    return 'rgba(' + clamp(this.get('r')) + ','
+                   + clamp(this.get('g')) + ','
+                   + clamp(this.get('b')) + ','
+                   + clamp(this.get('a')) + ')';
   },
 
   /**
@@ -170,10 +264,251 @@ SC.Color = SC.Object.extend(
     @returns {String} The color in the hsl color space.
    */
   toHSL: function () {
-    var r = this.r / 255,
-        g = this.g / 255,
-        b = this.b / 255,
-        max = Math.max(r, g, b),
+    return 'hsl(' + this.get('h') + ','
+                  + this.get('s') + '%,'
+                  + this.get('l') + '%)';
+  },
+
+  /**
+    Returns a CSS string of the color
+    under the hsla() scheme.
+
+    @returns {String} The color in the hsla color space.
+   */
+  toHSLA: function () {
+    return 'hsl(' + this.get('h') + ','
+                  + this.get('s') + '%,'
+                  + this.get('l') + '%,'
+                  + this.get('a') + ')';
+  },
+
+  /**
+    The CSS string representation that will be
+    best displayed by the browser.
+
+    @field
+    @type String
+   */
+  cssText: function () {
+    var supportsAlphaChannel = SC.Color.supportsRGBA ||
+                               SC.Color.supportsARGB;
+    return (this.a === 1 || !supportsAlphaChannel)
+           ? this.toHex()
+           : SC.Color.supportsRGBA
+           ? this.toRGBA()
+           : this.toARGB();
+  }.property('r', 'g', 'b').cacheable(),
+
+  /**
+    Returns a clone of this color.
+    This will always a deep clone.
+
+    @returns {SC.Color} The clone color.
+   */
+  copy: function () {
+    return SC.Color.create({
+      original: this.get('original'),
+      r: this.get('r'),
+      g: this.get('g'),
+      b: this.get('b'),
+      a: this.get('a')
+    });
+  },
+
+  /**
+    Returns a color that's the difference between two colors.
+
+    Note that the result might not be a valid CSS color.
+
+    @param {SC.Color} color The color to subtract from this one.
+    @returns {SC.Color} The difference between the two colors
+   */
+  sub: function (color) {
+    return SC.Color.create({
+      r: this.get('r') - color.get('r'),
+      g: this.get('g') - color.get('g'),
+      b: this.get('b') - color.get('b'),
+      a: this.get('a') - color.get('a')
+    });
+  },
+
+  /**
+    Returns a color that's the addition of two colors.
+
+    Note that the result might not be a valid CSS color.
+
+    @param {SC.Color} color The color to add to this one.
+    @returns {SC.Color} The addition of the two colors
+   */
+  add: function (color) {
+    return SC.Color.create({
+      r: this.get('r') + color.get('r'),
+      g: this.get('g') + color.get('g'),
+      b: this.get('b') + color.get('b'),
+      a: this.get('a') + color.get('a')
+    });
+  },
+
+  /**
+    Returns a color that has it's units uniformly multiplied
+    by a given multiplier.
+
+    Note that the result might not be a valid CSS color.
+
+    @param {Number} multipler How much to multiply rgba by.
+    @returns {SC.Color} The adjusted color
+   */
+  mult: function (multiplier) {
+    var round = Math.round;
+    return SC.Color.create({
+      r: round(this.get('r') * multiplier),
+      g: round(this.get('g') * multiplier),
+      b: round(this.get('b') * multiplier),
+      a: this.get('a') * multiplier
+    });
+  }
+});
+
+SC.Color.mixin(
+  /** @scope SC.Color */{
+
+  /**
+    Whether this browser supports the rgba color model.
+    Check courtesy of Modernizr.
+    @type Boolean
+    @see https://github.com/Modernizr/Modernizr/blob/master/modernizr.js#L552
+   */
+  supportsRGBA: (function () {
+    var style = document.getElementsByTagName('script')[0].style,
+        cssText = style.cssText,
+        supported;
+
+    style.cssText = 'background-color:rgba(5,2,1,.5)';
+    supported = style.backgroundColor.indexOf('rgba') !== -1;
+    style.cssText = cssText;
+    return supported;
+  }()),
+
+  /**
+    Whether this browser supports the argb color model.
+    @type Boolean
+   */
+  supportsARGB: (function () {
+    var style = document.getElementsByTagName('script')[0].style,
+        cssText = style.cssText,
+        supported;
+
+    style.cssText = 'filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#55000000", endColorstr="#55000000");';
+    supported = style.backgroundColor.indexOf('#55000000') !== -1;
+    style.cssText = cssText;
+    return supported;
+  }()),
+
+  /**
+    Used to clamp a value in between a minimum
+    value and a maximum value.
+
+    @param {Number} value The value to clamp.
+    @param {Number} min The minimum number the value can be.
+    @param {Number} max The maximum number the value can be.
+    @returns {Number} The value clamped between min and max.
+   */
+  clamp: function (value, min, max) {
+    return Math.max(Math.min(value, max), min);
+  },
+
+  /**
+    Clamps a number, then rounds it to the nearest integer.
+
+    @param {Number} value The value to clamp.
+    @param {Number} min The minimum number the value can be.
+    @param {Number} max The maximum number the value can be.
+    @returns {Number} The value clamped between min and max as an integer.
+    @see SC.Color.clamp
+   */
+  clampInt: function (value, min, max) {
+    return Math.round(SC.Color.clamp(value, min, max));
+  },
+
+  /**
+    Clamps a number so it lies in the device gamut.
+    For screens, this an integer between 0 and 255.
+
+    @param {Number} value The value to clamp
+    @returns {Number} The value clamped to the device gamut.
+   */
+  clampToDeviceGamut: function (value) {
+    return SC.Color.clampInt(value, 0, 255);
+  },
+
+  /**
+    Returns the RGB for a color defined in
+    the HSL color space.
+
+    (Notes are taken from the W3 spec, and are
+     written in ABC)
+
+    @param {Number} h The hue of the color
+    @param {Number} s The saturation of the color
+    @param {Number} l The luminosity of the color
+    @see http://www.w3.org/TR/css3-color/#hsl-color
+   */
+  hslToRGB: function (h, s, l) {
+    h /= 360;
+    s /= 100;
+    l /= 100;
+
+  // HOW TO RETURN hsl.to.rgb(h, s, l):
+    var m1, m2, hueToRGB = SC.Color.hueToRGB;
+    // SELECT:
+      // l<=0.5: PUT l*(s+1) IN m2
+      // ELSE: PUT l+s-l*s IN m2
+    m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
+    // PUT l*2-m2 IN m1
+    m1 = l * 2 - m2;
+    // PUT hue.to.rgb(m1, m2, h+1/3) IN r
+    // PUT hue.to.rgb(m1, m2, h    ) IN g
+    // PUT hue.to.rgb(m1, m2, h-1/3) IN b
+    // RETURN (r, g, b)
+    return [hueToRGB(m1, m2, h + 1/3) * 255,
+            hueToRGB(m1, m2, h)       * 255,
+            hueToRGB(m1, m2, h - 1/3) * 255];
+  },
+
+  /** @private
+    Returns the RGB value for a given hue.
+   */
+  hueToRGB: function (m1, m2, h) {
+    // HOW TO RETURN hue.to.rgb(m1, m2, h):
+    // IF h<0: PUT h+1 IN h
+    if (h < 0) h++;
+    // IF h>1: PUT h-1 IN h
+    if (h > 1) h--;
+    // IF h*6<1: RETURN m1+(m2-m1)*h*6
+    if (h < 1/6) return m1 + (m2 - m1) * h * 6;
+    // IF h*2<1: RETURN m2
+    if (h < 1/2) return m2;
+    // IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
+    if (h < 2/3) return m1 + (m2 - m1) * (2/3 - h) * 6;
+    // RETURN m1
+    return m1;
+  },
+
+  /**
+    Returns an RGB color transformed into the
+    HSL colorspace as triple `(r, g, b)`.
+
+    @param {Number} r The red component.
+    @param {Number} g The green component.
+    @param {Number} b The blue component.
+    @returns {Number[]} A HSL triple.
+   */
+  rgbToHSL: function (r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    var max = Math.max(r, g, b),
         min = Math.min(r, g, b),
         h, s, l = (max + min) / 2,
         d = max - min;
@@ -203,272 +538,7 @@ SC.Color = SC.Object.extend(
     s = Math.floor(s * 100);
     l = Math.floor(l * 100);
 
-    return 'hsl(' + h + ','
-                  + s + '%,'
-                  + l + '%)';
-  },
-
-  /**
-    Returns a CSS string of the color
-    under the hsla() scheme.
-
-    @returns {String} The color in the hsla color space.
-   */
-  toHSLA: function () {
-    var hsl = this.toHSL();
-    return 'hsla' + hsl.slice(3, -1) + ',' + this.a + ')';
-  },
-
-  /**
-    Returns the string representation
-    that will be best displayed by the
-    current browser.
-
-    @returns {String} The CSS value of this color.
-   */
-  toCSS: function () {
-    return (this.a === 1)
-           ? this.toHex()
-           : SC.Color.supportsRGBA
-           ? this.toRGBA()
-           : this.toARGB();
-  },
-
-  /**
-    Returns a new color with the hue rotated
-    the provided number of degrees in the hsl colorspace.
-    @param {Number} deg The number of degrees to rotate the hue.
-    @returns {SC.Color} The color with it's hue rotated.
-   */
-  rotate: function (deg) {
-    var hsla = this.toHSLA();
-    hsla = hsla.match(SC.Color.PARSE_HSLA);
-    deg += parseInt(hsla[1], 10);
-
-    return SC.Color.from('hsla(' + deg + ','
-                                 + hsla[2] + '%,'
-                                 + hsla[3] + '%,'
-                                 + hsla[4] + ')').freeze();
-  },
-
-  /**
-    Returns a new color lightened by a given amount.
-
-    The `amount` should be an int between 0 and 100
-    for this to make sense.
-
-    @param {Number} amount The amount that this color should be lightened
-    @returns {SC.Color} The lightened color.
-   */
-  lighten: function (amount) {
-    var hsla = this.toHSLA(),
-        lightness;
-    hsla = hsla.match(SC.Color.PARSE_HSLA);
-    lightness = parseInt(hsla[3], 10) + amount;
-
-    return SC.Color.from('hsla(' + hsla[1] + ','
-                                 + hsla[2] + '%,'
-                                 + lightness + '%,'
-                                 + hsla[4] + ')').freeze();
-  },
-
-  /**
-    Returns a new color darkened by a given amount.
-
-    The `amount` should be an int between 0 and 100
-    for this to make sense.
-
-    @param {Number} amount The amount that this color should be darkened
-    @returns {SC.Color} The lightened color.
-   */
-  darken: function (amount) {
-    return this.lighten(-1 * amount);
-  },
-
-  /**
-    Returns a saturated version of this color.
-
-    The `amount` should be an int between 0 and 100
-    for this to make sense.
-
-    @param {Number} amount The amount that this color should be saturated
-    @returns {SC.Color} The saturated color.
-   */
-  saturate: function (amount) {
-    var hsla = this.toHSLA(),
-        saturation;
-    hsla = hsla.match(SC.Color.PARSE_HSLA);
-    saturation = parseInt(hsla[2], 10) + amount;
-
-    return SC.Color.from('hsla(' + hsla[1] + ','
-                                 + saturation + '%,'
-                                 + hsla[3] + '%,'
-                                 + hsla[4] + ')').freeze();
-  },
-
-  /**
-    Returns a desaturated version of this color.
-
-    The `amount` should be an int between 0 and 100
-    for this to make sense.
-
-    @param {Number} amount The amount that this color should be desaturated
-    @returns {SC.Color} The desaturated color.
-   */
-  desaturate: function (amount) {
-    return this.saturate(-1 * amount);
-  },
-
-  /**
-    Returns a color that's the difference between two colors.
-
-    Note that the result might not be a valid CSS color.
-
-    @param {SC.Color} color The color to subtract from this one.
-    @returns {SC.Color} The difference between the two colors
-   */
-  sub: function (color) {
-    return SC.Color.create({
-      r: this.r - color.r,
-      g: this.g - color.g,
-      b: this.b - color.b,
-      a: this.a - color.a
-    }).freeze();
-  },
-
-  /**
-    Returns a color that's the addition of two colors.
-
-    Note that the result might not be a valid CSS color.
-
-    @param {SC.Color} color The color to add to this one.
-    @returns {SC.Color} The addition of the two colors
-   */
-  add: function (color) {
-    return SC.Color.create({
-      r: this.r + color.r,
-      g: this.g + color.g,
-      b: this.b + color.b,
-      a: this.a + color.a
-    }).freeze();
-  },
-
-  /**
-    Returns a color that has it's units uniformly multiplied
-    by a given multiplier.
-
-    Note that the result might not be a valid CSS color.
-
-    @param {Number} multipler How much to multiply rgba by.
-    @returns {SC.Color} The adjusted color
-   */
-  mult: function (multiplier) {
-    var round = Math.round;
-    return SC.Color.create({
-      r: round(this.r * multiplier),
-      g: round(this.g * multiplier),
-      b: round(this.b * multiplier),
-      a: this.a * multiplier
-    }).freeze();
-  }
-});
-
-SC.Color.mixin(
-  /** @scope SC.Color */{
-
-  /**
-    Whether this browser supports the rgba color model.
-    Check courtesy of Modernizr.
-    @type Boolean
-    @see https://github.com/Modernizr/Modernizr/blob/master/modernizr.js#L552
-   */
-  supportsRGBA: (function () {
-    var style = document.getElementsByTagName('script')[0].style,
-        cssText = style.cssText,
-        supported;
-
-    style.cssText = 'background-color:rgba(5,2,1,.5)';
-    supported = style.backgroundColor.indexOf('rgba') !== -1;
-    style.cssText = cssText;
-    return supported;
-  }()),
-
-  /**
-    Used to clamp a value in between a minimum
-    value and a maximum value.
-
-    @param {Number} value The value to clamp.
-    @param {Number} min The minimum number the value can be.
-    @param {Number} max The maximum number the value can be.
-    @returns {Number} The value clamped between min and max.
-   */
-  clamp: function (value, min, max) {
-    return Math.max(Math.min(value, max), min);
-  },
-
-  /**
-    Clamps a number, then rounds it to the nearest integer.
-
-    @param {Number} value The value to clamp.
-    @param {Number} min The minimum number the value can be.
-    @param {Number} max The maximum number the value can be.
-    @returns {Number} The value clamped between min and max as an integer.
-    @see SC.Color.clamp
-   */
-  clampInt: function (value, min, max) {
-    return Math.round(this.clamp(value, min, max));
-  },
-
-  /**
-    Returns the RGB for a color defined in
-    the HSL color space.
-
-    Note that the parameters `h`, `s`, and `l`
-    are normalized to be Numbers between 0 and 1.
-
-    (Notes are taken from the W3 spec, and are
-     written in ABC)
-
-    @param {Number} h The hue of the color
-    @param {Number} s The saturation of the color
-    @param {Number} l The luminosity of the color
-    @see http://www.w3.org/TR/css3-color/#hsl-color
-   */
-  hslToRGB: function (h, s, l) {
-  // HOW TO RETURN hsl.to.rgb(h, s, l):
-    var m1, m2, hueToRGB = SC.Color.hueToRGB;
-    // SELECT:
-      // l<=0.5: PUT l*(s+1) IN m2
-      // ELSE: PUT l+s-l*s IN m2
-    m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
-    // PUT l*2-m2 IN m1
-    m1 = l * 2 - m2;
-    // PUT hue.to.rgb(m1, m2, h+1/3) IN r
-    // PUT hue.to.rgb(m1, m2, h    ) IN g
-    // PUT hue.to.rgb(m1, m2, h-1/3) IN b
-    // RETURN (r, g, b)
-    return [hueToRGB(m1, m2, h + 1/3) * 255,
-            hueToRGB(m1, m2, h)       * 255,
-            hueToRGB(m1, m2, h - 1/3) * 255];
-  },
-
-  /**
-    Returns the RGB value for a given hue.
-   */
-  hueToRGB: function (m1, m2, h) {
-    // HOW TO RETURN hue.to.rgb(m1, m2, h):
-    // IF h<0: PUT h+1 IN h
-    if (h < 0) h++;
-    // IF h>1: PUT h-1 IN h
-    if (h > 1) h--;
-    // IF h*6<1: RETURN m1+(m2-m1)*h*6
-    if (h < 1/6) return m1 + (m2 - m1) * h * 6;
-    // IF h*2<1: RETURN m2
-    if (h < 1/2) return m2;
-    // IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
-    if (h < 2/3) return m1 + (m2 - m1) * (2/3 - h) * 6;
-    // RETURN m1
-    return m1;
+    return [h, s, l];
   },
 
   // ..........................................................
@@ -564,9 +634,9 @@ SC.Color.mixin(
 
     } else if (C.PARSE_HSL.test(color)) {
       color = color.match(C.PARSE_HSL);
-      color = C.hslToRGB(((parseInt(color[1], 10) % 360 + 360) % 360) / 360,
-                         C.clamp(parseInt(color[2], 10) / 100, 0, 1),
-                         C.clamp(parseInt(color[3], 10) / 100, 0, 1));
+      color = C.hslToRGB(((parseInt(color[1], 10) % 360 + 360) % 360),
+                         C.clamp(parseInt(color[2], 10), 0, 100),
+                         C.clamp(parseInt(color[3], 10), 0, 100));
 
       r = color[0];
       g = color[1];
@@ -577,9 +647,9 @@ SC.Color.mixin(
 
       a = parseFloat(color[4], 10);
 
-      color = C.hslToRGB(((parseInt(color[1], 10) % 360 + 360) % 360) / 360,
-                         C.clamp(parseInt(color[2], 10) / 100, 0, 1),
-                         C.clamp(parseInt(color[3], 10) / 100, 0, 1));
+      color = C.hslToRGB(((parseInt(color[1], 10) % 360 + 360) % 360),
+                         C.clamp(parseInt(color[2], 10), 0, 100),
+                         C.clamp(parseInt(color[3], 10), 0, 100));
 
       r = color[0];
       g = color[1];
@@ -600,6 +670,6 @@ SC.Color.mixin(
       g: C.clampInt(g, 0, 255),
       b: C.clampInt(b, 0, 255),
       a: C.clamp(a, 0, 1)
-    }).freeze();
+    });
   }
 });
