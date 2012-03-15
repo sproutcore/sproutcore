@@ -443,6 +443,62 @@ SC.Color.mixin(
 
   /**
     Returns the RGB for a color defined in
+    the HSV color space.
+
+    @param {Number} h The hue of the color
+    @param {Number} s The saturation of the color
+    @param {Number} v The value of the color
+   */
+  hsvToRgb: function (h, s, v) {
+    var r = 0, g = 0, b = 0;
+
+    if (v > 0) {
+      var i = (h == 1) ? 0 : Math.floor(h * 6),
+          f = (h == 1) ? 0 : (h * 6) - i,
+          p = v * (1 - s),
+          q = v * (1 - (s * f)),
+          t = v * (1 - (s * (1 - f))),
+          rgb = [[v, t, p],
+                 [q, v, p],
+                 [p, v, t],
+                 [p, q, v],
+                 [t, p, v],
+                 [v, p, q]];
+      r = Math.round(255 * rgb[i][0]);
+      g = Math.round(255 * rgb[i][1]);
+      b = Math.round(255 * rgb[i][2]);
+    }
+    return [r, g, b];
+  },
+
+  /**
+    Returns an RGB color transformed into the
+    HSV colorspace as triple `(h, s, v)`.
+
+    @param {Number} r The red component.
+    @param {Number} g The green component.
+    @param {Number} b The blue component.
+    @returns {Number[]} A HSL triple.
+   */
+  rgbToHsv: function (r, g, b) {
+    var max = Math.max(r, g, b),
+        min = Math.min(r, g, b),
+        s = (max === 0) ? 0 : (1 - min / max),
+        v = max / 255,
+        h;
+
+    // achromatic
+    if (max == min) {
+      h = 0;
+    } else {
+      h = ((max == r) ? ((g-b)/(max-min)/6) : ((max == g) ? ((b-r)/(max-min)/6+1/3) : ((r-g)/(max-min)/6+2/3)));
+    }
+    h = (h < 0) ? (h + 1) : ((h > 1)  ? (h - 1) : h);
+    return [h, s, v];
+  },
+
+  /**
+    Returns the RGB for a color defined in
     the HSL color space.
 
     (Notes are taken from the W3 spec, and are
