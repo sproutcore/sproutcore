@@ -101,7 +101,7 @@ SC.Color = SC.Object.extend(
    */
   h: function (key, deg) {
     var clamp = SC.Color.clampToDeviceGamut,
-        hsl = SC.Color.rgbToHSL(clamp(this.get('r')),
+        hsl = SC.Color.rgbToHsl(clamp(this.get('r')),
                                 clamp(this.get('g')),
                                 clamp(this.get('b'))),
         rgb;
@@ -110,7 +110,7 @@ SC.Color = SC.Object.extend(
       // Normalize the hue to be between 0 and 360
       hsl[0] = (deg % 360 + 360) % 360;
 
-      rgb = SC.Color.hslToRGB(hsl[0], hsl[1], hsl[2]);
+      rgb = SC.Color.hslToRgb(hsl[0], hsl[1], hsl[2]);
       this.beginPropertyChanges();
       this.set('r', rgb[0]);
       this.set('g', rgb[1]);
@@ -129,7 +129,7 @@ SC.Color = SC.Object.extend(
    */
   s: function (key, value) {
     var clamp = SC.Color.clampToDeviceGamut,
-        hsl = SC.Color.rgbToHSL(clamp(this.get('r')),
+        hsl = SC.Color.rgbToHsl(clamp(this.get('r')),
                                 clamp(this.get('g')),
                                 clamp(this.get('b'))),
         rgb;
@@ -138,7 +138,7 @@ SC.Color = SC.Object.extend(
       // Clamp the saturation between 0 and 100
       hsl[1] = SC.Color.clampInt(value, 0, 100);
 
-      rgb = SC.Color.hslToRGB(hsl[0], hsl[1], hsl[2]);
+      rgb = SC.Color.hslToRgb(hsl[0], hsl[1], hsl[2]);
       this.beginPropertyChanges();
       this.set('r', rgb[0]);
       this.set('g', rgb[1]);
@@ -158,7 +158,7 @@ SC.Color = SC.Object.extend(
    */
   l: function (key, value) {
     var clamp = SC.Color.clampToDeviceGamut,
-        hsl = SC.Color.rgbToHSL(clamp(this.get('r')),
+        hsl = SC.Color.rgbToHsl(clamp(this.get('r')),
                                 clamp(this.get('g')),
                                 clamp(this.get('b'))),
         rgb;
@@ -167,7 +167,7 @@ SC.Color = SC.Object.extend(
       // Clamp the lightness between 0 and 100
       hsl[2] = SC.Color.clampInt(value, 0, 100);
 
-      rgb = SC.Color.hslToRGB(hsl[0], hsl[1], hsl[2]);
+      rgb = SC.Color.hslToRgb(hsl[0], hsl[1], hsl[2]);
       this.beginPropertyChanges();
       this.set('r', rgb[0]);
       this.set('g', rgb[1]);
@@ -453,13 +453,13 @@ SC.Color.mixin(
     @param {Number} l The luminosity of the color
     @see http://www.w3.org/TR/css3-color/#hsl-color
    */
-  hslToRGB: function (h, s, l) {
+  hslToRgb: function (h, s, l) {
     h /= 360;
     s /= 100;
     l /= 100;
 
   // HOW TO RETURN hsl.to.rgb(h, s, l):
-    var m1, m2, hueToRGB = SC.Color.hueToRGB;
+    var m1, m2, hueToRgb = SC.Color.hueToRgb;
     // SELECT:
       // l<=0.5: PUT l*(s+1) IN m2
       // ELSE: PUT l+s-l*s IN m2
@@ -470,15 +470,15 @@ SC.Color.mixin(
     // PUT hue.to.rgb(m1, m2, h    ) IN g
     // PUT hue.to.rgb(m1, m2, h-1/3) IN b
     // RETURN (r, g, b)
-    return [hueToRGB(m1, m2, h + 1/3) * 255,
-            hueToRGB(m1, m2, h)       * 255,
-            hueToRGB(m1, m2, h - 1/3) * 255];
+    return [hueToRgb(m1, m2, h + 1/3) * 255,
+            hueToRgb(m1, m2, h)       * 255,
+            hueToRgb(m1, m2, h - 1/3) * 255];
   },
 
   /** @private
     Returns the RGB value for a given hue.
    */
-  hueToRGB: function (m1, m2, h) {
+  hueToRgb: function (m1, m2, h) {
     // HOW TO RETURN hue.to.rgb(m1, m2, h):
     // IF h<0: PUT h+1 IN h
     if (h < 0) h++;
@@ -496,14 +496,14 @@ SC.Color.mixin(
 
   /**
     Returns an RGB color transformed into the
-    HSL colorspace as triple `(r, g, b)`.
+    HSL colorspace as triple `(h, s, l)`.
 
     @param {Number} r The red component.
     @param {Number} g The green component.
     @param {Number} b The blue component.
     @returns {Number[]} A HSL triple.
    */
-  rgbToHSL: function (r, g, b) {
+  rgbToHsl: function (r, g, b) {
     r /= 255;
     g /= 255;
     b /= 255;
@@ -634,7 +634,7 @@ SC.Color.mixin(
 
     } else if (C.PARSE_HSL.test(color)) {
       color = color.match(C.PARSE_HSL);
-      color = C.hslToRGB(((parseInt(color[1], 10) % 360 + 360) % 360),
+      color = C.hslToRgb(((parseInt(color[1], 10) % 360 + 360) % 360),
                          C.clamp(parseInt(color[2], 10), 0, 100),
                          C.clamp(parseInt(color[3], 10), 0, 100));
 
@@ -647,7 +647,7 @@ SC.Color.mixin(
 
       a = parseFloat(color[4], 10);
 
-      color = C.hslToRGB(((parseInt(color[1], 10) % 360 + 360) % 360),
+      color = C.hslToRgb(((parseInt(color[1], 10) % 360 + 360) % 360),
                          C.clamp(parseInt(color[2], 10), 0, 100),
                          C.clamp(parseInt(color[3], 10), 0, 100));
 
