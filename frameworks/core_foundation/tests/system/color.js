@@ -36,10 +36,29 @@ test("SC.Color.from(rgba)", function () {
      "Invalid alpha should make the SC.Color.from return 'NO'");
 });
 
+test("SC.Color.from() with invalid rgb colors", function () {
+  // Too many arguments
+  ok(!SC.Color.from("rgb(0, 0, 0, 0)"));
+
+  // Too few arguments
+  ok(!SC.Color.from("rgba(0, 0, 0)"));
+  ok(!SC.Color.from("rgb(0, 0)"));
+
+  // No floats!
+  ok(!SC.Color.from("rgb(0.0, 0.0, 0.0)"));
+
+  // Missing parenthesis
+  ok(!SC.Color.from("rgb(0, 0, 0"));
+});
+
 test("SC.Color.from(#rgb)", function () {
-  matches(SC.Color.from("#213"),
-          34, 17, 51, 1,
+  matches(SC.Color.from("#21a"),
+          34, 17, 170, 1,
           "#rgb colors should be parseable");
+
+  ok(SC.Color.from("#ABC").isEqualTo(
+     SC.Color.from("#abc")),
+     "Character casing should not matter with hex colors");
 });
 
 test("SC.Color.from(#rrggbb)", function () {
@@ -51,3 +70,36 @@ test("SC.Color.from(#rrggbb)", function () {
      SC.Color.from("#abcdef")),
      "Character casing should not matter with hex colors");
 });
+
+test("SC.Color.from() with invalid hex colors", function () {
+  // Invalid character
+  ok(!SC.Color.from("#GAB"));
+
+  // Invalid length
+  ok(!SC.Color.from("#0000"));
+  ok(!SC.Color.from("#00000"));
+  ok(!SC.Color.from("#0000000"));
+});
+
+test("SC.Color.from(hsl)", function () {
+  matches(SC.Color.from("hsl(330, 60%, 54%)"),
+          208, 67, 138, 1,
+          "hsl() colors should be parseable");
+
+  matches(SC.Color.from("hsl(-90, 50%, 44%)"),
+          112, 56, 168, 1,
+          "negative hues should be allowed");
+});
+
+test("SC.Color.from(hsla)", function () {
+  matches(SC.Color.from("hsla(210, 87%, 55%, 0.4)"),
+          40, 140, 240, .4,
+          "hsla() colors should be parseable");
+});
+
+test("SC.Color.from(transparent)", function () {
+  matches(SC.Color.from("transparent"),
+          0, 0, 0, 0,
+          "transparent should be black with an alpha of 0");
+});
+
