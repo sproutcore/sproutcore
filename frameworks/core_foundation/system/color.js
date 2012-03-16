@@ -59,6 +59,11 @@ SC.Color = SC.Object.extend(
   /**
     The original color string that
     this object was created from.
+
+    For example, if you color was
+    created via `SC.Color.from("burlywood")`,
+    then this would be set to `"burlywood"`.
+
     @type String
     @default null
    */
@@ -66,6 +71,8 @@ SC.Color = SC.Object.extend(
 
   /**
     The alpha channel (opacity).
+    `a` is a percent between 0 and 1.
+
     @type Number
     @default 1
    */
@@ -73,6 +80,8 @@ SC.Color = SC.Object.extend(
 
   /**
     The red value.
+    `r` is an integer between 0 and 255.
+
     @type Number
     @default 0
    */
@@ -80,6 +89,8 @@ SC.Color = SC.Object.extend(
 
   /**
     The green value.
+    `g` is an integer between 0 and 255.
+
     @type Number
     @default 0
    */
@@ -87,6 +98,8 @@ SC.Color = SC.Object.extend(
 
   /**
     The blue value.
+    `b` is an integer between 0 and 255.
+
     @type Number
     @default 0
    */
@@ -94,7 +107,7 @@ SC.Color = SC.Object.extend(
 
   /**
     The current hue of this color.
-    Hue is in degrees between 0 and 360.
+    Hue is a float in degrees between 0° and 360°.
 
     @field
     @type Number
@@ -179,8 +192,8 @@ SC.Color = SC.Object.extend(
 
   /**
     Whether two colors are equivalent.
-    @param {SC.Color} color The color to compare.
-    @returns {Boolean} Whether the two colors are equivalent.
+    @param {SC.Color} color The color to compare this one to.
+    @returns {Boolean} YES if the two colors are equivalent
    */
   isEqualTo: function (color) {
     return this.get('r') === color.get('r') &&
@@ -200,7 +213,7 @@ SC.Color = SC.Object.extend(
     filter gradients with no change in
     the actual gradient.
 
-    @returns {String} The color in the rgba color space as a hex value.
+    @returns {String} The color in the rgba color space as an argb value.
    */
   toArgb: function () {
     var clamp = SC.Color.clampToDeviceGamut;
@@ -323,7 +336,7 @@ SC.Color = SC.Object.extend(
     Note that the result might not be a valid CSS color.
 
     @param {SC.Color} color The color to subtract from this one.
-    @returns {SC.Color} The difference between the two colors
+    @returns {SC.Color} The difference between the two colors.
    */
   sub: function (color) {
     return SC.Color.create({
@@ -340,7 +353,7 @@ SC.Color = SC.Object.extend(
     Note that the result might not be a valid CSS color.
 
     @param {SC.Color} color The color to add to this one.
-    @returns {SC.Color} The addition of the two colors
+    @returns {SC.Color} The addition of the two colors.
    */
   add: function (color) {
     return SC.Color.create({
@@ -358,7 +371,7 @@ SC.Color = SC.Object.extend(
     Note that the result might not be a valid CSS color.
 
     @param {Number} multipler How much to multiply rgba by.
-    @returns {SC.Color} The adjusted color
+    @returns {SC.Color} The adjusted color.
    */
   mult: function (multiplier) {
     var round = Math.round;
@@ -447,9 +460,11 @@ SC.Color.mixin(
     Returns the RGB for a color defined in
     the HSV color space.
 
-    @param {Number} h The hue of the color        [0..360]
-    @param {Number} s The saturation of the color [0..1]
-    @param {Number} v The value of the color      [0..1]
+    @param {Number} h The hue of the color as a degree between 0° and 360°
+    @param {Number} s The saturation of the color as a percent between 0 and 1.
+    @param {Number} v The value of the color as a percent between 0 and 1.
+    @returns {Number[]} A RGB triple in the form `(r, g, b)`
+      where each of the values are integers between 0 and 255.
    */
   hsvToRgb: function (h, s, v) {
     h /= 360;
@@ -479,10 +494,12 @@ SC.Color.mixin(
     Returns an RGB color transformed into the
     HSV colorspace as triple `(h, s, v)`.
 
-    @param {Number} r The red component.   [0..255]
-    @param {Number} g The green component. [0..255]
-    @param {Number} b The blue component.  [0..255]
-    @returns {Number[]} A HSV triple.
+    @param {Number} r The red component as an integer between 0 and 255.
+    @param {Number} g The green component as an integer between 0 and 255.
+    @param {Number} b The blue component as an integer between 0 and 255.
+    @returns {Number[]} A HSV triple in the form `(h, s, v)`
+      where `h` is in degrees (as a float) between 0° and 360° and
+            `s` and `v` are percents between 0 and 1.
    */
   rgbToHsv: function (r, g, b) {
     r /= 255;
@@ -523,9 +540,11 @@ SC.Color.mixin(
     (Notes are taken from the W3 spec, and are
      written in ABC)
 
-    @param {Number} h The hue of the color        [0..360]
-    @param {Number} s The saturation of the color [0..1]
-    @param {Number} l The luminosity of the color [0..1]
+    @param {Number} h The hue of the color as a degree between 0° and 360°
+    @param {Number} s The saturation of the color as a percent between 0 and 1.
+    @param {Number} l The luminosity of the color as a percent between 0 and 1.
+    @returns {Number[]} A RGB triple in the form `(r, g, b)`
+      where each of the values are integers between 0 and 255.
     @see http://www.w3.org/TR/css3-color/#hsl-color
    */
   hslToRgb: function (h, s, l) {
@@ -573,10 +592,12 @@ SC.Color.mixin(
     Returns an RGB color transformed into the
     HSL colorspace as triple `(h, s, l)`.
 
-    @param {Number} r The red component.   [0..255]
-    @param {Number} g The green component. [0..255]
-    @param {Number} b The blue component.  [0..255]
-    @returns {Number[]} A HSL triple.
+    @param {Number} r The red component as an integer between 0 and 255.
+    @param {Number} g The green component as an integer between 0 and 255.
+    @param {Number} b The blue component as an integer between 0 and 255.
+    @returns {Number[]} A HSL triple in the form `(h, s, l)`
+      where `h` is in degrees (as a float) between 0° and 360° and
+            `s` and `l` are percents between 0 and 1.
    */
   rgbToHsl: function (r, g, b) {
     r /= 255;
@@ -651,7 +672,7 @@ SC.Color.mixin(
     Any valid CSS color should work here.
 
     @param {String} color The color to parse into a `SC.Color` object.
-    @param {SC.Color} The color object representing the color passed in.
+    @returns {SC.Color} The color object representing the color passed in.
    */
   from: function (color) {
     var C = SC.Color,
