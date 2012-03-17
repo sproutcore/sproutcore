@@ -5,8 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-module("SC.mediaCapabilities", {
-});
+module("SC.mediaCapabilities", {});
 
 /**
  * Is Flash supported?
@@ -23,25 +22,25 @@ module("SC.mediaCapabilities", {
  * @see Department of Redundancy Department
  */
 test("Test Flash Support", function() {
-
+  
   doesFlashExist = NO;
-
+  
   // Non-IE detection
-  if (navigator.plugins) {
-    for ( var i = 0; i < navigator.plugins.length; i++) {
-      if (navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
+  if(navigator.plugins) {
+    for( var i = 0; i < navigator.plugins.length; i++) {
+      if(navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
         doesFlashExist = YES;
       }
     }
-  } else if (window.ActiveXObject) {
+  } else if(window.ActiveXObject) {
     try {
       var control = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
       delete control;
       doesFlashExist = YES;
-    } catch (e) {
+    } catch(e) {
     }
   }
-
+  
   equals(SC.mediaCapabilities.isFlashSupported, doesFlashExist, "Flash plugin result must match what the browser supports.");
 });
 
@@ -49,25 +48,25 @@ test("Test Flash Support", function() {
  * Is Quicktime supported?
  */
 test("Test Quicktime Support", function() {
-
+  
   doesQuicktimeExist = NO;
-
+  
   // Non-IE detection
-  if (navigator.plugins) {
-    for ( var i = 0; i < navigator.plugins.length; i++) {
-      if (navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
+  if(navigator.plugins) {
+    for( var i = 0; i < navigator.plugins.length; i++) {
+      if(navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
         doesQuicktimeExist = YES;
       }
     }
-  } else if (window.ActiveXObject) {
+  } else if(window.ActiveXObject) {
     try {
       var control = new ActiveXObject('QuickTime.QuickTime');
       delete control;
       doesQuicktimeExist = YES;
-    } catch (e) {
+    } catch(e) {
     }
   }
-
+  
   equals(SC.mediaCapabilities.isQuicktimeSupported, doesQuicktimeExist, "Quicktime plugin result must match what the browser supports.");
 });
 
@@ -77,12 +76,17 @@ test("Test Quicktime Support", function() {
 test("Test HTML5 Audio Support", function() {
   var isAudioSupported = NO;
   try {
+    if(SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
+      throw new Exception();
+    }
+    
     var doc = document.createElement('Audio');
     isAudioSupported = !!doc.canPlayType;
     delete doc;
-  } catch (e) {
+    
+  } catch(e) {
   }
-
+  
   equals(SC.mediaCapabilities.isHTML5AudioSupported, isAudioSupported, "Audio Support flag must match what we've been able to determine from the browser.");
 });
 
@@ -92,12 +96,16 @@ test("Test HTML5 Audio Support", function() {
 test("Test HTML5 Video Support", function() {
   var isVideoSupported = NO;
   try {
+    if(SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
+      throw new Exception();
+    }
+    
     var doc = document.createElement('Video');
     isVideoSupported = !!doc.canPlayType;
     delete doc;
-  } catch (e) {
+  } catch(e) {
   }
-
+  
   equals(SC.mediaCapabilities.isHTML5VideoSupported, isVideoSupported, "Video Support flag must match what we've been able to determine from the browser.");
 });
 
@@ -105,7 +113,6 @@ test("Test HTML5 Video Support", function() {
  * Test version support for the HTML5 getUserMedia spec.
  */
 test("Test HTML5 User Media Support", function() {
-
   var isMediaSupported = !!navigator.getUserMedia;
   equals(SC.mediaCapabilities.isHTML5StreamApiSupported, isMediaSupported, "Stream Support flag must match what we've been able to determine from the browser.");
 });

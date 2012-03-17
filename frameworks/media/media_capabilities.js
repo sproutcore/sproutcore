@@ -35,13 +35,19 @@ SC.mediaCapabilities = SC.Object.create({});
    */
   SC.mediaCapabilities.isHTML5AudioSupported = NO;
   try {
+    // Firefox 3.6 doesn't support the W3C API. Disable support.
+    if(SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
+      throw new Exception('Browser not supported');
+    }
+    
     var doc = document.createElement('audio');
     isAudioSupported = !!doc.canPlayType;
     delete doc;
     SC.mediaCapabilities.isHTML5AudioSupported = YES;
-  } catch (e) {
+    
+  } catch(e) {
   }
-
+  
   /**
    * Specifies whether the browser supports the HTML5 <video> tag.
    * 
@@ -50,13 +56,18 @@ SC.mediaCapabilities = SC.Object.create({});
    */
   SC.mediaCapabilities.isHTML5VideoSupported = NO;
   try {
+    // Firefox 3.6 doesn't support the W3C API. Disable support.
+    if(SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
+      throw new Exception('Browser not supported');
+    }
+    
     var doc = document.createElement('video');
     isVideoSupported = !!doc.canPlayType;
     delete doc;
     SC.mediaCapabilities.isHTML5VideoSupported = YES;
-  } catch (e) {
+  } catch(e) {
   }
-
+  
   /**
    * Specifies whether the browser supports the Adobe Flash plugin.
    * 
@@ -65,60 +76,60 @@ SC.mediaCapabilities = SC.Object.create({});
    */
   SC.mediaCapabilities.isFlashSupported = NO;
   // Non-IE detection
-  if (navigator.plugins) {
-    for ( var i = 0; i < navigator.plugins.length; i++) {
-      if (navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
+  if(navigator.plugins) {
+    for( var i = 0; i < navigator.plugins.length; i++) {
+      if(navigator.plugins[i].name.indexOf("Shockwave Flash") >= 0) {
         SC.mediaCapabilities.isFlashSupported = YES;
       }
     }
   }
   // IE ActiveX detection
-  if (window.ActiveXObject) {
+  if(window.ActiveXObject) {
     try {
       var control = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
       delete control;
       SC.mediaCapabilities.isFlashSupported = YES;
-    } catch (e) {
+    } catch(e) {
       // Do nothing- The ActiveX object isn't available.
     }
   }
-
+  
   /**
    * Specifies whether the browser supports quicktime media playback.
    * 
    * @type Boolean
    */
   SC.mediaCapabilities.isQuicktimeSupported = NO;
-
+  
   // Non-IE detection
-  if (navigator.plugins) {
-    for ( var i = 0; i < navigator.plugins.length; i++) {
-      if (navigator.plugins[i].name.indexOf("QuickTime") >= 0) {
+  if(navigator.plugins) {
+    for( var i = 0; i < navigator.plugins.length; i++) {
+      if(navigator.plugins[i].name.indexOf("QuickTime") >= 0) {
         SC.mediaCapabilities.isQuicktimeSupported = YES;
       }
     }
   }
   // IE ActiveX detection
-  if (window.ActiveXObject) {
+  if(window.ActiveXObject) {
     var control = null;
     try {
       control = new ActiveXObject('QuickTime.QuickTime');
       delete control;
       SC.mediaCapabilities.isQuicktimeSupported = YES;
-    } catch (e) {
+    } catch(e) {
       // Do nothing- the ActiveX object isn't available.
     }
-
+    
     try {
       // This generates a user prompt in Internet Explorer 7
       control = new ActiveXObject('QuickTimeCheckObject.QuickTimeCheck');
       delete control;
       SC.mediaCapabilities.isQuicktimeSupported = YES;
-    } catch (e) {
+    } catch(e) {
       // Do nothing- The ActiveX object isn't available.
     }
   }
-
+  
   /**
    * Specifies whether the browser supports the HTML5 getUserMedia/Stream API.
    * 
@@ -130,7 +141,7 @@ SC.mediaCapabilities = SC.Object.create({});
    * @type Boolean
    */
   SC.mediaCapabilities.isHTML5StreamApiSupported = !!navigator.getUserMedia;
-
+  
   /**
    * Specifies whether the browser supports audio recording via the HTML5 stream
    * API or the Adobe Flash plugin.
@@ -139,7 +150,7 @@ SC.mediaCapabilities = SC.Object.create({});
    * @type Boolean
    */
   SC.mediaCapabilities.hasMicrophone = SC.mediaCapabilities.isHTML5StreamApiSupported || SC.mediaCapabilities.isFlashSupported;
-
+  
   /**
    * Specifies whether the browser supports video recording via the HTML5 stream
    * API or the Adobe Flash Plugin.
@@ -148,7 +159,7 @@ SC.mediaCapabilities = SC.Object.create({});
    * @type Boolean
    */
   SC.mediaCapabilities.hasVideoCamera = SC.mediaCapabilities.isHTML5StreamApiSupported || SC.mediaCapabilities.isFlashSupported;
-
+  
   /**
    * Specifies whether the browser has audio playback capabilities.
    * 
@@ -156,7 +167,7 @@ SC.mediaCapabilities = SC.Object.create({});
    * @type Boolean
    */
   SC.mediaCapabilities.hasAudioPlayback = SC.mediaCapabilities.isHTML5AudioSupported || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
-
+  
   /**
    * Specifies whether the browser has video playback capabilities.
    * 
@@ -164,5 +175,5 @@ SC.mediaCapabilities = SC.Object.create({});
    * @type Boolean
    */
   SC.mediaCapabilities.hasVideoPlayback = SC.mediaCapabilities.isHTML5VideoSupported || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
-
+  
 })();
