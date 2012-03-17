@@ -21,13 +21,13 @@ SC.MediaSlider = SC.SliderView.extend(
    * The media view which this slider should attach itself to.
    */
   // TODO: Deprecate, bind to loadedTimeRanges instead.
-  mediaView : null,
-
+  mediaView: null,
+  
   /**
    * The name of our render delegate
    */
-  renderDelegateName : 'mediaSliderRenderDelegate',
-
+  renderDelegateName: 'mediaSliderRenderDelegate',
+  
   /**
    * @private
    * 
@@ -36,49 +36,49 @@ SC.MediaSlider = SC.SliderView.extend(
    * @param context
    * @param firstTime
    */
-  render : function(context, firstTime) {
+  render: function(context, firstTime) {
     sc_super();
-
+    
     // Render the loaded time ranges.
     this.renderLoadedTimeRanges();
   },
-
-  renderLoadedTimeRanges : function() {
+  
+  renderLoadedTimeRanges: function() {
     var ranges = this.getPath('mediaView.loadedTimeRanges');
     var rangesElement = this.$('.sc-loaded-ranges');
     var max = this.get('maximum');
     // TODO: Remove support for mediaView, simply bind to loadedTimeRanges.
-
+    
     // Read the ranges element, kick out if it doesn't exist yet.
-    if (SC.empty(rangesElement)) {
+    if(SC.empty(rangesElement)) {
       return;
     }
     // Scrub all children.
     rangesElement.empty(".sc-loaded-range");
-
+    
     // If there are no ranges, exit.
-    if (SC.empty(ranges)) {
+    if(SC.empty(ranges)) {
       return;
     }
-
+    
     var width = rangesElement.width();
-    for ( var i = 0; i < ranges.length; i += 2) {
+    for( var i = 0; i < ranges.length; i += 2) {
       try {
         // Ranges are reported as an array of numbers. Odds are start indexes,
         // evens are end indexes of the previous start index.
         var startRange = ranges[i];
         var endRange = ranges[i + 1];
-
+        
         var pixelLeft = width * (startRange / max);
         var pixelWidth = width * ((endRange - startRange) / max);
-
+        
         var tag = $('<span class="sc-loaded-range" />');
         tag.css('left', pixelLeft);
         tag.css('width', pixelWidth);
-
+        
         rangesElement.append(tag);
-
-      } catch (e) {
+        
+      } catch(e) {
       }
     }
   }.observes('*mediaView.loadedTimeRanges'),
