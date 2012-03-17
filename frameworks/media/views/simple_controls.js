@@ -33,7 +33,7 @@ SC.SimpleMediaControlsView = SC.View.extend(
     icon: 'play',
     layout: { top: 0, left: 0, width: 20, height:20 },
     action: "playPause",
-    targetBinding: "*owner.target",
+    targetBinding: "*owner.target"
   }),
   
   progressView: SC.MediaSlider.design({
