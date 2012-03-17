@@ -25,7 +25,7 @@ SC.BaseTheme.mediaSliderRenderDelegate = SC.RenderDelegate.create({
     var valueNow = dataSource.get('ariaValue');
     
     // addressing accessibility
-    jquery.attr({
+    context.attr({
       'aria-valuemax': valueMax,
       'aria-valuemin': valueMin,
       'aria-valuenow': valueNow,
@@ -45,28 +45,28 @@ SC.BaseTheme.mediaSliderRenderDelegate = SC.RenderDelegate.create({
     dataSource.get('renderState')._cachedHandle = null;
   },
   
-  update: function(dataSource, jquery) {
-    this.updateSizeClassName(dataSource, jquery);
+  update: function(dataSource, context) {
+    this.updateSizeClassName(dataSource, context);
     
     var valueMax = dataSource.get('maximum');
     var valueMin = dataSource.get('minimum');
     var valueNow = dataSource.get('ariaValue');
     
     // addressing accessibility
-    jquery.attr({
+    context.attr({
       'aria-valuemax': valueMax,
       'aria-valuemin': valueMin,
       'aria-valuenow': valueNow,
       'aria-orientation': 'horizontal'
     });
     if(valueMin !== 0 || valueMax !== 100) {
-      jquery.attr('aria-valuetext', valueNow);
+      context.attr('aria-valuetext', valueNow);
     }
     
     if(dataSource.didChangeFor('sliderRenderDelegate', 'value')) {
       var handle = dataSource.get('renderState')._cachedHandle;
       if(!handle) {
-        handle = dataSource.get('renderState')._cachedHandle = jquery.find('.sc-handle');
+        handle = dataSource.get('renderState')._cachedHandle = context.find('.sc-handle');
       }
       
       var value = dataSource.get('value');
