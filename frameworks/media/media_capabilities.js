@@ -36,8 +36,8 @@ SC.mediaCapabilities = SC.Object.create({});
   SC.mediaCapabilities.isHTML5AudioSupported = NO;
   try {
     // Firefox 3.6 doesn't support the W3C API. Disable support.
-    if(SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
-      throw new Exception('Browser not supported');
+    if(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
+      throw new Error('Browser not supported');
     }
     
     var doc = document.createElement('audio');
@@ -57,8 +57,8 @@ SC.mediaCapabilities = SC.Object.create({});
   SC.mediaCapabilities.isHTML5VideoSupported = NO;
   try {
     // Firefox 3.6 doesn't support the W3C API. Disable support.
-    if(SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
-      throw new Exception('Browser not supported');
+    if(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
+      throw new Error('Browser not supported');
     }
     
     var doc = document.createElement('video');
@@ -149,7 +149,8 @@ SC.mediaCapabilities = SC.Object.create({});
    * @name SC.mediaCapabilities.hasMicrophone
    * @type Boolean
    */
-  SC.mediaCapabilities.hasMicrophone = SC.mediaCapabilities.isHTML5StreamApiSupported || SC.mediaCapabilities.isFlashSupported;
+  SC.mediaCapabilities.hasMicrophone = SC.mediaCapabilities.isHTML5StreamApiSupported
+      || SC.mediaCapabilities.isFlashSupported;
   
   /**
    * Specifies whether the browser supports video recording via the HTML5 stream
@@ -158,7 +159,8 @@ SC.mediaCapabilities = SC.Object.create({});
    * @name SC.mediaCapabilities.hasMicrophone
    * @type Boolean
    */
-  SC.mediaCapabilities.hasVideoCamera = SC.mediaCapabilities.isHTML5StreamApiSupported || SC.mediaCapabilities.isFlashSupported;
+  SC.mediaCapabilities.hasVideoCamera = SC.mediaCapabilities.isHTML5StreamApiSupported
+      || SC.mediaCapabilities.isFlashSupported;
   
   /**
    * Specifies whether the browser has audio playback capabilities.
@@ -166,7 +168,8 @@ SC.mediaCapabilities = SC.Object.create({});
    * @name SC.mediaCapabilities.hasAudioPlayback
    * @type Boolean
    */
-  SC.mediaCapabilities.hasAudioPlayback = SC.mediaCapabilities.isHTML5AudioSupported || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
+  SC.mediaCapabilities.hasAudioPlayback = SC.mediaCapabilities.isHTML5AudioSupported
+      || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
   
   /**
    * Specifies whether the browser has video playback capabilities.
@@ -174,6 +177,42 @@ SC.mediaCapabilities = SC.Object.create({});
    * @name SC.mediaCapabilities.hasVideoPlayback
    * @type Boolean
    */
-  SC.mediaCapabilities.hasVideoPlayback = SC.mediaCapabilities.isHTML5VideoSupported || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
+  SC.mediaCapabilities.hasVideoPlayback = SC.mediaCapabilities.isHTML5VideoSupported
+      || SC.mediaCapabilities.isQuicktimeSupported || SC.mediaCapabilities.isFlashSupported;
+  
+  /**
+   * Specifies whether the browser supports Ogg Vorbis.
+   * 
+   * @name SC.mediaCapabilities.isOggSupported
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isOggSupported = SC.mediaCapabilities.hasVideoPlayback
+      && (SC.browser.isMozilla || SC.browser.isChrome || SC.browser.isOpera);
+  
+  /**
+   * Specifies whether the browser supports the WebM/VP8 Video format.
+   * 
+   * @name SC.mediaCapabilities.isWebMSupported
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isWebMSupported = SC.mediaCapabilities.hasVideoPlayback
+      && (SC.browser.isMozilla || SC.browser.isChrome || SC.browser.isOpera);
+  
+  /**
+   * Specifies whether the browser supports the Adobe FLV compression format.
+   * 
+   * @name isFLVSupported
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isFLVSupported = SC.mediaCapabilities.isFlashSupported;
+  
+  /**
+   * Specifies whether the browser supports the MPEG-4/H.264 Video format
+   * 
+   * @name isMP4Supported
+   * @type Boolean
+   */
+  SC.mediaCapabilities.isMP4Supported = SC.mediaCapabilities.hasVideoPlayback
+      && (SC.browser.isIE || SC.browser.isChrome || SC.browser.isSafari);
   
 })();

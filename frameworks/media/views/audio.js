@@ -376,7 +376,7 @@ SC.AudioView = SC.View.extend(
     try{
       media.GetVolume();
     }catch(e){
-      SC.Logger.log('loaded fail trying later');
+//      SC.Logger.log('loaded fail trying later');
       this.invokeLater(this.didAppendToDocument, 100);
       return;
     }
@@ -442,7 +442,7 @@ SC.AudioView = SC.View.extend(
   _qtTimer:function(){
     if (this.loaded === 'quicktime' && !this.get('paused')) {
       this.incrementProperty('_currentTime');
-      view.propertyDidChange('currentTime');
+      this.propertyDidChange('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),

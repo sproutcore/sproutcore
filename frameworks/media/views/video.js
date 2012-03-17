@@ -520,7 +520,7 @@ SC.VideoView = SC.View.extend(
   _qtTimer:function(){
     if(this.loaded==='quicktime' && !this.get('paused')){
       this.incrementProperty('_currentTime');
-      view.propertyDidChange('currentTime');
+      this.propertyDidChange('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),
