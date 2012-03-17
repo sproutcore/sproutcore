@@ -176,9 +176,6 @@ SC.VideoView = SC.View.extend(
           if(this.poster){
             context.push(' poster="'+this.poster+'"');
           }
-          // if(SC.browser.touch){
-          //               context.push(' controls="true"');
-          //             }
           context.push('/>');
           this.loaded='html5';
           return;
@@ -396,86 +393,8 @@ SC.VideoView = SC.View.extend(
             }
           }
         }catch(f){}
-      //view.set('loadedData', ev.loaded);
-      //console.log('progress '+ev.loaded+","+ev.total );
       SC.RunLoop.end();
     });
-
-    // SC.Event.add(videoElem, 'suspend', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('suspend');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(videoElem, 'load', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('load');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'abort', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('abort');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'error', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('error');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'loadend', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('loadend');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'emptied', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('emptied');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'stalled', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('stalled');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(videoElem, 'loadeddata', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('loadeddata');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'waiting', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('waiting');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'playing', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('playing');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(videoElem, 'canplaythrough', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('canplaythrough');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'seeking', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('seeking');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'seeked', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('seeked');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(videoElem, 'ratechange', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('ratechange');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(videoElem, 'volumechange', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('volumechange');
-    //       SC.RunLoop.end();
-    //     });
 
   },
 
@@ -487,7 +406,6 @@ SC.VideoView = SC.View.extend(
       this.loadedTimeRanges.push(videoElem.buffered.start(j));
       this.loadedTimeRanges.push(videoElem.buffered.end(j));
     }
-    //console.log('handled loadedTimeRanges='+this.loadedTimeRanges.toString());
     this.notifyPropertyChange('loadedTimeRanges');
   },
 
@@ -556,15 +474,6 @@ SC.VideoView = SC.View.extend(
       view.set('paused', NO);
       SC.RunLoop.end();
     });
-    // SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
-    //       console.log('qt_loadedfirstframe');
-    //     });
-    // SC.Event.add(videoElem, 'qt_error', this, function () {
-    //       console.log('qt_error');
-    //     });
-    // SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
-    //       console.log('qt_canplaythrough');
-    //     });
     SC.Event.add(videoElem, 'qt_load', this, function () {
       SC.RunLoop.begin();
       this.updateQTVideoObjectLoadedTimeRanges(vid);
@@ -575,22 +484,6 @@ SC.VideoView = SC.View.extend(
       this.updateQTVideoObjectLoadedTimeRanges(vid);
       SC.RunLoop.end();
     });
-    //     SC.Event.add(videoElem, 'qt_waiting', this, function () {
-    //       console.log('qt_waiting');
-    //     });
-    //     SC.Event.add(videoElem, 'qt_stalled', this, function () {
-    //       console.log('qt_stalled');
-    //     });
-    //     SC.Event.add(videoElem, 'qt_volumechange', this, function () {
-    //       console.log('qt_volumechange');
-    //     });
-    // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
-      // SC.RunLoop.begin();
-      //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-      //         console.log('qt_timechanged');
-      //         view.updateTime();
-      //         SC.RunLoop.end();
-    // });
   },
 
   updateQTVideoObjectLoadedTimeRanges: function(vid) {
@@ -791,7 +684,6 @@ SC.VideoView.updateProperty = function(scid, property, value) {
   var view = SC.VideoView.flashViews[scid];
   if(view){
     SC.RunLoop.begin();
-    //console.log("setting property from flash"+property+","+value);
     view.set(property, value);
     SC.RunLoop.end();
   }

@@ -330,13 +330,6 @@ SC.AudioView = SC.View.extend(
       });
     });
 
-    SC.Event.add(audioElem, 'loadedmetadata', this, function () {
-      SC.run(function() {
-        // view.set('audioWidth', audioElem.audioWidth);
-        // view.set('audioHeight', audioElem.audioHeight);
-      });
-    });
-
     SC.Event.add(audioElem, 'canplay', this, function () {
       SC.run(function() {
         view.set('canPlay', YES);
@@ -367,86 +360,7 @@ SC.AudioView = SC.View.extend(
         } catch (f) {}
       }, this);
 
-      //view.set('loadedData', ev.loaded);
-      //console.log('progress '+ev.loaded+","+ev.total );
     });
-
-    // SC.Event.add(audioElem, 'suspend', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('suspend');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(audioElem, 'load', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('load');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'abort', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('abort');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'error', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('error');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'loadend', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('loadend');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'emptied', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('emptied');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'stalled', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('stalled');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(audioElem, 'loadeddata', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('loadeddata');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'waiting', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('waiting');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'playing', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('playing');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(audioElem, 'canplaythrough', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('canplaythrough');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'seeking', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('seeking');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'seeked', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('seeked');
-    //       SC.RunLoop.end();
-    //     });
-    // SC.Event.add(audioElem, 'ratechange', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('ratechange');
-    //       SC.RunLoop.end();
-    //     });
-    //     SC.Event.add(audioElem, 'volumechange', this, function () {
-    //       SC.RunLoop.begin();
-    //       console.log('volumechange');
-    //       SC.RunLoop.end();
-    //     });
-
   },
 
   /**
@@ -461,7 +375,6 @@ SC.AudioView = SC.View.extend(
         dimensions;
     try{
       media.GetVolume();
-      // add media.GetTimeScale(); ?
     }catch(e){
       SC.Logger.log('loaded fail trying later');
       this.invokeLater(this.didAppendToDocument, 100);
@@ -516,37 +429,6 @@ SC.AudioView = SC.View.extend(
         view.set('paused', NO);
       });
     });
-    // SC.Event.add(audioElem, 'qt_loadedfirstframe', this, function () {
-    //       console.log('qt_loadedfirstframe');
-    //     });
-    // SC.Event.add(audioElem, 'qt_error', this, function () {
-    //       console.log('qt_error');
-    //     });
-    // SC.Event.add(audioElem, 'qt_canplaythrough', this, function () {
-    //       console.log('qt_canplaythrough');
-    //     });
-    //     SC.Event.add(audioElem, 'qt_load', this, function () {
-    //       console.log('qt_load');
-    //     });
-    // SC.Event.add(audioElem, 'qt_progress', this, function () {
-    //       console.log('qt_progress');
-    //     });
-    //     SC.Event.add(audioElem, 'qt_waiting', this, function () {
-    //       console.log('qt_waiting');
-    //     });
-    //     SC.Event.add(audioElem, 'qt_stalled', this, function () {
-    //       console.log('qt_stalled');
-    //     });
-    //     SC.Event.add(audioElem, 'qt_volumechange', this, function () {
-    //       console.log('qt_volumechange');
-    //     });
-    // SC.Event.add(audioElem, 'qt_timechanged', this, function () {
-      // SC.RunLoop.begin();
-      //         view.set('currentTime', media.GetTime()/media.GetTimeScale());
-      //         console.log('qt_timechanged');
-      //         view.updateTime();
-      //         SC.RunLoop.end();
-    // });
   },
 
 
