@@ -17,11 +17,9 @@ MediaExamples.CapabilitiesView = SC.View.extend(SC.FlowedLayout,
 {
   layoutDirection: SC.LAYOUT_VERTICAL,
   
-  childViews: ['hasAudioPlayback', 'hasVideoPlayback', 'hasMicrophone',
-               'hasVideoCamera', 'isHTML5AudioSupported',
-               'isHTML5VideoSupported', 'isHTML5StreamApiSupported',
-               'isQuicktimeSupported', 'isFlashSupported', 'isOggSupported',
-               'isWebMSupported', 'isFLVSupported', 'isMP4Supported'],
+  childViews: ['hasAudioPlayback', 'hasVideoPlayback', 'hasMicrophone', 'hasVideoCamera', 'isHTML5AudioSupported', 'isHTML5VideoSupported',
+               'isHTML5StreamApiSupported', 'isQuicktimeSupported', 'isFlashSupported', 'isOggSupported', 'isWebMSupported', 'isFLVSupported',
+               'isMP4Supported'],
   
   fillWidth: YES,
   
@@ -71,16 +69,14 @@ MediaExamples.CapabilitiesView = SC.View.extend(SC.FlowedLayout,
     layout: {
       height: 22
     },
-    value: "Stream API: "
-        + SC.mediaCapabilities.get("isHTML5StreamApiSupported")
+    value: "Stream API: " + SC.mediaCapabilities.get("isHTML5StreamApiSupported")
   }),
   
   isQuicktimeSupported: SC.LabelView.extend({
     layout: {
       height: 22
     },
-    value: "Quicktime Plugin: "
-        + SC.mediaCapabilities.get("isQuicktimeSupported")
+    value: "Quicktime Plugin: " + SC.mediaCapabilities.get("isQuicktimeSupported")
   }),
   
   isFlashSupported: SC.LabelView.extend({

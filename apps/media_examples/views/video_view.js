@@ -44,8 +44,7 @@ MediaExamples.VideoView = SC.View.extend(
     
     fillWidth: YES,
     
-    childViews: ['videoPlayer', 'mediaControlsLabel', 'mediaControls', 'miniControlsLabel', 'miniControls',
-                 'simpleControlsLabel', 'simpleControls'],
+    childViews: ['videoPlayer', 'mediaControlsLabel', 'mediaControls', 'miniControlsLabel', 'miniControls', 'simpleControlsLabel', 'simpleControls'],
     
     videoPlayer: SC.VideoView.extend({
       value: (function() {

@@ -18,18 +18,18 @@
 MediaExamples = SC.Application.create(
 /** @scope MediaExamples.prototype */
 {
-
-  NAMESPACE : 'MediaExamples',
-  VERSION : '0.1.0',
-
-  init : function() {
+  
+  NAMESPACE: 'MediaExamples',
+  VERSION: '0.1.0',
+  
+  init: function() {
     sc_super();
     SC.ready(function() {
       MediaExamples.main();
     });
   },
-
-  main : function() {
+  
+  main: function() {
     this.getPath('mainPage.mainPane').append();
   }
 });
