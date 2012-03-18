@@ -6,6 +6,7 @@ CHANGE LOG FOR 1.6+
 
 ### CHANGES & FEATURES
 
+* Added --statechart switch to sc-gen app to get a base statechart setup.
 * Addition of `invokeNext` to SC.RunLoop (easily accessed from SC.Object).
   This function invokes the passed target/method pair once at the beginning of
   the next runloop, before any other methods (including events) are processed.
@@ -108,9 +109,18 @@ CHANGE LOG FOR 1.6+
 * Removed legacy handler of buttons to improve speed.
 * Removed deltaAdjust in scrollView and left only the calculations done in
   SC.Event.
+* Removed the --template switch from sc-init, because it didn't create a project
+  structure that was compatible with SC 1.8+.
 
 ### BUG FIXES
 
+* Fixed an issue causing ScrollerView to not render correctly on first time.
+  [2e26048]
+* Fixed an issue with SC.RecordArray's made up of new records without guids,
+  where the order of the array would change in Chrome. [3937a54]
+* Fixed SC.SplitView is not properly resetting the cursor after a drag. [5db962d]
+* SC.CollectionView's height updates when its length changes. [cb03ec4]
+* Fixed the --dry-run switch for sc-init.
 * Several new unit tests, fixes for failing unit tests and clean up of outdated
   tests.
 * The documentation was extensively searched for typographical and

@@ -1,6 +1,6 @@
 SproutCore HTML5 Application Framework
 ======================================
- 
+
 SproutCore is a framework for building blazing-fast, desktop-like applications
 in the web browser using only native HTML5 features. With SproutCore, you can
 build rich, interactive applications in the web in less code than most simple
@@ -8,13 +8,12 @@ web pages require today.
 
 The easiest way to get started with SproutCore is using the Abbot build tools
 included with the SproutCore package when you install it from the Ruby gem.
-Please see the Get Started documentation on the SproutCore website for more
-information.
+Please see the Getting Started documentation on the
+[SproutCore website](http://www.sproutcore.com/) for more information.
 
-    http://www.sproutcore.com/
-
-If you would like to contact the authors, you can reach the current maintainer
-at <charles@sproutcore.com>
+For additional SproutCore user support, join the sproutcore@googlegroups.com
+mailing list and for those interested in working on the framework itself, please
+join sproutcore-dev@googlegroups.com.
 
 ## Contributors
 
@@ -36,10 +35,13 @@ code and ideas:
 - Bruz Marzolf
 - Charles Jolley
 - Charlie Lai
+- Cherif Yaya
 - Chris Hyle
 - Christopher M Pieper
 - Christopher Swasey
+- Chuck Edwall
 - Colin Campbell
+- Corey Burrows
 - Cortland Klein
 - Devin Torres
 - Devon Govett
@@ -50,16 +52,21 @@ code and ideas:
 - Ganesh J
 - Gareth Townsend
 - Geoffrey Donaldson
+- Gopal Sharma
 - Gregory Moeck
 - Hemanth Kumar
 - James A. Rosen
 - James Austin
+- James Craig
 - James F. Herdman
 - James Ribar
+- Jason Dooley
 - Jason Ketterman
+- Jeff Pittman
 - Jim Benton
 - Jiří Zajpt
 - Joe Gaudet
+- John Rogelstad
 - Jonathan Lewis
 - Joshua Dickens
 - Joshua Holt
@@ -71,6 +78,8 @@ code and ideas:
 - Lawrence Pit
 - Levi McCallum
 - Luke Burton
+- Luke Melia
+- Mahesh Mukundan
 - Majd Taby
 - Martin Häcker
 - Martin Ottenwaelter
@@ -79,7 +88,9 @@ code and ideas:
 - Matthias Loitsch
 - Maurits Lamers
 - Michael Cohen
+- Michael Gillogly
 - Michael Harris
+- Michael Krotscheck
 - Michael Rykov
 - Michal Kurgan
 - Mike Ball
@@ -94,16 +105,20 @@ code and ideas:
 - Nitin Gupta
 - Onar Vikingstad
 - Patrick Walton
+- Paul Chavard
 - Paul Lambert
 - Peter Bergström
 - Peter Wagenet
+- Piotr Sarnacki
 - Piotr Steininger
+- Rajesh Segu
 - Ray Bodenhorn
 - Rich Harrison
 - Richard Klancer
 - Rick Russell
 - Rob Linton
 - Robert Buchholz
+- Rodrigo Basa
 - Ryan Mudryk
 - Ryan Nielsen
 - Santhakumar Murugaiyan
@@ -111,6 +126,7 @@ code and ideas:
 - Sergey Ukustov
 - Steven Tate
 - Sudarshan Bhat
+- Sunny Ripert
 - Suvajit Gupta
 - Tanner Donovan
 - Teresa Tsui
@@ -121,9 +137,13 @@ code and ideas:
 - Tim Evans
 - Tom Dale
 - Tomasz Mazur
+- Topher Fangio
 - Trek Glowacki
 - Tyler Keating
+- Umberto Nicoletti
+- Vibul Imtarnasa
 - Vincent Fiano
+- Wesley Workman
 - William Kakes
 - Yehuda Katz
 - Yogesh Kumar
@@ -136,4 +156,5 @@ including:
 * [jQuery](http://www.jquery.com/)
 * [Prototype](http://www.prototypejs.org/)
 * [Datejs](http://www.datejs.com/)
-* [JSON2](http://www.json.org/) 
+* [JSON2](http://www.json.org/)
+

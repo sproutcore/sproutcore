@@ -759,6 +759,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   contentLengthDidChange: function() {
     var content = this.get('content');
     this.set('length', content ? content.get('length') : 0);
+    this.computeLayout();
   },
 
   /** @private

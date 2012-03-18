@@ -94,7 +94,7 @@ test("calling storeDidChangeStoreKeys() with a matching recordType", function() 
 
   recs.storeDidChangeStoreKeys([storeKey], SC.Set.create().add(SC.Record));
 
-  orig.unshift(storeKey); // update - must be first b/c id.bar < id.foo
+  orig.push(storeKey); // update - must be last b/c id.bar.storeKey < id.foo.storeKey
   equals(recs.get('needsFlush'), NO, 'should not need flush anymore');
   same(recs.get('storeKeys'), orig, 'storeKeys should now be updated - rec1[%@]{%@} = %@, rec2[%@]{%@} = %@'.fmt(
     rec.get('id'), rec.get('storeKey'), rec,
