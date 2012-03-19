@@ -77,10 +77,10 @@
   	left: 25px;
   }
   
-  .has-count img.right-icon {
-    right: 32px;
-  }
-  &.has-count{
+  &.has-count {
+    img.right-icon {
+      right: 32px;
+    }
     &.two-digit img.right-icon {
       right: 38px;
     }
