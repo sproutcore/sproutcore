@@ -36,7 +36,7 @@ module('SC.DateTime transform', {
         guid: '1', 
         createdAt: '2009-03-01T20:30:00-08:00',
         frenchCreatedAt: '01/03/2009 20:30:00',
-        unixTimeCreatedAt: '1235939400'
+        unixTimeCreatedAt: 1235939400
       },
       { 
         guid: '2', 
@@ -83,7 +83,7 @@ test("reading and writing a DateTime should successfully convert to/from unix ti
   // Writing test
   d3 = d3.advance({ year: 2, month: 7, day: 14, hour: -3 });
   sprocket.set('unixTimeCreatedAt', d3);
-  equals(sprocket.readAttribute('unixTimeCreatedAt'), '1318699800', 'writing a DateTime attribute that stored in unix time format should store the correct attribute');
+  equals(sprocket.readAttribute('unixTimeCreatedAt'), 1318699800, 'writing a DateTime attribute that stored in unix time format should store the correct attribute');
 });
 
 test("unix time should default to 0 ms when invalid value is provided", function() {

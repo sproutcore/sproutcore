@@ -623,8 +623,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
     from: function(dt, attr) {
       if (SC.none(dt)) return dt;
       if (attr.get('useUnixTime')) { 
-        dt = dt.get('milliseconds')/1000; 
-        return dt.toString();
+        return dt.get('milliseconds')/1000; 
       }
       var format = attr.get('format');
       return dt.toFormattedString(format ? format : SC.DateTime.recordFormat);
