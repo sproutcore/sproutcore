@@ -241,6 +241,11 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
         url: url, status: this.IMAGE_WAITING, callbacks: [], retainCount: 0, image: img
       };
       img.entry = entry ; // provide a link back to the image
+    } else if (entry && entry.image === null) {
+    	// Ensure that if we retrieve an entry that it has an associated Image,
+    	// since failed/aborted images will have had their image property nulled.
+    	entry.image = new Image();
+    	entry.image.entry = entry;
     }
     return entry ;
   },
