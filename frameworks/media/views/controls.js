@@ -21,10 +21,6 @@ SC.MediaControlsView = SC.View.extend(
   childViews: ['playButton', 'progressView', 'timeView', 'minusLabelView', 'volumeView', 'plusLabelView', 'theaterButton'],
   classNames: ['sc-media-controls'],
   
-  leftHandleInset:null,   //until a bug in the way bindings are handled is fixed, these have to be defined
-  rightHandleInset:null,  //for the slider to be able to have its notEmpty bindings function and drop in
-  handleWidth:null,       //their placeholder values.
-  
   playObserver: function(){
     if(this.getPath('target.paused')){
       this.get('playButton').set('icon', 'play');
@@ -33,18 +29,16 @@ SC.MediaControlsView = SC.View.extend(
     }
   }.observes('*target.paused'),
   
-  playButton: SC.ButtonView.design({
+  playButton: SC.ButtonView.extend({
     title: '',
-    titleMinWidth: 35,
     icon: 'play',
-    noStyle: YES,
     layout: { top: 0, left: 0, width: 20, height:20},
     action: "playPause",
-    targetBinding: "*owner.target",
-    renderStyle: 'renderImage'
+    targetBinding: "*owner.target"
   }),
-  progressView: SC.MediaSlider.design({
-    layout: { top: 0, left: 20, right: 220, height:20},
+  
+  progressView: SC.MediaSlider.extend({
+    layout: { top: 0, left: 25, right: 230, height:20},
     value:0,
     minimum: 0,
     step:0.1,
@@ -53,35 +47,38 @@ SC.MediaControlsView = SC.View.extend(
     mediaViewBinding: "*owner.target"
   }),
   
-  timeView: SC.LabelView.design({
+  timeView: SC.LabelView.extend({
     layout: { top: 0, right: 160, width: 60, height:20},
     classNames: 'time',
     textAlign: SC.ALIGN_CENTER,
     valueBinding: '*owner.target.time'
   }),
-  theaterButton: SC.ButtonView.design({
+  
+  theaterButton: SC.ButtonView.extend({
     title: '',
     icon: 'theater',
-    renderStyle: 'renderImage',
     titleMinWidth: 35,
     layout: { top: 0, right: 140, width: 20, height:20},
     action: "fullScreen",
     targetBinding: "*owner.target"
   }),
-  minusLabelView: SC.LabelView.design({
+  
+  minusLabelView: SC.LabelView.extend({
     layout: { top: 0, right: 120, width: 20, height:20},
     value: '',
     icon: 'minus'
   }),
-  volumeView: SC.MediaSlider.design({
-    layout: { top: 0, right: 20, width: 100, height:20},
+  
+  volumeView: SC.MediaSlider.extend({
+    layout: { top: 0, right: 25, width: 90, height:20},
     value:0,
     valueBinding: "*owner.target.volume" ,
     minimum: 0,
     maximum: 1,
     step: 0.01
   }),
-  plusLabelView: SC.LabelView.design({
+  
+  plusLabelView: SC.LabelView.extend({
     layout: { top: 0, right: 0, width: 20, height:20},
     value: '',
     icon: 'plus'

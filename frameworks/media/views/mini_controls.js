@@ -45,13 +45,15 @@ SC.MiniMediaControlsView = SC.View.extend(
     textAlign: SC.ALIGN_CENTER,
     valueBinding: '*owner.target.time'
   }),
+  
   minusLabelView: SC.LabelView.design({
     layout: { top: 0, left: 80, width: 20, height:20},
     value: '',
     icon: 'minus'
   }),
-  volumeView: SC.SliderView.design({
-    layout: { top: 0, left: 100, width: 100, height:20},
+  
+  volumeView: SC.MediaSlider.design({
+    layout: { top: 0, left: 100, right: 10, height:20},
     value:0,
     valueBinding: "*owner.target.volume" ,
     minimum: 0,
