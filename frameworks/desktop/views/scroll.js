@@ -864,11 +864,30 @@ SC.ScrollView = SC.View.extend({
 
   /** @private */
   mouseWheel: function(evt) {
-    this._scroll_wheelDeltaX += evt.wheelDeltaX;
-    this._scroll_wheelDeltaY += evt.wheelDeltaY;
+    var horizontalScrollOffset = this.get('horizontalScrollOffset'),
+        maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
+        maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
+        shouldScroll = NO,
+        verticalScrollOffset = this.get('verticalScrollOffset');
 
-    this.invokeLater(this._scroll_mouseWheel, 10) ;
-    return this.get('canScrollHorizontal') || this.get('canScrollVertical') ;
+    // Only attempt to scroll if we are allowed to scroll in the direction and
+    // have room to scroll in the direction.  Otherwise, ignore the event so
+    // that an outer ScrollView may capture it.
+    shouldScroll = ((this.get('canScrollHorizontal') &&
+        (evt.wheelDeltaX < 0 && horizontalScrollOffset > 0) ||
+        (evt.wheelDeltaX > 0 && horizontalScrollOffset < maximumHorizontalScrollOffset)) ||
+        (this.get('canScrollVertical') &&
+        (evt.wheelDeltaY < 0 && verticalScrollOffset > 0) ||
+        (evt.wheelDeltaY > 0 && verticalScrollOffset < maximumVerticalScrollOffset)));
+
+    if (shouldScroll) {
+      this._scroll_wheelDeltaX += evt.wheelDeltaX;
+      this._scroll_wheelDeltaY += evt.wheelDeltaY;
+
+      this.invokeLater(this._scroll_mouseWheel, 10);
+    }
+
+    return shouldScroll;
   },
 
   /** @private */
