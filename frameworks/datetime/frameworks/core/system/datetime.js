@@ -195,7 +195,7 @@ SC.Scanner = SC.Object.extend(
   
   You can also use SC.DateTime as a record attribute on a data model. 
   
-      SC.Record.attr(SC.DateTime); // Attribute stored as a string in `SC.DateTime.recordFormat` format
+      SC.Record.attr(SC.DateTime); // Default format is ISO8601. See `SC.DateTime.recordFormat`
       SC.Record.attr(SC.DateTime, { format: '%d/%m/%Y' }); // Attribute stored as a string in '%d/%m/%Y' format
       SC.Record.attr(SC.DateTime, { useUnixTime: YES }); // Attribute stored as a number in Unix time 
    
