@@ -309,14 +309,6 @@ SC.CoreScrollView = SC.View.extend(
     return this.get('frame').width;
   }.property('frame'),
 
-  /**
-    Whether or not native scrollbars are wanted.
-
-    @type Boolean
-    @default NO
-   */
-  wantsNativeScrollbars: NO,
-
   // ..........................................................
   // SCROLLERS
   //
@@ -745,8 +737,6 @@ SC.CoreScrollView = SC.View.extend(
     additional controls you have added to the view.
    */
   tile: function () {
-    if (this.get('wantsNativeScrollbars')) return; // Let the browser retile
-
     var hasHorizontal = this.get('canScrollHorizontal'),
         hasVertical = this.get('canScrollVertical'),
         hScroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null,
@@ -766,7 +756,7 @@ SC.CoreScrollView = SC.View.extend(
         height: ht
       };
       hScroll.set('layout', layout);
-      clipLayout.bottom = layout.bottom + (hScroll.get('isTranslucent') ? 0 : layout.height);
+      clipLayout.bottom = layout.bottom + layout.height;
     }
 
     if ((hasHorizontal && this.get('horizontalOverlay')) || !hasHorizontal) {
@@ -785,7 +775,7 @@ SC.CoreScrollView = SC.View.extend(
         width:  vt
       };
       vScroll.set('layout', layout);
-      clipLayout.right = layout.right + (vScroll.get('isTranslucent') ? 0 : layout.width);
+      clipLayout.right = layout.right + layout.width;
     }
 
     if ((hasVertical && this.get('verticalOverlay')) || !hasVertical) {
@@ -897,32 +887,30 @@ SC.CoreScrollView = SC.View.extend(
     // and replace our own contentView...
     this.contentView = this.containerView.get('contentView');
 
-    if (!this.get('wantsNativeScrollbars')) {
-      // create a horizontal scroller view if needed...
-      view = this.get("horizontalScrollerView");
-      if (view) {
-        if (this.get('hasHorizontalScroller')) {
-          view = this.createChildView(view, {
-            layoutDirection: SC.LAYOUT_HORIZONTAL,
-            valueBinding: '*owner.horizontalScrollOffset'
-          });
-          this.set('horizontalScrollerView', view);
-          childViews.push(view);
-        } else this.horizontalScrollerView = null;
-      }
+    // create a horizontal scroller view if needed...
+    view = this.get("horizontalScrollerView");
+    if (view) {
+      if (this.get('hasHorizontalScroller')) {
+        view = this.createChildView(view, {
+          layoutDirection: SC.LAYOUT_HORIZONTAL,
+          valueBinding: '*owner.horizontalScrollOffset'
+        });
+        this.set('horizontalScrollerView', view);
+        childViews.push(view);
+      } else this.horizontalScrollerView = null;
+    }
 
-      // create a vertical scroller view if needed...
-      view = this.get("verticalScrollerView");
-      if (view) {
-        if (this.get('hasVerticalScroller')) {
-          view = this.createChildView(view, {
-            layoutDirection: SC.LAYOUT_VERTICAL,
-            valueBinding: '*owner.verticalScrollOffset'
-          });
-          this.set('verticalScrollerView', view);
-          childViews.push(view);
-        } else this.verticalScrollerView = null;
-      }
+    // create a vertical scroller view if needed...
+    view = this.get("verticalScrollerView");
+    if (view) {
+      if (this.get('hasVerticalScroller')) {
+        view = this.createChildView(view, {
+          layoutDirection: SC.LAYOUT_VERTICAL,
+          valueBinding: '*owner.verticalScrollOffset'
+        });
+        this.set('verticalScrollerView', view);
+        childViews.push(view);
+      } else this.verticalScrollerView = null;
     }
 
     // set childViews array.
@@ -1041,10 +1029,8 @@ SC.CoreScrollView = SC.View.extend(
       if (this.get('autohidesHorizontalScroller')) {
         this.set('isHorizontalScrollerVisible', width > dimWidth);
       }
-      if (!this.get('wantsNativeScrollbars')) {
-        view.setIfChanged('maximum', width-dimWidth);
-        view.setIfChanged('proportion', dimWidth/width);
-      }
+      view.setIfChanged('maximum', width-dimWidth);
+      view.setIfChanged('proportion', dimWidth/width);
     }
 
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
@@ -1052,10 +1038,8 @@ SC.CoreScrollView = SC.View.extend(
       if (this.get('autohidesVerticalScroller')) {
         this.set('isVerticalScrollerVisible', height > dimHeight);
       }
-      if (!this.get('wantsNativeScrollbars')) {
-        view.setIfChanged('maximum', height - dimHeight);
-        view.setIfChanged('proportion', dimHeight / height);
-      }
+      view.setIfChanged('maximum', height - dimHeight);
+      view.setIfChanged('proportion', dimHeight / height);
     }
 
     // If there is no vertical scroller and auto hiding is on, make
@@ -1083,6 +1067,10 @@ SC.CoreScrollView = SC.View.extend(
     if (forceHeight || forceWidth) {
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     }
+
+    // Send change notifications since they didn't invalidate automatically
+    this.notifyPropertyChange('maximumVerticalScrollOffset');
+    this.notifyPropertyChange('maximumHorizontalScrollOffset');
   },
 
   /** @private
@@ -1102,16 +1090,6 @@ SC.CoreScrollView = SC.View.extend(
     if (this._verticalScrollOffset !== 0) this._verticalScrollOffset = -1;
     if (this._horizontalScrollOffset !== 0) this._horizontalScrollOffset = -1;
     this.invokeLast(this.adjustElementScroll);
-  },
-
-  willScroll: function () {
-    var content = this.get('contentView');
-    content && content.willScroll && content.willScroll(this);
-  },
-
-  didScroll: function () {
-    var content = this.get('contentView');
-    content && content.didScroll && content.didScroll(this);
   },
 
   /** @private

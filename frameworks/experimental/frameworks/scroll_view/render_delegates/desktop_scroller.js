@@ -79,13 +79,15 @@ SC.BaseTheme.desktopScrollerRenderDelegate = SC.RenderDelegate.create({
       thumb = context.find('.thumb');
 
       if (dataSource.didChangeFor(K, 'thumbPosition')) {
-        thumb.css(layoutDirection === SC.LAYOUT_VERTICAL ?
-                  'top' : 'left', dataSource.get('thumbPosition'));
+        thumb.css(isVertical
+                  ? 'top'
+                  : 'left', dataSource.get('thumbPosition'));
       }
 
       if (dataSource.didChangeFor(K, 'thumbLength')) {
-        thumb.css(layoutDirection === SC.LAYOUT_VERTICAL ?
-                  'height' : 'width', dataSource.get('thumbLength'));
+        thumb.css(isVertical
+                  ? 'height'
+                  : 'width', dataSource.get('thumbLength'));
       }
     }
   }
