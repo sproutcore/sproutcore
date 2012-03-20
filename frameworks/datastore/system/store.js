@@ -1713,8 +1713,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     in the store, then this method will request a refresh from the
     `dataSource`. Otherwise it will attempt to retrieve the record.
 
-    @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
+    @param {String} id to id of the record to load
     @param {Number} storeKey (optional) optional store key
     @param {Function} callback (optional) when refresh completes
     @returns {Boolean} YES if the retrieval was a success.
