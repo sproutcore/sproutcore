@@ -710,6 +710,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (hintOnFocus) this.$('.hint')[0].innerHTML = hint;
       else if (!hintOnFocus) elem.placeholder = hint;
 
+      // IE8 has problems aligning the input text in the center
+      // This is a workaround for centering it.
+      if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
+        input.css('line-height', this.get('frame').height + 'px');
+      }
+
       if (!val || (val && val.length === 0)) {
         if (this.get('isPassword')) { elem.type = 'password'; }
 
@@ -849,7 +855,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
     }
 
-    if (this.get('hintOnFocus')) {
+    if (this.get('hintOnFocus') ||
+        (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea)) {
       this._fixupTextLayout();
     }
   },
@@ -859,6 +866,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
    */
   _fixupTextLayout: function () {
     var lineHeight = this.get('frame').height + 'px';
+
+    if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
+      this.$input().css('line-height', lineHeight);
+    }
 
     if (this.get('hintOnFocus')) {
       this.$('.hint').css('line-height', lineHeight);
