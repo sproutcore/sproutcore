@@ -848,6 +848,21 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         SC.Event.add(input, 'keypress', this, this._firefox_dispatch_keypress);
       }
     }
+
+    if (this.get('hintOnFocus')) {
+      this._fixupTextLayout();
+    }
+  },
+
+  /** @private
+    Apply proper text layout to sc-hints and inputs.
+   */
+  _fixupTextLayout: function () {
+    var lineHeight = this.get('frame').height + 'px';
+
+    if (this.get('hintOnFocus')) {
+      this.$('.hint').css('line-height', lineHeight);
+    }
   },
 
   /** @private
