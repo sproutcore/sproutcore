@@ -107,17 +107,25 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   /**
     Whether the browser should automatically correct the input. 
+
+    When `autoCorrect` is set to `null`, the browser will use
+    the system defaults.
+
     @type Boolean
     @default YES
    */
-  autoCorrect: true,
+  autoCorrect: YES,
 
   /**
-    Whether the browser should automatically capitalize the input. 
+    Whether the browser should automatically capitalize the input.
+
+    When `autoCapitalize` is set to `null`, the browser will use
+    the system defaults.
+
     @type Boolean
     @default YES
    */
-  autoCapitalize: true,
+  autoCapitalize: YES,
 
   /**
     Localizes the hint if necessary.
@@ -623,9 +631,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
-      if (SC.browser.mobileSafari) {
-        autocorrectString = !autoCorrect ? ' autocorrect="off"' : '';
-        autocapitalizeString = !autoCapitalize ? ' autocapitalize="off"' : '';
+      if (autoCorrect != null) {
+        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"true"');
+      }
+
+      if (autoCorrect != null) {
+        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
       }
 
       if (isBrowserFocusable) {
@@ -718,9 +729,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         }
       }
 
-      if (SC.browser.mobileSafari){
-        input.attr('autoCapitalize', !autoCapitalize ? 'off':'true');
-        input.attr('autoCorrect', !autoCorrect ? 'off':'true');
+      if (autoCorrect != null) {
+        input.attr('autoCorrect', !autoCorrect ? 'off' : 'true');
+      } else {
+        input.attr('autoCorrect', null);
+      }
+
+      if (autoCapitalize != null) {
+        input.attr('autoCapitalize', !autoCapitalize ? 'off' : 'true');
+      } else {
+        input.attr('autoCapitalize', null);
       }
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
