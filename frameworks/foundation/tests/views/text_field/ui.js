@@ -19,13 +19,13 @@
   })
 
   .add("password", SC.TextFieldView, {
-    isPassword: YES,
+    type: "password",
     value: "I'm so secret"
   })
 
   .add("password-hint", SC.TextFieldView, {
     hint: "Passwerd",
-    isPassword: YES,
+    type: "password",
     value: "I'm so secret"
   })
 
