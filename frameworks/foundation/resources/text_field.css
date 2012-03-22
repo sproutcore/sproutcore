@@ -66,6 +66,7 @@
   	padding: 0px;
   	color: #aaa ;
   	font-size: 12px;
+  	-webkit-font-smoothing: antialiased;
   }
 
   &.text-area .sc-hint,
