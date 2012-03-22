@@ -18,6 +18,7 @@
     right: 3px;
     position: absolute;
   }
+
   &.sc-text-field-accessory-view {
     z-index: 2;
   }
@@ -37,12 +38,8 @@
 
   textarea {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    width:100%;
-    bottom: 0px;
-    right: 0px;
-    padding-top: 10px;
+    height: 100%;
+    width: 100%;
     display: block;
     background: transparent;
     vertical-align: middle;
@@ -51,6 +48,11 @@
     border: none;
     outline: none;
     -webkit-appearance:none;
+  }
+
+  &.text-area .padding {
+    bottom: 1px;
+    top: 2px;
   }
   
   .sc-hint {
@@ -71,15 +73,15 @@
 
   &.text-area .sc-hint,
   &.text-area .hint {
-    top: 2px;
-    left: 3px;
-    right: 3px;
+    top: 0px;
+    left: 1px;
+    right: 1px;
     bottom: 2px;
   }
 
   &.focus .sc-hint,
   &.not-empty .sc-hint {
-    display: none ;
+    display: none;
   }
 
   &.sc-hint .field{
