@@ -76,6 +76,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isTextArea: NO,
 
   /**
+    Whether the text field is currently focused.
+
+    @type Boolean
+    @default NO
+   */
+  focused: NO,
+
+  /**
     The hint to display while the field is not active.
 
     @type String
