@@ -13,7 +13,7 @@ SC.setupBodyClassNames = function() {
   if (!el) return ;
 
   browser = SC.browser.current ;
-  platform = SC.browser.windows ? 'windows' : SC.browser.mac ? 'mac' : 'other-platform' ;
+  platform = SC.browser.isWindows ? 'windows' : SC.browser.isMac ? 'mac' : 'other-platform' ;
   style = document.documentElement.style;
   shadows = (style.MozBoxShadow !== undefined) ||
                 (style.webkitBoxShadow !== undefined) ||
@@ -46,7 +46,7 @@ SC.setupBodyClassNames = function() {
   }
 
   if(browser==="safari" || browser==="chrome") classNames.push('webkit');
-  if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
+  if (SC.browser.isMobileSafari) classNames.push('mobile-safari') ;
   if ('createTouch' in document) classNames.push('touch');
   el.className = classNames.join(' ') ;
 } ;
