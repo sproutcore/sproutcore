@@ -867,7 +867,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _fixupTextLayout: function () {
     var height = this.get('frame').height;
 
-    if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
+    if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 &&
+        !this.get('isTextArea')) {
       this.$input().css('line-height', height + 'px');
     }
 
