@@ -856,7 +856,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
 
     if (this.get('hintOnFocus') ||
-        (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea)) {
+        (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !this.get('isTextArea'))) {
       this.invokeLast(this._fixupTextLayout);
     }
   },
