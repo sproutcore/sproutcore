@@ -857,7 +857,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     if (this.get('hintOnFocus') ||
         (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea)) {
-      this._fixupTextLayout();
+      this.invokeLast(this._fixupTextLayout);
     }
   },
 
@@ -865,14 +865,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     Apply proper text layout to sc-hints and inputs.
    */
   _fixupTextLayout: function () {
-    var lineHeight = this.get('frame').height + 'px';
+    var height = this.get('frame').height;
 
     if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
-      this.$input().css('line-height', lineHeight);
+      this.$input().css('line-height', height + 'px');
     }
 
-    if (this.get('hintOnFocus')) {
-      this.$('.hint').css('line-height', lineHeight);
+    if (this.get('hintOnFocus') && !this.get('isTextArea')) {
+      this.$('.hint').css('line-height', this.$('.hint').outerHeight() + 'px');
     }
   },
 
