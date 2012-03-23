@@ -98,7 +98,7 @@
     }
   }
 
-  .mozilla &{
+  .firefox &{
     &.focus {
       outline-color:-moz-mac-focusring;
       outline-offset:-5px;
