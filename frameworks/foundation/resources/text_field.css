@@ -18,39 +18,41 @@
     right: 3px;
     position: absolute;
   }
+
   &.sc-text-field-accessory-view {
-  	z-index: 2;
+    z-index: 2;
   }
   input {
-  	position: absolute;
-  	top: 0px;
-  	left: 0px;
-  	width: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
     height: 100%;
-  	display: block;
-  	background: transparent;
-  	vertical-align: middle;
-  	border: none;
-  	outline: none;
-  	-webkit-appearance:none;
+    display: block;
+    background: transparent;
+    vertical-align: middle;
+    border: none;
+    outline: none;
+    -webkit-appearance:none;
   }
 
   textarea {
     position: absolute;
-  	top: 0px;
-  	left: 0px;
-  	width:100%;
-    bottom: 0px;
-  	right: 0px;
-    padding-top: 10px;
-  	display: block;
-  	background: transparent;
-  	vertical-align: middle;
-  	resize: none;
-  	overflow: auto;
-  	border: none;
+    height: 100%;
+    width: 100%;
+    display: block;
+    background: transparent;
+    vertical-align: middle;
+    resize: none;
+    overflow: auto;
+    border: none;
     outline: none;
     -webkit-appearance:none;
+  }
+
+  &.text-area .padding {
+    bottom: 1px;
+    top: 2px;
   }
   
   .sc-hint {
@@ -58,27 +60,28 @@
   }  
   
   .sc-hint, .hint {
-  	position: absolute;
-  	top: 3px;
-  	left: 1px;
-  	right: 1px;
-  	bottom: 3px;
-  	padding: 0px;
-  	color: #aaa ;
-  	font-size: 12px;
+    position: absolute;
+    top: 3px;
+    left: 1px;
+    right: 1px;
+    bottom: 3px;
+    padding: 0px;
+    color: #aaa ;
+    font-size: 12px;
+    -webkit-font-smoothing: antialiased;
   }
 
   &.text-area .sc-hint,
   &.text-area .hint {
-  	top: 2px;
-  	left: 3px;
-  	right: 3px;
-  	bottom: 2px;
+    top: 0px;
+    left: 1px;
+    right: 1px;
+    bottom: 2px;
   }
 
   &.focus .sc-hint,
   &.not-empty .sc-hint {
-    display: none ;
+    display: none;
   }
 
   &.sc-hint .field{
@@ -106,7 +109,7 @@
       -moz-appearance: textfield;
     }
     textarea.field {
-    	height: 100%;
+      height: 100%;
     }
   }
 
@@ -118,7 +121,7 @@
       border:1px inset;
     }
     textarea.field {
-    	height: 100%;
+      height: 100%;
     }
   }
 }

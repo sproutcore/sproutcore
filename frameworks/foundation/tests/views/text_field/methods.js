@@ -105,6 +105,54 @@ test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute"
   ok(!view.$input().attr('readOnly'), 'should not have readOnly attribute');
 });
 
+test("autoCapitalize=YES should add autocapitalize", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', YES);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocapitalize') !== "off", 'should have an autocapitalize attribute');
+});
+
+test("autoCapitalize=NO should add autocapitalize='off'", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', NO);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocapitalize') === "off", 'should have an autocapitalize attribute set to "off"');
+});
+
+test("autoCapitalize=null should not add autocapitalize", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', null);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(!view.$input().attr('autocapitalize'), 'should not have an autocapitalize attribute set');
+});
+
+test("autoCorrect=YES should add autocorrect", function() {
+  SC.RunLoop.begin();
+  view.set('autoCorrect', YES);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocorrect') !== "off", 'should have an autocorrect attribute');
+});
+
+test("autoCorrect=NO should add autocorrect='off'", function() {
+  SC.RunLoop.begin();
+  view.set('autoCorrect', NO);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocorrect') === "off", 'should have an autocorrect attribute set to "off"');
+});
+
+test("autoCorrect=null should not add autocorrect", function() {
+  SC.RunLoop.begin();
+  view.set('autoCorrect', null);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(!view.$input().attr('autocorrect'), 'should not have an autocorrect attribute set');
+});
+
 // test("isEnabled=NO should add disabled attr to input", function() {
 //   SC.RunLoop.begin();
 //   view1.set('isEnabled', NO);
