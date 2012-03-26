@@ -8,14 +8,18 @@
    # See the comments in this file for more information on what you can
    # change.
 -%>
-<!doctype html>
+<!DOCTYPE html>
 <html<% unless @content_for_html5_manifest.blank? %> manifest="manifest.appcache"<% end %> class="no-js" lang="<%=language%>">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge<%= config.chrome_frame ? ',chrome=1' : '' %>"  >
 
     <script>
       var SC_benchmarkPreloadEvents = { headStart: new Date().getTime() };
-      window.documentElement.className = window.documentElement.className.replace(/(^|\s)no-js(\s|$)/, '$1js$2');
+      var docElem = window.documentElement || document.documentElement;
+      if(docElem) {
+        docElem.className = docElem.className.replace(/(^|\s)no-js(\s|$)/, '$1js$2');
+        docElem = null;
+      }
     </script>
 
     <meta http-equiv="Content-type" content="text/html; charset=utf-8"  >
