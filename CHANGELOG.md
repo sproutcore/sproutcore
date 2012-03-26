@@ -1,6 +1,55 @@
 CHANGE LOG FOR 1.6+
 ===================
 
+Edge
+----------
+
+### CHANGES & FEATURES
+
+* Adds `useUnixTime` attribute to SC.DateTime record attribute handlers.
+* Introduces fixes and enhancements to the media framework (thanks @krotscheck!):
+  - enables live scrubbing
+  - decouples MediaSlider and Audio/Video view
+  - fixes layout rendering by creating a render delegate
+  - adds SC.mediaCapabilities for media capability detection
+  - updates styling to use Chance
+
+### DEPRECATIONS & REMOVALS
+
+### BUG FIXES
+
+1.8.1 - BUG FIXES
+----------
+
+* Documentation fixes.
+* Fixes the timeout proxy settings: :inactivity_timeout & :connect_timeout.
+  Setting them in a proxy config allows the developer to extend the timeout for
+  the connection to be setup and for activity to occur.
+* Adds missing CSS for SC.PickerPane left and right pointer.
+* Tidies up index.rhtml template:
+  - removes self-closing HTML
+  - renames app.manifest to manifest.appcache
+* Fixes the styling of ModalPane backdrop for SC.PanelPane. [b1d386a]
+* Fixes regression with Firefox specific SC.TextFieldView CSS. [0bc44f1]
+* Improves use and compatibility of SC.TextFieldView:
+  - applies 'autocapitalize' and 'autocorrect' attributes to all browsers
+  - automatically centers hint text
+  - fixes problem centering input elements in IE8
+  - fixes problem positioning hint in textareas
+  - improves readability of hints by making them antialiased in Webkit
+* Fixes issue when subsequent attempts to load a failed/aborted image
+  will result in queue processing being stalled. [62ad31f]
+* Fixes nesting SC.ScrollViews not passing mousewheel events from child to
+  parent scroll view when child can no longer scroll. [341e88d]
+* Fixes styling problem with SC.ListItemView right-icon. [6de3c55]
+* Fixes SC.StaticContentView not removing previous content when setting content
+  to null. [81307a8]
+* Fixes Safari focus ring artifacts in panes and Chrome bug with non-HW
+  accelerated animations in render layers, by removing the default .sc-pane
+  --webkit-transform: translate3d(0,0,0) CSS. This also makes it possible
+  to accurately manage which parts of the page should become layers, because
+  making everything a layer is not optimal. [f9d56f3]
+
 1.8.0
 ----------
 
