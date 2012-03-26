@@ -82,6 +82,29 @@ test("root_responder.makeKeyPane() : Should make the main pane as the key pane i
  equals(responder.get('keyPane'),lightPane);
 });
 
+test("root_responder.ignoreTouchHandle() : Should ignore TEXTAREA, INPUT, A, and SELECT elements", function () {
+ var wasMobileSafari = SC.browser.isMobileSafari;
+ SC.browser.isMobileSafari = YES;
+
+ ["A", "INPUT", "TEXTAREA", "SELECT"].forEach(function (tag) {
+   ok(responder.ignoreTouchHandle({
+     target: { tagName: tag },
+     allowDefault: SC.K
+   }), "should pass touch events through to &lt;" + tag + "&gt;s");
+ });
+
+ ["AUDIO", "B", "Q", "BR", "BODY", "BUTTON", "CANVAS", "FORM",
+  "IFRAME", "IMG", "OPTION", "P", "PROGRESS", "STRONG",
+  "TABLE", "TBODY", "TR", "TH", "TD", "VIDEO"].forEach(function (tag) {
+   ok(!responder.ignoreTouchHandle({
+     target: { tagName: tag },
+     allowDefault: SC.K
+   }), "should NOT pass touch events through to &lt;" + tag + "&gt;s");
+ });
+
+ SC.browser.isMobileSafari = wasMobileSafari;
+});
+
 //// CLEANUP
 /// Commenting out this two functions as the methods don't exist
 //// confirm with Charles 

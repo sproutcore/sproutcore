@@ -1488,7 +1488,7 @@ SC.RootResponder = SC.Object.extend(
   ignoreTouchHandle: function(evt) {
     if(SC.browser.isMobileSafari){
       var tag = evt.target.tagName;
-      if(tag==="INPUT" || tag==="A"){
+      if(tag==="INPUT" || tag==="TEXTAREA" || tag==="A" || tag==="SELECT"){
         evt.allowDefault();
         return YES;
       }
