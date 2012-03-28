@@ -57,15 +57,15 @@ test("create a record", function() {
 
   rec = store.createRecord(SC.Record, hash);
   ok(rec, "a record was created");
-  sk=store.storeKeyFor(SC.Record, rec.id());
+  sk=store.storeKeyFor(SC.Record, rec.get('id'));
   equals(store.readDataHash(sk), hash, "data hashes are equivalent");
-  equals(rec.id(), "1234abcd", "guids are the same");
+  equals(rec.get('id'), "1234abcd", "guids are the same");
 
   rec = store.createRecord(SC.Record, hash2, "priKey");
   ok(rec, "a record with a custom id was created");
   sk=store.storeKeyFor(SC.Record, "priKey");
   equals(store.readDataHash(sk), hash2, "data hashes are equivalent");
-  equals(rec.id(), "priKey", "guids are the same");
+  equals(rec.get('id'), "priKey", "guids are the same");
   
   equals(store.changelog.length, 2, "The changelog has the following number of entries:");
   
@@ -90,11 +90,11 @@ test("Initializing default values", function() {
     rec2 = store.createRecord(MyRecordType, null, 'test2');
     
     //get storKeys
-    sk1 = store.storeKeyFor(MyRecordType, rec1.id());
-    sk2 = store.storeKeyFor(MyRecordType, rec2.id());
+    sk1 = store.storeKeyFor(MyRecordType, rec1.get('id'));
+    sk2 = store.storeKeyFor(MyRecordType, rec2.get('id'));
     
     ok(sk1, "a first record with default values was created");
-    console.log(store.readDataHash(sk1));;
+    
     equals(store.readDataHash(sk1)['string'], "Untitled", "the default value for 'string' was initialized");
     equals(store.readDataHash(sk1)['number'], 5, "the default value for 'number' was initialized");
     equals(store.readDataHash(sk1)['bool'], YES, "the default value for 'bool' was initialized");
