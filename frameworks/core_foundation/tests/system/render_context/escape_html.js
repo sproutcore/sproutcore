@@ -39,3 +39,10 @@ test("Tests stolen from Prototype.js", function() {
     ok(SC.RenderContext.escapeHTML(tests[idx++]) === tests[idx]);
   }
 });
+
+test("Should accept number argument", function() {
+  var number = 12345.6789,
+      numStr = number.toString();
+  
+  equals(numStr, SC.RenderContext.escapeHTML(number), "Properly produces string when invoked with a number argument");
+});
