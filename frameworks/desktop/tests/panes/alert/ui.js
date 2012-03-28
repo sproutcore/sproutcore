@@ -212,16 +212,22 @@ test("AlertPane.info with individual actions and targets for three buttons", fun
     clickValue = null;
   }
   
+  function clickButton(button) {
+    var elem = button.$();
+    SC.Event.trigger(elem, 'mousedown');
+    SC.Event.trigger(elem, 'mouseup');
+  }
+  
   showPane();
-  pane.dismiss(pane.get('button1'));
+  clickButton(pane.get('button1'));
   equals(clickValue, 'OK', 'Action for the OK button was clicked');
 
   showPane();
-  pane.dismiss(pane.get('button2'));
+  clickButton(pane.get('button2'));
   equals(clickValue, 'Cancel', 'Action for the Cancel button was clicked');
   
   showPane();
-  pane.dismiss(pane.get('button3'));
+  clickButton(pane.get('button3'));
   equals(clickValue, 'Extra', 'Action for the Extra button was clicked');
   
 });
