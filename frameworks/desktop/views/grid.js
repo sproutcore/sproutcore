@@ -24,7 +24,7 @@ SC.GridView = SC.ListView.extend(
     @see SC.View#classNames
   */
   classNames: ['sc-grid-view'],
-  
+
   /**
     @type Hash
     @default { left:0, right:0, top:0, bottom:0 }
@@ -32,21 +32,21 @@ SC.GridView = SC.ListView.extend(
   */
   layout: { left:0, right:0, top:0, bottom:0 },
 
-  /** 
+  /**
     The common row height for grid items.
-    
+
     The value should be an integer expressed in pixels.
-    
+
     @type Number
     @default 48
   */
   rowHeight: 48,
-  
+
   /**
     The minimum column width for grid items.  Items will actually
     be laid out as needed to completely fill the space, but the minimum
     width of each item will be this value.
-    
+
     @type Number
     @default 64
   */
@@ -54,25 +54,25 @@ SC.GridView = SC.ListView.extend(
 
   /**
     The default example item view will render text-based items.
-    
+
     You can override this as you wish.
-    
+
     @type SC.View
     @default SC.LabelView
   */
   exampleView: SC.LabelView,
-  
+
   /**
     Possible values:
-    
+
       - SC.HORIZONTAL_ORIENTATION
       - SC.VERTICAL_ORIENTATION
-    
+
     @type String
     @default SC.HORIZONTAL_ORIENTATION
   */
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
-  
+
   /** @private */
   itemsPerRow: function() {
     var f = this.get('frame'),
@@ -80,9 +80,9 @@ SC.GridView = SC.ListView.extend(
 
     return (columnWidth <= 0) ? 1 : Math.floor(f.width / columnWidth) ;
   }.property('clippingFrame', 'columnWidth').cacheable(),
-  
+
   /** @private
-    Find the contentIndexes to display in the passed rect. Note that we 
+    Find the contentIndexes to display in the passed rect. Note that we
     ignore the width of the rect passed since we need to have a single
     contiguous range.
   */
@@ -93,7 +93,7 @@ SC.GridView = SC.ListView.extend(
         max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow ;
     return SC.IndexSet.create(min, max-min);
   },
-  
+
   /** @private */
   layoutForContentIndex: function(contentIndex) {
     var rowHeight = this.get('rowHeight') || 48,
@@ -102,14 +102,14 @@ SC.GridView = SC.ListView.extend(
         columnWidth = Math.floor(frameWidth/itemsPerRow),
         row = Math.floor(contentIndex / itemsPerRow),
         col = contentIndex - (itemsPerRow*row) ;
-    return { 
+    return {
       left: col * columnWidth,
       top: row * rowHeight,
       height: rowHeight,
       width: columnWidth
     };
   },
-  
+
   /** @private
     Overrides default CollectionView method to compute the minimum height
     of the list view.
@@ -120,32 +120,32 @@ SC.GridView = SC.ListView.extend(
         rowHeight = this.get('rowHeight') || 48,
         itemsPerRow = this.get('itemsPerRow'),
         rows = Math.ceil(count / itemsPerRow) ;
-  
+
     // use this cached layout hash to avoid allocing memory...
     var ret = this._cachedLayoutHash ;
     if (!ret) ret = this._cachedLayoutHash = {};
-    
+
     // set minHeight
     ret.minHeight = rows * rowHeight ;
     this.calculatedHeight = ret.minHeight;
-    return ret; 
+    return ret;
   },
-  
+
   /**
     @type SC.View
   */
   insertionPointClass: SC.View.extend({
     classNames: ['grid-insertion-point'],
-    
+
     render: function(context, firstTime) {
       if (firstTime) context.push('<span class="anchor"></span>') ;
     }
   }),
-  
+
   /** @private */
   showInsertionPoint: function(itemView, dropOperation) {
     if (!itemView) return ;
-    
+
     // if drop on, then just add a class...
     if (dropOperation === SC.DROP_ON) {
       if (itemView !== this._dropOnInsertionPoint) {
@@ -153,24 +153,24 @@ SC.GridView = SC.ListView.extend(
         //itemView.addClassName('drop-target') ;
         this._dropOnInsertionPoint = itemView ;
       }
-      
+
     } else {
-      
+
       if (this._dropOnInsertionPoint) {
         //this._dropOnInsertionPoint.removeClassName('drop-target') ;
         this._dropOnInsertionPoint = null ;
       }
-    
+
       if (!this._insertionPointView) {
         this._insertionPointView = this.insertionPointClass.create() ;
       }
-    
+
       var insertionPoint = this._insertionPointView ;
       var itemViewFrame = itemView.get('frame') ;
-      var f = { height: itemViewFrame.height - 6, 
-            x: itemViewFrame.x, 
-            y: itemViewFrame.y + 6, 
-            width: 0 
+      var f = { height: itemViewFrame.height - 6,
+            x: itemViewFrame.x,
+            y: itemViewFrame.y + 6,
+            width: 0
           };
 
       if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
@@ -181,9 +181,9 @@ SC.GridView = SC.ListView.extend(
         itemView.parentNode.appendChild(insertionPoint) ;
       }
     }
-    
+
   },
-    
+
   /** @private */
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
@@ -194,9 +194,9 @@ SC.GridView = SC.ListView.extend(
       this._dropOnInsertionPoint = null ;
     }
   },
-  
+
   /** @private */
-  insertionIndexForLocation: function(loc, dropOperation) {  
+  insertionIndexForLocation: function(loc, dropOperation) {
     var f = this.get('frame'),
         sf = this.get('clippingFrame'),
         itemsPerRow = this.get('itemsPerRow'),
@@ -207,7 +207,7 @@ SC.GridView = SC.ListView.extend(
         offset = (loc.x - f.x - sf.x),
         col = Math.floor(offset / columnWidth),
         percentage = (offset / columnWidth) - col ;
-    
+
     // if the dropOperation is SC.DROP_ON and we are in the center 60%
     // then return the current item.
     if (dropOperation === SC.DROP_ON) {
@@ -218,7 +218,7 @@ SC.GridView = SC.ListView.extend(
     } else {
       if (percentage > 0.45) col++ ;
     }
-    
+
     // convert to index
     var ret= (row*itemsPerRow) + col ;
     return [ret, retOp] ;
@@ -235,9 +235,11 @@ SC.GridView = SC.ListView.extend(
 
     len = nowShowing.get('length');
 
-    for (idx=0; idx < len; idx++) {
+    // Only loop through the now showing indexes, if the content is sparsely
+    // loaded we could inadvertently trigger reloading unneeded content.
+    nowShowing.forEach(function(idx) {
       itemView = this.itemViewForContentIndex(idx);
       itemView.adjust(this.layoutForContentIndex(idx));
-    }
+    }, this);
   }.observes('clippingFrame')
 }) ;
