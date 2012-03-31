@@ -27,6 +27,18 @@
       @include slices("popover_notoolbar.png", $left: 40, $top: 40, $bottom: 40, $right: 40, $fill: 1 1, $skip: middle);
 
       .middle { display: none }
+
+      .left {
+	background-position: -191px 0px;
+	left: 15px;
+	width: 13px;
+      }
+
+      .right {
+	background-position: -232px 0px;
+	right: 8px;
+	width: 20px;
+      }
       
       div { z-index: 5; }
     }
@@ -38,8 +50,20 @@
         $skip: left middle right bottom-left bottom bottom-left bottom-right
       );
       
-      .left { top: 75px; }
-      .right { top: 75px; }
+      .left {
+	top: 75px;
+        background-position: -191px 0px;
+        left: 15px;
+        width: 13px;
+      }
+
+      .right {
+	top: 75px;
+        background-position: -232px 0px;
+        right: 8px;
+        width: 20px;
+      }
+
     }
     
     
@@ -50,8 +74,20 @@
         $skip: left middle right top-left top top-right
       );
       
-      .left { bottom: 75px; }
-      .right { bottom: 75px; }
+      .left {
+        bottom: 75px;
+        background-position: -191px 0px;
+        left: 15px;
+        width: 13px;
+      }
+
+      .right {
+        bottom: 75px;
+        background-position: -232px 0px;
+        right: 8px;
+        width: 20px;
+      }
+
     }
     
   }
