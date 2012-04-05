@@ -346,6 +346,53 @@ test("Basic Array Functionality: pushObject", function() {
   same(pplAttr[3], pLast.get('attributes'), "verify that parent attributes are the same as the last individual child attributes");  
 });
 
+test("Advanced Array Functionality: pushObject", function() {
+  var ppl, that = this;
+  that.willChange = 0;
+  that.didChange = 0;
+  that.removedCount = 0;
+  that.addedCount = 0;
+  
+  this.arrayContentWillChange = function(start, removedCount, addedCount) {
+    that.willChange += 1;
+  };
+  this.arrayContentDidChange = function(start, removedCount, addedCount) {
+    that.didChange += 1;
+    that.removedCount += removedCount;
+    that.addedCount += addedCount;
+  };
+  
+  // Create thea rray and add observers
+  ppl = testParent.get('people');
+  ppl.addArrayObservers({
+    target: this,
+    willChange: this.arrayContentWillChange,
+    didChange: this.arrayContentDidChange
+  });
+  
+  // This should fire willChange and didChange once each
+  ppl.pushObject(peopleData2[0]);
+  equals(that.willChange, 1, "arrayContentWillChange should have been executed once");
+  equals(that.didChange, 1, "arrayContentDidChange should have been executed once");
+  equals(that.removedCount, 0, "Zero records were removed");
+  equals(that.addedCount, 1, "1 Record was added");
+
+  // Reset
+  that.willChange = 0;
+  that.didChange = 0;
+  that.removedCount = 0;
+  that.addedCount = 0;
+  
+  // This should fire willChange and didChange once each
+  ppl.pushObject(peopleData2[1]);
+  equals(that.willChange, 1, "arrayContentWillChange should have been executed once");
+  equals(that.didChange, 1, "arrayContentDidChange should have been executed once");
+  equals(that.willChange, 2, "arrayContentWillChange should have been executed twice");
+  equals(that.didChange, 2, "arrayContentDidChange should have been executed twice");
+  equals(that.removedCount, 0, "Zero records were removed");
+  equals(that.addedCount, 1, "A second record was added");
+});
+
 test("Basic Array Functionality: popObject", function() {   
   var ppl, pplAttr, p, pFirst, pLast;
   // Add something to the array
