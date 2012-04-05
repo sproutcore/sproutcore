@@ -1007,9 +1007,13 @@ SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
   plain text.  You should make sure you pass all user-entered data through
   this method to avoid errors.  You can also do this with the text() helper
   method on a render context.
+  
+  @param {String|Number} text value to escape
+  @returns {String} string with all HTML values properly escaped
 */
 SC.RenderContext.escapeHTML = function(text) {
     if (!text) return '';
+    if (SC.typeOf(text) === SC.T_NUMBER) { text = text.toString(); }
     return text.replace(_escapeHTMLRegex, _escapeHTMLMethod);
 };
 })();
