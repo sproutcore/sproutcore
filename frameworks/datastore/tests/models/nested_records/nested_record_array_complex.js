@@ -387,8 +387,6 @@ test("Advanced Array Functionality: pushObject", function() {
   ppl.pushObject(peopleData2[1]);
   equals(that.willChange, 1, "arrayContentWillChange should have been executed once");
   equals(that.didChange, 1, "arrayContentDidChange should have been executed once");
-  equals(that.willChange, 2, "arrayContentWillChange should have been executed twice");
-  equals(that.didChange, 2, "arrayContentDidChange should have been executed twice");
   equals(that.removedCount, 0, "Zero records were removed");
   equals(that.addedCount, 1, "A second record was added");
 });
