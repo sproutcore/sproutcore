@@ -53,6 +53,7 @@ sc_require('ext/handlebars');
         property: property,
         previousContext: this,
         tagName: (options.hash.tagName || "span"),
+        classNames: (!!options.hash.classNames ? options.hash.classNames.split(',') : ""),
         isEscaped: options.hash.escaped
       });
 
