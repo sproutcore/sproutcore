@@ -302,6 +302,9 @@ test("SC.Color#cssText", function () {
 
   color.set('b', 128);
   equals(color.get('cssText'), '#008080');
+
+  color.set('a', 0.5);
+  ok(color.get('cssText') !== '#008080');
 });
 
 test("SC.Color#hue", function () {

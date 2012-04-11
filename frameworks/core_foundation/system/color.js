@@ -312,7 +312,7 @@ SC.Color = SC.Object.extend(
            : SC.Color.supportsRgba
            ? this.toRgba()
            : this.toArgb();
-  }.property('r', 'g', 'b').cacheable(),
+  }.property('r', 'g', 'b', 'a').cacheable(),
 
   /**
     Returns a clone of this color.
