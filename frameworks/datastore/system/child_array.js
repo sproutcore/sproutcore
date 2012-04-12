@@ -170,13 +170,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
         cr, recordType;
     
     newRecs = this._processRecordsToHashes(recs);
-    children.replace(idx, amt, newRecs);
     // notify that the record did change...
     if (newRecs !== this._prevChildren){
       this._performRecordPropertyChange(null, false);
-      this.arrayContentWillChange(idx, amt, len);
-      this._childrenContentDidChange(idx, amt, len);
     } 
+    children.replace(idx, amt, newRecs);
     record.recordDidChange(pname);
 
     return this;
