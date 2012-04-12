@@ -390,7 +390,7 @@ SC.AlertPane = SC.PanelPane.extend(
       } else {
         rootResponder = this.getPath('pane.rootResponder');
         if(rootResponder) {
-          target = sender.get('target');
+          target = sender.get('customTarget');
           rootResponder.sendAction(action, target || del, this, this, null, this);
         }
       }
@@ -451,7 +451,7 @@ SC.AlertPane.mixin(
         
         buttonView.set('title'.fmt(idx), title);
         if(action) buttonView.set('customAction'.fmt(idx), action);
-        if(target) buttonView.set('target'.fmt(idx), target);
+        if(target) buttonView.set('customTarget'.fmt(idx), target);
         buttonView.set('isVisible', !!title);
         buttonView.set('themeName', themeName);
       });
