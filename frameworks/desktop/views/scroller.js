@@ -56,24 +56,24 @@ SC.ScrollerView = SC.View.extend(
     @readOnly
   */
   ariaRole: 'scrollbar',
-  
-  
+
+
   // ..........................................................
   // PROPERTIES
   //
-  
+
   /**
     If YES, a click on the track will cause the scrollbar to scroll to that position.
     Otherwise, a click on the track will cause a page down.
-    
+
     In either case, alt-clicks will perform the opposite behavior.
-    
+
     @type Boolean
     @default NO
   */
   shouldScrollToClick: NO,
-  
-  
+
+
   /** @private
     The in-touch-scroll value.
   */
@@ -83,7 +83,7 @@ SC.ScrollerView = SC.View.extend(
     The value of the scroller.
 
     The value represents the position of the scroller's thumb.
-    
+
     @field
     @type Number
     @observes maximum
@@ -98,7 +98,7 @@ SC.ScrollerView = SC.View.extend(
     val = this._scs_value || minimum; // default value is at top/left
     return Math.max(Math.min(val, this.get('maximum')), minimum) ;
   }.property('maximum', 'minimum').cacheable(),
-  
+
   /**
     @type Number
     @observes value
@@ -173,7 +173,7 @@ SC.ScrollerView = SC.View.extend(
     appear horizontal or vertical.  This must be set when the view is created.
     Changing this once the view has been created will have no effect. Possible
     values:
-    
+
       - SC.LAYOUT_VERTICAL
       - SC.LAYOUT_HORIZONTAL
 
@@ -196,14 +196,14 @@ SC.ScrollerView = SC.View.extend(
   //
 
   /**
-    The width (if vertical scroller) or height (if horizontal scroller) of the 
+    The width (if vertical scroller) or height (if horizontal scroller) of the
     scrollbar.
 
     @type Number
     @default 14
   */
   scrollbarThickness: 14,
-  
+
   /**
     The width or height of the cap that encloses the track.
 
@@ -239,7 +239,7 @@ SC.ScrollerView = SC.View.extend(
     @default 11
   */
   buttonOverlap: 11,
-  
+
   /**
     The minimium length that the thumb will be, regardless of how much content
     is in the scroll view.
@@ -265,7 +265,8 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   render: function(context, firstTime) {
-    var classNames = {},
+    var ariaOrientation = 'vertical',
+        classNames = {},
         buttons = '',
         parentView = this.get('parentView'),
         layoutDirection = this.get('layoutDirection'),
@@ -280,6 +281,7 @@ SC.ScrollerView = SC.View.extend(
         break;
       case SC.LAYOUT_HORIZONTAL:
         classNames['sc-horizontal'] = YES;
+        ariaOrientation = 'horizontal';
         break;
     }
 
@@ -304,7 +306,7 @@ SC.ScrollerView = SC.View.extend(
       this.renderThumb(context, layoutDirection, thumbLength, thumbPosition);
 
       //addressing accessibility
-      context.attr('aria-orientation', 'vertical');
+      context.attr('aria-orientation', ariaOrientation);
 
       //addressing accessibility
       context.attr('aria-valuemax', this.get('maximum'));
@@ -353,12 +355,12 @@ SC.ScrollerView = SC.View.extend(
   touchScrollDidStart: function(value) {
     this.set("_touchScrollValue", value);
   },
-  
+
   /** @private */
   touchScrollDidEnd: function(value) {
     this.set("_touchScrollValue", NO);
   },
-  
+
   /** @private */
   touchScrollDidChange: function(value) {
     this.set("_touchScrollValue", value);
@@ -367,7 +369,7 @@ SC.ScrollerView = SC.View.extend(
   // ..........................................................
   // THUMB MANAGEMENT
   //
-  
+
   /** @private
     Adjusts the thumb (for backwards-compatibility calls adjustThumbPosition+adjustThumbSize by default)
   */
@@ -485,7 +487,7 @@ SC.ScrollerView = SC.View.extend(
         thumbLength = this.get('thumbLength'),
         capLength = this.get('capLength'),
         capOverlap = this.get('capOverlap'), position;
-        
+
     position = (value/max)*(trackLength-thumbLength);
     position += capLength - capOverlap; // account for the top/left cap
 
@@ -507,7 +509,7 @@ SC.ScrollerView = SC.View.extend(
   // ..........................................................
   // MOUSE EVENTS
   //
-  
+
   /** @private
     Returns the value for a position within the scroller's frame.
   */
@@ -516,8 +518,8 @@ SC.ScrollerView = SC.View.extend(
         trackLength = this.get('trackLength'),
         thumbLength = this.get('thumbLength'),
         capLength = this.get('capLength'),
-        capOverlap = this.get('capOverlap'), value; 
-    
+        capOverlap = this.get('capOverlap'), value;
+
     value = pos - (capLength - capOverlap);
     value = value / (trackLength - thumbLength);
     value = value * max;
@@ -546,7 +548,7 @@ SC.ScrollerView = SC.View.extend(
   */
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return NO;
-    
+
     // keep note of altIsDown for later.
     this._altIsDown = evt.altKey;
     this._shiftIsDown = evt.shiftKey;
@@ -591,7 +593,7 @@ SC.ScrollerView = SC.View.extend(
       // User clicked in the track
       var scrollToClick = this.get("shouldScrollToClick");
       if (evt.altKey) scrollToClick = !scrollToClick;
-      
+
       var trackLength = this.get('trackLength'),
           thumbLength = this.get('thumbLength'),
           frame = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY }),
@@ -605,13 +607,13 @@ SC.ScrollerView = SC.View.extend(
           this._mouseDownLocation = mousePosition = frame.x;
           break;
       }
-      
+
       if (scrollToClick) {
         this.set('value', this.valueForPosition(mousePosition - (thumbLength / 2)));
-        
+
         // and start a normal mouse down
         thumbPosition = this.get('thumbPosition');
-        
+
         this._thumbDragging = YES;
         this._thumbOffset = {x: frame.x - thumbPosition, y: frame.y - thumbPosition };
         this._mouseDownLocation = {x:evt.pageX, y:evt.pageY};
@@ -628,7 +630,7 @@ SC.ScrollerView = SC.View.extend(
           this.startMouseDownTimer('page');
         }
       }
-      
+
     }
 
     return YES;
@@ -669,7 +671,7 @@ SC.ScrollerView = SC.View.extend(
     If the user began the drag on the thumb, we calculate the difference
     between the mouse position at click and where it is now.  We then
     offset the thumb by that amount, within the bounds of the track.
-    
+
     If the user began scrolling up/down using the buttons, this will track
     what component they are currently over, changing the scroll direction.
 
@@ -686,7 +688,7 @@ SC.ScrollerView = SC.View.extend(
 
     // Only move the thumb if the user clicked on the thumb during mouseDown
     if (this._thumbDragging) {
-      
+
       switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
           delta = (evt.pageY - this._mouseDownLocation.y);
@@ -695,7 +697,7 @@ SC.ScrollerView = SC.View.extend(
           delta = (evt.pageX - this._mouseDownLocation.x);
           break;
       }
-      
+
       // if we are in alt now, but were not before, update the old thumb position to the new one
       if (evt.altKey) {
         if (!this._altIsDown || (this._shiftIsDown !== evt.shiftKey)) {
@@ -704,24 +706,24 @@ SC.ScrollerView = SC.View.extend(
           this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
           this._valueAtDragStart = this.get("value");
         }
-        
+
         // because I feel like it. Probably almost no one will find this tiny, buried feature.
         // Too bad.
         if (evt.shiftKey) delta = -delta;
-        
+
         this.set('value', Math.round(this._valueAtDragStart + delta * 2));
       } else {
         thumbPosition = thumbPositionAtDragStart + delta;
         length = this.get('trackLength') - this.get('thumbLength');
         this.set('value', Math.round( (thumbPosition/length) * this.get('maximum')));
       }
-    
+
     } else if (isScrollingUp || isScrollingDown) {
       var nowScrollingUp = NO, nowScrollingDown = NO;
-      
+
       var topButtonRect = this.$('.button-top')[0].getBoundingClientRect();
       var bottomButtonRect = this.$('.button-bottom')[0].getBoundingClientRect();
-      
+
       switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
           if (evt.clientY < topButtonRect.bottom) nowScrollingUp = YES;
@@ -732,12 +734,12 @@ SC.ScrollerView = SC.View.extend(
           else nowScrollingDown = YES;
           break;
       }
-      
+
       if ((nowScrollingUp || nowScrollingDown) && nowScrollingUp !== isScrollingUp){
         //
         // STOP OLD
         //
-        
+
         // If we have an element that was set as active in mouseDown,
         // remove its active state
         if (active) {
@@ -746,19 +748,19 @@ SC.ScrollerView = SC.View.extend(
 
         // Stop firing repeating events after mouseup
         this._mouseDownTimerAction = nowScrollingUp ? "scrollUp" : "scrollDown";
-        
+
         if (nowScrollingUp) {
           this.makeButtonActive('.button-top');
         } else if (nowScrollingDown) {
           this.makeButtonActive('.button-bottom');
         }
-        
+
          this._isScrollingUp = nowScrollingUp;
          this._isScrollingDown = nowScrollingDown;
       }
     }
-    
-    
+
+
     this._altIsDown = evt.altKey;
     this._shiftIsDown = evt.shiftKey;
     return YES;
@@ -769,7 +771,7 @@ SC.ScrollerView = SC.View.extend(
     clicks a button or inside the track to move a page at a time. If they
     continue holding the mouse button down, we want to repeat that action
     after a small delay.  This timer will be invalidated in mouseUp.
-    
+
     Specify "immediate" as YES if it should not wait.
   */
   startMouseDownTimer: function(action, immediate) {
@@ -849,52 +851,52 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
     @see SC.View#classNames
   */
   classNames: ['sc-touch-scroller-view'],
-  
+
   /**
     @type Number
     @default 12
   */
   scrollbarThickness: 12,
-  
+
   /**
     @type Number
     @default 5
   */
   capLength: 5,
-  
+
   /**
     @type Number
     @default 0
   */
   capOverlap: 0,
-  
+
   /**
     @type Boolean
     @default NO
   */
   hasButtons: NO,
-  
+
   /**
     @type Number
     @default 36
   */
   buttonOverlap: 36,
-  
+
   /** @private */
   adjustThumb: function(thumb, position, length) {
     var thumbInner = this.$('.thumb-inner');
     var max = this.get("scrollerLength") - this.capLength, min = this.get("minimum") + this.capLength;
-    
+
     if (position + length > max) {
       position = Math.min(max - 20, position);
       length = max - position;
     }
-    
+
     if (position < min) {
       length -= min - position;
       position = min;
     }
-    
+
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         if (this._thumbPosition !== position) thumb.css('-webkit-transform', 'translate3d(0px,' + position + 'px,0px)');
@@ -913,7 +915,7 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
     this._thumbPosition = position;
     this._thumbSize = length;
   },
-  
+
   /** @private */
   render: function(context, firstTime) {
     var classNames = [],
