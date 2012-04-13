@@ -34,7 +34,7 @@
     &.top-toolbar .popover-background {
       top: -20px;
       @include slices(
-        "popover.png", $left: 30, $top: 75, $bottom: 40, $right: 30, 
+        "popover.png", $left: 30, $top: 75, $bottom: 34, $right: 30, 
         $skip: left middle right bottom-left bottom bottom-left bottom-right
       );
 
@@ -44,7 +44,7 @@
     &.bottom-toolbar .popover-background {
       bottom: -20px;
       @include slices(
-        "popover.png", $left: 30, $bottom: 75, $top: 40, $right: 30, 
+        "popover.png", $left: 30, $bottom: 75, $top: 34, $right: 30, 
         $skip: left middle right top-left top top-right
       );
       
