@@ -33,7 +33,14 @@ module("SplitView - SplitChild (" + (layoutDirection === SC.LAYOUT_HORIZONTAL ? 
       
       left:  SC.View.extend(SC.SplitChild, { name: 'left', size: 100 }),
       middle: SC.View.extend(SC.SplitChild, { name: 'middle', size: 300, positionOffset: -10, sizeOffset: 20 }),
-      right: SC.View.extend(SC.SplitChild, { name: 'right', size: 100 }),
+      right: SC.SplitView.extend(SC.SplitChild, {
+        name: 'right',
+        size: 100,
+        splitDividerView: null,
+        childViews: ['top', 'bottom'],
+        top: SC.View.extend(SC.SplitChild, { name: 'top', size: 100 }),
+        bottom: SC.View.extend(SC.SplitChild, { name: 'bottom', size: 400 })
+      }),
       
       layout: { 
         left: 0, top: 0, 
@@ -127,6 +134,18 @@ test("Check that changing orientation changes layouts.", function() {
   
   // height is different, so layout should have changed to 100, 100, 100
   verifyChildren(splitView, 100, 100, 100);
+});
+
+test("Check that the `splitView` computed is correct on SC.SplitChilds", function () {
+  equals(splitView, splitView.childViews[0].get('splitView'));
+  equals(splitView, splitView.childViews[1].get('splitView'));
+  equals(splitView, splitView.childViews[2].get('splitView'),
+         'the splitView should the closest parent splitView');
+
+  var nestedSplitView = splitView.childViews[2];
+
+  equals(nestedSplitView, nestedSplitView.childViews[0].get('splitView'));
+  equals(nestedSplitView, nestedSplitView.childViews[1].get('splitView'));
 });
 
 }
