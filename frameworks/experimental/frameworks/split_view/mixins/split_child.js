@@ -214,7 +214,7 @@ SC.SplitChild =
    * @property SC.SplitView
   */
   splitView: function() {
-    var view = this ;
+    var view = this.get('parentView') ;
     while (view && !view.isSplitView) view = view.get('parentView') ;
     return view ;
   }.property('parentView').cacheable(),
