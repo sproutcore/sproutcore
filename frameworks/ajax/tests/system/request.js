@@ -303,3 +303,24 @@ test("Test Multiple listeners per single status response", function() {
   stop() ; // stops the test runner - wait for response
 });
 
+test("Test upload listeners", function() {
+
+    var response;
+
+    //Add upload progress event
+    request.notifyUpload("progress", this, function(progressEvent) {
+        ok(true, "Upload progress fired");
+    });
+
+    request.notify(200, this, function(response) {
+        ok(true, "Receieved a response");
+    });
+
+    response = request.send();
+
+    var uploadEvents = response.get("uploadEvents");
+
+    ok(uploadEvents["progress"] !== null, 'response has successfully added progress upload event');
+
+    stop() ; // stops the test runner - wait for response
+});

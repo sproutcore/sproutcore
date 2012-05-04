@@ -143,6 +143,17 @@ SC.Response = SC.Object.extend(
   }.property('request').cacheable(),
 
   /**
+         Returns the hash of upload event listeners set on the request.
+
+         @field
+         @type Hash
+         @observes request
+         */
+  uploadEvents: function() {
+      return this.getPath('request.uploadEvents');
+   }.property('request').cacheable(),
+
+  /**
     The response status code.
 
     @type Number
@@ -526,6 +537,20 @@ SC.XHRResponse = SC.Response.extend(
         };
         rawRequest.onreadystatechange = handleReadyStateChange;
       }
+    }
+
+    //TODO: Handle browsers that support only XMLHttpRequest v1
+    if(rawRequest.upload) { //Modern browsers that support XMLHttpRequest v2
+        var uploadEvents = this.get("uploadEvents"),
+            reqUpload = rawRequest.upload,
+            event, eventObj;
+        if(uploadEvents)  {
+            for(event in uploadEvents){
+                eventObj = uploadEvents[event];
+                SC.Event.add(reqUpload, event,
+                    eventObj.target, eventObj.action, eventObj.params, rawRequest);
+            }
+        }
     }
 
     // initiate request.
