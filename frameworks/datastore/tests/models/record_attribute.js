@@ -219,6 +219,17 @@ test("writing a date should generate an ISO date" ,function() {
   equals(rec.readAttribute('date'), '2009-04-02T05:28:03Z', 'should have time in ISO format');
 });
 
+test("writing a date with timezone should generate an ISO date" ,function() {
+  var date = new Date(1238650083966);
+
+  // Work with timezones
+  var utcDate = new Date(Number(date) + (date.getTimezoneOffset() * 60000)); // Adjust for timezone offset
+  date.getTimezoneOffset = function(){ return -120; }; // Hack the offset to respond 0
+
+  equals(rec.set('date', date), rec, 'returns reciever');
+  equals(rec.readAttribute('date'), '2009-04-02T07:28:03+02:00', 'should have time in ISO format with timezone');
+});
+
 test("writing an attribute should make relationship aggregate dirty" ,function() {
   equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
