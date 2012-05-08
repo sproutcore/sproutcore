@@ -1987,14 +1987,14 @@ SC.ScrollView = SC.View.extend({
     // newly-appearing elements before they come into view.
     if (content) {
       // Use accelerated drawing if the browser supports it
-      if (SC.platform.touch) {
+      if (SC.platform.supportsAcceleratedLayers) {
         this._applyCSSTransforms(content.get('layer'));
       }
 
       if (content._viewFrameDidChange) { content._viewFrameDidChange(); }
     }
 
-    if (container && !SC.platform.touch) {
+    if (container && !SC.platform.supportsAcceleratedLayers) {
       container = container.$()[0];
 
       if (container) {
