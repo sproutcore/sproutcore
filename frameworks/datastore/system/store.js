@@ -2174,11 +2174,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     statusOnly = dataHash || newId ? NO : YES;
     this.dataHashDidChange(storeKey, null, statusOnly);
 
-    // Force record to refresh its cached properties based on store key
-    var record = this.materializeRecord(storeKey);
-    if (record != null) {
-      record.notifyPropertyChange('status');
-    }
     //update callbacks
     this._retreiveCallbackForStoreKey(storeKey);
 
@@ -2207,12 +2202,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.removeDataHash(storeKey, status) ;
     this.dataHashDidChange(storeKey);
 
-    // Force record to refresh its cached properties based on store key
-    var record = this.materializeRecord(storeKey);
-    if (record != null) {
-      record.notifyPropertyChange('status');
-    }
-
+    
     this._retreiveCallbackForStoreKey(storeKey);
 
     return this ;
@@ -2244,11 +2234,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
 
-    // Force record to refresh its cached properties based on store key
-    var record = this.materializeRecord(storeKey);
-    if (record != null) {
-      record.notifyPropertyChange('status');
-    }
 
     this._retreiveCallbackForStoreKey(storeKey);
     return this ;
