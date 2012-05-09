@@ -1090,7 +1090,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     //initialize dataHash if necessary
     dataHash = (dataHash ? dataHash : {});
-    
+
     // First, try to get an id.  If no id is passed, look it up in the
     // dataHash.
     if (!id && (primaryKey = recordType.prototype.primaryKey)) {
@@ -1120,11 +1120,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else if (!id && (status===SC.DESTROYED_CLEAN || status===SC.ERROR)) {
       throw K.BAD_STATE_ERROR;
     }
-    
+
     // Save the recordType and materialize the record.
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
     ret = this.materializeRecord(storeKey);
-    
+
     // If the attribute wasn't provided in the dataHash, attempt to insert a
     // default value.  We have to do this after materializing the record,
     // because the defaultValue property may be a function that expects
@@ -1133,21 +1133,21 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for (prop in prototype) {
       var propPrototype = prototype[ prop ];
       if (propPrototype && propPrototype.isRecordAttribute) {
-      
+
         defaultVal = propPrototype.defaultValue;
         if (!dataHash[ prop ] && defaultVal) {
-          if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
+          if (SC.typeOf(defaultVal) === SC.T_FUNCTION) {
             defaultVal = defaultVal(ret, prop);
           }
 
-            dataHash[ prop ] = SC.copy(defaultVal, YES);
+          dataHash[ prop ] = SC.copy(defaultVal, YES);
         }
       }
     }
-    
+
     // Store the dataHash and setup initial status.
     this.writeDataHash(storeKey, dataHash, K.READY_NEW);
-    
+
     // Record is now in a committable state -- add storeKey to changelog
     changelog = this.changelog;
     if (!changelog) changelog = SC.Set.create();
@@ -1155,7 +1155,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.changelog = changelog;
 
     // if commit records is enabled
-    if(this.get('commitRecordsAutomatically')){
+    if (this.get('commitRecordsAutomatically')){
       this.invokeLast(this.commitRecords);
     }
 
