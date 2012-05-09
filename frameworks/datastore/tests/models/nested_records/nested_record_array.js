@@ -33,7 +33,7 @@ var initModels = function(){
       isNested: true,
       defaultValue: function(record, key) {
         var array = [];
-        array.pushObject(record.createNestedRecord(NestedRecord.ChildRecordTest1));
+        array.pushObject({});
         return array;
       }
     }),
@@ -42,11 +42,11 @@ var initModels = function(){
       isNested: true,
       defaultValue: function(record, key) {
         var array = [];
-        array.pushObject(record.createNestedRecord(SC.Record, {
+        array.pushObject({
           type: 'ChildRecordTest1',
           name: 'Default Child 1',
           value: 'burninate'
-        }));
+        });
         return array;
       }
     })
