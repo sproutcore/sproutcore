@@ -60,13 +60,6 @@ SC.RecordAttribute = SC.Object.extend(
     value will be substituted instead.  Note that `defaultValue`s are not
     converted, so the value should be in the output type expected by the
     attribute.
-    
-    value will be substituted instead.  Note that `defaultValue`s are not
-    converted, so the value should be in the output type expected by the
-    attribute.
-    value will be substituted instead.   Note that default values are placed
-    directly in the data hash, so when you call get they will be put through
-    the toType transform before being read.
 
     If you use a `defaultValue` function, the arguments given to it are the
     record instance and the key.
@@ -309,7 +302,7 @@ SC.RecordAttribute = SC.Object.extend(
       // careful: don't overwrite value here.  we want the return value to
       // cache.
       nvalue = this.fromType(record, key, value) ; // convert to attribute.
-      record.writeAttribute(attrKey, nvalue); 
+      record.writeAttribute(attrKey, nvalue);
     }
 
     value = record.readAttribute(attrKey);
@@ -606,7 +599,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
       Convert a String to a DateTime
     */
     to: function(str, attr) {
-      if(attr.get('useUnixTime')) { 
+      if(attr.get('useUnixTime')) {
         if(SC.typeOf(str) === SC.T_STRING) { str = parseInt(str); }
         if(isNaN(str) || SC.typeOf(str) !== SC.T_NUMBER) { str = 0; }
         return SC.DateTime.create({ milliseconds: str*1000, timezone: 0 });
@@ -622,8 +615,8 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
     */
     from: function(dt, attr) {
       if (SC.none(dt)) return dt;
-      if (attr.get('useUnixTime')) { 
-        return dt.get('milliseconds')/1000; 
+      if (attr.get('useUnixTime')) {
+        return dt.get('milliseconds')/1000;
       }
       var format = attr.get('format');
       return dt.toFormattedString(format ? format : SC.DateTime.recordFormat);
