@@ -1121,28 +1121,33 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       throw K.BAD_STATE_ERROR;
     }
     
+    // Save the recordType and materialize the record.
+    SC.Store.replaceRecordTypeFor(storeKey, recordType);
+    ret = this.materializeRecord(storeKey);
     
-    //search for recordAttribute
-    for (prop in recordType.prototype) {
+    // If the attribute wasn't provided in the dataHash, attempt to insert a
+    // default value.  We have to do this after materializing the record,
+    // because the defaultValue property may be a function that expects
+    // the record as an argument.
+    var prototype = recordType.prototype;
+    for (prop in prototype) {
+      var propPrototype = prototype[ prop ];
+      if (propPrototype && propPrototype.isRecordAttribute) {
       
-      if (recordType.prototype[ prop ] && recordType.prototype[ prop ].isRecordAttribute) {
-        //if attribute doesn't exist in dataHash
-        if (!dataHash[ prop ]) {
-          defaultVal = recordType.prototype[ prop ] ? recordType.prototype[ prop ].defaultValue : null;
-          if(SC.typeOf(defaultVal)===SC.T_FUNCTION)
-            dataHash[ prop ] = SC.copy(defaultVal(), YES);
-          else
+        defaultVal = propPrototype.defaultValue;
+        if (!dataHash[ prop ] && defaultVal) {
+          if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
+            defaultVal = defaultVal(ret, prop);
+          }
+
             dataHash[ prop ] = SC.copy(defaultVal, YES);
         }
       }
     }
     
-    // add dataHash and setup initial status -- also save recordType
+    // Store the dataHash and setup initial status.
     this.writeDataHash(storeKey, dataHash, K.READY_NEW);
     
-    SC.Store.replaceRecordTypeFor(storeKey, recordType);
-    this.dataHashDidChange(storeKey);
-
     // Record is now in a committable state -- add storeKey to changelog
     changelog = this.changelog;
     if (!changelog) changelog = SC.Set.create();
@@ -1154,9 +1159,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this.invokeLast(this.commitRecords);
     }
 
-    // Finally return materialized record, after we propagate the status to
-    // any aggregate records.
-    ret = this.materializeRecord(storeKey);
+    // Propagate the status to any aggregate records before returning.
     if (ret) ret.propagateToAggregates();
     return ret;
   },
