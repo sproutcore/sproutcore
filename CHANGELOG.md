@@ -1,5 +1,5 @@
-CHANGE LOG FOR 1.6+
-===================
+CHANGE LOG
+==========
 
 Edge
 ----------
@@ -17,6 +17,21 @@ Edge
 ### DEPRECATIONS & REMOVALS
 
 ### BUG FIXES
+
+
+1.8.2 - BUG FIXES
+----------
+
+* Fixed syntax error in Datastore unit test. [c62a0a9]
+* SC.SplitView can now mixin SC.SplitChild. [6f1586c]
+* Thinned picker pane border divs so that they don't overlap the content view. [0b06db2]
+* Prevents target property conflict when configuring button targets with SC.AlertPane. [0364b5c]
+* Changed the aria-orientation of horizontal SC.ScrollView to 'horizontal' from 'vertical'. [c3ee69b]
+* Allows SC.CollectionFastPath to work with sparse content by always returning an item view even when content isn't yet available. [020653b]
+* Prevents SC.GridView from iterating over its content array in order to work with sparse content. [020653b]
+* The 'mobile-safari' body class name is no longer being added in all browsers. [b491224]
+* Enables pasting in SC.TextFieldView to notify that the value changed. [a51318b]
+* Prevents default touch behavior being intercepted on <textarea> and <select> elements. [8093963]
 
 1.8.1 - BUG FIXES
 ----------
