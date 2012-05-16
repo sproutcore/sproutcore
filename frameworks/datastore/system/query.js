@@ -405,7 +405,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         // if this property has a registered comparison use that
         if (SC.Query.comparisons[propertyName]) {
           result = SC.Query.comparisons[propertyName](
-                    record1.get(propertyName),record2.get(propertyName));
+                    record1.getPath(propertyName),record2.getPath(propertyName));
 
         // if not use default SC.compare()
         } else {
