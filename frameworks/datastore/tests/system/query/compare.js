@@ -207,3 +207,11 @@ test('comparing through association', function(){
   equals(q.compare(rec1,rec2), 1, 'guid 2 should be before guid 1');
 });
 
+test('comparing through association with custom comparison', function(){
+  SC.Query.registerComparison('address.street', function (r1, r2) {
+    return SC.compare(r1, r2);
+  });
+  q.orderBy = 'address.street';
+  q.parse();
+  equals(q.compare(rec1,rec2), 1, 'guid 2 should be before guid 1');
+});
