@@ -410,7 +410,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         // if not use default SC.compare()
         } else {
           result = SC.compare(
-                    record1.get(propertyName), record2.get(propertyName) );
+                    record1.getPath(propertyName), record2.getPath(propertyName) );
         }
 
         if ((result!==0) && order[i].descending) result = (-1) * result;
