@@ -201,6 +201,18 @@ test("specifying a custom orderBy comparison function", function() {
   equals(usedCustomFunction, YES, 'we should have used our custom comparison function');
 });
 
+test("compare by custom query comparison", function(){
+  var usedQueryComparison = NO;
+  SC.Query.registerComparison('firstName', function (r1, r2) {
+    usedQueryComparison = YES;
+    return SC.compare(r2, r1);
+  });
+  q.orderBy = 'firstName';
+  q.parse();
+  equals(q.compare(rec1,rec2), -1, 'Jane should be after John');
+  equals(usedQueryComparison, YES, 'we should have used our query comparison function');
+});
+
 test('comparing through association', function(){
   q.orderBy = 'address.street'
   q.parse();
