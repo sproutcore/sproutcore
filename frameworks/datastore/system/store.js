@@ -1121,14 +1121,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       throw K.BAD_STATE_ERROR;
     }
 
-    // Save the recordType and materialize the record.
+    // Store the dataHash and setup initial status.
+    this.writeDataHash(storeKey, dataHash, K.READY_NEW);
+
+    // Register the recordType with the store.
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
-    ret = this.materializeRecord(storeKey);
+    this.dataHashDidChange(storeKey);
 
     // If the attribute wasn't provided in the dataHash, attempt to insert a
     // default value.  We have to do this after materializing the record,
     // because the defaultValue property may be a function that expects
     // the record as an argument.
+    ret = this.materializeRecord(storeKey);
     var prototype = recordType.prototype;
     for (prop in prototype) {
       var propPrototype = prototype[ prop ];
@@ -1144,9 +1148,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         }
       }
     }
-
-    // Store the dataHash and setup initial status.
-    this.writeDataHash(storeKey, dataHash, K.READY_NEW);
 
     // Record is now in a committable state -- add storeKey to changelog
     changelog = this.changelog;
