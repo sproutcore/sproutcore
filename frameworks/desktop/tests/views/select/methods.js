@@ -125,7 +125,15 @@ test("Check if setting a value actually changes the selection value", function()
   equals(view2.get('value'), 'Menu', 'value of Drop down should change to') ;
 }) ;
 
-// No need to test binding (was test10)
+// No need to test binding (was test10) (new test10 is way better)
+
+//test10
+test('Setting the view\'s items should not result in an error.', function() {
+  try { view1.set('items', null); }
+  catch (e) {
+    ok(false, 'Nulling out items should not throw an error.');
+  }
+});
 
 //test11
 test("The properties for select button should take default values unless specified", function() {

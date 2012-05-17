@@ -387,7 +387,7 @@ SC.SelectView = SC.ButtonView.extend(
         currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
         idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
 
-    items = this.get('items') ;
+    items = this.get('items') || [] ;
     items = this.sortObjects(items) ;
     len = items.length ;
 
