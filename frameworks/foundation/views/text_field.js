@@ -92,7 +92,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   hint: '',
 
   /**
-    The hint to display while the field is not active.
+    The type attribute of the input.
 
     @type String
     @default "text"
@@ -114,7 +114,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isBrowserFocusable: YES,
 
   /**
-    Whether the browser should automatically correct the input. 
+    Whether the browser should automatically correct the input.
 
     When `autoCorrect` is set to `null`, the browser will use
     the system defaults.
@@ -913,7 +913,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // our key/mouse down/up handlers (such as the user choosing Select All
     // from a menu).
     SC.Event.add(input, 'select', this, this._textField_selectionDidChange);
-    
+
     // handle a "paste" from app menu and context menu
     SC.Event.add(input, 'input', this, this._textField_inputDidChange);
   },
@@ -1008,11 +1008,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     this.updateHintOnFocus();
   },
-  
+
   /** @private
     Context-menu paste does not trigger fieldValueDidChange normally. To do so, we'll capture the
     input event and avoid duplicating the "fieldValueDidChange" call if it was already issued elsewhere.
-    
+
     I welcome someone else to find a better solution to this problem. However, please make sure that it
     works with pasting via shortcut, context menu and the application menu on *All Browsers*.
    */
@@ -1185,7 +1185,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     if (this.get('applyImmediately')) {
       // This has gone back and forth several times between invokeLater and setTimeout.
-      // Now we're back to invokeLater, please read the code comment above 
+      // Now we're back to invokeLater, please read the code comment above
       // this._textField_inputDidChange before changing it again.
       this._fieldValueDidChangeTimer = this.invokeLater(this.fieldValueDidChange, 10);
     }
@@ -1259,7 +1259,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   /** @private
-    Overridden from SC.FieldView. Provides correct tag name based on the 
+    Overridden from SC.FieldView. Provides correct tag name based on the
     `isTextArea` property.
    */
   _inputElementTagName: function () {
@@ -1269,7 +1269,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       return 'input';
     }
   },
-  
+
   /** @private
     This observer makes sure to hide the hint when a value is entered, or
     show it if it becomes empty.
