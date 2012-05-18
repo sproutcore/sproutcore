@@ -1075,6 +1075,29 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     You can also optionally specify an id or else it will be pulled from the
     data hash.
 
+    Example:
+
+      MyApp.Record = SC.Record.extend({
+        attrA: SC.Record.attr(String, { defaultValue: 'def' }),
+        isAttrB: SC.Record.attr(Boolean, { key: 'attr_b' }),
+        primaryKey: 'pKey'
+      });
+
+      // If you don't provide a value and have designated a defaultValue, the
+      // defaultValue will be used.
+      MyApp.store.createRecord(MyApp.Record).get('attributes');
+      > { attrA: 'def' }
+
+      // If you use a key on an attribute, you can specify the key name or the
+      // attribute name when creating the record, but if you specify both, only
+      // the attribute named value will be used.
+      MyApp.store.createRecord(MyApp.Record, { isAttrB: YES }).get('attributes');
+      > { attr_b: YES }
+      MyApp.store.createRecord(MyApp.Record, { attr_b: YES }).get('attributes');
+      > { attr_b: YES }
+      MyApp.store.createRecord(MyApp.Record, { isAttrB: NO, attr_b: YES }).get('attributes');
+      > { attr_b: YES }
+
     Note that the record will not yet be saved back to the server.  To save
     a record to the server, call `commitChanges()` on the store.
 
@@ -1085,8 +1108,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} Returns the created record
   */
   createRecord: function(recordType, dataHash, id) {
-    var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal, prop,
-        ret;
+    var primaryKey, prototype, storeKey, status, K = SC.Record, changelog, defaultVal, ret;
 
     //initialize dataHash if necessary
     dataHash = (dataHash ? dataHash : {});
@@ -1133,18 +1155,33 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // because the defaultValue property may be a function that expects
     // the record as an argument.
     ret = this.materializeRecord(storeKey);
-    var prototype = recordType.prototype;
-    for (prop in prototype) {
+    prototype = recordType.prototype;
+    for (var prop in prototype) {
       var propPrototype = prototype[ prop ];
       if (propPrototype && propPrototype.isRecordAttribute) {
+        // Use the record attribute key if it is defined.
+        var attrKey = propPrototype.key || prop;
 
-        defaultVal = propPrototype.defaultValue;
-        if (!dataHash[ prop ] && defaultVal) {
-          if (SC.typeOf(defaultVal) === SC.T_FUNCTION) {
-            defaultVal = defaultVal(ret, prop);
+        if (!dataHash.hasOwnProperty(attrKey)) {
+          if (dataHash.hasOwnProperty(prop)) {
+            // If the attribute key doesn't exist but the name does, fix it up.
+            // (i.e. the developer has a record attribute `endDate` with a key
+            // `end_date` on a record and when they created the record they
+            // provided `endDate` not `end_date`)
+            dataHash[ attrKey ] = dataHash[ prop ];
+            delete dataHash[ prop ];
+          } else {
+            // If the attribute doesn't exist in the hash at all, check for a
+            // default value to use instead.
+            defaultVal = propPrototype.defaultValue;
+            if (defaultVal) {
+              if (SC.typeOf(defaultVal)===SC.T_FUNCTION) dataHash[ attrKey ] = SC.copy(defaultVal(ret, attrKey), YES);
+              else dataHash[ attrKey ] = SC.copy(defaultVal, YES);
+            }
           }
-
-          dataHash[ prop ] = SC.copy(defaultVal, YES);
+        } else if (attrKey !== prop && dataHash.hasOwnProperty(prop)) {
+          // If both attrKey and prop are provided, use attrKey only.
+          delete dataHash[ prop ];
         }
       }
     }
@@ -1156,7 +1193,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.changelog = changelog;
 
     // if commit records is enabled
-    if (this.get('commitRecordsAutomatically')){
+    if(this.get('commitRecordsAutomatically')){
       this.invokeLast(this.commitRecords);
     }
 
