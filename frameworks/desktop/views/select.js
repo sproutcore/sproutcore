@@ -391,7 +391,7 @@ SC.SelectView = SC.ButtonView.extend(
     items = this.sortObjects(items) ;
     len = items.length ;
 
-    //Get the namekey, iconKey and valueKey set by the user
+    //Get the nameKey, iconKey and valueKey set by the user
     nameKey = this.get('itemTitleKey') ;
     iconKey = this.get('itemIconKey') ;
     valueKey = this.get('itemValueKey') ;
@@ -444,61 +444,71 @@ SC.SelectView = SC.ButtonView.extend(
     items.forEach(function(object) {
     if (object || object === 0) {
 
-      //Get the name value. If value key is not specified convert obj
-      //to string
-      name = nameKey ? (object.get ?
-        object.get(nameKey) : object[nameKey]) : object.toString() ;
-
-      // localize name if specified.
-      name = shouldLocalize? SC.String.loc(name) : name ;
-      name = escapeHTML ? SC.RenderContext.escapeHTML(name) : name;
-
-      //Get the icon value
-      icon = iconKey ? (object.get ?
-        object.get(iconKey) : object[iconKey]) : null ;
-      if (SC.none(object[iconKey])) icon = null ;
-
-      // get the value using the valueKey or the object
-        value = (valueKey) ? (object.get ?
-        object.get(valueKey) : object[valueKey]) : object ;
-
-      if (!SC.none(currentSelectedVal) && !SC.none(value)) {
-
-        // If the objects in question are records, we should just their storeKeys
-        isSameRecord = false;
-        if (SC.kindOf(currentSelectedVal, SC.Record) && SC.kindOf(value, SC.Record)) {
-          isSameRecord = currentSelectedVal.get('storeKey') === value.get('storeKey');
-        }
-
-        if (currentSelectedVal === value || isSameRecord) {
-          this.set('title', name);
-          this.set('icon', icon);
-        }
-      }
-
-      //Check if the item is currentSelectedItem or not
-      if(value === this.get('value')) {
-
-        //set the _itemIdx - To change the prefMatrix accordingly.
-        this.set('_itemIdx', idx) ;
-        isChecked = !showCheckbox ? NO : YES ;
-      }
-      else {
-        isChecked = NO ;
-      }
-
-      // Check if the item is enabled
-      itemEnabled = (object.get ? object.get(isEnabledKey) : object[isEnabledKey]);
-      if (NO !== itemEnabled) itemEnabled = YES;
-
       // get the separator
       isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
 
-      //Set the first item from the list as default selected item
-      if (idx === 0) {
-        this._defaultVal = value ;
-        this._defaultTitle = name ;
-        this._defaultIcon = icon ;
+        if (!isSeparator) {
+        //Get the name value. If value key is not specified convert obj
+        //to string
+        name = nameKey ? (object.get ?
+          object.get(nameKey) : object[nameKey]) : object.toString();
+
+        //@if(debug)
+        // Help the developer if they don't define a matching itemTitleKey.
+        if (!name) {
+          SC.warn("Developer Warning: SC.SelectView: Every item, other than separator items, should have the '%@' property defined!".fmt(nameKey));
+          name = '';
+        }
+        //@endif
+        // localize name if specified.
+        name = shouldLocalize ? SC.String.loc(name) : name ;
+        name = escapeHTML ? SC.RenderContext.escapeHTML(name) : name;
+
+        //Get the icon value
+        icon = iconKey ? (object.get ?
+          object.get(iconKey) : object[iconKey]) : null ;
+        if (SC.none(object[iconKey])) icon = null ;
+
+        // get the value using the valueKey or the object
+        value = valueKey ? (object.get ?
+          object.get(valueKey) : object[valueKey]) : object ;
+
+        if (!SC.none(currentSelectedVal) && !SC.none(value)) {
+
+          // If the objects in question are records, we should just their storeKeys
+          isSameRecord = false;
+          if (SC.kindOf(currentSelectedVal, SC.Record) && SC.kindOf(value, SC.Record)) {
+            isSameRecord = currentSelectedVal.get('storeKey') === value.get('storeKey');
+          }
+
+          if (currentSelectedVal === value || isSameRecord) {
+            this.set('title', name);
+            this.set('icon', icon);
+          }
+        }
+
+        //Check if the item is currentSelectedItem or not
+        if(value === this.get('value')) {
+
+          //set the _itemIdx - To change the prefMatrix accordingly.
+          this.set('_itemIdx', idx) ;
+          isChecked = !showCheckbox ? NO : YES ;
+        }
+        else {
+          isChecked = NO ;
+        }
+
+        // Check if the item is enabled
+        itemEnabled = (object.get ? object.get(isEnabledKey) : object[isEnabledKey]);
+        if (NO !== itemEnabled) itemEnabled = YES;
+
+        // Set the first non-separator selectable item from the list as the
+        // default selected item
+        if (SC.none(this._defaultVal) && itemEnabled) {
+          this._defaultVal = value ;
+          this._defaultTitle = name ;
+          this._defaultIcon = icon ;
+        }
       }
 
       item = SC.Object.create({

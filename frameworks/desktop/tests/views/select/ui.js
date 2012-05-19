@@ -96,6 +96,14 @@ var pane = SC.ControlTestPane.design()
       emptyName: '&lt;empty&gt;',
       escapeHTML: NO,
       showCheckbox: YES
+    })
+
+    .add("SelectWithSeparator", SC.SelectView, {
+      items: [{ title: "None", separator: YES },
+        { title: "Low", isEnabled: NO },
+        { separator: YES },
+        { title: "High" }],
+      itemTitleKey: 'title'
     });
 
 pane.show();
@@ -115,7 +123,7 @@ module('SC.SelectView ui', {
   }
 });
 
-//test1
+// test1
 test("Check the visiblity of the selectButtons", function() {
   ok(pane.view('Basic').get('isVisibleInWindow'), 'Basic.isVisibleInWindow should be YES') ;
   ok(pane.view('Disabled').get('isVisibleInWindow'), 'Disabled.isVisibleInWindow should be YES') ;
@@ -126,6 +134,7 @@ test("Check the visiblity of the selectButtons", function() {
   ok(pane.view('SelectButtonWithIcon').get('isVisibleInWindow'), 'SelectButtonWithIcon.isVisibleInWindow should be YES') ;
   ok(pane.view('StaticLayout').get('isVisibleInWindow'), 'StaticLayout.isVisibleInWindow should be YES') ;
   ok(pane.view('SelectButtonWithEmptyName').get('isVisibleInWindow'), 'SelectButtonWithEmptyName.isVisibleInWindow should be YES') ;
+  ok(pane.view('SelectWithSeparator').get('isVisibleInWindow'), 'SelectButtonWithEmptyName.isVisibleInWindow should be YES') ;
 }) ;
 
 //test2
@@ -241,7 +250,6 @@ test("StaticLayout", function() {
 test("SelectButtonWithEmptyName", function() {
   var view=pane.view('SelectButtonWithEmptyName').$(),
       label = pane.view('SelectButtonWithEmptyName').$('label');
-      console.log('label = ' + label);
   ok(!view.hasClass('icon'), 'hasClass(Icon) should be NO') ;
   ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
@@ -250,4 +258,22 @@ test("SelectButtonWithEmptyName", function() {
   ok(!view.hasClass('disabled'), 'hasClass(disabled) should be NO') ;
   ok(!view.hasClass('def'), 'hasClass(def) should be NO') ;
   equals(label[0].innerHTML, '&lt;empty&gt;', 'The label should be "&lt;empty&gt;"');
+});
+
+/**
+  This is just a simple test that shows that when the first item provided to
+  SC.SelectView is a separator or is not enabled, it ignores it as the default
+  in favor of the first item with a value that is selectable.
+*/
+test("SelectWithSeparator", function() {
+  var view=pane.view('SelectWithSeparator').$(),
+      label = pane.view('SelectWithSeparator').$('label');
+  ok(!view.hasClass('icon'), 'hasClass(Icon) should be NO') ;
+  ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
+  ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
+  ok(view.hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
+  ok(!view.hasClass('sel'), 'hasClass(sel) should be NO') ;
+  ok(!view.hasClass('disabled'), 'hasClass(disabled) should be NO') ;
+  ok(!view.hasClass('def'), 'hasClass(def) should be NO') ;
+  equals(label[0].innerHTML, 'High', 'The label should be "High"');
 });
