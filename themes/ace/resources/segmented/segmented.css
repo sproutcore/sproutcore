@@ -72,12 +72,4 @@ $theme.sc-segment-view {
     text-shadow: 0px -1px 1px rgba(0,0,0,.5);
   }
 
-  img {
-    vertical-align: middle;
-    position: relative;
-    top: -1px;
-    left: -2px;
-    margin-right: 2px;
-  }
-
 }

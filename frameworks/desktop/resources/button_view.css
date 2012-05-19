@@ -4,7 +4,7 @@
   vertical-align: middle;
   text-decoration: none ;
   border: 1px #555 solid;
-  
+
   &.sc-static-layout {
     margin: 0 4px;
   }
@@ -24,10 +24,10 @@
     vertical-align: middle ;
     margin-right: 2px;
     position: relative ;
-    top: -2px;
+    top: -1px;
     left: -2px;
   }
-  
+
   .ie7 &{
     display: inline;
   }
