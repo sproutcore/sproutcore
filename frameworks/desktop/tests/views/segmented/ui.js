@@ -48,6 +48,17 @@ var pane;
       isEnabled: NO,
       layout: { height: 25 }
     })
+    .add("3_items,2_sel,1_disabled", SC.SegmentedView, {
+      items: [
+      { value: "Item1" },
+      { value: "Item2", isEnabled: false },
+      { value: "Item3" }],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemIsEnabledKey: 'isEnabled',
+      value: ["Item1","Item2"],
+      layout: { height: 25 }
+    })
     .add("3_items,icon,2_sel", SC.SegmentedView, {
       items: [
       { value: "Item1", icon: iconURL },
@@ -196,8 +207,9 @@ var pane;
     ok(pane.view('3_items,1_sel').get('isVisibleInWindow'), '3_items,1_sel.isVisibleInWindow should be YES');
     ok(pane.view('2_items,toolTip').get('isVisibleInWindow'), '2_items,toolTip.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel,disabled').get('isVisibleInWindow'), '3_items,1_sel,disabled.isVisibleInWindow should be YES');
-    ok(pane.view('3_items,icon,2_sel').get('isVisibleInWindow'), '3_items,icon,2_sel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,2_sel,disabled').get('isVisibleInWindow'), '3_items,2_sel,disabled.isVisibleInWindow should be YES');
+    ok(pane.view('3_items,2_sel,1_disabled').get('isVisibleInWindow'), '3_items,2_sel,1_disabled.isVisibleInWindow should be YES');
+    ok(pane.view('3_items,icon,2_sel').get('isVisibleInWindow'), '3_items,icon,2_sel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel,emptySel').get('isVisibleInWindow'), '3_items,1 sel,emptySel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,2_sel,emptySel').get('isVisibleInWindow'), '3_items,2 sel,emptySel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel,multipleSel').get('isVisibleInWindow'), '3_items,1_sel,multipleSel.isVisibleInWindow should be YES');
@@ -208,7 +220,6 @@ var pane;
     ok(pane.view('3_items,rightAligned').get('isVisibleInWindow'), '3_items,rightAligned.isVisibleInWindow should be YES');
     ok(pane.view('aria-role_tab,tablist').get('isVisibleInWindow'), 'aria-role_tab,tablist.isVisibleInWindow should be YES');
     ok(pane.view('aria-labelledby').get('isVisibleInWindow'), 'aria-labelledby.isVisibleInWindow should be YES');
-
   });
 
 
@@ -234,10 +245,16 @@ var pane;
       if(i !== 0 && i < seglen-1) {
         ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segments have the right classname assigned.');
       }
-      viewElem=pane.view('3_items,2_sel,disabled').$();
-      ok(viewElem.hasClass('disabled'), '3_items,2_sel,disabled should have the disabled class set');
     }
 
+    viewElem=pane.view('3_items,1_sel,disabled').$();
+    ok(viewElem.hasClass('disabled'), '3_items,1_sel,disabled should have the disabled class set');
+
+    viewElem=pane.view('3_items,2_sel,disabled').$();
+    ok(viewElem.hasClass('disabled'), '3_items,2_sel,disabled should have the disabled class set');
+
+    seg=pane.view('3_items,2_sel,1_disabled').$('.sc-segment-view')[1];
+    ok($(seg).hasClass('disabled'), '3_items,2_sel,1_disabled should have the disabled class set on the middle segment');
   });
 
 
@@ -263,12 +280,11 @@ var pane;
       if(i!==0 && i!=seglen-1){
         ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segments have the right classname assigned.');
       }
-      viewElem=pane.view('3_items,2_sel,disabled').$();
-      ok(viewElem.hasClass('disabled'), '3_items,2_sel,disabled should have the disabled class set');
     }
 
+    viewElem=pane.view('3_items,2_sel,disabled').$();
+    ok(viewElem.hasClass('disabled'), '3_items,2_sel,disabled should have the disabled class set');
   });
-
 
   test("No value set", function() {
     var segments=pane.view('3_empty').$('.sc-segment-view');
@@ -283,7 +299,6 @@ var pane;
     }
 
   });
-
 
   test("Check that two items are selected.", function() {
     var segments=pane.view('3_items,icon,2_sel').$('.sc-segment-view');
@@ -300,7 +315,6 @@ var pane;
     equals(count, 2, '3_items,2_sel,disabled should have two segments selected.');
 
   });
-
 
   test("2_items,toolTip has toolTips assigned.", function() {
     var segments=pane.view('2_items,toolTip').$('.sc-segment-view');
@@ -453,5 +467,46 @@ var pane;
       equals(aria_labelledby, label, "segment " + (i+1) + " has aria-labeledby pointing at button label");
     }
   });
+
+test("Check that mouse events change the active classes.", function() {
+  var view1, view2, view3, layer1, layer2, layer3, point, ev;
+
+  view1 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(0); // $('.sc-segment-view')[0];
+  layer1 = view1.get('layer');
+  point = SC.offset(layer1);
+
+  ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+  SC.Event.trigger(layer1, 'mousedown', [ev]);
+
+  ok(view1.$().hasClass('active'), 'The first segment should have an active class on mousedown');
+
+  ev = SC.Event.simulateEvent(layer1, 'mousemove', { clientX: point.x + 1, clientY: point.y });
+  SC.Event.trigger(layer1, 'mousemove', [ev]);
+
+  view2 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(1);
+  layer2 = view2.get('layer');
+  point = SC.offset(layer2);
+
+  ev = SC.Event.simulateEvent(layer2, 'mousemove', { clientX: point.x + 1, clientY: point.y + 1 });
+  SC.Event.trigger(layer2, 'mousemove', [ev]);
+
+  ok(!view1.$().hasClass('active'), 'The first segment should no longer have an active class on mouseExited (via mousemove)');
+  ok(!view2.$().hasClass('active'), 'The disabled second segment should not have an active class on mouseEntered (via mousemove)');
+
+  view3 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(2);
+  layer3 = view3.get('layer');
+  point = SC.offset(layer3);
+
+  ev = SC.Event.simulateEvent(layer3, 'mousemove', { clientX: point.x + 1, clientY: point.y + 1 });
+  SC.Event.trigger(layer3, 'mousemove', [ev]);
+
+  ok(view3.$().hasClass('active'), 'The third segment should have an active class on mouseMoved');
+
+  ev = SC.Event.simulateEvent(layer3, 'mouseup', { clientX: point.x + 1, clientY: point.y + 1 });
+  SC.Event.trigger(layer3, 'mouseup', [ev]);
+
+  ok(!view1.$().hasClass('sel'), 'The first segment should lose its sel class on mouseUp');
+  ok(view3.$().hasClass('sel'), 'The third segment should have a sel class on mouseUp');
+});
 
 })();
