@@ -2,14 +2,12 @@
   display: block;
   white-space: nowrap;
   z-index: 1;
+
   img.icon {
     position: relative;
     vertical-align: middle;
-    top: -2px;
-    margin-right: 2px;
-    height: 16px;
-    width: 16px;
   }
+
   .sc-segment-view {
     position: relative;
     display: inline-block;
@@ -52,21 +50,21 @@
       padding-left: 10px;
       padding-right: 10px;
     }
-    
+
     .sc-button-inner {
       background: #DDDDDD;
     }
-    
+
     .sel .sc-button-inner {
       background: #999999;
       text-shadow: #909090 0px 1px 0px;
     }
-    
+
     .active .sc-button-inner {
       background: #999999;
       text-shadow: #909090 0px 1px 0px;
     }
-    
+
     &.disabled .sc-button-inner {
       background: #FFFFFF;
       color: #999;
@@ -78,7 +76,7 @@
         background: #FFFFFF;
       }
     }
-    
+
     &.sc-last-segment.disabled {
       background: #FFFFFF;
       .sel.disabled {
@@ -95,7 +93,7 @@
     min-width: 20px;
     min-height: 22px;
   }
-  
+
   &.disabled{
     .sc-segment-view .sc-button-inner {
       background: #FFFFFF;
@@ -113,7 +111,7 @@
         &.sel {
           background: #FFFFFF;
         }
-      } 
+      }
       &.sel .sc-button-inner {
         background: #FFFFFF;
       }

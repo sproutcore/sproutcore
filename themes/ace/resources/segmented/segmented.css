@@ -1,13 +1,13 @@
 $theme.sc-segmented-view {
   overflow: visible;
 
-  .disabled {
+  &.disabled {
     opacity: 0.5;
   }
 
 }
 
-$theme.sc-segmented-view $theme.sc-segment-view {
+$theme.sc-segment-view {
   margin: 0px;
   background: none;
   border: 0px none;
@@ -22,22 +22,22 @@ $theme.sc-segmented-view $theme.sc-segment-view {
   .ie7 & {
     display: inline;
   }
-  
+
   &.sc-first-segment { margin: 0px; padding: 0px ;}
   &.sc-last-segment { margin: 0px; padding: 0px; }
-  
+
   .left {
     position: absolute;
     left: 0px;
     zoom: 1;
   }
-  
+
   .right {
     position: absolute;
     right: 0px;
     zoom: 1;
   }
-  
+
   .middle {
     margin: 0px;
     padding: 0px;
@@ -46,38 +46,38 @@ $theme.sc-segmented-view $theme.sc-segment-view {
     zoom: 1;
     position: absolute;
   }
-  
+
   .sc-button-label {
     position: relative;
   }
-  
+
   &.active {
     color: #333;
     text-shadow: 0px 1px 1px white;
   }
-  
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
   &.sel {
     background:none;
     color: #fff;
     text-shadow: 0px -1px 1px rgba(0,0,0,.5);
   }
-  
+
   &.sel.active {
     background:none;
     color: #fff;
     text-shadow: 0px -1px 1px rgba(0,0,0,.5);
   }
-  
+
   img {
     vertical-align: middle;
     position: relative;
-    top: -2px;
+    top: -1px;
     left: -2px;
-    margin-right:2px;
+    margin-right: 2px;
   }
-  
-  .disabled {
-    opacity: 0.5;
-  }
-  
+
 }
