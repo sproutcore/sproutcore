@@ -89,7 +89,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     If false, the icon on the list item view will be hidden.  Otherwise,
     space will be left for the icon next to the list item view.
-    
+
     @type Boolean
     @default NO
   */
@@ -100,7 +100,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     If false, the icon on the list item view will be hidden.  Otherwise,
     space will be left for the icon next to the list item view.
-    
+
     @type Boolean
     @default NO
   */
@@ -111,7 +111,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     arrow.
 
     If false, the space for the branch arrow will be collapsed.
-    
+
     @type Boolean
     @default NO
   */
@@ -130,7 +130,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   /**
     The URL or CSS class name to use for the icon. This is only used if
     contentIconKey is null, or returns null from the delegate.
-    
+
     @type String
     @default null
   */
@@ -141,7 +141,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     This property will be checked on the content object to determine the
     icon to display.  It must return either a URL or a CSS class name.
-    
+
     @type String
     @default NO
   */
@@ -150,7 +150,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   /**
     The URL or CSS class name to use for the right icon. This is only used if
     contentRightIconKey is null, or returns null from the delegate.
-    
+
     @type String
     @default null
   */
@@ -161,7 +161,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     This property will be checked on the content object to determine the
     icon to display.  It must return either a URL or a CSS class name.
-    
+
     @type String
     @default null
   */
@@ -171,7 +171,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     (displayDelegate) The name of the property used for label itself
 
     If null, then the content object itself will be used..
-    
+
     @type String
     @default null
   */
@@ -182,7 +182,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     You should only disable this option if you are sure you will only
     display content that is already escaped and you need the added
     performance gain.
-    
+
     @type Boolean
     @default YES
   */
@@ -194,7 +194,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     The count will only be visible if this property is not null and the
     returned value is not 0.
-    
+
     @type String
     @default null
   */
@@ -207,17 +207,17 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     If this is null, then the branch view will be completely hidden.
     Otherwise space will be allocated for it.
-    
+
     @type String
     @default null
   */
   contentIsBranchKey: null,
-  
+
   /**
     Indent to use when rendering a list item with an outline level > 0.  The
     left edge of the list item will be indented by this amount for each
     outline level.
-    
+
     @type Number
     @default 16
   */
@@ -225,7 +225,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
   /**
     Outline level for this list item.  Usually set by the collection view.
-    
+
     @type Number
     @default 0
   */
@@ -234,11 +234,11 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   /**
     Disclosure state for this list item.  Usually set by the collection view
     when the list item is created. Possible values:
-    
+
       - SC.LEAF_NODE
       - SC.BRANCH_OPEN
       - SC.BRANCH_CLOSED
-    
+
     @type String
     @default SC.LEAF_NODE
   */
@@ -272,7 +272,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   /**
     Determines if content is editable or not. Checkboxes and other related
     components will render disabled if an item is not editable.
-    
+
     @field
     @type Boolean
     @observes content
@@ -281,13 +281,13 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     var content = this.get('content');
     return content && (content.get ? content.get('isEditable')!==NO : NO);
   }.property('content').cacheable(),
-  
+
   /**
     @type Object
     @default SC.InlineTextFieldDelegate
   */
   inlineEditorDelegate: SC.InlineTextFieldDelegate,
-  
+
   /**
     Finds and retrieves the element containing the label.  This is used
     for inline editing.  The default implementation returns a CoreQuery
@@ -585,7 +585,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   /*
     Edits the label portion of the list item. If scrollIfNeeded is YES, will
     scroll to the item before editing it.
-    
+
     @params {Boolean} if the parent scroll view should be scrolled to this item
       before editing begins
     @returns {Boolean} YES if successful
@@ -686,7 +686,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     this._oldOpacity = el.css('opacity');
     el.css('opacity', 0.0) ;
 
-    // restore old line height for original item if the old line height 
+    // restore old line height for original item if the old line height
     // was saved.
     if (this._oldLineHeight) el.css({ lineHeight: this._oldLineHeight }) ;
   }.enhance(),
@@ -764,8 +764,10 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       key = this.getDelegateProperty('contentIconKey', del) ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
 
-      this.renderIcon(working, value);
-      classArray.push('has-icon');
+      if (value) {
+        this.renderIcon(working, value);
+        classArray.push('has-icon');
+      }
     } else if (this.get('icon')) {
       value = this.get('icon');
       this.renderIcon(working, value);

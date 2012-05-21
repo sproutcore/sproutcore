@@ -8,19 +8,19 @@
 /*global module test htmlbody ok equals same stop start */
 
 var pane = SC.ControlTestPane.design({ height: 32 })
-  .add("basic", SC.ListItemView.design({ 
+  .add("basic", SC.ListItemView.design({
     content: "List Item"
   }))
 
-  .add("full", SC.ListItemView.design({ 
-    content: SC.Object.create({ 
+  .add("full", SC.ListItemView.design({
+    content: SC.Object.create({
       icon: "sc-icon-folder-16",
-      title: "List Item", 
+      title: "List Item",
       checkbox: YES,
       count: 23,
-      branch: YES 
+      branch: YES
     }),
-    
+
     hasContentIcon:  YES,
     hasContentBranch: YES,
 
@@ -29,53 +29,62 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentIconKey:  "icon",
     contentUnreadCountKey: 'count',
     contentIsBranchKey: 'branch',
-    
+
     disclosureState: SC.BRANCH_OPEN
 
   }))
 
-  .add("full - sel", SC.ListItemView.design({ 
-    content: SC.Object.create({ 
+  .add("full - sel", SC.ListItemView.design({
+    content: SC.Object.create({
       icon: "sc-icon-folder-16",
-      title: "List Item", 
+      title: "List Item",
       checkbox: YES,
       count: 23,
       branch: YES
     }),
 
     isSelected: YES,
-        
+
     hasContentIcon:  YES,
     hasContentBranch: YES,
 
     contentValueKey: "title",
     contentLeftActionKey: 'checkbox',
     leftAction: 'checkbox',
-    
+
     contentRightActionKey: 'isLoading',
-    
+
     contentCheckboxKey: 'checkbox',
     contentIconKey:  "icon",
     contentUnreadCountKey: 'count',
     contentIsBranchKey: 'branch',
-    
+
     disclosureState: SC.BRANCH_OPEN
 
   }))
-  
-  .add("icon", SC.ListItemView.design({ 
-    content: SC.Object.create({ 
-      title: "List Item", 
-      icon: "sc-icon-folder-16" 
+
+  .add("icon", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item",
+      icon: "sc-icon-folder-16"
     }),
-    
+
     contentValueKey: "title",
 
     contentIconKey:  "icon",
     hasContentIcon:  YES
 
   }))
-  
+
+  .add("icon - noIcon", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item"
+    }),
+    contentValueKey: "title",
+    contentIconKey:  "icon",
+    hasContentIcon:  YES
+  }))
+
   .add("icon - contentandview", SC.ListItemView.design({
     content: SC.Object.create({
       title: "List Item",
@@ -90,7 +99,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     hasContentIcon:  YES
 
   }))
-  
+
   .add("icon - view", SC.ListItemView.design({
     content: SC.Object.create({
       title: "List Item"
@@ -100,51 +109,51 @@ var pane = SC.ControlTestPane.design({ height: 32 })
 
     contentValueKey: "title"
   }))
-  
-  .add("disclosure - YES", SC.ListItemView.design({ 
+
+  .add("disclosure - YES", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item" }),
     contentValueKey: "title",
     disclosureState: SC.BRANCH_OPEN
   }))
 
-  .add("disclosure - NO", SC.ListItemView.design({ 
+  .add("disclosure - NO", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item" }),
     contentValueKey: "title",
     disclosureState: SC.BRANCH_CLOSED
   }))
 
-  .add("checkbox - YES", SC.ListItemView.design({ 
+  .add("checkbox - YES", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item", checkbox: YES }),
     contentValueKey: "title",
     contentCheckboxKey:  "checkbox"
   }))
 
-  .add("checkbox - NO", SC.ListItemView.design({ 
+  .add("checkbox - NO", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item", checkbox: NO }),
     contentValueKey: "title",
     contentCheckboxKey:  "checkbox"
   }))
 
-  .add("count - 0", SC.ListItemView.design({ 
+  .add("count - 0", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item", count: 0 }),
     contentValueKey: "title",
     contentUnreadCountKey:  "count"
   }))
 
-  .add("count - 10", SC.ListItemView.design({ 
+  .add("count - 10", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item", count: 10 }),
     contentValueKey: "title",
     contentUnreadCountKey:  "count"
   }))
-  
-  .add("outline - 1", SC.ListItemView.design({ 
+
+  .add("outline - 1", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item" }),
     contentValueKey: "title",
     contentUnreadCountKey:  "count",
     outlineLevel: 1
   }))
-  
-  .add("outline - 2", SC.ListItemView.design({ 
+
+  .add("outline - 2", SC.ListItemView.design({
     content: SC.Object.create({ title: "List Item" }),
     contentValueKey: "title",
     contentUnreadCountKey:  "count",
@@ -157,7 +166,7 @@ window.pane = pane ;
 
 // ..........................................................
 // DETECTORS
-// 
+//
 // The functions below test the presence of a particular part of the view.  If
 // you pass the second param then it expects the part to be in the view.  If
 // you pass null, then it expects the part to NOT be in the view.
@@ -165,10 +174,10 @@ window.pane = pane ;
 function basic(view, sel, disabled) {
   var cq = view.$();
   ok(cq.hasClass('sc-list-item-view'), 'should have sc-list-item-view class');
-  
+
   equals(cq.hasClass('sel'), !!sel, 'expect sel class');
   equals(cq.hasClass('disabled'), !!disabled, 'expect disabled class');
-  
+
   var idx = view.get('contentIndex');
   var evenOrOdd = (idx % 2 === 0) ? 'even' : 'odd';
   ok(cq.hasClass(evenOrOdd), 'should have an %@ class'.fmt(evenOrOdd));
@@ -245,7 +254,7 @@ function branch(view, visible) {
 
 // ..........................................................
 // Test Basic Setup
-// 
+//
 
 module("SC.ListItemView UI", pane.standardSetup());
 
@@ -288,6 +297,11 @@ test("icon", function() {
   icon(view, 'sc-icon-folder-16');
 });
 
+test("icon defined but not in view or content", function() {
+  var view = pane.view('icon - noIcon');
+  icon(view, null);
+});
+
 test("icon defined in view and in content", function() {
   var view = pane.view('icon - contentandview');
   icon(view, 'sc-icon-folder-16');
@@ -310,7 +324,7 @@ test('checkbox', function() {
 
 test('count', function() {
   // no count should show when count = 0;
-  count(pane.view('count - 0'), null); 
+  count(pane.view('count - 0'), null);
   count(pane.view('count - 10'), 10);
 });
 
@@ -318,7 +332,7 @@ test("outline - 1", function() {
   var v = pane.view('outline - 1'),
       indent = v.get('outlineIndent');
   ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
-  
+
   equals(v.$('.sc-outline').css('left'), indent*1+16 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
@@ -326,13 +340,13 @@ test("outline - 2", function() {
   var v = pane.view('outline - 2'),
       indent = v.get('outlineIndent');
   ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
-  
+
   equals(v.$('.sc-outline').css('left'), indent*2+16 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
 // ..........................................................
 // EDITING CONTENT
-// 
+//
 
 function adjustView(view, key, value) {
   SC.RunLoop.begin();
@@ -360,11 +374,11 @@ test("changing disclosure value should update display", function() {
   var view = pane.view('full');
   adjustView(view, 'disclosureState', SC.BRANCH_CLOSED);
   disclosure(view, NO);
-  
+
   // changing to leaf node should remove disclosure view
   adjustView(view, 'disclosureState', SC.LEAF_NODE);
   disclosure(view, null);
-  
+
   // changing back to open/closed should add the disclosure back
   adjustView(view, 'disclosureState', SC.BRANCH_OPEN);
   disclosure(view, YES);
@@ -374,7 +388,7 @@ test("changing checkbox value should update display", function() {
   var view = pane.view('full');
   adjustContent(view, 'checkbox', NO);
   checkbox(view, NO); // verify change
-  
+
   // changing to null should remove checkbox view
   adjustContent(view, 'checkbox', null);
   checkbox(view, null);
