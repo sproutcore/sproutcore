@@ -23,6 +23,7 @@ $theme.sc-segment-view {
     display: inline;
   }
 
+  /* The base style has a gray background added to the first and last segments. */
   &.sc-first-segment { background: none;  margin: 0px; padding: 0px;}
   &.sc-last-segment { background: none;  margin: 0px; padding: 0px; }
 
@@ -58,6 +59,10 @@ $theme.sc-segment-view {
 
   &.disabled {
     opacity: 0.5;
+
+    /* The base style has a white background added to the first and last segments when disabled. */
+    &.sc-first-segment { background: none; }
+    &.sc-last-segment { background: none; }
   }
 
   &.sel {
