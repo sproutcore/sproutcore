@@ -23,8 +23,8 @@ $theme.sc-segment-view {
     display: inline;
   }
 
-  &.sc-first-segment { margin: 0px; padding: 0px ;}
-  &.sc-last-segment { margin: 0px; padding: 0px; }
+  &.sc-first-segment { background: none;  margin: 0px; padding: 0px;}
+  &.sc-last-segment { background: none;  margin: 0px; padding: 0px; }
 
   .left {
     position: absolute;
