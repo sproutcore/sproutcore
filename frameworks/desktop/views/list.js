@@ -433,7 +433,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
 
   // ..........................................................
-  // DRAG AND ROP SUPPORT
+  // DRAG AND DROP SUPPORT
   //
 
   /**
