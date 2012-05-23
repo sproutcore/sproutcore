@@ -1090,7 +1090,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
       // If you use a key on an attribute, you can specify the key name or the
       // attribute name when creating the record, but if you specify both, only
-      // the attribute named value will be used.
+      // the key name will be used.
       MyApp.store.createRecord(MyApp.Record, { isAttrB: YES }).get('attributes');
       > { attr_b: YES }
       MyApp.store.createRecord(MyApp.Record, { attr_b: YES }).get('attributes');
