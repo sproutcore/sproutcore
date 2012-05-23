@@ -10,6 +10,6 @@ sc_require('views/touch/scroll');
 SC.ScrollView = SC.platform.touch ? SC.TouchScrollView : SC.DesktopScrollView;
 
 // Spoofed browsers should use TouchScrollView.
-if (SC.browser && SC.platform && SC.browser.mobileSafari && !SC.platform.touch) {
+if (SC.browser && SC.platform && SC.browser.isMobileSafari && !SC.platform.touch) {
   SC.ScrollView = SC.TouchScrollView;
 }
