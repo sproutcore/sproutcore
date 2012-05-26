@@ -730,7 +730,7 @@ SC.CoreView.reopen(
   _applyClassNameBindings: function() {
     var classBindings = this.get('classNameBindings'),
         classNames = this.get('classNames'),
-        elem, newClass, dasherizedClass;
+        dasherizedClass;
 
     if (!classBindings) { return; }
 
@@ -748,8 +748,8 @@ SC.CoreView.reopen(
       // class name.
       var observer = function() {
         // Get the current value of the property
-        newClass = this._classStringForProperty(property);
-        elem = this.$();
+        var newClass = this._classStringForProperty(property);
+        var elem = this.$();
 
         // If we had previously added a class to the element, remove it.
         if (oldClass) {
@@ -768,7 +768,7 @@ SC.CoreView.reopen(
         }
       };
 
-      this.addObserver(property, this, observer);
+      this.addObserver(property, this, observer); // .split(':')[0]
 
       // Get the class name for the property at its current value
       dasherizedClass = this._classStringForProperty(property);
@@ -783,6 +783,7 @@ SC.CoreView.reopen(
         // been closed over by the observer.
         oldClass = dasherizedClass;
       }
+
     }, this);
   },
 
