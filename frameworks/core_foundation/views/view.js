@@ -768,7 +768,7 @@ SC.CoreView.reopen(
         }
       };
 
-      this.addObserver(property, this, observer); // .split(':')[0]
+      this.addObserver(property.split(':')[0], this, observer);
 
       // Get the class name for the property at its current value
       dasherizedClass = this._classStringForProperty(property);
