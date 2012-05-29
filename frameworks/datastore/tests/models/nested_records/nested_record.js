@@ -19,7 +19,6 @@ var initModels = function() {
   });
 
   NestedRecord.ChildRecordTest = SC.Record.extend({
-    id: SC.Record.attr(String),
     name: SC.Record.attr(String),
     value: SC.Record.attr(String)
   });
