@@ -380,7 +380,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   compare: function(record1, record2) {
     var result = 0,
-        propertyName, order, len, i;
+        propertyName, order, len, i, methodName;
 
     // fast cases go here
     if (record1 === record2) return 0;
@@ -402,15 +402,16 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       len   = order ? order.length : 0;
       for (i=0; result===0 && (i < len); i++) {
         propertyName = order[i].propertyName;
+        methodName   = /\./.test(propertyName) ? 'getPath' : 'get';
         // if this property has a registered comparison use that
         if (SC.Query.comparisons[propertyName]) {
           result = SC.Query.comparisons[propertyName](
-                    record1.getPath(propertyName),record2.getPath(propertyName));
+                    record1[methodName](propertyName), record2[methodName](propertyName));
 
         // if not use default SC.compare()
         } else {
           result = SC.compare(
-                    record1.getPath(propertyName), record2.getPath(propertyName) );
+                    record1[methodName](propertyName), record2[methodName](propertyName));
         }
 
         if ((result!==0) && order[i].descending) result = (-1) * result;
