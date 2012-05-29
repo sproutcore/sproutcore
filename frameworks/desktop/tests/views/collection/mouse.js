@@ -153,6 +153,19 @@ test("first responder", function() {
   equals(view.get('isFirstResponder'), YES, 'view.isFirstResponder should be YES after mouse down');
 });
 
+test("clicking on a collection view with null content should not throw an error", function() {
+  var failed = NO;
+  view.set('content', null);
+  try {
+    var l = view.get('layer'),
+        evt = SC.Event.simulateEvent(l, 'mousedown');
+    SC.Event.trigger(l, 'mousedown', [evt]);
+  }
+  catch (e) { failed = YES; }
+  ok(!failed, "clicking on a collection view with null content should not throw an error");
+});
+
+
 // ..........................................................
 // ctrl-click mouse down
 // 

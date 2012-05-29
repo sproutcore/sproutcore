@@ -2149,8 +2149,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {Boolean} Usually YES.
   */
   mouseDown: function(ev) {
+    var content = this.get('content');
+
+    if (!content) return this.get('isSelectable');
+
     var itemView      = this.itemViewForEvent(ev),
-        content       = this.get('content'),
         contentIndex  = itemView ? itemView.get('contentIndex') : -1,
         info, anchor, sel, isSelected, modifierKeyPressed, didSelect = NO,
         allowsMultipleSel = content.get('allowsMultipleSelection');
