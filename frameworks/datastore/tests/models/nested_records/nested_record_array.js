@@ -204,8 +204,7 @@ test("Basic Read", function() {
   ok(SC.instanceOf(dpr, NestedRecord.ChildRecordTest1), "check that first default polymorphic ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
 
   // Check reference information
-  var pm = cr.get('primaryKey');
-  var key = cr.get(pm);
+  var key = cr.get('id');
   var storeRef = store.find(NestedRecord.ChildRecordTest1, key);
   ok(storeRef, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
   equals(cr, storeRef, "check the parent reference to the first child is the same as the direct store reference");
@@ -221,7 +220,7 @@ test("Basic Read", function() {
   equals(sameArray.get('length'), 4, "check that the length of the array of child records is still 4");
   var sameCR = sameArray.objectAt(0);
   ok(sameCR, "check to see if we have an instance of a child record again");
-  var oldKey = cr.get(pm), newKey = sameCR.get(pm);
+  var oldKey = cr.get('id'), newKey = sameCR.get('id');
   equals(oldKey, newKey, "check to see if the primary key are the same");
   equals(SC.guidFor(cr), SC.guidFor(sameCR), "check to see if the guid are the same");
   same(sameCR, cr, "check to see that it is the same child record as before");
@@ -254,15 +253,14 @@ test("Basic Write", function() {
 });
 
 test("Basic Write: reference tests", function() {
-   var pm, elems, cr, key, storeRef, newElems;
+   var elems, cr, key, storeRef, newElems;
 
    elems = testParent.get('elements');
    cr = elems.objectAt(0);
    // TODO: [EG] Add test to make sure the number of ChildRecords in store
 
    // Check reference information
-   pm = cr.get('primaryKey');
-   key = cr.get(pm);
+   key = cr.get('id');
    storeRef = store.find(NestedRecord.ChildRecordTest1, key);
    ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary keys');
    equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
