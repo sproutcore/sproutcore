@@ -73,6 +73,9 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     var ret, content = this.get('content');
     if (content) {
       ret = SC.TreeItemObserver.create({ item: content, delegate: this });
+      ret.bind('allowsSelection', this, 'allowsSelection');
+      ret.bind('allowsMultipleSelection', this, 'allowsMultipleSelection');
+      ret.bind('allowsEmptySelection', this, 'allowsEmptySelection');
     } else ret = null; // empty!
     this._sctc_arrangedObjects = ret ;
 

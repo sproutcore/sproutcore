@@ -338,3 +338,29 @@ function() {
   equals(selectionSet.get('length'), 0, 'selection set should have length 0');
   ok(indexSet === null, 'selection set should not have an indexSet');
 });
+
+test("SC.TreeController(SC.SelectionSupport) selection settings should persist between controller and tree item observer",
+function() {
+  var treeItemObserver = controller.get('arrangedObjects');
+  
+  SC.RunLoop.begin();
+  controller.set('allowsSelection', YES);
+  controller.set('allowsMultipleSelection', YES);
+  controller.set('allowsEmptySelection', YES);
+  SC.RunLoop.end();
+  
+  equals(treeItemObserver.get('allowsSelection'), YES, 'allowsSelection on the treeItemObserver should be YES');
+  equals(treeItemObserver.get('allowsMultipleSelection'), YES, 'allowsMultipleSelection on the treeItemObserver should be YES');
+  equals(treeItemObserver.get('allowsEmptySelection'), YES, 'allowsEmptySelection on the treeItemObserver should be YES');
+  
+  SC.RunLoop.begin();
+  controller.set('allowsSelection', NO);
+  controller.set('allowsMultipleSelection', NO);
+  controller.set('allowsEmptySelection', NO);
+  SC.RunLoop.end();
+  
+  equals(treeItemObserver.get('allowsSelection'), NO, 'allowsSelection on the treeItemObserver should be NO');
+  equals(treeItemObserver.get('allowsMultipleSelection'), NO, 'allowsMultipleSelection on the treeItemObserver should be NO');
+  equals(treeItemObserver.get('allowsEmptySelection'), NO, 'allowsEmptySelection on the treeItemObserver should be NO');
+  
+});
