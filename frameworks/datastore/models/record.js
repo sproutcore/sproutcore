@@ -880,6 +880,30 @@ SC.Record = SC.Object.extend(
   },
 
   /**
+    Unregisters a child record from its parent record.
+
+    Since accessing a child (nested) record creates a new data hash for the
+    child and caches the child record and its relationship to the parent record,
+    it's important to clear those caches when the child record is overwritten
+    or removed.  This function tells the store to remove the child record from
+    the store's various child record caches.
+
+    You should not need to call this function directly.  Simply setting the
+    child record property on the parent to a different value will cause the
+    previous child record to be unregistered.
+
+    @param {String} path The property path of the child record.
+  */
+  unregisterNestedRecord: function(path) {
+    var childRecord, csk, store;
+
+    store = this.get('store');
+    childRecord = this.getPath(path);
+    csk = childRecord.get('storeKey');
+    store.unregisterChildFromParent(csk);
+  },
+
+  /**
     @private
 
      private method that retrieves the `recordType` from the hash that is
