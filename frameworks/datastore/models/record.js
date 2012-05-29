@@ -854,7 +854,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} the child record that was registered
    */
   registerNestedRecord: function(value, key, path) {
-    var store, psk, csk, childRecord, recordType;
+    var store, psk = this.get('storeKey'), csk, childRecord, recordType;
 
     // if no path is entered it must be the key
     if (SC.none(path)) path = key;
@@ -866,12 +866,11 @@ SC.Record = SC.Object.extend(
     }
     else {
       recordType = this._materializeNestedRecordType(value, key);
-      childRecord = this.createNestedRecord(recordType, value);
+      childRecord = this.createNestedRecord(recordType, value, psk, path);
     }
     if (childRecord){
       this.isParentRecord = YES;
       store = this.get('store');
-      psk = this.get('storeKey');
       csk = childRecord.get('storeKey');
       store.registerChildToParent(psk, csk, path);
     }
@@ -952,41 +951,33 @@ SC.Record = SC.Object.extend(
     (may be null)
     @returns {SC.Record} the nested record created
    */
-  createNestedRecord: function(recordType, hash) {
-    var store, id, sk, pk, cr = null, existingId = null;
-    SC.run(function() {
-      hash = hash || {}; // init if needed
+  createNestedRecord: function(recordType, hash, psk, path) {
+    var store = this.get('store'), id, sk, pk, cr = null;
 
-      existingId = hash[recordType.prototype.primaryKey];
+    hash = hash || {}; // init if needed
 
-      store = this.get('store');
-      if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';
+    if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';
 
-      if (!id && (pk = recordType.prototype.primaryKey)) {
-        id = hash[pk];
-        // In case there is not a primary key supplied then we create on
-        // on the fly
-        sk = id ? store.storeKeyExists(recordType, id) : null;
-        if (sk){
-          store.writeDataHash(sk, hash);
-          cr = store.materializeRecord(sk);
-        } else {
-          cr = store.createRecord(recordType, hash) ;
-          if (SC.none(id)){
-            sk = cr.get('storeKey');
-            id = 'cr'+sk;
-            SC.Store.replaceIdFor(sk, id);
-            hash = store.readEditableDataHash(sk);
-            hash[pk] = id;
-          }
-        }
+    // Check for a primary key in the child record hash and if not found, then
+    // check for a custom id generation function and if we still have no id,
+    // generate a unique (and re-createable) id based on the parent's
+    // storeKey.  Having the generated id be re-createable is important so
+    // that we don't keep making new storeKeys for the same child record each
+    // time that it is reloaded.
+    id = hash[recordType.prototype.primaryKey];
+    if (!id) this.generateIdForChild(cr);
+    if (!id) { id = psk + '.' + path; }
 
-      }
-
-      // ID processing if necessary
-      if (SC.none(existingId) && this.generateIdForChild) this.generateIdForChild(cr);
-
-    }, this);
+    // If there is an id, there may also be a storeKey.  If so, update the
+    // hash for the child record in the store and materialize it.  If not,
+    // then create the child record.
+    sk = store.storeKeyExists(recordType, id);
+    if (sk) {
+      store.writeDataHash(sk, hash);
+      cr = store.materializeRecord(sk);
+    } else {
+      cr = store.createRecord(recordType, hash, id);
+    }
 
     return cr;
   },
