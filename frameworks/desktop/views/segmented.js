@@ -356,6 +356,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var items = this.get('items') || [],
         item,
         localItem,                        // Used to avoid altering the original items
+        previousItem,
         childViews = this.get('childViews'),
         childView,
         overflowView = childViews.lastObject(),
@@ -374,12 +375,25 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // Remove unneeded segments from the end back
       for (i = childViews.get('length') - 2; i >= items.get('length'); i--) {
         childView = childViews.objectAt(i);
+        localItem = childView.get('value');
 
         // If a selected childView has been removed then update our value
         if (SC.isArray(value)) {
-          value.removeObject(childView.get('value'));
-        } else if (value === childView.get('value')) {
+          value.removeObject(localItem);
+        } else if (value === localItem) {
           value = null;
+        }
+
+        // Remove observers from items we are losing off the end
+        if (localItem instanceof SC.Object) {
+
+          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+            itemKey = this.get(itemKeys.objectAt(j));
+
+            if (itemKey) {
+              localItem.removeObserver(itemKey, this, this.itemContentDidChange);
+            }
+          }
         }
 
         this.removeChild(childView);
@@ -413,6 +427,18 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     for (i = 0; i < items.get('length'); i++) {
       localItem = items.objectAt(i);
       childView = childViews.objectAt(i);
+      previousItem = childView.get('value');
+
+      if (previousItem instanceof SC.Object && !items.contains(previousItem)) {
+        // If the old item is no longer in the view, remove its observers
+        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+          itemKey = this.get(itemKeys.objectAt(j));
+
+          if (itemKey) {
+            previousItem.removeObserver(itemKey, this, this.itemContentDidChange);
+          }
+        }
+      }
 
       // Skip null/undefined items (but don't skip empty strings)
       if (SC.none(localItem)) continue;
