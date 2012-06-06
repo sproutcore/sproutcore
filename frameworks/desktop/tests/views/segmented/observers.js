@@ -40,7 +40,6 @@ module("SC.SegmentedView observers", {
 });
 
 test("Check that observers are removed properly", function() {
-  debugger;
   ok(item1.hasObserverFor('value'), 'Item1 should be observed');
   ok(item2.hasObserverFor('value'), 'Item2 should be observed');
   ok(item3.hasObserverFor('value'), 'Object2 should be observed');
