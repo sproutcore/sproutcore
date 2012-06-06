@@ -37,6 +37,12 @@ SC.DisclosureView = SC.ButtonView.extend(
   renderDelegateName: 'disclosureRenderDelegate',
 
   /**
+    @type Array
+    @default ['labelClassNames']
+  */
+  displayProperties: ['labelClassNames'],
+
+  /**
     @type String
     @default SC.TOGGLE_BEHAVIOR
     @see SC.ButtonView#buttonBehavior
