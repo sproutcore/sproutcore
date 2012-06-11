@@ -198,26 +198,120 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private
     Updates the value according the key.
   */
-  updateValue: function(key, upOrDown) {
-    // 0 is DOWN - 1 is UP
-    var newValue = (upOrDown === 0) ? -1 : 1;
-    var value = this.get('value'), hour;
-    switch(key) {
-      case '%a': case '%d': case '%j': this.set('value', value.advance({ day: newValue })); break;
-      case '%b': case '%m': this.set('value', value.advance({ month: newValue })); break;
-      case '%H': case '%I': this.set('value', value.advance({ hour: newValue })); break;
-      case '%M': this.set('value', value.advance({ minute: newValue })); break;
-      case '%p': {
-        hour = value.get('hour') >= 12 ? -12 : 12;
-        this.set('value', value.advance({ hour: hour }));
-        break;
+  updateValue: function(key, pressedKey) {
+    var value = this.get('value');
+    
+    if (pressedKey === "down" || pressedKey === "up") {
+      var newValue = (pressedKey === 'down') ? -1 : 1;
+      
+      switch(key) {
+        case '%a': case '%d': case '%j': this.set('value', value.advance({ day: newValue })); break;
+        case '%b': case '%m': this.set('value', value.advance({ month: newValue })); break;
+        case '%H': case '%I': this.set('value', value.advance({ hour: newValue })); break;
+        case '%M': this.set('value', value.advance({ minute: newValue })); break;
+        case '%p': {
+          var hour = value.get('hour') >= 12 ? -12 : 12;
+          this.set('value', value.advance({ hour: hour }));
+          break;
+        }
+        case '%S': this.set('value', value.advance({ second: newValue })); break;
+        case '%U': this.set('value', value.advance({ week1: newValue })); break;
+        case '%W': this.set('value', value.advance({ week0: newValue })); break;
+        case '%y': case '%Y': this.set('value', value.advance({ year: newValue })); break;
       }
-      case '%S': this.set('value', value.advance({ second: newValue })); break;
-      case '%U': this.set('value', value.advance({ week1: newValue })); break;
-      case '%W': this.set('value', value.advance({ week0: newValue })); break;
-      case '%y': case '%Y': this.set('value', value.advance({ year: newValue })); break;
+    }
+    // Else if a number were press
+    else {
+      var lastPressedKeys = this._lastPressedKeys,
+          pressTime = SC.DateTime.create().get('milliseconds'),
+          lastPressedTime = this._lastPressedTime;
+      
+      switch(key) {
+        case '%Y': 
+          var newYear;
+          
+          // If the user wait too long, we reset the last pressed keys
+          if (pressTime-lastPressedTime > 1200) lastPressedKeys = {};
+          
+          if (isNumber(lastPressedKeys.val1)) {
+            if (isNumber(lastPressedKeys.val3)) {
+              newYear = parseInt(''+lastPressedKeys.val3+lastPressedKeys.val2+lastPressedKeys.val1+pressedKey);
+            }
+            else if (isNumber(lastPressedKeys.val2)) {
+              newYear = parseInt(''+lastPressedKeys.val2+lastPressedKeys.val1+pressedKey+0);
+            }
+            else if (isNumber(lastPressedKeys.val1)) {
+              newYear = parseInt(''+lastPressedKeys.val1+pressedKey+0+0);
+            }
+          }
+          else {
+            newYear = parseInt(pressedKey+0+0+0);
+          }
+          
+          if (newYear >= 1000) {
+            this.set('value', value.adjust({ year: newYear }));
+          }
+        break;
+        case '%y':
+          var newYear = parseInt('20'+this._lastPressedKeys.val1+pressedKey);
+          this.set('value', value.adjust({ year: newYear }));
+        break;
+        case '%m':
+          this._updateValue('month', pressedKey, 12);
+        break;
+        case '%d':
+          var numberOfDaysForThisMonth = value.advance({ month: 1 }).adjust({ day: 1 }).advance({ day: -1 }).get('day');
+          this._updateValue('day', pressedKey, numberOfDaysForThisMonth);
+        break;
+        case '%H':
+          this._updateValue('hour', pressedKey, 24, true);
+        break;
+        case '%I':
+          this._updateValue('hour', pressedKey, 12, true);
+        break;
+        case '%M':
+          this._updateValue('minute', pressedKey, 60, true);
+        break;
+        case '%S':
+          this._updateValue('second', pressedKey, 60, true);
+        break;        
+      }
+      
+      // We save the last pressed keys
+      lastPressedKeys.val3 = lastPressedKeys.val2;
+      lastPressedKeys.val2 = lastPressedKeys.val1;
+      lastPressedKeys.val1 = pressedKey;
+      this._lastPressedTime = pressTime;
     }
   },
+  
+  /** @private */
+  _lastPressedKeys: {},
+  
+  /** @private */
+  _updateValue: function(key, pressedKey, maxValue, isTime) {
+    var value = this.get('value'),
+        newValue = parseInt(''+value.get(key)+pressedKey);
+    
+    // If the new value is to much (ex: 25 for the hours), or if the last entered key 
+    // is 0, then, we use only the pressed key
+    if (newValue > maxValue || this._lastPressedKeys.val1 == 0) newValue = pressedKey;
+    
+    // We set the value only if it's more than 0 except if it's a time
+    if (newValue > 0 || isTime) {
+      var hash = {};
+      
+      hash[key] = newValue;
+      
+      if (isTime) {
+        if (key === 'hour') hash['minute'] = value.get('minute');
+        if (key === 'hour' || key === 'minute') hash['seconde'] = value.get('seconde');
+      }
+      
+      this.set('value', value.adjust(hash));
+    }
+  },
+  
 
   _selectRootElement: function() {
     // TODO: This is a solution while I don't found how we
@@ -231,9 +325,19 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // ..........................................................
   // Key Event Support
   //
-
+  
   /** @private */
   keyDown: function(evt) {
+    var keyCodeMap = { 48: 0, 49: 1, 50: 2, 51: 3, 52: 4, 53: 5, 54: 6, 55: 7, 56: 8, 57: 9 },
+        pressedKey = keyCodeMap[evt.keyCode];
+    
+    if (isNumber(pressedKey)) {
+      var as = this.get('activeSelection');
+      var ts = this.get('tabsSelections');
+      this.updateValue(ts[as].get('key'), pressedKey);
+      return YES;
+    }
+    
     if (this.interpretKeyEvents(evt)) {
       evt.stop();
       return YES;
@@ -250,7 +354,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   moveUp: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
-    this.updateValue(ts[as].get('key'), 1);
+    this.updateValue(ts[as].get('key'), 'up');
     return YES;
   },
 
@@ -258,7 +362,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   moveDown: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
-    this.updateValue(ts[as].get('key'), 0);
+    this.updateValue(ts[as].get('key'), 'down');
     return YES;
   },
 
