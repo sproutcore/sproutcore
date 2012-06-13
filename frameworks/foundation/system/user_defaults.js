@@ -68,6 +68,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {Object} read value
   */
   readDefault: function(keyName) {
+    // Note: different implementations of localStorage may return 'null' or
+    // may return 'undefined' for missing properties so use SC.none() to check
+    // for the existence of ret throughout this function.
     var isIE7, ret, userKeyName, localStorage, key, del, storageSafari3;
 
     // namespace keyname
@@ -118,7 +121,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }
 
     // if not found in localStorage or delegate, try to find in defaults
-    if ((ret===undefined || ret===null) && this._defaults) {
+    if (SC.none(ret) && this._defaults) {
       ret = this._defaults[userKeyName] || this._defaults[keyName];
     }
 
