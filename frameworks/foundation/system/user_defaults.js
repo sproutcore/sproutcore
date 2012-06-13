@@ -118,7 +118,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }
 
     // if not found in localStorage or delegate, try to find in defaults
-    if ((ret===undefined) && this._defaults) {
+    if ((ret===undefined || ret===null) && this._defaults) {
       ret = this._defaults[userKeyName] || this._defaults[keyName];
     }
 

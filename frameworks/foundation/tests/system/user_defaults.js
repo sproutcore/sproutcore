@@ -18,6 +18,10 @@ module("User Defaults",{
  	   obj = SC.Object.create({
  		   bck : 'green'
  	    }); 	
+
+ 	  SC.userDefaults.defaults({
+			'app:testingValue': 99
+		});
  	}
 });
 
@@ -28,3 +32,9 @@ test("To check if the user defaults are stored and read from local storage",func
     equals(SC.userDefaults.readDefault('Back'), obj.bck, 'should read written property');
 });
 
+test("Test readDefault function will return a predefined default value when loading in Firefox v13", function() {
+
+  var expected = 99;
+  var result   = SC.userDefaults.readDefault('testingValue');
+  equals(result, expected, "test should equal 99");
+});
