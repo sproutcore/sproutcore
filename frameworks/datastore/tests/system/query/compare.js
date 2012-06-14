@@ -17,13 +17,17 @@ module("SC.Query comparison of records", {
       store: SC.Store.create()
     });
 
+    MyApp.Address = SC.Record.extend({});
+
     // setup a dummy model
-    MyApp.Foo = SC.Record.extend({});
+    MyApp.Foo = SC.Record.extend({
+      address: SC.Record.toOne(MyApp.Address, { nested: true })
+    });
 
     // load some data
     MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, firstName: "John", lastName: "Doe", year: 1974 },
-      { guid: 2, firstName: "Jane", lastName: "Doe", year: 1975 },
+      { guid: 1, firstName: "John", lastName: "Doe", year: 1974, address: { guid: 2, street: "2 Street" } },
+      { guid: 2, firstName: "Jane", lastName: "Doe", year: 1975, address: { guid: 1, street: "1 Street" } },
       { guid: 3, firstName: "Emily", lastName: "Parker", year: 1975, active: null },
       { guid: 4, firstName: "Johnny", lastName: "Cash", active: false },
       { guid: 5, firstName: "Bert", lastName: "Berthold", active: true }
@@ -197,3 +201,17 @@ test("specifying a custom orderBy comparison function", function() {
   equals(usedCustomFunction, YES, 'we should have used our custom comparison function');
 });
 
+test('comparing through association', function(){
+  q.orderBy = 'address.street'
+  q.parse();
+  equals(q.compare(rec1,rec2), 1, 'guid 2 should be before guid 1');
+});
+
+test('comparing through association with custom comparison', function(){
+  SC.Query.registerComparison('address.street', function (r1, r2) {
+    return SC.compare(r1, r2);
+  });
+  q.orderBy = 'address.street';
+  q.parse();
+  equals(q.compare(rec1,rec2), 1, 'guid 2 should be before guid 1');
+});
