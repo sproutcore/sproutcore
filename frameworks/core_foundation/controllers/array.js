@@ -63,8 +63,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     If you set this property to a key name, array of key names, or a function,
     then then ArrayController will automatically reorder your content array
-    to match the sort order.  (If you set a function, the function will be
-    used to sort).
+    to match the sort order.  When using key names, you may specify the
+    direction of the sort by appending ASC or DESC to the key name.  By default
+    sorting is done in ascending order.
+
+    For example,
+
+        myController.set('orderBy', 'title DESC');
+        myController.set('orderBy', ['lastName ASC', 'firstName DESC']);
 
     Normally, you should only use this property if you set the content of the
     controller to an unordered enumerable such as SC.Set or SC.SelectionSet.
@@ -378,8 +384,17 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       for(var i=0, l=orderBy.get('length'); i<l && !status; i++) {
         key = orderBy.objectAt(i);
 
+        if (key.search(/(ASC|DESC)/) === 0) {
+          //@if(debug)
+          SC.warn("SC.ArrayController's orderBy direction syntax has been changed to match that of SC.Query and MySQL.  Please change your String to 'key DESC' or 'key ASC'.  Having 'ASC' or 'DESC' precede the key has been deprecated.");
+          //@endif
         match = key.match(/^(ASC )?(DESC )?(.*)$/);
-        key = match[3]; order = match[2] ? -1 : 1;
+          key = match[3];
+        } else {
+          match = key.match(/^(\S*)\s*(DESC)?(?:ASC)?$/);
+          key = match[1];
+        }
+        order = match[2] ? -1 : 1;
 
         if (a) { a = a.isObservable ? a.get(key) : a[key]; }
         if (b) { b = b.isObservable ? b.get(key) : b[key]; }
