@@ -14,6 +14,11 @@ var TestObject = SC.Object.extend({
   toString: function() { return "TestObject(%@)".fmt(this.get("title")); }
 });
 
+var ComplexTestObject = SC.Object.extend({
+  firstName: null,
+  lastName: null,
+  toString: function() { return "TestObject(%@ %@)".fmt(this.get("firstName"), this.get('lastName')); }
+});
 
 // ..........................................................
 // EMPTY
@@ -175,6 +180,34 @@ test("array orderBy using String", function(){
   testController.set('orderBy', 'title DESC');
 
   equals(testController.get('firstSelectableObject'), content[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
+});
+
+
+test("array orderBy using Array", function(){
+  var complexContent,
+      familyNames = "Keating Zane Alberts Keating Keating".w(),
+      givenNames = "Travis Harold Brian Alvin Peter".w(),
+      testController;
+
+  complexContent = familyNames.map(function(x, i) {
+    return ComplexTestObject.create({ lastName: x, firstName: givenNames.objectAt(i) });
+  });
+
+  testController = SC.ArrayController.create({
+    content: complexContent
+  });
+
+  equals(testController.get('firstSelectableObject'), complexContent[0], 'first selectable object should be the first object in arrangedObjects');
+
+  // Reorder the content
+  testController.set('orderBy', ['lastName', 'firstName']); // Brian Alberts, Alvin Keating, Peter Keating, Travis Keating, Harold Zane
+  equals(testController.get('firstSelectableObject'), complexContent[2], 'first selectable object should be the first object in arrangedObjects (changed order)');
+  equals(testController.objectAt(1), complexContent[3], 'fourth content object should be the second object in arrangedObjects (changed order)');
+
+  // Reorder the content
+  testController.set('orderBy', ['lastName', 'firstName DESC']); // Brian Alberts, Travis Keating, Peter Keating, Alvin Keating,Harold Zane
+  equals(testController.objectAt(3), complexContent[3], 'fourth content object should be the fourth object in arrangedObjects (changed order)');
+
 });
 
 test("array orderBy using function", function(){
