@@ -379,7 +379,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     // generate comparison function if needed - use orderBy
     func = func || function(a,b) {
-      var status, key, match, descending;
+      var status, key, match, valueA, valueB;
 
       for(var i=0, l=orderBy.get('length'); i<l && !status; i++) {
         key = orderBy.objectAt(i);
@@ -388,7 +388,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
           //@if(debug)
           SC.warn("SC.ArrayController's orderBy direction syntax has been changed to match that of SC.Query and MySQL.  Please change your String to 'key DESC' or 'key ASC'.  Having 'ASC' or 'DESC' precede the key has been deprecated.");
           //@endif
-        match = key.match(/^(ASC )?(DESC )?(.*)$/);
+          match = key.match(/^(ASC )?(DESC )?(.*)$/);
           key = match[3];
         } else {
           match = key.match(/^(\S*)\s*(DESC)?(?:ASC)?$/);
@@ -396,10 +396,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         }
         order = match[2] ? -1 : 1;
 
-        if (a) { a = a.isObservable ? a.get(key) : a[key]; }
-        if (b) { b = b.isObservable ? b.get(key) : b[key]; }
+        if (a) { valueA = a.isObservable ? a.get(key) : a[key]; }
+        if (b) { valueB = b.isObservable ? b.get(key) : b[key]; }
 
-        status = SC.compare(a, b) * order;
+        status = SC.compare(valueA, valueB) * order;
       }
 
       return status ;
