@@ -57,7 +57,7 @@ function() {
   equals(controller.get('firstSelectableObject'), content[0], 'first selectable object should be the first object in arrangedObjects');
 
   // Reorder the content
-  controller.set('orderBy', 'DESC title');
+  controller.set('orderBy', 'title DESC');
 
   equals(controller.get('firstSelectableObject'), content[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
 });

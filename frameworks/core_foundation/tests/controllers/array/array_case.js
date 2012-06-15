@@ -163,6 +163,20 @@ test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
 });
 
+test("array orderBy using String", function(){
+  var testController = SC.ArrayController.create({
+    content: content,
+    orderBy: 'title ASC'
+  });
+
+  equals(testController.get('firstSelectableObject'), content[0], 'first selectable object should be the first object in arrangedObjects');
+
+  // Reorder the content
+  testController.set('orderBy', 'title DESC');
+
+  equals(testController.get('firstSelectableObject'), content[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
+});
+
 test("array orderBy using function", function(){
   var testFunc = function(a,b){
     if(a.get('title') > b.get('title')) return -1;
