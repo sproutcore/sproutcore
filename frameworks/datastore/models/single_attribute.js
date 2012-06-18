@@ -9,19 +9,19 @@ sc_require('models/record');
 sc_require('models/record_attribute');
 
 /** @class
-  
+
   `SingleAttribute` is a subclass of `RecordAttribute` and handles to-one
   relationships.
 
   There are many ways you can configure a `SingleAttribute`:
-  
-      group: SC.Record.toOne('MyApp.Group', { 
-        inverse: 'contacts', // set the key used to represent the inverse 
+
+      group: SC.Record.toOne('MyApp.Group', {
+        inverse: 'contacts', // set the key used to represent the inverse
         isMaster: YES|NO, // indicate whether changing this should dirty
         transform: function(), // transforms value <=> storeKey,
         isEditable: YES|NO, make editable or not
       });
-  
+
   @extends SC.RecordAttribute
   @since SproutCore 1.0
 */
@@ -32,29 +32,29 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     Specifies the property on the member record that represents the inverse
     of the current relationship.  If set, then modifying this relationship
     will also alter the opposite side of the relationship.
-    
+
     @type String
     @default null
   */
   inverse: null,
-  
+
   /**
     If set, determines that when an inverse relationship changes whether this
     record should become dirty also or not.
-    
+
     @type Boolean
     @default YES
   */
   isMaster: YES,
-  
-  
+
+
   /**
     @private - implements support for handling inverse relationships.
   */
   call: function(record, key, newRec) {
     var attrKey = this.get('key') || key,
         inverseKey, isMaster, oldRec, attr, ret, nvalue;
-    
+
     // WRITE
     if (newRec !== undefined && this.get('isEditable')) {
 
@@ -66,15 +66,15 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
       inverseKey = this.get('inverse');
       if (inverseKey) oldRec = this._scsa_call(record, key);
 
-      // careful: don't overwrite value here.  we want the return value to 
+      // careful: don't overwrite value here.  we want the return value to
       // cache.
       nvalue = this.fromType(record, key, newRec) ; // convert to attribute.
-      record.writeAttribute(attrKey, nvalue, !this.get('isMaster')); 
+      record.writeAttribute(attrKey, nvalue, !this.get('isMaster'));
       ret = newRec ;
 
-      // ok, now if we have an inverse relationship, get the inverse 
+      // ok, now if we have an inverse relationship, get the inverse
       // relationship and notify it of what is happening.  This will allow it
-      // to update itself as needed.  The callbacks implemented here are 
+      // to update itself as needed.  The callbacks implemented here are
       // supported by both SingleAttribute and ManyAttribute.
       //
       if (inverseKey && (oldRec !== newRec)) {
@@ -86,21 +86,21 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
           attr.inverseDidAddRecord(newRec, inverseKey, record, key);
         }
       }
-      
-    // READ 
+
+    // READ
     } else ret = this._scsa_call(record, key, newRec);
 
     return ret ;
   },
-  
+
   /** @private - save original call() impl */
   _scsa_call: SC.RecordAttribute.prototype.call,
-  
+
   /**
     Called by an inverse relationship whenever the receiver is no longer part
     of the relationship.  If this matches the inverse setting of the attribute
     then it will update itself accordingly.
-    
+
     @param {SC.Record} record the record owning this attribute
     @param {String} key the key for this attribute
     @param {SC.Record} inverseRecord record that was removed from inverse
@@ -123,12 +123,12 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
       }
     }
   },
-  
+
   /**
-    Called by an inverse relationship whenever the receiver is added to the 
-    inverse relationship.  This will set the value of this inverse record to 
+    Called by an inverse relationship whenever the receiver is added to the
+    inverse relationship.  This will set the value of this inverse record to
     the new record.
-    
+
     @param {SC.Record} record the record owning this attribute
     @param {String} key the key for this attribute
     @param {SC.Record} inverseRecord record that was added to inverse
@@ -137,8 +137,8 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
   inverseDidAddRecord: function(record, key, inverseRecord, inverseKey) {
     var myInverseKey  = this.get('inverse'),
         curRec   = this._scsa_call(record, key),
-        isMaster = this.get('isMaster'), 
-        attr, nvalue; 
+        isMaster = this.get('isMaster'),
+        attr, nvalue;
 
     // ok, replace myself with the new value...
     nvalue = this.fromType(record, key, inverseRecord); // convert to attr.

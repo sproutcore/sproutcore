@@ -159,6 +159,7 @@ test("writing to a to-one computed relationship should update set guid", functio
 
   rec3.set('relatedToComputed', rec);
   equals(rec3.readAttribute('relatedToComputed'), 'foo1', 'should write ID for set record to relatedTo attribute');
+  equals(rec2.get('relatedTo'), rec, 'should get foo record that was just set');
 });
 
 test("clearing a toOne relationship", function() {
@@ -216,7 +217,7 @@ test("modifying a toOne relationship with an inverse from other", function() {
   equals(foo1.get('bar'), bar1, 'precond - foo1.bar should eq bar1');
   equals(bar1.get('foo'), foo1, 'precond - bar.foo should eq foo1');
 
-  equals(foo3.get('bar'), bar2, 'precond - foo3.bar should eq null');
+  equals(foo3.get('bar'), bar2, 'precond - foo3.bar should eq bar2');
   equals(bar2.get('foo'), foo3, 'precond - bar2.foo should eq foo3');
 
 
@@ -233,10 +234,10 @@ test("modifying a toOne relationship with an inverse from other", function() {
   equals(bar2.get('foo'), null, 'bar2.foo should eq null after change');
 
   equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
-  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(foo3.get('status'), SC.Record.READY_DIRTY, 'foo3.status should be READY_DIRTY');
 
   equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
-  equals(bar2.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+  equals(bar2.get('status'), SC.Record.READY_CLEAN, 'bar2.status should be READY_CLEAN');
 
 });
 
@@ -245,7 +246,8 @@ test("modifying a keyed toOne relationship", function(){
 
   rec4.set('barKeyed', bar2);
 
-  equals(rec4.get('barId'), 'bar2', 'foo4.barId should == bar2');
+  equals(rec4.get('barKeyed'), bar2, 'foo4.barKeyed should == bar2');
+  equals(rec4.readAttribute('barId'), 'bar2', 'should write ID for set record to barId attribute');
 });
 
 test("isEditable NO should not allow editing", function() {
