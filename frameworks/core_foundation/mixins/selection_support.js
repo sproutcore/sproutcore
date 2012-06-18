@@ -23,7 +23,7 @@
   content you want the selection to reflect.
 
   Add this mixin to any controller you want to manage selection.  It is
-  already applied to the CollectionController and ArrayController.
+  already applied to SC.ArrayController.
 
   @since SproutCore 1.0
 */
