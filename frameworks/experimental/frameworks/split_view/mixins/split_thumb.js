@@ -200,38 +200,37 @@ SC.SplitThumb = {
     return YES;
   },
   
-  touchEnd: function(touch) {
+  touchEnd: function(evt) {
     this._isDragging = NO;
-    
+
+    this.touchesDragged(evt);
+
     var splitView = this.get('splitView');
-    
-    var mousePosition = splitView.get('layoutDirection') === SC.LAYOUT_HORIZONTAL ? 
-      touch.pageX : touch.pageY;
-    
-    var diff = mousePosition - this._scst_mouseStartPosition,
-        start = this._scst_childStartPosition;
-    
-    splitView.adjustPositionForChild(this.get('movesChild'), start + diff);
-    
+
     splitView.set('splitChildCursorStyle', null);
     splitView.endLiveResize();
     return YES;
   },
 
   mouseDown: function(evt) {
+    // We add an observer on the mouseup event in the case where we release the mouse while
+    // the divider is not under the mouse yet (in case of a latency). The observer will be remove
+    // on mouseup in any case.
+    SC.Event.add(document, 'mouseup', this, 'mouseUp');
+
     var splitView = this.get('splitView');
     splitView.set('splitChildCursorStyle', this.get('splitCursorStyle'));
-    
+
     return this.touchStart(evt);
   },
-  
+
   mouseDragged: function(evt) {
     return this.touchesDragged(evt);
   },
-  
+
   mouseUp: function(evt) {
-    this.get('splitView').set('splitChildCursorStyle', null);
-    
+    SC.Event.remove(document, 'mouseup', this, 'mouseUp');
+
     return this.touchEnd(evt);
   }
   
