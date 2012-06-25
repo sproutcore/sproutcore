@@ -143,17 +143,6 @@ SC.Response = SC.Object.extend(
   }.property('request').cacheable(),
 
   /**
-         Returns the hash of upload event listeners set on the request.
-
-         @field
-         @type Hash
-         @observes request
-         */
-  uploadEvents: function() {
-      return this.getPath('request.uploadEvents');
-   }.property('request').cacheable(),
-
-  /**
     The response status code.
 
     @type Number
@@ -383,7 +372,7 @@ SC.Response = SC.Object.extend(
 
     Will notify each listener. Returns true if any of the listeners handle.
   */
-  _notifyListeners: function(listeners, status) {
+  _notifyListeners: function(listeners, status, evt) {
     var notifiers = listeners[status], params, target, action;
     if (!notifiers) { return NO; }
 
@@ -394,6 +383,8 @@ SC.Response = SC.Object.extend(
       var notifier = notifiers[i];
       params = (notifier.params || []).copy();
       params.unshift(this);
+
+      if(evt) { params.push(evt); }
 
       target = notifier.target;
       action = notifier.action;
@@ -423,6 +414,27 @@ SC.Response = SC.Object.extend(
     if (!handled && status !== 0) { handled = this._notifyListeners(listeners, 0); }
     
     return this ;
+  },
+
+  /**
+    Notifies any event that is fired on raw request.
+
+    @returns {SC.Response} receiver
+ */
+  notifyEvent: function(eventType, evt){
+
+    var listeners = this.get('listeners'),
+        handled = NO;
+
+    if(!listeners) { return this; }
+
+    handled = this._notifyListeners(listeners, eventType, evt);
+    if(!handled){
+        //ignore
+    }
+
+    return this;
+
   },
   
   /**
@@ -501,6 +513,68 @@ SC.XHRResponse = SC.Response.extend(
   }.property('status').cacheable(),
 
   /**
+    Attach events to a given request
+
+    @returns {Boolean} Success/Failure
+ */
+  attachEvents: function(rawRequest){
+    var listeners = this.getPath("request.listeners"),
+        attached = false;
+    rawRequest = rawRequest || this.get('rawRequest');
+
+    if(!listeners){
+        return false;
+    }
+
+    //isNumber() checks if the given string is a Number
+    function isNumber(s){
+        return !isNaN (s-0) && s != null;
+    }
+
+    for(var status in listeners){
+        var eventObj = listeners[status];
+        //Make sure its not a HTTP status code
+        if(SC.typeOf(status) == SC.T_STRING
+            && !isNumber(status) ){
+            //Add event listeners to the request
+            this.addEventListener(rawRequest, status, eventObj);
+            attached = true;
+        }
+    }
+
+    return attached;
+  },
+
+  /**
+    Add an event listener to the given request
+
+    @returns {XMLHttpRequest|ActiveXObject}
+  */
+  addEventListener: function(rawRequest, eventType, target, action){
+    var reqObj = rawRequest,
+        status = eventType;
+    if (reqObj) {
+        //eventType could be a path eg: "upload.progress'
+        if(eventType && eventType.indexOf(".") != -1){
+            var eIndex = eventType.lastIndexOf(".");
+            var path = eventType.substring(0, eIndex);
+            reqObj = SC.objectForPropertyPath( path, rawRequest)
+            //Last part of the eventType is the event
+            eventType = eventType.substring(eIndex+1);
+        }
+        if(reqObj && eventType){
+            console.log("Attaching event "+eventType+" on request object");
+            var transport = this;
+            SC.Event.add(reqObj, eventType, this, function(evt){
+                transport.notifyEvent(status, evt);
+            }, rawRequest);
+        }
+    }
+
+    return rawRequest;
+  },
+
+  /**
     Cancels the request.
   */
   cancelTransport: function() {
@@ -539,19 +613,12 @@ SC.XHRResponse = SC.Response.extend(
       }
     }
 
-    //TODO: Handle browsers that support only XMLHttpRequest v1
-    if(rawRequest.upload) { //Modern browsers that support XMLHttpRequest v2
-        var uploadEvents = this.get("uploadEvents"),
-            reqUpload = rawRequest.upload,
-            event, eventObj;
-        if(uploadEvents)  {
-            for(event in uploadEvents){
-                eventObj = uploadEvents[event];
-                SC.Event.add(reqUpload, event,
-                    eventObj.target, eventObj.action, eventObj.params, rawRequest);
-            }
-        }
-    }
+    //attach events to the request
+    this.attachEvents();
+
+    //process transport
+    this.processTransport();
+
 
     // initiate request.
     rawRequest.open(this.get('type'), this.get('address'), async);
@@ -568,6 +635,21 @@ SC.XHRResponse = SC.Response.extend(
     if (!async) { this.finishRequest(); }
 
     return rawRequest;
+  },
+
+  /**
+    Process transport before sending the request.
+
+    You can override this if you need to, for example, add custom logic.
+
+    @returns {XMLHttpRequest|ActiveXObject}
+ */
+  processTransport: function(){
+
+    //Last chance to intercept transport before sending the request
+
+    return this;
+
   },
 
   /**

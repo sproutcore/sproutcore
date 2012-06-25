@@ -303,24 +303,25 @@ test("Test Multiple listeners per single status response", function() {
   stop() ; // stops the test runner - wait for response
 });
 
-test("Test upload listeners", function() {
+test("Test event listeners on request", function() {
 
     var response;
 
-    //Add upload progress event
-    request.notifyUpload("progress", this, function(progressEvent) {
-        ok(true, "Upload progress fired");
+    request.notify("progress", this, function(response, evt) {
+        ok(true, "Received progress event");
     });
 
-    request.notify(200, this, function(response) {
-        ok(true, "Receieved a response");
+    request.notify("abort", this, function(response, evt) {
+        ok(true, "Received abort event");
+    });
+
+    request.notify("error", this, function(response, evt) {
+        ok(true, "Received error event");
     });
 
     response = request.send();
-
-    var uploadEvents = response.get("uploadEvents");
-
-    ok(uploadEvents["progress"] !== null, 'response has successfully added progress upload event');
+    ok(SC.ok(response), 'response should not be error');
+    same(response.get('body'), {"message": "Yay!"}, 'repsonse.body');
 
     stop() ; // stops the test runner - wait for response
 });
