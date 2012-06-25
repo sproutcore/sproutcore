@@ -7,729 +7,647 @@
 /*global ActiveXObject */
 
 /*
- TODO Document SC.Response and SC.XHRResponse
- */
+  TODO Document SC.Response and SC.XHRResponse
+*/
 
 /**
- @class
+  @class
 
-     A response represents a single response from a server request.  An instance
- of this class is returned whenever you call SC.Request.send().
+  A response represents a single response from a server request.  An instance
+  of this class is returned whenever you call SC.Request.send().
 
- @extend SC.Object
- @since SproutCore 1.0
- */
+  @extend SC.Object
+  @since SproutCore 1.0
+*/
 SC.Response = SC.Object.extend(
-    /** @scope SC.Response.prototype */ {
+/** @scope SC.Response.prototype */ {
 
-        /**
-         Walk like a duck
+  /**
+    Walk like a duck
+    
+    @type Boolean
+  */
+  isResponse: YES,
+  
+  /**
+    Becomes true if there was a failure.  Makes this into an error object.
+    
+    @type Boolean
+    @default NO
+  */
+  isError: NO,
 
-         @type Boolean
-         */
-        isResponse: YES,
+  /**
+    Always the current response
 
-        /**
-         Becomes true if there was a failure.  Makes this into an error object.
+    @field
+    @type SC.Response
+    @default `this`
+  */
+  errorValue: function() {
+    return this;
+  }.property().cacheable(),
 
-         @type Boolean
-         @default NO
-         */
-        isError: NO,
+  /**
+    The error object generated when this becomes an error
 
-        /**
-         Always the current response
+    @type SC.Error
+    @default null
+  */
+  errorObject: null,
 
-         @field
-         @type SC.Response
-         @default `this`
-         */
-        errorValue: function() {
-            return this;
-        }.property().cacheable(),
+  /**
+    Request used to generate this response.  This is a copy of the original
+    request object as you may have modified the original request object since
+    then.
 
-        /**
-         The error object generated when this becomes an error
+    To retrieve the original request object use originalRequest.
 
-         @type SC.Error
-         @default null
-         */
-        errorObject: null,
+    @type SC.Request
+    @default null
+  */
+  request: null,
+  
+  /**
+    The request object that originated this request series.  Mostly this is
+    useful if you are looking for a reference to the original request.  To
+    inspect actual properties you should use request instead.
 
-        /**
-         Request used to generate this response.  This is a copy of the original
-         request object as you may have modified the original request object since
-         then.
+    @field
+    @type SC.Request
+    @observes request
+  */
+  originalRequest: function() {
+    var ret = this.get('request');
+    while (ret.get('source')) { ret = ret.get('source'); }
+    return ret ;
+  }.property('request').cacheable(),
 
-         To retrieve the original request object use originalRequest.
+  /** 
+    Type of request. Must be an HTTP method. Based on the request.
 
-         @type SC.Request
-         @default null
-         */
-        request: null,
+    @field
+    @type String
+    @observes request
+  */
+  type: function() {
+    return this.getPath('request.type');
+  }.property('request').cacheable(),
 
-        /**
-         The request object that originated this request series.  Mostly this is
-         useful if you are looking for a reference to the original request.  To
-         inspect actual properties you should use request instead.
+  /**
+    URL of request.
 
-         @field
-         @type SC.Request
-         @observes request
-         */
-        originalRequest: function() {
-            var ret = this.get('request');
-            while (ret.get('source')) { ret = ret.get('source'); }
-            return ret ;
-        }.property('request').cacheable(),
+    @field
+    @type String
+    @observes request
+  */
+  address: function() {
+    return this.getPath('request.address');
+  }.property('request').cacheable(),
 
-        /**
-         Type of request. Must be an HTTP method. Based on the request.
+  /**
+    If set then will attempt to automatically parse response as JSON 
+    regardless of headers.
 
-         @field
-         @type String
-         @observes request
-         */
-        type: function() {
-            return this.getPath('request.type');
-        }.property('request').cacheable(),
+    @field
+    @type Boolean
+    @default NO
+    @observes request
+  */
+  isJSON: function() {
+    return this.getPath('request.isJSON') || NO;
+  }.property('request').cacheable(),
 
-        /**
-         URL of request.
+  /**
+    If set, then will attempt to automatically parse response as XML
+    regarldess of headers.
 
-         @field
-         @type String
-         @observes request
-         */
-        address: function() {
-            return this.getPath('request.address');
-        }.property('request').cacheable(),
+    @field
+    @type Boolean
+    @default NO
+    @observes request
+  */
+  isXML: function() {
+    return this.getPath('request.isXML') || NO ;
+  }.property('request').cacheable(),
 
-        /**
-         If set then will attempt to automatically parse response as JSON
-         regardless of headers.
+  /**
+    Returns the hash of listeners set on the request.
 
-         @field
-         @type Boolean
-         @default NO
-         @observes request
-         */
-        isJSON: function() {
-            return this.getPath('request.isJSON') || NO;
-        }.property('request').cacheable(),
+    @field
+    @type Hash
+    @observes request
+  */
+  listeners: function() {
+    return this.getPath('request.listeners');
+  }.property('request').cacheable(),
 
-        /**
-         If set, then will attempt to automatically parse response as XML
-         regardless of headers.
-
-         @field
-         @type Boolean
-         @default NO
-         @observes request
-         */
-        isXML: function() {
-            return this.getPath('request.isXML') || NO ;
-        }.property('request').cacheable(),
-
-        /**
-         Returns the hash of listeners set on the request.
+  /**
+         Returns the hash of upload event listeners set on the request.
 
          @field
          @type Hash
          @observes request
          */
-        listeners: function() {
-            return this.getPath('request.listeners');
-        }.property('request').cacheable(),
+  uploadEvents: function() {
+      return this.getPath('request.uploadEvents');
+   }.property('request').cacheable(),
 
-        /**
-         The response status code.
+  /**
+    The response status code.
 
-         @type Number
-         @default -100
-         */
-        status: -100, // READY
+    @type Number
+    @default -100
+  */
+  status: -100, // READY
 
-        /**
-         Headers from the response. Computed on-demand
+  /**
+    Headers from the response. Computed on-demand
 
-         @type Hash
-         @default null
-         */
-        headers: null,
+    @type Hash
+    @default null
+  */
+  headers: null,
 
-        /**
-         The response body or the parsed JSON. Returns a SC.Error instance
-         if there is a JSON parsing error. If isJSON was set, will be parsed
-         automatically.
+  /**
+    The response body or the parsed JSON. Returns a SC.Error instance
+    if there is a JSON parsing error. If isJSON was set, will be parsed
+    automatically.
 
-         @field
-         @type {Hash|String|SC.Error}
-         */
-        body: function() {
-            // TODO: support XML
-            var ret = this.get('encodedBody');
-            if (ret && this.get('isJSON')) {
-                try {
-                    ret = SC.json.decode(ret);
-                } catch(e) {
-                    return SC.Error.create({
-                        message: e.name + ': ' + e.message,
-                        label: 'Response',
-                        errorValue: this });
-                }
-            }
-            return ret;
-        }.property('encodedBody').cacheable(),
+    @field
+    @type {Hash|String|SC.Error}
+  */
+  body: function() {
+    // TODO: support XML
+    var ret = this.get('encodedBody');
+    if (ret && this.get('isJSON')) {
+      try {
+        ret = SC.json.decode(ret);
+      } catch(e) {
+        return SC.Error.create({
+          message: e.name + ': ' + e.message,
+          label: 'Response',
+          errorValue: this });
+      }
+    }
+    return ret;
+  }.property('encodedBody').cacheable(),
 
-        /**
-         @private
-         @deprecated Use body instead.
+  /**
+    @private
+    @deprecated Use body instead.
 
-         Alias for body.
+    Alias for body.
 
-         @type Hash|String
-         @see #body
-         */
-        response: function() {
-            return this.get('body');
-        }.property('body').cacheable(),
+    @type Hash|String
+    @see #body
+  */
+  response: function() {
+    return this.get('body');
+  }.property('body').cacheable(),
 
-        /**
-         Set to YES if response is cancelled
+  /**
+    Set to YES if response is cancelled
 
-         @type Boolean
-         @default NO
-         */
-        isCancelled: NO,
+    @type Boolean
+    @default NO
+  */
+  isCancelled: NO,
 
-        /**
-         Set to YES if the request timed out. Set to NO if the request has
-         completed before the timeout value. Set to null if the timeout timer is
-         still ticking.
+  /**
+    Set to YES if the request timed out. Set to NO if the request has
+    completed before the timeout value. Set to null if the timeout timer is
+    still ticking.
 
-         @type Boolean
-         @default null
-         */
-        timedOut: null,
+    @type Boolean
+    @default null
+  */
+  timedOut: null,
+  
+  /**
+    The timer tracking the timeout
 
-        /**
-         The timer tracking the timeout
-
-         @type Number
-         @default null
-         */
-        timeoutTimer: null,
+    @type Number
+    @default null
+  */
+  timeoutTimer: null,
 
 
-        // ..........................................................
-        // METHODS
-        //
+  // ..........................................................
+  // METHODS
+  // 
 
-        /**
-         Called by the request manager when its time to actually run. This will
-         invoke any callbacks on the source request then invoke transport() to
-         begin the actual request.
-         */
-        fire: function() {
-            var req = this.get('request'),
-                source = req ? req.get('source') : null;
+  /**
+    Called by the request manager when its time to actually run. This will
+    invoke any callbacks on the source request then invoke transport() to
+    begin the actual request.
+  */
+  fire: function() {
+    var req = this.get('request'),
+        source = req ? req.get('source') : null;
 
-            // first give the source a chance to fixup the request and response
-            // then freeze req so no more changes can happen.
-            if (source && source.willSend) { source.willSend(req, this); }
-            req.freeze();
+    // first give the source a chance to fixup the request and response
+    // then freeze req so no more changes can happen.
+    if (source && source.willSend) { source.willSend(req, this); }
+    req.freeze();
 
-            // if the source did not cancel the request, then invoke the transport
-            // to actually trigger the request.  This might receive a response
-            // immediately if it is synchronous.
-            if (!this.get('isCancelled')) { this.invokeTransport(); }
+    // if the source did not cancel the request, then invoke the transport
+    // to actually trigger the request.  This might receive a response 
+    // immediately if it is synchronous.
+    if (!this.get('isCancelled')) { this.invokeTransport(); }
 
-            // If the request specified a timeout value, then set a timer for it now.
-            var timeout = req.get('timeout');
-            if (timeout) {
-                var timer = SC.Timer.schedule({
-                    target: this,
-                    action: 'timeoutReached',
-                    interval: timeout,
-                    repeats: NO
-                });
-                this.set('timeoutTimer', timer);
-            }
+    // If the request specified a timeout value, then set a timer for it now.
+    var timeout = req.get('timeout');
+    if (timeout) {
+      var timer = SC.Timer.schedule({
+        target: this,
+        action: 'timeoutReached',
+        interval: timeout,
+        repeats: NO
+      });
+      this.set('timeoutTimer', timer);
+    }
 
-            // if the transport did not cancel the request for some reason, let the
-            // source know that the request was sent
-            if (!this.get('isCancelled') && source && source.didSend) {
-                source.didSend(req, this);
-            }
-        },
+    // if the transport did not cancel the request for some reason, let the
+    // source know that the request was sent
+    if (!this.get('isCancelled') && source && source.didSend) {
+      source.didSend(req, this);
+    }
+  },
 
-        /**
-         Called by `SC.Response#fire()`. Starts the transport by invoking the
-         `SC.Response#receive()` function.
-         */
-        invokeTransport: function() {
-            this.receive(function(proceed) { this.set('status', 200); }, this);
-        },
+  /**
+    Called by `SC.Response#fire()`. Starts the transport by invoking the
+    `SC.Response#receive()` function.
+  */
+  invokeTransport: function() {
+    this.receive(function(proceed) { this.set('status', 200); }, this);
+  },
 
-        /**
-         Invoked by the transport when it receives a response. The passed-in
-         callback will be invoked to actually process the response. If cancelled
-         we will pass NO. You should clean up instead.
+  /**
+    Invoked by the transport when it receives a response. The passed-in
+    callback will be invoked to actually process the response. If cancelled
+    we will pass NO. You should clean up instead.
 
-         Invokes callbacks on the source request also.
+    Invokes callbacks on the source request also.
 
-         @param {Function} callback the function to receive
-         @param {Object} context context to execute the callback in
-         @returns {SC.Response} receiver
-         */
-        receive: function(callback, context) {
-            if (!this.get('timedOut')) {
-                // If we had a timeout timer scheduled, invalidate it now.
-                var timer = this.get('timeoutTimer');
-                if (timer) { timer.invalidate(); }
-                this.set('timedOut', NO);
-            }
+    @param {Function} callback the function to receive
+    @param {Object} context context to execute the callback in
+    @returns {SC.Response} receiver
+  */
+  receive: function(callback, context) {
+    if (!this.get('timedOut')) {
+      // If we had a timeout timer scheduled, invalidate it now.
+      var timer = this.get('timeoutTimer');
+      if (timer) { timer.invalidate(); }
+      this.set('timedOut', NO);
+    }
 
-            var req = this.get('request');
-            var source = req ? req.get('source') : null;
+    var req = this.get('request');
+    var source = req ? req.get('source') : null;
 
-            SC.run(function() {
-                // invoke the source, giving a chance to fixup the response or (more
-                // likely) cancel the request.
-                if (source && source.willReceive) { source.willReceive(req, this); }
+    SC.run(function() {
+      // invoke the source, giving a chance to fixup the response or (more
+      // likely) cancel the request.
+      if (source && source.willReceive) { source.willReceive(req, this); }
 
-                // invoke the callback.  note if the response was cancelled or not
-                callback.call(context, !this.get('isCancelled'));
+      // invoke the callback.  note if the response was cancelled or not
+      callback.call(context, !this.get('isCancelled'));
 
-                // if we weren't cancelled, then give the source first crack at handling
-                // the response.  if the source doesn't want listeners to be notified,
-                // it will cancel the response.
-                if (!this.get('isCancelled') && source && source.didReceive) {
-                    source.didReceive(req, this);
-                }
+      // if we weren't cancelled, then give the source first crack at handling
+      // the response.  if the source doesn't want listeners to be notified,
+      // it will cancel the response.
+      if (!this.get('isCancelled') && source && source.didReceive) {
+        source.didReceive(req, this);
+      }
 
-                // notify listeners if we weren't cancelled.
-                if (!this.get('isCancelled')) { this.notify(); }
-            }, this);
+      // notify listeners if we weren't cancelled.
+      if (!this.get('isCancelled')) { this.notify(); }
+    }, this);
 
-            // no matter what, remove from inflight queue
-            SC.Request.manager.transportDidClose(this);
-            return this;
-        },
+    // no matter what, remove from inflight queue
+    SC.Request.manager.transportDidClose(this);
+    return this;
+  },
 
-        /**
-         Default method just closes the connection. It will also mark the request
-         as cancelled, which will not call any listeners.
-         */
-        cancel: function() {
-            if (!this.get('isCancelled')) {
-                this.set('isCancelled', YES) ;
-                this.cancelTransport() ;
-                SC.Request.manager.transportDidClose(this) ;
-            }
-        },
+  /**
+    Default method just closes the connection. It will also mark the request
+    as cancelled, which will not call any listeners.
+  */
+  cancel: function() {
+    if (!this.get('isCancelled')) {
+      this.set('isCancelled', YES) ;
+      this.cancelTransport() ;
+      SC.Request.manager.transportDidClose(this) ;
+    }
+  },
 
-        /**
-         Default method just closes the connection.
+  /**
+    Default method just closes the connection.
 
-         @returns {Boolean} YES if this response has not timed out yet, NO otherwise
-         */
-        timeoutReached: function() {
-            // If we already received a response yet the timer still fired for some
-            // reason, do nothing.
-            if (this.get('timedOut') === null) {
-                this.set('timedOut', YES);
-                this.cancelTransport();
+    @returns {Boolean} YES if this response has not timed out yet, NO otherwise
+  */
+  timeoutReached: function() {
+    // If we already received a response yet the timer still fired for some
+    // reason, do nothing.
+    if (this.get('timedOut') === null) {
+      this.set('timedOut', YES);
+      this.cancelTransport();
 
-                // Invokes any relevant callbacks and notifies registered listeners, if
-                // any. In the event of a timeout, we set the status to 0 since we
-                // didn't actually get a response from the server.
-                this.receive(function(proceed) {
-                    if (!proceed) { return; }
+      // Invokes any relevant callbacks and notifies registered listeners, if
+      // any. In the event of a timeout, we set the status to 0 since we
+      // didn't actually get a response from the server.
+      this.receive(function(proceed) {
+        if (!proceed) { return; }
 
-                    // Set our value to an error.
-                    var error = SC.$error("HTTP Request timed out", "Request", 0) ;
-                    error.set("errorValue", this) ;
-                    this.set('isError', YES);
-                    this.set('errorObject', error);
-                    this.set('status', 0);
-                }, this);
+        // Set our value to an error.
+        var error = SC.$error("HTTP Request timed out", "Request", 0) ;
+        error.set("errorValue", this) ;
+        this.set('isError', YES);
+        this.set('errorObject', error);
+        this.set('status', 0);
+      }, this);
 
-                return YES;
-            }
+      return YES;
+    }
 
-            return NO;
-        },
+    return NO;
+  },
 
-        /**
-         Override with concrete implementation to actually cancel the transport.
-         */
-        cancelTransport: function() {},
+  /**
+    Override with concrete implementation to actually cancel the transport.
+  */
+  cancelTransport: function() {},
 
-        /**
-         @private
+  /**
+    @private
 
-         Will notify each listener. Returns true if any of the listeners handle.
-         */
-        _notifyListeners: function(listeners, status, evt) {
-            var notifiers = listeners[status], params, target, action;
-            if (!notifiers) { return NO; }
+    Will notify each listener. Returns true if any of the listeners handle.
+  */
+  _notifyListeners: function(listeners, status) {
+    var notifiers = listeners[status], params, target, action;
+    if (!notifiers) { return NO; }
 
-            var handled = NO;
-            var len = notifiers.length;
+    var handled = NO;
+    var len = notifiers.length;
 
-            for (var i = 0; i < len; i++) {
-                var notifier = notifiers[i];
-                params = (notifier.params || []).copy();
-                params.unshift(this);
+    for (var i = 0; i < len; i++) {
+      var notifier = notifiers[i];
+      params = (notifier.params || []).copy();
+      params.unshift(this);
 
-                if(evt) { params.push(evt); }
+      target = notifier.target;
+      action = notifier.action;
+      if (SC.typeOf(action) === SC.T_STRING) { action = target[action]; }
 
-                target = notifier.target;
-                action = notifier.action;
-                if (SC.typeOf(action) === SC.T_STRING) { action = target[action]; }
+      handled = action.apply(target, params);
+    }
 
-                handled = action.apply(target, params);
-            }
+    return handled;
+  },
 
-            return handled;
-        },
+  /**
+    Notifies any saved target/action. Call whenever you cancel, or end.
 
-        /**
-         Notifies any saved target/action. Call whenever you cancel, or end.
+    @returns {SC.Response} receiver
+  */
+  notify: function() {
+    var listeners = this.get('listeners'),
+        status = this.get('status'),
+        baseStat = Math.floor(status / 100) * 100,
+        handled = NO;
 
-         @returns {SC.Response} receiver
-         */
-        notify: function() {
-            var listeners = this.get('listeners'),
-                status = this.get('status'),
-                baseStat = Math.floor(status / 100) * 100,
-                handled = NO;
+    if (!listeners) { return this; }
 
-            if (!listeners) { return this; }
+    handled = this._notifyListeners(listeners, status);
+    if (!handled && baseStat !== status) { handled = this._notifyListeners(listeners, baseStat); }
+    if (!handled && status !== 0) { handled = this._notifyListeners(listeners, 0); }
+    
+    return this ;
+  },
+  
+  /**
+    String representation of the response object
 
-            handled = this._notifyListeners(listeners, status);
-            if (!handled && baseStat !== status) { handled = this._notifyListeners(listeners, baseStat); }
-            if (!handled && status !== 0) { handled = this._notifyListeners(listeners, 0); }
+    @returns {String}
+  */
+  toString: function() {
+    var ret = sc_super();
+    return "%@<%@ %@, status=%@".fmt(ret, this.get('type'), this.get('address'), this.get('status'));
+  }
 
-            return this ;
-        },
-
-        /**
-         Notifies any event that is fired on raw request.
-
-         @returns {SC.Response} receiver
-         */
-        notifyEvent: function(eventType, evt){
-
-            var listeners = this.get('listeners'),
-                handled = NO;
-
-            if(!listeners) { return this; }
-
-            handled = this._notifyListeners(listeners, eventType, evt);
-            if(!handled){
-                //ignore
-            }
-
-            return this;
-
-        },
-
-        /**
-         String representation of the response object
-
-         @returns {String}
-         */
-        toString: function() {
-            var ret = sc_super();
-            return "%@<%@ %@, status=%@".fmt(ret, this.get('type'), this.get('address'), this.get('status'));
-        }
-
-    });
+});
 
 /**
- @class
+  @class
 
-     Concrete implementation of SC.Response that implements support for using
- XHR requests.
+  Concrete implementation of SC.Response that implements support for using
+  XHR requests.
 
- @extends SC.Response
- @since SproutCore 1.0
- */
+  @extends SC.Response
+  @since SproutCore 1.0
+*/
 SC.XHRResponse = SC.Response.extend(
-    /** @scope SC.XHRResponse.prototype */{
+/** @scope SC.XHRResponse.prototype */{
 
-        /**
-         Implement transport-specific support for fetching all headers
-         */
-        headers: function() {
-            var xhr = this.get('rawRequest'),
-                str = xhr ? xhr.getAllResponseHeaders() : null,
-                ret = {};
+  /**
+    Implement transport-specific support for fetching all headers
+  */
+  headers: function() {
+    var xhr = this.get('rawRequest'),
+        str = xhr ? xhr.getAllResponseHeaders() : null,
+        ret = {};
 
-            if (!str) { return ret; }
+    if (!str) { return ret; }
 
-            str.split("\n").forEach(function(header) {
-                var idx = header.indexOf(':'),
-                    key, value;
+    str.split("\n").forEach(function(header) {
+      var idx = header.indexOf(':'),
+          key, value;
 
-                if (idx >= 0) {
-                    key = header.slice(0,idx);
-                    value = header.slice(idx + 1).trim();
-                    ret[key] = value;
-                }
-            }, this);
+      if (idx >= 0) {
+        key = header.slice(0,idx);
+        value = header.slice(idx + 1).trim();
+        ret[key] = value;
+      }
+    }, this);
 
-            return ret;
-        }.property('status').cacheable(),
+    return ret;
+  }.property('status').cacheable(),
 
-        /**
-         Returns a header value if found.
+  /**
+    Returns a header value if found.
 
-         @param {String} key The header key
-         @returns {String}
-         */
-        header: function(key) {
-            var xhr = this.get('rawRequest');
-            return xhr ? xhr.getResponseHeader(key) : null;
-        },
+    @param {String} key The header key
+    @returns {String}
+  */
+  header: function(key) {
+    var xhr = this.get('rawRequest');
+    return xhr ? xhr.getResponseHeader(key) : null;
+  },
 
-        /**
-         Implement transport-specific support for fetching tasks
+  /**
+    Implement transport-specific support for fetching tasks
 
-         @field
-         @type String
-         @default #rawRequest
-         */
-        encodedBody: function() {
-            var xhr = this.get('rawRequest');
+    @field
+    @type String
+    @default #rawRequest
+  */
+  encodedBody: function() {
+    var xhr = this.get('rawRequest');
 
-            if (!xhr) { return null; }
-            if (this.get('isXML')) { return xhr.responseXML; }
+    if (!xhr) { return null; }
+    if (this.get('isXML')) { return xhr.responseXML; }
 
-            return xhr.responseText;
-        }.property('status').cacheable(),
+    return xhr.responseText;
+  }.property('status').cacheable(),
 
-        /**
-         Attach events to a given request
+  /**
+    Cancels the request.
+  */
+  cancelTransport: function() {
+    var rawRequest = this.get('rawRequest');
+    if (rawRequest) { rawRequest.abort(); }
+    this.set('rawRequest', null);
+  },
 
-         @returns {Boolean} Success/Failure
-         */
-        attachEvents: function(rawRequest){
-            var listeners = this.getPath("request.listeners"),
-                attached = false;
-            rawRequest = rawRequest || this.get('rawRequest');
+  /**
+    Starts the transport of the request
 
-            if(!listeners){
-                return false;
+    @returns {XMLHttpRequest|ActiveXObject}
+  */
+  invokeTransport: function() {
+    var rawRequest, transport, handleReadyStateChange, async, headers;
+
+    rawRequest = this.createRequest();
+    this.set('rawRequest', rawRequest);
+
+    // configure async callback - differs per browser...
+    async = !!this.getPath('request.isAsynchronous');
+
+    if (async) {
+      if (!SC.browser.msie && !SC.browser.opera) {
+        SC.Event.add(rawRequest, 'readystatechange', this,
+                     this.finishRequest, rawRequest);
+      } else {
+        transport = this;
+        handleReadyStateChange = function() {
+          if (!transport) { return null; }
+          var ret = transport.finishRequest();
+          if (ret) { transport = null; }
+          return ret;
+        };
+        rawRequest.onreadystatechange = handleReadyStateChange;
+      }
+    }
+
+    //TODO: Handle browsers that support only XMLHttpRequest v1
+    if(rawRequest.upload) { //Modern browsers that support XMLHttpRequest v2
+        var uploadEvents = this.get("uploadEvents"),
+            reqUpload = rawRequest.upload,
+            event, eventObj;
+        if(uploadEvents)  {
+            for(event in uploadEvents){
+                eventObj = uploadEvents[event];
+                SC.Event.add(reqUpload, event,
+                    eventObj.target, eventObj.action, eventObj.params, rawRequest);
             }
+        }
+    }
 
-            //isNumber() checks if the given string is a Number
-            function isNumber(s){
-                return !isNaN (s-0) && s != null;
-            }
+    // initiate request.
+    rawRequest.open(this.get('type'), this.get('address'), async);
 
-            for(var status in listeners){
-                var eventObj = listeners[status];
-                //Make sure its not a HTTP status code
-                if(SC.typeOf(status) == SC.T_STRING
-                    && !isNumber(status) ){
-                    //Add event listeners to the request
-                    this.addEventListener(rawRequest, status, eventObj);
-                    attached = true;
-                }
-            }
+    // headers need to be set *after* the open call.
+    headers = this.getPath('request.headers');
+    for (var headerKey in headers) {
+      rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
+    }
 
-            return attached;
-        },
+    // now send the actual request body - for sync requests browser will
+    // block here
+    rawRequest.send(this.getPath('request.encodedBody')) ;
+    if (!async) { this.finishRequest(); }
 
-        /**
-         Add an event listener to the given request
+    return rawRequest;
+  },
 
-         @returns {XMLHttpRequest|ActiveXObject}
-         */
-        addEventListener: function(rawRequest, eventType, target, action){
-            var reqObj = rawRequest,
-                status = eventType;
-            if (reqObj) {
-                //eventType could be a path eg: "upload.progress'
-                if(eventType && eventType.indexOf(".") != -1){
-                    var eIndex = eventType.lastIndexOf(".");
-                    var path = eventType.substring(0, eIndex);
-                    reqObj = SC.objectForPropertyPath( path, rawRequest)
-                    //Last part of the eventType is the event
-                    eventType = eventType.substring(eIndex+1);
-                }
-                if(reqObj && eventType){
-                    console.log("Attaching event "+eventType+" on request object");
-                    var transport = this;
-                    SC.Event.add(reqObj, eventType, this, function(evt){
-                        transport.notifyEvent(status, evt);
-                    }, rawRequest);
-                }
-            }
+  /**
+    Creates the correct XMLHttpRequest object for this browser.
 
-            return rawRequest;
-        },
+    You can override this if you need to, for example, create an XHR on a
+    different domain name from an iframe.
 
+    @returns {XMLHttpRequest|ActiveXObject}
+  */
+  createRequest: function() {
+    function tryThese() {
+      for (var i=0; i < arguments.length; i++) {
+        try {
+          var item = arguments[i]();
+          return item;
+        } catch (e) {}
+      }
+      return NO;
+    }
 
-        /**
-         Cancels the request.
-         */
-        cancelTransport: function() {
-            var rawRequest = this.get('rawRequest');
-            if (rawRequest) { rawRequest.abort(); }
-            this.set('rawRequest', null);
-        },
+    return tryThese(
+      function() { return new XMLHttpRequest(); },
+      function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
+      function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
+    );
+  },
 
-        /**
-         Starts the transport of the request
+  /**
+    @private
 
-         @returns {XMLHttpRequest|ActiveXObject}
-         */
-        invokeTransport: function() {
-            var rawRequest, transport, handleReadyStateChange, async, headers;
+    Called by the XHR when it responds with some final results.
 
-            rawRequest = this.createRequest();
-            this.set('rawRequest', rawRequest);
+    @param {XMLHttpRequest} rawRequest the actual request
+    @returns {Boolean} YES if completed, NO otherwise
+  */
+  finishRequest: function(evt) {
+    var rawRequest = this.get('rawRequest'),
+        readyState = rawRequest.readyState,
+        error, status, msg;
 
-            // configure async callback - differs per browser...
-            async = !!this.getPath('request.isAsynchronous');
+    if (readyState === 4 && !this.get('timedOut')) {
+      this.receive(function(proceed) {
+        if (!proceed) { return; }
 
-            if (async) {
-                if (!SC.browser.isIE && !SC.browser.isOpera) {
-                    SC.Event.add(rawRequest, 'readystatechange', this,
-                        this.finishRequest, rawRequest);
-                } else {
-                    transport = this;
-                    handleReadyStateChange = function() {
-                        if (!transport) { return null; }
-                        var ret = transport.finishRequest();
-                        if (ret) { transport = null; }
-                        return ret;
-                    };
-                    rawRequest.onreadystatechange = handleReadyStateChange;
-                }
-            }
+        // collect the status and decide if we're in an error state or not
+        status = -1;
+        try {
+          status = rawRequest.status || 0;
+        } catch (e) {}
 
-            //attach events to the request
-            this.attachEvents();
+        // if there was an error - setup error and save it
+        if ((status < 200) || (status >= 300)) {
 
-            //process transport
-            this.processTransport();
+          try {
+            msg = rawRequest.statusText || '';
+          } catch(e2) {
+            msg = '';
+          }
 
-            // initiate request.
-            rawRequest.open(this.get('type'), this.get('address'), async);
-
-            // headers need to be set *after* the open call.
-            headers = this.getPath('request.headers');
-            for (var headerKey in headers) {
-                rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
-            }
-
-            // now send the actual request body - for sync requests browser will
-            // block here
-            rawRequest.send(this.getPath('request.encodedBody')) ;
-            if (!async) { this.finishRequest(); }
-
-            return rawRequest;
-        },
-
-        /**
-         Process transport before sending the request.
-
-         You can override this if you need to, for example, add custom logic.
-
-         @returns {XMLHttpRequest|ActiveXObject}
-         */
-        processTransport: function(){
-
-            //Last chance to intercept transport before sending the request
-
-            return this;
-
-        },
-
-        /**
-         Creates the correct XMLHttpRequest object for this browser.
-
-         You can override this if you need to, for example, create an XHR on a
-         different domain name from an iframe.
-
-         @returns {XMLHttpRequest|ActiveXObject}
-         */
-        createRequest: function() {
-            function tryThese() {
-                for (var i=0; i < arguments.length; i++) {
-                    try {
-                        var item = arguments[i]();
-                        return item;
-                    } catch (e) {}
-                }
-                return NO;
-            }
-
-            return tryThese(
-                function() { return new XMLHttpRequest(); },
-                function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
-                function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
-            );
-        },
-
-        /**
-         @private
-
-         Called by the XHR when it responds with some final results.
-
-         @param {XMLHttpRequest} rawRequest the actual request
-         @returns {Boolean} YES if completed, NO otherwise
-         */
-        finishRequest: function(evt) {
-            var rawRequest = this.get('rawRequest'),
-                readyState = rawRequest.readyState,
-                error, status, msg;
-
-            if (readyState === 4 && !this.get('timedOut')) {
-                this.receive(function(proceed) {
-                    if (!proceed) { return; }
-
-                    // collect the status and decide if we're in an error state or not
-                    status = -1;
-                    try {
-                        status = rawRequest.status || 0;
-                    } catch (e) {}
-
-                    // if there was an error - setup error and save it
-                    if ((status < 200) || (status >= 300)) {
-
-                        try {
-                            msg = rawRequest.statusText || '';
-                        } catch(e2) {
-                            msg = '';
-                        }
-
-                        error = SC.$error(msg || "HTTP Request failed", "Request", status);
-                        error.set("errorValue", this) ;
-                        this.set('isError', YES);
-                        this.set('errorObject', error);
-                    }
-
-                    // set the status - this will trigger changes on related properties
-                    this.set('status', status);
-                }, this);
-
-                // Avoid memory leaks
-                if (!SC.browser.isIE && !SC.browser.isOpera) {
-                    SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);
-                } else {
-                    rawRequest.onreadystatechange = null;
-                }
-
-                return YES;
-            }
-            return NO;
+          error = SC.$error(msg || "HTTP Request failed", "Request", status);
+          error.set("errorValue", this) ;
+          this.set('isError', YES);
+          this.set('errorObject', error);
         }
 
-    });
+        // set the status - this will trigger changes on relatedp properties
+        this.set('status', status);
+      }, this);
+
+      // Avoid memory leaks
+      if (!SC.browser.msie && !SC.browser.opera) {
+        SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);
+      } else {
+        rawRequest.onreadystatechange = null;
+      }
+
+      return YES;
+    }
+    return NO;
+  }
+
+});
