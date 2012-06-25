@@ -252,10 +252,6 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
       ret._headers = SC.copy(this._headers);
     }
 
-    if(this.hasOwnProperty('uploadEvents')) {
-        ret.uploadEvents = SC.copy(this.uploadEvents);
-    }
-
     ret.source = this.get('source') || this;
 
     return this.constructor.create(ret);
@@ -463,43 +459,6 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     listeners[status].push({target: target, action: action, params: params});
 
     return this;
-  },
-
-        /**
-         Configures a callback to execute on various events of file upload.
-         You must pass an event, at least a target and action/method to this.
-         You may also pass additional parameters which will be passed along
-         to your callback. If your callback handled the notification, it
-         should return YES.
-
-         ## Supported Events on XMLHttpRequest#Upload
-
-         loadstart, progress, abort, error, load, timeout, loadend
-
-         ## Callback Format
-
-         Your notification callback should expect to receive the Response object
-         as the first parameter plus any additional parameters that you pass.
-
-         @param {String} event
-         @param {Object} target
-         @param {String|Function} action
-         @param {Hash} params
-         @returns {SC.Request} receiver
-         */
-  notifyOnUpload: function(event, target, action, params){
-
-     var uploadEvents = this.uploadEvents;
-     params = SC.A(arguments).slice(3);
-
-     if(!uploadEvents){
-         this.uploadEvents = uploadEvents = {};
-     }
-
-     uploadEvents[event] =  {target: target, action: action, params: params};
-
-     return this;
-
   }
 
 });
