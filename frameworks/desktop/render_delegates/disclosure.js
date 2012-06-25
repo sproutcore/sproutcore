@@ -30,7 +30,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     
     context.push('<img src = "' + SC.BLANK_IMAGE_URL + '" class = "disclosure button ' + state + '" />');
 
-    labelClassNames.push('sc-button-label');
+    labelClassNames.push('sc-button-label', 'sc-disclosure-label');
     context = context.begin('span').addClass(labelClassNames).id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
@@ -55,9 +55,9 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
       active: dataSource.get('isActive')
     });
 
-    $label = jquery.find('span.sc-button-label');
+    $label = jquery.find('span.sc-disclosure-label');
 
-    labelClassNames.push('sc-button-label');
+    labelClassNames.push('sc-button-label', 'sc-disclosure-label');
     $label.removeClass().addClass(labelClassNames.join(' '));
     
     theme.labelRenderDelegate.update(dataSource, $label);
