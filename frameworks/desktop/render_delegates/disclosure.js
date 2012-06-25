@@ -58,8 +58,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     $label = jquery.find('span.sc-button-label');
 
     labelClassNames.push('sc-button-label');
-    $label.resetClassNames();
-    $label.addClass(labelClassNames.join(' '));
+    $label.removeClass().addClass(labelClassNames.join(' '));
     
     theme.labelRenderDelegate.update(dataSource, $label);
   }
