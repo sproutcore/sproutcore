@@ -1020,6 +1020,132 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES;
   },
 
+  /**
+    Selects the first enabled menu item when the home key is pressed.
+
+    @private
+   */
+  moveToBeginningOfDocument: function() {
+    var items = this.get('menuItemViews'),
+        len = items.get('length'),
+        idx = 0;
+
+    while (idx < len) {
+      if (items[idx].get('isEnabled')) {
+        this.set('currentMenuItem', items[idx]);
+        items[idx].becomeFirstResponder();
+        break;
+      }
+      ++idx;
+    }
+
+    return YES;
+  },
+
+  /**
+    Selects the last enabled menu item when the end key is pressed.
+
+    @private
+  */
+  moveToEndOfDocument: function() {
+    var items = this.get('menuItemViews'),
+        len = items.get('length'),
+        idx = len - 1;
+
+    while (idx >= 0) {
+      if (items[idx].get('isEnabled')) {
+        this.set('currentMenuItem', items[idx]);
+        items[idx].becomeFirstResponder();
+        break;
+      }
+      --idx;
+    }
+
+    return YES;
+  },
+
+  /**
+    Selects the next item one page down. If that is not enabled,
+    continues to move down until it finds an enabled item.
+
+    @private
+  */
+  pageDown: function() {
+    var currentMenuItem = this.get('currentMenuItem'),
+        items = this.get('menuItemViews'),
+        len = items.get('length'),
+        itemHeight = this.get('itemHeight'),
+        idx = 0,
+        foundItem = NO,
+        verticalPageScroll,
+        itemsPerPage;
+
+    if (this._scrollView && this._scrollView.verticalScrollerView ) {
+      verticalPageScroll = this._scrollView.get('verticalPageScroll');
+      verticalPageScroll -= this._scrollView.verticalScrollerView.getPath('frame.height');
+      itemsPerPage = Math.floor(verticalPageScroll / itemHeight);
+
+      if (currentMenuItem) {
+        idx = currentMenuItem.getPath('content.contentIndex');
+      }
+
+      if (idx >= 0 && idx < len - 1) {
+        idx = Math.min(idx + itemsPerPage, len - 1);
+        while (idx < len && !foundItem) {
+          if (items[idx].get('isEnabled')) {
+            this.set('currentMenuItem', items[idx]);
+            items[idx].becomeFirstResponder();
+            foundItem = YES;
+          }
+          ++idx;
+        }
+      }
+    }
+
+    return YES;
+  },
+
+  /**
+    Selects the previous item one page up. If that is not enabled,
+    continues to move up until it finds an enabled item.
+
+    @private
+  */
+  pageUp: function() {
+    var currentMenuItem = this.get('currentMenuItem'),
+        items = this.get('menuItemViews'),
+        len = items.get('length'),
+        itemHeight = this.get('itemHeight'),
+        idx = len - 1,
+        foundItem = NO,
+        verticalPageScroll,
+        itemsPerPage;
+
+    if (this._scrollView && this._scrollView.verticalScrollerView ) {
+      verticalPageScroll = this._scrollView.get('verticalPageScroll');
+      verticalPageScroll -= this._scrollView.verticalScrollerView.getPath('frame.height');
+      itemsPerPage = Math.floor(verticalPageScroll / itemHeight);
+
+      if (currentMenuItem) {
+        idx = currentMenuItem.getPath('content.contentIndex');
+      }
+
+      if (idx > 0 && idx < len) {
+        idx = Math.max(idx - itemsPerPage, 0);
+        while (idx >= 0 && !foundItem) {
+          if (items[idx].get('isEnabled')) {
+            this.set('currentMenuItem', items[idx]);
+            items[idx].becomeFirstResponder();
+            foundItem = YES;
+          }
+          --idx;
+        }
+      }
+    }
+
+    return YES;
+  },
+
   insertText: function(chr, evt) {
     var timer = this._timer, keyBuffer = this._keyBuffer;
 
