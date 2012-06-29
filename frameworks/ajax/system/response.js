@@ -563,7 +563,6 @@ SC.XHRResponse = SC.Response.extend(
             eventType = eventType.substring(eIndex+1);
         }
         if(reqObj && eventType){
-            console.log("Attaching event "+eventType+" on request object");
             var transport = this;
             SC.Event.add(reqObj, eventType, this, function(evt){
                 transport.notifyEvent(status, evt);

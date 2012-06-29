@@ -321,7 +321,7 @@ test("Test event listeners on request", function() {
 
     response = request.send();
     ok(SC.ok(response), 'response should not be error');
-    same(response.get('body'), {"message": "Yay!"}, 'repsonse.body');
+    same(response.get('body'), {"message": "Yay!"}, 'response.body');
 
     stop() ; // stops the test runner - wait for response
 });
