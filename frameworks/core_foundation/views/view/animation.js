@@ -134,7 +134,18 @@ SC.View.reopen(
     Called when animation ends, should not usually be called manually
   */
   transitionDidEnd: function(evt){
-    // WARNING: Sometimes this will get called more than once for a property. Not sure why.
-    this.get('layoutStyleCalculator').transitionDidEnd(evt);
+    var propertyName = evt.originalEvent.propertyName,
+        camelizedPropertyName = propertyName.camelize(),
+        style = evt.originalEvent.target.style;
+
+    // Filter out all properties that weren't
+    // explicitly transitioned
+    // @see http://stackoverflow.com/questions/8423221/how-to-fix-workaround-inconsistency-in-browser-implementations-of-the-transition
+    if ((propertyName in style &&
+         (style.cssText.indexOf(propertyName) !== -1)) ||
+        (camelizedPropertyName in style &&
+         style.cssText.indexOf(camelizedPropertyName) !== -1)) {
+      this.get('layoutStyleCalculator').transitionDidEnd(evt);
+    }
   }
 });

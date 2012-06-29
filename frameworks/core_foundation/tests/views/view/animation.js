@@ -55,7 +55,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1 });
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s linear', 'add transition');
+    ok(/^left 1s linear/.test(transitionFor(view)), 'add transition');
     equals(100, view.get('layout').left, 'left is 100');
   });
 
@@ -63,7 +63,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, 1);
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s linear', 'add transition');
+    ok(/^left 1s linear/.test(transitionFor(view)), 'add transition');
   });
 
   test("callbacks work in general", function(){
@@ -99,14 +99,15 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: 'ease-in' });
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s ease-in', 'uses ease-in timing');
+    ok(/left 1s ease-in/.test(transitionFor(view)), 'uses ease-in timing');
   });
 
   test("handles timing function array", function(){
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: [0.1, 0.2, 0.3, 0.4] });
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s cubic-bezier(0.1, 0.2, 0.3, 0.4)', 'uses cubic-bezier timing');
+    ok(/left 1s cubic-bezier\(0\.1, 0\.2, 0\.3, 0\.4\)/.test(transitionFor(view)),
+       'uses cubic-bezier timing');
   });
 
   test("should allow multiple keys to be set at once", function(){

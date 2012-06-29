@@ -1,6 +1,10 @@
+sc_require('system/platform');
+
 /**
   Properties that can be animated
   (Hash for faster lookup)
+  Should be based off of:
+  @see http://oli.jp/2010/css-animatable-properties/
 */
 SC.ANIMATABLE_PROPERTIES = {
   top:     YES,
@@ -23,6 +27,147 @@ SC.ANIMATABLE_PROPERTIES = {
   backgroundColor: NO
 };
 
+SC.Animator = function (view, keyframes, options) {
+  var duration = options.duration || 0,
+      delay = options.delay || 0,
+      timing = options.timing || 'ease',
+      direction = options.direction || 'normal',
+      iterationCount = options.iterationCount;
+
+  if (iterationCount == null) {
+    iterationCount = 1;
+  }
+
+  // @if(debug)
+  if (iterationCount < 0 || isNaN(iterationCount)) {
+    throw new Error(('<SC.View#%@> %@ is an invalid iteration count.\n' +
+                     'The iteration count must be 0 or greater.').fmt(view.get('layerId')));
+  }
+  // @end
+
+  if (SC.ANIMATION_TIMINGS[timing]) {
+    timing = SC.ANIMATION_TIMINGS[timing];
+  } else if (SC.isArray(timing) && timing.length === 4) {
+    timing = 'cubic-bezier(' + timing[0] + ',' + timing[1] +
+                               timing[2] + ',' + timing[3] + ')';
+  // @if(debug)
+  } else {
+    throw new Error(('<SC.View#%@> %@ is an invalid timing.\n' +
+                     'A timing must be one of the keys in SC.ANIMATION_TIMINGS ' +
+                     'or an array of values for a bézier curve').fmt(view.get('layerId')));
+  // @endif
+  }
+
+  if (SC.instanceOf(keyframes) === SC.KeyframesRule) {
+    this.keyframesRule = keyframes;
+
+  } else {
+    this.keyframesRule = SC.KeyframeRule.create({
+      keyframes: keyframes
+    });
+    this.isAnonymous = YES;
+  }
+
+  this.layer = view.get('layer');
+  this.animation = animation;
+  this.callback = options.callback || SC.K;
+};
+
+
+// Handle browsers that support CSS3 animations
+if (SC.platform.supportsCSSAnimations) {
+
+SC.Animator.prototype = {
+
+  /**
+    The DOM event that will be fired when the
+    animation has ended.
+    @see https://developer.mozilla.org/en/CSS/CSS_animations
+   */
+  animationEndName: (function () {
+    var name;
+
+    switch (SC.browser.engine) {
+    case SC.ENGINE.webkit:
+      name = 'webkitAnimationEnd';
+      break;
+    case SC.ENGINE.opera:
+    case SC.ENGINE.presto:
+      name = 'oAnimationEnd';
+      break;
+    case SC.ENGINE.trident:
+      name = 'MsAnimationEnd';
+      break;
+    case SC.ENGINE.gecko:
+    default:
+      name = 'animationend';
+    }
+
+    return name;
+  }()),
+
+  /**
+    @type DOMElement
+    @default null
+   */
+  layer: null,
+
+  /**
+    @type Function
+    @default null
+   */
+  callback: null,
+
+  animationName: SC.platform.cssPrefix + 'Animation',
+
+  run: function () {
+    var layer = this.layer;
+
+    SC.Event.add(layer, this.animationEndName, this, this.animationDidEnd);
+    layer.style[this.animationName] = this.animation;
+  },
+
+  animationDidEnd: function (evt) {
+    var propertyName = evt.originalEvent.propertyName,
+        camelizedPropertyName = propertyName.camelize(),
+        style = evt.originalEvent.target.style;
+
+    // Filter out all properties that weren't
+    // explicitly animated
+    if ((propertyName in style &&
+         (style.cssText.indexOf(propertyName) !== -1)) ||
+        (camelizedPropertyName in style &&
+         style.cssText.indexOf(camelizedPropertyName) !== -1)) {
+      this.stop(evt);
+    }
+  },
+
+  stop: function (evt) {
+    SC.Event.remove(layer, this.animationEndName, this, this.animationDidEnd);
+    this.layer.style[this.animationName] = null;
+
+    if (this.isAnonymous) {
+      this.keyframesRule.destroy();
+    }
+
+    if (this.callback) {
+      this.callback(evt);
+    }
+  },
+
+  destroy: function () {
+    this.layer = null;
+    this.callback = null;
+  }
+};
+
+} else {
+
+// We need to create tweening functions for
+// the following units (supported by SC.View#layout):
+//
+//   px, %, ints, floats *and* centerX / centerY
+
 
 /**
   The options hash allows the following:
@@ -36,9 +181,19 @@ SC.ANIMATABLE_PROPERTIES = {
      `framerate`: The framerate of the animation if
                   *not* using native animations.
 
+  iterationCount: Infinity or >=0
+  direction: 'normal', 'reverse', 'alternate', or 'alternate-reverse'
+  playState: 'running', 'paused'
+
+  If the animation is named, then the frames will
+  be cached for each sucesssive run. Otherwise,
+  the animation will be run anonymously and the
+  animation frames will be calculated every time.
+
   @param {SC.View} view The view to animate.
+  @see http://www.w3.org/TR/css3-animations/
  */
-SC.Animation = function (view, end, options) {
+SC.Animator = function (view, keyframes, options) {
   options = options || {};
 
   var start = {},
@@ -111,6 +266,7 @@ SC.Animation = function (view, end, options) {
       key = keys[j];
       // Bezier curve
       if (isBezier) {
+        frame[key] = keyframes.frameFor(percent, timing);
         if (units[key] === 'color') {
           frame[key] = start[key].add(delta[key].mult(timing(percent))).get('cssText');
         } else {
@@ -128,7 +284,7 @@ SC.Animation = function (view, end, options) {
   SC.Animation.RunLoop.schedule(this);
 };
 
-SC.Animation.prototype = {
+SC.Animator.prototype = {
 
   layer: null,
 
@@ -284,3 +440,5 @@ SC.Animation.RunLoop = {
   }
 
 };
+
+}
