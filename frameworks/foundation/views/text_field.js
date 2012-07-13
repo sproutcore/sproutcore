@@ -1171,7 +1171,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   /** @private */
-  insertTab: function(chr, evt) {
+  insertTab: function(evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) return NO;
     // Otherwise, handle.
