@@ -1934,6 +1934,13 @@ SC.ScrollView = SC.View.extend({
     // send change notifications since they don't invalidate automatically
     this.notifyPropertyChange('maximumVerticalScrollOffset');
     this.notifyPropertyChange('maximumHorizontalScrollOffset');
+
+    // Use accelerated drawing if the browser supports it
+    if (SC.platform.touch) {
+      this.invokeLast(function() {
+        this._applyCSSTransforms(view.get('layer'));
+      }, this);
+    }
   },
 
   /** @private
