@@ -87,6 +87,18 @@ SC.ModalPane = SC.Pane.extend(
     for(view in SC.View.views){
       view = SC.View.views[view];
       if (view!==pane && view.get('pane')===pane && view.get('isTextField')){
+        if (focusable) {
+          // Setting isBrowserFocusable back to YES. If we cached the previous
+          // value, use that instead.
+          if (view._scmp_isBrowserFocusable !== undefined) {
+            focusable = view._scmp_isBrowserFocusable;
+          }
+        } else {
+          // Cache the value of isBrowserFocusable. If the text field
+          // already had isBrowserFocusable: NO, we don't want to
+          // set it back to YES.
+          view._scmp_isBrowserFocusable = view.get('isBrowserFocusable');
+        }
         view.set('isBrowserFocusable', focusable);
       }
     }
