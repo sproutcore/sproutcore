@@ -484,7 +484,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
           transformsLength = animatedTransforms ? animatedTransforms.length : 0,
           transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
           layout = view.get('layout'),
-          key, callback, idx, shouldCancel;
+          key, keys = [], callback, idx, shouldCancel;
 
       if (pendingAnimations) {
         if (!activeAnimations) activeAnimations = {};
@@ -506,12 +506,10 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
           if (shouldCancel && activeAnimation) {
             if (callback = activeAnimation.callback) {
               if (transformsLength > 0) {
-                for (idx=0; idx < transformsLength; idx++) {
-                  this.runAnimationCallback(callback, null, animatedTransforms[idx], YES);
-                }
+                this.runAnimationCallback(callback, null, YES);
                 this._animatedTransforms = null;
               } else {
-                this.runAnimationCallback(callback, null, key, YES);
+                this.runAnimationCallback(callback, null, YES);
               }
             }
 
@@ -519,7 +517,13 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
           }
 
           activeAnimations[key] = pendingAnimation;
+          keys.push(key);
         }
+      }
+
+      this._groupedAnimations = {};
+      for (var i = 0; i < keys.length; i++) {
+        this._groupedAnimations[key] = keys;
       }
 
       this._activeAnimations = activeAnimations;
@@ -529,49 +533,57 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   didRenderAnimations: function(){
     if (!SC.platform.supportsCSSTransitions) {
-      var key, callback;
+      var key, callback,
+          called = {};
+
       // Transitions not supported
       for (key in this._pendingAnimations) {
         callback = this._pendingAnimations[key].callback;
-        if (callback) this.runAnimationCallback(callback, null, key, NO);
+        if (callback && !called[SC.guidFor(callback)]) {
+          called[SC.guidFor(callback)] = YES;
+          this.runAnimationCallback(callback, null, NO);
+        }
         this.removeAnimationFromLayout(key, NO, YES);
       }
       this._activeAnimations = this._pendingAnimations = null;
     }
   },
 
-  runAnimationCallback: function(callback, evt, propertyName, cancelled) {
+  runAnimationCallback: function(callback, evt, cancelled) {
     var view = this.get('view');
     if (callback) {
       if (SC.typeOf(callback) !== SC.T_HASH) { callback = { action: callback }; }
       callback.source = view;
       if (!callback.target) { callback.target = this; }
     }
-    SC.View.runCallback(callback, { event: evt, propertyName: propertyName, view: view, isCancelled: cancelled });
+    SC.View.runCallback(callback, { event: evt, view: view, isCancelled: cancelled });
   },
 
   transitionDidEnd: function(evt) {
     var propertyName = evt.originalEvent.propertyName,
+        propertyNames,
         animation, idx;
 
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
     if (animation) {
+      propertyNames = this._groupedAnimations && this._groupedAnimations[propertyName];
       if (animation.callback) {
         // Charles says this is a good idea
         SC.RunLoop.begin();
         // We're using invokeLater so we don't trigger any layout changes from the callbacks until the animations are done
-        if (this._animatedTransforms && this._animatedTransforms.length > 0) {
-          for (idx=0; idx < this._animatedTransforms.length; idx++) {
-            this.invokeLater('runAnimationCallback', 1, animation.callback, evt, this._animatedTransforms[idx], NO);
-          }
-        } else {
-          this.invokeLater('runAnimationCallback', 1, animation.callback, evt, propertyName, NO);
-        }
+        this.invokeLater('runAnimationCallback', 1, animation.callback, evt, NO);
         SC.RunLoop.end();
       }
-
       this.removeAnimationFromLayout(propertyName, YES);
+
+      var key;
+      if (propertyNames) {
+        for (var i = 0, len = propertyNames.length; i < len; i++) {
+          key = propertyNames[i];
+          this._activeAnimations[key] = this._groupedAnimations[key] = null;
+        }
+      }
     }
   },
 

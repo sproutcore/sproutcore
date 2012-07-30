@@ -88,7 +88,6 @@ if (SC.platform.supportsCSSTransitions) {
 
       // TODO: Test this better
       ok(data.event, "has event");
-      equals(data.propertyName, 'left', "propertyName is 'left'");
       equals(data.view, view, "view is correct");
       equals(data.isCancelled, false, "animation is not cancelled");
     });
@@ -119,11 +118,11 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   // Pretty sure this does the job
-  test("callbacks should be called for each property", function(){
+  test("callbacks should be called only once for a grouped animation", function(){
     stop(2000);
     var stopped = true;
 
-    expect(2);
+    expect(1);
     var propertyNames = "top left".w();
 
     SC.RunLoop.begin();
@@ -134,13 +133,7 @@ if (SC.platform.supportsCSSTransitions) {
         stopped = false;
       }
 
-      var hasProperty = false;
-      if (propertyNames.contains(data.propertyName)) {
-        propertyNames.removeObject(data.propertyName);
-        hasProperty = true;
-      }
-
-      ok(hasProperty, "has property: "+data.propertyName);
+      ok(true);
     });
     SC.RunLoop.end();
   });
@@ -302,7 +295,7 @@ if (SC.platform.supportsCSSTransitions) {
     stop(2000);
     var stopped = true;
 
-    expect(3);
+    expect(1);
     var propertyNames = "top left scale".w();
 
     SC.RunLoop.begin();
@@ -313,13 +306,7 @@ if (SC.platform.supportsCSSTransitions) {
         stopped = false;
       }
 
-      var hasProperty = false;
-      if (propertyNames.contains(data.propertyName)) {
-        propertyNames.removeObject(data.propertyName);
-        hasProperty = true;
-      }
-
-      ok(hasProperty, "has property: "+data.propertyName);
+      ok(true);
     });
     SC.RunLoop.end();
   });
@@ -372,11 +359,11 @@ test("should update layout", function(){
 });
 
 test("should still run callback", function(){
-  var ranCallback = false;
+  var ranCallback = 0;
 
   SC.RunLoop.begin();
-  view.animate('left', 100, 1, function() { ranCallback = true; });
+  view.animate({ top: 200, left: 100 }, 1, function() { ranCallback++; });
   SC.RunLoop.end();
 
-  ok(ranCallback, "should run callback");
+  equals(ranCallback, 1, "should run callback");
 });
