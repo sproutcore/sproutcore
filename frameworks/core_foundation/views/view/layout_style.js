@@ -592,7 +592,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       var layer = this.getPath('view.layer'),
           updatedCSS = [], key;
       for(key in this._activeAnimations) {
-        if (key !== propertyName) { updatedCSS.push(this._activeAnimations[key].css); }
+        if (key !== propertyName && this._activeAnimations[key]) { updatedCSS.push(this._activeAnimations[key].css); }
       }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
