@@ -199,6 +199,9 @@ Handlebars.registerHelper('bindAttr', function(options) {
 
     // Do not add the attribute when the value is false
     if (value !== NO) {
+      if (SC.typeOf(value) === SC.T_STRING) {
+        value = value.replace(/"/g, '&quot;');
+      }
       // Return the current value, in the form src="foo.jpg"
       ret.push(attr + '="' + value + '"');
     }
