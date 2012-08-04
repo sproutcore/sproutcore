@@ -590,9 +590,10 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   removeAnimationFromLayout: function(propertyName, updateStyle, isPending) {
     if (updateStyle) {
       var layer = this.getPath('view.layer'),
-          updatedCSS = [], key;
-      for(key in this._activeAnimations) {
-        if (key !== propertyName) { updatedCSS.push(this._activeAnimations[key].css); }
+          updatedCSS = [], key,
+          activeAnimations = this._activeAnimations;
+      for(key in activeAnimations) {
+        if (key !== propertyName && activeAnimations[key]) { updatedCSS.push(activeAnimations[key].css); }
       }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
