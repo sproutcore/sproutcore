@@ -199,6 +199,30 @@ if (SC.platform.supportsCSSTransitions) {
     }, 1000);
   });
 
+  // Pretty sure this does the job
+  test("adjusting and animating two different attributes in the same runloop should not throw an error" , function(){
+    // Set up error handler.
+    SC.ExceptionHandler.handleException = function() {
+      ok(true);
+    };
+
+    // Run test.
+    stop(2000);
+
+    expect(0);
+
+    SC.RunLoop.begin();
+    // We shouldn't have to use invokeLater, but it's the only way to get this to work!
+    view.invokeLater(function() {
+      this.adjust('top', 100).animate('left', 100, 0.5);
+    }, 1);
+    SC.RunLoop.invokeLater(function() {
+      start();
+    }, 1000);
+    SC.RunLoop.end();
+
+  });
+
   test("should handle transform attributes", function(){
     SC.RunLoop.begin();
     view.animate('rotateX', 45, { duration: 1 });
