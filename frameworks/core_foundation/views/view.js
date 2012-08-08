@@ -968,16 +968,37 @@ SC.CoreView.reopen(
   */
   tagName: 'div',
 
-
-
   /**
-    Standard CSS class names to apply to the view's outer element.  This
-    property automatically inherits any class names defined by the view's
-    superclasses as well.
+    Standard CSS class names to apply to the view's outer element.  These class
+    names are used in addition to any defined on the view's superclass.
 
     @property {Array}
   */
   classNames: [],
+
+  /**
+    A list of local property names to translate dynamically into standard
+    CSS class names on your view's layer (element).
+
+    Each entry in the array should take the form "propertyName:css-class".
+    For example, "isRed:my-red-view" will cause the class "my-red-view" to
+    be appended if the property "isRed" is (or becomes) true, and removed
+    if it later becomes false.
+
+    Optionally, you may provide just the property name, in which case it will
+    be dasherized and used as the class name.  For example, including
+    "isUpsideDown" will cause the view's isUpsideDown property to mediate the
+    class "is-upside-down".
+
+    Your property may return values which are true-ish (non-zero numbers, non-
+    empty strings, objects) or false-ish (zero, empty strings, null).
+
+    Class names mediated by these bindings are used in addition to any that
+    you've listed in the classNames property.
+
+    @property {Array}
+  */
+  classNameBindings: null,
 
   /**
     Tool tip property that will be set to the title attribute on the HTML
