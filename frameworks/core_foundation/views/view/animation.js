@@ -99,8 +99,14 @@ SC.View.reopen(
       }
     }
 
-    // now set adjusted layout
+    // If anything didChange, set adjusted layout.
     if (didChange) { this.set('layout', layout) ; }
+    // Otherwise, schedule the callback to run immediately after this runloop.
+    else if (callback) {
+      this.invokeLater( function() {
+        this.layoutStyleCalculator.runAnimationCallback(callback, null, NO);
+      }, 1); 
+    }
 
     return this ;
   },
