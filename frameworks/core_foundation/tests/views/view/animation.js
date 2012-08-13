@@ -199,7 +199,10 @@ if (SC.platform.supportsCSSTransitions) {
     }, 1000);
   });
 
-  // Pretty sure this does the job
+  // Placeholder for needed unit test.  (See below.)
+  test("adjusting and animating two different attributes in the same runloop should not throw an error");
+/*
+  // Attempted WIP version of above.
   test("adjusting and animating two different attributes in the same runloop should not throw an error" , function(){
     // Set up error handler.
     SC.ExceptionHandler.handleException = function() {
@@ -222,6 +225,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
 
   });
+*/
 
   test("should handle transform attributes", function(){
     SC.RunLoop.begin();
