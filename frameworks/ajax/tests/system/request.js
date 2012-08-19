@@ -7,15 +7,15 @@
 // ========================================================================
 // SC.Request Base Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module, test, ok, isObj, equals, expects */
 
 var url, request, contents ;
 
 module("SC.Request", {
 
   setup: function() {
-    url = sc_static("file_exists.json"); //"/static/sproutcore/en/desktop/_src/desktop.platform/english.lproj/file_exists.json" ;
-    request = SC.Request.getUrl(url) ;
+    url = sc_static("file_exists.json");
+    request = SC.Request.getUrl(url);
     contents = null ;
   },
 
@@ -164,14 +164,12 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   }, 2000);
 });
 
-/**
-  There are two ways to be notified of request changes:
 
-    - Implementing a didReceive function on the SC.Request object
-    - Registering a listener using notify()
+//   There are two ways to be notified of request changes:
+//     - Implementing a didReceive function on the SC.Request object
+//     - Registering a listener using notify()
+//   The following two tests test the timeout functionality for each of these.
 
-  The following two tests test the timeout functionality for each of these.
-*/
 test("Timeouts - SC.Request didReceive callback", function() {
   var message;
 
@@ -275,8 +273,6 @@ test("Timeouts - Status listener callback", function() {
 });
 
 test("Test Multiple listeners per single status response", function() {
-
-
   var numResponses = 0;
   var response;
 
@@ -284,14 +280,14 @@ test("Test Multiple listeners per single status response", function() {
 
   request.notify(200, this, function(response) {
     numResponses++;
-    ok(true, "Receieved a response");
+    ok(true, "Received a response");
 
     if (numResponses === 2) window.start();
   });
 
   request.notify(200, this, function(response) {
     numResponses++;
-    ok(true, "Receieved a response");
+    ok(true, "Received a response");
 
     if (numResponses === 2) window.start();
   });
@@ -303,3 +299,157 @@ test("Test Multiple listeners per single status response", function() {
   stop() ; // stops the test runner - wait for response
 });
 
+test("Test event listeners on successful request.", function() {
+  var abort = false,
+    error = false,
+    load = false,
+    loadend = false,
+    loadstart = false,
+    progress = false,
+    response,
+    status,
+    timeout = false;
+
+  request.notify("loadstart", this, function(evt) {
+    loadstart = true;
+  });
+
+  request.notify("progress", this, function(evt) {
+    progress = true;
+  });
+
+  request.notify("load", this, function(evt) {
+    load = true;
+  });
+
+  request.notify("loadend", this, function(evt) {
+    loadend = true;
+  });
+
+  request.notify(200, this, function(response) {
+    status = response.status;
+
+    ok(loadstart, "Received a loadstart event.");
+    ok(progress, "Received a progress event.");
+    ok(load, "Received a load event.");
+    ok(loadend, "Received a loadend event.");
+    ok(!abort, "Did not receive an abort event.");
+    ok(!error, "Did not receive an error event.");
+    ok(!timeout, "Did not receive a timeout event.");
+    equals(status, 200, "Received a response with status 200.");
+
+    window.start();
+  });
+
+  response = request.send();
+
+  stop() ; // stops the test runner - wait for response
+});
+
+
+test("Test event listeners on aborted request.", function() {
+  var abort = false,
+    error = false,
+    load = false,
+    loadend = false,
+    loadstart = false,
+    progress = false,
+    response,
+    status,
+    timeout = false;
+
+  request.notify("loadstart", this, function(evt) {
+    loadstart = true;
+  });
+
+  request.notify("progress", this, function(evt) {
+    progress = true;
+
+    // Cancel it before it completes.
+    response.cancel();
+  });
+
+  request.notify("abort", this, function(evt) {
+    abort = true;
+  });
+
+  request.notify("loadend", this, function(evt) {
+    loadend = true;
+
+    ok(loadstart, "Received a loadstart event.");
+    ok(progress, "Received a progress event.");
+    ok(abort, "Received an abort event.");
+    ok(!load, "Did not receive a load event.");
+    ok(loadend, "Received a loadend event.");
+    ok(!error, "Did not receive an error event.");
+    ok(!timeout, "Did not receive a timeout event.");
+    equals(status, undefined, "Did not receive a status notification.");
+
+    window.start();
+  });
+
+  request.notify(this, function(response) {
+    status = response.status;
+  });
+
+  response = request.send();
+
+  stop(); // stops the test runner - wait for response
+});
+
+test("Test upload event listeners on successful request.", function() {
+  var abort = false,
+    body = {},
+    error = false,
+    load = false,
+    loadend = false,
+    loadstart = false,
+    progress = false,
+    response,
+    status,
+    timeout = false;
+
+  // Use a POST request
+  request = SC.Request.postUrl('/');
+
+  request.notify("upload.loadstart", this, function(evt) {
+    loadstart = true;
+  });
+
+  request.notify("upload.progress", this, function(evt) {
+    progress = true;
+  });
+
+  request.notify("upload.load", this, function(evt) {
+    load = true;
+  });
+
+  request.notify("upload.loadend", this, function(evt) {
+    loadend = true;
+  });
+
+  request.notify(200, this, function(response) {
+    status = response.status;
+
+    ok(loadstart, "Received a loadstart event.");
+    ok(progress, "Received a progress event.");
+    ok(load, "Received a load event.");
+    ok(loadend, "Received a loadend event.");
+    ok(!abort, "Did not receive an abort event.");
+    ok(!error, "Did not receive an error event.");
+    ok(!timeout, "Did not receive a timeout event.");
+    equals(status, 200, "Received a response with status 200.");
+
+    window.start();
+  });
+
+  // Make a significant body object.
+  var i;
+  for (i = 10000; i >= 0; i--) {
+    body['k' + i] = 'v' + i;
+  }
+
+  response = request.send(body);
+
+  stop() ; // stops the test runner - wait for response
+});
