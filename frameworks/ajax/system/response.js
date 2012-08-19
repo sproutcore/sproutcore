@@ -373,7 +373,7 @@ SC.Response = SC.Object.extend(
     Will notify each listener. Returns true if any of the listeners handle.
   */
   _notifyListeners: function(listeners, status) {
-    var notifiers = listeners[status], params, target, action;
+    var notifiers = listeners[status], args, target, action;
     if (!notifiers) { return NO; }
 
     var handled = NO;
@@ -381,14 +381,14 @@ SC.Response = SC.Object.extend(
 
     for (var i = 0; i < len; i++) {
       var notifier = notifiers[i];
-      params = (notifier.params || []).copy();
-      params.unshift(this);
+      args = (notifier.args || []).copy();
+      args.unshift(this);
 
       target = notifier.target;
       action = notifier.action;
       if (SC.typeOf(action) === SC.T_STRING) { action = target[action]; }
 
-      handled = action.apply(target, params);
+      handled = action.apply(target, args);
     }
 
     return handled;
@@ -498,24 +498,58 @@ SC.XHRResponse = SC.Response.extend(
     this.set('rawRequest', null);
   },
 
+
   /**
     Starts the transport of the request
 
     @returns {XMLHttpRequest|ActiveXObject}
   */
   invokeTransport: function() {
-    var rawRequest, transport, handleReadyStateChange, async, headers;
+    var listener, listeners, listenersForKey,
+      rawRequest,
+      request = this.get('request'),
+      transport, handleReadyStateChange, async, headers;
 
     rawRequest = this.createRequest();
     this.set('rawRequest', rawRequest);
 
-    // configure async callback - differs per browser...
-    async = !!this.getPath('request.isAsynchronous');
+  // configure async callback - differs per browser...
+    async = !!request.get('isAsynchronous');
 
     if (async) {
-      if (!SC.browser.isIE && !SC.browser.isOpera) {
-        SC.Event.add(rawRequest, 'readystatechange', this,
-                     this.finishRequest, rawRequest);
+      if (window.XMLHttpRequestProgressEvent) {
+        // XMLHttpRequest Level 2
+
+        // Add progress event listeners that were specified on the request.
+        listeners = request.get("listeners");
+        if (listeners) {
+          for (var key in listeners) {
+
+            // Make sure the key is not an HTTP numeric status code.
+            if (isNaN(parseInt(key, 10))) {
+              // We still allow multiple notifiers on progress events, but we
+              // don't try to optimize this by using a single listener, because
+              // it is highly unlikely that the developer will add duplicate
+              // progress event notifiers and if they did, it is also unlikely
+              // that they would expect them to cascade in the way that the
+              // status code notifiers do.
+              listenersForKey = listeners[key];
+              for (var i = 0, len = listenersForKey.length; i < len; i++) {
+                listener = listenersForKey[i];
+                if (SC.none(key.split('.')[1])) {
+                  SC.Event.add(rawRequest, key, listener.target, listener.action, listener.args);
+                } else {
+                  SC.Event.add(rawRequest.upload, key.split('.')[1], listener.target, listener.action, listener.args);
+                }
+              }
+            }
+          }
+        }
+
+        SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
+      } else if (window.XMLHttpRequest) {
+        // XMLHttpRequest Level 1
+        SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
       } else {
         transport = this;
         handleReadyStateChange = function() {
@@ -554,21 +588,22 @@ SC.XHRResponse = SC.Response.extend(
     @returns {XMLHttpRequest|ActiveXObject}
   */
   createRequest: function() {
-    function tryThese() {
-      for (var i=0; i < arguments.length; i++) {
-        try {
-          var item = arguments[i]();
-          return item;
-        } catch (e) {}
-      }
-      return NO;
+    var rawRequest;
+
+    // check native support first
+    if (window.XMLHttpRequest) {
+      rawRequest = new XMLHttpRequest();
+    } else {
+      // There are two relevant Microsoft MSXML object types.
+      // See here for more information:
+      // http://www.snook.ca/archives/javascript/xmlhttprequest_activex_ie/
+      // http://blogs.msdn.com/b/xmlteam/archive/2006/10/23/using-the-right-version-of-msxml-in-internet-explorer.aspx
+      // http://msdn.microsoft.com/en-us/library/windows/desktop/ms763742(v=vs.85).aspx
+      try { rawRequest = new ActiveXObject("MSXML2.XMLHTTP.6.0");  } catch(e) {}
+      try { if (!rawRequest) rawRequest = new ActiveXObject("MSXML2.XMLHTTP");  } catch(e) {}
     }
 
-    return tryThese(
-      function() { return new XMLHttpRequest(); },
-      function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
-      function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
-    );
+    return rawRequest;
   },
 
   /**
@@ -580,9 +615,11 @@ SC.XHRResponse = SC.Response.extend(
     @returns {Boolean} YES if completed, NO otherwise
   */
   finishRequest: function(evt) {
-    var rawRequest = this.get('rawRequest'),
-        readyState = rawRequest.readyState,
-        error, status, msg;
+    var listener, listeners, listenersForKey,
+      rawRequest = this.get('rawRequest'),
+      readyState = rawRequest.readyState,
+      request,
+      error, status, msg;
 
     if (readyState === 4 && !this.get('timedOut')) {
       this.receive(function(proceed) {
@@ -614,7 +651,32 @@ SC.XHRResponse = SC.Response.extend(
       }, this);
 
       // Avoid memory leaks
-      if (!SC.browser.isIE && !SC.browser.isOpera) {
+      if (window.XMLHttpRequestProgressEvent) {
+        // XMLHttpReqeust Level 2
+
+        SC.Event.remove(rawRequest, 'loadend', this, this.requestDidEnd);
+
+        request = this.get('request');
+        listeners = request.get("listeners");
+        if (listeners) {
+          for (var key in listeners) {
+
+            // Make sure the key is not an HTTP numeric status code.
+            if (isNaN(parseInt(key, 10))) {
+              listenersForKey = listeners[key];
+              for (var i = 0, len = listenersForKey.length; i < len; i++) {
+                listener = listenersForKey[i];
+                if (SC.none(key.split('.')[1])) {
+                  SC.Event.remove(rawRequest, key, listener.target, listener.action, listener.args);
+                } else {
+                  SC.Event.remove(rawRequest.upload, key.split('.')[1], listener.target, listener.action, listener.args);
+                }
+              }
+            }
+          }
+        }
+      } else if (window.XMLHttpRequest) {
+        // XMLHttpReqeust Level 1
         SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);
       } else {
         rawRequest.onreadystatechange = null;
