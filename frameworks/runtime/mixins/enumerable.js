@@ -104,6 +104,13 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     contains only one object, this method should always return that object.
     If your enumerable is empty, this method should return undefined.
 
+    This property is observable if the enumerable supports it.  Examples
+    of enumerables where firstObject is observable include SC.Array,
+    SC.ManyArray and SC.SparseArray.  To implement a custom enumerable where
+    firstObject is observable, see {@link #enumerableContentDidChange}.
+
+    @see #enumerableContentDidChange
+
     @returns {Object} the object or undefined
   */
   firstObject: function() {
@@ -119,6 +126,13 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
   /**
     Helper method returns the last object from a collection.
+
+    This property is observable if the enumerable supports it.  Examples
+    of enumerables where lastObject is observable include SC.Array,
+    SC.ManyArray and SC.SparseArray.  To implement a custom enumerable where
+    lastObject is observable, see {@link #enumerableContentDidChange}.
+
+    @see #enumerableContentDidChange
 
     @returns {Object} the object or undefined
   */
@@ -795,9 +809,10 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
   /**
     Invoke this method when the contents of your enumerable has changed.
     This will notify any observers watching for content changes.  If you are
-    implementing an ordered enumerable (such as an array), also pass the
-    start and end values where the content changed so that it can be used to
-    notify range observers.
+    implementing an ordered enumerable (such as an Array), also pass the
+    start and length values so that it can be used to notify range observers.
+    Passing start and length values will also ensures that the computed
+    properties `firstObject` and `lastObject` are updated.
 
     @param {Number} [start] start offset for the content change
     @param {Number} [length] length of change
