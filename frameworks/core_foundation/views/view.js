@@ -960,6 +960,38 @@ SC.CoreView.reopen(
   //
 
   /**
+    A list of properties on the view to translate dynamically into attributes on
+    the view's layer (element).
+
+    When the view is rendered, the value of each property listed in
+    attributeBindings will be inserted in the element.  If the value is a
+    Boolean, the attribute name itself will be inserted.  As well, as the
+    value of any of these properties changes, the layer will update itself
+    automatically.
+
+    This is an easy way to set custom attributes on the View without
+    implementing it through a render or update function.
+
+    For example,
+
+        // ...  MyApp.MyView
+
+        attributeBindings: ['aria-valuenow', 'disabled'],
+
+        'aria-valuenow': function() {
+          return this.get('value');
+        }.property('value').cacheable(), // adds 'aria-valuenow="{value}"' attribute
+
+        disabled: YES, // adds 'disabled="disabled"' attribute
+
+        // ...
+
+    @property {Array}
+  */
+  attributeBindings: null,
+
+
+  /**
     Tag name for the view's outer element.  The tag name is only used when
     a layer is first created.  If you change the tagName for an element, you
     must destroy and recreate the view layer.
