@@ -28,12 +28,18 @@ var DummyEnumerable = SC.Object.extend( SC.Enumerable, {
     }
     return ret ;
   },
-  
+
+  shiftObject: function() {
+    var ret = this.content.shift();
+    this.enumerableContentDidChange();
+    return ret;
+  },
+
   pushObject: function(object) {
     this.content.push(object) ;
     this.enumerableContentDidChange() ;
   }
-  
+
 });
 
 var runFunc = function(a,b) { return ['DONE', a, b]; } ;
@@ -94,7 +100,7 @@ var CommonArray = [
 module("Real Array & DummyEnumerable", {
   
   setup: function() { 
-    enumerables = [SC.$A(CommonArray), DummyEnumerable.create({ content: CommonArray })] ;
+    enumerables = [SC.$A(CommonArray), DummyEnumerable.create({ content: SC.clone(CommonArray) })] ;
   },
   
   teardown: function() {
@@ -483,6 +489,45 @@ test("should invoke custom reducer", function() {
     src.reduceTest = reduceTestFunc ;
     equals("TEST", src.get("@test")) ;
     equals("prop", src.get("@test(prop)")) ;
+  }
+});
+
+test("should trigger observer on property when lastObject changes", function() {
+  var src, ary2 = enumerables;
+  for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
+    src = ary2[idx2];
+
+    var callCount = 0;
+    src.addObserver("lastObject", function() {
+      callCount++;
+    });
+
+    src.pushObject({
+      first: "John",
+      gender: "male",
+      californian: NO,
+      ready: YES,
+      visited: "Paris",
+      balance: 5
+    });
+
+    equals(callCount, 1, "callCount");
+  }
+});
+
+test("should trigger observer on property when firstObject changes", function() {
+  var src, ary2 = enumerables;
+  for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
+    src = ary2[idx2] ;
+
+    var callCount = 0;
+    src.addObserver("firstObject", function() {
+      callCount++;
+    });
+
+    src.shiftObject();
+
+    equals(callCount, 1, "callCount");
   }
 });
 
