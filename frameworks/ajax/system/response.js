@@ -536,10 +536,12 @@ SC.XHRResponse = SC.Response.extend(
               listenersForKey = listeners[key];
               for (var i = 0, len = listenersForKey.length; i < len; i++) {
                 listener = listenersForKey[i];
-                if (SC.none(key.split('.')[1])) {
-                  SC.Event.add(rawRequest, key, listener.target, listener.action, listener.args);
+
+                var keyTarget = key.split('.');
+                if (SC.none(keyTarget[1])) {
+                  SC.Event.add(rawRequest, keyTarget[0], listener.target, listener.action, listener.args);
                 } else {
-                  SC.Event.add(rawRequest.upload, key.split('.')[1], listener.target, listener.action, listener.args);
+                  SC.Event.add(rawRequest[keyTarget[0]], keyTarget[1], listener.target, listener.action, listener.args);
                 }
               }
             }
@@ -666,10 +668,12 @@ SC.XHRResponse = SC.Response.extend(
               listenersForKey = listeners[key];
               for (var i = 0, len = listenersForKey.length; i < len; i++) {
                 listener = listenersForKey[i];
-                if (SC.none(key.split('.')[1])) {
-                  SC.Event.remove(rawRequest, key, listener.target, listener.action, listener.args);
+
+                var keyTarget = key.split('.');
+                if (SC.none(keyTarget[1])) {
+                  SC.Event.remove(rawRequest, keyTarget[0], listener.target, listener.action, listener.args);
                 } else {
-                  SC.Event.remove(rawRequest.upload, key.split('.')[1], listener.target, listener.action, listener.args);
+                  SC.Event.remove(rawRequest[keyTarget[0]], keyTarget[1], listener.target, listener.action, listener.args);
                 }
               }
             }
