@@ -1015,15 +1015,17 @@ SC.CoreView.reopen(
     Each entry in the array should take the form "propertyName:css-class".
     For example, "isRed:my-red-view" will cause the class "my-red-view" to
     be appended if the property "isRed" is (or becomes) true, and removed
-    if it later becomes false.
+    if it later becomes false (or null/undefined).
 
     Optionally, you may provide just the property name, in which case it will
     be dasherized and used as the class name.  For example, including
     "isUpsideDown" will cause the view's isUpsideDown property to mediate the
     class "is-upside-down".
 
-    Your property may return values which are true-ish (non-zero numbers, non-
-    empty strings, objects) or false-ish (zero, empty strings, null).
+    Instead of a boolean value, your property may return a string, which will
+    be used as the class name for that entry.  Use caution when returning other
+    values; numbers will be appended verbatim and objects will be stringified,
+    leading to unintended results such as class="4" or class="Object object".
 
     Class names mediated by these bindings are used in addition to any that
     you've listed in the classNames property.
