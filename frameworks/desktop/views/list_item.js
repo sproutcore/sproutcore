@@ -309,7 +309,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     if (!layer) return NO ; // no layer yet -- nothing to do
 
     var el = SC.$(evt.target) ;
-    var ret = NO, classNames ;
+    var ret = NO;
     while(!ret && el.length>0 && (el[0] !== layer)) {
       if (el.hasClass(className)) ret = YES ;
       el = el.parent() ;
