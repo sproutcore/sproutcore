@@ -34,10 +34,6 @@
     })
     .add("aria-expanded-disabled", SC.DisclosureView, {
         value: NO, isEnabled: NO
-    })
-    .add("label classes", SC.DisclosureView, {
-        value: NO, isEnabled: YES,
-        labelClassNames: 'dummyclass1 dummyclass2 dummyclass3'.w()
     });
 
 	pane.show();
@@ -101,13 +97,6 @@
       var labelled_by = document.getElementById(view.$().attr('aria-labelledby'));
       equals(view.$('span.sc-button-label')[0], labelled_by, 'aria-labelledby should be the label element even if disabled');
       equals(view.$().attr('aria-expanded'), 'false', 'aria-expanded should be false');
-    });
-
-    test("label should accept classes", function() {
-      var view = pane.view('label classes');
-      ok(view.$('span.sc-button-label').hasClass('dummyclass1'), 'label should have first custom class');
-      ok(view.$('span.sc-button-label').hasClass('dummyclass2'), 'label should have second custom class');
-      ok(view.$('span.sc-button-label').hasClass('dummyclass3'), 'label should have third custom class');
     });
 
 })();
