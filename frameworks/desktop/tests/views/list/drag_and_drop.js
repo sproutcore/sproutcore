@@ -8,7 +8,6 @@
 /*
   This test evaluates drag and drop support for SC.ListView
 */
-module("SC.ListView - drag and drop");
 
 // Create a fake content array.  Generates a list with whatever length you
 // want of objects with a title based on the index.  Cannot mutate.
@@ -50,8 +49,10 @@ var pane = SC.ControlTestPane.design()
   }));
 
 pane.show(); // add a test to show the test pane
-window.pane = pane ;
+window.pane = pane;
 
+
+module("SC.ListView - drag and drop", pane.standardSetup());
 
 test("drag on default list view", function() {
   var ev,
@@ -68,6 +69,10 @@ test("drag on default list view", function() {
   SC.Event.trigger(layer, 'mousemove', [ev]);
 
   equals(listView.get('dragContent'), null, 'dragContent should not be set, because the default implementation should prevent dragging');
+
+  // Clean up
+  ev = SC.Event.simulateEvent(layer, 'mouseup');
+  SC.Event.trigger(layer, 'mouseup', [ev]);
 });
 
 
@@ -92,16 +97,12 @@ test("drag on list view with SC.DROP_ON support", function() {
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
-    var drag,
-      itemView2,
+    var itemView2,
       point;
 
     SC.RunLoop.begin();
-
     ev = SC.Event.simulateEvent(layer, 'mousemove');
     SC.Event.trigger(layer, 'mousemove', [ev]);
-
-    drag = SC.RootResponder._drag;
 
     equals(listView.get('dragContent').content, listView.get('content'), "dragContent.content should be equal to the ListView's content");
     ok(listView.get('dragContent').indexes.isEqual(SC.IndexSet.create(0)), "dragContent.indexes should be equal to indexes equal to [{0}]");
@@ -111,19 +112,21 @@ test("drag on list view with SC.DROP_ON support", function() {
     itemView2 = listView.itemViewForContentIndex(1);
     layer = itemView2.get('layer');
     point = SC.offset(layer);
+
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
+
 
     ok(itemView2.get('isDropTarget'), "second list item should have isDropTarget set to true");
 
     // This test only works because SC.ListItemView supports adding the class to match the property.
-    ok(itemView2.$().hasClass('drop-target'), "second list item should receive drop-target class");
-
+    ok(itemView2.$().hasClass('drop-target'), "second list item should add drop-target class");
 
     // Drag over 3rd item
     itemView = listView.itemViewForContentIndex(2);
     layer = itemView.get('layer');
     point = SC.offset(layer);
+
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
@@ -133,6 +136,10 @@ test("drag on list view with SC.DROP_ON support", function() {
     // This test only works because SC.ListItemView supports adding the class to match the property.
     ok(itemView.$().hasClass('drop-target'), "third list item should add drop-target class");
     ok(!itemView2.$().hasClass('drop-target'), "second list item should not add drop-target class");
+
+    // Clean up
+    ev = SC.Event.simulateEvent(layer, 'mouseup');
+    SC.Event.trigger(layer, 'mouseup', [ev]);
 
     window.start();
   };

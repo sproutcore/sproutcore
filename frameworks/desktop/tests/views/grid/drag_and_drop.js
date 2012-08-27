@@ -8,7 +8,6 @@
 /*
   This test evaluates drag and drop support for SC.GridView
 */
-module("SC.GridView - drag and drop");
 
 // Create a fake content array.  Generates a list with whatever length you
 // want of objects with a title based on the index.  Cannot mutate.
@@ -50,8 +49,9 @@ var pane = SC.ControlTestPane.design()
   }));
 
 pane.show(); // add a test to show the test pane
-window.pane = pane ;
+window.pane = pane;
 
+module("SC.GridView - drag and drop", pane.standardSetup());
 
 test("drag on default grid view", function() {
   var ev,
@@ -68,6 +68,10 @@ test("drag on default grid view", function() {
   SC.Event.trigger(layer, 'mousemove', [ev]);
 
   equals(gridView.get('dragContent'), null, 'dragContent should not be set, because the default implementation should prevent dragging');
+
+  // Clean up
+  ev = SC.Event.simulateEvent(layer, 'mouseup');
+  SC.Event.trigger(layer, 'mouseup', [ev]);
 });
 
 
@@ -92,20 +96,17 @@ test("drag on grid view with SC.DROP_ON support", function() {
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
-    var drag,
-      halfWidth,
+    var halfWidth,
       itemView2,
       point;
 
     SC.RunLoop.begin();
-
     ev = SC.Event.simulateEvent(layer, 'mousemove');
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
-    drag = SC.RootResponder._drag;
-
     equals(gridView.get('dragContent').content, gridView.get('content'), "dragContent.content should be equal to the GridView's content");
     ok(gridView.get('dragContent').indexes.isEqual(SC.IndexSet.create(0)), "dragContent.indexes should be equal to indexes equal to [{0}]");
+
     SC.RunLoop.end();
 
     // Drag over 2nd item
@@ -115,6 +116,7 @@ test("drag on grid view with SC.DROP_ON support", function() {
 
     // Note: GridView won't accept a DROP_ON unless past 20% into the width of the item.
     halfWidth = itemView2.get('frame').width * 0.5;
+
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + halfWidth, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
@@ -125,11 +127,16 @@ test("drag on grid view with SC.DROP_ON support", function() {
     itemView = gridView.itemViewForContentIndex(2);
     layer = itemView.get('layer');
     point = SC.offset(layer);
+
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + halfWidth, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
     ok(itemView.get('isDropTarget'), "third grid item should have isDropTarget set to true");
     ok(!itemView2.get('isDropTarget'), "second grid item should not have isDropTarget set to true");
+
+    // Clean up
+    ev = SC.Event.simulateEvent(layer, 'mouseup');
+    SC.Event.trigger(layer, 'mouseup', [ev]);
 
     window.start();
   };
