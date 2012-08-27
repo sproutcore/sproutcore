@@ -14,7 +14,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
 
     var theme = dataSource.get('theme'),
         value = dataSource.get('value'),
-        labelClassNames = SC.A(dataSource.get('labelClassNames'));
+        labelClassNames = ['sc-button-label', 'sc-disclosure-label'];
 
     var labelId = SC.guidFor(dataSource) + "-label";
 
@@ -30,7 +30,6 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     
     context.push('<img src = "' + SC.BLANK_IMAGE_URL + '" class = "disclosure button ' + state + '" />');
 
-    labelClassNames.push('sc-button-label', 'sc-disclosure-label');
     context = context.begin('span').addClass(labelClassNames).id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
@@ -40,9 +39,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     this.updateSizeClassName(dataSource, jquery);
 
     var theme = dataSource.get('theme'),
-        value = dataSource.get('value'),
-        labelClassNames = SC.A(dataSource.get('labelClassNames')),
-        $label;
+        value = dataSource.get('value');
 
     //addressing accessibility
     jquery.attr('aria-expanded', value);
@@ -55,12 +52,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
       active: dataSource.get('isActive')
     });
 
-    $label = jquery.find('span.sc-disclosure-label');
-
-    labelClassNames.push('sc-button-label', 'sc-disclosure-label');
-    $label.removeClass().addClass(labelClassNames.join(' '));
-    
-    theme.labelRenderDelegate.update(dataSource, $label);
+    theme.labelRenderDelegate.update(dataSource, jquery.find('span.sc-disclosure-label'));
   }
 });
 
