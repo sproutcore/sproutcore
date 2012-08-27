@@ -84,8 +84,8 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
 
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
   if(SC.browser.isWebkit || (SC.browser.isMozilla &&
-      SC.browser.compare(SC.browser.engineVersion, '2.0') >= 0) equals(input.val(), '', 'input should have empty value');
-  else equals(input.val(), expectedHint, 'input should have empty value');
+      SC.browser.compare(SC.browser.engineVersion, '2.0') >= 0)) { equals(input.val(), '', 'input should have empty value'); }
+  else { equals(input.val(), expectedHint, 'input should have empty value'); }
 
   if (expectedHint) {
     var hint = (view.get('hintOnFocus') ? view.$('.hint') : view.$('.sc-hint'));
