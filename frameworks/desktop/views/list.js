@@ -47,13 +47,19 @@ sc_require('mixins/collection_row_delegate');
   Note that row heights and offsets are cached so once they are calculated
   the list view will be able to display very quickly.
 
-  (Can we also have an 'estimate row heights' property that will simply
-  cheat for very long data sets to make rendering more efficient?)
+  ## Dropping on an Item
+
+  When the list view is configured to accept drags and drops onto its items, it
+  will set the isDropTarget property on the target item accordingly.  This
+  allows you to modify the appearance of the drop target list item accordingly
+  (@see SC.ListItemView#isDropTarget).
 
   @extends SC.CollectionView
   @extends SC.CollectionRowDelegate
   @since SproutCore 1.0
 */
+// (Can we also have an 'estimate row heights' property that will simply
+// cheat for very long data sets to make rendering more efficient?)
 SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 /** @scope SC.ListView.prototype */ {
 
@@ -486,13 +492,23 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     if (SC.none(level)) level = -1;
 
     if (dropOperation & SC.DROP_ON) {
-      this.hideInsertionPoint();
-      itemView.set('isSelected', YES);
-      this._lastDropOnView = itemView;
+      if (itemView !== this._lastDropOnView) {
+        this.hideInsertionPoint();
+
+        // If the drag is supposed to drop onto an item, notify the item that it
+        // is the current target of the drop.
+        itemView.set('isDropTarget', YES);
+
+        // Track the item so that we can clear isDropTarget when the drag changes;
+        // versus having to clear it from all items.
+        this._lastDropOnView = itemView;
+      }
     } else {
 
       if (this._lastDropOnView) {
-        this._lastDropOnView.set('isSelected', NO);
+        // If there was an item that was the target of the drop previously, be
+        // sure to clear it.
+        this._lastDropOnView.set('isDropTarget', NO);
         this._lastDropOnView = null;
       }
 
@@ -508,12 +524,12 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     }
   },
 
-  /**
-    @see SC.CollectionView#hideInsertionPoint
-  */
+  /** @see SC.CollectionView#hideInsertionPoint */
   hideInsertionPoint: function() {
+    // If there was an item that was the target of the drop previously, be
+    // sure to clear it.
     if (this._lastDropOnView) {
-      this._lastDropOnView.set('isSelected', NO);
+      this._lastDropOnView.set('isDropTarget', NO);
       this._lastDropOnView = null;
     }
 

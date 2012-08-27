@@ -4,10 +4,17 @@ $theme.collection {
   &.alternating .sc-collection-item.even {
     background: #eef3f6;
   }
-  
-  &.alternating .sc-collection-item.even.sel, 
+
+  &.alternating .sc-collection-item.even.sel,
   .sc-collection-item.sel {
     color: white;
     background: #608AB9;
+  }
+
+  /* Collection items that are the target of an SC.DROP_ON operation. */
+  &.alternating .sc-collection-item.even.drop-target,
+  .sc-collection-item.drop-target {
+    color: white;
+    background: #bcd7ec;
   }
 }

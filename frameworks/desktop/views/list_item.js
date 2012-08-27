@@ -56,7 +56,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     @default ['disclosureState', 'escapeHTML']
     @see SC.View#displayProperties
   */
-  displayProperties: ['disclosureState', 'escapeHTML'],
+  displayProperties: ['disclosureState', 'escapeHTML', 'isDropTarget'],
 
 
   // ..........................................................
@@ -135,6 +135,19 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     @default null
   */
   icon: null,
+
+  /**
+    Whether this item is the drop target of a drag operation.
+
+    If the list view supports the SC.DROP_ON operation, it will set this
+    property on whichever list item view is the current target of the drop.
+
+    When true, the 'drop-target' class is added to the element.
+
+    @type Boolean
+    @default false
+  */
+  isDropTarget: NO,
 
   /**
     (displayDelegate) Property key to use for the icon url
@@ -736,6 +749,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     // add alternating row classes
     classArray.push((this.get('contentIndex')%2 === 0) ? 'even' : 'odd');
     context.setClass('disabled', !this.get('isEnabled'));
+    context.setClass('drop-target', this.get('isDropTarget'));
 
     // outline level wrapper
     working = context.begin("div").addClass("sc-outline");

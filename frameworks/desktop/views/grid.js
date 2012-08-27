@@ -11,6 +11,13 @@ sc_require('views/list') ;
 
   A grid view renders a collection of items in a grid of rows and columns.
 
+  ## Dropping on an Item
+
+  When the grid view is configured to accept drags and drops onto its items, it
+  will set the isDropTarget property on the target item accordingly.  This
+  allows you to modify the appearance of the drop target grid item accordingly
+  (@see SC.ListItemView#isDropTarget).
+
   @extends SC.ListView
   @author Charles Jolley
   @version 1.0
@@ -144,21 +151,29 @@ SC.GridView = SC.ListView.extend(
 
   /** @private */
   showInsertionPoint: function(itemView, dropOperation) {
-    if (!itemView) return ;
+    if (!itemView) return;
 
     // if drop on, then just add a class...
-    if (dropOperation === SC.DROP_ON) {
-      if (itemView !== this._dropOnInsertionPoint) {
-        this.hideInsertionPoint() ;
-        //itemView.addClassName('drop-target') ;
-        this._dropOnInsertionPoint = itemView ;
+    if (dropOperation & SC.DROP_ON) {
+      if (itemView !== this._lastDropOnView) {
+        this.hideInsertionPoint();
+
+        // If the drag is supposed to drop onto an item, notify the item that it
+        // is the current target of the drop.
+        itemView.set('isDropTarget', YES);
+
+        // Track the item so that we can clear isDropTarget when the drag changes;
+        // versus having to clear it from all items.
+        this._lastDropOnView = itemView;
       }
 
     } else {
 
-      if (this._dropOnInsertionPoint) {
-        //this._dropOnInsertionPoint.removeClassName('drop-target') ;
-        this._dropOnInsertionPoint = null ;
+      if (this._lastDropOnView) {
+        // If there was an item that was the target of the drop previously, be
+        // sure to clear it.
+        this._lastDropOnView.set('isDropTarget', NO);
+        this._lastDropOnView = null ;
       }
 
       if (!this._insertionPointView) {
@@ -184,15 +199,18 @@ SC.GridView = SC.ListView.extend(
 
   },
 
-  /** @private */
+  /** @see SC.CollectionView#hideInsertionPoint */
   hideInsertionPoint: function() {
-    var insertionPoint = this._insertionPointView ;
-    if (insertionPoint) insertionPoint.removeFromParent() ;
-
-    if (this._dropOnInsertionPoint) {
-      //this._dropOnInsertionPoint.removeClassName('drop-target') ;
-      this._dropOnInsertionPoint = null ;
+    // If there was an item that was the target of the drop previously, be
+    // sure to clear it.
+    if (this._lastDropOnView) {
+      this._lastDropOnView.set('isDropTarget', NO);
+      this._lastDropOnView = null;
     }
+
+    var view = this._insertionPointView ;
+    if (view) view.removeFromParent().destroy();
+    this._insertionPointView = null;
   },
 
   /** @private */
