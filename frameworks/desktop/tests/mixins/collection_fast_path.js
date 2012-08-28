@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-var view, del, content;
+var view, exampleView;
 
 module("SC.CollectionFastPath", {
   setup: function() {
@@ -25,7 +25,7 @@ module("SC.CollectionFastPath", {
   },
 
   teardown: function() {
-    view = null;
+    view = exampleView = null;
   }
 });
 
