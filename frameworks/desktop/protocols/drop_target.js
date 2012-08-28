@@ -137,11 +137,12 @@ SC.DropTarget = {
     @param {SC.Drag} drag The current drag object
     @param {SC.Event} evt The most recent mouse move event.  Use to get 
       location 
+    @param {DragOp} op The proposed drag operation. A drag constant
     
     @returns {DragOps} A mask of all the drag operations allowed or 
       SC.DRAG_NONE
   */
-  computeDragOperations: function(drag, evt) {
+  computeDragOperations: function(drag, evt, op) {
     return SC.DRAG_NONE;
   },
   
