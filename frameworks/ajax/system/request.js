@@ -478,12 +478,13 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // Normalize arguments
     if (SC.typeOf(statusOrEvent) !== SC.T_NUMBER && SC.typeOf(statusOrEvent) !== SC.T_STRING) {
+      // Accept multiple additional arguments (Do so before shifting the arguments!)
+      args = SC.A(arguments).slice(2);
+
+      // Shift the arguments
       action = target;
       target = statusOrEvent;
       statusOrEvent = 0;
-
-      // Accept multiple additional arguments.
-      args = SC.A(arguments).slice(2);
     } else {
       // Accept multiple additional arguments.
       args = SC.A(arguments).slice(3);
