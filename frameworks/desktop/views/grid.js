@@ -243,21 +243,35 @@ SC.GridView = SC.ListView.extend(
   },
 
   /** @private
-    If the size of the clipping frame changes, all of the item views
-    on screen are potentially in the wrong position.  Update all of their
-    layouts if different.
+    Since GridView lays out items evenly from left to right, if the width of the
+    clipping frame changes, all of the item views on screen are potentially in
+    the wrong position.
+
+    Update all of their layouts if necessary.
   */
   _gv_clippingFrameDidChange: function() {
-    var nowShowing = this.get('nowShowing'), itemView, idx, len;
-    this.notifyPropertyChange('itemsPerRow');
+    var clippingFrame = this.get('clippingFrame'),
+      width;
 
-    len = nowShowing.get('length');
+    // Changes to the width of the clippingFrame is the only variable that
+    // alters the layout of item views.
+    width = clippingFrame.width;
+    if (this._lastFrameWidth && width !== this._lastFrameWidth) {
+      this.notifyPropertyChange('itemsPerRow');
 
-    // Only loop through the now showing indexes, if the content is sparsely
-    // loaded we could inadvertently trigger reloading unneeded content.
-    nowShowing.forEach(function(idx) {
-      itemView = this.itemViewForContentIndex(idx);
-      itemView.adjust(this.layoutForContentIndex(idx));
-    }, this);
+      var idx,
+        itemView,
+        nowShowing = this.get('nowShowing');
+
+      // Only loop through the now showing indexes, if the content is sparsely
+      // loaded we could inadvertently trigger reloading unneeded content.
+      nowShowing.forEach(function(idx) {
+        itemView = this.itemViewForContentIndex(idx);
+        itemView.adjust(this.layoutForContentIndex(idx));
+      }, this);
+    }
+
+    // Cache the last width in order to check for differences.
+    this._lastFrameWidth = width;
   }.observes('clippingFrame')
 }) ;
