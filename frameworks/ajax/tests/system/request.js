@@ -282,14 +282,14 @@ test("Test Multiple listeners per single status response", function() {
     numResponses++;
     ok(true, "Received a response");
 
-    if (numResponses === 2) window.start();
+    if (numResponses === 2) { window.start(); }
   });
 
   request.notify(200, this, function(response) {
     numResponses++;
     ok(true, "Received a response");
 
-    if (numResponses === 2) window.start();
+    if (numResponses === 2) { window.start(); }
   });
 
   response = request.send();
@@ -298,6 +298,37 @@ test("Test Multiple listeners per single status response", function() {
 
   stop() ; // stops the test runner - wait for response
 });
+
+
+/**
+  There was a short-lived bug where the additional Arguments passed to notify()
+  were being dropped because the slice on 'arguments' was happening after they
+  had already been adjusted.
+*/
+test("Multiple arguments passed to notify()", function() {
+  var response;
+
+  request.notify(this, function(response, a, b, c) {
+    equals(a, 'a', "Listener called with argument 'a'");
+    equals(b, 'b', "Listener called with argument 'b'");
+    equals(c, 'c', "Listener called with argument 'c'");
+
+    window.start();
+  }, 'a', 'b', 'c');
+
+  request.notify(200, this, function(response, a, b, c) {
+    equals(a, 'a', "Listener called with argument 'a'");
+    equals(b, 'b', "Listener called with argument 'b'");
+    equals(c, 'c', "Listener called with argument 'c'");
+
+    window.start();
+  }, 'a', 'b', 'c');
+
+  response = request.send();
+
+  stop() ; // stops the test runner - wait for response
+});
+
 
 test("Test event listeners on successful request.", function() {
   var abort = false,
