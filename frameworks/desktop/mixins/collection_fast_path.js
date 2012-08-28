@@ -18,6 +18,7 @@ SC.CollectionFastPath = {
   //
   initMixin: function() {
     this._indexMap = {};
+    this._viewMap = {};
   },
 
   /**
@@ -340,7 +341,7 @@ SC.CollectionFastPath = {
   */
   remapItemViews: function(nowShowing) {
     // reset the view map, but keep the old for removing
-    var oldMap = this._viewMap || {},
+    var oldMap = this._viewMap,
         newMap = (this._viewMap = {}),
         indexMap = (this._indexMap = {}),
         mayExist = [],
