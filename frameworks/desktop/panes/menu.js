@@ -1111,6 +1111,8 @@ SC.MenuPane = SC.PickerPane.extend(
           ++idx;
         }
       }
+    } else {
+      this.moveToEndOfDocument();
     }
 
     return YES;
@@ -1152,6 +1154,8 @@ SC.MenuPane = SC.PickerPane.extend(
           --idx;
         }
       }
+    } else {
+      this.moveToBeginningOfDocument();
     }
 
     return YES;
