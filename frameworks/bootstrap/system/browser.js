@@ -420,7 +420,7 @@ SC.detectBrowser = function(userAgent, language) {
   /** @deprecated Since version 1.7. Use browser.name.  See SC.BROWSER for possible values.
     Possible values:
 
-      - 'msie'
+      - 'ie'
       - 'mozilla'
       - 'chrome'
       - 'safari'
