@@ -124,6 +124,21 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       }
 
       if (bindings === null) bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
+      //@if(debug)
+      // Add some developer support.
+
+      // If a property binding is set on a Class and that Class is extended and
+      // the same property binding is set in the extend, two instances of the
+      // same Binding will exist on the object leading to strange behavior.
+      for (var i = bindings.length - 1; i >= 0; i--) {
+        if (bindings[i] === key) {
+          // There is already a binding for this key!
+          SC.Logger.warnGroup("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
+          SC.Logger.trace();
+          SC.Logger.warnGroupEnd();
+        }
+      }
+      //@endif
       bindings[bindings.length] = key ;
 
     // Also add observers, outlets, and properties for functions...
