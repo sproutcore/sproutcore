@@ -933,15 +933,15 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       }
 
     },
-    
+
     /**
       Will add an observes handler to this object for a given property path.
-      
+
       In most cases, the path provided is relative to this object. However,
       if the path begins with a captial character then the path is considered
       relative to the window object.
-      
-      @param {Function} observer the function on this object that will be 
+
+      @param {Function} observer the function on this object that will be
         notified of changes
       @param {String} path a property path string
       @return {Object} returns this
@@ -950,15 +950,15 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       this._configureObservesHandler(SC.OBSERVES_HANDLER_ADD, observer, path);
       return this;
     },
-    
+
     /**
       Will remove an observes handler from this object for a given property path.
-      
+
       In most cases, the path provided is relative to this object. However,
       if the path begins with a captial character then the path is considered
       relative to the window object.
-      
-      @param {Function} observer the function on this object that will be 
+
+      @param {Function} observer the function on this object that will be
         notified of changes
       @param {String} path a property path string
       @return {Object} returns this
@@ -967,27 +967,27 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       this._configureObservesHandler(SC.OBSERVES_HANDLER_REMOVE, observer, path);
       return this;
     },
-    
+
     /** @private
-    
+
       Used to either add or remove an observer handler on this object
       for a given property path.
-      
+
       In most cases, the path provided is relative to this object. However,
       if the path begins with a captial character then the path is considered
       relative to the window object.
-      
-      You must supply an action that is to be performed by this method. The 
+
+      You must supply an action that is to be performed by this method. The
       action can either be `SC.OBSERVES_HANDLER_ADD` or `SC.OBSERVES_HANDLER_REMOVE`.
-      
-      @param {Function} observer the function on this object that will be 
+
+      @param {Function} observer the function on this object that will be
         notified of changes
       @param {String} path a property path string
       @param {String} path a dot-notation property path string
     */
     _configureObservesHandler: function(action, observer, path) {
       var dotIndex, root;
-      
+
       switch (action) {
       case SC.OBSERVES_HANDLER_ADD:
         action = "addObserver"; break;
@@ -1031,15 +1031,15 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       key.  This is intended for debugging purposes only.  You generally do not
       want to rely on this method for production code.
 
-    @param {String} key the key to evaluate
-    @returns {Array} array of Observer objects, describing the observer.
-  */
-  observersForKey: function(key) {
-    SC.Observers.flush(this) ; // hookup as many observers as possible.
+      @param {String} key the key to evaluate
+      @returns {Array} array of Observer objects, describing the observer.
+    */
+    observersForKey: function(key) {
+      SC.Observers.flush(this) ; // hookup as many observers as possible.
 
-    var observers = this[SC.keyFor('_kvo_observers', key)];
-    return observers ? observers.getMembers() : [];
-  },
+      var observers = this[SC.keyFor('_kvo_observers', key)];
+      return observers ? observers.getMembers() : [];
+    },
 
     // this private method actually notifies the observers for any keys in the
     // observer queue.  If you pass a key it will be added to the queue.
