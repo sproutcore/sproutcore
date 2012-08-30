@@ -92,7 +92,7 @@ $theme.sc-segment-view {
     .left { @include slice("segmented_vertical_active.png", $left: 0, $width: 8, $height: 30, $top: 60); }
     .middle { @include slice("segmented_vertical_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 60); }
     .right { @include slice("segmented_vertical_active.png", $right: 0, $width: 8, $height: 30, $top: 60); }
-  }30
+  }
 
 
   /* SELECTED STATE */
