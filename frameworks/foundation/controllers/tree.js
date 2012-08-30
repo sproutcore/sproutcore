@@ -113,7 +113,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   /**
     @private
 
-    Returns the first item in arrangeObjects that is not a group.  This uses
+    Returns the first item in arrangedObjects that is not a group.  This uses
     a brute force approach right now; we assume you probably don't have a lot
     of groups up front.
   */
