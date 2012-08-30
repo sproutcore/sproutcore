@@ -9,19 +9,21 @@
   }
 
   .sc-segment-view {
-    position: relative;
+    border-right: 1px #555 solid;
+    color: black;
     display: inline-block;
-    top: 0;
     height: 22px;
     line-height: 22px;
-    border-right: 1px #555 solid;
-    text-shadow: #b0b0b0 0px 1px 0px;
-    text-decoration: none ;
-    color: black ;
+    position: relative;
     text-align: center;
+    text-decoration: none;
+    text-shadow: #b0b0b0 0px 1px 0px;
+    top: 0;
+
     &:focus {
       outline: none;
     }
+
     &.sc-first-segment {
       padding-left: 10px;
       padding-right: 10px;
@@ -34,6 +36,7 @@
         background: #999999;
       }
     }
+
     &.sc-last-segment {
       padding-right: 10px;
       border:none;
@@ -46,6 +49,7 @@
         background: #999999;
       }
     }
+
     .sc-middle-segment .sc-button-inner {
       padding-left: 10px;
       padding-right: 10px;
@@ -63,6 +67,10 @@
     .active .sc-button-inner {
       background: #999999;
       text-shadow: #909090 0px 1px 0px;
+    }
+
+    &.vertical {
+      display: block;
     }
 
     &.disabled .sc-button-inner {
