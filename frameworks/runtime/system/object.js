@@ -124,6 +124,21 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       }
 
       if (bindings === null) bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
+      //@if(debug)
+      // Add some developer support.
+
+      // If a property binding is set on a Class and that Class is extended and
+      // the same property binding is set in the extend, two instances of the
+      // same Binding will exist on the object leading to strange behavior.
+      for (var i = bindings.length - 1; i >= 0; i--) {
+        if (bindings[i] === key) {
+          // There is already a binding for this key!
+          SC.Logger.warnGroup("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
+          SC.Logger.trace();
+          SC.Logger.warnGroupEnd();
+        }
+      }
+      //@endif
       bindings[bindings.length] = key ;
 
     // Also add observers, outlets, and properties for functions...
@@ -326,9 +341,9 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype)),
         idx, len = arguments.length;
-    
-    for(idx=0;idx<len;idx++) { 
-      SC._object_extend(base, arguments[idx], ret.__sc_super__) ; 
+
+    for(idx=0;idx<len;idx++) {
+      SC._object_extend(base, arguments[idx], ret.__sc_super__) ;
     }
     base.constructor = ret; // save constructor
 
@@ -907,7 +922,7 @@ function findClassNames() {
   var seen = [],
       detectedSC = false;
   var searchObject = function(root, object, levels) {
-    
+
     var path, value, type;
     levels-- ;
 
