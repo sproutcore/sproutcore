@@ -3,6 +3,10 @@ $theme.sc-segmented-view {
 
   &.disabled {
     opacity: 0.5;
+
+    /* The base style has a white background added to the first and last segments when disabled. */
+    .sc-first-segment { background: none; }
+    .sc-last-segment { background: none; }
   }
 
 }
