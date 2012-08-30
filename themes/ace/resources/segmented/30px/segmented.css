@@ -22,6 +22,12 @@ $theme.sc-segment-view {
     @include slice("segmented_normal.png", $repeat: repeat-x, $left: 8, $width: 1);
   }
 
+  &.vertical {
+    .left { @include slice("segmented_vertical_normal.png", $left: 0, $width: 8, $height: 30, $top: 30); }
+    .middle { @include slice("segmented_vertical_normal.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 30); }
+    .right { @include slice("segmented_vertical_normal.png", $right: 0, $width: 8, $height: 30, $top: 30); }
+  }
+
   .sc-button-label {
     padding: 0px;
     font-size: 13px;
@@ -42,6 +48,18 @@ $theme.sc-segment-view {
     @include slice("segmented_normal.png", $right: 0, $width: 8);
   }
 
+  &.sc-first-segment.vertical {
+    .left { @include slice("segmented_vertical_normal.png", $left: 0, $width: 8, $height: 30); }
+    .middle { @include slice("segmented_vertical_normal.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30); }
+    .right { @include slice("segmented_vertical_normal.png", $right: 0, $width: 8, $height: 30); }
+  }
+
+  &.sc-last-segment.vertical {
+    .left { @include slice("segmented_vertical_normal.png", $left: 0, $width: 8, $height: 30, $top: 60); }
+    .middle { @include slice("segmented_vertical_normal.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 60); }
+    .right { @include slice("segmented_vertical_normal.png", $right: 0, $width: 8, $height: 30, $top: 60); }
+  }
+
 
   /* ACTIVE STATE */
   &.active {
@@ -57,6 +75,24 @@ $theme.sc-segment-view {
   &.active.sc-last-segment {
     .right { @include slice("segmented_active.png", $right: 0, $width: 8); }
   }
+
+  &.active.vertical {
+    .left { @include slice("segmented_vertical_active.png", $left: 0, $width: 8, $height: 30, $top: 30); }
+    .right { @include slice("segmented_vertical_active.png", $right: 0, $width: 8, $height: 30, $top: 30); }
+    .middle { @include slice("segmented_vertical_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 30); }
+  }
+
+  &.active.sc-first-segment.vertical {
+    .left { @include slice("segmented_vertical_active.png", $left: 0, $width: 8, $height: 30); }
+    .middle { @include slice("segmented_vertical_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30); }
+    .right { @include slice("segmented_vertical_active.png", $right: 0, $width: 8, $height: 30); }
+  }
+
+  &.active.sc-last-segment.vertical {
+    .left { @include slice("segmented_vertical_active.png", $left: 0, $width: 8, $height: 30, $top: 60); }
+    .middle { @include slice("segmented_vertical_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 60); }
+    .right { @include slice("segmented_vertical_active.png", $right: 0, $width: 8, $height: 30, $top: 60); }
+  }30
 
 
   /* SELECTED STATE */
@@ -74,6 +110,24 @@ $theme.sc-segment-view {
     .right { @include slice("segmented_selected.png", $right: 0, $width: 8); }
   }
 
+  &.sel.vertical {
+    .left { @include slice("segmented_vertical_selected.png", $left: 0, $width: 8, $height: 30, $top: 30); }
+    .right { @include slice("segmented_vertical_selected.png", $right: 0, $width: 8, $height: 30, $top: 30); }
+    .middle { @include slice("segmented_vertical_selected.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 30); }
+  }
+
+  &.sel.sc-first-segment.vertical {
+    .left { @include slice("segmented_vertical_selected.png", $left: 0, $width: 8, $height: 30); }
+    .middle { @include slice("segmented_vertical_selected.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30); }
+    .right { @include slice("segmented_vertical_selected.png", $right: 0, $width: 8, $height: 30); }
+  }
+
+  &.sel.sc-last-segment.vertical {
+    .left { @include slice("segmented_vertical_selected.png", $left: 0, $width: 8, $height: 30, $top: 60); }
+    .middle { @include slice("segmented_vertical_selected.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 60); }
+    .right { @include slice("segmented_vertical_selected.png", $right: 0, $width: 8, $height: 30, $top: 60); }
+  }
+
 
   /* SELECTED ACTIVE STATE */
   &.sel.active {
@@ -88,6 +142,24 @@ $theme.sc-segment-view {
 
   &.sel.active.sc-last-segment {
     .right { @include slice("segmented_selected_active.png", $right: 0, $width: 8); }
+  }
+
+  &.sel.active.vertical {
+    .left { @include slice("segmented_vertical_selected_active.png", $left: 0, $width: 8, $height: 30, $top: 30); }
+    .right { @include slice("segmented_vertical_selected_active.png", $right: 0, $width: 8, $height: 30, $top: 30); }
+    .middle { @include slice("segmented_vertical_selected_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 30); }
+  }
+
+  &.sel.active.sc-first-segment.vertical {
+    .left { @include slice("segmented_vertical_selected_active.png", $left: 0, $width: 8, $height: 30); }
+    .middle { @include slice("segmented_vertical_selected_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30); }
+    .right { @include slice("segmented_vertical_selected_active.png", $right: 0, $width: 8, $height: 30); }
+  }
+
+  &.sel.active.sc-last-segment.vertical {
+    .left { @include slice("segmented_vertical_selected_active.png", $left: 0, $width: 8, $height: 30, $top: 60); }
+    .middle { @include slice("segmented_vertical_selected_active.png", $repeat: repeat-x, $left: 8, $width: 1, $height: 30, $top: 60); }
+    .right { @include slice("segmented_vertical_selected_active.png", $right: 0, $width: 8, $height: 30, $top: 60); }
   }
 
 }
