@@ -344,12 +344,12 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     if (this.subclasses) {
       this.subclasses.forEach(function(subclass, idx) {
         //@if(debug)
-        SC.warn("Developer Warning: %@ was re-opened after subclasses were defined.  We're still registering the additions to all subclasses of %@, but it would be safer to reopen() %@ before subclassing it.".fmt(this, this, this));
+        // Turned Off, SC.View.reopen() makes this too obnoxious. SC.warn("Developer Warning: %@ was re-opened after subclasses were defined.  We're still registering the additions to all subclasses of %@, but it would be safer to reopen() %@ before subclassing it.".fmt(this, this, this));
         //@endif
         var key, value;
-
         for (key in props) {
 
+          // avoid copying builtin methods
           if (!props.hasOwnProperty(key)) continue;
 
           value = props[key];
