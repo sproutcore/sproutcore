@@ -569,14 +569,18 @@ SC.Object.prototype = {
   */
   mixin: function() {
     var idx, len = arguments.length, init;
-    for(idx=0;idx<len;idx++) SC.mixin(this, arguments[idx]) ;
+    for(idx=0;idx<len;idx++) SC._object_extend(this, arguments[idx]);
 
-    // call initMixin
+    // Reset the observable initialized status so that we can setup any new observables.
+    this._observableInited = NO;
+    this.initObservable();
+
+    // Call initMixin
     for(idx=0;idx<len;idx++) {
-      init = arguments[idx].initMixin ;
-      if (init) init.call(this) ;
+      init = arguments[idx].initMixin;
+      if (init) init.call(this);
     }
-    return this ;
+    return this;
   },
 
   /**
