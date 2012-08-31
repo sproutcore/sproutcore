@@ -326,9 +326,9 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype)),
         idx, len = arguments.length;
-    
-    for(idx=0;idx<len;idx++) { 
-      SC._object_extend(base, arguments[idx], ret.__sc_super__) ; 
+
+    for(idx=0;idx<len;idx++) {
+      SC._object_extend(base, arguments[idx], ret.__sc_super__) ;
     }
     base.constructor = ret; // save constructor
 
@@ -336,8 +336,41 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     return ret ;
   },
 
+  // Tested in ../tests/system/object/enhance.js
   reopen: function(props) {
-    return SC._object_extend(this.prototype, props, this.__sc_super__);
+    var ret;
+    ret = SC._object_extend(this.prototype, props, this.__sc_super__);
+
+    if (this.subclasses) {
+      this.subclasses.forEach(function(subclass, idx) {
+        //@if(debug)
+        SC.warn("Developer Warning: %@ was re-opened after subclasses were defined.  We're still registering the additions to all subclasses of %@, but it would be safer to reopen() %@ before subclassing it.".fmt(this, this, this));
+        //@endif
+        var key, value;
+
+        for (key in props) {
+
+          if (!props.hasOwnProperty(key)) continue;
+
+          value = props[key];
+
+          // Remove properties that have already been overridden by the subclass.
+          if (subclass.prototype.hasOwnProperty(key)) {
+            delete props[key];
+          }
+
+          // Remove enhancements that are only intended for the superclass's
+          // function.
+          if (value && (value instanceof Function) && (value.isEnhancement)) {
+            delete props[key];
+          }
+        }
+
+        subclass.reopen(props);
+      }, this);
+    }
+
+    return ret;
   },
 
   /**
@@ -907,7 +940,7 @@ function findClassNames() {
   var seen = [],
       detectedSC = false;
   var searchObject = function(root, object, levels) {
-    
+
     var path, value, type;
     levels-- ;
 
