@@ -26,30 +26,41 @@ test("reopening and enhancing", function() {
 test("subclassing and then enhancing the parent", function() {
   var Klass = SC.Object.extend({
     loudly: function(string) {
-      return string + this.get('exclaim');
+      return string + this.get('exclaim'); // foo!
     },
     exclaim: "!"
   });
 
+  var obj = Klass.create();
+  equals(obj.loudly("foo"), "foo!");
+
   Klass.reopen({
     loudly: function(original, string) {
-      return original(string.toUpperCase());
+      return original(string.toUpperCase()); // FOO!
     }.enhance()
   });
+
+  obj = Klass.create();
+  equals(obj.loudly("foo"), "FOO!");
 
   SubKlass = Klass.extend({
     loudly: function(string) {
-      return "ZOMG " + sc_super();
+      return "ZOMG " + sc_super(); // ZOMG FOO!
     }
   });
 
+  obj = SubKlass.create();
+  equals(obj.loudly("foo"), "ZOMG FOO!");
+
   Klass.reopen({
     loudly: function(original, string) {
-      return "OHAI: " + original(string);
+      return "OHAI: " + original(string); // OHAI: FOO!
     }.enhance()
   });
 
-  var obj = SubKlass.create();
+  obj = Klass.create();
+  equals(obj.loudly("foo"), "OHAI: FOO!");
+  obj = SubKlass.create();
   equals(obj.loudly("foo"), "ZOMG OHAI: FOO!");
 });
 
@@ -130,7 +141,6 @@ test("sc_super to a non-method", function() {
 test("sc_super works in enhanced methods", function() {
   var Klass = SC.Object.extend({
     loudly: function(string) {
-      console.log(string);
       return string.toUpperCase();
     }
   });
