@@ -12,7 +12,7 @@ TestControls.progressPage = SC.View.design({
     classNames: ["sample_controls"],
     layout: { left: 20, top: 40, right: 20, bottom: 40 },
     
-    childViews: "header normal disabled".w(),
+    childViews: "header normal disabled indeterminate".w(),
     
     header: SC.LabelView.design({
       fillWidth: YES,
@@ -28,6 +28,12 @@ TestControls.progressPage = SC.View.design({
     disabled: SC.FormView.row(SC.ProgressView.design({
       layout: { height: 20, width: 200 },
       isEnabled: NO
+    })),
+    
+    indeterminate: SC.FormView.row(SC.ProgressView.design({
+      layout: { height: 20, width: 200 },
+      isIndeterminate: YES,
+      isRunning: YES
     }))
   })
 });

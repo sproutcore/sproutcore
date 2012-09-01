@@ -26,6 +26,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   className: 'progress',
 
   render: function(dataSource, context) {
+    console.log("render delegate running");
+  
     this.addSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
@@ -35,7 +37,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
 
     var value;
     if (dataSource.get('isIndeterminate')) {
-      value = 120;
+      value = 1;
     } else {
       value = dataSource.get('value');
     }
@@ -52,7 +54,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       running: dataSource.get('isRunning'),
       disabled: !dataSource.get('isEnabled'),
       'sc-empty': (value <= 0),
-      'sc-complete': (value >= 1)
+      'sc-complete': (value >= 1 && !dataSource.get('isIndeterminate'))
     });
 
     context = context.begin('div').addClass('track');
@@ -82,7 +84,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
 
     var value;
     if (dataSource.get('isIndeterminate')) {
-      value = 120;
+      value = 1;
     } else {
       value = dataSource.get('value');
     }
@@ -92,7 +94,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       running: dataSource.get('isRunning'),
       disabled: !dataSource.get('isEnabled'),
       'sc-empty': (value <= 0),
-      'sc-complete': (value >= 1)
+      'sc-complete': (value >= 1 && !dataSource.get('isIndeterminate'))
     });
 
     $.find('.content').css('width', (value * 100) + "%");

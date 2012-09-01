@@ -224,6 +224,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
 
   /** @private */
   init: function() {
+    console.log("progress");
     sc_super();
     this.animateProgressBar();
   },
