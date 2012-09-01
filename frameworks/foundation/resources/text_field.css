@@ -113,7 +113,7 @@
     }
   }
 
-  .msie &{
+  .ie &{
     &.focus {
       outline: 1px dotted;
     }
@@ -122,6 +122,18 @@
     }
     textarea.field {
       height: 100%;
+    }
+  }
+
+  .opera &{
+    .border {
+      border:1px inset;
+    }
+  }
+
+  .mobile-safari &{
+    .border {
+      border:1px inset;
     }
   }
 }
