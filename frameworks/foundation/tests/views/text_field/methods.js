@@ -153,6 +153,17 @@ test("autoCorrect=null should not add autocorrect", function() {
   ok(!view.$input().attr('autocorrect'), 'should not have an autocorrect attribute set');
 });
 
+test("interpretKeyEvents should allow key command methods to be implemented.", function() {
+  view1.insertNewline = function() { successFlag = YES; return YES; };
+  // Hit enter.
+  SC.RunLoop.begin();
+  var evt = SC.Event.simulateEvent(view1.get('layer'), 'keydown', { which: SC.Event.KEY_RETURN, keyCode: SC.Event.KEY_RETURN })
+  view1.keyDown(evt);
+  SC.RunLoop.end();
+  // Test.
+  ok(successFlag, 'insertNewline should have been triggered.');
+});
+
 // test("isEnabled=NO should add disabled attr to input", function() {
 //   SC.RunLoop.begin();
 //   view1.set('isEnabled', NO);
