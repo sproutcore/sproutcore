@@ -22,7 +22,8 @@ TestControls.progressPage = SC.View.design({
     }),
 
     normal: SC.FormView.row(SC.ProgressView.design({
-      layout: { height: 20, width: 200 }
+      layout: { height: 20, width: 200 },
+      value: 0.3
     })),
 
     disabled: SC.FormView.row(SC.ProgressView.design({
