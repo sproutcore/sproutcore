@@ -280,6 +280,41 @@ test("changing value to a string", function() {
   setTimeout(assertions, 200);
 });
 
+test("on indeterminate state animation respects start,stop", function() {
+
+    var view = pane.view('progress indeterminate');
+
+    SC.RunLoop.begin();
+    view.set('isRunning', YES);
+    SC.RunLoop.end();
+
+    var currentBgPos = view.$('.middle')[0].style['background-position'];
+
+    var assertionsOnStart = function(){
+        var newBgPos = view.$('.middle')[0].style['background-position'];
+        ok(!(currentBgPos === newBgPos), 'bg pos should have changed (old was '+currentBgPos+'new is: '+newBgPos+')');
+
+        SC.RunLoop.begin();
+        view.set('isRunning', NO);
+        SC.RunLoop.end();
+
+        var currentBgPos = view.$('.middle')[0].style['background-position'];
+
+        var assertionsOnStop = function(){
+            var newBgPos = view.$('.middle')[0].style['background-position'];
+            ok((currentBgPos === newBgPos), 'after stopping, bg pos should NOT have changed (old was '+currentBgPos+'new is: '+newBgPos+')');
+
+            start();
+        };
+
+        setTimeout(assertionsOnStop, 400);
+    };
+
+    stop();
+    setTimeout(assertionsOnStart, 400);
+
+});
+
 test("Check if aria role is set to progress view", function() {
   var viewElem = pane.view('progress aria-role').$();
   ok(viewElem.attr('role') === 'progressbar', 'aria-role is set to the progress view');
