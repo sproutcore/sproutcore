@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.PROGRESS_OFFSET = 8;
+SC.BaseTheme.PROGRESS_OFFSET = 5;
 SC.BaseTheme.PROGRESS_OFFSET_RANGE = 48;
 
 /**
