@@ -5,6 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+SC.BaseTheme.PROGRESS_OFFSET = 8;
+SC.BaseTheme.PROGRESS_OFFSET_RANGE = 48;
+
 /**
   Renders and updates DOM representations of progress bars.
 
@@ -26,8 +29,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   className: 'progress',
 
   render: function(dataSource, context) {
-    console.log("render delegate running");
-  
+    console.log("render running");
+
     this.addSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
@@ -73,7 +76,10 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     var theme = dataSource.get('theme'),
         valueMax = dataSource.get('maximum'),
         valueMin = dataSource.get('minimum'),
-        valueNow = dataSource.get('ariaValue');
+        valueNow = dataSource.get('ariaValue'),
+        isIndeterminate = dataSource.get('isIndeterminate'),
+        isRunning = dataSource.get('isRunning'),
+        isEnabled = dataSource.get('isEnabled');
 
     // make accessible
     $.attr('aria-valuemax', valueMax);
@@ -83,20 +89,42 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
 
 
     var value;
-    if (dataSource.get('isIndeterminate')) {
+    if (isIndeterminate) {
       value = 1;
     } else {
       value = dataSource.get('value');
     }
 
     $.setClass({
-      indeterminate: dataSource.get('isIndeterminate'),
-      running: dataSource.get('isRunning'),
-      disabled: !dataSource.get('isEnabled'),
+      indeterminate: isIndeterminate,
+      running: isRunning,
+      disabled: !isEnabled,
       'sc-empty': (value <= 0),
-      'sc-complete': (value >= 1 && !dataSource.get('isIndeterminate'))
+      'sc-complete': (value >= 1 && !isIndeterminate)
     });
 
     $.find('.content').css('width', (value * 100) + "%");
-  }
+    if(isIndeterminate && isRunning) { // bas keeps running
+        var offset = this.getBackgroundImagePos($.find('.middle')).x;
+        offset = Math.round((Math.abs(offset) + SC.BaseTheme.PROGRESS_OFFSET ) % SC.BaseTheme.PROGRESS_OFFSET_RANGE );
+
+        $.find('.middle').css('background-position', "-"+offset+"px -2px");
+    }
+  },
+
+   getBackgroundImagePos: function(e) {
+        var result = $(e).css("background-position");
+        if (typeof result == "string") {
+            var a = result.split(" ");
+        } else {
+            var a = [$(e).css("background-position-x"),
+                     $(e).css("background-position-y")];
+        }
+        return {
+            x: parseFloat(a[0]),
+            xUnit: a[0].replace(/[0-9-.]/g, ""),
+            y: parseFloat(a[1]),
+            yUnit: a[1].replace(/[0-9-.]/g, "")
+        };
+    }
 });

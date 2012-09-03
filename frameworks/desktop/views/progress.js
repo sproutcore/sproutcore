@@ -196,7 +196,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
     @type Array
     @default null
   */
-  animatedBackgroundMatrix: null,
+  animatedBackgroundMatrix: [],
   
   /**
     Optionally specify the key used to extract the isIndeterminate value 
@@ -232,7 +232,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   /** @private */
   animateProgressBar: function() {
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
-      this._animateProgressBar(500); // wait to start to avoid probs
+      this._animateProgressBar(300); // wait to start to avoid probs
     }
   }.observes('isRunning', 'isVisibleInWindow'),
 
@@ -241,7 +241,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
     if (delay===0) delay = 1000/30;
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
       this.displayDidChange();
-      this.invokeLater(this._animateProgressBar, delay, 600);
+      this.invokeLater(this._animateProgressBar, delay, 300);
     }
   },
 
