@@ -105,7 +105,7 @@ test("basic", function() {
   equals(view.$('.content')[0].style.width, "25%", 'width should be 25%');
 
   // browsers compute the width after % adjustment differently.  just be close
-  var v = (SC.browser.isIE || SC.browser.isMozilla) ? 63 : 62;
+  var v = (SC.browser.isIE || SC.browser.isMozilla || SC.browser.isChrome) ? 63 : 62;
   equals(view.$('.content').width(), v, 'pixel width ');
 
 });
@@ -241,7 +241,7 @@ test("changing value to over maximum", function() {
   var view = pane.view('progress basic');
 
   // browsers compute the width after % adjustment differently.  just be close
-  var v = (SC.browser.isIE || SC.browser.isMozilla) ? 63 : 62;
+  var v = (SC.browser.isIE || SC.browser.isMozilla || SC.browser.isChrome) ? 63 : 62;
   equals(view.$('.content').width(), v, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 110);
@@ -288,20 +288,20 @@ test("on indeterminate state animation respects start,stop", function() {
     view.set('isRunning', YES);
     SC.RunLoop.end();
 
-    var currentBgPos = view.$('.middle')[0].style['background-position'];
+    var currentBgPos = view.$('.middle').css('background-position');
 
     var assertionsOnStart = function(){
-        var newBgPos = view.$('.middle')[0].style['background-position'];
+        var newBgPos = view.$('.middle').css('background-position');
         ok(!(currentBgPos === newBgPos), 'bg pos should have changed (old was '+currentBgPos+'new is: '+newBgPos+')');
 
         SC.RunLoop.begin();
         view.set('isRunning', NO);
         SC.RunLoop.end();
 
-        var currentBgPos = view.$('.middle')[0].style['background-position'];
+        currentBgPos = view.$('.middle').css('background-position');
 
         var assertionsOnStop = function(){
-            var newBgPos = view.$('.middle')[0].style['background-position'];
+            newBgPos = view.$('.middle').css('background-position');
             ok((currentBgPos === newBgPos), 'after stopping, bg pos should NOT have changed (old was '+currentBgPos+'new is: '+newBgPos+')');
 
             start();
