@@ -29,8 +29,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   className: 'progress',
 
   render: function(dataSource, context) {
-    console.log("render running");
-
     this.addSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
@@ -105,10 +103,11 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
 
     $.find('.content').css('width', (value * 100) + "%");
     if(isIndeterminate && isRunning) { // bas keeps running
-        var offset = this.getBackgroundImagePos($.find('.middle')).x;
+        var middle = $.find('.middle');
+        var offset = this.getBackgroundImagePos(middle).x;
         offset = Math.round((Math.abs(offset) + SC.BaseTheme.PROGRESS_OFFSET ) % SC.BaseTheme.PROGRESS_OFFSET_RANGE );
 
-        $.find('.middle').css('background-position', "-"+offset+"px -2px");
+        middle.css('background-position', offset+"px -2px");
     }
   },
 
@@ -122,9 +121,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
         }
         return {
             x: parseFloat(a[0]),
-            xUnit: a[0].replace(/[0-9-.]/g, ""),
-            y: parseFloat(a[1]),
-            yUnit: a[1].replace(/[0-9-.]/g, "")
+            y: parseFloat(a[1])
         };
     }
 });

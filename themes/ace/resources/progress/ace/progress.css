@@ -30,7 +30,7 @@ $theme.progress {
 
         /* width set in rendering */
 
-        @include slices("progress_view_indeterminate.png", $fill: 48 0);
+        @include slices("progress_view_indeterminate.png", $fill: 24 0);
     }
   }
   
