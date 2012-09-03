@@ -76,6 +76,9 @@ var pane = SC.ControlTestPane.design()
     minimum: 0,
     maximum: 100,
     isEnabled: NO
+  }).add("progress indeterminate", SC.ProgressView, {
+      layout: {top:0, bottom:0, left:0, width: 250},
+      isIndeterminate: YES
   });
 
 // ..........................................................
@@ -115,6 +118,17 @@ test("disabled", function() {
   ok(view.$('.content').length > 0, 'should have content class');
   equals(view.$('.content')[0].style.width, "0%", 'width should be 0%');
   equals(view.$('.content').width(), 0, 'pixel width ');
+
+});
+
+test("indeterminate", function() {
+
+  var view = pane.view('progress indeterminate');
+
+  ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
+  ok(view.$().hasClass('indeterminate'), 'should have indeterminate class');
+  ok(view.$('.content').length > 0, 'should have content class');
+  equals(view.$('.content')[0].style.width, "100%", 'width should be 100%');
 
 });
 
