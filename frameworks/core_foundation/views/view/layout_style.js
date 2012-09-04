@@ -450,11 +450,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     // for ie, we will NOT use alpha. It is just a source of pain.
     // a) it will not affect absolutely positioned child elements, and is therefore
     //    useless for most SC purposes.
-    // 
+    //
     // b) It completely breaks semitransparent background images (PNGs with opacity)
     //
     // If users want to use alpha, they should do it on their own.
-    
+
     // if(!SC.none(this.opacity)) ret.filter = "alpha(opacity=%@)".fmt(this.opacity * 100);
 
     ret.backgroundPosition = this.backgroundPosition;
@@ -472,19 +472,23 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     return ret ;
   },
 
-  willRenderAnimations: function(){
+  /** @private
+   This method is called before the layout style is applied to the layer.  If
+   animations have been defined for the view, they will be included in
+   this._pendingAnimations.  This method will clear out any conflicts between
+   pending and active animations.
+   */
+  willRenderAnimations: function() {
     if (SC.platform.supportsCSSTransitions) {
       var view = this.get('view'),
-          layer = view.get('layer'),
-          currentStyle = layer ? layer.style : null,
-          newStyle = view.get('layoutStyle'),
-          activeAnimations = this._activeAnimations, activeAnimation,
-          pendingAnimations = this._pendingAnimations, pendingAnimation,
-          animatedTransforms = this._animatedTransforms,
-          transformsLength = animatedTransforms ? animatedTransforms.length : 0,
-          transitionStyle = newStyle[SC.platform.domCSSPrefix+"Transition"],
-          layout = view.get('layout'),
-          key, keys = [], callback, idx, shouldCancel;
+        layer = view.get('layer'),
+        currentStyle = layer ? layer.style : null,
+        newStyle = view.get('layoutStyle'),
+        activeAnimations = this._activeAnimations, activeAnimation,
+        pendingAnimations = this._pendingAnimations, pendingAnimation,
+        animatedTransforms = this._animatedTransforms,
+        transformsLength = animatedTransforms ? animatedTransforms.length : 0,
+        key, keys = [], callback, idx, shouldCancel;
 
       if (pendingAnimations) {
         if (!activeAnimations) activeAnimations = {};
@@ -519,18 +523,21 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
           activeAnimations[key] = pendingAnimation;
           keys.push(key);
         }
-      }
 
-      this._groupedAnimations = {};
-      for (var i = 0; i < keys.length; i++) {
+        if (!this._groupedAnimations) this._groupedAnimations = {};
         this._groupedAnimations[key] = keys;
-      }
 
-      this._activeAnimations = activeAnimations;
-      this._pendingAnimations = null;
+        this._activeAnimations = activeAnimations;
+        this._pendingAnimations = null;
+      }
     }
   },
 
+  /** @private
+    This method is called after the layout style is applied to the layer.  If
+    the platform didn't support CSS transitions, the callbacks will be fired
+    immediately and the animations removed from the queue.
+  */
   didRenderAnimations: function(){
     if (!SC.platform.supportsCSSTransitions) {
       var key, callback,
@@ -545,6 +552,8 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
         }
         this.removeAnimationFromLayout(key, NO, YES);
       }
+
+      // Reset the placeholder variables now that the layout style has been applied.
       this._activeAnimations = this._pendingAnimations = null;
     }
   },
@@ -567,7 +576,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
     if (animation) {
-      propertyNames = this._groupedAnimations && this._groupedAnimations[propertyName];
       if (animation.callback) {
         // Charles says this is a good idea
         SC.RunLoop.begin();
@@ -578,11 +586,14 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       this.removeAnimationFromLayout(propertyName, YES);
 
       var key;
+      propertyNames = this._groupedAnimations && this._groupedAnimations[propertyName];
       if (propertyNames) {
         for (var i = 0, len = propertyNames.length; i < len; i++) {
           key = propertyNames[i];
-          this._activeAnimations[key] = this._groupedAnimations[key] = null;
+          delete this._activeAnimations[key];
         }
+
+        delete this._groupedAnimations[propertyName];
       }
     }
   },
@@ -592,7 +603,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       var layer = this.getPath('view.layer'),
           updatedCSS = [], key;
       for(key in this._activeAnimations) {
-        if (key !== propertyName && this._activeAnimations[key]) { updatedCSS.push(this._activeAnimations[key].css); }
+        if (key !== propertyName) { updatedCSS.push(this._activeAnimations[key].css); } //  && this._activeAnimations[key]
       }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
@@ -610,8 +621,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       this._animatedTransforms = null;
     }
     delete layout['animate' + SC.String.capitalize(propertyName)];
-
-    if (!isPending) { delete this._activeAnimations[propertyName]; }
   }
 
 });
