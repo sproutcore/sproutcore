@@ -123,7 +123,6 @@ if (SC.platform.supportsCSSTransitions) {
     var stopped = true;
 
     expect(1);
-    var propertyNames = "top left".w();
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
@@ -173,7 +172,7 @@ if (SC.platform.supportsCSSTransitions) {
   test("should not cancel callback when value hasn't changed", function() {
     var callbacks = 0, wasCancelled = NO, check = 0;
     stop(2000);
-    
+
     SC.RunLoop.begin();
     view.invokeLater(function() {
       // this triggers the initial layoutStyle code
@@ -185,12 +184,12 @@ if (SC.platform.supportsCSSTransitions) {
       view.displayDidChange();
     }, 1);
     SC.RunLoop.end();
-    
+
     setTimeout(function() {
       // capture the callbacks value
       check = callbacks;
     }, 250);
-    
+
     setTimeout(function() {
       start();
       equals(check, 0, "the callback should not have been cancelled initially");
@@ -199,33 +198,45 @@ if (SC.platform.supportsCSSTransitions) {
     }, 1000);
   });
 
-  // Placeholder for needed unit test.  (See below.)
-  test("adjusting and animating two different attributes in the same runloop should not throw an error");
-/*
-  // Attempted WIP version of above.
-  test("adjusting and animating two different attributes in the same runloop should not throw an error" , function(){
-    // Set up error handler.
-    SC.ExceptionHandler.handleException = function() {
-      ok(true);
-    };
-
+  /**
+    There was a bug in animation that once one property was animated, a null
+    version of it existed in _activeAnimations, such that when another property
+    was animated it would throw an exception iterating through _activeAnimations
+    and not expecting a null value.
+    */
+  test("animating different attributes at different times should not throw an error" , function(){
     // Run test.
     stop(2000);
 
     expect(0);
 
+    // Override and wrap the problematic method to capture the error.
+    view.layoutStyleCalculator.transitionDidEnd = function() {
+      try {
+        SC.View.LayoutStyleCalculator.prototype.transitionDidEnd.apply(this, arguments);
+        ok(true);
+      } catch (ex) {
+        ok(false);
+      }
+    };
+
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
     view.invokeLater(function() {
-      this.adjust('top', 100).animate('left', 100, 0.5);
+      view.animate('left', 75, 0.2);
     }, 1);
-    SC.RunLoop.invokeLater(function() {
-      start();
-    }, 1000);
     SC.RunLoop.end();
 
+    setTimeout(function() {
+      SC.RunLoop.begin();
+      view.animate('top', 50, 0.2);
+      SC.RunLoop.end();
+    }, 400);
+
+    setTimeout(function() {
+      start();
+    }, 1000);
   });
-*/
 
   test("should handle transform attributes", function(){
     SC.RunLoop.begin();
@@ -324,7 +335,6 @@ if (SC.platform.supportsCSSTransitions) {
     var stopped = true;
 
     expect(1);
-    var propertyNames = "top left scale".w();
 
     SC.RunLoop.begin();
     // We shouldn't have to use invokeLater, but it's the only way to get this to work!
