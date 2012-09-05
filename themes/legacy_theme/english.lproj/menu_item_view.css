@@ -25,12 +25,10 @@
   right:5px;
   top: 2px;
   background: transparent sc_static('images/icons/mini_222222');
-  background-position-x: 0px;
-  background-position-y: -160px;
+  background-position: 0px -160px;
 }
 
 .sc-menu-item.focus span.has-branch {
   background: transparent sc_static('images/icons/mini_ffffff');
-  background-position-x: 0px;
-  background-position-y: -160px;
+  background-position: 0px -160px;
 }
