@@ -24,7 +24,7 @@ SC.View.reopen(
     finger has completely left the view.  For example, a User might touch down
     on a button, but because of the wide surface of a finger, the touch might
     slip outside of the button's frame as the person lifts up.  If the button
-    uses touchIsInBoundary, then the user won't have to .
+    uses touchIsInBoundary it can make it easier for the User to hit it.
 
     By default, up to 25px on each side.
   */
