@@ -7,8 +7,8 @@ SC.View.reopen(
   // MULTITOUCH SUPPORT
   //
   /**
-    Set to YES if you want to receive touch events for each distinct touch (rather than only
-    the first touch start and last touch end).
+    Set to YES if you want to receive touch events for each distinct touch
+    (rather than only the first touch start and last touch end).
   */
   acceptsMultitouch: NO,
 
@@ -18,50 +18,43 @@ SC.View.reopen(
   hasTouch: NO,
 
   /**
-    A boundary set of distances outside which the touch will not be considered "inside" the view anymore.
+    A boundary set of distances outside which the touch will no longer be
+    considered "inside" the view anymore.  This is useful when we want to allow
+    a bit of touch drag outside of the view before we consider that the User's
+    finger has completely left the view.  For example, a User might touch down
+    on a button, but because of the wide surface of a finger, the touch might
+    slip outside of the button's frame as the person lifts up.  If the button
+    uses touchIsInBoundary, then the user won't have to .
 
-    By default, up to 50px on each side.
+    By default, up to 25px on each side.
   */
-  touchBoundary: { left: 50, right: 50, top: 50, bottom: 50 },
+  touchBoundary: { left: 25, right: 25, top: 25, bottom: 25 },
 
-  /**
-    @private
+  /** @private
     A computed property based on frame.
   */
-  _touchBoundaryFrame: function (){
-    return this.get("parentView").convertFrameToView(this.get('frame'), null);
-  }.property("frame", "parentView").cacheable(),
+  _touchBoundaryFrame: function () {
+    var boundary = this.get("touchBoundary"),
+      ret;
+
+    // Determine the frame of the View in screen coordinates
+    ret = this.get("parentView").convertFrameToView(this.get('frame'), null);
+
+    // Expand the frame to the acceptable boundary.
+    ret.x -= boundary.left;
+    ret.y -= boundary.top;
+    ret.width += boundary.left + boundary.right;
+    ret.height += boundary.top + boundary.bottom;
+
+    return ret;
+  }.property('touchBoundary', 'clippingFrame').cacheable(),
 
   /**
-    Returns YES if the provided touch is within the boundary.
+    Returns YES if the provided touch is within the boundary set by
+    touchBoundary.
   */
   touchIsInBoundary: function(touch) {
-    var f = this.get("_touchBoundaryFrame"), maxX = 0, maxY = 0, boundary = this.get("touchBoundary");
-    var x = touch.pageX, y = touch.pageY;
-
-    if (x < f.x) {
-      x = f.x - x;
-      maxX = boundary.left;
-    } else if (x > f.x + f.width) {
-      x = x - (f.x + f.width);
-      maxX = boundary.right;
-    } else {
-      x = 0;
-      maxX = 1;
-    }
-
-    if (y < f.y) {
-      y = f.y - y;
-      maxY = boundary.top;
-    } else if (y > f.y + f.height) {
-      y = y - (f.y + f.height);
-      maxY = boundary.bottom;
-    } else {
-      y = 0;
-      maxY = 1;
-    }
-
-    if (x > 100 || y > 100) return NO;
-    return YES;
+    return SC.pointInRect({x: touch.pageX, y: touch.pageY},
+      this.get("_touchBoundaryFrame"));
   }
 });
