@@ -111,7 +111,7 @@ SC.mixin( /** @scope SC */ {
       // offset to the results of getBoundingClientRect.
       //
       // See http://dev.jquery.it/ticket/6446
-      if (SC.browser.mobileSafari) {
+      if (SC.browser.isMobileSafari) {
         userAgent = navigator.userAgent;
         index = userAgent.indexOf('Mobile/');
         mobileBuildNumber = userAgent.substring(index + 7, index + 9);
@@ -124,7 +124,7 @@ SC.mixin( /** @scope SC */ {
 
       // Subtract the scroll offset for viewport coordinates
       if (relativeToFlag === 'viewport') {
-        
+
         if(SC.browser.isIE8OrLower){
           result.left -= $(window).scrollLeft();
           result.top -= $(window).scrollTop();
@@ -136,13 +136,13 @@ SC.mixin( /** @scope SC */ {
     }
 
     // Translate 'left', 'top' to 'x', 'y'
-    
+
     try{
       result.x = result.left;
       result.y = result.top;
     } catch (e) {
-      // We need this for IE, when the element is detached, for some strange 
-      // reason the object returned by element.getBoundingClientRect() 
+      // We need this for IE, when the element is detached, for some strange
+      // reason the object returned by element.getBoundingClientRect()
       // is read-only
       result = {x:result.left, y:result.top};
     }
