@@ -69,6 +69,14 @@ var pane = SC.ControlTestPane.design()
   .add("editable", SC.LabelView, { 
      value: "double click me",
      isEditable: YES
+  })
+  
+  .add("null value", SC.LabelView, { 
+     value: null
+  })
+  
+  .add("undefined value", SC.LabelView, { 
+     value: undefined
   });
 
 pane.show(); // add a test to show the test pane
@@ -95,6 +103,7 @@ test("Check that all Label are visible", function() {
   ok(pane.view('bold').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('bold height').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('editable').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
+  ok(pane.view('null value').get('isVisibleInWindow'), 'null value.isVisibleInWindow should be YES');
 });
   
 
@@ -149,7 +158,6 @@ test("Check that all labels have the right classes and styles set", function() {
   ok(!viewElem.hasClass('icon'), 'title,icon,selected.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
   ok(viewElem[0].style.fontWeight === 'bold', 'bold view should have bold fontWeight');
-   
 });
 
 
@@ -160,6 +168,11 @@ test("Check that the title is set or not and if it is in the appropriate element
   viewElem=pane.view('centered,icon').$('img');
   ok((viewElem!==null), 'should have an image corresponding to an icon');
 
+  viewElem=pane.view('null value').$();
+  equals(viewElem.text(), '', 'has correct empty value set');
+  
+  viewElem=pane.view('undefined value').$();
+  equals(viewElem.text(), '', 'has correct empty value set');
 });
 
 })();

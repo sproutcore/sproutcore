@@ -135,7 +135,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       }
     }
 
-    return icon + !SC.none(title) ? title : '';
+    return icon + (!SC.none(title) ? title : '');
   }
 
 });
