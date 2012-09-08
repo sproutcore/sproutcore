@@ -10,20 +10,20 @@ sc_require('render_delegates/render_delegate');
 /**
   @class
   Renders and updates DOM representations of a label.
-  
+
   Parameters
   --------------------------
   Expects these properties on the data source:
-  
+
   - title
-  
+
   If any of these are not present in the data source, the render delegate
   will throw an error.
-  
+
   Optional Parameters:
   ---------------------------
   If present, these properties will be used.
-  
+
   - icon: should be either a class name or a URL
   - hint: allows the label to display a hint value if its title is empty.
   - escapeHTML: whether the HTML should be escaped to prevent XSS attacks
@@ -36,10 +36,10 @@ sc_require('render_delegates/render_delegate');
 
 SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   className: 'label',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
-    
+
     var toolTip = dataSource.get('toolTip');
     if (toolTip) {
       context.attr('title', toolTip);
@@ -53,19 +53,19 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
-    
+
     context.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
     context.setClass('icon', dataSource.get('icon') || NO);
 
     var html = this.htmlForTitleAndIcon(dataSource);
     context.push(html);
-    
+
     // we could use didChangeFor, but in this case, checking the generated
     // HTML will probably be faster (and definitely be simpler)
     // because several properties are used.
     dataSource.get('renderState')._lastHTMLForTitleAndIcon = html;
   },
-  
+
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 
@@ -77,7 +77,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
-    
+
     var toolTip = dataSource.get('toolTip');
     if (toolTip) {
       jquery.attr('title', toolTip);
@@ -85,7 +85,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     else {
       jquery.removeAttr('title');
     }
-    
+
     jquery.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
 
     var html = this.htmlForTitleAndIcon(dataSource);
@@ -94,7 +94,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       dataSource.get('renderState')._lastHTMLForTitleAndIcon = html;
     }
   },
-  
+
   /**
     Generates the HTML for the title and icon of the label. Render delegates can
     override this to change how that HTML renders without affecting the rest of the
