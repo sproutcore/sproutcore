@@ -133,9 +133,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       for (var i = bindings.length - 1; i >= 0; i--) {
         if (bindings[i] === key) {
           // There is already a binding for this key!
-          SC.Logger.warnGroup("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
+          SC.warn("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
           SC.Logger.trace();
-          SC.Logger.warnGroupEnd();
         }
       }
       //@endif
