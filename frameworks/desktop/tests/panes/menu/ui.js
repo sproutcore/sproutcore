@@ -11,14 +11,14 @@ var items = [
   { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
   { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
   { title: 'Selected Menu Item', keyEquivalent: 'backspace' },
-  { separator: YES },
+  { isSeparator: YES },
   { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
   { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: ['ctrl_p', 'ctrl_f'] },
-  { separator: YES },
+  { isSeparator: YES },
   { title: 'Selected Menu Item…', isChecked: YES, keyEquivalent: 'ctrl_shift_o' },
   { title: 'Item with Submenu', subMenu: [{ title: 'Submenu item 1' }, { title: 'Submenu item 2'}] },
   { title: 'Disabled Menu Item', isEnabled: NO },
-  { separator: YES },
+  { isSeparator: YES },
   { title: 'Unique Menu Item Class Per Item', exampleView: SC.MenuItemView.extend({
       classNames: 'custom-menu-item'.w()
     }) }
@@ -110,7 +110,7 @@ test('Basic UI', function(){
 test('Control size', function() {
   var smallPane, largePane, views, items = [
     { title: 'Can I get get get' },
-    { title: 'To know know know know', separator: YES },
+    { title: 'To know know know know', isSeparator: YES },
     { title: 'Ya better better baby' }
   ];
 

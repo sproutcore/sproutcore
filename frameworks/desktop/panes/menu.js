@@ -381,10 +381,10 @@ SC.MenuPane = SC.PickerPane.extend(
     separator.
 
     @type String
-    @default "separator"
+    @default "isSeparator"
     @commonTask Menu Item Properties
   */
-  itemSeparatorKey: 'separator',
+  itemSeparatorKey: 'isSeparator',
 
   /**
     The name of the property that contains the target for the action that is
@@ -552,12 +552,12 @@ SC.MenuPane = SC.PickerPane.extend(
       parentViewDidResize: function() {
         this.notifyPropertyChange('frame');
       },
-      
+
       viewDidResize: function() {
-        
+
       }
     });
-    
+
     menuItemViews = this.get('menuItemViews');
     menuView.set('layout', { top: 0, left: 0, height : this.get('menuHeight')});
     menuView.replaceAllChildren(menuItemViews);
@@ -674,6 +674,17 @@ SC.MenuPane = SC.PickerPane.extend(
       height = item.get(heightKey);
       if (!height) {
         height = item.get(separatorKey) ? separatorHeight : defaultHeight;
+        //@if(debug)
+        // TODO: Remove in 1.10 and 2.0
+        // Help the developer if they were relying on the previously misleading
+        // default value of itemSeparatorKey.  We need to ensure that the change
+        // is backwards compatible with apps prior to 1.9.
+        if (separatorKey === 'isSeparator' && SC.none(item.get('isSeparator')) && item.get('separator')) {
+          SC.warn("Developer Warning: the default value of itemSeparatorKey has been changed from 'separator' to 'isSeparator' to match the documentation.  Please update your menu item properties to 'isSeparator: YES' to remove this warning.");
+          height = separatorHeight;
+          item.set('isSeparator', YES);
+        }
+        //@endif
       }
 
       propertiesHash = {
