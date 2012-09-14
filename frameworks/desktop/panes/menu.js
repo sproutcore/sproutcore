@@ -543,7 +543,7 @@ SC.MenuPane = SC.PickerPane.extend(
   createChildViews: function() {
     var scroll, menuView, menuItemViews;
 
-    scroll = this.createChildView(SC.MenuScrollView, {
+    scroll = this._menuScrollView = this.createChildView(SC.MenuScrollView, {
       borderStyle: SC.BORDER_NONE,
       controlSize: this.get('controlSize')
     });
@@ -1080,9 +1080,9 @@ SC.MenuPane = SC.PickerPane.extend(
         verticalPageScroll,
         itemsPerPage;
 
-    if (this._scrollView && this._scrollView.verticalScrollerView ) {
-      verticalPageScroll = this._scrollView.get('verticalPageScroll');
-      verticalPageScroll -= this._scrollView.verticalScrollerView.getPath('frame.height');
+    if (this._menuScrollView && this._menuScrollView.verticalScrollerView2) {
+      verticalPageScroll = this._menuScrollView.get('verticalPageScroll');
+      verticalPageScroll -= this._menuScrollView.verticalScrollerView2.getPath('frame.height');
       itemsPerPage = Math.floor(verticalPageScroll / itemHeight);
 
       if (currentMenuItem) {
@@ -1123,9 +1123,9 @@ SC.MenuPane = SC.PickerPane.extend(
         verticalPageScroll,
         itemsPerPage;
 
-    if (this._scrollView && this._scrollView.verticalScrollerView ) {
-      verticalPageScroll = this._scrollView.get('verticalPageScroll');
-      verticalPageScroll -= this._scrollView.verticalScrollerView.getPath('frame.height');
+    if (this._menuScrollView && this._menuScrollView.verticalScrollerView) {
+      verticalPageScroll = this._menuScrollView.get('verticalPageScroll');
+      verticalPageScroll -= this._menuScrollView.verticalScrollerView.getPath('frame.height');
       itemsPerPage = Math.floor(verticalPageScroll / itemHeight);
 
       if (currentMenuItem) {
