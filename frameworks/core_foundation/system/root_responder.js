@@ -1573,9 +1573,10 @@ SC.RootResponder = SC.Object.extend(
     Determines if the keyDown event is a nonprintable or function key. These
     kinds of events are processed as keyboard shortcuts.  If no shortcut
     handles the event, then it will be sent as a regular keyDown event.
+    This function is only valid when called with a keydown event.
   */
-  _isFunctionOrNonPrintableKey: function (evt) {
-    return !!(evt.altKey || evt.ctrlKey || evt.metaKey || ((evt.charCode !== evt.which) && SC.FUNCTION_KEYS[evt.which]));
+  _isFunctionOrNonPrintableKey: function(evt) {
+    return !!(evt.altKey || evt.ctrlKey || evt.metaKey || SC.FUNCTION_KEYS[evt.which]);
   },
 
   /** @private
@@ -1584,6 +1585,20 @@ SC.RootResponder = SC.Object.extend(
   */
   _isModifierKey: function (evt) {
     return !!SC.MODIFIER_KEYS[evt.charCode];
+  },
+
+   /**
+     @private
+     Determines if the key is printable (and therefore should be dispatched from keypress).
+     Some browsers send backspace, tab, enter, and escape on keypress, so we want to
+     explicitly ignore those here.
+
+     @param {KeyboardEvent} evt keypress event
+     @returns {Boolean}
+   */
+  _isPrintableKey: function(evt) {
+    return ((evt.originalEvent.which === undefined || evt.originalEvent.which > 0) &&
+      !(evt.which === 8 || evt.which === 9 || evt.which === 13 || evt.which === 27));
   },
 
   /** @private
@@ -1646,7 +1661,6 @@ SC.RootResponder = SC.Object.extend(
       // Arrow keys are handled in keypress for firefox
       if (keyCode >= 37 && keyCode <= 40 && SC.browser.isMozilla) return YES;
 
-
       ret = this.sendEvent('keyDown', evt);
 
       // attempt key equivalent if key not handled
@@ -1678,6 +1692,7 @@ SC.RootResponder = SC.Object.extend(
       this.keydownCounter++;
       if (this.keydownCounter == 2) return YES;
     }
+
     // delete is handled in keydown() for most browsers
     if (isFirefox && (evt.which === 8)) {
       //get the keycode and set it for which.
@@ -1693,10 +1708,11 @@ SC.RootResponder = SC.Object.extend(
 
       if ((charCode !== undefined && charCode === 0 && evt.keyCode !== 9) && !isFirefoxArrowKeys) return YES;
       if (isFirefoxArrowKeys) evt.which = keyCode;
-
       // we only want to rethrow if this is a printable key so that we don't
-      // duplicate the event sent in keydown when a modifier key is pressed
-      if (isFirefoxArrowKeys || !this._isFunctionOrNonPrintableKey(evt)) return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      // duplicate the event sent in keydown when a modifier key is pressed.
+      if (isFirefoxArrowKeys || this._isPrintableKey(evt)) {
+        return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling : YES;
+      }
     }
   },
 
