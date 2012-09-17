@@ -409,31 +409,14 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     return YES;
   },
 
-  // do it here instead of waiting on the binding to make sure the UI
-  // updates immediately.
-  /** @private */
-  fieldValueDidChange: function(partialChange) {
-    arguments.callee.base.call(this, partialChange) ;
-    //this.resizeToFit(this.getFieldValue()) ;
-  },
-
-  // invoked when the user presses return.  If this is a multi-line field,
-  // then allow the newine to proceed.  Otherwise, try to commit the
-  // edit.
+  // Invoked when the user presses return.  If this is a multi-line field,
+  // then allow the new line to proceed by calling the super class. 
+  // Otherwise, try to commit the edit.
   /** @private */
   insertNewline: function(evt) {
     if (this.get('isTextArea')) {
-      evt.allowDefault();
-      return arguments.callee.base.call(this, evt) ;
+      return sc_super();
     } else {
-      // TODO : this is a work around. There is a bug where the
-      // last character would get dropped
-      // if the editing was completed by pressing return
-      // needs to be fixed
-      if (this.get('value') != this.$input().val()) {
-        this.set('value', this.$input().val());
-      }
-
       this.commitEditing() ;
       return YES ;
     }

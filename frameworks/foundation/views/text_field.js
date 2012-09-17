@@ -1181,6 +1181,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     return YES ; // handled
   },
 
+  // If this is a multi-line field, then allow the new line to proceed.
+  /** @private */
+  insertNewline: function(evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES; // handled
+    }
+  },
+
   keyUp: function (evt) {
     if (SC.browser.isMozilla &&
         evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
