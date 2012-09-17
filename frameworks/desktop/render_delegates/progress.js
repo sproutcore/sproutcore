@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.BaseTheme.PROGRESS_OFFSET = 5;
-SC.BaseTheme.PROGRESS_OFFSET_RANGE = 48;
+SC.BaseTheme.PROGRESS_OFFSET = 0.5;
+SC.BaseTheme.PROGRESS_OFFSET_RANGE = 42;
 
 /**
   Renders and updates DOM representations of progress bars.
@@ -18,6 +18,7 @@ SC.BaseTheme.PROGRESS_OFFSET_RANGE = 48;
    - `isIndeterminate`
    - `isRunning`
    - `isEnabled`
+   - `isVisibleInWindow`
    - `value`
 
   Theme Constants
@@ -32,9 +33,9 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     this.addSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
-        valueMax = dataSource.get('maximum'),
-        valueMin = dataSource.get('minimum'),
-        valueNow = dataSource.get('ariaValue');
+      valueMax = dataSource.get('maximum'),
+      valueMin = dataSource.get('minimum'),
+      valueNow = dataSource.get('ariaValue');
 
     var value;
     if (dataSource.get('isIndeterminate')) {
@@ -48,7 +49,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuemin', valueMin);
     context.attr('aria-valuenow', valueNow);
     context.attr('aria-valuetext', valueNow);
-
 
     context.setClass({
       indeterminate: dataSource.get('isIndeterminate'),
@@ -72,12 +72,14 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     this.updateSizeClassName(dataSource, $);
 
     var theme = dataSource.get('theme'),
-        valueMax = dataSource.get('maximum'),
-        valueMin = dataSource.get('minimum'),
-        valueNow = dataSource.get('ariaValue'),
-        isIndeterminate = dataSource.get('isIndeterminate'),
-        isRunning = dataSource.get('isRunning'),
-        isEnabled = dataSource.get('isEnabled');
+      value,
+      valueMax = dataSource.get('maximum'),
+      valueMin = dataSource.get('minimum'),
+      valueNow = dataSource.get('ariaValue'),
+      isIndeterminate = dataSource.get('isIndeterminate'),
+      isRunning = dataSource.get('isRunning'),
+      isEnabled = dataSource.get('isEnabled'),
+      isVisibleInWindow = dataSource.get('isVisibleInWindow');
 
     // make accessible
     $.attr('aria-valuemax', valueMax);
@@ -85,8 +87,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     $.attr('aria-valuenow', valueNow);
     $.attr('aria-valuetext', valueNow);
 
-
-    var value;
     if (isIndeterminate) {
       value = 1;
     } else {
@@ -102,26 +102,47 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     });
 
     $.find('.content').css('width', (value * 100) + "%");
-    if(isIndeterminate && isRunning) { // bas keeps running
-        var middle = $.find('.middle');
-        var offset = this.getBackgroundImagePos(middle).x;
-        offset = Math.round((Math.abs(offset) + SC.BaseTheme.PROGRESS_OFFSET ) % SC.BaseTheme.PROGRESS_OFFSET_RANGE );
-
-        middle.css('background-position', offset+"px -2px");
-    }
+    if (isIndeterminate && isRunning && isVisibleInWindow) { this.animate(dataSource); }
   },
 
-   getBackgroundImagePos: function(e) {
-        var result = $(e).css("background-position");
-        if (typeof result == "string") {
-            var a = result.split(" ");
-        } else {
-            var a = [$(e).css("background-position-x"),
-                     $(e).css("background-position-y")];
+  /**
+    Animates the indeterminate progress view's middle background using
+    JavaScript and requestAnimationFrame().
+    */
+  animate: function(dataSource) {
+    var middle = SC.$('.content .middle'), // Don't use buffered jQuery!
+      offset = this._lastOffset,
+      self = this;
+
+    // Initialize the offset at 0.
+    if (SC.none(offset)) { offset = this._lastOffset = 0; }
+
+    function _animate() {
+      var roundedOffset;
+
+      if (dataSource.get('isIndeterminate') && dataSource.get('isRunning') && dataSource.get('isVisibleInWindow')) {
+        window.requestAnimationFrame(_animate);
+
+        offset = self._lastOffset;
+        offset = (offset + SC.BaseTheme.PROGRESS_OFFSET) % SC.BaseTheme.PROGRESS_OFFSET_RANGE;
+
+        // Only update the style when the offset changes (this avoids making
+        // the browser recalculate style in each frame).
+        roundedOffset = Math.round(offset);
+        if (roundedOffset > Math.round(self._lastOffset)) {
+          middle.css('background-position', roundedOffset + "px -2px");
         }
-        return {
-            x: parseFloat(a[0]),
-            y: parseFloat(a[1])
-        };
+
+        self._lastOffset = offset;
+      } else if (!dataSource.get('isIndeterminate')) {
+        // Clear out our custom background-position when isIndeterminate goes
+        // false.  Don't reset it when isRunning goes false, because that
+        // would cause the animation to jump.
+        middle.css('background-position', '');
+      }
     }
+
+    // Start the animation.
+    _animate();
+  }
 });
