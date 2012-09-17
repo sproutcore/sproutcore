@@ -1188,6 +1188,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       evt.allowDefault();
       return YES; // handled
     }
+    return NO;
   },
 
   keyUp: function (evt) {
