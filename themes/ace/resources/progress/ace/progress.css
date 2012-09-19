@@ -23,7 +23,7 @@ $theme.progress {
   &.indeterminate {
     .content {
       /* width set in rendering */
-      @include slices("progress_view_indeterminate_content.png", $left: 1, $right: 1, $fill: 42 0);
+      @include slices("progress_view_indeterminate_content.png", $left: 1, $right: 1, $fill: 10 0);
     }
   }
 

@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.BaseTheme.PROGRESS_OFFSET = 0.5;
-SC.BaseTheme.PROGRESS_OFFSET_RANGE = 42;
+SC.BaseTheme.PROGRESS_OFFSET_RANGE = 10;
 
 /**
   Renders and updates DOM representations of progress bars.
@@ -68,8 +68,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context = context.end();
   },
 
-  update: function(dataSource, $) {
-    this.updateSizeClassName(dataSource, $);
+  update: function(dataSource, context) {
+    this.updateSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
       value,
@@ -82,10 +82,10 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       isVisibleInWindow = dataSource.get('isVisibleInWindow');
 
     // make accessible
-    $.attr('aria-valuemax', valueMax);
-    $.attr('aria-valuemin', valueMin);
-    $.attr('aria-valuenow', valueNow);
-    $.attr('aria-valuetext', valueNow);
+    context.attr('aria-valuemax', valueMax);
+    context.attr('aria-valuemin', valueMin);
+    context.attr('aria-valuenow', valueNow);
+    context.attr('aria-valuetext', valueNow);
 
     if (isIndeterminate) {
       value = 1;
@@ -93,7 +93,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       value = dataSource.get('value');
     }
 
-    $.setClass({
+    context.setClass({
       indeterminate: isIndeterminate,
       running: isRunning,
       disabled: !isEnabled,
@@ -101,7 +101,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       'sc-complete': (value >= 1 && !isIndeterminate)
     });
 
-    $.find('.content').css('width', (value * 100) + "%");
+    context.find('.content').css('width', (value * 100) + "%");
     if (isIndeterminate && isRunning && isVisibleInWindow) { this.animate(dataSource); }
   },
 
@@ -110,17 +110,29 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     JavaScript and requestAnimationFrame().
     */
   animate: function(dataSource) {
-    var middle = SC.$('.content .middle'), // Don't use buffered jQuery!
-      offset = this._lastOffset,
-      self = this;
+    var offset = this._lastOffset,
+        self = this,
+        animating = this._animating;
+
+    // avoid invoking the animation code mutliple times if more than
+    // one progress bar neeeds animating and one has already started the loop
+    if(this._animating) return;
 
     // Initialize the offset at 0.
     if (SC.none(offset)) { offset = this._lastOffset = 0; }
 
+
     function _animate() {
+      var middle =  SC.$('.sc-progress-view.indeterminate.running .content .middle');
       var roundedOffset;
 
+      // nothing to animate
+      if(middle.length==0) {
+          self._animating=false;
+      }
+
       if (dataSource.get('isIndeterminate') && dataSource.get('isRunning') && dataSource.get('isVisibleInWindow')) {
+        self._animating=true;
         window.requestAnimationFrame(_animate);
 
         offset = self._lastOffset;
