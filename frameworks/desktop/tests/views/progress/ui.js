@@ -291,6 +291,9 @@ test("on indeterminate state animation respects start,stop", function() {
     var currentBgPos = view.$('.middle').css('background-position');
 
     var assertionsOnStart = function(){
+        ok(view.$().hasClass('indeterminate'), 'should have indeterminate class');
+        ok(view.$().hasClass('running'), 'should have indeterminate class');
+
         var newBgPos = view.$('.middle').css('background-position');
         ok(!(currentBgPos === newBgPos), 'bg pos should have changed (old was '+currentBgPos+' new is: '+newBgPos+')');
 
@@ -311,7 +314,7 @@ test("on indeterminate state animation respects start,stop", function() {
     };
 
     stop();
-    setTimeout(assertionsOnStart, 300);
+    setTimeout(assertionsOnStart, 500);
 
 });
 
