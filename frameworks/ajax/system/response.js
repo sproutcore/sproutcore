@@ -656,7 +656,7 @@ SC.XHRResponse = SC.Response.extend(
       if (window.XMLHttpRequestProgressEvent) {
         // XMLHttpReqeust Level 2
 
-        SC.Event.remove(rawRequest, 'loadend', this, this.requestDidEnd);
+        SC.Event.remove(rawRequest, 'loadend', this, this.finishRequest);
 
         request = this.get('request');
         listeners = request.get("listeners");

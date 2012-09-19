@@ -26,7 +26,7 @@ module("SC.offset", {
     // the offset by viewport will always equal offset by document), we simulate an app that uses a
     // scrollable viewport to test the validity of the functions.
     var viewportEl;
-    if (SC.browser.mobileSafari) {
+    if (SC.browser.isMobileSafari) {
       viewportEl = $("[name='viewport']")[0];
 
       viewportEl.setAttribute('content','initial-scale=0.8, minimum-scale=0.5, maximum-scale=1.2, user-scalable=yes, width=device-height');
@@ -56,15 +56,15 @@ module("SC.offset", {
       // Useful for debugging in iOS
       // /** Allow default touch events */
       //  touchStart: function(touch) {
-      //    if (SC.browser.mobileSafari) touch.allowDefault();
+      //    if (SC.browser.isMobileSafari) touch.allowDefault();
       //  },
       //
       //  touchesDragged: function(evt, touches) {
-      //    if (SC.browser.mobileSafari) evt.allowDefault();
+      //    if (SC.browser.isMobileSafari) evt.allowDefault();
       //  },
       //
       //  touchEnd: function(touch) {
-      //    if (SC.browser.mobileSafari) touch.allowDefault();
+      //    if (SC.browser.isMobileSafari) touch.allowDefault();
       //  }
     });
     pane.append();
@@ -78,7 +78,7 @@ module("SC.offset", {
 
   teardown: function() {
     // Useful for debugging in iOS
-    // if (!SC.browser.mobileSafari) {
+    // if (!SC.browser.isMobileSafari) {
       pane.remove();
       pane = view1 = view2 = view3 = view4 = null;
     // }

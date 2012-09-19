@@ -361,8 +361,12 @@ jQuery.Buffer = function() {
 
   Buffer.prototype.removeClass = function(value) {
     var context = this.bufferedCommand("flushClassNames");
-    if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
-    context.classNames[value] = false;
+    if (value === undefined) {
+      context.classNames = {};
+    } else {
+      if (!context.classNames) context.classNames = this._hashFromClassNames(this._el.className);
+      context.classNames[value] = false;
+    }
   };
 
   Buffer.prototype.resetClassNames = function(value) {

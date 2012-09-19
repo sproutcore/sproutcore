@@ -1129,30 +1129,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
 
-  /**
-    Simply allow keyDown & keyUp to pass through to the default web browser
-    implementation.
-   */
+  /** @private */
   keyDown: function (evt) {
+    return this.interpretKeyEvents(evt) || NO;
+  },
+
+  /** @private */
+  insertText: function(chr, evt) {
     var which = evt.which,
         keyCode = evt.keyCode,
-        maxLengthReached = false,
-        value, view;
-
-    // Handle return and escape.  this way they can be passed on to the
-    // responder chain.
-    // If the event is triggered by a return while entering IME input,
-    // don't got through this path.
-    if ((which === SC.Event.KEY_RETURN && !evt.isIMEInput) && !this.get('isTextArea')) { return NO; }
-    if (which === SC.Event.KEY_ESC) { return NO; }
-
-    // handle tab key
-    if ((which === SC.Event.KEY_TAB || keyCode === SC.Event.KEY_TAB) && this.get('defaultTabbingEnabled')) {
-      view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      if (view) view.becomeFirstResponder();
-      else evt.allowDefault();
-      return YES ; // handled
-    }
+        maxLengthReached = false;
 
     // maxlength for textareas
     if (!SC.platform.input.maxlength && this.get('isTextArea')) {
@@ -1182,6 +1168,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
 
     return YES;
+  },
+
+  /** @private */
+  insertTab: function(evt) {
+    // Don't handle if default tabbing hasn't been enabled.
+    if (!this.get('defaultTabbingEnabled')) return NO;
+    // Otherwise, handle.
+    var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES ; // handled
   },
 
   keyUp: function (evt) {

@@ -932,6 +932,10 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         }
       }
 
+      // Clean up these properties once they have been used.
+      delete this._observers;
+      delete this._bindings;
+      delete this._properties;
     },
 
     /**

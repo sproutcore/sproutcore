@@ -14,7 +14,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
 
     var theme = dataSource.get('theme'),
         value = dataSource.get('value'),
-        title = dataSource.get('title');
+        labelClassNames = ['sc-button-label', 'sc-disclosure-label'];
 
     var labelId = SC.guidFor(dataSource) + "-label";
 
@@ -29,8 +29,8 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     if (dataSource.get('isActive')) state += ' active';
     
     context.push('<img src = "' + SC.BLANK_IMAGE_URL + '" class = "disclosure button ' + state + '" />');
-    
-    context = context.begin('span').addClass('sc-button-label').id(labelId);
+
+    context = context.begin('span').addClass(labelClassNames).id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
   },
@@ -39,8 +39,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     this.updateSizeClassName(dataSource, jquery);
 
     var theme = dataSource.get('theme'),
-        value = dataSource.get('value'),
-        title = dataSource.get('title');
+        value = dataSource.get('value');
 
     //addressing accessibility
     jquery.attr('aria-expanded', value);
@@ -52,8 +51,8 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
       closed: !dataSource.get('isSelected'),
       active: dataSource.get('isActive')
     });
-    
-    theme.labelRenderDelegate.update(dataSource, jquery.find('span.sc-button-label'));
+
+    theme.labelRenderDelegate.update(dataSource, jquery.find('span.sc-disclosure-label'));
   }
 });
 
