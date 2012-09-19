@@ -6,21 +6,27 @@ $theme.progress {
     right: 0px;
     top: 0px;
     bottom: 0px;
-    
+
     @include slices("progress_view_track.png", $left: 1, $right: 1);
   }
-  
+
   .content {
     position: absolute;
     left: 0px;
     top: 0px;
     bottom: 0px;
-    
+
     /* width set in rendering */
-    
     @include slices("progress_view_content.png", $left: 1, $right: 1);
   }
-  
+
+  &.indeterminate {
+    .content {
+      /* width set in rendering */
+      @include slices("progress_view_indeterminate_content.png", $left: 1, $right: 1, $fill: 10 0);
+    }
+  }
+
   &.disabled {
     opacity: .5;
   }
