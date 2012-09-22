@@ -903,18 +903,20 @@ test("should be able to bind view class names to properties", function() {
 test("should be able to bind element attributes using {{bindAttr}}", function() {
   var template = SC.Handlebars.compile('<img {{bindAttr src="content.url" alt="content.title"}}>');
 
+  // There was a bug where if the initial value of an attribute contained
+  // double quotes ("), they would not be escaped properly.
   var view = SC.TemplateView.create({
     template: template,
     content: SC.Object.create({
       url: "http://www.sproutcore.com/img/branding/logo/png/dark.png",
-      title: "The SproutCore Logo"
+      title: "The \"SproutCore\" Logo"
     })
   });
 
   view.createLayer();
 
   equals(view.$('img').attr('src'), "http://www.sproutcore.com/img/branding/logo/png/dark.png", "sets src attribute");
-  equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
+  equals(view.$('img').attr('alt'), "The \"SproutCore\" Logo", "sets alt attribute");
 
   SC.run(function() {
     view.setPath('content.title', "El logo de Esproutcore");
