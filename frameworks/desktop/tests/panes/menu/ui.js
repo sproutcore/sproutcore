@@ -58,19 +58,17 @@ module('SC.MenuPane UI', {
   }
 });
 
-/*
-  Simulates clicking on the specified index.  If you pass verify as YES or NO
-  also verifies that the item view is subsequently selected or not.
+/**
+  Simulates clicking on the specified view.
 
   @param {SC.View} view the view
-  @param {Boolean} shiftKey simulate shift key pressed
-  @param {Boolean} ctrlKey simulate ctrlKey pressed
-  @returns {void}
+  @param {Boolean} [shiftKey] simulate shift key pressed
+  @param {Boolean} [ctrlKey] simulate ctrlKey pressed
 */
 function clickOn(view, shiftKey, ctrlKey) {
   var layer    = view.get('layer'),
-      opts     = { shiftKey: shiftKey, ctrlKey: ctrlKey },
-      sel, ev, modifiers;
+      opts     = { shiftKey: !!shiftKey, ctrlKey: !!ctrlKey },
+      ev;
 
   ok(layer, 'precond - view %@ should have layer'.fmt(view.toString()));
 
@@ -79,6 +77,43 @@ function clickOn(view, shiftKey, ctrlKey) {
 
   ev = SC.Event.simulateEvent(layer, 'mouseup', opts);
   SC.Event.trigger(layer, 'mouseup', [ev]);
+  SC.RunLoop.begin();
+  SC.RunLoop.end();
+  layer = null ;
+}
+
+/**
+  Simulates a key press on the specified view.
+
+  @param {SC.View} view the view
+  @param {Number} keyCode key to simulate
+  @param {Boolean} [isKeyPress] simulate key press event
+  @param {Boolean} [shiftKey] simulate shift key pressed
+  @param {Boolean} [ctrlKey] simulate ctrlKey pressed
+*/
+function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
+  var layer    = view.get('layer'),
+      opts     = {
+        shiftKey: !!shiftKey,
+        ctrlKey: !!ctrlKey,
+        keyCode: keyCode,
+        charCode: isKeyPress ? keyCode : 0,
+        which: keyCode
+      },
+      ev;
+
+  ok(layer, 'precond - view %@ should have layer'.fmt(view.toString()));
+
+  ev = SC.Event.simulateEvent(layer, 'keydown', opts);
+  SC.Event.trigger(layer, 'keydown', [ev]);
+
+  if (isKeyPress) {
+    ev = SC.Event.simulateEvent(layer, 'keypress', opts);
+    SC.Event.trigger(layer, 'keypress', [ev]);
+  }
+
+  ev = SC.Event.simulateEvent(layer, 'keyup', opts);
+  SC.Event.trigger(layer, 'keyup', [ev]);
   SC.RunLoop.begin();
   SC.RunLoop.end();
   layer = null ;
@@ -258,6 +293,38 @@ test('keyEquivalents', function() {
   });
 });
 
+test('scrolling', function() {
+  var currentMenuItem;
+
+  menu.popup();
+  menu.set('currentMenuItem', menu.get('menuItemViews')[0]);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Menu Item', 'menu should begin at first item');
+
+  keyPressOn(menu, SC.Event.KEY_DOWN);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Checked Menu Item', 'arrow down should move one item down');
+
+  keyPressOn(menu, SC.Event.KEY_UP);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Menu Item', 'arrow up should move one item up');
+
+  keyPressOn(menu, SC.Event.KEY_PAGEDOWN);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Unique Menu Item Class Per Item', 'page down should move one page down');
+
+  keyPressOn(menu, SC.Event.KEY_PAGEUP);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Menu Item', 'page up should move one page up');
+
+  keyPressOn(menu, SC.Event.KEY_END);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Unique Menu Item Class Per Item', 'end should move to the last item');
+
+  keyPressOn(menu, SC.Event.KEY_HOME);
+  currentMenuItem = menu.get('currentMenuItem');
+  equals(currentMenuItem.get('title'), 'Menu Item', 'home should move to the first item');
+});
 
 test('aria-role attribute', function() {
   var menuPane = SC.MenuPane.create({
