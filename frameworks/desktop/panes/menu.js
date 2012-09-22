@@ -1083,34 +1083,37 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   pageDown: function() {
     var currentMenuItem = this.get('currentMenuItem'),
-        items = this.get('menuItemViews'),
+        item, items = this.get('menuItemViews'),
         len = items.get('length'),
-        itemHeight = this.get('itemHeight'),
         idx = 0,
-        foundItem = NO,
-        verticalPageScroll,
-        itemsPerPage;
+        foundItemIdx,
+        verticalOffset = 0,
+        verticalPageScroll;
 
     if (this._menuScrollView && this._menuScrollView.verticalScrollerView2) {
-      verticalPageScroll = this._menuScrollView.get('verticalPageScroll');
-      verticalPageScroll -= this._menuScrollView.verticalScrollerView2.getPath('frame.height');
-      itemsPerPage = Math.floor(verticalPageScroll / itemHeight);
 
       if (currentMenuItem) {
         idx = currentMenuItem.getPath('content.contentIndex');
       }
 
-      if (idx >= 0 && idx < len - 1) {
-        idx = Math.min(idx + itemsPerPage, len - 1);
-        while (idx < len && !foundItem) {
-          if (items[idx].get('isEnabled')) {
-            this.set('currentMenuItem', items[idx]);
-            items[idx].becomeFirstResponder();
-            foundItem = YES;
-          }
-          ++idx;
+      foundItemIdx = idx;
+      verticalPageScroll = this._menuScrollView.get('verticalPageScroll');
+      for (idx; idx < len; idx++) {
+        item = items[idx];
+        verticalOffset += item.get('layout').height;
+
+        if (verticalOffset > verticalPageScroll) {
+          // We've gone further than an entire page scroll, so stop.
+          break;
+        } else {
+          // Only accept enabled items (which also excludes separators).
+          if (item.get('isEnabled')) { foundItemIdx = idx; }
         }
       }
+
+      item = items[foundItemIdx];
+      this.set('currentMenuItem', item);
+      item.becomeFirstResponder();
     } else {
       this.moveToEndOfDocument();
     }
@@ -1126,34 +1129,37 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   pageUp: function() {
     var currentMenuItem = this.get('currentMenuItem'),
-        items = this.get('menuItemViews'),
+        item, items = this.get('menuItemViews'),
         len = items.get('length'),
-        itemHeight = this.get('itemHeight'),
         idx = len - 1,
-        foundItem = NO,
-        verticalPageScroll,
-        itemsPerPage;
+        foundItemIdx,
+        verticalOffset = 0,
+        verticalPageScroll;
 
     if (this._menuScrollView && this._menuScrollView.verticalScrollerView) {
-      verticalPageScroll = this._menuScrollView.get('verticalPageScroll');
-      verticalPageScroll -= this._menuScrollView.verticalScrollerView.getPath('frame.height');
-      itemsPerPage = Math.floor(verticalPageScroll / itemHeight);
 
       if (currentMenuItem) {
         idx = currentMenuItem.getPath('content.contentIndex');
       }
 
-      if (idx > 0 && idx < len) {
-        idx = Math.max(idx - itemsPerPage, 0);
-        while (idx >= 0 && !foundItem) {
-          if (items[idx].get('isEnabled')) {
-            this.set('currentMenuItem', items[idx]);
-            items[idx].becomeFirstResponder();
-            foundItem = YES;
-          }
-          --idx;
+      foundItemIdx = idx;
+      verticalPageScroll = this._menuScrollView.get('verticalPageScroll');
+      for (idx; idx >= 0; idx--) {
+        item = items[idx];
+        verticalOffset += item.get('layout').height;
+
+        if (verticalOffset > verticalPageScroll) {
+          // We've gone further than an entire page scroll, so stop.
+          break;
+        } else {
+          // Only accept enabled items (which also excludes separators).
+          if (item.get('isEnabled')) { foundItemIdx = idx; }
         }
       }
+
+      item = items[foundItemIdx];
+      this.set('currentMenuItem', item);
+      item.becomeFirstResponder();
     } else {
       this.moveToBeginningOfDocument();
     }
