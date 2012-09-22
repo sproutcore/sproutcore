@@ -288,23 +288,23 @@ test("on indeterminate state animation respects start,stop", function() {
     view.set('isRunning', YES);
     SC.RunLoop.end();
 
-    var currentBgPos = view.$('.middle').css('background-position');
+    var currentBgPos = view.$('.content .middle').css('background-position');
 
     var assertionsOnStart = function(){
         ok(view.$().hasClass('indeterminate'), 'should have indeterminate class');
-        ok(view.$().hasClass('running'), 'should have indeterminate class');
+        ok(view.$().hasClass('running'), 'should have running class');
 
-        var newBgPos = view.$('.middle').css('background-position');
+        var newBgPos = view.$('.content .middle').css('background-position');
         ok(!(currentBgPos === newBgPos), 'bg pos should have changed (old was '+currentBgPos+' new is: '+newBgPos+')');
 
         SC.RunLoop.begin();
         view.set('isRunning', NO);
         SC.RunLoop.end();
 
-        currentBgPos = view.$('.middle').css('background-position');
+        currentBgPos = view.$('.content .middle').css('background-position');
 
         var assertionsOnStop = function(){
-            newBgPos = view.$('.middle').css('background-position');
+            newBgPos = view.$('.content .middle').css('background-position');
             ok((currentBgPos === newBgPos), 'after stopping, bg pos should NOT have changed (old was '+currentBgPos+' new is: '+newBgPos+')');
 
             start();
