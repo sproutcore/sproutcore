@@ -9,76 +9,106 @@
 SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
 
   /**
-    Invokes the named method after the specified period of time.
+    Invokes the named method after the specified period of time.  This
+    uses SC.Timer, which works properly with the Run Loop.
 
-    This is a convenience method that will create a single run timer to
-    invoke a method after a period of time.  The method should have the
-    signature:
+    Any additional arguments given to invokeOnce will be passed to the
+    method.
 
-        methodName: function(timer)
+    For example,
 
-    If you would prefer to pass your own parameters instead, you can instead
-    call invokeLater() directly on the function object itself.
+        var obj = SC.Object.create({
+          myMethod: function(a, b, c) {
+            alert('a: %@, b: %@, c: %@'.fmt(a, b, c));
+          }
+        });
 
-    @param methodName {String} method name to perform.
+        obj.invokeLater('myMethod', 200, 'x', 'y', 'z');
+
+        // After 200 ms, alerts "a: x, b: y, c: z"
+
+    @param method {String} method name to perform.
     @param interval {Number} period from current time to schedule.
     @returns {SC.Timer} scheduled timer.
   */
-  invokeLater: function(methodName, interval) {
-    if (interval === undefined) { interval = 1 ; }
-    var f = methodName, args, func;
+  invokeLater: function(method, interval) {
+    var f, args;
 
-    // if extra arguments were passed - build a function binding.
+    // Normalize the method and interval.
+    if (SC.typeOf(method) === SC.T_STRING) { method = this[method]; }
+    if (interval === undefined) { interval = 1 ; }
+
+    // If extra arguments were passed - build a function binding.
     if (arguments.length > 2) {
       args = SC.$A(arguments).slice(2);
-      if (SC.typeOf(f) === SC.T_STRING) { f = this[methodName] ; }
-      func = f ;
-      f = function() { return func.apply(this, args); } ;
+      f = function() { return method.apply(this, args); } ;
+    } else {
+      f = method;
     }
 
     // schedule the timer
     return SC.Timer.schedule({ target: this, action: f, interval: interval });
   },
-  
+
   /**
-    A convenience method which makes it easy to coalesce invocations to ensure 
-    that the method is only called once. This is useful if you need to schedule 
-    a call but only want it to trigger once after some defined interval has 
-    passed.
-    
+    A convenience method which makes it easy to coalesce invocations to ensure
+    that the method is only called once after the given period of time. This is
+    useful if you need to schedule a call from multiple places, but only want
+    it to run at most once.
+
+    Any additional arguments given to invokeOnceLater will be passed to the
+    method.
+
+    For example,
+
+        var obj = SC.Object.create({
+          myMethod: function(a, b, c) {
+            alert('a: %@, b: %@, c: %@'.fmt(a, b, c));
+          }
+        });
+
+        obj.invokeOnceLater('myMethod', 200, 'x', 'y', 'z');
+
+        // After 200 ms, alerts "a: x, b: y, c: z"
+
     @param {Function|String} method reference or method name
     @param {Number} interval
   */
   invokeOnceLater: function(method, interval) {
+    var args, f,
+        methodGuid,
+        timers = this._sc_invokeOnceLaterTimers,
+        existingTimer, newTimer;
+
+    // Normalize the method, interval and timers cache.
+    if (SC.typeOf(method) === SC.T_STRING) { method = this[method]; }
     if (interval === undefined) { interval = 1 ; }
+    if (!timers) { timers = this._sc_invokeOnceLaterTimers = {}; }
 
-    var timers = this._sc_invokeOnceLaterTimers,
-        methodGuid, existingTimer, f, newTimer;
-
-    // ensure we always deal with real functions
-    if (SC.typeOf(method) === SC.T_STRING) {
-      method = this[method];
-    }
-    
+    // If there's a timer outstanding for this method, invalidate it in favor of
+    // the new timer.
     methodGuid = SC.guidFor(method);
-    
-    if(!timers) {
-      this._sc_invokeOnceLaterTimers = timers = {};
-    }
-    
     existingTimer = timers[methodGuid];
-    if(existingTimer) existingTimer.invalidate();
-    
+    if (existingTimer) existingTimer.invalidate();
+
+    // If extra arguments were passed - apply them to the method.
+    if (arguments.length > 2) {
+      args = SC.$A(arguments).slice(2);
+    } else {
+      args = arguments;
+    }
+
+    // Create a function binding every time, so that the timers cache is properly cleaned out.
     f = function() {
       // GC assistance for IE
       delete timers[methodGuid];
-      return method.apply(this, arguments);
+      return method.apply(this, args);
     };
-    
-    // schedule the timer
+
+    // Schedule the new timer and track it.
     newTimer = SC.Timer.schedule({ target: this, action: f, interval: interval });
     timers[methodGuid] = newTimer;
-    
+
     return newTimer;
   },
 
