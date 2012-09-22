@@ -540,15 +540,15 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   */
   didRenderAnimations: function(){
     if (!SC.platform.supportsCSSTransitions) {
-      var key, callback,
-          called = {};
+      var key, callback;
 
       // Transitions not supported
       for (key in this._pendingAnimations) {
         callback = this._pendingAnimations[key].callback;
-        if (callback && !called[SC.guidFor(callback)]) {
-          called[SC.guidFor(callback)] = YES;
-          this.runAnimationCallback(callback, null, NO);
+        if (callback) {
+          // We're using invokeOnce because we only want to call a callback
+          // once for each group of animations.
+          this.invokeOnceLater('runAnimationCallback', 1, callback, null, NO);
         }
         this.removeAnimationFromLayout(key, NO, YES);
       }
@@ -577,11 +577,10 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
     if (animation) {
       if (animation.callback) {
-        // Charles says this is a good idea
-        SC.RunLoop.begin();
-        // We're using invokeLater so we don't trigger any layout changes from the callbacks until the animations are done
-        this.invokeLater('runAnimationCallback', 1, animation.callback, evt, NO);
-        SC.RunLoop.end();
+        // We're using invokeOnceLater so we don't trigger any layout changes from
+        // the callbacks until the animations are done and we only want to call
+        // a callback once for each group of animations.
+        this.invokeOnceLater('runAnimationCallback', 1, animation.callback, evt, NO);
       }
       this.removeAnimationFromLayout(propertyName, YES);
 

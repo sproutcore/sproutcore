@@ -125,19 +125,22 @@ if (SC.platform.supportsCSSTransitions) {
     expect(1);
 
     SC.RunLoop.begin();
-    // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1, { top: 100, left: 100 }, 0.500, function(data) {
+    view.invokeLater('animate', 1, { top: 100, left: 100 }, 0.250, function(data) {
       if (stopped) {
-        start();
         stopped = false;
+        // Continue on in a short moment.  Before the test times out, but after
+        // enough time for a second callback to possibly come in.
+        setTimeout(function() {
+          start();
+        }, 100);
       }
 
-      ok(true);
+      ok(true, 'callback called back');
     });
     SC.RunLoop.end();
   });
 
-  // This behavior should be up for debate.  Does the callback call immediately, or does it wait until the end of 
+  // This behavior should be up for debate.  Does the callback call immediately, or does it wait until the end of
   // the specified animation period?  Currently we're calling it immediately.
   test("callback should be called immediately when a property is animated to its current value.", function() {
 
@@ -426,11 +429,14 @@ test("should update layout", function(){
 });
 
 test("should still run callback", function(){
-  var ranCallback = 0;
+  stop(2000);
+
+  expect(1);
 
   SC.RunLoop.begin();
-  view.animate({ top: 200, left: 100 }, 1, function() { ranCallback++; });
+  view.animate({ top: 200, left: 100 }, 1, function() {
+    ok(true, "callback called");
+    start();
+  });
   SC.RunLoop.end();
-
-  equals(ranCallback, 1, "should run callback");
 });

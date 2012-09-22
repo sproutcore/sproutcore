@@ -69,11 +69,13 @@ SC.View.reopen(
 
     // In the case of zero duration, just adjust and call the callback.
     if (options.duration === 0) {
+      //@if(debug)
+      // Provide a little developer support if they are doing something that should be considered wrong.
+      SC.warn("Developer Warning: SC.View:animate() was called with a duration of 0 seconds.");
+      //@endif
       var ret = this.adjust(hash);
       if (callback) {
-        this.invokeLater( function() {
-          this.layoutStyleCalculator.runAnimationCallback(callback, null, NO);
-        }, 1); 
+        this.layoutStyleCalculator.invokeOnceLater('runAnimationCallback', 1, callback, null, NO);
       }
       return ret;
     }
@@ -93,14 +95,13 @@ SC.View.reopen(
     if (!layout.animate) { layout.animate = {}; }
 
     // Very similar to #adjust
-    for(key in hash) {
+    for (key in hash) {
       if (!hash.hasOwnProperty(key) || !SC.ANIMATABLE_PROPERTIES[key]) { continue; }
       value = hash[key];
       cur = layout[key];
       curAnim = layout.animate[key];
 
-      // loose comparison used instead of (value === null || value === undefined)
-      if (value == null) { throw "Can only animate to an actual value!"; }
+      if (SC.none(value)) { throw "Can only animate to an actual value!"; }
 
       // FIXME: We should check more than duration
       if (cur !== value || (curAnim && curAnim.duration !== options.duration)) {
@@ -112,11 +113,9 @@ SC.View.reopen(
 
     // If anything didChange, set adjusted layout.
     if (didChange) { this.set('layout', layout) ; }
-    // Otherwise, schedule the callback to run immediately after this runloop.
     else if (callback) {
-      this.invokeLater( function() {
-        this.layoutStyleCalculator.runAnimationCallback(callback, null, NO);
-      }, 1); 
+      // Otherwise, schedule the callback to run at the end of the runloop.
+      this.layoutStyleCalculator.invokeOnceLater('runAnimationCallback', 1, callback, null, NO);
     }
 
     return this ;
