@@ -67,6 +67,17 @@ SC.View.reopen(
 
     if (callback) { options.callback = callback; }
 
+    // In the case of zero duration, just adjust and call the callback.
+    if (options.duration === 0) {
+      var ret = this.adjust(hash);
+      if (callback) {
+        this.invokeLater( function() {
+          this.layoutStyleCalculator.runAnimationCallback(callback, null, NO);
+        }, 1); 
+      }
+      return ret;
+    }
+
     var timing = options.timing;
     if (timing) {
       if (typeof timing !== SC.T_STRING) {
@@ -99,8 +110,14 @@ SC.View.reopen(
       }
     }
 
-    // now set adjusted layout
+    // If anything didChange, set adjusted layout.
     if (didChange) { this.set('layout', layout) ; }
+    // Otherwise, schedule the callback to run immediately after this runloop.
+    else if (callback) {
+      this.invokeLater( function() {
+        this.layoutStyleCalculator.runAnimationCallback(callback, null, NO);
+      }, 1); 
+    }
 
     return this ;
   },

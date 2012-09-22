@@ -137,7 +137,36 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
   });
 
-  test("multiple animations should be able to run simultaneously", function(){
+  // This behavior should be up for debate.  Does the callback call immediately, or does it wait until the end of 
+  // the specified animation period?  Currently we're calling it immediately.
+  test("callback should be called immediately when a property is animated to its current value.", function() {
+
+    stop(2000);
+
+    expect(1);
+
+    SC.RunLoop.begin();
+    view.invokeLater('animate', 1, 'top', view.getPath('layout.top'), 0.250, function(){
+      ok(true, 'callback called back');
+      start();
+    });
+    SC.RunLoop.end();
+  });
+
+  test("callback should be called when a property is animated with a duration of zero.", function() {
+    stop(2000);
+
+    expect(1);
+
+    SC.RunLoop.begin();
+    view.invokeLater('animate', 1, 'top', 20, 0, function(){
+      ok(true, 'callback called back');
+      start();
+    });
+    SC.RunLoop.end();
+  });
+
+  test("multiple animations should be able to run simultaneously", function() {
     stop(2000);
 
     expect(2);
