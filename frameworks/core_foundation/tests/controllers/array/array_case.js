@@ -175,11 +175,13 @@ test("array orderBy using String", function(){
   });
 
   equals(testController.get('firstSelectableObject'), content[0], 'first selectable object should be the first object in arrangedObjects');
+  equals(testController.get('lastObject'), content[4], 'lastObject should be the last object in content');
 
   // Reorder the content
   testController.set('orderBy', 'title DESC');
 
   equals(testController.get('firstSelectableObject'), content[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
+  equals(testController.get('lastObject'), content[0], 'lastObject should be the first object in content (changed order)');
 });
 
 
