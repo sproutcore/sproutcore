@@ -7,7 +7,7 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-var pane, view, item1, item2, item3;
+var pane, view, view2, item1, item2, item3;
 
 module("SC.SegmentedView observers", {
   setup: function() {
@@ -15,10 +15,22 @@ module("SC.SegmentedView observers", {
     item1 = SC.Object.create({ value: "Item1" });
     item2 = SC.Object.create({ value: "Item2" });
     item3 = SC.Object.create({ value: "Item3" });
+    item4 = {value: 'ItemX'};
+    item5 = {value: 'ItemY'};
+    item6 = {value: 'ItemZ'};
     pane = SC.MainPane.create({
       childViews: [
         SC.SegmentedView.extend({
           items: [item1, item2, item3],
+          itemTitleKey: 'value',
+          itemValueKey: null,
+          itemActionKey: 'action',
+          value: null,
+          allowsEmptySelection: YES,
+          layout: { height: 25, width: 400 }
+        }),
+        SC.SegmentedView.extend({
+          items: [item4, item5, item6],
           itemTitleKey: 'value',
           itemValueKey: null,
           itemActionKey: 'action',
@@ -31,11 +43,12 @@ module("SC.SegmentedView observers", {
     SC.RunLoop.end();
 
     view = pane.childViews[0];
+    view2 = pane.childViews[1];
   },
 
   teardown: function() {
     pane.remove();
-    pane = view = null ;
+    pane = view = view2 = null ;
   }
 });
 
@@ -46,6 +59,7 @@ test("Check that observers are removed properly", function() {
 
   SC.RunLoop.begin();
   view.items.removeObject(item1);
+  view2.items.removeObject(item4);
   SC.RunLoop.end();
 
   ok(!item1.hasObserverFor('value'), 'Item1 should not be observed');
@@ -54,6 +68,7 @@ test("Check that observers are removed properly", function() {
 
   SC.RunLoop.begin();
   view.items.removeObject(item3);
+  view2.items.removeObject(item5);
   SC.RunLoop.end();
 
   ok(!item1.hasObserverFor('value'), 'Item1 should not be observed');

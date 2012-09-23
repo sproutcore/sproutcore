@@ -375,14 +375,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // Remove unneeded segments from the end back
       for (i = childViews.get('length') - 2; i >= items.get('length'); i--) {
         childView = childViews.objectAt(i);
-        localItem = childView.get('value');
-
-        // If a selected childView has been removed then update our value
-        if (SC.isArray(value)) {
-          value.removeObject(localItem);
-        } else if (value === localItem) {
-          value = null;
-        }
+        localItem = childView.get('localItem');
 
         // Remove observers from items we are losing off the end
         if (localItem instanceof SC.Object) {
@@ -394,6 +387,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
               localItem.removeObserver(itemKey, this, this.itemContentDidChange);
             }
           }
+        }
+
+        // If a selected childView has been removed then update our value
+        if (SC.isArray(value)) {
+          value.removeObject(localItem);
+        } else if (value === localItem) {
+          value = null;
         }
 
         this.removeChild(childView);
@@ -427,7 +427,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     for (i = 0; i < items.get('length'); i++) {
       localItem = items.objectAt(i);
       childView = childViews.objectAt(i);
-      previousItem = childView.get('value');
+      previousItem = childView.get('localItem');
 
       if (previousItem instanceof SC.Object && !items.contains(previousItem)) {
         // If the old item is no longer in the view, remove its observers
