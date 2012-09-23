@@ -103,23 +103,26 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
 
     context.find('.content').css('width', (value * 100) + "%");
 
-    if (!this._queue[context[0].id]) {
-      this._queue[context[0].id] = {
-        offset:0,
-        element:SC.$(context).find('.content .middle'),
-        shouldAnimate:false
-      };
-    }
+    // fallback for browsers that don't support css transitions
+    if(!SC.platform.supportsCSSTransitions) {
+        if (!this._queue[context[0].id]) {
+          this._queue[context[0].id] = {
+            offset:0,
+            element:SC.$(context).find('.content .middle'),
+            shouldAnimate:false
+          };
+        }
 
-    if (isIndeterminate && isRunning && isVisibleInWindow) {
-      // save offset in the queue and request animation
-      this._queue[context[0].id].shouldAnimate = true;
-      this.animate(dataSource);
-    } else if (!isIndeterminate) {
-      // Clear out our custom background-position when isIndeterminate toggles.
-      this._queue[context[0].id].element.css('background-position', '');
-    } else {
-      this._queue[context[0].id].shouldAnimate = false;
+        if (isIndeterminate && isRunning && isVisibleInWindow) {
+          // save offset in the queue and request animation
+          this._queue[context[0].id].shouldAnimate = true;
+          this.animate(dataSource);
+        } else if (!isIndeterminate) {
+          // Clear out our custom background-position when isIndeterminate toggles.
+          this._queue[context[0].id].element.css('background-position', '');
+        } else {
+          this._queue[context[0].id].shouldAnimate = false;
+        }
     }
   },
 
