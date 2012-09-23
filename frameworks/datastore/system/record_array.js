@@ -539,8 +539,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
       } // if (changed)
 
-      //console.log(this.toString() + ' partial flush took ' + (new Date()-startDate) + ' ms');
-
     // if no storeKeys, then we have to go through all of the storeKeys
     // and decide if they belong or not.  ick.
     } else {
@@ -571,8 +569,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
           if (rec && query.contains(rec)) storeKeys.push(storeKey);
         }
       });
-
-      //console.log(this.toString() + ' full flush took ' + (new Date()-startDate) + ' ms');
 
       didChange = YES ;
     }

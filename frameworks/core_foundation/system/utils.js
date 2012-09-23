@@ -162,7 +162,9 @@ SC.mixin( /** @scope SC */ {
     @returns {Point} A hash with x, y offsets.
   */
   viewportOffset: function(el) {
-    console.warn("SC.viewportOffset() has been deprecated in favor of SC.offset().  Please use SC.offset() from here on.");
+    //@if(debug)
+    SC.warn("Developer Warning: SC.viewportOffset() has been deprecated in favor of SC.offset().  Please use SC.offset() from here on.");
+    //@endif
     var result = SC.offset(el, 'viewport');
 
     return {x: result.left, y: result.top};

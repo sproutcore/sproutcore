@@ -248,7 +248,6 @@ SC.RenderContext = SC.Builder.create(
     @returns {SC.RenderContext} new context
   */
   begin: function(tagNameOrElement) {
-    // console.log('%@.begin(%@) called'.fmt(this, tagNameOrElement));
     return SC.RenderContext(tagNameOrElement, this);
   },
 
@@ -267,7 +266,6 @@ SC.RenderContext = SC.Builder.create(
     Removes an element with the passed id in the currently managed element.
   */
   remove: function(elementId) {
-    // console.log('remove('+elementId+')');
     if (!elementId) return ;
 
     var el, elem = this._elem ;
@@ -356,7 +354,6 @@ SC.RenderContext = SC.Builder.create(
     @returns {SC.RenderContext}
   */
   end: function() {
-    // console.log('%@.end() called'.fmt(this));
     // NOTE: If you modify this method, be careful to consider memory usage
     // and performance here.  This method is called frequently during renders
     // and we want it to be as fast as possible.
@@ -415,7 +412,6 @@ SC.RenderContext = SC.Builder.create(
     selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1) ;
     tag = tag + (selfClosing ? ' />' : '>') ;
 
-    // console.log('selfClosing == %@'.fmt(selfClosing));
     strings[this.offset] = tag;
 
     // now generate closing tag if needed...
@@ -1007,7 +1003,7 @@ SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
   plain text.  You should make sure you pass all user-entered data through
   this method to avoid errors.  You can also do this with the text() helper
   method on a render context.
-  
+
   @param {String|Number} text value to escape
   @returns {String} string with all HTML values properly escaped
 */

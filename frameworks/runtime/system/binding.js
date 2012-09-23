@@ -444,8 +444,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   fromPropertyDidChange: function(target, key) {
     var v = target ? target.get(key) : null;
 
-    //console.log("fromPropertyDidChange: %@ v = %@".fmt(this, v)) ;
-
     // if the new value is different from the current binding value, then
     // schedule to register an update.
     if (v !== this._bindingValue || key === '[]') {

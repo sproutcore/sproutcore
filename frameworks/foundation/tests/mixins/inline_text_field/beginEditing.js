@@ -44,7 +44,6 @@ pane = SC.ControlTestPane.design().add("label1", SC.LabelView, {
   value: 'Can\'t Touch This',
 
   inlineEditorShouldBeginEditing: function(inlineEditor) {
-    console.log('inlineEditorShouldBeginEditing');
     return NO;
   }
 });
@@ -80,13 +79,13 @@ optionsForLabelFromView = function(view) {
 
 
 /**
-  
+
 */
 module("Test the beginEditing() function of SC.InlineTextFieldView", {
   setup: function() {
 
     pane.standardSetup().setup();
-    
+
     var view1 = pane.view('label1'),
     view2 = pane.view("label2");
 
@@ -101,7 +100,7 @@ module("Test the beginEditing() function of SC.InlineTextFieldView", {
     optionsForLabel1 = optionsForLabel2 = null;
     SC.InlineTextFieldView.discardEditing();
     pane.standardSetup().teardown();
-    
+
   }
 });
 
@@ -131,7 +130,7 @@ function() {
 
 test("value of inline editor same as label",
 function() {
-  
+
   SC.RunLoop.begin();
   SC.InlineTextFieldView.beginEditing(optionsForLabel1);
   SC.RunLoop.end();

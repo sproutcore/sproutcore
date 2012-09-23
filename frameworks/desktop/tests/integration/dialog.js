@@ -18,9 +18,9 @@ module("A dialog with some basic controls and buttons", {
 
 test("adding dialog to screen", function() {
 
-  
+
   var delegate = SC.Object.create({
-    
+
     couldNotSend: function() {
       pane = SC.AlertPane.warn({
         message: "Email could not be sent",
@@ -33,7 +33,7 @@ test("adding dialog to screen", function() {
         delegate: this
       });
     },
-    
+
     showMoreInfo: function() {
       pane = SC.AlertPane.info({
         message: "Sending Email",
@@ -43,9 +43,8 @@ test("adding dialog to screen", function() {
         delegate: delegate
       });
     },
-    
+
     alertPaneDidDismiss: function(alert, status) {
-      //console.log("%@.alertDidDismiss - %@".fmt(alert, status));
       switch(status) {
         case SC.OK_STATUS:
           this.invokeLater(this.couldNotSend, 1000);

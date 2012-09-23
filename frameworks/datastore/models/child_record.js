@@ -15,7 +15,7 @@ SC.ChildRecord = SC.Record.extend({});
 
 SC.ChildRecord.extend = function() {
   // @if (debug)
-  console.log("SC.ChildRecord is deprecated. Please extend SC.Record instead.");
+  SC.warn("Developer Warning: SC.ChildRecord is deprecated. Please extend SC.Record instead.");
   // @endif
   return SC.Record.extend.apply(this, arguments);
 };
