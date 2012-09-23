@@ -534,6 +534,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // of knowing which indices changed. Instead, we just
     // invalidate the whole array.
     this.arrayContentDidChange(0, oldlen, newlen);
+    this.enumerableContentDidChange(0, oldlen - 1);
     this.endPropertyChanges();
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
