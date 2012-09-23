@@ -32,13 +32,14 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
   render:function (dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
-    var theme = dataSource.get('theme'),
-    valueMax = dataSource.get('maximum'),
-    valueMin = dataSource.get('minimum'),
-    valueNow = dataSource.get('ariaValue');
+    var isIndeterminate = dataSource.get('isIndeterminate'),
+      theme = dataSource.get('theme'),
+      valueMax = dataSource.get('maximum'),
+      valueMin = dataSource.get('minimum'),
+      valueNow = dataSource.get('ariaValue');
 
     var value;
-    if (dataSource.get('isIndeterminate')) {
+    if (isIndeterminate) {
       value = 1;
     } else {
       value = dataSource.get('value');
@@ -51,11 +52,11 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context.attr('aria-valuetext', valueNow);
 
     context.setClass({
-      indeterminate:dataSource.get('isIndeterminate'),
-      running:dataSource.get('isRunning'),
+      indeterminate:isIndeterminate,
+      running:dataSource.get('isRunning') && isIndeterminate,
       disabled:!dataSource.get('isEnabled'),
       'sc-empty':(value <= 0),
-      'sc-complete':(value >= 1 && !dataSource.get('isIndeterminate'))
+      'sc-complete':(value >= 1 && !isIndeterminate)
     });
 
     context = context.begin('div').addClass('track');
@@ -72,14 +73,14 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     this.updateSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
-    value,
-    valueMax = dataSource.get('maximum'),
-    valueMin = dataSource.get('minimum'),
-    valueNow = dataSource.get('ariaValue'),
-    isIndeterminate = dataSource.get('isIndeterminate'),
-    isRunning = dataSource.get('isRunning'),
-    isEnabled = dataSource.get('isEnabled'),
-    isVisibleInWindow = dataSource.get('isVisibleInWindow');
+      value,
+      valueMax = dataSource.get('maximum'),
+      valueMin = dataSource.get('minimum'),
+      valueNow = dataSource.get('ariaValue'),
+      isIndeterminate = dataSource.get('isIndeterminate'),
+      isRunning = dataSource.get('isRunning'),
+      isEnabled = dataSource.get('isEnabled'),
+      isVisibleInWindow = dataSource.get('isVisibleInWindow');
 
     // make accessible
     context.attr('aria-valuemax', valueMax);
@@ -105,24 +106,24 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
 
     // fallback for browsers that don't support css transitions
     if(!SC.platform.supportsCSSTransitions) {
-        if (!this._queue[context[0].id]) {
-          this._queue[context[0].id] = {
-            offset:0,
-            element:SC.$(context).find('.content .middle'),
-            shouldAnimate:false
-          };
-        }
+      if (!this._queue[context[0].id]) {
+        this._queue[context[0].id] = {
+          offset:0,
+          element:SC.$(context).find('.content .middle'),
+          shouldAnimate:false
+        };
+      }
 
-        if (isIndeterminate && isRunning && isVisibleInWindow) {
-          // save offset in the queue and request animation
-          this._queue[context[0].id].shouldAnimate = true;
-          this.animate(dataSource);
-        } else if (!isIndeterminate) {
-          // Clear out our custom background-position when isIndeterminate toggles.
-          this._queue[context[0].id].element.css('background-position', '');
-        } else {
-          this._queue[context[0].id].shouldAnimate = false;
-        }
+      if (isIndeterminate && isRunning && isVisibleInWindow) {
+        // save offset in the queue and request animation
+        this._queue[context[0].id].shouldAnimate = true;
+        this.animate(dataSource);
+      } else if (!isIndeterminate) {
+        // Clear out our custom background-position when isIndeterminate toggles.
+        this._queue[context[0].id].element.css('background-position', '');
+      } else {
+        this._queue[context[0].id].shouldAnimate = false;
+      }
     }
   },
 
