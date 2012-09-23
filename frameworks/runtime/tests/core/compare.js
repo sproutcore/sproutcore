@@ -3,7 +3,7 @@
 // Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals module ok equals same test MyApp */
+/*globals module, ok, equals, same, test */
 
 // test parsing of query string
 var v = [];
@@ -30,15 +30,17 @@ module("SC.compare()", {
 
 // ..........................................................
 // TESTS
-// 
+//
 
 test("ordering should work", function() {
-  for (var j=0; j < v.length; j++) {
+  var j;
+  for (j=0; j < v.length; j++) {
     equals(SC.compare(v[j],v[j]), 0, j +' should equal itself');
-    for (var i=j+1; i < v.length; i++) {
+    var i;
+    for (i=j+1; i < v.length; i++) {
       equals(SC.compare(v[j],v[i]), -1, 'v[' + j + '] (' + SC.typeOf(v[j]) + ') should be smaller than v[' + i + '] (' + SC.typeOf(v[i]) + ')' );
     }
-    
+
   }
-}); 
-  
+});
+

@@ -22,7 +22,7 @@ module("SC.Border", {
     pane.append();
     SC.RunLoop.end();
   },
-  
+
   teardown: function() {
     pane.remove();
     pane = null;
@@ -38,7 +38,7 @@ test('SC.View should not have border properties by default', function() {
 
 test('Views with SC.Border mixin should default to gray border', function() {
   var view = SC.View.create(SC.Border, { });
-  
+
   equals(view.get('borderStyle'), SC.BORDER_GRAY, "borderStyle should be SC.BORDER_GRAY");
   equals(view.get('borderTop'), 1, 'borderTop should be 1');
   equals(view.get('borderBottom'), 1, 'borderBottom should be 1');
@@ -89,18 +89,9 @@ test('View frame should account for borders if border dimension properties are s
   SC.RunLoop.begin().end();
   var frame = box3.get('frame'),
       elem = box3.get('layer');
-  
+
   equals(frame.x, elem.clientLeft, 'horizontal positions equal');
   equals(frame.y, elem.clientTop, 'vertical positions equal');
   equals(frame.width, elem.clientWidth, 'width equal');
   equals(frame.height, elem.clientHeight, 'height equal');
-});
-
-test('Should be deprecated', function(){
-  var originalLogger = console.warn, logged;
-  console.warn = function(msg){ logged = msg; }
-  SC.View.create(SC.Border);
-  console.warn = originalLogger;
-
-  equals(logged, "SC.Border is deprecated, please set border in your layout");
 });
