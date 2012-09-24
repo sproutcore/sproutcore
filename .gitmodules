@@ -1,0 +1,3 @@
+[submodule "apps/showcase"]
+	path = apps/showcase
+	url = git@github.com:sproutcore/showcase.git
