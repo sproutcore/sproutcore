@@ -6,17 +6,48 @@ Edge
 
 ### CHANGES & FEATURES
 
-* Adds `useUnixTime` attribute to SC.DateTime record attribute handlers.
-* Introduces fixes and enhancements to the media framework (thanks @krotscheck!):
+* Introduces SC.Color:
+  - feature detection for rgba
+  - parser from rgb(a), hsl(a), hex, and argb values to a normalized rgb space
+  - converter from the normalized rgb space to rgb(a), hsl(a), hex, and argb notations
+  - hsl mutators to rotate the hue, saturate, or lighten a color
+* Fixes and enhances the media framework:
   - enables live scrubbing
   - decouples MediaSlider and Audio/Video view
   - fixes layout rendering by creating a render delegate
   - adds SC.mediaCapabilities for media capability detection
   - updates styling to use Chance
+* Adds `useUnixTime` attribute to SC.DateTime record attribute handlers.
 
 ### DEPRECATIONS & REMOVALS
 
+
 ### BUG FIXES
+
+* Documentation fixes.
+* Fixes setting content of SC.StaticContentView to null, so that it removes
+  the previous content.
+* Fixed default CSS on SC.ListItemView img.right-icon
+
+1.8.2 - BUG FIXES
+----------
+
+* Thinned picker pane border divs so that they don't overlap the content view. 
+  [0b06db2]
+* Prevents target property conflict when configuring button targets with 
+  SC.AlertPane. [0364b5c]
+* Changed the aria-orientation of horizontal SC.ScrollView to 'horizontal' from 
+  'vertical'. [c3ee69b]
+* Allows SC.CollectionFastPath to work with sparse content by always returning 
+  an item view even when content isn't yet available. [020653b]
+* Prevents SC.GridView from iterating over its content array in order to work 
+  with sparse content. [020653b]
+* The 'mobile-safari' body class name is no longer being added in all browsers. 
+  [b491224]
+* Enables pasting in SC.TextFieldView to notify that the value changed. 
+  [a51318b]
+* Prevents default touch behavior being intercepted on <textarea> and <select> 
+  elements in mobile Safari. [8093963]
 
 1.8.1 - BUG FIXES
 ----------
