@@ -4,8 +4,8 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 sc_require('views/list') ;
+
 
 /** @class
 
@@ -86,7 +86,7 @@ SC.GridView = SC.ListView.extend(
         columnWidth = this.get('columnWidth') || 0 ;
 
     return (columnWidth <= 0) ? 1 : Math.floor(f.width / columnWidth) ;
-  }.property('clippingFrame', 'columnWidth').cacheable(),
+  }.property('frame', 'columnWidth').cacheable(),
 
   /** @private
     Find the contentIndexes to display in the passed rect. Note that we
@@ -104,7 +104,7 @@ SC.GridView = SC.ListView.extend(
   /** @private */
   layoutForContentIndex: function(contentIndex) {
     var rowHeight = this.get('rowHeight') || 48,
-        frameWidth = this.get('clippingFrame').width,
+        frameWidth = this.get('frame').width,
         itemsPerRow = this.get('itemsPerRow'),
         columnWidth = Math.floor(frameWidth/itemsPerRow),
         row = Math.floor(contentIndex / itemsPerRow),
@@ -244,18 +244,18 @@ SC.GridView = SC.ListView.extend(
 
   /** @private
     Since GridView lays out items evenly from left to right, if the width of the
-    clipping frame changes, all of the item views on screen are potentially in
+    frame changes, all of the item views on screen are potentially in
     the wrong position.
 
     Update all of their layouts if necessary.
   */
-  _gv_clippingFrameDidChange: function() {
-    var clippingFrame = this.get('clippingFrame'),
+  _gv_frameDidChange: function() {
+    var frame = this.get('frame'),
       width;
 
-    // Changes to the width of the clippingFrame is the only variable that
+    // Changes to the width of the frame is the only variable that
     // alters the layout of item views.
-    width = clippingFrame.width;
+    width = frame.width;
     if (this._lastFrameWidth && width !== this._lastFrameWidth) {
       this.notifyPropertyChange('itemsPerRow');
 
@@ -273,5 +273,6 @@ SC.GridView = SC.ListView.extend(
 
     // Cache the last width in order to check for differences.
     this._lastFrameWidth = width;
-  }.observes('clippingFrame')
-}) ;
+  }.observes('frame')
+
+});
