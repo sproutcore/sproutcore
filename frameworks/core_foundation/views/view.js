@@ -1268,7 +1268,12 @@ SC.CoreView.reopen(
   */
   removeChild: function(view) {
     // update parent node
-    view.set('parentView', null) ;
+    view.set('parentView', null);
+    // If we're the owner, then we created it and it's our job to destroy it.
+    if (view.get('owner') === this) {
+      view.destroy();
+      view.set('owner', null);
+    }
 
     // remove view from childViews array.
     var childViews = this.get('childViews'),
@@ -1330,10 +1335,14 @@ SC.CoreView.reopen(
     this.destroyLayer() ;
 
     // first destroy any children.
-    var childViews = this.get('childViews'), len = childViews.length, idx ;
+    var childViews = this.get('childViews'), len = childViews.length, idx, childView ;
     if (len) {
       childViews = childViews.slice() ;
-      for (idx=0; idx<len; ++idx) { childViews[idx].destroy() ; }
+      for (idx=0; idx<len; ++idx) {
+        childView = childViews[idx];
+        childView.destroy();
+        if (childView.get('owner') === this) childView.set('owner', null);
+      }
     }
 
     // next remove view from global hash
