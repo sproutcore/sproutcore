@@ -1272,7 +1272,6 @@ SC.CoreView.reopen(
     // If we're the owner, then we created it and it's our job to destroy it.
     if (view.get('owner') === this) {
       view.destroy();
-      view.set('owner', null);
     }
 
     // remove view from childViews array.
@@ -1291,7 +1290,10 @@ SC.CoreView.reopen(
   removeAllChildren: function() {
     var childViews = this.get('childViews'), view ;
     while (view = childViews.objectAt(childViews.get('length')-1)) {
-      this.removeChild(view) ;
+      this.removeChild(view);
+      if (view.get('owner') === this) {
+        view.destroy();
+      }
     }
     return this ;
   },
@@ -1317,10 +1319,7 @@ SC.CoreView.reopen(
   destroy: function() {
     if (this.get('isDestroyed')) { return this; } // nothing to do
 
-    this._destroy(); // core destroy method
-
-    // remove from parent if found
-    if (this.get('parentView')) { this.removeFromParent(); }
+    this._destroy(); // core destroy method. (Why is this in a separate method?)
 
     //Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
     sc_super();
@@ -1341,9 +1340,14 @@ SC.CoreView.reopen(
       for (idx=0; idx<len; ++idx) {
         childView = childViews[idx];
         childView.destroy();
-        if (childView.get('owner') === this) childView.set('owner', null);
       }
     }
+
+    // remove from parent if found
+    if (this.get('parentView')) { this.removeFromParent(); }
+
+    // remove owner, as there's no more need for it.
+    this.set('owner', null);
 
     // next remove view from global hash
     delete SC.View.views[this.get('layerId')] ;
