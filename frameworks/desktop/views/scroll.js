@@ -338,6 +338,45 @@ SC.ScrollView = SC.View.extend({
     return this.get('frame').width;
   }.property('frame'),
 
+  /**
+    Determines whether the vertical scroller should fade out while in overlay mode. Has no effect if verticalOverlay is set to false.
+
+    @property Boolean
+    @default YES
+   */
+  verticalFade: YES,
+
+  /**
+    Determines whether the horizontal scroller should fade out while in overlay mode. Has no effect if verticalOverlay is set to false.
+
+    @property Boolean
+    @default YES
+   */
+  horizontalFade: YES,
+
+  /**
+    Determines how quickly (in seconds) scrollbars fade in. In general, this should be very fast.
+
+    @property Number
+    @default 0.1
+   */
+  fadeInDuration: 0.1,
+
+  /**
+    Determines how long (in seconds) scrollbars wait before fading out.
+
+    @property Number
+    @default 0.25
+   */
+  fadeDelay: 0.25,
+
+  /**
+    Determines how quickly (in seconds) scrollbars fade out.
+
+    @property Number
+    @default 0.25
+   */
+  fadeOutDuration: 0.25,
 
   // ..........................................................
   // SCROLLERS
@@ -977,6 +1016,141 @@ SC.ScrollView = SC.View.extend({
   },
 
 
+  // ------------------------------------------------------------------------
+  // Fade Support
+  //
+
+  /** @private
+    Triggers fade-out as soon as we're appended. (Note: this may not be working
+    with scroll views being appended at app load.)
+  */
+  didAppendToDocument: function() {
+    this._fade_horizontalScrollerShouldFadeOut();
+    this._fade_verticalScrollerShouldFadeOut();
+  },
+
+  _touchScrollDidChange: function(original) {
+    original();
+  }.enhance(),
+
+  _touchScrollDidEnd: function(original) {
+    original();
+  }.enhance(),
+
+  _scroll_horizontalScrollOffsetDidChange: function(original) {
+    original();
+  }.observes('horizontalScrollOffset').enhance(),
+
+  _scroll_verticalScrollOffsetDidChange: function(original) {
+    original();
+    this.invokeOnce(this._fade_verticalScrollerShouldFadeIn);
+    this.invokeOnce(this._fade_setupVerticalScrollerFadeout);
+  }.observes('verticalScrollOffset').enhance(),
+
+  /** @private
+    Fade horizontal scroller in.
+  */
+  _fade_horizontalScrollerShouldFadeIn: function() {
+    // Gatekeep.
+    if (!this.get('horizontalOverlay') || !this.get('horizontalFade')) return;
+    var scroller = this.get('horizontalScrollerView');
+    if (!scroller || !scroller.get('isVisible')) return;
+    
+    // Fade in if needed.
+    var currentOpacity = scroller.getPath('layout.opacity');
+    if (!SC.none(currentOpacity) && currentOpacity !== 1) {
+      scroller.animate('opacity', 1, this.get('fadeInDuration'));
+    }
+    
+    // Cancel fade-out timer.
+    if (this._horizontalFadeTimer) {
+      this._horizontalFadeTimer.invalidate();
+      this._horizontalFadeTimer = null;
+    }
+  },
+
+  /** @private
+    Setup fade-out timer. This is used with mouse scrolling.
+  */
+  _fade_setupHorizontalScrollerFadeout: function() {
+    // Cancel fade-out timer.
+    if (this._horizontalFadeTimer) { this._horizontalFadeTimer.invalidate(); }
+    // Set new one.
+    var interval = (this.get('fadeDelay') || 0) * 1000;
+    this._horizontalFadeTimer = SC.Timer.schedule({
+      target: this,
+      action: '_fade_horizontalScrollerShouldFadeOut',
+      interval: interval
+    });
+  },
+
+  /** @private
+    Fade the horizontal scroller out.
+  */
+  _fade_horizontalScrollerShouldFadeOut: function() {
+    if (!this.get('horizontalOverlay') || !this.get('horizontalFade')) return;
+    var scroller = this.get('horizontalScrollerView');
+    if (!scroller) { return; }
+    var duration = this.get('fadeOutDuration') || 0;
+    scroller.animate('opacity', 0, duration);
+    if (this._horizontalFadeTimer) {
+      this._horizontalFadeTimer.invalidate();
+      this._horizontalFadeTimer = null;
+    }
+  },
+
+  /** @private
+    Fade the vertical scroller in.
+  */
+  _fade_verticalScrollerShouldFadeIn: function() {
+    // Gatekeep.
+    if (!this.get('verticalOverlay') || !this.get('verticalFade')) return;
+    var scroller = this.get('verticalScrollerView');
+    if (!scroller || !scroller.get('isVisible')) { return; }
+    
+    // Fade in if needed.
+    var currentOpacity = scroller.getPath('layout.opacity');
+    if (!SC.none(currentOpacity) && currentOpacity !== 1) {
+      scroller.animate('opacity', 1, this.get('fadeInDuration'));
+    }
+
+    // Cancel fade-out timer.
+    if (this._verticalFadeTimer) {
+      this._verticalFadeTimer.invalidate();
+      this._verticalFadeTimer = null;
+    }
+  },
+
+  /** @private
+    Setup the fade-out timer.  This is used with mouse scrolling.
+  */
+  _fade_setupVerticalScrollerFadeout: function() {
+    // Cancel fade-out timer.
+    if (this._verticalFadeTimer) this._verticalFadeTimer.invalidate();
+    // Set new one.
+    var interval = (this.get('fadeDelay') || 0) * 1000;
+    this._verticalFadeTimer = SC.Timer.schedule({
+      target: this,
+      action: '_fade_verticalScrollerShouldFadeOut',
+      interval: interval
+    });
+  },
+
+  /** @private
+    Fade the vertical scroller out.
+  */
+  _fade_verticalScrollerShouldFadeOut: function() {
+    if (!this.get('verticalOverlay') || !this.get('verticalFade')) return;
+    var scroller = this.get('verticalScrollerView');
+    if (!scroller) { return; }
+    var duration = this.get('fadeOutDuration') || 0;
+    scroller.animate('opacity', 0, duration);
+    if (this._verticalFadeTimer) {
+      this._verticalFadeTimer.invalidate();
+      this._verticalFadeTimer = null;
+    }
+  },
+
   // ..........................................................
   // Touch Support
   //
@@ -1036,11 +1210,14 @@ SC.ScrollView = SC.View.extend({
     // tell scrollers
     if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidChange) {
       this.verticalScrollerView.touchScrollDidChange(this._scroll_verticalScrollOffset);
+      this._fade_verticalScrollerShouldFadeIn();
     }
 
     if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidChange) {
       this.horizontalScrollerView.touchScrollDidChange(this._scroll_horizontalScrollOffset);
+      this._fade_horizontalScrollerShouldFadeIn()
     }
+
   },
 
   /** @private */
@@ -1072,6 +1249,11 @@ SC.ScrollView = SC.View.extend({
     if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidEnd) {
       this.horizontalScrollerView.touchScrollDidEnd(this._touch_horizontalScrollOffset);
     }
+
+    // Trigger fadeouts if necessary.
+    this._fade_horizontalScrollerShouldFadeOut();
+    this._fade_verticalScrollerShouldFadeOut();
+
   },
 
   /** @private */
@@ -1788,6 +1970,16 @@ SC.ScrollView = SC.View.extend({
     if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll() ;
   },
 
+  /** @private */
+  destroy: function() {
+    sc_super();
+    SC.Drag.removeScrollableView(this);
+    this._scroll_contentView = null;
+    this.set('containerView', null);
+    this.set('horizontalScrollerView', null);
+    this.set('verticalScrollerView', null);
+  },
+
   /** @private
     Registers/deregisters view with SC.Drag for autoscrolling
   */
@@ -1961,6 +2153,8 @@ SC.ScrollView = SC.View.extend({
   */
   _scroll_horizontalScrollOffsetDidChange: function() {
     this.invokeLast(this.adjustElementScroll);
+    this.invokeOnce(this._fade_horizontalScrollerShouldFadeIn);
+    this.invokeOnce(this._fade_setupHorizontalScrollerFadeout);
   }.observes('horizontalScrollOffset'),
 
   /** @private
@@ -1969,6 +2163,8 @@ SC.ScrollView = SC.View.extend({
   */
   _scroll_verticalScrollOffsetDidChange: function() {
     this.invokeLast(this.adjustElementScroll);
+    this.invokeOnce(this._fade_verticalScrollerShouldFadeIn);
+    this.invokeOnce(this._fade_setupVerticalScrollerFadeout);
   }.observes('verticalScrollOffset'),
 
   /** @private
