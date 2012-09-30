@@ -14,12 +14,17 @@ CoreTools.Target = SC.Record.extend(
 /** @scope CoreTools.Target.prototype */ {
 
   primaryKey: "name",
-  
+
+  /**
+    Kind of target.
+  */
+  kind: SC.Record.attr(String),
+
   /**
     Name of target.  This is also the primary key.
   */
   name: SC.Record.attr(String),
-  
+
   /**
     Parent of target.  Only non-null for nested targets.
   */
@@ -29,19 +34,19 @@ CoreTools.Target = SC.Record.extend(
     URL to use to load tests.
   */
   testsUrl: SC.Record.attr(String, { key: "link_tests" }),
-  
-  /**  
+
+  /**
     URL to use to load the app.  If no an app, returns null
   */
   appUrl: function() {
     return (this.get('kind') === 'app') ? CoreTools.attachUrlPrefix(this.get('name')) : null;
   }.property('kind', 'name').cacheable(),
-  
+
   /**
     The isExpanded state.  Defaults to NO on load.
   */
   isExpanded: SC.Record.attr(Boolean, { defaultValue: NO }),
-  
+
   /**
     Children of this target.  Computed by getting the loaded targets
   */
@@ -49,11 +54,11 @@ CoreTools.Target = SC.Record.extend(
     var store = this.get('store'),
         query = CoreTools.TARGETS_QUERY,
         ret   = store.find(query).filterProperty('parent', this);
-        
+
     if (ret) ret = ret.sortProperty('kind', 'displayName');
     return (ret && ret.get('length')>0) ? ret : null ;
   }.property().cacheable(),
-  
+
   /**
     Display name for this target
   */
@@ -61,7 +66,7 @@ CoreTools.Target = SC.Record.extend(
     var name = (this.get('name') || '(unknown)').split('/');
     return name[name.length-1];
   }.property('name').cacheable(),
-  
+
   /**
     The icon to display.  Based on the type.
   */
@@ -71,14 +76,14 @@ CoreTools.Target = SC.Record.extend(
       case "framework":
         ret = 'sc-icon-folder-16';
         break;
-        
+
       case "app":
         ret = 'sc-icon-options-16';
         break;
     }
     return ret ;
   }.property('kind').cacheable(),
-  
+
   /**
     This is the group key used to display.  Will be the kind unless the item
     belongs to the sproutcore target.
@@ -89,12 +94,12 @@ CoreTools.Target = SC.Record.extend(
     if (parent && (parent.get('name') === '/sproutcore')) return 'sproutcore';
     else return (this.get('kind') || 'unknown').toLowerCase();
   }.property('kind', 'parent').cacheable(),
-  
-  
+
+
   testsQuery: function() {
     return SC.Query.remote(CoreTools.Test, { url: this.get('testsUrl') });
   }.property('testsUrl').cacheable(),
-  
+
   /**
     Returns all of the tests associated with this target by fetching the
     testsUrl.
@@ -102,7 +107,7 @@ CoreTools.Target = SC.Record.extend(
   tests: function() {
     return this.get('store').find(this.get('testsQuery'));
   }.property('testsQuery').cacheable()
-  
+
 }) ;
 
 CoreTools.TARGETS_QUERY = SC.Query.remote(CoreTools.Target);

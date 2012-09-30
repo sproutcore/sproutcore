@@ -14,8 +14,9 @@ SC.stringsFor('English', {
   "Kind.app": "Apps",
   "Kind.framework" : "Frameworks",
   "Kind.sproutcore" : "SproutCore",
+  "Kind.module": "Modules",
   "Kind.theme": "Themes",
-  
+
   "_Test Runner" : "Test Runner",
   "_No Targets" : "No Targets",
   "_No Tests" : "No Tests",
