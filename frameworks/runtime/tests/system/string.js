@@ -7,6 +7,9 @@
 
 /*globals module test ok isObj equals expects */
 
+// Note that these unit tests are calling SC.String.fmt directly, which has a different
+// signature than String.prototype.fmt does.
+
 module("String Formatting");
 test("Passing ordered arguments", function() {
   equals(SC.String.fmt("%@, %@%@", ["Hello", "World", "!"]), "Hello, World!");
@@ -23,6 +26,10 @@ test("Passing named arguments", function() {
     { first: "Hello", last: "World", "punctuation": "!" }
   ]), "Hello, World!");
 });
+
+test("Passing incomplete named arguments", function() {
+  equals( SC.String.fmt("%{first}, %{last}%{punctuation}", [{first: 'Hello', punctuation: '!'}]), "Hello, %{last}!", "Formatting a string with an incomplete set of named arguments should leave unspecified named arguments in place." );
+})
 
 test("Passing arguments with formatters", function() {
   var F = function(value) {
