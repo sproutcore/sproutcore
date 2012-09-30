@@ -92,7 +92,9 @@ SC.String = /** @scope SC.String.prototype */ {
         throw "Cannot use named parameters with `fmt` without a data hash. String: '" + string + "'";
       }
 
-      return SC.String._scs_valueForKey(propertyPath, data, string);
+      var ret = SC.String._scs_valueForKey(propertyPath, data, string);
+      if (!SC.none(ret)) { return ret; }
+      else { return match; }
     }).replace(/%@([0-9]+)?/g, function(match, index) {
       if (hasHadNamedArguments) {
         throw "Invalid attempt to use both named parameters and indexed parameters. String: '" + string + "'";
