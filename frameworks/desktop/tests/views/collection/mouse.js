@@ -102,6 +102,48 @@ function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
   layer = itemView = null ;
 }
 
+/* 
+  Simulates dragging an index a certain distance.
+  
+  @param {SC.CollectionView} view the view
+  @param {Number} index the index to click on
+  @param {Number} offsetX horizontal distance to drag the item
+  @param {Number} offsetY vertical distance to drag the item
+  @param {Number} expectedIndex where the view should end up
+  @returns {void}
+*/
+function mouseDrag(view, index, offsetX, offsetY, expectedIndex) {
+  var itemView = view.itemViewForContentIndex(index),
+      layer    = itemView.get('layer'), 
+      opts     = { shiftKey: shiftKey, ctrlKey: ctrlKey }, 
+      x, y, ev;
+      
+  ok(layer, 'precond - itemView[%@] should have layer'.fmt(index));
+  
+  // Simulate mouse-down.
+  opts.clientX = itemView.getPath('frame.left');
+  opts.clientY = itemView.getPath('frame.top');
+  ev = SC.Event.simulateEvent(layer, 'mousedown', opts);
+  SC.Event.trigger(layer, 'mousedown', [ev]);
+
+  // Simulate drag-to-location.
+  opts.clientX = opts.clientX + offsetX;
+  opts.clientY = opts.clientY + offsetY;
+  ev = SC.Event.simulateEvent(layer, 'mousemove', opts)
+
+  // Simulate mouse-up.
+  ev = SC.Event.simulateEvent(layer, 'mouseup', opts);
+  SC.Event.trigger(layer, 'mouseup', [ev]);
+  
+  // Test and respond.
+  response = 'drag of {x: %@, y: %@} should have resulted in item %@ moving to position %@.'
+  response = response.fmt(offsetX, offsetY, index, expectedIndex);
+  ok(itemView.get('contentIndex') === expectedIndex, response); 
+  
+  // Clean up.
+  layer = itemView = null ;
+}
+
 /*
   Creates an SC.SelectionSet from a given index.
 
