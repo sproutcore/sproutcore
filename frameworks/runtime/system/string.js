@@ -93,6 +93,8 @@ SC.String = /** @scope SC.String.prototype */ {
       }
 
       var ret = SC.String._scs_valueForKey(propertyPath, data, string);
+      // If a value was found, return that; otherwise return the original matched text to retain it in the string
+      // for future formatting.
       if (!SC.none(ret)) { return ret; }
       else { return match; }
     }).replace(/%@([0-9]+)?/g, function(match, index) {
