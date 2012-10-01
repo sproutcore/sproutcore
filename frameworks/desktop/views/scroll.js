@@ -1973,11 +1973,19 @@ SC.ScrollView = SC.View.extend({
   /** @private */
   destroy: function() {
     sc_super();
+    // Undo this._scsv_registerAutoscroll().
     SC.Drag.removeScrollableView(this);
+    // Remove private content view tracker.
     this._scroll_contentView = null;
-    this.set('containerView', null);
+    // Remove scrollers.
     this.set('horizontalScrollerView', null);
     this.set('verticalScrollerView', null);
+    // Unhook observers on containerView; remove container view.
+    var contentView = this.get('contentView');
+    contentView.removeObserver('frame', this, this.contentViewFrameDidChange);
+    contentView.removeObserver('calculatedWidth', this, this.contentViewFrameDidChange);
+    contentView.removeObserver('calculatedHeight', this, this.contentViewFrameDidChange);
+    this.set('containerView', null);
   },
 
   /** @private
