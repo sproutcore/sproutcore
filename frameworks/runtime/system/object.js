@@ -644,7 +644,7 @@ SC.Object.prototype = {
     for(idx=0;idx < len; idx++) inits[idx].call(this);
 
     // disconnect all bindings
-    this.bindings.invoke('disconnect');
+    this.bindings.invoke('destroy');
     this.bindings = null;
 
     return this ;

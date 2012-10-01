@@ -430,30 +430,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       }
     }
 
-    // if either end of the binding isDestroyed, we should unhook the binding entirely.
-    // The test and the unhook are sort of hatchet-jobs here, and could probably be improved.
-    // Note that we check the roots for isDestroyed first.
-    var shouldDestroy;
-    if (this._toRoot) shouldDestroy = this._toRoot.isDestroyed;
-    else if (this._toTarget) shouldDestroy = this._toTarget.isDestroyed;
-    if (this._fromRoot) shouldDestroy = shouldDestroy && this._fromRoot.isDestroyed;
-    else if (this._fromTarget) shouldDestroy = shouldDestroy && this._fromTarget.isDestroyed;
-    // If shouldDestroy, unhook the stuff from the target.
-    if (shouldDestroy) {
-      this._toPropertyPath = null;
-      this._toPropertyKey = null;
-      this._toRoot = null;
-      this._toTarget = null;
-      this._fromPropertyPath = null;
-      this._fromPropertyKey = null;
-      this._fromRoot = null;
-      this._fromTarget = null;
-      this._toObserverData = null;
-      this._fromObserverData = null;
-      SC.Binding._changeQueue.remove(this);
-      this._changePending = NO;
-    }
-
     this.isConnected = NO ;
     return this ;
   },
@@ -478,6 +454,22 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
       this._scheduleSync();
     }
+  },
+
+  destroy: function() {
+    this.disconnect();
+    this._toPropertyPath = null;
+    this._toPropertyKey = null;
+    this._toRoot = null;
+    this._toTarget = null;
+    this._fromPropertyPath = null;
+    this._fromPropertyKey = null;
+    this._fromRoot = null;
+    this._fromTarget = null;
+    this._toObserverData = null;
+    this._fromObserverData = null;
+    SC.Binding._changeQueue.remove(this);
+    this._changePending = NO;
   },
 
   /**
