@@ -1975,16 +1975,12 @@ SC.ScrollView = SC.View.extend({
     sc_super();
     // Undo this._scsv_registerAutoscroll().
     SC.Drag.removeScrollableView(this);
-    // Remove private content view tracker.
-    this._scroll_contentView = null;
+    // Remove contentView (first, so observers which require a containerView don't throw an error).
+    this.set('contentView', null);
     // Remove scrollers.
     this.set('horizontalScrollerView', null);
     this.set('verticalScrollerView', null);
-    // Unhook observers on containerView; remove container view.
-    var contentView = this.get('contentView');
-    contentView.removeObserver('frame', this, this.contentViewFrameDidChange);
-    contentView.removeObserver('calculatedWidth', this, this.contentViewFrameDidChange);
-    contentView.removeObserver('calculatedHeight', this, this.contentViewFrameDidChange);
+    // Remove container view.
     this.set('containerView', null);
   },
 
