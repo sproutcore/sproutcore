@@ -692,6 +692,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Array} array with [object, property] if found or null
   */
   tupleForPropertyPath: function(path, root) {
+    // if passed nothing, return nothing.
+    if (SC.none(path)) return null;
 
     // if the passed path is itself a tuple, return it
     if (typeof path === "object" && (path instanceof Array)) return path ;
