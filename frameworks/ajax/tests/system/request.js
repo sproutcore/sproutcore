@@ -32,6 +32,74 @@ test("Basic Requirements", function() {
   ok(contents === null, "contents is null" ) ;
 });
 
+test("Default properties are correct for different types of requests.", function() {
+  var formBody,
+    headers,
+    jsonBody,
+    xmlBody,
+    req1, req2, req3, req4, req5;
+
+    // use this document for creating XML
+    xmlBody = document.implementation.createDocument(null, null, null);
+
+    // function that creates the XML structure
+    function o() {
+      var i, node = xmlBody.createElement(arguments[0]), text, child;
+
+      for(i = 1; i < arguments.length; i++) {
+          child = arguments[i];
+          if(typeof child == 'string') {
+              child = xmlBody.createTextNode(child);
+          }
+          node.appendChild(child);
+      }
+
+      return node;
+    }
+
+    // create the XML structure recursively
+    o('report',
+        o('submitter',
+            o('name', 'John Doe')
+        ),
+        o('students',
+            o('student',
+                o('name', 'Alice'),
+                o('grade', '80')
+            ),
+            o('student',
+                o('name', 'Bob'),
+                o('grade', '90')
+            )
+        )
+    );
+
+
+  jsonBody = { a: 1, b: 2 };
+  formBody = "fname=Henry&lname=Ford";
+  req1 = SC.Request.getUrl(url).json()._prep();
+  req2 = SC.Request.postUrl(url, formBody).header('Content-Type', 'application/x-www-form-urlencoded')._prep();
+  req3 = SC.Request.putUrl(url, xmlBody).xml()._prep();
+  req4 = SC.Request.patchUrl(url, jsonBody).json()._prep();
+  req5 = SC.Request.deleteUrl(url)._prep();
+
+  ok(req1.get('isJSON'), 'req1 should have isJSON true');
+  ok(!req1.get('isXML'), 'req1 should have isXML false');
+  equals(req1.header('Content-Type'), undefined, 'req1 should have Content-Type header as');
+  ok(!req2.get('isJSON'), 'req2 should have isJSON false');
+  ok(!req2.get('isXML'), 'req2 should have isXML false');
+  equals(req2.header('Content-Type'), 'application/x-www-form-urlencoded', 'req2 should have Content-Type header as');
+  ok(!req3.get('isJSON'), 'req3 should have isJSON false');
+  ok(req3.get('isXML'), 'req3 should have isXML true');
+  equals(req3.header('Content-Type'), 'text/xml', 'req3 should have Content-Type header as');
+  ok(req4.get('isJSON'), 'req4 should have isJSON true');
+  ok(!req4.get('isXML'), 'req4 should have isXML false');
+  equals(req4.header('Content-Type'), 'application/json', 'req4 should have Content-Type header as');
+  ok(!req5.get('isJSON'), 'req5 should have isJSON false');
+  ok(!req5.get('isXML'), 'req5 should have isXML false');
+  equals(req5.header('Content-Type'), undefined, 'req5 should have Content-Type header as');
+});
+
 test("Test Asynchronous GET Request", function() {
 
   var response, timer;
