@@ -101,6 +101,12 @@ test("binding disconnection actually works", function() {
   equals(toObject.get('value'), 'start');
 });
 
+test("binding destruction actually works", function() {
+  binding.destroy()
+  ok(binding.isDestroyed, "binding marks itself as destroyed.");
+  ok(!binding._fromTarget && !binding._toTarget, "binding destruction removes binding targets.");
+});
+
 module("bindings on classes");
 
 test("should connect when multiple instances of class are created", function() {
@@ -122,10 +128,20 @@ test("should connect when multiple instances of class are created", function() {
     var mySecondObj;
     SC.run(function() { mySecondObj = myClass.create() });
     equals(mySecondObj.get('foo'), "How to Be Happy");
+
+    SC.run(function() { myFirstObj.destroy(); })
+    ok(myFirstObj.fooBinding.isDestroyed, "destroying an object destroys its class bindings.");
+
   } finally {
     window.TestNamespace = undefined;
   }
 });
+
+// TODO (currently fails)
+//test("destroying a view destroys bindings that were instantiated from its class.", function() {
+//  toObject.destroy();
+//  ok(binding.isDestroyed, "destroying a view destroys its bindings.");
+//});
 
 module("one way binding", {
   setup: function() {
