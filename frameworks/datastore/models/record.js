@@ -454,7 +454,11 @@ SC.Record = SC.Object.extend(
         this.propertyDidChange('id'); // Reset computed value
       }
 
-      if(!ignoreDidChange) this.endEditing(key);
+      if(!ignoreDidChange) { this.endEditing(key); }
+      else {
+        // We must still inform the store of the change so that it can track the change across stores.
+        store.dataHashDidChange(storeKey, null, undefined, key);
+      }
     }
     return this ;
   },
