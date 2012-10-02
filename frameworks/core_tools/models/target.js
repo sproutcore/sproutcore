@@ -78,11 +78,11 @@ CoreTools.Target = SC.Record.extend(
         break;
 
       case "app":
-        ret = 'sc-icon-options-16';
+        ret = this.get('sortKind') === 'sproutcore' ? 'sc-icon-options-16' : 'sc-icon-sproutcore-16';
         break;
     }
     return ret ;
-  }.property('kind').cacheable(),
+  }.property('sortKind').cacheable(),
 
   /**
     This is the group key used to display.  Will be the kind unless the item

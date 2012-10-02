@@ -5,7 +5,7 @@
 /*globals CoreTools Welcome */
 
 /** @class
-  
+
   Manages the list of targets
 
   @extends SC.ArrayController
@@ -20,25 +20,25 @@ Welcome.targetsController = SC.ArrayController.create(
     var targets = Welcome.store.find(CoreTools.TARGETS_QUERY);
     this.set('content', targets);
   },
-  
+
   appsOnly: function() {
     return this.filter(function(t) {
       return t.get('kind') === 'app' && !t.get('name').match(/sproutcore\/(welcome|experimental)/);
-    });
+    }).sortProperty('sortKind', 'displayName');
   }.property('[]').cacheable(),
-  
+
   loadApplication: function() {
     var app = this.get('selection').firstObject(),
         url = app ? app.get('appUrl') : null;
-        
+
     if (url) {
       this.set('canLoadApp', NO);
-      this.invokeLater(function() { 
+      this.invokeLater(function() {
         window.location.href = url; // load new app
       });
     }
   },
-  
+
   launchEnabled: function() {
     var canLoadApp = this.get('canLoadApp'),
         selection = this.get('selection'),
@@ -48,7 +48,7 @@ Welcome.targetsController = SC.ArrayController.create(
 
   // used to disable all controls
   canLoadApp: YES,
-  
+
   allowsEmptySelection: NO,
   allowsMultipleSelection: NO
 
