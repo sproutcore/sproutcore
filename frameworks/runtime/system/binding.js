@@ -458,6 +458,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   destroy: function() {
     this.disconnect();
+    this._bindingSource = null;
     this._toPropertyPath = null;
     this._toPropertyKey = null;
     this._toRoot = null;
