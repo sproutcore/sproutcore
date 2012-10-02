@@ -1,6 +1,21 @@
 CHANGE LOG
 ==========
 
+Edge
+----------
+
+1.9.1 - BUG FIX RELEASE
+----------
+
+* Fixes SC.Request's application of the Content-Type header.  It was incorrectly
+  adding the header for requests that don't have a body which would cause some
+  servers to reject GET or DELETE requests.
+* Fixes a bug where SC.Record relationships modified within a nested store, would
+  fail to propagate the changes to the parent store if isMaster was NO in the
+  toOne or toMany attribute.  This also fixes possible instances of the same bug
+  if using writeAttribute() and passing YES for the ignoreDidChange param inside
+  a nested store.
+
 1.9.0
 ----------
 
