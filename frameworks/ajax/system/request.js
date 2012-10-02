@@ -267,7 +267,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     @returns {SC.Request|Object} receiver
   */
   header: function(key, value) {
-    var headers;
+    var header, headers;
 
     if (SC.typeOf(key) === SC.T_STRING) {
       headers = this._headers;
@@ -285,9 +285,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     } else if (value === undefined) {
       headers = key;
       this.beginPropertyChanges();
-      for(key in headers) {
-        if (!headers.hasOwnProperty(key)) { continue; }
-        this.header(key, headers[key]);
+      for(header in headers) {
+        if (!headers.hasOwnProperty(header)) { continue; }
+        this.header(header, headers[header]);
       }
       this.endPropertyChanges();
       return this;
@@ -359,15 +359,19 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   _prep: function() {
     var hasContentType = !!this.header('Content-Type');
 
-    if(this.get('attachIdentifyingHeaders')) {
+    if (this.get('attachIdentifyingHeaders')) {
       this.header('X-Requested-With', 'XMLHttpRequest');
       this.header('X-SproutCore-Version', SC.VERSION);
     }
 
-    if (this.get('isJSON') && !hasContentType) {
-      this.header('Content-Type', 'application/json');
-    } else if (this.get('isXML') && !hasContentType) {
-      this.header('Content-Type', 'text/xml');
+    // Set the Content-Type header only if not specified and the request
+    // includes a body.
+    if (!hasContentType && !!this.get('body')) {
+      if (this.get('isJSON')) {
+        this.header('Content-Type', 'application/json');
+      } else if (this.get('isXML')) {
+        this.header('Content-Type', 'text/xml');
+      }
     }
     return this;
   },
