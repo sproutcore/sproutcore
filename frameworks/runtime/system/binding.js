@@ -435,6 +435,46 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
+    Indicates when the binding has been destroyed.
+
+    @property {Boolean}
+    @default NO
+  */
+  isDestroyed: NO,
+
+  /**
+    Disconnects the binding and removes all properties and external references. Called by
+    either binding target object when destroyed.
+
+    @private
+  */
+  destroy: function() {
+    // If we're already destroyed, there's nothing to do.
+    if (this.isDestroyed) return;
+    // Disconnect the binding.
+    this.disconnect();
+    // Mark it destroyed.
+    this.isDestroyed = YES;
+    // Aggressively null out internal properties. (The binding remains in some queue that I can't find just now,
+    // which attempts to reconnect this binding if the property paths are left intact.)
+    this._bindingSource = null;
+    this._toPropertyPath = null;
+    this._toPropertyKey = null;
+    this._toRoot = null;
+    this._toTarget = null;
+    this._fromPropertyPath = null;
+    this._fromPropertyKey = null;
+    this._fromRoot = null;
+    this._fromTarget = null;
+    this._toObserverData = null;
+    this._fromObserverData = null;
+    // Removes from the change queue.
+    SC.Binding._changeQueue.remove(this);
+    // Cancel any pending changes.
+    this._changePending = NO;
+  },
+
+  /**
     Invoked whenever the value of the "from" property changes.  This will mark
     the binding as dirty if the value has changed.
 
@@ -454,23 +494,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
       this._scheduleSync();
     }
-  },
-
-  destroy: function() {
-    this.disconnect();
-    this._bindingSource = null;
-    this._toPropertyPath = null;
-    this._toPropertyKey = null;
-    this._toRoot = null;
-    this._toTarget = null;
-    this._fromPropertyPath = null;
-    this._fromPropertyKey = null;
-    this._fromRoot = null;
-    this._fromTarget = null;
-    this._toObserverData = null;
-    this._fromObserverData = null;
-    SC.Binding._changeQueue.remove(this);
-    this._changePending = NO;
   },
 
   /**
