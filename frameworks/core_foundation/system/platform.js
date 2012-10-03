@@ -348,11 +348,29 @@ SC.platform = SC.Object.create({
     return !!(window.history && window.history.pushState);
   }(),
 
+  /**
+    Whether the browser supports IndexedDB.
+  */
+  supportsIndexedDB: function() {
+    return !!(window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB || window.oIndexedDB);
+  }(),
+
+  /**
+    Whether the browser supports the canvas element.
+  */
   supportsCanvas: function() {
     return !!document.createElement('canvas').getContext;
   }(),
 
+  /**
+    Whether the browser supports the orientationchange event.
+  */
   supportsOrientationChange: ('onorientationchange' in window),
+
+  /**
+    Whether the browser supports WebSQL.
+  */
+  supportsWebSQL: ('openDatabase' in window),
 
   /**
     Because iOS is slow to dispatch the window.onorientationchange event,
