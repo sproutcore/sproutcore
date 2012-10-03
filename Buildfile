@@ -43,6 +43,7 @@ config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop, :routing]
 config :ajax,            :required => [:runtime, :core_foundation]
+config :designer,        :required => [:runtime, :foundation, :desktop]
 
 config :"experimental/split_view", :test_required => [:desktop]
 
@@ -107,5 +108,4 @@ config :core_tools, :required => [
   # mode :debug do
   #   config app_target, :combine_javascript => false
   # end
-
 end
