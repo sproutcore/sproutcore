@@ -1096,7 +1096,7 @@ Array.prototype.isEnumerable = YES ;
       // the loop as possible.
       if (value === undefined) {
         for (idx = 0; idx < len; idx++) {
-          item = this[index];
+          item = this[idx];
           cur = item ? (item.get ? item.get(key) : item[key]) : null;
           if (!!cur) ret.push(item);
         }
