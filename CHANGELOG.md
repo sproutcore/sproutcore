@@ -4,6 +4,13 @@ CHANGE LOG
 Edge
 ----------
 
+* Adds SC.platform.supportsWebSQL and SC.platform.supportsIndexedDB.
+* Improves the Welcome apps slightly:
+  - sorts the apps by name alphabetically
+  - groups SproutCore apps after project apps
+  - adds a new icon for app targets to further differentiate between the 
+    developer's apps and the SproutCore apps (Used in the TestRunner app too)
+
 1.9.1 - BUG FIX RELEASE
 ----------
 
