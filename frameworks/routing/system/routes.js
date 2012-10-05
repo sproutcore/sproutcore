@@ -135,10 +135,10 @@ SC.routes = SC.Object.create(
         separator, parts, i, len, crumbs, key;
 
     separator = (route.indexOf('?') < 0 && route.indexOf('&') >= 0) ? '&' : '?';
-    
+
     parts = route.split(separator);
     route = parts.shift();
-    
+
     params = this.deparam(parts.join('&'), coerce || false);
 
     // overlay any parameter passed in obj
@@ -147,7 +147,7 @@ SC.routes = SC.Object.create(
         params[key] = '' + obj[key];
       }
     }
-    
+
     params.params = separator + $.param(params);
     params.route = route;
 
@@ -405,10 +405,10 @@ SC.routes = SC.Object.create(
       }
     }
   },
-  
+
   /**
     Function to create an object out of a urlencoded param string.
-    
+
     @param {String} string the parameter string
     @param {Boolean} coerce coerce the values? (Default NO)
   */
@@ -427,6 +427,7 @@ SC.routes = SC.Object.create(
     } else if (string.indexOf('#') >= 0) {
       string = string.split('#')[1];
     }
+
     params = string.replace(/\+/g, ' ').split('&');
     len = params.length;
     for (idx = 0; idx < len; ++idx) {

@@ -20,7 +20,7 @@ test('Setup', function() {
 });
 
 module('SC.routes setup', {
-  
+
   setup: function() {
     router = SC.Object.create({
       route: function() {
@@ -31,7 +31,7 @@ module('SC.routes setup', {
       SC.routes.add('foo', router, router.route);
     });
   }
-  
+
 });
 
 test('Setup', function() {
@@ -43,7 +43,7 @@ test('Initial route', function() {
 });
 
 module('SC.routes._Route', {
-  
+
   setup: function() {
     router = SC.Object.create({
       route: function() {
@@ -51,7 +51,7 @@ module('SC.routes._Route', {
       }
     });
   }
-  
+
 });
 
 test('Route tree', function() {
@@ -61,73 +61,73 @@ test('Route tree', function() {
       abe = ['a', 'b', ':e'],
       as = ['a', '*foo'],
       a, b, c, d, e, s, p;
-  
+
   r.add(abc, router, router.route);
   r.add(abd, router, router.route);
   r.add(abe, router, router.route);
   r.add(as, router, router.route);
-  
+
   a = r.staticRoutes['a'];
   ok(a, 'There should be a staticRoutes tree for a');
   ok(!a.target, 'A node should not have a target');
   ok(!a.method, 'A node should not have a method');
-  
+
   b = a.staticRoutes['b'];
   ok(b, 'There should be a staticRoutes tree for b');
   ok(!b.target, 'A node should not have a target');
   ok(!b.method, 'A node should not have a method');
-  
+
   c = b.staticRoutes['c'];
   ok(c, 'There should be a staticRoutes tree for c');
   equals(c.target, router, 'A leaf should have a target');
   equals(c.method, router.route, 'A leaf should have a method');
-  
+
   d = b.staticRoutes['d'];
   ok(d, 'There should be a staticRoutes tree for d');
   equals(d.target, router, 'A leaf should have a target');
   equals(d.method, router.route, 'A leaf should have a method');
-  
+
   e = b.dynamicRoutes['e'];
   ok(e, 'There should be a dynamicRoutes tree for e');
   equals(d.target, router, 'A leaf should have a target');
   equals(d.method, router.route, 'A leaf should have a method');
-  
+
   s = a.wildcardRoutes['foo'];
   ok(s, 'There should be a wildcardRoutes tree for a');
-  
+
   equals(r.routeForParts(['a'], {}), null, 'routeForParts should return null for non existent routes');
   equals(r.routeForParts(['a', 'b'], {}), null, 'routeForParts should return null for non existent routes');
   equals(r.routeForParts(abc, {}), c, 'routeForParts should return the correct route for a/b/c');
-  
+
   equals(r.routeForParts(abd, {}), d, 'routeForParts should return the correct route for a/b/d');
-  
+
   abe[2] = 'foo';
   p = {};
   equals(r.routeForParts(abe, p), e, 'routeForParts should return the correct route for a/b/:e');
   equals(p['e'], 'foo', 'routeForParts should return the params for a/b/:e');
-  
+
   p = {};
   equals(r.routeForParts(['a', 'double', 'double', 'toil', 'and', 'trouble'], p), s, 'routeForParts should return the correct route for a/*foo');
   equals(p.foo, 'double/double/toil/and/trouble', 'routeForParts should return the params for a/*foo');
 });
 
 module('SC.routes location', {
-  
+
   teardown: function() {
     SC.routes.set('location', null);
   }
-  
+
 });
 
 var routeWorks = function(route, name) {
   SC.routes.set('location', route);
   equals(SC.routes.get('location'), route, name + ' route has been set');
-  
+
   setTimeout(function() {
     equals(SC.routes.get('location'), route, name + ' route is still the same');
     start();
   }, 300);
-  
+
   stop();
 };
 
@@ -149,7 +149,7 @@ test('Already escaped route', function() {
 });
 
 module('SC.routes defined routes', {
-  
+
   setup: function() {
     router = SC.Object.create({
       params: null,
@@ -162,11 +162,11 @@ module('SC.routes defined routes', {
       }
     });
   },
-  
+
   teardown: function() {
     SC.routes.set('location', null);
   }
-  
+
 });
 
 test('setting location triggers function when only passed function', function() {
@@ -184,7 +184,7 @@ test('setting location simply triggers route', function() {
   SC.routes.add("foo", router, "triggerRoute");
   SC.routes.set('location', 'bar');
   ok(!router.triggered, "Router not triggered with nonexistent route.");
-  
+
   SC.routes.set('location', 'foo');
   ok(router.triggered, "Router triggered.");
 });
@@ -194,7 +194,7 @@ test('calling trigger() triggers current location (again)', function() {
   SC.routes.set('location', 'foo');
   ok(router.triggered, "Router triggered first time.");
   router.triggered = NO;
-  
+
   SC.routes.trigger();
   ok(router.triggered, "Router triggered (again).");
 });
@@ -202,12 +202,12 @@ test('calling trigger() triggers current location (again)', function() {
 test('A mix of static, dynamic and wildcard route', function() {
   var didObserve = false,
       timer;
-  
+
   timer = setTimeout(function() {
     ok(false, 'Route change was not notified within 2 seconds');
     window.start();
   }, 2000);
-  
+
   router.addObserver('params', function() {
     if (!didObserve) {
       didObserve = true;
@@ -216,22 +216,22 @@ test('A mix of static, dynamic and wildcard route', function() {
       window.start();
     }
   });
-  
+
   SC.routes.add('foo/:controller/:action/bar/:id/*witches', router, router.route);
   SC.routes.set('location', 'foo/users/éàçùß€/bar/5/double/double/toil/and/trouble');
-  
+
   stop();
 });
 
 test('Route with parameters defined in a string', function() {
   var didObserve = false,
       timer;
-  
+
   timer = setTimeout(function() {
     ok(false, 'Route change was not notified within 2 seconds');
     window.start();
   }, 2000);
-  
+
   router.addObserver('params', function() {
     if (!didObserve) {
       didObserve = true;
@@ -240,22 +240,22 @@ test('Route with parameters defined in a string', function() {
       window.start();
     }
   });
-  
+
   SC.routes.add('*url', router, router.route);
   SC.routes.set('location', '?cuisine=french&party=4');
-  
+
   stop();
 });
 
 test('Route with parameters defined in a hash', function() {
   var didObserve = false,
       timer;
-  
+
   timer = setTimeout(function() {
     ok(false, 'Route change was not notified within 2 seconds');
     window.start();
   }, 2000);
-  
+
   router.addObserver('params', function() {
     if (!didObserve) {
       didObserve = true;
@@ -264,22 +264,22 @@ test('Route with parameters defined in a hash', function() {
       window.start();
     }
   });
-  
+
   SC.routes.add('*url', router, router.route);
   SC.routes.set('location', { cuisine: 'french', party: '4' });
-  
+
   stop();
 });
 
 test('A mix of everything', function() {
   var didObserve = false,
       timer;
-  
+
   timer = setTimeout(function() {
     ok(false, 'Route change was not notified within 2 seconds');
     window.start();
   }, 2000);
-  
+
   router.addObserver('params', function() {
     if (!didObserve) {
       didObserve = true;
@@ -288,15 +288,15 @@ test('A mix of everything', function() {
       window.start();
     }
   });
-  
+
   SC.routes.add('foo/:controller/:action/bar/:id/*witches', router, router.route);
   SC.routes.set('location', 'foo/users/éàçùß€/bar/5/double/double/toil/and/trouble?cuisine=french&party=4');
-  
+
   stop();
 });
 
 module('SC.routes location observing', {
-  
+
   setup: function() {
     router = SC.Object.create({
       hasBeenNotified: NO,
@@ -305,16 +305,16 @@ module('SC.routes location observing', {
       }
     });
   },
-  
+
   teardown: function() {
     SC.routes.set('location', null);
   }
-  
+
 });
 
 test('Location change', function() {
   var timer;
-  
+
   if (!SC.routes.get('usesHistory')) {
     timer = setTimeout(function() {
       ok(false, 'Route change was not notified within 2 seconds');
@@ -340,27 +340,27 @@ test('_extractParametersAndRoute with ? syntax', function() {
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264' }),
        { route: 'videos/5', params:'?format=h264', format: 'h264' },
        'route parameters should be correctly extracted');
-  
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264&size=small' }),
        { route: 'videos/5', params:'?format=h264&size=small', format: 'h264', size: 'small' },
        'route parameters should be correctly extracted');
-       
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264&size=small', format: 'ogg' }),
        { route: 'videos/5', params:'?format=ogg&size=small', format: 'ogg', size: 'small' },
        'route parameters should be extracted and overwritten');
-       
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5', format: 'h264', size: 'small' }),
        { route: 'videos/5', params:'?format=h264&size=small', format: 'h264', size: 'small' },
        'route should be well formatted with the given parameters');
-       
+
   same(SC.routes._extractParametersAndRoute({ format: 'h264', size: 'small' }),
        { route: '', params:'?format=h264&size=small', format: 'h264', size: 'small' },
        'route should be well formatted with the given parameters even if there is no initial route');
-      
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA' }),
        { route: 'videos/5', params:'?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA', format: 'h264', size: 'small', url: 'http://www.youtube.com/watch?v=G0k3kHtyoqc&feature=g-logo&context=G21d2678FOAAAAAAABAA' },
        'route paramters should be extracted and urldecoded');
-      
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA&videoLength=1120&macVersion=true' }, true),
        { route: 'videos/5', params:'?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA&videoLength=1120&macVersion=true', format: 'h264', size: 'small', url: 'http://www.youtube.com/watch?v=G0k3kHtyoqc&feature=g-logo&context=G21d2678FOAAAAAAABAA', videoLength: 1120, macVersion: true },
        'route paramters should be extracted, urldecoded and coerced');
@@ -370,11 +370,11 @@ test('_extractParametersAndRoute with & syntax', function() {
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5&format=h264' }),
        { route: 'videos/5', params:'&format=h264', format: 'h264' },
        'route parameters should be correctly extracted');
-       
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5&format=h264&size=small' }),
        { route: 'videos/5', params:'&format=h264&size=small', format: 'h264', size: 'small' },
        'route parameters should be correctly extracted');
-       
+
   same(SC.routes._extractParametersAndRoute({ route: 'videos/5&format=h264&size=small', format: 'ogg' }),
        { route: 'videos/5', params:'&format=ogg&size=small', format: 'ogg', size: 'small' },
        'route parameters should be extracted and overwritten');
@@ -392,4 +392,7 @@ test('deparam outputs object from string', function() {
   same(SC.routes.deparam('foo.html?query=test&numItems=5#home', true),
     { query: 'test', numItems: 5 },
     'deparam with relative location url-like string, coerce true');
+  same(SC.routes.deparam('query=test&numItems=5&size=small', true),
+    { query: 'test', numItems: 5, size: 'small' },
+    'deparam works with params only string');
 });
