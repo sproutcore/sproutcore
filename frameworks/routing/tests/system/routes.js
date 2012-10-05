@@ -379,3 +379,17 @@ test('_extractParametersAndRoute with & syntax', function() {
        { route: 'videos/5', params:'&format=ogg&size=small', format: 'ogg', size: 'small' },
        'route parameters should be extracted and overwritten');
 });
+
+module('deparam');
+
+test('deparam outputs object from string', function() {
+  same(SC.routes.deparam('http://test.fakeurl.com/dir/foo.html?query=test&numItems=5#home', true),
+    { query: 'test', numItems: 5 },
+    'deparam with properly query string first url-like string, coerce true');
+  same(SC.routes.deparam('http://test.fakeurl.com/dir/foo.html#home?query=test&numItems=5', true),
+    { query: 'test', numItems: 5 },
+    'deparam with hash location first url-like string, coerce true');
+  same(SC.routes.deparam('foo.html?query=test&numItems=5#home', true),
+    { query: 'test', numItems: 5 },
+    'deparam with relative location url-like string, coerce true');
+});
