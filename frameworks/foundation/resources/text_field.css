@@ -58,7 +58,7 @@
   .sc-hint {
     z-index: 1;
   }  
-  
+
   .sc-hint, .hint {
     position: absolute;
     top: 3px;
@@ -69,6 +69,7 @@
     color: #aaa ;
     font-size: 12px;
     -webkit-font-smoothing: antialiased;
+    cursor: text;
   }
 
   &.text-area .sc-hint,
