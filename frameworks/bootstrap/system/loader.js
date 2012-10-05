@@ -43,6 +43,9 @@ SC.setupBodyClassNames = function() {
     else if (ieVersion === 9) {
       classNames.push('ie9');
     }
+    else if  (ieVersion === 10) {
+      classNames.push('ie10');
+    }
   }
 
   if(browser==="safari" || browser==="chrome") classNames.push('webkit');
