@@ -381,7 +381,26 @@ SC.platform = SC.Object.create({
     @property {Boolean}
     @default NO
   */
-  windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window)
+  windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window),
+
+  /**
+    Does this browser support the Apache Cordova (formerly phonegap) runtime?
+    
+    This requires that you (the engineer) manually include the cordova 
+    javascript library for the appropriate platform (Android, iOS, etc)
+    in your code. There are various methods of doing this; creating your own
+    platform-specific index.rhtml is probably the easiest option. 
+    
+    WARNING: Using the javascript_libs Buildfile option for the cordova include
+    will NOT work. The library will be included after your application code,
+    by which time this property will already have been evaluated.
+
+    @property {Boolean}
+    @see http://incubator.apache.org/cordova/
+    @default NO
+  */
+  // Check for the global cordova property. 
+  cordova: (typeof window.cordova !== "undefined")
 
 });
 
