@@ -4,6 +4,8 @@ CHANGE LOG
 Edge
 ----------
 
+* Improves SC.request.deparam so that it can accept a full URL, not just the
+  params section only. 
 * Adds SC.platform.supportsWebSQL and SC.platform.supportsIndexedDB.
 * Improves the Welcome apps slightly:
   - sorts the apps by name alphabetically
@@ -14,6 +16,8 @@ Edge
 1.9.1 - BUG FIX RELEASE
 ----------
 
+* Fixes bug in SC.Locale that caused localizations to be overwritten by the 
+  last language localized.
 * Fixes SC.Request's application of the Content-Type header.  It was incorrectly
   adding the header for requests that don't have a body which would cause some
   servers to reject GET or DELETE requests.
