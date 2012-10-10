@@ -105,10 +105,19 @@ SC.View.reopen(
     @returns {SC.View} the receiver
   */
   insertBefore: function(view, beforeView) {
+    // Gatekeep: can only be used to insert children that aren't already here.
+    if (this.get('childViews').contains(view)) {
+      // Provide some developer support.
+      //@if(debug)
+      SC.log("Attempted to append view (%@) to parentView (%@) of which it was already a child.".fmt(view.toString(), this.toString()));
+      //@end if
+      return this;
+    }
+
     view.beginPropertyChanges(); // limit notifications
 
     // remove view from old parent if needed.  Also notify views.
-    if (view.get('parentView')) { view.removeFromParent() ; }
+    if (view.get('parentView') && view.get('parentView') !== this) { view.removeFromParent() ; }
     if (this.willAddChild) { this.willAddChild(view, beforeView) ; }
     if (view.willAddToParent) { view.willAddToParent(this, beforeView) ; }
 
