@@ -938,6 +938,17 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       delete this._properties;
     },
 
+    destroyObservable: function() {
+      // Destroy bindings
+      this.bindings.invoke('destroy');
+      this.bindings = null;
+
+      // TODO: Destroy observers
+
+      // TODO: Destroy properties
+      
+    },
+
     /**
       Will add an observes handler to this object for a given property path.
 
