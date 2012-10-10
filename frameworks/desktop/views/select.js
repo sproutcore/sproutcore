@@ -94,9 +94,9 @@ SC.SelectView = SC.ButtonView.extend(
     Key to use to identify separators.
 
     @type String
-    @default "separator"
+    @default "isSeparator"
   */
-  itemSeparatorKey: "separator",
+  itemSeparatorKey: "isSeparator",
 
   /**
     Key used to indicate if the item is to be enabled.
@@ -423,7 +423,7 @@ SC.SelectView = SC.ButtonView.extend(
       emptyName = escapeHTML ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
 
       item = SC.Object.create({
-        separator: NO,
+        isSeparator: NO,
         title: emptyName,
         icon: null,
         value: null,
@@ -443,6 +443,19 @@ SC.SelectView = SC.ButtonView.extend(
 
     items.forEach(function(object) {
     if (object || object === 0) {
+      //@if(debug)
+      // TODO: Remove in 1.11 and 2.0
+      // Help the developer if they were relying on the previously misleading
+      // default value of itemSeparatorKey.  We need to ensure that the change
+      // is backwards compatible with apps prior to 1.10.
+      if (separatorKey === 'isSeparator') {
+        if ((object.get && SC.none(object.get('isSeparator')) && object.get('separator')) || (SC.none(object.isSeparator) && object.separator)) {
+          SC.warn("Developer Warning: the default value of itemSeparatorKey has been changed from 'separator' to 'isSeparator' to match the documentation.  Please update your select item properties to 'isSeparator: YES' to remove this warning.");
+          if (object.set) { object.set('isSeparator', object.get('separator')); }
+          else { object.isSeparator = object.separator; }
+        }
+      }
+      //@endif
 
       // get the separator
       isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
@@ -512,7 +525,7 @@ SC.SelectView = SC.ButtonView.extend(
       }
 
       item = SC.Object.create({
-        separator: isSeparator,
+        isSeparator: isSeparator,
         title: name,
         icon: icon,
         value: value,
