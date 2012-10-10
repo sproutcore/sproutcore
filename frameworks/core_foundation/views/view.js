@@ -1314,12 +1314,8 @@ SC.CoreView.reopen(
 
     this._destroy(); // core destroy method
 
-    // remove from parent if found
-    if (this.get('parentView')) { this.removeFromParent(); }
-
     //Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
-    sc_super();
-    return this; // done with cleanup
+    return sc_super();
   },
 
   _destroy: function() {
@@ -1341,7 +1337,13 @@ SC.CoreView.reopen(
     delete this._CQ ;
     delete this.page ;
 
-    return this ;
+    // remove from parent if found.
+    if (this.get('parentView')) { this.removeFromParent(); }
+
+    // clear owner.
+    this.set('owner', null);
+
+    return this;
   },
 
   /**
