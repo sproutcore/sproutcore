@@ -21,7 +21,7 @@ module("SC.Query#containsRecordTypes", {
   
   teardown: function() { 
     MyApp = null ; 
-    SC.Record.subclasses = SC.Set.create(); // reset subclasses
+    SC.Record._subclasses = SC.Set.create(); // reset subclasses
   }
 });
 

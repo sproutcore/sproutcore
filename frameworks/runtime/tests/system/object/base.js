@@ -190,12 +190,3 @@ test("Checking the subclassOf function on an object and its subclass", function(
 	equals(obj1.subclassOf(obj), YES);
 	equals(obj.subclassOf(obj1), NO);
 });
-
-test("subclasses should contain defined subclasses", function() {
-  ok(obj.subclasses.contains(obj1), 'obj.subclasses should contain obj1');
-  
-  equals(obj1.subclasses.get('length'),0,'obj1.subclasses should be empty');
-  
-  var kls2 = obj1.extend();
-  ok(obj1.subclasses.contains(kls2), 'obj1.subclasses should contain kls2');
-});

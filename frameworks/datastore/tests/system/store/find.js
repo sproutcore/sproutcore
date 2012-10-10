@@ -80,7 +80,7 @@ module("SC.Query querying find() on a store", {
 
   teardown: function() {
     MyApp = null ;
-    SC.Record.subclasses.clear(); //reset
+    SC.Record._subclasses.clear(); //reset
   }
 
 });

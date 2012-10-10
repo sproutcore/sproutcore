@@ -230,7 +230,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       recordType = SC.objectForPropertyPath(recordType);
     }
 
-    recordType.subclasses.forEach(function(t) {
+    recordType._subclasses.forEach(function(t) {
       this._scq_expandRecordType(t, set);
     }, this);
   },
