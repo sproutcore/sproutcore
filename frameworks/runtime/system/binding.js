@@ -624,6 +624,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     binding value from one side to the other.
   */
   applyBindingValue: function() {
+    // do nothing if not connected
+    if (!this.isConnected) return;
+
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
     this._computeBindingValue();

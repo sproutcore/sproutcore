@@ -791,6 +791,7 @@ SC.FlowedLayout = {
     for (idx = 0; idx < len; idx++) {
       this.unobserveChildLayout(previouslyObserving[idx]);
     }
+    this._scfl_isObserving = nowObserving;
   },
   
   /** @private */
