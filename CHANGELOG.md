@@ -4,6 +4,17 @@ CHANGE LOG
 Edge
 ----------
 
+* Removes a lot of legacy default CSS attached to SC.SegmentedView. Also makes 
+  default SproutCore theme more easily allow for sprited button images (requires 
+  a width and height on the icon). After some consideration, the icon sizes are 
+  set by default to: 12x12px for small, 14x14px for regular, 16x16px for large 
+  and 24x24px for huge. These sizes fit well with the theme and although odd 
+  numbered heights would position a bit more nicely, even numbered height icons 
+  are much more common.
+* Allows SC.State to represent the empty ("") route. Previously, there was no 
+  way for a state to represent the empty route using representRoute:. Now a 
+  state can set representRoute: "" to be triggered when the empty route is 
+  fired.
 * Improves SC.request.deparam so that it can accept a full URL, not just the
   params section only. 
 * Adds SC.platform.supportsWebSQL and SC.platform.supportsIndexedDB.
@@ -12,6 +23,13 @@ Edge
   - groups SproutCore apps after project apps
   - adds a new icon for app targets to further differentiate between the 
     developer's apps and the SproutCore apps (Used in the TestRunner app too)
+
+### DEPRECATIONS & REMOVALS
+
+* The default value of SC.SelectView:itemSeparatorKey has been changed from 
+  'separator' to 'isSeparator' to match the documentation.  If a property 
+  'separator' is found on the item, it will still be used and a developer 
+  warning will appear in debug mode.
 
 1.9.1 - BUG FIX RELEASE
 ----------
@@ -31,7 +49,6 @@ Edge
 ----------
 
 ### CHANGES & FEATURES
-
 
 * Improves and adds much documentation.
 * Adds the Showcase app used on http://showcase.sproutcore.com.  This app contains
