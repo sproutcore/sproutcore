@@ -26,14 +26,17 @@ $theme.sc-segment-view {
     color:#777;
     font-size: 16px;
     font-weight: bold;
-    top: 11px;
+    line-height: 44px;
+    // top: 11px;
     text-shadow: 0px 1px 1px white;
     margin-left: 9px;
     margin-right: 10px;
   }
 
-  img {
-    top: -2px;
+  img.icon {
+    height: 24px;
+    top: 9px;
+    width: 24px;
   }
 
   &.sc-first-segment .left {

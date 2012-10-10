@@ -1,128 +1,54 @@
 .sc-segmented-view {
   display: block;
   white-space: nowrap;
-  z-index: 1;
+
+  /* The entire SegmentedView is disabled. */
+  &.disabled {
+    .sc-segment-view {
+      background: #FFF;
+      color: #999;
+
+      &.sel {
+        background: #EEE;
+      }
+    }
+  }
 
   img.icon {
     position: relative;
-    vertical-align: middle;
   }
 
+  /* Style for an individual segment. */
   .sc-segment-view {
-    border-right: 1px #555 solid;
+    background: #DDD;
     color: black;
     display: inline-block;
-    height: 22px;
-    line-height: 22px;
     position: relative;
     text-align: center;
-    text-decoration: none;
-    text-shadow: #b0b0b0 0px 1px 0px;
-    top: 0;
 
     &:focus {
       outline: none;
     }
 
-    &.sc-first-segment {
-      padding-left: 10px;
-      padding-right: 10px;
-      background: #DDDDDD;
-      .sc-button-inner {
-        padding-right: 10px;
-      }
-      .active,
-      .sel {
-        background: #999999;
-      }
+    &.active, &.sel {
+      background: #999;
     }
 
-    &.sc-last-segment {
-      padding-right: 10px;
-      border:none;
-      background: #DDDDDD;
-      .sc-button-inner {
-        padding-left: 10px;
-      }
-      .active,
-      .sel {
-        background: #999999;
+    &.disabled {
+      background: #FFF;
+      color: #999;
+
+      &.sel {
+        background: #EEE;
       }
     }
 
-    .sc-middle-segment .sc-button-inner {
-      padding-left: 10px;
-      padding-right: 10px;
-    }
-
-    .sc-button-inner {
-      background: #DDDDDD;
-    }
-
-    .sel .sc-button-inner {
-      background: #999999;
-      text-shadow: #909090 0px 1px 0px;
-    }
-
-    .active .sc-button-inner {
-      background: #999999;
-      text-shadow: #909090 0px 1px 0px;
+    &.sel.active {
+      background: #888;
     }
 
     &.vertical {
       display: block;
-    }
-
-    &.disabled .sc-button-inner {
-      background: #FFFFFF;
-      color: #999;
-    }
-
-    &.sc-first-segment.disabled {
-      background: #FFFFFF;
-      .sel.disabled {
-        background: #FFFFFF;
-      }
-    }
-
-    &.sc-last-segment.disabled {
-      background: #FFFFFF;
-      .sel.disabled {
-        background: #FFFFFF;
-      }
-    }
-
-    &.sel .sc-button-inner.disabled {
-      background: #FFFFFF;
-    }
-  }
-  .sc-button-inner {
-    display: block;
-    min-width: 20px;
-    min-height: 22px;
-  }
-
-  &.disabled{
-    .sc-segment-view .sc-button-inner {
-      background: #FFFFFF;
-      color: #999;
-    }
-    .sc-segment-view{
-      &.sc-first-segment {
-        background: #FFFFFF;
-        .sel {
-          background: #FFFFFF;
-        }
-      }
-      &.sc-last-segment {
-        background: #FFFFFF;
-        &.sel {
-          background: #FFFFFF;
-        }
-      }
-      &.sel .sc-button-inner {
-        background: #FFFFFF;
-      }
     }
   }
 }
