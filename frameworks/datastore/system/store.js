@@ -1392,6 +1392,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     is usually only used by low-level internal methods.  You will not usually
     destroy records this way.
 
+    Additionally, you can pass just a single `recordType` or an array of
+    `recordType`s instead of the ids and storeKeys. All records of these
+    types will be destroyed.
+
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to destroy
     @param {Array} storeKeys (optional) store keys to destroy
@@ -1399,19 +1403,31 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   destroyRecords: function(recordTypes, ids, storeKeys) {
     var len, isArray, idx, id, recordType, storeKey;
-    if(storeKeys===undefined){
-      len = ids.length;
+    if (SC.typeOf(storeKeys) !== SC.T_ARRAY) {
       isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
       if (!isArray) recordType = recordTypes;
-      for(idx=0;idx<len;idx++) {
-        if (isArray) recordType = recordTypes[idx] || SC.Record;
-        id = ids ? ids[idx] : undefined ;
-        this.destroyRecord(recordType, id, undefined);
+      if (SC.typeOf(ids) !== SC.T_ARRAY) {
+        // Destroy all records of recordTypes.
+        len = isArray ? recordTypes.length : 1;
+        for (idx = 0; idx < len; idx++) {
+          if (isArray) recordType = recordTypes[idx];
+          storeKeys = this.storeKeysFor(recordType);
+          this.destroyRecords(undefined, undefined, storeKeys);
+        }
+      } else {
+        // Destroy all records for ids.
+        len = ids.length;
+        for(idx=0;idx<len;idx++) {
+          if (isArray) recordType = recordTypes[idx] || SC.Record;
+          id = ids[idx];
+          this.destroyRecord(recordType, id, undefined);
+        }
       }
-    }else{
+    } else {
+      // Destroy all records for all storeKeys.
       len = storeKeys.length;
       for(idx=0;idx<len;idx++) {
-        storeKey = storeKeys ? storeKeys[idx] : undefined ;
+        storeKey = storeKeys[idx];
         this.destroyRecord(undefined, undefined, storeKey);
       }
     }
