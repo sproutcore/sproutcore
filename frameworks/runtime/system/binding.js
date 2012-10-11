@@ -130,7 +130,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   not allow Integers less than ten.  Note that it checks the value of the
   bindings and allows all other values to pass:
 
-        valueBinding: SC.Binding.transform(function(value, binding) {
+        valueBinding: SC.Binding.transform(function(value, isForward, binding) {
           return ((SC.typeOf(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value;
         }).from("MyApp.someController.value")
 
@@ -141,7 +141,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   be not less than the passed minimum:
 
       SC.Binding.notLessThan = function(minValue) {
-        return this.transform(function(value, binding) {
+        return this.transform(function(value, isForward, binding) {
           return ((SC.typeOf(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value ;
         }) ;
       } ;
@@ -515,10 +515,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     var transforms = this._transforms;
     if (transforms) {
       var len = transforms.length,
+          isForward = this.isForward(),
           transform;
       for(idx=0;idx<len;idx++) {
         transform = transforms[idx] ;
-        v = transform(v, this) ;
+        v = transform(v, isForward, this) ;
       }
     }
 
@@ -607,7 +608,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (!this._oneWay && this._fromTarget) {
       if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "->") ;
-      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      if (this.isForward()) {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      } else {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, tv) ;
+      }
       if (bench) SC.Benchmark.end(this.toString() + "->") ;
     }
 
@@ -615,7 +620,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (this._toTarget) {
       if (log) SC.Logger.log("%@: %@ <- %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
-      this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      if (this.isForward()) {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      } else {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, v) ;
+      }
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
     }
   },
@@ -708,6 +717,19 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         this._toTarget = tuple[0]; this._toPropertyKey = tuple[1] ;
       }
     }
+  },
+
+  /**
+    Returns the direction of the binding.  If isForward is YES, then the value 
+    being passed came from the "from" side of the binding (i.e. the "Binding.path" 
+    you named).  If isForward is NO, then the value came from the "to" side (i.e. 
+    the property you named with "propertyBinding").  You can vary your transform 
+    behavior if you are based on the direction of the change.
+    
+    @returns {Boolean}
+  */
+  isForward: function() {
+    return this._fromTarget === this._bindingSource;
   },
 
   /**
@@ -827,7 +849,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (placeholder === undefined) {
       placeholder = SC.MULTIPLE_PLACEHOLDER ;
     }
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (value && value.isEnumerable) {
         var len = value.get('length');
         value = (len>1) ? placeholder : (len<=0) ? null : value.firstObject();
@@ -846,7 +868,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (SC.none(value) || (value === '') || (SC.isArray(value) && (value.get ? value.get('length') : value.length)=== 0)) {
         value = placeholder ;
       }
@@ -864,7 +886,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   notNull: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (SC.none(value)) value = placeholder ;
       return value ;
     }) ;
@@ -878,7 +900,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   multiple: function(fromPath) {
-    return this.from(fromPath).transform(function(value) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (!SC.isArray(value)) value = (value == null) ? [] : [value] ;
       return value ;
     }) ;
@@ -893,10 +915,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   bool: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
-      var t = SC.typeOf(v) ;
-      if (t === SC.T_ERROR) return v ;
-      return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
+    return this.from(fromPath).transform(function(value, isForward, binding) {
+      var t = SC.typeOf(value) ;
+      if (t === SC.T_ERROR) return value ;
+      return (t == SC.T_ARRAY) ? (value.length > 0) : (value === '') ? NO : !!value ;
     }) ;
   },
 
@@ -966,10 +988,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   not: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
-      var t = SC.typeOf(v) ;
-      if (t === SC.T_ERROR) return v ;
-      return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
+    return this.from(fromPath).transform(function(value, isForward, binding) {
+      var t = SC.typeOf(value) ;
+      if (t === SC.T_ERROR) return value ;
+      return !((t == SC.T_ARRAY) ? (value.length > 0) : (value === '') ? NO : !!value) ;
     }) ;
   },
 
@@ -980,9 +1002,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   isNull: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
-      var t = SC.typeOf(v) ;
-      return (t === SC.T_ERROR) ? v : SC.none(v) ;
+    return this.from(fromPath).transform(function(value, isForward, binding) {
+      var t = SC.typeOf(value) ;
+      return (t === SC.T_ERROR) ? value : SC.none(value) ;
     });
   },
 

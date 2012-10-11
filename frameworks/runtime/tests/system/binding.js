@@ -472,3 +472,31 @@ test("works with local path", function(){
 
   equals(TestNamespace.toObject.get('relative'), "newerValue");
 });
+
+module("Binding transforms", {
+  setup: function() {
+    fromObject = SC.Object.create({ stringValue: '1A' });
+    toObject = SC.Object.create({ numberValue: 1 });
+    binding = SC.Binding.transform(function(value, isForward, binding) {
+      if (isForward) {
+        // We get a String to transform into a Number
+        return parseInt(value);
+      } else {
+        // We get a Number to transform into a String (w/ 'A' on the end)
+        return value + "A";
+      }
+    }).from("stringValue", fromObject).to("numberValue", toObject).connect();
+  }
+});
+
+test("The binding transforms in both directions", function() {
+  // Set in one direction
+  fromObject.set('stringValue', '2A');
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('numberValue'), 2);
+  
+  // Set in the other
+  toObject.set('numberValue', 3);
+  SC.Binding.flushPendingChanges();
+  equals(fromObject.get('stringValue'), '3A');
+});
