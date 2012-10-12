@@ -31,34 +31,14 @@
 
   pane.add("cleans-up-views", SC.ContainerView, {
     nowShowing: 'uninstantiatedView',
-
+    reuseInstantiatedViews: NO,
     uninstantiatedView: SC.View.design({})
   });
 
-    // .add("disabled - single selection", SC.ListView, {
-    //   isEnabled: NO,
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: singleSelection
-    // })
-    //
-    // .add("single selection", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: singleSelection
-    // })
-    //
-    // .add("multiple selection, contiguous", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: multiSelectionContiguous
-    // })
-    //
-    // .add("multiple selection, discontiguous", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: multiSelectionDiscontiguous
-    // })
+  pane.add("reuse-instantiated-views", SC.ContainerView, {
+    reuseInstantiatedViews: YES,
+    isEnabled: YES
+  });
 
   pane.show(); // add a test to show the test pane
 
@@ -83,18 +63,6 @@
     ok(view.$().hasClass('disabled'), 'should have disabled class');
     ok(!view.$().hasClass('sel'), 'should not have sel class');
   });
-
-  // test("disabled - single selection", function() {
-  //   var view = pane.view('disabled - single selection');
-  //   ok(view.$().hasClass('disabled'), 'should have disabled class');
-  //   ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
-  //  });
-  //
-  //  test("single selection", function() {
-  //    var view = pane.view('single selection');
-  //    ok(view.itemViewAtContentIndex(0).$().hasClass('sc-collection-item'), 'should have sc-collection-item class');
-  //    ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
-  //   });
 
   test("changing nowShowing", function() {
     var view = pane.view('basic');
@@ -163,6 +131,55 @@
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
     equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");
+  });
+
+  test("Reuse uninstantied views", function () {
+    var view = pane.view('reuse-instantiated-views');
+    view.awake();
+
+    var viewToAdd1 = SC.View.create({value: 'View1'});
+    SC.run(function () {view.set('nowShowing',viewToAdd1); });
+    equals(view._instantiatedViews, null, "_instantiatedViews should be null after setting nowShowing to view1(instantiated)");
+
+    var viewToAdd2 = SC.View.extend({value: 'View2'});
+    SC.run(function () { view.set('nowShowing',viewToAdd2); });
+    var instantiatedViews = view._instantiatedViews;
+    equals(instantiatedViews.get('length'), 1, "_instantiatedViews should have one view after setting nowShowing to view2(uninstantiated)"); 
+
+    var viewToAdd3 = SC.View.create({value: 'View3'});
+    SC.run(function () { view.set('nowShowing',viewToAdd3); });
+    equals(instantiatedViews.get('length'), 1, "_instantiatedViews should have one view after setting nowShowing to view3(instantiated)");
+
+    SC.run(function () { view.set('nowShowing',viewToAdd1); });
+    equals(instantiatedViews.get('length'), 1, "_instantiatedViews should have one view after setting nowShowing to view1(uninstantiated)");
+
+    var viewToAdd4 = SC.View.extend({value: 'View4'});
+    SC.run(function () { view.set('nowShowing',viewToAdd4); });
+    equals(instantiatedViews.get('length'), 2, "_instantiatedViews should have two view after setting nowShowing to view4(uninstantiated)");
+
+    equals(view.getPath('childViews.length'), 1, "should have one child view after all");
+
+    var viewForString = SC.LabelView.create({value: 'View3'});
+    SC.run(function () {
+      view.set('label', viewForString);
+      view.set('nowShowing', 'label');  
+    });
+    equals(view.get('contentView').get('value'), 'View3', 'contentView changes as intended when an instantiated view is passed to nowShowing');
+
+    // Set nowShowing to a nonexistent string.
+    viewToAdd = 'NonexistentNamespace.NonexistentViewClass';
+    view.set('nowShowing', viewToAdd);
+    equals(view.get('contentView'), null, 'contentView changes to null when nowShowing is set to a string pointing at nothing');
+
+    // we get the instantiated view before _instantiatedViews is set to null
+    var view2 = view._instantiatedViews.findProperty('view', viewToAdd2).instance;
+
+    SC.run(function () { view.destroy(); });
+    equals(view2.get('isDestroyed'), true, "view1(instantiated) should be destroy");
+
+    equals(viewToAdd3.get('isDestroyed'), false, "view3(uninstantiated) should not be destroy");
+
+    equals(view._instantiatedViews, null, "_instantiatedViews should be null after having destroy the container");
   });
 
 })();
