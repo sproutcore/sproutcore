@@ -359,7 +359,6 @@
   // TEST SELECTION SUPPORT
   //
 
-
   module('SC.TextFieldView: Selection Support', pane.standardSetup());
 
   test("Setting the selection to a null value should fail", function () {
@@ -411,7 +410,103 @@
     ok(fetchedSelection.get('length') === 3, 'the selection should have length 3');
   });
 
+  test("Setting no selection direction", function () {
+    var view = pane.view('with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
 
+    var newSelection = SC.TextSelection.create({ start: 2, end: 5, direction: 'none' });
+    view.set('selection', newSelection);
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'none', 'the selection direction should be none');
+  });
+
+  test("Setting forward selection direction", function () {
+    var view = pane.view('with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+
+    var newSelection = SC.TextSelection.create({ start: 2, end: 5, direction: 'forward' });
+    view.set('selection', newSelection);
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'forward', 'the selection direction should be forward');
+  });
+
+  test("Setting backward selection direction", function () {
+    var view = pane.view('with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+
+    var newSelection = SC.TextSelection.create({ start: 2, end: 5, direction: 'backward' });
+    view.set('selection', newSelection);
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+  });
+
+  test("Getting no selection direction", function () {
+    var view = pane.view('with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+
+    fieldElement.setSelectionRange(2, 5, 'none');
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'forward', 'the selection direction should default to forward');
+  });
+
+  test("Getting forward selection direction", function () {
+    var view = pane.view('with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+
+    fieldElement.setSelectionRange(2, 5, 'forward');
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'forward', 'the selection direction should be forward');
+  });
+
+  test("Getting backward selection direction", function () {
+    var view = pane.view('with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+
+    fieldElement.setSelectionRange(2, 5, 'backward');
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+  });
+
+  test("Setting textarea selection direction", function () {
+    var view = pane.view('textarea - with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+
+    var newSelection = SC.TextSelection.create({ start: 2, end: 5, direction: 'backward' });
+    view.set('selection', newSelection);
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+  });
+
+  test("Getting textarea selection direction", function () {
+    var view = pane.view('textarea - with value');
+    var fieldElement = view.$input()[0];
+    fieldElement.focus();
+
+    fieldElement.setSelectionRange(2, 5, 'backward');
+
+    var fetchedSelection = view.get('selection');
+    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+  });
 
   // ..........................................................
   // TEST ACCESSORY VIEWS

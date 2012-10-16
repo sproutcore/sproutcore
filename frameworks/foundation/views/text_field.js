@@ -399,6 +399,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   selection: function (key, value) {
     var element = this.$input()[0],
+        direction = 'none',
         range, start, end;
 
     // Are we being asked to set the value, or return the current value?
@@ -418,6 +419,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
             }
             if ('selectionEnd' in element) {
               end = element.selectionEnd;
+            }
+            if ('selectionDirection' in element) {
+              direction = element.selectionDirection;
             }
           }
           // In Firefox when you ask the selectionStart or End of a hidden
@@ -457,7 +461,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           }
         }
 
-        return SC.TextSelection.create({ start: start, end: end });
+        return SC.TextSelection.create({ start: start, end: end, direction: direction });
       } else {
         return null;
       }
@@ -470,7 +474,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       if (element) {
         if (element.setSelectionRange) {
-          element.setSelectionRange(value.get('start'), value.get('end'));
+          element.setSelectionRange(value.get('start'), value.get('end'), value.get('direction'));
         } else {
           // Support Internet Explorer.
           range = element.createTextRange();

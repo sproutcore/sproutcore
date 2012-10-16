@@ -47,6 +47,20 @@ SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
   end: -1,
 
   /**
+    The direction of the selection. Currently only supported on Chrome,
+    Firefox, and Safari >= 6.
+
+    Possible values are
+      * 'none'
+      * 'forward'
+      * 'backward'
+
+    @type {String}
+    @default 'none'
+  */
+  direction: 'none',
+
+  /**
     The length of the selection.  This is equivalent to (end - start) and
     exists mainly as a convenience.
 
@@ -74,22 +88,27 @@ SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
   copy: function () {
     return SC.TextSelection.create({
       start: this.get('start'),
-      end:   this.get('end')
+      end:   this.get('end'),
+      direction: this.get('direction')
     });
   },
 
   toString: function () {
-    var length = this.get('length');
+    var length = this.get('length'),
+        start = this.get('start'),
+        end = this.get('end'),
+        direction = this.get('direction');
+
     if (length  &&  length > 0) {
       if (length === 1) {
-        return "[%@ character selected: {%@, %@}]".fmt(length, this.get('start'), this.get('end'));
+        return "[%@ character selected: {%@, %@}; direction: %@]".fmt(length, start, end, direction);
       }
       else {
-        return "[%@ characters selected: {%@, %@}]".fmt(length, this.get('start'), this.get('end'));
+        return "[%@ characters selected: {%@, %@}; direction: %@]".fmt(length, start, end, direction);
       }
     }
     else {
-      return "[no text selected; caret at %@]".fmt(this.get('start'));
+      return "[no text selected; caret at %@]".fmt(start);
     }
   }
 });
