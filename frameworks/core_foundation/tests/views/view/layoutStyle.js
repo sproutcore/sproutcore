@@ -261,6 +261,21 @@
     performLayoutTest(layout, no_f, s, with_f, s, NO) ;
   }) ;
 
+  // Previously, you couldn't set a % width or height with a centerX/centerY of 0.
+  // But there's no reason that a % sized view can't be centered at 0 and this
+  // test shows that.
+  test("layout {centerX 0, centerY 0, width %, height %}", function() {
+    var layout = { centerX: 0, centerY: 0, width: 0.6, height: 0.6 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
+
+    // The parent frame is 200 x 200.
+    var size = 200 * 0.6;
+    var with_f = { x: (200 - size)*0.5, y: (200 - size)*0.5, width: size, height: size } ;
+    var s = { marginLeft: '-30%', marginTop: '-30%', width: '60%', height: '60%', top: "50%", left: "50%" } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO) ;
+  }) ;
+
   test("layout {top, left, width: auto, height: auto}", function() {
     child = SC.View.create({
       useStaticLayout: YES,
