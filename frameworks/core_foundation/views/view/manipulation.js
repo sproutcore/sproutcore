@@ -19,7 +19,7 @@ SC.View.reopen(
   /**
     Handles changes in the layer id.
   */
-  layerIdDidChange: function () {
+  layerIdDidChange: function() {
     var layer  = this.get('layer'),
         lid    = this.get('layerId'),
         lastId = this._lastLayerId;
@@ -60,7 +60,7 @@ SC.View.reopen(
     @param {SC.View} beforeView
     @returns {SC.View} the receiver
   */
-  insertBefore: function (view, beforeView) {
+  insertBefore: function(view, beforeView) {
     view.beginPropertyChanges(); // limit notifications
 
     // Reset any views that are already building in or out.
@@ -80,10 +80,10 @@ SC.View.reopen(
     //   }
     // });
 
-    return this;
+    return this ;
   },
 
-  removeChild: function (original, view) {
+  removeChild: function(original, view) {
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
       throw new Error("%@.removeChild(%@) must belong to parent".fmt(this, view));
@@ -91,8 +91,8 @@ SC.View.reopen(
 
     // notify views
     // TODO: Deprecate these notifications.
-    if (view.willRemoveFromParent) { view.willRemoveFromParent(); }
-    if (this.willRemoveChild) { this.willRemoveChild(view); }
+    if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
+    if (this.willRemoveChild) { this.willRemoveChild(view) ; }
 
     original(view);
 
@@ -111,13 +111,13 @@ SC.View.reopen(
     @param view {SC.View} the view to remove from the DOM.
     @returns {SC.View} the receiver
   */
-  replaceChild: function (view, oldView) {
+  replaceChild: function(view, oldView) {
     // suspend notifications
     view.beginPropertyChanges();
     oldView.beginPropertyChanges();
     this.beginPropertyChanges();
 
-    this.insertBefore(view, oldView).removeChild(oldView);
+    this.insertBefore(view,oldView).removeChild(oldView) ;
 
     // resume notifications
     this.endPropertyChanges();
@@ -176,7 +176,7 @@ SC.View.reopen(
     // }
     this.endPropertyChanges();
 
-    return this;
+    return this ;
   },
 
   /**
@@ -186,7 +186,7 @@ SC.View.reopen(
     @param view {SC.View} the view to insert
     @returns {SC.View} the receiver
   */
-  appendChild: function (view) {
+  appendChild: function(view) {
     return this.insertBefore(view, null);
   },
 
@@ -200,7 +200,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildInChild: function (view) {
+  buildInChild: function(view) {
     view.willBuildInToView(this);
     this.appendChild(view);
     view.buildInToView(this);
@@ -212,7 +212,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildOutChild: function (view) {
+  buildOutChild: function(view) {
     view.buildOutFromView(this);
   },
 
@@ -221,14 +221,14 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildInDidFinishFor: function (child) {
+  buildInDidFinishFor: function(child) {
   },
 
   /**
     @private
     Called by child view when build out finishes. By default removes the child view.
   */
-  buildOutDidFinishFor: function (child) {
+  buildOutDidFinishFor: function(child) {
     this.removeChild(child);
   },
 
@@ -251,7 +251,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildIn: function () {
+  buildIn: function() {
     //@if(debug)
     SC.warn("The SC.View build methods have been deprecated in favor of the transition plugins.  To build in a view, please provide a transitionIn plugin (many are pre-built in SproutCore) and to build out a view, please provide a transitionOut plugin.");
     //@endif
@@ -263,7 +263,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildOut: function () {
+  buildOut: function() {
     //@if(debug)
     SC.warn("The SC.View build methods have been deprecated in favor of the transition plugins.  To build in a view, please provide a transitionIn plugin (many are pre-built in SproutCore) and to build out a view, please provide a transitionOut plugin.");
     //@endif
@@ -276,7 +276,7 @@ SC.View.reopen(
     It is usually called before a build in, by the parent view.
     @deprecated Version 1.10
   */
-  resetBuild: function () {
+  resetBuild: function() {
 
   },
 
@@ -289,7 +289,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildOutDidCancel: function () {
+  buildOutDidCancel: function() {
 
   },
 
@@ -303,7 +303,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildInDidCancel: function () {
+  buildInDidCancel: function() {
 
   },
 
@@ -312,7 +312,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildInDidFinish: function () {
+  buildInDidFinish: function() {
     this.isBuildingIn = NO;
     this._buildingInTo.buildInDidFinishFor(this);
     this._buildingInTo = null;
@@ -323,7 +323,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  buildOutDidFinish: function () {
+  buildOutDidFinish: function() {
     this.isBuildingOut = NO;
     this._buildingOutFrom.buildOutDidFinishFor(this);
     this._buildingOutFrom = null;
@@ -334,7 +334,7 @@ SC.View.reopen(
 
     @deprecated Version 1.10
   */
-  resetBuildState: function () {
+  resetBuildState: function() {
     if (this.isBuildingIn) {
       this.buildInDidCancel();
       this.isBuildingIn = NO;
@@ -359,7 +359,7 @@ SC.View.reopen(
 
     Mostly, this cancels any build out _before_ the view is removed through parent change.
   */
-  willBuildInToView: function (view) {
+  willBuildInToView: function(view) {
     // stop any current build outs (and if we need to, we also need to build in again)
     if (this.isBuildingOut) {
       this.buildOutDidCancel();
@@ -370,7 +370,7 @@ SC.View.reopen(
     @private (semi)
     Called by building parent view's buildInChild method.
   */
-  buildInToView: function (view) {
+  buildInToView: function(view) {
     // if we are already building in, do nothing.
     if (this.isBuildingIn) { return; }
 
@@ -386,7 +386,7 @@ SC.View.reopen(
 
     The supplied view should always be the parent view.
   */
-  buildOutFromView: function (view) {
+  buildOutFromView: function(view) {
     // if we are already building out, do nothing.
     if (this.isBuildingOut) { return; }
 
