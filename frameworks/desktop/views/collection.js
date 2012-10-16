@@ -1107,6 +1107,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // return from cache if possible
     var content   = this.get('content'),
+        designMode = this.get('designMode'),
         item = content.objectAt(idx),
         del  = this.get('contentDelegate'),
         groupIndexes = this.get('_contentGroupIndexes'),
@@ -1199,6 +1200,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       var attrs = this._TMP_ATTRS;
       attrs.contentIndex      = idx;
       attrs.content           = item;
+      attrs.designMode        = designMode;
       attrs.owner             = attrs.displayDelegate = this;
       attrs.parentView        = parentView;   // Same here; shouldn't be needed
       attrs.page              = this.page;
@@ -1874,6 +1876,26 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   scrollToItemView: function(view) {
     if (view) view.scrollToVisible();
     return this ;
+  },
+
+  // ..........................................................
+  // DESIGN MODE SUPPORT
+  //
+
+  /** @private Set the designMode on each item view. */
+  adjustChildDesignModes: function (designMode) {
+    sc_super();
+
+    var idx,
+      itemView,
+      nowShowing = this.get('nowShowing');
+
+    // Only loop through the now showing indexes, if the content is sparsely
+    // loaded we could inadvertently trigger reloading unneeded content.
+    nowShowing.forEach(function(idx) {
+      itemView = this.itemViewForContentIndex(idx);
+      itemView.set('designMode', designMode);
+    }, this);
   },
 
   // ..........................................................
