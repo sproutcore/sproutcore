@@ -41,38 +41,38 @@ module("SC.CollectionView.itemViewForContentIndex", {
 
     // NOTE: delegate methods above are added here.
     SC.run(function () {
-      view = SC.CollectionView.create(del, {
-        content: content,
+    view = SC.CollectionView.create(del, {
+      content: content,
 
-        layoutForContentIndex: function(contentIndex) {
-          return this.fixtureLayout ;
-        },
+      layoutForContentIndex: function(contentIndex) {
+        return this.fixtureLayout ;
+      },
 
-        fixtureLayout: { left: 0, right: 0, top:0, bottom: 0 },
+      fixtureLayout: { left: 0, right: 0, top:0, bottom: 0 },
 
-        groupExampleView: SC.View.extend(), // custom for testing
+      groupExampleView: SC.View.extend(), // custom for testing
 
         exampleView: SC.View.extend({
           isReusable: false
         }), // custom for testing
 
-        testAsGroup: NO,
+      testAsGroup: NO,
 
-        contentIndexIsGroup: function() { return this.testAsGroup; },
+      contentIndexIsGroup: function() { return this.testAsGroup; },
 
-        contentGroupIndexes: function() {
-          if (this.testAsGroup) {
-            return SC.IndexSet.create(0, this.get('length'));
-          } else return null ;
-        },
+      contentGroupIndexes: function() {
+        if (this.testAsGroup) {
+          return SC.IndexSet.create(0, this.get('length'));
+        } else return null ;
+      },
 
-        fixtureNowShowing: SC.IndexSet.create(0, 3),
+      fixtureNowShowing: SC.IndexSet.create(0,3),
 
-        computeNowShowing: function() {
-          return this.fixtureNowShowing;
-        }
+      computeNowShowing: function() {
+        return this.fixtureNowShowing;
+      }
 
-      });
+    });
     });
 
     // add in delegate mixin
@@ -147,6 +147,23 @@ test("returning item from cache", function() {
 
 });
 
+// Tests support for the addition of designModes to SC.Pane and SC.View.  Since
+// SC.CollectionView doesn't use child views and thus doesn't call
+// SC.View:insertBefore, it needs to pass the designMode down to its item views
+// itself.
+test("set designMode on item views", function() {
+  var itemView;
+
+  // Initial designMode before creating the item view.
+  view.set('designMode', 'small');
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('designMode'), 'small', "itemView.designMode should be set to match the current value of the collection");
+
+  // Changes to designMode after creating the item view.
+  view.set('designMode', 'large');
+  equals(itemView.get('designMode'), 'large', "itemView.designMode should be set to match the current value of the collection");
+});
+
 // ..........................................................
 // ALTERNATE WAYS TO GET AN EXAMPLE VIEW
 //
@@ -165,7 +182,7 @@ test("contentExampleViewKey is set and content has property", function() {
 test("contentExampleViewKey is set and content is null", function() {
   view.set('contentExampleViewKey', 'foo');
   SC.run(function () {
-    content.replace(1,1,[null]);
+  content.replace(1,1,[null]);
   });
 
   var itemView = view.itemViewForContentIndex(1);
@@ -214,7 +231,7 @@ test("contentGroupExampleViewKey is set and content is null", function() {
 
   view.set('contentGroupExampleViewKey', 'foo');
   SC.run(function () {
-    content.replace(1,1,[null]);
+  content.replace(1,1,[null]);
   });
 
   var itemView = view.itemViewForContentIndex(1);
@@ -245,7 +262,7 @@ test("_contentGroupIndexes's cache should be properly invalidated", function() {
   ok(view.get('_contentGroupIndexes').isEqual(SC.IndexSet.create(0, 3)), "contentGroupIndexes should have correct initial value");
 
   SC.run(function () {
-    view.get('content').removeAt(2, 1);
+  view.get('content').removeAt(2, 1);
   });
 
   ok(view.get('_contentGroupIndexes').isEqual(SC.IndexSet.create(0, 2)), "contentGroupIndexes should have updated value after deletion");
