@@ -557,7 +557,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           // right-justify the view.
           if (!layout.right) layout.right = 0 ;
 
-          rightAccessoryView.adjust({ layout: layout }) ;
+          rightAccessoryView.adjust(layout) ;
         }
       }
     }
