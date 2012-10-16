@@ -278,22 +278,26 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     ret[finishBorder+'Width'] = finishBorderVal || null;
 
 
-    var sizeValue   = this[size],
+    var sizeIsPercent,
+        sizeValue   = this[size],
         centerValue = this[center],
-        startValue  = this[start];
+        startValue  = this[start],
+        value;
 
-    var sizeIsPercent = SC.isPercentage(sizeValue), centerIsPercent = SC.isPercentage(centerValue, YES);
+    sizeIsPercent = SC.isPercentage(sizeValue);
 
     // If > 1 then it should be a normal number value
     if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
 
-    if((sizeIsPercent && centerIsPercent) || (!sizeIsPercent && !centerIsPercent)) {
-      var value = centerValue - sizeValue/2;
-      ret[margin] = (sizeIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
-    } else {
-      // This error message happens whenever height is not set.
-      SC.Logger.warn("You have to set "+size+" and "+center+" using both percentages or pixels");
+    if (!sizeValue) {
+      //@if(debug)
+      // This error message happens whenever width or height is not set.
+      SC.warn("Developer Warning: When setting '"+center+"' in the layout, you must also set '"+size+"'.");
+      //@endif
       ret[margin] = "50%";
+    } else {
+      value = centerValue - sizeValue/2;
+      ret[margin] = (sizeIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
     }
 
     ret[size] = this._cssNumber(sizeValue) || 0;
