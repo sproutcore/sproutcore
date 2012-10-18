@@ -23,29 +23,36 @@ SC.Pane.reopen(
     additional design specific to the much different display size.  In order to
     make this possible and with as much ease as possible, SC.Pane and SC.View
     have support for design "modes".  A design mode represents a specific
-    design of the app for a range of the display width.  You may want to
-    have a "small" design mode for smartphones and a "large" design mode for
-    everything else, but you could even go so far as to have "small-portrait",
-    "small-landscape", "medium-portrait", "medium-landscape", "large-portrait",
-    etc.  No matter how many you implement, design modes can very easily be used
-    to reposition, hide or show and modify the styles of your views as needed.
+    design of the app for a range of the display's width.
 
-    To use design modes in your pane, set the property to a hash of mode names.
-    The value of each mode represents the upper width limit at which the design
-    mode of the pane should switch.  If the width of the window crosses the
-    threshold value, the new design mode will be applied to the pane and each
-    of its child views.
+    You may want to have a "small" design mode for smartphones and a "large"
+    design mode for everything else, but you could even go so far as to have
+    "small-portrait", "small-landscape", "medium-portrait", "medium-landscape",
+    "large-portrait", etc.  No matter how many you implement, design modes can
+    very easily be used to reposition, hide or show and modify the styles of
+    your views as needed.
 
-    If the pane or child view has a design mode layout in designLayouts that
-    matches, the layout of the view will be updated.  As well, the pane or its
-    child views can make computed properties dependent on designMode to update
-    other properties, such as isVisible or classNames (using classNameBindings).
+    To use design modes in your pane, set the designModes property to a hash of
+    mode names where the value of each mode represents the upper width limit at
+    which the design mode of the pane should switch.  As the width of the window
+    crosses the threshold value, the new design mode will be applied to the pane
+    and each of its child views.
+
+    If the pane or child view has a layout in designLayouts that matches the
+    current mode, the layout of the view will be updated.  As well, a className
+    for the current design mode will be applied to each child view, which allows
+    you to update the style of the views without adding bindings or
+    observers manually.
+
+    Note that the designMode property of each child view will be updated, so
+    you can make computed properties dependent on designMode in order to adjust
+    other properties, such as isVisible.
 
     For example,
 
         myPane = SC.PanelPane.create({
 
-          // The pane will support three modes.
+          // The pane will support three design modes.
           designModes: {
             small: 480,       // 0 to 480
             medium: 768,      // 481 to 768
@@ -53,11 +60,15 @@ SC.Pane.reopen(
           },
 
           contentView: SC.View.design({
+            // This view will additionally get class names: 'small', 'medium' &
+            // 'large' depending on the current design mode.  Therefore we can
+            // have specific styles in CSS like .my-view.small & .my-view.large
+            classNames: ['my-view'],
 
             // This view will change its layout for small and medium modes.
             designLayouts: {
               small: { height: 44 },
-              medium: { width: 180 }
+              medium: { height: 50, width: 180 }
             },
 
             // This view will hide itself in large mode.
@@ -74,23 +85,29 @@ SC.Pane.reopen(
         > 'small'
         > myPane.getPath('contentView.layout');
         > { height: 44 }
+        > myPane.getPath('contentView.classNames');
+        > ['sc-view', 'my-view', 'small']
 
         > myPane.adjust('width', 550);
         > myPane.get('designMode');
         > 'medium'
         > myPane.getPath('contentView.layout');
         > { width: 180 }
+        > myPane.getPath('contentView.classNames');
+        > ['sc-view', 'my-view', 'medium']
 
         > myPane.adjust('width', 1024);
         > myPane.get('designMode');
         > 'large'
         > myPane.getPath('contentView.layout');
         > { width: 180 } // Unchanged because this view doesn't have a 'large' design mode layout
+        > myPane.getPath('contentView.classNames');
+        > ['sc-view', 'my-view', 'large']
         > myPane.getPath('contentView.isVisible');
         > false
 
         > myPane.adjust('width', 2048);
-        > // Nothing new happens, design mode is already 'large'
+        > // Nothing changes, design mode is already 'large'
 
     @property {Object|null}
     @default null
@@ -180,9 +197,9 @@ SC.Pane.reopen(
       designMode = designModeNames.objectAt(i);
     }
 
-    // Update it if it has changed.
+    // Update only if it has changed.
     if (lastDesignMode !== designMode) {
-      this.set('designMode', designMode);
+      this.updateDesignMode(designMode, lastDesignMode);
 
       //@if(debug)
       if (!designMode) {
