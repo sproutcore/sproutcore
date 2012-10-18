@@ -1778,7 +1778,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   //
 
   /** @private Set the designMode on each item view. */
-  adjustChildDesignModes: function (designMode) {
+  adjustChildDesignModes: function (designMode, lastDesignMode) {
     sc_super();
 
     var idx,
@@ -1789,7 +1789,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // loaded we could inadvertently trigger reloading unneeded content.
     nowShowing.forEach(function(idx) {
       itemView = this.itemViewForContentIndex(idx);
-      itemView.set('designMode', designMode);
+      itemView.updateDesignMode(designMode, lastDesignMode);
     }, this);
   },
 
