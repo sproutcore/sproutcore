@@ -134,7 +134,6 @@ SC.Pane.reopen(
         }
     }
 
-    // this.invokeOnce(this._checkDesignMode);
     this.windowSizeDidChange(null, SC.RootResponder.responder.get('currentWindowSize'));
   },
 
