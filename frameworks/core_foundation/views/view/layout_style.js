@@ -289,7 +289,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     // If > 1 then it should be a normal number value
     if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
 
-    if (!sizeValue) {
+    if (SC.none(sizeValue)) {
       //@if(debug)
       // This error message happens whenever width or height is not set.
       SC.warn("Developer Warning: When setting '"+center+"' in the layout, you must also set '"+size+"'.");
