@@ -276,6 +276,19 @@
     performLayoutTest(layout, no_f, s, with_f, s, NO) ;
   }) ;
 
+  // Edge case: although rare, centered views should be able to have metrics of zero.
+  test("layout {centerX 0, centerY 0, width 0, height 0}", function() {
+    var layout = { centerX: 0, centerY: 0, width: 0, height: 0 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0 } ;
+
+    // The parent frame is 200 x 200.
+    var size = 0;
+    var with_f = { x: (200 - size)*0.5, y: (200 - size)*0.5, width: size, height: size } ;
+    var s = { marginLeft: '0px', marginTop: '0px', width: '0px', height: '0px', top: '50%', left: '50%' } ;
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO) ;
+  }) ;
+
   test("layout {top, left, width: auto, height: auto}", function() {
     child = SC.View.create({
       useStaticLayout: YES,
