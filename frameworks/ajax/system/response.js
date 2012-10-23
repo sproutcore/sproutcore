@@ -549,7 +549,8 @@ SC.XHRResponse = SC.Response.extend(
         }
 
         SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
-      } else if (window.XMLHttpRequest) {
+      } else if (window.XMLHttpRequest &&
+            (SC.browser.name !== SC.BROWSER.ie || SC.browser.compare(SC.browser.version, '8') > 0)) {
         // XMLHttpRequest Level 1
         SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
       } else {
