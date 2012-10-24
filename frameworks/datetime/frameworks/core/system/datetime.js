@@ -1136,6 +1136,7 @@ SC.DateTime.mixin(SC.Comparable,
                        0 if a == b
   */
   compare: function(a, b) {
+    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to compare()";
     var ma = a.get('milliseconds');
     var mb = b.get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
@@ -1155,6 +1156,7 @@ SC.DateTime.mixin(SC.Comparable,
       don't have the same timezone
   */
   compareDate: function(a, b) {
+    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to compareDate()";
     if (a.get('timezone') !== b.get('timezone')) throw SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR;
     var ma = a.adjust({hour: 0}).get('milliseconds');
     var mb = b.adjust({hour: 0}).get('milliseconds');
@@ -1171,6 +1173,7 @@ SC.DateTime.mixin(SC.Comparable,
     @param {String} format the interval to get the difference in
   */
   difference: function(a, b, format) {
+    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to difference()";
     var ma = a.get('milliseconds'),
         mb = b.get('milliseconds'),
         diff = mb - ma,
