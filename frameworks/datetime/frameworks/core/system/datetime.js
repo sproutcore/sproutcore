@@ -1104,6 +1104,7 @@ SC.DateTime.mixin(SC.Comparable,
                        0 if a == b
   */
   compare: function(a, b) {
+    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to compare()";
     var ma = a.get('milliseconds');
     var mb = b.get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
@@ -1123,11 +1124,47 @@ SC.DateTime.mixin(SC.Comparable,
       don't have the same timezone
   */
   compareDate: function(a, b) {
+    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to compareDate()";
     if (a.get('timezone') !== b.get('timezone')) throw SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR;
     var ma = a.adjust({hour: 0}).get('milliseconds');
     var mb = b.adjust({hour: 0}).get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
+  },
+
+  /**
+    This will tell you the interval of time between the two passed DateTime.
+    You can display the difference in week (w), day (d), hour (h), minute (M)
+    and second (S)
+
+    @param {SC.DateTime} a the first DateTime instance
+    @param {SC.DateTime} b the second DateTime instance
+    @param {String} format the interval to get the difference in
+  */
+  difference: function(a, b, format) {
+    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to difference()";
+    var ma = a.get('milliseconds'),
+        mb = b.get('milliseconds'),
+        diff = mb - ma,
+        divider;
+
+    switch(format) {
+      case 'd': 
+      case 'D': divider = 864e5; break; // day: 1000 * 60 * 60 * 24
+      case 'h': 
+      case 'H': divider = 36e5; break; // hour: 1000 * 60 * 60
+      case 'M': divider = 6e4; break; // minute: 1000 * 60
+      case 'S': divider = 1e3; break; // second: 1000
+      case 's': divider = 1; break;
+      case 'W': divider = 6048e5; break; // week: 1000 * 60 * 60 * 24 * 7
+      default: throw format+" is not supported"; break;
+    }
+
+    var ret = diff/divider;
+
+    return ret>0?Math.floor(ret):Math.ceil(ret);
   }
+
+
 
 });
 
