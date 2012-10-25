@@ -333,6 +333,11 @@ SC.platform = SC.Object.create({
   supportsAcceleratedLayers: NO,
 
   /**
+    Whether the browser supports the application cache.
+  */
+  supportsApplicationCache: ('applicationCache' in window),
+
+  /**
     Whether the browser supports the hashchange event.
   */
   supportsHashChange: function() {
