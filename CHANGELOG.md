@@ -4,6 +4,22 @@ CHANGE LOG
 Edge
 ----------
 
+* Adds SC.appCache and SC.platform.supportsApplicationCache.
+  Working with the application cache is a confusing and time-consuming task. 
+  This simple object abstracts out the most important properties for developers 
+  to use: hasNewVersion, isNewVersionValid, progress and isReadyForOffline all 
+  the while using the minimum number of event listeners which are properly 
+  cleaned up when unneeded. It also has a property shouldPoll that will lazily 
+  look for updates in the background at a fixed interval. This could be 
+  especially useful in a test environment, where you want to ensure that the 
+  testers aren't running the old version (which happens frequently when using 
+  the application cache).
+* Improves the center calculation for view layouts. Previously you could not use
+  a % width or height with a center value, but there is no technical reason for 
+  this limitation. For example, a view with width: 0.3% and centerX: 0, should 
+  get the layout style: "width: 30%; left: 50%; margin-left: -15%". Previously 
+  it would show a warning and give the view a non-functioning style: 
+  "width: 30%; left: 50%; margin-left: 50%".
 * Removes a lot of legacy default CSS attached to SC.SegmentedView. Also makes 
   default SproutCore theme more easily allow for sprited button images (requires 
   a width and height on the icon). After some consideration, the icon sizes are 
