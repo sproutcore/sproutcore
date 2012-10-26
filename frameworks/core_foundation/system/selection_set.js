@@ -220,7 +220,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     if (this.isFrozen) throw SC.FROZEN_ERROR ;
 
-    var sets, len, idx, set, oldlen, newlen, setlen, objects;
+    var sets, len, idx, i, set, oldlen, newlen, setlen, objects, object;
 
     // normalize
     if (start === undefined && length === undefined) {
@@ -257,13 +257,14 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
         length = undefined;
       }
 
-      objects.forEach(function(object) {
+      for (i = objects.get('length') - 1; i >= 0; --i) {
+        object = objects[i];
         idx = source.indexOf(object);
         if (start.contains(idx)) {
           objects.remove(object);
           newlen--;
         }
-      }, this);
+      }
     }
 
     // remove indexes from source index set
