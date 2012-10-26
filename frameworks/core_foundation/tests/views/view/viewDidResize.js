@@ -82,69 +82,64 @@ test("making sure that the frame value is correct inside viewDidResize()", funct
 // 
 module("SC.View#parentViewDidResize");
 
-// view.callCount must increments whenever something interesting happens
-function testParentViewDidResizeWithAlignments(view) {
+test("Optimized notify on frame and optimized cascade call to child views.", function() {
+  var view = SC.View.create({
+    // instrument...
+    frameCallCount: 0,
+    frameDidChange: function() {
+      this.frameCallCount++;
+    }.observes('frame'),
+    viewDidResize: CoreTest.stub('viewDidResize', SC.View.prototype.viewDidResize)
+  });
+
   // try with fixed layout
   view.set('layout', { top: 10, left: 10, height: 10, width: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 0, 'should not notify frame changed');
+  view.viewDidResize.expect(0);
+  equals(view.frameCallCount, 0, 'should not notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with flexible height
   view.set('layout', { top: 10, left: 10, bottom: 10, width: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 1, 'should notify frame changed');
+  view.viewDidResize.expect(1);
+  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with flexible width
   view.set('layout', { top: 10, left: 10, height: 10, right: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 1, 'should notify frame changed');
+  view.viewDidResize.expect(1);
+  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with right align
   view.set('layout', { top: 10, right: 10, height: 10, width: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 1, 'should notify frame changed');
+  view.viewDidResize.expect(0);
+  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with bottom align
   view.set('layout', { top: 10, bottom: 10, height: 10, width: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 1, 'should notify frame changed');
+  view.viewDidResize.expect(0);
+  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with center horizontal align
   view.set('layout', { centerX: 10, top: 10, height: 10, width: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 1, 'should notify frame changed');
+  view.viewDidResize.expect(0);
+  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with center vertical align
   view.set('layout', { left: 10, centerY: 10, height: 10, width: 10 });
-  view.callCount = 0 ;
+  view.viewDidResize.reset(); view.frameCallCount = 0;
   view.parentViewDidResize();
-  equals(view.callCount, 1, 'should notify frame changed');
-}
-
-test("notifies 'frame' property change unless layout is fixed", function() {
-  var view = SC.View.create({
-    // instrument...
-    callCount: 0 ,
-    frameDidChange: function() { 
-      this.callCount++; 
-    }.observes('frame')
-  });
-  testParentViewDidResizeWithAlignments(view);
-});
-
-test("calls viewDidResize on self unless layout is fixed", function() {
-  var view = SC.View.create({
-    // instrument...
-    callCount: 0 ,
-    viewDidResize: function() { this.callCount++; }
-  });
-  testParentViewDidResizeWithAlignments(view);
+  view.viewDidResize.expect(0);
+  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 });
 
 // ..........................................................
