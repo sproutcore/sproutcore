@@ -599,7 +599,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // check for an overflow (leave room for the overflow segment except for with the last segment)
       dimToFit = (i === length - 1) ? curElementsDim : curElementsDim + this.cachedOverflowDim;
 
-      if (dimToFit > visibleDim) {
+      if (dimToFit > visibleDim || this.isOverflowing) {
         // Add the localItem to the overflowItems
         this.overflowItems.pushObject(childView.get('localItem'));
 
