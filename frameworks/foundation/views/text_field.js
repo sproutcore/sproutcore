@@ -1171,14 +1171,51 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   /** @private */
+  deleteBackward: function(evt) {
+    return this.insertText(null, evt);
+  },
+
+  /** @private */
+  deleteForward: function(evt) {
+    return this.insertText(null, evt);
+  },
+
+  /**
+    @private
+
+    Invoked when the user presses return.  If this is a multi-line field,
+    then allow the newine to proceed.  Otherwise, try to commit the
+    edit.
+  */
+  insertNewline: function(evt) {
+    if (this.get('isTextArea') || evt.isIMEInput) {
+      evt.allowDefault();
+      return YES;
+    } else {
+      return NO ;
+    }
+  },
+
+  /** @private */
   insertTab: function(evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) return NO;
     // Otherwise, handle.
-    var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+    var view = this.get('nextValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
     return YES ; // handled
+  },
+
+  /** @private */
+  insertBacktab: function(evt) {
+    // Don't handle if default tabbing hasn't been enabled.
+    if (!this.get('defaultTabbingEnabled')) return NO;
+    // Otherwise, handle.
+    var view = this.get('previousValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES; // handled
   },
 
   keyUp: function (evt) {

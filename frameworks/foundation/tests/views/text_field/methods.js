@@ -166,6 +166,7 @@ test("interpretKeyEvents should allow key command methods to be implemented.", f
     deleteForwardFlag = NO,
     insertNewlineFlag = NO,
     insertTabFlag = NO,
+    insertBacktabFlag = NO,
     moveLeftFlag = NO,
     moveRightFlag = NO,
     moveUpFlag = NO,
@@ -180,6 +181,7 @@ test("interpretKeyEvents should allow key command methods to be implemented.", f
   view1.deleteForward = function() { deleteForwardFlag = YES; return YES; };
   view1.insertNewline = function() { insertNewlineFlag = YES; return YES; };
   view1.insertTab = function() { insertTabFlag = YES; return YES; };
+  view1.insertBacktab = function() { insertBacktabFlag = YES; return YES; };
   view1.moveLeft = function() { moveLeftFlag = YES; return YES; };
   view1.moveRight = function() { moveRightFlag = YES; return YES; };
   view1.moveUp = function() { moveUpFlag = YES; return YES; };
@@ -194,6 +196,8 @@ test("interpretKeyEvents should allow key command methods to be implemented.", f
   evt = SC.Event.simulateEvent(layer, 'keydown', { which: SC.Event.KEY_BACKSPACE, keyCode: SC.Event.KEY_BACKSPACE });
   view1.keyDown(evt);
   evt = SC.Event.simulateEvent(layer, 'keydown', { which: SC.Event.KEY_TAB, keyCode: SC.Event.KEY_TAB });
+  view1.keyDown(evt);
+  evt = SC.Event.simulateEvent(layer, 'keydown', { which: SC.Event.KEY_TAB, keyCode: SC.Event.KEY_TAB, shiftKey: YES });
   view1.keyDown(evt);
   evt = SC.Event.simulateEvent(layer, 'keydown', { which: SC.Event.KEY_RETURN, keyCode: SC.Event.KEY_RETURN });
   view1.keyDown(evt);
@@ -224,6 +228,7 @@ test("interpretKeyEvents should allow key command methods to be implemented.", f
   // Test.
   ok(deleteBackwardFlag, 'deleteBackward should have been triggered.');
   ok(insertTabFlag, 'insertTab should have been triggered.');
+  ok(insertBacktabFlag, 'insertBacktab should have been triggered.');
   ok(insertNewlineFlag, 'insertNewline should have been triggered.');
   ok(cancelFlag, 'cancel should have been triggered.');
   ok(moveLeftFlag, 'moveLeft should have been triggered.');
@@ -235,6 +240,27 @@ test("interpretKeyEvents should allow key command methods to be implemented.", f
   ok(moveToEndOfDocumentFlag, 'moveToEndOfDocument should have been triggered.');
   ok(pageUpFlag, 'pageUp should have been triggered.');
   ok(pageDownFlag, 'pageDown should have been triggered.');
+});
+
+test("tab should attempt to move focus", function() {
+  var nextValidKeyViewFlag = NO,
+      previousValidKeyViewFlag = NO,
+      evt,
+      layer;
+
+  view1.nextValidKeyView = function() { nextValidKeyViewFlag = YES; return null; }.property();
+  view1.previousValidKeyView = function() { previousValidKeyViewFlag = YES; return null; }.property();
+
+  SC.RunLoop.begin();
+  layer = view1.get('layer');
+  evt = SC.Event.simulateEvent(layer, 'keydown', { which: SC.Event.KEY_TAB, keyCode: SC.Event.KEY_TAB });
+  view1.keyDown(evt);
+  evt = SC.Event.simulateEvent(layer, 'keydown', { which: SC.Event.KEY_TAB, keyCode: SC.Event.KEY_TAB, shiftKey: YES });
+  view1.keyDown(evt);
+  SC.RunLoop.end();
+
+  ok(nextValidKeyViewFlag, 'nextValidKeyView should have been called.');
+  ok(previousValidKeyViewFlag, 'previousValidKeyView should have been called.');
 });
 
 // test("isEnabled=NO should add disabled attr to input", function() {
