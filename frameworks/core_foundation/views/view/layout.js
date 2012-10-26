@@ -214,34 +214,64 @@ SC.View.reopen(
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
 
   /**
-    Returns whether the layout is 'fixed' or not.  A fixed layout has a fixed
-    left & top position within its parent's frame as well as a fixed width and height.
-    Fixed layouts are therefore unaffected by changes to their parent view's
-    layout.
+    Returns whether the layout is 'fixed' or not.  A fixed layout means a
+    fixed left & top position and fixed width & height.  Fixed layouts are
+    therefore unaffected by changes to their parent view's layout.
 
     @returns {Boolean} YES if fixed, NO otherwise
     @test in layoutStyle
   */
   isFixedLayout: function() {
+    return this.get('isFixedPosition') && this.get('isFixedSize');
+  }.property('isFixedPosition', 'isFixedSize').cacheable(),
+
+  /**
+    Returns whether the position is 'fixed' or not.  A fixed position means a
+    fixed left & top position within its parent's frame.  Fixed positions are
+    therefore unaffected by changes to their parent view's size.
+
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layoutStyle
+  */
+  isFixedPosition: function() {
     var layout = this.get('layout'),
         ret;
 
-    // Layout is fixed if it has width + height !== SC.LAYOUT_AUTO and left + top
+    // Position is fixed if it has left + top !== SC.LAYOUT_AUTO
     ret = (
-      ((layout.width !== undefined) && (layout.height !== undefined)) &&
-      ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO)) &&
       ((layout.left !== undefined) && (layout.top !== undefined)) &&
       ((layout.left !== SC.LAYOUT_AUTO) && (layout.top !== SC.LAYOUT_AUTO))
     );
 
-    // The layout may appear fixed, but only if none of the values are percentages
+    // The position may appear fixed, but only if none of the values are percentages.
     if (ret) {
-      ret = (
-        !SC.isPercentage(layout.top) &&
-        !SC.isPercentage(layout.left) &&
-        !SC.isPercentage(layout.width) &&
-        !SC.isPercentage(layout.height)
-      );
+      ret = ( !SC.isPercentage(layout.top) && !SC.isPercentage(layout.left) );
+    }
+
+    return ret;
+  }.property('layout').cacheable(),
+
+  /**
+    Returns whether the size is 'fixed' or not.  A fixed size means a fixed
+    width and height.  Fixed sizes are therefore unaffected by changes to their
+    parent view's size.
+
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layoutStyle
+  */
+  isFixedSize: function () {
+    var layout = this.get('layout'),
+        ret;
+
+    // Size is fixed if it has width + height !== SC.LAYOUT_AUTO
+    ret = (
+      ((layout.width !== undefined) && (layout.height !== undefined)) &&
+      ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO))
+    );
+
+    // The size may appear fixed, but only if none of the values are percentages.
+    if (ret) {
+      ret = ( !SC.isPercentage(layout.width) && !SC.isPercentage(layout.height) );
     }
 
     return ret;
@@ -604,26 +634,28 @@ SC.View.reopen(
     This method may be called on your view whenever the parent view resizes.
 
     The default version of this method will reset the frame and then call
-    viewDidResize().  You will not usually override this method, but you may
-    override the viewDidResize() method.
+    viewDidResize() if its size may have changed.  You will not usually override
+    this method, but you may override the viewDidResize() method.
 
     @returns {void}
     @test in viewDidResize
   */
   parentViewDidResize: function() {
-    var frameMayHaveChanged;
+    var positionMayHaveChanged,
+      sizeMayHaveChanged;
 
     // If this view uses static layout, our "do we think the frame changed?"
     // result of isFixedLayout is not applicable and we simply have to assume
     // that the frame may have changed.
-    frameMayHaveChanged = this.useStaticLayout || !this.get('isFixedLayout');
+    sizeMayHaveChanged = this.useStaticLayout || !this.get('isFixedSize');
+    positionMayHaveChanged = !this.get('isFixedPosition');
 
-    // Do we think there's a chance our frame will have changed as a result?
-    if (frameMayHaveChanged) {
-      // There's a chance our frame changed.  Invoke viewDidResize(), which
-      // will notify about our change to 'frame' (if it actually changed) and
-      // appropriately notify our child views.
+    if (sizeMayHaveChanged) {
+      // If our size isn't fixed, our frame may have changed and it will effect our child views.
       this.viewDidResize();
+    } else if (positionMayHaveChanged) {
+      // If our size is fixed but our position isn't, our frame may have changed, but it won't effect our child views.
+      this._viewFrameDidChange();
     }
   },
 
