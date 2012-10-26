@@ -79,7 +79,7 @@ SC.Pane.reopen(
     @returns {SC.Pane} receiver
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    this.set('currentWindowSize', newSize) ;
+    this.set('currentWindowSize', newSize);
     this.setBodyOverflowIfNeeded();
     this.parentViewDidResize(); // start notifications.
     return this ;

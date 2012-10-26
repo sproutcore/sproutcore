@@ -627,8 +627,6 @@ SC.View.reopen(
     }
   },
 
-
-
   /**
     This method is invoked on your view when the view resizes due to a layout
     change or potentially due to the parent view resizing (if your view’s size
