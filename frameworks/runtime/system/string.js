@@ -45,13 +45,17 @@ SC.String = /** @scope SC.String.prototype */ {
 
     Indexed Parameters
     --------------------
-    Indexed parameters are just arguments you pass into format.
-
-    For example, if you call fmt("%@1 %3 %2", 1, 2, 3), you'll get "1 3 2" as output.
+    Indexed parameters are just arguments you pass into format. For example:
     
-    If you don't supply a number, it will use them in the order you supplied. For instance:
+        "%@1 %@3 %@2".fmt(1, 2, 3)
+        
+        // -> "1 3 2"
     
-        "abc".fmt("%@, %@", "Iskander", "Alex")  would return "Iskander, Alex".
+    If you don't supply a number, it will use them in the order you supplied. For example:
+    
+        "%@, %@".fmt("Iskander", "Alex")
+        
+        // -> "Iskander, Alex"
 
     Named Paramters
     --------------------
