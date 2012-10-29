@@ -12,7 +12,7 @@
 var fromObject, toObject, binding, Bon1, bon2 ; // global variables
 
 module("basic object binding", {
-  
+
   setup: function() {
     fromObject = SC.Object.create({ value: 'start' }) ;
     toObject = SC.Object.create({ value: 'end' }) ;
@@ -20,7 +20,7 @@ module("basic object binding", {
     SC.Binding.flushPendingChanges() ; // actually sets up up the connection
   }
 });
-  
+
 test("binding is connected", function() {
   equals(binding.isConnected, YES, "binding.isConnected") ;
 });
@@ -35,26 +35,26 @@ test("binding should have synced on connect", function() {
 
 test("changing fromObject should mark binding as dirty", function() {
   fromObject.set("value", "change") ;
-  equals(binding._changePending, YES) ;
+  ok(SC.Binding._changeQueue.contains(binding), "the binding should be in the _changeQueue");
 });
 
 test("fromObject change should propogate to toObject only after flush", function() {
   fromObject.set("value", "change") ;
   equals(toObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
-  equals(toObject.get("value"), "change") ;    
+  equals(toObject.get("value"), "change") ;
 });
 
 test("changing toObject should mark binding as dirty", function() {
   toObject.set("value", "change") ;
-  equals(binding._changePending, YES) ;
+  ok(SC.Binding._changeQueue.contains(binding), "the binding should be in the _changeQueue");
 });
 
 test("toObject change should propogate to fromObject only after flush", function() {
   toObject.set("value", "change") ;
   equals(fromObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
-  equals(fromObject.get("value"), "change") ;    
+  equals(fromObject.get("value"), "change") ;
 });
 
 test("suspended observing during bindings", function() {
@@ -64,20 +64,20 @@ test("suspended observing during bindings", function() {
     value1: 'value1',
     value2: 'value2'
   });
-  
+
   toObject = SC.Object.create({
     value1: 'value1',
     value2: 'value2',
-    
+
     callCount: 0,
-    
+
     observer: function() {
       equals(this.get('value1'), 'CHANGED', 'value1 when observer fires');
       equals(this.get('value2'), 'CHANGED', 'value2 when observer fires');
       this.callCount++;
     }.observes('value1', 'value2')
   });
-  
+
   toObject.bind('value1', fromObject, 'value1');
   toObject.bind('value2', fromObject, 'value2');
 
@@ -85,7 +85,7 @@ test("suspended observing during bindings", function() {
   // fire after bindings are done flushing.
   fromObject.set('value1', 'CHANGED').set('value2', 'CHANGED');
   SC.Binding.flushPendingChanges();
-  
+
   equals(toObject.callCount, 2, 'should call observer twice');
 });
 
@@ -149,70 +149,70 @@ module("one way binding", {
     binding = SC.Binding.from("value", fromObject).to("value", toObject).oneWay().connect() ;
     SC.Binding.flushPendingChanges() ; // actually sets up up the connection
   }
-  
+
 });
-  
+
 test("changing fromObject should mark binding as dirty", function() {
   fromObject.set("value", "change") ;
-  equals(binding._changePending, YES) ;
+  ok(SC.Binding._changeQueue.contains(binding), "the binding should be in the _changeQueue");
 });
 
 test("fromObject change should propogate after flush", function() {
   fromObject.set("value", "change") ;
   equals(toObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
-  equals(toObject.get("value"), "change") ;    
+  equals(toObject.get("value"), "change") ;
 });
 
 test("changing toObject should not make binding dirty", function() {
   toObject.set("value", "change") ;
-  equals(binding._changePending, NO) ;
+  ok(!SC.Binding._changeQueue.contains(binding), "the binding should not be in the _changeQueue");
 });
 
 test("toObject change should NOT propogate", function() {
   toObject.set("value", "change") ;
   equals(fromObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
-  equals(fromObject.get("value"), "start") ;    
+  equals(fromObject.get("value"), "start") ;
 });
 
 var first, second, third, binding1, binding2 ; // global variables
 
 module("chained binding", {
-  
+
   setup: function() {
     first = SC.Object.create({ output: 'first' }) ;
-    
-    second = SC.Object.create({ 
+
+    second = SC.Object.create({
       input: 'second',
       output: 'second',
-      
+
       inputDidChange: function() {
         this.set("output", this.get("input")) ;
-      }.observes("input")  
+      }.observes("input")
     }) ;
-    
+
     third = SC.Object.create({ input: "third" }) ;
-    
+
     binding1 = SC.Binding.from("output", first).to("input", second).connect() ;
     binding2 = SC.Binding.from("output", second).to("input", third).connect() ;
     SC.Binding.flushPendingChanges() ; // actually sets up up the connection
   }
-  
+
 });
 
 test("changing first output should propagate to third after flush", function() {
   first.set("output", "change") ;
   equals("change", first.get("output"), "first.output") ;
   ok("change" !== third.get("input"), "third.input") ;
-  
+
   var didChange = YES;
   while(didChange) didChange = SC.Binding.flushPendingChanges() ;
-  
+
   // bindings should not have bending changes
-  equals(binding1._changePending, NO, "binding1._changePending") ;
-  equals(binding2._changePending, NO, "binding2._changePending") ;
-  
+  ok(!SC.Binding._changeQueue.contains(binding1), "the binding should not be in the _changeQueue");
+  ok(!SC.Binding._changeQueue.contains(binding2), "the binding should not be in the _changeQueue");
+
   equals("change", first.get("output"), "first.output") ;
   equals("change", second.get("input"), "second.input") ;
   equals("change", second.get("output"), "second.output") ;
@@ -220,27 +220,27 @@ test("changing first output should propagate to third after flush", function() {
 });
 
 module("Custom Binding", {
-  
+
   setup: function() {
 	Bon1 = SC.Object.extend({
 		value1: "hi",
 		value2: 83,
 		array1: []
 	});
-	
+
 	bon2 = SC.Object.create({
 		val1: "hello",
 		val2: 25,
 		arr: [1,2,3,4]
 	});
-	
+
 	TestNamespace = {
       bon2: bon2,
       Bon1: Bon1
     } ;
   },
-  
-  teardown: function() { 
+
+  teardown: function() {
     bon2.destroy();
   }
 });
@@ -288,40 +288,40 @@ test("two bindings to the same value should sync in the order they are initializ
 
   SC.RunLoop.begin();
 
-  window.a = SC.Object.create({ 
-    foo: "bar" 
+  window.a = SC.Object.create({
+    foo: "bar"
   });
-  
+
   var a = window.a;
-  
-  window.b = SC.Object.create({ 
+
+  window.b = SC.Object.create({
     foo: "baz",
     fooBinding: "a.foo",
-    
+
     C: SC.Object.extend({
       foo: "bee",
       fooBinding: "*owner.foo"
     }),
-    
+
     init: function() {
       sc_super();
       this.set('c', this.C.create({ owner: this }));
     }
-    
+
   });
-  
+
   var b = window.b;
 
   SC.LOG_BINDINGS = NO;
-    
+
   SC.RunLoop.end();
-  
+
   equals(a.get('foo'), "bar", 'a.foo should not change');
   equals(b.get('foo'), "bar", 'a.foo should propogate up to b.foo');
   equals(b.c.get('foo'), "bar", 'a.foo should propogate up to b.c.foo');
-  
+
   window.a = window.b = null ;
-  
+
 });
 
 module("AND binding", {
@@ -342,7 +342,7 @@ module("AND binding", {
     SC.testControllerA.destroy();
     SC.testControllerB.destroy();
   }
-  
+
 });
 
 test("toObject.value should be YES if both sources are YES", function() {
@@ -399,7 +399,7 @@ module("OR binding", {
     SC.testControllerA.destroy();
     SC.testControllerB.destroy();
   }
-  
+
 });
 
 test("toObject.value should be first value if first value is truthy", function() {
