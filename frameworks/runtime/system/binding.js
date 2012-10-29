@@ -428,6 +428,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (!this._oneWay) {
         SC.Observers.removeObserver.apply(SC.Observers, this._toObserverData);
       }
+
+      // Remove ourselves from the change queue (if we are in it).
+      SC.Binding._changeQueue.remove(this);
     }
 
     this.isConnected = NO ;
@@ -451,10 +454,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   destroy: function() {
     // If we're already destroyed, there's nothing to do.
     if (this.isDestroyed) return;
-    // Disconnect the binding.
-    this.disconnect();
+
     // Mark it destroyed.
     this.isDestroyed = YES;
+
+    // Disconnect the binding.
+    this.disconnect();
+
     // Aggressively null out internal properties. (The binding remains in some queue that I can't find just now,
     // which attempts to reconnect this binding if the property paths are left intact.)
     this._bindingSource = null;
@@ -468,10 +474,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._fromTarget = null;
     this._toObserverData = null;
     this._fromObserverData = null;
-    // Removes from the change queue.
-    SC.Binding._changeQueue.remove(this);
-    // Cancel any pending changes.
-    this._changePending = NO;
   },
 
   /**
@@ -489,7 +491,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (v !== this._bindingValue || key === '[]') {
 
       this._setBindingValue(target, key) ;
-      this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.
 
       this._scheduleSync();
@@ -518,7 +519,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // schedule to register an update.
     if (v !== this._transformedBindingValue) {
       this._setBindingValue(target, key) ;
-      this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.
 
       this._scheduleSync();
@@ -573,7 +573,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   _alternateConnectQueue: SC.CoreSet.create(),
   _changeQueue: SC.CoreSet.create(),
   _alternateChangeQueue: SC.CoreSet.create(),
-  _changePending: NO,
 
   /**
     Call this method on SC.Binding to flush all bindings with changed pending.
@@ -631,8 +630,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     binding value from one side to the other.
   */
   applyBindingValue: function() {
-    this._changePending = NO ;
-
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
     this._computeBindingValue();
@@ -701,7 +698,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       // schedule to register an update.
       if (v !== this._bindingValue || key === '[]') {
         this._setBindingValue(target, key) ;
-        this._changePending = YES ;
         SC.Binding._changeQueue.add(this) ; // save for later.
       }
     }
