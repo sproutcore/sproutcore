@@ -364,8 +364,7 @@ SC.CoreView.reopen(
       childViews.insertAt(idx, this);
 
       // Pass the current designMode to the view (and its children).
-      var designMode = parentView.get('designMode');
-      if (designMode) { this.set('designMode', designMode); }
+      this.updateDesignMode(this.get('designMode'), parentView.get('designMode'));
 
       // Notify adopted (on self and all child views).
       this._adopted();

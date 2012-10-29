@@ -25,6 +25,9 @@ SC.Pane.reopen({
     this.recomputeDependentProperties();
     this.set('currentWindowSize', responder.currentWindowSize);
 
+    // Set the initial design mode.  The responder will update this if it changes.
+    this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
+
     // handle intercept if needed
     this._addIntercept();
 
