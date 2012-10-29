@@ -23,7 +23,7 @@ sc_require('mixins/responder_context');
 
   @type String
 */
-SC.MIXED_STATE = '__MIXED__';
+SC.MIXED_STATE = '__MIXED__' ;
 
 /** @class
   A Pane is like a regular view except that it does not need to live within a
@@ -134,12 +134,12 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {Object} target
     @returns {Object} object that handled the event
   */
-  sendEvent: function (action, evt, target) {
+  sendEvent: function(action, evt, target) {
     var handler;
 
     // walk up the responder chain looking for a method to handle the event
-    if (!target) target = this.get('firstResponder');
-    while (target) {
+    if (!target) target = this.get('firstResponder') ;
+    while(target) {
       if (action === 'touchStart') {
         // first, we must check that the target is not already touch responder
         // if it is, we don't want to have "found" it; that kind of recursion is sure to
@@ -164,7 +164,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
       // even if someone tries to fill in the nextResponder on the pane, stop
       // searching when we hit the pane.
-      target = (target === this) ? null : target.get('nextResponder');
+      target = (target === this) ? null : target.get('nextResponder') ;
     }
 
     // if no handler was found in the responder chain, try the default
@@ -174,16 +174,16 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       }
 
       if (!target) target = null;
-      else target = target.tryToPerform(action, evt) ? target : null;
+      else target = target.tryToPerform(action, evt) ? target : null ;
     }
 
     // if we don't have a default responder or no responders in the responder
     // chain handled the event, see if the pane itself implements the event
     else if (!target && !(target = this.get('defaultResponder'))) {
-      target = this.tryToPerform(action, evt) ? this : null;
+      target = this.tryToPerform(action, evt) ? this : null ;
     }
 
-    return evt.mouseHandler || target;
+    return evt.mouseHandler || target ;
   },
 
   // .......................................................
@@ -196,7 +196,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @property {SC.Responder}
     @readOnly
   */
-  nextResponder: function () {
+  nextResponder: function() {
     return null;
   }.property().cacheable(),
 
@@ -231,11 +231,11 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @returns {SC.Pane} receiver
   */
-  becomeKeyPane: function () {
-    if (this.get('isKeyPane')) return this;
-    if (this.rootResponder) this.rootResponder.makeKeyPane(this);
+  becomeKeyPane: function() {
+    if (this.get('isKeyPane')) return this ;
+    if (this.rootResponder) this.rootResponder.makeKeyPane(this) ;
 
-    return this;
+    return this ;
   },
 
   /**
@@ -244,11 +244,11 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @returns {SC.Pane} receiver
   */
-  resignKeyPane: function () {
-    if (!this.get('isKeyPane')) return this;
+  resignKeyPane: function() {
+    if (!this.get('isKeyPane')) return this ;
     if (this.rootResponder) this.rootResponder.makeKeyPane(null);
 
-    return this;
+    return this ;
   },
 
   /**
@@ -261,14 +261,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {Event} evt that cause this to become first responder
     @returns {SC.Pane} receiver
   */
-  makeFirstResponder: function (original, view, evt) {
+  makeFirstResponder: function(original, view, evt) {
     // firstResponder should never be null
-    if (!view) view = this;
+    if(!view) view = this;
 
     var current = this.get('firstResponder'),
       isKeyPane = this.get('isKeyPane');
 
-    if (current === view) return this; // nothing to do
+    if (current === view) return this ; // nothing to do
     if (SC.platform.touch && view && view.kindOf(SC.TextFieldView) && !view.get('focused')) return this;
 
     // if we are currently key pane, then notify key views of change also
@@ -291,8 +291,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     original(view, evt);
 
-    if (current) current.endPropertyChanges();
-    if (view) view.endPropertyChanges();
+    if(current) current.endPropertyChanges();
+    if(view) view.endPropertyChanges();
 
     // and notify again if needed.
     if (isKeyPane) {
@@ -304,7 +304,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       }
     }
 
-    return this;
+    return this ;
   }.enhance(),
 
   /**
@@ -315,9 +315,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
   */
-  willLoseKeyPaneTo: function (pane) {
+  willLoseKeyPaneTo: function(pane) {
     this._forwardKeyChange(this.get('isKeyPane'), 'willLoseKeyResponderTo', pane, NO);
-    return this;
+    return this ;
   },
 
   /**
@@ -329,13 +329,13 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
   */
-  willBecomeKeyPaneFrom: function (pane) {
+  willBecomeKeyPaneFrom: function(pane) {
     this._forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane, YES);
-    return this;
+    return this ;
   },
 
 
-  didBecomeKeyResponderFrom: function (responder) {},
+  didBecomeKeyResponderFrom: function(responder) {},
 
   /**
     Called just after the pane has lost its keyPane status.  Notifies the
@@ -345,11 +345,11 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
   */
-  didLoseKeyPaneTo: function (pane) {
+  didLoseKeyPaneTo: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', NO);
     this._forwardKeyChange(isKeyPane, 'didLoseKeyResponderTo', pane);
-    return this;
+    return this ;
   },
 
   /**
@@ -362,11 +362,11 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
 
   */
-  didBecomeKeyPaneFrom: function (pane) {
+  didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
-    return this;
+    return this ;
   },
 
   // .......................................................
@@ -388,7 +388,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane the pane that currently have focus
     @returns {void}
   */
-  focusFrom: function (pane) {},
+  focusFrom: function(pane) {},
 
   /**
     Invoked when the the pane is about to lose its focused pane status.
@@ -397,7 +397,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane the pane that will receive focus next
     @returns {void}
   */
-  blurTo: function (pane) {},
+  blurTo: function(pane) {},
 
   /**
     Invoked when the view is about to lose its mainPane status.  The default
@@ -407,8 +407,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {void}
   */
-  blurMainTo: function (pane) {
-    this.set('isMainPane', NO);
+  blurMainTo: function(pane) {
+    this.set('isMainPane', NO) ;
   },
 
   /**
@@ -420,7 +420,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {void}
   */
-  focusMainFrom: function (pane) {
+  focusMainFrom: function(pane) {
     this.set('isMainPane', YES);
   },
 
@@ -435,8 +435,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.RootResponder} rootResponder
     @returns {SC.Pane} receiver
   */
-  append: function () {
-    return this.appendTo(document.body);
+  append: function() {
+    return this.appendTo(document.body) ;
   },
 
   /**
@@ -446,10 +446,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @returns {SC.Pane} receiver
   */
-  remove: function () {
+  remove: function() {
     this._doDetach();
 
-    return this;
+    return this ;
   },
 
   /**
@@ -459,7 +459,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     is not already attached, and for calling `paneDidAttach` when done.
 
         pane = SC.Pane.create();
-        pane.insert(function (layer) {
+        pane.insert(function(layer) {
           jQuery(layer).insertBefore("#otherElement");
         });
 
@@ -467,7 +467,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       necessary in order to insert the pane's layer into the DOM.
     @returns {SC.Pane} receiver
    */
-  insert: function (fn) {
+  insert: function(fn) {
     // Render the layer.
     this.createLayer();
 
@@ -485,7 +485,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @returns {SC.Pane} receiver
   */
-  appendTo: function (elem) {
+  appendTo: function(elem) {
     var self = this;
 
     return this.insert(function () {
@@ -501,7 +501,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @deprecated Version 1.10
   */
-  paneDidAttach: function () {
+  paneDidAttach: function() {
     // Does nothing.  Left here so that subclasses that implement the method
     // and call sc_super() won't fail.
   },
@@ -512,7 +512,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     method to recompute properties that depend on the pane's existence
     in the document but must be run prior to child view notification.
    */
-  recomputeDependentProperties: function () {},
+  recomputeDependentProperties: function() {},
 
   /**
     YES when the pane is currently attached to a document DOM.  Read only.
@@ -531,7 +531,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /**
     Returns YES if wantsTouchIntercept and this is a touch platform.
   */
-  hasTouchIntercept: function () {
+  hasTouchIntercept: function(){
     return this.get('wantsTouchIntercept') && SC.platform.touch;
   }.property('wantsTouchIntercept').cacheable(),
 
@@ -547,7 +547,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   touchZ: 99,
 
   /** @private */
-  _addIntercept: function () {
+  _addIntercept: function() {
     if (this.get('hasTouchIntercept')) {
       var div = document.createElement("div");
       var divStyle = div.style;
@@ -566,7 +566,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  _removeIntercept: function () {
+  _removeIntercept: function() {
     if (this._touchIntercept) {
       document.body.removeChild(this._touchIntercept);
       this._touchIntercept = null;
@@ -574,12 +574,12 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  hideTouchIntercept: function () {
+  hideTouchIntercept: function() {
     if (this._touchIntercept) this._touchIntercept.style.display = "none";
   },
 
   /** @private */
-  showTouchIntercept: function () {
+  showTouchIntercept: function() {
     if (this._touchIntercept) this._touchIntercept.style.display = "block";
   },
 
@@ -592,7 +592,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   // },
 
   /** @private */
-  init: function () {
+  init: function() {
     // Backwards compatibility
     // TODO: REMOVE THIS
     if (this.hasTouchIntercept === YES) {
@@ -602,8 +602,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // if a layer was set manually then we will just attach to existing
     // HTML.
-    var hasLayer = !!this.get('layer');
-    sc_super();
+    var hasLayer = !!this.get('layer') ;
+    sc_super() ;
     if (hasLayer) {
       this._attached();
     }
@@ -612,4 +612,4 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /** @private */
   classNames: ['sc-pane']
 
-});
+}) ;
