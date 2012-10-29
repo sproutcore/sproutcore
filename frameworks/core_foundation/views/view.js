@@ -1319,8 +1319,6 @@ SC.CoreView.reopen(
   },
 
   _destroy: function() {
-    if (this.get('isDestroyed')) { return this ; } // nothing to do
-
     // destroy the layer -- this will avoid each child view destroying
     // the layer over and over again...
     this.destroyLayer() ;
