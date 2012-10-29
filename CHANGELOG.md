@@ -4,6 +4,36 @@ CHANGE LOG
 Edge
 ----------
 
+### CHANGES & FEATURES
+
+* Improves and adds documentation.
+* Adds SC.appCache and SC.platform.supportsApplicationCache.
+  Working with the application cache is a confusing and time-consuming task. 
+  This simple object abstracts out the most important properties for developers 
+  to use: hasNewVersion, isNewVersionValid, progress and isReadyForOffline all 
+  the while using the minimum number of event listeners which are properly 
+  cleaned up when unneeded. It also has a property shouldPoll that will lazily 
+  look for updates in the background at a fixed interval. This could be 
+  especially useful in a test environment, where you want to ensure that the 
+  testers aren't running the old version (which happens frequently when using 
+  the application cache).
+* Improves the center calculation for view layouts. Previously you could not use
+  a % width or height with a center value, but there is no technical reason for 
+  this limitation. For example, a view with width: 0.3% and centerX: 0, should 
+  get the layout style: "width: 30%; left: 50%; margin-left: -15%". Previously 
+  it would show a warning and give the view a non-functioning style: 
+  "width: 30%; left: 50%; margin-left: 50%".
+* Removes a lot of legacy default CSS attached to SC.SegmentedView. Also makes 
+  default SproutCore theme more easily allow for sprited button images (requires 
+  a width and height on the icon). After some consideration, the icon sizes are 
+  set by default to: 12x12px for small, 14x14px for regular, 16x16px for large 
+  and 24x24px for huge. These sizes fit well with the theme and although odd 
+  numbered heights would position a bit more nicely, even numbered height icons 
+  are much more common.
+* Allows SC.State to represent the empty ("") route. Previously, there was no 
+  way for a state to represent the empty route using representRoute:. Now a 
+  state can set representRoute: "" to be triggered when the empty route is 
+  fired.
 * Improves SC.request.deparam so that it can accept a full URL, not just the
   params section only. 
 * Adds SC.platform.supportsWebSQL and SC.platform.supportsIndexedDB.
@@ -13,9 +43,38 @@ Edge
   - adds a new icon for app targets to further differentiate between the 
     developer's apps and the SproutCore apps (Used in the TestRunner app too)
 
+### DEPRECATIONS & REMOVALS
+
+* The default value of SC.SelectView:itemSeparatorKey has been changed from 
+  'separator' to 'isSeparator' to match the documentation.  If a property 
+  'separator' is found on the item, it will still be used and a developer 
+  warning will appear in debug mode.
+* The 'owner' property that is assigned to child views is deprecated and may
+  be removed in a future release.  This property is assigned to a view's 
+  childViews when the view is created.  However, it is a duplication of the 
+  property 'parentView' and it is not maintained properly and not assigned if a 
+  childView is added later using appendChild() or replaceChild().
+
+
 1.9.1 - BUG FIX RELEASE
 ----------
 
+* Fixes memory leak with child views of SC.View.  The 'owner' property prevented
+  views from being able to be garbage collected when they are destroyed.
+* Fixes SC.stringFromLayout() to include all the layout properties.
+* Fixes the excess calling of parentViewDidResize on child views when the view's 
+  position changes, but it's size doesn't. Previously, views that had fixed 
+  sizes (i.e. width + height), but not fixed positions (i.e. not left + top) 
+  would still call parentViewDidResize on their own child views each time that 
+  the view's parent view resized. However, this isn't necessary, because changes 
+  to the view's parent view will effect the view's frame, but if the view has a 
+  fixed size, it will not effect the child view's frames.
+  - This fixes a strange issue that occurs with SC.ImageView's viewDidResize 
+    implementation, where it fails to resize appropriately.
+  - This separates isFixedLayout into isFixedPosition + isFixedSize, allowing us 
+    more options to decide what to do when the layout is a fixed position vs. a 
+    fixed size vs. both vs. neither.
+  - Note: A similar optimization already exists in layoutDidChange.
 * Fixes bug in SC.Locale that caused localizations to be overwritten by the 
   last language localized.
 * Fixes SC.Request's application of the Content-Type header.  It was incorrectly
@@ -31,7 +90,6 @@ Edge
 ----------
 
 ### CHANGES & FEATURES
-
 
 * Improves and adds much documentation.
 * Adds the Showcase app used on http://showcase.sproutcore.com.  This app contains
