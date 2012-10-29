@@ -4,6 +4,9 @@ CHANGE LOG
 Edge
 ----------
 
+### CHANGES & FEATURES
+
+* Improves and adds documentation.
 * Adds SC.appCache and SC.platform.supportsApplicationCache.
   Working with the application cache is a confusing and time-consuming task. 
   This simple object abstracts out the most important properties for developers 
@@ -46,10 +49,32 @@ Edge
   'separator' to 'isSeparator' to match the documentation.  If a property 
   'separator' is found on the item, it will still be used and a developer 
   warning will appear in debug mode.
+* The 'owner' property that is assigned to child views is deprecated and may
+  be removed in a future release.  This property is assigned to a view's 
+  childViews when the view is created.  However, it is a duplication of the 
+  property 'parentView' and it is not maintained properly and not assigned if a 
+  childView is added later using appendChild() or replaceChild().
+
 
 1.9.1 - BUG FIX RELEASE
 ----------
 
+* Fixes memory leak with child views of SC.View.  The 'owner' property prevented
+  views from being able to be garbage collected when they are destroyed.
+* Fixes SC.stringFromLayout() to include all the layout properties.
+* Fixes the excess calling of parentViewDidResize on child views when the view's 
+  position changes, but it's size doesn't. Previously, views that had fixed 
+  sizes (i.e. width + height), but not fixed positions (i.e. not left + top) 
+  would still call parentViewDidResize on their own child views each time that 
+  the view's parent view resized. However, this isn't necessary, because changes 
+  to the view's parent view will effect the view's frame, but if the view has a 
+  fixed size, it will not effect the child view's frames.
+  - This fixes a strange issue that occurs with SC.ImageView's viewDidResize 
+    implementation, where it fails to resize appropriately.
+  - This separates isFixedLayout into isFixedPosition + isFixedSize, allowing us 
+    more options to decide what to do when the layout is a fixed position vs. a 
+    fixed size vs. both vs. neither.
+  - Note: A similar optimization already exists in layoutDidChange.
 * Fixes bug in SC.Locale that caused localizations to be overwritten by the 
   last language localized.
 * Fixes SC.Request's application of the Content-Type header.  It was incorrectly
