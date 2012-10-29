@@ -99,6 +99,10 @@ test("binding disconnection actually works", function() {
   fromObject.set('value', 'change');
   SC.Binding.flushPendingChanges();
   equals(toObject.get('value'), 'start');
+
+  binding.connect();
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('value'), 'change');
 });
 
 test("binding destruction actually works", function() {
