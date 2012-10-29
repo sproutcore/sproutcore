@@ -39,7 +39,8 @@ SC.mixin( /** @scope SC */ {
     // quickly.
     var keys = ['maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'centerY',
                 'centerX', 'width', 'height', 'bottom', 'right', 'top',
-                'left'],
+                'left', 'zIndex', 'opacity', 'border', 'borderLeft',
+                'borderRight', 'borderTop', 'borderBottom'],
         keyValues = [], key,
         i = keys.length;
     while (--i >= 0) {
@@ -231,7 +232,7 @@ SC.mixin( /** @scope SC */ {
       width: element.clientWidth + padding,
       height: element.clientHeight
     };
-    
+
     // Firefox seems to be 1 px short at times, especially with non english characters.
     if (SC.browser.isMozilla) {
       result.width += 1;
