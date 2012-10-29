@@ -137,11 +137,10 @@ test("should connect when multiple instances of class are created", function() {
   }
 });
 
-// TODO (currently fails)
-//test("destroying a view destroys bindings that were instantiated from its class.", function() {
-//  toObject.destroy();
-//  ok(binding.isDestroyed, "destroying a view destroys its bindings.");
-//});
+test("destroying a view destroys bindings that were instantiated from its class.", function() {
+  toObject.destroy();
+  ok(binding.isDestroyed, "destroying a view destroys its bindings.");
+});
 
 module("one way binding", {
   setup: function() {
