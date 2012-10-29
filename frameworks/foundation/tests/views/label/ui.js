@@ -79,15 +79,15 @@ var pane = SC.ControlTestPane.design()
      value: undefined
   });
 
-pane.show(); // add a test to show the test pane
-
 
 module('SC.LabelView ui', {
   setup: function() {
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
   },
   teardown: function(){
     clearHtmlbody();
+    pane.standardSetup().teardown();
   }
 });
 

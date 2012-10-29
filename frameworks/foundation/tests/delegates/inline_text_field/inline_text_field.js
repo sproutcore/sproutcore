@@ -55,7 +55,6 @@ failEditor = SC.View.extend(SC.InlineEditor, {
   }
 });
 
-testPane.show();
 
 module("SC.InlineTextFieldDelegate basic", testPane.standardSetup());
 

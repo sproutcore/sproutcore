@@ -9,30 +9,30 @@
 
 (function() {
 var pane = SC.ControlTestPane.design()
-  .add("basic", SC.CheckboxView, { 
-    value: NO, isEnabled: YES, title: "Hello World" 
+  .add("basic", SC.CheckboxView, {
+    value: NO, isEnabled: YES, title: "Hello World"
   })
 
-  .add("selected", SC.CheckboxView, { 
-    value: YES, title: "Hello World" 
+  .add("selected", SC.CheckboxView, {
+    value: YES, title: "Hello World"
   })
 
-  .add("disabled", SC.CheckboxView, { 
-    isEnabled: NO, title: "Hello World" 
+  .add("disabled", SC.CheckboxView, {
+    isEnabled: NO, title: "Hello World"
   })
 
-  .add("disabled - selected", SC.CheckboxView, { 
-    isEnabled: NO, value: YES, title: "Hello World" 
+  .add("disabled - selected", SC.CheckboxView, {
+    isEnabled: NO, value: YES, title: "Hello World"
   })
 
   .add("static layout 1", SC.CheckboxView, {
-    useStaticLayout: YES, 
+    useStaticLayout: YES,
     layout: { width: 'auto', right: 'auto' },
     title: 'Static Layout'
   })
 
   .add("static layout 2", SC.CheckboxView, {
-    useStaticLayout: YES, 
+    useStaticLayout: YES,
     layout: { width: 'auto', right: 'auto' },
     title: 'Different Length Title'
   })
@@ -45,11 +45,9 @@ var pane = SC.ControlTestPane.design()
     value: NO, title: "aria-label"
   });
 
-pane.show(); // add a test to show the test pane
-
 // ..........................................................
 // TEST VIEWS
-// 
+//
 module('SC.CheckboxView ui', {
   setup: function(){
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
@@ -68,7 +66,7 @@ test("basic", function() {
 
   var input = view.$();
   equals(input.attr('aria-checked'), 'false',  'input should not be checked');
-  
+
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
@@ -80,7 +78,7 @@ test("selected", function() {
 
   var input = view.$();
   equals(input.attr('aria-checked'), 'true','input should be checked');
-  
+
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
@@ -92,7 +90,7 @@ test("disabled", function() {
 
   var input = view.$();
   equals(input.attr('aria-checked'), 'false','input should not be checked');
-  
+
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
@@ -104,7 +102,7 @@ test("disabled - selected", function() {
 
   var input = view.$();
   equals(input.attr('aria-checked'), 'true','input should be checked');
-  
+
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });

@@ -85,9 +85,6 @@
     isEditable: NO
   });
 
-
-pane.show(); // add a test to show the test pane
-
 // ..........................................................
 // VERIFY STANDARD STATES
 //
@@ -590,9 +587,9 @@ test("Adding both left and right accessory views changes style -- using design()
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
-test("Accessory views should only be instantiated once", function() {  
+test("Accessory views should only be instantiated once", function() {
   var view = pane.view('with value');
-  
+
   // Test the left accessory view
   SC.RunLoop.begin();
   var leftAccessoryViewInitCount = 0;
@@ -605,13 +602,13 @@ test("Accessory views should only be instantiated once", function() {
   });
   view.set('leftAccessoryView', leftAccessoryView);
   SC.RunLoop.end();
-  
+
   // Check it
   equals(leftAccessoryViewInitCount, 1, 'the left accessory view should only be initialized once');
-  
+
   // Reset to null so it isn't created a second time when rightAccessoryView is set
   view.set('leftAccessoryView', null);
-  
+
   // Test the right accessory view
   SC.RunLoop.begin();
   var rightAccessoryViewInitCount = 0;
@@ -624,7 +621,7 @@ test("Accessory views should only be instantiated once", function() {
   });
   view.set('rightAccessoryView', rightAccessoryView);
   SC.RunLoop.end();
-  
+
   // Check it
   equals(rightAccessoryViewInitCount, 1, 'the right accessory view should only be initialized once');
 });

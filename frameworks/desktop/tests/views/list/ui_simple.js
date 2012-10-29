@@ -6,33 +6,32 @@
 // ==========================================================================
 
 /*
-  This test evaluates a plain list with no custom row heights, outlines, 
+  This test evaluates a plain list with no custom row heights, outlines,
   group views or any other non-standard behavior.
 */
 
-module("SC.ListView - simple list");
 
 // create a fake content array.  Generates a list with whatever length you
 // want of objects with a title based on the index.  Cannot mutate.
 var ContentArray = SC.Object.extend(SC.Array, {
-  
+
   length: 0,
-  
+
   objectAt: function(idx) {
     if (idx >= this.get('length')) return undefined;
-    
+
     var content = this._content, ret ;
     if (!content) content = this._content = [];
-    
+
     ret = content[idx];
     if (!ret) {
-      ret = content[idx] = SC.Object.create({ 
+      ret = content[idx] = SC.Object.create({
         title: "ContentItem %@".fmt(idx),
         isDone: (idx % 3)===0,
         unread: (Math.random() > 0.5) ? Math.floor(Math.random() * 100) : 0
       });
     }
-    
+
     return ret ;
   }
 });
@@ -48,12 +47,9 @@ var pane = SC.ControlTestPane.design()
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",
       rowHeight: 20
-      
+
     })
   }));
-  
-pane.show(); // add a test to show the test pane
-window.pane = pane ;
 
 function verifyChildViewsMatch(views, set) {
   var indexes = set.clone();
@@ -66,7 +62,7 @@ function verifyChildViewsMatch(views, set) {
     }
     indexes.remove(idx);
   }, this);
-  
+
   if (indexes.get('length') === 0) {
     ok(YES, "all nowShowing indexes should have matching child views");
   } else {
@@ -74,14 +70,16 @@ function verifyChildViewsMatch(views, set) {
   }
 }
 
+module("SC.ListView - simple list", pane.standardSetup());
+
 // ..........................................................
 // BASIC RENDER TESTS
-// 
+//
 
 test("rendering only incremental portion", function() {
-  var listView = pane.view("basic").contentView; 
+  var listView = pane.view("basic").contentView;
   ok(listView.getPath("nowShowing.length") < listView.get('length'), 'nowShowing should be a subset of content items');
-  equals(listView.get('childViews').length, listView.get('nowShowing').get('length'), 'should have same number of childViews as nowShowing length');  
+  equals(listView.get('childViews').length, listView.get('nowShowing').get('length'), 'should have same number of childViews as nowShowing length');
 });
 
 test("scrolling by small amount should update incremental rendering", function() {
@@ -98,7 +96,7 @@ test("scrolling by small amount should update incremental rendering", function()
   SC.run(function() {
     scrollView.scrollTo(0,20);
   });
-  
+
   // top line should have scrolled out of view
   exp = SC.IndexSet.create(1,15);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
@@ -109,7 +107,7 @@ test("scrolling by small amount should update incremental rendering", function()
   SC.run(function() {
     scrollView.scrollTo(0,42);
   });
-  
+
   // top line should have scrolled out of view
   exp = SC.IndexSet.create(2,16);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
@@ -121,11 +119,11 @@ test("scrolling by small amount should update incremental rendering", function()
   SC.run(function() {
     scrollView.scrollTo(0,21);
   });
-  
+
   // top line should have scrolled out of view
   exp = SC.IndexSet.create(1,16);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
-  
+
 });

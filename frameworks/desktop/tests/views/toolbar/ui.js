@@ -14,10 +14,8 @@ var pane;
   pane = SC.ControlTestPane.design()
 
   .add("aria-role_ToolbarView", SC.ToolbarView, {
-    
-  });
 
-  pane.show();
+  });
 
   module('SC.ToolbarView UI', pane.standardSetup());
 

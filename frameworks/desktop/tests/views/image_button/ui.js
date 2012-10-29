@@ -11,9 +11,7 @@ var pane = SC.ControlTestPane.design({height:24})
     image: 'start'
   });
 
-pane.show();
-
-module('SC.ImageButtonView ui');
+module('SC.ImageButtonView ui', pane.standardSetup());
 
 test("Check if image class is set properly on ImageButton", function() {
   var viewElem = pane.view('default').$('div');

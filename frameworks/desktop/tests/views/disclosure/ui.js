@@ -10,10 +10,10 @@
 (function() {
 	var pane = SC.ControlTestPane.design()
 		.add("diclosure", SC.DisclosureView, {
-	      value: NO, isEnabled: YES		
+	      value: NO, isEnabled: YES
 		})
 		.add("selected", SC.DisclosureView, {
-	      value: YES	
+	      value: YES
 		})
 		.add("disabled", SC.DisclosureView, {
 	      isEnabled: NO
@@ -36,10 +36,8 @@
         value: NO, isEnabled: NO
     });
 
-	pane.show();
-	
 	module("TODO: Test SC.DisclosureView UI", pane.standardSetup());
-	
+
 	test("basic", function() {
 		var view = pane.view('diclosure');
 		ok(!view.$().hasClass('disabled'), 'should not have disabled class');

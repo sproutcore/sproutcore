@@ -7,24 +7,15 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("SC.PickerPane UI", {
-  setup: function(){
-    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-  },
-  teardown: function(){
-    clearHtmlbody();
-  }
-});
-
 
 function evaluatePicker(pane) {
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
   ok(pane.$().hasClass('sc-picker'), 'pane should have sc-picker class');
   ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
   ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
-  
+
   equals(pane.$('.sc-view').length, 1, 'pane should have only one content view');
-  
+
   var ret = pane.layoutStyle();
 
   equals(ret.width, '300px', 'pane should have width 300px');
@@ -32,18 +23,28 @@ function evaluatePicker(pane) {
 }
 
 var anchor = SC.ControlTestPane.design()
-  .add("anchor", SC.ButtonView, { 
-     title: "Anchor Button" 
+  .add("anchor", SC.ButtonView, {
+     title: "Anchor Button"
   });
 
-anchor.show(); // add a test to show the test pane
+module("SC.PickerPane UI", {
+  setup: function(){
+    htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    anchor.standardSetup().setup();
+  },
+  teardown: function(){
+    clearHtmlbody();
+    anchor.standardSetup().teardown();
+  }
+});
+
 
 var paneDefault ;
 var paneMenu ;
 var paneFixed ;
 var panePointer ;
 
-test("verify default picker pane content container is visible at correct location with right size", function() { 
+test("verify default picker pane content container is visible at correct location with right size", function() {
   paneDefault = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
@@ -55,7 +56,7 @@ test("verify default picker pane content container is visible at correct locatio
   //paneDefault.remove();
 }) ;
 
-test("verify menu picker pane content container is visible at correct location with right size", function() { 
+test("verify menu picker pane content container is visible at correct location with right size", function() {
   paneMenu = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
@@ -67,7 +68,7 @@ test("verify menu picker pane content container is visible at correct location w
   //paneMenu.remove();
 }) ;
 
-test("verify fixed picker pane content container is visible at correct location with right size", function() { 
+test("verify fixed picker pane content container is visible at correct location with right size", function() {
   paneFixed = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
@@ -79,7 +80,7 @@ test("verify fixed picker pane content container is visible at correct location 
   //paneFixed.remove();
 }) ;
 
-test("verify pointer picker pane content container is visible at correct location with right size", function() { 
+test("verify pointer picker pane content container is visible at correct location with right size", function() {
   panePointer = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({

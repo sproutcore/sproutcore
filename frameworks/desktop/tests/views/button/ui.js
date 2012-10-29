@@ -13,32 +13,32 @@
 var pane = SC.ControlTestPane.design({height:24})
   .add("basic", SC.ButtonView, {
   })
-  
-  .add("title", SC.ButtonView, { 
+
+  .add("title", SC.ButtonView, {
      title: "Hello World"
   })
-   
-  .add("icon", SC.ButtonView, { 
+
+  .add("icon", SC.ButtonView, {
     icon: iconURL
   })
-    
-  .add("title,icon", SC.ButtonView, { 
+
+  .add("title,icon", SC.ButtonView, {
     title: "Hello World", icon: iconURL
   })
-     
-  .add("title,icon,disabled", SC.ButtonView, { 
+
+  .add("title,icon,disabled", SC.ButtonView, {
     title: "Hello World", icon: iconURL , isEnabled: NO
   })
-  
-  .add("title,icon,default", SC.ButtonView, { 
+
+  .add("title,icon,default", SC.ButtonView, {
     title: "Hello World", icon: iconURL , isDefault: YES
   })
 
-  .add("title,icon,selected", SC.ButtonView, { 
+  .add("title,icon,selected", SC.ButtonView, {
     title: "Hello World", icon: iconURL , isSelected: YES
   })
 
-  .add("title,toolTip", SC.ButtonView, { 
+  .add("title,toolTip", SC.ButtonView, {
     title: "Hello World", toolTip: 'Hello World is my tool tip'
   })
 
@@ -58,26 +58,26 @@ var pane = SC.ControlTestPane.design({height:24})
     ariaRole: 'button',
     menu: ['a','b']
   });
-  // 
-  // .add("autocontrolsize", SC.ButtonView, { 
+  //
+  // .add("autocontrolsize", SC.ButtonView, {
   //   controlSize: SC.AUTO_CONTROL_SIZE,
   //   title: "Hello Cheese", layout: { left: 0, top: 0, right: 0, height: 37 }
   // })
-  // 
+  //
   // .add("calculatedcontrolsize", SC.ButtonView, {
   //   // control size should end up small
   //   title: "Smelly Severus", layout: { left: 0, top: 2, right: 0, bottom: 2 },
   //   controlSize: SC.CALCULATED_CONTROL_SIZE
   // });
 
-pane.show(); // add a test to show the test pane
-
 module('SC.ButtonView ui', {
   setup: function(){
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+    pane.standardSetup().setup();
   },
   teardown: function(){
     clearHtmlbody();
+    pane.standardSetup().teardown();
   }
 });
 
@@ -94,7 +94,7 @@ test("Check that all button are visible", function() {
   ok(pane.view('aria-pressed').get('isVisibleInWindow'), 'aria-pressed.isVisibleInWindow should be YES');
   ok(pane.view('aria-haspopup').get('isVisibleInWindow'), 'aria-haspopup.isVisibleInWindow should be YES');
 });
-  
+
 
 test("Check that all buttons have the right classes set", function() {
   var viewElem=pane.view('basic').$();
@@ -105,8 +105,8 @@ test("Check that all buttons have the right classes set", function() {
   ok(!viewElem.hasClass('sel'), 'basic.hasClass(sel) should be NO');
   ok(!viewElem.hasClass('disabled'), 'basic.hasClass(disabled) should be NO');
   ok(!viewElem.hasClass('def'), 'basic.hasClass(def) should be NO');
-  
-  
+
+
   viewElem=pane.view('title').$();
   ok(viewElem.hasClass('sc-view'), 'title.hasClass(sc-view) should be YES');
   ok(viewElem.hasClass('sc-button-view'), 'title.hasClass(sc-button-view) should be YES');
@@ -151,7 +151,7 @@ test("Check that all buttons have the right classes set", function() {
   ok(!viewElem.hasClass('sel'), 'title,icon,default.hasClass(sel) should be NO');
   ok(!viewElem.hasClass('disabled'), 'title,icon,default.hasClass(disabled) should be NO');
   ok(viewElem.hasClass('def'), 'title,icon,default.hasClass(def) should be YES');
-  
+
   viewElem=pane.view('title,icon,selected').$();
    ok(viewElem.hasClass('sc-view'), 'title,icon,selected.hasClass(sc-view) should be YES');
    ok(viewElem.hasClass('sc-button-view'), 'title,icon,selected.hasClass(sc-button-view) should be YES');
@@ -160,7 +160,7 @@ test("Check that all buttons have the right classes set", function() {
    ok(viewElem.hasClass('sel'), 'title,icon,selected.hasClass(sel) should be YES');
    ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
    ok(!viewElem.hasClass('def'), 'title,icon,selected.hasClass(def) should be NO');
-   
+
    viewElem=pane.view('title,toolTip').$();
    ok(viewElem.hasClass('sc-view'), 'title,toolTip.hasClass(sc-view) should be YES');
    ok(viewElem.hasClass('sc-button-view'), 'title,toolTip.hasClass(sc-button-view) should be YES');
@@ -228,7 +228,7 @@ test("mouseDown and then mouseUp anywhere in the button should toggle the aria-p
 //   var viewElem=pane.view('autocontrolsize').$();
 //   ok(viewElem.hasClass('sc-huge-size'), 'HUGE button has sc-huge-size class.');
 // });
-// 
+//
 // test("Check if CALCULATED_CONTROL_SIZE automatically found the correct controlSize", function() {
 //   var viewElem=pane.view('calculatedcontrolsize').$();
 //   ok(viewElem.hasClass('sc-small-size'), 'CALCULATED_CONTROL_SIZE button has sc-small-size class.');

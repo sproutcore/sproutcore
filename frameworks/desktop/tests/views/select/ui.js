@@ -106,7 +106,6 @@ var pane = SC.ControlTestPane.design()
       itemTitleKey: 'title'
     });
 
-pane.show();
 
 // ..........................................................
 // TEST VIEWS

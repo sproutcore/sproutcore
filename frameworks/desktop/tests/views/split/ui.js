@@ -9,23 +9,21 @@
 
 (function() {
   var pane = SC.ControlTestPane.design()
-    .add("horizontal", SC.SplitView, { 
+    .add("horizontal", SC.SplitView, {
 	  layout: { right: 20, bottom: 20, width: 100, height: 23 },
       layoutDirection: SC.LAYOUT_HORIZONTAL,canCollapseViews: NO
     })
-  
-    .add("vertical", SC.SplitView, { 
+
+    .add("vertical", SC.SplitView, {
       layoutDirection: SC.LAYOUT_VERTICAL,canCollapseViews: NO
     })
-  	.add("collapsable", SC.SplitView, { 
+  	.add("collapsable", SC.SplitView, {
       layoutDirection: SC.LAYOUT_HORIZONTAL,canCollapseViews: YES
     });
-      
-  pane.show(); // add a test to show the test pane
 
   // ..........................................................
   // TEST VIEWS
-  // 
+  //
   module('SC.SplitView ui', {
     setup: function(){
       htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
@@ -53,7 +51,7 @@
     ok(!view.$().hasClass('vertical'), 'should not be have vertical class');
 	equals(view.get('layoutDirection'),SC.LAYOUT_HORIZONTAL);
 	equals(view.get('canCollapseViews'),YES,"the view should be collapsable");
-  });		
+  });
  })();
 
 

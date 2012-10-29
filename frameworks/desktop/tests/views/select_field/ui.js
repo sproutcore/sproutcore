@@ -19,37 +19,37 @@ var integerObjects = [
 ];
 
 var pane = SC.ControlTestPane.design()
-    .add("basic", SC.SelectFieldView, { 
+    .add("basic", SC.SelectFieldView, {
        objects:["1","2","3","4","5"]
     })
-  
-    .add("disabled", SC.SelectFieldView, { 
+
+    .add("disabled", SC.SelectFieldView, {
       isEnabled: NO, objects:["1","2","3","4","5"]
     })
-  
-    .add("Not Selected", SC.SelectFieldView, { 
+
+    .add("Not Selected", SC.SelectFieldView, {
       isSelected: NO, objects:["1","2","3","4","5"]
     })
-  
-    .add("Not Visible", SC.SelectFieldView, { 
+
+    .add("Not Visible", SC.SelectFieldView, {
       isVisible: NO, objects:["1","2","3","4","5"]
     })
-  
-    .add("sortedStringOptions", SC.SelectFieldView, { 
+
+    .add("sortedStringOptions", SC.SelectFieldView, {
       objects:["Apple","Sproutcore 1.0","Development","Charles"],
-  useStaticLayout: YES, 
+  useStaticLayout: YES,
       layout: { width: 'auto', right: 'auto' }
     })
-      .add("unSortedStringOptions", SC.SelectFieldView, { 
+      .add("unSortedStringOptions", SC.SelectFieldView, {
         objects:["Apple","Sproutcore 1.0","Development","Charles"],
-    useStaticLayout: YES, 
+    useStaticLayout: YES,
     disableSort: YES,
         layout: { width: 'auto', right: 'auto' }
       })
-  
-    .add("Width 150 Right 0", SC.SelectFieldView, { 
+
+    .add("Width 150 Right 0", SC.SelectFieldView, {
       objects: [1,6,11,2,8],
-      useStaticLayout: YES, 
+      useStaticLayout: YES,
       layout: { width: '150', right: '0' }
     })
     .add("redraw", SC.SelectFieldView, {
@@ -69,13 +69,10 @@ var pane = SC.ControlTestPane.design()
       disableSort: YES
     });
 
-  
-  
-    pane.show();
 
 // ..........................................................
 // TEST VIEWS
-// 
+//
 
 module('SC.SelectFieldView ui', {
   setup: function(){
@@ -116,13 +113,13 @@ test("sortedStringOptions", function() {
    equals(null,view.get('sortKey'), 'sortkey not specified');
 });
 
-test("Width 150 Right 0", function() {  
+test("Width 150 Right 0", function() {
   var view = pane.view('Width 150 Right 0');
   ok(!view.$().hasClass('disabled'), 'should not have disabled class');
   ok(!view.$().hasClass('sel'), 'should not have sel class');
 });
 
-test("Check that by setting the value the selection actually changes", function() {  
+test("Check that by setting the value the selection actually changes", function() {
   var view = pane.view('Width 150 Right 0');
   SC.RunLoop.begin();
   view.set('value',2);

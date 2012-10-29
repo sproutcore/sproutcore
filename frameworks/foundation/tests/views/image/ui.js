@@ -37,8 +37,6 @@
       layout: { width: 200, height: 200 }
     });
 
-  pane.show();
-
   module('SC.ImageView ui', pane.standardSetup());
 
   test("Verify that all the rendering properties of an image that is being loaded are correct", function() {

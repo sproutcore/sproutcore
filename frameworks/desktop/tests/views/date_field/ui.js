@@ -72,9 +72,6 @@
   });
 
 
-
-pane.show(); // add a test to show the test pane
-
 // ..........................................................
 // VERIFY STANDARD STATES
 //

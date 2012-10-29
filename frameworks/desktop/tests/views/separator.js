@@ -9,13 +9,12 @@
 
 (function() {
   var pane = SC.ControlTestPane.design()
-  .add("horizontal", SC.SeparatorView, { 
+  .add("horizontal", SC.SeparatorView, {
     layoutDirection: SC.LAYOUT_HORIZONTAL
   })
-  .add("vertical", SC.SeparatorView, { 
+  .add("vertical", SC.SeparatorView, {
     layoutDirection: SC.LAYOUT_VERTICAL
-  });   
-  pane.show(); 
+  });
 
 module("TODO: Test SC.Separator UI", {
   setup: function(){
@@ -34,9 +33,9 @@ module("TODO: Test SC.Separator UI", {
     equals(view.get('layoutDirection'),SC.LAYOUT_HORIZONTAL,"the view is divided horizontally");
     view = pane.view('vertical');
     ok(!view.$().hasClass('horizontal'), 'should not be horizontally divided');
-    equals(view.get('layoutDirection'),SC.LAYOUT_VERTICAL,"the view is divided vertically");	
+    equals(view.get('layoutDirection'),SC.LAYOUT_VERTICAL,"the view is divided vertically");
   });
-  
+
   test("renders a component with a span tag",function(){
 	var view = pane.view('horizontal');
 	equals(view.get('tagName'), 'span', 'creates a pan tag');

@@ -8,13 +8,13 @@
 /* Test SC.StackedView with a Comments example. */
 
 var ShapeView = SC.View.extend(SC.Control, {
-  
+
   content: null,
-  
+
   classNames: 'shape',
 
   DIMENSION_KEYS: 'x y width height'.w(),
-  
+
   contentPropertyDidChange: function(target, key) {
     if (key === '*') {
       this.recomputeLayout();
@@ -25,7 +25,7 @@ var ShapeView = SC.View.extend(SC.Control, {
       this.recomputeLayout();
     }
   },
-  
+
   recomputeLayout: function() {
     var content = this.get('content'), layout ;
     if (content) {
@@ -38,29 +38,29 @@ var ShapeView = SC.View.extend(SC.Control, {
     } else {
       layout = { top: 0, left: 0, height: 0, width: 0 };
     }
-    
+
     this.set('layout', layout);
   },
-  
+
   render: function(context, firstTime) {
     var label = this.getPath('content.label');
-    context.push('<label>', label, '</label>');  
+    context.push('<label>', label, '</label>');
   }
 });
 
 var content = [
-  SC.Object.create({ 
-    label: "Shape 1", 
+  SC.Object.create({
+    label: "Shape 1",
     x: 10, y: 10, width: 100, height: 50
   }),
 
-  SC.Object.create({ 
-    label: "Shape 2", 
+  SC.Object.create({
+    label: "Shape 2",
     x: 50, y: 50, width: 65, height: 200
   }),
 
-  SC.Object.create({ 
-    label: "Shape 3", 
+  SC.Object.create({
+    label: "Shape 3",
     x: 100, y: 80, width: 200, height: 72
   })
 
@@ -72,18 +72,18 @@ var extra = SC.Object.create({
 });
 
 var ShapeCanvasView = SC.CollectionView.extend({
-  
+
   // save position on screen at mouse down so that we can properly compute
   // you can save in mouseDownInfo, which will be cleared on mouseUp
   mouseDown: function(ev) {
     var ret = sc_super();
     if (ret) {
       var offset = { x: ev.pageX, y: ev.pageY };
-      this.mouseDownInfo.dragAnchor = this.convertFrameFromView(offset, null); 
+      this.mouseDownInfo.dragAnchor = this.convertFrameFromView(offset, null);
     }
     return ret ;
   },
-  
+
   // handle dragging of content around on the screen
   mouseDragged: function(ev) {
     var info   = this.mouseDownInfo,
@@ -93,13 +93,13 @@ var ShapeCanvasView = SC.CollectionView.extend({
         ypoints = info.ypoints,
         adjust, sel, item, content, idx;
 
-    // if no items have been collected yet, this is the first time drag is 
+    // if no items have been collected yet, this is the first time drag is
     // called.  collect content items to drag.  If there is no selection, etc
     // just clear the anchor prop so that we don't try to drag again
     if (!items) {
       sel = this.get('selection');
       content = this.get('content');
-    
+
       // collect info about items to drag.  save initial x/y coordinates so we
       // can edit them later
       if (content && sel && sel.get('length') > 0) {
@@ -107,29 +107,29 @@ var ShapeCanvasView = SC.CollectionView.extend({
         xpoints = info.xpoints = [];
         ypoints = info.ypoints = [];
         items   = info.dragContent = [];
-      
-        sel.forEach(function(idx) { 
+
+        sel.forEach(function(idx) {
           item = content.objectAt(idx);
           if (!item) return; // nothing to do here
           items.push(item);
           xpoints.push(item.get('x'));
           ypoints.push(item.get('y'));
-        }, this); 
-      
+        }, this);
+
         info.shouldReselect = NO; // once we drag, don't alter selection
-        
+
       // if no content or no selection or selection is empty, just disable
       } else anchor = info.dragAnchor = null ;
     }
-  
+
     // if anchor is empty, dragging is disabled for this mouse down.
     if (!anchor) return sc_super();
-  
-    // now figure the adjustment for content items.  
+
+    // now figure the adjustment for content items.
     adjust = this.convertFrameFromView({ x: ev.pageX, y: ev.pageY }, null);
     adjust.x -= anchor.x;
     adjust.y -= anchor.y;
-    
+
     // and move each
     idx = items.length;
     while(--idx >= 0) {
@@ -139,10 +139,10 @@ var ShapeCanvasView = SC.CollectionView.extend({
         .set('y', ypoints[idx] + adjust.y)
       .endPropertyChanges();
     }
-  
+
     return YES ;
   }
-  
+
 });
 
 var pane = SC.ControlTestPane.design()
@@ -152,13 +152,10 @@ var pane = SC.ControlTestPane.design()
     exampleView: ShapeView,
     allowDeselectAll: YES
   });
-  
-pane.show(); // add a test to show the test pane
-window.pane = pane ;
 
 // ..........................................................
 // BASIC TESTS
-// 
+//
 module("Basic Tests", {
   setup: function(){
     htmlbody(["<style>",
@@ -178,9 +175,9 @@ module("Basic Tests", {
 
 // ..........................................................
 // SPECIAL CASES
-// 
+//
 
-// tests specific bug where a series of many edits strung together would 
+// tests specific bug where a series of many edits strung together would
 // cause the height to get out of sync.
 
 

@@ -9,27 +9,26 @@
   This test evaluates the creation of list item views with alternating rows
 */
 
-module("SC.ListView - alternating rows");
 
 // create a fake content array.  Generates a list with whatever length you
 // want of objects with a title based on the index.  Cannot mutate.
 var ContentArray = SC.Object.extend(SC.Array, {
-  
+
   length: 0,
-  
+
   objectAt: function(idx) {
     if (idx >= this.get('length')) return undefined;
-    
+
     var content = this._content, ret ;
     if (!content) content = this._content = [];
-    
+
     ret = content[idx];
     if (!ret) {
-      ret = content[idx] = SC.Object.create({ 
+      ret = content[idx] = SC.Object.create({
         title: "ContentItem %@".fmt(idx)
       });
     }
-    
+
     return ret ;
   }
 });
@@ -53,9 +52,6 @@ var pane = SC.ControlTestPane.design()
       rowHeight: 20
     })
   }));
-  
-pane.show(); // add a test to show the test pane
-window.pane = pane ;
 
 function verifyClasses(views) {
   var evens = SC.IndexSet.create(0).addEach([2,4,6,8,10]);
@@ -76,10 +72,12 @@ function verifyClasses(views) {
   });
 }
 
+module("SC.ListView - alternating rows", pane.standardSetup());
+
 test("alternating class set on list view", function() {
   var listView = pane.view("basic-even").contentView;
   var cq = listView.$();
-  
+
   ok(cq.hasClass('alternating'), "ListView instance should have 'alternating' CSS class");
 });
 
@@ -97,17 +95,17 @@ test("even/odd classes with incremental rendering - even", function() {
   var scrollView = pane.view("basic-even"),
       listView = scrollView.contentView,
       item = listView.childViews;
-  
+
   SC.run(function() {
     scrollView.scrollTo(0,21);
   });
-  
+
   verifyClasses(items);
-  
+
   SC.run(function() {
     scrollView.scrollTo(0,0);
   });
-  
+
   verifyClasses(items);
 });
 
@@ -115,16 +113,16 @@ test("even/odd classes with incremental rendering - odd", function() {
   var scrollView = pane.view("basic-odd"),
       listView = scrollView.contentView,
       item = listView.childViews;
-  
+
   SC.run(function() {
     scrollView.scrollTo(0,21);
   });
-  
+
   verifyClasses(items);
-  
+
   SC.run(function() {
     scrollView.scrollTo(0,0);
   });
-  
+
   verifyClasses(items);
 });

@@ -59,8 +59,6 @@
       layout: { left:12, height: 200, right:12, top:12}
     });
 
-  pane.show(); // add a test to show the test pane
-
   // ..........................................................
   // TEST VIEWS
   //
@@ -86,9 +84,9 @@
      var view = pane.view('tabView1');
      var viewElem = view.$(),
          segmentedView;
-     
+
      segmentedView = view.get('segmentedView');
-     
+
      ok(viewElem.hasClass('sc-view'), 'tabView1.hasClass(sc-view) should be YES');
      ok(viewElem.hasClass('sc-tab-view'), 'tabView1.hasClass(sc-tab-view) should be YES');
      ok(view.$('.sc-segmented-view').length, 'tabView1 should contain a segmented view');

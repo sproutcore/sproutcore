@@ -60,8 +60,6 @@
     //   selection: multiSelectionDiscontiguous
     // })
 
-  pane.show(); // add a test to show the test pane
-
   // ..........................................................
   // TEST VIEWS
   //

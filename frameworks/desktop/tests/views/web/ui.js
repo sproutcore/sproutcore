@@ -37,11 +37,10 @@
     }
   });
 
-  pane.show(); // add a test to show the test pane
   // ..........................................................
   // TEST VIEWS
-  // 
-  module('SC.WebView UI');
+  //
+  module('SC.WebView UI', pane.standardSetup());
 
   test("attributes tests",
   function() {
@@ -92,8 +91,8 @@
   function() {
     var view = pane.view('don\'t auto resize');
     equals(view.get('shouldAutoResize'), NO, 'should have auto resize flag as false');
-    
-    /** set the src a bit late so that the following onload event get's hooked 
+
+    /** set the src a bit late so that the following onload event get's hooked
     up before it actually loads
     */
     SC.RunLoop.begin();

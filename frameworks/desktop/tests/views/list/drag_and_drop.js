@@ -48,9 +48,6 @@ var pane = SC.ControlTestPane.design()
     })
   }));
 
-pane.show(); // add a test to show the test pane
-window.pane = pane;
-
 
 module("SC.ListView - drag and drop", pane.standardSetup());
 

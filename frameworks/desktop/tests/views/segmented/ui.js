@@ -185,8 +185,6 @@ var pane;
       layout: { height: 25 }
     });
 
-  pane.show(); // add a test to show the test pane
-
   // ..........................................................
   // TEST VIEWS
   //
