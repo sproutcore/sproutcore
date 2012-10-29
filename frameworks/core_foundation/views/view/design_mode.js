@@ -15,11 +15,11 @@ SC.View.reopen(
   //
 
   /**
-    The current design mode of the view.
+    The current design mode of the application and this view.
 
-    If the pane that this view belongs to has designModes specified, this
-    property will be set automatically when the view is created and as the
-    window width goes across a design mode boundary.
+    If the application has designModes specified, this property will be set
+    automatically when the view is created and as the window width changes
+    across the design mode boundaries.
 
     @property {String}
     @default null
@@ -27,34 +27,33 @@ SC.View.reopen(
   designMode: null,
 
   /**
-    The dynamic layouts for this view depending on the current design mode.
+    The dynamic adjustments to this view depending on the current design mode.
 
-    If you specify designModes on the view's pane, this hash will be checked
-    for a matching design mode layout to set for the current design mode.
+    If you specify designModes on the application, this hash will be checked
+    for a matching design mode adjustment to apply for the current design mode.
 
-    For example, if the pane has designModes 'small' and 'large', you could
-    specify designLayouts 'small' and 'large' that would be used for
-    the matching design mode.
+    For example, if the application has designModes 'small' and 'large', you
+    could specify matching designAdjustments 'small' and 'large' that would be
+    used depending on the current design mode.
 
     @property {Object|null}
     @default null
   */
-  designLayouts: null,
+  designAdjustments: null,
 
   // ------------------------------------------------------------------------
   // Methods
   //
 
   /** @private Recursively set the designMode on each child view. */
-  adjustChildDesignModes: function (designMode, lastDesignMode) {
+  adjustChildDesignModes: function (lastDesignMode, designMode) {
     var childViews = this.get('childViews');
 
     var i, len = childViews.get('length');
     for (i = 0; i < len; i++) {
       var childView = childViews.objectAt(i);
 
-      // childView.set('designMode', designMode);
-      childView.updateDesignMode(designMode, lastDesignMode);
+      childView.updateDesignMode(lastDesignMode, designMode);
     }
   },
 
@@ -65,41 +64,69 @@ SC.View.reopen(
     determines that the design mode, as specified in the pane's designModes
     property, has changed.  You should likely never need to call it manually.
 
-    This method updates the designMode property of the view, updates
-    the layout if a matching design layout in the view's designLayouts
+    This method updates the designMode property of the view, adjusts
+    the layout if a matching design adjustment in the view's designAdjustments
     property is found and adds a class name to the view for the current
     design mode.
 
     Note that updating the design mode also updates all child views of this
     view.
 
-    @param {String} designMode the name of the design mode
-    @param {String} [lastDesignMode] the previously applied
+    @param {String} lastDesignMode the previously applied design mode
+    @param {String} [designMode] the name of the design mode
    */
-  updateDesignMode: function (designMode, lastDesignMode) {
+  updateDesignMode: function (lastDesignMode, designMode) {
+    // Fast path.
+    if (lastDesignMode === designMode) { return; }
+
     var classNames = this.get('classNames'),
-      designLayouts,
+      designAdjustments,
       elem,
+      fallbackDesignMode,
+      key,
       layer,
-      newLayout,
-      oldClass = this.oldClass;
+      newAdjustment,
+      oldClass = this.oldClass,
+      responder = SC.RootResponder.responder,
+      prevAdjustment;
 
     this.set('designMode', designMode);
 
-    // If the view has a designModeLayout, adjust its layout to match.
-    designLayouts = this.get('designLayouts');
-    if (designLayouts) {
-      newLayout = designLayouts[designMode] || null;
+    // If the view has designAdjustments, adjust its layout to match.
+    designAdjustments = this.get('designAdjustments');
+    if (designMode && designAdjustments) {
+      // Find new adjustments.
+      fallbackDesignMode = designMode;
+      while (fallbackDesignMode && !newAdjustment) {
+        newAdjustment = designAdjustments[fallbackDesignMode];
+        fallbackDesignMode = responder.fallbackDesignMode(fallbackDesignMode);
+      }
 
-      if (newLayout) {
-        this.set('layout', newLayout);
+      // Find previous adjustments.
+      fallbackDesignMode = lastDesignMode;
+      while (fallbackDesignMode && !prevAdjustment) {
+        prevAdjustment = designAdjustments[fallbackDesignMode];
+        fallbackDesignMode = responder.fallbackDesignMode(fallbackDesignMode);
       }
-      //@if(debug)
-      else if (designMode) {
-        // Developer support if they've implemented designLayouts but maybe missed a layout for this mode.
-        SC.warn("Developer Warning: The view %@ has designLayouts, but none matching the current designMode: '%@'".fmt(this, designMode));
+
+      // Unset previous adjustments.
+      this.beginPropertyChanges();
+      if (prevAdjustment) {
+        for (key in prevAdjustment) {
+          if (SC.none(newAdjustment[key])) { this.adjust(key, null); }
+        }
       }
-      //@endif
+
+      // Apply new adjustments.
+      if (newAdjustment) {
+        this.adjust(newAdjustment);
+      } else {
+        //@if(debug)
+        // Developer support if they've implemented designAdjustments but maybe missed a layout for this mode.
+        SC.warn("Developer Warning: The view %@ has designAdjustments, but none matching the current designMode: '%@'".fmt(this, designMode));
+        //@endif
+      }
+      this.endPropertyChanges();
     }
 
     // Apply the design mode as a class name.
@@ -129,7 +156,7 @@ SC.View.reopen(
     }
 
     // Set the designMode on each child view (may be null).
-    this.adjustChildDesignModes(designMode, lastDesignMode);
+    this.adjustChildDesignModes(lastDesignMode, designMode);
   }
 
 });

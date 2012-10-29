@@ -514,6 +514,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
 
+    // set the initial design mode.  The responder will update this if it changes.
+    this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
+
     this.set('isPaneAttached', YES);
 
     this.recomputeDependentProperties();

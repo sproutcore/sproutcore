@@ -307,10 +307,12 @@ SC.RootResponder = SC.Object.extend(
   */
   resize: function() {
     this._resize();
-    //this.invokeLater(this._resize, 10);
+    this._assignDesignMode();
+
     return YES; //always allow normal processing to continue.
   },
 
+  /** @private */
   _resize: function() {
     // calculate new window size...
     var newSize = this.computeWindowSize(), oldSize = this.get('currentWindowSize');
@@ -324,9 +326,30 @@ SC.RootResponder = SC.Object.extend(
       // notify panes
       if (this.panes) {
         SC.run(function() {
-          this.panes.invoke('windowSizeDidChange', oldSize, newSize) ;
+          if (oldSize !== newSize) {
+            this.panes.invoke('windowSizeDidChange', oldSize, newSize);
+          }
         }, this);
       }
+    }
+  },
+
+  /** @private */
+  _assignDesignMode: function () {
+    var newDesignMode = this.computeDesignMode(), oldDesignMode = this.get('currentDesignMode');
+    if (oldDesignMode !== newDesignMode) {
+      this.set('currentDesignMode', newDesignMode);
+
+      if (this.panes) {
+        this.panes.invoke('updateDesignMode', oldDesignMode, newDesignMode);
+      }
+
+      //@if(debug)
+      if (!newDesignMode) {
+        // Developer support if they've turned off designMode after previously having it on.
+        SC.warn("Developer Warning: Design modes has been disabled for the application.  The layout of panes and child views will remain whatever it was for the '%@' design mode.".fmt(oldDesignMode));
+      }
+      //@endif
     }
   },
 
@@ -405,6 +428,112 @@ SC.RootResponder = SC.Object.extend(
   dragDidStart: function(drag) {
     this._mouseDownView = drag ;
     this._drag = drag ;
+  },
+
+  // ------------------------------------------------------------------------
+  // Design Modes
+  //
+
+  /** @private */
+  currentDesignMode: null,
+
+  /** @private Managed by SC.Application. */
+  designModes: function (key, value) {
+    if (SC.none(value)) {
+      // Clear previous values.
+      if (this._designModeNames) {
+        delete this._designModeNames;
+        delete this._designModeWidths;
+      }
+
+      value = null;
+    } else {
+      this._prepOrderedArrays(value);
+    }
+
+    this._assignDesignMode();
+
+    return value;
+  }.property().cacheable(),
+
+  /** @private */
+  computeDesignMode: function () {
+    var designMode = null,
+      designModeNames = this._designModeNames,
+      designModeWidths = this._designModeWidths,
+      lastDesignMode = this.get('currentDesignMode'),
+      width = this.get('currentWindowSize').width;
+
+    // Fast path!
+    if (!designModeNames) { return null; }
+
+    var i, len;
+    for (i = 0, len = designModeWidths.get('length'); i < len; i++) {
+      var layoutWidthThreshold = designModeWidths.objectAt(i);
+      if (width < layoutWidthThreshold) {
+        designMode = designModeNames.objectAt(i);
+        break;
+      }
+    }
+
+    // If no smaller designMode was found, use the biggest designMode.
+    if (SC.none(designMode) && designModeNames && designModeNames.get('length') > 0) {
+      designMode = designModeNames.objectAt(i);
+    }
+
+    return designMode;
+  },
+
+  /** @private (semi)
+    Returns the fallback design mode for the given design mode.  This is
+    primarily used by SC.View for the case where an adjustment isn't found
+    for the current design mode and we want to apply the next best design
+    mode as a fallback.
+  */
+  fallbackDesignMode: function (designMode) {
+    var designModeNames = this._designModeNames,
+      index,
+      ret = null;
+
+    index = designModeNames.indexOf(designMode);
+    if (index >= 0) {
+      ret = designModeNames[index - 1];
+    }
+
+    return ret;
+  },
+
+  /** @private Prepares ordered design modes & widths arrays when designModes changes. */
+  _prepOrderedArrays: function (designModes) {
+    var designModeNames,
+      designModeWidths;
+
+    // Order the design modes for easier access later.
+    if (designModes) {
+      designModeNames = this._designModeNames = [];
+      designModeWidths = this._designModeWidths = [];
+
+      var key;
+
+      outer:
+        for (key in designModes) {
+          var i, value;
+
+          // Assume that the keys will be ordered smallest to largest so run backwards.
+          value = designModes[key];
+          inner:
+            for (i = designModeWidths.length - 1; i >= 0; i--) {
+              if (designModeWidths[i] < value) {
+                // Exit early!
+                break inner;
+              }
+            }
+
+          i += 1;
+          designModeNames.splice(i, 0, key);
+          designModeWidths.splice(i, 0, value);
+        }
+    }
   },
 
   // .......................................................

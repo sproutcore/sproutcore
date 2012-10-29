@@ -127,8 +127,7 @@ SC.View.reopen(
     if(view.layoutDidChange) view.layoutDidChange();
 
     // Pass the current designMode to the view (and its children).
-    var designMode = this.get('designMode');
-    if (designMode) { view.updateDesignMode(designMode); }
+    view.updateDesignMode(view.get('designMode'), this.get('designMode'));
 
     view.endPropertyChanges();
 
