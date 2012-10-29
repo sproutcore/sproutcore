@@ -126,6 +126,10 @@ SC.View.reopen(
     if(view.parentViewDidChange) view.parentViewDidChange();
     if(view.layoutDidChange) view.layoutDidChange();
 
+    // Pass the current designMode to the view (and its children).
+    var designMode = this.get('designMode');
+    if (designMode) { view.updateDesignMode(designMode); }
+
     view.endPropertyChanges();
 
     // Make sure all notifications are delayed since the appending
@@ -139,7 +143,7 @@ SC.View.reopen(
       }
     });
 
-    // Even though its layer has not necessarily been created, the child views 
+    // Even though its layer has not necessarily been created, the child views
     // are added immediately. Hence notify views immediately.
     if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
     if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }
