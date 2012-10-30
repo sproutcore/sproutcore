@@ -162,6 +162,71 @@ test("adding an item, removing it, adding another item", function() {
   equals(set.length, 2, "set.length") ;
 });
 
+/**
+  This test illustrates a problem with SC.Set.  It stored references to objects
+  at increasing indexes and removed references to the objects by ignoring the
+  index and overwriting it with a new object if it comes along.  However, if
+  a lot of objects are added very quickly, they will be retained indefinitely
+  even after remove is called, until the same number of new objects are added
+  later.
+*/
+test("adding and removing items should not retain references to removed objects", function() {
+  var guid1, guid2,
+    idx1, idx2,
+    item1 = "item1",
+    item2 = "item2";
+
+  guid1 = SC.guidFor(item1);
+  guid2 = SC.guidFor(item2);
+
+  // add to set
+  set.add(item1);
+  set.add(item2);
+
+  idx1 = set[guid1];
+  idx2 = set[guid2];
+
+  equals(set.length, 2, "set.length");
+  equals(set[idx1], item1, "item1 is at index %@ on the set".fmt(idx1));
+  equals(set[idx2], item2, "item2 is at index %@ on the set".fmt(idx2));
+  equals(set[guid1], 0, "guid for item1, %@, references index %@ on the set".fmt(guid1, idx1));
+  equals(set[guid2], 1, "guid for item2, %@, references index %@ on the set".fmt(guid2, idx2));
+
+  // remove from set
+  set.remove(item1);
+  set.remove(item2);
+
+  equals(set.length, 0, "set.length");
+  equals(set[idx1], undefined, "item1 is no longer at index %@ on the set".fmt(idx1));
+  equals(set[idx2], undefined, "item2 is no longer at index %@ on the set".fmt(idx2));
+  equals(set[guid1], undefined, "guid for item1, %@, is no longer on the set".fmt(guid1));
+  equals(set[guid2], undefined, "guid for item2, %@, is no longer on the set".fmt(guid2));
+
+  // add to set
+  set.add(item1);
+  set.add(item2);
+
+  idx1 = set[guid1];
+  idx2 = set[guid2];
+
+  equals(set.length, 2, "set.length");
+  equals(set[idx1], item1, "item1 is at index %@ on the set".fmt(idx1));
+  equals(set[idx2], item2, "item2 is at index %@ on the set".fmt(idx2));
+  equals(set[guid1], 0, "guid for item1, %@, references index %@ on the set".fmt(guid1, idx1));
+  equals(set[guid2], 1, "guid for item2, %@, references index %@ on the set".fmt(guid2, idx2));
+
+  // remove from set in reverse order
+  set.remove(item2);
+  set.remove(item1);
+
+  equals(set.length, 0, "set.length");
+  equals(set[idx1], undefined, "item1 is no longer at index %@ on the set".fmt(idx1));
+  equals(set[idx2], undefined, "item2 is no longer at index %@ on the set".fmt(idx2));
+  equals(set[guid1], undefined, "guid for item1, %@, is no longer on the set".fmt(guid1));
+  equals(set[guid2], undefined, "guid for item2, %@, is no longer on the set".fmt(guid2));
+});
+
+
 module("SC.Set.remove + SC.Set.contains", {
 
   // generate a set with every type of object, but none of the specific

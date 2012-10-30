@@ -366,7 +366,8 @@ SC.Set = SC.mixin({},
       this[guid] = idx;
     }
 
-    // reduce the length
+    // Throw away the last object (it has been moved or is the object we are removing).
+    delete this[len-1];
     this.length = len-1;
 
     if (this.isObservable) this.enumerableContentDidChange();
