@@ -589,7 +589,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     var didFlush = NO,
         log = SC.LOG_BINDINGS,
         // connect any bindings
-        queue, binding ;
+        queue, binding;
+
     while((queue = this._connectQueue).length >0) {
       this._connectQueue = this._alternateConnectQueue ;
       this._alternateConnectQueue = queue ;

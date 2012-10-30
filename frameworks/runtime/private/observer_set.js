@@ -95,7 +95,10 @@ SC.ObserverSet = {
       this._members[SC.guidFor(entry[0])][SC.guidFor(entry[1])] = index;
     }
 
+    // Throw away the last member (it has been moved or is the member we are removing).
     members.pop();
+
+    // Remove the method tracked for the target.
     delete this._members[targetGuid][methodGuid];
 
     return true;

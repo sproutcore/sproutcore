@@ -946,14 +946,14 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       // TODO: Destroy observers
 
       // TODO: Destroy properties
-      
+
     },
 
     /**
       Will add an observes handler to this object for a given property path.
 
       In most cases, the path provided is relative to this object. However,
-      if the path begins with a captial character then the path is considered
+      if the path begins with a capital character then the path is considered
       relative to the window object.
 
       @param {Function} observer the function on this object that will be
@@ -970,7 +970,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       Will remove an observes handler from this object for a given property path.
 
       In most cases, the path provided is relative to this object. However,
-      if the path begins with a captial character then the path is considered
+      if the path begins with a capital character then the path is considered
       relative to the window object.
 
       @param {Function} observer the function on this object that will be
@@ -989,7 +989,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       for a given property path.
 
       In most cases, the path provided is relative to this object. However,
-      if the path begins with a captial character then the path is considered
+      if the path begins with a capital character then the path is considered
       relative to the window object.
 
       You must supply an action that is to be performed by this method. The
