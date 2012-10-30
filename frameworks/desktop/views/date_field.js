@@ -203,6 +203,8 @@ SC.DateFieldView = SC.TextFieldView.extend(
     
     if (pressedKey === "down" || pressedKey === "up") {
       var newValue = (pressedKey === 'down') ? -1 : 1;
+
+      if (!value) value = SC.DateTime.create();
       
       switch(key) {
         case '%a': case '%d': case '%j': this.set('value', value.advance({ day: newValue })); break;
@@ -220,97 +222,73 @@ SC.DateFieldView = SC.TextFieldView.extend(
         case '%y': case '%Y': this.set('value', value.advance({ year: newValue })); break;
       }
     }
-    // Else if a number were press
     else {
-      var lastPressedKeys = this._lastPressedKeys,
-          pressTime = SC.DateTime.create().get('milliseconds'),
-          lastPressedTime = this._lastPressedTime;
+      var lastValue = this._lastValue,
+          length = 2,
+          min = 0, 
+          max, key, newValue;
       
       switch(key) {
         case '%Y': 
-          var newYear;
-          
-          // If the user wait too long, we reset the last pressed keys
-          if (pressTime-lastPressedTime > 1200) lastPressedKeys = {};
-          
-          if (isNumber(lastPressedKeys.val1)) {
-            if (isNumber(lastPressedKeys.val3)) {
-              newYear = parseInt(''+lastPressedKeys.val3+lastPressedKeys.val2+lastPressedKeys.val1+pressedKey);
-            }
-            else if (isNumber(lastPressedKeys.val2)) {
-              newYear = parseInt(''+lastPressedKeys.val2+lastPressedKeys.val1+pressedKey+0);
-            }
-            else if (isNumber(lastPressedKeys.val1)) {
-              newYear = parseInt(''+lastPressedKeys.val1+pressedKey+0+0);
-            }
-          }
-          else {
-            newYear = parseInt(pressedKey+0+0+0);
-          }
-          
-          if (newYear >= 1000) {
-            this.set('value', value.adjust({ year: newYear }));
-          }
+          key = 'year';
+          min = 1000;
+          max = 9999;
+          length = 4;
         break;
         case '%y':
-          var newYear = parseInt('20'+this._lastPressedKeys.val1+pressedKey);
-          this.set('value', value.adjust({ year: newYear }));
+          key = 'year';
+          prefix = '20';
         break;
         case '%m':
-          this._updateValue('month', pressedKey, 12);
+          key = 'month';
+          min = 1;
+          max = 12;
         break;
         case '%d':
-          var numberOfDaysForThisMonth = value.advance({ month: 1 }).adjust({ day: 1 }).advance({ day: -1 }).get('day');
-          this._updateValue('day', pressedKey, numberOfDaysForThisMonth);
+          key = 'day';
+          min = 1;
+          max = 31;
         break;
         case '%H':
-          this._updateValue('hour', pressedKey, 24, true);
+          key = 'hour';
+          max = 23;
         break;
         case '%I':
-          this._updateValue('hour', pressedKey, 12, true);
+          key = 'hour';
+          max = 11;
         break;
         case '%M':
-          this._updateValue('minute', pressedKey, 60, true);
+          key = 'minute';
+          max = 59;
         break;
         case '%S':
-          this._updateValue('second', pressedKey, 60, true);
+          key = 'second';
+          max = 59;
         break;        
       }
+ 
+      if (SC.none(lastValue) || this._lastkey !== key) {
+        lastValue = value.get(key);
+        lastValue = (lastValue<10 ? '0' : '') + lastValue;
+      }
+
+      // We remove the first character and add the new one at the end of the string
+      lastValue = lastValue.slice(1) + pressedKey;
+      newValue = parseInt(lastValue);
       
-      // We save the last pressed keys
-      lastPressedKeys.val3 = lastPressedKeys.val2;
-      lastPressedKeys.val2 = lastPressedKeys.val1;
-      lastPressedKeys.val1 = pressedKey;
-      this._lastPressedTime = pressTime;
-    }
-  },
-  
-  /** @private */
-  _lastPressedKeys: {},
-  
-  /** @private */
-  _updateValue: function(key, pressedKey, maxValue, isTime) {
-    var value = this.get('value'),
-        newValue = parseInt(''+value.get(key)+pressedKey);
-    
-    // If the new value is to much (ex: 25 for the hours), or if the last entered key 
-    // is 0, then, we use only the pressed key
-    if (newValue > maxValue || this._lastPressedKeys.val1 == 0) newValue = pressedKey;
-    
-    // We set the value only if it's more than 0 except if it's a time
-    if (newValue > 0 || isTime) {
-      var hash = {};
-      
-      hash[key] = newValue;
-      
-      if (isTime) {
-        if (key === 'hour') hash['minute'] = value.get('minute');
-        if (key === 'hour' || key === 'minute') hash['seconde'] = value.get('seconde');
+      // If the value is allow, we update the value
+      if (newValue <= max && newValue >= min) {
+        var hash = {};
+        hash[key] = newValue;
+        
+        this.set('value', value.adjust(hash, NO));
       }
       
-      this.set('value', value.adjust(hash));
+      this._lastValue = lastValue;
+      this._lastkey = key;
     }
   },
+  
   
 
   _selectRootElement: function() {
@@ -325,16 +303,29 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // ..........................................................
   // Key Event Support
   //
+
+  // The key codes that should be be directly handle by the view
+  _supportedKeys: { 
+    32: 'r', // space
+    45: 'r', // dash
+    47: 'r', // slash
+    58: 'r', // colon
+    48: 0, 49: 1, 50: 2, 51: 3, 52: 4, 53: 5, 54: 6, 55: 7, 56: 8, 57: 9 
+  },
   
   /** @private */
   keyDown: function(evt) {
-    var keyCodeMap = { 48: 0, 49: 1, 50: 2, 51: 3, 52: 4, 53: 5, 54: 6, 55: 7, 56: 8, 57: 9 },
+    var keyCodeMap = this._supportedKeys,
         pressedKey = keyCodeMap[evt.keyCode];
     
-    if (isNumber(pressedKey)) {
-      var as = this.get('activeSelection');
-      var ts = this.get('tabsSelections');
-      this.updateValue(ts[as].get('key'), pressedKey);
+    if (!SC.none(pressedKey)) {
+      if (pressedKey === 'r') this.moveRight();
+      else {
+        var as = this.get('activeSelection');
+        var ts = this.get('tabsSelections');
+        this.updateValue(ts[as].get('key'), pressedKey);
+      }
+      
       return YES;
     }
     
