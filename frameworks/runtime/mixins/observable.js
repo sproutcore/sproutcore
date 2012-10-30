@@ -933,20 +933,38 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       }
 
       // Clean up these properties once they have been used.
-      delete this._observers;
       delete this._bindings;
       delete this._properties;
+
+      return this;
     },
 
+    /**
+      This method will destroy the observable.
+
+      @returns {Object} this
+    */
     destroyObservable: function() {
       // Destroy bindings
       this.bindings.invoke('destroy');
-      this.bindings = null;
+      delete this.bindings;
 
-      // TODO: Destroy observers
+      // Loop through observer functions and remove them
+      if (keys = this._observers) {
+        len = keys.length ;
+        for (loc=0;loc<len;loc++) {
+          key = keys[loc]; observer = this[key] ;
+          propertyPaths = observer.propertyPaths ;
+          propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
+          for(ploc=0;ploc<propertyPathsLength;ploc++) {
+            path = propertyPaths[ploc] ;
+            this.removeObservesHandler(observer, path);
+          }
+        }
+      }
+      delete this._observers;
 
-      // TODO: Destroy properties
-
+      return this;
     },
 
     /**
